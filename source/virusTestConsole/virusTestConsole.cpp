@@ -1,0 +1,47 @@
+#include "../dsp56300/source/dsp56kEmu/dsp.h"
+
+#include "../virusLib/romLoader.h"
+
+using namespace dsp56k;
+
+int main(int _argc, char* _argv[])
+{
+	constexpr TWord g_memorySize = 0xc00000;	// @steven not sure how much we need
+
+	const DefaultMemoryMap memoryMap;
+	Memory memory(memoryMap, g_memorySize);
+
+	memory.setExternalMemory(0x200000, true);	// @steven was the starting address 0x200000?
+	PeripheralsDefault periph;
+
+	DSP dsp(memory, &periph, &periph);
+
+	virusLib::RomLoader romLoader;
+	if(!romLoader.loadFromFile(memory, _argv[1]))
+		return -1;
+	
+	std::thread dspThread([&]()
+	{
+		dsp.setPC(0);		// @steven exec from 0 is fine?
+
+		while(true)
+			dsp.exec();
+	});
+
+	constexpr size_t sampleCount = 4;
+
+	float inputDataL[sampleCount] = {1,-1,0.5f,-0.5f};
+	float inputDataR[sampleCount] = {1,-1,0.5f,-0.5f};
+	float outputDataL[sampleCount] = {0,0,0,0};
+	float outputDataR[sampleCount] = {0,0,0,0};
+
+	float* audioIn[2] = {inputDataL, inputDataR};
+	float* audioOut[2] = {outputDataL, outputDataR};
+
+	while(true)
+	{
+		periph.getEssi().processAudioInterleavedTX0(audioIn, audioOut, sampleCount);
+	}
+
+	return 0;
+}
