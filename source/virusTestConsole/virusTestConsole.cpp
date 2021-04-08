@@ -6,7 +6,7 @@ using namespace dsp56k;
 
 int main(int _argc, char* _argv[])
 {
-	constexpr TWord g_memorySize = 0xc00000;	// @steven not sure how much we need
+	constexpr TWord g_memorySize = 0x600000;	// @steven not sure how much we need
 
 	const DefaultMemoryMap memoryMap;
 	Memory memory(memoryMap, g_memorySize);
