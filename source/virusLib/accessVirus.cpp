@@ -1,26 +1,23 @@
-#include "pch.h"
-#include "accessvirus.h"
-#include <iostream>
+#include <cassert>
 #include <fstream>
-#include "../dsp56kEmu/assert.h"
-#include "../dsp56kEmu/logging.h"
 
+#include "accessVirus.h"
 
-AccessVirus::AccessVirus(const char * path)
+#include "../dsp56300/source/dsp56kEmu/logging.h"
+
+AccessVirus::AccessVirus(const char* _path) : m_path(_path)
 {
 	LOG("Init access virus");
-	this->path = path;
 }
 
-
-std::vector<AccessVirus::Chunk *> AccessVirus::get_dsp_chunks()
+std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
 {
 	uint32_t offset = 0x18000;
 
 	// Open file
-	std::ifstream file(this->path, std::ios::binary | std::ios::ate);
+	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
 
-	std::vector<Chunk *> chunks(5);
+	std::vector<Chunk> chunks(5);
 
 	// Read all the chunks, hardcoded to 4 for convenience
 	for (int i = 0; i <= 4; i++)
@@ -28,23 +25,23 @@ std::vector<AccessVirus::Chunk *> AccessVirus::get_dsp_chunks()
 		file.seekg(offset);
 
 		// Read buffer
-		Chunk* chunk = new Chunk;
+		Chunk chunk;
 		//file.read(reinterpret_cast<char *>(&chunk->chunk_id), 1);
-		file.read((char *)(&chunk->chunk_id), 1);
-		file.read((char *)(&chunk->size1), 1);
-		file.read((char *)(&chunk->size2), 1);
+		file.read(reinterpret_cast<char*>(&chunk.chunk_id), 1);
+		file.read(reinterpret_cast<char*>(&chunk.size1), 1);
+		file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
-		assert(chunk->chunk_id == 4 - i);
+		assert(chunk.chunk_id == 4 - i);
 
 		// Format uses a special kind of size where the first byte should be decreased by 1
-		uint16_t len = (chunk->size1 - 1) << 8 | chunk->size2;
-		chunk->items = std::vector<uint32_t>(len);
+		const uint16_t len = ((chunk.size1 - 1) << 8) | chunk.size2;
 
 		uint8_t buf[3];
+
 		for (uint32_t j = 0; j < len; j++)
 		{
-			file.read(reinterpret_cast<char *>(buf), 3);
-			chunk->items[j] = (buf[0] << 16) | (buf[1] << 8) | buf[2];
+			file.read(reinterpret_cast<char*>(buf), 3);
+			chunk.items.emplace_back((buf[0] << 16) | (buf[1] << 8) | buf[2]);
 		}
 
 		chunks[i] = chunk;
@@ -56,33 +53,27 @@ std::vector<AccessVirus::Chunk *> AccessVirus::get_dsp_chunks()
 
 }
 
-AccessVirus::DSPProgram * AccessVirus::get_dsp_program()
+AccessVirus::DSPProgram AccessVirus::get_dsp_program() const
 {
-	std::vector<AccessVirus::Chunk *> chunks = this->get_dsp_chunks();
+	auto chunks = get_dsp_chunks();
 	
-	DSPProgram * dspProgram = new DSPProgram;
-	dspProgram->bootRom = new BootRom;
-	dspProgram->commandStream = std::vector<uint32_t>();
-	dspProgram->bootRom->size = chunks[0]->items[0];
-	dspProgram->bootRom->offset = chunks[0]->items[1];
-	dspProgram->bootRom->data = std::vector<uint32_t>(dspProgram->bootRom->size);
+	DSPProgram dspProgram;
+	dspProgram.bootRom.size = chunks[0].items[0];
+	dspProgram.bootRom.offset = chunks[0].items[1];
+	dspProgram.bootRom.data = std::vector<uint32_t>(dspProgram.bootRom.size);
 
 	// The first chunk contains the bootrom
-	unsigned int i;
-	for (i = 2; i < dspProgram->bootRom->size + 2; i++)
+	auto i = 2;
+	for (; i < dspProgram.bootRom.size + 2; i++)
 	{
-		dspProgram->bootRom->data[i - 2] = chunks[0]->items[i];
+		dspProgram.bootRom.data[i-2] = chunks[0].items[i];
 	}
 
 	// The rest of the chunks is made up of the command stream
-	int idx = 0;
-	for (unsigned int j = 0; j < chunks.size(); j++)
+	for (auto j = 0; j < chunks.size(); j++)
 	{
-		for (; i < chunks[j]->items.size(); i++)
-		{
-			dspProgram->commandStream.push_back(chunks[j]->items[i]);
-			idx += 1;
-		}
+		for (; i < chunks[j].items.size(); i++)
+			dspProgram.commandStream.emplace_back(chunks[j].items[i]);
 		i = 0;
 	}
 

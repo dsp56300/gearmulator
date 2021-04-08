@@ -4,6 +4,7 @@ project(ceLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
+	accessVirus.cpp accessVirus.h
 	romLoader.cpp romLoader.h
 )
 

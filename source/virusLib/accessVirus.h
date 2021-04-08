@@ -1,38 +1,38 @@
 #pragma once
+
 #include <vector>
 
 class AccessVirus
 {
 public:
-	typedef struct Chunk
+	struct Chunk
 	{
-		uint8_t chunk_id;
-		uint8_t size1;
-		uint8_t size2;
+		uint8_t chunk_id = 0;
+		uint8_t size1 = 0;
+		uint8_t size2 = 0;
 		std::vector<uint32_t> items;
-	} Chunk;
+	};
 
-	typedef struct BootRom
+	struct BootRom
 	{
-		uint32_t size;
-		uint32_t offset;
+		uint32_t size = 0;
+		uint32_t offset = 0;
 		std::vector<uint32_t> data;
-	} BootRom;
+	};
 
-	typedef struct DSPProgram
+	struct DSPProgram
 	{
-		BootRom *bootRom;
+		BootRom bootRom;
 		std::vector<uint32_t> commandStream;
-	} DSPProgram;
+	};
 
-	AccessVirus(const char* path);
+	explicit AccessVirus(const char* _path);
 
-	std::vector<Chunk *> get_dsp_chunks();
-
-	DSPProgram * get_dsp_program();
+	DSPProgram get_dsp_program() const;
 
 private:
-	const char* path;
+	std::vector<Chunk> get_dsp_chunks() const;
 
+	const char* const m_path;
 };
 
