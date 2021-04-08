@@ -1,3 +1,3 @@
 [submodule "source/dsp56300"]
 	path = source/dsp56300
-	url = https://github.com/Lyve1981/dsp56300
+	url = ../dsp56300
