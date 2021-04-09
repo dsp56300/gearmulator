@@ -6,12 +6,13 @@ using namespace dsp56k;
 
 int main(int _argc, char* _argv[])
 {
-	constexpr TWord g_memorySize = 0x600000;	// @steven not sure how much we need
+	constexpr TWord g_memorySize = 0x400000;	// 128k words beginning at 0x200000
 
 	const DefaultMemoryMap memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 
-//	memory.setExternalMemory(0x200000, true);	// @steven was the starting address 0x200000?
+	memory.setExternalMemory(0x200000, true);	// @steven was the starting address 0x200000?
+
 	PeripheralsDefault periph;
 
 	DSP dsp(memory, &periph, &periph);
@@ -22,7 +23,7 @@ int main(int _argc, char* _argv[])
 	
 	std::thread dspThread([&]()
 	{
-		dsp.setPC(0);		// @steven exec from 0 is fine?
+		dsp.setPC(0x000da6);
 
 		while(true)
 			dsp.exec();
