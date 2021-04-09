@@ -37,11 +37,11 @@ int main(int _argc, char* _argv[])
 	float outputDataR[sampleCount] = {0,0,0,0};
 
 	float* audioIn[2] = {inputDataL, inputDataR};
-	float* audioOut[2] = {outputDataL, outputDataR};
+	float* audioOut[6] = {outputDataL, outputDataR, outputDataL, outputDataR, outputDataL, outputDataR};
 
 	while(true)
 	{
-		periph.getEssi().processAudioInterleavedTX0(audioIn, audioOut, sampleCount);
+		periph.getEssi().processAudioInterleaved(audioIn, audioOut, sampleCount, 6);
 	}
 
 	return 0;
