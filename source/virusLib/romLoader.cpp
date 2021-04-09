@@ -34,31 +34,6 @@ namespace virusLib
 		while (!m_loadFinished) 
 			dsp.exec();
 
-		/* DEBUG
-		for(size_t a=0; a<dsp56k::MemArea_COUNT; ++a)
-		{
-			char filename[128];
-			sprintf(filename, "virusMem_%c.bin", dsp56k::g_memAreaNames[a]);
-			FILE* hFile = fopen(filename, "wb");
-			if(hFile)
-			{
-				for(size_t i=0; i<_memory.size(); ++i)
-				{
-					const dsp56k::TWord w = _memory.get(static_cast<dsp56k::EMemArea>(a), i);
-//					if(w == 0)
-//						continue;
-					uint8_t m = (w>>16)&0xff;
-					uint8_t c = (w>>8)&0xff;
-					uint8_t l = (w)&0xff;
-					fwrite(&m, 1, 1, hFile);
-					fwrite(&c, 1, 1, hFile);
-					fwrite(&l, 1, 1, hFile);
-				}
-				fclose(hFile);
-			}
-		}
-		*/
-
 		return true;
 	}
 
