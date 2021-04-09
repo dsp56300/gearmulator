@@ -44,13 +44,13 @@ namespace virusLib
 		case dsp56k::Essi::ESSI_PRRC:	// Port C Direction Register
 			return 0;
 
-		case dsp56k::HostIO_HSR:		// Host Status Register (HSR)
+		case dsp56k::HI08::HSR:		// Host Status Register (HSR)
 			// indicate that we have data as long as the command stream is not empty
 			if(m_commandStream.empty())
 				return 0;
-			return (1<<dsp56k::HSR_HRDF);		// Host Receive Data Full
+			return (1<<dsp56k::HI08::HSR_HRDF);		// Host Receive Data Full
 
-		case dsp56k::HostIO_HRX:
+		case dsp56k::HI08::HRX:
 			{
 				const auto ret = m_commandStream.front();
 				m_commandStream.erase(m_commandStream.begin());
