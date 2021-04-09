@@ -1,4 +1,5 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
+#include "../dsp56300/source/dsp56kEmu/unittests.h"
 
 #include "../virusLib/romLoader.h"
 
@@ -6,6 +7,8 @@ using namespace dsp56k;
 
 int main(int _argc, char* _argv[])
 {
+	UnitTests tests;
+
 	constexpr TWord g_memorySize = 0x400000;	// 128k words beginning at 0x200000
 
 	const DefaultMemoryMap memoryMap;
