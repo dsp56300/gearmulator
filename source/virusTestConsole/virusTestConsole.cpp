@@ -13,7 +13,7 @@ int main(int _argc, char* _argv[])
 
 	memory.setExternalMemory(0x200000, true);	// @steven was the starting address 0x200000?
 
-	PeripheralsDefault periph;
+	Peripherals56362 periph;
 
 	DSP dsp(memory, &periph, &periph);
 
@@ -41,7 +41,7 @@ int main(int _argc, char* _argv[])
 
 	while(true)
 	{
-		periph.getEssi().processAudioInterleaved(audioIn, audioOut, sampleCount, 6);
+		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, 2, 6);
 	}
 
 	return 0;
