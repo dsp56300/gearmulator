@@ -20,6 +20,8 @@ int main(int _argc, char* _argv[])
 
 	DSP dsp(memory, &periph, &periph);
 
+	dsp.enableTrace(true);
+	
 	virusLib::RomLoader romLoader;
 	if(!romLoader.loadFromFile(dsp, _argv[1]))
 		return -1;
