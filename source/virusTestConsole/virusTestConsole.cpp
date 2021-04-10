@@ -21,9 +21,11 @@ int main(int _argc, char* _argv[])
 	DSP dsp(memory, &periph, &periph);
 
 	virusLib::RomLoader romLoader;
-	if(!romLoader.loadFromFile(memory, _argv[1]))
+	if(!romLoader.loadFromFile(dsp, _argv[1]))
 		return -1;
-	
+
+	dsp.setPeriph(0, &periph);
+
 	std::thread dspThread([&]()
 	{
 		dsp.setPC(0x000da6);

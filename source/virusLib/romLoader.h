@@ -13,7 +13,7 @@ namespace virusLib
 	class RomLoader : dsp56k::IPeripherals
 	{
 	public:
-		bool loadFromFile(dsp56k::Memory& _memory, const char* _filename);
+		bool loadFromFile(dsp56k::DSP& _dsp, const char* _filename);
 	private:
 		dsp56k::TWord read(dsp56k::TWord _addr) override;
 		void write(dsp56k::TWord _addr, dsp56k::TWord _value) override;

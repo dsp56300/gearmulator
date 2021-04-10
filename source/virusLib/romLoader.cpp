@@ -7,7 +7,7 @@
 
 namespace virusLib
 {
-	bool RomLoader::loadFromFile(dsp56k::Memory& _memory, const char* _filename)
+	bool RomLoader::loadFromFile(dsp56k::DSP& _dsp, const char* _filename)
 	{
 		const AccessVirus v(_filename);
 
@@ -22,17 +22,20 @@ namespace virusLib
 	    printf("Program BootROM len = 0x%x\n", bootRom.data.size());
 	    printf("Program Commands len = 0x%x\n", rom.commandStream.size());
 
+		auto& mem = _dsp.memory();
+
+		_dsp.setPeriph(0, this);
+
 		// Load BootROM in DSP memory
 		dsp56k::TWord idx = 0;
 		for (auto it = bootRom.data.begin(); it != bootRom.data.end(); ++it++, ++idx)
-			_memory.set(dsp56k::MemArea_P, bootRom.offset + idx, *it);
+			mem.set(dsp56k::MemArea_P, bootRom.offset + idx, *it);
 
 		// Initialize the DSP
-		dsp56k::DSP dsp(_memory, this, this);
-		dsp.setPC(bootRom.offset);
+		_dsp.setPC(bootRom.offset);
 
 		while (!m_loadFinished) 
-			dsp.exec();
+			_dsp.exec();
 
 		return true;
 	}
