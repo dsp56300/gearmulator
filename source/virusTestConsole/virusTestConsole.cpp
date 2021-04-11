@@ -31,7 +31,7 @@ int main(int _argc, char* _argv[])
 
 	std::thread dspThread([&]()
 	{
-		dsp.setPC(0x000da6);
+//		dsp.setPC(0x000da6);
 
 		while(true)
 			dsp.exec();
