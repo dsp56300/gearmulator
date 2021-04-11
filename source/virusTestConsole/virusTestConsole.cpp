@@ -14,7 +14,7 @@ int main(int _argc, char* _argv[])
 	const DefaultMemoryMap memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 
-	memory.setExternalMemory(0x200000, true);	// @steven was the starting address 0x200000?
+	memory.setExternalMemory(0x20000, true);	// @steven was the starting address 0x200000?
 
 	Peripherals56362 periph;
 
