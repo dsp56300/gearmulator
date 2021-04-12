@@ -39,8 +39,6 @@ int main(int _argc, char* _argv[])
 
 //	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
 
-	dsp.enableTrace(true);
-
 	std::thread dspThread([&]()
 	{
 		while(true)
@@ -79,6 +77,9 @@ int main(int _argc, char* _argv[])
 	vals[44]=0x72f4f4;vals[45]=0x7f7f00;
 	// queue for HDI08
 	loader.join();
+
+	dsp.enableTrace(true);
+
 	periph.getHDI08().write(vals,46);
 
 	FILE* hFile = nullptr;
