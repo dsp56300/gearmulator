@@ -96,7 +96,8 @@ int main(int _argc, char* _argv[])
 			for (int i=0;i<3;i++) midi[i]=0x3000000|(midi[i]<<16);
 			periph.getHDI08().write(midi,3);
 		}
-		LOG("Deliver Audio");
+		if((ctr & 0xfff) == 0)
+			LOG("Deliver Audio");
 		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
 		if(!hFile)
