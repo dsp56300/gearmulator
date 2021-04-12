@@ -55,8 +55,8 @@ int main(int _argc, char* _argv[])
 	int vals[46];
 	for (int i=0;i<22;i++) {vals[i*2]=0x72f4f4;vals[i*2+1]=(pots[i]<<8)|0x400000;}
 	vals[44]=0x72f4f4;vals[45]=0x7f7f00;
-	// queue for HI08
-	periph.getHI08().write(vals,46);
+	// queue for HDI08
+	periph.getHDI08().write(vals,46);
 	
 	while(true)
 	{
