@@ -1,7 +1,7 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
-#include "../virusLib/romLoader.h"
+#include "../virusLib/accessVirus.h"
 
 using namespace dsp56k;
 
@@ -9,24 +9,36 @@ int main(int _argc, char* _argv[])
 {
 	UnitTests tests;
 
+	// Create the DSP with peripherals
 	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x200000
-
 	const DefaultMemoryMap memoryMap;
 	Memory memory(memoryMap, g_memorySize);
-
 	memory.setExternalMemory(0x020000, true);
-
 	Peripherals56362 periph;
-
 	DSP dsp(memory, &periph, &periph);
 
-	virusLib::RomLoader romLoader;
-	if(!romLoader.loadFromFile(dsp, _argv[1]))
-		return -1;
+	// Get the flash contents
+	const AccessVirus v(_argv[1]);
+	const auto rom = v.get_dsp_program();
+	const auto& bootRom = rom.bootRom;
+	
+	printf("Program BootROM size = 0x%x\n", bootRom.size);
+	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
+	printf("Program BootROM len = 0x%lx\n", bootRom.data.size());
+	printf("Program Commands len = 0x%lx\n", rom.commandStream.size());
+
+	// Load BootROM in DSP memory
+	for (int i=0; i<bootRom.data.size(); i++)
+		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
+	// Attach command stream
+	periph.getHDI08().writeCommandStream(rom.commandStream);
+	// Initialize the DSP
+	dsp.setPC(bootRom.offset);
+	// And run until we get rebooted!
+	while (!periph.readAndClearResetState())
+		dsp.exec();
 
 //	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
-
-	dsp.setPeriph(0, &periph);
 
 	dsp.enableTrace(true);
 
