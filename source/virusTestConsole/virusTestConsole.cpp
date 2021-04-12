@@ -53,13 +53,24 @@ int main(int _argc, char* _argv[])
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 6;
 
-	float inputDataL[sampleCount] = {1,-1,0.5f,-0.5f};
-	float inputDataR[sampleCount] = {1,-1,0.5f,-0.5f};
-	float outputDataL[sampleCount] = {0,0,0,0};
-	float outputDataR[sampleCount] = {0,0,0,0};
+	float inputData[channelsIn][sampleCount] = 
+	{
+		{1,-1,0.5f,-0.5f},
+		{1,-1,0.5f,-0.5f},
+	};
 
-	float* audioIn [channelsIn ] = {inputDataL, inputDataR};
-	float* audioOut[channelsOut] = {outputDataL, outputDataR, outputDataL, outputDataR, outputDataL, outputDataR};
+	float outputData[channelsOut][sampleCount] = 
+	{
+		{0,0,0,0},
+		{0,0,0,0},
+		{0,0,0,0},
+		{0,0,0,0},
+		{0,0,0,0},
+		{0,0,0,0}
+	};
+
+	float* audioIn [channelsIn ] = {inputData[0], inputData[1]};
+	float* audioOut[channelsOut] = {outputData[0], outputData[1], outputData[2], outputData[3], outputData[4], outputData[5]};
 
 	// Make a dummy setup
 	int pots[22]={0x1a,0x1b,0x1c,0x1d,0x35,0x36,0x2d,0x4c,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x60,0x6a,0x7c,0x7d,0x7e,0x79,0x6d,0x7f};
@@ -69,17 +80,34 @@ int main(int _argc, char* _argv[])
 	// queue for HDI08
 	loader.join();
 	periph.getHDI08().write(vals,46);
-	
+
+	FILE* hFile = nullptr;
+
 	while(true)
 	{
 		LOG("Deliver Audio");
 		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
-		for(auto c=0; c<channelsOut; ++c)
+		if(!hFile)
+		{
+			for(auto c=0; c<channelsOut; ++c)
+			{
+				for(auto i=0; i<sampleCount; ++i)
+				{
+					if(audioOut[c][i] != 0.0f)
+					{
+//						hFile = fopen("virus_out.raw", "wb");
+					}
+				}
+			}
+		}
+
+		if(hFile)
 		{
 			for(auto i=0; i<sampleCount; ++i)
 			{
-				assert(audioOut[c][i] == 0.0f && "We've to sample data!");
+				for(auto c=0; c<2; ++c)
+					fwrite(&audioOut[c][i], sizeof(float), 1, hFile);
 			}
 		}
 	}
