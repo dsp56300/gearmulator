@@ -73,7 +73,7 @@ int main(int _argc, char* _argv[])
 	while(true)
 	{
 		LOG("Deliver Audio");
-		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, 2, 6);
+		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
 		for(auto c=0; c<channelsOut; ++c)
 		{
