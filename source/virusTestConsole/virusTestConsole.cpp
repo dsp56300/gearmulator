@@ -32,25 +32,9 @@ int main(int _argc, char* _argv[])
 
 	std::thread dspThread([&]()
 	{
-		auto counter = -0x2BFD9;
-		auto timer = false;
-
 		while(true)
 		{
-			if(dsp.getPC() == 0x2BFF4)
-				timer = true;
-			if(dsp.getPC() == 0x02c013)
-				timer = false;
-
-			if(timer)
-			{
-				if(counter++ == 100)
-				{
-					dsp.injectInterrupt(Vba_TIMER0_Overflow);
-					counter = 0;
-				}
-			}
-			dsp.exec();			
+			dsp.exec();
 		}
 	});
 
