@@ -10,6 +10,9 @@ std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362&
 	// Load BootROM in DSP memory
 	for (int i=0; i<v.bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
+
+//	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false);
+
 	// Attach command stream
 	std::thread feedCommandStream([&]()
 	{
