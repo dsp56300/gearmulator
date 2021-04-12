@@ -14,10 +14,16 @@ void boot_virus_from_file(DSP& dsp,Peripherals56362& periph,const char *filename
 	for (int i=0; i<v.bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
 	// Attach command stream
-	periph.getHDI08().writeCommandStream(v.commandStream);
+	std::thread feedCommandStream([&]()
+	{
+		periph.getHDI08().write((int32_t*)&v.commandStream[0],v.commandStream.size());
+	});
+	feedCommandStream.detach();
+	
 	// Initialize the DSP
 	dsp.setPC(v.bootRom.offset);
 	// And run until we get rebooted!
+	periph.readAndClearResetState();
 	while (!periph.readAndClearResetState())
 		dsp.exec();
 }
