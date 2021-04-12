@@ -83,8 +83,8 @@ int main(int _argc, char* _argv[])
 
 	dsp.enableTrace(true);
 
-	periph.getHDI08().write(vals,44);
-	
+//	periph.getHDI08().write(vals,44);
+
 
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
