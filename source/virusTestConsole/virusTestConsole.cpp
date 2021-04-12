@@ -72,20 +72,27 @@ int main(int _argc, char* _argv[])
 
 	// Make a dummy setup
 	int pots[22]={0x1a,0x1b,0x1c,0x1d,0x35,0x36,0x2d,0x4c,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x60,0x6a,0x7c,0x7d,0x7e,0x79,0x6d,0x7f};
-	int vals[46];
-	for (int i=0;i<22;i++) {vals[i*2]=0x72f4f4;vals[i*2+1]=(pots[i]<<8)|0x400000;}
-	vals[44]=0x72f4f4;vals[45]=0x7f7f00;
+	int vals[44];
+	for (int i=0;i<22;i++) {vals[i*2]=0x2f4f472;vals[i*2+1]=(pots[i]<<8)|0x200007f;}
+
 	// queue for HDI08
 	loader.join();
 
 	dsp.enableTrace(true);
 
-	periph.getHDI08().write(vals,46);
+	periph.getHDI08().write(vals,44);
+	
 
 	FILE* hFile = nullptr;
-
+	int ctr=0;
 	while(true)
 	{
+		ctr++;
+		if (ctr==8192) {
+			int midi[3]={0x90,0x3C,0x7F};
+			for (int i=0;i<3;i++) midi[i]=0x3000000|(midi[i]<<16);
+			periph.getHDI08().write(midi,3);
+		}
 		LOG("Deliver Audio");
 		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
@@ -97,7 +104,7 @@ int main(int _argc, char* _argv[])
 				{
 					if(audioOut[c][i] != 0.0f)
 					{
-//						hFile = fopen("virus_out.raw", "wb");
+						hFile = fopen("virus_out.raw", "wb");
 					}
 				}
 			}
