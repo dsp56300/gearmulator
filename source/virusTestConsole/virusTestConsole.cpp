@@ -5,6 +5,24 @@
 
 using namespace dsp56k;
 
+void boot_virus_from_file(DSP& dsp,Peripherals56362& periph,const char *filename)
+{
+	// Get the flash contents
+	const AccessVirus v(filename);
+
+	// Load BootROM in DSP memory
+	for (int i=0; i<v.bootRom.data.size(); i++)
+		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
+	// Attach command stream
+	periph.getHDI08().writeCommandStream(v.commandStream);
+	// Initialize the DSP
+	dsp.setPC(v.bootRom.offset);
+	// And run until we get rebooted!
+	while (!periph.readAndClearResetState())
+		dsp.exec();
+}
+
+
 int main(int _argc, char* _argv[])
 {
 	UnitTests tests;
@@ -17,26 +35,7 @@ int main(int _argc, char* _argv[])
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
 
-	// Get the flash contents
-	const AccessVirus v(_argv[1]);
-	const auto rom = v.get_dsp_program();
-	const auto& bootRom = rom.bootRom;
-	
-	printf("Program BootROM size = 0x%x\n", bootRom.size);
-	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
-	printf("Program BootROM len = 0x%lx\n", bootRom.data.size());
-	printf("Program Commands len = 0x%lx\n", rom.commandStream.size());
-
-	// Load BootROM in DSP memory
-	for (int i=0; i<bootRom.data.size(); i++)
-		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
-	// Attach command stream
-	periph.getHDI08().writeCommandStream(rom.commandStream);
-	// Initialize the DSP
-	dsp.setPC(bootRom.offset);
-	// And run until we get rebooted!
-	while (!periph.readAndClearResetState())
-		dsp.exec();
+	boot_virus_from_file(dsp, periph, _argv[1]);
 
 //	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
 

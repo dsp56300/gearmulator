@@ -8,6 +8,32 @@
 AccessVirus::AccessVirus(const char* _path) : m_path(_path)
 {
 	LOG("Init access virus");
+
+	auto chunks = get_dsp_chunks();
+	
+	bootRom.size = chunks[0].items[0];
+	bootRom.offset = chunks[0].items[1];
+	bootRom.data = std::vector<uint32_t>(bootRom.size);
+
+	// The first chunk contains the bootrom
+	auto i = 2;
+	for (; i < bootRom.size + 2; i++)
+	{
+		bootRom.data[i-2] = chunks[0].items[i];
+	}
+
+	// The rest of the chunks is made up of the command stream
+	for (auto j = 0; j < chunks.size(); j++)
+	{
+		for (; i < chunks[j].items.size(); i++)
+			commandStream.emplace_back(chunks[j].items[i]);
+		i = 0;
+	}
+
+	printf("Program BootROM size = 0x%x\n", bootRom.size);
+	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
+	printf("Program BootROM len = 0x%lx\n", bootRom.data.size());
+	printf("Program Commands len = 0x%lx\n", commandStream.size());
 }
 
 std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
@@ -51,31 +77,4 @@ std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
 
 	return chunks;
 
-}
-
-AccessVirus::DSPProgram AccessVirus::get_dsp_program() const
-{
-	auto chunks = get_dsp_chunks();
-	
-	DSPProgram dspProgram;
-	dspProgram.bootRom.size = chunks[0].items[0];
-	dspProgram.bootRom.offset = chunks[0].items[1];
-	dspProgram.bootRom.data = std::vector<uint32_t>(dspProgram.bootRom.size);
-
-	// The first chunk contains the bootrom
-	auto i = 2;
-	for (; i < dspProgram.bootRom.size + 2; i++)
-	{
-		dspProgram.bootRom.data[i-2] = chunks[0].items[i];
-	}
-
-	// The rest of the chunks is made up of the command stream
-	for (auto j = 0; j < chunks.size(); j++)
-	{
-		for (; i < chunks[j].items.size(); i++)
-			dspProgram.commandStream.emplace_back(chunks[j].items[i]);
-		i = 0;
-	}
-
-	return dspProgram;
 }

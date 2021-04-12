@@ -20,15 +20,10 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	struct DSPProgram
-	{
-		BootRom bootRom;
-		std::vector<uint32_t> commandStream;
-	};
-
 	explicit AccessVirus(const char* _path);
 
-	DSPProgram get_dsp_program() const;
+	BootRom bootRom;
+	std::vector<uint32_t> commandStream;
 
 private:
 	std::vector<Chunk> get_dsp_chunks() const;
