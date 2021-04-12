@@ -5,11 +5,8 @@
 
 using namespace dsp56k;
 
-void boot_virus_from_file(DSP& dsp,Peripherals56362& periph,const char *filename)
+std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362& periph)
 {
-	// Get the flash contents
-	const AccessVirus v(filename);
-
 	// Load BootROM in DSP memory
 	for (int i=0; i<v.bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
@@ -18,14 +15,10 @@ void boot_virus_from_file(DSP& dsp,Peripherals56362& periph,const char *filename
 	{
 		periph.getHDI08().write((int32_t*)&v.commandStream[0],v.commandStream.size());
 	});
-	feedCommandStream.detach();
-	
+
 	// Initialize the DSP
 	dsp.setPC(v.bootRom.offset);
-	// And run until we get rebooted!
-	periph.readAndClearResetState();
-	while (!periph.readAndClearResetState())
-		dsp.exec();
+	return feedCommandStream;
 }
 
 
@@ -41,7 +34,8 @@ int main(int _argc, char* _argv[])
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
 
-	boot_virus_from_file(dsp, periph, _argv[1]);
+	const AccessVirus v(_argv[1]);
+	std::thread loader = boot_virus_from_file(v, dsp, periph);
 
 //	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
 
@@ -73,6 +67,7 @@ int main(int _argc, char* _argv[])
 	for (int i=0;i<22;i++) {vals[i*2]=0x72f4f4;vals[i*2+1]=(pots[i]<<8)|0x400000;}
 	vals[44]=0x72f4f4;vals[45]=0x7f7f00;
 	// queue for HDI08
+	loader.join();
 	periph.getHDI08().write(vals,46);
 	
 	while(true)
