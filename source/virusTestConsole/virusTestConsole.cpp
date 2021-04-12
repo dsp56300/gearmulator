@@ -50,6 +50,14 @@ int main(int _argc, char* _argv[])
 	float* audioIn [channelsIn ] = {inputDataL, inputDataR};
 	float* audioOut[channelsOut] = {outputDataL, outputDataR, outputDataL, outputDataR, outputDataL, outputDataR};
 
+	// Make a dummy setup
+	int pots[22]={0x1a,0x1b,0x1c,0x1d,0x35,0x36,0x2d,0x4c,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x60,0x6a,0x7c,0x7d,0x7e,0x79,0x6d,0x7f};
+	int vals[46];
+	for (int i=0;i<22;i++) {vals[i*2]=0x72f4f4;vals[i*2+1]=(pots[i]<<8)|0x400000;}
+	vals[44]=0x72f4f4;vals[45]=0x7f7f00;
+	// queue for HI08
+	periph.getHI08().write(vals,46);
+	
 	while(true)
 	{
 		LOG("Deliver Audio");
