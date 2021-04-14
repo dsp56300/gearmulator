@@ -76,7 +76,7 @@ int main(int _argc, char* _argv[])
 	// Make a dummy setup
 	int pots[22]={0x1a,0x1b,0x1c,0x1d,0x35,0x36,0x2d,0x4c,0x5a,0x5b,0x5c,0x5d,0x5e,0x5f,0x60,0x6a,0x7c,0x7d,0x7e,0x79,0x6d,0x7f};
 	int vals[46];
-	for (int i=0;i<22;i++) {vals[i*2]=0xf4f472;vals[i*2+1]=(pots[i]<<8)|0x000040;}
+	for (int i=0;i<22;i++) {vals[i*2]=0xf4f472;vals[i*2+1]=(pots[i]<<8)|0x00003f;}
 	vals[44]=0xf4f472;vals[45]=0x007f7f;
 
 	// queue for HDI08
@@ -98,7 +98,7 @@ int main(int _argc, char* _argv[])
 			LOG("Beep");
 			dsp.enableTrace(true);
 			periph.getHDI08().setHostFlags(0, 1);
-//			periph.getHDI08().writeRX(vals,44);
+			periph.getHDI08().writeRX(vals,46);
 			if (!bittest(periph.getHDI08().readControlRegister(), HDI08::HCR_HRIE)) {
 				LOG("TOO EARLY!");
 				continue;
