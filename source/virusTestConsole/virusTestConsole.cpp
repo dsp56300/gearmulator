@@ -3,6 +3,8 @@
 
 #include "../virusLib/accessVirus.h"
 
+#define HEXN(S, n)                     std::hex << std::setfill('0') << std::setw(n) << S
+
 using namespace dsp56k;
 
 std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362& periph)
@@ -58,7 +60,7 @@ int main(int _argc, char* _argv[])
 			// Only support for single byte responses atm
 			uint32_t word = periph.getHDI08().readTX();
 			if ((word & 0xff00ffff) != 0) {
-				LOG("Unexpected MIDI data: 0x" << std::hex << word);
+				LOG("Unexpected MIDI data: 0x" << HEX(word));
 				continue;
 			}
 
@@ -69,7 +71,7 @@ int main(int _argc, char* _argv[])
 				if (buf == 0)
 					continue;
 				if (buf != 0xf0) {
-					LOG("Unexpected MIDI bytes: 0x" << std::hex << buf);
+					LOG("Unexpected MIDI bytes: 0x" << HEXN(buf, 2));
 					continue;
 				}
 				sequenceStarted = true;
@@ -81,11 +83,11 @@ int main(int _argc, char* _argv[])
 			// End of midi command, show it
 			if (buf == 0xf7) {
 				std::ostringstream stringStream;
-				for (int i = 0; i < idx - 1; i++) {
+				for (int i = 0; i < idx; i++) {
 					//printf("tmp: 0x%x\n", midi[i]);
-					stringStream << std::hex << midi[i];
+					stringStream << HEXN(midi[i], 2);
 				}
-				LOG("MIDI BUFFER: 0x" << stringStream.str());
+				LOG("SYSEX RESPONSE: 0x" << stringStream.str());
 				memset(midi, 0, sizeof midi);
 				sequenceStarted = false;
 				idx = 0;
@@ -143,7 +145,9 @@ int main(int _argc, char* _argv[])
 			LOG("Beep");
 			dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::StackIndent));
 			periph.getHDI08().setHostFlags(0, 1);
-			periph.getHDI08().writeRX(vals,46);
+			int dev_inq[3] = {0xf07e00, 0x060601, 0xf7};
+			periph.getHDI08().writeRX(dev_inq, 3);
+			//periph.getHDI08().writeRX(vals,46);
 			if (!bittest(periph.getHDI08().readControlRegister(), HDI08::HCR_HRIE)) {
 				LOG("TOO EARLY!");
 				continue;
