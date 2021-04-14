@@ -50,6 +50,51 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
+	std::thread midiThread([&]() {
+		int midi[128];
+		auto sequenceStarted = false;
+		size_t idx = 0;
+		while (true) {
+			// Only support for single byte responses atm
+			uint32_t word = periph.getHDI08().readTX();
+			if ((word & 0xff00ffff) != 0) {
+				LOG("Unexpected MIDI data: 0x" << std::hex << word);
+				continue;
+			}
+
+			int buf = (word & 0x00ff0000) >> 16;
+
+			// Check for sequence start 0xf0
+			if (!sequenceStarted) {
+				if (buf == 0)
+					continue;
+				if (buf != 0xf0) {
+					LOG("Unexpected MIDI bytes: 0x" << std::hex << buf);
+					continue;
+				}
+				sequenceStarted = true;
+			}
+
+			midi[idx] = buf;
+			++idx;
+
+			// End of midi command, show it
+			if (buf == 0xf7) {
+				std::ostringstream stringStream;
+				for (int i = 0; i < idx - 1; i++) {
+					//printf("tmp: 0x%x\n", midi[i]);
+					stringStream << std::hex << midi[i];
+				}
+				LOG("MIDI BUFFER: 0x" << stringStream.str());
+				memset(midi, 0, sizeof midi);
+				sequenceStarted = false;
+				idx = 0;
+			}
+
+			//LOG("BUF=0x"<< HEX(buf));
+		}
+	});
+
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 6;
@@ -106,7 +151,6 @@ int main(int _argc, char* _argv[])
 			go=1;
 			tosend=270;
 		}
-		
 		if (tosend && !periph.getHDI08().hasDataToSend())
 		{
 			LOG("Sending! " << tosend);
