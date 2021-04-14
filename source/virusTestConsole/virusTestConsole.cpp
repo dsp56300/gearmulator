@@ -141,7 +141,7 @@ int main(int _argc, char* _argv[])
 		ctr++;
 		if (ctr==8192) {
 			LOG("Beep");
-			dsp.enableTrace(true);
+			dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::StackIndent));
 			periph.getHDI08().setHostFlags(0, 1);
 			periph.getHDI08().writeRX(vals,46);
 			if (!bittest(periph.getHDI08().readControlRegister(), HDI08::HCR_HRIE)) {
