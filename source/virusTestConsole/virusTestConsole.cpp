@@ -11,12 +11,6 @@
 
 using namespace dsp56k;
 
-typedef struct Cmd
-{
-	const char* name;
-	uint8_t key;
-	uint8_t value;
-} Cmd;
 
 std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362& periph)
 {
@@ -108,6 +102,7 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
+
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 6;
@@ -147,163 +142,34 @@ int main(int _argc, char* _argv[])
 
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
-	auto bruteidx = 0x73;
 
-	// SYSEX (part a & b)
-	std::array<char, 256> values;
-	std::ifstream file(_argv[2], std::ios::binary);
-	file.seekg(0x9);
-	file.read(values.data(), values.size());
-//	printf("OSC VOLUME: 0x%x\n", values[0x24]);
-//	printf("CHAR = 0x%x\n", values[0xf0]);
-//	assert(values[0xf0] == 0x62);
-	int bank = 0, param = 0;
+	// Load preset
+	Syx syx(periph.getHDI08());
+	std::thread sendSyxThread([&]() {
+		syx.sendControlCommand(Syx::CC_DEVICE_ID, 0);
+		syx.sendControlCommand(Syx::CC_PART_ENABLE, 1);
+		syx.sendControlCommand(Syx::CC_PART_MIDI_CHANNEL, 0);
+		syx.sendControlCommand(Syx::CC_PART_OUTPUT_SELECT, 0);
 
-	// Part C
-	std::vector<Cmd> commands;
-	commands.emplace_back(Cmd{"Device ID", 93, 0});
-	commands.emplace_back(Cmd{"Part Enable", 72, 1});
-	commands.emplace_back(Cmd{"Part MIDI Channel", 34, 0});
-	commands.emplace_back(Cmd{"Part Output Select", 41, 0});
+		// Wait for a bit and send the SYX
+		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+		syx.sendFile(_argv[2]);
 
-	// Part C after A+B are set
-	std::vector<Cmd> commandsAfter;
-	commandsAfter.emplace_back(Cmd{"Part MIDI Volume Enable", 73, 1});
-	commandsAfter.emplace_back(Cmd{"Part MIDI Volume Init", 40, 127});
-	commandsAfter.emplace_back(Cmd{"Part Volume", 39, 0x7f});
-	commandsAfter.emplace_back(Cmd{"Master Volume", 127, 0x40});
-//	commands.emplace_back(Cmd{"Part Prog Change Enable", 78, 1});
-//	commands.emplace_back(Cmd{"MIDI Dump Tx", 98, 0});
-//	commands.emplace_back(Cmd{"MIDI Dump Rx", 99, 1});
-//	commands.emplace_back(Cmd{"MIDI Control Low (SysEx)", 94, 0});
-//	commands.emplace_back(Cmd{"MIDI Control High (SysEx)", 95, 0});
+		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
+		syx.sendControlCommand(Syx::CC_PART_MIDI_VOLUME_ENABLE, 1);
+		syx.sendControlCommand(Syx::CC_PART_MIDI_VOLUME_INIT, 127);
+		syx.sendControlCommand(Syx::CC_PART_VOLUME, 0x7f);
+		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x40);
 
-	const int delayed_last = 1;
-	int cmdIdx = 0, cmdAfterIdx = 0;
+		// Send MIDI data
+		printf("SENDING MIDI!\n");
+		int data[3] = {0x901f7f};
+		periph.getHDI08().writeRX(data, 1);
+	});
 
-	auto t = false;
-	auto sethostflag = false;
-	auto ready = false;
-	auto midisent = false;
-	auto superFinal = false;
 	while (true)
 	{
 		ctr++;
-
-		// Only execute a command every 1000 cycles
-		if (!ready && ctr > 300 && (ctr % 10) == 0) {
-			// Check if we are allowed to send MIDI data
-			if (!bittest(periph.getHDI08().readControlRegister(), HDI08::HCR_HRIE)) {
-				LOG("TOO EARLY!");
-				continue;
-			}
-
-			if (!sethostflag) {
-				periph.getHDI08().setHostFlags(0, 1);
-				LOG("Setted host flag 0 1");
-				// Send a MIDI command
-
-//				int data[3] = {0xf330100};
-//				periph.getHDI08().writeRX(data, 1);
-//				int data[3] = {0x903c7f};
-//				periph.getHDI08().writeRX(data, 1);
-//				go = true;
-//				int data2[3] = {0x803c7f};
-//				periph.getHDI08().writeRX(data2, 1);
-				sethostflag = true;
-			}
-
-			if (ctr > 2000) {
-				if (cmdIdx < commands.size()) {
-					// Send the initial PART C commands
-					auto cmd = commands[cmdIdx];
-					printf("Sending PART C command %s: 0x%x=0x%x\n", cmd.name, cmd.key, cmd.value);
-					int buf[] = {0xf00040, 0x0000f7};
-					buf[0] = buf[0] | (0x72 << 8);
-					buf[1] = buf[1] | ((cmd.key % 0x80) << 16) | (cmd.value << 8);
-					periph.getHDI08().writeRX(buf, 2);
-					cmdIdx++;
-				} else if (bank <= 1) {
-					// CLEAR Page A & B
-	//				for (int tmp = 0; tmp < 3; tmp++) {
-	//					while (true) {
-	//						if (bank == 0 && (param == 2 || param == 3 || param == 4 || param == 7)) {
-	//							// Skip these
-	//							param++;
-	//							continue;
-	//						}
-	//						break;
-	//					}
-						int cmd = 0x70 + bank;
-						int buf[] = {0xf00040, 0x0000f7};
-						//const int value = values[param];
-						const int value = 0x0;
-						buf[0] = buf[0] | (cmd << 8);
-						buf[1] = buf[1] | ((param % 0x80) << 16) | (value << 8);
-						printf("Sending parameter BANK=0x%x KEY=0x%x VALUE=0x%x..\n", cmd, param, value);
-						periph.getHDI08().writeRX(buf, 2);
-						if ((param % 0x80) == 0x7f) {
-							bank++;
-							param++;
-						}
-						param++;
-	//				}
-				} else {
-					// COMPLETE! Send the C after commands to enable sound
-					if (cmdAfterIdx < commandsAfter.size()) {
-						auto cmd = commandsAfter[cmdAfterIdx];
-						printf("Sending PART C command AFTER %s: 0x%x=0x%x\n", cmd.name, cmd.key, cmd.value);
-						int buf[] = {0xf00040, 0x0000f7};
-						buf[0] = buf[0] | (0x72 << 8);
-						buf[1] = buf[1] | ((cmd.key % 0x80) << 16) | (cmd.value << 8);
-						periph.getHDI08().writeRX(buf, 2);
-						cmdAfterIdx++;
-					} else {
-						ready = true;
-						go = true;
-						bank = 0;
-						param = 0;
-					}
-				}
-			}
-		}
-
-		// Send page A & B
-		if (ready) {
-			if ((ctr % 50) == 0) {
-				if (bank <= 1) {
-					int cmd = 0x70 + bank;
-					int buf[] = {0xf00040, 0x0000f7};
-					const int value = values[param];
-					buf[0] = buf[0] | (cmd << 8);
-					buf[1] = buf[1] | ((param % 0x80) << 16) | (value << 8);
-					printf("Sending UPDATED parameter BANK=0x%x KEY=0x%x VALUE=0x%x..\n", cmd, param % 0x80, value);
-					periph.getHDI08().writeRX(buf, 2);
-					if ((param % 0x80) == 0x7f) {
-						printf("INCREASING!!!\n");
-						bank++;
-						param++;
-					}
-					param++;
-				} else {
-					superFinal = true;
-				}
-			}
-		}
-
-		// SEND MIDI
-		if (superFinal && (ctr % 1000) == 0) {
-			printf("Superfinal!!!");
-
-//			int data[3] = {0x903c7f};
-			int data[3] = {0x901f7f};
-			periph.getHDI08().writeRX(data, 1);
-			midisent = true;
-		}
-
-		//
-		// END
-		//
 
 //		if (tosend && !periph.getHDI08().hasDataToSend())
 //		{
@@ -324,7 +190,7 @@ int main(int _argc, char* _argv[])
 
 		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
-		if(!hFile && go)
+		if(!hFile)
 		{
 			for(auto c=0; c<channelsOut; ++c)
 			{
