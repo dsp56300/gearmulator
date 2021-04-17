@@ -56,8 +56,8 @@ public:
 //	const int SINGLE = 0x40;
 
 	Syx (dsp56k::HDI08& hdi08);
-	int sendFile (const std::vector<TWord>& preset);
-	int sendControlCommand(const ControlCommand command, const int value);
+	void sendFile (const std::vector<TWord>& preset);
+	void sendControlCommand(const ControlCommand command, const int value);
 private:
 	void send(const Syx::Page page, const int part, const int param, const int value);
 	void waitUntilReady();

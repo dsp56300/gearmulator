@@ -16,7 +16,7 @@ Syx::Syx(HDI08& _hdi08) : m_hdi08(_hdi08)
 	m_hdi08.setHostFlags(0, 1);
 }
 
-int Syx::sendFile(const std::vector<TWord>& preset)
+void Syx::sendFile(const std::vector<TWord>& preset)
 {
 	waitUntilBufferEmpty();
 
@@ -33,7 +33,7 @@ int Syx::sendFile(const std::vector<TWord>& preset)
 	}
 }
 
-int Syx::sendControlCommand(const Syx::ControlCommand _command, const int _value)
+void Syx::sendControlCommand(const Syx::ControlCommand _command, const int _value)
 {
 	waitUntilReady();
 	send(Syx::PAGE_C, Syx::SINGLE, _command, _value);
