@@ -90,7 +90,7 @@ void AccessVirus::loadPreset(const int bank, const int no)
 	file.seekg(offset);
 
 	preset.clear();
-	preset.resize(0x56);
+	preset.resize(0x57);
 
 	uint8_t buf[3];
 	for (int i = 0; i <= 0x56; i++) {
