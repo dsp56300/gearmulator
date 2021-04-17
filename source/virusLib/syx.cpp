@@ -13,13 +13,21 @@
 
 Syx::Syx(HDI08& _hdi08) : m_hdi08(_hdi08)
 {
-	m_hdi08.setHostFlags(0, 1);
 }
+
+void Syx::writeHostBitsWithWait(int flag1,int flag2)
+{
+	int hsr=m_hdi08.readStatusRegister();
+	int target=(flag1?1:0)|(flag2?2:0);
+	if (((hsr>>3)&3)==target) return;
+	waitUntilBufferEmpty();
+	m_hdi08.setHostFlags(flag1, flag2);
+}
+
 
 void Syx::sendFile(const std::vector<TWord>& preset)
 {
-	waitUntilBufferEmpty();
-
+	writeHostBitsWithWait(0,1);
 	// Send header
 	int buf[] = {0xf47555, 0x104000};
 	m_hdi08.writeRX(buf, 2);
@@ -27,7 +35,6 @@ void Syx::sendFile(const std::vector<TWord>& preset)
 	// Send preset
 	for (int i =0; i < preset.size(); i++)
 	{
-		waitUntilBufferEmpty();
 		TWord data = preset[i];
 		m_hdi08.writeRX((const int *)&data, 1);
 	}
@@ -41,11 +48,18 @@ void Syx::sendControlCommand(const Syx::ControlCommand _command, const int _valu
 
 void Syx::send(const Syx::Page _page, const int _part, const int _param, const int _value)
 {
-	waitUntilBufferEmpty();
+	writeHostBitsWithWait(0,1);
 	int buf[] = {0xf4f400, 0x0};
 	buf[0] = buf[0] | (0x70 + _page);
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
+}
+
+void Syx::sendMIDI(int a,int b,int c)
+{
+	writeHostBitsWithWait(1,1);
+	int buf[3]={a<<16,b<<16,c<<16};
+	m_hdi08.writeRX(buf,3);
 }
 
 void Syx::waitUntilBufferEmpty()

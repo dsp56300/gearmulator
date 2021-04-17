@@ -58,8 +58,10 @@ public:
 	Syx (dsp56k::HDI08& hdi08);
 	void sendFile (const std::vector<TWord>& preset);
 	void sendControlCommand(const ControlCommand command, const int value);
+	void sendMIDI(int a,int b,int c);
 private:
 	void send(const Syx::Page page, const int part, const int param, const int value);
+	void writeHostBitsWithWait(int flag1,int flag2);
 	void waitUntilReady();
 	void waitUntilBufferEmpty();
 	HDI08& m_hdi08;
