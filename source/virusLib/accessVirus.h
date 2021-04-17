@@ -1,6 +1,10 @@
 #pragma once
 
 #include <vector>
+#include "../dsp56300/source/dsp56kEmu/dsp.h"
+
+using namespace dsp56k;
+
 
 class AccessVirus
 {
@@ -21,9 +25,13 @@ public:
 	};
 
 	explicit AccessVirus(const char* _path);
+	void loadPreset(const int bank, const int preset);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
+
+	std::vector<TWord> preset;
+
 
 private:
 	std::vector<Chunk> get_dsp_chunks() const;

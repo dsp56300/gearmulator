@@ -75,6 +75,33 @@ std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
 		offset += 0x8000;
 	}
 
+	file.close();
+
 	return chunks;
 
+}
+
+void AccessVirus::loadPreset(const int bank, const int no)
+{
+	uint32_t offset = 0x50000 + (bank * 0x8000) + (no * 0x100);
+
+	// Open file
+	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
+	file.seekg(offset);
+
+	preset.clear();
+	preset.resize(0x56);
+
+	uint8_t buf[3];
+	for (int i = 0; i <= 0x56; i++) {
+		if (i == 0x56) {
+			file.read(reinterpret_cast<char*>(buf), 1);
+			preset[i] = (buf[0] << 16 | 0x0701);
+		} else {
+			file.read(reinterpret_cast<char*>(buf), 3);
+			preset[i] = ((buf[0] << 16) | (buf[1] << 8) | buf[2]);
+		}
+	}
+
+	file.close();
 }

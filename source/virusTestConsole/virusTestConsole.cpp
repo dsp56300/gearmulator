@@ -44,7 +44,7 @@ int main(int _argc, char* _argv[])
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
 
-	const AccessVirus v(_argv[1]);
+	AccessVirus v(_argv[1]);
 	std::thread loader = boot_virus_from_file(v, dsp, periph);
 
 //	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
@@ -143,6 +143,8 @@ int main(int _argc, char* _argv[])
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
 
+	v.loadPreset(0, 94);
+
 	// Load preset
 	Syx syx(periph.getHDI08());
 	std::thread sendSyxThread([&]() {
@@ -157,7 +159,7 @@ int main(int _argc, char* _argv[])
 		syx.sendControlCommand(Syx::UNK76, 0x0);
 		syx.sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
 		syx.sendControlCommand(Syx::INPUT_BOOST, 0x0);
-		syx.sendControlCommand(Syx::MASTER_TUNE, 0x40);
+		syx.sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
 		syx.sendControlCommand(Syx::DEVICE_ID, 0x0);
 		syx.sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
 		syx.sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
@@ -168,17 +170,10 @@ int main(int _argc, char* _argv[])
 		syx.sendControlCommand(Syx::LCD_CONTRAST, 0x40);
 		syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
 		syx.sendControlCommand(Syx::UNK_6d, 0x6c);
-		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a);
+		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
 
-		// Wait for a bit and send the SYX
-		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-		syx.sendFile(_argv[2]);
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(5000));
-		syx.sendControlCommand(Syx::CC_PART_MIDI_VOLUME_ENABLE, 1);
-		syx.sendControlCommand(Syx::CC_PART_MIDI_VOLUME_INIT, 127);
-		syx.sendControlCommand(Syx::CC_PART_VOLUME, 0x7f);
-		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x40);
+		// Send preset
+		syx.sendFile(v.preset);
 
 		// Send MIDI data
 		printf("SENDING MIDI!\n");
@@ -189,6 +184,7 @@ int main(int _argc, char* _argv[])
 	while (true)
 	{
 		ctr++;
+
 
 //		if (tosend && !periph.getHDI08().hasDataToSend())
 //		{
