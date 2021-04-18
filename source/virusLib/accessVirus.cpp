@@ -92,11 +92,14 @@ void AccessVirus::loadPreset(const int bank, const int no)
 	preset.clear();
 	preset.resize(0x56);
 
+	char presetname[11]={0};
 	uint8_t buf[3];
 	for (int i = 0; i < 0x56; i++) {
 		file.read(reinterpret_cast<char*>(buf), 3);
 		preset[i] = ((buf[0] << 16) | (buf[1] << 8) | buf[2]);
+		for (int k=0;k<3;k++) {int off=i*3+k;if (off>=240 && off<250) presetname[off-240]=buf[k];}
 	}
+	LOG("Loading Preset: [" << presetname << "]");
 
 	file.close();
 }
