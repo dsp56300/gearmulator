@@ -16,14 +16,14 @@ AccessVirus::AccessVirus(const char* _path) : m_path(_path)
 	bootRom.data = std::vector<uint32_t>(bootRom.size);
 
 	// The first chunk contains the bootrom
-	auto i = 2;
+	uint32_t i = 2;
 	for (; i < bootRom.size + 2; i++)
 	{
 		bootRom.data[i-2] = chunks[0].items[i];
 	}
 
 	// The rest of the chunks is made up of the command stream
-	for (auto j = 0; j < chunks.size(); j++)
+	for (size_t j = 0; j < chunks.size(); j++)
 	{
 		for (; i < chunks[j].items.size(); i++)
 			commandStream.emplace_back(chunks[j].items[i]);
