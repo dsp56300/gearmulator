@@ -129,8 +129,6 @@ int main(int _argc, char* _argv[])
 	// queue for HDI08
 	loader.join();
 
-	int off=0,tosend=0;
-
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
 
@@ -166,6 +164,7 @@ int main(int _argc, char* _argv[])
 		// Send preset
 		syx.sendFile(v.preset);
 		
+		std::this_thread::sleep_for(std::chrono::seconds(3));
 		LOG("Sending Note On!");
 		syx.sendMIDI(0x90,0x3c,0x7f);	// Note On
 		
