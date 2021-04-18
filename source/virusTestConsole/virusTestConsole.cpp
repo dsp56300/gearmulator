@@ -15,7 +15,7 @@ using namespace dsp56k;
 std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362& periph)
 {
 	// Load BootROM in DSP memory
-	for (int i=0; i<v.bootRom.data.size(); i++)
+	for (size_t i=0; i<v.bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
 
 //	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false);
@@ -88,7 +88,7 @@ int main(int _argc, char* _argv[])
 			// End of midi command, show it
 			if (buf == 0xf7) {
 				std::ostringstream stringStream;
-				for (int i = 0; i < idx; i++) {
+				for (size_t i = 0; i < idx; i++) {
 					//printf("tmp: 0x%x\n", midi[i]);
 					stringStream << HEXN(midi[i], 2);
 				}

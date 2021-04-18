@@ -33,7 +33,7 @@ void Syx::sendFile(const std::vector<TWord>& preset)
 	m_hdi08.writeRX(buf, 2);
 
 	// Send preset
-	for (int i =0; i < preset.size(); i++)
+	for (size_t i =0; i < preset.size(); i++)
 	{
 		TWord data = preset[i];
 		m_hdi08.writeRX((const int *)&data, 1);
