@@ -53,6 +53,18 @@ int main(int _argc, char* _argv[])
 	{
 		while(true)
 		{
+			/*
+			// Dump memory content at a specific PC
+			if(dsp.getPC() == 0x2c183)
+			{
+				memory.saveAsText("emu_X.txt", MemArea_X, 0, 0x3800);
+				memory.saveAsText("emu_Y.txt", MemArea_Y, 0, 0x3800);
+				memory.saveAsText("emu_P.txt", MemArea_P, 0, 0x3800);
+				memory.saveAsText("emu_E.txt", MemArea_Y, 0x20000, 0x20000);
+				memory.saveAssembly("emu_P.asm", 0, 0x3800);
+				memory.saveAssembly("emu_E.asm", 0x20000, 0x20000);
+			}
+			*/
 			dsp.exec();
 		}
 	});
