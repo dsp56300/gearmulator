@@ -18,7 +18,7 @@ std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362&
 	for (size_t i=0; i<v.bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
 
-//	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false);
+//	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false, &periph);
 
 	// Attach command stream
 	std::thread feedCommandStream([&]()
@@ -46,8 +46,6 @@ int main(int _argc, char* _argv[])
 
 	AccessVirus v(_argv[1]);
 	std::thread loader = boot_virus_from_file(v, dsp, periph);
-
-//	memory.saveAssembly("Virus_P.asm", 0, g_memorySize, false, true);
 
 	std::thread dspThread([&]()
 	{
@@ -140,6 +138,7 @@ int main(int _argc, char* _argv[])
 
 	// queue for HDI08
 	loader.join();
+//	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
 
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
