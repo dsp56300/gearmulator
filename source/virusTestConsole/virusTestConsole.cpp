@@ -115,7 +115,7 @@ int main(int _argc, char* _argv[])
 
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
-	constexpr size_t channelsOut = 6;
+	constexpr size_t channelsOut = 2;
 
 	float inputData[channelsIn][sampleCount] = 
 	{
@@ -126,15 +126,11 @@ int main(int _argc, char* _argv[])
 	float outputData[channelsOut][sampleCount] = 
 	{
 		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
-		{0,0,0,0},
 		{0,0,0,0}
 	};
 
 	float* audioIn [channelsIn ] = {inputData[0], inputData[1]};
-	float* audioOut[channelsOut] = {outputData[0], outputData[1], outputData[2], outputData[3], outputData[4], outputData[5]};
+	float* audioOut[channelsOut] = {outputData[0], outputData[1]};
 
 	// queue for HDI08
 	loader.join();
@@ -177,7 +173,8 @@ int main(int _argc, char* _argv[])
 		
 		std::this_thread::sleep_for(std::chrono::seconds(3));
 		LOG("Sending Note On!");
-		syx.sendMIDI(0x90,0x3c,0x7f);	// Note On
+		syx.sendControlCommand(Syx::AUDITION, 0x7f);
+//		syx.sendMIDI(0x90,0x30,0x30);	// Note On
 		
 	});
 
@@ -211,7 +208,7 @@ int main(int _argc, char* _argv[])
 		{
 			for(auto i=0; i<sampleCount; ++i)
 			{
-				for(auto c=0; c<1; ++c)
+				for(auto c=0; c<2; ++c)
 					fwrite(&audioOut[c][i], sizeof(float), 1, hFile);
 			}
 		}

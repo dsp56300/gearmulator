@@ -22,6 +22,7 @@ public:
 		CC_PART_VOLUME             = 0x27,  // 39
 		CC_MASTER_VOLUME           = 0x7f,  // 127
 
+		AUDITION				   = 0x01, // 01
 		UNK1a                      = 0x1a, // 26
 		UNK1b                      = 0x1b, // 27
 		UNK1c                      = 0x1c, // 28
@@ -52,8 +53,8 @@ public:
 		PAGE_C = 2
 	};
 
-	const int SINGLE = 0x0;
-//	const int SINGLE = 0x40;
+//	const int SINGLE = 0x0;
+	const int SINGLE = 0x40;
 
 	Syx (dsp56k::HDI08& hdi08);
 	void sendFile (const std::vector<TWord>& preset);
