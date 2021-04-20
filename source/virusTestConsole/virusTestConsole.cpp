@@ -139,7 +139,7 @@ int main(int _argc, char* _argv[])
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
 
-	v.loadPreset(0, 94);
+	v.loadPreset(0, 23);
 	
 	// Load preset
 	Syx syx(periph.getHDI08());
