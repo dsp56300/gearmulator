@@ -100,13 +100,13 @@ int main(int _argc, char* _argv[])
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 2;
 
-	float inputData[channelsIn][sampleCount] = 
+	float inputData[channelsIn][sampleCount] =
 	{
 		{1,-1,0.5f,-0.5f},
 		{1,-1,0.5f,-0.5f},
 	};
 
-	float outputData[channelsOut][sampleCount] = 
+	float outputData[channelsOut][sampleCount] =
 	{
 		{0,0,0,0},
 		{0,0,0,0}
@@ -122,7 +122,10 @@ int main(int _argc, char* _argv[])
 	FILE* hFile = nullptr;
 	int ctr=0,go=0;
 
-	v.loadPreset(0, 23);
+//	v.loadPreset(3, 0x65);	// SmoothBsBC
+//	v.loadPreset(0, 23);	// Digedi_JS
+	v.loadPreset(0,126);
+//	v.loadPreset(0,5);
 	
 	// Load preset
 	Syx syx(periph.getHDI08());
@@ -156,6 +159,7 @@ int main(int _argc, char* _argv[])
 		
 		std::this_thread::sleep_for(std::chrono::seconds(3));
 		LOG("Sending Note On!");
+		syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 		syx.sendControlCommand(Syx::AUDITION, 0x7f);
 //		syx.sendMIDI(0x90,0x30,0x30);	// Note On
 		
