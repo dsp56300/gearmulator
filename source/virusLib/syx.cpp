@@ -42,12 +42,12 @@ void Syx::sendFile(const std::vector<TWord>& preset)
 
 void Syx::sendControlCommand(const Syx::ControlCommand _command, const int _value)
 {
-	waitUntilReady();
 	send(Syx::PAGE_C, Syx::SINGLE, _command, _value);
 }
 
 void Syx::send(const Syx::Page _page, const int _part, const int _param, const int _value)
 {
+	waitUntilReady();
 	writeHostBitsWithWait(0,1);
 	int buf[] = {0xf4f400, 0x0};
 	buf[0] = buf[0] | (0x70 + _page);

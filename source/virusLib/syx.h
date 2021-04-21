@@ -53,15 +53,15 @@ public:
 		PAGE_C = 2
 	};
 
-//	const int SINGLE = 0x0;
-	const int SINGLE = 0x40;
+	const int SINGLE = 0x0;
+//	const int SINGLE = 0x40;
 
 	Syx (dsp56k::HDI08& hdi08);
 	void sendFile (const std::vector<TWord>& preset);
 	void sendControlCommand(const ControlCommand command, const int value);
 	void sendMIDI(int a,int b,int c);
-private:
 	void send(const Syx::Page page, const int part, const int param, const int value);
+private:
 	void writeHostBitsWithWait(int flag1,int flag2);
 	void waitUntilReady();
 	void waitUntilBufferEmpty();
