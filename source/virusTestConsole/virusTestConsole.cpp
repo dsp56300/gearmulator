@@ -48,7 +48,22 @@ int main(int _argc, char* _argv[])
 	AccessVirus v(_argv[1]);
 	std::thread loader = boot_virus_from_file(v, dsp, periph);
 
+	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
+
+#if MEMORY_HEAT_MAP
+	const auto thread = std::thread([&]
+	{
+		while(true)
+		{
+			dsp.exec();
+
+			if(dsp.getInstructionCounter() == 0x100000)
+				memory.saveHeatmap("heatmap.txt", false);
+		}
+	});
+#else
 	DSPThread dspThread(dsp);
+#endif
 
 	std::thread midiThread([&]() {
 		int midi[128];
@@ -125,6 +140,7 @@ int main(int _argc, char* _argv[])
 //	v.loadPreset(3, 0x65);	// SmoothBsBC
 //	v.loadPreset(0, 23);	// Digedi_JS
 	v.loadPreset(0,126);
+	v.loadPreset(3,101);
 //	v.loadPreset(0,5);
 	
 	// Load preset
