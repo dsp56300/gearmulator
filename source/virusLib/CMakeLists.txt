@@ -4,7 +4,9 @@ project(ceLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
-	accessVirus.cpp accessVirus.h syx.h syx.cpp
+	plugin.cpp plugin.h
+	romfile.cpp romfile.h
+	syx.cpp syx.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})

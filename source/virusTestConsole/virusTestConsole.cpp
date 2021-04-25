@@ -5,33 +5,13 @@
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
-#include "../virusLib/accessVirus.h"
+#include "../virusLib/romfile.h"
 #include "../virusLib/syx.h"
 
 #define HEXN(S, n)                     std::hex << std::setfill('0') << std::setw(n) << S
 
 using namespace dsp56k;
 using namespace virusLib;
-
-std::thread bootDSPFromROM(const ROMFile& v,DSP& dsp,Peripherals56362& periph)
-{
-	// Load BootROM in DSP memory
-	for (size_t i=0; i<v.bootRom.data.size(); i++)
-		dsp.memory().set(dsp56k::MemArea_P, v.bootRom.offset + i, v.bootRom.data[i]);
-
-//	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false, &periph);
-
-	// Attach command stream
-	std::thread feedCommandStream([&]()
-	{
-		periph.getHDI08().writeRX((int32_t*)&v.commandStream[0],v.commandStream.size());
-	});
-
-	// Initialize the DSP
-	dsp.setPC(v.bootRom.offset);
-	return feedCommandStream;
-}
-
 
 int main(int _argc, char* _argv[])
 {
@@ -46,7 +26,7 @@ int main(int _argc, char* _argv[])
 	DSP dsp(memory, &periph, &periph);
 
 	ROMFile v(_argv[1]);
-	std::thread loader = bootDSPFromROM(v, dsp, periph);
+	auto loader = v.bootDSP(dsp, periph);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
@@ -77,7 +57,7 @@ int main(int _argc, char* _argv[])
 				continue;
 			}
 
-			int buf = (word & 0x00ff0000) >> 16;
+			auto buf = (word & 0x00ff0000) >> 16;
 
 			// Check for sequence start 0xf0
 			if (!sequenceStarted) {

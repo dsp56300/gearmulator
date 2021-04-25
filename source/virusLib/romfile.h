@@ -1,8 +1,15 @@
 #pragma once
 
+#include <thread>
 #include <vector>
 
-#include "../dsp56300/source/dsp56kEmu/dsp.h"
+#include "../dsp56300/source/dsp56kEmu/types.h"
+
+namespace dsp56k
+{
+	class Peripherals56362;
+	class DSP;
+}
 
 namespace virusLib
 {
@@ -26,6 +33,8 @@ public:
 
 	explicit ROMFile(const char* _path);
 	void loadPreset(int bank, int presetNumber);
+
+	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;

@@ -1,8 +1,10 @@
 #include <cassert>
 #include <fstream>
 
-#include "accessVirus.h"
+#include "romfile.h"
 
+
+#include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 namespace virusLib
@@ -104,5 +106,24 @@ void ROMFile::loadPreset(const int bank, const int presetNumber)
 	LOG("Loading Preset: [" << presetname << "]");
 
 	file.close();
+}
+
+std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
+{
+	// Load BootROM in DSP memory
+	for (size_t i=0; i<bootRom.data.size(); i++)
+		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
+
+//	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false, &periph);
+
+	// Attach command stream
+	std::thread feedCommandStream([&]()
+	{
+		periph.getHDI08().writeRX(reinterpret_cast<int32_t*>(&commandStream[0]),commandStream.size());
+	});
+
+	// Initialize the DSP
+	dsp.setPC(bootRom.offset);
+	return feedCommandStream;
 }
 }
