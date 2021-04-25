@@ -4,6 +4,7 @@ project(ceLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
+	device.cpp device.h
 	plugin.cpp plugin.h
 	romfile.cpp romfile.h
 	syx.cpp syx.h
