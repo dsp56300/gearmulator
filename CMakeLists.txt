@@ -11,7 +11,41 @@ include(base.cmake)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/virusLib)
 
-add_executable(virusTestConsole)
+if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
+	set(VIRUS_VST2 true)
+else()
+	set(VIRUS_VST2 false)
+endif()
 
+if(VIRUS_VST2)
+	add_subdirectory(source/vstsdk2.4.2)
+	add_subdirectory(source/vst2)
+endif()
+
+# ----------------- Test Console
+
+add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
 target_link_libraries(virusTestConsole PUBLIC virusLib)
+
+# ----------------- VST2 Plugin
+
+if(VIRUS_VST2)
+	add_library(virusVst2dll MODULE)
+
+	target_sources(virusVst2dll PRIVATE source/vst2/vstMain.cpp)
+
+	if(MSVC)
+		target_sources(virusVst2dll PRIVATE source/vstsdk2.4.2/public.sdk/samples/vst2.x/win/vstplug.def source/vst2/version.rc)
+	endif()
+
+	target_include_directories(virusVst2dll PRIVATE source/vstsdk2.4.2/)
+
+	target_link_libraries(virusVst2dll virusVst2 vstsdk2 virusLib)
+
+	if(MSVC)
+		set_target_properties(virusVst2dll PROPERTIES OUTPUT_NAME "VirusEmuVST2${CMAKE_VS_PLATFORM_NAME}")
+	else()
+		set_target_properties(virusVst2dll PROPERTIES OUTPUT_NAME "VirusEmuVST2")
+	endif()
+endif()

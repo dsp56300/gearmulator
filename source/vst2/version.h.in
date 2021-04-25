@@ -1,0 +1,3 @@
+#pragma once 
+#define VERSION "@virusEmu_VERSION_MAJOR@.@virusEmu_VERSION_MINOR@@virusEmu_VERSION_PATCH@"
+#define VERSIONVST @virusEmu_VERSION_MAJOR@@virusEmu_VERSION_MINOR@@virusEmu_VERSION_PATCH@
