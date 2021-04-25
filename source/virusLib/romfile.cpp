@@ -3,7 +3,6 @@
 
 #include "romfile.h"
 
-
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 

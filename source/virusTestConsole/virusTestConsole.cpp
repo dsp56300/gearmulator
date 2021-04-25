@@ -19,7 +19,7 @@ int main(int _argc, char* _argv[])
 
 	// Create the DSP with peripherals
 	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x200000
-	const DefaultMemoryMap memoryMap;
+	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
 	Peripherals56362 periph;
@@ -119,13 +119,21 @@ int main(int _argc, char* _argv[])
 
 //	v.loadPreset(3, 0x65);	// SmoothBsBC
 //	v.loadPreset(0, 23);	// Digedi_JS
-	v.loadPreset(0,126);
-	v.loadPreset(3,101);
+//	v.loadPreset(0, 50);	// Hoppin' SV
+//	v.loadPreset(0, 28);	// Etheral SV
+//	v.loadPreset(1, 75);	// Oscar1 HS
+	v.loadPreset(0, 93);	// RepeaterJS
+//	v.loadPreset(0,126);
+//	v.loadPreset(3,101);
 //	v.loadPreset(0,5);
 	
 	// Load preset
 	Syx syx(periph.getHDI08());
 	std::thread sendSyxThread([&]() {
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+
+		LOG("Sending Preset!");
+
 		syx.sendControlCommand(Syx::UNK1a, 0x1);
 		syx.sendControlCommand(Syx::UNK1b, 0x1);
 		syx.sendControlCommand(Syx::UNK1c, 0x0);
@@ -152,12 +160,16 @@ int main(int _argc, char* _argv[])
 
 		// Send preset
 		syx.sendFile(v.preset);
-		
-		std::this_thread::sleep_for(std::chrono::seconds(3));
+
+		std::this_thread::sleep_for(std::chrono::seconds(5));
 		LOG("Sending Note On!");
-		syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
-		syx.sendControlCommand(Syx::AUDITION, 0x7f);
-//		syx.sendMIDI(0x90,0x30,0x30);	// Note On
+//		syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
+//		syx.sendControlCommand(Syx::AUDITION, 0x7f);
+		syx.sendMIDI(0x90,60,0x7f);	// Note On
+//		std::this_thread::sleep_for(std::chrono::seconds(1));
+//		syx.sendMIDI(0x90,0x33,0x7f);	// Note On
+//		std::this_thread::sleep_for(std::chrono::seconds(1));
+//		syx.sendMIDI(0x90,0x37,0x3f);	// Note On
 		
 	});
 
