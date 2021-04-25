@@ -21,9 +21,10 @@ namespace virusLib
 	{
 		m_memory.setExternalMemory(g_externalMemStart, true);
 
+		auto loader = m_rom.bootDSP(m_dsp, m_periph);
+
 		m_dspThread.reset(new DSPThread(m_dsp));
 
-		auto loader = m_rom.bootDSP(m_dsp, m_periph);
 		loader.join();
 
 		m_initThread.reset(new std::thread([&]()
