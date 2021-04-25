@@ -4,7 +4,9 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 
-class AccessVirus
+namespace virusLib
+{
+class ROMFile
 {
 public:
 	struct Chunk
@@ -22,8 +24,8 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	explicit AccessVirus(const char* _path);
-	void loadPreset(const int bank, const int preset);
+	explicit ROMFile(const char* _path);
+	void loadPreset(int bank, int presetNumber);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
@@ -36,3 +38,4 @@ private:
 
 	const char* const m_path;
 };
+}

@@ -11,9 +11,9 @@
 #define HEXN(S, n)                     std::hex << std::setfill('0') << std::setw(n) << S
 
 using namespace dsp56k;
+using namespace virusLib;
 
-
-std::thread boot_virus_from_file(const AccessVirus& v,DSP& dsp,Peripherals56362& periph)
+std::thread bootDSPFromROM(const ROMFile& v,DSP& dsp,Peripherals56362& periph)
 {
 	// Load BootROM in DSP memory
 	for (size_t i=0; i<v.bootRom.data.size(); i++)
@@ -45,8 +45,8 @@ int main(int _argc, char* _argv[])
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
 
-	AccessVirus v(_argv[1]);
-	std::thread loader = boot_virus_from_file(v, dsp, periph);
+	ROMFile v(_argv[1]);
+	std::thread loader = bootDSPFromROM(v, dsp, periph);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 

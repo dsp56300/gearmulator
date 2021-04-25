@@ -5,7 +5,9 @@
 
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
-AccessVirus::AccessVirus(const char* _path) : m_path(_path)
+namespace virusLib
+{
+ROMFile::ROMFile(const char* _path) : m_path(_path)
 {
 	LOG("Init access virus");
 
@@ -36,7 +38,7 @@ AccessVirus::AccessVirus(const char* _path) : m_path(_path)
 	printf("Program Commands len = 0x%lx\n", commandStream.size());
 }
 
-std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
+std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 {
 	uint32_t offset = 0x18000;
 
@@ -81,9 +83,9 @@ std::vector<AccessVirus::Chunk> AccessVirus::get_dsp_chunks() const
 
 }
 
-void AccessVirus::loadPreset(const int bank, const int no)
+void ROMFile::loadPreset(const int bank, const int presetNumber)
 {
-	uint32_t offset = 0x50000 + (bank * 0x8000) + (no * 0x100);
+	uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
 
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
@@ -102,4 +104,5 @@ void AccessVirus::loadPreset(const int bank, const int no)
 	LOG("Loading Preset: [" << presetname << "]");
 
 	file.close();
+}
 }

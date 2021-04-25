@@ -3,6 +3,8 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
 
+namespace virusLib
+{
 class Syx
 {
 public:
@@ -63,3 +65,4 @@ private:
 	void waitUntilBufferEmpty() const;
 	dsp56k::HDI08& m_hdi08;
 };
+}
