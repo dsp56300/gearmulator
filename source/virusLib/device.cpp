@@ -18,56 +18,68 @@ namespace virusLib
 		, m_dsp(m_memory, &m_periph, &m_periph)
 		, m_rom(_romFileName)
 		, m_syx(m_periph.getHDI08())
-		, m_dspThread(m_dsp)
 	{
 		m_memory.setExternalMemory(g_externalMemStart, true);
+
+		m_dspThread.reset(new DSPThread(m_dsp));
 
 		auto loader = m_rom.bootDSP(m_dsp, m_periph);
 		loader.join();
 
-		m_syx.sendControlCommand(Syx::UNK1a, 0x1);
-		m_syx.sendControlCommand(Syx::UNK1b, 0x1);
-		m_syx.sendControlCommand(Syx::UNK1c, 0x0);
-		m_syx.sendControlCommand(Syx::UNK1d, 0x0);
-		m_syx.sendControlCommand(Syx::UNK35, 0x40);
-		m_syx.sendControlCommand(Syx::UNK36, 0xc);
-		m_syx.sendControlCommand(Syx::UNK36, 0xc); // duplicate
-		m_syx.sendControlCommand(Syx::SECOND_OUTPUT_SELECT, 0x0);
-		m_syx.sendControlCommand(Syx::UNK76, 0x0);
-		m_syx.sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
-		m_syx.sendControlCommand(Syx::INPUT_BOOST, 0x0);
-		m_syx.sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
-		m_syx.sendControlCommand(Syx::DEVICE_ID, 0x0);
-		m_syx.sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
-		m_syx.sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
-		m_syx.sendControlCommand(Syx::MIDI_ARPEGGIATOR_SEND, 0x0);
-		m_syx.sendControlCommand(Syx::MIDI_CLOCK_RX, 0x1);
-		m_syx.sendControlCommand(Syx::GLOBAL_CHANNEL, 0x0);
-		m_syx.sendControlCommand(Syx::LED_MODE, 0x2);
-		m_syx.sendControlCommand(Syx::LCD_CONTRAST, 0x40);
-		m_syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
-		m_syx.sendControlCommand(Syx::UNK_6d, 0x6c);
-		m_syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
+		m_initThread.reset(new std::thread([&]()
+		{
+			m_syx.sendControlCommand(Syx::UNK1a, 0x1);
+			m_syx.sendControlCommand(Syx::UNK1b, 0x1);
+			m_syx.sendControlCommand(Syx::UNK1c, 0x0);
+			m_syx.sendControlCommand(Syx::UNK1d, 0x0);
+			m_syx.sendControlCommand(Syx::UNK35, 0x40);
+			m_syx.sendControlCommand(Syx::UNK36, 0xc);
+			m_syx.sendControlCommand(Syx::UNK36, 0xc); // duplicate
+			m_syx.sendControlCommand(Syx::SECOND_OUTPUT_SELECT, 0x0);
+			m_syx.sendControlCommand(Syx::UNK76, 0x0);
+			m_syx.sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
+			m_syx.sendControlCommand(Syx::INPUT_BOOST, 0x0);
+			m_syx.sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
+			m_syx.sendControlCommand(Syx::DEVICE_ID, 0x0);
+			m_syx.sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
+			m_syx.sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
+			m_syx.sendControlCommand(Syx::MIDI_ARPEGGIATOR_SEND, 0x0);
+			m_syx.sendControlCommand(Syx::MIDI_CLOCK_RX, 0x1);
+			m_syx.sendControlCommand(Syx::GLOBAL_CHANNEL, 0x0);
+			m_syx.sendControlCommand(Syx::LED_MODE, 0x2);
+			m_syx.sendControlCommand(Syx::LCD_CONTRAST, 0x40);
+			m_syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
+			m_syx.sendControlCommand(Syx::UNK_6d, 0x6c);
+			m_syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
 
-		// Send preset
-		m_rom.loadPreset(0, 93);	// RepeaterJS
-		m_syx.sendFile(m_rom.preset);
+			// Send preset
+			m_rom.loadPreset(0, 93);	// RepeaterJS
+			m_syx.sendFile(m_rom.preset);
+
+			m_initDone = true;
+			m_initThread->detach();
+			m_initThread.reset();
+		}));
 	}
 
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
-		for(size_t i=0; i<_midiIn.size(); ++i)
+		if(m_initDone)
 		{
-			const auto& me = _midiIn[i];
-			// TODO: midi timing
-			if(me.sysex.empty())
+			for(size_t i=0; i<_midiIn.size(); ++i)
 			{
-				m_syx.sendMIDI(me.a, me.b, me.c);				
-			}
-			else
-			{
-				// TODO: sysex
-//				m_syx.sendSysex();
+				const auto& me = _midiIn[i];
+				// TODO: midi timing
+				if(me.sysex.empty())
+				{
+					LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
+					m_syx.sendMIDI(me.a, me.b, me.c);				
+				}
+				else
+				{
+					// TODO: sysex
+//					m_syx.sendSysex();
+				}
 			}
 		}
 		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2);

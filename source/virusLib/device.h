@@ -24,6 +24,8 @@ namespace virusLib
 
 		Syx m_syx;
 		
-		dsp56k::DSPThread m_dspThread;
+		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
+		std::unique_ptr<std::thread> m_initThread;
+		bool m_initDone = false;
 	};
 }
