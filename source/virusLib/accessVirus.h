@@ -38,4 +38,3 @@ private:
 
 	const char* const m_path;
 };
-

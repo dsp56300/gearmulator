@@ -1,31 +1,23 @@
-#include <cassert>
-#include <fstream>
-#include <array>
 #include <vector>
-#include <stdexcept>
 #include <chrono>
 #include <thread>
 
 #include "syx.h"
 
-#include "../dsp56300/source/dsp56kEmu/logging.h"
-
-
 Syx::Syx(HDI08& _hdi08) : m_hdi08(_hdi08)
 {
 }
 
-void Syx::writeHostBitsWithWait(int flag1,int flag2)
+void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
-	int hsr=m_hdi08.readStatusRegister();
-	int target=(flag1?1:0)|(flag2?2:0);
+	const int hsr=m_hdi08.readStatusRegister();
+	const int target=(flag1?1:0)|(flag2?2:0);
 	if (((hsr>>3)&3)==target) return;
 	waitUntilBufferEmpty();
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-
-void Syx::sendFile(const std::vector<TWord>& preset)
+void Syx::sendFile(const std::vector<TWord>& preset) const
 {
 	writeHostBitsWithWait(0,1);
 	// Send header
@@ -35,17 +27,17 @@ void Syx::sendFile(const std::vector<TWord>& preset)
 	// Send preset
 	for (size_t i =0; i < preset.size(); i++)
 	{
-		TWord data = preset[i];
-		m_hdi08.writeRX((const int *)&data, 1);
+		auto data = preset[i];
+		m_hdi08.writeRX(reinterpret_cast<const int*>(&data), 1);
 	}
 }
 
-void Syx::sendControlCommand(const Syx::ControlCommand _command, const int _value)
+void Syx::sendControlCommand(const ControlCommand _command, const int _value) const
 {
-	send(Syx::PAGE_C, Syx::SINGLE, _command, _value);
+	send(PAGE_C, SINGLE, _command, _value);
 }
 
-void Syx::send(const Syx::Page _page, const int _part, const int _param, const int _value)
+void Syx::send(const Page _page, const int _part, const int _param, const int _value) const
 {
 	waitUntilReady();
 	writeHostBitsWithWait(0,1);
@@ -55,24 +47,26 @@ void Syx::send(const Syx::Page _page, const int _part, const int _param, const i
 	m_hdi08.writeRX(buf, 2);
 }
 
-void Syx::sendMIDI(int a,int b,int c)
+void Syx::sendMIDI(int a,int b,int c) const
 {
 	writeHostBitsWithWait(1,1);
 	int buf[3]={a<<16,b<<16,c<<16};
 	m_hdi08.writeRX(buf,3);
 }
 
-void Syx::waitUntilBufferEmpty()
+void Syx::waitUntilBufferEmpty() const
 {
-	while (m_hdi08.hasDataToSend()) {
+	while (m_hdi08.hasDataToSend())
+	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 		std::this_thread::yield();
 	}
 }
 
-void Syx::waitUntilReady()
+void Syx::waitUntilReady() const
 {
-	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) {
+	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) 
+	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(100));
 		std::this_thread::yield();
 	}

@@ -1,7 +1,5 @@
 #pragma once
 
-#include <array>
-
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
 
@@ -57,13 +55,13 @@ public:
 //	const int SINGLE = 0x40;
 
 	Syx (dsp56k::HDI08& hdi08);
-	void sendFile (const std::vector<TWord>& preset);
-	void sendControlCommand(const ControlCommand command, const int value);
-	void sendMIDI(int a,int b,int c);
-	void send(const Syx::Page page, const int part, const int param, const int value);
+	void sendFile (const std::vector<TWord>& preset) const;
+	void sendControlCommand(ControlCommand command, int value) const;
+	void sendMIDI(int a,int b,int c) const;
+	void send(Page page, int part, int param, int value) const;
 private:
-	void writeHostBitsWithWait(int flag1,int flag2);
-	void waitUntilReady();
-	void waitUntilBufferEmpty();
+	void writeHostBitsWithWait(char flag1,char flag2) const;
+	void waitUntilReady() const;
+	void waitUntilBufferEmpty() const;
 	HDI08& m_hdi08;
 };
