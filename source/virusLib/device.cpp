@@ -29,6 +29,8 @@ namespace virusLib
 
 		m_initThread.reset(new std::thread([&]()
 		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+
 			m_syx.sendControlCommand(Syx::UNK1a, 0x1);
 			m_syx.sendControlCommand(Syx::UNK1b, 0x1);
 			m_syx.sendControlCommand(Syx::UNK1c, 0x0);
@@ -52,6 +54,8 @@ namespace virusLib
 			m_syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
 			m_syx.sendControlCommand(Syx::UNK_6d, 0x6c);
 			m_syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
+
+			std::this_thread::sleep_for(std::chrono::seconds(1));
 
 			// Send preset
 			m_rom.loadPreset(0, 93);	// RepeaterJS
