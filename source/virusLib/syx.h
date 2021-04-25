@@ -3,8 +3,6 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
 
-using namespace dsp56k;
-
 class Syx
 {
 public:
@@ -54,8 +52,8 @@ public:
 	const int SINGLE = 0x0;
 //	const int SINGLE = 0x40;
 
-	Syx (dsp56k::HDI08& hdi08);
-	void sendFile (const std::vector<TWord>& preset) const;
+	explicit Syx (dsp56k::HDI08& hdi08);
+	void sendFile (const std::vector<dsp56k::TWord>& preset) const;
 	void sendControlCommand(ControlCommand command, int value) const;
 	void sendMIDI(int a,int b,int c) const;
 	void send(Page page, int part, int param, int value) const;
@@ -63,5 +61,5 @@ private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
-	HDI08& m_hdi08;
+	dsp56k::HDI08& m_hdi08;
 };

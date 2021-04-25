@@ -4,6 +4,8 @@
 
 #include "syx.h"
 
+using namespace dsp56k;
+
 Syx::Syx(HDI08& _hdi08) : m_hdi08(_hdi08)
 {
 }

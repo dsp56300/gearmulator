@@ -1,10 +1,8 @@
 #pragma once
 
 #include <vector>
+
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
-
-using namespace dsp56k;
-
 
 class AccessVirus
 {
@@ -30,7 +28,7 @@ public:
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
 
-	std::vector<TWord> preset;
+	std::vector<dsp56k::TWord> preset;
 
 
 private:
