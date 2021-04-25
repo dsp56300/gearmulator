@@ -8,7 +8,7 @@ namespace virusLib
 	{
 		dsp56k::UnitTests tests;
 
-		m_device.reset(new Device("f:\\AccessVirusEmulator\\Access Virus C (am29f040b_6v6).BIN"));
+		m_device.reset(new Device("f:\\AccessVirusEmulator\\Virus_C_OS_Flash_V6_5.BIN"));
 	}
 
 	Plugin::~Plugin()
