@@ -63,6 +63,11 @@ namespace virusLib
 		}));
 	}
 
+	Device::~Device()
+	{
+		m_dspThread.reset();
+	}
+
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
 		if(m_initDone)

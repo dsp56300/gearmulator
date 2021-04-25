@@ -11,6 +11,7 @@ namespace virusLib
 	{
 	public:
 		Device(const char* _romFileName);
+		~Device();
 		void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 
 	private:
