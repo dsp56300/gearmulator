@@ -35,8 +35,8 @@ ROMFile::ROMFile(const char* _path) : m_path(_path)
 
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
-	printf("Program BootROM len = 0x%lx\n", bootRom.data.size());
-	printf("Program Commands len = 0x%lx\n", commandStream.size());
+	printf("Program BootROM len = 0x%lx\n", static_cast<uint32_t>(bootRom.data.size()));
+	printf("Program Commands len = 0x%lx\n", static_cast<uint32_t>(commandStream.size()));
 }
 
 std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
@@ -110,7 +110,7 @@ void ROMFile::loadPreset(const int bank, const int presetNumber)
 std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 {
 	// Load BootROM in DSP memory
-	for (size_t i=0; i<bootRom.data.size(); i++)
+	for (uint32_t i=0; i<bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
 
 //	dsp.memory().saveAssembly("Virus_BootROM.asm", v.bootRom.offset, v.bootRom.size, false, false, &periph);

@@ -139,7 +139,7 @@ VstInt32 VSTAudioEffect::getChunk( void** _data, bool _isPreset /*= false*/ )
 {
 	m_chunkData.resize(1, 0);
 	*_data = &m_chunkData[0];
-	return m_chunkData.size();
+	return static_cast<VstInt32>(m_chunkData.size());
 }
 
 // _____________________________________________________________________________
@@ -310,7 +310,7 @@ void VSTAudioEffect::sendMidiEventsToHost(const std::vector<virusLib::SMidiEvent
 			dst.deltaFrames = ev.offset;
 
 			dst.sysexDump = (char*)&ev.sysex[0];
-			dst.dumpBytes = ev.sysex.size();
+			dst.dumpBytes = static_cast<VstInt32>(ev.sysex.size());
 
 			events.push_back(dst);
 		}
