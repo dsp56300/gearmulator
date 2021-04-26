@@ -25,9 +25,9 @@ public:
 	VstInt32		processEvents				(VstEvents* events) override;
 
 	void			setSampleRate				(float sampleRate) override;
+	void			setBlockSize				(VstInt32 blockSize) override;
 
 	VstInt32		canDo						(char* text) override;
-
 	// Midi
 	VstInt32		getNumMidiInputChannels		() override { return 16; }				/// Returns number of MIDI input channels used [0, 16]
 

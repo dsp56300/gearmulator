@@ -15,6 +15,7 @@ namespace virusLib
 		void addMidiEvent(const SMidiEvent& _ev);
 		void setSamplerate(float _samplerate) {}
 		void process(float** _inputs, float** _outputs, size_t _count);
+		void setBlockSize(size_t _blockSize);
 
 	private:
 		std::vector<SMidiEvent> m_midiIn;

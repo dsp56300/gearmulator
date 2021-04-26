@@ -92,8 +92,14 @@ namespace virusLib
 				}
 			}
 		}
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2);
+
+		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
 
 		// TODO: midi out
+	}
+
+	void Device::setBlockSize(size_t _size)
+	{
+		m_nextLatency = _size;
 	}
 }

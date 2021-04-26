@@ -27,4 +27,9 @@ namespace virusLib
 		m_midiIn.clear();
 		m_midiOut.clear();	// TODO
 	}
+
+	void Plugin::setBlockSize(size_t _blockSize)
+	{
+		m_device->setBlockSize(_blockSize);
+	}
 }

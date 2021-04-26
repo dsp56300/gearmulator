@@ -158,6 +158,11 @@ void VSTAudioEffect::setSampleRate( float _sampleRate )
 	m_plugin.setSamplerate(_sampleRate);
 }
 
+void VSTAudioEffect::setBlockSize(VstInt32 blockSize)
+{
+	m_plugin.setBlockSize(blockSize);
+}
+
 // _____________________________________________________________________________
 // canDo
 //
