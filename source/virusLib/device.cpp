@@ -9,7 +9,7 @@ using namespace dsp56k;
 
 namespace virusLib
 {
-	// 128k words beginning at 0x200000
+	// 128k words beginning at $20000
 	constexpr TWord g_externalMemStart	= 0x020000;
 	constexpr TWord g_memorySize		= 0x040000;
 
