@@ -58,7 +58,9 @@ namespace virusLib
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 
 			// Send preset
-			m_rom.loadPreset(0, 93);	// RepeaterJS
+//			m_rom.loadPreset(0, 93);	// RepeaterJS
+//			m_rom.loadPreset(0, 6);		// BusysawsSV
+			m_rom.loadPreset(0, 12);	// CommerseSV
 			m_syx.sendFile(m_rom.preset);
 
 			m_initDone = true;
