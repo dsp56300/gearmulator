@@ -1,4 +1,5 @@
 #pragma once
+#include <cstdint>
 #include "midiTypes.h"
 #include "romfile.h"
 #include "syx.h"
