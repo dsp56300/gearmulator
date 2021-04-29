@@ -2,13 +2,32 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
+#include "romfile.h"
 
 namespace virusLib
 {
 class Syx
 {
 public:
-	enum ControlCommand
+	enum SysexMessageType
+	{
+		DUMP_SINGLE                = 0x10,
+		DUMP_MULTI                 = 0x11,
+		REQUEST_SINGLE             = 0x30,
+		REQUEST_MULTI              = 0x31,
+		REQUEST_BANK_SINGLE        = 0x32,
+		REQUEST_BANK_MULTI         = 0x33,
+		REQUEST_ARRANGEMENT        = 0x34,
+		REQUEST_GLOBAL             = 0x35,
+		REQUEST_TOTAL              = 0x36,
+		REQUEST_CONTROLLER_DUMP    = 0x37,
+
+		PARAM_CHANGE_A             = 0x70,
+		PARAM_CHANGE_B             = 0x71,
+		PARAM_CHANGE_C             = 0x72,
+	};
+
+    enum ControlCommand
 	{
 		CC_DEVICE_ID               = 0x5d,  // 93
 		CC_PART_ENABLE             = 0x48,  // 72
@@ -46,23 +65,30 @@ public:
 
 	enum Page
 	{
-		PAGE_A = 0,
-		PAGE_B = 1,
-		PAGE_C = 2
+		PAGE_A = 0x70,
+		PAGE_B = 0x71,
+		PAGE_C = 0x72,
 	};
 
-	const int SINGLE = 0x0;
-//	const int SINGLE = 0x40;
+	const static int SINGLE = 0x40;
 
-	explicit Syx (dsp56k::HDI08& hdi08);
-	void sendFile (const std::vector<dsp56k::TWord>& preset) const;
+	explicit Syx (dsp56k::HDI08& hdi08, ROMFile& romFile);
+	void sendFile (int program, const std::vector<dsp56k::TWord>& preset) const;
 	void sendControlCommand(ControlCommand command, int value) const;
 	void sendMIDI(int a,int b,int c) const;
 	void send(Page page, int part, int param, int value) const;
+	std::vector<uint8_t> sendSysex(std::vector<uint8_t> _data) const;
+
+	int dumpSingle(int _bank, int _program, std::array<uint8_t, 256>& _data) const;
+	int requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t, 256>& _data) const;
+
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
 	dsp56k::HDI08& m_hdi08;
+	ROMFile& m_romFile;
+	const uint8_t m_deviceId = 0;
+	std::array<uint8_t, 256> m_multiEditBuffer;
 };
 }

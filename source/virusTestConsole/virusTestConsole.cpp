@@ -8,8 +8,7 @@
 
 #include "../virusLib/romfile.h"
 #include "../virusLib/syx.h"
-
-#define HEXN(S, n)                     std::hex << std::setfill('0') << std::setw(n) << S
+#include "../virusLib/midi.h"
 
 using namespace dsp56k;
 using namespace virusLib;
@@ -91,7 +90,6 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 2;
@@ -127,9 +125,12 @@ int main(int _argc, char* _argv[])
 //	v.loadPreset(0,126);
 //	v.loadPreset(3,101);
 //	v.loadPreset(0,5);
-	
+
+	const bool midiMode = _argc >= 3;
+
 	// Load preset
-	Syx syx(periph.getHDI08());
+	Syx syx(periph.getHDI08(), v);
+
 	std::thread sendSyxThread([&]() {
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -160,17 +161,27 @@ int main(int _argc, char* _argv[])
 		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
 
 		// Send preset
-		syx.sendFile(v.preset);
+		if (midiMode)
+		{
+			Midi midi(syx);
+			if (midi.connect() == 0)
+				midi.listen();
+		}
+		else
+		{
+			syx.sendFile(Syx::SINGLE, v.preset);
 
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-		LOG("Sending Note On!");
-//		syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
-//		syx.sendControlCommand(Syx::AUDITION, 0x7f);
-		syx.sendMIDI(0x90,60,0x7f);	// Note On
-//		std::this_thread::sleep_for(std::chrono::seconds(1));
-//		syx.sendMIDI(0x90,0x33,0x7f);	// Note On
-//		std::this_thread::sleep_for(std::chrono::seconds(1));
-//		syx.sendMIDI(0x90,0x37,0x3f);	// Note On
+//			std::this_thread::sleep_for(std::chrono::seconds(5));
+			LOG("Sending Note On!");
+//			syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
+//			syx.sendControlCommand(Syx::AUDITION, 0x7f);
+			syx.sendMIDI(0x90,60,0x7f);	// Note On
+//			std::this_thread::sleep_for(std::chrono::seconds(1));
+//			syx.sendMIDI(0x90,0x33,0x7f);	// Note On
+//			std::this_thread::sleep_for(std::chrono::seconds(1));
+//			syx.sendMIDI(0x90,0x37,0x3f);	// Note On
+
+		}
 		
 	});
 

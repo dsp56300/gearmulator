@@ -17,7 +17,7 @@ namespace virusLib
 		: m_memory(m_memoryValidator, g_memorySize)
 		, m_dsp(m_memory, &m_periph, &m_periph)
 		, m_rom(_romFileName)
-		, m_syx(m_periph.getHDI08())
+		, m_syx(m_periph.getHDI08(), m_rom)
 	{
 		m_memory.setExternalMemory(g_externalMemStart, true);
 
@@ -61,7 +61,7 @@ namespace virusLib
 //			m_rom.loadPreset(0, 93);	// RepeaterJS
 //			m_rom.loadPreset(0, 6);		// BusysawsSV
 			m_rom.loadPreset(0, 12);	// CommerseSV
-			m_syx.sendFile(m_rom.preset);
+			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
 
 			m_initDone = true;
 			m_initThread->detach();
@@ -89,8 +89,8 @@ namespace virusLib
 				}
 				else
 				{
-					// TODO: sysex
-//					m_syx.sendSysex();
+					// TODO: sysex response
+					m_syx.sendSysex(me.sysex);
 				}
 			}
 		}

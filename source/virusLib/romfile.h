@@ -33,7 +33,7 @@ public:
 
 	explicit ROMFile(const char* _path);
 	void loadPreset(int bank, int presetNumber);
-
+	void getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out);
 	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
 
 	BootRom bootRom;

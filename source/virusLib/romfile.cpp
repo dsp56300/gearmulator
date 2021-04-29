@@ -125,4 +125,13 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	dsp.setPC(bootRom.offset);
 	return feedCommandStream;
 }
+
+void ROMFile::getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out)
+{
+	// Open file
+	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
+	file.seekg(0x48000 + (_presetNumber * 256));
+	file.read(reinterpret_cast<char *>(_out.data()), 256);
+	file.close();
+}
 }
