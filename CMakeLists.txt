@@ -11,6 +11,7 @@ include(base.cmake)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/portmidi)
+add_subdirectory(source/portaudio)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
 	set(VIRUS_VST2 true)
@@ -28,6 +29,12 @@ endif()
 add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
 target_link_libraries(virusTestConsole PUBLIC virusLib)
+
+# ----------------- Standalone
+
+add_executable(virusStandalone)
+target_sources(virusStandalone PRIVATE source/virusStandalone/virusStandalone.cpp)
+target_link_libraries(virusStandalone PUBLIC virusLib portaudio_static)
 
 # ----------------- VST2 Plugin
 
