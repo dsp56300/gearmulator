@@ -160,15 +160,43 @@ int main(int _argc, char* _argv[])
 		syx.sendControlCommand(Syx::UNK_6d, 0x6c);
 		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
 
-		// Send preset
 		if (midiMode)
 		{
-			Midi midi(syx);
+			Midi midi;
 			if (midi.connect() == 0)
-				midi.listen();
+			{
+				SMidiEvent ev;
+				while (true)
+				{
+					if (midi.read(ev) == Midi::midiNoData)
+					{
+						std::this_thread::sleep_for(std::chrono::milliseconds(200));
+						continue;
+					}
+
+					if (!ev.sysex.empty())
+					{
+						const auto response = syx.sendSysex(ev.sysex);
+						if (!response.empty())
+						{
+							SMidiEvent out;
+							out.sysex = response;
+							midi.write(out);
+						}
+					}
+					else
+					{
+						syx.sendMIDI(ev.a, ev.b, ev.c);
+					}
+
+					ev = {};
+				}
+			}
+
 		}
 		else
 		{
+			// Send preset
 			syx.sendFile(Syx::SINGLE, v.preset);
 
 //			std::this_thread::sleep_for(std::chrono::seconds(5));
