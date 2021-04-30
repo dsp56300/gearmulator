@@ -93,7 +93,7 @@ if(VIRUS_VST2Filter)
 	target_link_libraries(virusVstFilter virusFilterVst2 vstsdk2)
 
 	if(MSVC)
-		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusEmuVST2${CMAKE_VS_PLATFORM_NAME}")
+		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusVST2Filter${CMAKE_VS_PLATFORM_NAME}")
 	else()
 		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusVST2Filter")
 	endif()
