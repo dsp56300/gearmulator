@@ -17,14 +17,20 @@ void get_coeffs(int *coeffs,int freq,int res,int gain=0x400000)
 	int c00=lut_out[lut_off],c01=lut_out[lut_off+1],c10=lut_out[lut_off+32],c11=lut_out[lut_off+33];
 	int d0=lut2_out[freq_off],d1=lut2_out[freq_off+1];
 
-	long long t1=(c00*0x800000+frac_a*(c01-c00))>>23;
-	long long t2=(c10*0x800000+frac_a*(c11-c10))>>23;
-	long long a = -(t1*0x800000 + frac_b*(t2-t1))>>23;
-	long long b=(d0*0x800000 + frac_a*(d1-d0))>>23;
-	b=((0x400000-a)*b)>>23;
-	long long c=(gain*(0x400000-a-b))>>24;
+	long long t1=(c00*0x800000ll+frac_a*(c01-c00));
+	long long t1s=t1>>23;
+	long long t2=(c10*0x800000ll+frac_a*(c11-c10))>>23;
+
+	long long a = (-(t1 + frac_b*(t2-t1s)))<<1;
+	long long b=(d0*0x800000ll + frac_a*(d1-d0))>>23;
+	long long t3=(0x400000000000ll-a);
+	b=((t3>>24)*b)<<1;
+	a=a>>24;
+	long long t4=(t3-b)>>25;
+	b=b>>24;
+	long long c=(t4*gain)>>23;
 	long long d=c>>1;
-	
+		
 	coeffs[4]=a & 0xffffff;
 	coeffs[3]=b & 0xffffff;
 	coeffs[2]=d & 0xffffff;
@@ -110,7 +116,7 @@ void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32
 			a=clamp(-8388608,a>>24,8388607);
 			hist[1]=hist[0];hist[0]=audio_in;
 			hist[3]=hist[2];hist[2]=a;
-			float audio_out=a/8388608;
+			float audio_out=a/8388608.0;
 			*out1++=audio_out;
 			*out2++=audio_out;
 		}
