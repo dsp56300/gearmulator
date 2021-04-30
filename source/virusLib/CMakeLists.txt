@@ -5,13 +5,16 @@ add_library(virusLib STATIC)
 
 set(SOURCES
 	device.cpp device.h
+	deviceStandalone.cpp deviceStandalone.h
 	midiTypes.h
 	plugin.cpp plugin.h
 	romfile.cpp romfile.h
 	syx.cpp syx.h
+	midi.cpp midi.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(virusLib PUBLIC dsp56kEmu)
+target_include_directories(virusLib PUBLIC ../portmidi/pm_common/ ../portaudio/include)
+target_link_libraries(virusLib PUBLIC dsp56kEmu portmidi-static)

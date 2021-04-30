@@ -1,4 +1,4 @@
-#include "device.h"
+#include "deviceStandalone.h"
 
 #include "romfile.h"
 
@@ -13,12 +13,13 @@ namespace virusLib
 	constexpr TWord g_externalMemStart	= 0x020000;
 	constexpr TWord g_memorySize		= 0x040000;
 
-	Device::Device(const char* _romFileName)
+	StandaloneDevice::StandaloneDevice(const char* _romFileName)
 		: m_memory(m_memoryValidator, g_memorySize)
 		, m_dsp(m_memory, &m_periph, &m_periph)
 		, m_rom(_romFileName)
 		, m_syx(m_periph.getHDI08(), m_rom)
 	{
+		m_initDone = false;
 		m_memory.setExternalMemory(g_externalMemStart, true);
 
 		auto loader = m_rom.bootDSP(m_dsp, m_periph);
@@ -42,7 +43,7 @@ namespace virusLib
 			m_syx.sendControlCommand(Syx::UNK76, 0x0);
 			m_syx.sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
 			m_syx.sendControlCommand(Syx::INPUT_BOOST, 0x0);
-			m_syx.sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
+			m_syx.sendControlCommand(Syx::MASTER_TUNE, 0x40);
 			m_syx.sendControlCommand(Syx::DEVICE_ID, 0x0);
 			m_syx.sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
 			m_syx.sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
@@ -53,15 +54,15 @@ namespace virusLib
 			m_syx.sendControlCommand(Syx::LCD_CONTRAST, 0x40);
 			m_syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
 			m_syx.sendControlCommand(Syx::UNK_6d, 0x6c);
-			m_syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
-
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+			m_syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a);
 
 			// Send preset
-//			m_rom.loadPreset(0, 93);	// RepeaterJS
-//			m_rom.loadPreset(0, 6);		// BusysawsSV
-			m_rom.loadPreset(0, 12);	// CommerseSV
-			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
+//			std::this_thread::sleep_for(std::chrono::seconds(1));
+//			LOG("Sending preset!")
+//			m_rom.loadPreset(0, 50);	// Hoppin' SV
+//			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
+//			std::this_thread::sleep_for(std::chrono::seconds(1));
+//			m_syx.sendMIDI(0x90,60,0x7f);	// Note On
 
 			m_initDone = true;
 			m_initThread->detach();
@@ -69,15 +70,19 @@ namespace virusLib
 		}));
 	}
 
-	Device::~Device()
+	StandaloneDevice::~StandaloneDevice()
 	{
 		m_dspThread.reset();
 	}
 
-	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	void StandaloneDevice::process(float* _inputs, float* _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
 		if(m_initDone)
 		{
+			if (m_periph.getHDI08().hasTX()) {
+				m_periph.getHDI08().readTX();  // prevent HDI08 overflow
+			}
+
 			for(size_t i=0; i<_midiIn.size(); ++i)
 			{
 				const auto& me = _midiIn[i];
@@ -89,18 +94,21 @@ namespace virusLib
 				}
 				else
 				{
-					// TODO: sysex response
-					m_syx.sendSysex(me.sysex);
+					const auto response = m_syx.sendSysex(me.sysex);
+					if (!response.empty()) {
+						SMidiEvent ev;
+						ev.sysex = response;
+						_midiOut.push_back(ev);
+					}
 				}
 			}
 		}
 
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
-
+		m_periph.getEsai().processAudioInterleavedSingle(_inputs, _outputs, _size, 2, 2, m_nextLatency);
 		// TODO: midi out
 	}
 
-	void Device::setBlockSize(size_t _size)
+	void StandaloneDevice::setBlockSize(size_t _size)
 	{
 		m_nextLatency = _size;
 	}
