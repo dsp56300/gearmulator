@@ -10,9 +10,9 @@ void get_coeffs(long long *coeffs,int freq,int res,int gain=0x400000)
 	freq=(freq>>10)&0x1FFF;
 	int freq_off=(freq>>8);
 	int lut_off=((res>>15)&0xe0)+freq_off;
-	int frac_a=(freq<<15)&0x7F8000;
+	long long frac_a=(freq<<15)&0x7F8000;
 	if (freq_off==0x1f) frac_a=0;	// assumed - not from actual code: don't interpolate past the end of the table.
-	int frac_b=(res<<3)&0x7FFFF8;
+	long long  frac_b=(res<<3)&0x7FFFF8;
 
 	int c00=lut_out[lut_off],c01=lut_out[lut_off+1],c10=lut_out[lut_off+32],c11=lut_out[lut_off+33];
 	int d0=lut2_out[freq_off],d1=lut2_out[freq_off+1];
@@ -77,6 +77,7 @@ void VSTAudioEffect::resume()
 {
 	for (int i=0;i<4;i++) hist[i]=0;
 	for (int i=0;i<3;i++) vals[i]=params[i];
+	get_coeffs(coeffs,0x7fffff*vals[0],0x7fffff*vals[1],0x7fffff*vals[2]);
 }
 
 int clamp(int min,int val,int max) {return (val<min)?min:(val>max)?max:val;}
@@ -85,6 +86,7 @@ int clamp(int min,int val,int max) {return (val<min)?min:(val>max)?max:val;}
 void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
 	float *in1=inputs[0],*in2=inputs[1],*out1=outputs[0],*out2=outputs[1];
+	float slew=4096.0;
 	
 	while (sampleFrames)
 	{
@@ -100,10 +102,10 @@ void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32
 			{
 				if (vals[i]==params[i]) continue;
 				float diff=params[i]-vals[i];
-				float inc=fmin(fmax(-1,diff*256),1)/256.0;
-				if (256*fabs(diff)<1) vals[i]=params[i]; else vals[i]+=diff;
+				float inc=fmin(fmax(-1,diff*slew),1)/slew;
+				if (slew*fabs(diff)<1) vals[i]=params[i]; else vals[i]+=inc;
 			}
-			get_coeffs(coeffs,0x7fffff*vals[0],0x7fffff*vals[1],0x7fffff*vals[2]);
+			get_coeffs(coeffs,8388607.f*vals[0],8388607.f*vals[1],8388607.f*vals[2]);
 		}
 		
 		for (int i=0;i<toprocess;i++)
