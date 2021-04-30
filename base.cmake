@@ -90,3 +90,6 @@ endif()
 if(DEFINED K1VHEADLESS)
 	add_definitions(/DK1VHEADLESS)
 endif()
+
+set(PA_DISABLE_INSTALL ON)
+set(PA_BUILD_SHARED OFF)
