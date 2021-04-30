@@ -34,6 +34,7 @@ public:
 
 private:
 	float params[3];
-	int coeffs[5],hist[4];
+	long long coeffs[5];
+	int hist[4];
 	float vals[3];
 };
