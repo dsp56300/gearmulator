@@ -4,7 +4,8 @@ project(vstsdk2)
 set(SOURCES
 	public.sdk/source/vst2.x/audioeffect.cpp
 	public.sdk/source/vst2.x/audioeffectx.cpp
-	public.sdk/source/vst2.x/vstplugmain.cpp)
+#	public.sdk/source/vst2.x/vstplugmain.cpp
+	)
 
 add_library(vstsdk2 STATIC ${SOURCES})
 

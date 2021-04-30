@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include "public.sdk/source/vst2.x/audioeffectx.h"
+#include "version.h"
 
 
 class VSTAudioEffect : public AudioEffectX
@@ -16,7 +17,7 @@ public:
 
 	void			setSampleRate				(float sampleRate) override {}
 
-	void 			resume();
+	void 			resume						() override;
 
 	// Parameters
 	void			setParameter				(VstInt32 index, float value) override {params[index]=value;}
@@ -32,6 +33,7 @@ public:
 	VstPlugCategory	getPlugCategory				() override {return kPlugCategEffect;}
 
 private:
-	float params[3],coeffs[5],hist[4];
+	float params[3];
+	int coeffs[5],hist[4];
 	float vals[3];
 };
