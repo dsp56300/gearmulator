@@ -10,6 +10,7 @@ void get_coeffs(int *coeffs,int freq,int res,int gain=0x400000)
 	int freq_off=(freq>>8);
 	int lut_off=((res>>15)&0xe0)+freq_off;
 	int frac_a=(freq<<15)&0x7F8000;
+	if (freq_off==0x1f) frac_a=0;	// assumed - not from actual code: don't interpolate past the end of the table.
 	int frac_b=(res<<3)&0x7FFFF8;
 
 	int c00=lut_out[lut_off],c01=lut_out[lut_off+1],c10=lut_out[lut_off+32],c11=lut_out[lut_off+33];
