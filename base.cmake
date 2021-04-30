@@ -79,8 +79,8 @@ else()
 	add_definitions(/DRELEASE)
 endif()
 
-# we need C++14
-set(CMAKE_CXX_STANDARD 14)
+# we need C++17
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 
 if(UNIX AND NOT APPLE)
