@@ -53,8 +53,8 @@ int main(int _argc, char* _argv[])
 {
 	//	constexpr size_t sampleCount = paFramesPerBufferUnspecified;
 	constexpr size_t sampleCount = 4096;
-	constexpr size_t channelsIn = 1;  // mono performs a little better it seems
-	constexpr size_t channelsOut = 1;
+	constexpr size_t channelsIn = 0;
+	constexpr size_t channelsOut = 2;
 
 	PaStream *stream;
 	PaError err;
