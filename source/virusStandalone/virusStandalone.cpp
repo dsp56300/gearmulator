@@ -5,12 +5,11 @@
 using namespace dsp56k;
 using namespace virusLib;
 
-//#define SAMPLE_RATE (44100)
-//#define SAMPLE_RATE (48000)
-#define SAMPLE_RATE (46730)
+#define SAMPLE_RATE (46875)
 
 typedef struct
 {
+	bool midiEnabled = true;
 	std::unique_ptr<Midi> midi;
 	std::vector<SMidiEvent> midiIn;
 	std::vector<SMidiEvent> midiOut;
@@ -31,21 +30,26 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
 	float *in = (float*)inputBuffer;
 
 	// Receive MIDI
-	SMidiEvent ev;
-	if (paUserData->midi->read(ev) == Midi::midiGotData) {
-		paUserData->midiIn.push_back(ev);
+	if (paUserData->midiEnabled) {
+		SMidiEvent ev;
+		if (paUserData->midi->read(ev) == Midi::midiGotData){
+			paUserData->midiIn.push_back(ev);
+		}
 	}
 
 	paUserData->device->process(&paUserData->zeroes[0], out, framesPerBuffer, paUserData->midiIn, paUserData->midiOut);
-	paUserData->midiIn.clear();
 
 	// Send MIDI back
-	for(size_t i=0; i<paUserData->midiOut.size(); ++i)
-	{
-		const auto &me = paUserData->midiOut[i];
-		paUserData->midi->write(me);
+	if (paUserData->midiEnabled) {
+		for(size_t i=0; i<paUserData->midiOut.size(); ++i)
+		{
+			const auto &me = paUserData->midiOut[i];
+			paUserData->midi->write(me);
+		}
+
+		paUserData->midiIn.clear();
+		paUserData->midiOut.clear();
 	}
-	paUserData->midiOut.clear();
 
 	return 0;
 }
@@ -60,12 +64,8 @@ int main(int _argc, char* _argv[])
 	PaStream *stream;
 	PaError err;
 
-	data.device.reset(new StandaloneDevice(_argv[1]));
-	data.midi.reset(new Midi());
-	data.zeroes.resize(sampleCount*2);
-
-	if (data.midi->connect() != 0) {
-		LOG("Could not connect to MIDI")
+	if (_argc < 2) {
+		LOGFMT("Usage: %s <virus_rom_file>", _argv[0])
 		return -1;
 	}
 
@@ -79,6 +79,15 @@ int main(int _argc, char* _argv[])
 		LOGFMT("Error opening stream: %d", err)
 		return -1;
 	}
+
+	data.midi.reset(new Midi());
+	if (data.midi->connect() != 0) {
+		LOG("Continuing without MIDI")
+		data.midiEnabled = false;
+	}
+
+	data.zeroes.resize(sampleCount*2);
+	data.device.reset(new StandaloneDevice(_argv[1]));
 
 	err = Pa_StartStream( stream );
 	if( err != paNoError ) {
