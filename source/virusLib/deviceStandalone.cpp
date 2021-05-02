@@ -62,6 +62,7 @@ namespace virusLib
 			m_rom.loadPreset(0, 50);	// Hoppin' SV
 			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
 			std::this_thread::sleep_for(std::chrono::seconds(1));
+			LOG("Sending MIDI")
 			m_syx.sendMIDI(0x90,60,0x7f);	// Note On
 
 			m_initDone = true;
@@ -104,7 +105,7 @@ namespace virusLib
 			}
 		}
 
-		m_periph.getEsai().processAudioInterleavedSingle(_inputs, _outputs, _size, 0, 2, m_nextLatency);
+		m_periph.getEsai().processAudioInterleavedSingle(_inputs, _outputs, _size, 2, 2, m_nextLatency);
 		// TODO: midi out
 	}
 

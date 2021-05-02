@@ -15,6 +15,7 @@ typedef struct
 	std::vector<SMidiEvent> midiIn;
 	std::vector<SMidiEvent> midiOut;
 	std::unique_ptr<StandaloneDevice> device;
+	std::vector<float> zeroes;
 } PaUserData;
 
 static PaUserData data;
@@ -35,7 +36,7 @@ static int paCallback(const void *inputBuffer, void *outputBuffer,
 		paUserData->midiIn.push_back(ev);
 	}
 
-	paUserData->device->process(in, out, framesPerBuffer, paUserData->midiIn, paUserData->midiOut);
+	paUserData->device->process(&paUserData->zeroes[0], out, framesPerBuffer, paUserData->midiIn, paUserData->midiOut);
 	paUserData->midiIn.clear();
 
 	// Send MIDI back
@@ -61,6 +62,7 @@ int main(int _argc, char* _argv[])
 
 	data.device.reset(new StandaloneDevice(_argv[1]));
 	data.midi.reset(new Midi());
+	data.zeroes.resize(sampleCount*2);
 
 	if (data.midi->connect() != 0) {
 		LOG("Could not connect to MIDI")
