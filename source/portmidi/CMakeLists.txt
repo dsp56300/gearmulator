@@ -9,9 +9,9 @@ PROJECT(portmidi)
 include_directories(pm_common porttime)
 add_subdirectory(pm_common)
 
-add_subdirectory(pm_test)
+#add_subdirectory(pm_test)
 
-add_subdirectory(pm_dylib)
+#add_subdirectory(pm_dylib)
 
 if(PMJAVA)
 	# Cannot figure out how to make an xcode Java application with CMake
