@@ -29,6 +29,7 @@ int main(int _argc, char* _argv[])
 	auto loader = v.bootDSP(dsp, periph);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
+	long long saveHeatmapInstr = 0;
 
 #if MEMORY_HEAT_MAP
 	const auto thread = std::thread([&]
@@ -37,8 +38,11 @@ int main(int _argc, char* _argv[])
 		{
 			dsp.exec();
 
-			if(dsp.getInstructionCounter() == 0x100000)
+			if(saveHeatmapInstr && dsp.getInstructionCounter() >= saveHeatmapInstr)
+			{
 				memory.saveHeatmap("heatmap.txt", false);
+				saveHeatmapInstr=0;
+			}
 		}
 	});
 #else
@@ -234,6 +238,8 @@ int main(int _argc, char* _argv[])
 					if(audioOut[c][i] != 0.0f)
 					{
 						hFile = fopen("virus_out.raw", "wb");
+						memory.clearHeatmap();
+						saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
 					}
 				}
 			}
