@@ -17,11 +17,13 @@ namespace virusLib
 		void setBlockSize(size_t _size);
 
 	private:
-		dsp56k::DefaultMemoryValidator m_memoryValidator;
-		dsp56k::Memory m_memory;
+		std::vector<uint8_t> m_buffer;
 
+		dsp56k::DefaultMemoryValidator m_memoryValidator;
 		dsp56k::Peripherals56362 m_periph;
-		dsp56k::DSP m_dsp;
+
+		dsp56k::Memory* m_memory = nullptr;
+		dsp56k::DSP* m_dsp = nullptr;
 
 		ROMFile m_rom;
 

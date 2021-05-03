@@ -13,17 +13,29 @@ namespace virusLib
 	constexpr TWord g_externalMemStart	= 0x020000;
 	constexpr TWord g_memorySize		= 0x040000;
 
+	constexpr size_t g_requiredMemSize	= alignedSize<DSP>() + alignedSize<Memory>() + g_memorySize * MemArea_COUNT * sizeof(uint32_t);
+
 	Device::Device(const char* _romFileName)
-		: m_memory(m_memoryValidator, g_memorySize)
-		, m_dsp(m_memory, &m_periph, &m_periph)
-		, m_rom(_romFileName)
+		: m_rom(_romFileName)
 		, m_syx(m_periph.getHDI08(), m_rom)
 	{
-		m_memory.setExternalMemory(g_externalMemStart, true);
+		m_buffer.resize(alignedSize(g_requiredMemSize));
 
-		auto loader = m_rom.bootDSP(m_dsp, m_periph);
+		auto* buf = &m_buffer[0];
+		buf = alignedAddress(buf);
 
-		m_dspThread.reset(new DSPThread(m_dsp));
+		auto* bufDSP = buf;
+		auto* bufMem = bufDSP + alignedSize<DSP>();
+		auto* bufBuf = bufMem + alignedSize<Memory>();
+		
+		m_memory = new (bufMem)Memory(m_memoryValidator, g_memorySize, reinterpret_cast<TWord*>(bufBuf));
+		m_dsp = new (buf)DSP(*m_memory, &m_periph, &m_periph);
+
+		m_memory->setExternalMemory(g_externalMemStart, true);
+
+		auto loader = m_rom.bootDSP(*m_dsp, m_periph);
+
+		m_dspThread.reset(new DSPThread(*m_dsp));
 
 		loader.join();
 
@@ -72,6 +84,15 @@ namespace virusLib
 	Device::~Device()
 	{
 		m_dspThread.reset();
+
+		if(m_dsp)
+		{
+			m_dsp->~DSP();
+			m_memory->~Memory();
+
+			m_dsp = nullptr;
+			m_memory = nullptr;
+		}
 	}
 
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
@@ -97,7 +118,11 @@ namespace virusLib
 
 		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
 
-		// TODO: midi out
+		// prevent HDI08 overflow
+		while(m_periph.getHDI08().hasTX())
+		{
+			m_periph.getHDI08().readTX();
+		}
 	}
 
 	void Device::setBlockSize(size_t _size)
