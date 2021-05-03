@@ -111,7 +111,7 @@ void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32
 		for (int i=0;i<toprocess;i++)
 		{
 			float in=(*in1++) + (*in2++);
-			in=fmin(fmax(-1,in),1);
+			in=fmin(fmax(-1,in*0.25),1);
 			long audio_in=floor(0x7FFFFF*in);
 			long long a=audio_in*coeffs[0]+hist[0]*coeffs[1]+hist[1]*coeffs[2]+hist[2]*coeffs[3]+hist[3]*coeffs[4];
 			a=(a<<2) + 0x400000;
