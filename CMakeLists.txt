@@ -8,6 +8,8 @@ project(virusEmu VERSION 0.0.1)
 
 include(base.cmake)
 
+set(ASMJIT_STATIC TRUE)
+
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/portmidi)
@@ -20,6 +22,7 @@ else()
 	set(VIRUS_VST2 false)
 	set(VIRUS_VST2Filter false)
 endif()
+
 
 if(VIRUS_VST2)
 	add_subdirectory(source/vstsdk2.4.2)
