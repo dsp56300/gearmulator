@@ -121,11 +121,14 @@ int main(int _argc, char* _argv[])
 	int ctr=0,go=0;
 
 //	v.loadPreset(3, 0x65);	// SmoothBsBC
-//	v.loadPreset(0, 23);	// Digedi_JS
+
+	v.loadPreset(0, 12);    // CommerseSV
+
+	//	v.loadPreset(0, 23);	// Digedi_JS
 //	v.loadPreset(0, 50);	// Hoppin' SV
 //	v.loadPreset(0, 28);	// Etheral SV
 //	v.loadPreset(1, 75);	// Oscar1 HS
-	v.loadPreset(0, 93);	// RepeaterJS
+//	v.loadPreset(0, 93);	// RepeaterJS
 //	v.loadPreset(0,126);
 //	v.loadPreset(3,101);
 //	v.loadPreset(0,5);
@@ -206,8 +209,22 @@ int main(int _argc, char* _argv[])
 //			std::this_thread::sleep_for(std::chrono::seconds(5));
 			LOG("Sending Note On!");
 //			syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
+
+//			syx.send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
+//			syx.send(Syx::Page::PAGE_A,0,51, 7);		// filter type
+
+
 //			syx.sendControlCommand(Syx::AUDITION, 0x7f);
 			syx.sendMIDI(0x90,60,0x7f);	// Note On
+			syx.sendMIDI(0x90,63,0x7f);	// Note On
+			syx.sendMIDI(0x90,67,0x7f);	// Note On
+			syx.sendMIDI(0x90,58,0x7f);	// Note On
+			syx.sendMIDI(0x90,72,0x7f);	// Note On
+			syx.sendMIDI(0x90,75,0x7f);	// Note On
+			syx.sendMIDI(0x90,79,0x7f);	// Note On
+			syx.sendMIDI(0x90,82,0x7f);	// Note On
+
+
 //			std::this_thread::sleep_for(std::chrono::seconds(1));
 //			syx.sendMIDI(0x90,0x33,0x7f);	// Note On
 //			std::this_thread::sleep_for(std::chrono::seconds(1));
