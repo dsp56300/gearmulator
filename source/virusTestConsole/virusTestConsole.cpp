@@ -99,38 +99,39 @@ void midiCallback(void *data,DSP *dsp)
 
 	if (midiMode)
 	{
-		Midi midi;
-		if (midi.connect() == 0)
-		{
-			
-			SMidiEvent ev;
-			while (true)
+		std::thread sendSyxThread([&]() {
+			Midi midi;
+			if (midi.connect() == 0)
 			{
-				if (midi.read(ev) == Midi::midiNoData)
+				
+				SMidiEvent ev;
+				while (true)
 				{
-					std::this_thread::sleep_for(std::chrono::milliseconds(200));
-					continue;
-				}
-
-				if (!ev.sysex.empty())
-				{
-					const auto response = syx->sendSysex(ev.sysex);
-					if (!response.empty())
+					if (midi.read(ev) == Midi::midiNoData)
 					{
-						SMidiEvent out;
-						out.sysex = response;
-						midi.write(out);
+						std::this_thread::sleep_for(std::chrono::milliseconds(200));
+						continue;
 					}
-				}
-				else
-				{
-					syx->sendMIDI(ev.a, ev.b, ev.c);
-				}
 
-				ev = {};
+					if (!ev.sysex.empty())
+					{
+						const auto response = syx->sendSysex(ev.sysex);
+						if (!response.empty())
+						{
+							SMidiEvent out;
+							out.sysex = response;
+							midi.write(out);
+						}
+					}
+					else
+					{
+						syx->sendMIDI(ev.a, ev.b, ev.c);
+					}
+
+					ev = {};
+				}
 			}
-		}
-
+		});
 	}
 	else
 	{
