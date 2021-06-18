@@ -32,6 +32,10 @@ int main(int _argc, char* _argv[])
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
 
+	// uncomment to enable JIT runtime
+//	Jit jit(dsp);
+//	dsp.setJit(&jit);
+
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
 
