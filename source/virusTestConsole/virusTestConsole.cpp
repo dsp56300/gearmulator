@@ -169,9 +169,7 @@ int main(int _argc, char* _argv[])
 	DSP dsp(memory, &periph, &periph);
 
 	periph.getEsai().setCallback(audioCallback,4,1);
-	float inputData[2][4] =	{{1,-1,0.5f,-0.5f}, {1,-1,0.5f,-0.5f}};
-	float* audioIn [2] = {inputData[0],  inputData[1] };
-	periph.getEsai().writeAudioIn(audioIn, 4, 2);
+	periph.getEsai().writeEmptyAudioIn(4, 2);
 
 
 	// uncomment to enable JIT runtime
