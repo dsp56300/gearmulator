@@ -129,9 +129,11 @@ int main(int _argc, char* _argv[])
 
 //	v.loadPreset(3, 0x65);	// SmoothBsBC
 
-	v.loadPreset(0, 12);    // CommerseSV
+//	v.loadPreset(0, 12);    // CommerseSV
 
-	//	v.loadPreset(0, 23);	// Digedi_JS
+//	v.loadPreset(0, 23);	// Digedi_JS
+//	v.loadPreset(0, 69);	// Mystique		TODO this one crashes the interpreter
+//	v.loadPreset(1, 4);		// Backing		TODO this one, too, at the same location
 //	v.loadPreset(0, 50);	// Hoppin' SV
 //	v.loadPreset(0, 28);	// Etheral SV
 //	v.loadPreset(1, 75);	// Oscar1 HS
@@ -139,6 +141,8 @@ int main(int _argc, char* _argv[])
 //	v.loadPreset(0,126);
 //	v.loadPreset(3,101);
 //	v.loadPreset(0,5);
+
+	v.loadPreset(3, 56);	// Impact  MS
 
 	const bool midiMode = _argc >= 3;
 
