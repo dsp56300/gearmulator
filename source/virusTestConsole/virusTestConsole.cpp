@@ -4,6 +4,8 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
+#include "../dsp56300/source/dsp56kEmu/jit.h"
+#include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
 #include "../virusLib/romfile.h"
@@ -15,7 +17,12 @@ using namespace virusLib;
 
 int main(int _argc, char* _argv[])
 {
-	UnitTests tests;
+	if(true)
+	{
+		UnitTests tests;
+		JitUnittests jitTests;
+//		return 0;
+	}
 
 	// Create the DSP with peripherals
 	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x200000
