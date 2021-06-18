@@ -122,6 +122,10 @@ int main(int _argc, char* _argv[])
 
 	// queue for HDI08
 	loader.join();
+
+	// dump memory to files
+//	memory.saveAsText("Virus_X.txt", MemArea_X, 0, memory.size());
+//	memory.saveAsText("Virus_Y.txt", MemArea_Y, 0, memory.size());
 //	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
 
 	FILE* hFile = nullptr;
