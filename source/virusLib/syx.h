@@ -82,6 +82,7 @@ public:
 	int dumpSingle(int _bank, int _program, std::array<uint8_t, 256>& _data) const;
 	int requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t, 256>& _data) const;
 
+	ROMFile& getROMFile() {return m_romFile;}
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;

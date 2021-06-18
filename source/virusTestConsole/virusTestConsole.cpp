@@ -57,6 +57,99 @@ void audioCallback(dsp56k::Audio* audio)
 	}
 }
 
+bool midiMode = false;
+void midiNoteOn(void *data,DSP *dsp)
+{
+	Syx* syx=(Syx*)data;
+	LOG("Sending Note On!");
+	syx->sendMIDI(0x90,60,0x7f);	// Note On
+//		syx->sendControlCommand(Syx::AUDITION, 0x7f);
+//		syx->sendMIDI(0xB0,113,0);	// Send FX off
+
+}
+void midiCallback(void *data,DSP *dsp)
+{
+	Syx* syx=(Syx*)data;
+
+	LOG("Sending Preset!");
+
+	syx->sendControlCommand(Syx::UNK1a, 0x1);
+	syx->sendControlCommand(Syx::UNK1b, 0x1);
+	syx->sendControlCommand(Syx::UNK1c, 0x0);
+	syx->sendControlCommand(Syx::UNK1d, 0x0);
+	syx->sendControlCommand(Syx::UNK35, 0x40);
+	syx->sendControlCommand(Syx::UNK36, 0xc);
+	syx->sendControlCommand(Syx::UNK36, 0xc); // duplicate
+	syx->sendControlCommand(Syx::SECOND_OUTPUT_SELECT, 0x0);
+	syx->sendControlCommand(Syx::UNK76, 0x0);
+	syx->sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
+	syx->sendControlCommand(Syx::INPUT_BOOST, 0x0);
+	syx->sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
+	syx->sendControlCommand(Syx::DEVICE_ID, 0x0);
+	syx->sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
+	syx->sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
+	syx->sendControlCommand(Syx::MIDI_ARPEGGIATOR_SEND, 0x0);
+	syx->sendControlCommand(Syx::MIDI_CLOCK_RX, 0x1);
+	syx->sendControlCommand(Syx::GLOBAL_CHANNEL, 0x0);
+	syx->sendControlCommand(Syx::LED_MODE, 0x2);
+	syx->sendControlCommand(Syx::LCD_CONTRAST, 0x40);
+	syx->sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
+	syx->sendControlCommand(Syx::UNK_6d, 0x6c);
+	syx->sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
+
+	if (midiMode)
+	{
+		Midi midi;
+		if (midi.connect() == 0)
+		{
+			
+			SMidiEvent ev;
+			while (true)
+			{
+				if (midi.read(ev) == Midi::midiNoData)
+				{
+					std::this_thread::sleep_for(std::chrono::milliseconds(200));
+					continue;
+				}
+
+				if (!ev.sysex.empty())
+				{
+					const auto response = syx->sendSysex(ev.sysex);
+					if (!response.empty())
+					{
+						SMidiEvent out;
+						out.sysex = response;
+						midi.write(out);
+					}
+				}
+				else
+				{
+					syx->sendMIDI(ev.a, ev.b, ev.c);
+				}
+
+				ev = {};
+			}
+		}
+
+	}
+	else
+	{
+		// Send preset
+		syx->sendFile(Syx::SINGLE, syx->getROMFile().preset);
+//			syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
+
+//			syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
+//			syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
+
+		// MIDI Tempo meta message, set tempo to 120 bpm
+//			syx->sendMIDI(0xFF,0x51,0x03);
+//			syx->sendMIDI(0x07,0xA1,0x20);
+		
+		dsp->setCallback(midiNoteOn, data, 477263+70000*10);
+
+	}
+}
+
 int main(int _argc, char* _argv[])
 {
 	if(true)
@@ -79,12 +172,33 @@ int main(int _argc, char* _argv[])
 	float* audioIn [2] = {inputData[0],  inputData[1] };
 	periph.getEsai().writeAudioIn(audioIn, 4, 2);
 
+
 	// uncomment to enable JIT runtime
 //	Jit jit(dsp);
 //	dsp.setJit(&jit);
 
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
+	//	v.loadPreset(3, 0x65);	// SmoothBsBC
+
+	//	v.loadPreset(0, 12);    // CommerseSV
+
+	//	v.loadPreset(0, 23);	// Digedi_JS
+	//	v.loadPreset(0, 69);	// Mystique		TODO this one crashes the interpreter
+	//	v.loadPreset(1, 4);		// Backing		TODO this one, too, at the same location
+	//	v.loadPreset(0, 50);	// Hoppin' SV
+	//	v.loadPreset(0, 28);	// Etheral SV
+	//	v.loadPreset(1, 75);	// Oscar1 HS
+	//	v.loadPreset(0, 93);	// RepeaterJS
+	//	v.loadPreset(0,126);
+	//	v.loadPreset(3,101);
+	//	v.loadPreset(0,5);
+	v.loadPreset(3, 56);	// Impact  MS
+
+	// Load preset
+	midiMode = _argc >= 3;
+	Syx syx(periph.getHDI08(), v);
+	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 	long long saveHeatmapInstr = 0;
@@ -152,7 +266,6 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-
 	// queue for HDI08
 	loader.join();
 
@@ -161,123 +274,8 @@ int main(int _argc, char* _argv[])
 //	memory.saveAsText("Virus_Y.txt", MemArea_Y, 0, memory.size());
 //	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
 
-	FILE* hFile = nullptr;
-	int ctr=0,go=0;
 
-//	v.loadPreset(3, 0x65);	// SmoothBsBC
 
-//	v.loadPreset(0, 12);    // CommerseSV
-
-//	v.loadPreset(0, 23);	// Digedi_JS
-//	v.loadPreset(0, 69);	// Mystique		TODO this one crashes the interpreter
-//	v.loadPreset(1, 4);		// Backing		TODO this one, too, at the same location
-//	v.loadPreset(0, 50);	// Hoppin' SV
-//	v.loadPreset(0, 28);	// Etheral SV
-//	v.loadPreset(1, 75);	// Oscar1 HS
-//	v.loadPreset(0, 93);	// RepeaterJS
-//	v.loadPreset(0,126);
-//	v.loadPreset(3,101);
-//	v.loadPreset(0,5);
-
-	v.loadPreset(3, 56);	// Impact  MS
-
-	const bool midiMode = _argc >= 3;
-
-	// Load preset
-	Syx syx(periph.getHDI08(), v);
-
-	std::thread sendSyxThread([&]() {
-		std::this_thread::sleep_for(std::chrono::seconds(5));
-
-		LOG("Sending Preset!");
-
-		syx.sendControlCommand(Syx::UNK1a, 0x1);
-		syx.sendControlCommand(Syx::UNK1b, 0x1);
-		syx.sendControlCommand(Syx::UNK1c, 0x0);
-		syx.sendControlCommand(Syx::UNK1d, 0x0);
-		syx.sendControlCommand(Syx::UNK35, 0x40);
-		syx.sendControlCommand(Syx::UNK36, 0xc);
-		syx.sendControlCommand(Syx::UNK36, 0xc); // duplicate
-		syx.sendControlCommand(Syx::SECOND_OUTPUT_SELECT, 0x0);
-		syx.sendControlCommand(Syx::UNK76, 0x0);
-		syx.sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
-		syx.sendControlCommand(Syx::INPUT_BOOST, 0x0);
-		syx.sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
-		syx.sendControlCommand(Syx::DEVICE_ID, 0x0);
-		syx.sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
-		syx.sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
-		syx.sendControlCommand(Syx::MIDI_ARPEGGIATOR_SEND, 0x0);
-		syx.sendControlCommand(Syx::MIDI_CLOCK_RX, 0x1);
-		syx.sendControlCommand(Syx::GLOBAL_CHANNEL, 0x0);
-		syx.sendControlCommand(Syx::LED_MODE, 0x2);
-		syx.sendControlCommand(Syx::LCD_CONTRAST, 0x40);
-		syx.sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
-		syx.sendControlCommand(Syx::UNK_6d, 0x6c);
-		syx.sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
-
-		if (midiMode)
-		{
-			Midi midi;
-			if (midi.connect() == 0)
-			{
-				SMidiEvent ev;
-				while (true)
-				{
-					if (midi.read(ev) == Midi::midiNoData)
-					{
-						std::this_thread::sleep_for(std::chrono::milliseconds(200));
-						continue;
-					}
-
-					if (!ev.sysex.empty())
-					{
-						const auto response = syx.sendSysex(ev.sysex);
-						if (!response.empty())
-						{
-							SMidiEvent out;
-							out.sysex = response;
-							midi.write(out);
-						}
-					}
-					else
-					{
-						syx.sendMIDI(ev.a, ev.b, ev.c);
-					}
-
-					ev = {};
-				}
-			}
-
-		}
-		else
-		{
-			// Send preset
-			syx.sendFile(Syx::SINGLE, v.preset);
-
-//			std::this_thread::sleep_for(std::chrono::seconds(5));
-			LOG("Sending Note On!");
-//			syx.send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
-
-//			syx.send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
-//			syx.send(Syx::Page::PAGE_A,0,51, 7);		// filter type
-
-			// MIDI Tempo meta message, set tempo to 120 bpm
-//			syx.sendMIDI(0xFF,0x51,0x03);
-//			syx.sendMIDI(0x07,0xA1,0x20);
-			std::this_thread::sleep_for(std::chrono::seconds(5));
-
-//			syx.sendControlCommand(Syx::AUDITION, 0x7f);
-//			syx.sendMIDI(0xB0,113,0);	// Send FX off
-			syx.sendMIDI(0x90,60,0x7f);	// Note On
-
-//			std::this_thread::sleep_for(std::chrono::seconds(1));
-//			syx.sendMIDI(0x90,0x33,0x7f);	// Note On
-//			std::this_thread::sleep_for(std::chrono::seconds(1));
-//			syx.sendMIDI(0x90,0x37,0x3f);	// Note On
-
-		}
-		
-	});
 
 	while (true)
 	{
