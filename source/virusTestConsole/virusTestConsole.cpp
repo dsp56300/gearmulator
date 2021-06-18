@@ -15,6 +15,48 @@
 using namespace dsp56k;
 using namespace virusLib;
 
+
+void audioCallback(dsp56k::Audio* audio)
+{
+	static FILE *hFile=0;
+	static int ctr=0;
+	constexpr size_t sampleCount = 4;
+	constexpr size_t channelsIn = 2;
+	constexpr size_t channelsOut = 2;
+
+	float inputData[channelsIn][sampleCount] =	{{1,-1,0.5f,-0.5f}, {1,-1,0.5f,-0.5f}};
+	float* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
+	float outputData[channelsOut][sampleCount] ={{0, 0,   0,    0},	{0, 0,   0,    0}};
+	float* audioOut[channelsOut] = {outputData[0], outputData[1]};
+
+	
+	ctr++;
+	if((ctr & 0xfff) == 0) {LOG("Deliver Audio");}
+
+	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
+
+	if(!hFile)
+	{
+		for(int c=0; c<channelsOut; ++c)
+		{
+			for(int i=0; i<sampleCount; ++i)
+			{
+				if(audioOut[c][i] != 0.0f)
+				{
+					hFile = fopen("virus_out.raw", "wb");
+//					memory.clearHeatmap();
+//					saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
+				}
+			}
+		}
+	}
+
+	if(hFile)
+	{
+		for(int i=0; i<sampleCount; ++i) for(int c=0; c<2; ++c) fwrite(&audioOut[c][i], sizeof(float), 1, hFile);
+	}
+}
+
 int main(int _argc, char* _argv[])
 {
 	if(true)
@@ -31,6 +73,11 @@ int main(int _argc, char* _argv[])
 	memory.setExternalMemory(0x020000, true);
 	Peripherals56362 periph;
 	DSP dsp(memory, &periph, &periph);
+
+	periph.getEsai().setCallback(audioCallback,4,1);
+	float inputData[2][4] =	{{1,-1,0.5f,-0.5f}, {1,-1,0.5f,-0.5f}};
+	float* audioIn [2] = {inputData[0],  inputData[1] };
+	periph.getEsai().writeAudioIn(audioIn, 4, 2);
 
 	// uncomment to enable JIT runtime
 //	Jit jit(dsp);
@@ -105,24 +152,6 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	constexpr size_t sampleCount = 4;
-	constexpr size_t channelsIn = 2;
-	constexpr size_t channelsOut = 2;
-
-	float inputData[channelsIn][sampleCount] =
-	{
-		{1,-1,0.5f,-0.5f},
-		{1,-1,0.5f,-0.5f},
-	};
-
-	float outputData[channelsOut][sampleCount] =
-	{
-		{0,0,0,0},
-		{0,0,0,0}
-	};
-
-	float* audioIn [channelsIn ] = {inputData[0], inputData[1]};
-	float* audioOut[channelsOut] = {outputData[0], outputData[1]};
 
 	// queue for HDI08
 	loader.join();
@@ -252,40 +281,7 @@ int main(int _argc, char* _argv[])
 
 	while (true)
 	{
-		ctr++;
-		
-		if((ctr & 0xfff) == 0)
-		{
-			LOG("Deliver Audio");
-			dsp.logSC("audio");
-		}
-
-		periph.getEsai().processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
-
-		if(!hFile)
-		{
-			for(auto c=0; c<channelsOut; ++c)
-			{
-				for(auto i=0; i<sampleCount; ++i)
-				{
-					if(audioOut[c][i] != 0.0f)
-					{
-						hFile = fopen("virus_out.raw", "wb");
-						memory.clearHeatmap();
-						saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
-					}
-				}
-			}
-		}
-
-		if(hFile)
-		{
-			for(auto i=0; i<sampleCount; ++i)
-			{
-				for(auto c=0; c<2; ++c)
-					fwrite(&audioOut[c][i], sizeof(float), 1, hFile);
-			}
-		}
+		std::this_thread::sleep_for(std::chrono::seconds(1));
 	}
 
 	return 0;
