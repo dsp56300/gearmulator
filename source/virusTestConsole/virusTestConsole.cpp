@@ -154,7 +154,7 @@ int main(int _argc, char* _argv[])
 	Syx syx(periph.getHDI08(), v);
 
 	std::thread sendSyxThread([&]() {
-		std::this_thread::sleep_for(std::chrono::seconds(1));
+		std::this_thread::sleep_for(std::chrono::seconds(5));
 
 		LOG("Sending Preset!");
 
@@ -228,17 +228,14 @@ int main(int _argc, char* _argv[])
 //			syx.send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
 //			syx.send(Syx::Page::PAGE_A,0,51, 7);		// filter type
 
+			// MIDI Tempo meta message, set tempo to 120 bpm
+//			syx.sendMIDI(0xFF,0x51,0x03);
+//			syx.sendMIDI(0x07,0xA1,0x20);
+			std::this_thread::sleep_for(std::chrono::seconds(5));
 
 //			syx.sendControlCommand(Syx::AUDITION, 0x7f);
+//			syx.sendMIDI(0xB0,113,0);	// Send FX off
 			syx.sendMIDI(0x90,60,0x7f);	// Note On
-			syx.sendMIDI(0x90,63,0x7f);	// Note On
-			syx.sendMIDI(0x90,67,0x7f);	// Note On
-			syx.sendMIDI(0x90,58,0x7f);	// Note On
-			syx.sendMIDI(0x90,72,0x7f);	// Note On
-			syx.sendMIDI(0x90,75,0x7f);	// Note On
-			syx.sendMIDI(0x90,79,0x7f);	// Note On
-			syx.sendMIDI(0x90,82,0x7f);	// Note On
-
 
 //			std::this_thread::sleep_for(std::chrono::seconds(1));
 //			syx.sendMIDI(0x90,0x33,0x7f);	// Note On
