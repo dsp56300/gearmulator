@@ -271,6 +271,8 @@ int main(int _argc, char* _argv[])
 			}
 
 			//LOG("BUF=0x"<< HEX(buf));
+
+			std::this_thread::sleep_for(std::chrono::milliseconds(1));
 		}
 	});
 
