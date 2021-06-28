@@ -84,7 +84,7 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 
 }
 
-void ROMFile::loadPreset(const int bank, const int presetNumber)
+std::string ROMFile::loadPreset(const int bank, const int presetNumber)
 {
 	uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
 
@@ -105,6 +105,8 @@ void ROMFile::loadPreset(const int bank, const int presetNumber)
 	LOG("Loading Preset: [" << presetname << "]");
 
 	file.close();
+
+	return std::string(presetname);
 }
 
 std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)

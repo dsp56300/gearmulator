@@ -15,6 +15,7 @@
 using namespace dsp56k;
 using namespace virusLib;
 
+std::string audioFilename;
 
 void audioCallback(dsp56k::Audio* audio)
 {
@@ -43,7 +44,7 @@ void audioCallback(dsp56k::Audio* audio)
 			{
 				if(audioOut[c][i] != 0.0f)
 				{
-					hFile = fopen("virus_out.raw", "wb");
+					hFile = fopen(("virusEmu_" + audioFilename + ".raw").c_str(), "wb");
 //					memory.clearHeatmap();
 //					saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
 				}
@@ -179,32 +180,39 @@ int main(int _argc, char* _argv[])
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
 
-//	v.loadPreset(3, 0x65);	// SmoothBsBC
-
-//	v.loadPreset(0, 12);    // CommerseSV
-
-//	v.loadPreset(0, 23);	// Digedi_JS
-//	v.loadPreset(0, 69);	// Mystique
-//	v.loadPreset(1, 4);		// Backing
-//	v.loadPreset(0, 50);	// Hoppin' SV
-//	v.loadPreset(0, 28);	// Etheral SV
-//	v.loadPreset(1, 75);	// Oscar1 HS
-//	v.loadPreset(0, 93);	// RepeaterJS
-//	v.loadPreset(0,126);
-//	v.loadPreset(3,101);
-//	v.loadPreset(0,5);
-	v.loadPreset(3, 56);	// Impact  MS
-//	v.loadPreset(3, 73);	// NiceArp JS
-//	v.loadPreset(0, 51);	// IndiArp BC
-//	v.loadPreset(0, 103);	// SilkArp SV
-//	v.loadPreset(3, 15);	// BellaArpJS
-//	v.loadPreset(3, 35);	// EnglArp JS
-//	v.loadPreset(3, 93);	// Rhy-Arp JS
-//	v.loadPreset(3, 119);	// WalkaArpJS
-//	v.loadPreset(0, 126);	// Init
-
+	if(_argc > 2)
+	{
+		int preset = atoi(_argv[2]);
+		const int bank = preset / 128;
+		preset -= bank * 128;
+		audioFilename = v.loadPreset(bank, preset);
+	}
+	else
+	{
+//		audioFilename = v.loadPreset(3, 0x65);	// SmoothBsBC
+//		audioFilename = v.loadPreset(0, 12);    // CommerseSV
+//		audioFilename = v.loadPreset(0, 23);	// Digedi_JS
+//		audioFilename = v.loadPreset(0, 69);	// Mystique
+//		audioFilename = v.loadPreset(1, 4);		// Backing
+//		audioFilename = v.loadPreset(0, 50);	// Hoppin' SV
+//		audioFilename = v.loadPreset(0, 28);	// Etheral SV
+//		audioFilename = v.loadPreset(1, 75);	// Oscar1 HS
+//		audioFilename = v.loadPreset(0, 93);	// RepeaterJS
+//		audioFilename = v.loadPreset(0,126);
+//		audioFilename = v.loadPreset(3,101);
+//		audioFilename = v.loadPreset(0,5);
+		audioFilename = v.loadPreset(3, 56);	// Impact  MS
+//		audioFilename = v.loadPreset(3, 73);	// NiceArp JS
+//		audioFilename = v.loadPreset(0, 51);	// IndiArp BC
+//		audioFilename = v.loadPreset(0, 103);	// SilkArp SV
+//		audioFilename = v.loadPreset(3, 15);	// BellaArpJS
+//		audioFilename = v.loadPreset(3, 35);	// EnglArp JS
+//		audioFilename = v.loadPreset(3, 93);	// Rhy-Arp JS
+//		audioFilename = v.loadPreset(3, 119);	// WalkaArpJS
+//		audioFilename = v.loadPreset(0, 126);	// Init
+	}
 	// Load preset
-	midiMode = _argc >= 3;
+	midiMode = false;//_argc >= 3;
 	Syx syx(periph.getHDI08(), v);
 	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
