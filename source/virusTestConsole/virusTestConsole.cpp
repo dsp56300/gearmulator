@@ -173,8 +173,8 @@ int main(int _argc, char* _argv[])
 
 
 	// uncomment to enable JIT runtime
-//	Jit jit(dsp);
-//	dsp.setJit(&jit);
+	Jit jit(dsp);
+	dsp.setJit(&jit);
 
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
