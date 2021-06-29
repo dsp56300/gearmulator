@@ -11,6 +11,7 @@ set(SOURCES
 	romfile.cpp romfile.h
 	syx.cpp syx.h
 	midi.cpp midi.h
+	wavWriter.cpp wavWriter.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})

@@ -11,11 +11,20 @@
 #include "../virusLib/romfile.h"
 #include "../virusLib/syx.h"
 #include "../virusLib/midi.h"
+#include "../virusLib/wavWriter.h"
 
 using namespace dsp56k;
 using namespace virusLib;
 
 std::string audioFilename;
+std::vector<float> audioData;
+WavWriter writer;
+#if _DEBUG
+size_t g_writeBlockSize = 8192;
+#else
+size_t g_writeBlockSize = 65536;
+#endif
+size_t g_nextWriteSize = g_writeBlockSize;
 
 void audioCallback(dsp56k::Audio* audio)
 {
@@ -36,7 +45,7 @@ void audioCallback(dsp56k::Audio* audio)
 
 	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
-	if(!hFile)
+	if(!audioData.capacity())
 	{
 		for(int c=0; c<channelsOut; ++c)
 		{
@@ -44,17 +53,42 @@ void audioCallback(dsp56k::Audio* audio)
 			{
 				if(audioOut[c][i] != 0.0f)
 				{
-					hFile = fopen(("virusEmu_" + audioFilename + ".raw").c_str(), "wb");
 //					memory.clearHeatmap();
 //					saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
+					audioData.reserve(2048);
 				}
 			}
 		}
+
+		if(audioData.capacity())
+		{
+			for(size_t i=0; i<audioFilename.size(); ++i)
+			{
+				if(audioFilename[i] == ' ')
+					audioFilename[i] = '_';
+			}
+			audioFilename = "virusEmu_" + audioFilename + ".wav";
+		}
 	}
 
-	if(hFile)
+	if(audioData.capacity())
 	{
-		for(int i=0; i<sampleCount; ++i) for(int c=0; c<2; ++c) fwrite(&audioOut[c][i], sizeof(float), 1, hFile);
+		for(int i=0; i<sampleCount; ++i)
+		{
+			for(int c=0; c<2; ++c)
+				audioData.push_back(audioOut[c][i]);
+		}
+
+		if(audioData.size() >= g_nextWriteSize)
+		{
+			if(writer.write(audioFilename, 32, true, 2, 12000000/256, audioData))
+			{
+				audioData.clear();
+				g_nextWriteSize = g_writeBlockSize;
+			}
+			else
+				g_nextWriteSize += g_writeBlockSize;
+		}
 	}
 }
 
