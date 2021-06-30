@@ -17,7 +17,7 @@ using namespace dsp56k;
 using namespace virusLib;
 
 std::string audioFilename;
-std::vector<float> audioData;
+std::vector<uint8_t> audioData;
 WavWriter writer;
 #if _DEBUG
 size_t g_writeBlockSize = 8192;
@@ -25,6 +25,14 @@ size_t g_writeBlockSize = 8192;
 size_t g_writeBlockSize = 65536;
 #endif
 size_t g_nextWriteSize = g_writeBlockSize;
+
+void writeWord(const TWord _word)
+{
+	const auto d = reinterpret_cast<const uint8_t*>(&_word);
+	audioData.push_back(d[0]);
+	audioData.push_back(d[1]);
+	audioData.push_back(d[2]);
+}
 
 void audioCallback(dsp56k::Audio* audio)
 {
@@ -34,10 +42,10 @@ void audioCallback(dsp56k::Audio* audio)
 	constexpr size_t channelsIn = 2;
 	constexpr size_t channelsOut = 2;
 
-	float inputData[channelsIn][sampleCount] =	{{1,-1,0.5f,-0.5f}, {1,-1,0.5f,-0.5f}};
-	float* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
-	float outputData[channelsOut][sampleCount] ={{0, 0,   0,    0},	{0, 0,   0,    0}};
-	float* audioOut[channelsOut] = {outputData[0], outputData[1]};
+	TWord inputData[channelsIn][sampleCount] =	{{0,0,0,0}, {0,0,0,0}};
+	TWord* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
+	TWord outputData[channelsOut][sampleCount] ={{0, 0,   0,    0},	{0, 0,   0,    0}};
+	TWord* audioOut[channelsOut] = {outputData[0], outputData[1]};
 
 	
 	ctr++;
@@ -76,12 +84,12 @@ void audioCallback(dsp56k::Audio* audio)
 		for(int i=0; i<sampleCount; ++i)
 		{
 			for(int c=0; c<2; ++c)
-				audioData.push_back(audioOut[c][i]);
+				writeWord(audioOut[c][i]);
 		}
 
 		if(audioData.size() >= g_nextWriteSize)
 		{
-			if(writer.write(audioFilename, 32, true, 2, 12000000/256, audioData))
+			if(writer.write(audioFilename, 24, false, 2, 12000000/256, audioData))
 			{
 				audioData.clear();
 				g_nextWriteSize = g_writeBlockSize;
