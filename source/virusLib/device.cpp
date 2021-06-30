@@ -3,6 +3,7 @@
 #include "romfile.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
+#include "../dsp56300/source/dsp56kEmu/jit.h"
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 
 using namespace dsp56k;
@@ -30,6 +31,9 @@ namespace virusLib
 		
 		m_memory = new (bufMem)Memory(m_memoryValidator, g_memorySize, reinterpret_cast<TWord*>(bufBuf));
 		m_dsp = new (buf)DSP(*m_memory, &m_periph, &m_periph);
+
+		m_jit = new Jit(*m_dsp);
+		m_dsp->setJit(m_jit);		
 
 		m_memory->setExternalMemory(g_externalMemStart, true);
 
@@ -87,6 +91,11 @@ namespace virusLib
 
 		if(m_dsp)
 		{
+			if(m_jit)
+			{
+				m_dsp->setJit(nullptr);
+				delete m_jit;				
+			}
 			m_dsp->~DSP();
 			m_memory->~Memory();
 

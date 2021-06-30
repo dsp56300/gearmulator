@@ -24,6 +24,7 @@ namespace virusLib
 
 		dsp56k::Memory* m_memory = nullptr;
 		dsp56k::DSP* m_dsp = nullptr;
+		dsp56k::Jit* m_jit = nullptr;
 
 		ROMFile m_rom;
 
