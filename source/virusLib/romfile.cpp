@@ -102,7 +102,8 @@ std::string ROMFile::loadPreset(const int bank, const int presetNumber)
 		preset[i] = ((buf[0] << 16) | (buf[1] << 8) | buf[2]);
 		for (int k=0;k<3;k++) {int off=i*3+k;if (off>=240 && off<250) presetname[off-240]=buf[k];}
 	}
-	LOG("Loading Preset: [" << presetname << "]");
+
+	LOG("Loading Preset: Bank " << ('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << "[" << presetname << "]");
 
 	file.close();
 
