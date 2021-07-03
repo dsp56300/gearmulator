@@ -198,7 +198,7 @@ int main(int _argc, char* _argv[])
 {
 	if(true)
 	{
-		UnitTests tests;
+//		UnitTests tests;
 		JitUnittests jitTests;
 //		return 0;
 	}
@@ -216,6 +216,12 @@ int main(int _argc, char* _argv[])
 
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
+
+	for(auto b=0; b<8; ++b)
+	{
+		for(auto p=0; p<128; ++p)
+			v.loadPreset(b, p);
+	}
 
 	if(_argc > 2)
 	{
