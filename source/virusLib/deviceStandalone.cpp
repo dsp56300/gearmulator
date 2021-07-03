@@ -95,7 +95,8 @@ namespace virusLib
 				}
 				else
 				{
-					const auto response = m_syx.sendSysex(me.sysex);
+					std::vector<uint8_t> response;
+					m_syx.sendSysex(me.sysex, false, response);
 					if (!response.empty()) {
 						SMidiEvent ev;
 						ev.sysex = response;

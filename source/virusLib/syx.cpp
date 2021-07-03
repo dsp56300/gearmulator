@@ -14,6 +14,15 @@ Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile
 	m_romFile.getMulti(0, m_multiEditBuffer);
 }
 
+bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
+{
+	const int target = (flag1?1:0)|(flag2?2:0);
+	const int hsr = m_hdi08.readStatusRegister();
+	if (((hsr>>3)&3)==target) 
+		return false;
+	return m_hdi08.hasDataToSend();
+}
+
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
 	const int hsr=m_hdi08.readStatusRegister();
@@ -44,28 +53,35 @@ void Syx::sendControlCommand(const ControlCommand _command, const int _value) co
 	send(PAGE_C, 0x0, _command, _value);
 }
 
-void Syx::send(const Page _page, const int _part, const int _param, const int _value) const
+bool Syx::send(const Page _page, const int _part, const int _param, const int _value, bool cancelIfFull/* = false*/) const
 {
 	waitUntilReady();
+	if(cancelIfFull && needsToWaitForHostBits(0,1))
+		return false;
 	writeHostBitsWithWait(0,1);
 	int buf[] = {0xf4f400, 0x0};
 	buf[0] = buf[0] | _page;
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
+	return true;
 }
 
-void Syx::sendMIDI(int a,int b,int c) const
+bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/) const
 {
+	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
+		return false;
 	writeHostBitsWithWait(1,1);
 	int buf[3]={a<<16,b<<16,c<<16};
 	m_hdi08.writeRX(buf,3);
+	return true;
 }
 
-std::vector<uint8_t> Syx::sendSysex(std::vector<uint8_t> _data) const
+bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response) const
 {
     uint8_t deviceId = _data[5];
     uint8_t cmd = _data[6];
-    std::vector<uint8_t> response;
+
+	response.clear();
 
     LOGFMT("Incoming sysex request [device=0x%x, cmd=0x%x]", deviceId, cmd);
     switch (cmd)
@@ -85,7 +101,7 @@ std::vector<uint8_t> Syx::sendSysex(std::vector<uint8_t> _data) const
             const int res = requestMulti(deviceId, bank, program, dump);
             if (res == 0)
             {
-                response.resize(550);
+                response.resize(1024);
                 response[0] = M_STARTOFSYSEX;
                 response[1] = 0x00;
                 response[2] = 0x20;
@@ -104,21 +120,23 @@ std::vector<uint8_t> Syx::sendSysex(std::vector<uint8_t> _data) const
                     cs += value;
                 }
                 response[idx++] = cs & 0x7f; // checksum
-                response[idx] = M_ENDOFSYSEX;
+                response[idx++] = M_ENDOFSYSEX;
+            	assert(idx < response.size() && "memory corruption!");
+            	response.resize(idx);
             }
             break;
         }
         case PARAM_CHANGE_A:
         case PARAM_CHANGE_B:
-        case PARAM_CHANGE_C: {
-            send((Page)cmd, _data[7], _data[8], _data[9]);
-            break;
+        case PARAM_CHANGE_C:
+    	{
+            return send((Page)cmd, _data[7], _data[8], _data[9], cancelIfFull);
         }
         default:
             LOG("Unknown sysex cmd " << HEXN((int)cmd, 2));
     }
 
-    return response;
+    return true;
 }
 
 void Syx::waitUntilBufferEmpty() const

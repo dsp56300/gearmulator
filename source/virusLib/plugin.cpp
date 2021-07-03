@@ -27,10 +27,10 @@ namespace virusLib
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
 	{
-		m_resampler.process(_inputs, _outputs, m_midiIn, m_midiOut, _count, 
+		m_resampler.process(_inputs, _outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
-			m_device->process(_in, _out, _c, _midiIn, _midiOut);			
+			m_device->process(_in, _out, _c, _midiIn, _midiOut);
 		});
 
 		m_midiIn.clear();

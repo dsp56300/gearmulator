@@ -73,7 +73,7 @@ namespace virusLib
 			// Send preset
 //			m_rom.loadPreset(0, 93);	// RepeaterJS
 //			m_rom.loadPreset(0, 6);		// BusysawsSV
-			m_rom.loadPreset(0, 12);	// CommerseSV
+//			m_rom.loadPreset(0, 12);	// CommerseSV on Virus C
 			m_rom.loadPreset(0, 268);	// CommerseSV on Virus B
 			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
 
@@ -97,33 +97,90 @@ namespace virusLib
 		}
 	}
 
-	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	void Device::drainHDI08()
 	{
-		if(m_initDone)
-		{
-			for(size_t i=0; i<_midiIn.size(); ++i)
-			{
-				const auto& me = _midiIn[i];
-				// TODO: midi timing
-				if(me.sysex.empty())
-				{
-					LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
-					m_syx.sendMIDI(me.a, me.b, me.c);				
-				}
-				else
-				{
-					// TODO: sysex response
-					m_syx.sendSysex(me.sysex);
-				}
-			}
-		}
-
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
-
 		// prevent HDI08 overflow
 		while(m_periph.getHDI08().hasTX())
-		{
 			m_periph.getHDI08().readTX();
+	}
+
+	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	{
+		m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
+
+		auto sendMidi =[&](const SMidiEvent& me)
+		{
+			if(me.sysex.empty())
+			{
+//				LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
+				return m_syx.sendMIDI(me.a, me.b, me.c);
+			}
+
+			SMidiEvent response;
+			// TODO: sysex response
+			if(!m_syx.sendSysex(me.sysex, true, response.sysex))
+				return false;
+
+			if(!response.sysex.empty())
+				_midiOut.emplace_back(response);
+
+			return true;
+		};
+		
+		if(m_initDone && !m_midiIn.empty())
+		{
+			size_t i = 0;
+
+			uint32_t end = 0;
+			uint32_t begin = 0;
+
+			bool sendMidiFailed = false;
+
+			while(i < m_midiIn.size() && !sendMidiFailed)
+			{
+				end = m_midiIn[i].offset;
+
+				const auto size = end - begin;
+
+				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_nextLatency);
+				drainHDI08();
+
+				_inputs[0] += size;
+				_inputs[1] += size;
+				_outputs[0] += size;
+				_outputs[1] += size;
+
+				size_t j=i;
+				for(size_t j=i; j<m_midiIn.size() && !sendMidiFailed; j++)
+				{
+					if(m_midiIn[j].offset <= end)
+					{
+						if(!sendMidi(m_midiIn[j]))
+						{
+							if(j > 0)
+								m_midiIn.erase(m_midiIn.begin(), m_midiIn.begin() + j - 1);
+							sendMidiFailed = true;							
+						}
+						++i;
+					}
+				}
+
+				begin = end;
+			}
+
+			if(end < _size)
+			{
+				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size - end, 2, 2, m_nextLatency);
+				drainHDI08();				
+			}
+
+			if(!sendMidiFailed)
+				m_midiIn.clear();
+		}
+		else
+		{
+			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
+			drainHDI08();
 		}
 	}
 

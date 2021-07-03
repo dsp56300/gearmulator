@@ -158,7 +158,8 @@ void midiCallback(void *data,DSP *dsp)
 
 					if (!ev.sysex.empty())
 					{
-						const auto response = syx->sendSysex(ev.sysex);
+						std::vector<unsigned char> response;
+						syx->sendSysex(ev.sysex, false, response);
 						if (!response.empty())
 						{
 							SMidiEvent out;

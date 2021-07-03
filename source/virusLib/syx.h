@@ -75,14 +75,16 @@ public:
 	explicit Syx (dsp56k::HDI08& hdi08, ROMFile& romFile);
 	void sendFile (int program, const std::vector<dsp56k::TWord>& preset) const;
 	void sendControlCommand(ControlCommand command, int value) const;
-	void sendMIDI(int a,int b,int c) const;
-	void send(Page page, int part, int param, int value) const;
-	std::vector<uint8_t> sendSysex(std::vector<uint8_t> _data) const;
+	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false) const;
+	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;
+	bool sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response) const;
 
 	int dumpSingle(int _bank, int _program, std::array<uint8_t, 256>& _data) const;
 	int requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t, 256>& _data) const;
 
 	ROMFile& getROMFile() {return m_romFile;}
+
+	bool needsToWaitForHostBits(char flag1,char flag2) const;
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
