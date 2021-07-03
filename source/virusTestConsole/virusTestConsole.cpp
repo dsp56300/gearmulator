@@ -214,11 +214,6 @@ int main(int _argc, char* _argv[])
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
 
-
-	// uncomment to enable JIT runtime
-	Jit jit(dsp);
-	dsp.setJit(&jit);
-
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
 
