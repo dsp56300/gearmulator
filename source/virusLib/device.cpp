@@ -150,10 +150,9 @@ namespace virusLib
 				_outputs[0] += size;
 				_outputs[1] += size;
 
-				size_t j=i;
 				for(size_t j=i; j<m_midiIn.size() && !sendMidiFailed; j++)
 				{
-					if(m_midiIn[j].offset <= end)
+					if(m_midiIn[j].offset <= static_cast<int>(end))
 					{
 						if(!sendMidi(m_midiIn[j]))
 						{
