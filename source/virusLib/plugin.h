@@ -4,6 +4,7 @@
 
 #include "device.h"
 #include "midiTypes.h"
+#include "resampler.h"
 
 namespace virusLib
 {

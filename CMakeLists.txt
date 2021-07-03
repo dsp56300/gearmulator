@@ -14,6 +14,7 @@ add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/portmidi)
 add_subdirectory(source/portaudio)
+add_subdirectory(source/libresample)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
 	set(VIRUS_VST2 true)

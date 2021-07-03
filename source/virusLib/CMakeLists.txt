@@ -7,10 +7,11 @@ set(SOURCES
 	device.cpp device.h
 	deviceStandalone.cpp deviceStandalone.h
 	midiTypes.h
+	midi.cpp midi.h
 	plugin.cpp plugin.h
+	resampler.cpp resampler.h
 	romfile.cpp romfile.h
 	syx.cpp syx.h
-	midi.cpp midi.h
 	wavWriter.cpp wavWriter.h
 )
 
@@ -18,4 +19,4 @@ target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_include_directories(virusLib PUBLIC ../portmidi/pm_common/ ../portaudio/include)
-target_link_libraries(virusLib PUBLIC dsp56kEmu portmidi-static)
+target_link_libraries(virusLib PUBLIC dsp56kEmu portmidi-static resample)
