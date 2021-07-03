@@ -32,9 +32,6 @@ namespace virusLib
 		m_memory = new (bufMem)Memory(m_memoryValidator, g_memorySize, reinterpret_cast<TWord*>(bufBuf));
 		m_dsp = new (buf)DSP(*m_memory, &m_periph, &m_periph);
 
-		m_jit = new Jit(*m_dsp);
-		m_dsp->setJit(m_jit);		
-
 		m_memory->setExternalMemory(g_externalMemStart, true);
 
 		auto loader = m_rom.bootDSP(*m_dsp, m_periph);
@@ -77,6 +74,7 @@ namespace virusLib
 //			m_rom.loadPreset(0, 93);	// RepeaterJS
 //			m_rom.loadPreset(0, 6);		// BusysawsSV
 			m_rom.loadPreset(0, 12);	// CommerseSV
+			m_rom.loadPreset(0, 268);	// CommerseSV on Virus B
 			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
 
 			m_initDone = true;
@@ -91,11 +89,6 @@ namespace virusLib
 
 		if(m_dsp)
 		{
-			if(m_jit)
-			{
-				m_dsp->setJit(nullptr);
-				delete m_jit;				
-			}
 			m_dsp->~DSP();
 			m_memory->~Memory();
 
