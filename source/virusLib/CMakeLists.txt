@@ -4,12 +4,14 @@ project(ceLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
+	audiobuffer.cpp audiobuffer.h
 	device.cpp device.h
 	deviceStandalone.cpp deviceStandalone.h
 	midiTypes.h
 	midi.cpp midi.h
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
+	resamplerInOut.cpp resamplerInOut.h
 	romfile.cpp romfile.h
 	syx.cpp syx.h
 	wavWriter.cpp wavWriter.h

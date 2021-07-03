@@ -1,30 +1,37 @@
 #pragma once
 
-#include "midiTypes.h"
+#include <cassert>
 
 #include <functional>
 #include <vector>
+
+#include "audiobuffer.h"
 
 namespace virusLib
 {
 	class Resampler
 	{
 	public:
-		using TMidiVec = std::vector<SMidiEvent>;
-		using TProcessFunc = std::function<void(float**, TMidiVec&, uint32_t, uint32_t)>;
+		using TProcessFunc = std::function<void(float**, uint32_t)>;
 
-		Resampler(TProcessFunc _process, float _samplerateIn, float _samplerateOut);
+		Resampler(float _samplerateIn, float _samplerateOut);
 		Resampler(const Resampler&) = delete;
 		~Resampler();
 
-		void process(float** _output, uint32_t _numChannels, uint32_t _numSamples, TMidiVec& _midiIn);
+		uint32_t process(AudioBuffer& _output, size_t _outputOffset, uint32_t _numChannels, uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
+		{
+			float* buffers[8];
+			_output.fillPointers(buffers, _outputOffset);
+			return process(buffers, _numChannels, _numSamples, _allowLessOutput, _processFunc);
+		}
+
+		uint32_t process(float** _output, uint32_t _numChannels, uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc);
 
 		float getSamplerateIn() const { return m_samplerateIn; }
 		float getSamplerateOut() const { return m_samplerateOut; }
 
 	private:
-		uint32_t processResample(float** _output, uint32_t _numChannels, uint32_t _numSamples, TMidiVec& _midiIn);
-		static void clearMidiEvents(TMidiVec& _midiEvents, int _usedLen);
+		uint32_t processResample(float** _output, uint32_t _numChannels, uint32_t _numSamples, const TProcessFunc& _processFunc);
 		void destroyResamplers();
 		void setChannelCount(uint32_t _numChannels);
 
@@ -34,12 +41,8 @@ namespace virusLib
 		const float m_factorOutToIn;
 
 		std::vector<void*> m_resamplerOut;
-		std::vector<SMidiEvent> m_midiEvents;
 
 		std::vector< std::vector<float> > m_tempOutput;
 		std::vector< float* > m_outputPtrs;
-		std::vector<SMidiEvent> m_timeScaledMidiIn;
-
-		TProcessFunc m_process;
 	};
 }

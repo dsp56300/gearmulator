@@ -6,9 +6,8 @@ namespace virusLib
 {
 	Plugin::Plugin()
 	{
-		dsp56k::UnitTests tests;
-
-		m_device.reset(new Device("c:\\Virus_C_OS_Flash_V6_5.BIN"));
+		m_device.reset(new Device("c:\\AccessVirusB(am29f040b_4v9).BIN"));
+		m_resampler.setDeviceSamplerate(12000000.0f / 256.0f);
 	}
 
 	Plugin::~Plugin()
@@ -21,9 +20,19 @@ namespace virusLib
 		m_midiIn.push_back(_ev);
 	}
 
+	void Plugin::setSamplerate(float _samplerate)
+	{
+		m_resampler.setHostSamplerate(_samplerate);
+	}
+
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
 	{
-		m_device->process(_inputs, _outputs, _count, m_midiIn, m_midiOut);
+		m_resampler.process(_inputs, _outputs, m_midiIn, m_midiOut, _count, 
+			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
+		{
+			m_device->process(_in, _out, _c, _midiIn, _midiOut);			
+		});
+
 		m_midiIn.clear();
 		m_midiOut.clear();	// TODO
 	}

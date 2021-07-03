@@ -1,10 +1,10 @@
 #pragma once
 
-#include <memory>
-
 #include "device.h"
 #include "midiTypes.h"
-#include "resampler.h"
+#include "resamplerInOut.h"
+
+#include <memory>
 
 namespace virusLib
 {
@@ -13,14 +13,19 @@ namespace virusLib
 	public:
 		Plugin();
 		virtual ~Plugin();
+
 		void addMidiEvent(const SMidiEvent& _ev);
-		void setSamplerate(float _samplerate) {}
-		void process(float** _inputs, float** _outputs, size_t _count);
+
+		void setSamplerate(float _samplerate);
 		void setBlockSize(size_t _blockSize);
+
+		void process(float** _inputs, float** _outputs, size_t _count);
 
 	private:
 		std::vector<SMidiEvent> m_midiIn;
 		std::vector<SMidiEvent> m_midiOut;
 		std::unique_ptr<Device> m_device;
+
+		ResamplerInOut m_resampler;
 	};
 }

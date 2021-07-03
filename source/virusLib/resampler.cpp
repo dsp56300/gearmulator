@@ -7,14 +7,12 @@
 
 #include "../dsp56300/source/dsp56kEmu/fastmath.h"
 
-virusLib::Resampler::Resampler(TProcessFunc _process, const float _samplerateIn, const float _samplerateOut)
+virusLib::Resampler::Resampler(const float _samplerateIn, const float _samplerateOut)
 	: m_samplerateIn(_samplerateIn)
 	, m_samplerateOut(_samplerateOut)
 	, m_factorInToOut(_samplerateIn / _samplerateOut)
 	, m_factorOutToIn(_samplerateOut / _samplerateIn)
-	, m_process(std::move(_process))
 {
-	m_midiEvents.reserve(128);
 }
 
 virusLib::Resampler::~Resampler()
@@ -22,51 +20,45 @@ virusLib::Resampler::~Resampler()
 	destroyResamplers();
 }
 
-void virusLib::Resampler::process(float** _output, const uint32_t _numChannels, const uint32_t _numSamples, TMidiVec& _midiIn)
+uint32_t virusLib::Resampler::process(float** _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
 {
 	setChannelCount(_numChannels);
 
 	if (getSamplerateIn() == getSamplerateOut())
 	{
-		m_process(_output, _midiIn, _numChannels, _numSamples);
+		_processFunc(_output, _numSamples);
+		return _numSamples;
 	}
-	else
+
+	uint32_t index = 0;
+	uint32_t remaining = _numSamples;
+
+	while (remaining > 0)
 	{
-		uint32_t index = 0;
-		uint32_t remaining = _numSamples;
+		m_outputPtrs.resize(_numChannels);
 
-		while (remaining > 0)
-		{
-			m_outputPtrs.resize(_numChannels);
+		for (uint32_t i = 0; i < _numChannels; ++i)
+			m_outputPtrs[i] = &_output[i][index];
 
-			for (uint32_t i = 0; i < _numChannels; ++i)
-				m_outputPtrs[i] = &_output[i][index];
+		const uint32_t outBufferUsed = processResample(&m_outputPtrs[0], _numChannels, remaining, _processFunc);
 
-			const uint32_t outBufferUsed = processResample(&m_outputPtrs[0], _numChannels, remaining, _midiIn);
+		index += outBufferUsed;
+		remaining -= outBufferUsed;
 
-			index += outBufferUsed;
-			remaining -= outBufferUsed;
-
-//			if (remaining > 0)
-//				LOG("outBufferUsed " << outBufferUsed << " outLen " << _numSamples);
-		}
+		if(_allowLessOutput)
+			break;
+//		if (remaining > 0)
+//			LOG("outBufferUsed " << outBufferUsed << " outLen " << _numSamples);
 	}
+
+	return index;
 }
 
-uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, TMidiVec& _midiIn)
+uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
 	const uint32_t inputLen = dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut);
 
 	const auto availableInputLen = static_cast<uint32_t>(m_tempOutput[0].size());
-
-	if(!_midiIn.empty())
-	{
-		for (auto& ev : _midiIn)
-			ev.offset = dsp56k::floor_int(static_cast<float>(ev.offset) * m_factorInToOut);
-
-		m_timeScaledMidiIn.insert(m_timeScaledMidiIn.end(), _midiIn.begin(), _midiIn.end());
-		_midiIn.clear();
-	}
 
 	if (availableInputLen < inputLen)
 	{
@@ -78,12 +70,7 @@ uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _
 			tempBuffers[i] = &m_tempOutput[i][availableInputLen];
 		}
 
-		m_process(tempBuffers, m_timeScaledMidiIn, _numChannels, inputLen - availableInputLen);
-
-		for (auto&& e : m_timeScaledMidiIn)
-			e.offset += availableInputLen;
-
-		clearMidiEvents(m_timeScaledMidiIn, inputLen - availableInputLen);
+		_processFunc(tempBuffers, inputLen - availableInputLen);
 	}
 
 	uint32_t outBufferUsed = 0;
@@ -109,28 +96,6 @@ uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _
 	}
 
 	return outBufferUsed;
-}
-
-void virusLib::Resampler::clearMidiEvents(TMidiVec& _midiEvents, int _usedLen)
-{
-	if (_midiEvents.empty())
-		return;
-
-	for (auto i = static_cast<int>(_midiEvents.size())-1; i>=0; --i)
-	{
-		auto& ev = _midiEvents[i];
-
-		if (ev.offset >= _usedLen)
-		{
-			ev.offset -= _usedLen;
-			assert(ev.offset >= 0);
-		}
-		else
-		{
-			_midiEvents.erase(_midiEvents.begin(), _midiEvents.begin() + i + 1);
-			break;
-		}
-	}
 }
 
 void virusLib::Resampler::destroyResamplers()
