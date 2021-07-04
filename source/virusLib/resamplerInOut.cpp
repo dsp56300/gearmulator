@@ -1,6 +1,7 @@
 #include "resamplerInOut.h"
 
 #include "../dsp56300/source/dsp56kEmu/fastmath.h"
+#include "../dsp56300/source/dsp56kEmu/logging.h"
 
 namespace virusLib
 {
@@ -118,6 +119,7 @@ namespace virusLib
 				m_scaledInput.insertZeroes(diff);
 				m_scaledInputSize += diff;
 				m_outputLatency += diff;
+				LOG("Resampler output latency " << m_outputLatency << " samples");
 			}
 			m_scaledInput.fillPointers(inputs);
 			_processFunc(inputs, _outs, _numProcessedSamples, m_processedMidiIn, m_midiOut);
