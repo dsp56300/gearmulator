@@ -6,6 +6,10 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
+#ifdef _WIN32
+#include <Windows.h>
+#endif
+
 namespace virusLib
 {
 ROMFile::ROMFile(const char* _path) : m_path(_path)
@@ -46,6 +50,15 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
 
+	if(!file.is_open())
+	{
+		LOG("Failed to load ROM at " << m_path);
+#ifdef _WIN32
+		const std::string errorMessage = std::string("Failed to load ROM at ") + m_path;
+		::MessageBox(nullptr, "ROM not found", errorMessage.c_str(), MB_OK);
+#endif
+		return {};
+	}
 	std::vector<Chunk> chunks(5);
 
 	// Read all the chunks, hardcoded to 4 for convenience
