@@ -12,6 +12,9 @@ namespace virusLib
 Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile)
 {
 	m_romFile.getMulti(0, m_multiEditBuffer);
+
+	for(auto i=0; i<static_cast<int>(m_singleEditBuffer.size()); ++i)
+		m_romFile.getSingle(0, i, m_singleEditBuffer[i]);
 }
 
 bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
@@ -82,10 +85,40 @@ bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/) const
 
 bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response) const
 {
-    uint8_t deviceId = _data[5];
-    uint8_t cmd = _data[6];
+	const auto manufacturerA = _data[1];
+	const auto manufacturerB = _data[2];
+	const auto manufacturerC = _data[3];
+	const auto productId = _data[4];
+    const auto deviceId = _data[5];
+    const auto cmd = _data[6];
 
 	response.clear();
+	
+	auto buildPresetResponse = [&](uint8_t _type, uint8_t _bank, uint8_t _program, const TPreset& _dump)
+	{
+        response.resize(1024);
+        response[0] = M_STARTOFSYSEX;
+        response[1] = manufacturerA;
+        response[2] = manufacturerB;
+        response[3] = manufacturerC;
+        response[4] = productId;
+        response[5] = deviceId;
+        response[6] = _type;
+        response[7] = _bank;
+        response[8] = _program;
+
+        uint8_t cs = deviceId + 11 + response[7];
+        size_t idx = 9;
+        for(const auto value : _dump)
+        {
+            response[idx++] = value;
+            cs += value;
+        }
+        response[idx++] = cs & 0x7f; // checksum
+        response[idx++] = M_ENDOFSYSEX;
+        assert(idx < response.size() && "memory corruption!");
+        response.resize(idx);
+	};
 
     LOGFMT("Incoming sysex request [device=0x%x, cmd=0x%x]", deviceId, cmd);
     switch (cmd)
@@ -94,7 +127,7 @@ bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<u
 		{
             const uint8_t bank = _data[7];
             const uint8_t program = _data[8];
-            std::array<uint8_t, 256> dump;
+            TPreset dump;
             std::copy(_data.data() + 9, _data.data() + 9 + 256, dump.begin());
             return sendSingle(bank, program, dump, cancelIfFull);
         }
@@ -102,37 +135,22 @@ bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<u
 		{
             const uint8_t bank = _data[7];
             const uint8_t program = _data[8];
-            std::array<uint8_t, 256> dump;
-            const int res = requestMulti(deviceId, bank, program, dump);
-            if (res == 0)
-            {
-                response.resize(1024);
-                response[0] = M_STARTOFSYSEX;
-                response[1] = 0x00;
-                response[2] = 0x20;
-                response[3] = 0x33;
-                response[4] = 0x01;
-                response[5] = deviceId;
-                response[6] = DUMP_MULTI;  // multi dump
-                response[7] = 0x00;        // bank number
-                response[8] = 0x00;        // program number
-
-                uint8_t cs = deviceId + 11 + response[7];
-                size_t idx = 9;
-                for(const uint8_t value : dump)
-                {
-                    response[idx++] = value;
-                    cs += value;
-                }
-                response[idx++] = cs & 0x7f; // checksum
-                response[idx++] = M_ENDOFSYSEX;
-            	assert(idx < response.size() && "memory corruption!");
-            	response.resize(idx);
-            }
+            TPreset dump;
+            const auto res = requestMulti(deviceId, bank, program, dump);
+        	if(res)
+		        buildPresetResponse(DUMP_MULTI, bank, program, dump);
             break;
         }
 		case REQUEST_SINGLE:
+        {
+            const uint8_t bank = _data[7];
+            const uint8_t program = _data[8];
+            TPreset dump;
+            const auto res = requestSingle(deviceId, bank, program, dump);
+        	if(res)
+		        buildPresetResponse(DUMP_SINGLE, bank, program, dump);
 			break;
+        }
         case PARAM_CHANGE_A:
         case PARAM_CHANGE_B:
         case PARAM_CHANGE_C:
@@ -164,30 +182,47 @@ void Syx::waitUntilReady() const
 	}
 }
 
-int Syx::requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t, 256>& _data) const
+bool Syx::requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const
 {
 	if (_deviceId != m_deviceId) {
 		// Ignore messages intended for a different device
-		return -1;
+		return false;
 	}
 
 	if (_bank == 0)
 	{
 		// Use multi-edit buffer
 		_data = m_multiEditBuffer;
-		return 0;
+		return true;
 	}
 
 	if (_bank != 1)
-		return -1;
+		return false;
 
 	// Load from flash
-	m_romFile.getMulti(_program, _data);
-
-	return 0;
+	return m_romFile.getMulti(_program, _data);
 }
 
-bool Syx::sendSingle(int _bank, int _program, std::array<uint8_t, 256>& _data, bool cancelIfFull) const
+bool Syx::requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) const
+{
+	if (_deviceId != m_deviceId) 
+	{
+		// Ignore messages intended for a different device
+		return false;
+	}
+	
+	if (_bank == 0)
+	{
+		// Use single-edit buffer
+		_data = m_singleEditBuffer[_program % m_singleEditBuffer.size()];
+		return true;
+	}
+
+	// Load from flash
+	return m_romFile.getSingle(_bank - 1, _program, _data);
+}
+
+bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull) const
 {
 	if (_bank != 0) 
 	{

@@ -72,15 +72,19 @@ public:
 
 	const static int SINGLE = 0x40;
 
-	explicit Syx (dsp56k::HDI08& hdi08, ROMFile& romFile);
-	bool sendFile (int program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
+	using TPreset = std::array<uint8_t, 256>;
+
+	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
+
+	bool sendFile(int program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
 	void sendControlCommand(ControlCommand command, int value) const;
 	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false) const;
 	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;
 	bool sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response) const;
 
-	bool sendSingle(int _bank, int _program, std::array<uint8_t, 256>& _data, bool cancelIfFull) const;
-	int requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t, 256>& _data) const;
+	bool sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull) const;
+	bool requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const;
+	bool requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) const;
 
 	ROMFile& getROMFile() {return m_romFile;}
 
@@ -92,6 +96,8 @@ private:
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_romFile;
 	const uint8_t m_deviceId = 0;
-	std::array<uint8_t, 256> m_multiEditBuffer;
+
+	TPreset m_multiEditBuffer;
+	std::array<TPreset,16> m_singleEditBuffer;
 };
 }
