@@ -9,6 +9,7 @@ set(SOURCES
 	deviceStandalone.cpp deviceStandalone.h
 	midiTypes.h
 	midi.cpp midi.h
+	midiOutParser.cpp midiOutParser.h
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h

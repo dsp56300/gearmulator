@@ -12,6 +12,7 @@
 #include "../virusLib/syx.h"
 #include "../virusLib/midi.h"
 #include "../virusLib/wavWriter.h"
+#include "../virusLib/midiOutParser.h"
 
 using namespace dsp56k;
 using namespace virusLib;
@@ -281,50 +282,14 @@ int main(int _argc, char* _argv[])
 	DSPThread dspThread(dsp);
 #endif
 
-	std::thread midiThread([&]() {
-		int midi[128];
-		auto sequenceStarted = false;
-		size_t idx = 0;
-		while (true) {
-			// Only support for single byte responses atm
-			uint32_t word = periph.getHDI08().readTX();
-			if ((word & 0xff00ffff) != 0) {
-				LOG("Unexpected MIDI data: 0x" << HEX(word));
-				continue;
-			}
-
-			auto buf = (word & 0x00ff0000) >> 16;
-
-			// Check for sequence start 0xf0
-			if (!sequenceStarted) {
-				if (buf == 0 || buf == 0xf5)
-					continue;
-				if (buf != 0xf0) {
-					LOG("Unexpected MIDI bytes: 0x" << HEXN(buf, 2));
-					continue;
-				}
-				sequenceStarted = true;
-			}
-
-			midi[idx] = buf;
-			++idx;
-
-			// End of midi command, show it
-			if (buf == 0xf7) {
-				std::ostringstream stringStream;
-				for (size_t i = 0; i < idx; i++) {
-					//printf("tmp: 0x%x\n", midi[i]);
-					stringStream << HEXN(midi[i], 2);
-				}
-				LOG("SYSEX RESPONSE: 0x" << stringStream.str());
-				memset(midi, 0, sizeof midi);
-				sequenceStarted = false;
-				idx = 0;
-			}
-
-			//LOG("BUF=0x"<< HEX(buf));
-
-			std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	MidiOutParser midiOut;
+	
+	std::thread midiThread([&]() 
+	{
+		while(true)
+		{
+			const auto word = periph.getHDI08().readTX();
+			midiOut.append(word);
 		}
 	});
 
