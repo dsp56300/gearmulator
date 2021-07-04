@@ -113,7 +113,7 @@ namespace virusLib
 			if(me.sysex.empty())
 			{
 //				LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
-				return m_syx.sendMIDI(me.a, me.b, me.c);
+				return m_syx.sendMIDI(me.a, me.b, me.c, true);
 			}
 
 			SMidiEvent response;
