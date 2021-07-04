@@ -32,8 +32,11 @@ void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-void Syx::sendFile(int program, const std::vector<TWord>& preset) const
+bool Syx::sendFile(int program, const std::vector<TWord>& preset, bool cancelIfFull) const
 {
+	if(cancelIfFull && needsToWaitForHostBits(0,1))
+		return false;
+
 	writeHostBitsWithWait(0,1);
 	// Send header
 	int buf[] = {0xf47555, 0x100000};
@@ -46,6 +49,7 @@ void Syx::sendFile(int program, const std::vector<TWord>& preset) const
 		auto data = preset[i];
 		m_hdi08.writeRX(reinterpret_cast<const int*>(&data), 1);
 	}
+	return true;
 }
 
 void Syx::sendControlCommand(const ControlCommand _command, const int _value) const
@@ -86,15 +90,16 @@ bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<u
     LOGFMT("Incoming sysex request [device=0x%x, cmd=0x%x]", deviceId, cmd);
     switch (cmd)
     {
-        case DUMP_SINGLE: {
+        case DUMP_SINGLE: 
+		{
             const uint8_t bank = _data[7];
             const uint8_t program = _data[8];
             std::array<uint8_t, 256> dump;
             std::copy(_data.data() + 9, _data.data() + 9 + 256, dump.begin());
-            dumpSingle(bank, program, dump);
-            break;
+            return sendSingle(bank, program, dump, cancelIfFull);
         }
-        case REQUEST_MULTI: {
+        case REQUEST_MULTI:
+		{
             const uint8_t bank = _data[7];
             const uint8_t program = _data[8];
             std::array<uint8_t, 256> dump;
@@ -126,6 +131,8 @@ bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<u
             }
             break;
         }
+		case REQUEST_SINGLE:
+			break;
         case PARAM_CHANGE_A:
         case PARAM_CHANGE_B:
         case PARAM_CHANGE_C:
@@ -180,11 +187,12 @@ int Syx::requestMulti(int _deviceId, int _bank, int _program, std::array<uint8_t
 	return 0;
 }
 
-int Syx::dumpSingle(int _bank, int _program, std::array<uint8_t, 256>& _data) const
+bool Syx::sendSingle(int _bank, int _program, std::array<uint8_t, 256>& _data, bool cancelIfFull) const
 {
-	if (_bank != 0) {
+	if (_bank != 0) 
+	{
 		// We do not support writing to flash
-		return -1;
+		return false;
 	}
 
 	// Convert array of uint8_t to vector of 24bit TWord
@@ -192,15 +200,13 @@ int Syx::dumpSingle(int _bank, int _program, std::array<uint8_t, 256>& _data) co
 	std::vector<TWord> preset;
 	preset.resize(0x56);
 	for (int i = 0; i < 0x56; i++) {
-		preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
-		if (i == 0x55) {
-			// We need to clear the last bytes or it might not load properly!
-			preset[i] = preset[i] & 0xff0000;
-		}
+		if (i == 0x55)
+			preset[i] = _data[idx] << 16;
+		else
+			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
 		idx += 3;
 	}
-	sendFile(_program, preset);
-	return 0;
+	return sendFile(_program, preset, cancelIfFull);
 }
 
 }
