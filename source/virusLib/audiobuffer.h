@@ -26,6 +26,7 @@ namespace virusLib
 		}
 
 		void insertZeroes(size_t _size);
+		const std::vector<float>& getChannel(const size_t _channel) { return m_data[_channel]; }
 
 		AudioBuffer(size_t _channelCount = 2, size_t _capacity = 1024);
 	private:
