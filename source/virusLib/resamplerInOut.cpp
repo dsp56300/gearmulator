@@ -95,14 +95,27 @@ namespace virusLib
 		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCount, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
 		{
 			// resampler prewarming, wants more data than we have
-			if(_numRequestedSamples > m_input.size())
+			const auto offset = _numRequestedSamples > m_input.size() ? _numRequestedSamples - m_input.size() : 0;
+			if(offset)
 			{
-				const size_t diff = _numRequestedSamples - m_input.size();
-				m_input.insertZeroes(diff);
-				m_inputLatency += diff;
+				for(size_t c=0; c<g_channelCount; ++c)
+				{
+					memset(_data[c], 0, sizeof(float) * offset);
+					_data[c] += offset;
+				}
 			}
-			m_input.fillPointers(_data);
-			m_input.remove(_numRequestedSamples);
+
+			const auto count = (_numRequestedSamples - offset);
+
+			if(count)
+			{
+				for(size_t c=0; c<g_channelCount; ++c)
+					memcpy(_data[c], &m_input.getChannel(c)[0], sizeof(float) * count);
+
+				m_input.remove(count);
+			}
+
+			m_inputLatency += offset;
 		});
 
 		const auto outputSize = m_out->process(_outputs, g_channelCount, _numSamples, false, [&](float** _outs, uint32_t _numProcessedSamples)
