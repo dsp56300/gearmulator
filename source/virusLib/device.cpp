@@ -40,7 +40,7 @@ namespace virusLib
 
 		loader.join();
 
-		m_initThread.reset(new std::thread([&]()
+		
 		{
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 
@@ -78,9 +78,9 @@ namespace virusLib
 			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
 
 			m_initDone = true;
-			m_initThread->detach();
-			m_initThread.reset();
-		}));
+//			m_initThread->detach();
+//			m_initThread.reset();
+		};
 	}
 
 	Device::~Device()
