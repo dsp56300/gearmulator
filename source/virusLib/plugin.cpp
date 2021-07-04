@@ -17,6 +17,8 @@ namespace virusLib
 
 	void Plugin::addMidiEvent(const SMidiEvent& _ev)
 	{
+		std::lock_guard lock(m_lock);
+		
 		// sysex might be send in multiple chunks. Happens if coming from hardware
 		if(!_ev.sysex.empty())
 		{
@@ -55,11 +57,13 @@ namespace virusLib
 
 	void Plugin::setSamplerate(float _samplerate)
 	{
+		std::lock_guard lock(m_lock);
 		m_resampler.setHostSamplerate(_samplerate);
 	}
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
 	{
+		std::lock_guard lock(m_lock);
 		m_resampler.process(_inputs, _outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
@@ -77,6 +81,7 @@ namespace virusLib
 
 	void Plugin::setBlockSize(size_t _blockSize)
 	{
+		std::lock_guard lock(m_lock);
 		m_device->setBlockSize(_blockSize);
 	}
 }

@@ -30,5 +30,6 @@ namespace virusLib
 		SMidiEvent m_pendingSyexInput;
 
 		ResamplerInOut m_resampler;
+		std::mutex m_lock;
 	};
 }
