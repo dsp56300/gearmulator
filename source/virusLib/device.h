@@ -1,5 +1,7 @@
 #pragma once
 #include <cstdint>
+
+#include "midiOutParser.h"
 #include "midiTypes.h"
 #include "romfile.h"
 #include "syx.h"
@@ -13,11 +15,12 @@ namespace virusLib
 	public:
 		Device(const char* _romFileName);
 		~Device();
-		void drainHDI08();
 		void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setBlockSize(size_t _size);
 
 	private:
+		void readMidiOut(std::vector<SMidiEvent>& _midiOut);
+
 		std::vector<uint8_t> m_buffer;
 
 		dsp56k::DefaultMemoryValidator m_memoryValidator;
@@ -36,5 +39,6 @@ namespace virusLib
 		std::vector<SMidiEvent> m_midiIn;
 		bool m_initDone = false;
 		size_t m_nextLatency = 0;
+		MidiOutParser m_midiOutParser;
 	};
 }

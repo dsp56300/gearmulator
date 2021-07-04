@@ -1,9 +1,7 @@
 #include "device.h"
-
 #include "romfile.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
-#include "../dsp56300/source/dsp56kEmu/jit.h"
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 
 using namespace dsp56k;
@@ -97,11 +95,18 @@ namespace virusLib
 		}
 	}
 
-	void Device::drainHDI08()
+	void Device::readMidiOut(std::vector<SMidiEvent>& _midiOut)
 	{
 		// prevent HDI08 overflow
 		while(m_periph.getHDI08().hasTX())
-			m_periph.getHDI08().readTX();
+		{
+			if(m_midiOutParser.append(m_periph.getHDI08().readTX()))
+			{
+				const auto midi = m_midiOutParser.getMidiData();
+				_midiOut.insert(_midiOut.end(), midi.begin(), midi.end());
+				m_midiOutParser.clearMidiData();
+			}
+		}
 	}
 
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
@@ -143,7 +148,7 @@ namespace virusLib
 				const auto size = end - begin;
 
 				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_nextLatency);
-				drainHDI08();
+				readMidiOut(_midiOut);
 
 				_inputs[0] += size;
 				_inputs[1] += size;
@@ -170,7 +175,7 @@ namespace virusLib
 			if(end < _size)
 			{
 				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size - end, 2, 2, m_nextLatency);
-				drainHDI08();				
+				readMidiOut(_midiOut);				
 			}
 
 			if(!sendMidiFailed)
@@ -179,7 +184,7 @@ namespace virusLib
 		else
 		{
 			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
-			drainHDI08();
+			readMidiOut(_midiOut);
 		}
 	}
 
