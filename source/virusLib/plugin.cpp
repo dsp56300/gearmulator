@@ -17,6 +17,39 @@ namespace virusLib
 
 	void Plugin::addMidiEvent(const SMidiEvent& _ev)
 	{
+		// sysex might be send in multiple chunks. Happens if coming from hardware
+		if(!_ev.sysex.empty())
+		{
+			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+
+			if(isComplete)
+			{
+				m_midiIn.push_back(_ev);
+				return;
+			}
+
+			const bool isStart = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() != M_ENDOFSYSEX;
+			const bool isEnd = _ev.sysex.front() != M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+
+			if(isStart)
+			{
+				m_pendingSyexInput = _ev;
+				return;
+			}
+
+			if(!m_pendingSyexInput.sysex.empty())
+			{
+				m_pendingSyexInput.sysex.insert(m_pendingSyexInput.sysex.end(), _ev.sysex.begin(), _ev.sysex.end());
+
+				if(isEnd)
+				{
+					m_midiIn.push_back(m_pendingSyexInput);
+					m_pendingSyexInput.sysex.clear();
+				}
+			}
+			return;
+		}
+
 		m_midiIn.push_back(_ev);
 	}
 

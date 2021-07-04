@@ -26,6 +26,8 @@ namespace virusLib
 		std::vector<SMidiEvent> m_midiOut;
 		std::unique_ptr<Device> m_device;
 
+		SMidiEvent m_pendingSyexInput;
+
 		ResamplerInOut m_resampler;
 	};
 }
