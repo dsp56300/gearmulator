@@ -20,6 +20,7 @@ namespace virusLib
 		void setBlockSize(size_t _blockSize);
 
 		void process(float** _inputs, float** _outputs, size_t _count);
+		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 	private:
 		std::vector<SMidiEvent> m_midiIn;

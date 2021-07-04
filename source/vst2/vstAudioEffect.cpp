@@ -130,6 +130,8 @@ VstPlugCategory VSTAudioEffect::getPlugCategory()
 void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
 	m_plugin.process(inputs, outputs, sampleFrames);
+	m_plugin.getMidiOut(m_midiOut);
+	sendMidiEventsToHost(m_midiOut);
 }
 
 // _____________________________________________________________________________

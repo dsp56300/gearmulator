@@ -66,4 +66,5 @@ private:
 
 	std::vector<uint8_t>	m_chunkData;
 	virusLib::Plugin		m_plugin;
+	std::vector<virusLib::SMidiEvent> m_midiOut;
 };
