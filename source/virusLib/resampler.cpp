@@ -1,5 +1,6 @@
 #include "resampler.h"
 
+#include <algorithm>
 #include <cassert>
 #include <utility>
 
@@ -56,7 +57,7 @@ uint32_t virusLib::Resampler::process(float** _output, const uint32_t _numChanne
 
 uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
-	const uint32_t inputLen = dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut);
+	const uint32_t inputLen = std::max(1, dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut));
 
 	const auto availableInputLen = static_cast<uint32_t>(m_tempOutput[0].size());
 
