@@ -99,34 +99,33 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 
 std::string ROMFile::loadPreset(const int bank, const int presetNumber)
 {
-	uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
+	std::array<uint8_t, 256> data;
 
-	// Open file
-	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
-	file.seekg(offset);
+	if(!getSingle(bank, presetNumber, data))
+		return {};
 
 	preset.clear();
 	preset.resize(0x56);
 
 	char presetname[11]={0};
-	uint8_t buf[3];
 	for (int i = 0; i < 0x56; i++) 
 	{
-		file.read(reinterpret_cast<char*>(buf), 3);
+		const auto idx = i*3;
 
-		preset[i] = ((buf[0] << 16) | (buf[1] << 8) | buf[2]);
+		preset[i] = data[idx] << 16;
+
+		if(idx < 255)
+			preset[i] |= (data[idx+1] << 8) | data[idx+2];
 
 		for (int k=0;k<3;k++)
 		{
-			int off=i*3+k;
+			const auto off = idx + k;
 			if (off>=240 && off<250) 
-				presetname[off-240]=buf[k];
+				presetname[off-240]=data[off];
 		}
 	}
 
-	LOG("Loading Preset: Bank " << ('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << "[" << presetname << "]");
-
-	file.close();
+	LOG("Loading Preset: Bank " << static_cast<char>('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << " [" << presetname << "]");
 
 	return std::string(presetname);
 }
@@ -150,12 +149,30 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	return feedCommandStream;
 }
 
-void ROMFile::getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out)
+bool ROMFile::getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const
+{
+	const uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
+	return getPreset(offset, _out);
+}
+
+bool ROMFile::getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out) const
+{
+	// Open file
+	return getPreset(0x48000 + (_presetNumber * 256), _out);
+}
+
+bool ROMFile::getPreset(const uint32_t _offset, std::array<uint8_t, 256>& _out) const
 {
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
-	file.seekg(0x48000 + (_presetNumber * 256));
+	if(!file.is_open())
+		return false;
+	file.seekg(_offset);
+	if(file.tellg() != _offset)
+		return false;
 	file.read(reinterpret_cast<char *>(_out.data()), 256);
 	file.close();
+	return true;
 }
+
 }
