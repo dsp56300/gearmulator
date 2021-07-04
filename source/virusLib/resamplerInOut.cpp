@@ -141,5 +141,6 @@ namespace virusLib
 		});
 
 		scaleMidiEvents(_midiOut, m_midiOut, hostDivDev);
+		m_midiOut.clear();
 	}
 }

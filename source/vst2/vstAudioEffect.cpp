@@ -132,6 +132,7 @@ void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32
 	m_plugin.process(inputs, outputs, sampleFrames);
 	m_plugin.getMidiOut(m_midiOut);
 	sendMidiEventsToHost(m_midiOut);
+	m_midiOut.clear();
 }
 
 // _____________________________________________________________________________
