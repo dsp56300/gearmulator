@@ -70,13 +70,16 @@ public:
 		PAGE_C = 0x72,
 	};
 
-	const static int SINGLE = 0x40;
+	enum ProgramType
+	{
+		SINGLE = 0x40
+	};
 
 	using TPreset = std::array<uint8_t, 256>;
 
 	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
-	bool sendFile(int program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
+	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
 	void sendControlCommand(ControlCommand command, int value) const;
 	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false) const;
 	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;

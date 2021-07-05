@@ -62,7 +62,7 @@ void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Syx::sendFile(int program, const std::vector<TWord>& preset, bool cancelIfFull) const
+bool Syx::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull) const
 {
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
@@ -268,7 +268,7 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
 		idx += 3;
 	}
-	return sendFile(_program, preset, cancelIfFull);
+	return sendPreset(_program, preset, cancelIfFull);
 }
 
 }

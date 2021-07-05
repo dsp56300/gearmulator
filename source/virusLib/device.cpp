@@ -52,7 +52,8 @@ namespace virusLib
 //			m_rom.loadPreset(0, 12);	// CommerseSV on Virus C
 //			m_rom.loadPreset(0, 268);	// CommerseSV on Virus B
 			m_rom.loadPreset(0, 116);	// Virus B: Choir 4 BC
-			m_syx.sendFile(Syx::SINGLE, m_rom.preset);
+
+			m_syx.sendPreset(Syx::SINGLE, m_rom.preset);
 
 			m_initDone = true;
 //			m_initThread->detach();

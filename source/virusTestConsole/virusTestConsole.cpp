@@ -159,7 +159,7 @@ void midiCallback(void *data,DSP *dsp)
 	else
 	{
 		// Send preset
-		syx->sendFile(Syx::SINGLE, syx->getROMFile().preset);
+		syx->sendPreset(Syx::SINGLE, syx->getROMFile().preset);
 //			syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
 //			syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
