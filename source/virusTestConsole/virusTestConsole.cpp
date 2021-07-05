@@ -72,7 +72,7 @@ void audioCallback(dsp56k::Audio* audio)
 
 		if(audioData.capacity())
 		{
-			audioFilename = Syx::getPresetName(preset);
+			audioFilename = Syx::getSingleName(preset);
 
 			for(size_t i=0; i<audioFilename.size(); ++i)
 			{

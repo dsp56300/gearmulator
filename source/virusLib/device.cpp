@@ -46,6 +46,8 @@ namespace virusLib
 
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 
+			m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
+
 			Syx::TPreset preset;
 			
 			// Send preset
@@ -55,7 +57,7 @@ namespace virusLib
 //			m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
 			m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
 
-			m_syx.sendSingle(0, Syx::SINGLE, preset, false);
+			m_syx.sendSingle(0, 0, preset, false);
 
 			m_initDone = true;
 //			m_initThread->detach();

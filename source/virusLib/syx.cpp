@@ -53,13 +53,23 @@ void Syx::sendInitControlCommands()
 	sendControlCommand(CC_MASTER_VOLUME, 0x7a); // issue
 }
 
-std::string Syx::getPresetName(const TPreset& _preset)
+std::string Syx::getSingleName(const TPreset& _preset)
+{
+	return getPresetName(_preset, 240, 249);
+}
+
+std::string Syx::getMultiName(const TPreset& _preset)
+{
+	return getPresetName(_preset, 4, 13);
+}
+
+std::string Syx::getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last)
 {
 	std::string name;
 
 	name.reserve(11);
 
-	for (int i = 240; i < 250; i++)
+	for (uint32_t i = _first; i <= _last; i++)
 	{
 		const char c = _preset[i];
 		if(c < 32 || c > 127)
@@ -127,7 +137,7 @@ bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/) const
 	return true;
 }
 
-bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response) const
+bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response)
 {
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -266,13 +276,15 @@ bool Syx::requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) 
 	return m_romFile.getSingle(_bank - 1, _program, _data);
 }
 
-bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull) const
+bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{
 		// We do not support writing to flash
 		return false;
 	}
+
+	m_singleEditBuffer[_program % m_singleEditBuffer.size()] = _data;
 
 	// Convert array of uint8_t to vector of 24bit TWord
 	int idx = 0;
