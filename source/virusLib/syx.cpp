@@ -26,6 +26,33 @@ bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
 	return m_hdi08.hasDataToSend();
 }
 
+void Syx::sendInitControlCommands()
+{
+	sendControlCommand(UNK1a, 0x1);
+	sendControlCommand(UNK1b, 0x1);
+	sendControlCommand(UNK1c, 0x0);
+	sendControlCommand(UNK1d, 0x0);
+	sendControlCommand(UNK35, 0x40);
+	sendControlCommand(UNK36, 0xc);
+	sendControlCommand(UNK36, 0xc); // duplicate
+	sendControlCommand(SECOND_OUTPUT_SELECT, 0x0);
+	sendControlCommand(UNK76, 0x0);
+	sendControlCommand(INPUT_THRU_LEVEL, 0x0);
+	sendControlCommand(INPUT_BOOST, 0x0);
+	sendControlCommand(MASTER_TUNE, 0x40); // issue
+	sendControlCommand(DEVICE_ID, 0x0);
+	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);
+	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);
+	sendControlCommand(MIDI_ARPEGGIATOR_SEND, 0x0);
+	sendControlCommand(MIDI_CLOCK_RX, 0x1);
+	sendControlCommand(GLOBAL_CHANNEL, 0x0);
+	sendControlCommand(LED_MODE, 0x2);
+	sendControlCommand(LCD_CONTRAST, 0x40);
+	sendControlCommand(PANEL_DESTINATION, 0x1);
+	sendControlCommand(UNK_6d, 0x6c);
+	sendControlCommand(CC_MASTER_VOLUME, 0x7a); // issue
+}
+
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
 	const int hsr=m_hdi08.readStatusRegister();

@@ -113,33 +113,11 @@ void midiNoteOn(void *data,DSP *dsp)
 }
 void midiCallback(void *data,DSP *dsp)
 {
-	Syx* syx=(Syx*)data;
+	auto* syx = static_cast<Syx*>(data);
 
 	LOG("Sending Preset!");
 
-	syx->sendControlCommand(Syx::UNK1a, 0x1);
-	syx->sendControlCommand(Syx::UNK1b, 0x1);
-	syx->sendControlCommand(Syx::UNK1c, 0x0);
-	syx->sendControlCommand(Syx::UNK1d, 0x0);
-	syx->sendControlCommand(Syx::UNK35, 0x40);
-	syx->sendControlCommand(Syx::UNK36, 0xc);
-	syx->sendControlCommand(Syx::UNK36, 0xc); // duplicate
-	syx->sendControlCommand(Syx::SECOND_OUTPUT_SELECT, 0x0);
-	syx->sendControlCommand(Syx::UNK76, 0x0);
-	syx->sendControlCommand(Syx::INPUT_THRU_LEVEL, 0x0);
-	syx->sendControlCommand(Syx::INPUT_BOOST, 0x0);
-	syx->sendControlCommand(Syx::MASTER_TUNE, 0x40); // issue
-	syx->sendControlCommand(Syx::DEVICE_ID, 0x0);
-	syx->sendControlCommand(Syx::MIDI_CONTROL_LOW_PAGE, 0x1);
-	syx->sendControlCommand(Syx::MIDI_CONTROL_HIGH_PAGE, 0x0);
-	syx->sendControlCommand(Syx::MIDI_ARPEGGIATOR_SEND, 0x0);
-	syx->sendControlCommand(Syx::MIDI_CLOCK_RX, 0x1);
-	syx->sendControlCommand(Syx::GLOBAL_CHANNEL, 0x0);
-	syx->sendControlCommand(Syx::LED_MODE, 0x2);
-	syx->sendControlCommand(Syx::LCD_CONTRAST, 0x40);
-	syx->sendControlCommand(Syx::PANEL_DESTINATION, 0x1);
-	syx->sendControlCommand(Syx::UNK_6d, 0x6c);
-	syx->sendControlCommand(Syx::CC_MASTER_VOLUME, 0x7a); // issue
+	syx->sendInitControlCommands();
 
 	if (midiMode)
 	{

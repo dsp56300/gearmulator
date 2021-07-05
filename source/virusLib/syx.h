@@ -89,6 +89,8 @@ public:
 	ROMFile& getROMFile() {return m_romFile;}
 
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
+	void sendInitControlCommands();
+
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
