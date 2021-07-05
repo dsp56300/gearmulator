@@ -4,6 +4,8 @@
 #include "midiTypes.h"
 #include "resampler.h"
 
+#include <memory>	// unique_ptr
+
 namespace virusLib
 {
 	class ResamplerInOut

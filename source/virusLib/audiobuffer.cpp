@@ -1,6 +1,7 @@
 #include "audiobuffer.h"
 
 #include <cassert>
+#include <cstring>	// memcpy
 
 namespace virusLib
 {
