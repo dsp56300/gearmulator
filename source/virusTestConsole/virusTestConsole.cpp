@@ -115,8 +115,8 @@ void midiNoteOn(void *data,DSP *dsp)
 	Syx* syx=(Syx*)data;
 	LOG("Sending Note On!");
 	syx->sendMIDI(0x90,60,0x7f);	// Note On
-//		syx->sendControlCommand(Syx::AUDITION, 0x7f);
-//		syx->sendMIDI(0xB0,113,0);	// Send FX off
+//	syx->sendControlCommand(Syx::AUDITION, 0x7f);
+//	syx->sendMIDI(0xB0,113,0);	// Send FX off
 
 }
 void midiCallback(void *data,DSP *dsp)
@@ -168,14 +168,14 @@ void midiCallback(void *data,DSP *dsp)
 	{
 		// Send preset
 		syx->sendSingle(0, Syx::SINGLE, preset, false);
-//			syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
+//		syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
-//			syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
-//			syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
+//		syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
+//		syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
 
 		// MIDI Tempo meta message, set tempo to 120 bpm
-//			syx->sendMIDI(0xFF,0x51,0x03);
-//			syx->sendMIDI(0x07,0xA1,0x20);
+//		syx->sendMIDI(0xFF,0x51,0x03);
+//		syx->sendMIDI(0x07,0xA1,0x20);
 		
 		dsp->setCallback(midiNoteOn, data, 477263+70000*10);
 
