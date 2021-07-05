@@ -1,10 +1,8 @@
 #include <fstream>
 #include <vector>
-#include <cstring>
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
-#include "../dsp56300/source/dsp56kEmu/jit.h"
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
@@ -17,8 +15,9 @@
 using namespace dsp56k;
 using namespace virusLib;
 
-std::string audioFilename;
 std::vector<uint8_t> audioData;
+std::string audioFilename;
+
 WavWriter writer;
 #if _DEBUG
 size_t g_writeBlockSize = 8192;
@@ -26,6 +25,8 @@ size_t g_writeBlockSize = 8192;
 size_t g_writeBlockSize = 65536;
 #endif
 size_t g_nextWriteSize = g_writeBlockSize;
+
+Syx::TPreset preset;
 
 void writeWord(const TWord _word)
 {
@@ -71,6 +72,8 @@ void audioCallback(dsp56k::Audio* audio)
 
 		if(audioData.capacity())
 		{
+			audioFilename = Syx::getPresetName(preset);
+
 			for(size_t i=0; i<audioFilename.size(); ++i)
 			{
 				if(audioFilename[i] == ' ')
@@ -99,6 +102,11 @@ void audioCallback(dsp56k::Audio* audio)
 				g_nextWriteSize += g_writeBlockSize;
 		}
 	}
+}
+
+void loadSingle(ROMFile& r, int b, int p)
+{
+	r.getSingle(b, p, preset);
 }
 
 bool midiMode = false;
@@ -159,7 +167,7 @@ void midiCallback(void *data,DSP *dsp)
 	else
 	{
 		// Send preset
-		syx->sendPreset(Syx::SINGLE, syx->getROMFile().preset);
+		syx->sendSingle(0, Syx::SINGLE, preset, false);
 //			syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
 //			syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
@@ -197,42 +205,36 @@ int main(int _argc, char* _argv[])
 	ROMFile v(_argv[1]);
 	auto loader = v.bootDSP(dsp, periph);
 
-	for(auto b=0; b<8; ++b)
-	{
-		for(auto p=0; p<128; ++p)
-			v.loadPreset(b, p);
-	}
-
 	if(_argc > 2)
 	{
 		int preset = atoi(_argv[2]);
 		const int bank = preset / 128;
 		preset -= bank * 128;
-		audioFilename = v.loadPreset(bank, preset);
+		loadSingle(v, bank, preset);
 	}
 	else
 	{
-//		audioFilename = v.loadPreset(3, 0x65);	// SmoothBsBC
-//		audioFilename = v.loadPreset(0, 12);    // CommerseSV
-//		audioFilename = v.loadPreset(0, 23);	// Digedi_JS
-//		audioFilename = v.loadPreset(0, 69);	// Mystique
-//		audioFilename = v.loadPreset(1, 4);		// Backing
-//		audioFilename = v.loadPreset(0, 50);	// Hoppin' SV
-//		audioFilename = v.loadPreset(0, 28);	// Etheral SV
-//		audioFilename = v.loadPreset(1, 75);	// Oscar1 HS
-//		audioFilename = v.loadPreset(0, 93);	// RepeaterJS
-//		audioFilename = v.loadPreset(0,126);
-//		audioFilename = v.loadPreset(3,101);
-//		audioFilename = v.loadPreset(0,5);
-//		audioFilename = v.loadPreset(3, 56);	// Impact  MS
-//		audioFilename = v.loadPreset(3, 73);	// NiceArp JS
-		audioFilename = v.loadPreset(0, 51);	// IndiArp BC
-//		audioFilename = v.loadPreset(0, 103);	// SilkArp SV
-//		audioFilename = v.loadPreset(3, 15);	// BellaArpJS
-//		audioFilename = v.loadPreset(3, 35);	// EnglArp JS
-//		audioFilename = v.loadPreset(3, 93);	// Rhy-Arp JS
-//		audioFilename = v.loadPreset(3, 119);	// WalkaArpJS
-//		audioFilename = v.loadPreset(0, 126);	// Init
+//		loadSingle(v, 3, 0x65);		// SmoothBsBC
+//		loadSingle(v, 0, 12);		// CommerseSV
+//		loadSingle(v, 0, 23);		// Digedi_JS
+//		loadSingle(v, 0, 69);		// Mystique
+//		loadSingle(v, 1, 4);		// Backing
+//		loadSingle(v, 0, 50);		// Hoppin' SV
+//		loadSingle(v, 0, 28);		// Etheral SV
+//		loadSingle(v, 1, 75);		// Oscar1 HS
+//		loadSingle(v, 0, 93);		// RepeaterJS
+//		loadSingle(v, 0,126);
+//		loadSingle(v, 3,101);
+//		loadSingle(v, 0,5);
+//		loadSingle(v, 3, 56);		// Impact  MS
+//		loadSingle(v, 3, 73);		// NiceArp JS
+		loadSingle(v, 0, 51);		// IndiArp BC
+//		loadSingle(v, 0, 103);		// SilkArp SV
+//		loadSingle(v, 3, 15);		// BellaArpJS
+//		loadSingle(v, 3, 35);		// EnglArp JS
+//		loadSingle(v, 3, 93);		// Rhy-Arp JS
+//		loadSingle(v, 3, 119);		// WalkaArpJS
+//		loadSingle(v, 0, 126);		// Init
 	}
 	// Load preset
 	midiMode = false;//_argc >= 3;

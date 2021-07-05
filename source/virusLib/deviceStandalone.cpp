@@ -37,8 +37,9 @@ namespace virusLib
 			// Send preset
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 			LOG("Sending preset!")
-			m_rom.loadPreset(0, 50);	// Hoppin' SV
-			m_syx.sendPreset(Syx::SINGLE, m_rom.preset);
+			Syx::TPreset preset;
+			m_rom.getSingle(0, 50, preset);	// Hoppin' SV
+			m_syx.sendSingle(0, Syx::SINGLE, preset, false);
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 			LOG("Sending MIDI")
 			m_syx.sendMIDI(0x90,60,0x7f);	// Note On

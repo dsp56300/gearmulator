@@ -53,6 +53,23 @@ void Syx::sendInitControlCommands()
 	sendControlCommand(CC_MASTER_VOLUME, 0x7a); // issue
 }
 
+std::string Syx::getPresetName(const TPreset& _preset)
+{
+	std::string name;
+
+	name.reserve(11);
+
+	for (int i = 240; i < 250; i++)
+	{
+		const char c = _preset[i];
+		if(c < 32 || c > 127)
+			break;
+		name.push_back(c);
+	}
+
+	return name;
+}
+
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
 	const int hsr=m_hdi08.readStatusRegister();
@@ -261,7 +278,8 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 	int idx = 0;
 	std::vector<TWord> preset;
 	preset.resize(0x56);
-	for (int i = 0; i < 0x56; i++) {
+	for (int i = 0; i < 0x56; i++)
+	{
 		if (i == 0x55)
 			preset[i] = _data[idx] << 16;
 		else

@@ -94,40 +94,6 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 	file.close();
 
 	return chunks;
-
-}
-
-std::string ROMFile::loadPreset(const int bank, const int presetNumber)
-{
-	std::array<uint8_t, 256> data;
-
-	if(!getSingle(bank, presetNumber, data))
-		return {};
-
-	preset.clear();
-	preset.resize(0x56);
-
-	char presetname[11]={0};
-	for (int i = 0; i < 0x56; i++) 
-	{
-		const auto idx = i*3;
-
-		preset[i] = data[idx] << 16;
-
-		if(idx < 255)
-			preset[i] |= (data[idx+1] << 8) | data[idx+2];
-
-		for (int k=0;k<3;k++)
-		{
-			const auto off = idx + k;
-			if (off>=240 && off<250) 
-				presetname[off-240]=data[off];
-		}
-	}
-
-	LOG("Loading Preset: Bank " << static_cast<char>('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << " [" << presetname << "]");
-
-	return std::string(presetname);
 }
 
 std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)

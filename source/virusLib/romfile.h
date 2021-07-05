@@ -3,8 +3,6 @@
 #include <thread>
 #include <vector>
 
-#include "../dsp56300/source/dsp56kEmu/types.h"
-
 namespace dsp56k
 {
 	class Peripherals56362;
@@ -32,17 +30,15 @@ public:
 	};
 
 	explicit ROMFile(const char* _path);
-	std::string loadPreset(int bank, int presetNumber);
+
 	bool getMulti(int _presetNumber, std::array<uint8_t, 256>& _out) const;
 	bool getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const;
 	bool getPreset(uint32_t _offset, std::array<uint8_t, 256>& _out) const;
+
 	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
-
-	std::vector<dsp56k::TWord> preset;
-
 
 private:
 	std::vector<Chunk> get_dsp_chunks() const;

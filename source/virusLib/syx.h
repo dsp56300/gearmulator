@@ -94,6 +94,8 @@ public:
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
 
+	static std::string getPresetName(const TPreset& _preset);
+
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;

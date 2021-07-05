@@ -46,14 +46,16 @@ namespace virusLib
 
 			std::this_thread::sleep_for(std::chrono::seconds(1));
 
+			Syx::TPreset preset;
+			
 			// Send preset
-//			m_rom.loadPreset(0, 93);	// RepeaterJS
-//			m_rom.loadPreset(0, 6);		// BusysawsSV
-//			m_rom.loadPreset(0, 12);	// CommerseSV on Virus C
-//			m_rom.loadPreset(0, 268);	// CommerseSV on Virus B
-			m_rom.loadPreset(0, 116);	// Virus B: Choir 4 BC
+//			m_rom.loadPreset(0, 93, preset);	// RepeaterJS
+//			m_rom.loadPreset(0, 6, preset);		// BusysawsSV
+//			m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
+//			m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
+			m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
 
-			m_syx.sendPreset(Syx::SINGLE, m_rom.preset);
+			m_syx.sendSingle(0, Syx::SINGLE, preset, false);
 
 			m_initDone = true;
 //			m_initThread->detach();
