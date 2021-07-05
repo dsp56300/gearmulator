@@ -206,7 +206,7 @@ int main(int _argc, char* _argv[])
 	}
 
 	// Create the DSP with peripherals
-	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x200000
+	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x20000
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
