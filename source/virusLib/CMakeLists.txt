@@ -24,3 +24,7 @@ source_group("source" FILES ${SOURCES})
 
 target_include_directories(virusLib PUBLIC ../portmidi/pm_common/ ../portaudio/include)
 target_link_libraries(virusLib PUBLIC dsp56kEmu portmidi-static resample)
+
+if(NOT MSVC)
+	target_link_libraries(virusLib PUBLIC dsp56kEmu portmidi-static dl)
+endif()
