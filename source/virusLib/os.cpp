@@ -96,15 +96,12 @@ namespace virusLib
 	{
 		std::string path = getModulePath();
 
-		puts(path.c_str());
 #ifdef USE_DIRENT
 		if(path.empty())
 		{
 			char temp[1024];
 			getcwd(temp, sizeof(temp));
 			path = temp;
-			puts("CWD: ");
-			puts(path.c_str());
 		}
 
 		DIR *dir;
@@ -120,8 +117,6 @@ namespace virusLib
 
 				if(ext != ".bin")
 					continue;
-
-				puts(file.c_str());
 
 				if(_expectedSize)
 				{
