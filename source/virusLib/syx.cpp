@@ -9,8 +9,9 @@ using namespace dsp56k;
 
 namespace virusLib
 {
-Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile)
+Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile), m_currentBank({0})
 {
+	m_currentBank.fill(0);
 	m_romFile.getMulti(0, m_multiEditBuffer);
 
 	for(auto i=0; i<static_cast<int>(m_singleEditBuffer.size()); ++i)
@@ -127,8 +128,32 @@ bool Syx::send(const Page _page, const int _part, const int _param, const int _v
 	return true;
 }
 
-bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/) const
+bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 {
+	const auto channel = a & 0x0f;
+	const auto status = a & 0xf0;
+
+	switch (status)
+	{
+	case M_PROGRAMCHANGE:
+		{
+			TPreset single;
+			if(m_romFile.getSingle(m_currentBank[channel], b, single))
+			{
+				return sendSingle(0, channel, single, cancelIfFull);
+			}
+		}
+	case M_CONTROLCHANGE:
+		switch(b)
+		{
+		case MC_BANKSELECTLSB:
+		case MC_BANKSELECTMSB:
+			m_currentBank[channel] = c & 7;	 // TODO: max bank count? 8 on C but 6 on B
+			return true;
+		}
+		break;
+	}
+
 	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
 		return false;
 	writeHostBitsWithWait(1,1);

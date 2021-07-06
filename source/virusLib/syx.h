@@ -82,7 +82,7 @@ public:
 
 	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
 	void sendControlCommand(ControlCommand command, int value) const;
-	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false) const;
+	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false);
 	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;
 	bool sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response);
 
@@ -109,5 +109,6 @@ private:
 
 	TPreset m_multiEditBuffer;
 	std::array<TPreset,16> m_singleEditBuffer;
+	std::array<uint32_t,16> m_currentBank;
 };
 }
