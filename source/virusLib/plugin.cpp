@@ -8,8 +8,8 @@ namespace virusLib
 	Plugin::Plugin()
 	{
 		const std::string path = getModulePath();
-
-		m_device.reset(new Device((path + "AccessVirusB(am29f040b_4v9).BIN").c_str()));
+		const std::string rom = findROM();
+		m_device.reset(new Device(rom.c_str()));
 		m_resampler.setDeviceSamplerate(12000000.0f / 256.0f);
 	}
 

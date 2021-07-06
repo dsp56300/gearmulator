@@ -53,9 +53,9 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 
 	if(!file.is_open())
 	{
-		LOG("Failed to load ROM at " << m_path);
+		LOG("Failed to load ROM at '" << m_path << "'");
 #ifdef _WIN32
-		const std::string errorMessage = std::string("Failed to load ROM at ") + m_path;
+		const std::string errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
 		::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
 #endif
 		return {};
