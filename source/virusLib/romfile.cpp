@@ -59,6 +59,9 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 #endif
 		return {};
 	}
+
+	LOG("Loading ROM at " << m_path);
+
 	std::vector<Chunk> chunks(5);
 
 	// Read all the chunks, hardcoded to 4 for convenience
