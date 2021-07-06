@@ -148,7 +148,10 @@ bool ROMFile::getPreset(const uint32_t _offset, std::array<uint8_t, 256>& _out) 
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
 	if(!file.is_open())
+	{
+		LOG("Failed to open ROM file " << m_path)
 		return false;
+	}
 	file.seekg(_offset);
 	if(file.tellg() != _offset)
 		return false;
