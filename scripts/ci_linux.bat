@@ -1,3 +1,1 @@
-pushd ..\
-bash -c ./build_linux.sh
-popd
+bash -c ./ci_linux.sh
