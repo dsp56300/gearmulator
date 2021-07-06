@@ -2,6 +2,7 @@
 #include <fstream>
 
 #include "romfile.h"
+#include "syx.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
@@ -121,7 +122,19 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 bool ROMFile::getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const
 {
 	const uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
-	return getPreset(offset, _out);
+
+	if(!getPreset(offset, _out))
+		return false;
+
+	std::stringstream ss;
+	ss << "Loading Single: Bank " << static_cast<char>('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << " [" << Syx::getSingleName(_out) << "]";
+
+	const std::string msg(ss.str());
+	
+	LOG(msg);
+	puts(msg.c_str());
+
+	return true;
 }
 
 bool ROMFile::getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out) const
