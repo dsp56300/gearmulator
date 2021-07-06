@@ -13,7 +13,7 @@
 
 namespace virusLib
 {
-ROMFile::ROMFile(const char* _path) : m_path(_path)
+ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 {
 	LOG("Init access virus");
 

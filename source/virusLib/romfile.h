@@ -29,7 +29,7 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	explicit ROMFile(const char* _path);
+	explicit ROMFile(const std::string& _path);
 
 	bool getMulti(int _presetNumber, std::array<uint8_t, 256>& _out) const;
 	bool getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const;
@@ -43,6 +43,6 @@ public:
 private:
 	std::vector<Chunk> get_dsp_chunks() const;
 
-	const char* const m_path;
+	const std::string m_path;
 };
 }
