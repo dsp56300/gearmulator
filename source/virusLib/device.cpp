@@ -152,7 +152,12 @@ namespace virusLib
 						if(!sendMidi(m_midiIn[j]))
 						{
 							if(j > 0)
-								m_midiIn.erase(m_midiIn.begin(), m_midiIn.begin() + j - 1);
+							{
+								m_midiIn.erase(m_midiIn.begin(), m_midiIn.begin() + j);
+
+								for (auto& event : m_midiIn)
+									event.offset = 0;
+							}
 							sendMidiFailed = true;							
 						}
 						++i;
