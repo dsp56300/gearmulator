@@ -3,5 +3,5 @@ git pull
 cd ../
 ./build_mac.sh
 cd scripts
-7z a ../deploy/VirusVSTMac.zip ../temp/cmake/VirusVST2.vst
-7z a ../deploy/VirusTestConsoleMac.zip ../temp/cmake/virusTestConsole ../deploy/linux/*.sh
+7z a ../deploy/VirusVSTMac.zip ../temp/cmake/Release/VirusVST2.vst
+7z a ../deploy/VirusTestConsoleMac.zip ../temp/cmake/Release/virusTestconsole ../deploy/linux/*.sh
