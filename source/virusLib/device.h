@@ -20,6 +20,7 @@ namespace virusLib
 
 	private:
 		void readMidiOut(std::vector<SMidiEvent>& _midiOut);
+		void dummyProcess(uint32_t _numSamples);
 
 		std::vector<uint8_t> m_buffer;
 
@@ -35,9 +36,7 @@ namespace virusLib
 		Syx m_syx;
 		
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
-		std::unique_ptr<std::thread> m_initThread;
 		std::vector<SMidiEvent> m_midiIn;
-		bool m_initDone = false;
 		size_t m_nextLatency = 0;
 		MidiOutParser m_midiOutParser;
 	};

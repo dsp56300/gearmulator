@@ -38,31 +38,24 @@ namespace virusLib
 
 		loader.join();
 
+		dummyProcess(8);
+
+		m_syx.sendInitControlCommands();
+
+		dummyProcess(8);
+
+		m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
+
+		Syx::TPreset preset;
 		
-		{
-			std::this_thread::sleep_for(std::chrono::seconds(1));
+		// Send preset
+//		m_rom.loadPreset(0, 93, preset);	// RepeaterJS
+//		m_rom.loadPreset(0, 6, preset);		// BusysawsSV
+//		m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
+//		m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
+		m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
 
-			m_syx.sendInitControlCommands();
-
-			std::this_thread::sleep_for(std::chrono::seconds(1));
-
-			m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
-
-			Syx::TPreset preset;
-			
-			// Send preset
-//			m_rom.loadPreset(0, 93, preset);	// RepeaterJS
-//			m_rom.loadPreset(0, 6, preset);		// BusysawsSV
-//			m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
-//			m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
-			m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
-
-			m_syx.sendSingle(0, 0, preset, false);
-
-			m_initDone = true;
-//			m_initThread->detach();
-//			m_initThread.reset();
-		};
+		m_syx.sendSingle(0, 0, preset, false);
 	}
 
 	Device::~Device()
@@ -92,6 +85,20 @@ namespace virusLib
 		}
 	}
 
+	void Device::dummyProcess(uint32_t _numSamples)
+	{
+		std::vector<float> buf;
+		buf.resize(_numSamples);
+		const auto ptr = &buf[0];
+		float* in[2] = {ptr, ptr};
+		float* out[2] = {ptr, ptr};
+
+		std::vector<SMidiEvent> midiIn;
+		std::vector<SMidiEvent> midiOut;
+
+		process(in, out, _numSamples, midiIn, midiOut);
+	}
+
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
 		m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
@@ -115,7 +122,7 @@ namespace virusLib
 			return true;
 		};
 		
-		if(m_initDone && !m_midiIn.empty())
+		if(!m_midiIn.empty())
 		{
 			size_t i = 0;
 
