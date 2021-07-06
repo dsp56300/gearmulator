@@ -1,0 +1,2 @@
+virusTestConsole "IndiArp BC"
+
