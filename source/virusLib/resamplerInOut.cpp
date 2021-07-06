@@ -5,6 +5,8 @@
 
 #include <cstring>	// memset/memcpy
 
+using namespace dsp56k;
+
 namespace virusLib
 {
 	constexpr uint32_t g_channelCount = 2;
@@ -50,7 +52,7 @@ namespace virusLib
 		for(size_t i=0; i<_src.size(); ++i)
 		{
 			_dst.push_back(_src[i]);
-			_dst[i].offset = dsp56k::floor_int(static_cast<float>(_src[i].offset) * _scale);
+			_dst[i].offset = floor_int(static_cast<float>(_src[i].offset) * _scale);
 		}
 	}
 
@@ -62,7 +64,7 @@ namespace virusLib
 		for(size_t i=0; i<_src.size(); ++i)
 		{
 			_dst.push_back(_src[i]);
-			_dst[i].offset = dsp56k::clamp(_dst[i].offset, static_cast<int>(_offsetMin), static_cast<int>(_offsetMax));
+			_dst[i].offset = clamp(_dst[i].offset, static_cast<int>(_offsetMin), static_cast<int>(_offsetMax));
 		}
 	}
 
@@ -96,9 +98,9 @@ namespace virusLib
 
 		// input jitter
 		if(m_scaledInputSize > 1)
-			scaledSamples = static_cast<uint32_t>(dsp56k::floor_int(static_cast<float>(_numSamples) * devDivHost));
+			scaledSamples = static_cast<uint32_t>(floor_int(static_cast<float>(_numSamples) * devDivHost));
 		else
-			scaledSamples = static_cast<uint32_t>(dsp56k::ceil_int(static_cast<float>(_numSamples) * devDivHost));
+			scaledSamples = static_cast<uint32_t>(ceil_int(static_cast<float>(_numSamples) * devDivHost));
 
 		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCount, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
 		{
