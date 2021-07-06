@@ -10,6 +10,7 @@ set(SOURCES
 	midiTypes.h
 	midi.cpp midi.h
 	midiOutParser.cpp midiOutParser.h
+	os.cpp os.h
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h

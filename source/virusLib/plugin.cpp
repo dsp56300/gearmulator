@@ -1,12 +1,15 @@
 #include "plugin.h"
 
+#include "os.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
 namespace virusLib
 {
 	Plugin::Plugin()
 	{
-		m_device.reset(new Device("c:\\AccessVirusB(am29f040b_4v9).BIN"));
+		const std::string path = getModulePath();
+
+		m_device.reset(new Device((path + "AccessVirusB(am29f040b_4v9).BIN").c_str()));
 		m_resampler.setDeviceSamplerate(12000000.0f / 256.0f);
 	}
 
