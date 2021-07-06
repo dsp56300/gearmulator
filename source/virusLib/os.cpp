@@ -1,9 +1,16 @@
 #include "os.h"
 #include "syx.h"
 
-#include <filesystem>
+#ifdef __APPLE__			// filesystem is only available on Mac OS Catalina 10.15+
+#define USE_DIRENT
+#endif
 
-namespace fs = std::filesystem;
+#ifdef USE_DIRENT
+#	include <dirent.h>
+#	include <unistd.h>
+#else
+#	include <filesystem>
+#endif
 
 #ifdef _WIN32
 #	define NOMINMAX
@@ -69,23 +76,83 @@ namespace virusLib
 		return path;
 	}
 
-	static std::string& lowercase(std::string& _src)
+	static std::string lowercase(const std::string& _src)
 	{
-		for(size_t i=0; i<_src.size(); ++i)
-			_src[i] = tolower(_src[i]);
-		return _src;
+		std::string str(_src);
+		for(size_t i=0; i<str.size(); ++i)
+			str[i] = tolower(str[i]);
+		return str;
+	}
+
+	static std::string getExtension(const std::string& _name)
+	{
+		const auto pos = _name.find_last_of('.');
+		if(pos != std::string::npos)
+			return _name.substr(pos);
+		return std::string();
 	}
 
 	std::string findROM(const size_t _expectedSize)
 	{
 		std::string path = getModulePath();
 
+		puts(path.c_str());
+#ifdef USE_DIRENT
+		if(path.empty())
+		{
+			char temp[1024];
+			getcwd(temp, sizeof(temp));
+			path = temp;
+			puts("CWD: ");
+			puts(path.c_str());
+		}
+
+		DIR *dir;
+		struct dirent *ent;
+		if ((dir = opendir (path.c_str())))
+		{
+			/* print all the files and directories within directory */
+			while ((ent = readdir (dir)))
+			{
+				const std::string file = path + ent->d_name;
+
+				const std::string ext = lowercase(getExtension(file));
+
+				if(ext != ".bin")
+					continue;
+
+				puts(file.c_str());
+
+				if(_expectedSize)
+				{
+					FILE* hFile = fopen(file.c_str(), "rb");
+					if(!hFile)
+						continue;
+
+					fseek(hFile, 0, SEEK_END);
+					const auto size = ftell(hFile);
+					fclose(hFile);
+					if(size != _expectedSize)
+						continue;
+
+					LOG("Found ROM at path " << file);
+
+					return file;
+				}
+			}
+			closedir (dir);
+		}
+		else
+		{
+			return std::string();
+		}
+#else	
 		if(path.empty())
 			path = std::filesystem::current_path().string();
 
 		try
 		{
-			for (const std::filesystem::directory_entry& entry : fs::directory_iterator(path))
+			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
 			{
 				const auto file = entry.path();
 				if(!file.has_extension())
@@ -94,9 +161,9 @@ namespace virusLib
 				if(_expectedSize && entry.file_size() != _expectedSize)
 					continue;
 
-				std::string ext = file.extension().string();
+				std::string ext = lowercase(file.extension().string());
 				
-				if(lowercase(ext) != ".bin")
+				if(ext != ".bin")
 					continue;
 
 				LOG("Found ROM at path " << file);
@@ -107,6 +174,7 @@ namespace virusLib
 		catch(...)
 		{
 		}
+#endif
 
 		return std::string();
 	}
