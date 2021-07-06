@@ -81,7 +81,6 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<SMidiEvent>& _midiOut)
 	{
-		// prevent HDI08 overflow
 		while(m_periph.getHDI08().hasTX())
 		{
 			if(m_midiOutParser.append(m_periph.getHDI08().readTX()))
