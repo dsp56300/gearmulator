@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(virusFilterVst2)
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/versionRC.h.in ${CMAKE_CURRENT_SOURCE_DIR}/versionRC.h)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist)
 
