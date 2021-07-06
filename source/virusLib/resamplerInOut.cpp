@@ -92,14 +92,20 @@ namespace virusLib
 		m_input.append(_inputs, _numSamples);
 
 		// resample input to buffer scaledInput
-		const auto scaledSamples = static_cast<uint32_t>(dsp56k::round_int(static_cast<float>(_numSamples) * devDivHost));
+		uint32_t scaledSamples;
+
+		// input jitter
+		if(m_scaledInputSize > 1)
+			scaledSamples = static_cast<uint32_t>(dsp56k::floor_int(static_cast<float>(_numSamples) * devDivHost));
+		else
+			scaledSamples = static_cast<uint32_t>(dsp56k::ceil_int(static_cast<float>(_numSamples) * devDivHost));
 
 		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCount, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
 		{
-			// resampler prewarming, wants more data than we have
 			const auto offset = _numRequestedSamples > m_input.size() ? _numRequestedSamples - m_input.size() : 0;
 			if(offset)
 			{
+				// resampler prewarming, wants more data than we have
 				for(size_t c=0; c<g_channelCount; ++c)
 				{
 					memset(_data[c], 0, sizeof(float) * offset);
@@ -125,11 +131,10 @@ namespace virusLib
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
-			// resampler prewarming, wants more data than we have
-
 			float* inputs[g_channelCount];
 			if(_numProcessedSamples > m_scaledInputSize)
 			{
+				// resampler prewarming, wants more data than we have
 				const auto diff = _numProcessedSamples - m_scaledInputSize;
 				m_scaledInput.insertZeroes(diff);
 				m_scaledInputSize += diff;
