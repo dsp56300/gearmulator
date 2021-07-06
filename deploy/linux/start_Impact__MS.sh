@@ -1,1 +1,1 @@
-virusTestConsole "Impact  MS"
+./virusTestConsole "Impact  MS"

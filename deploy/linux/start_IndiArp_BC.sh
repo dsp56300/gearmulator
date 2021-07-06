@@ -1,1 +1,1 @@
-virusTestConsole "IndiArp BC"
+./virusTestConsole "IndiArp BC"

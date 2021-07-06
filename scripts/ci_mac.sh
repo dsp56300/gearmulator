@@ -4,4 +4,4 @@ cd ../
 ./build_mac.sh
 cd scripts
 7z a ../deploy/VirusVSTMac.zip ../temp/cmake/Release/VirusVST2.vst
-7z a ../deploy/VirusTestConsoleMac.zip ../temp/cmake/Release/virusTestconsole ../deploy/linux/*.sh
+7z a ../deploy/VirusTestConsoleMac.zip ../temp/cmake/Release/virusTestConsole ../deploy/linux/*.sh
