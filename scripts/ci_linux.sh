@@ -1,4 +1,4 @@
 cd ../
-git pull
+#git pull
 ./build_linux.sh
 cd scripts
