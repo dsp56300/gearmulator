@@ -1,3 +1,3 @@
 #pragma once 
-#define VERSION "0.02"
-#define VERSIONVST 002
+#define VERSION "1.12"
+#define VERSIONVST 112
