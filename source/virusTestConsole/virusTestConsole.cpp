@@ -11,6 +11,7 @@
 #include "../virusLib/midi.h"
 #include "../virusLib/wavWriter.h"
 #include "../virusLib/midiOutParser.h"
+#include "../virusLib/os.h"
 
 using namespace dsp56k;
 using namespace virusLib;
@@ -109,6 +110,48 @@ void loadSingle(ROMFile& r, int b, int p)
 	r.getSingle(b, p, preset);
 }
 
+bool loadSingle(ROMFile& r, const std::string& _preset)
+{
+	auto isDigit = true;
+	for(size_t i=0; i<_preset.size(); ++i)
+	{
+		if(!isdigit(_preset[i]))
+		{
+			isDigit = false;
+			break;
+		}
+	}
+
+	if(isDigit)
+	{
+		int preset = atoi(_preset.c_str());
+		const int bank = preset / 128;
+		preset -= bank * 128;
+		loadSingle(r, bank, preset);
+		return true;
+	}
+
+	for(uint32_t b=0; b<8; ++b)
+	{
+		for(uint32_t p=0; p<128; ++p)
+		{
+			std::array<uint8_t, 256> data;
+			r.getSingle(b, p, data);
+
+			const std::string name = Syx::getSingleName(data);
+			if(name.empty())
+			{
+				return false;				
+			}
+			if(name == _preset)
+			{
+				loadSingle(r, b, p);
+				return true;
+			}
+		}
+	}
+	return false;
+}
 bool midiMode = false;
 void midiNoteOn(void *data,DSP *dsp)
 {
@@ -129,6 +172,8 @@ void midiCallback(void *data,DSP *dsp)
 
 	if (midiMode)
 	{
+		LOG("Using MIDI mode");
+
 		std::thread sendSyxThread([&]() {
 			Midi midi;
 			if (midi.connect() == 0)
@@ -186,9 +231,11 @@ int main(int _argc, char* _argv[])
 {
 	if(true)
 	{
+		puts("Running Unit Tests...");
 //		UnitTests tests;
 		JitUnittests jitTests;
 //		return 0;
+		puts("Unit Tests finished.");
 	}
 
 	// Create the DSP with peripherals
@@ -202,15 +249,12 @@ int main(int _argc, char* _argv[])
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
 
-	ROMFile v(_argv[1]);
+	ROMFile v(findROM().c_str());
 	auto loader = v.bootDSP(dsp, periph);
 
-	if(_argc > 2)
+	if(_argc > 1)
 	{
-		int preset = atoi(_argv[2]);
-		const int bank = preset / 128;
-		preset -= bank * 128;
-		loadSingle(v, bank, preset);
+		loadSingle(v, _argv[1]);
 	}
 	else
 	{
@@ -237,7 +281,7 @@ int main(int _argc, char* _argv[])
 //		loadSingle(v, 0, 126);		// Init
 	}
 	// Load preset
-	midiMode = false;//_argc >= 3;
+	midiMode = _argc >= 3;
 	Syx syx(periph.getHDI08(), v);
 	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
