@@ -1,4 +1,5 @@
 #include <fstream>
+#include <iostream>
 #include <vector>
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
@@ -249,12 +250,22 @@ int main(int _argc, char* _argv[])
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
 
-	ROMFile v(findROM().c_str());
+	const auto romFile = findROM();
+	if(romFile.empty())
+	{
+		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
+		return -1;
+	}
+	ROMFile v(romFile);
 	auto loader = v.bootDSP(dsp, periph);
 
 	if(_argc > 1)
 	{
-		loadSingle(v, _argv[1]);
+		if(!loadSingle(v, _argv[1]))
+		{
+			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;
+			return -1;
+		}
 	}
 	else
 	{
