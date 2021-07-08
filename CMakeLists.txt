@@ -34,6 +34,10 @@ if(VIRUS_VST2)
 	add_subdirectory(source/vst2filter)
 endif()
 
+# ----------------- Juce based audio plugin
+
+add_subdirectory(source/jucePlugin)
+
 # ----------------- Test Console
 
 add_executable(virusTestConsole)
