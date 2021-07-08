@@ -20,11 +20,13 @@ add_subdirectory(source/libresample)
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
 	set(VIRUS_VST2 true)
 	set(VIRUS_VST2Filter true)
+	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
 else()
 	set(VIRUS_VST2 false)
 	set(VIRUS_VST2Filter false)
 endif()
 
+add_subdirectory(source/JUCE)
 
 if(VIRUS_VST2)
 	add_subdirectory(source/vstsdk2.4.2)
