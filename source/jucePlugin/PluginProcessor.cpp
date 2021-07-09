@@ -167,6 +167,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 			ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
 			ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
 		}
+
+		ev.offset = metadata.samplePosition;
+
 		m_plugin.addMidiEvent(ev);
 	}
 
