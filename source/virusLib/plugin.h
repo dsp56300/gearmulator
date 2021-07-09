@@ -24,6 +24,8 @@ namespace virusLib
 		void getMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 
 	private:
+		float* getDummyBuffer(size_t _minimumSize);
+		
 		std::vector<synthLib::SMidiEvent> m_midiIn;
 		std::vector<synthLib::SMidiEvent> m_midiOut;
 		std::unique_ptr<Device> m_device;
@@ -32,5 +34,7 @@ namespace virusLib
 
 		synthLib::ResamplerInOut m_resampler;
 		std::mutex m_lock;
+
+		std::vector<float> m_dummyBuffer;
 	};
 }

@@ -69,8 +69,16 @@ namespace virusLib
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
 	{
+		float* inputs[8] {};
+		float* outputs[8] {};
+
+		inputs[0] = _inputs && _inputs[0] ? _inputs[0] : getDummyBuffer(_count);
+		inputs[1] = _inputs && _inputs[1] ? _inputs[1] : getDummyBuffer(_count);
+		outputs[0] = _outputs && _outputs[0] ? _outputs[0] : getDummyBuffer(_count);
+		outputs[1] = _outputs && _outputs[1] ? _outputs[1] : getDummyBuffer(_count);
+
 		std::lock_guard lock(m_lock);
-		m_resampler.process(_inputs, _outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
+		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
 			m_device->process(_in, _out, _c, _midiIn, _midiOut);
@@ -83,6 +91,14 @@ namespace virusLib
 	{
 		std::swap(_midiOut, m_midiOut);
 		m_midiOut.clear();
+	}
+
+	float* Plugin::getDummyBuffer(size_t _minimumSize)
+	{
+		if(m_dummyBuffer.size() < _minimumSize)
+			m_dummyBuffer.resize(_minimumSize);
+
+		return &m_dummyBuffer[0];
 	}
 
 	void Plugin::setBlockSize(size_t _blockSize)
