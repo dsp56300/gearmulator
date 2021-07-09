@@ -18,7 +18,10 @@ ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 	LOG("Init access virus");
 
 	auto chunks = get_dsp_chunks();
-	
+
+	if(chunks.empty())
+		return;
+
 	bootRom.size = chunks[0].items[0];
 	bootRom.offset = chunks[0].items[1];
 	bootRom.data = std::vector<uint32_t>(bootRom.size);
