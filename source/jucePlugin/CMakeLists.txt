@@ -18,7 +18,7 @@ juce_add_plugin(jucePlugin
     PLUGIN_CODE TusV                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 VST Standalone              # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "DSP 56300 Emulator"           # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "DSP56300Emu"                  # The name of the final executable, which can differ from the target name
 	)
 
 target_sources(jucePlugin PRIVATE
