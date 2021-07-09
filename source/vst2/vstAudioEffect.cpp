@@ -176,9 +176,6 @@ VstInt32 VSTAudioEffect::canDo( char* text )
 	if( !_stricmp( text, "receiveVstEvents" ) )			return 1;
 	if( !_stricmp( text, "receiveVstTimeInfo" ) )		return 1;
 	if( !_stricmp (text, "2in2out") )					return 1;
-	if( !_stricmp (text, "0in2out") )					return 1;
-	if( !_stricmp (text, "0in8out"))					return 1;
-	if( !_stricmp (text, "2in8out"))					return 1;
 	if( !_stricmp (text, "sendVstMidiEvent") )			return 1;
 	if( !_stricmp (text, "sendVstMidiEvents") )			return 1;
 	if( !_stricmp (text, "sendVstEvents") )				return 1;	
