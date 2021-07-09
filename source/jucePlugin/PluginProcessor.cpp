@@ -173,6 +173,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		m_plugin.addMidiEvent(ev);
 	}
 
+	midiMessages.clear();
+
 	m_plugin.process(inputs, outputs, buffer.getNumSamples());
 }
 
