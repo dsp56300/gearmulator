@@ -30,8 +30,8 @@ namespace synthLib
 		std::unique_ptr<Resampler> m_out = nullptr;
 		std::unique_ptr<Resampler> m_in = nullptr;
 
-		float m_samplerateDevice;
-		float m_samplerateHost;
+		float m_samplerateDevice = 0;
+		float m_samplerateHost = 0;
 
 		AudioBuffer m_scaledInput;
 		AudioBuffer m_input;
