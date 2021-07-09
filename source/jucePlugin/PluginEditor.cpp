@@ -1,6 +1,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include "version.h"
+
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
     : AudioProcessorEditor (&p), processorRef (p)
@@ -23,7 +25,10 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
-    g.drawFittedText ("DSP 56300 Emulator Juce-powered VST3, I'm coming for ya!", getLocalBounds(), juce::Justification::centred, 1);
+
+	const std::string version = "DSP 56300 Emulator\nVersion " + std::string(g_pluginVersionString) + "\n" __DATE__ " " __TIME__;
+
+    g.drawFittedText(version, getLocalBounds(), juce::Justification::centred, 2);
 }
 
 void AudioPluginAudioProcessorEditor::resized()

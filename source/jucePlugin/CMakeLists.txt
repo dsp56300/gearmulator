@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.15)
 project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
+
 juce_add_plugin(jucePlugin
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
@@ -22,6 +24,7 @@ juce_add_plugin(jucePlugin
 target_sources(jucePlugin PRIVATE
         PluginEditor.cpp
         PluginProcessor.cpp
+		version.h
 		)
 
 target_compile_definitions(jucePlugin
