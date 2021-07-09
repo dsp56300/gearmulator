@@ -85,7 +85,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 
-	m_plugin.setSamplerate(sampleRate);
+	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
 }
 
