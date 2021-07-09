@@ -263,9 +263,10 @@ void Syx::waitUntilReady() const
 
 bool Syx::requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const
 {
-	if (_deviceId != m_deviceId) {
+	if (_deviceId != m_deviceId) 
+	{
 		// Ignore messages intended for a different device
-		return false;
+		return true;
 	}
 
 	if (_bank == 0)
@@ -287,7 +288,7 @@ bool Syx::requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) 
 	if (_deviceId != m_deviceId) 
 	{
 		// Ignore messages intended for a different device
-		return false;
+		return true;
 	}
 	
 	if (_bank == 0)
@@ -305,8 +306,8 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{
-		// We do not support writing to flash
-		return false;
+		LOG("We do not support writing to flash, attempt to write single to bank " << _bank << ", program " << _program);
+		return true;
 	}
 
 	m_singleEditBuffer[_program % m_singleEditBuffer.size()] = _data;
