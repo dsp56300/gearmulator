@@ -1,8 +1,10 @@
+cd ../
 git reset --hard
 git pull
 git submodule update --recursive
-cd ../
 ./build_mac.sh
 cd scripts
-7z a ../deploy/VirusVSTMac.zip ../temp/cmake/Release/VirusVST2.vst
-7z a ../deploy/VirusTestConsoleMac.zip ../temp/cmake/Release/virusTestConsole ../deploy/linux/*.sh
+7z a ../deploy/dsp56300emuVST2Mac.zip ../cmake/source/jucePlugin/jucePlugin_artefacts/Release/VST/libDSP56300Emu.so
+7z a ../deploy/dsp56300emuVST3Mac.zip ../cmake/source/jucePlugin/jucePlugin_artefacts/Release/VST3/DSP56300Emu.vst3
+7z a ../deploy/dsp56300emuAUMac.zip ../cmake/source/jucePlugin/jucePlugin_artefacts/Release/AU/DSP56300Emu.component
+7z a ../deploy/dsp56300emuTestConsoleMac.zip ../temp/cmake/Release/virusTestConsole ../deploy/linux/*.sh

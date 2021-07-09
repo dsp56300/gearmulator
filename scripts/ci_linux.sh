@@ -1,7 +1,9 @@
 cd ../
+git reset --hard
 git pull
 git submodule update --recursive
 ./build_linux.sh
 cd scripts
-7z a ../deploy/VirusVSTLinux.zip ../temp/cmake_linux/libVirusVST2.so
-7z a ../deploy/VirusTestConsoleLinux.zip ../temp/cmake_linux/virusTestConsole ../deploy/linux/*.sh
+7z a ../deploy/dsp56300emuVST2Linux.zip ../cmake_linux/source/jucePlugin/jucePlugin_artefacts/Release/VST/libDSP56300Emu.so
+7z a ../deploy/dsp56300emuVST3Linux.zip ../cmake_linux/source/jucePlugin/jucePlugin_artefacts/Release/VST3/DSP56300Emu.vst3
+7z a ../deploy/dsp56300emuTestConsoleLinux.zip ../temp/cmake_linux/virusTestConsole ../deploy/linux/*.sh
