@@ -4,3 +4,6 @@
 [submodule "source/JUCE"]
 	path = source/JUCE
 	url = https://github.com/juce-framework/JUCE
+[submodule "source/ctrlr"]
+	path = source/ctrlr
+	url = https://github.com/Lyve1981/ctrlr.git
