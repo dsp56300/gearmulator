@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(virusEmu VERSION 1.1.2)
+project(virusEmu VERSION 1.1.3)
 
 include(base.cmake)
 
