@@ -23,6 +23,7 @@ namespace synthLib
 		m_samplerateDevice = _samplerate;
 		recreate();
 	}
+	
 	void ResamplerInOut::setHostSamplerate(float _samplerate)
 	{
 		if(m_samplerateHost == _samplerate)
@@ -84,6 +85,9 @@ namespace synthLib
 
 	void ResamplerInOut::process(float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc)
 	{
+		if(!m_in || !m_out)
+			return;
+
 		const auto devDivHost = m_samplerateDevice / m_samplerateHost;
 		const auto hostDivDev = m_samplerateHost / m_samplerateDevice;
 
