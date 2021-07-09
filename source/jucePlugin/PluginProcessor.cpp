@@ -187,6 +187,22 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	midiMessages.clear();
 
 	m_plugin.process(inputs, outputs, buffer.getNumSamples());
+
+	m_plugin.getMidiOut(m_midiOut);
+
+	for(size_t i=0; i<m_midiOut.size(); ++i)
+	{
+		const auto& e = m_midiOut[i];
+		if(e.sysex.empty())
+		{
+			midiMessages.addEvent(juce::MidiMessage (e.a, e.b, e.c, 0.0), 0);
+		}
+		else
+		{
+			midiMessages.addEvent(juce::MidiMessage (&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0), 0);
+		}
+	}
+	m_midiOut.clear();
 }
 
 //==============================================================================
