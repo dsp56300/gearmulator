@@ -7,7 +7,7 @@
 
 using namespace dsp56k;
 
-namespace virusLib
+namespace synthLib
 {
 	constexpr uint32_t g_channelCount = 2;
 

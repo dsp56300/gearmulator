@@ -1,8 +1,9 @@
 #pragma once
 
 #include "device.h"
-#include "midiTypes.h"
-#include "resamplerInOut.h"
+
+#include "../synthLib/midiTypes.h"
+#include "../synthLib/resamplerInOut.h"
 
 #include <memory>
 
@@ -14,22 +15,22 @@ namespace virusLib
 		Plugin();
 		virtual ~Plugin();
 
-		void addMidiEvent(const SMidiEvent& _ev);
+		void addMidiEvent(const synthLib::SMidiEvent& _ev);
 
 		void setSamplerate(float _samplerate);
 		void setBlockSize(size_t _blockSize);
 
 		void process(float** _inputs, float** _outputs, size_t _count);
-		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
+		void getMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 
 	private:
-		std::vector<SMidiEvent> m_midiIn;
-		std::vector<SMidiEvent> m_midiOut;
+		std::vector<synthLib::SMidiEvent> m_midiIn;
+		std::vector<synthLib::SMidiEvent> m_midiOut;
 		std::unique_ptr<Device> m_device;
 
-		SMidiEvent m_pendingSyexInput;
+		synthLib::SMidiEvent m_pendingSyexInput;
 
-		ResamplerInOut m_resampler;
+		synthLib::ResamplerInOut m_resampler;
 		std::mutex m_lock;
 	};
 }

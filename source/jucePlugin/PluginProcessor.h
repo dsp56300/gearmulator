@@ -49,5 +49,5 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 
 	virusLib::Plugin					m_plugin;
-	std::vector<virusLib::SMidiEvent>	m_midiOut;
+	std::vector<synthLib::SMidiEvent>	m_midiOut;
 };

@@ -43,7 +43,7 @@ namespace virusLib
 			}
 			LOG("SYSEX RESPONSE: 0x" << stringStream.str());
 
-			SMidiEvent ev;
+			synthLib::SMidiEvent ev;
 			std::swap(ev.sysex, m_data);
 			m_midiData.push_back(ev);
 			return true;

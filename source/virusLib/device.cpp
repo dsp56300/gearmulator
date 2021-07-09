@@ -73,7 +73,7 @@ namespace virusLib
 		}
 	}
 
-	void Device::readMidiOut(std::vector<SMidiEvent>& _midiOut)
+	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		while(m_periph.getHDI08().hasTX())
 		{
@@ -94,17 +94,17 @@ namespace virusLib
 		float* in[2] = {ptr, ptr};
 		float* out[2] = {ptr, ptr};
 
-		std::vector<SMidiEvent> midiIn;
-		std::vector<SMidiEvent> midiOut;
+		std::vector<synthLib::SMidiEvent> midiIn;
+		std::vector<synthLib::SMidiEvent> midiOut;
 
 		process(in, out, _numSamples, midiIn, midiOut);
 	}
 
-	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
 
-		auto sendMidi =[&](const SMidiEvent& me)
+		auto sendMidi =[&](const synthLib::SMidiEvent& me)
 		{
 			if(me.sysex.empty())
 			{
@@ -112,7 +112,7 @@ namespace virusLib
 				return m_syx.sendMIDI(me.a, me.b, me.c, true);
 			}
 
-			SMidiEvent response;
+			synthLib::SMidiEvent response;
 			// TODO: sysex response
 			if(!m_syx.sendSysex(me.sysex, true, response.sysex))
 				return false;

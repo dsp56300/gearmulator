@@ -1,8 +1,8 @@
 #include "midi.h"
 
-using namespace dsp56k;
+#include "../dsp56300/source/dsp56kEmu/logging.h"
 
-namespace virusLib
+namespace synthLib
 {
 Midi::Midi()
 {

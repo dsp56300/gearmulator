@@ -55,7 +55,7 @@ namespace virusLib
 		m_dspThread.reset();
 	}
 
-	void StandaloneDevice::process(float* _inputs, float* _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	void StandaloneDevice::process(float* _inputs, float* _outputs, const size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		if(m_initDone)
 		{
@@ -77,7 +77,7 @@ namespace virusLib
 					std::vector<uint8_t> response;
 					m_syx.sendSysex(me.sysex, false, response);
 					if (!response.empty()) {
-						SMidiEvent ev;
+						synthLib::SMidiEvent ev;
 						ev.sysex = response;
 						_midiOut.push_back(ev);
 					}

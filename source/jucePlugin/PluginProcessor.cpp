@@ -152,7 +152,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	{
 		const auto message = metadata.getMessage();
 
-		virusLib::SMidiEvent ev{};
+		synthLib::SMidiEvent ev{};
 
 		if(message.isSysEx() || message.getRawDataSize() > 3)
 		{

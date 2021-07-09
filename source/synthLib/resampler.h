@@ -7,7 +7,7 @@
 
 #include "audiobuffer.h"
 
-namespace virusLib
+namespace synthLib
 {
 	class Resampler
 	{

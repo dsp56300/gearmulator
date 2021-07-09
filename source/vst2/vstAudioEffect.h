@@ -7,7 +7,7 @@
 #include "../virusLib/plugin.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 
-namespace virusLib
+namespace synthLib
 {
 	struct SMidiEvent;
 }
@@ -60,11 +60,11 @@ public:
 	VstInt32		beginLoadProgram			(VstPatchChunkInfo* /*ptr*/) override { return 1; }
 
 private:
-	void			sendMidi					(const virusLib::SMidiEvent& _midi);
+	void			sendMidi					(const synthLib::SMidiEvent& _midi);
 
-	void			sendMidiEventsToHost		(const std::vector<virusLib::SMidiEvent>& _midiEvents);
+	void			sendMidiEventsToHost		(const std::vector<synthLib::SMidiEvent>& _midiEvents);
 
-	std::vector<uint8_t>	m_chunkData;
-	virusLib::Plugin		m_plugin;
-	std::vector<virusLib::SMidiEvent> m_midiOut;
+	std::vector<uint8_t>				m_chunkData;
+	virusLib::Plugin					m_plugin;
+	std::vector<synthLib::SMidiEvent>	m_midiOut;
 };

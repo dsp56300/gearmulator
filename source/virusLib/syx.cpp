@@ -3,9 +3,10 @@
 #include <thread>
 
 #include "syx.h"
-#include "midiTypes.h"
+#include "../synthLib/midiTypes.h"
 
 using namespace dsp56k;
+using namespace synthLib;
 
 namespace virusLib
 {

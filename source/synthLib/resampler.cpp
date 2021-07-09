@@ -8,7 +8,7 @@
 
 #include "../dsp56300/source/dsp56kEmu/fastmath.h"
 
-virusLib::Resampler::Resampler(const float _samplerateIn, const float _samplerateOut)
+synthLib::Resampler::Resampler(const float _samplerateIn, const float _samplerateOut)
 	: m_samplerateIn(_samplerateIn)
 	, m_samplerateOut(_samplerateOut)
 	, m_factorInToOut(_samplerateIn / _samplerateOut)
@@ -16,12 +16,12 @@ virusLib::Resampler::Resampler(const float _samplerateIn, const float _samplerat
 {
 }
 
-virusLib::Resampler::~Resampler()
+synthLib::Resampler::~Resampler()
 {
 	destroyResamplers();
 }
 
-uint32_t virusLib::Resampler::process(float** _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
+uint32_t synthLib::Resampler::process(float** _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
 {
 	setChannelCount(_numChannels);
 
@@ -55,7 +55,7 @@ uint32_t virusLib::Resampler::process(float** _output, const uint32_t _numChanne
 	return index;
 }
 
-uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
+uint32_t synthLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
 	const uint32_t inputLen = std::max(1, dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut));
 
@@ -99,14 +99,14 @@ uint32_t virusLib::Resampler::processResample(float ** _output, const uint32_t _
 	return outBufferUsed;
 }
 
-void virusLib::Resampler::destroyResamplers()
+void synthLib::Resampler::destroyResamplers()
 {
 	for (auto& resampler : m_resamplerOut)
 		resample_close(resampler);
 	m_resamplerOut.clear();
 }
 
-void virusLib::Resampler::setChannelCount(uint32_t _numChannels)
+void synthLib::Resampler::setChannelCount(uint32_t _numChannels)
 {
 	if (m_tempOutput.size() == _numChannels)
 		return;

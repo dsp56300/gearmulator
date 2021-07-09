@@ -1,8 +1,9 @@
 #pragma once
 #include <cstdint>
 
+#include "../synthLib/midiTypes.h"
+
 #include "midiOutParser.h"
-#include "midiTypes.h"
 #include "romfile.h"
 #include "syx.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
@@ -15,11 +16,11 @@ namespace virusLib
 	public:
 		Device(const char* _romFileName);
 		~Device();
-		void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
+		void process(float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut);
 		void setBlockSize(size_t _size);
 
 	private:
-		void readMidiOut(std::vector<SMidiEvent>& _midiOut);
+		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 		void dummyProcess(uint32_t _numSamples);
 
 		std::vector<uint8_t> m_buffer;
@@ -36,7 +37,7 @@ namespace virusLib
 		Syx m_syx;
 		
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
-		std::vector<SMidiEvent> m_midiIn;
+		std::vector<synthLib::SMidiEvent> m_midiIn;
 		size_t m_nextLatency = 0;
 		MidiOutParser m_midiOutParser;
 	};

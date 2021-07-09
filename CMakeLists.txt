@@ -12,6 +12,7 @@ include(base.cmake)
 set(ASMJIT_STATIC TRUE)
 
 add_subdirectory(source/dsp56300/source)
+add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/portmidi)
 add_subdirectory(source/portaudio)

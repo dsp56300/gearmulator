@@ -7,15 +7,17 @@
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
+#include "../synthLib/midi.h"
+#include "../synthLib/wavWriter.h"
+#include "../synthLib/os.h"
+
 #include "../virusLib/romfile.h"
 #include "../virusLib/syx.h"
-#include "../virusLib/midi.h"
-#include "../virusLib/wavWriter.h"
 #include "../virusLib/midiOutParser.h"
-#include "../virusLib/os.h"
 
 using namespace dsp56k;
 using namespace virusLib;
+using namespace synthLib;
 
 std::vector<uint8_t> audioData;
 std::string audioFilename;

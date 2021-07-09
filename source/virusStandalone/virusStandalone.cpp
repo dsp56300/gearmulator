@@ -1,9 +1,10 @@
 #include "portaudio.h"
 #include "../virusLib/deviceStandalone.h"
-#include "../virusLib/midi.h"
+#include "../synthLib/midi.h"
 
 using namespace dsp56k;
 using namespace virusLib;
+using namespace synthLib;
 
 #define SAMPLE_RATE (46875)
 

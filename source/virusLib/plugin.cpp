@@ -1,7 +1,10 @@
 #include "plugin.h"
 
-#include "os.h"
+#include "../synthLib/os.h"
+
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
+
+using namespace synthLib;
 
 namespace virusLib
 {

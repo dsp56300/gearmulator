@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-namespace virusLib
+namespace synthLib
 {
 	class AudioBuffer
 	{

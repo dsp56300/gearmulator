@@ -4,7 +4,7 @@
 #include <vector>
 #include <string>
 
-namespace virusLib
+namespace synthLib
 {
 #ifdef _MSC_VER
 // TODO: gcc and others

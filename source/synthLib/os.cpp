@@ -1,5 +1,6 @@
 #include "os.h"
-#include "syx.h"
+
+#include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #ifdef __APPLE__			// filesystem is only available on Mac OS Catalina 10.15+
 #define USE_DIRENT
@@ -22,7 +23,7 @@
 
 #pragma optimize("",off)
 
-namespace virusLib
+namespace synthLib
 {
 	std::string getModulePath()
 	{

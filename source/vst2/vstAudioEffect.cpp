@@ -4,7 +4,7 @@
 
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
-#include "../virusLib/midiTypes.h"
+#include "../synthLib/midiTypes.h"
 
 #ifndef _MSC_VER
 #define _stricmp strcasecmp
@@ -207,7 +207,7 @@ VstInt32 VSTAudioEffect::processEvents( VstEvents* events )
 		{
 			const auto* ev = (const VstMidiEvent*)eve;
 
-			virusLib::SMidiEvent midiEvent;
+			synthLib::SMidiEvent midiEvent;
 			midiEvent.a = ev->midiData[0];
 			midiEvent.b = ev->midiData[1];
 			midiEvent.c = ev->midiData[2];
@@ -222,7 +222,7 @@ VstInt32 VSTAudioEffect::processEvents( VstEvents* events )
 
 			LOG("Got Sysex! Length " << ev->dumpBytes);
 
-			virusLib::SMidiEvent midiEvent;
+			synthLib::SMidiEvent midiEvent;
 			midiEvent.sysex.resize(ev->dumpBytes);
 			midiEvent.offset = ev->deltaFrames;
 
@@ -239,14 +239,14 @@ VstInt32 VSTAudioEffect::processEvents( VstEvents* events )
 	return 1; // want more
 }
 
-void VSTAudioEffect::sendMidi(const virusLib::SMidiEvent& _midi)
+void VSTAudioEffect::sendMidi(const synthLib::SMidiEvent& _midi)
 {
-	std::vector<virusLib::SMidiEvent> events;
+	std::vector<synthLib::SMidiEvent> events;
 	events.push_back(_midi);
 	sendMidiEventsToHost(events);
 }
 
-void VSTAudioEffect::sendMidiEventsToHost(const std::vector<virusLib::SMidiEvent>& _midiEvents)
+void VSTAudioEffect::sendMidiEventsToHost(const std::vector<synthLib::SMidiEvent>& _midiEvents)
 {
 	// send midi back to VST host
 	if (_midiEvents.empty())

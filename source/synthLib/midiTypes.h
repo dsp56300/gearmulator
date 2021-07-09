@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace virusLib
+namespace synthLib
 {
 	// MIDI status bytes
 	enum MidiStatusByte

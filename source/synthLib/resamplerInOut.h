@@ -6,7 +6,7 @@
 
 #include <memory>	// unique_ptr
 
-namespace virusLib
+namespace synthLib
 {
 	class ResamplerInOut
 	{

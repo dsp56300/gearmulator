@@ -5,7 +5,7 @@
 #include <map>
 #include <cassert>
 
-namespace virusLib
+namespace synthLib
 {
 	bool WavWriter::write(const std::string & _filename, const int _bitsPerSample, const bool _isFloat, const int _channelCount, const int _samplerate, const void* _data, const size_t _dataSize)
 	{

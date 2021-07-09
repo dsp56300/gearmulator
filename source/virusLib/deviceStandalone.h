@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include "../virusLib/midiTypes.h"
+#include "../synthLib/midiTypes.h"
 #include "../virusLib/romfile.h"
 #include "../virusLib/syx.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
@@ -13,7 +13,7 @@ namespace virusLib
 	public:
 		StandaloneDevice(const char* _romFileName);
 		~StandaloneDevice();
-		void process(float* _inputs, float* _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
+		void process(float* _inputs, float* _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut);
 		void setBlockSize(size_t _size);
 
 	private:

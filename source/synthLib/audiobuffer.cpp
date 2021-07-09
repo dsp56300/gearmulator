@@ -3,7 +3,7 @@
 #include <cassert>
 #include <cstring>	// memcpy
 
-namespace virusLib
+namespace synthLib
 {
 	void AudioBuffer::insertZeroes(size_t _size)
 	{

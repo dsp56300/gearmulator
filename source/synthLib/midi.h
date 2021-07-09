@@ -1,14 +1,13 @@
 #pragma once
 
 #include "portmidi.h"
-#include "syx.h"
 #include "midiTypes.h"
 
 #define INPUT_BUFFER_SIZE 0
 #define OUTPUT_BUFFER_SIZE 32
 #define LATENCY 0
 
-namespace virusLib
+namespace synthLib
 {
 	class Midi
 	{
