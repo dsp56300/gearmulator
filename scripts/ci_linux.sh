@@ -1,5 +1,6 @@
 cd ../
-#git pull
+git pull
+git submodule update --recursive
 ./build_linux.sh
 cd scripts
 7z a ../deploy/VirusVSTLinux.zip ../temp/cmake_linux/libVirusVST2.so

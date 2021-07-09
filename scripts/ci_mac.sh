@@ -1,5 +1,6 @@
 git reset --hard
-git pull --recurse-submodules
+git pull
+git submodule update --recursive
 cd ../
 ./build_mac.sh
 cd scripts
