@@ -10,6 +10,8 @@ namespace virusLib
 {
 	Plugin::Plugin()
 	{
+		std::lock_guard lock(m_lock);
+
 		const std::string path = getModulePath();
 		const std::string rom = findROM();
 		m_device.reset(new Device(rom.c_str()));
@@ -18,6 +20,8 @@ namespace virusLib
 
 	Plugin::~Plugin()
 	{
+		std::lock_guard lock(m_lock);
+
 		m_device.reset();
 	}
 
