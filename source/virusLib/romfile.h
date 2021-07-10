@@ -29,11 +29,17 @@ public:
 		std::vector<uint32_t> data;
 	};
 
+	using TPreset = std::array<uint8_t, 256>;
+
 	explicit ROMFile(const std::string& _path);
 
-	bool getMulti(int _presetNumber, std::array<uint8_t, 256>& _out) const;
-	bool getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const;
-	bool getPreset(uint32_t _offset, std::array<uint8_t, 256>& _out) const;
+	bool getMulti(int _presetNumber, TPreset& _out) const;
+	bool getSingle(int bank, int presetNumber, TPreset& _out) const;
+	bool getPreset(uint32_t _offset, TPreset& _out) const;
+	
+	static std::string getSingleName(const TPreset& _preset);
+	static std::string getMultiName(const TPreset& _preset);
+	static std::string getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last);
 
 	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
 

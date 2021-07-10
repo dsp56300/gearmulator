@@ -76,7 +76,7 @@ public:
 		SINGLE = 0x40
 	};
 
-	using TPreset = std::array<uint8_t, 256>;
+	using TPreset = ROMFile::TPreset;
 
 	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
@@ -94,10 +94,6 @@ public:
 
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
-
-	static std::string getSingleName(const TPreset& _preset);
-	static std::string getMultiName(const TPreset& _preset);
-	static std::string getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last);
 
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;

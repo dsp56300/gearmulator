@@ -2,7 +2,6 @@
 #include <fstream>
 
 #include "romfile.h"
-#include "syx.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
@@ -122,7 +121,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	return feedCommandStream;
 }
 
-bool ROMFile::getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _out) const
+bool ROMFile::getSingle(int bank, int presetNumber, TPreset& _out) const
 {
 	const uint32_t offset = 0x50000 + (bank * 0x8000) + (presetNumber * 0x100);
 
@@ -130,7 +129,7 @@ bool ROMFile::getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _o
 		return false;
 
 	std::stringstream ss;
-	ss << "Loading Single: Bank " << static_cast<char>('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << " [" << Syx::getSingleName(_out) << "]";
+	ss << "Loading Single: Bank " << static_cast<char>('A' + bank) << " " << std::setfill('0') << std::setw(3) << presetNumber << " [" << getSingleName(_out) << "]";
 
 	const std::string msg(ss.str());
 	
@@ -140,13 +139,13 @@ bool ROMFile::getSingle(int bank, int presetNumber, std::array<uint8_t, 256>& _o
 	return true;
 }
 
-bool ROMFile::getMulti(const int _presetNumber, std::array<uint8_t, 256>& _out) const
+bool ROMFile::getMulti(const int _presetNumber, TPreset& _out) const
 {
 	// Open file
 	return getPreset(0x48000 + (_presetNumber * 256), _out);
 }
 
-bool ROMFile::getPreset(const uint32_t _offset, std::array<uint8_t, 256>& _out) const
+bool ROMFile::getPreset(const uint32_t _offset, TPreset& _out) const
 {
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
@@ -161,6 +160,32 @@ bool ROMFile::getPreset(const uint32_t _offset, std::array<uint8_t, 256>& _out) 
 	file.read(reinterpret_cast<char *>(_out.data()), 256);
 	file.close();
 	return true;
+}
+std::string ROMFile::getSingleName(const TPreset& _preset)
+{
+	return getPresetName(_preset, 240, 249);
+}
+
+std::string ROMFile::getMultiName(const TPreset& _preset)
+{
+	return getPresetName(_preset, 4, 13);
+}
+
+std::string ROMFile::getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last)
+{
+	std::string name;
+
+	name.reserve(11);
+
+	for (uint32_t i = _first; i <= _last; i++)
+	{
+		const char c = _preset[i];
+		if(c < 32 || c > 127)
+			break;
+		name.push_back(c);
+	}
+
+	return name;
 }
 
 }

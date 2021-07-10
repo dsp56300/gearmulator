@@ -35,33 +35,6 @@ void Syx::sendInitControlCommands()
 	sendControlCommand(CC_MASTER_VOLUME, 0x7a);
 }
 
-std::string Syx::getSingleName(const TPreset& _preset)
-{
-	return getPresetName(_preset, 240, 249);
-}
-
-std::string Syx::getMultiName(const TPreset& _preset)
-{
-	return getPresetName(_preset, 4, 13);
-}
-
-std::string Syx::getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last)
-{
-	std::string name;
-
-	name.reserve(11);
-
-	for (uint32_t i = _first; i <= _last; i++)
-	{
-		const char c = _preset[i];
-		if(c < 32 || c > 127)
-			break;
-		name.push_back(c);
-	}
-
-	return name;
-}
-
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
 	const int hsr=m_hdi08.readStatusRegister();

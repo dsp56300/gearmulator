@@ -76,7 +76,7 @@ void audioCallback(dsp56k::Audio* audio)
 
 		if(audioData.capacity())
 		{
-			audioFilename = Syx::getSingleName(preset);
+			audioFilename = ROMFile::getSingleName(preset);
 
 			for(size_t i=0; i<audioFilename.size(); ++i)
 			{
@@ -141,7 +141,7 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 			std::array<uint8_t, 256> data;
 			r.getSingle(b, p, data);
 
-			const std::string name = Syx::getSingleName(data);
+			const std::string name = ROMFile::getSingleName(data);
 			if(name.empty())
 			{
 				return false;				
