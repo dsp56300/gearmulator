@@ -39,6 +39,10 @@ endif()
 
 add_subdirectory(source/jucePlugin)
 
+if(UNIX AND NOT APPLE)
+	install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/)
+endif()
+
 # ----------------- Test Console
 
 add_executable(virusTestConsole)
@@ -110,3 +114,20 @@ if(VIRUS_VST2Filter)
 		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusVST2Filter")
 	endif()
 endif()
+
+# ----------------- CPack
+
+set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
+set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
+set(CPACK_PACKAGE_NAME "DSP56300Emu")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DSP 56300 family emulator audio plugin")
+
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Usual Suspects")
+set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+
+set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
+set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
+set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
+
+include(CPack)
