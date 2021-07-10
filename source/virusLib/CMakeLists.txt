@@ -7,7 +7,6 @@ set(SOURCES
 	device.cpp device.h
 	deviceStandalone.cpp deviceStandalone.h
 	midiOutParser.cpp midiOutParser.h
-	plugin.cpp plugin.h
 	romfile.cpp romfile.h
 	syx.cpp syx.h
 )

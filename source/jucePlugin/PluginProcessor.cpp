@@ -1,12 +1,16 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+#include "../synthLib/os.h"
+
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor()
      : AudioProcessor (BusesProperties()
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                        )
+	, m_device(synthLib::findROM())
+	, m_plugin(&m_device)
 {
 }
 

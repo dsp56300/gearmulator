@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <vector>
 
+#include "../synthLib/plugin.h"
+#include "../virusLib/device.h"
 
-#include "../virusLib/plugin.h"
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 
 namespace synthLib
@@ -65,6 +66,7 @@ private:
 	void			sendMidiEventsToHost		(const std::vector<synthLib::SMidiEvent>& _midiEvents);
 
 	std::vector<uint8_t>				m_chunkData;
-	virusLib::Plugin					m_plugin;
+	virusLib::Device					m_device;
+	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
 };

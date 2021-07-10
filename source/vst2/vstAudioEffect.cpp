@@ -5,6 +5,7 @@
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #include "../synthLib/midiTypes.h"
+#include "../synthLib/os.h"
 
 #ifndef _MSC_VER
 #define _stricmp strcasecmp
@@ -19,6 +20,8 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 //-------------------------------------------------------------------------------------------------------
 VSTAudioEffect::VSTAudioEffect (audioMasterCallback am)
 : AudioEffectX		(am, 0, 0)	// 0 programs, 0 parameters
+, m_device(synthLib::findROM())
+, m_plugin(&m_device)
 {
 	LOG( "Initializing plugin" );
 

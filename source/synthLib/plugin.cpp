@@ -1,28 +1,14 @@
 #include "plugin.h"
 
-#include "../synthLib/os.h"
-
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
 using namespace synthLib;
 
-namespace virusLib
+namespace synthLib
 {
-	Plugin::Plugin()
+	Plugin::Plugin(Device* _device) : m_device(_device)
 	{
-		std::lock_guard lock(m_lock);
-
-		const std::string path = getModulePath();
-		const std::string rom = findROM();
-		m_device.reset(new Device(rom.c_str()));
-		m_resampler.setDeviceSamplerate(12000000.0f / 256.0f);
-	}
-
-	Plugin::~Plugin()
-	{
-		std::lock_guard lock(m_lock);
-
-		m_device.reset();
+		m_resampler.setDeviceSamplerate(_device->getSamplerate());
 	}
 
 	void Plugin::addMidiEvent(const SMidiEvent& _ev)
