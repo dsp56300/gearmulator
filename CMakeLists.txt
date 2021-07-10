@@ -43,7 +43,7 @@ set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 add_subdirectory(source/jucePlugin)
 
 if(UNIX AND NOT APPLE)
-	install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/)
+	install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
 endif()
 
 # ----------------- Test Console
@@ -119,6 +119,10 @@ if(VIRUS_VST2Filter)
 endif()
 
 # ----------------- CPack
+
+set(CPACK_COMPONENTS_ALL plugin)
+set(CPACK_DEB_COMPONENT_INSTALL ON)
+set(CPACK_RPM_COMPONENT_INSTALL ON)
 
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
