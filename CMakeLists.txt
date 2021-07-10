@@ -27,7 +27,7 @@ else()
 	set(VIRUS_VST2Filter false)
 endif()
 
-add_subdirectory(source/JUCE)
+add_subdirectory(source/ctrlr/JUCE)
 
 if(VIRUS_VST2)
 	add_subdirectory(source/vstsdk2.4.2)
