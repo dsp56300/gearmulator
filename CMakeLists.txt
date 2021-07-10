@@ -37,6 +37,9 @@ endif()
 
 # ----------------- Juce based audio plugin
 
+set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+
 add_subdirectory(source/jucePlugin)
 
 if(UNIX AND NOT APPLE)
