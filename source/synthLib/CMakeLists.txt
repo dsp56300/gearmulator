@@ -19,7 +19,7 @@ target_sources(synthLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_include_directories(synthLib PUBLIC ../portmidi/pm_common/ ../portaudio/include)
-target_link_libraries(synthLib PUBLIC portmidi-static resample)
+target_link_libraries(synthLib PUBLIC portmidi-static resample dsp56kEmu)
 
 if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)

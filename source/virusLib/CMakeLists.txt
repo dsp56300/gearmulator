@@ -14,4 +14,4 @@ set(SOURCES
 target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(virusLib PUBLIC dsp56kEmu synthLib)
+target_link_libraries(virusLib PUBLIC synthLib)
