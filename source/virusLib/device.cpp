@@ -113,7 +113,7 @@ namespace virusLib
 			}
 
 			synthLib::SMidiEvent response;
-			// TODO: sysex response
+
 			if(!m_syx.sendSysex(me.sysex, true, response.sysex))
 				return false;
 
