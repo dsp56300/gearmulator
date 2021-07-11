@@ -35,7 +35,7 @@ if(VIRUS_VST2)
 	add_subdirectory(source/vst2filter)
 endif()
 
-add_subdirectory(source/ctrlr)
+#add_subdirectory(source/ctrlr)
 
 # ----------------- Juce based audio plugin
 
