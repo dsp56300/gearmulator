@@ -32,6 +32,7 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 		message += "\n\nNo ROM, no sound!\nCopy ROM next to plugin, must end with .bin";
 
     g.drawFittedText(message, getLocalBounds(), juce::Justification::centred, 2);
+    g.drawFittedText("To donate: paypal.me/dsp56300", getLocalBounds(), juce::Justification::centredBottom, 2);
 }
 
 void AudioPluginAudioProcessorEditor::resized()
