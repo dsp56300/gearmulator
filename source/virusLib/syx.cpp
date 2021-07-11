@@ -30,9 +30,11 @@ bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
 
 void Syx::sendInitControlCommands()
 {
+	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
+	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
-	sendControlCommand(CC_MASTER_VOLUME, 0x7a);
+	sendControlCommand(CC_MASTER_VOLUME, 100);			// Set master volume to 100
 }
 
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
