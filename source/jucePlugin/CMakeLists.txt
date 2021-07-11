@@ -19,28 +19,30 @@ juce_add_plugin(jucePlugin
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 VST Standalone              # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "DSP56300Emu"                  # The name of the final executable, which can differ from the target name
-	)
+)
 
-target_sources(jucePlugin PRIVATE
-        PluginEditor.cpp
-        PluginProcessor.cpp
-		version.h
-		)
+target_sources(jucePlugin 
+PRIVATE
+    PluginEditor.cpp
+    PluginProcessor.cpp
+	version.h
+)
 
-target_compile_definitions(jucePlugin
-    PUBLIC
-        # JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
-        JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
-        JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-        JUCE_VST3_CAN_REPLACE_VST2=0)
+target_compile_definitions(jucePlugin 
+PUBLIC
+	# JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
+	JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
+	JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
+	JUCE_VST3_CAN_REPLACE_VST2=0
+)
 
-target_link_libraries(jucePlugin
-    PRIVATE
-        # AudioPluginData           # If we'd created a binary data target, we'd link to it here
-        juce::juce_audio_utils
-    PUBLIC
-		virusLib
-        #juce::juce_recommended_config_flags
-        #juce::juce_recommended_lto_flags
-        #juce::juce_recommended_warning_flags
-		)
+target_link_libraries(jucePlugin 
+PRIVATE
+    # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+    juce::juce_audio_utils
+PUBLIC
+	virusLib
+    #juce::juce_recommended_config_flags
+    #juce::juce_recommended_lto_flags
+    #juce::juce_recommended_warning_flags
+)
