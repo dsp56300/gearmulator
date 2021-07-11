@@ -25,6 +25,8 @@ target_sources(jucePlugin
 PRIVATE
     PluginEditor.cpp
     PluginProcessor.cpp
+    PluginEditor.h
+    PluginProcessor.h
 	version.h
 )
 
