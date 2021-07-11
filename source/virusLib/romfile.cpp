@@ -65,7 +65,8 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 
 	LOG("Loading ROM at " << m_path);
 
-	std::vector<Chunk> chunks(5);
+	std::vector<Chunk> chunks;
+	chunks.reserve(5);
 
 	// Read all the chunks, hardcoded to 4 for convenience
 	for (int i = 0; i <= 4; i++)
@@ -92,7 +93,7 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 			chunk.items.emplace_back((buf[0] << 16) | (buf[1] << 8) | buf[2]);
 		}
 
-		chunks[i] = chunk;
+		chunks.emplace_back(chunk);
 
 		offset += 0x8000;
 	}

@@ -43,11 +43,13 @@ public:
 
 	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
 
-	BootRom bootRom;
-	std::vector<uint32_t> commandStream;
+	bool isValid() const { return bootRom.size > 0; }
 
 private:
 	std::vector<Chunk> get_dsp_chunks() const;
+
+	BootRom bootRom;
+	std::vector<uint32_t> commandStream;
 
 	const std::string m_path;
 };

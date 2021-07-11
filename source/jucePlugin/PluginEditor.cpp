@@ -26,9 +26,12 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
     g.setColour (juce::Colours::white);
     g.setFont (15.0f);
 
-	const std::string version = "DSP 56300 Emulator\nVersion " + std::string(g_pluginVersionString) + "\n" __DATE__ " " __TIME__;
+	std::string message = "DSP 56300 Emulator\nVersion " + std::string(g_pluginVersionString) + "\n" __DATE__ " " __TIME__;
 
-    g.drawFittedText(version, getLocalBounds(), juce::Justification::centred, 2);
+	if(!processorRef.isPluginValid())
+		message += "\n\nNo ROM, no sound!\nCopy ROM next to plugin, must end with .bin";
+
+    g.drawFittedText(message, getLocalBounds(), juce::Justification::centred, 2);
 }
 
 void AudioPluginAudioProcessorEditor::resized()

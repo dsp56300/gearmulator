@@ -14,7 +14,8 @@ namespace virusLib
 	public:
 		Device(const std::string& _romFileName);
 
-		float getSamplerate() override;
+		float getSamplerate() const override;
+		bool isValid() const override;
 
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;

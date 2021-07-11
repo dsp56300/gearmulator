@@ -12,6 +12,9 @@ namespace virusLib
 		, m_rom(_romFileName)
 		, m_syx(getHDI08(), m_rom)
 	{
+		if(!m_rom.isValid())
+			return;
+
 		auto loader = m_rom.bootDSP(getDSP(), getPeriph());
 
 		startDSPThread();
@@ -39,9 +42,14 @@ namespace virusLib
 		m_syx.sendSingle(0, 0, preset, false);
 	}
 
-	float Device::getSamplerate()
+	float Device::getSamplerate() const
 	{
 		return 12000000.0f / 256.0f;
+	}
+
+	bool Device::isValid() const
+	{
+		return m_rom.isValid();
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "device.h"
+#include <mutex>
 
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/resamplerInOut.h"
 
 namespace synthLib
 {
+	class Device;
+
 	class Plugin
 	{
 	public:
@@ -19,6 +21,8 @@ namespace synthLib
 
 		void process(float** _inputs, float** _outputs, size_t _count);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
+
+		bool isValid() const;
 
 	private:
 		float* getDummyBuffer(size_t _minimumSize);

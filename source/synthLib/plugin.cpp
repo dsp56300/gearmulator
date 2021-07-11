@@ -1,6 +1,5 @@
 #include "plugin.h"
-
-#include "../dsp56300/source/dsp56kEmu/unittests.h"
+#include "device.h"
 
 using namespace synthLib;
 
@@ -59,6 +58,9 @@ namespace synthLib
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
 	{
+		if(!m_device->isValid())
+			return;
+
 		float* inputs[8] {};
 		float* outputs[8] {};
 
@@ -81,6 +83,11 @@ namespace synthLib
 	{
 		std::swap(_midiOut, m_midiOut);
 		m_midiOut.clear();
+	}
+
+	bool Plugin::isValid() const
+	{
+		return m_device->isValid();
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)

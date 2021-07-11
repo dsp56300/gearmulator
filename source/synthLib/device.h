@@ -19,7 +19,8 @@ namespace synthLib
 
 		void startDSPThread();
 
-		virtual float getSamplerate() = 0;
+		virtual float getSamplerate() const = 0;
+		virtual bool isValid() const = 0;
 
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
