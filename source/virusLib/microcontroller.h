@@ -109,12 +109,18 @@ private:
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
 	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
+
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_rom;
-	const uint8_t m_deviceId = 0;
+
+	uint8_t m_deviceId = 0;
 
 	TPreset m_multiEditBuffer;
-	std::array<TPreset,16> m_singleEditBuffer;
+
+	std::array<TPreset,16> m_singleEditBuffers;	// Multi mode
+	TPreset m_singleEditBuffer;					// Single mode
+
 	std::array<uint32_t,16> m_currentBank;
 };
+
 }

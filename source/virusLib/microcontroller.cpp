@@ -18,8 +18,15 @@ Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hd
 	m_currentBank.fill(0);
 	m_rom.getMulti(0, m_multiEditBuffer);
 
-	for(auto i=0; i<static_cast<int>(m_singleEditBuffer.size()); ++i)
-		m_rom.getSingle(0, i, m_singleEditBuffer[i]);
+//	m_rom.getSingle(0, 93, preset);		// RepeaterJS
+//	m_rom.getSingle(0, 6, preset);		// BusysawsSV
+//	m_rom.getSingle(0, 12, preset);		// CommerseSV on Virus C
+//	m_rom.getSingle(0, 268, preset);	// CommerseSV on Virus B
+//	m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
+	m_rom.getSingle(0, 0, m_singleEditBuffer);
+
+	for(auto i=0; i<static_cast<int>(m_singleEditBuffers.size()); ++i)
+		m_rom.getSingle(0, i, m_singleEditBuffers[i]);
 }
 
 void Microcontroller::sendInitControlCommands()
@@ -33,19 +40,9 @@ void Microcontroller::sendInitControlCommands()
 
 void Microcontroller::createDefaultState()
 {
-//	m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
+//	m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode: Not needed, DSP will switch to either Single or Multi mode depending on where we write the Single to
 
-	TPreset preset;
-	
-	// Send preset
-//	m_rom.loadPreset(0, 93, preset);	// RepeaterJS
-//	m_rom.loadPreset(0, 6, preset);		// BusysawsSV
-//	m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
-//	m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
-//	m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
-	m_rom.getSingle(0, 1, preset);
-
-	sendSingle(0, 0, preset, false);
+	sendSingle(0, 0, m_singleEditBuffer, false);
 }
 
 bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
@@ -324,7 +321,7 @@ bool Microcontroller::requestSingle(int _bank, int _program, TPreset& _data) con
 	if (_bank == 0)
 	{
 		// Use single-edit buffer
-		_data = m_singleEditBuffer[_program % m_singleEditBuffer.size()];
+		_data = m_singleEditBuffers[_program % m_singleEditBuffers.size()];
 		return true;
 	}
 
@@ -340,7 +337,7 @@ bool Microcontroller::sendSingle(int _bank, int _program, TPreset& _data, bool c
 		return true;
 	}
 
-	m_singleEditBuffer[_program % m_singleEditBuffer.size()] = _data;
+	m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
 
 	// Convert array of uint8_t to vector of 24bit TWord
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
