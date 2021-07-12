@@ -49,6 +49,8 @@ public:
 	//
 
 	bool isPluginValid() const { return m_plugin.isValid(); }
+	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
+	void addMidiEvent(const synthLib::SMidiEvent& ev);
 
 	// _____________
 	//

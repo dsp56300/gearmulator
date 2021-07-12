@@ -27,19 +27,7 @@ namespace virusLib
 
 		dummyProcess(8);
 
-		m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
-
-		Syx::TPreset preset;
-		
-		// Send preset
-//		m_rom.loadPreset(0, 93, preset);	// RepeaterJS
-//		m_rom.loadPreset(0, 6, preset);		// BusysawsSV
-//		m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
-//		m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
-//		m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
-		m_rom.getSingle(0, 0, preset);
-
-		m_syx.sendSingle(0, 0, preset, false);
+		m_syx.createDefaultState();
 	}
 
 	float Device::getSamplerate() const

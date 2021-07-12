@@ -131,7 +131,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // when they first compile a plugin, but obviously you don't need to keep
     // this code if your algorithm always overwrites all the output channels.
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+		buffer.clear (i, 0, buffer.getNumSamples());
 
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
@@ -192,6 +192,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	m_plugin.process(inputs, outputs, buffer.getNumSamples());
 
+	m_midiOut.clear();
 	m_plugin.getMidiOut(m_midiOut);
 
 	for(size_t i=0; i<m_midiOut.size(); ++i)
@@ -206,7 +207,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 			midiMessages.addEvent(juce::MidiMessage (&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0), 0);
 		}
 	}
-	m_midiOut.clear();
 }
 
 //==============================================================================
@@ -234,6 +234,18 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     juce::ignoreUnused (data, sizeInBytes);
+}
+
+void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
+{
+	juce::ScopedLock lock(getCallbackLock());
+	std::swap(dst, m_midiOut);
+	m_midiOut.clear();
+}
+
+void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
+{
+	m_plugin.addMidiEvent(ev);
 }
 
 //==============================================================================

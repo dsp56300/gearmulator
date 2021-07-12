@@ -57,6 +57,7 @@ public:
 		MIDI_ARPEGGIATOR_SEND      = 0x60, // 96
 		MIDI_CLOCK_RX              = 0x6a, // 106
 		PLAY_MODE                  = 0x7a, // 122
+		PART_NUMBER                = 0x7b, // 123
 		GLOBAL_CHANNEL             = 0x7c, // 124
 		LED_MODE                   = 0x7d, // 125
 		LCD_CONTRAST               = 0x7e, // 126
@@ -80,13 +81,14 @@ public:
 
 	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
-	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false) const;
+	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false, bool isMulti = false) const;
 	void sendControlCommand(ControlCommand command, int value) const;
 	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false);
 	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;
-	bool sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response);
+	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<uint8_t>& _response);
 
 	bool sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull);
+	bool sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull);
 	bool requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const;
 	bool requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) const;
 
@@ -94,6 +96,8 @@ public:
 
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
+
+	void createDefaultState();
 
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;

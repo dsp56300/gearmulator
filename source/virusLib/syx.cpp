@@ -8,6 +8,8 @@
 using namespace dsp56k;
 using namespace synthLib;
 
+constexpr uint32_t g_sysexPresetHeaderSize = 9;
+
 namespace virusLib
 {
 Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile), m_currentBank({0})
@@ -19,15 +21,6 @@ Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile
 		m_romFile.getSingle(0, i, m_singleEditBuffer[i]);
 }
 
-bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
-{
-	const int target = (flag1?1:0)|(flag2?2:0);
-	const int hsr = m_hdi08.readStatusRegister();
-	if (((hsr>>3)&3)==target) 
-		return false;
-	return m_hdi08.hasDataToSend();
-}
-
 void Syx::sendInitControlCommands()
 {
 	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
@@ -35,6 +28,32 @@ void Syx::sendInitControlCommands()
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
 	sendControlCommand(CC_MASTER_VOLUME, 100);			// Set master volume to 100
+}
+
+void Syx::createDefaultState()
+{
+//	m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
+
+	TPreset preset;
+	
+	// Send preset
+//	m_rom.loadPreset(0, 93, preset);	// RepeaterJS
+//	m_rom.loadPreset(0, 6, preset);		// BusysawsSV
+//	m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
+//	m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
+//	m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
+	m_romFile.getSingle(0, 1, preset);
+
+	sendSingle(0, 0, preset, false);
+}
+
+bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
+{
+	const int target = (flag1?1:0)|(flag2?2:0);
+	const int hsr = m_hdi08.readStatusRegister();
+	if (((hsr>>3)&3)==target) 
+		return false;
+	return m_hdi08.hasDataToSend();
 }
 
 void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
@@ -46,14 +65,14 @@ void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Syx::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull) const
+bool Syx::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti) const
 {
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
 
 	writeHostBitsWithWait(0,1);
 	// Send header
-	int buf[] = {0xf47555, 0x100000};
+	int buf[] = {0xf47555, isMulti ? 0x110000 : 0x100000};
 	buf[1] = buf[1] | (program << 8);
 	m_hdi08.writeRX(buf, 2);
 
@@ -118,7 +137,7 @@ bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 	return true;
 }
 
-bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<uint8_t>& response)
+bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<uint8_t>& _response)
 {
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -127,73 +146,112 @@ bool Syx::sendSysex(std::vector<uint8_t> _data, bool cancelIfFull, std::vector<u
     const auto deviceId = _data[5];
     const auto cmd = _data[6];
 
-	response.clear();
+	_response.clear();
 	
 	auto buildPresetResponse = [&](uint8_t _type, uint8_t _bank, uint8_t _program, const TPreset& _dump)
 	{
-        response.resize(1024);
-        response[0] = M_STARTOFSYSEX;
-        response[1] = manufacturerA;
-        response[2] = manufacturerB;
-        response[3] = manufacturerC;
-        response[4] = productId;
-        response[5] = deviceId;
-        response[6] = _type;
-        response[7] = _bank;
-        response[8] = _program;
+        _response.resize(1024);
+        _response[0] = M_STARTOFSYSEX;
+        _response[1] = manufacturerA;
+        _response[2] = manufacturerB;
+        _response[3] = manufacturerC;
+        _response[4] = productId;
+        _response[5] = deviceId;
+        _response[6] = _type;
+        _response[7] = _bank;
+        _response[8] = _program;
 
-        uint8_t cs = deviceId + 11 + response[7];
+        uint8_t cs = deviceId + 11 + _response[7];
         size_t idx = 9;
         for(const auto value : _dump)
         {
-            response[idx++] = value;
+            _response[idx++] = value;
             cs += value;
         }
-        response[idx++] = cs & 0x7f; // checksum
-        response[idx++] = M_ENDOFSYSEX;
+        _response[idx++] = cs & 0x7f; // checksum
+        _response[idx++] = M_ENDOFSYSEX;
         assert(idx < response.size() && "memory corruption!");
-        response.resize(idx);
+        _response.resize(idx);
 	};
 
     LOGFMT("Incoming sysex request [device=0x%x, cmd=0x%x]", deviceId, cmd);
+
     switch (cmd)
     {
         case DUMP_SINGLE: 
-		{
-            const uint8_t bank = _data[7];
-            const uint8_t program = _data[8];
-            TPreset dump;
-            std::copy(_data.data() + 9, _data.data() + 9 + 256, dump.begin());
-            return sendSingle(bank, program, dump, cancelIfFull);
-        }
+			{
+	            const uint8_t bank = _data[7];
+	            const uint8_t program = _data[8];
+	            TPreset dump;
+	            std::copy(_data.data() + g_sysexPresetHeaderSize, _data.data() + g_sysexPresetHeaderSize + 256, dump.begin());
+	            return sendSingle(bank, program, dump, _cancelIfFull);
+	        }
+		case DUMP_MULTI: 
+			{
+	            const uint8_t bank = _data[7];
+	            const uint8_t program = _data[8];
+	            TPreset dump;
+	            std::copy(_data.data() + g_sysexPresetHeaderSize, _data.data() + g_sysexPresetHeaderSize + 256, dump.begin());
+	            return sendMulti(bank, program, dump, _cancelIfFull);
+	        }
         case REQUEST_MULTI:
-		{
-            const uint8_t bank = _data[7];
-            const uint8_t program = _data[8];
-            TPreset dump;
-            const auto res = requestMulti(deviceId, bank, program, dump);
-        	if(res)
-		        buildPresetResponse(DUMP_MULTI, bank, program, dump);
-            break;
-        }
+			{
+	            const uint8_t bank = _data[7];
+	            const uint8_t program = _data[8];
+	            TPreset dump;
+	            const auto res = requestMulti(deviceId, bank, program, dump);
+        		if(res)
+			        buildPresetResponse(DUMP_MULTI, bank, program, dump);
+	            break;
+	        }
 		case REQUEST_SINGLE:
-        {
-            const uint8_t bank = _data[7];
-            const uint8_t program = _data[8];
-            TPreset dump;
-            const auto res = requestSingle(deviceId, bank, program, dump);
-        	if(res)
-		        buildPresetResponse(DUMP_SINGLE, bank, program, dump);
-			break;
-        }
+	        {
+	            const uint8_t bank = _data[7];
+	            const uint8_t program = _data[8];
+	            TPreset dump;
+	            const auto res = requestSingle(deviceId, bank, program, dump);
+				if(res)
+					buildPresetResponse(DUMP_SINGLE, bank, program, dump);
+				break;
+	        }
         case PARAM_CHANGE_A:
         case PARAM_CHANGE_B:
         case PARAM_CHANGE_C:
-    	{
-            return send((Page)cmd, _data[7], _data[8], _data[9], cancelIfFull);
-        }
+    		{
+        		const auto page = static_cast<Page>(cmd);
+
+       			if(page == PAGE_C && _data[8] == PLAY_MODE)
+       			{
+       				switch(_data[9])
+       				{
+					case 0:	// Single
+						{
+			                TPreset single;
+			                if(!m_romFile.getSingle(0, 0, single))
+				                return true;       				
+
+							LOG("Switch to Single mode");
+			                return sendSingle(0, SINGLE, single, _cancelIfFull);
+						}
+					case 1:
+						// TODO: Single-Multi
+						break;
+					default:
+						{
+							TPreset multi;
+       						if(!m_romFile.getMulti(0, multi))
+								return true;
+
+							LOG("Switch to Multi mode");
+							return sendMulti(0, 0, multi, _cancelIfFull);
+						}
+       				}
+	            }
+
+				return send(page, _data[7], _data[8], _data[9], _cancelIfFull);
+	        }
         default:
-            LOG("Unknown sysex cmd " << HEXN((int)cmd, 2));
+            LOG("Unknown sysex command " << HEXN(cmd, 2));
     }
 
     return true;
@@ -280,7 +338,32 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
 		idx += 3;
 	}
-	return sendPreset(_program, preset, cancelIfFull);
+	return sendPreset(_program, preset, cancelIfFull, false);
+}
+
+bool Syx::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
+{
+	if (_bank != 0) 
+	{
+		LOG("We do not support writing to flash, attempt to write multi to bank " << _bank << ", program " << _program);
+		return true;
+	}
+
+	m_multiEditBuffer = _data;
+
+	// Convert array of uint8_t to vector of 24bit TWord
+	int idx = 0;
+	std::vector<TWord> preset;
+	preset.resize(0x56);
+	for (int i = 0; i < 0x56; i++)
+	{
+		if (i == 0x55)
+			preset[i] = _data[idx] << 16;
+		else
+			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
+		idx += 3;
+	}
+	return sendPreset(_program, preset, cancelIfFull, true);
 }
 
 }

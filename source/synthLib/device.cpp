@@ -7,8 +7,6 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	// 128k words beginning at $20000
-
 	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress)
 	{
 		const size_t g_requiredMemSize	= alignedSize<DSP>() + alignedSize<Memory>() + _memorySize * MemArea_COUNT * sizeof(uint32_t);

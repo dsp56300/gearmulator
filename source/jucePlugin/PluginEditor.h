@@ -14,9 +14,14 @@ public:
     void resized() override;
 
 private:
+	void switchPlayMode(uint8_t _playMode);
+	
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     AudioPluginAudioProcessor& processorRef;
 
+	juce::TextButton m_btSingleMode;
+	juce::TextButton m_btMultiMode;
+	
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 };
