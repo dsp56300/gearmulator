@@ -77,6 +77,13 @@ public:
 		SINGLE = 0x40
 	};
 
+	enum PlayMode
+	{
+		PlayModeSingle,
+		PlayModeMultiSingle,	// This one is just a different view of multi mode on the hardware, not needed
+		PlayModeMulti,
+	};
+
 	using TPreset = ROMFile::TPreset;
 
 	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
@@ -89,10 +96,8 @@ public:
 
 	bool sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull);
 	bool sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull);
-	bool requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const;
-	bool requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) const;
-
-	ROMFile& getROMFile() {return m_romFile;}
+	bool requestMulti(int _bank, int _program, TPreset& _data) const;
+	bool requestSingle(int _bank, int _program, TPreset& _data) const;
 
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
@@ -103,6 +108,7 @@ private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
+	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_romFile;
 	const uint8_t m_deviceId = 0;

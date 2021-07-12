@@ -14,7 +14,7 @@ public:
     void resized() override;
 
 private:
-	void switchPlayMode(uint8_t _playMode);
+	void switchPlayMode(uint8_t _playMode) const;
 	
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.

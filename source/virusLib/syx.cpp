@@ -147,7 +147,13 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
     const auto cmd = _data[6];
 
 	_response.clear();
-	
+
+	if (deviceId != m_deviceId) 
+	{
+		// ignore messages intended for a different device
+		return true;
+	}
+
 	auto buildPresetResponse = [&](uint8_t _type, uint8_t _bank, uint8_t _program, const TPreset& _dump)
 	{
         _response.resize(1024);
@@ -174,45 +180,47 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
         _response.resize(idx);
 	};
 
-    LOGFMT("Incoming sysex request [device=0x%x, cmd=0x%x]", deviceId, cmd);
-
     switch (cmd)
     {
         case DUMP_SINGLE: 
 			{
 	            const uint8_t bank = _data[7];
 	            const uint8_t program = _data[8];
+			    LOG("Dump Single, Bank " << bank << ", program " << program);
 	            TPreset dump;
-	            std::copy(_data.data() + g_sysexPresetHeaderSize, _data.data() + g_sysexPresetHeaderSize + 256, dump.begin());
+	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 	            return sendSingle(bank, program, dump, _cancelIfFull);
 	        }
 		case DUMP_MULTI: 
 			{
 	            const uint8_t bank = _data[7];
 	            const uint8_t program = _data[8];
+			    LOG("Dump Multi, Bank " << bank << ", program " << program);
 	            TPreset dump;
-	            std::copy(_data.data() + g_sysexPresetHeaderSize, _data.data() + g_sysexPresetHeaderSize + 256, dump.begin());
+	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 	            return sendMulti(bank, program, dump, _cancelIfFull);
-	        }
-        case REQUEST_MULTI:
-			{
-	            const uint8_t bank = _data[7];
-	            const uint8_t program = _data[8];
-	            TPreset dump;
-	            const auto res = requestMulti(deviceId, bank, program, dump);
-        		if(res)
-			        buildPresetResponse(DUMP_MULTI, bank, program, dump);
-	            break;
 	        }
 		case REQUEST_SINGLE:
 	        {
 	            const uint8_t bank = _data[7];
 	            const uint8_t program = _data[8];
+			    LOG("Request Single, Bank " << bank << ", program " << program);
 	            TPreset dump;
-	            const auto res = requestSingle(deviceId, bank, program, dump);
+	            const auto res = requestSingle(bank, program, dump);
 				if(res)
 					buildPresetResponse(DUMP_SINGLE, bank, program, dump);
 				break;
+	        }
+        case REQUEST_MULTI:
+			{
+	            const uint8_t bank = _data[7];
+	            const uint8_t program = _data[8];
+			    LOG("Request Multi, Bank " << bank << ", program " << program);
+	            TPreset dump;
+	            const auto res = requestMulti(bank, program, dump);
+        		if(res)
+			        buildPresetResponse(DUMP_MULTI, bank, program, dump);
+	            break;
 	        }
         case PARAM_CHANGE_A:
         case PARAM_CHANGE_B:
@@ -220,7 +228,7 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
     		{
         		const auto page = static_cast<Page>(cmd);
 
-       			if(page == PAGE_C && _data[8] == PLAY_MODE)
+        		if(page == PAGE_C && _data[8] == PLAY_MODE)
        			{
        				switch(_data[9])
        				{
@@ -266,6 +274,25 @@ void Syx::waitUntilBufferEmpty() const
 	}
 }
 
+std::vector<TWord> Syx::presetToDSPWords(const TPreset& _preset)
+{
+	int idx = 0;
+
+	std::vector<TWord> preset;
+	preset.resize(0x56);
+
+	for (int i = 0; i < 0x56; i++)
+	{
+		if (i == 0x55)
+			preset[i] = _preset[idx] << 16;
+		else
+			preset[i] = ((_preset[idx] << 16) | (_preset[idx + 1] << 8) | _preset[idx + 2]);
+		idx += 3;
+	}
+
+	return preset;
+}
+
 void Syx::waitUntilReady() const
 {
 	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) 
@@ -275,14 +302,8 @@ void Syx::waitUntilReady() const
 	}
 }
 
-bool Syx::requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) const
+bool Syx::requestMulti(int _bank, int _program, TPreset& _data) const
 {
-	if (_deviceId != m_deviceId) 
-	{
-		// Ignore messages intended for a different device
-		return true;
-	}
-
 	if (_bank == 0)
 	{
 		// Use multi-edit buffer
@@ -297,14 +318,8 @@ bool Syx::requestMulti(int _deviceId, int _bank, int _program, TPreset& _data) c
 	return m_romFile.getMulti(_program, _data);
 }
 
-bool Syx::requestSingle(int _deviceId, int _bank, int _program, TPreset& _data) const
+bool Syx::requestSingle(int _bank, int _program, TPreset& _data) const
 {
-	if (_deviceId != m_deviceId) 
-	{
-		// Ignore messages intended for a different device
-		return true;
-	}
-	
 	if (_bank == 0)
 	{
 		// Use single-edit buffer
@@ -327,18 +342,7 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 	m_singleEditBuffer[_program % m_singleEditBuffer.size()] = _data;
 
 	// Convert array of uint8_t to vector of 24bit TWord
-	int idx = 0;
-	std::vector<TWord> preset;
-	preset.resize(0x56);
-	for (int i = 0; i < 0x56; i++)
-	{
-		if (i == 0x55)
-			preset[i] = _data[idx] << 16;
-		else
-			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
-		idx += 3;
-	}
-	return sendPreset(_program, preset, cancelIfFull, false);
+	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
 }
 
 bool Syx::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
@@ -352,18 +356,7 @@ bool Syx::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 	m_multiEditBuffer = _data;
 
 	// Convert array of uint8_t to vector of 24bit TWord
-	int idx = 0;
-	std::vector<TWord> preset;
-	preset.resize(0x56);
-	for (int i = 0; i < 0x56; i++)
-	{
-		if (i == 0x55)
-			preset[i] = _data[idx] << 16;
-		else
-			preset[i] = ((_data[idx] << 16) | (_data[idx + 1] << 8) | _data[idx + 2]);
-		idx += 3;
-	}
-	return sendPreset(_program, preset, cancelIfFull, true);
+	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, true);
 }
 
 }

@@ -63,7 +63,7 @@ void AudioPluginAudioProcessorEditor::resized()
 	// subcomponents in your editor..
 }
 
-void AudioPluginAudioProcessorEditor::switchPlayMode(uint8_t _playMode)
+void AudioPluginAudioProcessorEditor::switchPlayMode(uint8_t _playMode) const
 {
 	synthLib::SMidiEvent ev;
 	ev.sysex = { 0xf0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x72, 0x0, 0x7a, _playMode, 0xf7};
