@@ -5,7 +5,6 @@ add_library(virusLib STATIC)
 
 set(SOURCES
 	device.cpp device.h
-	deviceStandalone.cpp deviceStandalone.h
 	midiOutParser.cpp midiOutParser.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
