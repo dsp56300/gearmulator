@@ -7,7 +7,6 @@
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 #include "../dsp56300/source/dsp56kEmu/unittests.h"
 
-#include "../synthLib/midi.h"
 #include "../synthLib/wavWriter.h"
 #include "../synthLib/os.h"
 
@@ -155,7 +154,6 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 	}
 	return false;
 }
-bool midiMode = false;
 void midiNoteOn(void *data,DSP *dsp)
 {
 	Microcontroller* syx=(Microcontroller*)data;
@@ -173,61 +171,18 @@ void midiCallback(void *data,DSP *dsp)
 
 	syx->sendInitControlCommands();
 
-	if (midiMode)
-	{
-		LOG("Using MIDI mode");
+	// Send preset
+	syx->sendSingle(0, Microcontroller::SINGLE, preset, false);
+//	syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
-		std::thread sendSyxThread([&]() {
-			Midi midi;
-			if (midi.connect() == 0)
-			{
-				
-				SMidiEvent ev;
-				while (true)
-				{
-					if (midi.read(ev) == Midi::midiNoData)
-					{
-						std::this_thread::sleep_for(std::chrono::milliseconds(200));
-						continue;
-					}
+//	syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
+//	syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
 
-					if (!ev.sysex.empty())
-					{
-						std::vector<unsigned char> response;
-						syx->sendSysex(ev.sysex, false, response);
-						if (!response.empty())
-						{
-							SMidiEvent out;
-							out.sysex = response;
-							midi.write(out);
-						}
-					}
-					else
-					{
-						syx->sendMIDI(ev.a, ev.b, ev.c);
-					}
-
-					ev = {};
-				}
-			}
-		});
-	}
-	else
-	{
-		// Send preset
-		syx->sendSingle(0, Microcontroller::SINGLE, preset, false);
-//		syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
-
-//		syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
-//		syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
-
-		// MIDI Tempo meta message, set tempo to 120 bpm
-//		syx->sendMIDI(0xFF,0x51,0x03);
-//		syx->sendMIDI(0x07,0xA1,0x20);
+	// MIDI Tempo meta message, set tempo to 120 bpm
+//	syx->sendMIDI(0xFF,0x51,0x03);
+//	syx->sendMIDI(0x07,0xA1,0x20);
 		
-		dsp->setCallback(midiNoteOn, data, 477263+70000*10);
-
-	}
+	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
 }
 
 int main(int _argc, char* _argv[])
@@ -294,7 +249,7 @@ int main(int _argc, char* _argv[])
 //		loadSingle(v, 0, 126);		// Init
 	}
 	// Load preset
-	midiMode = _argc >= 3;
+
 	Microcontroller syx(periph.getHDI08(), v);
 	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 

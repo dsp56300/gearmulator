@@ -14,27 +14,16 @@ set(ASMJIT_STATIC TRUE)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
-add_subdirectory(source/portmidi)
-add_subdirectory(source/portaudio)
 add_subdirectory(source/libresample)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
-	set(VIRUS_VST2 true)
-	set(VIRUS_VST2Filter true)
+	set(VIRUS_VST2Filter false)	# skip for now
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
 else()
-	set(VIRUS_VST2 false)
 	set(VIRUS_VST2Filter false)
 endif()
 
 add_subdirectory(source/ctrlr/JUCE)
-
-if(VIRUS_VST2)
-	add_subdirectory(source/vstsdk2.4.2)
-	add_subdirectory(source/vst2)
-	add_subdirectory(source/vst2filter)
-endif()
-
 #add_subdirectory(source/ctrlr)
 
 # ----------------- Juce based audio plugin
@@ -54,45 +43,12 @@ add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
 target_link_libraries(virusTestConsole PUBLIC virusLib)
 
-# ----------------- Standalone
-
-add_executable(virusStandalone)
-target_sources(virusStandalone PRIVATE source/virusStandalone/virusStandalone.cpp)
-target_link_libraries(virusStandalone PUBLIC virusLib portaudio_static)
-
-# ----------------- VST2 Plugin
-
-if(VIRUS_VST2)
-	add_library(virusVst2dll MODULE)
-
-	target_sources(virusVst2dll PRIVATE source/vstsdk2.4.2/public.sdk/source/vst2.x/vstplugmain.cpp)
-	if(MSVC)
-		target_sources(virusVst2dll PRIVATE source/vstsdk2.4.2/public.sdk/samples/vst2.x/win/vstplug.def source/vst2/version.rc)
-	elseif(APPLE)
-		set_target_properties(virusVst2dll PROPERTIES BUNDLE TRUE)
-		set_target_properties(virusVst2dll PROPERTIES CXX_VISIBILITY_PRESET default)
-		set_target_properties(virusVst2dll PROPERTIES CMAKE_C_VISIBILITY_PRESET default)
-		set_target_properties(virusVst2dll PROPERTIES XCODE_ATTRIBUTE_INFOPLIST_FILE "source/vst2/Info.plist")
-  		set_target_properties(virusVst2dll PROPERTIES XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES")
-		set_target_properties(virusVst2dll PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst")
-		set_target_properties(virusVst2dll PROPERTIES XCODE_ATTRIBUTE_GENERATE_MASTER_OBJECT_FILE "YES")
-		set_target_properties(virusVst2dll PROPERTIES XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load")
-	endif()
-
-	target_include_directories(virusVst2dll PRIVATE source/vstsdk2.4.2/)
-
-	target_link_libraries(virusVst2dll virusVst2 vstsdk2 virusLib)
-
-	if(MSVC)
-		set_target_properties(virusVst2dll PROPERTIES OUTPUT_NAME "VirusEmuVST2${CMAKE_VS_PLATFORM_NAME}")
-	else()
-		set_target_properties(virusVst2dll PROPERTIES OUTPUT_NAME "VirusVST2")
-	endif()
-endif()
-
 # ----------------- VST2 Filter Plugin
 
 if(VIRUS_VST2Filter)
+	add_subdirectory(source/vstsdk2.4.2)
+	add_subdirectory(source/vst2filter)
+
 	add_library(virusVstFilter MODULE)
 
 	target_sources(virusVstFilter PRIVATE source/vstsdk2.4.2/public.sdk/source/vst2.x/vstplugmain.cpp)
