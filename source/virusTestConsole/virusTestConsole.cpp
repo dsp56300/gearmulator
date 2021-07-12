@@ -172,7 +172,7 @@ void midiCallback(void *data,DSP *dsp)
 	syx->sendInitControlCommands();
 
 	// Send preset
-	syx->sendSingle(0, Microcontroller::SINGLE, preset, false);
+	syx->writeSingle(0, Microcontroller::SINGLE, preset, false);
 //	syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
 //	syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.

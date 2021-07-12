@@ -90,15 +90,15 @@ public:
 	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
 	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false, bool isMulti = false) const;
-	void sendControlCommand(ControlCommand command, int value) const;
+	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendMIDI(int a,int b,int c, bool cancelIfFull = false);
-	bool send(Page page, int part, int param, int value, bool cancelIfFull = false) const;
+	bool send(Page page, int part, int param, uint8_t value, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<uint8_t>& _response);
 
-	bool sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull);
-	bool sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull);
-	bool requestMulti(int _bank, int _program, TPreset& _data) const;
-	bool requestSingle(int _bank, int _program, TPreset& _data) const;
+	bool writeSingle(uint32_t _bank, uint32_t _program, TPreset& _data, bool cancelIfFull);
+	bool writeMulti(uint32_t _bank, uint32_t _program, TPreset& _data, bool cancelIfFull);
+	bool requestMulti(uint32_t _bank, uint32_t _program, TPreset& _data) const;
+	bool requestSingle(uint32_t _bank, uint32_t _program, TPreset& _data) const;
 
 	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
@@ -110,6 +110,7 @@ private:
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
 	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
+	bool getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const;
 
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_rom;
@@ -117,6 +118,9 @@ private:
 	uint8_t m_deviceId = 0;
 
 	TPreset m_multiEditBuffer;
+
+	std::array<uint8_t, 256> m_globalSettings;
+	std::vector<std::vector<TPreset>> m_singles;
 
 	// Multi mode
 	std::array<TPreset,16> m_singleEditBuffers;

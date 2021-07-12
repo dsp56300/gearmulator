@@ -10,23 +10,48 @@ using namespace dsp56k;
 using namespace synthLib;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
+constexpr uint32_t g_singleRamBankCount = 2;
 
 namespace virusLib
 {
-Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0})
+Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0}), m_currentSingles({0})
 {
+	m_globalSettings.fill(0);
 	m_currentBanks.fill(0);
+
 	m_rom.getMulti(0, m_multiEditBuffer);
 
-//	m_rom.getSingle(0, 93, preset);		// RepeaterJS
-//	m_rom.getSingle(0, 6, preset);		// BusysawsSV
-//	m_rom.getSingle(0, 12, preset);		// CommerseSV on Virus C
-//	m_rom.getSingle(0, 268, preset);	// CommerseSV on Virus B
-//	m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
-	m_rom.getSingle(0, 0, m_singleEditBuffer);
+	bool failed = false;
+
+	// read all singles from ROM and copy first ROM banks to RAM banks
+	for(uint32_t b=0; b<8 && !failed; ++b)
+	{
+		std::vector<TPreset> singles;
+
+		for(uint32_t p=0; p<128; ++p)
+		{
+			const auto bank = b > g_singleRamBankCount ? b - g_singleRamBankCount : b;
+
+			TPreset single;
+			m_rom.getSingle(bank, p, single);
+
+			if(ROMFile::getSingleName(single).size() != 10)
+			{
+				failed = true;
+				break;				
+			}
+
+			singles.emplace_back(single);
+		}
+
+		if(!singles.empty())
+			m_singles.emplace_back(std::move(singles));
+	}
+
+	m_singleEditBuffer = m_singles[0][0];
 
 	for(auto i=0; i<static_cast<int>(m_singleEditBuffers.size()); ++i)
-		m_rom.getSingle(0, i, m_singleEditBuffers[i]);
+		m_singleEditBuffers[i] = m_singles[0][i];
 }
 
 void Microcontroller::sendInitControlCommands()
@@ -42,7 +67,7 @@ void Microcontroller::createDefaultState()
 {
 //	m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode: Not needed, DSP will switch to either Single or Multi mode depending on where we write the Single to
 
-	sendSingle(0, 0, m_singleEditBuffer, false);
+	writeSingle(0, 0, m_singleEditBuffer, false);
 }
 
 bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
@@ -83,12 +108,12 @@ bool Microcontroller::sendPreset(uint32_t program, const std::vector<TWord>& pre
 	return true;
 }
 
-void Microcontroller::sendControlCommand(const ControlCommand _command, const int _value) const
+void Microcontroller::sendControlCommand(const ControlCommand _command, const uint8_t _value)
 {
 	send(PAGE_C, 0x0, _command, _value);
 }
 
-bool Microcontroller::send(const Page _page, const int _part, const int _param, const int _value, bool cancelIfFull/* = false*/) const
+bool Microcontroller::send(const Page _page, const int _part, const int _param, const uint8_t _value, bool cancelIfFull/* = false*/)
 {
 	waitUntilReady();
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
@@ -98,13 +123,23 @@ bool Microcontroller::send(const Page _page, const int _part, const int _param, 
 	buf[0] = buf[0] | _page;
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
+
+	if(_page == PAGE_C)
+	{
+		m_globalSettings[_param] = _value;
+	}
 	return true;
 }
 
-bool Microcontroller::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
+bool Microcontroller::sendMIDI(int a, int b, int c, bool cancelIfFull/* = false*/)
 {
 	const auto channel = a & 0x0f;
 	const auto status = a & 0xf0;
+
+	const auto singleMode = m_globalSettings[PLAY_MODE] == PlayModeSingle;
+
+	if(singleMode && channel != m_globalSettings[GLOBAL_CHANNEL])
+		return true;
 
 	switch (status)
 	{
@@ -112,17 +147,33 @@ bool Microcontroller::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 		{
 			TPreset single;
 
-			if(m_rom.getSingle(m_currentBanks[channel], b, single))
+			if(singleMode)
 			{
-				return sendSingle(0, channel, single, cancelIfFull);
+				if(getSingle(m_currentBank, b, single))
+				{
+					m_currentSingle = b;
+					return writeSingle(0, SINGLE, single, cancelIfFull);
+				}
+			}
+			else
+			{
+				if(getSingle(m_currentBanks[channel], b, single))
+				{
+					m_currentSingles[channel] = b;
+					return writeSingle(0, channel, single, cancelIfFull);
+				}
 			}
 		}
+		break;
 	case M_CONTROLCHANGE:
 		switch(b)
 		{
 		case MC_BANKSELECTLSB:
 		case MC_BANKSELECTMSB:
-			m_currentBanks[channel] = c & 7;	 // TODO: max bank count? 8 on C but 6 on B
+			if(singleMode)
+				m_currentBank = c % m_singles.size();
+			else
+				m_currentBanks[channel] = c % m_singles.size();
 			return true;
 		}
 		break;
@@ -188,7 +239,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			    LOG("Dump Single, Bank " << bank << ", program " << program);
 	            TPreset dump;
 	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-	            return sendSingle(bank, program, dump, _cancelIfFull);
+	            return writeSingle(bank, program, dump, _cancelIfFull);
 	        }
 		case DUMP_MULTI: 
 			{
@@ -197,7 +248,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			    LOG("Dump Multi, Bank " << bank << ", program " << program);
 	            TPreset dump;
 	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-	            return sendMulti(bank, program, dump, _cancelIfFull);
+	            return writeMulti(bank, program, dump, _cancelIfFull);
 	        }
 		case REQUEST_SINGLE:
 	        {
@@ -229,29 +280,35 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
         		if(page == PAGE_C && _data[8] == PLAY_MODE)
        			{
-       				switch(_data[9])
+        			const auto playMode = _data[9];
+
+       				switch(playMode)
        				{
-					case 0:	// Single
+					case PlayModeSingle:
 						{
 			                TPreset single;
-			                if(!m_rom.getSingle(0, 0, single))
+			                if(!getSingle(0, 0, single))
 				                return true;       				
 
+							m_globalSettings[PLAY_MODE] = playMode;
+
 							LOG("Switch to Single mode");
-			                return sendSingle(0, SINGLE, single, _cancelIfFull);
+			                return writeSingle(0, SINGLE, single, _cancelIfFull);
 						}
-					case 1:
-						// TODO: Single-Multi
-						break;
-					default:
+					case PlayModeMultiSingle:
+					case PlayModeMulti:
 						{
 							TPreset multi;
        						if(!m_rom.getMulti(0, multi))
 								return true;
 
+							m_globalSettings[PLAY_MODE] = playMode;
+
 							LOG("Switch to Multi mode");
-							return sendMulti(0, 0, multi, _cancelIfFull);
+							return writeMulti(0, 0, multi, _cancelIfFull);
 						}
+					default:
+						return true;
        				}
 	            }
 
@@ -292,6 +349,19 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 	return preset;
 }
 
+bool Microcontroller::getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const
+{
+	if(_bank > m_singles.size())
+		return false;
+	const auto& s = m_singles[_bank];
+	
+	if(_preset >= s.size())
+		return false;
+
+	_result = s[_preset];
+	return true;
+}
+
 void Microcontroller::waitUntilReady() const
 {
 	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) 
@@ -301,7 +371,7 @@ void Microcontroller::waitUntilReady() const
 	}
 }
 
-bool Microcontroller::requestMulti(int _bank, int _program, TPreset& _data) const
+bool Microcontroller::requestMulti(uint32_t _bank, uint32_t _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -317,7 +387,7 @@ bool Microcontroller::requestMulti(int _bank, int _program, TPreset& _data) cons
 	return m_rom.getMulti(_program, _data);
 }
 
-bool Microcontroller::requestSingle(int _bank, int _program, TPreset& _data) const
+bool Microcontroller::requestSingle(uint32_t _bank, uint32_t _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -327,24 +397,31 @@ bool Microcontroller::requestSingle(int _bank, int _program, TPreset& _data) con
 	}
 
 	// Load from flash
-	return m_rom.getSingle(_bank - 1, _program, _data);
+	return getSingle(_bank - 1, _program, _data);
 }
 
-bool Microcontroller::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeSingle(uint32_t _bank, uint32_t _program, TPreset& _data, bool cancelIfFull)
 {
-	if (_bank != 0) 
+	if (_bank > 0) 
 	{
-		LOG("We do not support writing to flash, attempt to write single to bank " << _bank << ", program " << _program);
+		if(_bank >= m_singles.size() || _bank >= g_singleRamBankCount)
+			return true;	// out of range
+
+		if(_program >= m_singles[_bank].size())
+			return true;	// out of range
+
+		m_singles[_bank][_program] = _data;
+
 		return true;
 	}
 
 	m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
 
-	// Convert array of uint8_t to vector of 24bit TWord
+	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
 }
 
-bool Microcontroller::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeMulti(uint32_t _bank, uint32_t _program, TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{
