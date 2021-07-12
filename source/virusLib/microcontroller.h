@@ -17,10 +17,10 @@ public:
 		REQUEST_MULTI              = 0x31,
 		REQUEST_BANK_SINGLE        = 0x32,
 		REQUEST_BANK_MULTI         = 0x33,
-		REQUEST_ARRANGEMENT        = 0x34,
-		REQUEST_GLOBAL             = 0x35,
-		REQUEST_TOTAL              = 0x36,
-		REQUEST_CONTROLLER_DUMP    = 0x37,
+		REQUEST_ARRANGEMENT        = 0x34,			// current Multi + all referenced Singles in the Multi. Only the Singles whose parts are enabled in the Multi are sent
+		REQUEST_GLOBAL             = 0x35,			// All parameters not related to a single or a multi
+		REQUEST_TOTAL              = 0x36,			// Single RAM Banks + Multi RAM Bank + Global
+		REQUEST_CONTROLLER_DUMP    = 0x37,			// Sends the current Single edit buffer as individual controller/polypressure/sysex
 
 		PARAM_CHANGE_A             = 0x70,
 		PARAM_CHANGE_B             = 0x71,
