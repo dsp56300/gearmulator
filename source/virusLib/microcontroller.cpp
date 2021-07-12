@@ -13,9 +13,9 @@ constexpr uint32_t g_sysexPresetHeaderSize = 9;
 
 namespace virusLib
 {
-Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBank({0})
+Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0})
 {
-	m_currentBank.fill(0);
+	m_currentBanks.fill(0);
 	m_rom.getMulti(0, m_multiEditBuffer);
 
 //	m_rom.getSingle(0, 93, preset);		// RepeaterJS
@@ -111,7 +111,8 @@ bool Microcontroller::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 	case M_PROGRAMCHANGE:
 		{
 			TPreset single;
-			if(m_rom.getSingle(m_currentBank[channel], b, single))
+
+			if(m_rom.getSingle(m_currentBanks[channel], b, single))
 			{
 				return sendSingle(0, channel, single, cancelIfFull);
 			}
@@ -121,7 +122,7 @@ bool Microcontroller::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 		{
 		case MC_BANKSELECTLSB:
 		case MC_BANKSELECTMSB:
-			m_currentBank[channel] = c & 7;	 // TODO: max bank count? 8 on C but 6 on B
+			m_currentBanks[channel] = c & 7;	 // TODO: max bank count? 8 on C but 6 on B
 			return true;
 		}
 		break;

@@ -2,6 +2,7 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
+
 #include "romfile.h"
 
 namespace virusLib
@@ -117,10 +118,15 @@ private:
 
 	TPreset m_multiEditBuffer;
 
-	std::array<TPreset,16> m_singleEditBuffers;	// Multi mode
-	TPreset m_singleEditBuffer;					// Single mode
+	// Multi mode
+	std::array<TPreset,16> m_singleEditBuffers;
+	std::array<uint32_t,16> m_currentBanks;
+	std::array<uint32_t,16> m_currentSingles;
 
-	std::array<uint32_t,16> m_currentBank;
+	// Single mode
+	TPreset m_singleEditBuffer;
+	uint32_t m_currentBank = 0;
+	uint32_t m_currentSingle = 0;
 };
 
 }
