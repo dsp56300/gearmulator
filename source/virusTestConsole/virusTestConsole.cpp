@@ -12,7 +12,7 @@
 #include "../synthLib/os.h"
 
 #include "../virusLib/romfile.h"
-#include "../virusLib/syx.h"
+#include "../virusLib/microcontroller.h"
 #include "../virusLib/midiOutParser.h"
 
 using namespace dsp56k;
@@ -30,7 +30,7 @@ size_t g_writeBlockSize = 65536;
 #endif
 size_t g_nextWriteSize = g_writeBlockSize;
 
-Syx::TPreset preset;
+Microcontroller::TPreset preset;
 
 void writeWord(const TWord _word)
 {
@@ -158,7 +158,7 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 bool midiMode = false;
 void midiNoteOn(void *data,DSP *dsp)
 {
-	Syx* syx=(Syx*)data;
+	Microcontroller* syx=(Microcontroller*)data;
 	LOG("Sending Note On!");
 	syx->sendMIDI(0x90,60,0x7f);	// Note On
 //	syx->sendControlCommand(Syx::AUDITION, 0x7f);
@@ -167,7 +167,7 @@ void midiNoteOn(void *data,DSP *dsp)
 }
 void midiCallback(void *data,DSP *dsp)
 {
-	auto* syx = static_cast<Syx*>(data);
+	auto* syx = static_cast<Microcontroller*>(data);
 
 	LOG("Sending Preset!");
 
@@ -215,7 +215,7 @@ void midiCallback(void *data,DSP *dsp)
 	else
 	{
 		// Send preset
-		syx->sendSingle(0, Syx::SINGLE, preset, false);
+		syx->sendSingle(0, Microcontroller::SINGLE, preset, false);
 //		syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
 //		syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
@@ -295,7 +295,7 @@ int main(int _argc, char* _argv[])
 	}
 	// Load preset
 	midiMode = _argc >= 3;
-	Syx syx(periph.getHDI08(), v);
+	Microcontroller syx(periph.getHDI08(), v);
 	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));

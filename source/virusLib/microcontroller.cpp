@@ -2,7 +2,8 @@
 #include <chrono>
 #include <thread>
 
-#include "syx.h"
+#include "microcontroller.h"
+
 #include "../synthLib/midiTypes.h"
 
 using namespace dsp56k;
@@ -12,16 +13,16 @@ constexpr uint32_t g_sysexPresetHeaderSize = 9;
 
 namespace virusLib
 {
-Syx::Syx(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_romFile(_romFile), m_currentBank({0})
+Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBank({0})
 {
 	m_currentBank.fill(0);
-	m_romFile.getMulti(0, m_multiEditBuffer);
+	m_rom.getMulti(0, m_multiEditBuffer);
 
 	for(auto i=0; i<static_cast<int>(m_singleEditBuffer.size()); ++i)
-		m_romFile.getSingle(0, i, m_singleEditBuffer[i]);
+		m_rom.getSingle(0, i, m_singleEditBuffer[i]);
 }
 
-void Syx::sendInitControlCommands()
+void Microcontroller::sendInitControlCommands()
 {
 	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
 	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
@@ -30,7 +31,7 @@ void Syx::sendInitControlCommands()
 	sendControlCommand(CC_MASTER_VOLUME, 100);			// Set master volume to 100
 }
 
-void Syx::createDefaultState()
+void Microcontroller::createDefaultState()
 {
 //	m_syx.send(Syx::PAGE_C, 0, Syx::PLAY_MODE, 2); // enable multi mode
 
@@ -42,12 +43,12 @@ void Syx::createDefaultState()
 //	m_rom.loadPreset(0, 12, preset);	// CommerseSV on Virus C
 //	m_rom.loadPreset(0, 268, preset);	// CommerseSV on Virus B
 //	m_rom.getSingle(0, 116, preset);	// Virus B: Choir 4 BC
-	m_romFile.getSingle(0, 1, preset);
+	m_rom.getSingle(0, 1, preset);
 
 	sendSingle(0, 0, preset, false);
 }
 
-bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
+bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
 {
 	const int target = (flag1?1:0)|(flag2?2:0);
 	const int hsr = m_hdi08.readStatusRegister();
@@ -56,7 +57,7 @@ bool Syx::needsToWaitForHostBits(char flag1, char flag2) const
 	return m_hdi08.hasDataToSend();
 }
 
-void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
+void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
 	const int hsr=m_hdi08.readStatusRegister();
 	const int target=(flag1?1:0)|(flag2?2:0);
@@ -65,7 +66,7 @@ void Syx::writeHostBitsWithWait(const char flag1, const char flag2) const
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Syx::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti) const
+bool Microcontroller::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti) const
 {
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
@@ -85,12 +86,12 @@ bool Syx::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool ca
 	return true;
 }
 
-void Syx::sendControlCommand(const ControlCommand _command, const int _value) const
+void Microcontroller::sendControlCommand(const ControlCommand _command, const int _value) const
 {
 	send(PAGE_C, 0x0, _command, _value);
 }
 
-bool Syx::send(const Page _page, const int _part, const int _param, const int _value, bool cancelIfFull/* = false*/) const
+bool Microcontroller::send(const Page _page, const int _part, const int _param, const int _value, bool cancelIfFull/* = false*/) const
 {
 	waitUntilReady();
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
@@ -103,7 +104,7 @@ bool Syx::send(const Page _page, const int _part, const int _param, const int _v
 	return true;
 }
 
-bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
+bool Microcontroller::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 {
 	const auto channel = a & 0x0f;
 	const auto status = a & 0xf0;
@@ -113,7 +114,7 @@ bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 	case M_PROGRAMCHANGE:
 		{
 			TPreset single;
-			if(m_romFile.getSingle(m_currentBank[channel], b, single))
+			if(m_rom.getSingle(m_currentBank[channel], b, single))
 			{
 				return sendSingle(0, channel, single, cancelIfFull);
 			}
@@ -137,7 +138,7 @@ bool Syx::sendMIDI(int a,int b,int c, bool cancelIfFull/* = false*/)
 	return true;
 }
 
-bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<uint8_t>& _response)
+bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<uint8_t>& _response)
 {
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -235,7 +236,7 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
 					case 0:	// Single
 						{
 			                TPreset single;
-			                if(!m_romFile.getSingle(0, 0, single))
+			                if(!m_rom.getSingle(0, 0, single))
 				                return true;       				
 
 							LOG("Switch to Single mode");
@@ -247,7 +248,7 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
 					default:
 						{
 							TPreset multi;
-       						if(!m_romFile.getMulti(0, multi))
+       						if(!m_rom.getMulti(0, multi))
 								return true;
 
 							LOG("Switch to Multi mode");
@@ -265,7 +266,7 @@ bool Syx::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::
     return true;
 }
 
-void Syx::waitUntilBufferEmpty() const
+void Microcontroller::waitUntilBufferEmpty() const
 {
 	while (m_hdi08.hasDataToSend())
 	{
@@ -274,7 +275,7 @@ void Syx::waitUntilBufferEmpty() const
 	}
 }
 
-std::vector<TWord> Syx::presetToDSPWords(const TPreset& _preset)
+std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 {
 	int idx = 0;
 
@@ -293,7 +294,7 @@ std::vector<TWord> Syx::presetToDSPWords(const TPreset& _preset)
 	return preset;
 }
 
-void Syx::waitUntilReady() const
+void Microcontroller::waitUntilReady() const
 {
 	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) 
 	{
@@ -302,7 +303,7 @@ void Syx::waitUntilReady() const
 	}
 }
 
-bool Syx::requestMulti(int _bank, int _program, TPreset& _data) const
+bool Microcontroller::requestMulti(int _bank, int _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -315,10 +316,10 @@ bool Syx::requestMulti(int _bank, int _program, TPreset& _data) const
 		return false;
 
 	// Load from flash
-	return m_romFile.getMulti(_program, _data);
+	return m_rom.getMulti(_program, _data);
 }
 
-bool Syx::requestSingle(int _bank, int _program, TPreset& _data) const
+bool Microcontroller::requestSingle(int _bank, int _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -328,10 +329,10 @@ bool Syx::requestSingle(int _bank, int _program, TPreset& _data) const
 	}
 
 	// Load from flash
-	return m_romFile.getSingle(_bank - 1, _program, _data);
+	return m_rom.getSingle(_bank - 1, _program, _data);
 }
 
-bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
+bool Microcontroller::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{
@@ -345,7 +346,7 @@ bool Syx::sendSingle(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
 }
 
-bool Syx::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
+bool Microcontroller::sendMulti(int _bank, int _program, TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{

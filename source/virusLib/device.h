@@ -5,7 +5,7 @@
 
 #include "midiOutParser.h"
 #include "romfile.h"
-#include "syx.h"
+#include "microcontroller.h"
 
 namespace virusLib
 {
@@ -22,7 +22,7 @@ namespace virusLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 
 		ROMFile m_rom;
-		Syx m_syx;
+		Microcontroller m_syx;
 		MidiOutParser m_midiOutParser;
 	};
 }

@@ -8,7 +8,7 @@ set(SOURCES
 	deviceStandalone.cpp deviceStandalone.h
 	midiOutParser.cpp midiOutParser.h
 	romfile.cpp romfile.h
-	syx.cpp syx.h
+	microcontroller.cpp microcontroller.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})

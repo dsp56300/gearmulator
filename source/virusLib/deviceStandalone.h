@@ -2,7 +2,7 @@
 #include <cstdint>
 #include "../synthLib/midiTypes.h"
 #include "../virusLib/romfile.h"
-#include "../virusLib/syx.h"
+#include "../virusLib/microcontroller.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 
@@ -25,7 +25,7 @@ namespace virusLib
 
 		ROMFile m_rom;
 
-		Syx m_syx;
+		Microcontroller m_syx;
 		
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
 		std::unique_ptr<std::thread> m_initThread;

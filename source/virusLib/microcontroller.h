@@ -6,7 +6,7 @@
 
 namespace virusLib
 {
-class Syx
+class Microcontroller
 {
 public:
 	enum SysexMessageType
@@ -86,7 +86,7 @@ public:
 
 	using TPreset = ROMFile::TPreset;
 
-	explicit Syx(dsp56k::HDI08& hdi08, ROMFile& romFile);
+	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
 	bool sendPreset(uint32_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false, bool isMulti = false) const;
 	void sendControlCommand(ControlCommand command, int value) const;
@@ -110,7 +110,7 @@ private:
 	void waitUntilBufferEmpty() const;
 	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
 	dsp56k::HDI08& m_hdi08;
-	ROMFile& m_romFile;
+	ROMFile& m_rom;
 	const uint8_t m_deviceId = 0;
 
 	TPreset m_multiEditBuffer;
