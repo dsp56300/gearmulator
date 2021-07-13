@@ -130,7 +130,7 @@ namespace synthLib
 
 			const auto clockTickPos = _ppqPos * clockTicksPerQuarter;
 
-			if(m_clockTickPos <= 0.001f)
+			if(m_clockTickPos <= 0.001f || clockTickPos < m_clockTickPos)
 				m_clockTickPos = std::floor(clockTickPos);
 
 			const float offset = clockTickPos - m_clockTickPos;
