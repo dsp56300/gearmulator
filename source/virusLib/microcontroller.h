@@ -129,6 +129,10 @@ private:
 	bool loadMultiSingle(uint8_t _part);
 	bool loadMultiSingle(uint8_t _part, const TPreset& _multi);
 
+	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
+	static void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value);
+	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
+	
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_rom;
 

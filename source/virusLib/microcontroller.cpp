@@ -168,8 +168,12 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 				partBankSelect(channel, c, false);
 			return true;
 		default:
+			applyToSingleEditBuffer(PAGE_A, singleMode ? channel : 0, b, c);
 			break;
 		}
+		break;
+	case M_POLYPRESSURE:
+		applyToSingleEditBuffer(PAGE_B, singleMode ? channel : 0, b, c);
 		break;
 	default:
 		break;
@@ -282,6 +286,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 				if(page == PAGE_C)
 				{
+					applyToMultiEditBuffer(part, param, value);
+
 					const auto command = static_cast<ControlCommand>(param);
 
 					switch(command)
@@ -324,6 +330,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 					default:
 						break;
 					}
+				}
+				else
+				{
+					applyToSingleEditBuffer(page, part, param, value);
 				}
 
 				return send(page, part, param, value, _cancelIfFull);
@@ -525,6 +535,25 @@ void Microcontroller::process(size_t _size)
 			++m_pendingSingleWrites;			
 		}
 	}
+}
+
+void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
+{
+	if(m_globalSettings[PLAY_MODE] == PlayModeSingle)
+		applyToSingleEditBuffer(m_singleEditBuffer, _page, _param, _value);
+	else
+		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
+}
+
+void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
+{
+	// The manual does not have a Single dump specification, therefore I assume that its a 1:1 mapping of pages A and B
+	_single[_page * 128 + _param] = _value;
+}
+
+void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t _param, const uint8_t _value)
+{
+	// TODO: This is horrible. We need to remap everything
 }
 
 }
