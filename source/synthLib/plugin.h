@@ -46,5 +46,6 @@ namespace synthLib
 		// MIDI Clock
 		bool m_isPlaying = false;
 		uint32_t m_lastKnownBeat = 0;
+		float m_clockTickPos = 0.0f;
 	};
 }

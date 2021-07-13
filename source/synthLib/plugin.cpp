@@ -117,6 +117,7 @@ namespace synthLib
 			SMidiEvent evStop;
 			evStop.a = M_STOP;
 			m_midiIn.insert(m_midiIn.begin(), evStop);
+			m_clockTickPos = 0.0f;
 		}
 
 		if(m_isPlaying)
@@ -128,9 +129,13 @@ namespace synthLib
 			const float samplesPerClock = m_hostSamplerate / clockTicksPerSecond;
 
 			const auto clockTickPos = _ppqPos * clockTicksPerQuarter;
-			const float offset = clockTickPos - std::floorf(clockTickPos);
 
-			const float firstSamplePos = (1.0f - offset) * samplesPerClock;
+			if(m_clockTickPos <= 0.001f)
+				m_clockTickPos = std::floor(clockTickPos);
+
+			const float offset = clockTickPos - m_clockTickPos;
+
+			const float firstSamplePos = std::max((1.0f - offset) * samplesPerClock, 0.0f);
 
 			const auto max = static_cast<float>(_sampleCount);
 
@@ -148,7 +153,6 @@ namespace synthLib
 					{
 						evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
 						evClock.offset = insertPos;
-						LOG("MC at " << evClock.offset);
 						m_midiIn.insert(it, evClock);
 						found = true;
 						break;
@@ -160,10 +164,10 @@ namespace synthLib
 					evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
 					evClock.offset = insertPos;
 					m_midiIn.push_back(evClock);
-					LOG("MC at " << evClock.offset);
 				}
 
 				needsStart = false;
+				m_clockTickPos += 1.0f;
 			}
 		}
 	}
