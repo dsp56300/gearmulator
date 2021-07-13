@@ -17,10 +17,7 @@ add_subdirectory(source/virusLib)
 add_subdirectory(source/libresample)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
-	set(VIRUS_VST2Filter false)	# skip for now
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
-else()
-	set(VIRUS_VST2Filter false)
 endif()
 
 add_subdirectory(source/ctrlr/JUCE)
@@ -42,39 +39,6 @@ endif()
 add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
 target_link_libraries(virusTestConsole PUBLIC virusLib)
-
-# ----------------- VST2 Filter Plugin
-
-if(VIRUS_VST2Filter)
-	add_subdirectory(source/vstsdk2.4.2)
-	add_subdirectory(source/vst2filter)
-
-	add_library(virusVstFilter MODULE)
-
-	target_sources(virusVstFilter PRIVATE source/vstsdk2.4.2/public.sdk/source/vst2.x/vstplugmain.cpp)
-	if(MSVC)
-		target_sources(virusVstFilter PRIVATE source/vstsdk2.4.2/public.sdk/samples/vst2.x/win/vstplug.def source/vst2/version.rc)
-	elseif(APPLE)
-		set_target_properties(virusVstFilter PROPERTIES BUNDLE TRUE)
-		set_target_properties(virusVstFilter PROPERTIES CXX_VISIBILITY_PRESET default)
-		set_target_properties(virusVstFilter PROPERTIES CMAKE_C_VISIBILITY_PRESET default)
-		set_target_properties(virusVstFilter PROPERTIES XCODE_ATTRIBUTE_INFOPLIST_FILE "source/vst2filter/Info.plist")
-  		set_target_properties(virusVstFilter PROPERTIES XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES")
-		set_target_properties(virusVstFilter PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst")
-		set_target_properties(virusVstFilter PROPERTIES XCODE_ATTRIBUTE_GENERATE_MASTER_OBJECT_FILE "YES")
-		set_target_properties(virusVstFilter PROPERTIES XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load")
-	endif()
-
-	target_include_directories(virusVstFilter PRIVATE source/vstsdk2.4.2/)
-
-	target_link_libraries(virusVstFilter virusFilterVst2 vstsdk2)
-
-	if(MSVC)
-		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusVST2Filter${CMAKE_VS_PLATFORM_NAME}")
-	else()
-		set_target_properties(virusVstFilter PROPERTIES OUTPUT_NAME "VirusVST2Filter")
-	endif()
-endif()
 
 # ----------------- CPack
 

@@ -1,6 +1,0 @@
-#pragma once 
-
-#define FILEVER        @virusEmu_VERSION_MAJOR@,@virusEmu_VERSION_MINOR@,@virusEmu_VERSION_PATCH@,0
-#define PRODUCTVER     FILEVER
-#define STRFILEVER     "@virusEmu_VERSION_MAJOR@, @virusEmu_VERSION_MINOR@, @virusEmu_VERSION_PATCH@, 0"
-#define STRPRODUCTVER  STRFILEVER
