@@ -192,8 +192,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	const auto manufacturerB = _data[2];
 	const auto manufacturerC = _data[3];
 	const auto productId = _data[4];
-    const auto deviceId = _data[5];
-    const auto cmd = _data[6];
+	const auto deviceId = _data[5];
+	const auto cmd = _data[6];
 
 	_response.clear();
 
@@ -205,119 +205,122 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildPresetResponse = [&](uint8_t _type, uint8_t _bank, uint8_t _program, const TPreset& _dump)
 	{
-        _response.resize(1024);
-        _response[0] = M_STARTOFSYSEX;
-        _response[1] = manufacturerA;
-        _response[2] = manufacturerB;
-        _response[3] = manufacturerC;
-        _response[4] = productId;
-        _response[5] = deviceId;
-        _response[6] = _type;
-        _response[7] = _bank;
-        _response[8] = _program;
+		_response.resize(1024);
+		_response[0] = M_STARTOFSYSEX;
+		_response[1] = manufacturerA;
+		_response[2] = manufacturerB;
+		_response[3] = manufacturerC;
+		_response[4] = productId;
+		_response[5] = deviceId;
+		_response[6] = _type;
+		_response[7] = _bank;
+		_response[8] = _program;
 
-        uint8_t cs = deviceId + 11 + _response[7];
-        size_t idx = 9;
-        for(const auto value : _dump)
-        {
-            _response[idx++] = value;
-            cs += value;
-        }
-        _response[idx++] = cs & 0x7f; // checksum
-        _response[idx++] = M_ENDOFSYSEX;
-        assert(idx < _response.size() && "memory corruption!");
-        _response.resize(idx);
+		uint8_t cs = deviceId + 11 + _response[7];
+		size_t idx = 9;
+		for(const auto value : _dump)
+		{
+			_response[idx++] = value;
+			cs += value;
+		}
+		_response[idx++] = cs & 0x7f; // checksum
+		_response[idx++] = M_ENDOFSYSEX;
+		assert(idx < _response.size() && "memory corruption!");
+		_response.resize(idx);
 	};
 
-    switch (cmd)
-    {
-        case DUMP_SINGLE: 
+	switch (cmd)
+	{
+		case DUMP_SINGLE: 
 			{
-	            const uint8_t bank = _data[7];
-	            const uint8_t program = _data[8];
-			    LOG("Dump Single, Bank " << bank << ", program " << program);
-	            TPreset dump;
-	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-	            return writeSingle(bank, program, dump, _cancelIfFull);
-	        }
+				const uint8_t bank = _data[7];
+				const uint8_t program = _data[8];
+				LOG("Dump Single, Bank " << bank << ", program " << program);
+				TPreset dump;
+				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				return writeSingle(bank, program, dump, _cancelIfFull);
+			}
 		case DUMP_MULTI: 
 			{
-	            const uint8_t bank = _data[7];
-	            const uint8_t program = _data[8];
-			    LOG("Dump Multi, Bank " << bank << ", program " << program);
-	            TPreset dump;
-	            std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-	            return writeMulti(bank, program, dump, _cancelIfFull);
-	        }
+				const uint8_t bank = _data[7];
+				const uint8_t program = _data[8];
+				LOG("Dump Multi, Bank " << bank << ", program " << program);
+				TPreset dump;
+				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				return writeMulti(bank, program, dump, _cancelIfFull);
+			}
 		case REQUEST_SINGLE:
-	        {
-	            const uint8_t bank = _data[7];
-	            const uint8_t program = _data[8];
-			    LOG("Request Single, Bank " << bank << ", program " << program);
-	            TPreset dump;
-	            const auto res = requestSingle(bank, program, dump);
+			{
+				const uint8_t bank = _data[7];
+				const uint8_t program = _data[8];
+				LOG("Request Single, Bank " << bank << ", program " << program);
+				TPreset dump;
+				const auto res = requestSingle(bank, program, dump);
 				if(res)
 					buildPresetResponse(DUMP_SINGLE, bank, program, dump);
 				break;
-	        }
-        case REQUEST_MULTI:
+			}
+		case REQUEST_MULTI:
 			{
-	            const uint8_t bank = _data[7];
-	            const uint8_t program = _data[8];
-			    LOG("Request Multi, Bank " << bank << ", program " << program);
-	            TPreset dump;
-	            const auto res = requestMulti(bank, program, dump);
-        		if(res)
-			        buildPresetResponse(DUMP_MULTI, bank, program, dump);
-	            break;
-	        }
-        case PARAM_CHANGE_A:
-        case PARAM_CHANGE_B:
-        case PARAM_CHANGE_C:
-    		{
-        		const auto page = static_cast<Page>(cmd);
+				const uint8_t bank = _data[7];
+				const uint8_t program = _data[8];
+				LOG("Request Multi, Bank " << bank << ", program " << program);
+				TPreset dump;
+				const auto res = requestMulti(bank, program, dump);
+				if(res)
+					buildPresetResponse(DUMP_MULTI, bank, program, dump);
+				break;
+			}
+		case PARAM_CHANGE_A:
+		case PARAM_CHANGE_B:
+		case PARAM_CHANGE_C:
+			{
+				const auto page = static_cast<Page>(cmd);
 
-        		if(page == PAGE_C && _data[8] == PLAY_MODE)
-       			{
-        			const auto playMode = _data[9];
+				if(page == PAGE_C)
+				{
+					if(_data[8] == PLAY_MODE)
+					{
+						const auto playMode = _data[9];
 
-       				switch(playMode)
-       				{
-					case PlayModeSingle:
+						switch(playMode)
 						{
-			                TPreset single;
-			                if(!getSingle(0, 0, single))
-				                return true;       				
+						case PlayModeSingle:
+							{
+								TPreset single;
+								if(!getSingle(0, 0, single))
+									return true;       				
 
-							m_globalSettings[PLAY_MODE] = playMode;
+								m_globalSettings[PLAY_MODE] = playMode;
 
-							LOG("Switch to Single mode");
-			                return writeSingle(0, SINGLE, single, _cancelIfFull);
+								LOG("Switch to Single mode");
+								return writeSingle(0, SINGLE, single, _cancelIfFull);
+							}
+						case PlayModeMultiSingle:
+						case PlayModeMulti:
+							{
+								TPreset multi;
+								if(!m_rom.getMulti(0, multi))
+									return true;
+
+								m_globalSettings[PLAY_MODE] = playMode;
+
+								LOG("Switch to Multi mode");
+								return writeMulti(0, 0, multi, _cancelIfFull);
+							}
+						default:
+							return true;
 						}
-					case PlayModeMultiSingle:
-					case PlayModeMulti:
-						{
-							TPreset multi;
-       						if(!m_rom.getMulti(0, multi))
-								return true;
-
-							m_globalSettings[PLAY_MODE] = playMode;
-
-							LOG("Switch to Multi mode");
-							return writeMulti(0, 0, multi, _cancelIfFull);
-						}
-					default:
-						return true;
-       				}
-	            }
+					}
+				}
 
 				return send(page, _data[7], _data[8], _data[9], _cancelIfFull);
-	        }
-        default:
-            LOG("Unknown sysex command " << HEXN(cmd, 2));
-    }
+			}
+		default:
+			LOG("Unknown sysex command " << HEXN(cmd, 2));
+	}
 
-    return true;
+	return true;
 }
 
 void Microcontroller::waitUntilBufferEmpty() const
