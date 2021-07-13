@@ -169,7 +169,6 @@ bool Microcontroller::sendMIDI(int a, int b, int c, bool cancelIfFull/* = false*
 		switch(b)
 		{
 		case MC_BANKSELECTLSB:
-		case MC_BANKSELECTMSB:
 			if(singleMode)
 				m_currentBank = c % m_singles.size();
 			else
