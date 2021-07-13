@@ -19,12 +19,13 @@ namespace synthLib
 		void setSamplerate(float _samplerate);
 		void setBlockSize(size_t _blockSize);
 
-		void process(float** _inputs, float** _outputs, size_t _count);
+		void process(float** _inputs, float** _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;
 
 	private:
+		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying);
 		float* getDummyBuffer(size_t _minimumSize);
 		
 		std::vector<SMidiEvent> m_midiIn;
@@ -38,5 +39,8 @@ namespace synthLib
 		Device* const m_device;
 
 		std::vector<float> m_dummyBuffer;
+
+		float m_hostSamplerate = 0.0f;
+		float m_hostSamplerateInv = 0.0f;
 	};
 }

@@ -54,12 +54,16 @@ namespace synthLib
 	{
 		std::lock_guard lock(m_lock);
 		m_resampler.setHostSamplerate(_samplerate);
+		m_hostSamplerate = _samplerate;
+		m_hostSamplerateInv = _samplerate > 0 ? 1.0f / _samplerate : 0.0f;
 	}
 
-	void Plugin::process(float** _inputs, float** _outputs, size_t _count)
+	void Plugin::process(float** _inputs, float** _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
 		if(!m_device->isValid())
 			return;
+
+		processMidiClock(_bpm, _ppqPos, _isPlaying);
 
 		float* inputs[8] {};
 		float* outputs[8] {};
@@ -88,6 +92,10 @@ namespace synthLib
 	bool Plugin::isValid() const
 	{
 		return m_device->isValid();
+	}
+
+	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying)
+	{
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)
