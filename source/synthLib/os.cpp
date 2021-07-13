@@ -150,7 +150,8 @@ namespace synthLib
 		{
 			for (const std::filesystem::directory_entry& entry : std::filesystem::directory_iterator(path))
 			{
-				const auto file = entry.path();
+				const auto& file = entry.path();
+
 				if(!file.has_extension())
 					continue;
 
