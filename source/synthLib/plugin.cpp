@@ -98,6 +98,9 @@ namespace synthLib
 
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
+		if(_bpm < 1.0f)
+			return;
+
 		auto needsStart = false;
 
 		if(_isPlaying && !m_isPlaying)

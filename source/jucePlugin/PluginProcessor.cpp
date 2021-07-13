@@ -190,9 +190,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	midiMessages.clear();
 
-    juce::AudioPlayHead::CurrentPositionInfo pos;
-
-	getPlayHead()->getCurrentPosition(pos);
+    juce::AudioPlayHead::CurrentPositionInfo pos{0};
+	
+	auto* playHead = getPlayHead();
+	if(playHead)
+		playHead->getCurrentPosition(pos);
 
 	m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm), static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
