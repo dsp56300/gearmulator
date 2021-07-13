@@ -114,7 +114,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	// Attach command stream
 	std::thread feedCommandStream([&]()
 	{
-		periph.getHDI08().writeRX(reinterpret_cast<int32_t*>(&commandStream[0]),commandStream.size());
+		periph.getHDI08().writeRX(commandStream);
 	});
 
 	// Initialize the DSP

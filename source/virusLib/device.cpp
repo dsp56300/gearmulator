@@ -40,6 +40,12 @@ namespace virusLib
 		return m_rom.isValid();
 	}
 
+	void Device::process(float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+	{
+		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
+		m_syx.process(_size);
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		if(_ev.sysex.empty())
@@ -48,12 +54,12 @@ namespace virusLib
 			return m_syx.sendMIDI(_ev.a, _ev.b, _ev.c, true);
 		}
 
-		synthLib::SMidiEvent response;
+		std::vector<synthLib::SMidiEvent> responses;
 
-		if(!m_syx.sendSysex(_ev.sysex, true, response.sysex))
+		if(!m_syx.sendSysex(_ev.sysex, true, responses))
 			return false;
 
-		if(!response.sysex.empty())
+		for (const auto& response : responses)
 			_response.emplace_back(response);
 
 		return true;

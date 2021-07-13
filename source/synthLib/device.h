@@ -14,7 +14,7 @@ namespace synthLib
 	public:
 		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress);
 		virtual ~Device();
-		void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
+		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setBlockSize(size_t _size);
 
 		void startDSPThread();
