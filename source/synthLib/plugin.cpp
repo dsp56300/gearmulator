@@ -1,6 +1,8 @@
 #include "plugin.h"
 #include "device.h"
 
+#include <cmath>
+
 using namespace synthLib;
 
 namespace synthLib
