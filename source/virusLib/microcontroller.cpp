@@ -226,7 +226,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
         }
         _response[idx++] = cs & 0x7f; // checksum
         _response[idx++] = M_ENDOFSYSEX;
-        assert(idx < response.size() && "memory corruption!");
+        assert(idx < _response.size() && "memory corruption!");
         _response.resize(idx);
 	};
 
