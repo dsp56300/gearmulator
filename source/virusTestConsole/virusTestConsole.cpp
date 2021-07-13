@@ -1,4 +1,3 @@
-#include <fstream>
 #include <iostream>
 #include <vector>
 
@@ -66,8 +65,6 @@ void audioCallback(dsp56k::Audio* audio)
 			{
 				if(audioOut[c][i] != 0.0f)
 				{
-//					memory.clearHeatmap();
-//					saveHeatmapInstr = dsp.getInstructionCounter()+0x10000000;
 					audioData.reserve(2048);
 				}
 			}
@@ -156,11 +153,9 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 }
 void midiNoteOn(void *data,DSP *dsp)
 {
-	Microcontroller* syx=(Microcontroller*)data;
+	auto* uc = static_cast<Microcontroller*>(data);
 	LOG("Sending Note On!");
-	syx->sendMIDI(0x90,60,0x7f);	// Note On
-//	syx->sendControlCommand(Syx::AUDITION, 0x7f);
-//	syx->sendMIDI(0xB0,113,0);	// Send FX off
+	uc->sendMIDI(0x90,60,0x7f);	// Note On
 
 }
 void midiCallback(void *data,DSP *dsp)
@@ -173,15 +168,7 @@ void midiCallback(void *data,DSP *dsp)
 
 	// Send preset
 	syx->writeSingle(0, Microcontroller::SINGLE, preset, false);
-//	syx->send(Syx::Page::PAGE_B,0,100, 1);		// distortion curve. setting this to nonzero will break a preset.
 
-//	syx->send(Syx::Page::PAGE_A,0,49, 0);		// saturation curve.
-//	syx->send(Syx::Page::PAGE_A,0,51, 7);		// filter type
-
-	// MIDI Tempo meta message, set tempo to 120 bpm
-//	syx->sendMIDI(0xFF,0x51,0x03);
-//	syx->sendMIDI(0x07,0xA1,0x20);
-		
 	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
 }
 
@@ -254,25 +241,8 @@ int main(int _argc, char* _argv[])
 	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
-	long long saveHeatmapInstr = 0;
 
-#if MEMORY_HEAT_MAP
-	const auto thread = std::thread([&]
-	{
-		while(true)
-		{
-			dsp.exec();
-
-			if(saveHeatmapInstr && dsp.getInstructionCounter() >= saveHeatmapInstr)
-			{
-				memory.saveHeatmap("heatmap.txt", false);
-				saveHeatmapInstr=0;
-			}
-		}
-	});
-#else
 	DSPThread dspThread(dsp);
-#endif
 
 	MidiOutParser midiOut;
 	
@@ -292,9 +262,6 @@ int main(int _argc, char* _argv[])
 //	memory.saveAsText("Virus_X.txt", MemArea_X, 0, memory.size());
 //	memory.saveAsText("Virus_Y.txt", MemArea_Y, 0, memory.size());
 //	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
-
-
-
 
 	while (true)
 	{
