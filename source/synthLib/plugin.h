@@ -25,7 +25,7 @@ namespace synthLib
 		bool isValid() const;
 
 	private:
-		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying);
+		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		
 		std::vector<SMidiEvent> m_midiIn;
@@ -42,5 +42,9 @@ namespace synthLib
 
 		float m_hostSamplerate = 0.0f;
 		float m_hostSamplerateInv = 0.0f;
+
+		// MIDI Clock
+		bool m_isPlaying = false;
+		uint32_t m_lastKnownBeat = 0;
 	};
 }

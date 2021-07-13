@@ -63,7 +63,7 @@ namespace synthLib
 		if(!m_device->isValid())
 			return;
 
-		processMidiClock(_bpm, _ppqPos, _isPlaying);
+		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		float* inputs[8] {};
 		float* outputs[8] {};
@@ -94,8 +94,78 @@ namespace synthLib
 		return m_device->isValid();
 	}
 
-	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying)
+	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
+		auto needsStart = false;
+
+		if(_isPlaying && !m_isPlaying)
+		{
+			const uint32_t beat = dsp56k::floor_int(_ppqPos);
+
+			if(beat > m_lastKnownBeat)
+			{
+				// start
+				m_isPlaying = true;
+				needsStart = true;
+			}
+			m_lastKnownBeat = beat;
+		}
+		else if(m_isPlaying && !_isPlaying)
+		{
+			m_isPlaying = false;
+
+			SMidiEvent evStop;
+			evStop.a = M_STOP;
+			m_midiIn.insert(m_midiIn.begin(), evStop);
+		}
+
+		if(m_isPlaying)
+		{
+			constexpr float clockTicksPerQuarter = 24.0f;
+
+			const float quartersPerSecond = _bpm / 60.0f;
+			const float clockTicksPerSecond = clockTicksPerQuarter * quartersPerSecond;
+			const float samplesPerClock = m_hostSamplerate / clockTicksPerSecond;
+
+			const auto clockTickPos = _ppqPos * clockTicksPerQuarter;
+			const float offset = clockTickPos - std::floorf(clockTickPos);
+
+			const float firstSamplePos = (1.0f - offset) * samplesPerClock;
+
+			const auto max = static_cast<float>(_sampleCount);
+
+			SMidiEvent evClock;
+
+			for(float pos = std::floorf(firstSamplePos); pos < max; pos += samplesPerClock)
+			{
+				const int insertPos = dsp56k::floor_int(pos);
+
+				bool found = false;
+
+				for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
+				{
+					if(it->offset > insertPos)
+					{
+						evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+						evClock.offset = insertPos;
+						LOG("MC at " << evClock.offset);
+						m_midiIn.insert(it, evClock);
+						found = true;
+						break;
+					}
+				}
+
+				if(!found)
+				{
+					evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+					evClock.offset = insertPos;
+					m_midiIn.push_back(evClock);
+					LOG("MC at " << evClock.offset);
+				}
+
+				needsStart = false;
+			}
+		}
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)
