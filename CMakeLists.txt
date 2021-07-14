@@ -25,12 +25,11 @@ add_subdirectory(source/ctrlr/JUCE)
 
 # ----------------- Juce based audio plugin
 
-
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/jucePlugin)
-	if(UNIX AND NOT APPLE)
+	if(UNIX AND NOT APPLE AND JUCE_GLOBAL_VST2_SDK_PATH)
 		install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
 	endif()
 
