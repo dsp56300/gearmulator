@@ -146,7 +146,7 @@ namespace synthLib
 
 			SMidiEvent evClock;
 
-			for(float pos = std::floorf(firstSamplePos); pos < max; pos += samplesPerClock)
+			for(float pos = std::floor(firstSamplePos); pos < max; pos += samplesPerClock)
 			{
 				const int insertPos = dsp56k::floor_int(pos);
 
