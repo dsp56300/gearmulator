@@ -146,25 +146,30 @@ namespace synthLib
 
 			SMidiEvent evClock;
 
+			const auto midiEventsEmpty = m_midiIn.empty();
+
 			for(float pos = std::floor(firstSamplePos); pos < max; pos += samplesPerClock)
 			{
 				const int insertPos = dsp56k::floor_int(pos);
 
 				bool found = false;
 
-				for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
+				if(!midiEventsEmpty)
 				{
-					if(it->offset > insertPos)
+					for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
 					{
-						evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
-						evClock.offset = insertPos;
-						m_midiIn.insert(it, evClock);
-						found = true;
-						break;
+						if(it->offset > insertPos)
+						{
+							evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+							evClock.offset = insertPos;
+							m_midiIn.insert(it, evClock);
+							found = true;
+							break;
+						}
 					}
 				}
 
-				if(!found)
+				if(midiEventsEmpty || !found)
 				{
 					evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
 					evClock.offset = insertPos;
