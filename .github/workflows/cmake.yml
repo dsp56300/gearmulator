@@ -16,7 +16,7 @@ jobs:
     steps:
     - name: Install X
       if: matrix.os == 'ubuntu-latest'
-      run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev
+      run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev
 
     - uses: actions/checkout@v2
       with:
