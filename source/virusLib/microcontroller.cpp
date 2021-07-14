@@ -243,7 +243,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 				return writeSingle(bank, program, dump, _cancelIfFull);
 			}
-		case DUMP_MULTI: 
+		case DUMP_MULTI:
 			{
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
@@ -261,6 +261,37 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const auto res = requestSingle(bank, program, dump);
 				if(res)
 					buildPresetResponse(DUMP_SINGLE, bank, program, dump);
+				break;
+			}
+		case REQUEST_BANK_SINGLE:
+			{
+				const uint8_t bank = _data[7];
+
+				if(bank > 0 && bank < m_singles.size())
+				{
+					// eat this, host, whoever you are. 128 single packets
+					for(uint8_t i=0; i<m_singles[bank].size(); ++i)
+					{
+						TPreset data;
+						const auto res = requestSingle(bank, i, data);
+						buildPresetResponse(DUMP_SINGLE, bank, i, data);
+					}
+				}
+				break;
+			}
+		case REQUEST_BANK_MULTI:
+			{
+				const uint8_t bank = _data[7];
+				if(bank == 1)
+				{
+					// eat this, host, whoever you are. 128 multi packets
+					for(uint8_t i=0; i<128; ++i)
+					{
+						TPreset data;
+						const auto res = requestMulti(bank, i, data);
+						buildPresetResponse(DUMP_MULTI, bank, i, data);
+					}
+				}
 				break;
 			}
 		case REQUEST_MULTI:
