@@ -16,6 +16,9 @@ namespace virusLib
 {
 Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0}), m_currentSingles({0})
 {
+	if(!_romFile.isValid())
+		return;
+
 	m_globalSettings.fill(0);
 	m_currentBanks.fill(0);
 
