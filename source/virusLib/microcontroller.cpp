@@ -582,7 +582,13 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
 {
 	// The manual does not have a Single dump specification, therefore I assume that its a 1:1 mapping of pages A and B
-	_single[_page * 128 + _param] = _value;
+
+	const uint32_t offset = (_page - PAGE_A) * 128 + _param;
+
+	if(offset >= _single.size())
+		return;
+
+	_single[offset] = _value;
 }
 
 void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t _param, const uint8_t _value)
