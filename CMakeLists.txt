@@ -41,7 +41,7 @@ target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole
 target_link_libraries(virusTestConsole PUBLIC virusLib)
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(virusTestConsole -static-libgcc -static-libstdc++)
+	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
 # ----------------- CPack

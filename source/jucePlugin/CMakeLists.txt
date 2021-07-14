@@ -47,9 +47,8 @@ PUBLIC
     #juce::juce_recommended_config_flags
     #juce::juce_recommended_lto_flags
     #juce::juce_recommended_warning_flags
-	-static-libgcc -static-libstdc++
 )
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(jucePlugin -static-libgcc -static-libstdc++)
+	target_link_libraries(jucePlugin PUBLIC -static-libgcc -static-libstdc++)
 endif()
