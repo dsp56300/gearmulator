@@ -38,7 +38,11 @@ endif()
 
 add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
-target_link_libraries(virusTestConsole PUBLIC virusLib -static-libgcc -static-libstdc++)
+target_link_libraries(virusTestConsole PUBLIC virusLib)
+
+if(UNIX AND NOT APPLE)
+	target_link_libraries(virusTestConsole -static-libgcc -static-libstdc++)
+endif()
 
 # ----------------- CPack
 
