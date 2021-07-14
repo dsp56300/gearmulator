@@ -10,7 +10,7 @@ project(gearmulator VERSION 1.1.5)
 include(base.cmake)
 
 set(ASMJIT_STATIC TRUE)
-
+option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
@@ -25,14 +25,17 @@ add_subdirectory(source/ctrlr/JUCE)
 
 # ----------------- Juce based audio plugin
 
+
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+	add_subdirectory(source/jucePlugin)
+	if(UNIX AND NOT APPLE)
+		install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+	endif()
 
-add_subdirectory(source/jucePlugin)
-
-if(UNIX AND NOT APPLE)
-	install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
 endif()
+
 
 # ----------------- Test Console
 
