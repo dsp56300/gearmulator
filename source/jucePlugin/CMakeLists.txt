@@ -3,6 +3,12 @@ project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
+if(JUCE_GLOBAL_VST2_SDK_PATH)
+    set(VST "VST")
+else()
+    set(VST "")
+endif()
+
 juce_add_plugin(jucePlugin
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
@@ -17,7 +23,7 @@ juce_add_plugin(jucePlugin
     PLUGIN_MANUFACTURER_CODE TusP               # A four-character manufacturer id with at least one upper-case character
     PLUGIN_CODE TusV                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
-    FORMATS AU VST3 VST Standalone              # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
+    FORMATS AU VST3 ${VST} Standalone           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "DSP56300Emu"                  # The name of the final executable, which can differ from the target name
 )
 
