@@ -232,14 +232,24 @@ void AudioPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
-    juce::ignoreUnused (destData);
+
+	std::vector<uint8_t> state;
+	m_plugin.getState(state, synthLib::StateTypeGlobal);
+	destData.append(&state[0], state.size());
 }
 
 void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
-    juce::ignoreUnused (data, sizeInBytes);
+
+	if(sizeInBytes < 1)
+		return;
+
+	std::vector<uint8_t> state;
+	state.resize(sizeInBytes);
+	memcpy(&state[0], data, sizeInBytes);
+	m_plugin.setState(state);
 }
 
 void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)

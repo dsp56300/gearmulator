@@ -46,6 +46,16 @@ namespace virusLib
 		m_syx.process(_size);
 	}
 
+	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
+	{
+		return false;
+	}
+
+	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
+	{
+		return false;
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		if(_ev.sysex.empty())
