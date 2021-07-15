@@ -48,12 +48,12 @@ namespace virusLib
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return false;
+		return m_syx.getState(_state, _type);
 	}
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return false;
+		return m_syx.setState(_state, _type);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)

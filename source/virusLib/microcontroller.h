@@ -5,6 +5,8 @@
 
 #include "romfile.h"
 
+#include "../synthLib/deviceTypes.h"
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -15,7 +17,7 @@ namespace virusLib
 class Microcontroller
 {
 public:
-	enum SysexMessageType
+	enum SysexMessageType : uint8_t
 	{
 		DUMP_SINGLE                = 0x10,
 		DUMP_MULTI                 = 0x11,
@@ -33,7 +35,7 @@ public:
 		PARAM_CHANGE_C             = 0x72,
 	};
 
-    enum ControlCommand
+    enum ControlCommand : uint8_t
 	{
 		AUDITION					= 01,
 
@@ -102,7 +104,7 @@ public:
 		MASTER_VOLUME				= 127
 	};
 
-	enum MultiDump
+	enum MultiDump : uint8_t
 	{
 		MD_NAME_CHAR_0				= 4,
 		MD_NAME_CHAR_1				= 5,
@@ -140,7 +142,7 @@ public:
 		MD_PART_STATE				= 240,
 	};
 
-	enum MultiPartStateBits
+	enum MultiPartStateBits : uint8_t
 	{
 		MD_PART_ENABLE,
 		MD_PART_MIDI_VOLUME_ENABLE,
@@ -190,6 +192,9 @@ public:
 
 	void createDefaultState();
 	void process(size_t _size);
+
+	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
+	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
