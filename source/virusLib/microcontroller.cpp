@@ -691,6 +691,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 					ev.sysex.resize(i + 1 - begin);
 					memcpy(&ev.sysex[0], &_state[begin], ev.sysex.size());
 					events.emplace_back(ev);
+					break;
 				}
 			}
 		}
