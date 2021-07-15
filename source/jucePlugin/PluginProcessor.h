@@ -44,6 +44,8 @@ public:
     //==============================================================================
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
+    void getCurrentProgramStateInformation (juce::MemoryBlock& destData) override;
+    void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override;
 
 	// _____________
 	//
@@ -55,6 +57,8 @@ public:
 	// _____________
 	//
 private:
+	void setState(const void* _data, size_t _sizeInBytes);
+	
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 
