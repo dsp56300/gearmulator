@@ -327,15 +327,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		buildMultiResponse(0, 0);
 
 		for(uint8_t p=0; p<16; ++p)
-		{
-			const auto partBank = m_multiEditBuffer[MD_PART_BANK_NUMBER + p];
-			const auto partSingle = m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + p];
-
-			TPreset single;
-
-			if(getSingle(partBank, partSingle, single))
-				buildPresetResponse(DUMP_SINGLE, 0, p, single);
-		}
+			buildPresetResponse(DUMP_SINGLE, 0, p, m_singleEditBuffers[p]);
 	};
 
 	switch (cmd)
