@@ -11,6 +11,7 @@ using namespace synthLib;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
+constexpr uint32_t g_presetsPerBank = 128;
 
 constexpr uint8_t g_pageC_global[]     = {45,63,64,65,66,67,68,69,70,85,86,87,90,91,92,93,94,95,96,97,98,99,105,106,110,111,112,113,114,115,116,117,118,120,121,122,123,124,125,126,127};
 constexpr uint8_t g_pageC_multi[]      = {5,6,7,8,9,10,11,12,13,14,22,31,32,33,34,35,36,37,38,39,40,41,72,73,74,75,77,78};
@@ -35,7 +36,7 @@ Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hd
 	{
 		std::vector<TPreset> singles;
 
-		for(uint32_t p=0; p<128; ++p)
+		for(uint32_t p=0; p<g_presetsPerBank; ++p)
 		{
 			const auto bank = b > g_singleRamBankCount ? b - g_singleRamBankCount : b;
 
@@ -203,15 +204,14 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	const auto deviceId = _data[5];
 	const auto cmd = _data[6];
 
-	if (deviceId != m_deviceId) 
+	if (deviceId != m_globalSettings[DEVICE_ID])
 	{
 		// ignore messages intended for a different device
 		return true;
 	}
 
-	auto buildPresetResponse = [&](uint8_t _type, uint8_t _bank, uint8_t _program, const TPreset& _dump)
+	auto buildResponseHeader = [&](SMidiEvent& ev)
 	{
-		SMidiEvent ev;
 		auto& response = ev.sysex;
 
 		response.reserve(1024);
@@ -222,6 +222,15 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(manufacturerC);
 		response.push_back(productId);
 		response.push_back(deviceId);
+	};
+
+	auto buildPresetResponse = [&](const uint8_t _type, const uint8_t _bank, const uint8_t _program, const TPreset& _dump)
+	{
+		SMidiEvent ev;
+		auto& response = ev.sysex;
+
+		buildResponseHeader(ev);
+
 		response.push_back(_type);
 		response.push_back(_bank);
 		response.push_back(_program);
@@ -237,6 +246,94 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(M_ENDOFSYSEX);
 
 		_responses.emplace_back(std::move(ev));
+	};
+
+	auto buildSingleResponse = [&](const uint8_t _bank, const uint8_t _program)
+	{
+		TPreset dump;
+		const auto res = requestSingle(_bank, _program, dump);
+		if(res)
+			buildPresetResponse(DUMP_SINGLE, _bank, _program, dump);
+	};
+
+	auto buildMultiResponse = [&](const uint8_t _bank, const uint8_t _program)
+	{
+		TPreset dump;
+		const auto res = requestMulti(_bank, _program, dump);
+		if(res)
+			buildPresetResponse(DUMP_MULTI, _bank, _program, dump);
+	};
+
+	auto buildSingleBankResponse = [&](const uint8_t _bank)
+	{
+		if(_bank > 0 && _bank < m_singles.size())
+		{
+			// eat this, host, whoever you are. 128 single packets
+			for(uint8_t i=0; i<m_singles[_bank].size(); ++i)
+			{
+				TPreset data;
+				const auto res = requestSingle(_bank, i, data);
+				buildPresetResponse(DUMP_SINGLE, _bank, i, data);
+			}
+		}		
+	};
+
+	auto buildMultiBankResponse = [&](const uint8_t _bank)
+	{
+		if(_bank == 1)
+		{
+			// eat this, host, whoever you are. 128 multi packets
+			for(uint8_t i=0; i<g_presetsPerBank; ++i)
+			{
+				TPreset data;
+				const auto res = requestMulti(_bank, i, data);
+				buildPresetResponse(DUMP_MULTI, _bank, i, data);
+			}
+		}
+	};
+
+	auto buildGlobalResponse = [&](const uint8_t _param)
+	{
+		SMidiEvent ev;
+		auto& response = ev.sysex;
+
+		buildResponseHeader(ev);
+
+		response.push_back(PARAM_CHANGE_C);
+		response.push_back(0);	// part = 0
+		response.push_back(_param);
+		response.push_back(m_globalSettings[_param]);
+		response.push_back(M_ENDOFSYSEX);
+	};
+
+	auto buildGlobalResponses = [&]()
+	{
+		for (auto globalParam : g_pageC_global)
+			buildGlobalResponse(globalParam);
+	};
+
+	auto buildTotalResponse = [&]()
+	{
+		buildSingleBankResponse(1);
+		buildSingleBankResponse(2);
+		buildMultiBankResponse(1);
+		buildGlobalResponses();
+	};
+
+	auto buildArrangementResponse = [&]()
+	{
+		buildMultiResponse(0, 0);
+
+		for(uint8_t p=0; p<16; ++p)
+		{
+			const auto partBank = m_multiEditBuffer[MD_PART_BANK_NUMBER + p];
+			const auto partSingle = m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + p];
+
+			TPreset single;
+
+			if(getSingle(partBank, partSingle, single))
+				buildPresetResponse(DUMP_SINGLE, 0, p, single);
+		}
 	};
 
 	switch (cmd)
@@ -264,41 +361,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
 				LOG("Request Single, Bank " << bank << ", program " << program);
-				TPreset dump;
-				const auto res = requestSingle(bank, program, dump);
-				if(res)
-					buildPresetResponse(DUMP_SINGLE, bank, program, dump);
-				break;
-			}
-		case REQUEST_BANK_SINGLE:
-			{
-				const uint8_t bank = _data[7];
-
-				if(bank > 0 && bank < m_singles.size())
-				{
-					// eat this, host, whoever you are. 128 single packets
-					for(uint8_t i=0; i<m_singles[bank].size(); ++i)
-					{
-						TPreset data;
-						const auto res = requestSingle(bank, i, data);
-						buildPresetResponse(DUMP_SINGLE, bank, i, data);
-					}
-				}
-				break;
-			}
-		case REQUEST_BANK_MULTI:
-			{
-				const uint8_t bank = _data[7];
-				if(bank == 1)
-				{
-					// eat this, host, whoever you are. 128 multi packets
-					for(uint8_t i=0; i<128; ++i)
-					{
-						TPreset data;
-						const auto res = requestMulti(bank, i, data);
-						buildPresetResponse(DUMP_MULTI, bank, i, data);
-					}
-				}
+				buildSingleResponse(bank, program);
 				break;
 			}
 		case REQUEST_MULTI:
@@ -306,12 +369,30 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
 				LOG("Request Multi, Bank " << bank << ", program " << program);
-				TPreset dump;
-				const auto res = requestMulti(bank, program, dump);
-				if(res)
-					buildPresetResponse(DUMP_MULTI, bank, program, dump);
+				buildMultiResponse(bank, program);
 				break;
 			}
+		case REQUEST_BANK_SINGLE:
+			{
+				const uint8_t bank = _data[7];
+				buildSingleBankResponse(bank);
+				break;
+			}
+		case REQUEST_BANK_MULTI:
+			{
+				const uint8_t bank = _data[7];
+				buildMultiBankResponse(bank);
+				break;
+			}
+		case REQUEST_GLOBAL:
+			buildGlobalResponses();
+			break;
+		case REQUEST_TOTAL:
+			buildTotalResponse();
+			break;
+		case REQUEST_ARRANGEMENT:
+			buildArrangementResponse();
+			break;
 		case PARAM_CHANGE_A:
 		case PARAM_CHANGE_B:
 		case PARAM_CHANGE_C:
@@ -557,8 +638,8 @@ bool Microcontroller::loadMultiSingle(uint8_t _part)
 
 bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 {
-	const auto partBank = _multi[32 + _part];
-	const auto partSingle = _multi[48 + _part];
+	const auto partBank = _multi[MD_PART_BANK_NUMBER + _part];
+	const auto partSingle = _multi[MD_PART_PROGRAM_NUMBER + _part];
 
 	partBankSelect(_part, partBank, false);
 	return partProgramChange(_part, partSingle, true);
@@ -587,7 +668,7 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 {
 	// The manual does not have a Single dump specification, therefore I assume that its a 1:1 mapping of pages A and B
 
-	const uint32_t offset = (_page - PAGE_A) * 128 + _param;
+	const uint32_t offset = (_page - PAGE_A) * g_presetsPerBank + _param;
 
 	if(offset >= _single.size())
 		return;
