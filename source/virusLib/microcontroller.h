@@ -35,44 +35,120 @@ public:
 
     enum ControlCommand
 	{
-		CC_DEVICE_ID               = 0x5d,  // 93
-		CC_PART_ENABLE             = 0x48,  // 72
-		CC_PART_MIDI_CHANNEL       = 0x22,  // 34
-		CC_PART_OUTPUT_SELECT      = 0x29,  // 41
+		AUDITION					= 01,
 
-		CC_PART_MIDI_VOLUME_ENABLE = 0x49,  // 73
-		CC_PART_MIDI_VOLUME_INIT   = 0x28,  // 40
-		CC_PART_VOLUME             = 0x27,  // 39
-		CC_MASTER_VOLUME           = 0x7f,  // 127
+    	// Multi
+    	MULTI_NAME_CHAR_0			= 5,
+    	MULTI_NAME_CHAR_1			= 6,
+    	MULTI_NAME_CHAR_2			= 7,
+    	MULTI_NAME_CHAR_3			= 8,
+    	MULTI_NAME_CHAR_4			= 9,
+    	MULTI_NAME_CHAR_5			= 10,
+    	MULTI_NAME_CHAR_6			= 11,
+    	MULTI_NAME_CHAR_7			= 12,
+    	MULTI_NAME_CHAR_8			= 13,
+    	MULTI_NAME_CHAR_9			= 14,
 
-		AUDITION				   = 0x01, // 01
-		UNK1a                      = 0x1a, // 26
-		UNK1b                      = 0x1b, // 27
-		UNK1c                      = 0x1c, // 28
-		UNK1d                      = 0x1d, // 29
-    	PART_BANK_SELECT           = 0x1f, // 31		The change is executed once a program change is received
-    	PART_BANK_CHANGE           = 0x20, // 32		The change is executed immediately
-    	PART_PROGRAM_CHANGE        = 0x21, // 33
-		SECOND_OUTPUT_SELECT       = 0x2d, // 45
-		UNK35                      = 0x35, // 53
-		UNK36                      = 0x36, // 54
-		UNK76                      = 0x4c, // 76
-		INPUT_THRU_LEVEL           = 0x5a, // 90
-		INPUT_BOOST                = 0x5b, // 91
-		MASTER_TUNE                = 0x5c, // 92
-		DEVICE_ID                  = 0x5d, // 93
-		MIDI_CONTROL_LOW_PAGE      = 0x5e, // 94
-		MIDI_CONTROL_HIGH_PAGE     = 0x5f, // 95
-		MIDI_ARPEGGIATOR_SEND      = 0x60, // 96
-    	MULTI_PROGRAM_CHANGE       = 0x69, // 105
-		MIDI_CLOCK_RX              = 0x6a, // 106
-		UNK_6d                     = 0x6d, // 109
-		PLAY_MODE                  = 0x7a, // 122
-		PART_NUMBER                = 0x7b, // 123
-		GLOBAL_CHANNEL             = 0x7c, // 124
-		LED_MODE                   = 0x7d, // 125
-		LCD_CONTRAST               = 0x7e, // 126
-		PANEL_DESTINATION          = 0x79, // 121
+    	MULTI_DELAY_OUTPUT_SELECT	= 22,
+
+		UNK1a						= 26,
+		UNK1b						= 27,
+		UNK1c						= 28,
+		UNK1d						= 29,
+
+    	// Multi parts
+    	PART_BANK_SELECT			= 31,		// The change is executed once a program change is received
+		PART_BANK_CHANGE			= 32,		// The change is executed immediately
+		PART_PROGRAM_CHANGE			= 33,
+		PART_MIDI_CHANNEL			= 34,
+		PART_LOW_KEY				= 35,
+		PART_HIGH_KEY				= 36,
+		PART_TRANSPOSE				= 37,
+    	PART_DETUNE					= 38,
+		PART_VOLUME					= 39,
+		PART_MIDI_VOLUME_INIT		= 40,
+		PART_OUTPUT_SELECT			= 41,
+
+		SECOND_OUTPUT_SELECT		= 45,
+
+    	UNK35						= 53,
+		UNK36						= 54,
+
+    	// Multi parts
+    	PART_ENABLE					= 72,
+		PART_MIDI_VOLUME_ENABLE		= 73,
+    	PART_HOLD_PEDAL_ENABLE		= 74,
+    	PART_KEYB_TO_MIDI			= 75,
+    	UNK76						= 76,
+    	PART_NOTE_STEAL_PRIO		= 77,
+    	PART_PROG_CHANGE_ENABLE		= 78,
+
+    	INPUT_THRU_LEVEL			= 90,
+		INPUT_BOOST					= 91,
+		MASTER_TUNE					= 92,
+		DEVICE_ID					= 93,
+		MIDI_CONTROL_LOW_PAGE		= 94,
+		MIDI_CONTROL_HIGH_PAGE		= 95,
+		MIDI_ARPEGGIATOR_SEND		= 96,
+		MULTI_PROGRAM_CHANGE		= 105,
+		MIDI_CLOCK_RX				= 106,
+		UNK6d						= 109,
+		PLAY_MODE					= 122,
+		PART_NUMBER					= 123,
+		GLOBAL_CHANNEL				= 124,
+		LED_MODE					= 125,
+		LCD_CONTRAST				= 126,
+		PANEL_DESTINATION			= 121,
+		MASTER_VOLUME				= 127
+	};
+
+	enum MultiDump
+	{
+		MD_NAME_CHAR_0				= 4,
+		MD_NAME_CHAR_1				= 5,
+		MD_NAME_CHAR_2				= 6,
+		MD_NAME_CHAR_3				= 7,
+		MD_NAME_CHAR_4				= 8,
+		MD_NAME_CHAR_5				= 9,
+		MD_NAME_CHAR_6				= 10,
+		MD_NAME_CHAR_7				= 11,
+		MD_NAME_CHAR_8				= 12,
+		MD_NAME_CHAR_9				= 13,
+
+		MD_CLOCK_TEMPO				= 15,
+		MD_DELAY_MODE				= 16,
+		MD_DELAY_TIME				= 17,
+		MD_DELAY_FEEDBACK			= 18,
+		MD_DELAY_RATE				= 19,
+		MD_DELAY_DEPTH				= 20,
+		MD_DELAY_SHAPE				= 21,
+		MD_DELAY_OUTPUT_SELECT		= 22,
+		MD_DELAY_CLOCK				= 23,
+		MD_DELAY_COLOR				= 24,
+
+		MD_PART_BANK_NUMBER			= 32,
+		MD_PART_PROGRAM_NUMBER		= 48,
+		MD_PART_MIDI_CHANNEL		= 64,
+		MD_PART_LOW_KEY				= 80,
+		MD_PART_HIGH_KEY			= 96,
+		MD_PART_TRANSPOSE			= 112,
+		MD_PART_DETUNE				= 128,
+		MD_PART_VOLUME				= 144,
+		MD_PART_MIDI_VOLUME_INIT	= 160,
+		MD_PART_OUTPUT_SELECT		= 176,
+		MD_PART_EFFECT_SEND			= 192,
+		MD_PART_STATE				= 240,
+	};
+
+	enum MultiPartStateBits
+	{
+		MD_PART_ENABLE,
+		MD_PART_MIDI_VOLUME_ENABLE,
+		MD_PART_HOLD_PEDAL_ENABLE,
+		MD_PART_KEYB_TO_MIDI,
+		MD_PART_INTERNAL_BIT4,
+		MD_PART_NOTE_STEAL_PRIORITY,
+		MD_PART_PROG_CHANGE_ENABLE
 	};
 
 	enum Page

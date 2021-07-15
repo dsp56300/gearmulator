@@ -12,6 +12,10 @@ using namespace synthLib;
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
 
+constexpr uint8_t g_pageC_global[]     = {45,63,64,65,66,67,68,69,70,85,86,87,90,91,92,93,94,95,96,97,98,99,105,106,110,111,112,113,114,115,116,117,118,120,121,122,123,124,125,126,127};
+constexpr uint8_t g_pageC_multi[]      = {5,6,7,8,9,10,11,12,13,14,22,31,32,33,34,35,36,37,38,39,40,41,72,73,74,75,77,78};
+constexpr uint8_t g_pageC_multiPart[]  = {31,32,33,34,35,36,37,38,39,40,41,72,73,74,75,77,78};
+
 namespace virusLib
 {
 Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0}), m_currentSingles({0})
@@ -63,7 +67,7 @@ void Microcontroller::sendInitControlCommands()
 	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
-	sendControlCommand(CC_MASTER_VOLUME, 100);			// Set master volume to 100
+	sendControlCommand(MASTER_VOLUME, 100);			// Set master volume to 100
 }
 
 void Microcontroller::createDefaultState()
