@@ -7,6 +7,8 @@
 
 #include "../synthLib/deviceTypes.h"
 
+#include <list>
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -206,7 +208,7 @@ private:
 	bool partBankSelect(uint8_t _part, uint8_t _value, bool _immediatelySelectSingle);
 	bool partProgramChange(uint8_t _part, uint8_t _value, bool pendingSingleWrite = false);
 	bool multiProgramChange(uint8_t _value);
-	bool loadMulti(uint8_t _program, const TPreset& _multi, bool _loadMultiSingles = true);
+	bool loadMulti(uint8_t _program, const TPreset& _multi);
 	bool loadMultiSingle(uint8_t _part);
 	bool loadMultiSingle(uint8_t _part, const TPreset& _multi);
 
@@ -233,7 +235,15 @@ private:
 	uint8_t m_currentSingle = 0;
 
 	// Device does not like if we send everything at once, therefore we delay the send of Singles after sending a Multi
-	int m_pendingSingleWrites = 16;
+	struct SPendingPresetWrite
+	{
+		uint8_t program = 0;
+		bool isMulti = false;
+		std::vector<dsp56k::TWord> data;
+	};
+
+	std::list<SPendingPresetWrite> m_pendingPresetWrites;
+	uint32_t m_presetWriteCount = 0;
 };
 
 }

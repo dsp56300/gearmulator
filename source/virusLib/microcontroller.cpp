@@ -98,8 +98,11 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 
 bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti)
 {
-	if(cancelIfFull && needsToWaitForHostBits(0,1))
-		return false;
+	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
+	{
+		m_pendingPresetWrites.emplace_back(SPendingPresetWrite{program, isMulti, preset});
+		return true;
+	}
 
 	writeHostBitsWithWait(0,1);
 	// Send header
@@ -107,7 +110,6 @@ bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& pres
 	buf[1] = buf[1] | (program << 8);
 	m_hdi08.writeRX(buf, 2);
 
-	// Send to DSP
 	m_hdi08.writeRX(preset);
 
 	return true;
@@ -618,15 +620,13 @@ bool Microcontroller::multiProgramChange(uint8_t _value)
 	return loadMulti(_value, multi);
 }
 
-bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi, bool _loadMultiSingles)
+bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 {
 	if(!writeMulti(0, _program, _multi, true))
 		return false;
 
 	for(uint8_t p=0; p<16; ++p)
 		loadMultiSingle(p, _multi);
-
-	m_pendingSingleWrites = 0;
 
 	return true;
 }
@@ -647,12 +647,12 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 
 void Microcontroller::process(size_t _size)
 {
-	if(m_pendingSingleWrites < 16 && !m_hdi08.hasDataToSend())
+	if(!m_pendingPresetWrites.empty() && !m_hdi08.hasDataToSend())
 	{
-		if(writeSingle(0, m_pendingSingleWrites, m_singleEditBuffers[m_pendingSingleWrites], true))
-		{
-			++m_pendingSingleWrites;			
-		}
+		const auto preset = m_pendingPresetWrites.front();
+		m_pendingPresetWrites.pop_front();
+
+		sendPreset(preset.program, preset.data, false, preset.isMulti);
 	}
 }
 
