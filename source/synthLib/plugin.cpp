@@ -7,6 +7,8 @@ using namespace synthLib;
 
 namespace synthLib
 {
+	constexpr uint8_t g_stateVersion = 1;
+
 	Plugin::Plugin(Device* _device) : m_device(_device)
 	{
 		m_resampler.setDeviceSamplerate(_device->getSamplerate());
@@ -96,8 +98,43 @@ namespace synthLib
 		return m_device->isValid();
 	}
 
+	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
+	{
+		if(!m_device)
+			return false;
+
+		_state.push_back(g_stateVersion);
+		_state.push_back(_type);
+
+		return m_device->getState(_state, _type);
+	}
+
+	bool Plugin::setState(const std::vector<uint8_t>& _state)
+	{
+		if(!m_device)
+			return false;
+
+		if(_state.size() < 2)
+			return false;
+
+		const auto version = _state[0];
+
+		if(version != g_stateVersion)
+			return false;
+
+		const auto stateType = static_cast<StateType>(_state[1]);
+
+		auto state = _state;
+		state.erase(state.begin(), state.begin() + 2);
+
+		return m_device->setState(state, stateType);
+	}
+
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
+		if(_bpm < 1.0f)
+			return;
+
 		auto needsStart = false;
 
 		if(_isPlaying && !m_isPlaying)
@@ -143,25 +180,30 @@ namespace synthLib
 
 			SMidiEvent evClock;
 
-			for(float pos = std::floorf(firstSamplePos); pos < max; pos += samplesPerClock)
+			const auto midiEventsEmpty = m_midiIn.empty();
+
+			for(float pos = std::floor(firstSamplePos); pos < max; pos += samplesPerClock)
 			{
 				const int insertPos = dsp56k::floor_int(pos);
 
 				bool found = false;
 
-				for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
+				if(!midiEventsEmpty)
 				{
-					if(it->offset > insertPos)
+					for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
 					{
-						evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
-						evClock.offset = insertPos;
-						m_midiIn.insert(it, evClock);
-						found = true;
-						break;
+						if(it->offset > insertPos)
+						{
+							evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+							evClock.offset = insertPos;
+							m_midiIn.insert(it, evClock);
+							found = true;
+							break;
+						}
 					}
 				}
 
-				if(!found)
+				if(midiEventsEmpty || !found)
 				{
 					evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
 					evClock.offset = insertPos;

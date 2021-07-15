@@ -2,7 +2,9 @@
 
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
-#ifdef __APPLE__			// filesystem is only available on Mac OS Catalina 10.15+
+#ifndef _WIN32
+// filesystem is only available on Mac OS Catalina 10.15+
+// filesystem causes linker errors in gcc-8 if linked statically
 #define USE_DIRENT
 #endif
 

@@ -5,6 +5,8 @@
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/resamplerInOut.h"
 
+#include "deviceTypes.h"
+
 namespace synthLib
 {
 	class Device;
@@ -23,6 +25,9 @@ namespace synthLib
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;
+
+		bool getState(std::vector<uint8_t>& _state, StateType _type);
+		bool setState(const std::vector<uint8_t>& _state);
 
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);

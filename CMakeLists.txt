@@ -5,12 +5,12 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(virusEmu VERSION 1.1.4)
+project(gearmulator VERSION 1.1.6)
 
 include(base.cmake)
 
 set(ASMJIT_STATIC TRUE)
-
+option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
@@ -26,19 +26,24 @@ add_subdirectory(source/ctrlr/JUCE)
 # ----------------- Juce based audio plugin
 
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
-
-add_subdirectory(source/jucePlugin)
-
-if(UNIX AND NOT APPLE)
-	install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
+	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+	add_subdirectory(source/jucePlugin)
+	if(UNIX AND NOT APPLE AND JUCE_GLOBAL_VST2_SDK_PATH)
+		install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+	endif()
 endif()
+
 
 # ----------------- Test Console
 
 add_executable(virusTestConsole)
 target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
 target_link_libraries(virusTestConsole PUBLIC virusLib)
+
+if(UNIX AND NOT APPLE)
+	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
+endif()
 
 # ----------------- CPack
 
