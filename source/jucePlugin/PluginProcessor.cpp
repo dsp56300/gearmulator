@@ -91,6 +91,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
+	setLatencySamples(m_plugin.getLatencySamples());
 }
 
 void AudioPluginAudioProcessor::releaseResources()

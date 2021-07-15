@@ -17,6 +17,7 @@ namespace synthLib
 		virtual ~Device();
 		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setBlockSize(size_t _size);
+		uint32_t getLatencySamples() const { return m_nextLatency; }
 
 		void startDSPThread();
 
