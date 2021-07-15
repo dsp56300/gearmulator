@@ -96,7 +96,7 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Microcontroller::sendPreset(uint32_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti) const
+bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti)
 {
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
@@ -514,7 +514,7 @@ void Microcontroller::waitUntilReady() const
 	}
 }
 
-bool Microcontroller::requestMulti(uint32_t _bank, uint32_t _program, TPreset& _data) const
+bool Microcontroller::requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -530,7 +530,7 @@ bool Microcontroller::requestMulti(uint32_t _bank, uint32_t _program, TPreset& _
 	return m_rom.getMulti(_program, _data);
 }
 
-bool Microcontroller::requestSingle(uint32_t _bank, uint32_t _program, TPreset& _data) const
+bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const
 {
 	if (_bank == 0)
 	{
@@ -543,7 +543,7 @@ bool Microcontroller::requestSingle(uint32_t _bank, uint32_t _program, TPreset& 
 	return getSingle(_bank - 1, _program, _data);
 }
 
-bool Microcontroller::writeSingle(uint32_t _bank, uint32_t _program, const TPreset& _data, bool cancelIfFull, bool pendingSingleWrite)
+bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull, bool pendingSingleWrite)
 {
 	if (_bank > 0) 
 	{
@@ -569,7 +569,7 @@ bool Microcontroller::writeSingle(uint32_t _bank, uint32_t _program, const TPres
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
 }
 
-bool Microcontroller::writeMulti(uint32_t _bank, uint32_t _program, const TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
 {
 	if (_bank != 0) 
 	{
