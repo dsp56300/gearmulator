@@ -212,8 +212,6 @@ private:
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_rom;
 
-	uint8_t m_deviceId = 0;
-
 	TPreset m_multiEditBuffer;
 
 	std::array<uint8_t, 256> m_globalSettings;
