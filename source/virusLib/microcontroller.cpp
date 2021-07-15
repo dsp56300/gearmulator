@@ -546,7 +546,7 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	return getSingle(_bank - 1, _program, _data);
 }
 
-bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull, bool pendingSingleWrite)
+bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
 {
 	if (_bank > 0) 
 	{
@@ -564,9 +564,6 @@ bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset
 	m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << _program);
-
-	if(pendingSingleWrite)
-		return true;
 
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
@@ -598,14 +595,14 @@ bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, 
 	return true;
 }
 
-bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _value, bool pendingSingleWrite)
+bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _value)
 {
 	TPreset single;
 
 	if(getSingle(m_currentBanks[_part], _value, single))
 	{
 		m_currentSingles[_part] = _value;
-		return writeSingle(0, _part, single, true, pendingSingleWrite);
+		return writeSingle(0, _part, single, true);
 	}
 
 	return true;
@@ -643,7 +640,7 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 	const auto partSingle = _multi[MD_PART_PROGRAM_NUMBER + _part];
 
 	partBankSelect(_part, partBank, false);
-	return partProgramChange(_part, partSingle, true);
+	return partProgramChange(_part, partSingle);
 }
 
 void Microcontroller::process(size_t _size)
