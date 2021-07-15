@@ -705,6 +705,14 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	if(events.empty())
 		return false;
 
+	std::vector<SMidiEvent> unusedResponses;
+
+	for (const auto& event : events)
+	{
+		sendSysex(event.sysex, false, unusedResponses);
+		unusedResponses.clear();
+	}
+
 	return true;
 }
 
