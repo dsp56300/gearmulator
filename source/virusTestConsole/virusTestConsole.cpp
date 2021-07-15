@@ -184,7 +184,7 @@ int main(int _argc, char* _argv[])
 	}
 
 	// Create the DSP with peripherals
-	constexpr TWord g_memorySize = 0x040000;	// 128k words beginning at 0x20000
+	constexpr TWord g_memorySize = 0x100000;	// 128k words beginning at 0x20000
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
@@ -194,7 +194,7 @@ int main(int _argc, char* _argv[])
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
 
-	const auto romFile = findROM();
+	const auto romFile = findROM(1024 * 1024);
 	if(romFile.empty())
 	{
 		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
@@ -238,7 +238,7 @@ int main(int _argc, char* _argv[])
 	// Load preset
 
 	Microcontroller syx(periph.getHDI08(), v);
-	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
+//	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
