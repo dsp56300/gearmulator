@@ -552,9 +552,12 @@ bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset
 		return true;
 	}
 
-	m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
+	if(_program == SINGLE)
+		m_singleEditBuffer = _data;
+	else
+		m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
 
-	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << _program);
+	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
 
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
