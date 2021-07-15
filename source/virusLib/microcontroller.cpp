@@ -344,7 +344,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			{
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
-				LOG("Dump Single, Bank " << (int)bank << ", (int)program " << program);
+				LOG("Dump Single, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 				return writeSingle(bank, program, dump, _cancelIfFull);
@@ -353,7 +353,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			{
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
-				LOG("Dump Multi, Bank " << (int)bank << ", (int)program " << program);
+				LOG("Dump Multi, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 				return writeMulti(bank, program, dump, _cancelIfFull);
@@ -362,7 +362,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			{
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
-				LOG("Request Single, Bank " << (int)bank << ", (int)program " << program);
+				LOG("Request Single, Bank " << (int)bank << ", program " << (int)program);
 				buildSingleResponse(bank, program);
 				break;
 			}
@@ -370,7 +370,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			{
 				const uint8_t bank = _data[7];
 				const uint8_t program = _data[8];
-				LOG("Request Multi, Bank " << (int)bank << ", (int)program " << program);
+				LOG("Request Multi, Bank " << (int)bank << ", program " << (int)program);
 				buildMultiResponse(bank, program);
 				break;
 			}
