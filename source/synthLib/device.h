@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "deviceTypes.h"
 #include "../synthLib/midiTypes.h"
 
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
@@ -21,6 +22,8 @@ namespace synthLib
 
 		virtual float getSamplerate() const = 0;
 		virtual bool isValid() const = 0;
+		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
+		virtual bool setState(const std::vector<uint8_t>& _state, StateType _type) = 0;
 
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;

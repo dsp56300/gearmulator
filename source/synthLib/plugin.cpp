@@ -7,6 +7,8 @@ using namespace synthLib;
 
 namespace synthLib
 {
+	constexpr uint8_t g_stateVersion = 1;
+
 	Plugin::Plugin(Device* _device) : m_device(_device)
 	{
 		m_resampler.setDeviceSamplerate(_device->getSamplerate());
@@ -94,6 +96,38 @@ namespace synthLib
 	bool Plugin::isValid() const
 	{
 		return m_device->isValid();
+	}
+
+	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
+	{
+		if(!m_device)
+			return false;
+
+		_state.push_back(g_stateVersion);
+		_state.push_back(_type);
+
+		return m_device->getState(_state, _type);
+	}
+
+	bool Plugin::setState(const std::vector<uint8_t>& _state)
+	{
+		if(!m_device)
+			return false;
+
+		if(_state.size() < 2)
+			return false;
+
+		const auto version = _state[0];
+
+		if(version != g_stateVersion)
+			return false;
+
+		const auto stateType = static_cast<StateType>(_state[1]);
+
+		auto state = _state;
+		state.erase(state.begin(), state.begin() + 2);
+
+		return m_device->setState(state, stateType);
 	}
 
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
