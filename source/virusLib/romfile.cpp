@@ -48,7 +48,8 @@ ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 
 std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 {
-	uint32_t offset = 0x18000;
+	uint32_t offset = 0x70000;
+	const int lastChunkId = 14;
 
 	// Open file
 	std::ifstream file(this->m_path, std::ios::binary | std::ios::ate);
@@ -66,10 +67,10 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 	LOG("Loading ROM at " << m_path);
 
 	std::vector<Chunk> chunks;
-	chunks.reserve(5);
+	chunks.reserve(lastChunkId + 1);
 
 	// Read all the chunks, hardcoded to 4 for convenience
-	for (int i = 0; i <= 4; i++)
+	for (int i = 0; i <= lastChunkId; i++)
 	{
 		file.seekg(offset);
 
@@ -80,7 +81,7 @@ std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
 		file.read(reinterpret_cast<char*>(&chunk.size1), 1);
 		file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
-		assert(chunk.chunk_id == 4 - i);
+		assert(chunk.chunk_id == lastChunkId - i);
 
 		// Format uses a special kind of size where the first byte should be decreased by 1
 		const uint16_t len = ((chunk.size1 - 1) << 8) | chunk.size2;
