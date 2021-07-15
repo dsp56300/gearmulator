@@ -184,7 +184,7 @@ public:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses);
 
-	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull, bool pendingSingleWrite = false);
+	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull);
 	bool writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull);
 	bool requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const;
 	bool requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const;
@@ -206,7 +206,7 @@ private:
 	bool getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const;
 
 	bool partBankSelect(uint8_t _part, uint8_t _value, bool _immediatelySelectSingle);
-	bool partProgramChange(uint8_t _part, uint8_t _value, bool pendingSingleWrite = false);
+	bool partProgramChange(uint8_t _part, uint8_t _value);
 	bool multiProgramChange(uint8_t _value);
 	bool loadMulti(uint8_t _program, const TPreset& _multi);
 	bool loadMultiSingle(uint8_t _part);
