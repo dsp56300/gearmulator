@@ -27,6 +27,10 @@ jobs:
       if: matrix.cmake_generator == 'Ninja'
       uses: seanmiddleditch/gha-setup-ninja@master
 
+    - name: Set up MSVC compiler
+      if: matrix.os == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
+
     - name: Configure CMake with ${{ matrix.cmake_generator }}
       if: matrix.cmake_generator != 'default'
       run: cmake -G ${{ matrix.cmake_generator }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
