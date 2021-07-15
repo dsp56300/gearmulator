@@ -11,8 +11,9 @@ jobs:
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest, windows-latest ]
+        cmake_generator: [ default, Ninja ]
       fail-fast: false
-    name:  ${{ matrix.os }} build
+    name:  ${{ matrix.os }} build with ${{ matrix.cmake_generator }} cmake generator
     steps:
     - name: Install X
       if: matrix.os == 'ubuntu-latest'
@@ -22,7 +23,20 @@ jobs:
       with:
         submodules: "recursive"
 
-    - name: Configure CMake
+    - name: Setting up Ninja build system
+      if: matrix.cmake_generator == 'Ninja'
+      uses: seanmiddleditch/gha-setup-ninja@master
+
+    - name: Set up MSVC compiler
+      if: matrix.os == 'windows-latest'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake with ${{ matrix.cmake_generator }}
+      if: matrix.cmake_generator != 'default'
+      run: cmake -G ${{ matrix.cmake_generator }} -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Configure CMake with default generator
+      if: matrix.cmake_generator == 'default'
       run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
