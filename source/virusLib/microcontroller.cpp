@@ -314,10 +314,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildTotalResponse = [&]()
 	{
+		buildGlobalResponses();
 		buildSingleBankResponse(1);
 		buildSingleBankResponse(2);
 		buildMultiBankResponse(1);
-		buildGlobalResponses();
 	};
 
 	auto buildArrangementResponse = [&]()
@@ -654,6 +654,58 @@ void Microcontroller::process(size_t _size)
 			++m_pendingSingleWrites;			
 		}
 	}
+}
+
+bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
+{
+	const auto deviceId = m_globalSettings[DEVICE_ID];
+
+	std::vector<SMidiEvent> responses;
+
+	if(_type == StateTypeGlobal)
+		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, false, responses);
+
+	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, false, responses);
+
+	if(responses.empty())
+		return false;
+
+	for (const auto& response : responses)
+	{
+		assert(!response.sysex.empty());
+		_state.insert(_state.end(), response.sysex.begin(), response.sysex.end());		
+	}
+
+	return true;
+}
+
+bool Microcontroller::setState(const std::vector<unsigned char>& _state, const StateType _type)
+{
+	std::vector<SMidiEvent> events;
+
+	for(size_t i=0; i<_state.size(); ++i)
+	{
+		if(_state[i] == 0xf0)
+		{
+			const auto begin = i;
+
+			for(++i; i<_state.size(); ++i)
+			{
+				if(_state[i] == 0xf7)
+				{
+					SMidiEvent ev;
+					ev.sysex.resize(i + 1 - begin);
+					memcpy(&ev.sysex[0], &_state[begin], ev.sysex.size());
+					events.emplace_back(ev);
+				}
+			}
+		}
+	}
+
+	if(events.empty())
+		return false;
+
+	return true;
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
