@@ -226,8 +226,6 @@ private:
 
 	// Multi mode
 	std::array<TPreset,16> m_singleEditBuffers;
-	std::array<uint8_t,16> m_currentBanks;
-	std::array<uint8_t,16> m_currentSingles;
 
 	// Single mode
 	TPreset m_singleEditBuffer;

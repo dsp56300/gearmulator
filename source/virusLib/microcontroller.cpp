@@ -20,13 +20,12 @@ constexpr uint8_t g_pageC_multiPart[]  = {31,32,33,34,35,36,37,38,39,40,41,72,73
 
 namespace virusLib
 {
-Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_currentBanks({0}), m_currentSingles({0})
+Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
 
 	m_globalSettings.fill(0);
-	m_currentBanks.fill(0);
 
 	m_rom.getMulti(0, m_multiEditBuffer);
 
@@ -587,10 +586,10 @@ bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset&
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
 {
-	m_currentBanks[_part] = _value % m_singles.size();
+	m_multiEditBuffer[MD_PART_BANK_NUMBER + _part] = _value % m_singles.size();
 
 	if(_immediatelySelectSingle)
-		return partProgramChange(_part, m_currentSingles[_part]);
+		return partProgramChange(_part, m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part]);
 
 	return true;
 }
@@ -599,9 +598,11 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 {
 	TPreset single;
 
-	if(getSingle(m_currentBanks[_part], _value, single))
+	const auto bank = m_multiEditBuffer[MD_PART_BANK_NUMBER + _part];
+
+	if(getSingle(bank, _value, single))
 	{
-		m_currentSingles[_part] = _value;
+		m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part] = _value;
 		return writeSingle(0, _part, single, true);
 	}
 
