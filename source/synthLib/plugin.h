@@ -21,6 +21,8 @@ namespace synthLib
 		void setSamplerate(float _samplerate);
 		void setBlockSize(size_t _blockSize);
 
+		uint32_t getLatencySamples() const;
+
 		void process(float** _inputs, float** _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
