@@ -77,7 +77,12 @@ namespace synthLib
 		fixPath(".vst3/");
 		fixPath(".component/");
 
-		auto end = path.find_last_of("/\\");
+		fixPath(".vst\\");
+		fixPath(".vst3\\");
+		fixPath(".component\\");
+
+		const auto end = path.find_last_of("/\\");
+
 		if(end != std::string::npos)
 			path = path.substr(0, end + 1);
 
