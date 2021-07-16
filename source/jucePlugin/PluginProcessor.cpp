@@ -91,6 +91,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
+	setLatencySamples(m_plugin.getLatencySamples());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -242,14 +243,19 @@ void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeI
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+	setState(data, sizeInBytes);
+}
 
-	if(sizeInBytes < 1)
-		return;
-
+void AudioPluginAudioProcessor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
+{
 	std::vector<uint8_t> state;
-	state.resize(sizeInBytes);
-	memcpy(&state[0], data, sizeInBytes);
-	m_plugin.setState(state);
+	m_plugin.getState(state, synthLib::StateTypeCurrentProgram);
+	destData.append(&state[0], state.size());
+}
+
+void AudioPluginAudioProcessor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
+{
+	setState(data, sizeInBytes);
 }
 
 void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
@@ -262,6 +268,17 @@ void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>
 void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
 {
 	m_plugin.addMidiEvent(ev);
+}
+
+void AudioPluginAudioProcessor::setState(const void* _data, size_t _sizeInBytes)
+{
+	if(_sizeInBytes < 1)
+		return;
+
+	std::vector<uint8_t> state;
+	state.resize(_sizeInBytes);
+	memcpy(&state[0], _data, _sizeInBytes);
+	m_plugin.setState(state);
 }
 
 //==============================================================================

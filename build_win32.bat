@@ -5,9 +5,11 @@ IF %ERRORLEVEL% NEQ 0 (
 	exit /B 2
 )
 pushd %outdir%
-cmake --build . --config Debug
+cmake --build . --config Release
 IF %ERRORLEVEL% NEQ 0 (
 	popd 
 	exit /B 2
 )
+cpack -G ZIP
 popd
+move /y %outdir%*.zip deploy\
