@@ -29,11 +29,14 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/jucePlugin)
-	if(UNIX AND NOT APPLE AND JUCE_GLOBAL_VST2_SDK_PATH)
-		install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+	if(JUCE_GLOBAL_VST2_SDK_PATH)
+		if(MSVC OR APPLE)
+			install(TARGETS jucePlugin_VST DESTINATION . COMPONENT plugin)
+		elseif(UNIX)
+			install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+		endif()
 	endif()
 endif()
-
 
 # ----------------- Test Console
 
@@ -45,21 +48,27 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
+install(TARGETS virusTestConsole DESTINATION . COMPONENT testConsole)
+install(DIRECTORY deploy/win/ DESTINATION . COMPONENT testConsole)
+
 # ----------------- CPack
 
-set(CPACK_COMPONENTS_ALL plugin)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL plugin testConsole)
+
+set(CPACK_COMPONENTS_GROUPING IGNORE)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
 set(CPACK_PACKAGE_NAME "DSP56300Emu")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DSP 56300 family emulator audio plugin")
 
+set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Usual Suspects")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
+set(CPACK_RPM_COMPONENT_INSTALL ON)
 set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
 set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
