@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+#include "os.h"
+
 using namespace synthLib;
 
 namespace synthLib
@@ -67,6 +69,8 @@ namespace synthLib
 		if(!m_device->isValid())
 			return;
 
+		setFlushDenormalsToZero();
+		
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		float* inputs[8] {};
