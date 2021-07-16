@@ -49,7 +49,12 @@ if(UNIX AND NOT APPLE)
 endif()
 
 install(TARGETS virusTestConsole DESTINATION . COMPONENT testConsole)
-install(DIRECTORY deploy/win/ DESTINATION . COMPONENT testConsole)
+
+if(MSVC)
+	install(DIRECTORY deploy/win/ DESTINATION . COMPONENT testConsole)
+else()
+	install(DIRECTORY deploy/linux/ DESTINATION . COMPONENT testConsole)
+endif()
 
 # ----------------- CPack
 
