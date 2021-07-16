@@ -56,10 +56,18 @@ Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hd
 			m_singles.emplace_back(std::move(singles));
 	}
 
-	m_singleEditBuffer = m_singles[0][0];
+	if(!m_singles.empty())
+	{
+		const auto& singles = m_singles[0];
 
-	for(auto i=0; i<static_cast<int>(m_singleEditBuffers.size()); ++i)
-		m_singleEditBuffers[i] = m_singles[0][i];
+		if(!singles.empty())
+		{
+			m_singleEditBuffer = singles[0];
+
+			for(auto i=0; i<static_cast<int>(std::min(singles.size(), m_singleEditBuffers.size())); ++i)
+				m_singleEditBuffers[i] = singles[i];
+		}
+	}
 }
 
 void Microcontroller::sendInitControlCommands()
