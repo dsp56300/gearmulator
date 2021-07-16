@@ -1,6 +1,7 @@
 #include "os.h"
 
 #include "../dsp56300/source/dsp56kEmu/logging.h"
+#include "../dsp56300/source/dsp56kEmu/buildconfig.h"
 
 #ifndef _WIN32
 // filesystem is only available on Mac OS Catalina 10.15+
@@ -23,7 +24,11 @@
 #	include <dlfcn.h>
 #endif
 
-#pragma optimize("",off)
+#ifdef _MSC_VER
+#	include <cfloat>
+#elif defined(HAVE_SSE)
+#	include <immintrin.h>
+#endif
 
 namespace synthLib
 {
@@ -176,5 +181,14 @@ namespace synthLib
 #endif
 
 		return std::string();
+	}
+
+	void setFlushDenormalsToZero()
+	{
+#if defined(_MSC_VER)
+		_controlfp(_DN_FLUSH, _MCW_DN);
+#elif defined(HAVE_SSE)
+		_MM_SET_FLUSH_ZERO_MODE (_MM_FLUSH_ZERO_ON);
+#endif
 	}
 }
