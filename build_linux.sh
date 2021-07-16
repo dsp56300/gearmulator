@@ -4,6 +4,6 @@ cmake --build . --config Release
 cpack -G DEB
 cpack -G RPM
 cpack -G ZIP
-move *.deb ../../deploy/ 
-move *.rpm ../../deploy/ 
-move *.zip ../../deploy/ 
+mv *.deb ../../deploy/ 
+mv *.rpm ../../deploy/ 
+mv *.zip ../../deploy/ 

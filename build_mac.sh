@@ -2,4 +2,4 @@ cmake -G Xcode -S . -B ./temp/cmake
 cd ./temp/cmake
 cmake --build . --config Release
 cpack -G ZIP
-move *.zip ../../deploy/
+mv *.zip ../../deploy/
