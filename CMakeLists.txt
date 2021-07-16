@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.15)
 set(CMAKE_OSX_ARCHITECTURES "x86_64")
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.1.6)
+project(gearmulator VERSION 1.1.7)
 
 include(base.cmake)
 
@@ -29,11 +29,19 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/jucePlugin)
-	if(UNIX AND NOT APPLE AND JUCE_GLOBAL_VST2_SDK_PATH)
-		install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT plugin)
+	if(JUCE_GLOBAL_VST2_SDK_PATH)
+		if(MSVC OR APPLE)
+			install(TARGETS jucePlugin_VST DESTINATION . COMPONENT VST2)
+			install(TARGETS jucePlugin_VST3 DESTINATION . COMPONENT VST3)
+			if(APPLE)
+				install(TARGETS jucePlugin_AU DESTINATION . COMPONENT AU)
+			endif()
+		elseif(UNIX)
+			install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2)
+			install(TARGETS jucePlugin_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
+		endif()
 	endif()
 endif()
-
 
 # ----------------- Test Console
 
@@ -45,21 +53,32 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
+install(TARGETS virusTestConsole DESTINATION . COMPONENT testConsole)
+
+if(MSVC)
+	install(DIRECTORY deploy/win/ DESTINATION . COMPONENT testConsole)
+else()
+	install(DIRECTORY deploy/linux/ DESTINATION . COMPONENT testConsole)
+endif()
+
 # ----------------- CPack
 
-set(CPACK_COMPONENTS_ALL plugin)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_COMPONENTS_ALL VST2 VST3 AU testConsole)
+
+set(CPACK_COMPONENTS_GROUPING IGNORE)
+set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 
 set(CPACK_PACKAGE_CONTACT "The Usual Suspects")
 set(CPACK_PACKAGE_VENDOR "The Usual Suspects")
 set(CPACK_PACKAGE_NAME "DSP56300Emu")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "DSP 56300 family emulator audio plugin")
 
+set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_DEBIAN_PACKAGE_MAINTAINER "The Usual Suspects")
 set(CPACK_DEBIAN_PACKAGE_HOMEPAGE "https://dsp56300.wordpress.com")
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
 
+set(CPACK_RPM_COMPONENT_INSTALL ON)
 set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
 set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})

@@ -5,6 +5,6 @@ namespace synthLib
 	enum StateType
 	{
 		StateTypeGlobal,
-		StateTypeLocal,
+		StateTypeCurrentProgram,
 	};
 }
