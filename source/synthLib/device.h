@@ -16,8 +16,8 @@ namespace synthLib
 		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress);
 		virtual ~Device();
 		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
-		void setBlockSize(uint32_t _size);
-		uint32_t getLatencySamples() const { return m_nextLatency; }
+		void setLatencySamples(uint32_t _size);
+		uint32_t getLatencySamples() const { return m_latency; }
 
 		void startDSPThread();
 
@@ -48,6 +48,6 @@ namespace synthLib
 
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
 		std::vector<SMidiEvent> m_midiIn;
-		uint32_t m_nextLatency = 0;
+		uint32_t m_latency = 0;
 	};
 }
