@@ -432,7 +432,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 							case PlayModeMulti:
 								{
 									m_globalSettings[PLAY_MODE] = PlayModeMulti;
-									return loadMulti(0, m_multiEditBuffer);
+									writeMulti(0, 0, m_multiEditBuffer);
+									for(uint8_t i=0; i<16; ++i)
+										writeSingle(0, i, m_singleEditBuffers[i]);
+									return true;
 								}
 							default:
 								return true;
