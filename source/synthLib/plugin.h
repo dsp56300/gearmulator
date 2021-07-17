@@ -34,6 +34,7 @@ namespace synthLib
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
+		void updateDeviceLatency();
 		
 		std::vector<SMidiEvent> m_midiIn;
 		std::vector<SMidiEvent> m_midiOut;
@@ -41,7 +42,7 @@ namespace synthLib
 		SMidiEvent m_pendingSyexInput;
 
 		ResamplerInOut m_resampler;
-		std::mutex m_lock;
+		mutable std::mutex m_lock;
 
 		Device* const m_device;
 
@@ -49,6 +50,8 @@ namespace synthLib
 
 		float m_hostSamplerate = 0.0f;
 		float m_hostSamplerateInv = 0.0f;
+
+		uint32_t m_blockSize = 0;
 
 		// MIDI Clock
 		bool m_isPlaying = false;
