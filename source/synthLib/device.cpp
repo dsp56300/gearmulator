@@ -120,7 +120,7 @@ namespace synthLib
 		}
 	}
 
-	void Device::setBlockSize(const size_t _size)
+	void Device::setBlockSize(const uint32_t _size)
 	{
 		m_nextLatency = _size;
 	}

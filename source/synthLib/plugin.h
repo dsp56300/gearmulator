@@ -19,7 +19,7 @@ namespace synthLib
 		void addMidiEvent(const SMidiEvent& _ev);
 
 		void setSamplerate(float _samplerate);
-		void setBlockSize(size_t _blockSize);
+		void setBlockSize(uint32_t _blockSize);
 
 		uint32_t getLatencySamples() const;
 
