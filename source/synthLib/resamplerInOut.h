@@ -39,11 +39,9 @@ namespace synthLib
 		AudioBuffer m_output;
 
 		size_t m_scaledInputSize = 0;
-		size_t m_inputSize = 0;
-		size_t m_scaledOutputSize = 0;
-		size_t m_outputSize = 0;
 
 		TMidiVec m_processedMidiIn;
+
 		TMidiVec m_midiIn;
 		TMidiVec m_midiOut;
 
