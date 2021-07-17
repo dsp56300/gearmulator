@@ -228,7 +228,7 @@ namespace synthLib
 		return &m_dummyBuffer[0];
 	}
 
-	void Plugin::setBlockSize(size_t _blockSize)
+	void Plugin::setBlockSize(const uint32_t _blockSize)
 	{
 		std::lock_guard lock(m_lock);
 		m_device->setBlockSize(_blockSize);
