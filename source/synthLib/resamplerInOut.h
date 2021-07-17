@@ -14,7 +14,7 @@ namespace synthLib
 		using TMidiVec = std::vector<SMidiEvent>;
 		using TProcessFunc = std::function<void(float**, float**, size_t, const TMidiVec&, TMidiVec&)>;
 
-		ResamplerInOut();
+		ResamplerInOut() = default;
 
 		void setDeviceSamplerate(float _samplerate);
 		void setHostSamplerate(float _samplerate);
