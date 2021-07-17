@@ -539,7 +539,11 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	if (_bank == 0)
 	{
 		// Use single-edit buffer
-		_data = m_singleEditBuffers[_program % m_singleEditBuffers.size()];
+		if(_program == SINGLE)
+			_data = m_singleEditBuffer;
+		else
+			_data = m_singleEditBuffers[_program % m_singleEditBuffers.size()];
+
 		return true;
 	}
 
