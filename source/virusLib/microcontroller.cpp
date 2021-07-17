@@ -459,11 +459,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				}
 				else
 				{
-                    if (m_globalSettings[PLAY_MODE] != PlayModeSingle || part == SINGLE)
-                    {
+					if (m_globalSettings[PLAY_MODE] != PlayModeSingle || part == SINGLE)
+					{
 						// virus only applies sysex changes to other parts while in multi mode.
-                        applyToSingleEditBuffer(page, part, param, value);
-                    }
+						applyToSingleEditBuffer(page, part, param, value);
+					}
 				}
 
 				return send(page, part, param, value, _cancelIfFull);
@@ -641,7 +641,7 @@ bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 		return false;
 
 	for (uint8_t p = 0; p < 16; ++p)
-        loadMultiSingle(p, _multi);
+		loadMultiSingle(p, _multi);
 
 	return true;
 }
