@@ -178,12 +178,12 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 				partBankSelect(channel, c, false);
 			return true;
 		default:
-			applyToSingleEditBuffer(PAGE_A, singleMode ? channel : 0, b, c);
+			applyToSingleEditBuffer(PAGE_A, singleMode ? SINGLE : channel, b, c);
 			break;
 		}
 		break;
 	case M_POLYPRESSURE:
-		applyToSingleEditBuffer(PAGE_B, singleMode ? channel : 0, b, c);
+		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, b, c);
 		break;
 	default:
 		break;
@@ -206,9 +206,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	const auto deviceId = _data[5];
 	const auto cmd = _data[6];
 
-	if (deviceId != m_globalSettings[DEVICE_ID])
+	if (deviceId != m_globalSettings[DEVICE_ID] && deviceId != OMNI_DEVICE_ID && m_globalSettings[DEVICE_ID] != OMNI_DEVICE_ID)
 	{
-		// ignore messages intended for a different device
+		// ignore messages intended for a different device, allow omni requests
 		return true;
 	}
 
@@ -459,7 +459,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				}
 				else
 				{
-					applyToSingleEditBuffer(page, part, param, value);
+                    if (m_globalSettings[PLAY_MODE] != PlayModeSingle || part == SINGLE)
+                    {
+						// virus only applies sysex changes to other parts while in multi mode.
+                        applyToSingleEditBuffer(page, part, param, value);
+                    }
 				}
 
 				return send(page, part, param, value, _cancelIfFull);
@@ -636,8 +640,8 @@ bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 	if(!writeMulti(0, _program, _multi))
 		return false;
 
-	for(uint8_t p=0; p<16; ++p)
-		loadMultiSingle(p, _multi);
+	for (uint8_t p = 0; p < 16; ++p)
+        loadMultiSingle(p, _multi);
 
 	return true;
 }
@@ -730,7 +734,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
-	if(m_globalSettings[PLAY_MODE] == PlayModeSingle)
+	if(_part == SINGLE)
 		applyToSingleEditBuffer(m_singleEditBuffer, _page, _param, _value);
 	else
 		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
