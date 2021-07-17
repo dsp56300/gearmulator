@@ -96,7 +96,7 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti)
+bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool isMulti)
 {
 	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
@@ -159,7 +159,7 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 				if(getSingle(m_currentBank, b, single))
 				{
 					m_currentSingle = b;
-					return writeSingle(0, SINGLE, single, cancelIfFull);
+					return writeSingle(0, SINGLE, single);
 				}
 			}
 			else
@@ -349,7 +349,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				LOG("Received Single dump, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-				return writeSingle(bank, program, dump, _cancelIfFull);
+				return writeSingle(bank, program, dump);
 			}
 		case DUMP_MULTI:
 			{
@@ -358,7 +358,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				LOG("Received Multi dump, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-				return writeMulti(bank, program, dump, _cancelIfFull);
+				return writeMulti(bank, program, dump);
 			}
 		case REQUEST_SINGLE:
 			{
@@ -426,7 +426,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 									m_globalSettings[PLAY_MODE] = playMode;
 
 									LOG("Switch to Single mode");
-									return writeSingle(0, SINGLE, m_singleEditBuffer, _cancelIfFull);
+									return writeSingle(0, SINGLE, m_singleEditBuffer);
 								}
 							case PlayModeMultiSingle:
 							case PlayModeMulti:
@@ -551,7 +551,7 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	return getSingle(_bank - 1, _program, _data);
 }
 
-bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data)
 {
 	if (_bank > 0) 
 	{
@@ -574,10 +574,10 @@ bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
 
 	// Send to DSP
-	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
+	return sendPreset(_program, presetToDSPWords(_data), false);
 }
 
-bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data)
 {
 	if (_bank != 0) 
 	{
@@ -590,7 +590,7 @@ bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset&
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
 
 	// Convert array of uint8_t to vector of 24bit TWord
-	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, true);
+	return sendPreset(_program, presetToDSPWords(_data), true);
 }
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
@@ -612,7 +612,7 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 	if(getSingle(bank, _value, single))
 	{
 		m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part] = _value;
-		return writeSingle(0, _part, single, true);
+		return writeSingle(0, _part, single);
 	}
 
 	return true;
@@ -630,7 +630,7 @@ bool Microcontroller::multiProgramChange(uint8_t _value)
 
 bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 {
-	if(!writeMulti(0, _program, _multi, true))
+	if(!writeMulti(0, _program, _multi))
 		return false;
 
 	for(uint8_t p=0; p<16; ++p)
@@ -660,7 +660,7 @@ void Microcontroller::process(size_t _size)
 		const auto preset = m_pendingPresetWrites.front();
 		m_pendingPresetWrites.pop_front();
 
-		sendPreset(preset.program, preset.data, false, preset.isMulti);
+		sendPreset(preset.program, preset.data, preset.isMulti);
 	}
 }
 
