@@ -178,14 +178,14 @@ public:
 
 	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
-	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool cancelIfFull = false, bool isMulti = false);
+	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
 	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFull = false);
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses);
 
-	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull);
-	bool writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull);
+	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data);
+	bool writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data);
 	bool requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const;
 	bool requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const;
 
