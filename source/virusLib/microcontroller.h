@@ -174,6 +174,8 @@ public:
 		PlayModeMulti,
 	};
 
+	const uint8_t OMNI_DEVICE_ID = 0x10;
+
 	using TPreset = ROMFile::TPreset;
 
 	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
