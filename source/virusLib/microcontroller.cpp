@@ -324,10 +324,20 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildArrangementResponse = [&]()
 	{
+		// If we are in multi mode, we return the Single mode single first. If in single mode, it is returned last.
+		// The reason is that we want to backup everything but the last loaded multi/single defines the play mode when restoring
+		const bool isMultiMode = m_globalSettings[PLAY_MODE] == PlayModeMulti;
+
+		if(isMultiMode)
+			buildSingleResponse(0, SINGLE);
+
 		buildMultiResponse(0, 0);
 
 		for(uint8_t p=0; p<16; ++p)
 			buildPresetResponse(DUMP_SINGLE, 0, p, m_singleEditBuffers[p]);
+
+		if(!isMultiMode)
+			buildSingleResponse(0, SINGLE);
 	};
 
 	switch (cmd)
