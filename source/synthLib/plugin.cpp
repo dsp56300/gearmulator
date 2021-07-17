@@ -72,8 +72,6 @@ namespace synthLib
 
 		setFlushDenormalsToZero();
 
-		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
-
 		float* inputs[8] {};
 		float* outputs[8] {};
 
@@ -83,6 +81,9 @@ namespace synthLib
 		outputs[1] = _outputs && _outputs[1] ? _outputs[1] : getDummyBuffer(_count);
 
 		std::lock_guard lock(m_lock);
+
+		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
