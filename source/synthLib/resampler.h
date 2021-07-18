@@ -5,6 +5,8 @@
 #include <functional>
 #include <vector>
 
+#include <cstdint>
+
 #include "audiobuffer.h"
 
 namespace synthLib

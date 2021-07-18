@@ -167,7 +167,7 @@ void midiCallback(void *data,DSP *dsp)
 	syx->sendInitControlCommands();
 
 	// Send preset
-	syx->writeSingle(0, Microcontroller::SINGLE, preset, false);
+	syx->writeSingle(0, Microcontroller::SINGLE, preset);
 
 	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
 }
