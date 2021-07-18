@@ -104,7 +104,7 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool cancelIfFull, bool isMulti)
+bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool isMulti)
 {
 	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
@@ -167,7 +167,7 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 				if(getSingle(m_currentBank, b, single))
 				{
 					m_currentSingle = b;
-					return writeSingle(0, SINGLE, single, cancelIfFull);
+					return writeSingle(0, SINGLE, single);
 				}
 			}
 			else
@@ -186,12 +186,12 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 				partBankSelect(channel, c, false);
 			return true;
 		default:
-			applyToSingleEditBuffer(PAGE_A, singleMode ? channel : 0, b, c);
+			applyToSingleEditBuffer(PAGE_A, singleMode ? SINGLE : channel, b, c);
 			break;
 		}
 		break;
 	case M_POLYPRESSURE:
-		applyToSingleEditBuffer(PAGE_B, singleMode ? channel : 0, b, c);
+		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, b, c);
 		break;
 	default:
 		break;
@@ -214,9 +214,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	const auto deviceId = _data[5];
 	const auto cmd = _data[6];
 
-	if (deviceId != m_globalSettings[DEVICE_ID])
+	if (deviceId != m_globalSettings[DEVICE_ID] && deviceId != OMNI_DEVICE_ID && m_globalSettings[DEVICE_ID] != OMNI_DEVICE_ID)
 	{
-		// ignore messages intended for a different device
+		// ignore messages intended for a different device, allow omni requests
 		return true;
 	}
 
@@ -332,10 +332,20 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildArrangementResponse = [&]()
 	{
+		// If we are in multi mode, we return the Single mode single first. If in single mode, it is returned last.
+		// The reason is that we want to backup everything but the last loaded multi/single defines the play mode when restoring
+		const bool isMultiMode = m_globalSettings[PLAY_MODE] == PlayModeMulti;
+
+		if(isMultiMode)
+			buildSingleResponse(0, SINGLE);
+
 		buildMultiResponse(0, 0);
 
 		for(uint8_t p=0; p<16; ++p)
 			buildPresetResponse(DUMP_SINGLE, 0, p, m_singleEditBuffers[p]);
+
+		if(!isMultiMode)
+			buildSingleResponse(0, SINGLE);
 	};
 
 	switch (cmd)
@@ -347,7 +357,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				LOG("Received Single dump, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-				return writeSingle(bank, program, dump, _cancelIfFull);
+				return writeSingle(bank, program, dump);
 			}
 		case DUMP_MULTI:
 			{
@@ -356,7 +366,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				LOG("Received Multi dump, Bank " << (int)bank << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-				return writeMulti(bank, program, dump, _cancelIfFull);
+				return writeMulti(bank, program, dump);
 			}
 		case REQUEST_SINGLE:
 			{
@@ -424,13 +434,16 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 									m_globalSettings[PLAY_MODE] = playMode;
 
 									LOG("Switch to Single mode");
-									return writeSingle(0, SINGLE, m_singleEditBuffer, _cancelIfFull);
+									return writeSingle(0, SINGLE, m_singleEditBuffer);
 								}
 							case PlayModeMultiSingle:
 							case PlayModeMulti:
 								{
 									m_globalSettings[PLAY_MODE] = PlayModeMulti;
-									return loadMulti(0, m_multiEditBuffer);
+									writeMulti(0, 0, m_multiEditBuffer);
+									for(uint8_t i=0; i<16; ++i)
+										writeSingle(0, i, m_singleEditBuffers[i]);
+									return true;
 								}
 							default:
 								return true;
@@ -454,7 +467,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				}
 				else
 				{
-					applyToSingleEditBuffer(page, part, param, value);
+					if (m_globalSettings[PLAY_MODE] != PlayModeSingle || part == SINGLE)
+					{
+						// virus only applies sysex changes to other parts while in multi mode.
+						applyToSingleEditBuffer(page, part, param, value);
+					}
 				}
 
 				return send(page, part, param, value, _cancelIfFull);
@@ -537,7 +554,11 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	if (_bank == 0)
 	{
 		// Use single-edit buffer
-		_data = m_singleEditBuffers[_program % m_singleEditBuffers.size()];
+		if(_program == SINGLE)
+			_data = m_singleEditBuffer;
+		else
+			_data = m_singleEditBuffers[_program % m_singleEditBuffers.size()];
+
 		return true;
 	}
 
@@ -545,7 +566,7 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	return getSingle(_bank - 1, _program, _data);
 }
 
-bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data)
 {
 	if (_bank > 0) 
 	{
@@ -568,10 +589,10 @@ bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
 
 	// Send to DSP
-	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, false);
+	return sendPreset(_program, presetToDSPWords(_data), false);
 }
 
-bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data, bool cancelIfFull)
+bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data)
 {
 	if (_bank != 0) 
 	{
@@ -584,7 +605,7 @@ bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset&
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
 
 	// Convert array of uint8_t to vector of 24bit TWord
-	return sendPreset(_program, presetToDSPWords(_data), cancelIfFull, true);
+	return sendPreset(_program, presetToDSPWords(_data), true);
 }
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
@@ -606,7 +627,7 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 	if(getSingle(bank, _value, single))
 	{
 		m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part] = _value;
-		return writeSingle(0, _part, single, true);
+		return writeSingle(0, _part, single);
 	}
 
 	return true;
@@ -624,10 +645,10 @@ bool Microcontroller::multiProgramChange(uint8_t _value)
 
 bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 {
-	if(!writeMulti(0, _program, _multi, true))
+	if(!writeMulti(0, _program, _multi))
 		return false;
 
-	for(uint8_t p=0; p<16; ++p)
+	for (uint8_t p = 0; p < 16; ++p)
 		loadMultiSingle(p, _multi);
 
 	return true;
@@ -654,7 +675,7 @@ void Microcontroller::process(size_t _size)
 		const auto preset = m_pendingPresetWrites.front();
 		m_pendingPresetWrites.pop_front();
 
-		sendPreset(preset.program, preset.data, false, preset.isMulti);
+		sendPreset(preset.program, preset.data, preset.isMulti);
 	}
 }
 
@@ -721,7 +742,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
-	if(m_globalSettings[PLAY_MODE] == PlayModeSingle)
+	if(_part == SINGLE)
 		applyToSingleEditBuffer(m_singleEditBuffer, _page, _param, _value);
 	else
 		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);

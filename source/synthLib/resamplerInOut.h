@@ -14,7 +14,7 @@ namespace synthLib
 		using TMidiVec = std::vector<SMidiEvent>;
 		using TProcessFunc = std::function<void(float**, float**, size_t, const TMidiVec&, TMidiVec&)>;
 
-		ResamplerInOut();
+		ResamplerInOut() = default;
 
 		void setDeviceSamplerate(float _samplerate);
 		void setHostSamplerate(float _samplerate);
@@ -39,11 +39,9 @@ namespace synthLib
 		AudioBuffer m_output;
 
 		size_t m_scaledInputSize = 0;
-		size_t m_inputSize = 0;
-		size_t m_scaledOutputSize = 0;
-		size_t m_outputSize = 0;
 
 		TMidiVec m_processedMidiIn;
+
 		TMidiVec m_midiIn;
 		TMidiVec m_midiOut;
 
