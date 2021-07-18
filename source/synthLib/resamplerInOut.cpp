@@ -11,10 +11,6 @@ namespace synthLib
 {
 	constexpr uint32_t g_channelCount = 2;
 
-	ResamplerInOut::ResamplerInOut()
-	{
-	}
-
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
 	{
 		if(m_samplerateDevice == _samplerate)

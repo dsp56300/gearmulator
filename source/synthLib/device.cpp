@@ -74,7 +74,7 @@ namespace synthLib
 
 				const auto size = end - begin;
 
-				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_nextLatency);
+				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_latency);
 				readMidiOut(_midiOut);
 
 				_inputs[0] += size;
@@ -106,7 +106,7 @@ namespace synthLib
 
 			if(end < _size)
 			{
-				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size - end, 2, 2, m_nextLatency);
+				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size - end, 2, 2, m_latency);
 				readMidiOut(_midiOut);				
 			}
 
@@ -115,14 +115,15 @@ namespace synthLib
 		}
 		else
 		{
-			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_nextLatency);
+			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
 			readMidiOut(_midiOut);
 		}
 	}
 
-	void Device::setBlockSize(const size_t _size)
+	void Device::setLatencySamples(const uint32_t _size)
 	{
-		m_nextLatency = _size;
+		m_latency = _size;
+		LOG("Latency set to " << m_latency << " samples at " << getSamplerate() << " Hz");
 	}
 
 	void Device::startDSPThread()
