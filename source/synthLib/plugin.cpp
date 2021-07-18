@@ -3,6 +3,8 @@
 
 #include <cmath>
 
+#include "os.h"
+
 using namespace synthLib;
 
 namespace synthLib
@@ -60,6 +62,7 @@ namespace synthLib
 		m_resampler.setHostSamplerate(_samplerate);
 		m_hostSamplerate = _samplerate;
 		m_hostSamplerateInv = _samplerate > 0 ? 1.0f / _samplerate : 0.0f;
+		updateDeviceLatency();
 	}
 
 	void Plugin::process(float** _inputs, float** _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
@@ -67,7 +70,7 @@ namespace synthLib
 		if(!m_device->isValid())
 			return;
 
-		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+		setFlushDenormalsToZero();
 
 		float* inputs[8] {};
 		float* outputs[8] {};
@@ -78,6 +81,9 @@ namespace synthLib
 		outputs[1] = _outputs && _outputs[1] ? _outputs[1] : getDummyBuffer(_count);
 
 		std::lock_guard lock(m_lock);
+
+		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
+
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
 			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
@@ -224,14 +230,25 @@ namespace synthLib
 		return &m_dummyBuffer[0];
 	}
 
-	void Plugin::setBlockSize(size_t _blockSize)
+	void Plugin::updateDeviceLatency()
+	{
+		if(m_blockSize <= 0 || m_hostSamplerate <= 0)
+			return;
+
+		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize) * m_device->getSamplerate() * m_hostSamplerateInv));
+		m_device->setLatencySamples(latency);
+	}
+
+	void Plugin::setBlockSize(const uint32_t _blockSize)
 	{
 		std::lock_guard lock(m_lock);
-		m_device->setBlockSize(_blockSize);
+		m_blockSize = _blockSize;
+		updateDeviceLatency();
 	}
 
 	uint32_t Plugin::getLatencySamples() const
 	{
+		std::lock_guard lock(m_lock);
 		return m_device->getLatencySamples();
 	}
 }

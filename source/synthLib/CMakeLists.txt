@@ -7,6 +7,7 @@ set(SOURCES
 	audiobuffer.cpp audiobuffer.h
 	device.cpp device.h
 	deviceTypes.h
+	midiToSysex.cpp midiToSysex.h
 	midiTypes.h
 	os.cpp os.h
 	plugin.cpp plugin.h
