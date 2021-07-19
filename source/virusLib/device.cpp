@@ -60,8 +60,8 @@ namespace virusLib
 	{
 		if(_ev.sysex.empty())
 		{
-//			LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
-			return m_syx.sendMIDI(_ev.a, _ev.b, _ev.c, true);
+//			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
+			return m_syx.sendMIDI(_ev, true);
 		}
 
 		std::vector<synthLib::SMidiEvent> responses;

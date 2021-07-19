@@ -155,10 +155,10 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	return true;
 }
 
-bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFull/* = false*/)
+bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = false*/)
 {
-	const uint8_t channel = a & 0x0f;
-	const uint8_t status = a & 0xf0;
+	const uint8_t channel = _ev.a & 0x0f;
+	const uint8_t status = _ev.a & 0xf0;
 
 	const auto singleMode = m_globalSettings[PLAY_MODE] == PlayModeSingle;
 
@@ -173,45 +173,40 @@ bool Microcontroller::sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFul
 
 			if(singleMode)
 			{
-				if(getSingle(m_currentBank, b, single))
+				if(getSingle(m_currentBank, _ev.b, single))
 				{
-					m_currentSingle = b;
+					m_currentSingle = _ev.b;
 					return writeSingle(0, SINGLE, single);
 				}
 			}
 			else
 			{
-				return partProgramChange(channel, b);
+				return partProgramChange(channel, _ev.b);
 			}
 		}
 		break;
 	case M_CONTROLCHANGE:
-		switch(b)
+		switch(_ev.b)
 		{
 		case MC_BANKSELECTLSB:
 			if(singleMode)
-				m_currentBank = c % m_singles.size();
+				m_currentBank = _ev.c % m_singles.size();
 			else
-				partBankSelect(channel, c, false);
+				partBankSelect(channel, _ev.c, false);
 			return true;
 		default:
-			applyToSingleEditBuffer(PAGE_A, singleMode ? SINGLE : channel, b, c);
+			applyToSingleEditBuffer(PAGE_A, singleMode ? SINGLE : channel, _ev.b, _ev.c);
 			break;
 		}
 		break;
 	case M_POLYPRESSURE:
-		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, b, c);
+		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
 		break;
 	default:
 		break;
 	}
 
-	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
-		return false;
-	writeHostBitsWithWait(1,1);
-	TWord buf[3] = {static_cast<TWord>(a)<<16, static_cast<TWord>(b)<<16, static_cast<TWord>(c)<<16};
-	m_hdi08.writeRX(buf,3);
-	return true;
+	return sendMIDItoDSP(_ev.a,_ev.b,_ev.c, cancelIfFull);
 }
 
 bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses)
@@ -779,6 +774,16 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		unusedResponses.clear();
 	}
 
+	return true;
+}
+
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull)
+{
+	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
+		return false;
+	writeHostBitsWithWait(1,1);
+	TWord buf[3] = {static_cast<TWord>(_a)<<16, static_cast<TWord>(_b)<<16, static_cast<TWord>(_c)<<16};
+	m_hdi08.writeRX(buf,3);
 	return true;
 }
 

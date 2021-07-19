@@ -197,6 +197,6 @@ namespace synthLib
 		std::vector<uint8_t> sysex;
 		int offset;
 
-		SMidiEvent() : a(0), b(0), c(0), offset(0) {}
+		SMidiEvent(const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const int _offset = 0) : a(_a), b(_b), c(_c), offset(_offset) {}
 	};
 }
