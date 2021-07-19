@@ -182,7 +182,7 @@ public:
 
 	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
 	void sendControlCommand(ControlCommand command, uint8_t value);
-	bool sendMIDI(uint8_t a, uint8_t b, uint8_t c, bool cancelIfFull = false);
+	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses);
 
@@ -199,6 +199,8 @@ public:
 
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
+
+	bool sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull);
 
 private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;

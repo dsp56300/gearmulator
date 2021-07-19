@@ -155,7 +155,7 @@ void midiNoteOn(void *data,DSP *dsp)
 {
 	auto* uc = static_cast<Microcontroller*>(data);
 	LOG("Sending Note On!");
-	uc->sendMIDI(0x90,60,0x7f);	// Note On
+	uc->sendMIDI(SMidiEvent(0x90,60,0x7f));	// Note On
 
 }
 void midiCallback(void *data,DSP *dsp)
