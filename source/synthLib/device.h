@@ -29,6 +29,7 @@ namespace synthLib
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>& _response) = 0;
+		virtual void onAudioWritten() {}
 
 		void dummyProcess(uint32_t _numSamples);
 

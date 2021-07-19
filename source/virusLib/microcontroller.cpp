@@ -106,6 +106,8 @@ bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
 
 void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) const
 {
+	std::lock_guard lock(m_mutex);
+
 	const int hsr=m_hdi08.readStatusRegister();
 	const int target=(flag1?1:0)|(flag2?2:0);
 	if (((hsr>>3)&3)==target) return;
@@ -115,6 +117,8 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 
 bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool isMulti)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
 		m_pendingPresetWrites.emplace_back(SPendingPresetWrite{program, isMulti, preset});
@@ -139,7 +143,10 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value, bool cancelIfFull/* = false*/)
 {
+	std::lock_guard lock(m_mutex);
+
 	waitUntilReady();
+
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
 	writeHostBitsWithWait(0,1);
@@ -206,7 +213,8 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 		break;
 	}
 
-	return sendMIDItoDSP(_ev.a,_ev.b,_ev.c, cancelIfFull);
+	m_pendingMidiEvents.push_back(_ev);
+	return true;
 }
 
 bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses)
@@ -707,6 +715,8 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 
 void Microcontroller::process(size_t _size)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(!m_pendingPresetWrites.empty() && !m_hdi08.hasDataToSend())
 	{
 		const auto preset = m_pendingPresetWrites.front();
@@ -779,12 +789,33 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
 		return false;
 	writeHostBitsWithWait(1,1);
 	TWord buf[3] = {static_cast<TWord>(_a)<<16, static_cast<TWord>(_b)<<16, static_cast<TWord>(_c)<<16};
 	m_hdi08.writeRX(buf,3);
 	return true;
+}
+
+void Microcontroller::sendPendingMidiEvents(uint32_t _maxOffset)
+{
+	auto size = m_pendingMidiEvents.size();
+
+	if(!size)
+		return;
+
+	while(!m_pendingMidiEvents.empty() && static_cast<uint32_t>(m_pendingMidiEvents.front().offset) <= _maxOffset)
+	{
+		const auto& ev = m_pendingMidiEvents.front();
+
+		if(!sendMIDItoDSP(ev.a,ev.b,ev.c, true))
+			break;
+
+		m_pendingMidiEvents.pop_front();
+		--size;
+	}	
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)

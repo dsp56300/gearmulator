@@ -19,7 +19,12 @@ namespace synthLib
 		auto* bufDSP = buf;
 		auto* bufMem = bufDSP + alignedSize<DSP>();
 		auto* bufBuf = bufMem + alignedSize<Memory>();
-		
+
+		m_periph.getEsai().setCallback([this](Audio* _audio)
+		{
+			onAudioWritten();
+		}, 0, 1);
+
 		m_memory = new (bufMem)Memory(m_memoryValidator, _memorySize, reinterpret_cast<TWord*>(bufBuf));
 		m_dsp = new (buf)DSP(*m_memory, &m_periph, &m_periph);
 
@@ -57,67 +62,12 @@ namespace synthLib
 
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
-		m_midiIn.insert(m_midiIn.end(), _midiIn.begin(), _midiIn.end());
+		for(size_t i=0; i<_midiIn.size(); ++i)
+			sendMidi(_midiIn[i], _midiOut);
 
-		if(!m_midiIn.empty())
-		{
-			size_t i = 0;
+		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
 
-			uint32_t end = 0;
-			uint32_t begin = 0;
-
-			bool sendMidiFailed = false;
-
-			while(i < m_midiIn.size() && !sendMidiFailed)
-			{
-				end = m_midiIn[i].offset;
-
-				const auto size = end - begin;
-
-				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_latency);
-				readMidiOut(_midiOut);
-
-				_inputs[0] += size;
-				_inputs[1] += size;
-				_outputs[0] += size;
-				_outputs[1] += size;
-
-				for(size_t j=i; j<m_midiIn.size() && !sendMidiFailed; j++)
-				{
-					if(m_midiIn[j].offset <= static_cast<int>(end))
-					{
-						if(!sendMidi(m_midiIn[j], _midiOut))
-						{
-							if(j > 0)
-							{
-								m_midiIn.erase(m_midiIn.begin(), m_midiIn.begin() + j);
-
-								for (auto& event : m_midiIn)
-									event.offset = 0;
-							}
-							sendMidiFailed = true;							
-						}
-						++i;
-					}
-				}
-
-				begin = end;
-			}
-
-			if(end < _size)
-			{
-				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size - end, 2, 2, m_latency);
-				readMidiOut(_midiOut);				
-			}
-
-			if(!sendMidiFailed)
-				m_midiIn.clear();
-		}
-		else
-		{
-			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
-			readMidiOut(_midiOut);
-		}
+		readMidiOut(_midiOut);
 	}
 
 	void Device::setLatencySamples(const uint32_t _size)
