@@ -249,6 +249,6 @@ namespace synthLib
 	uint32_t Plugin::getLatencySamples() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_device->getLatencySamples();
+		return m_blockSize;
 	}
 }
