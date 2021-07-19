@@ -42,6 +42,8 @@ namespace virusLib
 
 	void Device::process(float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
+		m_numSamplesProcessed += static_cast<uint32_t>(_size);
+
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 		m_syx.process(_size);
 	}
@@ -61,7 +63,9 @@ namespace virusLib
 		if(_ev.sysex.empty())
 		{
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
-			return m_syx.sendMIDI(_ev, true);
+			auto ev = _ev;
+			ev.offset += m_numSamplesProcessed;
+			return m_syx.sendMIDI(ev, true);
 		}
 
 		std::vector<synthLib::SMidiEvent> responses;
@@ -86,5 +90,13 @@ namespace virusLib
 				m_midiOutParser.clearMidiData();
 			}
 		}
+	}
+
+	void Device::onAudioWritten()
+	{
+		m_numSamplesWritten += 1;
+
+		if(m_numSamplesWritten >= 0)
+			m_syx.sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 }

@@ -6,13 +6,10 @@
 #include "romfile.h"
 
 #include "../synthLib/deviceTypes.h"
+#include "../synthLib/midiTypes.h"
 
 #include <list>
-
-namespace synthLib
-{
-	struct SMidiEvent;
-}
+#include <mutex>
 
 namespace virusLib
 {
@@ -180,10 +177,7 @@ public:
 
 	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
-	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
-	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
-	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses);
 
 	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data);
@@ -191,7 +185,6 @@ public:
 	bool requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const;
 	bool requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const;
 
-	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void sendInitControlCommands();
 
 	void createDefaultState();
@@ -202,7 +195,13 @@ public:
 
 	bool sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull);
 
+	void sendPendingMidiEvents(uint32_t _maxOffset);
+
 private:
+	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
+	void sendControlCommand(ControlCommand command, uint8_t value);
+	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
+	bool needsToWaitForHostBits(char flag1,char flag2) const;
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
@@ -245,7 +244,9 @@ private:
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
-	uint32_t m_presetWriteCount = 0;
+
+	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
+	mutable std::recursive_mutex m_mutex;
 };
 
 }
