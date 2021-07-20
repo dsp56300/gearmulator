@@ -18,6 +18,7 @@ namespace synthLib
 		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setLatencySamples(uint32_t _size);
 		uint32_t getLatencySamples() const { return m_latency; }
+		uint32_t getInternalLatencySamples() const;
 
 		void startDSPThread();
 
