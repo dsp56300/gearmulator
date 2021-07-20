@@ -806,7 +806,7 @@ void Microcontroller::sendPendingMidiEvents(uint32_t _maxOffset)
 	if(!size)
 		return;
 
-	while(!m_pendingMidiEvents.empty() && static_cast<uint32_t>(m_pendingMidiEvents.front().offset) <= _maxOffset)
+	while(!m_pendingMidiEvents.empty() && m_pendingMidiEvents.front().offset <= _maxOffset)
 	{
 		const auto& ev = m_pendingMidiEvents.front();
 
