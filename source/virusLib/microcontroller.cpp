@@ -169,7 +169,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 
 	const auto singleMode = m_globalSettings[PLAY_MODE] == PlayModeSingle;
 
-	if(singleMode && channel != m_globalSettings[GLOBAL_CHANNEL])
+	if(status != 0xf0 && singleMode && channel != m_globalSettings[GLOBAL_CHANNEL])
 		return true;
 
 	switch (status)
