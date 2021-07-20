@@ -237,6 +237,8 @@ namespace synthLib
 
 		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize) * m_device->getSamplerate() * m_hostSamplerateInv));
 		m_device->setLatencySamples(latency);
+
+		m_deviceLatency = m_device->getInternalLatencySamples() * m_hostSamplerate / m_device->getSamplerate();
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)
@@ -249,6 +251,6 @@ namespace synthLib
 	uint32_t Plugin::getLatencySamples() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize;
+		return m_blockSize + m_deviceLatency;
 	}
 }
