@@ -42,10 +42,10 @@ namespace virusLib
 
 	void Device::process(float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
-
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 		m_syx.process(_size);
+
+		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
@@ -64,7 +64,7 @@ namespace virusLib
 		{
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
-			ev.offset += m_numSamplesProcessed;
+			ev.offset += m_numSamplesProcessed + getLatencySamples();
 			return m_syx.sendMIDI(ev, true);
 		}
 
@@ -96,7 +96,6 @@ namespace virusLib
 	{
 		m_numSamplesWritten += 1;
 
-		if(m_numSamplesWritten >= 0)
-			m_syx.sendPendingMidiEvents(m_numSamplesWritten >> 1);
+		m_syx.sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 }
