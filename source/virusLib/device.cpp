@@ -58,6 +58,11 @@ namespace virusLib
 		return m_syx.setState(_state, _type);
 	}
 
+	uint32_t Device::getInternalLatencySamples() const
+	{
+		return 300;		// hard to belive but this is what I figured out by measuring with the init patch
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		if(_ev.sysex.empty())
