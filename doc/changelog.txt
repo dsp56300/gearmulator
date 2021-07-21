@@ -1,0 +1,9 @@
+Release Notes 1.1.7:
+
+- MIDI: Support Global, Total, Arrangement and Controller Dump requests
+- Plugin state is now saved in host/project. The saved state includes global parameters, the RAM banks A & B, the current Multi (in Multi mode) plus all Singles referenced by that Multi and the current Single in Single mode
+- Plugin latency is now reported to host, fixes audio offsets when bouncing and other synchronization issues
+- Fix midi timing when using large block sizes
+- Fix possible FPU denormalization issue in resampling code causing high CPU load(Bearbeitet)
+- Fix issue that may have caused CPU hickups when running host at 44,1 Khz or below
+- Fix MIDI clock not forwarded to DSP when running in Single mode
