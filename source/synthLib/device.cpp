@@ -76,11 +76,6 @@ namespace synthLib
 		LOG("Latency set to " << m_latency << " samples at " << getSamplerate() << " Hz");
 	}
 
-	uint32_t Device::getInternalLatencySamples() const
-	{
-		return 260;	// hard to belive but this is what I figured out by measuring with the init patch
-	}
-
 	void Device::startDSPThread()
 	{
 		m_dspThread.reset(new DSPThread(*m_dsp));
