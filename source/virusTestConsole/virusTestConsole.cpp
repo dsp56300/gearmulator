@@ -259,9 +259,9 @@ int main(int _argc, char* _argv[])
 	loader.join();
 
 	// dump memory to files
-//	memory.saveAsText("Virus_X.txt", MemArea_X, 0, memory.size());
-//	memory.saveAsText("Virus_Y.txt", MemArea_Y, 0, memory.size());
-//	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
+//	memory.saveAsText((romFile + "_X.txt").c_str(), MemArea_X, 0, memory.size());
+//	memory.saveAsText((romFile + "_Y.txt").c_str(), MemArea_Y, 0, memory.size());
+//	memory.saveAssembly((romFile + "_P.asm").c_str(), 0, memory.size(), true, false, &periph);
 
 	while (true)
 	{
