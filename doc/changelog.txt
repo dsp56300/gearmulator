@@ -1,4 +1,12 @@
-Release Notes 1.1.7:
+Release Notes 
+
+1.1.8:
+
+- Fix plugin failing AU validation on Mac OS
+- Fix plugin getting stuck if block size is larger than 4096
+- Small performance improvements in DSP code
+
+1.1.7:
 
 - MIDI: Support Global, Total, Arrangement and Controller Dump requests
 - Plugin state is now saved in host/project. The saved state includes global parameters, the RAM banks A & B, the current Multi (in Multi mode) plus all Singles referenced by that Multi and the current Single in Single mode
