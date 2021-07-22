@@ -156,20 +156,28 @@ void midiNoteOn(void *data,DSP *dsp)
 	auto* uc = static_cast<Microcontroller*>(data);
 	LOG("Sending Note On!");
 	uc->sendMIDI(SMidiEvent(0x90,60,0x7f));	// Note On
+	uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 
 }
+
+void sendPresetCallback(void *data,DSP *dsp)
+{
+	LOG("Sending Preset!");
+
+	// Send preset
+	auto* uc = static_cast<Microcontroller*>(data);
+	uc->writeSingle(0, Microcontroller::SINGLE, preset);
+
+	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
+}
+
 void midiCallback(void *data,DSP *dsp)
 {
 	auto* syx = static_cast<Microcontroller*>(data);
 
-	LOG("Sending Preset!");
-
 	syx->sendInitControlCommands();
 
-	// Send preset
-	syx->writeSingle(0, Microcontroller::SINGLE, preset);
-
-	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
+	dsp->setCallback(sendPresetCallback, data, 477263+70000*5);
 }
 
 int main(int _argc, char* _argv[])
@@ -238,7 +246,7 @@ int main(int _argc, char* _argv[])
 	// Load preset
 
 	Microcontroller syx(periph.getHDI08(), v);
-	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
+	dsp.setCallback(midiCallback, &syx, 477263+70000*2);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
