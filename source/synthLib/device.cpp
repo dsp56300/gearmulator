@@ -65,39 +65,22 @@ namespace synthLib
 		for (const auto& ev : _midiIn)
 			sendMidi(ev, _midiOut);
 
-		const auto maxSize = getPeriph().getEsai().getAudioInputs()[0].capacity() >> 2;
-
-		if(_size <= maxSize)
-		{
-			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
-
-			readMidiOut(_midiOut);
-		}
-		else
-		{
-			// The only real "host" doing stuff like this is the AU validation tool which comes with 4096 samples at 11025 Hz. We do not want to increase the ring buffer sizes of ESAI even more
-			size_t remaining = _size;
-
-			while(remaining >= maxSize)
-			{
-				const size_t size = std::min(maxSize, remaining);
-				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_latency);
-				readMidiOut(_midiOut);
-
-				_inputs[0] += size;
-				_inputs[1] += size;
-				_outputs[0] += size;
-				_outputs[1] += size;
-
-				remaining -= size;
-			}
-		}		
+		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
+		readMidiOut(_midiOut);
 	}
 
 	void Device::setLatencySamples(const uint32_t _size)
 	{
-		m_latency = _size;
+		const uint32_t maxLatency = static_cast<uint32_t>(getPeriph().getEsai().getAudioInputs()[0].capacity()) >> 1;
+
+		m_latency = std::min(_size, maxLatency);
+
 		LOG("Latency set to " << m_latency << " samples at " << getSamplerate() << " Hz");
+
+		if(_size > maxLatency)
+		{
+			LOG("Warning, limited requested latency " << _size << " to maximum value " << maxLatency << ", audio will be out of sync!");
+		}
 	}
 
 	void Device::startDSPThread()
