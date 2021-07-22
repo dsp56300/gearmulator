@@ -246,7 +246,7 @@ int main(int _argc, char* _argv[])
 	// Load preset
 
 	Microcontroller syx(periph.getHDI08(), v);
-	dsp.setCallback(midiCallback, &syx, 477263+70000*2);
+	dsp.setCallback(midiCallback, &syx, 477263+70000*3);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
