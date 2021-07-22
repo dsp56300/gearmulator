@@ -62,12 +62,36 @@ namespace synthLib
 
 	void Device::process(float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
-		for(size_t i=0; i<_midiIn.size(); ++i)
-			sendMidi(_midiIn[i], _midiOut);
+		for (const auto& ev : _midiIn)
+			sendMidi(ev, _midiOut);
 
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
+		const auto maxSize = getPeriph().getEsai().getAudioInputs()[0].capacity() >> 2;
 
-		readMidiOut(_midiOut);
+		if(_size <= maxSize)
+		{
+			m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
+
+			readMidiOut(_midiOut);
+		}
+		else
+		{
+			// The only real "host" doing stuff like this is the AU validation tool which comes with 4096 samples at 11025 Hz. We do not want to increase the ring buffer sizes of ESAI even more
+			size_t remaining = _size;
+
+			while(remaining >= maxSize)
+			{
+				const size_t size = std::min(maxSize, remaining);
+				m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, size, 2, 2, m_latency);
+				readMidiOut(_midiOut);
+
+				_inputs[0] += size;
+				_inputs[1] += size;
+				_outputs[0] += size;
+				_outputs[1] += size;
+
+				remaining -= size;
+			}
+		}		
 	}
 
 	void Device::setLatencySamples(const uint32_t _size)
