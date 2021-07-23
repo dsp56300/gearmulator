@@ -16,8 +16,8 @@ namespace Virus
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
         void printMessage(const SysEx &) const;
-
     private:
+        void sendSysEx(const SysEx &);
         std::vector<uint8_t> constructMessage(SysEx msg);
 
         AudioPluginAudioProcessor &m_processor;
