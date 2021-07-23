@@ -15,6 +15,8 @@ namespace Virus
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
+        void printMessage(const SysEx &) const;
+
     private:
         std::vector<uint8_t> constructMessage(SysEx msg);
 

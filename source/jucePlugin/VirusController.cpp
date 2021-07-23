@@ -7,6 +7,15 @@ namespace Virus
     {
     }
 
+    void Controller::printMessage(const SysEx &msg) const
+    {
+        for (auto &m : msg)
+        {
+            std::cout << std::hex << (int)m << ",";
+        }
+        std::cout << std::endl;
+    }
+
     std::vector<uint8_t> Controller::constructMessage(SysEx msg)
     {
         uint8_t start[] = {0xf0, 0x00, 0x20, 0x33, 0x01, static_cast<uint8_t>(m_deviceId)};
@@ -21,6 +30,7 @@ namespace Virus
         for (auto msg : m_virusOut)
         {
             // parse here
+            printMessage(msg.sysex);
         }
     }
 }; // namespace Virus
