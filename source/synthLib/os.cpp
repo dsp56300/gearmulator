@@ -76,10 +76,12 @@ namespace synthLib
         fixPath(".vst/");
         fixPath(".vst3/");
         fixPath(".component/");
+        fixPath(".app/");
 
         fixPath(".vst\\");
         fixPath(".vst3\\");
         fixPath(".component\\");
+        fixPath(".app\\");
 
         const auto end = path.find_last_of("/\\");
 
