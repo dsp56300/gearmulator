@@ -31,8 +31,10 @@ target_sources(jucePlugin
 PRIVATE
     PluginEditor.cpp
     PluginProcessor.cpp
+    VirusController.cpp
     PluginEditor.h
     PluginProcessor.h
+    VirusController.h
 	version.h
 )
 
