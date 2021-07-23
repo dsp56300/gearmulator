@@ -17,6 +17,7 @@ namespace Virus
 
         void printMessage(const SysEx &) const;
     private:
+        void parseMessage(const SysEx &);
         void sendSysEx(const SysEx &);
         std::vector<uint8_t> constructMessage(SysEx msg);
 
