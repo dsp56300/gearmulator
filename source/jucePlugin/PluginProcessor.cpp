@@ -4,13 +4,11 @@
 #include "../synthLib/os.h"
 
 //==============================================================================
-AudioPluginAudioProcessor::AudioPluginAudioProcessor()
-     : AudioProcessor (BusesProperties()
-                       .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                       .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
-                       )
-	, m_device(synthLib::findROM())
-	, m_plugin(&m_device)
+AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
+    AudioProcessor(BusesProperties()
+                       .withInput("Input", juce::AudioChannelSet::stereo(), true)
+                       .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
+    m_device(synthLib::findROM()), m_plugin(&m_device)
 {
 }
 
@@ -88,6 +86,12 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
+    if (m_controller == nullptr)
+    {
+        // initialize controller if not exists.
+        // assures PluginProcessor is fully constructed!
+        m_controller = std::make_unique<Virus::Controller>(*this);
+    }
 
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
@@ -201,10 +205,12 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	m_midiOut.clear();
 	m_plugin.getMidiOut(m_midiOut);
+    if (m_midiOut.size() > 0)
+        m_controller->dispatchVirusOut(m_midiOut);
 
-	for(size_t i=0; i<m_midiOut.size(); ++i)
-	{
-		const auto& e = m_midiOut[i];
+    for (size_t i = 0; i < m_midiOut.size(); ++i)
+    {
+        const auto& e = m_midiOut[i];
 		if(e.sysex.empty())
 		{
 			midiMessages.addEvent(juce::MidiMessage (e.a, e.b, e.c, 0.0), 0);
@@ -213,7 +219,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		{
 			midiMessages.addEvent(juce::MidiMessage (&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0), 0);
 		}
-	}
+    }
 }
 
 //==============================================================================
