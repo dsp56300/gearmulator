@@ -6,6 +6,7 @@ class AudioPluginAudioProcessor;
 
 namespace Virus
 {
+    using SysEx = std::vector<uint8_t>;
     class Controller
     {
     public:
@@ -15,6 +16,8 @@ namespace Virus
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
     private:
+        std::vector<uint8_t> constructMessage(SysEx msg);
+
         AudioPluginAudioProcessor &m_processor;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
