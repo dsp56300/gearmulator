@@ -794,8 +794,26 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool can
 	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
 		return false;
 	writeHostBitsWithWait(1,1);
-	TWord buf[3] = {static_cast<TWord>(_a)<<16, static_cast<TWord>(_b)<<16, static_cast<TWord>(_c)<<16};
-	m_hdi08.writeRX(buf,3);
+
+	switch (_a)
+	{
+	case M_TIMINGCLOCK:
+	case M_START:
+	case M_CONTINUE:
+	case M_STOP:
+		{
+			const auto temp = static_cast<TWord>(_a) << 16;
+			m_hdi08.writeRX(&temp, 1);
+		}
+		break;
+	default:
+		{
+			TWord buf[3] = { static_cast<TWord>(_a) << 16, static_cast<TWord>(_b) << 16, static_cast<TWord>(_c) << 16 };
+			m_hdi08.writeRX(buf, 3);
+		}
+		break;
+	}
+
 	return true;
 }
 
