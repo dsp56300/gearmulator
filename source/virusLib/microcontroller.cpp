@@ -121,7 +121,17 @@ bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& pres
 
 	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
+		for(auto it = m_pendingPresetWrites.begin(); it != m_pendingPresetWrites.end();)
+		{
+			const auto& pendingPreset = *it;
+			if (pendingPreset.isMulti == isMulti && pendingPreset.program == program)
+				it = m_pendingPresetWrites.erase(it);
+			else
+				++it;
+		}
+
 		m_pendingPresetWrites.emplace_back(SPendingPresetWrite{program, isMulti, preset});
+
 		return true;
 	}
 
