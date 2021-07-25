@@ -9,10 +9,10 @@ using MessageType = virusLib::Microcontroller::SysexMessageType;
 namespace Virus
 {
     static constexpr uint8_t kSysExStart[] = {0xf0, 0x00, 0x20, 0x33, 0x01};
+    static constexpr auto kHeaderWithMsgCodeLen = 7;
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
-        sendSysEx(constructMessage({0x30, 0x00, 0x00}));
     }
 
     void Controller::parseMessage(const SysEx &msg)
@@ -40,14 +40,45 @@ namespace Virus
                 switch (msg[i])
                 {
                 case MessageType::DUMP_SINGLE:
-                    std::cout << "Parse Single" << std::endl;
+                    parseSingle(msg);
                     break;
                 case MessageType::DUMP_MULTI:
-                    std::cout << "Parse Multi" << std::endl;
+                    parseMulti(msg);
                     break;
+                default:
+                    std::cout << "Controller: Begin Unhandled SysEx! --" << std::endl;
+                    printMessage(msg);
+                    std::cout << "Controller: End Unhandled SysEx! --" << std::endl;
                 }
             }
         }
+    }
+
+    void Controller::parseSingle(const SysEx &msg)
+    {
+        auto pos = kHeaderWithMsgCodeLen;
+        const auto bankNum = msg[pos];
+        pos++;
+        const auto progNum = msg[pos];
+        pos++;
+        parseData(msg, pos);
+    }
+
+    void Controller::parseMulti(const SysEx &msg)
+    {
+        uint8_t bankNum, progNum, data256, checksum;
+        assert(msg.size() - kHeaderWithMsgCodeLen > 0);
+    }
+
+    void Controller::parseData(const SysEx &msg, const size_t startPos)
+    {
+        constexpr auto pageSize = 128;
+        constexpr auto expectedDataSize = pageSize * 2; // we have 2 pages
+        constexpr auto checkSumSize = 1;
+
+        const auto dataSize = msg.size() - startPos - 1;
+        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
+        assert(hasChecksum || dataSize == expectedDataSize);
     }
 
     void Controller::printMessage(const SysEx &msg) const
@@ -79,8 +110,14 @@ namespace Virus
         m_virusOut = newData;
         for (auto msg : m_virusOut)
         {
-            // parse here
-            parseMessage(msg.sysex);
+            if (msg.sysex.size() == 0)
+            {
+                // no sysex
+                DBG(juce::String::formatted("Plain a:%04x b:%04x c:%04x", msg.a, msg.b, msg.c));
+                return;
+            }
+            else
+                parseMessage(msg.sysex);
         }
     }
 }; // namespace Virus
