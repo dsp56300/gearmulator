@@ -1,7 +1,7 @@
 #pragma once
 
+#include <juce_audio_processors/juce_audio_processors.h>
 #include "../synthLib/plugin.h"
-
 class AudioPluginAudioProcessor;
 
 namespace Virus
@@ -16,8 +16,12 @@ namespace Virus
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
         void printMessage(const SysEx &) const;
+
     private:
         void parseMessage(const SysEx &);
+        void parseSingle(const SysEx &);
+        void parseMulti(const SysEx &);
+        void parseData(const SysEx &, size_t startPos);
         void sendSysEx(const SysEx &);
         std::vector<uint8_t> constructMessage(SysEx msg);
 
