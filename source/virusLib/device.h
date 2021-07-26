@@ -22,12 +22,17 @@ namespace virusLib
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 
+		uint32_t getInternalLatencySamples() const override;
+
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
+		void onAudioWritten() override;
 
 		ROMFile m_rom;
 		Microcontroller m_syx;
 		MidiOutParser m_midiOutParser;
+		uint32_t m_numSamplesWritten = 0;
+		uint32_t m_numSamplesProcessed = 0;
 	};
 }

@@ -44,6 +44,8 @@ namespace virusLib
 	{
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 		m_syx.process(_size);
+
+		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
@@ -56,12 +58,19 @@ namespace virusLib
 		return m_syx.setState(_state, _type);
 	}
 
+	uint32_t Device::getInternalLatencySamples() const
+	{
+		return 300;		// hard to belive but this is what I figured out by measuring with the init patch
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		if(_ev.sysex.empty())
 		{
-//			LOG("MIDI: " << std::hex << (int)me.a << " " << (int)me.b << " " << (int)me.c);
-			return m_syx.sendMIDI(_ev.a, _ev.b, _ev.c, true);
+//			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
+			auto ev = _ev;
+			ev.offset += m_numSamplesProcessed + getLatencySamples();
+			return m_syx.sendMIDI(ev, true);
 		}
 
 		std::vector<synthLib::SMidiEvent> responses;
@@ -86,5 +95,12 @@ namespace virusLib
 				m_midiOutParser.clearMidiData();
 			}
 		}
+	}
+
+	void Device::onAudioWritten()
+	{
+		m_numSamplesWritten += 1;
+
+		m_syx.sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 }

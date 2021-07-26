@@ -18,6 +18,7 @@ namespace synthLib
 		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setLatencySamples(uint32_t _size);
 		uint32_t getLatencySamples() const { return m_latency; }
+		virtual uint32_t getInternalLatencySamples() const { return 0; }
 
 		void startDSPThread();
 
@@ -29,6 +30,7 @@ namespace synthLib
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>& _response) = 0;
+		virtual void onAudioWritten() {}
 
 		void dummyProcess(uint32_t _numSamples);
 

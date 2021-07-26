@@ -155,21 +155,29 @@ void midiNoteOn(void *data,DSP *dsp)
 {
 	auto* uc = static_cast<Microcontroller*>(data);
 	LOG("Sending Note On!");
-	uc->sendMIDI(0x90,60,0x7f);	// Note On
+	uc->sendMIDI(SMidiEvent(0x90,60,0x7f));	// Note On
+	uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 
 }
+
+void sendPresetCallback(void *data,DSP *dsp)
+{
+	LOG("Sending Preset!");
+
+	// Send preset
+	auto* uc = static_cast<Microcontroller*>(data);
+	uc->writeSingle(0, Microcontroller::SINGLE, preset);
+
+	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
+}
+
 void midiCallback(void *data,DSP *dsp)
 {
 	auto* syx = static_cast<Microcontroller*>(data);
 
-	LOG("Sending Preset!");
-
 	syx->sendInitControlCommands();
 
-	// Send preset
-	syx->writeSingle(0, Microcontroller::SINGLE, preset);
-
-	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
+	dsp->setCallback(sendPresetCallback, data, 477263+70000*5);
 }
 
 int main(int _argc, char* _argv[])
@@ -238,7 +246,7 @@ int main(int _argc, char* _argv[])
 	// Load preset
 
 	Microcontroller syx(periph.getHDI08(), v);
-	dsp.setCallback(midiCallback, &syx, 477263+70000*5);
+	dsp.setCallback(midiCallback, &syx, 477263+70000*3);
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
@@ -259,9 +267,9 @@ int main(int _argc, char* _argv[])
 	loader.join();
 
 	// dump memory to files
-//	memory.saveAsText("Virus_X.txt", MemArea_X, 0, memory.size());
-//	memory.saveAsText("Virus_Y.txt", MemArea_Y, 0, memory.size());
-//	memory.saveAssembly("Virus_P.asm", 0, memory.size(), true, false, &periph);
+//	memory.saveAsText((romFile + "_X.txt").c_str(), MemArea_X, 0, memory.size());
+//	memory.saveAsText((romFile + "_Y.txt").c_str(), MemArea_Y, 0, memory.size());
+//	memory.saveAssembly((romFile + "_P.asm").c_str(), 0, memory.size(), true, false, &periph);
 
 	while (true)
 	{
