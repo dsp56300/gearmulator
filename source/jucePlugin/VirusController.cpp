@@ -68,6 +68,9 @@ namespace Virus
     {
         uint8_t bankNum, progNum, data256, checksum;
         assert(msg.size() - kHeaderWithMsgCodeLen > 0);
+        constexpr auto startPos = kHeaderWithMsgCodeLen + 4;
+        auto progName = parseAsciiText(msg, startPos + 1);
+        DBG(progName);
     }
 
     void Controller::parseData(const SysEx &msg, const size_t startPos)
@@ -79,6 +82,20 @@ namespace Virus
         const auto dataSize = msg.size() - startPos - 1;
         const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
         assert(hasChecksum || dataSize == expectedDataSize);
+
+        const auto namePos = 128 + 112;
+        assert(startPos + namePos < msg.size());
+        auto progName = parseAsciiText(msg, startPos + namePos);
+        DBG(progName);
+    }
+
+    juce::String Controller::parseAsciiText(const SysEx &msg, const int start)
+    {
+        char text[kNameLength + 1];
+        text[kNameLength] = 0; // termination
+        for (auto pos = 0; pos < kNameLength; ++pos)
+            text[pos] = msg[start + pos];
+        return juce::String(text);
     }
 
     void Controller::printMessage(const SysEx &msg) const

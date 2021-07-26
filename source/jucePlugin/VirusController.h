@@ -10,6 +10,8 @@ namespace Virus
     class Controller
     {
     public:
+        static constexpr auto kNameLength = 10;
+
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 
         // this is called by the plug-in on audio thread!
@@ -18,6 +20,7 @@ namespace Virus
         void printMessage(const SysEx &) const;
 
     private:
+        juce::String parseAsciiText(const SysEx &, int startPos);
         void parseMessage(const SysEx &);
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
