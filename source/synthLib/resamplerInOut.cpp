@@ -61,7 +61,7 @@ namespace synthLib
 		for(size_t i=0; i<_src.size(); ++i)
 		{
 			_dst.push_back(_src[i]);
-			_dst[i].offset = clamp(_dst[i].offset, static_cast<int>(_offsetMin), static_cast<int>(_offsetMax));
+			_dst[i].offset = clamp(_dst[i].offset, _offsetMin, _offsetMax);
 		}
 	}
 
