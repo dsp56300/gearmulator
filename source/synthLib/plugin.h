@@ -53,6 +53,8 @@ namespace synthLib
 
 		uint32_t m_blockSize = 0;
 
+		uint32_t m_deviceLatency;
+
 		// MIDI Clock
 		bool m_isPlaying = false;
 		uint32_t m_lastKnownBeat = 0;
