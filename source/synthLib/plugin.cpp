@@ -198,7 +198,7 @@ namespace synthLib
 				{
 					for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
 					{
-						if(it->offset > insertPos)
+						if(static_cast<int>(it->offset) > insertPos)
 						{
 							evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
 							evClock.offset = insertPos;
@@ -237,6 +237,8 @@ namespace synthLib
 
 		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize) * m_device->getSamplerate() * m_hostSamplerateInv));
 		m_device->setLatencySamples(latency);
+
+		m_deviceLatency = static_cast<uint32_t>(m_device->getInternalLatencySamples() * m_hostSamplerate / m_device->getSamplerate());
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)
@@ -249,6 +251,6 @@ namespace synthLib
 	uint32_t Plugin::getLatencySamples() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_device->getLatencySamples();
+		return m_blockSize + m_deviceLatency;
 	}
 }
