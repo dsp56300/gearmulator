@@ -20,7 +20,6 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
 endif()
 
-add_subdirectory(source/ctrlr/JUCE)
 #add_subdirectory(source/ctrlr)
 
 # ----------------- Juce based audio plugin
@@ -28,6 +27,7 @@ add_subdirectory(source/ctrlr/JUCE)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+	add_subdirectory(source/ctrlr/JUCE)
 	add_subdirectory(source/jucePlugin)
 	if(JUCE_GLOBAL_VST2_SDK_PATH)
 		if(MSVC OR APPLE)
