@@ -336,6 +336,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(_param);
 		response.push_back(m_globalSettings[_param]);
 		response.push_back(M_ENDOFSYSEX);
+
+		_responses.push_back(ev);
 	};
 
 	auto buildGlobalResponses = [&]()
