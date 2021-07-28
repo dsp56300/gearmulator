@@ -61,7 +61,19 @@ namespace Virus
         pos++;
         const auto progNum = msg[pos];
         pos++;
-        parseData(msg, pos);
+
+        constexpr auto pageSize = 128;
+        constexpr auto expectedDataSize = pageSize * 2; // we have 2 pages
+        constexpr auto checkSumSize = 1;
+
+        const auto dataSize = msg.size() - pos - 1;
+        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
+        assert(hasChecksum || dataSize == expectedDataSize);
+
+        const auto namePos = 128 + 112;
+        assert(pos + namePos < msg.size());
+        auto progName = parseAsciiText(msg, pos + namePos);
+        DBG(progName);
     }
 
     void Controller::parseMulti(const SysEx &msg)
@@ -98,22 +110,6 @@ namespace Virus
             sum += dst[i];
         }
         return sum;
-    }
-
-    void Controller::parseData(const SysEx &msg, const size_t startPos)
-    {
-        constexpr auto pageSize = 128;
-        constexpr auto expectedDataSize = pageSize * 2; // we have 2 pages
-        constexpr auto checkSumSize = 1;
-
-        const auto dataSize = msg.size() - startPos - 1;
-        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
-        assert(hasChecksum || dataSize == expectedDataSize);
-
-        const auto namePos = 128 + 112;
-        assert(startPos + namePos < msg.size());
-        auto progName = parseAsciiText(msg, startPos + namePos);
-        DBG(progName);
     }
 
     juce::String Controller::parseAsciiText(const SysEx &msg, const int start)
