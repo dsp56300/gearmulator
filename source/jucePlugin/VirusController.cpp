@@ -66,21 +66,38 @@ namespace Virus
 
     void Controller::parseMulti(const SysEx &msg)
     {
-        assert(msg.size() - kHeaderWithMsgCodeLen > 0);
-        constexpr auto startPos = kHeaderWithMsgCodeLen + 4;
-        auto progName = parseAsciiText(msg, startPos + 1);
+        constexpr auto expectedDataSize = 2 + 256;
+        constexpr auto checkSumSize = 1;
+        const auto dataSize = msg.size() - kHeaderWithMsgCodeLen - 1;
+        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
+        assert(hasChecksum || dataSize == expectedDataSize);
+
+        constexpr auto startPos = kHeaderWithMsgCodeLen;
 
         MultiPatch patch;
         patch.bankNumber = msg[startPos];
         patch.progNumber = msg[startPos + 1];
-        copyData(msg, startPos + 2, patch.data);
+        auto progName = parseAsciiText(msg, startPos + 2 + 3);
+        [[maybe_unused]] auto dataSum = copyData(msg, startPos + 2, patch.data);
+        if (hasChecksum)
+        {
+            const int expectedChecksum = msg[msg.size() - 2];
+            const auto msgDeviceId = msg[5];
+            const int checksum = (msgDeviceId + 0x11 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
+//            assert(checksum == expectedChecksum);
+        }
         m_multis[patch.progNumber] = patch;
     }
 
-    void Controller::copyData(const SysEx &src, int startPos, uint8_t *dst)
+    uint8_t Controller::copyData(const SysEx &src, int startPos, uint8_t *dst)
     {
+        uint8_t sum = 0;
         for (auto i = 0; i < kDataSizeInBytes; i++)
+        {
             dst[i] = src[startPos + i];
+            sum += dst[i];
+        }
+        return sum;
     }
 
     void Controller::parseData(const SysEx &msg, const size_t startPos)
