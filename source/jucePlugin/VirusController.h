@@ -20,6 +20,20 @@ namespace Virus
         void printMessage(const SysEx &) const;
 
     private:
+        static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
+
+        struct MultiPatch
+        {
+            uint8_t bankNumber;
+            uint8_t progNumber;
+            uint8_t data[kDataSizeInBytes];
+        };
+
+        MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
+
+        // unchecked copy for patch data bytes
+        static inline void copyData(const SysEx &src, int startPos, uint8_t *dst);
+
         juce::String parseAsciiText(const SysEx &, int startPos);
         void parseMessage(const SysEx &);
         void parseSingle(const SysEx &);

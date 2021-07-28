@@ -66,11 +66,21 @@ namespace Virus
 
     void Controller::parseMulti(const SysEx &msg)
     {
-        uint8_t bankNum, progNum, data256, checksum;
         assert(msg.size() - kHeaderWithMsgCodeLen > 0);
         constexpr auto startPos = kHeaderWithMsgCodeLen + 4;
         auto progName = parseAsciiText(msg, startPos + 1);
-        DBG(progName);
+
+        MultiPatch patch;
+        patch.bankNumber = msg[startPos];
+        patch.progNumber = msg[startPos + 1];
+        copyData(msg, startPos + 2, patch.data);
+        m_multis[patch.progNumber] = patch;
+    }
+
+    void Controller::copyData(const SysEx &src, int startPos, uint8_t *dst)
+    {
+        for (auto i = 0; i < kDataSizeInBytes; i++)
+            dst[i] = src[startPos + i];
     }
 
     void Controller::parseData(const SysEx &msg, const size_t startPos)
