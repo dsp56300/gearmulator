@@ -32,7 +32,7 @@ namespace Virus
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
 
         // unchecked copy for patch data bytes
-        static inline void copyData(const SysEx &src, int startPos, uint8_t *dst);
+        static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
         juce::String parseAsciiText(const SysEx &, int startPos);
         void parseMessage(const SysEx &);
