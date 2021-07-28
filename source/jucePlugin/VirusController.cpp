@@ -56,23 +56,31 @@ namespace Virus
 
     void Controller::parseSingle(const SysEx &msg)
     {
-        auto pos = kHeaderWithMsgCodeLen;
-        const auto bankNum = msg[pos];
-        pos++;
-        const auto progNum = msg[pos];
-        pos++;
-
         constexpr auto pageSize = 128;
-        constexpr auto expectedDataSize = pageSize * 2; // we have 2 pages
+        constexpr auto expectedDataSize = pageSize * 2 + 1 + 1; // we have 2 pages
         constexpr auto checkSumSize = 1;
-
-        const auto dataSize = msg.size() - pos - 1;
+        const auto dataSize = msg.size() - (kHeaderWithMsgCodeLen + 1); // 1 end byte, 1 bank, 1 prg
         const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
         assert(hasChecksum || dataSize == expectedDataSize);
 
-        const auto namePos = 128 + 112;
-        assert(pos + namePos < msg.size());
-        auto progName = parseAsciiText(msg, pos + namePos);
+        SinglePatch patch;
+        patch.bankNumber = msg[kHeaderWithMsgCodeLen];
+        patch.progNumber = msg[kHeaderWithMsgCodeLen + 1];
+        [[maybe_unused]] const auto dataSum = copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
+
+        if (hasChecksum)
+        {
+            const auto checksum = msg[msg.size() - 2];
+            const auto deviceId = msg[5];
+            [[maybe_unused]] const auto expectedSum =
+                (deviceId + 0x10 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
+            assert(expectedSum == checksum);
+        }
+        m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
+
+        const auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
+        assert(namePos < msg.size());
+        auto progName = parseAsciiText(msg, namePos);
         DBG(progName);
     }
 
@@ -96,7 +104,7 @@ namespace Virus
             const int expectedChecksum = msg[msg.size() - 2];
             const auto msgDeviceId = msg[5];
             const int checksum = (msgDeviceId + 0x11 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
-//            assert(checksum == expectedChecksum);
+            assert(checksum == expectedChecksum);
         }
         m_multis[patch.progNumber] = patch;
     }
