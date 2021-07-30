@@ -130,6 +130,27 @@ namespace Virus
          */
     }
 
+    juce::StringArray Controller::getSinglePresetNames(int bank) const
+    {
+        if (bank > 1 || bank < 0)
+        {
+            jassertfalse;
+            return {};
+        }
+
+        juce::StringArray bankNames;
+        for (auto i = 0; i < 128; i++)
+            bankNames.add(parseAsciiText(m_singles[0][i].data, 128 + 112));
+        return bankNames;
+    }
+    juce::StringArray Controller::getMultiPresetsName() const
+    {
+        juce::StringArray bankNames;
+        for (auto i = 0; i < 128; i++)
+            bankNames.add(parseAsciiText(m_multis[i].data, 0));
+        return bankNames;
+    }
+
     void Controller::parseSingle(const SysEx &msg)
     {
         constexpr auto pageSize = 128;
@@ -564,7 +585,7 @@ namespace Virus
         return sum;
     }
 
-    juce::String Controller::parseAsciiText(const SysEx &msg, const int start)
+    template <typename T> juce::String Controller::parseAsciiText(const T &msg, const int start) const
     {
         char text[kNameLength + 1];
         text[kNameLength] = 0; // termination
