@@ -86,13 +86,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    if (m_controller == nullptr)
-    {
-        // initialize controller if not exists.
-        // assures PluginProcessor is fully constructed!
-        m_controller = std::make_unique<Virus::Controller>(*this);
-    }
-
+    getController(); // ensures controller is constructed before calling from processBlock!
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
 	setLatencySamples(m_plugin.getLatencySamples());
@@ -274,6 +268,17 @@ void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>
 void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
 {
 	m_plugin.addMidiEvent(ev);
+}
+
+Virus::Controller &AudioPluginAudioProcessor::getController()
+{
+    if (m_controller == nullptr)
+    {
+        // initialize controller if not exists.
+        // assures PluginProcessor is fully constructed!
+        m_controller = std::make_unique<Virus::Controller>(*this);
+    }
+    return *m_controller;
 }
 
 void AudioPluginAudioProcessor::setState(const void* _data, size_t _sizeInBytes)
