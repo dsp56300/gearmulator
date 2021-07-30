@@ -9,7 +9,7 @@ class AudioPluginAudioProcessor;
 namespace Virus
 {
     using SysEx = std::vector<uint8_t>;
-    class Controller
+    class Controller : private juce::Timer
     {
     public:
         friend Parameter;
@@ -33,6 +33,8 @@ namespace Virus
         juce::StringArray getMultiPresetsName() const;
 
     private:
+        void timerCallback() override;
+
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
         struct MultiPatch
@@ -87,6 +89,7 @@ namespace Virus
         std::vector<uint8_t> constructMessage(SysEx msg);
 
         AudioPluginAudioProcessor &m_processor;
+        juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
     };
