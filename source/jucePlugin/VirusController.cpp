@@ -15,6 +15,7 @@ namespace Virus
     {
         registerParams();
         sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
+        startTimer(5);
     }
 
     void Controller::registerParams()
@@ -618,9 +619,9 @@ namespace Virus
         return msg;
     }
 
-    void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
+    void Controller::timerCallback()
     {
-        m_virusOut = newData;
+        const juce::ScopedLock sl(m_eventQueueLock);
         for (auto msg : m_virusOut)
         {
             if (msg.sysex.size() == 0)
@@ -632,5 +633,15 @@ namespace Virus
             else
                 parseMessage(msg.sysex);
         }
+        m_virusOut.clear();
+    }
+
+    void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
+    {
+        const juce::ScopedTryLock sl(m_eventQueueLock);
+        if (!sl.isLocked())
+            return;
+
+        m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
     }
 }; // namespace Virus
