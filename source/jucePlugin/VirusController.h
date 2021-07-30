@@ -22,6 +22,12 @@ namespace Virus
 
         void printMessage(const SysEx &) const;
 
+        // currently Value as I figure out what's the best approach
+        // ch - [0-15]
+        // bank - [0-2] (ABC)
+        // paramIndex - [0-127]
+        juce::Value *getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex);
+
     private:
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
@@ -44,6 +50,27 @@ namespace Virus
 
         static const std::initializer_list<Parameter::Description> m_paramsDescription;
 
+        struct ParamIndex
+        {
+            uint8_t page;
+            uint8_t partNum;
+            uint8_t paramNum;
+            bool operator<(ParamIndex const &rhs) const
+            {
+				if (page < rhs.page)         return false;
+				if (page > rhs.page)         return true;
+				if (partNum < rhs.partNum)   return false;
+				if (partNum > rhs.partNum)   return true;
+				if (paramNum < rhs.paramNum) return false;
+				if (paramNum > rhs.paramNum) return true;
+				return false;
+			}
+        };
+
+        std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthParams;
+
+        void registerParams();
+
         // unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
@@ -51,6 +78,7 @@ namespace Virus
         void parseMessage(const SysEx &);
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
+        void parseParamChange(const SysEx &);
         void sendSysEx(const SysEx &);
         std::vector<uint8_t> constructMessage(SysEx msg);
 
