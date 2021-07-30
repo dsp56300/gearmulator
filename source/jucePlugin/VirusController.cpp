@@ -13,6 +13,29 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
+        registerParams();
+        sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
+    }
+
+    void Controller::registerParams()
+    {
+        // 16 parts * 3 pages * 128 params
+        // TODO: not register internal/unused params?
+        for (uint8_t pt = 0; pt < 16; pt++)
+        {
+            for (auto desc : m_paramsDescription)
+            {
+                ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+                auto p = std::make_unique<Parameter>(*this, desc, pt);
+                if ((desc.classFlags & Parameter::Class::GLOBAL) ||
+                    (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE))
+                {
+                    if (pt != 0)
+                        return; // only register on first part!
+                }
+                m_synthParams.insert_or_assign(idx, std::move(p));
+            }
+        }
     }
 
     void Controller::parseMessage(const SysEx &msg)
@@ -45,6 +68,11 @@ namespace Virus
                 case MessageType::DUMP_MULTI:
                     parseMulti(msg);
                     break;
+                case MessageType::PARAM_CHANGE_A:
+                case MessageType::PARAM_CHANGE_B:
+                case MessageType::PARAM_CHANGE_C:
+                    parseParamChange(msg);
+                    break;
                 default:
                     std::cout << "Controller: Begin Unhandled SysEx! --" << std::endl;
                     printMessage(msg);
@@ -52,6 +80,54 @@ namespace Virus
                 }
             }
         }
+    }
+
+    juce::Value *Controller::getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+    {
+        auto it = m_synthParams.find({static_cast<uint8_t>(0x70 + bank), ch, paramIndex});
+        if (it != m_synthParams.end())
+            return &it->second->getValueObject();
+        else
+        {
+            // unregistered param?
+            jassertfalse;
+            return nullptr;
+        }
+    }
+
+    void Controller::parseParamChange(const SysEx &msg)
+    {
+        const auto pos = kHeaderWithMsgCodeLen - 1;
+        const auto value = msg[pos + 3];
+        ParamIndex idx = {msg[pos], msg[pos + 1], msg[pos + 2]};
+        auto paramIt = m_synthParams.find(idx);
+        if (paramIt == m_synthParams.end())
+        {
+            // ensure it's not global
+            idx.partNum = 0;
+            paramIt = m_synthParams.find(idx);
+            if (paramIt == m_synthParams.end())
+            {
+                jassertfalse;
+                return;
+            }
+            auto flags = paramIt->second->getDescription().classFlags;
+            if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
+            {
+                jassertfalse;
+                return;
+            }
+        }
+
+        paramIt->second->getValueObject().setValue(value);
+        // TODO:
+        /**
+         If a
+        global  parameter  or  a  Multi  parameter  is  ac-
+        cessed,  which  is  not  part-sensitive  (e.g.  Input
+        Boost  or  Multi  Delay  Time),  the  part  number  is
+        ignored
+         */
     }
 
     void Controller::parseSingle(const SysEx &msg)
