@@ -28,6 +28,10 @@ namespace Virus
         // paramIndex - [0-127]
         juce::Value *getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
+        // bank - 0-1 (AB)
+        juce::StringArray getSinglePresetNames(int bank) const;
+        juce::StringArray getMultiPresetsName() const;
+
     private:
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
@@ -74,7 +78,7 @@ namespace Virus
         // unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
-        juce::String parseAsciiText(const SysEx &, int startPos);
+        template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
         void parseMessage(const SysEx &);
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
