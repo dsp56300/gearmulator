@@ -32,9 +32,11 @@ PRIVATE
     PluginEditor.cpp
     PluginProcessor.cpp
     VirusController.cpp
+    VirusParameter.cpp
     PluginEditor.h
     PluginProcessor.h
     VirusController.h
+    VirusParameter.h
 	version.h
 )
 

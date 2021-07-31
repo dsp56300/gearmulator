@@ -2,6 +2,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "../synthLib/plugin.h"
+#include "VirusParameter.h"
+
 class AudioPluginAudioProcessor;
 
 namespace Virus
@@ -10,6 +12,7 @@ namespace Virus
     class Controller
     {
     public:
+        friend Parameter;
         static constexpr auto kNameLength = 10;
 
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
