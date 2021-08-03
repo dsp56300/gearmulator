@@ -42,6 +42,8 @@ namespace Virus
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
         SinglePatch m_singles[2][128];
 
+        static const std::initializer_list<Parameter::Description> m_paramsDescription;
+
         // unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
