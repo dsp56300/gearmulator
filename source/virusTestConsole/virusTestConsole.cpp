@@ -63,7 +63,7 @@ void audioCallback(dsp56k::Audio* audio)
 		{
 			for(int i=0; i<sampleCount; ++i)
 			{
-				if(audioOut[c][i] != 0.0f)
+				if(audioOut[c][i])
 				{
 					audioData.reserve(2048);
 				}
