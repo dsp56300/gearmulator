@@ -80,6 +80,7 @@ void audioCallback(dsp56k::Audio* audio)
 					audioFilename[i] = '_';
 			}
 			audioFilename = "virusEmu_" + audioFilename + ".wav";
+			LOG("Begin writing audio to file " << audioFilename);
 		}
 	}
 
