@@ -29,6 +29,9 @@ size_t g_writeBlockSize = 65536;
 size_t g_nextWriteSize = g_writeBlockSize;
 
 Microcontroller::TPreset preset;
+Microcontroller* microcontroller = nullptr;
+
+size_t audioCallbackCount = 0;
 
 void writeWord(const TWord _word)
 {
@@ -40,6 +43,25 @@ void writeWord(const TWord _word)
 
 void audioCallback(dsp56k::Audio* audio)
 {
+	switch (audioCallbackCount)
+	{
+	case 8:
+		LOG("Sending Init Control Commands");
+		microcontroller->sendInitControlCommands();
+		break;
+	case 64:
+		LOG("Sending Preset");
+		microcontroller->writeSingle(0, Microcontroller::SINGLE, preset);
+		break;
+	case 128:
+		LOG("Sending Note On");
+		microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x7f));	// Note On
+		microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		break;
+	}
+
+	++audioCallbackCount;
+	
 	static FILE *hFile=0;
 	static int ctr=0;
 	constexpr size_t sampleCount = 4;
@@ -152,34 +174,6 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 	}
 	return false;
 }
-void midiNoteOn(void *data,DSP *dsp)
-{
-	auto* uc = static_cast<Microcontroller*>(data);
-	LOG("Sending Note On!");
-	uc->sendMIDI(SMidiEvent(0x90,60,0x7f));	// Note On
-	uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
-
-}
-
-void sendPresetCallback(void *data,DSP *dsp)
-{
-	LOG("Sending Preset!");
-
-	// Send preset
-	auto* uc = static_cast<Microcontroller*>(data);
-	uc->writeSingle(0, Microcontroller::SINGLE, preset);
-
-	dsp->setCallback(midiNoteOn, data, 477263+70000*10);
-}
-
-void midiCallback(void *data,DSP *dsp)
-{
-	auto* syx = static_cast<Microcontroller*>(data);
-
-	syx->sendInitControlCommands();
-
-	dsp->setCallback(sendPresetCallback, data, 477263+70000*5);
-}
 
 int main(int _argc, char* _argv[])
 {
@@ -246,8 +240,8 @@ int main(int _argc, char* _argv[])
 	}
 	// Load preset
 
-	Microcontroller syx(periph.getHDI08(), v);
-	dsp.setCallback(midiCallback, &syx, 477263+70000*3);
+	Microcontroller uc(periph.getHDI08(), v);
+	microcontroller = &uc;
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
