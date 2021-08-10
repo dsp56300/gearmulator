@@ -85,7 +85,7 @@ void Microcontroller::sendInitControlCommands()
 	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
-	sendControlCommand(MASTER_VOLUME, 100);			// Set master volume to 100
+	sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
 }
 
 void Microcontroller::createDefaultState()
@@ -267,14 +267,19 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(_bank);
 		response.push_back(_program);
 
-		uint8_t cs = deviceId + 11 + response[7];
-		size_t idx = 9;
 		for(const auto value : _dump)
 		{
 			response.push_back(value);
-			cs += value;
 		}
-		response.push_back(cs & 0x7f); // checksum
+
+		// checksum
+		uint8_t cs = 0;
+
+		for(size_t i=5; i<response.size(); ++i)
+			cs += response[i];
+
+		response.push_back(cs & 0x7f);
+
 		response.push_back(M_ENDOFSYSEX);
 
 		_responses.emplace_back(std::move(ev));
@@ -336,6 +341,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(_param);
 		response.push_back(m_globalSettings[_param]);
 		response.push_back(M_ENDOFSYSEX);
+
+		_responses.push_back(ev);
 	};
 
 	auto buildGlobalResponses = [&]()
