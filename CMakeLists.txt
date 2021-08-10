@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
 # build a fat binary that runs on both intel and the new Apple M1 chip
-#set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
-set(CMAKE_OSX_ARCHITECTURES "x86_64")
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
+#set(CMAKE_OSX_ARCHITECTURES "x86_64")
+
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
 project(gearmulator VERSION 1.1.8)
@@ -20,7 +21,6 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
 endif()
 
-add_subdirectory(source/ctrlr/JUCE)
 #add_subdirectory(source/ctrlr)
 
 # ----------------- Juce based audio plugin
@@ -28,6 +28,7 @@ add_subdirectory(source/ctrlr/JUCE)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
+	add_subdirectory(source/ctrlr/JUCE)
 	add_subdirectory(source/jucePlugin)
 	if(JUCE_GLOBAL_VST2_SDK_PATH)
 		if(MSVC OR APPLE)
