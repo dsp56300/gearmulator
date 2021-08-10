@@ -66,8 +66,9 @@ namespace synthLib
         }
 #endif
 
-        auto fixPath = [&](std::string key) {
-            const auto end = path.find(key);
+        auto fixPath = [&](std::string key)
+    	{
+            const auto end = path.rfind(key);
 
             if (end != std::string::npos)
                 path = path.substr(0, end);
