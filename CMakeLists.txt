@@ -6,7 +6,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.1.8)
+project(gearmulator VERSION 1.1.9)
 
 include(base.cmake)
 
