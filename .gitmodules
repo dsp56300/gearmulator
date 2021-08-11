@@ -1,9 +1,6 @@
 [submodule "source/dsp56300"]
 	path = source/dsp56300
 	url = https://github.com/Lyve1981/dsp56300 
-[submodule "source/ctrlr"]
-	path = source/ctrlr
-	url = https://github.com/Lyve1981/ctrlr.git
 [submodule "source/JUCE"]
 	path = source/JUCE
 	url = https://github.com/dsp56300/JUCE
