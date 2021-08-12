@@ -35,4 +35,5 @@ IndentWidth: 4
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
 TabWidth: 4
+UseTab: Always
 ...

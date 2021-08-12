@@ -1,5 +1,17 @@
 Release Notes 
 
+1.1.9 (2021.08.12):
+
+- [Imp] An arm64 JIT recompiler has been implemented, which gives a large performance boost on Apple M1, Raspberry Pi and other arm64 based CPUs
+- [Imp] Default Master Volume is now set to 127 instead of 100
+- [Imp] Small performance improvements on x64
+
+- [Fix] plugin did not remember Single/Multi mode switch
+- [Fix] MIDI clock events confused DSP and corrupted other MIDI events, such as Pitch Bend and others.
+- [Fix] ROM location search did not find any ROM in certain circumstances
+- [Fix] state restore after reopening plugin sent default presets before sending the correct ones
+- [Fix] plugin not responding to MIDI Sysex "Global Request"
+
 1.1.8:
 
 - Fix plugin failing AU validation on Mac OS
