@@ -15,24 +15,20 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
     // editor's size to whatever you need it to be.
     setSize (400, 300);
 
+	m_btSingleMode.setRadioGroupId(0x3cf);
+	m_btMultiMode.setRadioGroupId(0x3cf);
 	addAndMakeVisible(m_btSingleMode);
 	addAndMakeVisible(m_btMultiMode);
-
 	m_btSingleMode.setTopLeftPosition(0,0);
 	m_btSingleMode.setSize(120,30);
-
+	m_btMultiMode.getToggleStateValue().referTo(*processorRef.getController().getParam(0, 2, 0x7a));
+	const auto isMulti = processorRef.getController().isMultiMode();
+	m_btSingleMode.setToggleState(!isMulti, juce::dontSendNotification);
+	m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
+	m_btSingleMode.setClickingTogglesState(true);
+	m_btMultiMode.setClickingTogglesState(true);
 	m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10, 0);
 	m_btMultiMode.setSize(120,30);
-
-	m_btSingleMode.onClick = [this]()
-	{
-		switchPlayMode(0);
-	};
-
-	m_btMultiMode.onClick = [this]()
-	{
-		switchPlayMode(2);
-	};
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -61,11 +57,4 @@ void AudioPluginAudioProcessorEditor::resized()
 {
 	// This is generally where you'll want to lay out the positions of any
 	// subcomponents in your editor..
-}
-
-void AudioPluginAudioProcessorEditor::switchPlayMode(uint8_t _playMode) const
-{
-	synthLib::SMidiEvent ev;
-	ev.sysex = { 0xf0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x72, 0x0, 0x7a, _playMode, 0xf7};
-	processorRef.addMidiEvent(ev);
 }
