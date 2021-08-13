@@ -15,4 +15,10 @@ namespace Virus
         const uint8_t value = static_cast<int>(m_value.getValue());
         m_ctrl.sendSysEx(m_ctrl.constructMessage({static_cast<uint8_t>(m_desc.page), m_partNum, m_desc.index, value}));
     }
+
+    juce::String Parameter::genId()
+    {
+        return juce::String::formatted("%d_%d_%d", (int)m_desc.page, m_partNum, m_paramNum);
+    }
+
 } // namespace Virus
