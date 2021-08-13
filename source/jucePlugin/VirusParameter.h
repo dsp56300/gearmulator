@@ -53,6 +53,7 @@ namespace Virus
         const Description getDescription() const { return m_desc; };
 
     private:
+        juce::String genId();
         void valueChanged(juce::Value &) override;
 
         Controller &m_ctrl;
