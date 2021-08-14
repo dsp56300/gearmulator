@@ -7,8 +7,8 @@ namespace Virus
 
     class Controller;
 
-    class Parameter : private juce::Value::Listener
-    {
+	class Parameter : private juce::Value::Listener, public juce::RangedAudioParameter
+	{
     public:
         enum Class
         {
@@ -52,13 +52,25 @@ namespace Virus
 
         const Description getDescription() const { return m_desc; };
 
-    private:
+		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
+
+		float getValue() const override { return m_value.getValue(); }
+		void setValue(float newValue) override { return m_value.setValue(newValue); };
+		float getDefaultValue() const override { return 0; /* maybe return from ROM state? */ }
+
+		float getValueForText(const juce::String &text) const override
+		{
+			return m_desc.textToValueFunction(text, m_desc);
+		}
+
+	private:
         juce::String genId();
         void valueChanged(juce::Value &) override;
 
         Controller &m_ctrl;
-        Description m_desc;
-        uint8_t m_paramNum, m_partNum;
+		const Description m_desc;
+		juce::NormalisableRange<float> m_range;
+		uint8_t m_paramNum, m_partNum;
         juce::Value m_value;
     };
 } // namespace Virus
