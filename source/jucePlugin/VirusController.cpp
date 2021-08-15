@@ -34,8 +34,15 @@ namespace Virus
                     if (pt != 0)
                         return; // only register on first part!
                 }
-                m_synthParams.insert_or_assign(idx, std::move(p));
-            }
+				if (p->getDescription().isPublic)
+				{
+					// lifecycle managed by host
+					m_synthParams.insert_or_assign(idx, p.get());
+					m_processor.addParameter(p.release());
+				}
+				else
+					m_synthInternalParams.insert_or_assign(idx, std::move(p));
+			}
         }
     }
 
@@ -83,45 +90,59 @@ namespace Virus
         }
     }
 
-    juce::Value *Controller::getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex)
-    {
-        auto it = m_synthParams.find({static_cast<uint8_t>(0x70 + bank), ch, paramIndex});
-        if (it != m_synthParams.end())
-            return &it->second->getValueObject();
-        else
-        {
+	Parameter *Controller::findSynthParam(const uint8_t ch, const uint8_t bank, const uint8_t paramIndex)
+	{
+		auto it = m_synthParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+		if (it == m_synthParams.end())
+		{
+			auto iti = m_synthInternalParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+			if (iti == m_synthInternalParams.end())
+				return nullptr;
+			else
+				return iti->second.get();
+		}
+		return it->second;
+	}
+
+	juce::Value *Controller::getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+	{
+		auto *param = findSynthParam(ch, static_cast<uint8_t>(0x70 + bank), paramIndex);
+		if (param == nullptr)
+		{
             // unregistered param?
             jassertfalse;
             return nullptr;
         }
-    }
+		return &param->getValueObject();
+	}
 
-    void Controller::parseParamChange(const SysEx &msg)
+	void Controller::parseParamChange(const SysEx &msg)
     {
         const auto pos = kHeaderWithMsgCodeLen - 1;
         const auto value = msg[pos + 3];
-        ParamIndex idx = {msg[pos], msg[pos + 1], msg[pos + 2]};
-        auto paramIt = m_synthParams.find(idx);
-        if (paramIt == m_synthParams.end())
-        {
+		const auto bank = msg[pos];
+		const auto ch = msg[pos + 1];
+		const auto index = msg[pos + 2];
+		auto param = findSynthParam(ch, bank, index);
+		if (param == nullptr && ch != 0)
+		{
             // ensure it's not global
-            idx.partNum = 0;
-            paramIt = m_synthParams.find(idx);
-            if (paramIt == m_synthParams.end())
-            {
+			param = findSynthParam(0, bank, index);
+			if (param == nullptr)
+			{
                 jassertfalse;
                 return;
             }
-            auto flags = paramIt->second->getDescription().classFlags;
-            if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
+			auto flags = param->getDescription().classFlags;
+			if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
             {
                 jassertfalse;
                 return;
             }
         }
 
-        paramIt->second->getValueObject().setValue(value);
-        // TODO:
+		param->getValueObject().setValue(value);
+		// TODO:
         /**
          If a
         global  parameter  or  a  Multi  parameter  is  ac-

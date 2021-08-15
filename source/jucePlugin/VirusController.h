@@ -74,11 +74,15 @@ namespace Virus
 			}
         };
 
-        std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthParams;
+		std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthInternalParams;
+		std::map<ParamIndex, Parameter *> m_synthParams; // exposed and managed by audio processor
 
-        void registerParams();
+		void registerParams();
+		// tries to find synth param in both internal and host.
+		// @return found parameter or nullptr if none found.
+		Parameter *findSynthParam(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
-        // unchecked copy for patch data bytes
+		// unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
         template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
