@@ -4,10 +4,9 @@
 #include "version.h"
 
 //==============================================================================
-AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor& p)
-    : AudioProcessorEditor (&p), processorRef (p)
-	, m_btSingleMode("Single Mode")
-	, m_btMultiMode("Multi Mode")
+AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
+	AudioProcessorEditor(&p), processorRef(p), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode"),
+	m_tempEditor(p)
 {
     ignoreUnused (processorRef);
 
@@ -29,6 +28,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor (AudioPluginAud
 	m_btMultiMode.setClickingTogglesState(true);
 	m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10, 0);
 	m_btMultiMode.setSize(120,30);
+
+	addAndMakeVisible(m_tempEditor);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -57,4 +58,5 @@ void AudioPluginAudioProcessorEditor::resized()
 {
 	// This is generally where you'll want to lay out the positions of any
 	// subcomponents in your editor..
+	m_tempEditor.setBounds(0, 35, getWidth(), getHeight() - 35);
 }

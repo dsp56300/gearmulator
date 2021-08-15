@@ -185,8 +185,24 @@ namespace Virus
         return bankNames;
     }
 
-    void Controller::parseSingle(const SysEx &msg)
-    {
+	void Controller::setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg)
+	{
+		if (bank < 0 || bank > 1 || prg < 0 || prg > 127)
+		{
+			jassertfalse;
+			return;
+		}
+
+		uint8_t pt = isMultiMode() ? part : 0x40;
+		auto &preset = m_singles[bank][prg];
+		SysEx patch = {MessageType::DUMP_SINGLE, 0x0, pt};
+		for (auto i = 0; i < kDataSizeInBytes; ++i)
+			patch.push_back(preset.data[i]);
+		sendSysEx(constructMessage(patch));
+	}
+
+	void Controller::parseSingle(const SysEx &msg)
+	{
         constexpr auto pageSize = 128;
         constexpr auto expectedDataSize = pageSize * 2 + 1 + 1; // we have 2 pages
         constexpr auto checkSumSize = 1;
