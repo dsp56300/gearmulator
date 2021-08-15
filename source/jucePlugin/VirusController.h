@@ -32,6 +32,8 @@ namespace Virus
         juce::StringArray getSinglePresetNames(int bank) const;
         juce::StringArray getMultiPresetsName() const;
 		bool isMultiMode() { return getParam(0, 2, 0x7a)->getValue(); }
+		// part 0 - 15 (ignored when single! 0x40...)
+		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
 
 	private:
 		void timerCallback() override;
