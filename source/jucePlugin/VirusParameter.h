@@ -64,13 +64,14 @@ namespace Virus
 		}
 
 	private:
-        juce::String genId();
-        void valueChanged(juce::Value &) override;
+		juce::String genId(const Description &d, int part);
+		void valueChanged(juce::Value &) override;
 
         Controller &m_ctrl;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
 		uint8_t m_paramNum, m_partNum;
-        juce::Value m_value;
+		int m_lastValue{-1};
+		juce::Value m_value;
     };
 } // namespace Virus

@@ -10,6 +10,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                        .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
     m_device(synthLib::findROM()), m_plugin(&m_device)
 {
+	auto &ctrl = getController(); // init controller
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
@@ -86,7 +87,6 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    getController(); // ensures controller is constructed before calling from processBlock!
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
 	setLatencySamples(m_plugin.getLatencySamples());
