@@ -3,7 +3,7 @@
 #include "PluginProcessor.h"
 
 //==============================================================================
-class AudioPluginAudioProcessorEditor  : public juce::AudioProcessorEditor
+class AudioPluginAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
 public:
     explicit AudioPluginAudioProcessorEditor (AudioPluginAudioProcessor&);
@@ -14,9 +14,10 @@ public:
     void resized() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    AudioPluginAudioProcessor& processorRef;
+	void timerCallback() override;
+	// This reference is provided as a quick way for your editor to
+	// access the processor object that created it.
+	AudioPluginAudioProcessor& processorRef;
 
 	juce::GenericAudioProcessorEditor m_tempEditor;
 
