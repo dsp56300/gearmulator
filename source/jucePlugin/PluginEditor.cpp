@@ -50,6 +50,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	}
 
 	addAndMakeVisible(m_tempEditor);
+
+	startTimerHz(5);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -74,6 +76,19 @@ void AudioPluginAudioProcessorEditor::paint (juce::Graphics& g)
 					 2);
 	g.drawFittedText("To donate: paypal.me/dsp56300", getLocalBounds().removeFromRight(400).removeFromTop(35),
 					 juce::Justification::centred, 2);
+}
+
+void AudioPluginAudioProcessorEditor::timerCallback()
+{
+	// ugly (polling!) way for refreshing presets names as this is temporary ui
+	const auto multiMode = processorRef.getController().isMultiMode();
+	for (auto pt = 0; pt < 16; pt++)
+	{
+		bool singlePartOrInMulti = pt == 0 || multiMode;
+		m_partSelectors[pt].setVisible(singlePartOrInMulti);
+		if (singlePartOrInMulti)
+			m_partSelectors[pt].setButtonText(processorRef.getController().getCurrentPartPresetName(pt));
+	}
 }
 
 void AudioPluginAudioProcessorEditor::resized()
