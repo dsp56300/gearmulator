@@ -20,6 +20,8 @@ private:
 
 	juce::GenericAudioProcessorEditor m_tempEditor;
 
+	juce::TextButton m_partSelectors[16];
+
 	juce::TextButton m_btSingleMode;
 	juce::TextButton m_btMultiMode;
 	
