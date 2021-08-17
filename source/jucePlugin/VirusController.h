@@ -31,9 +31,10 @@ namespace Virus
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(int bank) const;
         juce::StringArray getMultiPresetsName() const;
+		bool isMultiMode() { return getParam(0, 2, 0x7a)->getValue(); }
 
-    private:
-        void timerCallback() override;
+	private:
+		void timerCallback() override;
 
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
