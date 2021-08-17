@@ -185,6 +185,17 @@ namespace Virus
         return bankNames;
     }
 
+	juce::String Controller::getCurrentPartPresetName(uint8_t part)
+	{
+		// expensive but fresh!
+		constexpr uint8_t asciiStart = 112;
+		char text[kNameLength + 1];
+		text[kNameLength] = 0; // termination
+		for (auto pos = 0; pos < kNameLength; ++pos)
+			text[pos] = static_cast<int>(getParam(part, 1, asciiStart + pos)->getValue());
+		return juce::String(text);
+	}
+
 	void Controller::setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg)
 	{
 		if (bank < 0 || bank > 1 || prg < 0 || prg > 127)

@@ -34,6 +34,7 @@ namespace Virus
 		bool isMultiMode() { return getParam(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
+		juce::String getCurrentPartPresetName(uint8_t part);
 
 	private:
 		void timerCallback() override;
