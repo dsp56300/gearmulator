@@ -22,32 +22,45 @@ namespace Virus
     {
         // 16 parts * 3 pages * 128 params
         // TODO: not register internal/unused params?
-        for (uint8_t pt = 0; pt < 16; pt++)
-        {
-            for (auto desc : m_paramsDescription)
-            {
-                ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
-                auto p = std::make_unique<Parameter>(*this, desc, pt);
-                if ((desc.classFlags & Parameter::Class::GLOBAL) ||
-                    (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE))
-                {
-                    if (pt != 0)
-                        return; // only register on first part!
-                }
+		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
+		for (uint8_t pt = 0; pt < 16; pt++)
+		{
+			const auto partNumber = juce::String(pt + 1);
+			auto group =
+				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
+			for (auto desc : m_paramsDescription)
+			{
+				ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+				auto p = std::make_unique<Parameter>(*this, desc, pt);
+				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) ||
+					(desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
+				if (isNonPartExclusive)
+				{
+					if (pt != 0)
+						continue; // only register on first part!
+				}
 				if (p->getDescription().isPublic)
 				{
 					// lifecycle managed by host
 					m_synthParams.insert_or_assign(idx, p.get());
-					m_processor.addParameter(p.release());
+					if (isNonPartExclusive)
+					{
+						jassert(pt == 0);
+						globalParams->addChild(std::move(p));
+					}
+					else
+						group->addChild(std::move(p));
 				}
 				else
 					m_synthInternalParams.insert_or_assign(idx, std::move(p));
 			}
-        }
-    }
+			m_processor.addParameterGroup(std::move(group));
+		}
+		m_processor.addParameterGroup(std::move(globalParams));
+	}
 
-    void Controller::parseMessage(const SysEx &msg)
-    {
+	void Controller::parseMessage(const SysEx &msg)
+	{
         if (msg.size() < 8)
             return; // shorter than expected!
 
@@ -140,7 +153,6 @@ namespace Virus
                 return;
             }
         }
-
 		param->getValueObject().setValue(value);
 		// TODO:
         /**
