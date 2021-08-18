@@ -93,7 +93,8 @@ namespace Virus
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
         void parseParamChange(const SysEx &);
-        void sendSysEx(const SysEx &);
+		void parseControllerDump(synthLib::SMidiEvent &);
+		void sendSysEx(const SysEx &);
         std::vector<uint8_t> constructMessage(SysEx msg);
 
         AudioPluginAudioProcessor &m_processor;

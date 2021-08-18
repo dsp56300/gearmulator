@@ -267,7 +267,32 @@ namespace Virus
         m_multis[patch.progNumber] = patch;
     }
 
-    const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
+	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
+	{
+		uint8_t bank = 0xFF;
+		uint8_t part = 0x40;
+		if (m.a & synthLib::M_CONTROLCHANGE)
+		{
+			part = m.a ^ synthLib::M_CONTROLCHANGE;
+			bank = 0x0;
+		}
+		else if (m.a & synthLib::M_POLYPRESSURE)
+		{
+			part = m.a ^ synthLib::M_POLYPRESSURE;
+			bank = 0x1;
+		}
+		else
+		{
+			jassertfalse;
+			return;
+		}
+		jassert(bank != 0xFF);
+		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, bank == 0 ? "A" : "B", m.b,
+									m.c));
+		findSynthParam(part, bank, m.b)->setValueNotifyingHost(m.c);
+	}
+
+	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0,3}, {},{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 1, "Modulation Wheel", {0,127}, {},{}, false, false, false},
@@ -687,9 +712,8 @@ namespace Virus
             if (msg.sysex.size() == 0)
             {
                 // no sysex
-                DBG(juce::String::formatted("Plain a:%04x b:%04x c:%04x", msg.a, msg.b, msg.c));
-                return;
-            }
+				parseControllerDump(msg);
+			}
             else
                 parseMessage(msg.sysex);
         }
