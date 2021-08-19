@@ -234,7 +234,14 @@ namespace Virus
                 (deviceId + 0x10 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
             assert(expectedSum == checksum);
         }
-        m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
+		if (patch.bankNumber == 0)
+		{
+			constexpr auto bankSize = kDataSizeInBytes / 2;
+			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
+			for (auto i = 0; i < kDataSizeInBytes; i++)
+				findSynthParam(ch, i > bankSize ? 1 : 0, i % bankSize)->setValueNotifyingHost(patch.data[i]);
+		}
+		m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
 
         const auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
