@@ -54,8 +54,8 @@ namespace Virus
 
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 
-		float getValue() const override { return m_value.getValue(); }
-		void setValue(float newValue) override { return m_value.setValue(newValue); };
+		float getValue() const override { return convertTo0to1(m_value.getValue()); }
+		void setValue(float newValue) override { return m_value.setValue(convertFrom0to1(newValue)); };
 		void setValueFromSynth(int newValue, bool notifyHost = true);
 		float getDefaultValue() const override { return 0; /* maybe return from ROM state? */ }
 
