@@ -56,6 +56,7 @@ namespace Virus
 
 		float getValue() const override { return m_value.getValue(); }
 		void setValue(float newValue) override { return m_value.setValue(newValue); };
+		void setValueFromSynth(int newValue, bool notifyHost = true);
 		float getDefaultValue() const override { return 0; /* maybe return from ROM state? */ }
 
 		float getValueForText(const juce::String &text) const override

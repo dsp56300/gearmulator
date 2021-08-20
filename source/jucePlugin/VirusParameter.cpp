@@ -24,6 +24,15 @@ namespace Virus
 		}
 	}
 
+	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
+	{
+		m_lastValue = newValue;
+		if (notifyHost)
+			setValueNotifyingHost(convertTo0to1(newValue));
+		else
+			m_value.setValue(newValue);
+	}
+
 	juce::String Parameter::genId(const Description &d, const int part)
 	{
 		return juce::String::formatted("%d_%d_%d", (int)d.page, part, d.index);
