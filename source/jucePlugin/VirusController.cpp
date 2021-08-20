@@ -153,7 +153,7 @@ namespace Virus
                 return;
             }
         }
-		param->getValueObject().setValue(value);
+		param->setValueFromSynth(value, true);
 		// TODO:
         /**
          If a
@@ -239,9 +239,13 @@ namespace Virus
 			constexpr auto bankSize = kDataSizeInBytes / 2;
 			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
 			for (auto i = 0; i < kDataSizeInBytes; i++)
-				findSynthParam(ch, i > bankSize ? 1 : 0, i % bankSize)->setValueNotifyingHost(patch.data[i]);
+			{
+				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize))
+					p->setValueFromSynth(patch.data[i], true);
+			}
 		}
-		m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
+		else
+			m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
 
         const auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
@@ -296,7 +300,7 @@ namespace Virus
 		jassert(bank != 0xFF);
 		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, bank == 0 ? "A" : "B", m.b,
 									m.c));
-		findSynthParam(part, bank, m.b)->setValueNotifyingHost(m.c);
+		findSynthParam(part, bank, m.b)->setValueFromSynth(m.c, true);
 	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
