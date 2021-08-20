@@ -15,8 +15,9 @@ namespace Virus
     {
         registerParams();
         sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
-        startTimer(5);
-    }
+		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		startTimer(5);
+	}
 
     void Controller::registerParams()
     {
