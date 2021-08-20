@@ -211,6 +211,7 @@ namespace Virus
 		for (auto i = 0; i < kDataSizeInBytes; ++i)
 			patch.push_back(preset.data[i]);
 		sendSysEx(constructMessage(patch));
+		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 	}
 
 	void Controller::parseSingle(const SysEx &msg)
