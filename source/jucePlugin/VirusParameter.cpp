@@ -24,6 +24,8 @@ namespace Virus
 				m_ctrl.constructMessage({static_cast<uint8_t>(m_desc.page), m_partNum, m_desc.index, value}));
 			m_lastValue = value;
 		}
+		if (onValueChanged)
+			onValueChanged();
 	}
 
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)

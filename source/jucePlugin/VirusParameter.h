@@ -64,6 +64,10 @@ namespace Virus
 			return m_desc.textToValueFunction(text, m_desc);
 		}
 
+		// allow 'injecting' additional code for specific parameter.
+		// eg. multi/single value change requires triggering more logic.
+		std::function<void()> onValueChanged = {};
+
 	private:
 		juce::String genId(const Description &d, int part);
 		void valueChanged(juce::Value &) override;
