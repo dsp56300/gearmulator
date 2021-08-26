@@ -5,6 +5,8 @@
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/resamplerInOut.h"
 
+#include "../dsp56300/source/dsp56kEmu/ringbuffer.h"
+
 #include "deviceTypes.h"
 
 namespace synthLib
@@ -35,14 +37,17 @@ namespace synthLib
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
-		
+		void processMidiInEvents();
+
+		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
 		std::vector<SMidiEvent> m_midiIn;
 		std::vector<SMidiEvent> m_midiOut;
 
-		SMidiEvent m_pendingSyexInput;
+		SMidiEvent m_pendingSysexInput;
 
 		ResamplerInOut m_resampler;
 		mutable std::mutex m_lock;
+		mutable std::mutex m_lockAddMidiEvent;
 
 		Device* const m_device;
 
