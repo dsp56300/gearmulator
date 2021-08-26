@@ -14,7 +14,12 @@ namespace Virus
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
         registerParams();
-        sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
+		// add lambda to enforce updating patches when virus switch from/to multi/single.
+		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
+			const uint8_t prg = isMultiMode() ? 0x0 : 0x40;
+			sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, prg}));
+		};
+		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 		startTimer(5);
 	}
@@ -238,6 +243,14 @@ namespace Virus
         }
 		if (patch.bankNumber == 0)
 		{
+			// virus sends also the single buffer not matter what's the mode.
+			// instead of keeping both, we 'encapsulate' this into first channel.
+			// the logic to maintain this is done by listening the global single/multi param.
+			if (isMultiMode() && patch.progNumber == 0x40)
+				return;
+			else if (!isMultiMode() && patch.progNumber == 0x0)
+				return;
+
 			constexpr auto bankSize = kDataSizeInBytes / 2;
 			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
 			for (auto i = 0; i < kDataSizeInBytes; i++)
