@@ -318,9 +318,21 @@ namespace Virus
 		findSynthParam(part, bank, m.b)->setValueFromSynth(m.c, true);
 	}
 
+
+	juce::String numToBank(float bankIdx, Parameter::Description)
+	{
+		jassert(bankIdx >= 0);
+		juce::String prefix = "RAM";
+		if (bankIdx > 3)
+		{
+			prefix = bankIdx < 9 ? "ROM " : "ROM";
+		}
+		return prefix + juce::String(juce::roundToInt(bankIdx + 1));
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
-    {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0,3}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 1, "Modulation Wheel", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 2, "Breath Controller", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 3, "Contr 3", {0,127}, {},{}, false, false, false},
