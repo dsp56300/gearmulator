@@ -38,11 +38,11 @@ namespace Virus
             uint8_t index;
             juce::String name;
             juce::Range<int> range;
-            std::function<juce::String(float, Description ctx)> valueToTextFunction;
-            std::function<float(const juce::String &, Description ctx)> textToValueFunction;
-            bool isPublic;
-            bool isDiscrete;
-            bool isBool;
+			std::function<juce::String(float, Description ctx)> valueToTextFunction;
+			std::function<float(const juce::String &, Description ctx)> textToValueFunction;
+			bool isPublic;
+			bool isDiscrete;
+			bool isBool;
         };
 
         Parameter(Controller &, const Description desc, uint8_t partNum = 0x40);
@@ -58,10 +58,23 @@ namespace Virus
 		void setValue(float newValue) override { return m_value.setValue(convertFrom0to1(newValue)); };
 		void setValueFromSynth(int newValue, bool notifyHost = true);
 		float getDefaultValue() const override { return 0; /* maybe return from ROM state? */ }
+		bool isDiscrete() const override { return m_desc.isDiscrete; }
+		bool isBoolean() const override { return m_desc.isBool; }
 
 		float getValueForText(const juce::String &text) const override
 		{
-			return m_desc.textToValueFunction(text, m_desc);
+			if (m_desc.textToValueFunction)
+				return convertTo0to1(m_desc.textToValueFunction(text, m_desc));
+			else
+				return convertTo0to1(text.getFloatValue());
+		}
+
+		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
+		{
+			if (m_desc.valueToTextFunction)
+				return m_desc.valueToTextFunction(convertFrom0to1(normalisedValue), m_desc);
+			else
+				return juce::String(juce::roundToInt(convertFrom0to1(normalisedValue)));
 		}
 
 		// allow 'injecting' additional code for specific parameter.
