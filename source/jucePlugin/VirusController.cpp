@@ -330,6 +330,21 @@ namespace Virus
 		return prefix + juce::String(juce::roundToInt(bankIdx + 1));
 	}
 
+	juce::String numToPan(float panIdx, Parameter::Description)
+	{
+		// handles rounding due to continuous...
+		const auto idx = juce::roundToInt(panIdx);
+		if (idx == 64)
+			return "Center";
+		if (idx == 0)
+			return "Left";
+		if (idx == 127)
+			return "Right";
+
+		const auto sign = idx > 64 ? "+" : "";
+		return sign + juce::String(juce::roundToInt(idx - 64));
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -342,7 +357,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 7, "Channel Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 8, "Balance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 9, "Contr 9", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 10, "Panorama", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 10, "Panorama", {0,127}, numToPan,{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 11, "Expression", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 12, "Contr 12", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 13, "Contr 13", {0,127}, {},{}, false, false, false},
