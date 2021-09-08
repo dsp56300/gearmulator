@@ -405,6 +405,19 @@ namespace Virus
 		}
 	}
 
+	juce::String numToFilterMode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Lowpass";
+		case 1:  return "Highpass";
+		case 2:  return "Bandpass";
+		case 3:  return "Bandside";
+		default: return juce::String(idx);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -457,8 +470,8 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 47, "Filter2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,6}, numToSatCurv, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,3}, {},{}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,3}, numToFilterMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, numToFilterMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 53, "Filter Routing", {0,3}, {},{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 54, "Filter Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 55, "Filter Env Decay", {0,127}, {},{}, true, false, false},
