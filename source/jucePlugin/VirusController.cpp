@@ -330,6 +330,14 @@ namespace Virus
 		return prefix + juce::String(juce::roundToInt(bankIdx + 1));
 	}
 
+	juce::String numTo7bitSigned(const float idx) { numTo7bitSigned(juce::roundToInt(idx)); }
+
+	juce::String numTo7bitSigned(const int idx)
+	{
+		const auto sign = idx > 64 ? "+" : "";
+		return sign + juce::String(juce::roundToInt(idx - 64));
+	}
+
 	juce::String numToPan(float panIdx, Parameter::Description)
 	{
 		// handles rounding due to continuous...
@@ -340,9 +348,7 @@ namespace Virus
 			return "Left";
 		if (idx == 127)
 			return "Right";
-
-		const auto sign = idx > 64 ? "+" : "";
-		return sign + juce::String(juce::roundToInt(idx - 64));
+		return numTo7bitSigned(idx);
 	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
