@@ -488,6 +488,19 @@ namespace Virus
 		}
 	}
 
+	juce::String numToDelayReverbMode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "Delay";
+		case 2:  return "Reverb";
+		case 3:  return "Reverb + Feedback";
+		default: return juce::String(idx);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -595,7 +608,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 108, "Chorus Delay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,5}, numToLfoShape, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,1}, {},{}, true, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,3}, numToDelayReverbMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 115, "Delay Feedback", {0,127}, {},{}, true, false, false},
