@@ -542,6 +542,19 @@ namespace Virus
 		return juce::String(juce::roundToInt(63 + (190 - 63) * (idx / 127))) + "BPM";
 	}
 
+	juce::String numToControlSmoothMode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "On";
+		case 2:  return "Auto";
+		case 3:  return "Note";
+		default: return juce::String(idx);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -680,7 +693,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,19}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 20, "Delay Clock", {0,16}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 21, "Lfo3 Clock", {0,19}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, numToControlSmoothMode,{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 26, "Bender Range Up", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 27, "Bender Range Down", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 28, "Bender Scale", {0,1}, {},{}, true, false, true},
