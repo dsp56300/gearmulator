@@ -871,7 +871,6 @@ namespace Virus
 		return juce::roundToInt(v) == 0 ? "Off" : "Twin " + juce::String(juce::roundToInt(v));
 	}
 
-
 	juce::String numToOscFmMode(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -885,6 +884,11 @@ namespace Virus
 		case 5:  return "In L+R";
 		default: return juce::String(idx);
 		}
+	}
+
+	juce::String numToPhaserMode(float v, Parameter::Description)
+	{
+		return juce::roundToInt(v) == 0 ? "Off" : "Stage " + juce::String(juce::roundToInt(v));
 	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
@@ -1079,7 +1083,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 80, "LFO1 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 81, "LFO2 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 82, "LFO2 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 84, "Phaser Mode", {0,6}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 84, "Phaser Mode", {0,6}, numToPhaserMode, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 85, "Phaser Mix", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 86, "Phaser Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 87, "Phaser Depth", {0,127}, {},{}, true, false, false},
