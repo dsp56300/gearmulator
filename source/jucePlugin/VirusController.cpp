@@ -565,6 +565,302 @@ namespace Virus
 		return juce::roundToInt(v) == 0 ? "Linear" : "Exponential";
 	}
 
+	juce::String numToModMatrixSource(float v, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(v);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "PitchBnd";
+		case 2:  return "ChanPres";
+		case 3:  return "ModWheel";
+		case 4:  return "Breath";
+		case 5:  return "Contr3";
+		case 6:  return "Foot";
+		case 7:  return "Data";
+		case 8:  return "Balance";
+		case 9:  return "Contr 9";
+		case 10: return "Express";
+		case 11: return "Contr 12";
+		case 12: return "Contr 13";
+		case 13: return "Contr 14";
+		case 14: return "Contr 15";
+		case 15: return "Contr 16";
+		case 16: return "HoldPed";
+		case 17: return "PortaSw";
+		case 18: return "SostPed";
+		case 19: return "AmpEnv";
+		case 20: return "FiltEnv";
+		case 21: return "Lfo 1";
+		case 22: return "Lfo 2";
+		case 23: return "Lfo 3";
+		case 24: return "VeloOn";
+		case 25: return "VeloOff";
+		case 26: return "KeyFlw";
+		case 27: return "Random";
+		default: return juce::String(v);
+		}
+	}
+
+	juce::String numToModMatrixDest(float v, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(v);
+		switch (ridx)
+		{
+		case 0:   return "Off";
+		case 1:   return "PatchVol";
+		case 2:   return "ChannelVol";
+		case 3:   return "Panorama";
+		case 4:   return "Transpose";
+		case 5:   return "Portamento";
+		case 6:   return "Osc1Shape";
+		case 7:   return "Osc1PlsWdh";
+		case 8:   return "Osc1WavSel";
+		case 9:   return "Osc1Pitch";
+		case 10:  return "Osc1Keyflw";
+		case 11:  return "Osc2Shape";
+		case 12:  return "Osc2PlsWdh";
+		case 13:  return "Osc2WavSel";
+		case 14:  return "Osc2Pitch";
+		case 15:  return "Osc2Detune";
+		case 16:  return "Osc2FmAmt";
+		case 17:  return "Osc2EnvAmt";
+		case 18:  return "FmEnvAmt";
+		case 19:  return "Osc2Keyflw";
+		case 20:  return "OscBalance";
+		case 21:  return "SubOscVol";
+		case 22:  return "OscMainVol";
+		case 23:  return "NoiseVol";
+		case 24:  return "Cutoff";
+		case 25:  return "Cutoff2";
+		case 26:  return "Filt1Reso";
+		case 27:  return "Filt2Reso";
+		case 28:  return "Flt1EnvAmt";
+		case 29:  return "Flt2EnvAmt";
+		case 30:  return "Flt1Keyflw";
+		case 31:  return "Flt2Keyflw";
+		case 32:  return "FltBalance";
+		case 33:  return "FltAttack";
+		case 34:  return "FltDecay";
+		case 35:  return "FltSustain";
+		case 36:  return "FltSusTime";
+		case 37:  return "FltRelease";
+		case 38:  return "AmpAttack";
+		case 39:  return "AmpDecay";
+		case 40:  return "AmpSustain";
+		case 41:  return "AmpSusTime";
+		case 42:  return "AmpRelease";
+		case 43:  return "Lfo1Rate";
+		case 44:  return "Lfo1Cont";
+		case 45:  return "Lfo1>Osc1";
+		case 46:  return "Lfo1>Osc2";
+		case 47:  return "Lfo1>PlsWd";
+		case 48:  return "Lfo1>Reso";
+		case 49:  return "Lfo1>FltGn";
+		case 50:  return "Lfo2Rate";
+		case 51:  return "Lfo2Cont";
+		case 52:  return "Lfo2>Shape";
+		case 53:  return "Lfo2>Fm";
+		case 54:  return "Lfo2>Cut1";
+		case 55:  return "Lfo2>Cut2";
+		case 56:  return "Lfo2>Pan";
+		case 57:  return "Lfo3Rate";
+		case 58:  return "Lfo3OscAmt";
+		case 59:  return "UniDetune";
+		case 60:  return "UniSpread";
+		case 61:  return "UniLfoPhs";
+		case 62:  return "ChorusMix";
+		case 63:  return "ChorusRate";
+		case 64:  return "ChorusDpth";
+		case 65:  return "ChorusDly";
+		case 66:  return "ChorusFeed";
+		case 67:  return "EffectSend";
+		case 68:  return "DelayTime";
+		case 69:  return "DelayFeed";
+		case 70:  return "DelayRate";
+		case 71:  return "DelayDepth";
+		case 72:  return "Osc1ShpVel";
+		case 73:  return "Osc2ShpVel";
+		case 74:  return "PlsWhdVel";
+		case 75:  return "FmAmtVel";
+		case 76:  return "Flt1EnvVel";
+		case 77:  return "Flt2EnvVel";
+		case 78:  return "Reso1Vel";
+		case 79:  return "Reso2Vel";
+		case 80:  return "AmpVel";
+		case 81:  return "PanVel";
+		case 82:  return "Ass1Amt1";
+		case 83:  return "Ass2Amt1";
+		case 84:  return "Ass2Amt2";
+		case 85:  return "Ass3Amt1";
+		case 86:  return "Ass3Amt2";
+		case 87:  return "Ass3Amt3";
+		case 88:  return "OscInitPhs";
+		case 89:  return "PunchInt";
+		case 90:  return "RingMod";
+		case 91:  return "NoiseColor";
+		case 92:  return "DelayColor";
+		case 93:  return "ABoostInt";
+		case 94:  return "ABoostTune";
+		case 95:  return "DistInt";
+		case 96:  return "RingmodMix";
+		case 97:  return "Osc3Volume";
+		case 98:  return "Osc3Semi";
+		case 99:  return "Osc3Detune";
+		case 100: return "Lfo1AssAmt";
+		case 101: return "Lfo2AssAmt";
+		case 102: return "PhaserMix";
+		case 103: return "PhaserRate";
+		case 104: return "PhaserDept";
+		case 105: return "PhaserFreq";
+		case 106: return "PhaserFdbk";
+		case 107: return "PhaserSprd";
+		case 108: return "RevbDecay";
+		case 109: return "RevDamping";
+		case 110: return "RevbColor";
+		case 111: return "RevPredely";
+		case 112: return "RevFeedbck";
+		case 113: return "SecBalance";
+		case 114: return "ArpNoteLen";
+		case 115: return "ArpSwing";
+		case 116: return "ArpPattern";
+		case 117: return "EqMidGain";
+		case 118: return "EqMidFreq";
+		case 119: return "EqMidQFactor";
+		case 120: return "Assign4Amt";
+		case 121: return "Assign5Amt";
+		case 122: return "Assign6Amt";
+		default:  return juce::String(v);
+		}
+	}
+
+	juce::String numToSoftKnobDest(float v, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(v);
+		switch (ridx)
+		{
+		case 0:   return "Off";
+		case 1:   return "ModWheel";
+		case 2:   return "Breath";
+		case 3:   return "Contr3";
+		case 4:   return "Foot";
+		case 5:   return "Data";
+		case 6:   return "Balance";
+		case 7:   return "Contr9";
+		case 8:   return "Expression";
+		case 9:   return "Contr12";
+		case 10:  return "Contr13";
+		case 11:  return "Contr14";
+		case 12:  return "Contr15";
+		case 13:  return "Contr16";
+		case 14:  return "PatchVolume";
+		case 15:  return "ChannelVolume";
+		case 16:  return "Panorama";
+		case 17:  return "Transpose";
+		case 18:  return "Portamento";
+		case 19:  return "UnisonDetune";
+		case 20:  return "UnisonPanSprd";
+		case 21:  return "UnisoLfoPhase";
+		case 22:  return "ChorusMix";
+		case 23:  return "ChorusRate";
+		case 24:  return "ChorusDepth";
+		case 25:  return "ChorusDelay";
+		case 26:  return "ChorusFeedback";
+		case 27:  return "EffectSend";
+		case 28:  return "DelayTime(ms)";
+		case 29:  return "DelayFeedback";
+		case 30:  return "DelayRate";
+		case 31:  return "DelayDepth";
+		case 32:  return "Osc1WavSelect";
+		case 33:  return "Osc1PulseWidth";
+		case 34:  return "Osc1Semitone";
+		case 35:  return "Osc1Keyfollow";
+		case 36:  return "Osc2WavSelect";
+		case 37:  return "Os2PulseWidth";
+		case 38:  return "Osc2EnvAmount";
+		case 39:  return "FmEnvAmount";
+		case 40:  return "Osc2Keyfollow";
+		case 41:  return "NoiseVolume";
+		case 42:  return "Filt1Resonance";
+		case 43:  return "Filt2Resonance";
+		case 44:  return "Filt1EnvAmount";
+		case 45:  return "Filt2EnvAmount";
+		case 46:  return "Filt1Keyfollow";
+		case 47:  return "Filt2Keyfollow";
+		case 48:  return "Lfo1Symmetry";
+		case 49:  return "Lfo1>Osc1";
+		case 50:  return "Lfo1>Osc2";
+		case 51:  return "Lfo1>PulsWidth";
+		case 52:  return "Lfo1>Resonance";
+		case 53:  return "Lfo1>FiltGain";
+		case 54:  return "Lfo2Symmetry";
+		case 55:  return "Lfo2>Shape";
+		case 56:  return "Lfo2>FmAmount";
+		case 57:  return "Lfo2>Cutoff1";
+		case 58:  return "Lfo2>Cutoff2";
+		case 59:  return "Lfo2>Panorama";
+		case 60:  return "Lfo3Rate";
+		case 61:  return "Lfo3OscAmount";
+		case 62:  return "Osc1ShapeVel";
+		case 63:  return "Osc2ShapeVel";
+		case 64:  return "PulsWidthVel";
+		case 65:  return "FmAmountVel";
+		case 66:  return "Filt1EnvVel";
+		case 67:  return "Filt2EnvVel";
+		case 68:  return "Resonance1Vel";
+		case 69:  return "Resonance2Vel";
+		case 70:  return "AmplifierVel";
+		case 71:  return "PanoramaVel";
+		case 72:  return "Assign1Amt1";
+		case 73:  return "Assign2Amt1";
+		case 74:  return "Assign2Amt2";
+		case 75:  return "Assign3Amt1";
+		case 76:  return "Assign3Amt2";
+		case 77:  return "Assign3Amt3";
+		case 78:  return "ClockTempo";
+		case 79:  return "InputThru";
+		case 80:  return "OscInitPhase";
+		case 81:  return "PunchIntensity";
+		case 82:  return "Ringmodulator";
+		case 83:  return "NoiseColor";
+		case 84:  return "DelayColor";
+		case 85:  return "AnalogBoostInt";
+		case 86:  return "AnalogBstTune";
+		case 87:  return "DistortionInt";
+		case 88:  return "RingModMix";
+		case 89:  return "Osc3Volume";
+		case 90:  return "Osc3Semitone";
+		case 91:  return "Osc3Detune";
+		case 92:  return "Lfo1AssignAmt";
+		case 93:  return "Lfo2AssignAmt";
+		case 94:  return "PhaserMix";
+		case 95:  return "PhaserRate";
+		case 96:  return "PhaserDepth";
+		case 97:  return "PhaserFrequency";
+		case 98:  return "PhaserFeedback";
+		case 99:  return "PhaserSpread";
+		case 100: return "RevDecayTime";
+		case 101: return "ReverbDamping";
+		case 102: return "ReverbColor";
+		case 103: return "ReverbFeedback";
+		case 104: return "SecondBalance";
+		case 105: return "ArpMode";
+		case 106: return "ArpPattern";
+		case 107: return "ArpClock";
+		case 108: return "ArpNoteLength";
+		case 109: return "ArpSwing";
+		case 110: return "ArpOctaves";
+		case 111: return "ArpHold";
+		case 112: return "EqMidGain";
+		case 113: return "EqMidFreq";
+		case 114: return "EqMidQFactor";
+		case 115: return "Assign4Amt";
+		case 116: return "Assign5Amt";
+		case 117: return "Assign6Amt";
+		default:  return juce::String(v);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -736,26 +1032,26 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 58, "Second Output Balance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 60, "Amp Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 61, "Panorama Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 62, "Soft Knob-1 Single", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 63, "Soft Knob-2 Single", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 64, "Assign1 Source", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 65, "Assign1 Destination", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 62, "Soft Knob-1 Single", {0,127}, numToSoftKnobDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 63, "Soft Knob-2 Single", {0,127}, numToSoftKnobDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 64, "Assign1 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 65, "Assign1 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 66, "Assign1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 67, "Assign2 Source", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 68, "Assign2 Destination1", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 67, "Assign2 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 68, "Assign2 Destination1", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 69, "Assign2 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 70, "Assign2 Destination2", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 70, "Assign2 Destination2", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 71, "Assign2 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 72, "Assign3 Source", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 73, "Assign3 Destination1", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 72, "Assign3 Source", {0,127}, numToModMatrixSource, {}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 73, "Assign3 Destination1", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 74, "Assign3 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 75, "Assign3 Destination2", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 75, "Assign3 Destination2", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 76, "Assign3 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 77, "Assign2 Destination3", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 77, "Assign2 Destination3", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 78, "Assign2 Amount3", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 79, "LFO1 Assign Dest", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 79, "LFO1 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 80, "LFO1 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 81, "LFO2 Assign Dest", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 81, "LFO2 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 82, "LFO2 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 84, "Phaser Mode", {0,6}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 85, "Phaser Mix", {0,127}, {},{}, true, false, false},
@@ -774,14 +1070,14 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 99, "Input Ringmodulator", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 100, "Distortion Curve", {0,6}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 101, "Distortion Intensity", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 102, "Assign 4 Source", {0,27}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Destination", {0,122}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 102, "Assign 4 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Destination", {0,122}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C,104, "Assign 4 Amount", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 5 Source", {0,27}, {},{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 106, "Assign 5 Destination", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 5 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 106, "Assign 5 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 107, "Assign 5 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 6 Source", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 109, "Assign 6 Destination", {0,122}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 6 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 109, "Assign 6 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 110, "Assign 6 Amount", {0,127}, paramTo7bitSigned, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, {},{}, true, true, false},
 
