@@ -351,6 +351,36 @@ namespace Virus
 		return numTo7bitSigned(idx);
 	}
 
+	juce::String numToOscShape(float panIdx, Parameter::Description)
+	{
+		const auto idx = juce::roundToInt(panIdx);
+		if (idx == 64)
+			return "Wave";
+		if (idx == 0)
+			return "Saw";
+		if (idx == 127)
+			return "Pulse";
+		return numTo7bitSigned(idx);
+	}
+
+	juce::String numToOscWaveSelect(float panIdx, Parameter::Description)
+	{
+		const auto idx = juce::roundToInt(panIdx);
+		if (idx == 0)
+			return "Sine";
+		if (idx == 1)
+			return "Triangle";
+		return "Wave " + juce::String(idx);
+	}
+
+	juce::String numToKeyfollow(float panIdx, Parameter::Description)
+	{
+		const auto idx = juce::roundToInt(panIdx);
+		if (idx == 32)
+			return "Default";
+		return juce::String(idx);
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -370,22 +400,22 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 14, "Contr 14", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 15, "Contr 15", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 16, "Contr 16", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 17, "Osc1 Shape", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 17, "Osc1 Shape", {0,127}, numToOscShape,{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 18, "Osc1 Pulsewidth", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,64}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,64}, numToOscWaveSelect, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 20, "Osc1 Semitone", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 23, "Osc2 Pulsewidth", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,64}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, numToKeyfollow, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, numToOscShape, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 23, "Osc2 Pulsewidth", {0,127}, {}, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,64}, numToOscWaveSelect,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 25, "Osc2 Semitone", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 26, "Osc2 Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 27, "Osc2 FM Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 28, "Osc2 Sync", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 29, "Osc2 Filt Env Amt", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 30, "FM Filt Env Amt", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 31, "Osc2 Keyfollow", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 32, "Bank Select", {0,3}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 31, "Osc2 Keyfollow", {0,127}, numToKeyfollow,{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 32, "Bank Select", {0, 3 + 26}, numToBank,{}, false, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 33, "Osc Balance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 34, "Suboscillator Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 35, "Suboscillator Shape", {0,1}, {},{}, true, false, true},
@@ -572,9 +602,9 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, {},{}, true, true, false},
 
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, {},{}, true, true, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 31, "Part Bank Select", {0,3}, {},{}, true, true, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 32, "Part Bank Change", {0,3}, {},{}, true, true, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 33, "Part Program Change", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 31, "Part Bank Select", {0, 3 + 26}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 32, "Part Bank Change", {0, 3 + 26}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 33, "Part Program Change", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 34, "Part Midi Channel", {0,15}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 35, "Part Low Key", {0,127}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 36, "Part High Key", {0,127}, {},{}, false, true, false},
