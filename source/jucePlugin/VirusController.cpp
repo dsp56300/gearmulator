@@ -517,6 +517,21 @@ namespace Virus
 		}
 	}
 
+	juce::String numToLfoDest(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Osc1";
+		case 1:  return "Osc1+2";
+		case 2:  return "Osc2";
+		case 3:  return "PW1";
+		case 4:  return "PW1+2";
+		case 5:  return "PW2";
+		default: return juce::String(idx);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -646,7 +661,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 8, "Lfo3 Shape", {0,5}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 9, "Lfo3 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 10, "Lfo3 Keyfollow", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, numToLfoDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 12, "Osc Lfo3 Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 13, "Lfo3 Fade-In Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, {},{}, true, false, false},
