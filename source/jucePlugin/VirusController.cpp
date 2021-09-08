@@ -431,6 +431,18 @@ namespace Virus
 		}
 	}
 
+	juce::String numToEnvSusTime(float idx, Parameter::Description)
+	{
+		// handles rounding due to continuous...
+		const auto ridx = juce::roundToInt(idx);
+		if (ridx == 64)
+			return "Fall";
+		if (ridx == 0)
+			return "Infinite";
+		if (ridx == 127)
+			return "Rise";
+		return numTo7bitSigned(idx);
+	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
@@ -490,12 +502,12 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 54, "Filter Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 55, "Filter Env Decay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 56, "Filter Env Sustain", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 57, "Filter Env Sustain Time", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 57, "Filter Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 58, "Filter Env Release", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 59, "Amp Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 60, "Amp Env Decay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 61, "Amp Env Sustain", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 62, "Amp Env Sustain Time", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 62, "Amp Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 63, "Amp Env Release", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 64, "Hold Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 65, "Portamento Pedal", {0,127}, {},{}, false, false, false},
