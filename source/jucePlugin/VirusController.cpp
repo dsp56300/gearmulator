@@ -886,6 +886,37 @@ namespace Virus
 		}
 	}
 
+	juce::String numToMusicDivision(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "1/64";
+		case 2:  return "1/32";
+		case 3:  return "1/16";
+		case 4:  return "1/8";
+		case 5:  return "1/4";
+		case 6:  return "1/2";
+		case 7:  return "3/64";
+		case 8:  return "3/32";
+		case 9:  return "3/16";
+		case 10: return "3/8";
+		case 11: return "1/24";
+		case 12: return "1/12";
+		case 13: return "1/6";
+		case 14: return "1/3";
+		case 15: return "2/3";
+		case 16: return "3/4";
+		case 17: return "1/1";
+		case 18: return "2/1";
+		case 19: return "4/1";
+		case 20: return "8/1";
+		case 21: return "16/1";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToPhaserMode(float v, Parameter::Description)
 	{
 		return juce::roundToInt(v) == 0 ? "Off" : "Stage " + juce::String(juce::roundToInt(v));
@@ -1024,11 +1055,11 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 12, "Osc Lfo3 Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 13, "Lfo3 Fade-In Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 17, "Arp Clock", {0,17}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 18, "Lfo1 Clock", {0,19}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,19}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 20, "Delay Clock", {0,16}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 21, "Lfo3 Clock", {0,19}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 17, "Arp Clock", {0,17}, numToMusicDivision, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 18, "Lfo1 Clock", {0,19}, numToMusicDivision, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,19}, numToMusicDivision, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 20, "Delay Clock", {0,16}, numToMusicDivision, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 21, "Lfo3 Clock", {0,19}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, numToControlSmoothMode,{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 26, "Bender Range Up", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 27, "Bender Range Down", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
