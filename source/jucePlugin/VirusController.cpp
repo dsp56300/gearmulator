@@ -532,6 +532,10 @@ namespace Virus
 		}
 	}
 
+	juce::String numToArpSwing(float idx, Parameter::Description)
+	{
+		return juce::String(juce::roundToInt(50 + (75 - 50) * (idx / 127))) + "%";
+	}
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -656,7 +660,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 4, "Arp Hold Enable", {0,1}, {},{}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 6, "Arp Swing", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 6, "Arp Swing", {0,127}, numToArpSwing, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 7, "Lfo3 Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 8, "Lfo3 Shape", {0,5}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 9, "Lfo3 Mode", {0,1}, numToLfoMode, {}, true, false, true},
