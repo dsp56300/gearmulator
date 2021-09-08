@@ -536,6 +536,12 @@ namespace Virus
 	{
 		return juce::String(juce::roundToInt(50 + (75 - 50) * (idx / 127))) + "%";
 	}
+
+	juce::String numToClockTempo(float idx, Parameter::Description)
+	{
+		return juce::String(juce::roundToInt(63 + (190 - 63) * (idx / 127))) + "BPM";
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -668,7 +674,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, numToLfoDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 12, "Osc Lfo3 Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 13, "Lfo3 Fade-In Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 17, "Arp Clock", {0,17}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 18, "Lfo1 Clock", {0,19}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,19}, {},{}, true, false, false},
