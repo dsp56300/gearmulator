@@ -501,6 +501,22 @@ namespace Virus
 		}
 	}
 
+	juce::String numToArpMode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "Up";
+		case 2:  return "Down";
+		case 3:  return "Up&Down";
+		case 4:  return "As Played";
+		case 5:  return "Random";
+		case 6:  return "Chord";
+		default: return juce::String(idx);
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -620,7 +636,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 122, "Keyb Local", {0,1}, {},{}, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 123, "All Notes Off", {0,127}, {},{}, false, false, false},
 
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 1, "Arp Mode", {0,6}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 1, "Arp Mode", {0,6}, numToArpMode, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 2, "Arp Pattern Selct", {0,31}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 4, "Arp Hold Enable", {0,1}, {},{}, true, false, true},
