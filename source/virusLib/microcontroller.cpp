@@ -303,10 +303,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildSingleBankResponse = [&](const uint8_t _bank)
 	{
-		if(_bank > 0 && _bank < m_singles.size())
+		if(_bank > 0 && _bank <= m_singles.size())
 		{
 			// eat this, host, whoever you are. 128 single packets
-			for(uint8_t i=0; i<m_singles[_bank].size(); ++i)
+			for(uint8_t i=0; i<m_singles[_bank-1].size(); ++i)
 			{
 				TPreset data;
 				const auto res = requestSingle(_bank, i, data);
@@ -575,7 +575,7 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 
 bool Microcontroller::getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const
 {
-	if(_bank > m_singles.size())
+	if(_bank >= m_singles.size())
 		return false;
 	const auto& s = m_singles[_bank];
 	
