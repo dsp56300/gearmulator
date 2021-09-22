@@ -804,7 +804,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull)
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const
 {
 	std::lock_guard lock(m_mutex);
 
