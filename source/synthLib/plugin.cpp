@@ -219,31 +219,31 @@ namespace synthLib
 	{
 		while (!m_midiInRingBuffer.empty())
 		{
-			const auto _ev = m_midiInRingBuffer.pop_front();
+			const auto ev = m_midiInRingBuffer.pop_front();
 
 			// sysex might be send in multiple chunks. Happens if coming from hardware
-			if (!_ev.sysex.empty())
+			if (!ev.sysex.empty())
 			{
-				const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+				const bool isComplete = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
 
 				if (isComplete)
 				{
-					m_midiIn.push_back(_ev);
-					return;
+					m_midiIn.push_back(ev);
+					continue;
 				}
 
-				const bool isStart = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() != M_ENDOFSYSEX;
-				const bool isEnd = _ev.sysex.front() != M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+				const bool isStart = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() != M_ENDOFSYSEX;
+				const bool isEnd = ev.sysex.front() != M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
 
 				if (isStart)
 				{
-					m_pendingSysexInput = _ev;
-					return;
+					m_pendingSysexInput = ev;
+					continue;
 				}
 
 				if (!m_pendingSysexInput.sysex.empty())
 				{
-					m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), _ev.sysex.begin(), _ev.sysex.end());
+					m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), ev.sysex.begin(), ev.sysex.end());
 
 					if (isEnd)
 					{
@@ -251,10 +251,9 @@ namespace synthLib
 						m_pendingSysexInput.sysex.clear();
 					}
 				}
-				return;
 			}
 
-			m_midiIn.push_back(_ev);
+			m_midiIn.push_back(ev);
 		}
 	}
 
