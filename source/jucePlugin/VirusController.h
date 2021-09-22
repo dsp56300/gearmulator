@@ -35,7 +35,7 @@ namespace Virus
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
 		juce::String getCurrentPartPresetName(uint8_t part);
-
+		uint32_t getBankCount() const { return m_singles.size(); }
 	private:
 		void timerCallback() override;
 
@@ -56,7 +56,7 @@ namespace Virus
         };
 
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
-        SinglePatch m_singles[2][128];
+        std::array<std::array<SinglePatch, 128>, 8> m_singles;
 
         static const std::initializer_list<Parameter::Description> m_paramsDescription;
 

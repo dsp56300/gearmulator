@@ -32,18 +32,21 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	for (auto pt = 0; pt < 16; pt++)
 	{
 		m_partSelectors[pt].onClick = [this, pt]() {
-			auto bankA = processorRef.getController().getSinglePresetNames(0);
-			auto bankB = processorRef.getController().getSinglePresetNames(1);
-			juce::PopupMenu pA;
-			juce::PopupMenu pB;
-			for (auto i = 0; i < 128; i++)
-			{
-				pA.addItem(bankA[i], [this, i, pt] { processorRef.getController().setCurrentPartPreset(pt, 0, i); });
-				pB.addItem(bankB[i], [this, i, pt] { processorRef.getController().setCurrentPartPreset(pt, 1, i); });
-			}
+
 			juce::PopupMenu selector;
-			selector.addSubMenu("Bank A", pA);
-			selector.addSubMenu("Bank B", pB);
+
+			for(auto b=0; b<processorRef.getController().getBankCount(); ++b)
+			{
+				auto bank = processorRef.getController().getSinglePresetNames(b);
+				juce::PopupMenu p;
+				for (auto i = 0; i < 128; i++)
+				{
+					p.addItem(bank[i], [this, b, i, pt] { processorRef.getController().setCurrentPartPreset(pt, b, i); });
+				}
+				std::stringstream bankName;
+				bankName << "Bank " << static_cast<char>('A' + b);
+				selector.addSubMenu(std::string(bankName.str()), p);
+			}
 			selector.showMenu(juce::PopupMenu::Options());
 		};
 		addAndMakeVisible(m_partSelectors[pt]);

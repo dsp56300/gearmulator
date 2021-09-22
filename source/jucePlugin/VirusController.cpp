@@ -21,7 +21,11 @@ namespace Virus
 		};
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
-		startTimer(5);
+
+    	for(uint8_t i=3; i<=8; ++i)
+			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));
+
+    	startTimer(5);
 	}
 
     void Controller::registerParams()
@@ -172,7 +176,7 @@ namespace Virus
 
     juce::StringArray Controller::getSinglePresetNames(int bank) const
     {
-        if (bank > 1 || bank < 0)
+        if (bank >= m_singles.size() || bank < 0)
         {
             jassertfalse;
             return {};
@@ -204,7 +208,7 @@ namespace Virus
 
 	void Controller::setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg)
 	{
-		if (bank < 0 || bank > 1 || prg < 0 || prg > 127)
+		if (bank < 0 || bank >= m_singles.size() || prg < 0 || prg > 127)
 		{
 			jassertfalse;
 			return;
