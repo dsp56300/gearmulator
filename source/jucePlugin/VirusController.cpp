@@ -180,7 +180,7 @@ namespace Virus
 
         juce::StringArray bankNames;
         for (auto i = 0; i < 128; i++)
-            bankNames.add(parseAsciiText(m_singles[0][i].data, 128 + 112));
+            bankNames.add(parseAsciiText(m_singles[bank][i].data, 128 + 112));
         return bankNames;
     }
     juce::StringArray Controller::getMultiPresetsName() const
