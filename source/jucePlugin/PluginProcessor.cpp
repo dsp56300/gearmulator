@@ -189,8 +189,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	midiMessages.clear();
 
-    juce::AudioPlayHead::CurrentPositionInfo pos{0};
-	
+    juce::AudioPlayHead::CurrentPositionInfo pos{};
+
 	auto* playHead = getPlayHead();
 	if(playHead)
 		playHead->getCurrentPosition(pos);
