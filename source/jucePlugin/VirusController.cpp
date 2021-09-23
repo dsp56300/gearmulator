@@ -1357,10 +1357,8 @@ namespace Virus
 
     void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
     {
-        const juce::ScopedTryLock sl(m_eventQueueLock);
-        if (!sl.isLocked())
-            return;
+        const juce::ScopedLock sl(m_eventQueueLock);
 
-        m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
+    	m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
     }
 }; // namespace Virus
