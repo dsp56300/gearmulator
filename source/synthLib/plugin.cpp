@@ -78,7 +78,7 @@ namespace synthLib
 		return m_device->isValid();
 	}
 
-	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
+	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type) const
 	{
 		if(!m_device)
 			return false;

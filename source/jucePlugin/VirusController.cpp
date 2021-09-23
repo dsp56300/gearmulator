@@ -1327,6 +1327,7 @@ namespace Virus
     {
         synthLib::SMidiEvent ev;
         ev.sysex = msg;
+		ev.source = synthLib::MidiEventSourceEditor;
         m_processor.addMidiEvent(ev);
     }
 

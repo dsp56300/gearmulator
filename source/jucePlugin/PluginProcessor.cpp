@@ -199,20 +199,20 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	m_midiOut.clear();
 	m_plugin.getMidiOut(m_midiOut);
-    if (m_midiOut.size() > 0)
+    if (!m_midiOut.empty())
         m_controller->dispatchVirusOut(m_midiOut);
 
     for (size_t i = 0; i < m_midiOut.size(); ++i)
     {
         const auto& e = m_midiOut[i];
-		if(e.sysex.empty())
-		{
+
+		if (e.source == synthLib::MidiEventSourceEditor)
+			continue;
+
+    	if(e.sysex.empty())
 			midiMessages.addEvent(juce::MidiMessage (e.a, e.b, e.c, 0.0), 0);
-		}
 		else
-		{
 			midiMessages.addEvent(juce::MidiMessage (&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0), 0);
-		}
     }
 }
 

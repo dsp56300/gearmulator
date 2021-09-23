@@ -178,7 +178,7 @@ public:
 	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
-	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses);
+	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data);
