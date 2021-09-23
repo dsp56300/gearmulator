@@ -30,7 +30,7 @@ namespace synthLib
 
 		bool isValid() const;
 
-		bool getState(std::vector<uint8_t>& _state, StateType _type);
+		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state);
 
 	private:
