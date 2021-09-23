@@ -17,8 +17,8 @@ namespace Virus
 
     void Parameter::valueChanged(juce::Value &)
     {
-        const uint8_t value = static_cast<int>(m_value.getValue());
-        jassert (m_range.getRange().contains(value) || m_range.end == value);
+		const uint8_t value = roundToInt(m_value.getValue());
+		jassert (m_range.getRange().contains(value) || m_range.end == value);
 		if (value != m_lastValue)
 		{
 			m_ctrl.sendSysEx(
