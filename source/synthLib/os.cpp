@@ -1,5 +1,7 @@
 #include "os.h"
 
+#include <cassert>
+
 #include "../dsp56300/source/dsp56kEmu/buildconfig.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
@@ -66,25 +68,26 @@ namespace synthLib
         }
 #endif
 
-        auto fixPath = [&](const std::string& _key)
+    	auto fixPathWithDelim = [&](const std::string& _key, const char _delim)
     	{
-            const auto end = path.rfind(_key);
+			const auto end = path.rfind(_key + _delim);
 
-            if (end != std::string::npos)
-                path = path.substr(0, end);
-        };
+			if (end != std::string::npos && (path.find(_delim + _key) + 1) != end)
+				path = path.substr(0, end);
+		};
 
-        fixPath(".vst/");
-        fixPath(".vst3/");
-        fixPath(".component/");
-        fixPath(".app/");
+    	auto fixPath = [&](const std::string& _key)
+    	{
+			fixPathWithDelim(_key, '/');
+			fixPathWithDelim(_key, '\\');
+		};
 
-        fixPath(".vst\\");
-        fixPath(".vst3\\");
-        fixPath(".component\\");
-        fixPath(".app\\");
+		fixPath(".vst");
+		fixPath(".vst3");
+		fixPath(".component");
+		fixPath(".app");
 
-        const auto end = path.find_last_of("/\\");
+		const auto end = path.find_last_of("/\\");
 
         if (end != std::string::npos)
             path = path.substr(0, end + 1);
