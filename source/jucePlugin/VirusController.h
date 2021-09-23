@@ -35,7 +35,7 @@ namespace Virus
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
 		juce::String getCurrentPartPresetName(uint8_t part);
-		uint32_t getBankCount() const { return m_singles.size(); }
+		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 	private:
 		void timerCallback() override;
 
