@@ -1,4 +1,4 @@
 #pragma once
 
-static constexpr const char* const g_pluginVersionString = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@@PROJECT_VERSION_PATCH@";
+static constexpr const char* const g_pluginVersionString = "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@";
 static constexpr uint32_t g_pluginVersion = @PROJECT_VERSION_MAJOR@@PROJECT_VERSION_MINOR@@PROJECT_VERSION_PATCH@;
