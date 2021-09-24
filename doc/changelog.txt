@@ -1,5 +1,13 @@
 Release Notes 
 
+1.2.0 (2021.09.23):
+
+- [Imp] A temporary GUI has been added that allows to: modify parameters without needing external editors and allows to switch presets 
+- [Imp] All parameters can now be automated from a DAW
+
+- [Fix] Sysex event processing is now more responsive
+- [Fix] Version number displayed as x.yz instead of x.y.z
+
 1.1.9 (2021.08.12):
 
 - [Imp] An arm64 JIT recompiler has been implemented, which gives a large performance boost on Apple M1, Raspberry Pi and other arm64 based CPUs
