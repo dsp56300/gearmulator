@@ -65,8 +65,14 @@ namespace Virus
 		{
 			if (m_desc.textToValueFunction)
 				return convertTo0to1(m_desc.textToValueFunction(text, m_desc));
-			else
-				return convertTo0to1(text.getFloatValue());
+			if (m_desc.valueToTextFunction)
+			{
+				// brute force but this should be O(1) of 128...
+				for (auto i = 0; i < 128; i++)
+					if (m_desc.valueToTextFunction(i, m_desc) == text)
+						return convertTo0to1(i);
+			}
+			return convertTo0to1(text.getFloatValue());
 		}
 
 		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
