@@ -1107,7 +1107,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 69, "Assign2 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 70, "Assign2 Destination2", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 71, "Assign2 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 72, "Assign3 Source", {0,127}, numToModMatrixSource, {}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 72, "Assign3 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 73, "Assign3 Destination1", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 74, "Assign3 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 75, "Assign3 Destination2", {0,122}, numToModMatrixDest,{}, true, true, false},
