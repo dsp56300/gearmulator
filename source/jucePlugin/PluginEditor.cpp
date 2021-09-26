@@ -14,6 +14,9 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
     // editor's size to whatever you need it to be.
 	setSize(800, 400);
 
+	// Resizable UI
+	setResizable(true, true);
+
 	m_btSingleMode.setRadioGroupId(0x3cf);
 	m_btMultiMode.setRadioGroupId(0x3cf);
 	addAndMakeVisible(m_btSingleMode);
