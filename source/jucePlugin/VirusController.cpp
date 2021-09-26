@@ -456,7 +456,7 @@ namespace Virus
 		case 0:  return "Sine";
 		case 1:  return "Triangle";
 		case 2:  return "Saw";
-		case 3:  return "Sqaure";
+		case 3:  return "Square";
 		case 4:  return "S&H";
 		case 5:  return "S&G";
 		default: return juce::String(idx);
