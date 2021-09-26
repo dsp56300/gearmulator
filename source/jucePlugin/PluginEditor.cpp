@@ -16,6 +16,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
 	// Resizable UI
 	setResizable(true, true);
+	setResizeLimits(800,400,800,1600);
 
 	m_btSingleMode.setRadioGroupId(0x3cf);
 	m_btMultiMode.setRadioGroupId(0x3cf);
