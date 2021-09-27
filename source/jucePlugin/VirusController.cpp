@@ -368,9 +368,9 @@ namespace Virus
 	{
 		const auto idx = juce::roundToInt(panIdx);
 		if (idx == 64)
-			return "Wave";
-		if (idx == 0)
 			return "Saw";
+		if (idx == 0)
+			return "Wave";
 		if (idx == 127)
 			return "Pulse";
 		return numTo7bitSigned(idx);
