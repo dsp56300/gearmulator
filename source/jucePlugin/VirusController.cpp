@@ -405,6 +405,16 @@ namespace Virus
 		case 3:  return "Middle";
 		case 4:  return "Hard";
 		case 5:  return "Digital";
+		case 6:  return "Shaper";
+		case 7:  return "Rectifier";
+		case 8:  return "BitReducer";
+		case 9:  return "RateReducer";
+		case 10:  return "Rate+Flw";
+		case 11:  return "LowPass";
+		case 12:  return "Low+Flw";
+		case 13:  return "HighPass";
+		case 14:  return "High+Flw";
+
 		default: return juce::String(idx);
 		}
 	}
@@ -977,7 +987,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 46, "Filter1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 47, "Filter2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,6}, numToSatCurv, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,14}, numToSatCurv, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,3}, numToFilterMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, numToFilterMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 53, "Filter Routing", {0,3}, numToFilterRouting, {}, true, true, false},
