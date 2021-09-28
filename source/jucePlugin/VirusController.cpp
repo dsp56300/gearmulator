@@ -1036,7 +1036,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 98, "Unison Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,2}, numToInputMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,3}, numToInputMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 105, "Chorus Mix", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 106, "Chorus Rate", {0,127}, {},{}, true, false, false},
