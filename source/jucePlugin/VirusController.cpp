@@ -428,6 +428,10 @@ namespace Virus
 		case 1:  return "Highpass";
 		case 2:  return "Bandpass";
 		case 3:  return "Bandstop";
+		case 4:  return "Analog 1P";
+		case 5:  return "Analog 2P";
+		case 6:  return "Analog 3P";
+		case 7:  return "Analog 4P";
 		default: return juce::String(idx);
 		}
 	}
@@ -1051,8 +1055,8 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 47, "Filter2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,14}, numToSatCurv, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,3}, numToFilterMode, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, numToFilterMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,7}, numToFilterMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,7}, numToFilterMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 53, "Filter Routing", {0,3}, numToFilterRouting, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 54, "Filter Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 55, "Filter Env Decay", {0,127}, {},{}, true, false, false},
