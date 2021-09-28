@@ -427,7 +427,7 @@ namespace Virus
 		case 0:  return "Lowpass";
 		case 1:  return "Highpass";
 		case 2:  return "Bandpass";
-		case 3:  return "Bandside";
+		case 3:  return "Bandstop";
 		default: return juce::String(idx);
 		}
 	}
