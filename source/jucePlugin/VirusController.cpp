@@ -1137,7 +1137,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 20, "Delay Clock", {0,16}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 21, "Lfo3 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, numToControlSmoothMode,{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, numToControlSmoothMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 26, "Bender Range Up", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 27, "Bender Range Down", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 28, "Bender Scale", {0,1}, numToLinExp, {}, true, false, true},
