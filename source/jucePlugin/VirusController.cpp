@@ -985,7 +985,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 38, "Ringmodulator Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::VIRUS_C, 39, "Noise Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 40, "Cutoff", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 41, "Cutoff2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 41, "Cutoff2", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 42, "Filter1 Resonance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 43, "Filter2 Resonance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 44, "Filter1 Env Amt", {0,127}, {},{}, true, false, false},
