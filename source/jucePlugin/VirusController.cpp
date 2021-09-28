@@ -1123,7 +1123,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 123, "All Notes Off", {0,127}, {},{}, false, false, false},
 
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 1, "Arp Mode", {0,6}, numToArpMode, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 2, "Arp Pattern Selct", {0,31}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 2, "Arp Pattern Selct", {0,61}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 4, "Arp Hold Enable", {0,1}, {},{}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
