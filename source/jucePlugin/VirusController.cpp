@@ -424,10 +424,10 @@ namespace Virus
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
 		{
-		case 0:  return "Lowpass";
-		case 1:  return "Highpass";
-		case 2:  return "Bandpass";
-		case 3:  return "Bandstop";
+		case 0:  return "LowPass";
+		case 1:  return "HighPass";
+		case 2:  return "BandPass";
+		case 3:  return "BandStop";
 		case 4:  return "Analog 1P";
 		case 5:  return "Analog 2P";
 		case 6:  return "Analog 3P";
