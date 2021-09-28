@@ -1031,7 +1031,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 90, "Panorama Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 91, "Patch Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 93, "Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 97, "Unison Mode", {0,15}, numToUnisonMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 98, "Unison Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
