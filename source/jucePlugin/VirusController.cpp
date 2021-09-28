@@ -1010,7 +1010,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 65, "Portamento Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 66, "Sostenuto Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 67, "Lfo1 Rate", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 68, "Lfo1 Shape", {0,5}, numToLfoShape, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 68, "Lfo1 Shape", {0,5}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 69, "Lfo1 Env Mode", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 70, "Lfo1 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 71, "Lfo1 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
