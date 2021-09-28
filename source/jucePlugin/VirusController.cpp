@@ -469,6 +469,68 @@ namespace Virus
 		case 3:  return "Square";
 		case 4:  return "S&H";
 		case 5:  return "S&G";
+		case 6:  return "Wave3";
+		case 7:  return "Wave4";
+		case 8:  return "Wave5";
+		case 9:  return "Wave6";
+		case 10:  return "Wave7";
+		case 11:  return "Wave8";
+		case 12:  return "Wave9";
+		case 13:  return "Wave10";
+		case 14:  return "Wave11";
+		case 15:  return "Wave12";
+		case 16:  return "Wave13";
+		case 17:  return "Wave14";
+		case 18:  return "Wave15";
+		case 19:  return "Wave16";
+		case 20:  return "Wave17";
+		case 21:  return "Wave18";
+		case 22:  return "Wave19";
+		case 23:  return "Wave20";
+		case 24:  return "Wave21";
+		case 25:  return "Wave22";
+		case 26:  return "Wave23";
+		case 27:  return "Wave24";
+		case 28:  return "Wave25";
+		case 29:  return "Wave26";
+		case 30:  return "Wave27";
+		case 31:  return "Wave28";
+		case 32:  return "Wave29";
+		case 33:  return "Wave30";
+		case 34:  return "Wave31";
+		case 35:  return "Wave32";
+		case 36:  return "Wave33";
+		case 37:  return "Wave34";
+		case 38:  return "Wave35";
+		case 39:  return "Wave36";
+		case 40:  return "Wave37";
+		case 41:  return "Wave38";
+		case 42:  return "Wave39";
+		case 43:  return "Wave40";
+		case 44:  return "Wave41";
+		case 45:  return "Wave42";
+		case 46:  return "Wave43";
+		case 47:  return "Wave44";
+		case 48:  return "Wave45";
+		case 49:  return "Wave46";
+		case 50:  return "Wave47";
+		case 51:  return "Wave48";
+		case 52:  return "Wave49";
+		case 53:  return "Wave50";
+		case 54:  return "Wave51";
+		case 55:  return "Wave52";
+		case 56:  return "Wave53";
+		case 57:  return "Wave54";
+		case 58:  return "Wave55";
+		case 59:  return "Wave56";
+		case 60:  return "Wave57";
+		case 61:  return "Wave58";
+		case 62:  return "Wave59";
+		case 63:  return "Wave60";
+		case 64:  return "Wave61";
+		case 65:  return "Wave62";
+		case 66:  return "Wave63";
+		case 67:  return "Wave64";
 		default: return juce::String(idx);
 		}
 	}
@@ -1006,7 +1068,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 65, "Portamento Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 66, "Sostenuto Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 67, "Lfo1 Rate", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 68, "Lfo1 Shape", {0,5}, numToLfoShape, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 68, "Lfo1 Shape", {0,67}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 69, "Lfo1 Env Mode", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 70, "Lfo1 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 71, "Lfo1 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
@@ -1018,7 +1080,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 77, "Reso Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 78, "FiltGain Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 79, "Lfo2 Rate", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 80, "Lfo2 Shape", {0,5}, numToLfoShape,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 80, "Lfo2 Shape", {0,67}, numToLfoShape,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 81, "Lfo2 Env Mode", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 82, "Lfo2 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 83, "Lfo2 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
@@ -1043,7 +1105,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 107, "Chorus Depth", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 108, "Chorus Delay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,5}, numToLfoShape, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,67}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,3}, numToDelayReverbMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
@@ -1063,7 +1125,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 6, "Arp Swing", {0,127}, numToArpSwing, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 7, "Lfo3 Rate", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 8, "Lfo3 Shape", {0,5}, numToLfoShape, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 8, "Lfo3 Shape", {0,67}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 9, "Lfo3 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 10, "Lfo3 Keyfollow", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, numToLfoDest, {}, true, true, false},
