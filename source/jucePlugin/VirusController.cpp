@@ -936,12 +936,7 @@ namespace Virus
 		default:  return juce::String(v);
 		}
 	}
-
-	juce::String numToKeytrigger(float v, Parameter::Description)
-	{
-		return juce::roundToInt(v) == 0 ? "Off" : "Keytrigger Phase " + juce::String(juce::roundToInt(v));
-	}
-
+	
 	juce::String numToUnisonMode(float v, Parameter::Description)
 	{
 		return juce::roundToInt(v) == 0 ? "Off" : "Twin " + juce::String(juce::roundToInt(v));
