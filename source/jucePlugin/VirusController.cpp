@@ -1084,7 +1084,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 82, "Lfo2 Mode", {0,1}, numToLfoMode, {}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 83, "Lfo2 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 84, "Lfo2 Keyfollow", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 85, "Lfo2 Keytrigger", {0,127}, numToKeytrigger,{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 85, "Lfo2 Keytrigger", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 86, "OscShape Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 87, "FmAmount Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 88, "Cutoff1 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
