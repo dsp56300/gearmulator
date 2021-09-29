@@ -386,14 +386,6 @@ namespace Virus
 		return "Wave " + juce::String(idx);
 	}
 
-	juce::String numToKeyfollow(float panIdx, Parameter::Description)
-	{
-		const auto idx = juce::roundToInt(panIdx);
-		if (idx == 32)
-			return "Default";
-		return juce::String(idx);
-	}
-
 	juce::String numToSatCurv(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
