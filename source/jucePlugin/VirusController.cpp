@@ -1029,7 +1029,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 18, "Osc1 Pulsewidth", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,64}, numToOscWaveSelect, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 20, "Osc1 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, numToKeyfollow, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, numToOscShape, {}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 23, "Osc2 Pulsewidth", {0,127}, {}, {}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,64}, numToOscWaveSelect,{}, true, true, false},
