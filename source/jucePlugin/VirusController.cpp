@@ -1263,7 +1263,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 38, "Input Follower Mode",
         {0,9}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 39, "Vocoder Mode", {0,12}, {},{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 42, "Osc3 Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 43, "Osc3 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 44, "Osc3 Detune", {0,127}, {},{}, true, false, false},
