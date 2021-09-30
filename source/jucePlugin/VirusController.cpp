@@ -552,6 +552,83 @@ namespace Virus
 		}
 	}
 
+	juce::String numToOsc3Mode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "Slave";
+		case 2:  return "Saw";
+		case 3:  return "Pulse";
+		case 4:  return "Sine";
+		case 5:  return "Triangle";
+		case 6:  return "Wave3";
+		case 7:  return "Wave4";
+		case 8:  return "Wave5";
+		case 9:  return "Wave6";
+		case 10:  return "Wave7";
+		case 11:  return "Wave8";
+		case 12:  return "Wave9";
+		case 13:  return "Wave10";
+		case 14:  return "Wave11";
+		case 15:  return "Wave12";
+		case 16:  return "Wave13";
+		case 17:  return "Wave14";
+		case 18:  return "Wave15";
+		case 19:  return "Wave16";
+		case 20:  return "Wave17";
+		case 21:  return "Wave18";
+		case 22:  return "Wave19";
+		case 23:  return "Wave20";
+		case 24:  return "Wave21";
+		case 25:  return "Wave22";
+		case 26:  return "Wave23";
+		case 27:  return "Wave24";
+		case 28:  return "Wave25";
+		case 29:  return "Wave26";
+		case 30:  return "Wave27";
+		case 31:  return "Wave28";
+		case 32:  return "Wave29";
+		case 33:  return "Wave30";
+		case 34:  return "Wave31";
+		case 35:  return "Wave32";
+		case 36:  return "Wave33";
+		case 37:  return "Wave34";
+		case 38:  return "Wave35";
+		case 39:  return "Wave36";
+		case 40:  return "Wave37";
+		case 41:  return "Wave38";
+		case 42:  return "Wave39";
+		case 43:  return "Wave40";
+		case 44:  return "Wave41";
+		case 45:  return "Wave42";
+		case 46:  return "Wave43";
+		case 47:  return "Wave44";
+		case 48:  return "Wave45";
+		case 49:  return "Wave46";
+		case 50:  return "Wave47";
+		case 51:  return "Wave48";
+		case 52:  return "Wave49";
+		case 53:  return "Wave50";
+		case 54:  return "Wave51";
+		case 55:  return "Wave52";
+		case 56:  return "Wave53";
+		case 57:  return "Wave54";
+		case 58:  return "Wave55";
+		case 59:  return "Wave56";
+		case 60:  return "Wave57";
+		case 61:  return "Wave58";
+		case 62:  return "Wave59";
+		case 63:  return "Wave60";
+		case 64:  return "Wave61";
+		case 65:  return "Wave62";
+		case 66:  return "Wave63";
+		case 67:  return "Wave64";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToLfoMode(float v, Parameter::Description) { return juce::roundToInt(v) == 0 ? "Poly" : "Mono"; }
 
 	juce::String numToKeyMode(float idx, Parameter::Description)
@@ -1263,7 +1340,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 38, "Input Follower Mode",
         {0,9}, {},{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 39, "Vocoder Mode", {0,12}, {},{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, numToOsc3Mode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 42, "Osc3 Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 43, "Osc3 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 44, "Osc3 Detune", {0,127}, {},{}, true, false, false},
