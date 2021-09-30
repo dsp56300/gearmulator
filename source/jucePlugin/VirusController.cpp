@@ -1098,6 +1098,18 @@ namespace Virus
 		default: return juce::String(v);
 		}
 	}
+	
+	juce::String numToFilterSelect(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Filter 1";
+		case 1:  return "Filter 2";
+		case 2:  return "Filter 1+2";
+		default: return juce::String(idx);
+		}
+	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
@@ -1317,7 +1329,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 6 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 109, "Assign 6 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 110, "Assign 6 Amount", {0,127}, paramTo7bitSigned, {}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, numToFilterSelect, {}, true, true, false},
 
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, numToOutputDelaySelect, {}, true, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 31, "Part Bank Select", {0, 3 + 26}, {},{}, false, true, false},
