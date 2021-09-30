@@ -191,12 +191,22 @@ namespace synthLib
 		Note_C8, Note_Cis8, Note_D8, Note_Dis8, Note_E8, Note_F8, Note_Fis8, Note_G8
 	};
 
+	enum MidiEventSource
+	{
+		MidiEventSourcePlugin,
+		MidiEventSourceEditor,
+	};
+
 	struct SMidiEvent
 	{
 		uint8_t a, b, c;
 		std::vector<uint8_t> sysex;
 		uint32_t offset;
+		MidiEventSource source;
 
-		SMidiEvent(const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0) : a(_a), b(_b), c(_c), offset(_offset) {}
+		SMidiEvent(const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0, const MidiEventSource _source = MidiEventSourcePlugin)
+			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
+		{
+		}
 	};
 }
