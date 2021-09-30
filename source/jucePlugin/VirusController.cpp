@@ -1400,7 +1400,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 60, "Amp Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 61, "Panorama Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 62, "Soft Knob-1 Single", {0,117}, numToSoftKnobDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 63, "Soft Knob-2 Single", {0,127}, numToSoftKnobDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 63, "Soft Knob-2 Single", {0,117}, numToSoftKnobDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 64, "Assign1 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 65, "Assign1 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 66, "Assign1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
