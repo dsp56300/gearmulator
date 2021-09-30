@@ -579,6 +579,30 @@ namespace Virus
 		}
 	}
 
+	juce::String numToOutputDelaySelect(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "OUT 1 L";
+		case 1:  return "OUT 1 L+R";
+		case 2:  return "OUT 1 R";
+		case 3:  return "OUT 2 L";
+		case 4:  return "OUT 2 L+R";
+		case 5:  return "OUT 2 R";
+		case 6:  return "OUT 3 L";
+		case 7:  return "OUT 3 L+R";
+		case 8:  return "OUT 3 R";
+		case 9:  return "AUX 1 L";
+		case 10:  return "AUX 1 L+R";
+		case 11:  return "AUX 1 R";
+		case 12:  return "AUX 2 L";
+		case 13:  return "AUX 2 L+R";
+		case 14:  return "AUX 2 R";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToDelayReverbMode(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -1251,7 +1275,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 110, "Assign 6 Amount", {0,127}, paramTo7bitSigned, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, {},{}, true, true, false},
 
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, {},{}, true, true, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, numToOutputDelaySelect, {}, true, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 31, "Part Bank Select", {0, 3 + 26}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 32, "Part Bank Change", {0, 3 + 26}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 33, "Part Program Change", {0,127}, {},{}, false, false, false},
