@@ -1205,7 +1205,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 30, "Filter1 Env Polarity", {0,1}, numToNegPos, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 31, "Filter1 Env Polarity", {0,1}, numToNegPos, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 32, "Filter2 Cutoff Link", {0,1}, {},{}, true, false, true},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 33, "Filter Keytrack Base", {0,127}, {},{}, true, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 33, "Filter Keytrack Base", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 34, "Osc FM Mode", {0,12}, numToOscFmMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 35, "Osc Init Phase", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 36, "Punch Intensity", {0,127}, {},{}, true, false, false},
