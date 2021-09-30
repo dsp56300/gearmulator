@@ -18,42 +18,14 @@ namespace synthLib
 
 	void Plugin::addMidiEvent(const SMidiEvent& _ev)
 	{
-		std::lock_guard lock(m_lock);
-		
-		// sysex might be send in multiple chunks. Happens if coming from hardware
-		if(!_ev.sysex.empty())
+		std::lock_guard lock(m_lockAddMidiEvent);
+
+		if(m_midiInRingBuffer.full())
 		{
-			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
-
-			if(isComplete)
-			{
-				m_midiIn.push_back(_ev);
-				return;
-			}
-
-			const bool isStart = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() != M_ENDOFSYSEX;
-			const bool isEnd = _ev.sysex.front() != M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
-
-			if(isStart)
-			{
-				m_pendingSyexInput = _ev;
-				return;
-			}
-
-			if(!m_pendingSyexInput.sysex.empty())
-			{
-				m_pendingSyexInput.sysex.insert(m_pendingSyexInput.sysex.end(), _ev.sysex.begin(), _ev.sysex.end());
-
-				if(isEnd)
-				{
-					m_midiIn.push_back(m_pendingSyexInput);
-					m_pendingSyexInput.sysex.clear();
-				}
-			}
-			return;
+			std::lock_guard lock(m_lock);
+			processMidiInEvents();
 		}
-
-		m_midiIn.push_back(_ev);
+		m_midiInRingBuffer.push_back(_ev);
 	}
 
 	void Plugin::setSamplerate(float _samplerate)
@@ -71,6 +43,8 @@ namespace synthLib
 			return;
 
 		setFlushDenormalsToZero();
+
+		processMidiInEvents();
 
 		float* inputs[8] {};
 		float* outputs[8] {};
@@ -104,7 +78,7 @@ namespace synthLib
 		return m_device->isValid();
 	}
 
-	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type)
+	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type) const
 	{
 		if(!m_device)
 			return false;
@@ -239,6 +213,48 @@ namespace synthLib
 		m_device->setLatencySamples(latency);
 
 		m_deviceLatency = static_cast<uint32_t>(m_device->getInternalLatencySamples() * m_hostSamplerate / m_device->getSamplerate());
+	}
+
+	void Plugin::processMidiInEvents()
+	{
+		while (!m_midiInRingBuffer.empty())
+		{
+			const auto ev = m_midiInRingBuffer.pop_front();
+
+			// sysex might be send in multiple chunks. Happens if coming from hardware
+			if (!ev.sysex.empty())
+			{
+				const bool isComplete = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
+
+				if (isComplete)
+				{
+					m_midiIn.push_back(ev);
+					continue;
+				}
+
+				const bool isStart = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() != M_ENDOFSYSEX;
+				const bool isEnd = ev.sysex.front() != M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
+
+				if (isStart)
+				{
+					m_pendingSysexInput = ev;
+					continue;
+				}
+
+				if (!m_pendingSysexInput.sysex.empty())
+				{
+					m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), ev.sysex.begin(), ev.sysex.end());
+
+					if (isEnd)
+					{
+						m_midiIn.push_back(m_pendingSysexInput);
+						m_pendingSysexInput.sysex.clear();
+					}
+				}
+			}
+
+			m_midiIn.push_back(ev);
+		}
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)
