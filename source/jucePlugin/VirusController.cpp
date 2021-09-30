@@ -1020,6 +1020,13 @@ namespace Virus
 		case 3:  return "Noise";
 		case 4:  return "In L";
 		case 5:  return "In L+R";
+		case 6:  return "In R";
+		case 7:  return "Aux1 L";
+		case 8:  return "Aux1 L+R";
+		case 9:  return "Aux1 R";
+		case 10:  return "Aux2 L";
+		case 11:  return "Aux2 L+R";
+		case 12:  return "Aux2 R";
 		default: return juce::String(idx);
 		}
 	}
