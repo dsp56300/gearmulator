@@ -4,6 +4,7 @@
 
 #include "../synthLib/plugin.h"
 #include "../virusLib/device.h"
+#include "VirusController.h"
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor
@@ -49,7 +50,7 @@ public:
 
 	// _____________
 	//
-
+    Virus::Controller &getController();
 	bool isPluginValid() const { return m_plugin.isValid(); }
 	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 	void addMidiEvent(const synthLib::SMidiEvent& ev);
@@ -57,8 +58,10 @@ public:
 	// _____________
 	//
 private:
-	void setState(const void* _data, size_t _sizeInBytes);
-	
+    std::unique_ptr<Virus::Controller> m_controller;
+
+    void setState(const void *_data, size_t _sizeInBytes);
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
 
