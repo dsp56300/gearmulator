@@ -53,10 +53,10 @@ Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hd
 	{
 		std::vector<TPreset> singles;
 
+		const auto bank = b >= g_singleRamBankCount ? b - g_singleRamBankCount : b;
+
 		for(uint32_t p=0; p<g_presetsPerBank; ++p)
 		{
-			const auto bank = b > g_singleRamBankCount ? b - g_singleRamBankCount : b;
-
 			TPreset single;
 			m_rom.getSingle(bank, p, single);
 
