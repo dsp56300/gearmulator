@@ -561,6 +561,24 @@ namespace Virus
 		}
 	}
 
+	juce::String numToInputSelect(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "IN L";
+		case 1:  return "IN L+R";
+		case 2:  return "IN R";
+		case 3:  return "AUX 1 L";
+		case 4:  return "AUX 1 L+R";
+		case 5:  return "AUX 1 R";
+		case 6:  return "AUX 2 L";
+		case 7:  return "AUX 2 L+R";
+		case 8:  return "AUX 2 R";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToDelayReverbMode(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -1113,7 +1131,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,3}, numToInputMode, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, {},{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, numToInputSelect,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 105, "Chorus Mix", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 106, "Chorus Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 107, "Chorus Depth", {0,127}, {},{}, true, false, false},
