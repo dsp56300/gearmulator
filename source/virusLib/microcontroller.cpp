@@ -53,10 +53,10 @@ Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hd
 	{
 		std::vector<TPreset> singles;
 
+		const auto bank = b >= g_singleRamBankCount ? b - g_singleRamBankCount : b;
+
 		for(uint32_t p=0; p<g_presetsPerBank; ++p)
 		{
-			const auto bank = b > g_singleRamBankCount ? b - g_singleRamBankCount : b;
-
 			TPreset single;
 			m_rom.getSingle(bank, p, single);
 
@@ -235,7 +235,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 	return true;
 }
 
-bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses)
+bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
 {
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
@@ -267,6 +267,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	auto buildPresetResponse = [&](const uint8_t _type, const uint8_t _bank, const uint8_t _program, const TPreset& _dump)
 	{
 		SMidiEvent ev;
+		ev.source = _source;
+
 		auto& response = ev.sysex;
 
 		buildResponseHeader(ev);
@@ -311,10 +313,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildSingleBankResponse = [&](const uint8_t _bank)
 	{
-		if(_bank > 0 && _bank < m_singles.size())
+		if(_bank > 0 && _bank <= m_singles.size())
 		{
 			// eat this, host, whoever you are. 128 single packets
-			for(uint8_t i=0; i<m_singles[_bank].size(); ++i)
+			for(uint8_t i=0; i<m_singles[_bank-1].size(); ++i)
 			{
 				TPreset data;
 				const auto res = requestSingle(_bank, i, data);
@@ -340,6 +342,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	auto buildGlobalResponse = [&](const uint8_t _param)
 	{
 		SMidiEvent ev;
+		ev.source = _source;
 		auto& response = ev.sysex;
 
 		buildResponseHeader(ev);
@@ -350,7 +353,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(m_globalSettings[_param]);
 		response.push_back(M_ENDOFSYSEX);
 
-		_responses.push_back(ev);
+		_responses.emplace_back(std::move(ev));
 	};
 
 	auto buildGlobalResponses = [&]()
@@ -390,11 +393,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		TPreset _dump, _multi;
 		const auto res = requestSingle(0, _part, _dump);
 		const auto resm = requestMulti(0, 0, _multi);
-		const uint8_t channel = _part == SINGLE ? m_globalSettings[GLOBAL_CHANNEL] : _multi[(size_t)MD_PART_MIDI_CHANNEL + _part];
+		const uint8_t channel = _part == SINGLE ? m_globalSettings[GLOBAL_CHANNEL] : _multi[static_cast<size_t>(MD_PART_MIDI_CHANNEL) + _part];
 		for (const auto cc : g_pageA)
 		{
 			SMidiEvent ev;
-
+			ev.source = _source;
 			ev.a = M_CONTROLCHANGE + channel;
 			ev.b = cc;
 			ev.c = _dump[cc];
@@ -403,9 +406,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		for (const auto cc : g_pageB)
 		{
 			SMidiEvent ev;
+			ev.source = _source;
 			ev.a = M_POLYPRESSURE + channel;
 			ev.b = cc;
-			ev.c = _dump[(size_t)cc+128];
+			ev.c = _dump[static_cast<size_t>(cc)+128];
 			_responses.emplace_back(std::move(ev));
 		}
 		
@@ -583,7 +587,7 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 
 bool Microcontroller::getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const
 {
-	if(_bank > m_singles.size())
+	if(_bank >= m_singles.size())
 		return false;
 	const auto& s = m_singles[_bank];
 	
@@ -758,9 +762,9 @@ bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateTy
 	std::vector<SMidiEvent> responses;
 
 	if(_type == StateTypeGlobal)
-		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, false, responses);
+		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, false, responses, MidiEventSourcePlugin);
 
-	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, false, responses);
+	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, false, responses, MidiEventSourcePlugin);
 
 	if(responses.empty())
 		return false;
@@ -805,14 +809,14 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 	for (const auto& event : events)
 	{
-		sendSysex(event.sysex, false, unusedResponses);
+		sendSysex(event.sysex, false, unusedResponses, MidiEventSourcePlugin);
 		unusedResponses.clear();
 	}
 
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull)
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const
 {
 	std::lock_guard lock(m_mutex);
 
