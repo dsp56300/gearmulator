@@ -1064,7 +1064,18 @@ namespace Virus
 
 	juce::String numToPhaserMode(float v, Parameter::Description)
 	{
-		return juce::roundToInt(v) == 0 ? "Off" : "Stage " + juce::String(juce::roundToInt(v));
+		const auto ridx = juce::roundToInt(v);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "1 Stage";
+		case 2:  return "2 Stages";
+		case 3:  return "3 Stages";
+		case 4:  return "4 Stages";
+		case 5:  return "5 Stages";
+		case 6:  return "6 Stages";
+		default: return juce::String(v);
+		}
 	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
