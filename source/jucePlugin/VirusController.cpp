@@ -676,7 +676,7 @@ namespace Virus
 		return juce::String(juce::roundToInt(50 + (75 - 50) * (idx / 127))) + "%";
 	}
 
-	juce::String numToArpOctave(float idx, Parameter::Description)
+	juce::String numToNumPlusOne(float idx, Parameter::Description)
 	{
 		return juce::String(juce::roundToInt(idx + 1));
 	}
@@ -1232,7 +1232,7 @@ namespace Virus
 
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 1, "Arp Mode", {0,6}, numToArpMode, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 2, "Arp Pattern Selct", {0,61}, {},{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, numToArpOctave,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, numToNumPlusOne,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 4, "Arp Hold Enable", {0,1}, {},{}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 6, "Arp Swing", {0,127}, numToArpSwing, {}, true, false, false},
