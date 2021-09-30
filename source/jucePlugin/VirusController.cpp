@@ -1151,6 +1151,25 @@ namespace Virus
 		}
 	}
 
+	juce::String numToInputFollowerMode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Off";
+		case 1:  return "In L";
+		case 2:  return "In L+R";
+		case 3:  return "In R";
+		case 4:  return "Aux1 L";
+		case 5:  return "Aux1 L+R";
+		case 6:  return "Aux1 R";
+		case 7:  return "Aux2 L";
+		case 8:  return "Aux2 L+R";
+		case 9:  return "Aux2 R";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToMusicDivision(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -1359,8 +1378,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 34, "Osc FM Mode", {0,12}, numToOscFmMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 35, "Osc Init Phase", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 36, "Punch Intensity", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 38, "Input Follower Mode",
-        {0,9}, {},{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 38, "Input Follower Mode", {0,9}, numToInputFollowerMode, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 39, "Vocoder Mode", {0,12}, numToVocoderMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, numToOsc3Mode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 42, "Osc3 Volume", {0,127}, {},{}, true, false, false},
