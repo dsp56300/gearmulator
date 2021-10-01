@@ -10,6 +10,8 @@
 using namespace dsp56k;
 using namespace synthLib;
 
+constexpr virusLib::Microcontroller::PlayMode g_defaultPlayMode = virusLib::Microcontroller::PlayModeSingle;
+
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
 constexpr uint32_t g_presetsPerBank = 128;
@@ -91,9 +93,12 @@ void Microcontroller::sendInitControlCommands()
 
 void Microcontroller::createDefaultState()
 {
-	sendControlCommand(PLAY_MODE, PlayModeMulti);
-//	writeSingle(0, 0, m_singleEditBuffer, false);
-	loadMulti(0, m_multiEditBuffer);
+	sendControlCommand(PLAY_MODE, g_defaultPlayMode);
+
+	if constexpr (g_defaultPlayMode == PlayModeSingle)
+		writeSingle(0, SINGLE, m_singleEditBuffer);
+	else
+		loadMulti(0, m_multiEditBuffer);
 }
 
 bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
