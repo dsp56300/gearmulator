@@ -538,6 +538,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 						// virus only applies sysex changes to other parts while in multi mode.
 						applyToSingleEditBuffer(page, part, param, value);
 					}
+					if (m_globalSettings[PLAY_MODE] == PlayModeSingle && part == 0)
+					{
+						// accept parameter changes in single mode even if sent for part 0, this is how the editor does it right now
+						applyToSingleEditBuffer(page, SINGLE, param, value);
+					}
 				}
 
 				return send(page, part, param, value, _cancelIfFull);
