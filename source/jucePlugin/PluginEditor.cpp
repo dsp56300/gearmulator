@@ -6,6 +6,7 @@
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode"),
+	m_btLoadFile("Load bank"),
 	m_tempEditor(p)
 {
     ignoreUnused (processorRef);
@@ -32,6 +33,13 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	m_btMultiMode.setClickingTogglesState(true);
 	m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10, 0);
 	m_btMultiMode.setSize(120,30);
+
+	addAndMakeVisible(m_btLoadFile);
+	m_btLoadFile.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + m_btMultiMode.getWidth() + 10, 0);
+	m_btLoadFile.setSize(120, 30);
+	m_btLoadFile.onClick = [this]() {
+			loadFile();
+	};
 
 	for (auto pt = 0; pt < 16; pt++)
 	{
@@ -109,4 +117,70 @@ void AudioPluginAudioProcessorEditor::resized()
 	{
 		m_partSelectors[pt].setBounds(area.removeFromTop(20));
 	}
+}
+
+void AudioPluginAudioProcessorEditor::loadFile() {
+	juce::FileChooser chooser("Choose syx/midi banks to import",
+		m_previousPath.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : m_previousPath,
+							  "*.syx,*.mid,*.midi",
+							  true);
+	const bool result = chooser.browseForFileToOpen();
+	if (result)
+	{
+		const auto result = chooser.getResult();
+		m_previousPath = result.getParentDirectory().getFullPathName();
+		const auto ext = result.getFileExtension().toLowerCase();
+		if (ext == ".syx")
+		{
+			juce::MemoryBlock data;
+			result.loadFileAsData(data);
+			for (auto it = data.begin(); it != data.end(); it += 267)
+			{
+				if ((it + 267) < data.end())
+				{
+					processorRef.getController().parseMessage(Virus::SysEx(it, it + 267));
+				}
+			}
+			m_btLoadFile.setButtonText("Loaded");
+		}
+		else if (ext == ".mid" || ext == ".midi")
+		{
+			juce::MemoryBlock data;
+			if (!result.loadFileAsData(data))
+			{
+				return;
+			}
+			const uint8_t *ptr = (uint8_t *)data.getData();
+			const auto end = ptr + data.getSize();
+
+			for (auto it = ptr; it < end; it += 1)
+			{
+				if ((uint8_t)*it == (uint8_t)0xf0 && (it+267) < end)
+				{
+					if ((uint8_t) *(it + 1) == (uint8_t)0x00)
+					{
+						auto syx = Virus::SysEx(it, it + 267);
+						syx[7] = 0x01; // force to bank a
+						syx[266] = 0xf7;
+						processorRef.getController().parseMessage(syx);
+						
+						it += 266;
+					}
+					else // some midi files have two bytes after the 0xf0
+					{
+						auto syx = Virus::SysEx();
+						syx.push_back(0xf0);
+						for (auto i = it + 3; i < it + 3 + 266; i++)
+						{
+								syx.push_back((uint8_t)*i);
+						}
+						syx[7] = 0x01; // force to bank a
+						syx[266] = 0xf7;
+						processorRef.getController().parseMessage(syx);
+						it += 266;
+					}
+				}
+			}
+		}
+	}	
 }
