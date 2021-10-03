@@ -86,7 +86,7 @@ namespace Virus
             }
             else if (i == 5)
             {
-                if (msg[i] != m_deviceId)
+                if (msg[i] != m_deviceId && msg[i] != 0x10)
                     return; // not intended to this device!
             }
             else if (i == 6)

@@ -36,6 +36,7 @@ namespace Virus
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
+		void parseMessage(const SysEx &);
 	private:
 		void timerCallback() override;
 
@@ -89,7 +90,6 @@ namespace Virus
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
 
         template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
-        void parseMessage(const SysEx &);
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
         void parseParamChange(const SysEx &);
