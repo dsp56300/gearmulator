@@ -1435,7 +1435,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 97, "Bass Intensity", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 98, "Bass Tune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 99, "Input Ringmodulator", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 100, "Distortion Curve", {0,6}, numToDistortionCurv,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 100, "Distortion Curve", {0,11}, numToDistortionCurv,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 101, "Distortion Intensity", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 102, "Assign 4 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
