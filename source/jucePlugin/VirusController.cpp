@@ -1,3 +1,4 @@
+#include <juce_audio_processors/juce_audio_processors.h>
 #include "VirusController.h"
 #include "PluginProcessor.h"
 
@@ -103,6 +104,12 @@ namespace Virus
                 case MessageType::PARAM_CHANGE_B:
                 case MessageType::PARAM_CHANGE_C:
                     parseParamChange(msg);
+                    break;
+                case MessageType::REQUEST_SINGLE:
+                case MessageType::REQUEST_MULTI:
+                case MessageType::REQUEST_GLOBAL:
+                case MessageType::REQUEST_TOTAL:
+                    sendSysEx(msg);
                     break;
                 default:
                     std::cout << "Controller: Begin Unhandled SysEx! --" << std::endl;
@@ -1661,6 +1668,6 @@ namespace Virus
     {
         const juce::ScopedLock sl(m_eventQueueLock);
 
-    	m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
+        m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
     }
 }; // namespace Virus
