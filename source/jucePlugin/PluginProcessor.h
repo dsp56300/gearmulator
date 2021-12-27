@@ -54,10 +54,10 @@ public:
 	bool isPluginValid() const { return m_plugin.isValid(); }
 	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 	void addMidiEvent(const synthLib::SMidiEvent& ev);
-	bool setMidiOutput(juce::String _out);
-	juce::MidiOutput* getMidiOutput();
-	bool setMidiInput(juce::String _in);
-	juce::MidiInput* getMidiInput();
+	bool setMidiOutput(const juce::String& _out);
+	juce::MidiOutput* getMidiOutput() const;
+	bool setMidiInput(const juce::String& _in);
+	juce::MidiInput* getMidiInput() const;
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
 	// _____________
