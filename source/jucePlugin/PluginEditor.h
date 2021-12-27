@@ -34,6 +34,7 @@ private:
 	juce::ComboBox m_cmbMidiInput;
 	juce::ComboBox m_cmbMidiOutput;
 	juce::AudioDeviceManager deviceManager;
+	juce::PropertiesFile *m_properties;
 	int m_lastInputIndex = 0;
 	int m_lastOutputIndex = 0;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)

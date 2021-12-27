@@ -297,23 +297,33 @@ void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
 juce::MidiOutput *AudioPluginAudioProcessor::getMidiOutput() { return m_midiOutput.get(); }
 juce::MidiInput *AudioPluginAudioProcessor::getMidiInput() { return m_midiInput.get(); }
 
-void AudioPluginAudioProcessor::setMidiOutput(juce::String _out) {
+bool AudioPluginAudioProcessor::setMidiOutput(juce::String _out) {
 	if (m_midiOutput != nullptr && m_midiOutput->isBackgroundThreadRunning())
 	{
 		m_midiOutput->stopBackgroundThread();
 	}
 	m_midiOutput.swap(juce::MidiOutput::openDevice(_out));
-	m_midiOutput->startBackgroundThread();
+	if (m_midiOutput != nullptr)
+	{
+		m_midiOutput->startBackgroundThread();
+		return true;
+	}
+	return false;
 }
 
-void AudioPluginAudioProcessor::setMidiInput(juce::String _in)
+bool AudioPluginAudioProcessor::setMidiInput(juce::String _in)
 {
 	if (m_midiInput != nullptr)
 	{
 		m_midiInput->stop();
 	}
 	m_midiInput.swap(juce::MidiInput::openDevice(_in, this));
-	m_midiInput->start();
+	if (m_midiInput != nullptr)
+	{
+		m_midiInput->start();
+		return true;
+	}
+	return false;
 }
 
 void AudioPluginAudioProcessor::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
