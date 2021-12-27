@@ -55,9 +55,9 @@ public:
 	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 	void addMidiEvent(const synthLib::SMidiEvent& ev);
 	bool setMidiOutput(juce::String _out);
-	juce::MidiOutput*  AudioPluginAudioProcessor::getMidiOutput();
+	juce::MidiOutput* getMidiOutput();
 	bool setMidiInput(juce::String _in);
-	juce::MidiInput* AudioPluginAudioProcessor::getMidiInput();
+	juce::MidiInput* getMidiInput();
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
 	// _____________

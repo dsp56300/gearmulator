@@ -302,7 +302,7 @@ bool AudioPluginAudioProcessor::setMidiOutput(juce::String _out) {
 	{
 		m_midiOutput->stopBackgroundThread();
 	}
-	m_midiOutput.swap(juce::MidiOutput::openDevice(_out));
+	m_midiOutput = juce::MidiOutput::openDevice(_out);
 	if (m_midiOutput != nullptr)
 	{
 		m_midiOutput->startBackgroundThread();
@@ -317,7 +317,7 @@ bool AudioPluginAudioProcessor::setMidiInput(juce::String _in)
 	{
 		m_midiInput->stop();
 	}
-	m_midiInput.swap(juce::MidiInput::openDevice(_in, this));
+	m_midiInput = juce::MidiInput::openDevice(_in, this);
 	if (m_midiInput != nullptr)
 	{
 		m_midiInput->start();
