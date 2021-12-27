@@ -54,9 +54,9 @@ public:
 	bool isPluginValid() const { return m_plugin.isValid(); }
 	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 	void addMidiEvent(const synthLib::SMidiEvent& ev);
-	void setMidiOutput(juce::String _out);
+	bool setMidiOutput(juce::String _out);
 	juce::MidiOutput*  AudioPluginAudioProcessor::getMidiOutput();
-	void setMidiInput(juce::String _in);
+	bool setMidiInput(juce::String _in);
 	juce::MidiInput* AudioPluginAudioProcessor::getMidiInput();
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
