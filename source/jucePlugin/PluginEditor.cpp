@@ -11,6 +11,13 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 {
     ignoreUnused (processorRef);
 
+	juce::PropertiesFile::Options opts;
+	opts.applicationName = "DSP56300 Emulator";
+	opts.filenameSuffix = ".settings";
+	opts.folderName = "DSP56300 Emulator";
+	opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+	m_properties = new juce::PropertiesFile(opts);
+
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
 	setSize(800, 800);
@@ -62,6 +69,17 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 			selector.showMenu(juce::PopupMenu::Options());
 		};
 		addAndMakeVisible(m_partSelectors[pt]);
+	}
+	
+	auto midiIn = m_properties->getValue("midi_input", "");
+	auto midiOut = m_properties->getValue("midi_output", "");
+	if (midiIn != "")
+	{
+		processorRef.setMidiInput(midiIn);
+	}
+	if (midiOut != "")
+	{
+		processorRef.setMidiOutput(midiOut);
 	}
 
 	m_cmbMidiInput.setSize(160, 30);
@@ -115,6 +133,8 @@ void AudioPluginAudioProcessorEditor::updateMidiInput(int index)
 
 	if (index == 0)
 	{
+		m_properties->setValue("midi_input", "");
+		m_properties->save();
 		m_lastInputIndex = index;
 		m_cmbMidiInput.setSelectedItemIndex(index, juce::dontSendNotification);
 		return;
@@ -125,10 +145,17 @@ void AudioPluginAudioProcessorEditor::updateMidiInput(int index)
 	if (!deviceManager.isMidiInputDeviceEnabled(newInput.identifier))
 		deviceManager.setMidiInputDeviceEnabled(newInput.identifier, true);
 
-	processorRef.setMidiInput(newInput.identifier);
+	if (!processorRef.setMidiInput(newInput.identifier))
+	{
+		m_cmbMidiInput.setSelectedItemIndex(0, juce::dontSendNotification);
+		m_lastInputIndex = 0;
+		return;
+	}
+
+	m_properties->setValue("midi_input", newInput.identifier);
+	m_properties->save();
 
 	m_cmbMidiInput.setSelectedItemIndex(index+1, juce::dontSendNotification);
-
 	m_lastInputIndex = index;
 }
 void AudioPluginAudioProcessorEditor::updateMidiOutput(int index)
@@ -137,6 +164,8 @@ void AudioPluginAudioProcessorEditor::updateMidiOutput(int index)
 
 	if (index == 0)
 	{
+		m_properties->setValue("midi_output", "");
+		m_properties->save();
 		m_cmbMidiOutput.setSelectedItemIndex(index, juce::dontSendNotification);
 		m_lastOutputIndex = index;
 		processorRef.setMidiOutput("");
@@ -144,15 +173,16 @@ void AudioPluginAudioProcessorEditor::updateMidiOutput(int index)
 	}
 	index--;
 	auto newOutput = list[index];
-	processorRef.setMidiOutput(newOutput.identifier);
-	if (processorRef.getMidiOutput() == nullptr)
+	if(!processorRef.setMidiOutput(newOutput.identifier))
 	{
 		m_cmbMidiOutput.setSelectedItemIndex(0, juce::dontSendNotification);
+		m_lastOutputIndex = 0;
 		return;
 	}
+	m_properties->setValue("midi_output", newOutput.identifier);
+	m_properties->save();
 
 	m_cmbMidiOutput.setSelectedItemIndex(index+1, juce::dontSendNotification);
-
 	m_lastOutputIndex = index;
 }
 
