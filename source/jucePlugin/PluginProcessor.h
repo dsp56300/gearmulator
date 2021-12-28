@@ -1,13 +1,13 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
-
+#include <juce_audio_devices/juce_audio_devices.h>
 #include "../synthLib/plugin.h"
 #include "../virusLib/device.h"
 #include "VirusController.h"
 
 //==============================================================================
-class AudioPluginAudioProcessor  : public juce::AudioProcessor
+class AudioPluginAudioProcessor  : public juce::AudioProcessor, juce::MidiInputCallback
 {
 public:
     //==============================================================================
@@ -54,12 +54,18 @@ public:
 	bool isPluginValid() const { return m_plugin.isValid(); }
 	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 	void addMidiEvent(const synthLib::SMidiEvent& ev);
-
+	bool setMidiOutput(const juce::String& _out);
+	juce::MidiOutput* getMidiOutput() const;
+	bool setMidiInput(const juce::String& _in);
+	juce::MidiInput* getMidiInput() const;
+	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
+	
 	// _____________
 	//
 private:
     std::unique_ptr<Virus::Controller> m_controller;
-
+	std::unique_ptr<juce::MidiOutput> m_midiOutput;
+	std::unique_ptr<juce::MidiInput> m_midiInput;
     void setState(const void *_data, size_t _sizeInBytes);
 
     //==============================================================================

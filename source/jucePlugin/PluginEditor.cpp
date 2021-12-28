@@ -6,10 +6,17 @@
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode"),
-	m_btLoadFile("Load bank"),
-	m_tempEditor(p)
+	m_btLoadFile("Load bank"), m_cmbMidiInput("Midi Input"), m_cmbMidiOutput("Midi Output"),
+	deviceManager(), m_tempEditor(p)
 {
     ignoreUnused (processorRef);
+
+	juce::PropertiesFile::Options opts;
+	opts.applicationName = "DSP56300 Emulator";
+	opts.filenameSuffix = ".settings";
+	opts.folderName = "DSP56300 Emulator";
+	opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+	m_properties = new juce::PropertiesFile(opts);
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -31,11 +38,11 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
 	m_btSingleMode.setClickingTogglesState(true);
 	m_btMultiMode.setClickingTogglesState(true);
-	m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10, 0);
+	m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10, m_btSingleMode.getY());
 	m_btMultiMode.setSize(120,30);
 
 	addAndMakeVisible(m_btLoadFile);
-	m_btLoadFile.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + m_btMultiMode.getWidth() + 10, 0);
+	m_btLoadFile.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + m_btMultiMode.getWidth() + 10, m_btSingleMode.getY());
 	m_btLoadFile.setSize(120, 30);
 	m_btLoadFile.onClick = [this]() {
 			loadFile();
@@ -63,10 +70,120 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 		};
 		addAndMakeVisible(m_partSelectors[pt]);
 	}
+	
+	auto midiIn = m_properties->getValue("midi_input", "");
+	auto midiOut = m_properties->getValue("midi_output", "");
+	if (midiIn != "")
+	{
+		processorRef.setMidiInput(midiIn);
+	}
+	if (midiOut != "")
+	{
+		processorRef.setMidiOutput(midiOut);
+	}
+
+	m_cmbMidiInput.setSize(160, 30);
+	m_cmbMidiInput.setTopLeftPosition(0, 400);
+	m_cmbMidiOutput.setSize(160, 30);
+	m_cmbMidiOutput.setTopLeftPosition(164, 400);
+	addAndMakeVisible(m_cmbMidiInput);
+	addAndMakeVisible(m_cmbMidiOutput);
+	m_cmbMidiInput.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
+	auto midiInputs = juce::MidiInput::getAvailableDevices();
+	juce::StringArray midiInputNames;
+	midiInputNames.add(" - Midi In - ");
+	auto inIndex = 0;
+	for (int i = 0; i < midiInputs.size(); i++)
+	{
+		const auto input = midiInputs[i];
+		if (processorRef.getMidiInput() != nullptr && input.identifier == processorRef.getMidiInput()->getIdentifier())
+		{
+			inIndex = i + 1;
+		}
+		midiInputNames.add(input.name);
+	}
+	m_cmbMidiInput.addItemList(midiInputNames, 1);
+	m_cmbMidiInput.setSelectedItemIndex(inIndex, juce::dontSendNotification);
+	m_cmbMidiOutput.setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
+	auto midiOutputs = juce::MidiOutput::getAvailableDevices();
+	juce::StringArray midiOutputNames;
+	midiOutputNames.add(" - Midi Out - ");
+	auto outIndex = 0;
+	for (int i = 0; i < midiOutputs.size(); i++)
+	{
+		const auto output = midiOutputs[i];
+		if (processorRef.getMidiOutput() != nullptr && output.identifier == processorRef.getMidiOutput()->getIdentifier())
+		{
+			outIndex = i+1;
+		}
+		midiOutputNames.add(output.name);
+	}
+	m_cmbMidiOutput.addItemList(midiOutputNames, 1);
+	m_cmbMidiOutput.setSelectedItemIndex(outIndex, juce::dontSendNotification);
+	m_cmbMidiInput.onChange = [this]() { updateMidiInput(m_cmbMidiInput.getSelectedItemIndex()); };
+	m_cmbMidiOutput.onChange = [this]() { updateMidiOutput(m_cmbMidiOutput.getSelectedItemIndex()); };
 
 	addAndMakeVisible(m_tempEditor);
 
 	startTimerHz(5);
+}
+void AudioPluginAudioProcessorEditor::updateMidiInput(int index)
+{ 
+	auto list = juce::MidiInput::getAvailableDevices();
+
+	if (index == 0)
+	{
+		m_properties->setValue("midi_input", "");
+		m_properties->save();
+		m_lastInputIndex = index;
+		m_cmbMidiInput.setSelectedItemIndex(index, juce::dontSendNotification);
+		return;
+	}
+	index--;
+	auto newInput = list[index];
+
+	if (!deviceManager.isMidiInputDeviceEnabled(newInput.identifier))
+		deviceManager.setMidiInputDeviceEnabled(newInput.identifier, true);
+
+	if (!processorRef.setMidiInput(newInput.identifier))
+	{
+		m_cmbMidiInput.setSelectedItemIndex(0, juce::dontSendNotification);
+		m_lastInputIndex = 0;
+		return;
+	}
+
+	m_properties->setValue("midi_input", newInput.identifier);
+	m_properties->save();
+
+	m_cmbMidiInput.setSelectedItemIndex(index+1, juce::dontSendNotification);
+	m_lastInputIndex = index;
+}
+void AudioPluginAudioProcessorEditor::updateMidiOutput(int index)
+{
+	auto list = juce::MidiOutput::getAvailableDevices();
+
+	if (index == 0)
+	{
+		m_properties->setValue("midi_output", "");
+		m_properties->save();
+		m_cmbMidiOutput.setSelectedItemIndex(index, juce::dontSendNotification);
+		m_lastOutputIndex = index;
+		processorRef.setMidiOutput("");
+		return;
+	}
+	index--;
+	auto newOutput = list[index];
+	if(!processorRef.setMidiOutput(newOutput.identifier))
+	{
+		m_cmbMidiOutput.setSelectedItemIndex(0, juce::dontSendNotification);
+		m_lastOutputIndex = 0;
+		return;
+	}
+	m_properties->setValue("midi_output", newOutput.identifier);
+	m_properties->save();
+
+	m_cmbMidiOutput.setSelectedItemIndex(index+1, juce::dontSendNotification);
+	m_lastOutputIndex = index;
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()

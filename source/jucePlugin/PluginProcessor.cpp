@@ -1,21 +1,20 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_audio_devices/juce_audio_devices.h>
 #include "../synthLib/os.h"
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
     AudioProcessor(BusesProperties()
-                       .withInput("Input", juce::AudioChannelSet::stereo(), true)
-                       .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-    m_device(synthLib::findROM()), m_plugin(&m_device)
+                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
+	MidiInputCallback(), m_device(synthLib::findROM()), m_plugin(&m_device)
 {
-	auto &ctrl = getController(); // init controller
+	getController(); // init controller
 }
 
-AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
-{
-}
+AudioPluginAudioProcessor::~AudioPluginAudioProcessor() = default;
 
 //==============================================================================
 const juce::String AudioPluginAudioProcessor::getName() const
@@ -199,20 +198,35 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 	m_midiOut.clear();
 	m_plugin.getMidiOut(m_midiOut);
+
     if (!m_midiOut.empty())
-        m_controller->dispatchVirusOut(m_midiOut);
+	{
+		m_controller->dispatchVirusOut(m_midiOut);
+	}
 
-    for (size_t i = 0; i < m_midiOut.size(); ++i)
+    for (auto& e : m_midiOut)
     {
-        const auto& e = m_midiOut[i];
-
-		if (e.source == synthLib::MidiEventSourceEditor)
+	    if (e.source == synthLib::MidiEventSourceEditor)
 			continue;
 
-    	if(e.sysex.empty())
-			midiMessages.addEvent(juce::MidiMessage (e.a, e.b, e.c, 0.0), 0);
+    	if (e.sysex.empty())
+		{
+			const juce::MidiMessage message(e.a, e.b, e.c, 0.0);
+			midiMessages.addEvent(message, 0);
+
+			// additionally send to the midi output we've selected in the editor
+			if (m_midiOutput)
+				m_midiOutput->sendMessageNow(message);
+		}
 		else
-			midiMessages.addEvent(juce::MidiMessage (&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0), 0);
+		{
+			const juce::MidiMessage message(&e.sysex[0], e.sysex.size(), 0.0);
+			midiMessages.addEvent(message, 0);
+
+			// additionally send to the midi output we've selected in the editor
+			if (m_midiOutput)
+				m_midiOutput->sendMessageNow(message);
+		}
     }
 }
 
@@ -268,6 +282,99 @@ void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>
 void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
 {
 	m_plugin.addMidiEvent(ev);
+}
+
+juce::MidiOutput *AudioPluginAudioProcessor::getMidiOutput() const { return m_midiOutput.get(); }
+juce::MidiInput *AudioPluginAudioProcessor::getMidiInput() const { return m_midiInput.get(); }
+
+bool AudioPluginAudioProcessor::setMidiOutput(const juce::String& _out)
+{
+	if (m_midiOutput != nullptr && m_midiOutput->isBackgroundThreadRunning())
+	{
+		m_midiOutput->stopBackgroundThread();
+	}
+	m_midiOutput = juce::MidiOutput::openDevice(_out);
+	if (m_midiOutput != nullptr)
+	{
+		m_midiOutput->startBackgroundThread();
+		return true;
+	}
+	return false;
+}
+
+bool AudioPluginAudioProcessor::setMidiInput(const juce::String& _in)
+{
+	if (m_midiInput != nullptr)
+	{
+		m_midiInput->stop();
+	}
+	m_midiInput = juce::MidiInput::openDevice(_in, this);
+	if (m_midiInput != nullptr)
+	{
+		m_midiInput->start();
+		return true;
+	}
+	return false;
+}
+
+void AudioPluginAudioProcessor::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
+{
+	const auto* raw = message.getSysExData();
+	if (raw)
+	{
+		const auto count = message.getSysExDataSize();
+		auto syx = Virus::SysEx();
+		syx.push_back(0xf0);
+		for (int i = 0; i < count; i++)
+		{
+			syx.push_back(raw[i]);
+		}
+		syx.push_back(0xf7);
+		synthLib::SMidiEvent sm;
+		sm.source = synthLib::MidiEventSourcePlugin;
+		sm.sysex = syx;
+		getController().parseMessage(syx);
+
+		addMidiEvent(sm);
+
+		if (m_midiOutput)
+		{
+			std::vector<synthLib::SMidiEvent> data;
+			getLastMidiOut(data);
+			if (!data.empty())
+			{
+				const auto msg = juce::MidiMessage::createSysExMessage(data.data(), static_cast<int>(data.size()));
+
+				m_midiOutput->sendMessageNow(msg);
+			}
+		}
+	}
+	else
+	{
+		const auto count = message.getRawDataSize();
+		const auto* rawData = message.getRawData();
+		if (count >= 1 && count <= 3)
+		{
+			synthLib::SMidiEvent sm;
+			sm.source = synthLib::MidiEventSourcePlugin;
+			sm.a = rawData[0];
+			sm.b = count > 1 ? rawData[1] : 0;
+			sm.c = count > 2 ? rawData[2] : 0;
+			addMidiEvent(sm);
+		}
+		else
+		{
+			synthLib::SMidiEvent sm;
+			sm.source = synthLib::MidiEventSourcePlugin;
+			auto syx = Virus::SysEx();
+			for (int i = 0; i < count; i++)
+			{
+				syx.push_back(rawData[i]);
+			}
+			sm.sysex = syx;
+			addMidiEvent(sm);
+		}
+	}
 }
 
 Virus::Controller &AudioPluginAudioProcessor::getController()
