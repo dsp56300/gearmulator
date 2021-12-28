@@ -1514,7 +1514,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::GLOBAL, 121, "Panel Destination", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 122, "Play Mode", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 123, "Part Number", {0,127}, {},{}, false, true, false}, // 0..15;40
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 124, "Global Channel", {0,15}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 124, "Global Channel", {0,15}, {},{}, true, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 125, "Led Mode", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 126, "LCD Contrast", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 127, "Master Volume", {0,127}, {},{}, false, false, false},
