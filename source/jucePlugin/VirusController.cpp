@@ -228,8 +228,12 @@ namespace Virus
 			patch.push_back(preset.data[i]);
 		sendSysEx(constructMessage(patch));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		m_currentBank[part] = bank;
+		m_currentProgram[part] = prg;
 	}
 
+	uint8_t Controller::getCurrentPartBank(uint8_t part) { return m_currentBank[part]; }
+	uint8_t Controller::getCurrentPartProgram(uint8_t part) { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
         constexpr auto pageSize = 128;
@@ -1488,7 +1492,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::GLOBAL, 90, "Input Thru Level", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 91, "Input Boost", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 92, "Master Tune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 93, "Device ID", {0,16}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 93, "Device ID", {0,16}, {},{}, true, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 94, "Midi Control Low Page", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 95, "Midi Control High Page", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 96, "Midi Arpeggiator Send", {0,1}, {},{}, false, false, true},
