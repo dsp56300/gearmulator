@@ -39,7 +39,7 @@ namespace Virus
 			const auto partNumber = juce::String(pt + 1);
 			auto group =
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
-			for (auto desc : m_paramsDescription)
+			for (const auto& desc : m_paramsDescription)
 			{
 				ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
 				auto p = std::make_unique<Parameter>(*this, desc, pt);
