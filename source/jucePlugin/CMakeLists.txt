@@ -52,6 +52,8 @@ PRIVATE
 	VirusController.h
 	VirusParameter.cpp
 	VirusParameter.h
+	VirusParameterBinding.cpp
+	VirusParameterBinding.h
 	version.h
 )
 

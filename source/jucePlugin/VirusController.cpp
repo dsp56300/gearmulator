@@ -167,15 +167,20 @@ namespace Virus
 
     juce::Value* Controller::getParamValue(const ParameterType _param)
     {
+		auto res = getParameter(_param);
+		return res ? &res->getValueObject() : nullptr;
+    }
+
+    Parameter* Controller::getParameter(const ParameterType _param)
+    {
 		const auto it = m_paramTypeToParamIndex.find(_param);
 		if (it == m_paramTypeToParamIndex.end())
 			return nullptr;
 
 		const auto& index = it->second;
 
-		auto res = findSynthParam(index);
-		return res ? &res->getValueObject() : nullptr;
-    }
+		return findSynthParam(index);
+	}
 
     void Controller::parseParamChange(const SysEx &msg)
     {

@@ -1,12 +1,15 @@
 #include "Virus_OscEditor.h"
 #include "BinaryData.h"
 #include "Ui_Utils.h"
+#include "../VirusParameterBinding.h"
 
 using namespace juce;
 
 constexpr auto comboBoxWidth = 84;
 
-OscEditor::OscEditor()
+OscEditor::OscEditor(VirusParameterBinding& _parameterBinding)
+: m_oscOne(_parameterBinding, 0), m_oscTwo(_parameterBinding), m_oscThree(_parameterBinding)
+, m_unison(_parameterBinding), m_mixer(_parameterBinding), m_ringMod(_parameterBinding), m_sub(_parameterBinding), m_portamento(_parameterBinding), m_filters(_parameterBinding), m_filterEnv(_parameterBinding), m_ampEnv(_parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_osc_1018x620_png, BinaryData::bg_osc_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
@@ -42,7 +45,7 @@ void OscEditor::resized()
                         Buttons::SyncButton::kWidth, Buttons::SyncButton::kHeight);
 }
 
-OscEditor::OscOne::OscOne()
+OscEditor::OscOne::OscOne(VirusParameterBinding& _parameterBinding, uint32_t _oscIndex)
 {
     for (auto *s : {&m_shape, &m_pulseWidth, &m_semitone, &m_keyFollow})
         setupRotary(*this, *s);
@@ -53,9 +56,15 @@ OscEditor::OscOne::OscOne()
 
     addAndMakeVisible(m_waveSelect);
     m_waveSelect.setBounds (18, 42, comboBoxWidth, comboBoxHeight);
+
+	_parameterBinding.bind(m_semitone, _oscIndex == 0 ? Virus::Param_Osc1Semitone : Virus::Param_Osc2Semitone);
+	_parameterBinding.bind(m_shape, _oscIndex == 0 ? Virus::Param_Osc1Shape : Virus::Param_Osc2Shape);
+	_parameterBinding.bind(m_pulseWidth, _oscIndex == 0 ? Virus::Param_Osc1PW : Virus::Param_Osc2PW);
+	_parameterBinding.bind(m_keyFollow, _oscIndex == 0 ? Virus::Param_Osc1Keyfollow : Virus::Param_Osc2Keyfollow);
+//	_parameterBinding.bind(m_waveSelect, _oscIndex == 0 ? Virus::Param_Osc1Wave : Virus::Param_Osc2Wave);
 }
 
-OscEditor::OscTwo::OscTwo()
+OscEditor::OscTwo::OscTwo(VirusParameterBinding& _parameterBinding) : OscOne(_parameterBinding, 1)
 {
     for (auto *s : {&m_fmAmount, &m_detune, &m_envFm, &m_envOsc2})
         setupRotary(*this, *s);
@@ -67,7 +76,7 @@ OscEditor::OscTwo::OscTwo()
     m_fmMode.setBounds (18, 140, comboBoxWidth, comboBoxHeight);
 }
 
-OscEditor::OscThree::OscThree()
+OscEditor::OscThree::OscThree(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_semitone, &m_detune, &m_level})
         setupRotary(*this, *s);
@@ -79,7 +88,7 @@ OscEditor::OscThree::OscThree()
     m_oscThreeMode.setBounds (18, 43, comboBoxWidth, comboBoxHeight);
 }
 
-OscEditor::Unison::Unison()
+OscEditor::Unison::Unison(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_detune, &m_panSpread, &m_lfoPhase, &m_phaseInit})
         setupRotary(*this, *s);
@@ -91,7 +100,7 @@ OscEditor::Unison::Unison()
     m_unisonVoices.setBounds (18, 42, comboBoxWidth, comboBoxHeight);
 }
 
-OscEditor::Mixer::Mixer()
+OscEditor::Mixer::Mixer(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_oscBalance, &m_oscLevel})
         setupRotary(*this, *s);
@@ -100,7 +109,7 @@ OscEditor::Mixer::Mixer()
     m_oscLevel.setBounds(m_oscBalance.getBounds().translated(knobSize, 0));
 }
 
-OscEditor::RingMod::RingMod()
+OscEditor::RingMod::RingMod(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_noiseLevel, &m_ringModLevel, &m_noiseColor})
         setupRotary(*this, *s);
@@ -111,7 +120,7 @@ OscEditor::RingMod::RingMod()
     m_noiseColor.setBounds(m_noiseLevel.getBounds().translated(0, 95));
 }
 
-OscEditor::Sub::Sub()
+OscEditor::Sub::Sub(VirusParameterBinding& _parameterBinding)
 {
     setupRotary(*this, m_level);
     m_level.getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_RED);
@@ -120,13 +129,13 @@ OscEditor::Sub::Sub()
     addAndMakeVisible(m_subWaveform);
 }
 
-OscEditor::Portamento::Portamento()
+OscEditor::Portamento::Portamento(VirusParameterBinding& _parameterBinding)
 {
     setupRotary(*this, m_portamento);
     m_portamento.setBounds(12, 18, knobSize, knobSize);
 }
 
-OscEditor::Filters::Filters() : m_link1(true), m_link2(true)
+OscEditor::Filters::Filters(VirusParameterBinding& _parameterBinding) : m_filter{_parameterBinding,_parameterBinding}, m_link1(true), m_link2(true)
 {
     addAndMakeVisible(m_filter[0]);
     addAndMakeVisible(m_filter[1]);
@@ -155,7 +164,7 @@ OscEditor::Filters::Filters() : m_link1(true), m_link2(true)
     m_keyFollowBase.setBounds (m_filterMode[0].getBounds().translated (286, 0));
 }
 
-OscEditor::Filters::Filter::Filter()
+OscEditor::Filters::Filter::Filter(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_cutoff, &m_res, &m_envAmount, &m_keyTrack, &m_resVel, &m_envVel})
         setupRotary(*this, *s);
@@ -167,7 +176,7 @@ OscEditor::Filters::Filter::Filter()
     m_envVel.setBounds(m_resVel.getBounds().translated(knobSize - 5, 0));
 }
 
-OscEditor::Envelope::Envelope()
+OscEditor::Envelope::Envelope(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_attack, &m_decay, &m_sustain, &m_time, &m_release})
         setupRotary(*this, *s);

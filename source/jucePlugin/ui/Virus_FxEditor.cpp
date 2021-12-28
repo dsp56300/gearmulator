@@ -6,7 +6,7 @@ using namespace juce;
 
 constexpr auto comboBoxWidth = 84;
 
-FxEditor::FxEditor()
+FxEditor::FxEditor(VirusParameterBinding& _parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_fx_1018x620_png, BinaryData::bg_fx_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());

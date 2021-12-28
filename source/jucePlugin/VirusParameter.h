@@ -4,10 +4,9 @@
 
 namespace Virus
 {
-
     class Controller;
 
-	class Parameter : private juce::Value::Listener, public juce::RangedAudioParameter
+	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
 	{
     public:
         enum Class

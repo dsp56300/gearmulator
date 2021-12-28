@@ -6,7 +6,7 @@ constexpr auto comboBoxWidth = 84;
 
 using namespace juce;
 
-ArpEditor::ArpEditor()
+ArpEditor::ArpEditor(VirusParameterBinding& _parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_arp_1018x620_png, BinaryData::bg_arp_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());

@@ -396,6 +396,7 @@ namespace Virus
         // paramIndex - [0-127]
         juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
         juce::Value *getParamValue(ParameterType _param);
+        Parameter* getParameter(ParameterType _param);
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(int bank) const;

@@ -5,7 +5,7 @@
 using namespace juce;
 constexpr auto comboBoxWidth = 98;
 
-LfoEditor::LfoEditor()
+LfoEditor::LfoEditor(VirusParameterBinding& _parameterBinding) : m_lfoOne(_parameterBinding), m_lfoTwo(_parameterBinding), m_lfoThree(_parameterBinding), m_modMatrix(_parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_lfo_1018x620_png, BinaryData::bg_lfo_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
@@ -22,7 +22,7 @@ LfoEditor::LfoEditor()
     addAndMakeVisible(m_modMatrix);
 }
 
-LfoEditor::LfoBase::LfoBase()
+LfoEditor::LfoBase::LfoBase(VirusParameterBinding& _parameterBinding)
 {
     for (auto *s : {&m_rate, &m_keytrack, &m_amount})
         setupRotary(*this, *s);
@@ -36,7 +36,7 @@ LfoEditor::LfoBase::LfoBase()
     addAndMakeVisible(m_assignDest);
 }
 
-LfoEditor::LfoTwoOneShared::LfoTwoOneShared() : m_link(false)
+LfoEditor::LfoTwoOneShared::LfoTwoOneShared(VirusParameterBinding& _parameterBinding) : LfoBase(_parameterBinding), m_link(false)
 {
     for (auto *s : {&m_contour, &m_phase})
         setupRotary(*this, *s);
@@ -52,7 +52,7 @@ LfoEditor::LfoTwoOneShared::LfoTwoOneShared() : m_link(false)
     m_assignDest.setBounds(393, 122, comboBoxWidth, comboBoxHeight);
 }
 
-LfoEditor::LfoOne::LfoOne()
+LfoEditor::LfoOne::LfoOne(VirusParameterBinding& _parameterBinding) : LfoTwoOneShared(_parameterBinding)
 {
     for (auto *s : {&m_osc1Pitch, &m_osc2Pitch, &m_filterGain, &m_pw12, &m_reso12})
         setupRotary(*this, *s);
@@ -64,7 +64,7 @@ LfoEditor::LfoOne::LfoOne()
     addAndMakeVisible(m_link); // add last to allow clicking over knobs area...
 }
 
-LfoEditor::LfoTwo::LfoTwo()
+LfoEditor::LfoTwo::LfoTwo(VirusParameterBinding& _parameterBinding) : LfoTwoOneShared(_parameterBinding)
 {
     for (auto *s : {&m_f1cutoff, &m_f2cutoff, &m_panning, &m_shape12, &m_fmAmount})
         setupRotary(*this, *s);
@@ -76,7 +76,7 @@ LfoEditor::LfoTwo::LfoTwo()
     addAndMakeVisible(m_link); // add last to allow clicking over knobs area...
 }
 
-LfoEditor::LfoThree::LfoThree()
+LfoEditor::LfoThree::LfoThree(VirusParameterBinding& _parameterBinding) : LfoBase(_parameterBinding)
 {
     setupRotary(*this, m_fadeIn);
     m_rate.setBounds(107, 22, knobSize, knobSize);
@@ -86,7 +86,7 @@ LfoEditor::LfoThree::LfoThree()
     m_assignDest.setBounds(393, 45, comboBoxWidth, comboBoxHeight);
 }
 
-LfoEditor::ModMatrix::ModMatrix()
+LfoEditor::ModMatrix::ModMatrix(VirusParameterBinding& _parameterBinding)
 {
     constexpr auto kNumOfSlots = 6;
     for (auto s = 0; s < kNumOfSlots; s++)
