@@ -1,5 +1,6 @@
 #pragma once
 
+#include "VirusParameterBinding.h"
 #include "PluginProcessor.h"
 #include <juce_audio_devices/juce_audio_devices.h>
 //==============================================================================
@@ -23,7 +24,7 @@ private:
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
 	AudioPluginAudioProcessor& processorRef;
-
+	VirusParameterBinding m_parameterBinding;
 	juce::GenericAudioProcessorEditor m_tempEditor;
 	juce::TextButton m_partSelectors[16];
 	juce::TextButton m_prevPatch[16];

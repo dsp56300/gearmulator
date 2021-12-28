@@ -3,15 +3,17 @@
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
 
+class VirusParameterBinding;
+
 class LfoEditor : public juce::Component
 {
 public:
-    LfoEditor();
+    LfoEditor(VirusParameterBinding& _parameterBinding);
 
 private:
     struct LfoBase : juce::Component
     {
-        LfoBase();
+        LfoBase(VirusParameterBinding& _parameterBinding);
         juce::Slider m_rate;
         juce::Slider m_keytrack;
         juce::Slider m_amount;
@@ -22,7 +24,7 @@ private:
 
     struct LfoTwoOneShared : LfoBase
     {
-        LfoTwoOneShared();
+        LfoTwoOneShared(VirusParameterBinding& _parameterBinding);
         juce::Slider m_contour;
         juce::Slider m_phase;
         Buttons::LfoButton m_envMode;
@@ -31,7 +33,7 @@ private:
 
     struct LfoOne : LfoTwoOneShared
     {
-        LfoOne();
+        LfoOne(VirusParameterBinding& _parameterBinding);
         juce::Slider m_osc1Pitch;
         juce::Slider m_osc2Pitch;
         juce::Slider m_filterGain;
@@ -41,7 +43,7 @@ private:
 
     struct LfoTwo : LfoTwoOneShared
     {
-        LfoTwo();
+        LfoTwo(VirusParameterBinding& _parameterBinding);
         juce::Slider m_f1cutoff;
         juce::Slider m_f2cutoff;
         juce::Slider m_panning;
@@ -51,13 +53,13 @@ private:
 
     struct LfoThree : LfoBase
     {
-        LfoThree();
+        LfoThree(VirusParameterBinding& _parameterBinding);
         juce::Slider m_fadeIn;
     } m_lfoThree;
 
     struct ModMatrix : juce::Component
     {
-        ModMatrix();
+        ModMatrix(VirusParameterBinding& _parameterBinding);
         void setupSlot(int slot, std::initializer_list<juce::Point<int>> destsPos, juce::Point<int> sourcePos);
         struct MatrixSlot : juce::Component
         {

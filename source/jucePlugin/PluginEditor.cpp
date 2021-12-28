@@ -8,8 +8,9 @@
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode"),
+	m_parameterBinding(p),
 	m_btLoadFile("Load bank"), m_cmbMidiInput("Midi Input"), m_cmbMidiOutput("Midi Output"),
-	deviceManager(), m_tempEditor(p)
+	m_tempEditor(p)
 {
     ignoreUnused (processorRef);
 
@@ -157,7 +158,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 		m_virusEditor->setUsingNativeTitleBar(true);
 		m_virusEditor->setVisible(true);
 		m_virusEditor->setResizable(true, false);
-		m_virusEditor->setContentOwned(new VirusEditor(), true);
+		m_virusEditor->setContentOwned(new VirusEditor(m_parameterBinding), true);
 	};
 	addAndMakeVisible(m_openEditor);
 }

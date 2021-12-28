@@ -2,10 +2,12 @@
 
 #include "../PluginProcessor.h"
 
+class VirusParameterBinding;
+
 class ArpEditor : public juce::Component
 {
 public:
-    ArpEditor();
+    ArpEditor(VirusParameterBinding& _parameterBinding);
 
 private:
     struct VelocityAmount : juce::Component

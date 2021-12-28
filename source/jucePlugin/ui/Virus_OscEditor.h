@@ -3,16 +3,18 @@
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
 
+class VirusParameterBinding;
+
 class OscEditor : public juce::Component
 {
 public:
-    OscEditor();
+    OscEditor(VirusParameterBinding& _parameterBinding);
     void resized() override;
 
 private:
     struct OscOne : juce::Component
     {
-        OscOne();
+        OscOne(VirusParameterBinding& _parameterBinding, uint32_t _oscIndex);
         juce::Slider m_shape;
         juce::Slider m_pulseWidth;
         juce::Slider m_semitone;
@@ -22,14 +24,14 @@ private:
 
     struct OscTwo : OscOne
     {
-        OscTwo();
+        OscTwo(VirusParameterBinding& _parameterBinding);
         juce::Slider m_fmAmount, m_detune, m_envFm, m_envOsc2;
         juce::ComboBox m_fmMode;
     } m_oscTwo;
 
     struct OscThree : juce::Component
     {
-        OscThree();
+        OscThree(VirusParameterBinding& _parameterBinding);
         juce::Slider m_semitone;
         juce::Slider m_detune;
         juce::Slider m_level;
@@ -38,7 +40,7 @@ private:
 
     struct Unison : juce::Component
     {
-        Unison();
+        Unison(VirusParameterBinding& _parameterBinding);
         juce::Slider m_detune;
         juce::Slider m_panSpread;
         juce::Slider m_lfoPhase;
@@ -48,14 +50,14 @@ private:
 
     struct Mixer : juce::Component
     {
-        Mixer();
+        Mixer(VirusParameterBinding& _parameterBinding);
         juce::Slider m_oscBalance;
         juce::Slider m_oscLevel;
     } m_mixer;
 
     struct RingMod : juce::Component
     {
-        RingMod();
+        RingMod(VirusParameterBinding& _parameterBinding);
         juce::Slider m_noiseLevel;
         juce::Slider m_ringModLevel;
         juce::Slider m_noiseColor;
@@ -64,23 +66,23 @@ private:
 
     struct Sub : juce::Component
     {
-        Sub();
+        Sub(VirusParameterBinding& _parameterBinding);
         juce::Slider m_level;
         Buttons::HandleButton m_subWaveform;
     } m_sub;
 
     struct Portamento : juce::Component
     {
-        Portamento();
+        Portamento(VirusParameterBinding& _parameterBinding);
         juce::Slider m_portamento;
     } m_portamento;
 
     struct Filters : juce::Component
     {
-        Filters();
+        Filters(VirusParameterBinding& _parameterBinding);
         struct Filter : juce::Component
         {
-            Filter();
+            Filter(VirusParameterBinding& _parameterBinding);
             juce::Slider m_cutoff;
             juce::Slider m_res;
             juce::Slider m_envAmount;
@@ -97,7 +99,7 @@ private:
 
     struct Envelope : juce::Component
     {
-        Envelope();
+        Envelope(VirusParameterBinding& _parameterBinding);
         juce::Slider m_attack;
         juce::Slider m_decay;
         juce::Slider m_sustain;
@@ -107,11 +109,13 @@ private:
 
     struct FilterEnv : Envelope
     {
+		FilterEnv(VirusParameterBinding& _parameterBinding) : Envelope(_parameterBinding) {}
     } m_filterEnv;
 
     struct AmpEnv : Envelope
     {
-    } m_ampEnv;
+		AmpEnv(VirusParameterBinding& _parameterBinding) : Envelope(_parameterBinding) {}
+	} m_ampEnv;
 
     Buttons::SyncButton m_oscSync;
     std::unique_ptr<juce::Drawable> m_background;

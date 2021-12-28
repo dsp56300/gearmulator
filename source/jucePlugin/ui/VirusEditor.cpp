@@ -11,7 +11,7 @@ using namespace juce;
 constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
 
-VirusEditor::VirusEditor()
+VirusEditor::VirusEditor(VirusParameterBinding& _parameterBinding) : m_parameterBinding(_parameterBinding)
 {
     setLookAndFeel(&m_lookAndFeel);
 
@@ -21,10 +21,10 @@ VirusEditor::VirusEditor()
     addAndMakeVisible (*m_background);
     addAndMakeVisible (m_mainButtons);
 
-    m_arpEditor = std::make_unique<ArpEditor>();
-    m_fxEditor = std::make_unique<FxEditor>();
-    m_lfoEditor = std::make_unique<LfoEditor>();
-    m_oscEditor = std::make_unique<OscEditor>();
+    m_arpEditor = std::make_unique<ArpEditor>(_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding);
+    m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
+    m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
 
     applyToSections([this](Component *s) { addChildComponent(s); });
 

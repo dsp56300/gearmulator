@@ -4,6 +4,7 @@
 #include "Virus_Buttons.h"
 #include "Virus_LookAndFeel.h"
 
+class VirusParameterBinding;
 class OscEditor;
 class LfoEditor;
 class FxEditor;
@@ -12,8 +13,8 @@ class ArpEditor;
 class VirusEditor : public juce::Component
 {
 public:
-    VirusEditor();
-    ~VirusEditor();
+    VirusEditor(VirusParameterBinding& _parameterBinding);
+    ~VirusEditor() override;
     void resized() override;
 
 private:
@@ -39,6 +40,7 @@ private:
 
     void applyToSections(std::function<void(juce::Component *)>);
 
+	VirusParameterBinding& m_parameterBinding;
     std::unique_ptr<OscEditor> m_oscEditor;
     std::unique_ptr<LfoEditor> m_lfoEditor;
     std::unique_ptr<FxEditor> m_fxEditor;

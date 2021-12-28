@@ -3,10 +3,12 @@
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
 
+class VirusParameterBinding;
+
 class FxEditor : public juce::Component
 {
 public:
-    FxEditor();
+    FxEditor(VirusParameterBinding& _parameterBinding);
 
 private:
     struct Distortion : juce::Component
