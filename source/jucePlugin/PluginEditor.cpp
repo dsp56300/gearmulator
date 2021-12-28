@@ -130,6 +130,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	startTimerHz(5);
 
 	m_openEditor.setButtonText("Show Editor");
+	m_openEditor.setTopLeftPosition(0, 500);
 	m_openEditor.onClick = [this]()
 	{
 		m_virusEditor.reset(new juce::ResizableWindow("VirusEditor", true));
