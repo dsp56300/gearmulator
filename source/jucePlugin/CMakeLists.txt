@@ -30,7 +30,9 @@ juce_add_plugin(jucePlugin
 target_sources(jucePlugin 
 PRIVATE
     PluginEditor.cpp
+    PluginEditor.h
     PluginProcessor.cpp
+    PluginProcessor.h
     ui/Virus_Buttons.cpp
     ui/Virus_LookAndFeel.cpp
     ui/VirusEditor.cpp
@@ -38,8 +40,6 @@ PRIVATE
     ui/Virus_FxEditor.cpp
     ui/Virus_LfoEditor.cpp
     ui/Virus_OscEditor.cpp
-    PluginEditor.h
-    PluginProcessor.h
     ui/Virus_Buttons.h
     ui/Virus_LookAndFeel.h
     ui/VirusEditor.h
@@ -48,6 +48,10 @@ PRIVATE
     ui/Virus_LfoEditor.h
     ui/Virus_OscEditor.h
     ui/Ui_Utils.h
+	VirusController.cpp
+	VirusController.h
+	VirusParameter.cpp
+	VirusParameter.h
 	version.h
 )
 
