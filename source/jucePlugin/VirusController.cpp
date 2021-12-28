@@ -41,9 +41,17 @@ namespace Virus
 			const auto partNumber = juce::String(pt + 1);
 			auto group =
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
+
+			uint32_t parameterDescIndex = 0;
 			for (const auto& desc : m_paramsDescription)
 			{
-				ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
+				++parameterDescIndex;
+
+				const ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+
+				m_paramTypeToParamIndex.insert(std::make_pair(paramType, idx));
+
 				auto p = std::make_unique<Parameter>(*this, desc, pt);
 				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) ||
 					(desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
@@ -122,23 +130,32 @@ namespace Virus
         }
     }
 
-	Parameter *Controller::findSynthParam(const uint8_t ch, const uint8_t bank, const uint8_t paramIndex)
+	Parameter *Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
 	{
-		auto it = m_synthParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+		const ParamIndex paramIndex{ _page, _part, _paramIndex };
+
+		return findSynthParam(paramIndex);
+	}
+
+    Parameter* Controller::findSynthParam(const ParamIndex& _paramIndex)
+    {
+		const auto it = m_synthParams.find(_paramIndex);
+
 		if (it == m_synthParams.end())
 		{
-			auto iti = m_synthInternalParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+			const auto iti = m_synthInternalParams.find(_paramIndex);
+
 			if (iti == m_synthInternalParams.end())
 				return nullptr;
-			else
-				return iti->second.get();
+
+			return iti->second.get();
 		}
 		return it->second;
 	}
 
-	juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+    juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
-		auto *param = findSynthParam(ch, static_cast<uint8_t>(0x70 + bank), paramIndex);
+		auto *param = findSynthParam(ch, static_cast<uint8_t>(Parameter::Page::A + bank), paramIndex);
 		if (param == nullptr)
 		{
             // unregistered param?
@@ -148,7 +165,19 @@ namespace Virus
 		return &param->getValueObject();
 	}
 
-	void Controller::parseParamChange(const SysEx &msg)
+    juce::Value* Controller::getParamValue(const ParameterType _param)
+    {
+		const auto it = m_paramTypeToParamIndex.find(_param);
+		if (it == m_paramTypeToParamIndex.end())
+			return nullptr;
+
+		const auto& index = it->second;
+
+		auto res = findSynthParam(index);
+		return res ? &res->getValueObject() : nullptr;
+    }
+
+    void Controller::parseParamChange(const SysEx &msg)
     {
         const auto pos = kHeaderWithMsgCodeLen - 1;
         const auto value = msg[pos + 3];
