@@ -26,12 +26,12 @@ namespace Virus
         // ch - [0-15]
         // bank - [0-2] (ABC)
         // paramIndex - [0-127]
-        juce::Value *getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex);
+        juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(int bank) const;
         juce::StringArray getMultiPresetsName() const;
-		bool isMultiMode() { return getParam(0, 2, 0x7a)->getValue(); }
+		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
 		uint8_t getCurrentPartBank(uint8_t part);
