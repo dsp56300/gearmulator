@@ -68,7 +68,26 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 			}
 			selector.showMenu(juce::PopupMenu::Options());
 		};
+		m_partSelectors[pt].setSize(m_partSelectors[pt].getWidth() - 48, m_partSelectors[pt].getHeight());
+		m_partSelectors[pt].setTopLeftPosition(m_partSelectors[pt].getPosition() + juce::Point(24, 0));
 		addAndMakeVisible(m_partSelectors[pt]);
+
+		m_prevPatch[pt].setSize(24, m_partSelectors[pt].getHeight());
+		m_nextPatch[pt].setSize(24, m_partSelectors[pt].getHeight());
+		m_prevPatch[pt].setTopLeftPosition(m_partSelectors[pt].getPosition() - juce::Point(24, 0));
+		m_nextPatch[pt].setTopLeftPosition(m_partSelectors[pt].getPosition() + juce::Point(m_partSelectors[pt].getWidth(), 0));
+		m_prevPatch[pt].setButtonText("<");
+		m_nextPatch[pt].setButtonText(">");
+		m_prevPatch[pt].onClick = [this, pt]() {
+			processorRef.getController().setCurrentPartPreset(pt, processorRef.getController().getCurrentPartBank(pt),
+															  std::max(0, processorRef.getController().getCurrentPartProgram(pt) - 1));
+		};
+		m_nextPatch[pt].onClick = [this, pt]() {
+			processorRef.getController().setCurrentPartPreset(pt, processorRef.getController().getCurrentPartBank(pt),
+															  std::min(127, processorRef.getController().getCurrentPartProgram(pt) + 1));
+		};
+		addAndMakeVisible(m_prevPatch[pt]);
+		addAndMakeVisible(m_nextPatch[pt]);
 	}
 	
 	auto midiIn = m_properties->getValue("midi_input", "");
@@ -218,6 +237,8 @@ void AudioPluginAudioProcessorEditor::timerCallback()
 	{
 		bool singlePartOrInMulti = pt == 0 || multiMode;
 		m_partSelectors[pt].setVisible(singlePartOrInMulti);
+		m_prevPatch[pt].setVisible(singlePartOrInMulti);
+		m_nextPatch[pt].setVisible(singlePartOrInMulti);
 		if (singlePartOrInMulti)
 			m_partSelectors[pt].setButtonText(processorRef.getController().getCurrentPartPresetName(pt));
 	}
