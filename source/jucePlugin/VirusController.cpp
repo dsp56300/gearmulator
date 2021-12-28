@@ -134,7 +134,7 @@ namespace Virus
 		return it->second;
 	}
 
-	juce::Value *Controller::getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+	juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
 		auto *param = findSynthParam(ch, static_cast<uint8_t>(0x70 + bank), paramIndex);
 		if (param == nullptr)
@@ -209,7 +209,7 @@ namespace Virus
 		char text[kNameLength + 1];
 		text[kNameLength] = 0; // termination
 		for (auto pos = 0; pos < kNameLength; ++pos)
-			text[pos] = static_cast<int>(getParam(part, 1, asciiStart + pos)->getValue());
+			text[pos] = static_cast<int>(getParamValue(part, 1, asciiStart + pos)->getValue());
 		return juce::String(text);
 	}
 
