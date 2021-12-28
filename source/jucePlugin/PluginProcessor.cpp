@@ -194,10 +194,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	if(playHead)
 		playHead->getCurrentPosition(pos);
 
-	m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm), static_cast<float>(pos.ppqPosition), pos.isPlaying);
+    m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
+                     static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
-	m_midiOut.clear();
-	m_plugin.getMidiOut(m_midiOut);
+    m_midiOut.clear();
+    m_plugin.getMidiOut(m_midiOut);
 
     if (!m_midiOut.empty())
 	{
