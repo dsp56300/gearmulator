@@ -37,6 +37,7 @@ namespace Virus
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseMessage(const SysEx &);
+		void sendSysEx(const SysEx &);
 	private:
 		void timerCallback() override;
 
@@ -93,8 +94,8 @@ namespace Virus
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
         void parseParamChange(const SysEx &);
-		void parseControllerDump(synthLib::SMidiEvent &);
-		void sendSysEx(const SysEx &);
+        void parseControllerDump(synthLib::SMidiEvent &);
+
         std::vector<uint8_t> constructMessage(SysEx msg);
 
         AudioPluginAudioProcessor &m_processor;
