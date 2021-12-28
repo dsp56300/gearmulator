@@ -395,6 +395,7 @@ namespace Virus
         // bank - [0-2] (ABC)
         // paramIndex - [0-127]
         juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
+        juce::Value *getParamValue(ParameterType _param);
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(int bank) const;
@@ -450,11 +451,13 @@ namespace Virus
 
 		std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthInternalParams;
 		std::map<ParamIndex, Parameter *> m_synthParams; // exposed and managed by audio processor
+		std::map<ParameterType, ParamIndex> m_paramTypeToParamIndex;
 
 		void registerParams();
 		// tries to find synth param in both internal and host.
 		// @return found parameter or nullptr if none found.
-		Parameter *findSynthParam(uint8_t ch, uint8_t bank, uint8_t paramIndex);
+		Parameter *findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
+		Parameter* findSynthParam(const ParamIndex& _paramIndex);
 
 		// unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
