@@ -34,13 +34,14 @@ namespace Virus
 		bool isMultiMode() { return getParam(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
+		uint8_t getCurrentPartBank(uint8_t part);
+		uint8_t getCurrentPartProgram(uint8_t part);
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &);
 	private:
 		void timerCallback() override;
-
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
         struct MultiPatch
@@ -102,5 +103,7 @@ namespace Virus
         juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
+        uint8_t m_currentBank[16];
+        uint8_t m_currentProgram[16];
     };
 }; // namespace Virus

@@ -26,13 +26,15 @@ private:
 
 	juce::GenericAudioProcessorEditor m_tempEditor;
 	juce::TextButton m_partSelectors[16];
-
+	juce::TextButton m_prevPatch[16];
+	juce::TextButton m_nextPatch[16];
 	juce::TextButton m_btSingleMode;
 	juce::TextButton m_btMultiMode;
 	juce::TextButton m_btLoadFile;
 	juce::String m_previousPath;
 	juce::ComboBox m_cmbMidiInput;
 	juce::ComboBox m_cmbMidiOutput;
+
 	juce::AudioDeviceManager deviceManager;
 	juce::PropertiesFile *m_properties;
 	int m_lastInputIndex = 0;
