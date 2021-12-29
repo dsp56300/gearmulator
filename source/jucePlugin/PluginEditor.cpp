@@ -35,7 +35,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	addAndMakeVisible(m_btMultiMode);
 	m_btSingleMode.setTopLeftPosition(0,0);
 	m_btSingleMode.setSize(120,30);
-	m_btMultiMode.getToggleStateValue().referTo(*processorRef.getController().getParamValue(0, 2, 0x7a));
+	m_btMultiMode.getToggleStateValue().referTo(*processorRef.getController().getParamValue(Virus::Param_PlayMode));
 	const auto isMulti = processorRef.getController().isMultiMode();
 	m_btSingleMode.setToggleState(!isMulti, juce::dontSendNotification);
 	m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
