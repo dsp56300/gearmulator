@@ -89,7 +89,8 @@ private:
             juce::Slider m_keyTrack;
             juce::Slider m_resVel;
             juce::Slider m_envVel;
-        } m_filter[2];
+        };
+		std::array<Filter, 2> m_filter;
         juce::Slider m_filterBalance;
         Buttons::EnvPol m_envPol[2];
         Buttons::LinkButton m_link1, m_link2;
