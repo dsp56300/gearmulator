@@ -397,6 +397,8 @@ void AudioPluginAudioProcessor::setState(const void* _data, size_t _sizeInBytes)
 	state.resize(_sizeInBytes);
 	memcpy(&state[0], _data, _sizeInBytes);
 	m_plugin.setState(state);
+	if (m_controller)
+		m_controller->onStateLoaded();
 }
 
 //==============================================================================
