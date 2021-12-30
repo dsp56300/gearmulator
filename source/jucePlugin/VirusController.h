@@ -4,6 +4,11 @@
 #include "../synthLib/plugin.h"
 #include "VirusParameter.h"
 
+namespace virusLib
+{
+	enum class BankNumber : uint8_t;
+}
+
 class AudioPluginAudioProcessor;
 
 namespace Virus
@@ -399,18 +404,19 @@ namespace Virus
         Parameter* getParameter(ParameterType _param);
 
         // bank - 0-1 (AB)
-        juce::StringArray getSinglePresetNames(int bank) const;
+        juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         juce::StringArray getMultiPresetsName() const;
 		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
-		void setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg);
-		uint8_t getCurrentPartBank(uint8_t part);
+		void setCurrentPartPreset(uint8_t part, virusLib::BankNumber bank, uint8_t prg);
+        virusLib::BankNumber getCurrentPartBank(uint8_t part);
 		uint8_t getCurrentPartProgram(uint8_t part);
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &);
-	private:
+        void onStateLoaded();
+    private:
 		void timerCallback() override;
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
@@ -423,7 +429,7 @@ namespace Virus
 
         struct SinglePatch
         {
-            uint8_t bankNumber;
+	        virusLib::BankNumber bankNumber;
             uint8_t progNumber;
             uint8_t data[kDataSizeInBytes];
         };
@@ -475,7 +481,7 @@ namespace Virus
         juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
-        uint8_t m_currentBank[16];
+        virusLib::BankNumber m_currentBank[16];
         uint8_t m_currentProgram[16];
     };
 }; // namespace Virus

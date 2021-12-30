@@ -68,8 +68,8 @@ namespace Virus
 			{
 				// brute force but this should be O(1) of 128...
 				for (auto i = 0; i < 128; i++)
-					if (m_desc.valueToTextFunction(i, m_desc) == text)
-						return convertTo0to1(i);
+					if (m_desc.valueToTextFunction(static_cast<float>(i), m_desc) == text)
+						return convertTo0to1(static_cast<float>(i));
 			}
 			return convertTo0to1(text.getFloatValue());
 		}
