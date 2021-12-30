@@ -48,19 +48,20 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 			loadFile();
 	};
 
-	for (auto pt = 0; pt < 16; pt++)
+	for (uint8_t pt = 0; pt < 16; pt++)
 	{
 		m_partSelectors[pt].onClick = [this, pt]() {
 
 			juce::PopupMenu selector;
 
-			for(auto b=0; b<processorRef.getController().getBankCount(); ++b)
+			for(uint8_t b=0; b<processorRef.getController().getBankCount(); ++b)
 			{
-				auto bank = processorRef.getController().getSinglePresetNames(b);
+				const auto bank = virusLib::fromArrayIndex(b);
+				auto presetNames = processorRef.getController().getSinglePresetNames(bank);
 				juce::PopupMenu p;
-				for (auto i = 0; i < 128; i++)
+				for (uint8_t i = 0; i < 128; i++)
 				{
-					p.addItem(bank[i], [this, b, i, pt] { processorRef.getController().setCurrentPartPreset(pt, b, i); });
+					p.addItem(presetNames[i], [this, bank, i, pt] { processorRef.getController().setCurrentPartPreset(pt, bank, i); });
 				}
 				std::stringstream bankName;
 				bankName << "Bank " << static_cast<char>('A' + b);

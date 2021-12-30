@@ -51,7 +51,7 @@ void audioCallback(dsp56k::Audio* audio)
 		break;
 	case 64:
 		LOG("Sending Preset");
-		microcontroller->writeSingle(0, SINGLE, preset);
+		microcontroller->writeSingle(BankNumber::EditBuffer, SINGLE, preset);
 		break;
 	case 128:
 		LOG("Sending Note On");
