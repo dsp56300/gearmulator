@@ -196,7 +196,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 
 			if(singleMode)
 			{
-				if(getSingle(m_currentBank, _ev.b, single))
+				if(getSingle(fromArrayIndex(m_currentBank), _ev.b, single))
 				{
 					m_currentSingle = _ev.b;
 					return writeSingle(BankNumber::EditBuffer, SINGLE, single);
@@ -593,11 +593,17 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 	return preset;
 }
 
-bool Microcontroller::getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const
+bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const
 {
-	if(_bank >= m_singles.size())
+	if (_bank == BankNumber::EditBuffer)
 		return false;
-	const auto& s = m_singles[_bank];
+
+	const auto bank = toArrayIndex(_bank);
+	
+	if(bank >= m_singles.size())
+		return false;
+
+	const auto& s = m_singles[bank];
 	
 	if(_preset >= s.size())
 		return false;
@@ -645,7 +651,7 @@ bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset&
 	}
 
 	// Load from flash
-	return getSingle(toArrayIndex(_bank), _program, _data);
+	return getSingle(_bank, _program, _data);
 }
 
 bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data)
@@ -706,7 +712,7 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 {
 	TPreset single;
 
-	const auto bank = m_multiEditBuffer[MD_PART_BANK_NUMBER + _part];
+	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
 	if(getSingle(bank, _value, single))
 	{
