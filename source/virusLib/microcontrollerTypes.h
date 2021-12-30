@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 namespace virusLib
 {
 	enum SysexMessageType : uint8_t
@@ -158,4 +160,23 @@ namespace virusLib
 	};
 
 	static constexpr uint8_t OMNI_DEVICE_ID = 0x10;
+
+	enum class BankNumber : uint8_t
+	{
+		EditBuffer,
+		A,
+		B,
+		C,
+		D,
+		E,
+		F,
+		G,
+		H,
+		Count
+	};
+
+	uint8_t toMidiByte(BankNumber _bank);
+	BankNumber fromMidiByte(uint8_t _byte);
+	uint32_t toArrayIndex(BankNumber _bank);
+	BankNumber fromArrayIndex(uint8_t _bank);
 }

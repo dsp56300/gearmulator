@@ -51,19 +51,20 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 			loadFile();
 	};
 
-	for (auto pt = 0; pt < 16; pt++)
+	for (uint8_t pt = 0; pt < 16; pt++)
 	{
 		m_partSelectors[pt].onClick = [this, pt]() {
 
 			juce::PopupMenu selector;
 
-			for(auto b=0; b<processorRef.getController().getBankCount(); ++b)
+			for(uint8_t b=0; b<processorRef.getController().getBankCount(); ++b)
 			{
-				auto bank = processorRef.getController().getSinglePresetNames(b);
+				const auto bank = virusLib::fromArrayIndex(b);
+				auto presetNames = processorRef.getController().getSinglePresetNames(bank);
 				juce::PopupMenu p;
-				for (auto i = 0; i < 128; i++)
+				for (uint8_t i = 0; i < 128; i++)
 				{
-					p.addItem(bank[i], [this, b, i, pt] { processorRef.getController().setCurrentPartPreset(pt, b, i); });
+					p.addItem(presetNames[i], [this, bank, i, pt] { processorRef.getController().setCurrentPartPreset(pt, bank, i); });
 				}
 				std::stringstream bankName;
 				bankName << "Bank " << static_cast<char>('A' + b);
@@ -280,63 +281,70 @@ void AudioPluginAudioProcessorEditor::loadFile() {
 		m_previousPath.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : m_previousPath,
 							  "*.syx,*.mid,*.midi",
 							  true);
-	const bool result = chooser.browseForFileToOpen();
-	if (result)
-	{
-		const auto result = chooser.getResult();
-		m_previousPath = result.getParentDirectory().getFullPathName();
-		const auto ext = result.getFileExtension().toLowerCase();
-		if (ext == ".syx")
-		{
-			juce::MemoryBlock data;
-			result.loadFileAsData(data);
-			for (auto it = data.begin(); it != data.end(); it += 267)
-			{
-				if ((it + 267) < data.end())
-				{
-					processorRef.getController().parseMessage(Virus::SysEx(it, it + 267));
-				}
-			}
-			m_btLoadFile.setButtonText("Loaded");
-		}
-		else if (ext == ".mid" || ext == ".midi")
-		{
-			juce::MemoryBlock data;
-			if (!result.loadFileAsData(data))
-			{
-				return;
-			}
-			const uint8_t *ptr = (uint8_t *)data.getData();
-			const auto end = ptr + data.getSize();
 
-			for (auto it = ptr; it < end; it += 1)
+	if (!chooser.browseForFileToOpen())
+		return;
+	bool sentData = false;
+	const auto result = chooser.getResult();
+	m_previousPath = result.getParentDirectory().getFullPathName();
+	const auto ext = result.getFileExtension().toLowerCase();
+	if (ext == ".syx")
+	{
+		juce::MemoryBlock data;
+		result.loadFileAsData(data);
+		for (auto it = data.begin(); it != data.end(); it += 267)
+		{
+			if ((it + 267) < data.end())
 			{
-				if ((uint8_t)*it == (uint8_t)0xf0 && (it+267) < end)
-				{
-					if ((uint8_t) *(it + 1) == (uint8_t)0x00)
-					{
-						auto syx = Virus::SysEx(it, it + 267);
-						syx[7] = 0x01; // force to bank a
-						syx[266] = 0xf7;
-						processorRef.getController().parseMessage(syx);
-						
-						it += 266;
-					}
-					else // some midi files have two bytes after the 0xf0
-					{
-						auto syx = Virus::SysEx();
-						syx.push_back(0xf0);
-						for (auto i = it + 3; i < it + 3 + 266; i++)
-						{
-								syx.push_back((uint8_t)*i);
-						}
-						syx[7] = 0x01; // force to bank a
-						syx[266] = 0xf7;
-						processorRef.getController().parseMessage(syx);
-						it += 266;
-					}
-				}
+				processorRef.getController().sendSysEx(Virus::SysEx(it, it + 267));
+				sentData = true;
 			}
 		}
-	}	
+		m_btLoadFile.setButtonText("Loaded");
+	}
+	else if (ext == ".mid" || ext == ".midi")
+	{
+		juce::MemoryBlock data;
+		if (!result.loadFileAsData(data))
+		{
+			return;
+		}
+		const uint8_t *ptr = (uint8_t *)data.getData();
+		const auto end = ptr + data.getSize();
+
+		for (auto it = ptr; it < end; it += 1)
+		{
+			if ((uint8_t)*it == (uint8_t)0xf0 && (it+267) < end)
+			{
+				if ((uint8_t) *(it + 1) == (uint8_t)0x00)
+				{
+					auto syx = Virus::SysEx(it, it + 267);
+					syx[7] = 0x01; // force to bank a
+					syx[266] = 0xf7;
+
+					processorRef.getController().sendSysEx(syx);
+
+					it += 266;
+				}
+				else // some midi files have two bytes after the 0xf0
+				{
+					auto syx = Virus::SysEx();
+					syx.push_back(0xf0);
+					for (auto i = it + 3; i < it + 3 + 266; i++)
+					{
+						syx.push_back((uint8_t)*i);
+					}
+					syx[7] = 0x01; // force to bank a
+					syx[266] = 0xf7;
+					processorRef.getController().sendSysEx(syx);
+					it += 266;
+				}
+
+				sentData = true;
+			}
+		}
+	}
+
+	if (sentData)
+		processorRef.getController().onStateLoaded();
 }

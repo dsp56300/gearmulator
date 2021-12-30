@@ -25,10 +25,10 @@ public:
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
-	bool writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data);
-	bool writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data);
-	bool requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const;
-	bool requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const;
+	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
+	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
+	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const;
+	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const;
 
 	void sendInitControlCommands();
 
@@ -51,7 +51,7 @@ private:
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
 	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
-	bool getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const;
+	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
 
 	bool partBankSelect(uint8_t _part, uint8_t _value, bool _immediatelySelectSingle);
 	bool partProgramChange(uint8_t _part, uint8_t _value);
