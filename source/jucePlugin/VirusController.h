@@ -45,7 +45,8 @@ namespace Virus
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &);
-	private:
+        void onStateLoaded();
+    private:
 		void timerCallback() override;
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 

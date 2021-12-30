@@ -1658,6 +1658,11 @@ namespace Virus
         m_processor.addMidiEvent(ev);
     }
 
+    void Controller::onStateLoaded()
+    {
+		sendSysEx(constructMessage({ MessageType::REQUEST_TOTAL }));
+	}
+
     std::vector<uint8_t> Controller::constructMessage(SysEx msg)
     {
         const uint8_t start[] = {0xf0, 0x00, 0x20, 0x33, 0x01, static_cast<uint8_t>(m_deviceId)};
