@@ -2,10 +2,9 @@
 #include "VirusController.h"
 #include "PluginProcessor.h"
 
-// TODO: all sysex structs can be refactored to common instead of including this!
-#include "../virusLib/microcontroller.h"
+#include "../virusLib/microcontrollerTypes.h"
 
-using MessageType = virusLib::Microcontroller::SysexMessageType;
+using MessageType = virusLib::SysexMessageType;
 
 namespace Virus
 {
