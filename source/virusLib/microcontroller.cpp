@@ -10,7 +10,7 @@
 using namespace dsp56k;
 using namespace synthLib;
 
-constexpr virusLib::Microcontroller::PlayMode g_defaultPlayMode = virusLib::Microcontroller::PlayModeSingle;
+constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
