@@ -2,10 +2,9 @@
 #include "VirusController.h"
 #include "PluginProcessor.h"
 
-// TODO: all sysex structs can be refactored to common instead of including this!
-#include "../virusLib/microcontroller.h"
+#include "../virusLib/microcontrollerTypes.h"
 
-using MessageType = virusLib::Microcontroller::SysexMessageType;
+using MessageType = virusLib::SysexMessageType;
 
 namespace Virus
 {
@@ -181,8 +180,16 @@ namespace Virus
          */
     }
 
-    juce::StringArray Controller::getSinglePresetNames(int bank) const
+    juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
+		if (_bank == virusLib::BankNumber::EditBuffer)
+		{
+			jassertfalse;
+			return {};
+		}
+
+		const auto bank = virusLib::toArrayIndex(_bank);
+
         if (bank >= m_singles.size() || bank < 0)
         {
             jassertfalse;
@@ -213,9 +220,17 @@ namespace Virus
 		return juce::String(text);
 	}
 
-	void Controller::setCurrentPartPreset(uint8_t part, uint8_t bank, uint8_t prg)
+	void Controller::setCurrentPartPreset(uint8_t part, virusLib::BankNumber _bank, uint8_t prg)
 	{
-		if (bank < 0 || bank >= m_singles.size() || prg < 0 || prg > 127)
+    	if(_bank == virusLib::BankNumber::EditBuffer || prg < 0 || prg > 127)
+    	{
+			jassertfalse;
+			return;
+    	}
+
+    	const auto bank = virusLib::toArrayIndex(_bank);
+
+		if (bank >= m_singles.size())
 		{
 			jassertfalse;
 			return;
@@ -228,8 +243,12 @@ namespace Virus
 			patch.push_back(preset.data[i]);
 		sendSysEx(constructMessage(patch));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		m_currentBank[part] = _bank;
+		m_currentProgram[part] = prg;
 	}
 
+	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) { return m_currentBank[part]; }
+	uint8_t Controller::getCurrentPartProgram(uint8_t part) { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
         constexpr auto pageSize = 128;
@@ -240,7 +259,7 @@ namespace Virus
         assert(hasChecksum || dataSize == expectedDataSize);
 
         SinglePatch patch;
-        patch.bankNumber = msg[kHeaderWithMsgCodeLen];
+        patch.bankNumber = virusLib::fromMidiByte(msg[kHeaderWithMsgCodeLen]);
         patch.progNumber = msg[kHeaderWithMsgCodeLen + 1];
         [[maybe_unused]] const auto dataSum = copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
 
@@ -248,16 +267,15 @@ namespace Virus
         {
             const auto checksum = msg[msg.size() - 2];
             const auto deviceId = msg[5];
-            [[maybe_unused]] const auto expectedSum =
-                (deviceId + 0x10 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
+            [[maybe_unused]] const auto expectedSum = (deviceId + 0x10 + virusLib::toMidiByte(patch.bankNumber) + patch.progNumber + dataSum) & 0x7f;
             assert(expectedSum == checksum);
         }
-		if (patch.bankNumber == 0)
+		if (patch.bankNumber == virusLib::BankNumber::EditBuffer)
 		{
 			// virus sends also the single buffer not matter what's the mode.
 			// instead of keeping both, we 'encapsulate' this into first channel.
 			// the logic to maintain this is done by listening the global single/multi param.
-			if (isMultiMode() && patch.progNumber == 0x40)
+			if (isMultiMode() && patch.progNumber == virusLib::SINGLE)
 				return;
 			else if (!isMultiMode() && patch.progNumber == 0x0)
 				return;
@@ -271,7 +289,7 @@ namespace Virus
 			}
 		}
 		else
-			m_singles[patch.bankNumber - 1][patch.progNumber] = patch;
+			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
 
         const auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
@@ -1488,7 +1506,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::GLOBAL, 90, "Input Thru Level", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 91, "Input Boost", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 92, "Master Tune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 93, "Device ID", {0,16}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 93, "Device ID", {0,16}, {},{}, true, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 94, "Midi Control Low Page", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 95, "Midi Control High Page", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 96, "Midi Arpeggiator Send", {0,1}, {},{}, false, false, true},
@@ -1510,7 +1528,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::GLOBAL, 121, "Panel Destination", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 122, "Play Mode", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 123, "Part Number", {0,127}, {},{}, false, true, false}, // 0..15;40
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 124, "Global Channel", {0,15}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 124, "Global Channel", {0,15}, {},{}, true, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 125, "Led Mode", {0,2}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 126, "LCD Contrast", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 127, "Master Volume", {0,127}, {},{}, false, false, false},
@@ -1639,6 +1657,11 @@ namespace Virus
 		ev.source = synthLib::MidiEventSourceEditor;
         m_processor.addMidiEvent(ev);
     }
+
+    void Controller::onStateLoaded()
+    {
+		sendSysEx(constructMessage({ MessageType::REQUEST_TOTAL }));
+	}
 
     std::vector<uint8_t> Controller::constructMessage(SysEx msg)
     {
