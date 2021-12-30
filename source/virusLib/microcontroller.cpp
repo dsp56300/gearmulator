@@ -10,7 +10,7 @@
 using namespace dsp56k;
 using namespace synthLib;
 
-constexpr virusLib::Microcontroller::PlayMode g_defaultPlayMode = virusLib::Microcontroller::PlayModeSingle;
+constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
@@ -104,7 +104,7 @@ void Microcontroller::createDefaultState()
 	sendControlCommand(PLAY_MODE, g_defaultPlayMode);
 
 	if constexpr (g_defaultPlayMode == PlayModeSingle)
-		writeSingle(0, SINGLE, m_singleEditBuffer);
+		writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
 	else
 		loadMulti(0, m_multiEditBuffer);
 }
@@ -204,10 +204,10 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 
 			if(singleMode)
 			{
-				if(getSingle(m_currentBank, _ev.b, single))
+				if(getSingle(fromArrayIndex(m_currentBank), _ev.b, single))
 				{
 					m_currentSingle = _ev.b;
-					return writeSingle(0, SINGLE, single);
+					return writeSingle(BankNumber::EditBuffer, SINGLE, single);
 				}
 			}
 			else
@@ -270,7 +270,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(deviceId);
 	};
 
-	auto buildPresetResponse = [&](const uint8_t _type, const uint8_t _bank, const uint8_t _program, const TPreset& _dump)
+	auto buildPresetResponse = [&](const uint8_t _type, const BankNumber _bank, const uint8_t _program, const TPreset& _dump)
 	{
 		SMidiEvent ev;
 		ev.source = _source;
@@ -280,7 +280,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		buildResponseHeader(ev);
 
 		response.push_back(_type);
-		response.push_back(_bank);
+		response.push_back(toMidiByte(_bank));
 		response.push_back(_program);
 
 		for(const auto value : _dump)
@@ -301,7 +301,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		_responses.emplace_back(std::move(ev));
 	};
 
-	auto buildSingleResponse = [&](const uint8_t _bank, const uint8_t _program)
+	auto buildSingleResponse = [&](const BankNumber _bank, const uint8_t _program)
 	{
 		TPreset dump;
 		const auto res = requestSingle(_bank, _program, dump);
@@ -309,7 +309,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			buildPresetResponse(DUMP_SINGLE, _bank, _program, dump);
 	};
 
-	auto buildMultiResponse = [&](const uint8_t _bank, const uint8_t _program)
+	auto buildMultiResponse = [&](const BankNumber _bank, const uint8_t _program)
 	{
 		TPreset dump;
 		const auto res = requestMulti(_bank, _program, dump);
@@ -317,12 +317,17 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			buildPresetResponse(DUMP_MULTI, _bank, _program, dump);
 	};
 
-	auto buildSingleBankResponse = [&](const uint8_t _bank)
+	auto buildSingleBankResponse = [&](const BankNumber _bank)
 	{
-		if(_bank > 0 && _bank <= m_singles.size())
+		if (_bank == BankNumber::EditBuffer)
+			return;
+
+		const auto bankIndex = toArrayIndex(_bank);
+
+		if(bankIndex < m_singles.size())
 		{
 			// eat this, host, whoever you are. 128 single packets
-			for(uint8_t i=0; i<m_singles[_bank-1].size(); ++i)
+			for(uint8_t i=0; i<m_singles[bankIndex].size(); ++i)
 			{
 				TPreset data;
 				const auto res = requestSingle(_bank, i, data);
@@ -331,9 +336,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		}		
 	};
 
-	auto buildMultiBankResponse = [&](const uint8_t _bank)
+	auto buildMultiBankResponse = [&](const BankNumber _bank)
 	{
-		if(_bank == 1)
+		if(_bank == BankNumber::A)
 		{
 			// eat this, host, whoever you are. 128 multi packets
 			for(uint8_t i=0; i<g_presetsPerBank; ++i)
@@ -371,9 +376,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	auto buildTotalResponse = [&]()
 	{
 		buildGlobalResponses();
-		buildSingleBankResponse(1);
-		buildSingleBankResponse(2);
-		buildMultiBankResponse(1);
+		buildSingleBankResponse(BankNumber::A);
+		buildSingleBankResponse(BankNumber::B);
+		buildMultiBankResponse(BankNumber::A);
 	};
 
 	auto buildArrangementResponse = [&]()
@@ -383,22 +388,22 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		const bool isMultiMode = m_globalSettings[PLAY_MODE] == PlayModeMulti;
 
 		if(isMultiMode)
-			buildSingleResponse(0, SINGLE);
+			buildSingleResponse(BankNumber::EditBuffer, SINGLE);
 
-		buildMultiResponse(0, 0);
+		buildMultiResponse(BankNumber::EditBuffer, 0);
 
 		for(uint8_t p=0; p<16; ++p)
-			buildPresetResponse(DUMP_SINGLE, 0, p, m_singleEditBuffers[p]);
+			buildPresetResponse(DUMP_SINGLE, BankNumber::EditBuffer, p, m_singleEditBuffers[p]);
 
 		if(!isMultiMode)
-			buildSingleResponse(0, SINGLE);
+			buildSingleResponse(BankNumber::EditBuffer, SINGLE);
 	};
 
 	auto buildControllerDumpResponse = [&](uint8_t _part)
 	{
 		TPreset _dump, _multi;
-		const auto res = requestSingle(0, _part, _dump);
-		const auto resm = requestMulti(0, 0, _multi);
+		const auto res = requestSingle(BankNumber::EditBuffer, _part, _dump);
+		const auto resm = requestMulti(BankNumber::EditBuffer, 0, _multi);
 		const uint8_t channel = _part == SINGLE ? m_globalSettings[GLOBAL_CHANNEL] : _multi[static_cast<size_t>(MD_PART_MIDI_CHANNEL) + _part];
 		for (const auto cc : g_pageA)
 		{
@@ -425,33 +430,33 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 	{
 		case DUMP_SINGLE: 
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
-				LOG("Received Single dump, Bank " << (int)bank << ", program " << (int)program);
+				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 				return writeSingle(bank, program, dump);
 			}
 		case DUMP_MULTI:
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
-				LOG("Received Multi dump, Bank " << (int)bank << ", program " << (int)program);
+				LOG("Received Multi dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset dump;
 				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
 				return writeMulti(bank, program, dump);
 			}
 		case REQUEST_SINGLE:
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
-				LOG("Request Single, Bank " << (int)bank << ", program " << (int)program);
+				LOG("Request Single, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				buildSingleResponse(bank, program);
 				break;
 			}
 		case REQUEST_MULTI:
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
 				LOG("Request Multi, Bank " << (int)bank << ", program " << (int)program);
 				buildMultiResponse(bank, program);
@@ -459,19 +464,19 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 			}
 		case REQUEST_BANK_SINGLE:
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				buildSingleBankResponse(bank);
 				break;
 			}
 		case REQUEST_BANK_MULTI:
 			{
-				const uint8_t bank = _data[7];
+				const auto bank = fromMidiByte(_data[7]);
 				buildMultiBankResponse(bank);
 				break;
 			}
 		case REQUEST_CONTROLLER_DUMP:
 			{
-				const uint8_t part = _data[8];
+				const auto part = _data[8];
 				if (part < 16 || part == SINGLE)
 					buildControllerDumpResponse(part);
 				break;
@@ -514,15 +519,15 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 									m_globalSettings[PLAY_MODE] = playMode;
 
 									LOG("Switch to Single mode");
-									return writeSingle(0, SINGLE, m_singleEditBuffer);
+									return writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
 								}
 							case PlayModeMultiSingle:
 							case PlayModeMulti:
 								{
 									m_globalSettings[PLAY_MODE] = PlayModeMulti;
-									writeMulti(0, 0, m_multiEditBuffer);
+									writeMulti(BankNumber::EditBuffer, 0, m_multiEditBuffer);
 									for(uint8_t i=0; i<16; ++i)
-										writeSingle(0, i, m_singleEditBuffers[i]);
+										writeSingle(BankNumber::EditBuffer, i, m_singleEditBuffers[i]);
 									return true;
 								}
 							default:
@@ -596,11 +601,17 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 	return preset;
 }
 
-bool Microcontroller::getSingle(uint32_t _bank, uint32_t _preset, TPreset& _result) const
+bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const
 {
-	if(_bank >= m_singles.size())
+	if (_bank == BankNumber::EditBuffer)
 		return false;
-	const auto& s = m_singles[_bank];
+
+	const auto bank = toArrayIndex(_bank);
+	
+	if(bank >= m_singles.size())
+		return false;
+
+	const auto& s = m_singles[bank];
 	
 	if(_preset >= s.size())
 		return false;
@@ -618,25 +629,25 @@ void Microcontroller::waitUntilReady() const
 	}
 }
 
-bool Microcontroller::requestMulti(uint8_t _bank, uint8_t _program, TPreset& _data) const
+bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const
 {
-	if (_bank == 0)
+	if (_bank == BankNumber::EditBuffer)
 	{
 		// Use multi-edit buffer
 		_data = m_multiEditBuffer;
 		return true;
 	}
 
-	if (_bank != 1)
+	if (_bank != BankNumber::A)
 		return false;
 
 	// Load from flash
 	return m_rom.getMulti(_program, _data);
 }
 
-bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _data) const
+bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const
 {
-	if (_bank == 0)
+	if (_bank == BankNumber::EditBuffer)
 	{
 		// Use single-edit buffer
 		if(_program == SINGLE)
@@ -648,20 +659,22 @@ bool Microcontroller::requestSingle(uint8_t _bank, uint8_t _program, TPreset& _d
 	}
 
 	// Load from flash
-	return getSingle(_bank - 1, _program, _data);
+	return getSingle(_bank, _program, _data);
 }
 
-bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset& _data)
+bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
-	if (_bank > 0) 
+	if (_bank != BankNumber::EditBuffer) 
 	{
-		if(_bank >= m_singles.size() || _bank >= g_singleRamBankCount)
+		const auto bank = toArrayIndex(_bank);
+
+		if(bank >= m_singles.size() || bank >= g_singleRamBankCount)
 			return true;	// out of range
 
-		if(_program >= m_singles[_bank].size())
+		if(_program >= m_singles[bank].size())
 			return true;	// out of range
 
-		m_singles[_bank][_program] = _data;
+		m_singles[bank][_program] = _data;
 
 		return true;
 	}
@@ -677,11 +690,11 @@ bool Microcontroller::writeSingle(uint8_t _bank, uint8_t _program, const TPreset
 	return sendPreset(_program, presetToDSPWords(_data), false);
 }
 
-bool Microcontroller::writeMulti(uint8_t _bank, uint8_t _program, const TPreset& _data)
+bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
-	if (_bank != 0) 
+	if (_bank != BankNumber::EditBuffer) 
 	{
-		LOG("We do not support writing to flash, attempt to write multi to bank " << _bank << ", program " << _program);
+		LOG("We do not support writing to RAM or ROM, attempt to write multi to bank " << static_cast<int>(toMidiByte(_bank)) << ", program " << static_cast<int>(_program));
 		return true;
 	}
 
@@ -707,12 +720,12 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 {
 	TPreset single;
 
-	const auto bank = m_multiEditBuffer[MD_PART_BANK_NUMBER + _part];
+	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
 	if(getSingle(bank, _value, single))
 	{
 		m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part] = _value;
-		return writeSingle(0, _part, single);
+		return writeSingle(BankNumber::EditBuffer, _part, single);
 	}
 
 	return true;
@@ -730,7 +743,7 @@ bool Microcontroller::multiProgramChange(uint8_t _value)
 
 bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
 {
-	if(!writeMulti(0, _program, _multi))
+	if(!writeMulti(BankNumber::EditBuffer, _program, _multi))
 		return false;
 
 	for (uint8_t p = 0; p < 16; ++p)
