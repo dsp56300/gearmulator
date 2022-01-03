@@ -1,5 +1,19 @@
 Release Notes 
 
+1.2.1 (2022.01.03):
+
+- [Change] Switch default play mode to Single
+- [Imp] Add ability to load a sound bank via Midi/Sysex (thx to @balls)
+- [Imp] Added native Midi ports support to allow to make it easier to use external editors for the emulator (thx to @balls)
+- [Imp] Add ability to resize temporary UI (thx to @lol_catz)
+- [Imp] Oscillator 3 Mode is now a dropdown menu instead of a Slider (thx to @lol_catz)
+
+- [Fix] Fix presets sent via Sysex to Bank A were stored in Bank B
+- [Fix] Fix parameter changes not remembered in single mode if sent for part 0
+- [Fix] Fix master tune being off after reloading a project
+- [Fix] Added missing distortion curves (thx to @balls)
+- [Fix] Various parameter range or naming issues (thx to @lol_catz)
+
 1.2.0 (2021.09.23):
 
 - [Imp] A temporary GUI has been added that allows to: modify parameters without needing external editors and allows to switch presets 
