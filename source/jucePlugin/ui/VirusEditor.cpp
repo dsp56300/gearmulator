@@ -5,6 +5,7 @@
 #include "Virus_FxEditor.h"
 #include "Virus_LfoEditor.h"
 #include "Virus_OscEditor.h"
+#include "../VirusParameterBinding.h"
 
 using namespace juce;
 
@@ -35,9 +36,20 @@ VirusEditor::VirusEditor(VirusParameterBinding& _parameterBinding) : m_parameter
         m_lfoEditor->setVisible(m_mainButtons.m_lfoMatrix.getToggleState());
         m_oscEditor->setVisible(m_mainButtons.m_oscFilter.getToggleState());
     };
-
+	m_oscEditor->setVisible(true);
+	m_mainButtons.m_oscFilter.setToggleState(true, NotificationType::dontSendNotification);
     addAndMakeVisible(m_presetButtons);
-
+	for (auto i = 0; i < 16; i++)
+	{
+		m_partSelect[i].setBounds(34, 161 + i*(36), 39, 36);
+		m_partSelect[i].setButtonText(juce::String(i));
+		m_partSelect[i].setRadioGroupId(kPartGroupId);
+		m_partSelect[i].setClickingTogglesState(true);
+		m_partSelect[i].onClick = [this, i]() {
+			this->changePart(i);
+		};
+		addAndMakeVisible(m_partSelect[i]);
+	}
     setSize (kPanelWidth, kPanelHeight);
 }
 
@@ -60,6 +72,28 @@ void VirusEditor::resized()
     m_presetButtons.setBounds(statusArea.removeFromRight(188));
     applyToSections([this](Component *s) { s->setTopLeftPosition(338, 133); });
 }
+void VirusEditor::changePart(uint8_t _part) {
+
+    m_parameterBinding.m_part = _part;
+	removeChildComponent(m_oscEditor.get());
+    m_oscEditor	= std::make_unique<OscEditor>(m_parameterBinding);
+	addChildComponent(m_oscEditor.get());
+
+	removeChildComponent(m_lfoEditor.get());
+	m_lfoEditor = std::make_unique<LfoEditor>(m_parameterBinding);
+	addChildComponent(m_lfoEditor.get());
+
+    removeChildComponent(m_fxEditor.get());
+	m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding);
+	addChildComponent(m_fxEditor.get());
+
+    removeChildComponent(m_arpEditor.get());
+	m_arpEditor = std::make_unique<ArpEditor>(m_parameterBinding);
+	addChildComponent(m_arpEditor.get());
+
+	m_mainButtons.updateSection();
+	resized();
+}
 
 VirusEditor::MainButtons::MainButtons()
 : m_oscFilter ("OSC|FILTER", DrawableButton::ImageRaw)
@@ -74,6 +108,7 @@ VirusEditor::MainButtons::MainButtons()
     setupButton (3, Drawable::createFromImageData (BinaryData::GLOBAL_btn_arp_settings_141x26_png, BinaryData::GLOBAL_btn_arp_settings_141x26_pngSize), m_arpSettings);
     setSize ((kButtonWidth + kMargin) * numOfMainButtons, kButtonHeight);
 }
+
 
 void VirusEditor::MainButtons::valueChanged(juce::Value &) { updateSection(); }
 
@@ -98,4 +133,16 @@ VirusEditor::PresetButtons::PresetButtons()
     m_save.setBounds(28, y, w, Buttons::PresetButton::kHeight);
     m_load.setBounds(36 + w, y, w, Buttons::PresetButton::kHeight);
     m_presets.setBounds(43 + w * 2, y, w, Buttons::PresetButton::kHeight);
+}
+
+
+
+VirusEditor::PartButtons::PartButtons()
+{
+	/* for (auto i = 0; i < 16; i++)
+	{
+		m_partSelect[i].setButtonText(juce::String(i));
+		/m_partSelect[i].onClick = [this, i]() { changePart(i); };
+		addAndMakeVisible(m_partSelect[i]);
+	}*/
 }

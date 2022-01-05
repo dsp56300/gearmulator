@@ -181,6 +181,18 @@ namespace Virus
 		return findSynthParam(index);
 	}
 
+	Parameter *Controller::getParameter(const ParameterType _param, const uint8_t _part)
+	{
+		const auto it = m_paramTypeToParamIndex.find(_param);
+		if (it == m_paramTypeToParamIndex.end())
+			return nullptr;
+
+		const auto &index = it->second;
+		
+		ParamIndex paramIndex{index.page, _part, index.paramNum};
+		return findSynthParam(paramIndex);
+	}
+
     void Controller::parseParamChange(const SysEx &msg)
     {
         const auto pos = kHeaderWithMsgCodeLen - 1;
@@ -506,6 +518,19 @@ namespace Virus
 		case 5:  return "Analog 2P";
 		case 6:  return "Analog 3P";
 		case 7:  return "Analog 4P";
+		default: return juce::String(idx);
+		}
+	}
+
+	juce::String numToFilter2Mode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "LowPass";
+		case 1:  return "HighPass";
+		case 2:  return "BandPass";
+		case 3:  return "BandStop";
 		default: return juce::String(idx);
 		}
 	}
@@ -1343,7 +1368,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,14}, numToSatCurv, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,7}, numToFilterMode, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,7}, numToFilterMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, numToFilter2Mode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 53, "Filter Routing", {0,3}, numToFilterRouting, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 54, "Filter Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 55, "Filter Env Decay", {0,127}, {},{}, true, false, false},

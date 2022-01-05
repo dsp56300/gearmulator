@@ -82,7 +82,7 @@ private:
         Filters(VirusParameterBinding& _parameterBinding);
         struct Filter : juce::Component
         {
-            Filter(VirusParameterBinding& _parameterBinding);
+            Filter(VirusParameterBinding& _parameterBinding, uint8_t fltIndex);
             juce::Slider m_cutoff;
             juce::Slider m_res;
             juce::Slider m_envAmount;
@@ -100,7 +100,7 @@ private:
 
     struct Envelope : juce::Component
     {
-        Envelope(VirusParameterBinding& _parameterBinding);
+		Envelope(VirusParameterBinding &_parameterBinding, Virus::EnvelopeType _envIndex);
         juce::Slider m_attack;
         juce::Slider m_decay;
         juce::Slider m_sustain;
@@ -110,12 +110,12 @@ private:
 
     struct FilterEnv : Envelope
     {
-		FilterEnv(VirusParameterBinding& _parameterBinding) : Envelope(_parameterBinding) {}
+		FilterEnv(VirusParameterBinding& _parameterBinding) : Envelope(_parameterBinding, Virus::EnvelopeType::Env_Filter) {}
     } m_filterEnv;
 
     struct AmpEnv : Envelope
     {
-		AmpEnv(VirusParameterBinding& _parameterBinding) : Envelope(_parameterBinding) {}
+		AmpEnv(VirusParameterBinding &_parameterBinding) : Envelope(_parameterBinding, Virus::EnvelopeType::Env_Amp) {}
 	} m_ampEnv;
 
     Buttons::SyncButton m_oscSync;
