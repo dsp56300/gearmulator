@@ -51,4 +51,12 @@ namespace Buttons
         static constexpr auto kHeight = 15;
         PresetButton();
     };
+
+    class PartSelectButton : public juce::DrawableButton
+	{
+	public:
+		static constexpr auto kWidth = 39;
+		static constexpr auto kHeight = 36;
+		PartSelectButton();
+    };
 } // namespace Buttons

@@ -13,7 +13,7 @@ public:
 private:
     struct LfoBase : juce::Component
     {
-        LfoBase(VirusParameterBinding& _parameterBinding);
+        LfoBase(VirusParameterBinding& _parameterBinding, uint8_t _lfoIndex);
         juce::Slider m_rate;
         juce::Slider m_keytrack;
         juce::Slider m_amount;
@@ -24,7 +24,7 @@ private:
 
     struct LfoTwoOneShared : LfoBase
     {
-        LfoTwoOneShared(VirusParameterBinding& _parameterBinding);
+        LfoTwoOneShared(VirusParameterBinding& _parameterBinding, uint8_t _lfoIndex);
         juce::Slider m_contour;
         juce::Slider m_phase;
         Buttons::LfoButton m_envMode;

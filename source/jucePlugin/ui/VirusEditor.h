@@ -16,8 +16,11 @@ public:
     VirusEditor(VirusParameterBinding& _parameterBinding);
     ~VirusEditor() override;
     void resized() override;
+	void changePart(uint8_t _part);
 
 private:
+	Buttons::PartSelectButton m_partSelect[16];
+	static constexpr auto kPartGroupId = 0x3FBBA;
     struct MainButtons : juce::Component, juce::Value::Listener
     {
         MainButtons();
@@ -38,6 +41,10 @@ private:
         Buttons::PresetButton m_save, m_load, m_presets;
     } m_presetButtons;
 
+    struct PartButtons : juce::Component {
+		PartButtons();
+		Buttons::PartSelectButton m_partSelect[16];
+    };
     void applyToSections(std::function<void(juce::Component *)>);
 
 	VirusParameterBinding& m_parameterBinding;

@@ -77,6 +77,7 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/buttons/presets_btn_43_15.png"
         "assets/buttons/Handle_18x47.png"
         "assets/buttons/sync2_54x25.png"
+        "assets/buttons/part_select_btn_39x72.png"
         "assets/knobs/Gen_70x70_100.png"
         "assets/knobs/Gen_pol_70x70_100.png"
         "assets/knobs/GenBlue_70x70_100.png"
