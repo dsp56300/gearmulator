@@ -1,6 +1,6 @@
 #pragma once
 #include "VirusController.h"
-
+#include "VirusParameter.h"
 namespace juce {
 	class Value;
 }
@@ -14,11 +14,12 @@ public:
 	{
 		m_part = _part;
 	}
-
-	void bind(juce::Slider& _control, Virus::ParameterType _param) const;
-	void bind(juce::ComboBox &_control, Virus::ParameterType _param) const;
-	void bind(juce::DrawableButton &_control, Virus::ParameterType _param) const;
-	void bind(juce::Component &_control, Virus::ParameterType _param) const;
+	void setPart(uint8_t _part);
+	void bind(juce::Slider& _control, Virus::ParameterType _param);
+	void bind(juce::ComboBox &_control, Virus::ParameterType _param);
+	void bind(juce::DrawableButton &_control, Virus::ParameterType _param);
+	void bind(juce::Component &_control, Virus::ParameterType _param);
 	AudioPluginAudioProcessor& m_processor;
 	uint8_t m_part;
+	juce::Array<Virus::Parameter*> m_bindings;
 };

@@ -27,8 +27,8 @@ LfoEditor::LfoBase::LfoBase(VirusParameterBinding& _parameterBinding, uint8_t _l
 {
     for (auto *s : {&m_rate, &m_keytrack, &m_amount})
         setupRotary(*this, *s);
-    addAndMakeVisible(m_subWaveform);
-    m_subWaveform.setBounds(8, 123, Buttons::HandleButton::kWidth, Buttons::HandleButton::kHeight);
+    addAndMakeVisible(m_mode);
+    m_mode.setBounds(8, 123, Buttons::HandleButton::kWidth, Buttons::HandleButton::kHeight);
 
     addAndMakeVisible(m_shape);
     m_shape.setBounds(10, 37, 84, comboBoxHeight);
@@ -44,12 +44,15 @@ LfoEditor::LfoBase::LfoBase(VirusParameterBinding& _parameterBinding, uint8_t _l
     const Virus::ParameterType clock[] = {Virus::Param_Lfo1Clock, Virus::Param_Lfo2Clock, Virus::Param_Lfo3Clock};
     const Virus::ParameterType assignDest[] = {Virus::Param_Lfo1AssignDest, Virus::Param_Lfo2AssignDest,
                                                Virus::Param_Lfo3Destination};
+    const Virus::ParameterType lfoModes[] = {Virus::Param_Lfo1Mode, Virus::Param_Lfo2Mode, Virus::Param_Lfo3Mode};
+
     _parameterBinding.bind(m_rate, rate[_lfoIndex]);
     _parameterBinding.bind(m_keytrack, keytrack[_lfoIndex]);
     _parameterBinding.bind(m_amount, amount[_lfoIndex]);
     _parameterBinding.bind(m_shape, shapes[_lfoIndex]);
     _parameterBinding.bind(m_clock, clock[_lfoIndex]);
     _parameterBinding.bind(m_assignDest, assignDest[_lfoIndex]);
+    _parameterBinding.bind(m_mode, lfoModes[_lfoIndex]);
 }
 
 LfoEditor::LfoTwoOneShared::LfoTwoOneShared(VirusParameterBinding& _parameterBinding, uint8_t _lfoIndex) : LfoBase(_parameterBinding, _lfoIndex), m_link(false)
@@ -73,7 +76,7 @@ LfoEditor::LfoTwoOneShared::LfoTwoOneShared(VirusParameterBinding& _parameterBin
     _parameterBinding.bind(m_phase, _lfoIndex == 0 ? Virus::Param_Lfo1KeyTrigger : Virus::Param_Lfo2Keytrigger);
     //parameterBinding.bind(m_amount, Virus::Param_Lfo1AssignAmount);
     _parameterBinding.bind(m_envMode, _lfoIndex == 0 ? Virus::Param_Lfo1EnvMode : Virus::Param_Lfo2EnvMode);
-    _parameterBinding.bind(m_link, _lfoIndex == 0 ? Virus::Param_Lfo1Mode : Virus::Param_Lfo2Mode);
+    //_parameterBinding.bind(m_link, _lfoIndex == 0 ? Virus::Param_Lfo1Mode : Virus::Param_Lfo2Mode);
     //_parameterBinding.bind(m_assignDest, Virus::Param_Lfo1AssignDest);
 }
 
@@ -137,29 +140,34 @@ LfoEditor::ModMatrix::ModMatrix(VirusParameterBinding& _parameterBinding)
     setupSlot(4, {{255, 338}}, {320, 314});
     setupSlot(5, {{255, 462}}, {320, 439});
 
-    _parameterBinding.bind(m_modMatrix[0]->m_source, Virus::Param_Assign1Source);
-    _parameterBinding.bind(m_modMatrix[1]->m_source, Virus::Param_Assign2Source);
-    _parameterBinding.bind(m_modMatrix[2]->m_source, Virus::Param_Assign3Source);
+    // slot 0 is assign2, slot 1 is assign3, then 1,4,5,6
+    _parameterBinding.bind(m_modMatrix[0]->m_source, Virus::Param_Assign2Source);
+    _parameterBinding.bind(m_modMatrix[1]->m_source, Virus::Param_Assign3Source);
+    _parameterBinding.bind(m_modMatrix[2]->m_source, Virus::Param_Assign1Source);
     _parameterBinding.bind(m_modMatrix[3]->m_source, Virus::Param_Assign4Source);
     _parameterBinding.bind(m_modMatrix[4]->m_source, Virus::Param_Assign5Source);
     _parameterBinding.bind(m_modMatrix[5]->m_source, Virus::Param_Assign6Source);
 
-    _parameterBinding.bind(m_modMatrix[0]->m_destinations[0]->m_amount, Virus::Param_Assign1Amount);
-    _parameterBinding.bind(m_modMatrix[1]->m_destinations[0]->m_amount, Virus::Param_Assign2Amount1);
-    //_parameterBinding.bind(m_modMatrix[1]->m_destinations[1]->m_amount, Virus::Param_Assign2Amount2);
-    //_parameterBinding.bind(m_modMatrix[1]->m_destinations[2]->m_amount, Virus::Param_Assign2Amount3);
-    _parameterBinding.bind(m_modMatrix[2]->m_destinations[0]->m_amount, Virus::Param_Assign3Amount1);
-    //_parameterBinding.bind(m_modMatrix[2]->m_destinations[1]->m_amount, Virus::Param_Assign3Amount2);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[0]->m_amount, Virus::Param_Assign2Amount1);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[1]->m_amount, Virus::Param_Assign2Amount2);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[2]->m_amount, Virus::Param_Assign2Amount3);
+
+    _parameterBinding.bind(m_modMatrix[1]->m_destinations[0]->m_amount, Virus::Param_Assign3Amount1);
+    _parameterBinding.bind(m_modMatrix[1]->m_destinations[1]->m_amount, Virus::Param_Assign3Amount2);
+
+    _parameterBinding.bind(m_modMatrix[2]->m_destinations[0]->m_amount, Virus::Param_Assign1Amount);
+
     _parameterBinding.bind(m_modMatrix[3]->m_destinations[0]->m_amount, Virus::Param_Assign4Amount);
     _parameterBinding.bind(m_modMatrix[4]->m_destinations[0]->m_amount, Virus::Param_Assign5Amount);
     _parameterBinding.bind(m_modMatrix[5]->m_destinations[0]->m_amount, Virus::Param_Assign6Amount);
 
-    _parameterBinding.bind(m_modMatrix[0]->m_destinations[0]->m_dest, Virus::Param_Assign1Destination);
-    _parameterBinding.bind(m_modMatrix[1]->m_destinations[0]->m_dest, Virus::Param_Assign2Destination1);
-    //_parameterBinding.bind(m_modMatrix[1]->m_destinations[1]->m_dest, Virus::Param_Assign2Destination2);
-    //_parameterBinding.bind(m_modMatrix[1]->m_destinations[2]->m_dest, Virus::Param_Assign2Destination3);
-    _parameterBinding.bind(m_modMatrix[2]->m_destinations[0]->m_dest, Virus::Param_Assign3Destination1);
-    //_parameterBinding.bind(m_modMatrix[2]->m_destinations[1]->m_dest, Virus::Param_Assign3Destination2);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[0]->m_dest, Virus::Param_Assign2Destination1);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[1]->m_dest, Virus::Param_Assign2Destination2);
+    _parameterBinding.bind(m_modMatrix[0]->m_destinations[2]->m_dest, Virus::Param_Assign2Destination3);
+    _parameterBinding.bind(m_modMatrix[1]->m_destinations[0]->m_dest, Virus::Param_Assign3Destination1);
+    _parameterBinding.bind(m_modMatrix[1]->m_destinations[1]->m_dest, Virus::Param_Assign3Destination2);
+
+    _parameterBinding.bind(m_modMatrix[2]->m_destinations[0]->m_dest, Virus::Param_Assign1Destination);
     _parameterBinding.bind(m_modMatrix[3]->m_destinations[0]->m_dest, Virus::Param_Assign4Destination);
     _parameterBinding.bind(m_modMatrix[4]->m_destinations[0]->m_dest, Virus::Param_Assign5Destination);
     _parameterBinding.bind(m_modMatrix[5]->m_destinations[0]->m_dest, Virus::Param_Assign6Destination);
