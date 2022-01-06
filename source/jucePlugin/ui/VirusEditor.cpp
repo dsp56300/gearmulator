@@ -1,6 +1,6 @@
 #include "VirusEditor.h"
 #include "BinaryData.h"
-
+#include "../version.h"
 #include "Virus_ArpEditor.h"
 #include "Virus_FxEditor.h"
 #include "Virus_LfoEditor.h"
@@ -13,8 +13,8 @@ using namespace juce;
 constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
 
-VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, Virus::Controller& _controller) :
-    m_parameterBinding(_parameterBinding), m_controller(_controller)
+VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
+    m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode")
 {
     setLookAndFeel(&m_lookAndFeel);
 
@@ -61,7 +61,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, Virus::Contro
         addAndMakeVisible(m_partSelect[pt]);
         
         m_presetNames[pt].setBounds(80, 172 + pt * (36), 136, 16);
-        m_presetNames[pt].setButtonText(_controller.getCurrentPartPresetName(pt));
+        m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
         m_presetNames[pt].setColour(0, juce::Colours::white);
 
         m_presetNames[pt].onClick = [this, pt]() {
@@ -106,6 +106,102 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, Virus::Contro
         addAndMakeVisible(m_nextPatch[pt]);
     }
     m_partSelect[0].setToggleState(true, NotificationType::sendNotification);
+
+    m_btSingleMode.setRadioGroupId(0x3cf);
+    m_btMultiMode.setRadioGroupId(0x3cf);
+    addAndMakeVisible(m_btSingleMode);
+    addAndMakeVisible(m_btMultiMode);
+    m_btSingleMode.setTopLeftPosition(102, 756);
+    m_btSingleMode.setSize(100, 30);
+    m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
+    const auto isMulti = m_controller.isMultiMode();
+    m_btSingleMode.setToggleState(!isMulti, juce::dontSendNotification);
+    m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
+    m_btSingleMode.setClickingTogglesState(false);
+    m_btMultiMode.setClickingTogglesState(false);
+    m_btSingleMode.onClick = [this]() { setPlayMode(0); };
+    m_btMultiMode.onClick = [this]() { setPlayMode(1); };
+
+    m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10,
+    m_btSingleMode.getY());
+    m_btMultiMode.setSize(100, 30);
+
+    juce::PropertiesFile::Options opts;
+    opts.applicationName = "DSP56300 Emulator";
+    opts.filenameSuffix = ".settings";
+    opts.folderName = "DSP56300 Emulator";
+    opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+    m_properties = new juce::PropertiesFile(opts);
+    auto midiIn = m_properties->getValue("midi_input", "");
+    auto midiOut = m_properties->getValue("midi_output", "");
+    if (midiIn != "")
+    {
+        processorRef.setMidiInput(midiIn);
+    }
+    if (midiOut != "")
+    {
+        processorRef.setMidiOutput(midiOut);
+    }
+
+    m_cmbMidiInput.setSize(160, 30);
+    m_cmbMidiInput.setTopLeftPosition(350, 760);
+    m_cmbMidiOutput.setSize(160, 30);
+    m_cmbMidiOutput.setTopLeftPosition(350+164, 760);
+    addAndMakeVisible(m_cmbMidiInput);
+    addAndMakeVisible(m_cmbMidiOutput);
+    m_cmbMidiInput.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
+    auto midiInputs = juce::MidiInput::getAvailableDevices();
+    juce::StringArray midiInputNames;
+    midiInputNames.add(" - Midi In - ");
+    auto inIndex = 0;
+    for (int i = 0; i < midiInputs.size(); i++)
+    {
+        const auto input = midiInputs[i];
+        if (processorRef.getMidiInput() != nullptr && input.identifier == processorRef.getMidiInput()->getIdentifier())
+        {
+            inIndex = i + 1;
+        }
+        midiInputNames.add(input.name);
+    }
+    m_cmbMidiInput.addItemList(midiInputNames, 1);
+    m_cmbMidiInput.setSelectedItemIndex(inIndex, juce::dontSendNotification);
+    m_cmbMidiOutput.setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
+    auto midiOutputs = juce::MidiOutput::getAvailableDevices();
+    juce::StringArray midiOutputNames;
+    midiOutputNames.add(" - Midi Out - ");
+    auto outIndex = 0;
+    for (int i = 0; i < midiOutputs.size(); i++)
+    {
+        const auto output = midiOutputs[i];
+        if (processorRef.getMidiOutput() != nullptr &&
+            output.identifier == processorRef.getMidiOutput()->getIdentifier())
+        {
+            outIndex = i + 1;
+        }
+        midiOutputNames.add(output.name);
+    }
+    m_cmbMidiOutput.addItemList(midiOutputNames, 1);
+    m_cmbMidiOutput.setSelectedItemIndex(outIndex, juce::dontSendNotification);
+    m_cmbMidiInput.onChange = [this]() { updateMidiInput(m_cmbMidiInput.getSelectedItemIndex()); };
+    m_cmbMidiOutput.onChange = [this]() { updateMidiOutput(m_cmbMidiOutput.getSelectedItemIndex()); };
+
+    std::string message =
+        "DSP 56300 Emulator\nVersion " + std::string(g_pluginVersionString) + "\n" __DATE__ " " __TIME__;
+    if (!processorRef.isPluginValid())
+        message += "\n\nNo ROM, no sound!\nCopy ROM next to plugin, must end with .bin";
+    message += "\n\nTo donate: paypal.me/dsp56300";
+    m_version.setText(message, NotificationType::dontSendNotification);
+    m_version.setBounds(94, 2, 220, 150);
+    m_version.setColour(juce::Label::textColourId, juce::Colours::white);
+    m_version.setJustificationType(Justification::centred);
+    addAndMakeVisible(m_version);
+
+    m_patchName.setBounds(410, 48, 362, 36);
+    m_patchName.setJustificationType(Justification::left);
+    m_patchName.setFont(juce::Font(32.0f, juce::Font::bold));
+    m_patchName.setColour(juce::Label::textColourId, juce::Colours::red);
+    addAndMakeVisible(m_patchName);
+
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
 }
@@ -124,7 +220,72 @@ void VirusEditor::timerCallback()
         m_nextPatch[pt].setVisible(singlePartOrInMulti);
         if (singlePartOrInMulti)
             m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
+        if (pt == m_parameterBinding.m_part)
+        {
+            m_patchName.setText(m_controller.getCurrentPartPresetName(pt),
+                                NotificationType::dontSendNotification);
+        }
     }
+    
+}
+
+void VirusEditor::updateMidiInput(int index)
+{
+    auto list = juce::MidiInput::getAvailableDevices();
+
+    if (index == 0)
+    {
+        m_properties->setValue("midi_input", "");
+        m_properties->save();
+        m_lastInputIndex = index;
+        m_cmbMidiInput.setSelectedItemIndex(index, juce::dontSendNotification);
+        return;
+    }
+    index--;
+    auto newInput = list[index];
+
+    if (!deviceManager.isMidiInputDeviceEnabled(newInput.identifier))
+        deviceManager.setMidiInputDeviceEnabled(newInput.identifier, true);
+
+    if (!processorRef.setMidiInput(newInput.identifier))
+    {
+        m_cmbMidiInput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_lastInputIndex = 0;
+        return;
+    }
+
+    m_properties->setValue("midi_input", newInput.identifier);
+    m_properties->save();
+
+    m_cmbMidiInput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_lastInputIndex = index;
+}
+void VirusEditor::updateMidiOutput(int index)
+{
+    auto list = juce::MidiOutput::getAvailableDevices();
+
+    if (index == 0)
+    {
+        m_properties->setValue("midi_output", "");
+        m_properties->save();
+        m_cmbMidiOutput.setSelectedItemIndex(index, juce::dontSendNotification);
+        m_lastOutputIndex = index;
+        processorRef.setMidiOutput("");
+        return;
+    }
+    index--;
+    auto newOutput = list[index];
+    if (!processorRef.setMidiOutput(newOutput.identifier))
+    {
+        m_cmbMidiOutput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_lastOutputIndex = 0;
+        return;
+    }
+    m_properties->setValue("midi_output", newOutput.identifier);
+    m_properties->save();
+
+    m_cmbMidiOutput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_lastOutputIndex = index;
 }
 void VirusEditor::updatePartsPresetNames()
 {
@@ -150,22 +311,35 @@ void VirusEditor::resized()
     m_presetButtons.setBounds(statusArea.removeFromRight(188));
     applyToSections([this](Component *s) { s->setTopLeftPosition(338, 133); });
 }
-void VirusEditor::changePart(uint8_t _part) {
 
-    m_parameterBinding.m_part = _part;
+void VirusEditor::setPlayMode(uint8_t _mode) {
+    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
+    changePart(0);
+}
+
+void VirusEditor::changePart(uint8_t _part)
+{
+    for (auto &p : m_partSelect)
+    {
+        p.setToggleState(false, juce::dontSendNotification);
+    }
+    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
+    m_parameterBinding.setPart(_part);
+
     removeChildComponent(m_oscEditor.get());
+    removeChildComponent(m_lfoEditor.get());
+    removeChildComponent(m_fxEditor.get());
+    removeChildComponent(m_arpEditor.get());
+
     m_oscEditor	= std::make_unique<OscEditor>(m_parameterBinding);
     addChildComponent(m_oscEditor.get());
 
-    removeChildComponent(m_lfoEditor.get());
     m_lfoEditor = std::make_unique<LfoEditor>(m_parameterBinding);
     addChildComponent(m_lfoEditor.get());
 
-    removeChildComponent(m_fxEditor.get());
     m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding);
     addChildComponent(m_fxEditor.get());
 
-    removeChildComponent(m_arpEditor.get());
     m_arpEditor = std::make_unique<ArpEditor>(m_parameterBinding);
     addChildComponent(m_arpEditor.get());
 

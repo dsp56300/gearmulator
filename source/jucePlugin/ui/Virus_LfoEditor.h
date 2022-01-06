@@ -17,7 +17,7 @@ private:
         juce::Slider m_rate;
         juce::Slider m_keytrack;
         juce::Slider m_amount;
-        Buttons::HandleButton m_subWaveform;
+        Buttons::HandleButton m_mode;
         juce::ComboBox m_shape, m_clock;
         juce::ComboBox m_assignDest;
     };

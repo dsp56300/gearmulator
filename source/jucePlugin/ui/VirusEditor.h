@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_audio_devices/juce_audio_devices.h>
 #include "Virus_Buttons.h"
 #include "Virus_LookAndFeel.h"
 #include "../VirusController.h"
@@ -14,22 +15,36 @@ class ArpEditor;
 class VirusEditor : public juce::Component, private juce::Timer
 {
 public:
-    VirusEditor(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
+    VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
     ~VirusEditor() override;
     void resized() override;
     void changePart(uint8_t _part);
     void updatePartsPresetNames();
     void loadFile();
+    void setPlayMode(uint8_t _mode);
+
 private:
     void timerCallback() override;
+    void updateMidiInput(int index);
+    void updateMidiOutput(int index);
 
+    juce::Label m_version;
+    juce::Label m_patchName;
     Buttons::PartSelectButton m_partSelect[16];
     juce::Label m_partLabels[16];
     juce::TextButton m_presetNames[16];
     juce::TextButton m_nextPatch[16];
     juce::TextButton m_prevPatch[16];
+    juce::TextButton m_btSingleMode;
+    juce::TextButton m_btMultiMode;
+    juce::ComboBox m_cmbMidiInput;
+    juce::ComboBox m_cmbMidiOutput;
+    juce::AudioDeviceManager deviceManager;
+    juce::PropertiesFile *m_properties;
+    int m_lastInputIndex = 0;
+    int m_lastOutputIndex = 0;
 
-    static constexpr auto kPartGroupId = 0x3FBBA;
+    static constexpr auto kPartGroupId = 0x3FBBC;
     struct MainButtons : juce::Component, juce::Value::Listener
     {
         MainButtons();
@@ -56,6 +71,7 @@ private:
     void applyToSections(std::function<void(juce::Component *)>);
 
     VirusParameterBinding& m_parameterBinding;
+    AudioPluginAudioProcessor &processorRef;
     Virus::Controller& m_controller;
     std::unique_ptr<OscEditor> m_oscEditor;
     std::unique_ptr<LfoEditor> m_lfoEditor;
