@@ -407,7 +407,7 @@ namespace Virus
         juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
         juce::Value *getParamValue(ParameterType _param);
         Parameter* getParameter(ParameterType _param);
-		Parameter *getParameter(ParameterType _param, uint8_t _part);
+        Parameter *getParameter(ParameterType _param, uint8_t _part);
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;

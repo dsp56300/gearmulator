@@ -14,7 +14,6 @@ public:
 	//void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
     void paint (juce::Graphics&) override;
     void resized() override;
-	AudioPluginAudioProcessor &getProcessor() { return processorRef; };
 
 private:
 	void updateMidiInput(int index);

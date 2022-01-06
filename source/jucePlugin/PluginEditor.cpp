@@ -160,7 +160,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 		m_virusEditor->setUsingNativeTitleBar(true);
 		m_virusEditor->setVisible(true);
 		m_virusEditor->setResizable(true, false);
-		m_virusEditor->setContentOwned(new VirusEditor(m_parameterBinding,*ctrl), true);
+		m_virusEditor->setContentOwned(new VirusEditor(m_parameterBinding, *ctrl), true);
 	};
 	addAndMakeVisible(m_openEditor);
 }
