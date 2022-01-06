@@ -17,19 +17,19 @@ public:
     VirusEditor(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
     ~VirusEditor() override;
     void resized() override;
-	void changePart(uint8_t _part);
-	void updatePartsPresetNames();
-	void loadFile();
+    void changePart(uint8_t _part);
+    void updatePartsPresetNames();
+    void loadFile();
 private:
-	void timerCallback() override;
+    void timerCallback() override;
 
-	Buttons::PartSelectButton m_partSelect[16];
-	juce::Label m_partLabels[16];
-	juce::TextButton m_presetNames[16];
-	juce::TextButton m_nextPatch[16];
-	juce::TextButton m_prevPatch[16];
+    Buttons::PartSelectButton m_partSelect[16];
+    juce::Label m_partLabels[16];
+    juce::TextButton m_presetNames[16];
+    juce::TextButton m_nextPatch[16];
+    juce::TextButton m_prevPatch[16];
 
-	static constexpr auto kPartGroupId = 0x3FBBA;
+    static constexpr auto kPartGroupId = 0x3FBBA;
     struct MainButtons : juce::Component, juce::Value::Listener
     {
         MainButtons();
@@ -51,12 +51,12 @@ private:
     } m_presetButtons;
 
     struct PartButtons : juce::Component {
-		PartButtons();
+        PartButtons();
     };
     void applyToSections(std::function<void(juce::Component *)>);
 
-	VirusParameterBinding& m_parameterBinding;
-	Virus::Controller& m_controller;
+    VirusParameterBinding& m_parameterBinding;
+    Virus::Controller& m_controller;
     std::unique_ptr<OscEditor> m_oscEditor;
     std::unique_ptr<LfoEditor> m_lfoEditor;
     std::unique_ptr<FxEditor> m_fxEditor;
