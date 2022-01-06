@@ -57,11 +57,11 @@ OscEditor::OscOne::OscOne(VirusParameterBinding& _parameterBinding, uint32_t _os
     addAndMakeVisible(m_waveSelect);
     m_waveSelect.setBounds (18, 42, comboBoxWidth, comboBoxHeight);
 
-	_parameterBinding.bind(m_semitone, _oscIndex == 0 ? Virus::Param_Osc1Semitone : Virus::Param_Osc2Semitone);
-	_parameterBinding.bind(m_shape, _oscIndex == 0 ? Virus::Param_Osc1Shape : Virus::Param_Osc2Shape);
-	_parameterBinding.bind(m_pulseWidth, _oscIndex == 0 ? Virus::Param_Osc1PW : Virus::Param_Osc2PW);
-	_parameterBinding.bind(m_keyFollow, _oscIndex == 0 ? Virus::Param_Osc1Keyfollow : Virus::Param_Osc2Keyfollow);
-	_parameterBinding.bind(m_waveSelect, _oscIndex == 0 ? Virus::Param_Osc1Wave : Virus::Param_Osc2Wave);
+    _parameterBinding.bind(m_semitone, _oscIndex == 0 ? Virus::Param_Osc1Semitone : Virus::Param_Osc2Semitone);
+    _parameterBinding.bind(m_shape, _oscIndex == 0 ? Virus::Param_Osc1Shape : Virus::Param_Osc2Shape);
+    _parameterBinding.bind(m_pulseWidth, _oscIndex == 0 ? Virus::Param_Osc1PW : Virus::Param_Osc2PW);
+    _parameterBinding.bind(m_keyFollow, _oscIndex == 0 ? Virus::Param_Osc1Keyfollow : Virus::Param_Osc2Keyfollow);
+    _parameterBinding.bind(m_waveSelect, _oscIndex == 0 ? Virus::Param_Osc1Wave : Virus::Param_Osc2Wave);
 }
 
 OscEditor::OscTwo::OscTwo(VirusParameterBinding& _parameterBinding) : OscOne(_parameterBinding, 1)
@@ -76,10 +76,10 @@ OscEditor::OscTwo::OscTwo(VirusParameterBinding& _parameterBinding) : OscOne(_pa
     m_fmMode.setBounds (18, 140, comboBoxWidth, comboBoxHeight);
 
     _parameterBinding.bind(m_fmAmount, Virus::Param_Osc2FMAmount);
-	_parameterBinding.bind(m_detune, Virus::Param_Osc2Detune);
-	_parameterBinding.bind(m_envFm, Virus::Param_FMFiltEnvAmt);
-	_parameterBinding.bind(m_envOsc2, Virus::Param_Osc2FltEnvAmt);
-	_parameterBinding.bind(m_fmMode, Virus::Param_OscFMMode);
+    _parameterBinding.bind(m_detune, Virus::Param_Osc2Detune);
+    _parameterBinding.bind(m_envFm, Virus::Param_FMFiltEnvAmt);
+    _parameterBinding.bind(m_envOsc2, Virus::Param_Osc2FltEnvAmt);
+    _parameterBinding.bind(m_fmMode, Virus::Param_OscFMMode);
 }
 
 OscEditor::OscThree::OscThree(VirusParameterBinding& _parameterBinding)
@@ -94,9 +94,9 @@ OscEditor::OscThree::OscThree(VirusParameterBinding& _parameterBinding)
     m_oscThreeMode.setBounds (18, 43, comboBoxWidth, comboBoxHeight);
 
     _parameterBinding.bind(m_semitone, Virus::Param_Osc3Semitone);
-	_parameterBinding.bind(m_detune, Virus::Param_Osc3Detune);
-	_parameterBinding.bind(m_level, Virus::Param_Osc3Volume);
-	_parameterBinding.bind(m_oscThreeMode, Virus::Param_Osc3Mode);
+    _parameterBinding.bind(m_detune, Virus::Param_Osc3Detune);
+    _parameterBinding.bind(m_level, Virus::Param_Osc3Volume);
+    _parameterBinding.bind(m_oscThreeMode, Virus::Param_Osc3Mode);
 }
 
 OscEditor::Unison::Unison(VirusParameterBinding& _parameterBinding)
@@ -111,10 +111,10 @@ OscEditor::Unison::Unison(VirusParameterBinding& _parameterBinding)
     m_unisonVoices.setBounds (18, 42, comboBoxWidth, comboBoxHeight);
 
     _parameterBinding.bind(m_detune, Virus::Param_UnisonDetune);
-	_parameterBinding.bind(m_panSpread, Virus::Param_UnisonPanSpread);
-	_parameterBinding.bind(m_lfoPhase, Virus::Param_UnisonLfoPhase);
-	_parameterBinding.bind(m_phaseInit, Virus::Param_OscInitPhase);
-	_parameterBinding.bind(m_unisonVoices, Virus::Param_UnisonMode);
+    _parameterBinding.bind(m_panSpread, Virus::Param_UnisonPanSpread);
+    _parameterBinding.bind(m_lfoPhase, Virus::Param_UnisonLfoPhase);
+    _parameterBinding.bind(m_phaseInit, Virus::Param_OscInitPhase);
+    _parameterBinding.bind(m_unisonVoices, Virus::Param_UnisonMode);
 }
 
 OscEditor::Mixer::Mixer(VirusParameterBinding& _parameterBinding)
@@ -126,7 +126,7 @@ OscEditor::Mixer::Mixer(VirusParameterBinding& _parameterBinding)
     m_oscLevel.setBounds(m_oscBalance.getBounds().translated(knobSize, 0));
 
     _parameterBinding.bind(m_oscBalance, Virus::Param_OscBalance);
-	_parameterBinding.bind(m_oscLevel, Virus::Param_OscMainVolume);
+    _parameterBinding.bind(m_oscLevel, Virus::Param_OscMainVolume);
 }
 
 OscEditor::RingMod::RingMod(VirusParameterBinding& _parameterBinding)
@@ -140,8 +140,8 @@ OscEditor::RingMod::RingMod(VirusParameterBinding& _parameterBinding)
     m_noiseColor.setBounds(m_noiseLevel.getBounds().translated(0, 95));
 
     _parameterBinding.bind(m_noiseLevel, Virus::Param_NoiseVolume);
-	_parameterBinding.bind(m_ringModLevel, Virus::Param_RingModMVolume);
-	_parameterBinding.bind(m_noiseColor, Virus::Param_NoiseColor);
+    _parameterBinding.bind(m_ringModLevel, Virus::Param_RingModMVolume);
+    _parameterBinding.bind(m_noiseColor, Virus::Param_NoiseColor);
 }
 
 OscEditor::Sub::Sub(VirusParameterBinding& _parameterBinding)
@@ -153,7 +153,7 @@ OscEditor::Sub::Sub(VirusParameterBinding& _parameterBinding)
     addAndMakeVisible(m_subWaveform);
 
     _parameterBinding.bind(m_level, Virus::Param_SubOscVolume);
-	_parameterBinding.bind(m_subWaveform, Virus::Param_SubOscShape);
+    _parameterBinding.bind(m_subWaveform, Virus::Param_SubOscShape);
 }
 
 OscEditor::Portamento::Portamento(VirusParameterBinding& _parameterBinding)
@@ -193,16 +193,14 @@ OscEditor::Filters::Filters(VirusParameterBinding &_parameterBinding) :	m_filter
     m_keyFollowBase.setBounds (m_filterMode[0].getBounds().translated (286, 0));
 
     _parameterBinding.bind(m_filterBalance, Virus::Param_FilterBalance);
-	_parameterBinding.bind(m_filterMode[0], Virus::Param_FilterModeA);
-	_parameterBinding.bind(m_filterMode[1], Virus::Param_FilterModeB);
-	_parameterBinding.bind(m_filterRouting, Virus::Param_FilterRouting);
-	_parameterBinding.bind(m_saturationCurve, Virus::Param_SaturationCurve);
-	_parameterBinding.bind(m_keyFollowBase, Virus::Param_FilterKeyFollowA); // maybe not right
-	_parameterBinding.bind(m_link1, Virus::Param_Filter2CutoffLink);
-	_parameterBinding.bind(m_envPol[0], Virus::Param_Filter1EnvPolarity);
-	_parameterBinding.bind(m_envPol[1], Virus::Param_Filter2EnvPolarity);
-	/* _parameterBinding.bind(m_envPol[0], Virus::Param_Filter1EnvPolarity);
-	_parameterBinding.bind(m_envPol[1], Virus::Param_Filter2EnvPolarity);*/
+    _parameterBinding.bind(m_filterMode[0], Virus::Param_FilterModeA);
+    _parameterBinding.bind(m_filterMode[1], Virus::Param_FilterModeB);
+    _parameterBinding.bind(m_filterRouting, Virus::Param_FilterRouting);
+    _parameterBinding.bind(m_saturationCurve, Virus::Param_SaturationCurve);
+    _parameterBinding.bind(m_keyFollowBase, Virus::Param_FilterKeyFollowA); // maybe not right
+    _parameterBinding.bind(m_link1, Virus::Param_Filter2CutoffLink);
+    _parameterBinding.bind(m_envPol[0].m_pos, Virus::Param_Filter1EnvPolarity);
+    _parameterBinding.bind(m_envPol[1].m_pos, Virus::Param_Filter2EnvPolarity);
 }
 
 OscEditor::Filters::Filter::Filter(VirusParameterBinding& _parameterBinding, const uint8_t _fltIndex)
@@ -217,11 +215,11 @@ OscEditor::Filters::Filter::Filter(VirusParameterBinding& _parameterBinding, con
     m_envVel.setBounds(m_resVel.getBounds().translated(knobSize - 5, 0));
 
     _parameterBinding.bind(m_cutoff, _fltIndex == 0 ? Virus::Param_FilterCutA : Virus::Param_FilterCutB);
-	_parameterBinding.bind(m_res, _fltIndex == 0 ? Virus::Param_FilterResA: Virus::Param_FilterResB);
-	_parameterBinding.bind(m_envAmount, _fltIndex == 0 ? Virus::Param_FilterEnvAmtA : Virus::Param_FilterEnvAmtB);
-	_parameterBinding.bind(m_keyTrack, _fltIndex == 0 ? Virus::Param_FilterKeyFollowA : Virus::Param_FilterKeyFollowB);
-	_parameterBinding.bind(m_resVel, _fltIndex == 0 ? Virus::Param_Resonance1Velocity : Virus::Param_Resonance2Velocity);
-	_parameterBinding.bind(m_envVel, _fltIndex == 0 ? Virus::Param_Filter1EnvAmtVelocity : Virus::Param_Filter2EnvAmtVelocity);
+    _parameterBinding.bind(m_res, _fltIndex == 0 ? Virus::Param_FilterResA: Virus::Param_FilterResB);
+    _parameterBinding.bind(m_envAmount, _fltIndex == 0 ? Virus::Param_FilterEnvAmtA : Virus::Param_FilterEnvAmtB);
+    _parameterBinding.bind(m_keyTrack, _fltIndex == 0 ? Virus::Param_FilterKeyFollowA : Virus::Param_FilterKeyFollowB);
+    _parameterBinding.bind(m_resVel, _fltIndex == 0 ? Virus::Param_Resonance1Velocity : Virus::Param_Resonance2Velocity);
+    _parameterBinding.bind(m_envVel, _fltIndex == 0 ? Virus::Param_Filter1EnvAmtVelocity : Virus::Param_Filter2EnvAmtVelocity);
 }
 
 OscEditor::Envelope::Envelope(VirusParameterBinding& _parameterBinding, Virus::EnvelopeType _envIndex)
@@ -236,12 +234,12 @@ OscEditor::Envelope::Envelope(VirusParameterBinding& _parameterBinding, Virus::E
 
     _parameterBinding.bind(m_attack,
                            _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvAttack : Virus::Param_FilterEnvAttack);
-	_parameterBinding.bind(m_decay,
-						   _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvDecay : Virus::Param_FilterEnvDecay);
-	_parameterBinding.bind(m_sustain,
-						   _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvSustain : Virus::Param_FilterEnvSustain);
-	_parameterBinding.bind(m_release,
-						   _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvRelease : Virus::Param_FilterEnvRelease);
-	_parameterBinding.bind(m_time,
+    _parameterBinding.bind(m_decay,
+                           _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvDecay : Virus::Param_FilterEnvDecay);
+    _parameterBinding.bind(m_sustain,
+                           _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvSustain : Virus::Param_FilterEnvSustain);
+    _parameterBinding.bind(m_release,
+                           _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvRelease : Virus::Param_FilterEnvRelease);
+    _parameterBinding.bind(m_time,
                            _envIndex == Virus::Env_Amp ? Virus::Param_AmpEnvSustainTime : Virus::Param_FilterEnvSustainTime);
 }

@@ -1,12 +1,14 @@
 #include "Virus_ArpEditor.h"
 #include "BinaryData.h"
 #include "Ui_Utils.h"
-
+#include "../VirusParameterBinding.h"
 constexpr auto comboBoxWidth = 84;
 
 using namespace juce;
 
-ArpEditor::ArpEditor(VirusParameterBinding& _parameterBinding)
+ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding) :
+    m_velocityAmount(_parameterBinding), m_inputs(_parameterBinding), m_arp(_parameterBinding),
+    m_softKnobs(_parameterBinding), m_patchSettings(_parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_arp_1018x620_png, BinaryData::bg_arp_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
@@ -23,7 +25,7 @@ ArpEditor::ArpEditor(VirusParameterBinding& _parameterBinding)
     addAndMakeVisible(m_patchSettings);
 }
 
-ArpEditor::VelocityAmount::VelocityAmount()
+ArpEditor::VelocityAmount::VelocityAmount(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 19;
     for (auto *s : {&m_osc1Shape, &m_filter1Freq, &m_filter1Res, &m_pulseWidth, &m_volume, &m_panorama, &m_osc2Shape,
@@ -41,17 +43,31 @@ ArpEditor::VelocityAmount::VelocityAmount()
     m_filter2Freq.setBounds(m_osc1Shape.getRight() - 7, y2, knobSize, knobSize);
     m_filter2Res.setBounds(m_filter1Freq.getRight() - 8, y2, knobSize, knobSize);
     m_fmAmount.setBounds(m_filter1Res.getRight() - 7, y2, knobSize, knobSize);
+
+    _parameterBinding.bind(m_osc1Shape, Virus::Param_Osc1ShapeVelocity);
+    _parameterBinding.bind(m_filter1Freq, Virus::Param_Filter1EnvAmtVelocity);
+    _parameterBinding.bind(m_filter1Res, Virus::Param_Resonance1Velocity);
+    _parameterBinding.bind(m_pulseWidth, Virus::Param_PulseWidthVelocity);
+    _parameterBinding.bind(m_volume, Virus::Param_AmpVelocity);
+    _parameterBinding.bind(m_panorama, Virus::Param_PanoramaVelocity);
+    _parameterBinding.bind(m_osc2Shape, Virus::Param_Osc2ShapeVelocity);
+    _parameterBinding.bind(m_filter2Freq, Virus::Param_Filter2EnvAmtVelocity);
+    _parameterBinding.bind(m_filter2Res, Virus::Param_Resonance2Velocity);
+    _parameterBinding.bind(m_fmAmount, Virus::Param_FmAmountVelocity);
 }
 
-ArpEditor::Inputs::Inputs()
+ArpEditor::Inputs::Inputs(VirusParameterBinding &_parameterBinding)
 {
     addAndMakeVisible(m_inputMode);
     m_inputMode.setBounds(43, 38, comboBoxWidth, comboBoxHeight);
     addAndMakeVisible(m_inputSelect);
     m_inputSelect.setBounds(145, 38, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_inputMode, Virus::Param_InputMode);
+    _parameterBinding.bind(m_inputSelect, Virus::Param_InputSelect);
 }
 
-ArpEditor::Arpeggiator::Arpeggiator()
+ArpEditor::Arpeggiator::Arpeggiator(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 18;
     for (auto *s : {&m_globalTempo, &m_noteLength, &m_noteSwing})
@@ -75,9 +91,18 @@ ArpEditor::Arpeggiator::Arpeggiator()
     m_arpHold.setButtonText("On");
     addAndMakeVisible(m_arpHold);
     m_arpHold.setBounds(220, m_octaveRange.getY(), 32, comboBoxHeight);
+
+    _parameterBinding.bind(m_globalTempo, Virus::Param_ClockTempo);
+    _parameterBinding.bind(m_noteLength, Virus::Param_ArpNoteLength);
+    _parameterBinding.bind(m_noteSwing, Virus::Param_ArpSwing);
+    _parameterBinding.bind(m_mode, Virus::Param_ArpMode);
+    _parameterBinding.bind(m_pattern, Virus::Param_ArpPatternSelect);
+    _parameterBinding.bind(m_octaveRange, Virus::Param_ArpOctaveRange);
+    _parameterBinding.bind(m_resolution, Virus::Param_ArpClock);
+    _parameterBinding.bind(m_arpHold, Virus::Param_ArpHoldEnable);
 }
 
-ArpEditor::SoftKnobs::SoftKnobs()
+ArpEditor::SoftKnobs::SoftKnobs(VirusParameterBinding &_parameterBinding)
 {
     auto distance = 105;
     for (auto i = 0; i < 2; i++)
@@ -89,7 +114,7 @@ ArpEditor::SoftKnobs::SoftKnobs()
     }
 }
 
-ArpEditor::PatchSettings::PatchSettings()
+ArpEditor::PatchSettings::PatchSettings(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 18;
     for (auto *s : {&m_patchVolume, &m_panning, &m_outputBalance, &m_transpose})
@@ -116,4 +141,15 @@ ArpEditor::PatchSettings::PatchSettings()
     m_bendDown.setBounds(x2, 42, comboBoxWidth, comboBoxHeight);
     m_smoothMode.setBounds(x2, m_bendScale.getY(), comboBoxWidth, comboBoxHeight);
     m_cat2.setBounds(x2, m_cat1.getY(), comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_patchVolume, Virus::Param_PatchVolume);
+    _parameterBinding.bind(m_panning, Virus::Param_Panorama);
+    //_parameterBinding.bind(m_outputBalance, Virus::Param_SecondOutputBalance);
+    _parameterBinding.bind(m_transpose, Virus::Param_Transpose);
+    _parameterBinding.bind(m_keyMode, Virus::Param_KeyMode);
+    //_parameterBinding.bind(m_secondaryOutput, Virus::Param_KeyMode);
+    _parameterBinding.bind(m_bendUp, Virus::Param_BenderRangeUp);
+    _parameterBinding.bind(m_bendDown, Virus::Param_BenderRangeDown);
+    _parameterBinding.bind(m_bendScale, Virus::Param_BenderScale);
+    _parameterBinding.bind(m_smoothMode, Virus::Param_ControlSmoothMode);
 }

@@ -13,21 +13,21 @@ public:
 private:
     struct Distortion : juce::Component
     {
-        Distortion();
+        Distortion(VirusParameterBinding &_parameterBinding);
         juce::Slider m_intensity;
         juce::ComboBox m_curve;
     } m_dist;
 
     struct AnalogBoost : juce::Component
     {
-        AnalogBoost();
+        AnalogBoost(VirusParameterBinding &_parameterBinding);
         juce::Slider m_boost;
         juce::Slider m_tune;
     } m_analogBoost;
 
     struct Phaser : juce::Component
     {
-        Phaser();
+        Phaser(VirusParameterBinding &_parameterBinding);
         juce::Slider m_rate;
         juce::Slider m_freq;
         juce::Slider m_depth;
@@ -39,7 +39,7 @@ private:
 
     struct Chorus : juce::Component
     {
-        Chorus();
+        Chorus(VirusParameterBinding &_parameterBinding);
         juce::Slider m_rate;
         juce::Slider m_depth;
         juce::Slider m_feedback;
@@ -50,7 +50,7 @@ private:
 
     struct Equalizer : juce::Component
     {
-        Equalizer();
+        Equalizer(VirusParameterBinding &_parameterBinding);
         juce::Slider m_low_gain;
         juce::Slider m_low_freq;
         juce::Slider m_mid_gain;
@@ -62,7 +62,7 @@ private:
 
     struct EnvelopeFollower : juce::Component
     {
-        EnvelopeFollower();
+        EnvelopeFollower(VirusParameterBinding &_parameterBinding);
         juce::Slider m_gain;
         juce::Slider m_attack;
         juce::Slider m_release;
@@ -71,13 +71,13 @@ private:
 
     struct Punch : juce::Component
     {
-        Punch();
+        Punch(VirusParameterBinding &_parameterBinding);
         juce::Slider m_amount;
     } m_punch;
 
     struct DelayAndReverb : juce::Component
     {
-        DelayAndReverb();
+        DelayAndReverb(VirusParameterBinding &_parameterBinding);
         juce::Slider m_time;
         juce::Slider m_rate;
         juce::Slider m_depth;
@@ -87,7 +87,7 @@ private:
 
         struct Sync : juce::Component
         {
-            Sync();
+            Sync(VirusParameterBinding &_parameterBinding);
             juce::Slider m_mix;
             juce::ComboBox m_clock, m_lfoShape;
         } m_sync;
@@ -95,7 +95,7 @@ private:
 
     struct Vocoder : juce::Component
     {
-        Vocoder();
+        Vocoder(VirusParameterBinding &_parameterBinding);
         juce::Slider m_sourceBalance;
         juce::Slider m_spectralBalance;
         juce::Slider m_bands;
@@ -106,7 +106,7 @@ private:
 
         struct Carrier : juce::Component
         {
-            Carrier();
+            Carrier(VirusParameterBinding &_parameterBinding);
             juce::Slider m_center_freq;
             juce::Slider m_q_factor;
             juce::Slider m_spread;
@@ -114,7 +114,7 @@ private:
 
         struct Modulator : juce::Component
         {
-            Modulator();
+            Modulator(VirusParameterBinding &_parameterBinding);
             juce::Slider m_freq_offset;
             juce::Slider m_q_factor;
             juce::Slider m_spread;

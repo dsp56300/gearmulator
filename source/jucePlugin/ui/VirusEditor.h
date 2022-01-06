@@ -3,6 +3,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "Virus_Buttons.h"
 #include "Virus_LookAndFeel.h"
+#include "../VirusController.h"
 
 class VirusParameterBinding;
 class OscEditor;
@@ -10,16 +11,24 @@ class LfoEditor;
 class FxEditor;
 class ArpEditor;
 
-class VirusEditor : public juce::Component
+class VirusEditor : public juce::Component, private juce::Timer
 {
 public:
-    VirusEditor(VirusParameterBinding& _parameterBinding);
+    VirusEditor(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
     ~VirusEditor() override;
     void resized() override;
 	void changePart(uint8_t _part);
-
+	void updatePartsPresetNames();
+	void loadFile();
 private:
+	void timerCallback() override;
+
 	Buttons::PartSelectButton m_partSelect[16];
+	juce::Label m_partLabels[16];
+	juce::TextButton m_presetNames[16];
+	juce::TextButton m_nextPatch[16];
+	juce::TextButton m_prevPatch[16];
+
 	static constexpr auto kPartGroupId = 0x3FBBA;
     struct MainButtons : juce::Component, juce::Value::Listener
     {
@@ -43,11 +52,11 @@ private:
 
     struct PartButtons : juce::Component {
 		PartButtons();
-		Buttons::PartSelectButton m_partSelect[16];
     };
     void applyToSections(std::function<void(juce::Component *)>);
 
 	VirusParameterBinding& m_parameterBinding;
+	Virus::Controller& m_controller;
     std::unique_ptr<OscEditor> m_oscEditor;
     std::unique_ptr<LfoEditor> m_lfoEditor;
     std::unique_ptr<FxEditor> m_fxEditor;
@@ -56,4 +65,6 @@ private:
     std::unique_ptr<juce::Drawable> m_background;
 
     Virus::LookAndFeel m_lookAndFeel;
+
+    juce::String m_previousPath;
 };

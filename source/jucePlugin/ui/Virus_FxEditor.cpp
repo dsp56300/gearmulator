@@ -1,12 +1,15 @@
 #include "Virus_FxEditor.h"
 #include "BinaryData.h"
 #include "Ui_Utils.h"
-
+#include "../VirusParameterBinding.h"
 using namespace juce;
 
 constexpr auto comboBoxWidth = 84;
 
-FxEditor::FxEditor(VirusParameterBinding& _parameterBinding)
+FxEditor::FxEditor(VirusParameterBinding &_parameterBinding) :
+    m_dist(_parameterBinding), m_analogBoost(_parameterBinding), m_phaser(_parameterBinding),
+    m_chorus(_parameterBinding), m_eq(_parameterBinding), m_envFollow(_parameterBinding), m_punch(_parameterBinding),
+    m_delayReverb(_parameterBinding), m_vocoder(_parameterBinding)
 {
     setupBackground(*this, m_background, BinaryData::bg_fx_1018x620_png, BinaryData::bg_fx_1018x620_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
@@ -31,23 +34,29 @@ FxEditor::FxEditor(VirusParameterBinding& _parameterBinding)
     addAndMakeVisible(m_vocoder);
 }
 
-FxEditor::Distortion::Distortion()
+FxEditor::Distortion::Distortion(VirusParameterBinding &_parameterBinding)
 {
     setupRotary(*this, m_intensity);
     m_intensity.setBounds(101, 18, knobSize, knobSize);
     addAndMakeVisible(m_curve);
     m_curve.setBounds(17, 42, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_intensity, Virus::Param_DistortionIntensity);
+    _parameterBinding.bind(m_curve, Virus::Param_DistortionCurve);
 }
 
-FxEditor::AnalogBoost::AnalogBoost()
+FxEditor::AnalogBoost::AnalogBoost(VirusParameterBinding &_parameterBinding)
 {
     for (auto *s : {&m_boost, &m_tune})
         setupRotary(*this, *s);
     m_boost.setBounds(16, 18, knobSize, knobSize);
     m_tune.setBounds(m_boost.getBounds().withX(m_boost.getRight() - 4));
+
+    _parameterBinding.bind(m_boost, Virus::Param_BassIntensity);
+    _parameterBinding.bind(m_tune, Virus::Param_BassTune);
 }
 
-FxEditor::Phaser::Phaser()
+FxEditor::Phaser::Phaser(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 16;
     for (auto *s : {&m_rate, &m_freq, &m_depth, &m_feedback, &m_spread, &m_mix})
@@ -61,9 +70,17 @@ FxEditor::Phaser::Phaser()
     m_mix.setBounds(m_spread.getRight() - 7, y, knobSize, knobSize);
     addAndMakeVisible(m_stages);
     m_stages.setBounds(17, 41, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_rate, Virus::Param_PhaserRate);
+    _parameterBinding.bind(m_freq, Virus::Param_PhaserFreq);
+    _parameterBinding.bind(m_depth, Virus::Param_PhaserDepth);
+    _parameterBinding.bind(m_feedback, Virus::Param_PhaserFeedback);
+    _parameterBinding.bind(m_spread, Virus::Param_PhaserSpread);
+    _parameterBinding.bind(m_mix, Virus::Param_PhaserMix);
+    _parameterBinding.bind(m_stages, Virus::Param_PhaserMode);
 }
 
-FxEditor::Chorus::Chorus()
+FxEditor::Chorus::Chorus(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 18;
     for (auto *s : {&m_rate, &m_depth, &m_feedback, &m_delay, &m_mix})
@@ -76,9 +93,16 @@ FxEditor::Chorus::Chorus()
     m_mix.setBounds(m_delay.getRight() - 4, y, knobSize, knobSize);
     addAndMakeVisible(m_lfoShape);
     m_lfoShape.setBounds(17, 42, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_rate, Virus::Param_ChorusRate);
+    _parameterBinding.bind(m_depth, Virus::Param_ChorusDepth);
+    _parameterBinding.bind(m_feedback, Virus::Param_ChorusFeedback);
+    _parameterBinding.bind(m_delay, Virus::Param_ChorusDelay);
+    _parameterBinding.bind(m_mix, Virus::Param_ChorusMix);
+    _parameterBinding.bind(m_lfoShape, Virus::Param_ChorusLfoShape);
 }
 
-FxEditor::Equalizer::Equalizer()
+FxEditor::Equalizer::Equalizer(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 18;
     for (auto *s : {&m_low_gain, &m_low_freq, &m_mid_gain, &m_mid_freq, &m_mid_q, &m_high_gain, &m_high_freq})
@@ -90,9 +114,17 @@ FxEditor::Equalizer::Equalizer()
     m_mid_q.setBounds(m_mid_freq.getRight() - 6, y, knobSize, knobSize);
     m_high_gain.setBounds(m_mid_q.getRight() - 6, y, knobSize, knobSize);
     m_high_freq.setBounds(m_high_gain.getRight() - 6, y, knobSize, knobSize);
+
+    _parameterBinding.bind(m_low_gain, Virus::Param_LowEqGain);
+    _parameterBinding.bind(m_low_freq, Virus::Param_LowEqFreq);
+    _parameterBinding.bind(m_mid_gain, Virus::Param_MidEqGain);
+    _parameterBinding.bind(m_mid_freq, Virus::Param_MidEqFreq);
+    _parameterBinding.bind(m_mid_q, Virus::Param_MidEqQFactor);
+    _parameterBinding.bind(m_high_gain, Virus::Param_HighEqGain);
+    _parameterBinding.bind(m_high_freq, Virus::Param_HighEqFreq);
 }
 
-FxEditor::EnvelopeFollower::EnvelopeFollower()
+FxEditor::EnvelopeFollower::EnvelopeFollower(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = 12;
     for (auto *s : {&m_gain, &m_attack, &m_release})
@@ -102,15 +134,18 @@ FxEditor::EnvelopeFollower::EnvelopeFollower()
     m_release.setBounds(m_attack.getRight() - 7, y, knobSize, knobSize);
     addAndMakeVisible(m_input);
     m_input.setBounds(17, 37, comboBoxWidth, comboBoxHeight);
+
 }
 
-FxEditor::Punch::Punch()
+FxEditor::Punch::Punch(VirusParameterBinding &_parameterBinding)
 {
     setupRotary(*this, m_amount);
     m_amount.setBounds(19, 12, knobSize, knobSize);
+
+    _parameterBinding.bind(m_amount, Virus::Param_PunchIntensity);
 }
 
-FxEditor::DelayAndReverb::DelayAndReverb()
+FxEditor::DelayAndReverb::DelayAndReverb(VirusParameterBinding &_parameterBinding) : m_sync(_parameterBinding)
 {
     constexpr auto y = 18;
     for (auto *s : {&m_time, &m_rate, &m_depth, &m_color, &m_feedback})
@@ -126,9 +161,16 @@ FxEditor::DelayAndReverb::DelayAndReverb()
 
     m_sync.setBounds(0, 116 + 2, 481, 116);
     addAndMakeVisible(m_sync);
+
+    _parameterBinding.bind(m_time, Virus::Param_DelayTime);
+    _parameterBinding.bind(m_rate, Virus::Param_DelayRateReverbDecayTime);
+    _parameterBinding.bind(m_depth, Virus::Param_DelayDepthReverbRoomSize);
+    _parameterBinding.bind(m_color, Virus::Param_DelayColor);
+    _parameterBinding.bind(m_feedback, Virus::Param_DelayFeedback);
+    _parameterBinding.bind(m_fxMode, Virus::Param_DelayReverbMode);
 }
 
-FxEditor::DelayAndReverb::Sync::Sync()
+FxEditor::DelayAndReverb::Sync::Sync(VirusParameterBinding &_parameterBinding)
 {
     setupRotary(*this, m_mix);
     m_mix.getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_RED);
@@ -138,9 +180,14 @@ FxEditor::DelayAndReverb::Sync::Sync()
     m_clock.setBounds(18, 22, comboBoxWidth, comboBoxHeight);
     addAndMakeVisible(m_lfoShape);
     m_lfoShape.setBounds(m_clock.getBounds().getRight() + 26, 22, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_mix, Virus::Param_EffectSend);
+    _parameterBinding.bind(m_clock, Virus::Param_DelayClock);
+    _parameterBinding.bind(m_lfoShape, Virus::Param_DelayLfoShape);
 }
 
-FxEditor::Vocoder::Vocoder() : m_link(true)
+FxEditor::Vocoder::Vocoder(VirusParameterBinding &_parameterBinding) :
+    m_link(true), m_carrier(_parameterBinding), m_modulator(_parameterBinding)
 {
     constexpr auto y = 17;
     for (auto *s : {&m_sourceBalance, &m_spectralBalance, &m_bands, &m_attack, &m_release})
@@ -160,9 +207,10 @@ FxEditor::Vocoder::Vocoder() : m_link(true)
     m_link.setBounds(445, 195, 12, 36);
     addAndMakeVisible(m_mode);
     m_mode.setBounds(16, 43, comboBoxWidth, comboBoxHeight);
+
 }
 
-FxEditor::Vocoder::Carrier::Carrier()
+FxEditor::Vocoder::Carrier::Carrier(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = -4;
     for (auto *s : {&m_center_freq, &m_q_factor, &m_spread})
@@ -172,7 +220,7 @@ FxEditor::Vocoder::Carrier::Carrier()
     m_spread.setBounds(m_q_factor.getRight() - 7, y, knobSize, knobSize);
 }
 
-FxEditor::Vocoder::Modulator::Modulator()
+FxEditor::Vocoder::Modulator::Modulator(VirusParameterBinding &_parameterBinding)
 {
     constexpr auto y = -4;
     for (auto *s : {&m_freq_offset, &m_q_factor, &m_spread})

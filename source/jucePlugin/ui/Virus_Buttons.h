@@ -24,10 +24,10 @@ namespace Buttons
     {
     public:
         EnvPol();
-
-    private:
         juce::DrawableButton m_pos;
         juce::DrawableButton m_neg;
+    private:
+
     };
 
     class LinkButton : public juce::DrawableButton
