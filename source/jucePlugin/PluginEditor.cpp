@@ -1,6 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
+#include "VirusController.h"
 #include "version.h"
 
 #include "ui/VirusEditor.h"
@@ -152,14 +152,15 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
 	m_openEditor.setButtonText("Show Editor");
 	m_openEditor.setTopLeftPosition(0, 500);
-	m_openEditor.onClick = [this]()
+	auto ctrl =& processorRef.getController();
+	m_openEditor.onClick = [this, ctrl]()
 	{
 		m_virusEditor.reset(new juce::ResizableWindow("VirusEditor", true));
 		m_virusEditor->setTopLeftPosition(0, 0);
 		m_virusEditor->setUsingNativeTitleBar(true);
 		m_virusEditor->setVisible(true);
 		m_virusEditor->setResizable(true, false);
-		m_virusEditor->setContentOwned(new VirusEditor(m_parameterBinding), true);
+		m_virusEditor->setContentOwned(new VirusEditor(m_parameterBinding,*ctrl), true);
 	};
 	addAndMakeVisible(m_openEditor);
 }

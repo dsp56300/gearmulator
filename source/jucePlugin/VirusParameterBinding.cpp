@@ -28,8 +28,10 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 	_combo.addItemList(v->getAllValueStrings(), 1);
 	_combo.setSelectedItemIndex(v->getValueObject().getValueSource().getValue());
 	_combo.onChange = [this, &_combo, v]() {
-		v->setValue(_combo.getSelectedItemIndex());
+		//v->setValue(_combo.getSelectedId() - 1);
+		v->getValueObject().getValueSource().setValue(_combo.getSelectedItemIndex());
 	};
+	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedItemIndex(v->getValueObject().getValueSource().getValue(), juce::NotificationType::dontSendNotification); };
 }
 
 void VirusParameterBinding::bind(juce::DrawableButton &_btn, Virus::ParameterType _param) const

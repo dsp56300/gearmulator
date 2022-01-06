@@ -120,7 +120,7 @@ namespace Virus
 		Param_ChorusDelay,
 		Param_ChorusFeedback,
 		Param_ChorusLfoShape,
-		Param_DelayReverMode,
+		Param_DelayReverbMode,
 		Param_EffectSend,
 		Param_DelayTime,
 		Param_DelayFeedback,
