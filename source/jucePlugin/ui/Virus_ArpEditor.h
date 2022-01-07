@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../PluginProcessor.h"
+#include "Virus_Buttons.h"
 
 class VirusParameterBinding;
 
@@ -38,7 +39,7 @@ private:
         juce::Slider m_noteLength;
         juce::Slider m_noteSwing;
         juce::ComboBox m_mode, m_pattern, m_octaveRange, m_resolution;
-        juce::TextButton m_arpHold;
+        Buttons::ArpHoldButton m_arpHold;
     } m_arp;
 
     struct SoftKnobs : juce::Component

@@ -19,7 +19,13 @@ namespace Buttons
         static constexpr auto kWidth = 23;
         static constexpr auto kHeight = 19;
     };
-
+    class ArpHoldButton : public juce::DrawableButton
+    {
+    public:
+        ArpHoldButton();
+        static constexpr auto kWidth = 28;
+        static constexpr auto kHeight = 11;
+    };
     class EnvPol : public juce::Component
     {
     public:
@@ -53,10 +59,10 @@ namespace Buttons
     };
 
     class PartSelectButton : public juce::DrawableButton
-	{
-	public:
-		static constexpr auto kWidth = 39;
-		static constexpr auto kHeight = 36;
-		PartSelectButton();
+    {
+    public:
+        static constexpr auto kWidth = 39;
+        static constexpr auto kHeight = 36;
+        PartSelectButton();
     };
 } // namespace Buttons

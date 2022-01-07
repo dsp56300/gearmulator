@@ -27,6 +27,17 @@ namespace Buttons
         setImages(off.get(), nullptr, on.get(), nullptr, on.get());
     }
 
+    Buttons::ArpHoldButton::ArpHoldButton() : DrawableButton("ArpHoldButton", DrawableButton::ImageRaw)
+    {
+        auto off = Drawable::createFromImageData(BinaryData::arphold_btn_28_22_png, BinaryData::arphold_btn_28_22_pngSize);
+        auto on = off->createCopy();
+        setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
+        setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
+        setClickingTogglesState(true);
+        on->setOriginWithOriginalSize({0, -11});
+        setImages(off.get(), nullptr, on.get(), nullptr, on.get());
+    }
+
     Buttons::EnvPol::EnvPol() : m_pos("Positive", DrawableButton::ImageRaw), m_neg("Negative", DrawableButton::ImageRaw)
     {
         static int radioGroup = 0x4bc3f;

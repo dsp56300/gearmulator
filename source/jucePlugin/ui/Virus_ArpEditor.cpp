@@ -88,9 +88,9 @@ ArpEditor::Arpeggiator::Arpeggiator(VirusParameterBinding &_parameterBinding)
     m_resolution.setBounds(220, comboTopY, comboBoxWidth, comboBoxHeight);
     m_octaveRange.setBounds(m_pattern.getBounds().translated(0, comboBoxHeight + 18));
 
-    m_arpHold.setButtonText("On");
+    //m_arpHold.setButtonText("On");
     addAndMakeVisible(m_arpHold);
-    m_arpHold.setBounds(220, m_octaveRange.getY(), 32, comboBoxHeight);
+    m_arpHold.setBounds(222, m_octaveRange.getY()+2, 28, 11);
 
     _parameterBinding.bind(m_globalTempo, Virus::Param_ClockTempo);
     _parameterBinding.bind(m_noteLength, Virus::Param_ArpNoteLength);
