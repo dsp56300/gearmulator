@@ -21,6 +21,7 @@ public:
     void changePart(uint8_t _part);
     void updatePartsPresetNames();
     void loadFile();
+	void saveFile();
     void setPlayMode(uint8_t _mode);
 
 private:

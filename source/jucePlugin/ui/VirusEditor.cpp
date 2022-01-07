@@ -42,13 +42,14 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_mainButtons.m_oscFilter.setToggleState(true, NotificationType::dontSendNotification);
     addAndMakeVisible(m_presetButtons);
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
+    m_presetButtons.m_save.onClick = [this]() { saveFile(); };
     for (auto pt = 0; pt < 16; pt++)
     {
-        m_partLabels[pt].setBounds(34, 161 + pt * (36), 39, 36);
+        m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
         m_partLabels[pt].setText(juce::String(pt + 1), juce::dontSendNotification);
         m_partLabels[pt].setColour(0, juce::Colours::white);
         m_partLabels[pt].setColour(1, juce::Colour(45, 24, 24));
-        m_partLabels[pt].setJustificationType(Justification::centredLeft);
+        m_partLabels[pt].setJustificationType(Justification::centred);
         addAndMakeVisible(m_partLabels[pt]);
 
         m_partSelect[pt].setBounds(34, 161 + pt*(36), 39, 36);
@@ -412,13 +413,10 @@ void VirusEditor::loadFile()
     {
         juce::MemoryBlock data;
         result.loadFileAsData(data);
-        if (data.getSize() % 267 != 0)
-        {
-            return;
-        }
+
         for (auto it = data.begin(); it != data.end(); it += 267)
         {
-            if ((it + 267) < data.end())
+            if ((it + 267) <= data.end())
             {
                 m_controller.sendSysEx(Virus::SysEx(it, it + 267));
                 sentData = true;
@@ -470,4 +468,38 @@ void VirusEditor::loadFile()
 
     if (sentData)
         m_controller.onStateLoaded();
+}
+
+void VirusEditor::saveFile() {
+    juce::FileChooser chooser(
+        "Save preset as syx",
+        m_previousPath.isEmpty()
+            ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+            : m_previousPath,
+        "*.syx", true);
+
+    if (!chooser.browseForFileToSave(true))
+        return;
+    bool sentData = false;
+    const auto result = chooser.getResult();
+    m_previousPath = result.getParentDirectory().getFullPathName();
+    const auto ext = result.getFileExtension().toLowerCase();
+
+    const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
+    const uint8_t syxEof[1] = {0xF7};
+    uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
+    uint8_t data[256];
+    for (int i = 0; i < 256; i++)
+    {
+        auto param = m_controller.getParamValue(m_parameterBinding.m_part, i < 128 ? 0 : 1, i % 128);
+
+        data[i] = (int)(param ? param->getValue() : 0);
+        cs += data[i];
+    }
+    cs = cs & 0x7f;
+
+    result.appendData(syxHeader, 9);
+    result.appendData(data, 256);
+    result.appendData(&cs, 1);
+    result.appendData(syxEof, 1);
 }
