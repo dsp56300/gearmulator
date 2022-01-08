@@ -83,12 +83,11 @@ ArpEditor::Arpeggiator::Arpeggiator(VirusParameterBinding &_parameterBinding)
     constexpr auto comboBoxHeight = 15;
     constexpr auto comboTopY = 35;
 
-    m_mode.setBounds(39, 40, 52, 38);
+    m_mode.setBounds(35, 40, 100, 18);
     m_pattern.setBounds(114, comboTopY, comboBoxWidth, comboBoxHeight);
     m_resolution.setBounds(220, comboTopY, comboBoxWidth, comboBoxHeight);
     m_octaveRange.setBounds(m_pattern.getBounds().translated(0, comboBoxHeight + 18));
 
-    //m_arpHold.setButtonText("On");
     addAndMakeVisible(m_arpHold);
     m_arpHold.setBounds(222, m_octaveRange.getY()+2, 28, 11);
 

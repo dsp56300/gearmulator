@@ -5,6 +5,7 @@
 #include "Virus_FxEditor.h"
 #include "Virus_LfoEditor.h"
 #include "Virus_OscEditor.h"
+#include "Virus_PatchBrowser.h"
 #include "../VirusParameterBinding.h"
 #include "../VirusController.h"
 
@@ -28,6 +29,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_fxEditor = std::make_unique<FxEditor>(_parameterBinding);
     m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
     m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
+    m_patchBrowser = std::make_unique<PatchBrowser>(_parameterBinding, m_controller);
 
     applyToSections([this](Component *s) { addChildComponent(s); });
 
@@ -37,12 +39,14 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         m_fxEditor->setVisible(m_mainButtons.m_effects.getToggleState());
         m_lfoEditor->setVisible(m_mainButtons.m_lfoMatrix.getToggleState());
         m_oscEditor->setVisible(m_mainButtons.m_oscFilter.getToggleState());
+        m_patchBrowser->setVisible(m_mainButtons.m_patches.getToggleState());
     };
     m_oscEditor->setVisible(true);
     m_mainButtons.m_oscFilter.setToggleState(true, NotificationType::dontSendNotification);
     addAndMakeVisible(m_presetButtons);
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
     m_presetButtons.m_save.onClick = [this]() { saveFile(); };
+
     for (auto pt = 0; pt < 16; pt++)
     {
         m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
@@ -61,9 +65,11 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         };
         addAndMakeVisible(m_partSelect[pt]);
         
-        m_presetNames[pt].setBounds(80, 172 + pt * (36), 136, 16);
+        m_presetNames[pt].setBounds(80, 171 + pt * (36) - 2, 136, 16 + 4);
         m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
-        m_presetNames[pt].setColour(0, juce::Colours::white);
+        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255,113,128));
+        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
+        //m_presetNames[pt].setColour(0, juce::Colours::white);
 
         m_presetNames[pt].onClick = [this, pt]() {
             juce::PopupMenu selector;
@@ -89,10 +95,14 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         };
         addAndMakeVisible(m_presetNames[pt]);
 
-        m_prevPatch[pt].setBounds(228, 173 + 36*pt, 16, 12);
-        m_nextPatch[pt].setBounds(247, 173 + 36*pt, 16, 12);
+        m_prevPatch[pt].setBounds(228, 173 + 36*pt - 2, 16, 14);
+        m_nextPatch[pt].setBounds(247, 173 + 36*pt - 2, 16, 14);
         m_prevPatch[pt].setButtonText("<");
         m_nextPatch[pt].setButtonText(">");
+        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
+        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
+        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
+        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
         m_prevPatch[pt].onClick = [this, pt]() {
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
@@ -114,12 +124,16 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     addAndMakeVisible(m_btMultiMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
     m_btSingleMode.setSize(100, 30);
-    m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
+    //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
     const auto isMulti = m_controller.isMultiMode();
     m_btSingleMode.setToggleState(!isMulti, juce::dontSendNotification);
     m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
-    m_btSingleMode.setClickingTogglesState(false);
-    m_btMultiMode.setClickingTogglesState(false);
+    m_btSingleMode.setClickingTogglesState(true);
+    m_btMultiMode.setClickingTogglesState(true);
+    m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
+    m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
     m_btSingleMode.onClick = [this]() { setPlayMode(0); };
     m_btMultiMode.onClick = [this]() { setPlayMode(1); };
 
@@ -200,7 +214,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.setBounds(410, 48, 362, 36);
     m_patchName.setJustificationType(Justification::left);
     m_patchName.setFont(juce::Font(32.0f, juce::Font::bold));
-    m_patchName.setColour(juce::Label::textColourId, juce::Colours::red);
+    m_patchName.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
     addAndMakeVisible(m_patchName);
 
     startTimerHz(5);
@@ -298,7 +312,8 @@ void VirusEditor::updatePartsPresetNames()
 void VirusEditor::applyToSections(std::function<void(Component *)> action)
 {
     for (auto *section : {static_cast<Component *>(m_arpEditor.get()), static_cast<Component *>(m_fxEditor.get()),
-                          static_cast<Component *>(m_lfoEditor.get()), static_cast<Component *>(m_oscEditor.get())})
+                          static_cast<Component *>(m_lfoEditor.get()), static_cast<Component *>(m_oscEditor.get()),
+                          static_cast<Component *>(m_patchBrowser.get())})
     {
         action(section);
     }
@@ -353,12 +368,14 @@ VirusEditor::MainButtons::MainButtons()
 , m_lfoMatrix ("LFO|MATRIX", DrawableButton::ImageRaw)
 , m_effects ("EFFECTS", DrawableButton::ImageRaw)
 , m_arpSettings ("ARP|SETTINGS", DrawableButton::ImageRaw)
+, m_patches("PATCHES", DrawableButton::ImageRaw)
 {
-    constexpr auto numOfMainButtons = 4;
+    constexpr auto numOfMainButtons = 5;
     setupButton (0, Drawable::createFromImageData (BinaryData::GLOBAL_btn_osc_filter_141x26_png, BinaryData::GLOBAL_btn_osc_filter_141x26_pngSize), m_oscFilter);
     setupButton (1, Drawable::createFromImageData (BinaryData::GLOBAL_btn_lfo_matrix_141x26_png, BinaryData::GLOBAL_btn_lfo_matrix_141x26_pngSize), m_lfoMatrix);
     setupButton (2, Drawable::createFromImageData (BinaryData::GLOBAL_btn_effects_141x26_png, BinaryData::GLOBAL_btn_effects_141x26_pngSize), m_effects);
     setupButton (3, Drawable::createFromImageData (BinaryData::GLOBAL_btn_arp_settings_141x26_png, BinaryData::GLOBAL_btn_arp_settings_141x26_pngSize), m_arpSettings);
+    setupButton (4,  Drawable::createFromImageData(BinaryData::GLOBAL_btn_patch_browser_141x26_png, BinaryData::GLOBAL_btn_patch_browser_141x26_pngSize), m_patches);
     setSize ((kButtonWidth + kMargin) * numOfMainButtons, kButtonHeight);
 }
 
@@ -493,7 +510,7 @@ void VirusEditor::saveFile() {
     {
         auto param = m_controller.getParamValue(m_parameterBinding.m_part, i < 128 ? 0 : 1, i % 128);
 
-        data[i] = (int)(param ? param->getValue() : 0);
+        data[i] = param ? (int)param->getValue() : 0;
         cs += data[i];
     }
     cs = cs & 0x7f;

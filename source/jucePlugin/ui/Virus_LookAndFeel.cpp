@@ -61,5 +61,9 @@ void LookAndFeel::drawComboBox (Graphics& g, int width, int height, bool isButto
 {
     // panels draws combo box... so it's invisible :)
 }
+void LookAndFeel::drawButtonBackground(juce::Graphics &, juce::Button &, const juce::Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+
+}
 
 } // namespace Virus

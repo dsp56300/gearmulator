@@ -40,6 +40,7 @@ PRIVATE
     ui/Virus_FxEditor.cpp
     ui/Virus_LfoEditor.cpp
     ui/Virus_OscEditor.cpp
+    ui/Virus_PatchBrowser.cpp
     ui/Virus_Buttons.h
     ui/Virus_LookAndFeel.h
     ui/VirusEditor.h
@@ -47,6 +48,7 @@ PRIVATE
     ui/Virus_FxEditor.h
     ui/Virus_LfoEditor.h
     ui/Virus_OscEditor.h
+    ui/Virus_PatchBrowser.h
     ui/Ui_Utils.h
 	VirusController.cpp
 	VirusController.h
@@ -70,6 +72,7 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/buttons/GLOBAL_btn_effects_141x26.png"
         "assets/buttons/GLOBAL_btn_lfo_matrix_141x26.png"
         "assets/buttons/GLOBAL_btn_osc_filter_141x26.png"
+        "assets/buttons/GLOBAL_btn_patch_browser_141x26.png"
         "assets/buttons/env_pol_50x34.png"
         "assets/buttons/lfo_btn_23_19.png"
         "assets/buttons/link_vert_12x36.png"

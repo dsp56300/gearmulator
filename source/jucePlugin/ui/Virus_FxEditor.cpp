@@ -208,6 +208,13 @@ FxEditor::Vocoder::Vocoder(VirusParameterBinding &_parameterBinding) :
     addAndMakeVisible(m_mode);
     m_mode.setBounds(16, 43, comboBoxWidth, comboBoxHeight);
 
+    _parameterBinding.bind(m_mode, Virus::Param_VocoderMode);
+    _parameterBinding.bind(m_bands, Virus::Param_FilterEnvRelease);
+    _parameterBinding.bind(m_sourceBalance, Virus::Param_FilterBalance);
+    _parameterBinding.bind(m_spectralBalance, Virus::Param_FilterEnvSustainTime);
+    _parameterBinding.bind(m_attack, Virus::Param_FilterEnvAttack);
+    _parameterBinding.bind(m_release, Virus::Param_FilterEnvDecay);
+    _parameterBinding.bind(m_link, Virus::Param_Filter2CutoffLink);
 }
 
 FxEditor::Vocoder::Carrier::Carrier(VirusParameterBinding &_parameterBinding)
@@ -218,6 +225,10 @@ FxEditor::Vocoder::Carrier::Carrier(VirusParameterBinding &_parameterBinding)
     m_center_freq.setBounds(12, -4, knobSize, knobSize);
     m_q_factor.setBounds(m_center_freq.getRight() - 8, y, knobSize, knobSize);
     m_spread.setBounds(m_q_factor.getRight() - 7, y, knobSize, knobSize);
+
+    _parameterBinding.bind(m_center_freq, Virus::Param_FilterCutA);
+    _parameterBinding.bind(m_q_factor, Virus::Param_FilterResA);
+    _parameterBinding.bind(m_spread, Virus::Param_FilterKeyFollowA);
 }
 
 FxEditor::Vocoder::Modulator::Modulator(VirusParameterBinding &_parameterBinding)
@@ -230,4 +241,9 @@ FxEditor::Vocoder::Modulator::Modulator(VirusParameterBinding &_parameterBinding
     m_spread.setBounds(m_q_factor.getRight() - 7, y, knobSize, knobSize);
     addAndMakeVisible(m_modInput);
     m_modInput.setBounds(8, 23, comboBoxWidth, comboBoxHeight);
+
+    _parameterBinding.bind(m_freq_offset, Virus::Param_FilterCutB);
+    _parameterBinding.bind(m_q_factor, Virus::Param_FilterResB);
+    _parameterBinding.bind(m_spread, Virus::Param_FilterKeyFollowB);
+    _parameterBinding.bind(m_modInput, Virus::Param_InputSelect);
 }

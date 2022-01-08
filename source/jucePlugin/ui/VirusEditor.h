@@ -11,6 +11,7 @@ class OscEditor;
 class LfoEditor;
 class FxEditor;
 class ArpEditor;
+class PatchBrowser;
 
 class VirusEditor : public juce::Component, private juce::Timer
 {
@@ -21,7 +22,7 @@ public:
     void changePart(uint8_t _part);
     void updatePartsPresetNames();
     void loadFile();
-	void saveFile();
+    void saveFile();
     void setPlayMode(uint8_t _mode);
 
 private:
@@ -53,7 +54,7 @@ private:
         void valueChanged(juce::Value &) override;
 
         std::function<void()> updateSection;
-        juce::DrawableButton m_oscFilter, m_lfoMatrix, m_effects, m_arpSettings;
+        juce::DrawableButton m_oscFilter, m_lfoMatrix, m_effects, m_arpSettings, m_patches;
         static constexpr auto kMargin = 5;
         static constexpr auto kButtonWidth = 141;
         static constexpr auto kButtonHeight = 26;
@@ -78,6 +79,7 @@ private:
     std::unique_ptr<LfoEditor> m_lfoEditor;
     std::unique_ptr<FxEditor> m_fxEditor;
     std::unique_ptr<ArpEditor> m_arpEditor;
+    std::unique_ptr<PatchBrowser> m_patchBrowser;
 
     std::unique_ptr<juce::Drawable> m_background;
 
