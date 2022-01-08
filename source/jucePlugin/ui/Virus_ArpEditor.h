@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../PluginProcessor.h"
+#include "Virus_Buttons.h"
 
 class VirusParameterBinding;
 
@@ -12,7 +13,7 @@ public:
 private:
     struct VelocityAmount : juce::Component
     {
-        VelocityAmount();
+        VelocityAmount(VirusParameterBinding &_parameterBinding);
         juce::Slider m_osc1Shape;
         juce::Slider m_filter1Freq;
         juce::Slider m_filter1Res;
@@ -27,29 +28,29 @@ private:
 
     struct Inputs : juce::Component
     {
-        Inputs();
+        Inputs(VirusParameterBinding &_parameterBinding);
         juce::ComboBox m_inputMode, m_inputSelect;
     } m_inputs;
 
     struct Arpeggiator : juce::Component
     {
-        Arpeggiator();
+        Arpeggiator(VirusParameterBinding &_parameterBinding);
         juce::Slider m_globalTempo;
         juce::Slider m_noteLength;
         juce::Slider m_noteSwing;
         juce::ComboBox m_mode, m_pattern, m_octaveRange, m_resolution;
-        juce::TextButton m_arpHold;
+        Buttons::ArpHoldButton m_arpHold;
     } m_arp;
 
     struct SoftKnobs : juce::Component
     {
-        SoftKnobs();
+        SoftKnobs(VirusParameterBinding &_parameterBinding);
         juce::ComboBox m_funcAs[2], m_name[2];
     } m_softKnobs;
 
     struct PatchSettings : juce::Component
     {
-        PatchSettings();
+        PatchSettings(VirusParameterBinding &_parameterBinding);
         juce::Slider m_patchVolume;
         juce::Slider m_panning;
         juce::Slider m_outputBalance;

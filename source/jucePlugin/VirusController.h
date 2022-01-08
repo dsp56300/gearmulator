@@ -120,7 +120,7 @@ namespace Virus
 		Param_ChorusDelay,
 		Param_ChorusFeedback,
 		Param_ChorusLfoShape,
-		Param_DelayReverMode,
+		Param_DelayReverbMode,
 		Param_EffectSend,
 		Param_DelayTime,
 		Param_DelayFeedback,
@@ -381,6 +381,11 @@ namespace Virus
 		Param_Count
 	};
 
+	enum EnvelopeType
+	{
+		Env_Amp,
+		Env_Filter
+	};
     using SysEx = std::vector<uint8_t>;
     class Controller : private juce::Timer
     {
@@ -402,6 +407,7 @@ namespace Virus
         juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
         juce::Value *getParamValue(ParameterType _param);
         Parameter* getParameter(ParameterType _param);
+        Parameter *getParameter(ParameterType _param, uint8_t _part);
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
