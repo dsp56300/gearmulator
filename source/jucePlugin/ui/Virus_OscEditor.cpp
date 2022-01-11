@@ -26,6 +26,8 @@ OscEditor::OscEditor(VirusParameterBinding& _parameterBinding)
     addAndMakeVisible(m_filterEnv);
     addAndMakeVisible(m_ampEnv);
     addAndMakeVisible(m_oscSync);
+
+    _parameterBinding.bind(m_oscSync, Virus::Param_Osc2Sync);
 }
 
 void OscEditor::resized()

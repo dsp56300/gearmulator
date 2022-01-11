@@ -42,6 +42,7 @@ namespace Virus
 			bool isPublic;
 			bool isDiscrete;
 			bool isBool;
+			bool isBipolar;
         };
 
         Parameter(Controller &, const Description desc, uint8_t partNum = 0x40);
@@ -56,9 +57,10 @@ namespace Virus
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
 		void setValue(float newValue) override { return m_value.setValue(convertFrom0to1(newValue)); };
 		void setValueFromSynth(int newValue, bool notifyHost = true);
-		float getDefaultValue() const override { return 0; /* maybe return from ROM state? */ }
+		float getDefaultValue() const override { return m_desc.isBipolar ? 64.0f : 0.0f; /* maybe return from ROM state? */ }
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
 		bool isBoolean() const override { return m_desc.isBool; }
+		bool isBipolar() const { return m_desc.isBipolar; }
 
 		float getValueForText(const juce::String &text) const override
 		{

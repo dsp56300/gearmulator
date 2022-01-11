@@ -106,12 +106,10 @@ namespace Buttons
 
     Buttons::PartSelectButton::PartSelectButton() : DrawableButton("PartSelectButton", DrawableButton::ButtonStyle::ImageRaw)
     {
-        auto normal =
-            Drawable::createFromImageData(BinaryData::part_select_btn_39x72_png, BinaryData::part_select_btn_39x72_pngSize);
-        auto pressed = normal->createCopy();
-        pressed->setOriginWithOriginalSize({0, -36});
+        auto on =
+            Drawable::createFromImageData(BinaryData::part_select_btn_36x36_png, BinaryData::part_select_btn_36x36_pngSize);
         setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
         setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
-        setImages(normal.get(), nullptr, pressed.get(), nullptr, pressed.get(), nullptr, normal.get());
+        setImages(nullptr, nullptr, on.get(), nullptr, on.get(), nullptr, nullptr);
     }
 }; // namespace Buttons

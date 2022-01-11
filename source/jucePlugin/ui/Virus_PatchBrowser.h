@@ -52,4 +52,5 @@ private:
                            bool rowIsSelected) override;
 
     virtual void selectedRowsChanged(int lastRowSelected) override;
+    virtual void cellDoubleClicked (int rowNumber, int columnId, const juce::MouseEvent &) override;
 };

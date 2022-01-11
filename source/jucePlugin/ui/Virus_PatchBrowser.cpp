@@ -75,6 +75,7 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
             }
         }
         m_patchList.updateContent();
+        m_patchList.deselectAllRows();
         m_patchList.repaint(); // force repaint since row number doesn't often change
     }
     else if (ext == ".mid" || ext == ".midi")
@@ -181,7 +182,7 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
 void PatchBrowser::selectedRowsChanged(int lastRowSelected) { 
     auto idx = m_patchList.getSelectedRow();
     uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
-    syxHeader[8] = m_controller.isMultiMode() ? m_parameterBinding.m_part : virusLib::ProgramType::SINGLE; // set edit buffer
+    syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
     const uint8_t syxEof = 0xF7;
     uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
     uint8_t data[256];
@@ -204,4 +205,11 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     syx.push_back(syxEof);
     m_controller.sendSysEx(syx); // send to edit buffer
     m_controller.parseMessage(syx); // update ui
+}
+
+void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
+{
+    if(rowNumber == m_patchList.getSelectedRow()) {
+        selectedRowsChanged(0);
+    }
 }

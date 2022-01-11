@@ -15,7 +15,8 @@ constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
 
 VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
-    m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()), m_btSingleMode("Single Mode"), m_btMultiMode("Multi Mode")
+    m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()), m_btSingleMode("Single\nMode"), m_btMultiSingleMode("Multi\nSingle"), m_btMultiMode("Multi\nMode"),
+    m_controlLabel("ctrlLabel", "")
 {
     setLookAndFeel(&m_lookAndFeel);
 
@@ -56,7 +57,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         m_partLabels[pt].setJustificationType(Justification::centred);
         addAndMakeVisible(m_partLabels[pt]);
 
-        m_partSelect[pt].setBounds(34, 161 + pt*(36), 39, 36);
+        m_partSelect[pt].setBounds(35, 161 + pt*(36), 36, 36);
         m_partSelect[pt].setButtonText(juce::String(pt));
         m_partSelect[pt].setRadioGroupId(kPartGroupId);
         m_partSelect[pt].setClickingTogglesState(true);
@@ -69,7 +70,6 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
         m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255,113,128));
         m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
-        //m_presetNames[pt].setColour(0, juce::Colours::white);
 
         m_presetNames[pt].onClick = [this, pt]() {
             juce::PopupMenu selector;
@@ -115,31 +115,53 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         };
         addAndMakeVisible(m_prevPatch[pt]);
         addAndMakeVisible(m_nextPatch[pt]);
+
+        m_partVolumes[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        m_partVolumes[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+        m_partVolumes[pt].setBounds(m_nextPatch[pt].getBounds().translated(m_nextPatch[pt].getWidth()+8, 0));
+        m_partVolumes[pt].setSize(18,18);
+        m_partVolumes[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
+        _parameterBinding.bind(m_partVolumes[pt], Virus::Param_PartVolume, pt);
+        addAndMakeVisible(m_partVolumes[pt]);
+
+        m_partPans[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        m_partPans[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+        m_partPans[pt].setBounds(m_partVolumes[pt].getBounds().translated(m_partVolumes[pt].getWidth()+4, 0));
+        m_partPans[pt].setSize(18,18);
+        m_partPans[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
+        _parameterBinding.bind(m_partPans[pt], Virus::Param_Panorama, pt);
+        addAndMakeVisible(m_partPans[pt]);
     }
-    m_partSelect[0].setToggleState(true, NotificationType::sendNotification);
+    m_partSelect[m_controller.getCurrentPart()].setToggleState(true, NotificationType::sendNotification);
 
     m_btSingleMode.setRadioGroupId(0x3cf);
     m_btMultiMode.setRadioGroupId(0x3cf);
+    m_btMultiSingleMode.setRadioGroupId(0x3cf);
     addAndMakeVisible(m_btSingleMode);
     addAndMakeVisible(m_btMultiMode);
+    addAndMakeVisible(m_btMultiSingleMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
-    m_btSingleMode.setSize(100, 30);
+    m_btSingleMode.setSize(70, 30);
     //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    const auto isMulti = m_controller.isMultiMode();
-    m_btSingleMode.setToggleState(!isMulti, juce::dontSendNotification);
-    m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
+    const auto isMulti = m_controller.getParamValue(Virus::Param_PlayMode)>0;
     m_btSingleMode.setClickingTogglesState(true);
     m_btMultiMode.setClickingTogglesState(true);
+    m_btMultiSingleMode.setClickingTogglesState(true);
+    m_btSingleMode.setToggleState(true, juce::sendNotificationAsync);
+    //m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
+    //m_btMultiSingleMode.setToggleState(isMulti, juce::dontSendNotification);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
     m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btSingleMode.onClick = [this]() { setPlayMode(0); };
-    m_btMultiMode.onClick = [this]() { setPlayMode(1); };
+    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
+    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
+    m_btSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeSingle); };
+    m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
+    m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
 
-    m_btMultiMode.setTopLeftPosition(m_btSingleMode.getPosition().x + m_btSingleMode.getWidth() + 10,
-    m_btSingleMode.getY());
-    m_btMultiMode.setSize(100, 30);
+    m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+    m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
 
     juce::PropertiesFile::Options opts;
     opts.applicationName = "DSP56300 Emulator";
@@ -215,7 +237,25 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.setJustificationType(Justification::left);
     m_patchName.setFont(juce::Font(32.0f, juce::Font::bold));
     m_patchName.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
+    m_patchName.setEditable(false, true, true);
+    m_patchName.onTextChange = [this]() {
+        auto text = m_patchName.getText();
+        if(text.trim().length() > 0) {
+            m_controller.setSinglePresetName(m_controller.getCurrentPart(), text);
+        }
+    };
     addAndMakeVisible(m_patchName);
+
+    m_controlLabel.setBounds(650, 48, 262, 36);
+    m_controlLabel.setJustificationType(Justification::right);
+    m_controlLabel.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
+    m_controlLabel.setFont(juce::Font(16.0f, juce::Font::bold));
+    //m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
+    //m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
+    
+    addAndMakeVisible(m_controlLabel);
+
+    addMouseListener(this, true);
 
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
@@ -235,11 +275,14 @@ void VirusEditor::timerCallback()
         m_nextPatch[pt].setVisible(singlePartOrInMulti);
         if (singlePartOrInMulti)
             m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
-        if (pt == m_parameterBinding.m_part)
+        if (pt == m_controller.getCurrentPart())
         {
-            m_patchName.setText(m_controller.getCurrentPartPresetName(pt),
-                                NotificationType::dontSendNotification);
+            const auto patchName = m_controller.getCurrentPartPresetName(pt);
+            if(m_patchName.getText() != patchName) {
+                m_patchName.setText(patchName, NotificationType::dontSendNotification);
+            }
         }
+        //m_partVolumes[pt].setValue(m_controller.getParameter(Virus::Param_PartVolume, pt)->getValue(), juce::dontSendNotification);
     }
     
 }
@@ -317,6 +360,39 @@ void VirusEditor::applyToSections(std::function<void(Component *)> action)
     {
         action(section);
     }
+}
+
+void VirusEditor::mouseDrag(const juce::MouseEvent & event)
+{
+    const bool paramLocal = false;
+    auto props = event.eventComponent->getProperties();
+    if(props.contains("type") && props["type"] == "slider") {
+        m_controlLabel.setVisible(true);
+        auto comp = dynamic_cast<juce::Slider*>(event.eventComponent);
+        if(comp) {
+            auto name = props["name"];
+            
+            if(paramLocal) {
+                m_controlLabel.setTopLeftPosition(getTopLevelComponent()->getLocalPoint(comp->getParentComponent(), comp->getPosition().translated(0, -16)));
+                m_controlLabel.setSize(comp->getWidth(), 20);
+            }
+            else {
+                m_controlLabel.setBounds(m_patchName.getBounds().translated(m_controlLabel.getWidth(), 0));
+                m_controlLabel.setSize(m_patchName.getWidth()/2, m_patchName.getHeight());
+            }
+            if (props.contains("bipolar") && props["bipolar"]) {
+                m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
+            } else {
+                m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+            }
+        }
+    }
+}
+
+void VirusEditor::mouseUp(const juce::MouseEvent & event)
+{
+    m_controlLabel.setText("", juce::dontSendNotification);
+    m_controlLabel.setVisible(false);
 }
 
 void VirusEditor::resized()
@@ -501,14 +577,13 @@ void VirusEditor::saveFile() {
     const auto result = chooser.getResult();
     m_previousPath = result.getParentDirectory().getFullPathName();
     const auto ext = result.getFileExtension().toLowerCase();
-
     const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
     const uint8_t syxEof[1] = {0xF7};
     uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
     uint8_t data[256];
     for (int i = 0; i < 256; i++)
     {
-        auto param = m_controller.getParamValue(m_parameterBinding.m_part, i < 128 ? 0 : 1, i % 128);
+        auto param = m_controller.getParamValue(m_controller.getCurrentPart(), i < 128 ? 0 : 1, i % 128);
 
         data[i] = param ? (int)param->getValue() : 0;
         cs += data[i];

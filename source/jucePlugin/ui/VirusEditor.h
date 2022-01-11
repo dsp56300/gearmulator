@@ -12,6 +12,7 @@ class LfoEditor;
 class FxEditor;
 class ArpEditor;
 class PatchBrowser;
+class Parts;
 
 class VirusEditor : public juce::Component, private juce::Timer
 {
@@ -32,12 +33,16 @@ private:
 
     juce::Label m_version;
     juce::Label m_patchName;
+    juce::Label m_controlLabel;
     Buttons::PartSelectButton m_partSelect[16];
     juce::Label m_partLabels[16];
     juce::TextButton m_presetNames[16];
     juce::TextButton m_nextPatch[16];
     juce::TextButton m_prevPatch[16];
+    juce::Slider m_partVolumes[16];
+    juce::Slider m_partPans[16];
     juce::TextButton m_btSingleMode;
+    juce::TextButton m_btMultiSingleMode;
     juce::TextButton m_btMultiMode;
     juce::ComboBox m_cmbMidiInput;
     juce::ComboBox m_cmbMidiOutput;
@@ -81,9 +86,13 @@ private:
     std::unique_ptr<ArpEditor> m_arpEditor;
     std::unique_ptr<PatchBrowser> m_patchBrowser;
 
+    std::unique_ptr<Parts> m_partList;
     std::unique_ptr<juce::Drawable> m_background;
 
     Virus::LookAndFeel m_lookAndFeel;
 
     juce::String m_previousPath;
+
+    void mouseDrag (const juce::MouseEvent &event) override;
+    void mouseUp (const juce::MouseEvent &event) override;
 };

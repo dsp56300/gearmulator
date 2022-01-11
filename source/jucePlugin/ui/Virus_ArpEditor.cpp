@@ -83,7 +83,8 @@ ArpEditor::Arpeggiator::Arpeggiator(VirusParameterBinding &_parameterBinding)
     constexpr auto comboBoxHeight = 15;
     constexpr auto comboTopY = 35;
 
-    m_mode.setBounds(35, 40, 100, 18);
+    m_mode.setBounds(35, 40, 90, 15);
+    m_mode.setJustificationType(Justification::topLeft);
     m_pattern.setBounds(114, comboTopY, comboBoxWidth, comboBoxHeight);
     m_resolution.setBounds(220, comboTopY, comboBoxWidth, comboBoxHeight);
     m_octaveRange.setBounds(m_pattern.getBounds().translated(0, comboBoxHeight + 18));
@@ -111,6 +112,11 @@ ArpEditor::SoftKnobs::SoftKnobs(VirusParameterBinding &_parameterBinding)
         addAndMakeVisible(m_name[i]);
         m_name[i].setBounds(m_funcAs[i].getX() + distance, 42, comboBoxWidth, comboBoxHeight);
     }
+    _parameterBinding.bind(m_name[0], Virus::Param_SoftKnob1ShortName);
+    _parameterBinding.bind(m_name[1], Virus::Param_SoftKnob2ShortName);
+
+    _parameterBinding.bind(m_funcAs[0], Virus::Param_SoftKnob1Single);
+    _parameterBinding.bind(m_funcAs[1], Virus::Param_SoftKnob2Single);
 }
 
 ArpEditor::PatchSettings::PatchSettings(VirusParameterBinding &_parameterBinding)
@@ -125,9 +131,11 @@ ArpEditor::PatchSettings::PatchSettings(VirusParameterBinding &_parameterBinding
     m_transpose.setBounds(m_panning.getX(), y2, knobSize, knobSize);
 
     for (auto *cb :
-         {&m_keyMode, &m_secondaryOutput, &m_bendUp, &m_bendDown, &m_bendScale, &m_smoothMode, &m_cat1, &m_cat2})
+         {&m_keyMode, &m_secondaryOutput, &m_bendScale, &m_smoothMode, &m_cat1, &m_cat2})
         addAndMakeVisible(cb);
-
+    
+    addAndMakeVisible(m_bendUp);
+    addAndMakeVisible(m_bendDown);
 
     constexpr auto yDist = 50;
     m_keyMode.setBounds(18, 42, comboBoxWidth, comboBoxHeight);
@@ -146,9 +154,12 @@ ArpEditor::PatchSettings::PatchSettings(VirusParameterBinding &_parameterBinding
     //_parameterBinding.bind(m_outputBalance, Virus::Param_SecondOutputBalance);
     _parameterBinding.bind(m_transpose, Virus::Param_Transpose);
     _parameterBinding.bind(m_keyMode, Virus::Param_KeyMode);
-    //_parameterBinding.bind(m_secondaryOutput, Virus::Param_KeyMode);
     _parameterBinding.bind(m_bendUp, Virus::Param_BenderRangeUp);
     _parameterBinding.bind(m_bendDown, Virus::Param_BenderRangeDown);
     _parameterBinding.bind(m_bendScale, Virus::Param_BenderScale);
     _parameterBinding.bind(m_smoothMode, Virus::Param_ControlSmoothMode);
+    _parameterBinding.bind(m_cat1, Virus::Param_Category1);
+    _parameterBinding.bind(m_cat2, Virus::Param_Category2);
+
+    _parameterBinding.bind(m_secondaryOutput, Virus::Param_PartOutputSelect);
 }

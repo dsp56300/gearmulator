@@ -56,7 +56,8 @@ private:
         juce::Slider m_outputBalance;
         juce::Slider m_transpose;
         juce::ComboBox m_keyMode, m_secondaryOutput;
-        juce::ComboBox m_bendUp, m_bendDown, m_bendScale, m_smoothMode, m_cat1, m_cat2;
+        juce::ComboBox m_bendScale, m_smoothMode, m_cat1, m_cat2;
+        juce::ComboBox m_bendUp, m_bendDown;
     } m_patchSettings;
 
     std::unique_ptr<juce::Drawable> m_background;
