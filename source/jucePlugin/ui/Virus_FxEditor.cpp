@@ -135,6 +135,10 @@ FxEditor::EnvelopeFollower::EnvelopeFollower(VirusParameterBinding &_parameterBi
     addAndMakeVisible(m_input);
     m_input.setBounds(17, 37, comboBoxWidth, comboBoxHeight);
 
+    _parameterBinding.bind(m_input, Virus::Param_InputFollowMode);
+    _parameterBinding.bind(m_attack, Virus::Param_FilterEnvAttack);
+    _parameterBinding.bind(m_release, Virus::Param_FilterEnvDecay);
+    _parameterBinding.bind(m_gain, Virus::Param_FilterEnvSustain);
 }
 
 FxEditor::Punch::Punch(VirusParameterBinding &_parameterBinding)
