@@ -83,6 +83,7 @@ namespace virusLib
 		MIDI_ARPEGGIATOR_SEND = 96,
 		MULTI_PROGRAM_CHANGE = 105,
 		MIDI_CLOCK_RX = 106,
+		EFFECT_SEND = 113, // actually in bank A
 		UNK6d = 109,
 		PLAY_MODE = 122,
 		PART_NUMBER = 123,

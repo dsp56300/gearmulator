@@ -150,6 +150,10 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
+
+    // without this some combobox parameters are wrong on first load, no idea why.
+    m_controller.getParameter(Virus::Param_PlayMode)->setValue(virusLib::PlayModeSingle);
+    recreateControls();
 }
 
 VirusEditor::~VirusEditor() { setLookAndFeel(nullptr); }

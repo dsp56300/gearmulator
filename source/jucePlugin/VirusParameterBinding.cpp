@@ -48,7 +48,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 }
 void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _param, uint8_t _part)
 {
-	const auto v = m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart());
+	const auto v = m_processor.getController().getParameter(_param, _part);
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");

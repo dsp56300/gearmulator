@@ -90,6 +90,8 @@ private:
             Sync(VirusParameterBinding &_parameterBinding);
             juce::Slider m_mix;
             juce::ComboBox m_clock, m_lfoShape;
+            juce::ComboBox m_reverbMode;
+            juce::Slider m_damping;
         } m_sync;
     } m_delayReverb;
 

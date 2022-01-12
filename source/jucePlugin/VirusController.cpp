@@ -379,6 +379,9 @@ namespace Virus
 				if (auto* p = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
 				}
+				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
+					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
+				}
 			}
 		}
         if (hasChecksum)
@@ -662,7 +665,20 @@ namespace Virus
 		default: return juce::String(idx);
 		}
 	}
-
+	juce::String numToDelayLfoShape(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Sine";
+		case 1:  return "Triangle";
+		case 2:  return "Saw";
+		case 3:  return "Square";
+		case 4:  return "S&H";
+		case 5:  return "S&G";
+			default: return juce::String("");
+		}
+	}
 	juce::String numToOsc3Mode(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -822,8 +838,28 @@ namespace Virus
 		case 2:  return "Reverb";
 		case 3:  return "Reverb + Feedback 1";
 		case 4:  return "Reverb + Feedback 2";
-		case 5:  return "Delay X:Y";
-		case 6:  return "Pattern X+Y";
+		case 5:  return "Delay2:1";
+		case 6: return "Delay4:3";
+		case 7: return "Delay4:1";
+		case 8: return "Delay8:7";
+		case 9: return "Pattern1+1";
+		case 10: return "Pattern2+1";
+		case 11: return "Pattern3+1";
+		case 12: return "Pattern4+1";
+		case 13: return "Pattern5+1";
+		case 14: return "Pattern2+3";
+		case 15: return "Pattern2+5";
+		case 16: return "Pattern3+2";
+		case 17: return "Pattern3+3";
+		case 18: return "Pattern3+4";
+		case 19: return "Pattern3+5";
+		case 20: return "Pattern4+3";
+		case 21: return "Pattern4+5";
+		case 22: return "Pattern5+2";
+		case 23: return "Pattern5+3";
+		case 24: return "Pattern5+4";
+		case 25: return "Pattern5+5";
+		case 26: return "Pattern X+Y";
 		default: return juce::String(idx);
 		}
 	}
@@ -1397,6 +1433,17 @@ namespace Virus
 		default: return juce::String("");
 		}
 	}
+	juce::String numToReverbRoomSize(float idx, Parameter::Description) {
+		const auto ridx = juce::roundToInt(idx);
+
+		switch (ridx) {
+			case 0: return "Ambience";
+			case 1: return "Small Room";
+			case 2: return "Large Room";
+			case 3: return "Hall";
+			default: return juce::String("");
+		}
+	}
 
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
@@ -1505,13 +1552,13 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 108, "Chorus Delay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,67}, numToLfoShape, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,6}, numToDelayReverbMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,26}, numToDelayReverbMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 115, "Delay Feedback", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Delay Rate / Reverb Decay Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Delay Depth / Reverb Room Size", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,5}, numToLfoShape, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Delay Depth / Reverb Room Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,127}, numToDelayLfoShape, {}, true, true, false},
 //    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Reverb Damping", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 119, "Delay Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 122, "Keyb Local", {0,1}, {},{}, false, false, true},

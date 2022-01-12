@@ -50,6 +50,25 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
 
 void PatchBrowser::selectionChanged() {}
 
+VirusModel guessVersion(uint8_t *data) {
+    if (data[51] > 3) {
+        // check extra filter modes
+        return VirusModel::C;
+    }
+    if(data[179] == 0x40 && data[180] == 0x40) // soft knobs don't exist on B so they have fixed value
+        return VirusModel::B;
+    /*if (data[232] != 0x03 || data[235] != 0x6c || data[238] != 0x01) { // extra mod slots
+        return VirusModel::C;
+    }*/
+    /*if(data[173] != 0x00 || data[174] != 0x00) // EQ
+        return VirusModel::C;*/
+    /*if (data[220] != 0x40 || data[221] != 0x54 || data[222] != 0x20 || data[223] != 0x40 || data[224] != 0x40) {
+        // eq controls
+        return VirusModel::C;
+    }*/
+    return VirusModel::C;
+
+}
 void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
 {
     auto ext = file.getFileExtension().toLowerCase();
@@ -75,17 +94,17 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
             {
                 Patch patch;
                 patch.progNumber = index;
-                if ((uint8_t)*(it + 266) != (uint8_t)0xf7) {
-                        patch.model = VirusModel::TI;
-                }
-                else {
-                    patch.model = VirusModel::B;
-                }
                 data.copyTo(patch.data, 267*index + 9, 256);
                 patch.name = parseAsciiText(patch.data, 128 + 112);
                 patch.category1 = patch.data[251];
                 patch.category2 = patch.data[252];
                 patch.unison = patch.data[97];
+                if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
+                        patch.model = VirusModel::TI;
+                }
+                else {
+                    patch.model = guessVersion(patch.data);
+                }
                 m_patches.add(patch);
                 index++;
             }
@@ -123,17 +142,17 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
 
                     Patch patch;
                     patch.progNumber = index;
-                    if ((uint8_t)*(it + 266) != (uint8_t)0xf7) {
-                        patch.model = VirusModel::TI;
-                    }
-                    else {
-                        patch.model = VirusModel::B;
-                    }
                     std::copy(syx.begin() + 9, syx.end() - 2, patch.data);
                     patch.name = parseAsciiText(patch.data, 128 + 112);
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
+                        patch.model = VirusModel::TI;
+                    }
+                    else {
+                        patch.model = guessVersion(patch.data);
+                    }
                     m_patches.add(patch);
                     index++;
                     it += 266;
@@ -154,18 +173,18 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                     syx[266] = 0xf7;
                     
                     Patch patch;
-                    if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7) { // TI patches are 512 bytes
-                        patch.model = VirusModel::TI;
-                    }
-                    else {
-                        patch.model = VirusModel::B;
-                    }
                     std::memcpy(patch.data, syx.data()+9, 256);
                     patch.progNumber = index;
                     patch.name = parseAsciiText(patch.data, 128 + 112);
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
+                        patch.model = VirusModel::TI;
+                    }
+                    else {
+                        patch.model = guessVersion(patch.data);
+                    }
                     m_patches.add(patch);
                     index++;
 
