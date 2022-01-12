@@ -58,6 +58,7 @@ private:
         static constexpr auto kButtonWidth = 141;
         static constexpr auto kButtonHeight = 26;
         static constexpr auto kGroupId = 0x3FBBA;
+        void applyToMainButtons(std::function<void(juce::DrawableButton *)>);
     } m_mainButtons;
 
     struct PresetButtons : juce::Component
@@ -86,7 +87,9 @@ private:
     Virus::LookAndFeel m_lookAndFeel;
 
     juce::String m_previousPath;
+    bool m_paramDisplayLocal = false;
 
     void mouseDrag (const juce::MouseEvent &event) override;
     void mouseUp (const juce::MouseEvent &event) override;
+
 };

@@ -227,7 +227,10 @@ namespace Virus
         ignored
          */
     }
-
+	uint8_t Controller::getVirusModel()
+	{
+		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
+	}
     juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
 		if (_bank == virusLib::BankNumber::EditBuffer)
@@ -1532,11 +1535,11 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 83, "Lfo2 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 84, "Lfo2 Keyfollow", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 85, "Lfo2 Keytrigger", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 86, "OscShape Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 87, "FmAmount Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 86, "Shape Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 87, "FM Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 88, "Cutoff1 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 89, "Cutoff2 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 90, "Panorama Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 90, "Pan Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 91, "Patch Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 93, "Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, true, false},
@@ -1608,8 +1611,8 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 50, "Fm Amount Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 51, "Soft Knob1 ShortName", {0,71}, numToSoftKnobName,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 52, "Soft Knob2 ShortName", {0,71}, numToSoftKnobName,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 54, "Filter1 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 55, "Filter2 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 54, "Flt1 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 55, "Flt2 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 56, "Resonance1 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 57, "Resonance2 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 58, "Second Output Balance", {0,127}, {},{}, true, false, false},

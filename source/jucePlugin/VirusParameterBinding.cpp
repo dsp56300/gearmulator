@@ -37,7 +37,7 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 	_slider.setDoubleClickReturnValue(true, v->getDefaultValue());
 	_slider.getValueObject().referTo(v->getValueObject());
 	_slider.getProperties().set("type", "slider");
-	_slider.getProperties().set("name", v->name);
+	_slider.getProperties().set("name", v->getDescription().name);
 	if (v->isBipolar()) {
 		_slider.getProperties().set("bipolar", true);
 	}

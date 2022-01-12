@@ -4,6 +4,7 @@
 #include "Virus_PatchBrowser.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 using namespace juce;
+using namespace virusLib;
 constexpr auto comboBoxWidth = 98;
 const juce::Array<juce::String> categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
                              "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",

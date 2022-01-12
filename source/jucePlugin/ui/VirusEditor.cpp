@@ -14,7 +14,7 @@ using namespace juce;
 
 constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
-
+static uint8_t currentTab = 3;
 VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
     m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()),
     m_controlLabel("ctrlLabel", "")
@@ -42,14 +42,43 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     // show/hide section from buttons..
     m_mainButtons.updateSection = [this]() {
+        if (m_mainButtons.m_arpSettings.getToggleState()) {
+            currentTab = 0;
+        }
+        else if (m_mainButtons.m_effects.getToggleState()) {
+            currentTab = 1;
+        }
+        else if (m_mainButtons.m_lfoMatrix.getToggleState()) {
+            currentTab = 2;
+        }
+        else if (m_mainButtons.m_oscFilter.getToggleState()) {
+            currentTab = 3;
+        }
+        else if (m_mainButtons.m_patches.getToggleState()) {
+            currentTab = 4;
+        }
         m_arpEditor->setVisible(m_mainButtons.m_arpSettings.getToggleState());
         m_fxEditor->setVisible(m_mainButtons.m_effects.getToggleState());
         m_lfoEditor->setVisible(m_mainButtons.m_lfoMatrix.getToggleState());
         m_oscEditor->setVisible(m_mainButtons.m_oscFilter.getToggleState());
         m_patchBrowser->setVisible(m_mainButtons.m_patches.getToggleState());
     };
-    m_oscEditor->setVisible(true);
-    m_mainButtons.m_oscFilter.setToggleState(true, NotificationType::dontSendNotification);
+    uint8_t index = 0;
+    applyToSections([this, index](Component *s) mutable { 
+        if (currentTab == index) {
+            s->setVisible(true);
+        }
+        index++;
+    });
+    index = 0;
+    m_mainButtons.applyToMainButtons([this, &index](DrawableButton *s) mutable {
+        if (currentTab == index) {
+            s->setToggleState(true, juce::dontSendNotification);
+        }
+        index++;
+    });
+    //m_oscEditor->setVisible(true);
+    //m_mainButtons.m_oscFilter.setToggleState(true, NotificationType::dontSendNotification);
     addAndMakeVisible(m_presetButtons);
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
     m_presetButtons.m_save.onClick = [this]() { saveFile(); };
@@ -118,6 +147,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     if (!processorRef.isPluginValid())
         message += "\n\nNo ROM, no sound!\nCopy ROM next to plugin, must end with .bin";
     message += "\n\nTo donate: paypal.me/dsp56300";
+    std::string model(m_controller.getVirusModel() == virusLib::VirusModel::B ? "B" : "C");
+    message += "\n\nROM Loaded: " + _processorRef.getRomName();
     m_version.setText(message, NotificationType::dontSendNotification);
     m_version.setBounds(94, 2, 220, 150);
     m_version.setColour(juce::Label::textColourId, juce::Colours::white);
@@ -132,27 +163,33 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.onTextChange = [this]() {
         auto text = m_patchName.getText();
         if(text.trim().length() > 0) {
+            if (text == "/pv") { // stupid debug thing to remove later
+                m_paramDisplayLocal = !m_paramDisplayLocal;
+                return;
+            }
             m_controller.setSinglePresetName(m_controller.getCurrentPart(), text);
         }
     };
     addAndMakeVisible(m_patchName);
 
-    m_controlLabel.setBounds(650, 48, 262, 36);
-    m_controlLabel.setJustificationType(Justification::right);
+    m_controlLabel.setBounds(m_patchName.getBounds().translated(m_controlLabel.getWidth(), 0));
+    m_controlLabel.setSize(m_patchName.getWidth()/2, m_patchName.getHeight());
+    m_controlLabel.setJustificationType(Justification::topRight);
     m_controlLabel.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
     m_controlLabel.setFont(juce::Font(16.0f, juce::Font::bold));
     //m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
     //m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
-    
+
     addAndMakeVisible(m_controlLabel);
 
+    m_controller.getBankCount();
     addMouseListener(this, true);
 
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
 
     // without this some combobox parameters are wrong on first load, no idea why.
-    m_controller.getParameter(Virus::Param_PlayMode)->setValue(virusLib::PlayModeSingle);
+    //m_controller.getParameter(Virus::Param_PlayMode)->setValue(virusLib::PlayModeSingle);
     recreateControls();
 }
 
@@ -243,10 +280,17 @@ void VirusEditor::applyToSections(std::function<void(Component *)> action)
         action(section);
     }
 }
-
+void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableButton *)> action)
+{
+    for (auto *section : {static_cast<juce::DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),
+                          static_cast<DrawableButton *>(&m_lfoMatrix), static_cast<DrawableButton *>(&m_oscFilter),
+                          static_cast<DrawableButton *>(&m_patches)})
+    {
+        action(section);
+    }
+}
 void VirusEditor::mouseDrag(const juce::MouseEvent & event)
 {
-    const bool paramLocal = false;
     auto props = event.eventComponent->getProperties();
     if(props.contains("type") && props["type"] == "slider") {
         m_controlLabel.setVisible(true);
@@ -254,18 +298,25 @@ void VirusEditor::mouseDrag(const juce::MouseEvent & event)
         if(comp) {
             auto name = props["name"];
             
-            if(paramLocal) {
+            if(m_paramDisplayLocal) {
                 m_controlLabel.setTopLeftPosition(getTopLevelComponent()->getLocalPoint(comp->getParentComponent(), comp->getPosition().translated(0, -16)));
                 m_controlLabel.setSize(comp->getWidth(), 20);
+                m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
+                m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
+                if (props.contains("bipolar") && props["bipolar"]) {
+                    m_controlLabel.setText(juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
+                } else {
+                    m_controlLabel.setText(juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+                }
             }
             else {
                 m_controlLabel.setBounds(m_patchName.getBounds().translated(m_controlLabel.getWidth(), 0));
                 m_controlLabel.setSize(m_patchName.getWidth()/2, m_patchName.getHeight());
-            }
-            if (props.contains("bipolar") && props["bipolar"]) {
-                m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
-            } else {
-                m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+                if (props.contains("bipolar") && props["bipolar"]) {
+                    m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
+                } else {
+                    m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+                }
             }
         }
     }

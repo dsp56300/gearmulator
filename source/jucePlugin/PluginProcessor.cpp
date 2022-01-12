@@ -9,7 +9,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
     AudioProcessor(BusesProperties()
                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-	MidiInputCallback(), m_device(synthLib::findROM()), m_plugin(&m_device)
+	MidiInputCallback(), m_romName(synthLib::findROM()), m_device(synthLib::findROM()), m_plugin(&m_device)
 {
 	getController(); // init controller
 }

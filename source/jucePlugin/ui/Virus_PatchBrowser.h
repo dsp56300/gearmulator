@@ -5,12 +5,6 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "../VirusController.h"
 class VirusParameterBinding;
-enum VirusModel {
-    A,
-    B,
-    C,
-    TI
-};
 
 const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 struct Patch
@@ -20,7 +14,7 @@ struct Patch
     uint8_t category1;
     uint8_t category2;
     uint8_t data[256];
-    VirusModel model;
+    virusLib::VirusModel model;
     uint8_t unison;
 };
 
