@@ -166,17 +166,18 @@ FxEditor::DelayAndReverb::DelayAndReverb(VirusParameterBinding &_parameterBindin
     m_sync.setBounds(0, 116 + 2, 481, 116);
     addAndMakeVisible(m_sync);
 
-    _parameterBinding.bind(m_time, Virus::Param_DelayTime);
-    _parameterBinding.bind(m_rate, Virus::Param_DelayRateReverbDecayTime);
-    _parameterBinding.bind(m_depth, Virus::Param_DelayDepthReverbRoomSize);
-    _parameterBinding.bind(m_color, Virus::Param_DelayColor);
-    _parameterBinding.bind(m_feedback, Virus::Param_DelayFeedback);
-    _parameterBinding.bind(m_fxMode, Virus::Param_DelayReverbMode);
+    _parameterBinding.bind(m_time, Virus::Param_DelayTime, 0);
+    _parameterBinding.bind(m_rate, Virus::Param_DelayRateReverbDecayTime, 0);
+    _parameterBinding.bind(m_depth, Virus::Param_DelayDepthReverbRoomSize, 0);
+    _parameterBinding.bind(m_color, Virus::Param_DelayColor, 0);
+    _parameterBinding.bind(m_feedback, Virus::Param_DelayFeedback, 0);
+    _parameterBinding.bind(m_fxMode, Virus::Param_DelayReverbMode, 0);
 }
 
 FxEditor::DelayAndReverb::Sync::Sync(VirusParameterBinding &_parameterBinding)
 {
     setupRotary(*this, m_mix);
+    setupRotary(*this, m_damping);
     m_mix.getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_RED);
     m_mix.setBounds(376, -2, knobSize, knobSize);
 
@@ -185,9 +186,18 @@ FxEditor::DelayAndReverb::Sync::Sync(VirusParameterBinding &_parameterBinding)
     addAndMakeVisible(m_lfoShape);
     m_lfoShape.setBounds(m_clock.getBounds().getRight() + 26, 22, comboBoxWidth, comboBoxHeight);
 
+    addAndMakeVisible(m_reverbMode);
+    m_reverbMode.setBounds(m_lfoShape.getBounds().getRight() + 26, 22, comboBoxWidth, comboBoxHeight);
+    
+    m_damping.getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_RED);
+    m_damping.setBounds(m_reverbMode.getBounds().getRight() + 2, -2, knobSize, knobSize);
+    addAndMakeVisible(m_damping);
+
     _parameterBinding.bind(m_mix, Virus::Param_EffectSend);
-    _parameterBinding.bind(m_clock, Virus::Param_DelayClock);
-    _parameterBinding.bind(m_lfoShape, Virus::Param_DelayLfoShape);
+    _parameterBinding.bind(m_clock, Virus::Param_DelayClock, 0);
+    _parameterBinding.bind(m_lfoShape, Virus::Param_DelayLfoShape, 0);
+    _parameterBinding.bind(m_damping, Virus::Param_DelayLfoShape, 0);
+    _parameterBinding.bind(m_reverbMode, Virus::Param_DelayDepthReverbRoomSize, 0);
 }
 
 FxEditor::Vocoder::Vocoder(VirusParameterBinding &_parameterBinding) :

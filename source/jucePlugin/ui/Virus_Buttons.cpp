@@ -29,12 +29,12 @@ namespace Buttons
 
     Buttons::ArpHoldButton::ArpHoldButton() : DrawableButton("ArpHoldButton", DrawableButton::ImageRaw)
     {
-        auto off = Drawable::createFromImageData(BinaryData::arphold_btn_28_22_png, BinaryData::arphold_btn_28_22_pngSize);
+        auto off = Drawable::createFromImageData(BinaryData::arphold_btn_36x36_png, BinaryData::arphold_btn_36x36_pngSize);
         auto on = off->createCopy();
         setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
         setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
         setClickingTogglesState(true);
-        on->setOriginWithOriginalSize({0, -11});
+        on->setOriginWithOriginalSize({0, -17});
         setImages(off.get(), nullptr, on.get(), nullptr, on.get());
     }
 
