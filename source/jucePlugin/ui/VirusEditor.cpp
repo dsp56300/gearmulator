@@ -6,6 +6,7 @@
 #include "Virus_LfoEditor.h"
 #include "Virus_OscEditor.h"
 #include "Virus_PatchBrowser.h"
+#include "Virus_Parts.h"
 #include "../VirusParameterBinding.h"
 #include "../VirusController.h"
 
@@ -15,7 +16,7 @@ constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
 
 VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
-    m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()), m_btSingleMode("Single\nMode"), m_btMultiSingleMode("Multi\nSingle"), m_btMultiMode("Multi\nMode"),
+    m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()),
     m_controlLabel("ctrlLabel", "")
 {
     setLookAndFeel(&m_lookAndFeel);
@@ -31,6 +32,11 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
     m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
     m_patchBrowser = std::make_unique<PatchBrowser>(_parameterBinding, m_controller);
+    m_partList = std::make_unique<Parts>(_parameterBinding, m_controller);
+
+    m_partList->setBounds(0,0, 338, kPanelHeight);
+    m_partList->setVisible(true);
+    addChildComponent(m_partList.get());
 
     applyToSections([this](Component *s) { addChildComponent(s); });
 
@@ -47,121 +53,6 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     addAndMakeVisible(m_presetButtons);
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
     m_presetButtons.m_save.onClick = [this]() { saveFile(); };
-
-    for (auto pt = 0; pt < 16; pt++)
-    {
-        m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
-        m_partLabels[pt].setText(juce::String(pt + 1), juce::dontSendNotification);
-        m_partLabels[pt].setColour(0, juce::Colours::white);
-        m_partLabels[pt].setColour(1, juce::Colour(45, 24, 24));
-        m_partLabels[pt].setJustificationType(Justification::centred);
-        addAndMakeVisible(m_partLabels[pt]);
-
-        m_partSelect[pt].setBounds(35, 161 + pt*(36), 36, 36);
-        m_partSelect[pt].setButtonText(juce::String(pt));
-        m_partSelect[pt].setRadioGroupId(kPartGroupId);
-        m_partSelect[pt].setClickingTogglesState(true);
-        m_partSelect[pt].onClick = [this, pt]() {
-            this->changePart(pt);
-        };
-        addAndMakeVisible(m_partSelect[pt]);
-        
-        m_presetNames[pt].setBounds(80, 171 + pt * (36) - 2, 136, 16 + 4);
-        m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
-        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255,113,128));
-        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
-
-        m_presetNames[pt].onClick = [this, pt]() {
-            juce::PopupMenu selector;
-
-            for (uint8_t b = 0; b < m_controller.getBankCount(); ++b)
-            {
-                const auto bank = virusLib::fromArrayIndex(b);
-                auto presetNames = m_controller.getSinglePresetNames(bank);
-                juce::PopupMenu p;
-                for (uint8_t j = 0; j < 128; j++)
-                {
-                    const auto presetName = presetNames[j];
-                    p.addItem(presetNames[j], [this, bank, j, pt, presetName] {
-                        m_controller.setCurrentPartPreset(pt, bank, j);
-                        m_presetNames[pt].setButtonText(presetName);
-                    });
-                }
-                std::stringstream bankName;
-                bankName << "Bank " << static_cast<char>('A' + b);
-                selector.addSubMenu(std::string(bankName.str()), p);
-            }
-            selector.showMenu(juce::PopupMenu::Options());
-        };
-        addAndMakeVisible(m_presetNames[pt]);
-
-        m_prevPatch[pt].setBounds(228, 173 + 36*pt - 2, 16, 14);
-        m_nextPatch[pt].setBounds(247, 173 + 36*pt - 2, 16, 14);
-        m_prevPatch[pt].setButtonText("<");
-        m_nextPatch[pt].setButtonText(">");
-        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
-        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
-        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
-        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
-        m_prevPatch[pt].onClick = [this, pt]() {
-            m_controller.setCurrentPartPreset(
-                pt, m_controller.getCurrentPartBank(pt),
-                std::max(0, m_controller.getCurrentPartProgram(pt) - 1));
-        };
-        m_nextPatch[pt].onClick = [this, pt]() {
-            m_controller.setCurrentPartPreset(
-                pt, m_controller.getCurrentPartBank(pt),
-                std::min(127, m_controller.getCurrentPartProgram(pt) + 1));
-        };
-        addAndMakeVisible(m_prevPatch[pt]);
-        addAndMakeVisible(m_nextPatch[pt]);
-
-        m_partVolumes[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        m_partVolumes[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        m_partVolumes[pt].setBounds(m_nextPatch[pt].getBounds().translated(m_nextPatch[pt].getWidth()+8, 0));
-        m_partVolumes[pt].setSize(18,18);
-        m_partVolumes[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
-        _parameterBinding.bind(m_partVolumes[pt], Virus::Param_PartVolume, pt);
-        addAndMakeVisible(m_partVolumes[pt]);
-
-        m_partPans[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        m_partPans[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-        m_partPans[pt].setBounds(m_partVolumes[pt].getBounds().translated(m_partVolumes[pt].getWidth()+4, 0));
-        m_partPans[pt].setSize(18,18);
-        m_partPans[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
-        _parameterBinding.bind(m_partPans[pt], Virus::Param_Panorama, pt);
-        addAndMakeVisible(m_partPans[pt]);
-    }
-    m_partSelect[m_controller.getCurrentPart()].setToggleState(true, NotificationType::sendNotification);
-
-    m_btSingleMode.setRadioGroupId(0x3cf);
-    m_btMultiMode.setRadioGroupId(0x3cf);
-    m_btMultiSingleMode.setRadioGroupId(0x3cf);
-    addAndMakeVisible(m_btSingleMode);
-    addAndMakeVisible(m_btMultiMode);
-    addAndMakeVisible(m_btMultiSingleMode);
-    m_btSingleMode.setTopLeftPosition(102, 756);
-    m_btSingleMode.setSize(70, 30);
-    //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    const auto isMulti = m_controller.getParamValue(Virus::Param_PlayMode)>0;
-    m_btSingleMode.setClickingTogglesState(true);
-    m_btMultiMode.setClickingTogglesState(true);
-    m_btMultiSingleMode.setClickingTogglesState(true);
-    m_btSingleMode.setToggleState(true, juce::sendNotificationAsync);
-    //m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
-    //m_btMultiSingleMode.setToggleState(isMulti, juce::dontSendNotification);
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-    m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
-    m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
-
-    m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
-    m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
 
     juce::PropertiesFile::Options opts;
     opts.applicationName = "DSP56300 Emulator";
@@ -270,11 +161,6 @@ void VirusEditor::timerCallback()
     for (auto pt = 0; pt < 16; pt++)
     {
         bool singlePartOrInMulti = pt == 0 || multiMode;
-        m_presetNames[pt].setVisible(singlePartOrInMulti);
-        m_prevPatch[pt].setVisible(singlePartOrInMulti);
-        m_nextPatch[pt].setVisible(singlePartOrInMulti);
-        if (singlePartOrInMulti)
-            m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
         if (pt == m_controller.getCurrentPart())
         {
             const auto patchName = m_controller.getCurrentPartPresetName(pt);
@@ -282,7 +168,6 @@ void VirusEditor::timerCallback()
                 m_patchName.setText(patchName, NotificationType::dontSendNotification);
             }
         }
-        //m_partVolumes[pt].setValue(m_controller.getParameter(Virus::Param_PartVolume, pt)->getValue(), juce::dontSendNotification);
     }
     
 }
@@ -345,13 +230,6 @@ void VirusEditor::updateMidiOutput(int index)
     m_cmbMidiOutput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
     m_lastOutputIndex = index;
 }
-void VirusEditor::updatePartsPresetNames()
-{
-    for (auto i = 0; i < 16; i++)
-    {
-        m_presetNames[i].setButtonText(m_controller.getCurrentPartPresetName(i));
-    }
-}
 void VirusEditor::applyToSections(std::function<void(Component *)> action)
 {
     for (auto *section : {static_cast<Component *>(m_arpEditor.get()), static_cast<Component *>(m_fxEditor.get()),
@@ -404,20 +282,14 @@ void VirusEditor::resized()
     applyToSections([this](Component *s) { s->setTopLeftPosition(338, 133); });
 }
 
-void VirusEditor::setPlayMode(uint8_t _mode) {
-    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
-    changePart(0);
+void VirusEditor::handleCommandMessage(int commandId) {
+    if (commandId == Commands::Rebind) {
+        recreateControls();
+    }
 }
 
-void VirusEditor::changePart(uint8_t _part)
+void VirusEditor::recreateControls()
 {
-    for (auto &p : m_partSelect)
-    {
-        p.setToggleState(false, juce::dontSendNotification);
-    }
-    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
-    m_parameterBinding.setPart(_part);
-
     removeChildComponent(m_oscEditor.get());
     removeChildComponent(m_lfoEditor.get());
     removeChildComponent(m_fxEditor.get());
@@ -530,7 +402,11 @@ void VirusEditor::loadFile()
         {
             if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
             {
-                if ((uint8_t) * (it + 1) == (uint8_t)0x00)
+                if ((uint8_t)*(it+1) == 0x00
+                    && (uint8_t)*(it+2) == 0x20
+                    && (uint8_t)*(it+3) == 0x33
+                    && (uint8_t)*(it+4) == 0x01
+                    && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
                 {
                     auto syx = Virus::SysEx(it, it + 267);
                     syx[7] = 0x01; // force to bank a
@@ -540,7 +416,11 @@ void VirusEditor::loadFile()
 
                     it += 266;
                 }
-                else // some midi files have two bytes after the 0xf0
+                else if((uint8_t)*(it+3) == 0x00
+                    && (uint8_t)*(it+4) == 0x20
+                    && (uint8_t)*(it+5) == 0x33
+                    && (uint8_t)*(it+6) == 0x01
+                    && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
                 {
                     auto syx = Virus::SysEx();
                     syx.push_back(0xf0);

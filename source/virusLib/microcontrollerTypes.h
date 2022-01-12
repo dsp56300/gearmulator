@@ -38,6 +38,8 @@ namespace virusLib
 		MULTI_NAME_CHAR_8 = 13,
 		MULTI_NAME_CHAR_9 = 14,
 
+		CLOCK_TEMPO = 16, // this is actually in page B
+
 		MULTI_DELAY_OUTPUT_SELECT = 22,
 
 		UNK1a = 26,

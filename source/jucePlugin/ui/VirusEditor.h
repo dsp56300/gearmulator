@@ -20,30 +20,25 @@ public:
     VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
     ~VirusEditor() override;
     void resized() override;
-    void changePart(uint8_t _part);
+    void recreateControls();
     void updatePartsPresetNames();
     void loadFile();
     void saveFile();
-    void setPlayMode(uint8_t _mode);
 
+    enum Commands {
+        None,
+        Rebind = 0x100
+    };
 private:
     void timerCallback() override;
+    void handleCommandMessage(int commandId) override;
     void updateMidiInput(int index);
     void updateMidiOutput(int index);
 
     juce::Label m_version;
     juce::Label m_patchName;
     juce::Label m_controlLabel;
-    Buttons::PartSelectButton m_partSelect[16];
-    juce::Label m_partLabels[16];
-    juce::TextButton m_presetNames[16];
-    juce::TextButton m_nextPatch[16];
-    juce::TextButton m_prevPatch[16];
-    juce::Slider m_partVolumes[16];
-    juce::Slider m_partPans[16];
-    juce::TextButton m_btSingleMode;
-    juce::TextButton m_btMultiSingleMode;
-    juce::TextButton m_btMultiMode;
+
     juce::ComboBox m_cmbMidiInput;
     juce::ComboBox m_cmbMidiOutput;
     juce::AudioDeviceManager deviceManager;
@@ -51,7 +46,6 @@ private:
     int m_lastInputIndex = 0;
     int m_lastOutputIndex = 0;
 
-    static constexpr auto kPartGroupId = 0x3FBBC;
     struct MainButtons : juce::Component, juce::Value::Listener
     {
         MainButtons();
