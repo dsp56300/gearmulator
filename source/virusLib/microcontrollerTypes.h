@@ -177,7 +177,13 @@ namespace virusLib
 		H,
 		Count
 	};
-
+	enum VirusModel : uint8_t
+	{
+		A,
+		B,
+		C,
+		TI
+	};
 	uint8_t toMidiByte(BankNumber _bank);
 	BankNumber fromMidiByte(uint8_t _byte);
 	uint32_t toArrayIndex(BankNumber _bank);

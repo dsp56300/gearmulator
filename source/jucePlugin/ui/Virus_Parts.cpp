@@ -5,6 +5,7 @@
 #include "VirusEditor.h"
 using namespace juce;
 
+static uint8_t g_playMode = 0;
 Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _controller) : m_parameterBinding(_parameterBinding), m_controller(_controller),
     m_btSingleMode("Single\nMode"), m_btMultiSingleMode("Multi\nSingle"), m_btMultiMode("Multi\nMode")
 {
@@ -109,7 +110,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btSingleMode.setClickingTogglesState(true);
     m_btMultiMode.setClickingTogglesState(true);
     m_btMultiSingleMode.setClickingTogglesState(true);
-    m_btSingleMode.setToggleState(true, juce::sendNotificationAsync);
+    //m_btSingleMode.setToggleState(true, juce::sendNotificationAsync);
     //m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
     //m_btMultiSingleMode.setToggleState(isMulti, juce::dontSendNotification);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
@@ -125,6 +126,16 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
     m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
 
+    const uint8_t playMode = g_playMode;
+    if (playMode == virusLib::PlayModeSingle) {
+        m_btSingleMode.setToggleState(true, juce::dontSendNotification);
+    }
+    else if (playMode == virusLib::PlayModeMultiSingle) {
+        m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
+    }
+    else if (playMode == virusLib::PlayModeMulti) {
+        m_btMultiMode.setToggleState(true, juce::dontSendNotification);
+    }
     startTimerHz(5);
     setSize(338, 800);
 }
@@ -142,6 +153,7 @@ void Parts::changePart(uint8_t _part)
 
 void Parts::setPlayMode(uint8_t _mode) {
     m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
+    g_playMode = _mode;
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
 }
 
