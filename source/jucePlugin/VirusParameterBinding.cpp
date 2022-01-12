@@ -67,7 +67,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 		v->getValueObject().getValueSource().setValue(_combo.getSelectedId() - 1);
 	};
 
-	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedId((int)v->getValueObject().getValueSource().getValue() + 1, juce::NotificationType::dontSendNotification); };
+	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedId((int)v->getValueObject().getValueSource().getValue() + 1, juce::dontSendNotification); };
 	m_bindings.add(v);
 }
 

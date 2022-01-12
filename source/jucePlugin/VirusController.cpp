@@ -27,7 +27,6 @@ namespace Virus
 
     	for(uint8_t i=3; i<=8; ++i)
 			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));
-
     	startTimer(5);
 	}
 
@@ -376,6 +375,9 @@ namespace Virus
 					if (auto* p = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL+i)) {
 						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i*16) + pt], true);
 					}
+				}
+				if (auto* p = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO)) {
+					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
 				}
 			}
 		}
@@ -1528,7 +1530,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, numToLfoDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 12, "Osc Lfo3 Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 13, "Lfo3 Fade-In Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 17, "Arp Clock", {0,17}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 18, "Lfo1 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,21}, numToMusicDivision, {}, true, true, false},

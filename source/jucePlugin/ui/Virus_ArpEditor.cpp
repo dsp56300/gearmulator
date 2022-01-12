@@ -92,7 +92,7 @@ ArpEditor::Arpeggiator::Arpeggiator(VirusParameterBinding &_parameterBinding)
     addAndMakeVisible(m_arpHold);
     m_arpHold.setBounds(222, m_octaveRange.getY()+2, 28, 11);
 
-    _parameterBinding.bind(m_globalTempo, Virus::Param_ClockTempo);
+    _parameterBinding.bind(m_globalTempo, Virus::Param_ClockTempo, 0);
     _parameterBinding.bind(m_noteLength, Virus::Param_ArpNoteLength);
     _parameterBinding.bind(m_noteSwing, Virus::Param_ArpSwing);
     _parameterBinding.bind(m_mode, Virus::Param_ArpMode);
