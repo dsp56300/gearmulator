@@ -105,14 +105,12 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     addAndMakeVisible(m_btMultiSingleMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
     m_btSingleMode.setSize(70, 30);
+
     //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    const auto isMulti = m_controller.getParamValue(Virus::Param_PlayMode)>0;
     m_btSingleMode.setClickingTogglesState(true);
     m_btMultiMode.setClickingTogglesState(true);
     m_btMultiSingleMode.setClickingTogglesState(true);
-    //m_btSingleMode.setToggleState(true, juce::sendNotificationAsync);
-    //m_btMultiMode.setToggleState(isMulti, juce::dontSendNotification);
-    //m_btMultiSingleMode.setToggleState(isMulti, juce::dontSendNotification);
+
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
     m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
