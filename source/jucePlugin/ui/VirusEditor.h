@@ -88,7 +88,9 @@ private:
 
     juce::String m_previousPath;
     bool m_paramDisplayLocal = false;
-
+    void updateControlLabel(Component *eventComponent);
+    void mouseEnter (const juce::MouseEvent &event) override;
+    void mouseExit (const juce::MouseEvent &event) override;
     void mouseDrag (const juce::MouseEvent &event) override;
     void mouseUp (const juce::MouseEvent &event) override;
 
