@@ -39,6 +39,9 @@ namespace Virus
         case KnobStyle::GENERIC_BLUE:
             knob = m_genBlue.get();
             break;
+        case KnobStyle::GENERIC_MULTI:
+            knob = m_multi.get();
+            break;
         case KnobStyle::GENERIC:
         default:
             knob = m_genKnob.get();
@@ -49,7 +52,13 @@ namespace Virus
             //        g.fillAll (Colours::pink.withAlpha (0.4f));
             const auto step = roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional));
             // take relevant pos
-            knob->setOriginWithOriginalSize({0.0f, -70.0f * step});
+            if (knob == m_multi.get()) {
+                knob->setOriginWithOriginalSize({0.0f, -18.0f * step});
+            }
+            else {
+                knob->setOriginWithOriginalSize({0.0f, -70.0f * step});
+            }
+
         }
         // this won't support scaling!
         knob->drawAt(g, x, y, 1.0f);

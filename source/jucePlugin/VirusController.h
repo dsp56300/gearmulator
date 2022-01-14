@@ -231,7 +231,8 @@ namespace Virus
 		Param_Assign6Destination,
 		Param_Assign6Amount,
 		Param_FilterSelect,
-
+		Param_Category1,
+		Param_Category2,
 		Param_DelayOutputSelect,
 		Param_PartBankSelect,
 		Param_PartBankChange,
@@ -408,10 +409,11 @@ namespace Virus
         juce::Value *getParamValue(ParameterType _param);
         Parameter* getParameter(ParameterType _param);
         Parameter *getParameter(ParameterType _param, uint8_t _part);
-
+		uint8_t getVirusModel();
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         juce::StringArray getMultiPresetsName() const;
+		void setSinglePresetName(uint8_t part, juce::String _name);
 		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, virusLib::BankNumber bank, uint8_t prg);
@@ -419,6 +421,8 @@ namespace Virus
 		uint8_t getCurrentPartProgram(uint8_t part);
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
+		uint8_t getCurrentPart() const { return m_currentPart; }
+		void setCurrentPart(uint8_t _part) { m_currentPart = _part; }
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &);
         void onStateLoaded();
@@ -442,7 +446,7 @@ namespace Virus
 
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
         std::array<std::array<SinglePatch, 128>, 8> m_singles;
-
+		MultiPatch m_currentMulti;
         static const std::initializer_list<Parameter::Description> m_paramsDescription;
 
         struct ParamIndex
@@ -489,5 +493,6 @@ namespace Virus
         unsigned char m_deviceId;
         virusLib::BankNumber m_currentBank[16];
         uint8_t m_currentProgram[16];
+		uint8_t m_currentPart;
     };
 }; // namespace Virus

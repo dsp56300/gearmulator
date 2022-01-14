@@ -38,6 +38,8 @@ namespace virusLib
 		MULTI_NAME_CHAR_8 = 13,
 		MULTI_NAME_CHAR_9 = 14,
 
+		CLOCK_TEMPO = 16, // this is actually in page B
+
 		MULTI_DELAY_OUTPUT_SELECT = 22,
 
 		UNK1a = 26,
@@ -81,6 +83,7 @@ namespace virusLib
 		MIDI_ARPEGGIATOR_SEND = 96,
 		MULTI_PROGRAM_CHANGE = 105,
 		MIDI_CLOCK_RX = 106,
+		EFFECT_SEND = 113, // actually in bank A
 		UNK6d = 109,
 		PLAY_MODE = 122,
 		PART_NUMBER = 123,
@@ -174,7 +177,13 @@ namespace virusLib
 		H,
 		Count
 	};
-
+	enum VirusModel : uint8_t
+	{
+		A,
+		B,
+		C,
+		TI
+	};
 	uint8_t toMidiByte(BankNumber _bank);
 	BankNumber fromMidiByte(uint8_t _byte);
 	uint32_t toArrayIndex(BankNumber _bank);

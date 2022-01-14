@@ -6,6 +6,18 @@
 #include "../VirusController.h"
 class VirusParameterBinding;
 
+const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
+struct Patch
+{
+    int progNumber;
+    juce::String name;
+    uint8_t category1;
+    uint8_t category2;
+    uint8_t data[256];
+    virusLib::VirusModel model;
+    uint8_t unison;
+};
+
 class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel
 {
 
@@ -15,15 +27,6 @@ public:
 private:
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;
-    struct Patch
-    {
-        uint8_t progNumber;
-        juce::String name;
-        uint8_t category1;
-        uint8_t category2;
-        uint8_t data[256];
-        
-    };
     template <typename T> juce::String parseAsciiText(const T &msg, const int start) const
     {
         char text[Virus::Controller::kNameLength + 1];
@@ -52,4 +55,16 @@ private:
                            bool rowIsSelected) override;
 
     virtual void selectedRowsChanged(int lastRowSelected) override;
+    virtual void cellDoubleClicked (int rowNumber, int columnId, const juce::MouseEvent &) override;
+    void sortOrderChanged(int newSortColumnId, bool isForwards) override;
+    class PatchBrowserSorter;
+    enum Columns {
+        INDEX = 1,
+        NAME = 2,
+        CAT1 = 3,
+        CAT2 = 4,
+        ARP = 5,
+        UNI = 6,
+        VER = 7
+    };
 };
