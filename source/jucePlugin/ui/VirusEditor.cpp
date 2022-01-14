@@ -289,12 +289,12 @@ void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableBut
         action(section);
     }
 }
-void VirusEditor::mouseDrag(const juce::MouseEvent & event)
-{
-    auto props = event.eventComponent->getProperties();
+
+void VirusEditor::updateControlLabel(Component* eventComponent) {
+    auto props = eventComponent->getProperties();
     if(props.contains("type") && props["type"] == "slider") {
         m_controlLabel.setVisible(true);
-        auto comp = dynamic_cast<juce::Slider*>(event.eventComponent);
+        auto comp = dynamic_cast<juce::Slider*>(eventComponent);
         if(comp) {
             auto name = props["name"];
             
@@ -321,7 +321,23 @@ void VirusEditor::mouseDrag(const juce::MouseEvent & event)
         }
     }
 }
+void VirusEditor::mouseDrag(const juce::MouseEvent & event)
+{
+    updateControlLabel(event.eventComponent);
+}
 
+void VirusEditor::mouseEnter(const juce::MouseEvent& event) {
+    if (event.mouseWasDraggedSinceMouseDown()) {
+        return;
+    }
+    updateControlLabel(event.eventComponent);
+}
+void VirusEditor::mouseExit(const juce::MouseEvent& event) {
+    if (event.mouseWasDraggedSinceMouseDown()) {
+        return;
+    }
+    m_controlLabel.setText("", juce::dontSendNotification);
+}
 void VirusEditor::mouseUp(const juce::MouseEvent & event)
 {
     m_controlLabel.setText("", juce::dontSendNotification);
