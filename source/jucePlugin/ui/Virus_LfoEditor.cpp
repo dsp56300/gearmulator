@@ -70,14 +70,9 @@ LfoEditor::LfoTwoOneShared::LfoTwoOneShared(VirusParameterBinding& _parameterBin
     m_link.setBounds(293, 8, 36, 12);
     m_assignDest.setBounds(393, 122, comboBoxWidth, comboBoxHeight);
 
-    //_parameterBinding.bind(m_rate, Virus::Param_Lfo1Rate);
-    //_parameterBinding.bind(m_keytrack, Virus::Param_Lfo1Keyfollow);
     _parameterBinding.bind(m_contour, _lfoIndex == 0 ? Virus::Param_Lfo1Symmetry : Virus::Param_Lfo2Symmetry);
     _parameterBinding.bind(m_phase, _lfoIndex == 0 ? Virus::Param_Lfo1KeyTrigger : Virus::Param_Lfo2Keytrigger);
-    //parameterBinding.bind(m_amount, Virus::Param_Lfo1AssignAmount);
     _parameterBinding.bind(m_envMode, _lfoIndex == 0 ? Virus::Param_Lfo1EnvMode : Virus::Param_Lfo2EnvMode);
-    //_parameterBinding.bind(m_link, _lfoIndex == 0 ? Virus::Param_Lfo1Mode : Virus::Param_Lfo2Mode);
-    //_parameterBinding.bind(m_assignDest, Virus::Param_Lfo1AssignDest);
 }
 
 LfoEditor::LfoOne::LfoOne(VirusParameterBinding& _parameterBinding) : LfoTwoOneShared(_parameterBinding, 0)

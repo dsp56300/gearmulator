@@ -16,7 +16,8 @@ namespace Virus
             GENERIC,
             GENERIC_POL,
             GENERIC_BLUE,
-            GENERIC_RED
+            GENERIC_RED,
+            GENERIC_MULTI
         };
 
         static const char *KnobStyleProp;
