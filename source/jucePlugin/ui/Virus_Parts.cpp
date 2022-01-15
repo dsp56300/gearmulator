@@ -5,10 +5,10 @@
 #include "VirusEditor.h"
 using namespace juce;
 
-static uint8_t g_playMode = 0;
 Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _controller) : m_parameterBinding(_parameterBinding), m_controller(_controller),
     m_btSingleMode("Single\nMode"), m_btMultiSingleMode("Multi\nSingle"), m_btMultiMode("Multi\nMode")
 {
+    setSize(338, 800);
     for (auto pt = 0; pt < 16; pt++)
     {
         m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
@@ -106,11 +106,6 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btSingleMode.setTopLeftPosition(102, 756);
     m_btSingleMode.setSize(70, 30);
 
-    //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    m_btSingleMode.setClickingTogglesState(true);
-    m_btMultiMode.setClickingTogglesState(true);
-    m_btMultiSingleMode.setClickingTogglesState(true);
-
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
     m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
@@ -124,22 +119,32 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
     m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
 
-    const uint8_t playMode = g_playMode;
-    if (playMode == virusLib::PlayModeSingle) {
+    m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = [this] { updatePlayModeButtons(); };
+    updatePlayModeButtons();
+
+    startTimerHz(5);
+}
+Parts::~Parts() {
+    m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = nullptr;
+}
+void Parts::updatePlayModeButtons()
+{
+    const auto _mode = m_controller.getParameter(Virus::Param_PlayMode, 0)->getValue();
+    if (_mode == virusLib::PlayModeSingle)
+    {
         m_btSingleMode.setToggleState(true, juce::dontSendNotification);
     }
-    else if (playMode == virusLib::PlayModeMultiSingle) {
+    else if (_mode == virusLib::PlayModeMultiSingle)
+    {
         m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
     }
-    else if (playMode == virusLib::PlayModeMulti) {
+    else if (_mode == virusLib::PlayModeMulti)
+    {
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
     }
-    startTimerHz(5);
-    setSize(338, 800);
 }
-
 void Parts::changePart(uint8_t _part)
-{
+    {
     for (auto &p : m_partSelect)
     {
         p.setToggleState(false, juce::dontSendNotification);
@@ -150,8 +155,8 @@ void Parts::changePart(uint8_t _part)
 }
 
 void Parts::setPlayMode(uint8_t _mode) {
+
     m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
-    g_playMode = _mode;
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
 }
 

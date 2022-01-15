@@ -10,8 +10,10 @@ class Parts : public juce::Component, private juce::Timer
 {
     public:
         Parts(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
+        ~Parts();
         static constexpr auto kPartGroupId = 0x3FBBC;
     private:
+		void updatePlayModeButtons();
         void changePart(uint8_t _part);
         void setPlayMode(uint8_t _mode);
         void timerCallback() override;
