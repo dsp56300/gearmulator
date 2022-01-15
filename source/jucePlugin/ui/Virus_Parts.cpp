@@ -120,16 +120,21 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
 
     m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = [this] { updatePlayModeButtons(); };
-    updatePlayModeButtons();
+    //updatePlayModeButtons();
 
     startTimerHz(5);
 }
 Parts::~Parts() {
+    stopTimer();
     m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = nullptr;
 }
 void Parts::updatePlayModeButtons()
 {
-    const auto _mode = m_controller.getParameter(Virus::Param_PlayMode, 0)->getValue();
+    const auto modeParam = m_controller.getParameter(Virus::Param_PlayMode, 0);
+    if (modeParam == nullptr) {
+        return;
+    }
+    const auto _mode = (int)modeParam->getValue();
     if (_mode == virusLib::PlayModeSingle)
     {
         m_btSingleMode.setToggleState(true, juce::dontSendNotification);
@@ -141,6 +146,17 @@ void Parts::updatePlayModeButtons()
     else if (_mode == virusLib::PlayModeMulti)
     {
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
+    }
+    const auto multiMode = m_controller.isMultiMode();
+	//updatePlayModeButtons();
+    for (auto pt = 0; pt < 16; pt++)
+    {
+        bool singlePartOrInMulti = pt == 0 || multiMode;
+        m_presetNames[pt].setVisible(singlePartOrInMulti);
+        m_prevPatch[pt].setVisible(singlePartOrInMulti);
+        m_nextPatch[pt].setVisible(singlePartOrInMulti);
+        if (singlePartOrInMulti)
+            m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
     }
 }
 void Parts::changePart(uint8_t _part)
@@ -163,15 +179,4 @@ void Parts::setPlayMode(uint8_t _mode) {
 void Parts::timerCallback()
 {
     // ugly (polling!) way for refreshing presets names as this is temporary ui
-    const auto multiMode = m_controller.isMultiMode();
-    for (auto pt = 0; pt < 16; pt++)
-    {
-        bool singlePartOrInMulti = pt == 0 || multiMode;
-        m_presetNames[pt].setVisible(singlePartOrInMulti);
-        m_prevPatch[pt].setVisible(singlePartOrInMulti);
-        m_nextPatch[pt].setVisible(singlePartOrInMulti);
-        if (singlePartOrInMulti)
-            m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
-    }
-    
 }
