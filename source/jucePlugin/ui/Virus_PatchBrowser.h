@@ -41,6 +41,7 @@ private:
     juce::Array<Patch> m_patches;
     juce::PropertiesFile *m_properties;
 
+    int loadBankFile(const juce::File &file, const int _startIndex);
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;

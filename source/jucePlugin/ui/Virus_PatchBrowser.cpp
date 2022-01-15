@@ -2,6 +2,7 @@
 #include "BinaryData.h"
 #include "Ui_Utils.h"
 #include "Virus_PatchBrowser.h"
+#include "VirusEditor.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 using namespace juce;
 using namespace virusLib;
@@ -70,20 +71,17 @@ VirusModel guessVersion(uint8_t *data) {
     return VirusModel::C;
 
 }
-void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
-{
+int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0) {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
-    m_properties->setValue("virus_bank_dir", path);
+    int loadedCount = 0;
+    int index = _startIndex;
     if (ext == ".syx")
     {
-        m_patches.clear();
-
         juce::MemoryBlock data;
         if (!file.loadFileAsData(data)) {
-            return;
+            return 0;
         }
-        int index = 0;
         for (auto it = data.begin(); it != data.end(); it += 267)
         {
             if ((uint8_t)*it == (uint8_t)0xf0
@@ -110,19 +108,14 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                 index++;
             }
         }
-        m_patchList.updateContent();
-        m_patchList.deselectAllRows();
-        m_patchList.repaint(); // force repaint since row number doesn't often change
     }
     else if (ext == ".mid" || ext == ".midi")
     {
-        m_patches.clear();
         juce::MemoryBlock data;
         if (!file.loadFileAsData(data))
         {
-            return;
+            return 0;
         }
-        uint8_t index = 0;
 
         const uint8_t *ptr = (uint8_t *)data.getData();
         const auto end = ptr + data.getSize();
@@ -187,6 +180,7 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                         patch.model = guessVersion(patch.data);
                     }
                     m_patches.add(patch);
+                    loadedCount++;
                     index++;
 
                     it += 266;
@@ -194,10 +188,39 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
 
             }
         }
+    }
+    return index;
+}
+
+void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
+{
+    auto ext = file.getFileExtension().toLowerCase();
+    auto path = file.getParentDirectory().getFullPathName();
+    if (file.isDirectory() && e.mods.isRightButtonDown()) {
+        auto p = juce::PopupMenu();
+        p.addItem("Add directory contents to patch list", [this, file]() {
+            m_patches.clear();
+            int lastIndex = 0;
+            for (auto f : juce::RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", juce::File::findFiles)) {
+                lastIndex = loadBankFile(f.getFile(), lastIndex);
+            }
+            m_patchList.updateContent();
+            m_patchList.deselectAllRows();
+            m_patchList.repaint();    
+        });
+        p.showMenu(juce::PopupMenu::Options());
+        
+        return;
+    }
+    m_properties->setValue("virus_bank_dir", path);
+    if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid") {
+        m_patches.clear();
+        loadBankFile(file);
         m_patchList.updateContent();
         m_patchList.deselectAllRows();
         m_patchList.repaint();
     }
+
 }
 
 void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
@@ -273,6 +296,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     syx.push_back(syxEof);
     m_controller.sendSysEx(syx); // send to edit buffer
     m_controller.parseMessage(syx); // update ui
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)

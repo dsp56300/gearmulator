@@ -14,7 +14,16 @@ using namespace juce;
 
 constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
-static uint8_t currentTab = 3;
+enum Tabs
+{
+	ArpSettings,
+	Effects,
+	LfoMatrix,
+	OscFilter,
+	Patches
+};
+static uint8_t currentTab = Tabs::OscFilter;
+
 VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
     m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()),
     m_controlLabel("ctrlLabel", "")
@@ -24,6 +33,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_background = Drawable::createFromImageData (BinaryData::bg_1377x800_png, BinaryData::bg_1377x800_pngSize);
 
     m_background->setBufferedToImage (true);
+
     addAndMakeVisible (*m_background);
     addAndMakeVisible (m_mainButtons);
 
@@ -43,19 +53,19 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     // show/hide section from buttons..
     m_mainButtons.updateSection = [this]() {
         if (m_mainButtons.m_arpSettings.getToggleState()) {
-            currentTab = 0;
+            currentTab = Tabs::ArpSettings;
         }
         else if (m_mainButtons.m_effects.getToggleState()) {
-            currentTab = 1;
+            currentTab = Tabs::Effects;
         }
         else if (m_mainButtons.m_lfoMatrix.getToggleState()) {
-            currentTab = 2;
+            currentTab = Tabs::LfoMatrix;
         }
         else if (m_mainButtons.m_oscFilter.getToggleState()) {
-            currentTab = 3;
+            currentTab = Tabs::OscFilter;
         }
         else if (m_mainButtons.m_patches.getToggleState()) {
-            currentTab = 4;
+            currentTab = Tabs::Patches;
         }
         m_arpEditor->setVisible(m_mainButtons.m_arpSettings.getToggleState());
         m_fxEditor->setVisible(m_mainButtons.m_effects.getToggleState());
@@ -188,16 +198,17 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
 
-    // without this some combobox parameters are wrong on first load, no idea why.
-    //m_controller.getParameter(Virus::Param_PlayMode)->setValue(virusLib::PlayModeSingle);
     recreateControls();
 }
 
-VirusEditor::~VirusEditor() { setLookAndFeel(nullptr); }
+VirusEditor::~VirusEditor() { stopTimer(); setLookAndFeel(nullptr); }
 
 void VirusEditor::timerCallback()
 {
     // ugly (polling!) way for refreshing presets names as this is temporary ui
+}
+
+void VirusEditor::updateParts() {
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
     {
@@ -210,7 +221,6 @@ void VirusEditor::timerCallback()
             }
         }
     }
-    
 }
 
 void VirusEditor::updateMidiInput(int index)
@@ -297,7 +307,6 @@ void VirusEditor::updateControlLabel(Component* eventComponent) {
         auto comp = dynamic_cast<juce::Slider*>(eventComponent);
         if(comp) {
             auto name = props["name"];
-            
             if(m_paramDisplayLocal) {
                 m_controlLabel.setTopLeftPosition(getTopLevelComponent()->getLocalPoint(comp->getParentComponent(), comp->getPosition().translated(0, -16)));
                 m_controlLabel.setSize(comp->getWidth(), 20);
@@ -338,6 +347,9 @@ void VirusEditor::mouseExit(const juce::MouseEvent& event) {
     }
     m_controlLabel.setText("", juce::dontSendNotification);
 }
+void VirusEditor::mouseDown(const juce::MouseEvent &event) {
+
+}
 void VirusEditor::mouseUp(const juce::MouseEvent & event)
 {
     m_controlLabel.setText("", juce::dontSendNotification);
@@ -354,8 +366,10 @@ void VirusEditor::resized()
 }
 
 void VirusEditor::handleCommandMessage(int commandId) {
-    if (commandId == Commands::Rebind) {
-        recreateControls();
+    switch (commandId) {
+        case Commands::Rebind: recreateControls();
+        case Commands::UpdateParts: { updateParts(); m_partList->updatePartNames(); };
+        default: return;
     }
 }
 

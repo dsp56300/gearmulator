@@ -11,6 +11,7 @@ class Parts : public juce::Component, private juce::Timer
     public:
         Parts(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
         ~Parts();
+        void updatePartNames();
         static constexpr auto kPartGroupId = 0x3FBBC;
     private:
 		void updatePlayModeButtons();
