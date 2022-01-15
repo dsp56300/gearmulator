@@ -46,6 +46,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
                     p.addItem(presetNames[j], [this, bank, j, pt, presetName] {
                         m_controller.setCurrentPartPreset(pt, bank, j);
                         m_presetNames[pt].setButtonText(presetName);
+                        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
                     });
                 }
                 std::stringstream bankName;
@@ -68,11 +69,13 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
                 std::max(0, m_controller.getCurrentPartProgram(pt) - 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
         m_nextPatch[pt].onClick = [this, pt]() {
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
                 std::min(127, m_controller.getCurrentPartProgram(pt) + 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
         addAndMakeVisible(m_prevPatch[pt]);
         addAndMakeVisible(m_nextPatch[pt]);
@@ -147,8 +150,12 @@ void Parts::updatePlayModeButtons()
     {
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
     }
+
+    updatePartNames();
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+}
+void Parts::updatePartNames() {
     const auto multiMode = m_controller.isMultiMode();
-	//updatePlayModeButtons();
     for (auto pt = 0; pt < 16; pt++)
     {
         bool singlePartOrInMulti = pt == 0 || multiMode;
@@ -167,6 +174,7 @@ void Parts::changePart(uint8_t _part)
     }
     m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
     m_parameterBinding.setPart(_part);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
 }
 
