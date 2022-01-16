@@ -93,12 +93,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
     m_presetButtons.m_save.onClick = [this]() { saveFile(); };
 
-    juce::PropertiesFile::Options opts;
-    opts.applicationName = "DSP56300 Emulator";
-    opts.filenameSuffix = ".settings";
-    opts.folderName = "DSP56300 Emulator";
-    opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
-    m_properties = new juce::PropertiesFile(opts);
+    m_properties = m_controller.getConfig();
     auto midiIn = m_properties->getValue("midi_input", "");
     auto midiOut = m_properties->getValue("midi_output", "");
     if (midiIn != "")
@@ -192,6 +187,10 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     addAndMakeVisible(m_controlLabel);
 
+    m_controller.onProgramChange = [this]() {
+        updateParts();
+        m_partList->refreshParts();
+    };
     m_controller.getBankCount();
     addMouseListener(this, true);
 
@@ -348,14 +347,16 @@ void VirusEditor::mouseExit(const juce::MouseEvent& event) {
     m_controlLabel.setText("", juce::dontSendNotification);
 }
 void VirusEditor::mouseDown(const juce::MouseEvent &event) {
-
+    
 }
 void VirusEditor::mouseUp(const juce::MouseEvent & event)
 {
     m_controlLabel.setText("", juce::dontSendNotification);
     m_controlLabel.setVisible(false);
 }
-
+void VirusEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) {
+    updateControlLabel(event.eventComponent);
+}
 void VirusEditor::resized()
 {
     m_background->setBounds (getLocalBounds());
@@ -368,7 +369,7 @@ void VirusEditor::resized()
 void VirusEditor::handleCommandMessage(int commandId) {
     switch (commandId) {
         case Commands::Rebind: recreateControls();
-        case Commands::UpdateParts: { updateParts(); m_partList->updatePartNames(); };
+        case Commands::UpdateParts: { updateParts(); m_partList->refreshParts(); };
         default: return;
     }
 }
@@ -529,10 +530,11 @@ void VirusEditor::loadFile()
 }
 
 void VirusEditor::saveFile() {
+    auto path = m_controller.getConfig()->getValue("virus_bank_dir", "");
     juce::FileChooser chooser(
         "Save preset as syx",
         m_previousPath.isEmpty()
-            ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+            ? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
             : m_previousPath,
         "*.syx", true);
 

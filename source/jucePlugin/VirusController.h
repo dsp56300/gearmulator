@@ -1,6 +1,7 @@
 #pragma once
 
 #include <juce_audio_processors/juce_audio_processors.h>
+#include <juce_gui_extra/juce_gui_extra.h>
 #include "../synthLib/plugin.h"
 #include "VirusParameter.h"
 
@@ -426,6 +427,8 @@ namespace Virus
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &);
         void onStateLoaded();
+		juce::PropertiesFile* getConfig() { return m_config; }
+		std::function<void()> onProgramChange = {};
     private:
 		void timerCallback() override;
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
@@ -494,5 +497,6 @@ namespace Virus
         virusLib::BankNumber m_currentBank[16];
         uint8_t m_currentProgram[16];
 		uint8_t m_currentPart = 0;
+		juce::PropertiesFile *m_config;
     };
 }; // namespace Virus

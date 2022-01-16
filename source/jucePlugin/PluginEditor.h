@@ -26,6 +26,7 @@ private:
 
 	// New "real" editor
 	VirusEditor *m_virusEditor;
+	juce::ComboBox m_scale;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 

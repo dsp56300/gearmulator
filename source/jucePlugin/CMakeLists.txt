@@ -103,6 +103,7 @@ target_link_libraries(jucePlugin
 PRIVATE
     jucePlugin_BinaryData
     juce::juce_audio_utils
+    juce::juce_cryptography
 PUBLIC
 	virusLib
     #juce::juce_recommended_config_flags

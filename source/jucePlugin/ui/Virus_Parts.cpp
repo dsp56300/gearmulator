@@ -105,7 +105,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.setRadioGroupId(0x3cf);
     addAndMakeVisible(m_btSingleMode);
     addAndMakeVisible(m_btMultiMode);
-    addAndMakeVisible(m_btMultiSingleMode);
+    //addAndMakeVisible(m_btMultiSingleMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
     m_btSingleMode.setSize(70, 30);
 
@@ -121,15 +121,8 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
 
     m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
     m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
-
-    m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = [this] { updatePlayModeButtons(); };
-    //updatePlayModeButtons();
-
-    startTimerHz(5);
 }
 Parts::~Parts() {
-    stopTimer();
-    m_controller.getParameter(Virus::Param_PlayMode, 0)->onValueChanged = nullptr;
 }
 void Parts::updatePlayModeButtons()
 {
@@ -142,19 +135,16 @@ void Parts::updatePlayModeButtons()
     {
         m_btSingleMode.setToggleState(true, juce::dontSendNotification);
     }
-    else if (_mode == virusLib::PlayModeMultiSingle)
+    /*else if (_mode == virusLib::PlayModeMultiSingle) // disabled for now
     {
         m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
-    }
-    else if (_mode == virusLib::PlayModeMulti)
+    }*/
+    else if (_mode == virusLib::PlayModeMulti || _mode == virusLib::PlayModeMultiSingle)
     {
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
     }
-
-    updatePartNames();
-    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
-void Parts::updatePartNames() {
+void Parts::refreshParts() {
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
     {
@@ -165,6 +155,7 @@ void Parts::updatePartNames() {
         if (singlePartOrInMulti)
             m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
     }
+    updatePlayModeButtons();
 }
 void Parts::changePart(uint8_t _part)
     {
@@ -182,9 +173,4 @@ void Parts::setPlayMode(uint8_t _mode) {
 
     m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
-}
-
-void Parts::timerCallback()
-{
-    // ugly (polling!) way for refreshing presets names as this is temporary ui
 }
