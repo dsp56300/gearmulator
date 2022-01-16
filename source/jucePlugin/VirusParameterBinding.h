@@ -15,9 +15,9 @@ public:
 	}
 	Virus::Parameter *m_param;
 	juce::Slider* m_slider;
-	void VirusParameterBindingMouseListener::mouseDown(const juce::MouseEvent &event) { m_param->beginChangeGesture(); };
-	void VirusParameterBindingMouseListener::mouseUp(const juce::MouseEvent &event) { m_param->endChangeGesture(); };
-	void VirusParameterBindingMouseListener::mouseDrag(const juce::MouseEvent &event) { m_param->setValueNotifyingHost(m_param->convertTo0to1((float)m_slider->getValue())); };
+	void mouseDown(const juce::MouseEvent &event) { m_param->beginChangeGesture(); };
+	void mouseUp(const juce::MouseEvent &event) { m_param->endChangeGesture(); };
+	void mouseDrag(const juce::MouseEvent &event) { m_param->setValueNotifyingHost(m_param->convertTo0to1((float)m_slider->getValue())); };
 };
 
 class VirusParameterBinding : juce::MouseListener
