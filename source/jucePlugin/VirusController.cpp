@@ -14,7 +14,13 @@ namespace Virus
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
 		assert(sizeof(m_paramsDescription) / sizeof(Parameter::Description) == Param_Count && "size of enum must match size of parameter descriptions");
-    	
+		juce::PropertiesFile::Options opts;
+		opts.applicationName = "DSP56300 Emulator";
+		opts.filenameSuffix = ".settings";
+		opts.folderName = "DSP56300 Emulator";
+		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		m_config = new juce::PropertiesFile(opts);
+
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
@@ -345,6 +351,9 @@ namespace Virus
 				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize))
 					p->setValueFromSynth(patch.data[i], true);
 			}
+			if (onProgramChange) {
+				onProgramChange();
+			}
 		}
 		else
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
@@ -385,6 +394,8 @@ namespace Virus
 				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
 				}
+				m_currentBank[pt] = (virusLib::BankNumber)(patch.data[virusLib::MD_PART_BANK_NUMBER + pt]+1);
+				m_currentProgram[pt] = patch.data[virusLib::MD_PART_PROGRAM_NUMBER + pt];
 			}
 		}
         if (hasChecksum)
@@ -1375,7 +1386,7 @@ namespace Virus
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
 		{
-//		case 0:  return "Off";
+		case 0:  return "";
 		case 1:  return "1 Stage";
 		case 2:  return "2 Stages";
 		case 3:  return "3 Stages";
@@ -1545,7 +1556,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 97, "Unison Mode", {0,15}, numToUnisonMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 98, "Unison Detune", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Pan Spread", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,3}, numToInputMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, numToInputSelect,{}, true, true, false},
@@ -1559,8 +1570,8 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 115, "Delay Feedback", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Delay Rate / Reverb Decay Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Delay Depth / Reverb Room Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Dly Rate / Rev Decay", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Dly Depth / Rev Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,127}, numToDelayLfoShape, {}, true, true, false},
 //    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Reverb Damping", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 119, "Delay Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},

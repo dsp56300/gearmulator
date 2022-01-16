@@ -16,6 +16,7 @@ struct Patch
     uint8_t data[256];
     virusLib::VirusModel model;
     uint8_t unison;
+    uint8_t transpose;
 };
 
 class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel
@@ -37,11 +38,13 @@ private:
     }
     juce::WildcardFileFilter m_fileFilter;
     juce::FileBrowserComponent m_bankList;
+    juce::TextEditor m_search;
     juce::TableListBox m_patchList;
     juce::Array<Patch> m_patches;
+    juce::Array<Patch> m_filteredPatches;
     juce::PropertiesFile *m_properties;
-
-    int loadBankFile(const juce::File &file, const int _startIndex);
+    juce::HashMap<juce::String, bool> m_checksums;
+    int loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;
@@ -66,6 +69,7 @@ private:
         CAT2 = 4,
         ARP = 5,
         UNI = 6,
-        VER = 7
+        ST = 7,
+        VER = 8,
     };
 };
