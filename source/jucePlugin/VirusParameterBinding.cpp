@@ -2,6 +2,7 @@
 #include "VirusParameter.h"
 #include "PluginProcessor.h"
 class Parameter;
+
 VirusParameterBinding::~VirusParameterBinding()
 {
 	clearBindings();

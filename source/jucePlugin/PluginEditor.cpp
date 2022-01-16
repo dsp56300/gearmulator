@@ -15,7 +15,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	const auto config = processorRef.getController().getConfig();
 	auto scale = config->getIntValue("scale", 100);
 	m_virusEditor->setTopLeftPosition(0, 0);
-	m_scale.setBounds(8,8,64,24);
+	m_scale.setBounds(0,0,52,24);
 	m_scale.addItem("50%", 50);
 	m_scale.addItem("75%", 75);
 	m_scale.addItem("100%", 100);

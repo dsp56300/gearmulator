@@ -107,7 +107,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     addAndMakeVisible(m_btMultiMode);
     //addAndMakeVisible(m_btMultiSingleMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
-    m_btSingleMode.setSize(70, 30);
+    m_btSingleMode.setSize(103, 30);
 
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
@@ -119,8 +119,8 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
     m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
 
-    m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
-    m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
+    //m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+    m_btMultiMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
 }
 Parts::~Parts() {
 }
@@ -172,5 +172,8 @@ void Parts::changePart(uint8_t _part)
 void Parts::setPlayMode(uint8_t _mode) {
 
     m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
+    if (_mode == virusLib::PlayModeSingle && m_controller.getCurrentPart() != 0) {
+        changePart(0);
+    }
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
 }

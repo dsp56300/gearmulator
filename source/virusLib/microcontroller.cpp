@@ -904,10 +904,10 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
 	// remap page C parameters into the multi edit buffer
-	if (_part == PAGE_C && _param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT) {
+	if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT) {
 		m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
 	}
-	else if (_part == PAGE_B && _param == CLOCK_TEMPO) {
+	else if (_param == CLOCK_TEMPO) {
 		m_multiEditBuffer[MD_CLOCK_TEMPO] = _value;
 	}
 }

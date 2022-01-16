@@ -38,7 +38,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     addAndMakeVisible (m_mainButtons);
 
     m_arpEditor = std::make_unique<ArpEditor>(_parameterBinding);
-    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding, m_controller);
     m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
     m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
     m_patchBrowser = std::make_unique<PatchBrowser>(_parameterBinding, m_controller);
@@ -387,7 +387,7 @@ void VirusEditor::recreateControls()
     m_lfoEditor = std::make_unique<LfoEditor>(m_parameterBinding);
     addChildComponent(m_lfoEditor.get());
 
-    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding, m_controller);
     addChildComponent(m_fxEditor.get());
 
     m_arpEditor = std::make_unique<ArpEditor>(m_parameterBinding);
