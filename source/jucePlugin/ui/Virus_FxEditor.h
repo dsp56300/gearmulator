@@ -2,14 +2,14 @@
 
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
-
+#include "../VirusController.h"
 class VirusParameterBinding;
 
 class FxEditor : public juce::Component
 {
 public:
-    FxEditor(VirusParameterBinding& _parameterBinding);
-
+    FxEditor(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
+    void rebind();
 private:
     struct Distortion : juce::Component
     {
@@ -75,26 +75,29 @@ private:
         juce::Slider m_amount;
     } m_punch;
 
-    struct DelayAndReverb : juce::Component
+    struct Delay : juce::Component
     {
-        DelayAndReverb(VirusParameterBinding &_parameterBinding);
+        Delay(VirusParameterBinding &_parameterBinding);
+        std::unique_ptr<juce::Drawable> m_background;
         juce::Slider m_time;
         juce::Slider m_rate;
         juce::Slider m_depth;
         juce::Slider m_color;
         juce::Slider m_feedback;
-        juce::ComboBox m_fxMode;
+        juce::ComboBox m_clock, m_lfoShape;
+    };
 
-        struct Sync : juce::Component
-        {
-            Sync(VirusParameterBinding &_parameterBinding);
-            juce::Slider m_mix;
-            juce::ComboBox m_clock, m_lfoShape;
-            juce::ComboBox m_reverbMode;
-            juce::Slider m_damping;
-        } m_sync;
-    } m_delayReverb;
-
+    struct Reverb : juce::Component
+    {
+        Reverb(VirusParameterBinding &_parameterBinding);
+        std::unique_ptr<juce::Drawable> m_background;
+        juce::Slider m_time;
+        juce::Slider m_rate;
+        juce::Slider m_damping;
+        juce::Slider m_color;
+        juce::Slider m_feedback;
+        juce::ComboBox m_reverbMode;
+    };
     struct Vocoder : juce::Component
     {
         Vocoder(VirusParameterBinding &_parameterBinding);
@@ -123,6 +126,10 @@ private:
             juce::ComboBox m_modInput;
         } m_modulator;
     } m_vocoder;
-
+    juce::ComboBox m_fxMode;
+    juce::Slider m_fxSend;
+    std::unique_ptr<Delay> m_delay;
+    std::unique_ptr<Reverb> m_reverb;
+    VirusParameterBinding &m_parameterBinding;
     std::unique_ptr<juce::Drawable> m_background;
 };

@@ -70,6 +70,8 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/panels/bg_fx_1018x620.png"
         "assets/panels/bg_lfo_1018x620.png"
         "assets/panels/bg_osc_1018x620.png"
+        "assets/panels/bg_fxreverb_481x234.png"
+        "assets/panels/bg_fxdelay_481x234.png"
         "assets/buttons/GLOBAL_btn_arp_settings_141x26.png"
         "assets/buttons/GLOBAL_btn_effects_141x26.png"
         "assets/buttons/GLOBAL_btn_lfo_matrix_141x26.png"
