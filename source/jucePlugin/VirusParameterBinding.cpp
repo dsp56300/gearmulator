@@ -1,7 +1,7 @@
 #include "VirusParameterBinding.h"
 #include "VirusParameter.h"
 #include "PluginProcessor.h"
-
+class Parameter;
 
 VirusParameterBinding::~VirusParameterBinding()
 {
@@ -31,8 +31,8 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 		assert(false && "Failed to find parameter");
 		return;
 	}
+	_slider.addMouseListener(new VirusParameterBindingMouseListener(v, _slider), false);
 	const auto range = v->getNormalisableRange();
-
 	_slider.setRange(range.start, range.end, range.interval);
 	_slider.setDoubleClickReturnValue(true, v->getDefaultValue());
 	_slider.getValueObject().referTo(v->getValueObject());
@@ -42,7 +42,6 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 		_slider.getProperties().set("bipolar", true);
 	}
 }
-
 void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _param) {
 	bind(_combo, _param, m_processor.getController().getCurrentPart());
 }
@@ -55,6 +54,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 		return;
 	}
 	_combo.setTextWhenNothingSelected("--");
+	_combo.setScrollWheelEnabled(true);
 	int idx = 1;
 	for (auto vs : v->getAllValueStrings()) {
 		if(vs.isNotEmpty())
@@ -64,9 +64,11 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 	//_combo.addItemList(v->getAllValueStrings(), 1);
 	_combo.setSelectedId((int)v->getValueObject().getValueSource().getValue() + 1, juce::dontSendNotification);
 	_combo.onChange = [this, &_combo, v]() {
-		v->getValueObject().getValueSource().setValue(_combo.getSelectedId() - 1);
+		v->beginChangeGesture();
+		v->setValueNotifyingHost(v->convertTo0to1(v->getValueForText(_combo.getText()))); //.getSelectedId() - 1);
+		v->endChangeGesture();
+		v->getValueObject().getValueSource().setValue((int)_combo.getSelectedId() - 1);
 	};
-
 	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedId((int)v->getValueObject().getValueSource().getValue() + 1, juce::dontSendNotification); };
 	m_bindings.add(v);
 }

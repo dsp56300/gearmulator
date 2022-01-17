@@ -6,15 +6,17 @@
 #include "../VirusController.h"
 class VirusParameterBinding;
 
-class Parts : public juce::Component, private juce::Timer
+class Parts : public juce::Component
 {
     public:
         Parts(VirusParameterBinding& _parameterBinding, Virus::Controller& _controller);
+        ~Parts();
+        void refreshParts();
         static constexpr auto kPartGroupId = 0x3FBBC;
     private:
+        void updatePlayModeButtons();
         void changePart(uint8_t _part);
         void setPlayMode(uint8_t _mode);
-        void timerCallback() override;
         Virus::Controller &m_controller;
         VirusParameterBinding &m_parameterBinding;
 
