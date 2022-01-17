@@ -5,10 +5,10 @@
 #include "VirusEditor.h"
 using namespace juce;
 
-static uint8_t g_playMode = 0;
 Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _controller) : m_parameterBinding(_parameterBinding), m_controller(_controller),
     m_btSingleMode("Single\nMode"), m_btMultiSingleMode("Multi\nSingle"), m_btMultiMode("Multi\nMode")
 {
+    setSize(338, 800);
     for (auto pt = 0; pt < 16; pt++)
     {
         m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
@@ -46,6 +46,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
                     p.addItem(presetNames[j], [this, bank, j, pt, presetName] {
                         m_controller.setCurrentPartPreset(pt, bank, j);
                         m_presetNames[pt].setButtonText(presetName);
+                        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
                     });
                 }
                 std::stringstream bankName;
@@ -68,11 +69,13 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
                 std::max(0, m_controller.getCurrentPartProgram(pt) - 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
         m_nextPatch[pt].onClick = [this, pt]() {
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
                 std::min(127, m_controller.getCurrentPartProgram(pt) + 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
         addAndMakeVisible(m_prevPatch[pt]);
         addAndMakeVisible(m_nextPatch[pt]);
@@ -102,14 +105,9 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.setRadioGroupId(0x3cf);
     addAndMakeVisible(m_btSingleMode);
     addAndMakeVisible(m_btMultiMode);
-    addAndMakeVisible(m_btMultiSingleMode);
+    //addAndMakeVisible(m_btMultiSingleMode);
     m_btSingleMode.setTopLeftPosition(102, 756);
-    m_btSingleMode.setSize(70, 30);
-
-    //m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    m_btSingleMode.setClickingTogglesState(true);
-    m_btMultiMode.setClickingTogglesState(true);
-    m_btMultiSingleMode.setClickingTogglesState(true);
+    m_btSingleMode.setSize(103, 30);
 
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
     m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
@@ -121,43 +119,32 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
     m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
 
-    m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
-    m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
-
-    const uint8_t playMode = g_playMode;
-    if (playMode == virusLib::PlayModeSingle) {
+    //m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+    m_btMultiMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+}
+Parts::~Parts() {
+}
+void Parts::updatePlayModeButtons()
+{
+    const auto modeParam = m_controller.getParameter(Virus::Param_PlayMode, 0);
+    if (modeParam == nullptr) {
+        return;
+    }
+    const auto _mode = (int)modeParam->getValue();
+    if (_mode == virusLib::PlayModeSingle)
+    {
         m_btSingleMode.setToggleState(true, juce::dontSendNotification);
     }
-    else if (playMode == virusLib::PlayModeMultiSingle) {
+    /*else if (_mode == virusLib::PlayModeMultiSingle) // disabled for now
+    {
         m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
-    }
-    else if (playMode == virusLib::PlayModeMulti) {
+    }*/
+    else if (_mode == virusLib::PlayModeMulti || _mode == virusLib::PlayModeMultiSingle)
+    {
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
     }
-    startTimerHz(5);
-    setSize(338, 800);
 }
-
-void Parts::changePart(uint8_t _part)
-{
-    for (auto &p : m_partSelect)
-    {
-        p.setToggleState(false, juce::dontSendNotification);
-    }
-    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
-    m_parameterBinding.setPart(_part);
-    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
-}
-
-void Parts::setPlayMode(uint8_t _mode) {
-    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
-    g_playMode = _mode;
-    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
-}
-
-void Parts::timerCallback()
-{
-    // ugly (polling!) way for refreshing presets names as this is temporary ui
+void Parts::refreshParts() {
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
     {
@@ -168,5 +155,25 @@ void Parts::timerCallback()
         if (singlePartOrInMulti)
             m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
     }
-    
+    updatePlayModeButtons();
+}
+void Parts::changePart(uint8_t _part)
+    {
+    for (auto &p : m_partSelect)
+    {
+        p.setToggleState(false, juce::dontSendNotification);
+    }
+    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
+    m_parameterBinding.setPart(_part);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
+}
+
+void Parts::setPlayMode(uint8_t _mode) {
+
+    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
+    if (_mode == virusLib::PlayModeSingle && m_controller.getCurrentPart() != 0) {
+        changePart(0);
+    }
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
 }

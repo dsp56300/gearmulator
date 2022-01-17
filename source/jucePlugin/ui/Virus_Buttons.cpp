@@ -34,7 +34,7 @@ namespace Buttons
         setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
         setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
         setClickingTogglesState(true);
-        on->setOriginWithOriginalSize({0, -17});
+        off->setOriginWithOriginalSize({0, -17});
         setImages(off.get(), nullptr, on.get(), nullptr, on.get());
     }
 

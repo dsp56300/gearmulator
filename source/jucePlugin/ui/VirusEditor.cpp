@@ -14,7 +14,16 @@ using namespace juce;
 
 constexpr auto kPanelWidth = 1377;
 constexpr auto kPanelHeight = 800;
-static uint8_t currentTab = 3;
+enum Tabs
+{
+	ArpSettings,
+	Effects,
+	LfoMatrix,
+	OscFilter,
+	Patches
+};
+static uint8_t currentTab = Tabs::OscFilter;
+
 VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
     m_parameterBinding(_parameterBinding), processorRef(_processorRef), m_controller(processorRef.getController()),
     m_controlLabel("ctrlLabel", "")
@@ -24,11 +33,12 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_background = Drawable::createFromImageData (BinaryData::bg_1377x800_png, BinaryData::bg_1377x800_pngSize);
 
     m_background->setBufferedToImage (true);
+
     addAndMakeVisible (*m_background);
     addAndMakeVisible (m_mainButtons);
 
     m_arpEditor = std::make_unique<ArpEditor>(_parameterBinding);
-    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding, m_controller);
     m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
     m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
     m_patchBrowser = std::make_unique<PatchBrowser>(_parameterBinding, m_controller);
@@ -43,19 +53,19 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     // show/hide section from buttons..
     m_mainButtons.updateSection = [this]() {
         if (m_mainButtons.m_arpSettings.getToggleState()) {
-            currentTab = 0;
+            currentTab = Tabs::ArpSettings;
         }
         else if (m_mainButtons.m_effects.getToggleState()) {
-            currentTab = 1;
+            currentTab = Tabs::Effects;
         }
         else if (m_mainButtons.m_lfoMatrix.getToggleState()) {
-            currentTab = 2;
+            currentTab = Tabs::LfoMatrix;
         }
         else if (m_mainButtons.m_oscFilter.getToggleState()) {
-            currentTab = 3;
+            currentTab = Tabs::OscFilter;
         }
         else if (m_mainButtons.m_patches.getToggleState()) {
-            currentTab = 4;
+            currentTab = Tabs::Patches;
         }
         m_arpEditor->setVisible(m_mainButtons.m_arpSettings.getToggleState());
         m_fxEditor->setVisible(m_mainButtons.m_effects.getToggleState());
@@ -83,12 +93,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_presetButtons.m_load.onClick = [this]() { loadFile(); };
     m_presetButtons.m_save.onClick = [this]() { saveFile(); };
 
-    juce::PropertiesFile::Options opts;
-    opts.applicationName = "DSP56300 Emulator";
-    opts.filenameSuffix = ".settings";
-    opts.folderName = "DSP56300 Emulator";
-    opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
-    m_properties = new juce::PropertiesFile(opts);
+    m_properties = m_controller.getConfig();
     auto midiIn = m_properties->getValue("midi_input", "");
     auto midiOut = m_properties->getValue("midi_output", "");
     if (midiIn != "")
@@ -163,11 +168,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.onTextChange = [this]() {
         auto text = m_patchName.getText();
         if(text.trim().length() > 0) {
-            if (text == "/pv") { // stupid debug thing to remove later
-                m_paramDisplayLocal = !m_paramDisplayLocal;
-                return;
-            }
             m_controller.setSinglePresetName(m_controller.getCurrentPart(), text);
+            m_partList->refreshParts();
         }
     };
     addAndMakeVisible(m_patchName);
@@ -182,22 +184,27 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     addAndMakeVisible(m_controlLabel);
 
+    m_controller.onProgramChange = [this]() {
+        updateParts();
+        m_partList->refreshParts();
+    };
     m_controller.getBankCount();
     addMouseListener(this, true);
 
     startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
 
-    // without this some combobox parameters are wrong on first load, no idea why.
-    //m_controller.getParameter(Virus::Param_PlayMode)->setValue(virusLib::PlayModeSingle);
     recreateControls();
 }
 
-VirusEditor::~VirusEditor() { setLookAndFeel(nullptr); }
+VirusEditor::~VirusEditor() { stopTimer(); setLookAndFeel(nullptr); }
 
 void VirusEditor::timerCallback()
 {
     // ugly (polling!) way for refreshing presets names as this is temporary ui
+}
+
+void VirusEditor::updateParts() {
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
     {
@@ -210,7 +217,6 @@ void VirusEditor::timerCallback()
             }
         }
     }
-    
 }
 
 void VirusEditor::updateMidiInput(int index)
@@ -289,15 +295,14 @@ void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableBut
         action(section);
     }
 }
-void VirusEditor::mouseDrag(const juce::MouseEvent & event)
-{
-    auto props = event.eventComponent->getProperties();
+
+void VirusEditor::updateControlLabel(Component* eventComponent) {
+    auto props = eventComponent->getProperties();
     if(props.contains("type") && props["type"] == "slider") {
         m_controlLabel.setVisible(true);
-        auto comp = dynamic_cast<juce::Slider*>(event.eventComponent);
+        auto comp = dynamic_cast<juce::Slider*>(eventComponent);
         if(comp) {
             auto name = props["name"];
-            
             if(m_paramDisplayLocal) {
                 m_controlLabel.setTopLeftPosition(getTopLevelComponent()->getLocalPoint(comp->getParentComponent(), comp->getPosition().translated(0, -16)));
                 m_controlLabel.setSize(comp->getWidth(), 20);
@@ -321,13 +326,34 @@ void VirusEditor::mouseDrag(const juce::MouseEvent & event)
         }
     }
 }
+void VirusEditor::mouseDrag(const juce::MouseEvent & event)
+{
+    updateControlLabel(event.eventComponent);
+}
 
+void VirusEditor::mouseEnter(const juce::MouseEvent& event) {
+    if (event.mouseWasDraggedSinceMouseDown()) {
+        return;
+    }
+    updateControlLabel(event.eventComponent);
+}
+void VirusEditor::mouseExit(const juce::MouseEvent& event) {
+    if (event.mouseWasDraggedSinceMouseDown()) {
+        return;
+    }
+    m_controlLabel.setText("", juce::dontSendNotification);
+}
+void VirusEditor::mouseDown(const juce::MouseEvent &event) {
+    
+}
 void VirusEditor::mouseUp(const juce::MouseEvent & event)
 {
     m_controlLabel.setText("", juce::dontSendNotification);
     m_controlLabel.setVisible(false);
 }
-
+void VirusEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) {
+    updateControlLabel(event.eventComponent);
+}
 void VirusEditor::resized()
 {
     m_background->setBounds (getLocalBounds());
@@ -338,8 +364,10 @@ void VirusEditor::resized()
 }
 
 void VirusEditor::handleCommandMessage(int commandId) {
-    if (commandId == Commands::Rebind) {
-        recreateControls();
+    switch (commandId) {
+        case Commands::Rebind: recreateControls();
+        case Commands::UpdateParts: { updateParts(); m_partList->refreshParts(); };
+        default: return;
     }
 }
 
@@ -356,7 +384,7 @@ void VirusEditor::recreateControls()
     m_lfoEditor = std::make_unique<LfoEditor>(m_parameterBinding);
     addChildComponent(m_lfoEditor.get());
 
-    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding, m_controller);
     addChildComponent(m_fxEditor.get());
 
     m_arpEditor = std::make_unique<ArpEditor>(m_parameterBinding);
@@ -499,10 +527,11 @@ void VirusEditor::loadFile()
 }
 
 void VirusEditor::saveFile() {
+    auto path = m_controller.getConfig()->getValue("virus_bank_dir", "");
     juce::FileChooser chooser(
         "Save preset as syx",
         m_previousPath.isEmpty()
-            ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+            ? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
             : m_previousPath,
         "*.syx", true);
 

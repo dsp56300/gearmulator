@@ -14,7 +14,13 @@ namespace Virus
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
 		assert(sizeof(m_paramsDescription) / sizeof(Parameter::Description) == Param_Count && "size of enum must match size of parameter descriptions");
-    	
+		juce::PropertiesFile::Options opts;
+		opts.applicationName = "DSP56300 Emulator";
+		opts.filenameSuffix = ".settings";
+		opts.folderName = "DSP56300 Emulator";
+		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		m_config = new juce::PropertiesFile(opts);
+
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
@@ -342,8 +348,15 @@ namespace Virus
 			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
 			for (auto i = 0; i < kDataSizeInBytes; i++)
 			{
-				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize))
-					p->setValueFromSynth(patch.data[i], true);
+				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize)) {
+					if((p->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
+						continue;
+					else
+						p->setValueFromSynth(patch.data[i], true);
+				}
+			}
+			if (onProgramChange) {
+				onProgramChange();
 			}
 		}
 		else
@@ -382,9 +395,11 @@ namespace Virus
 				if (auto* p = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
 				}
-				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
+/*				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
-				}
+				}*/
+				m_currentBank[pt] = (virusLib::BankNumber)(patch.data[virusLib::MD_PART_BANK_NUMBER + pt]+1);
+				m_currentProgram[pt] = patch.data[virusLib::MD_PART_PROGRAM_NUMBER + pt];
 			}
 		}
         if (hasChecksum)
@@ -1375,7 +1390,7 @@ namespace Virus
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
 		{
-//		case 0:  return "Off";
+		case 0:  return "";
 		case 1:  return "1 Stage";
 		case 2:  return "2 Stages";
 		case 3:  return "3 Stages";
@@ -1545,7 +1560,7 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 97, "Unison Mode", {0,15}, numToUnisonMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 98, "Unison Detune", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Pan Spread", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,3}, numToInputMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, numToInputSelect,{}, true, true, false},
@@ -1555,12 +1570,12 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 108, "Chorus Delay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,67}, numToLfoShape, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,26}, numToDelayReverbMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 112, "Delay/Reverb Mode", {0,26}, numToDelayReverbMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 115, "Delay Feedback", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Delay Rate / Reverb Decay Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Delay Depth / Reverb Room Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Dly Rate / Rev Decay", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Dly Depth / Rev Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,127}, numToDelayLfoShape, {}, true, true, false},
 //    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Reverb Damping", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 119, "Delay Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
@@ -1658,7 +1673,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 101, "Distortion Intensity", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 104, "Assign 4 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 4 Amount", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 4 Amount", {0,127}, {},{}, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 106, "Assign 5 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 107, "Assign 5 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 5 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},

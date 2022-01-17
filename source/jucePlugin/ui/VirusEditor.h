@@ -21,13 +21,14 @@ public:
     ~VirusEditor() override;
     void resized() override;
     void recreateControls();
-    void updatePartsPresetNames();
+    void updateParts();
     void loadFile();
     void saveFile();
 
     enum Commands {
         None,
-        Rebind = 0x100
+        Rebind = 0x100,
+        UpdateParts = 0x101,
     };
 private:
     void timerCallback() override;
@@ -88,8 +89,12 @@ private:
 
     juce::String m_previousPath;
     bool m_paramDisplayLocal = false;
-
+    void updateControlLabel(Component *eventComponent);
+    void mouseEnter (const juce::MouseEvent &event) override;
+    void mouseExit (const juce::MouseEvent &event) override;
     void mouseDrag (const juce::MouseEvent &event) override;
+	void mouseDown (const juce::MouseEvent &event) override;
     void mouseUp (const juce::MouseEvent &event) override;
+    void mouseWheelMove (const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
 
 };

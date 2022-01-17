@@ -2,7 +2,9 @@
 #include "BinaryData.h"
 #include "Ui_Utils.h"
 #include "Virus_PatchBrowser.h"
+#include "VirusEditor.h"
 #include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_cryptography/juce_cryptography.h>
 using namespace juce;
 using namespace virusLib;
 constexpr auto comboBoxWidth = 98;
@@ -15,14 +17,10 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     m_controller(_controller),
     m_patchList("Patch browser"),
     m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
-    m_bankList(FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL)
+    m_bankList(FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
+    m_search("Search Box")
 {
-    juce::PropertiesFile::Options opts;
-    opts.applicationName = "DSP56300 Emulator";
-    opts.filenameSuffix = ".settings";
-    opts.folderName = "DSP56300 Emulator";
-    opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
-    m_properties = new juce::PropertiesFile(opts);
+    m_properties = m_controller.getConfig();
     
     auto bankDir = m_properties->getValue("virus_bank_dir", "");
     if (bankDir != "" && juce::File(bankDir).isDirectory())
@@ -30,21 +28,42 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
         m_bankList.setRoot(bankDir);
     }
 
-    setBounds(22, 30, 1000, 570);
+    setBounds(22, 30, 1000, 600);
     m_bankList.setBounds(16, 28, 480, 540);
 
     m_patchList.setBounds(m_bankList.getBounds().translated(m_bankList.getWidth(), 0));
 
     m_patchList.getHeader().addColumn("#", Columns::INDEX, 32);
-    m_patchList.getHeader().addColumn("Name", Columns::NAME, 140);
-    m_patchList.getHeader().addColumn("Category1", Columns::CAT1, 90);
-    m_patchList.getHeader().addColumn("Category2", Columns::CAT2, 90);
+    m_patchList.getHeader().addColumn("Name", Columns::NAME, 130);
+    m_patchList.getHeader().addColumn("Category1", Columns::CAT1, 84);
+    m_patchList.getHeader().addColumn("Category2", Columns::CAT2, 84);
     m_patchList.getHeader().addColumn("Arp", Columns::ARP, 32);
     m_patchList.getHeader().addColumn("Uni", Columns::UNI, 32);
+    m_patchList.getHeader().addColumn("ST+-", Columns::ST, 32);
     m_patchList.getHeader().addColumn("Ver", Columns::VER, 32);
     addAndMakeVisible(m_bankList);
     addAndMakeVisible(m_patchList);
 
+    m_search.setSize(m_patchList.getWidth(), 20);
+    m_search.setColour(TextEditor::textColourId, juce::Colours::white);
+    m_search.setTopLeftPosition(m_patchList.getBounds().getBottomLeft().translated(0, 8));
+    m_search.onTextChange = [this] {
+        m_filteredPatches.clear();
+        for(auto patch : m_patches) {
+            const auto searchValue = m_search.getText();
+            if (searchValue.isEmpty()) {
+                m_filteredPatches.add(patch);
+            }
+            else if(patch.name.containsIgnoreCase(searchValue)) {
+                m_filteredPatches.add(patch);
+            }
+        }
+        m_patchList.updateContent();
+        m_patchList.deselectAllRows();
+        m_patchList.repaint();
+    };
+    m_search.setTextToShowWhenEmpty("search...", juce::Colours::grey);
+    addAndMakeVisible(m_search);
     m_bankList.addListener(this);
     m_patchList.setModel(this);
 }
@@ -70,20 +89,17 @@ VirusModel guessVersion(uint8_t *data) {
     return VirusModel::C;
 
 }
-void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
-{
+int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0, const bool dedupe = false) {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
-    m_properties->setValue("virus_bank_dir", path);
+    int loadedCount = 0;
+    int index = _startIndex;
     if (ext == ".syx")
     {
-        m_patches.clear();
-
         juce::MemoryBlock data;
         if (!file.loadFileAsData(data)) {
-            return;
+            return 0;
         }
-        int index = 0;
         for (auto it = data.begin(); it != data.end(); it += 267)
         {
             if ((uint8_t)*it == (uint8_t)0xf0
@@ -100,29 +116,29 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                 patch.category1 = patch.data[251];
                 patch.category2 = patch.data[252];
                 patch.unison = patch.data[97];
+                patch.transpose = patch.data[93];
                 if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                 }
                 else {
                     patch.model = guessVersion(patch.data);
                 }
-                m_patches.add(patch);
-                index++;
+                auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                if(!dedupe || !m_checksums.contains(md5)) {
+                    m_checksums.set(md5, true);
+                    m_patches.add(patch);
+                    index++;
+                }
             }
         }
-        m_patchList.updateContent();
-        m_patchList.deselectAllRows();
-        m_patchList.repaint(); // force repaint since row number doesn't often change
     }
     else if (ext == ".mid" || ext == ".midi")
     {
-        m_patches.clear();
         juce::MemoryBlock data;
         if (!file.loadFileAsData(data))
         {
-            return;
+            return 0;
         }
-        uint8_t index = 0;
 
         const uint8_t *ptr = (uint8_t *)data.getData();
         const auto end = ptr + data.getSize();
@@ -148,14 +164,20 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    m_patches.add(patch);
-                    index++;
+                    auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                    if(!dedupe || !m_checksums.contains(md5)) {
+                        m_checksums.set(md5, true);
+                        m_patches.add(patch);
+                        index++;
+                    }
+
                     it += 266;
                 }
                 else if((uint8_t)*(it+3) == 0x00 // some midi files have two bytes after the 0xf0
@@ -180,31 +202,86 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    m_patches.add(patch);
-                    index++;
+                    auto md5 = juce::MD5(it+2+9 + 17, 256-17-3).toHexString();
+                    if(!dedupe || !m_checksums.contains(md5)) {
+                        m_checksums.set(md5, true);
+                        m_patches.add(patch);
+                        index++;
+                    }
+                    loadedCount++;
 
                     it += 266;
                 }
+            }
+        }
+    }
+    return index;
+}
 
+void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
+{
+    auto ext = file.getFileExtension().toLowerCase();
+    auto path = file.getParentDirectory().getFullPathName();
+    if (file.isDirectory() && e.mods.isRightButtonDown()) {
+        auto p = juce::PopupMenu();
+        p.addItem("Add directory contents to patch list", [this, file]() {
+            m_patches.clear();
+            m_checksums.clear();
+            int lastIndex = 0;
+            for (auto f : juce::RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", juce::File::findFiles)) {
+                lastIndex = loadBankFile(f.getFile(), lastIndex, true);
+            }
+            m_filteredPatches.clear();
+            for(auto patch : m_patches) {
+                const auto searchValue = m_search.getText();
+                if (searchValue.isEmpty()) {
+                    m_filteredPatches.add(patch);
+                }
+                else if(patch.name.containsIgnoreCase(searchValue)) {
+                    m_filteredPatches.add(patch);
+                }
+            }
+            m_patchList.updateContent();
+            m_patchList.deselectAllRows();
+            m_patchList.repaint();    
+        });
+        p.showMenu(juce::PopupMenu::Options());
+        
+        return;
+    }
+    m_properties->setValue("virus_bank_dir", path);
+    if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid") {
+        m_patches.clear();
+        loadBankFile(file);
+        m_filteredPatches.clear();
+        for(auto patch : m_patches) {
+            const auto searchValue = m_search.getText();
+            if (searchValue.isEmpty()) {
+                m_filteredPatches.add(patch);
+            }
+            else if(patch.name.containsIgnoreCase(searchValue)) {
+                m_filteredPatches.add(patch);
             }
         }
         m_patchList.updateContent();
         m_patchList.deselectAllRows();
         m_patchList.repaint();
     }
+
 }
 
 void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
 
 void PatchBrowser::browserRootChanged(const File &newRoot) {}
 
-int PatchBrowser::getNumRows() { return m_patches.size(); }
+int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
 
 void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int height, bool rowIsSelected) {
     auto alternateColour = getLookAndFeel()
@@ -220,7 +297,7 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     g.setColour(rowIsSelected ? juce::Colours::darkblue
                                 : getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
     
-    auto rowElement = m_patches[rowNumber];
+    auto rowElement = m_filteredPatches[rowNumber];
     //auto text = rowElement.name;
     juce::String text = "";
     if (columnId == Columns::INDEX)
@@ -235,6 +312,8 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
         text = rowElement.data[129] != 0 ? "Y" : " ";
     else if(columnId == Columns::UNI)
         text = rowElement.unison == 0 ? " " : juce::String(rowElement.unison+1);
+    else if(columnId == Columns::ST)
+        text = rowElement.transpose != 64 ? juce::String(rowElement.transpose - 64) : " ";
     else if (columnId == Columns::VER) {
         if(rowElement.model < ModelList.size())
             text = ModelList[rowElement.model];
@@ -256,7 +335,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     uint8_t data[256];
     for (int i = 0; i < 256; i++)
     {
-        data[i] = m_patches[idx].data[i];
+        data[i] = m_filteredPatches[idx].data[i];
         cs += data[i];
     }
     cs = cs & 0x7f;
@@ -273,6 +352,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     syx.push_back(syxEof);
     m_controller.sendSysEx(syx); // send to edit buffer
     m_controller.parseMessage(syx); // update ui
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
@@ -313,6 +393,9 @@ public:
         else if (attributeToSort == Columns::VER) {
             return direction * (first.model - second.model);
         }
+        else if (attributeToSort == Columns::ST) {
+            return direction * (first.transpose - second.transpose);
+        }
         return direction * (first.progNumber - second.progNumber);
     }
 
@@ -326,7 +409,7 @@ void PatchBrowser::sortOrderChanged(int newSortColumnId, bool isForwards)
     if (newSortColumnId != 0)
     {
         PatchBrowser::PatchBrowserSorter sorter (newSortColumnId, isForwards);
-        m_patches.sort(sorter);
+        m_filteredPatches.sort(sorter);
         m_patchList.updateContent();
     }
 }

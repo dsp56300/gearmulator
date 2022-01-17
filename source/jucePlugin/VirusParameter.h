@@ -57,7 +57,21 @@ namespace Virus
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
 		void setValue(float newValue) override { return m_value.setValue(convertFrom0to1(newValue)); };
 		void setValueFromSynth(int newValue, bool notifyHost = true);
-		float getDefaultValue() const override { return m_desc.isBipolar ? 64.0f : 0.0f; /* maybe return from ROM state? */ }
+		float getDefaultValue() const override {
+			// default value should probably be in description instead of hardcoded like this.
+			if (m_desc.index == 21 || m_desc.index == 31) { // osc keyfollows
+				return 64+32;
+			}
+			else if (m_desc.index == 36) // osc vol / saturation
+				return 64;
+			else if (m_desc.index == 40) // filter1 cutoffs
+				return 127;
+			else if(m_desc.index == 41) //filter 2
+				return 64;
+			else if(m_desc.index == 91) // patch volume
+				return 100;
+			return m_desc.isBipolar ? 64.0f : 0.0f; /* maybe return from ROM state? */
+		}
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
 		bool isBoolean() const override { return m_desc.isBool; }
 		bool isBipolar() const { return m_desc.isBipolar; }
