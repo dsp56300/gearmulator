@@ -168,11 +168,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.onTextChange = [this]() {
         auto text = m_patchName.getText();
         if(text.trim().length() > 0) {
-            if (text == "/pv") { // stupid debug thing to remove later
-                m_paramDisplayLocal = !m_paramDisplayLocal;
-                return;
-            }
             m_controller.setSinglePresetName(m_controller.getCurrentPart(), text);
+            m_partList->refreshParts();
         }
     };
     addAndMakeVisible(m_patchName);
