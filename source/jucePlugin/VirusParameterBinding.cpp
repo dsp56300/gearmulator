@@ -34,7 +34,7 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 	_slider.addMouseListener(new VirusParameterBindingMouseListener(v, _slider), false);
 	const auto range = v->getNormalisableRange();
 	_slider.setRange(range.start, range.end, range.interval);
-	_slider.setDoubleClickReturnValue(true, v->getDefaultValue());
+	_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
 	_slider.getValueObject().referTo(v->getValueObject());
 	_slider.getProperties().set("type", "slider");
 	_slider.getProperties().set("name", v->getDescription().name);
