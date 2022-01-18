@@ -195,6 +195,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     setSize (kPanelWidth, kPanelHeight);
 
     recreateControls();
+	updateParts();
 }
 
 VirusEditor::~VirusEditor() { stopTimer(); setLookAndFeel(nullptr); }
