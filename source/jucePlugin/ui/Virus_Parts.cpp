@@ -98,7 +98,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
         _parameterBinding.bind(m_partPans[pt], Virus::Param_Panorama, pt);
         addAndMakeVisible(m_partPans[pt]);
     }
-    m_partSelect[m_controller.getCurrentPart()].setToggleState(true, NotificationType::sendNotification);
+    m_partSelect[m_controller.getCurrentPart()].setToggleState(true, NotificationType::dontSendNotification);
 
     m_btSingleMode.setRadioGroupId(0x3cf);
     m_btMultiMode.setRadioGroupId(0x3cf);
@@ -121,6 +121,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
 
     //m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
     m_btMultiMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+    refreshParts();
 }
 Parts::~Parts() {
 }
