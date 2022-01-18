@@ -198,7 +198,12 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 	updateParts();
 }
 
-VirusEditor::~VirusEditor() { stopTimer(); setLookAndFeel(nullptr); }
+VirusEditor::~VirusEditor()
+{
+	stopTimer();
+	setLookAndFeel(nullptr);
+	m_controller.onProgramChange = nullptr;
+}
 
 void VirusEditor::timerCallback()
 {
