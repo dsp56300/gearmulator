@@ -110,6 +110,6 @@ namespace Buttons
             Drawable::createFromImageData(BinaryData::part_select_btn_36x36_png, BinaryData::part_select_btn_36x36_pngSize);
         setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
         setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
-        setImages(nullptr, nullptr, on.get(), nullptr, on.get(), nullptr, nullptr);
+        setImages(on.get(), nullptr, on.get(), nullptr, on.get(), nullptr, nullptr);
     }
 }; // namespace Buttons
