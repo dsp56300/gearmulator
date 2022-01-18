@@ -235,6 +235,9 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 
 bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
 {
+	if (_data.size() < 7)
+		return true;	// invalid sysex or not directed to us
+
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
 	const auto manufacturerC = _data[3];
