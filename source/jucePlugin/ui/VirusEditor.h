@@ -14,7 +14,7 @@ class ArpEditor;
 class PatchBrowser;
 class Parts;
 
-class VirusEditor : public juce::Component, private juce::Timer
+class VirusEditor : public juce::Component
 {
 public:
     VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
@@ -31,7 +31,6 @@ public:
         UpdateParts = 0x101,
     };
 private:
-    void timerCallback() override;
     void handleCommandMessage(int commandId) override;
     void updateMidiInput(int index);
     void updateMidiOutput(int index);
