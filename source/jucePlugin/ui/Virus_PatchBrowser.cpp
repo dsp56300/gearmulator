@@ -17,7 +17,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     m_controller(_controller),
     m_patchList("Patch browser"),
     m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
-    m_bankList(FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
+    m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
     m_search("Search Box")
 {
     m_properties = m_controller.getConfig();
