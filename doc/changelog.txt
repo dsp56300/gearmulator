@@ -1,5 +1,9 @@
 Release Notes 
 
+1.2.4c (2022.01.18):
+
+- [Fix] Freezing of plugins for some seconds because DSP skipped processing peripheral devices in certain circumstances
+
 1.2.4b (2022.01.18):
 
 - [Fix] Possible crash at startup
