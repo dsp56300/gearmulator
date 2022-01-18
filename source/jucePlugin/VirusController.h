@@ -435,16 +435,16 @@ namespace Virus
 
         struct MultiPatch
         {
-            uint8_t bankNumber;
-            uint8_t progNumber;
-            uint8_t data[kDataSizeInBytes];
+            uint8_t bankNumber = 0;
+            uint8_t progNumber = 0;
+            uint8_t data[kDataSizeInBytes]{};
         };
 
         struct SinglePatch
         {
-	        virusLib::BankNumber bankNumber;
-            uint8_t progNumber;
-            uint8_t data[kDataSizeInBytes];
+	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
+            uint8_t progNumber = 0;
+            uint8_t data[kDataSizeInBytes]{};
         };
 
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
