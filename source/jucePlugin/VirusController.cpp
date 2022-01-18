@@ -36,6 +36,12 @@ namespace Virus
     	startTimer(5);
 	}
 
+    Controller::~Controller()
+    {
+	    stopTimer();
+		delete m_config;
+    }
+
     void Controller::registerParams()
     {
         // 16 parts * 3 pages * 128 params
