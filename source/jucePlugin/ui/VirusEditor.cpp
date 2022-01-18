@@ -191,7 +191,6 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_controller.getBankCount();
     addMouseListener(this, true);
 
-    startTimerHz(5);
     setSize (kPanelWidth, kPanelHeight);
 
     recreateControls();
@@ -200,14 +199,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
 VirusEditor::~VirusEditor()
 {
-	stopTimer();
 	setLookAndFeel(nullptr);
 	m_controller.onProgramChange = nullptr;
-}
-
-void VirusEditor::timerCallback()
-{
-    // ugly (polling!) way for refreshing presets names as this is temporary ui
 }
 
 void VirusEditor::updateParts() {
