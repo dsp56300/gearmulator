@@ -1,3 +1,6 @@
 temp/
 vtune/
 *.aps
+/.vs
+/out/build/x64-Debug
+/temp2/cmake_win64
