@@ -121,6 +121,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
 
     //m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
     m_btMultiMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
+    refreshParts();
 }
 Parts::~Parts() {
 }
