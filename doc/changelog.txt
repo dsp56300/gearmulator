@@ -1,5 +1,15 @@
 Release Notes 
 
+1.2.4b (2022.01.18):
+
+- [Fix] Possible crash at startup
+- [Fix] Plugin doesn't emit any sound in some circumstances
+- [Fix] Possible crash when closing editor window, reopening it and switching presets
+- [Fix] Possible crash when invalid sysex message received
+- [Fix] Memory leaks
+- [Fix] Broken Combo Box selection
+- [Fix] Preset name not being displayed after reopening editor window
+
 1.2.4 (2022.01.18):
 
 - [Imp] UI scale selector. Higher quality image assets for larger sizes will be included in a future release.
