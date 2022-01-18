@@ -1,5 +1,51 @@
 Release Notes 
 
+1.2.4 (2022.01.18):
+
+- [Imp] UI scale selector. Higher quality image assets for larger sizes will be included in a future release.
+- [Imp] Name search in patch browser.
+- [Imp] Show transpose column in patch browser.
+- [Imp] Right click a directory in patch browser to dedupe and add all syx/midi files within to the patch list.
+- [Imp] Mouse hover now shows parameter value.
+- [Imp] Scroll wheel now cycles through combobox options.
+- [Imp] DSP emulation code has been optimized and is now 10% to 20% faster
+
+- [Change] Save preset location now defaults to the patch browsers last directory
+- [Change] Multi-Single removed.
+- [Change] In multi mode, FX are no longer applied when loading a patch. (previously they did on part 1 only)
+
+- [Fix] Reverb/Delay now show correct controls for the selected mode.
+- [Fix] Some parameters in UI showing wrong values in multi mode.
+- [Fix] Moving parameters now sends automation to DAW.
+- [Fix] Crash when loading second instance on some platforms.
+- [Fix] Crash when removing track
+- [Fix] Some better double click default values
+
+1.2.3 (2022.01.14):
+
+- [Imp] Add double click to edit preset name.
+- [Imp] Add missing reverb controls. 
+- [Imp] Connect unassigned GUI controls (Bend, Category, SoftKnob config, Input follower)
+- [Imp] Control changes now show their value in the main display
+- [Imp] Add Part Volume and part pan control
+- [Imp] Add Multi-Single mode.
+- [Imp] Add part output selection for main and aux buses.
+- [Imp] Sync internal virus clock to host bpm
+- [Imp] Patch Browser sorting by column headers
+- [Imp] Flag for TI patches in browser.
+
+- [Fix] Fix selected part not being remembered when reopening editor
+- [Fix] Patch browser not switching if selected index doesn't change.
+- [Fix] Double now click resets to to center instead of 0 on bipolar controls.
+- [Fix] Matrix slot 4/5/6 not working on C rom.
+- [Fix] Osc sync button
+- [Fix] Crash when removing the track with GUI open in some DAWs.
+- [Fix] Update some art assets
+
+1.2.2 (2022.01.08):
+
+- [Imp] First version that uses the new User Interface instead of the temporary one
+
 1.2.1 (2022.01.03):
 
 - [Change] Switch default play mode to Single
