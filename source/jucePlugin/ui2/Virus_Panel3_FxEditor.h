@@ -51,7 +51,6 @@ private:
     
 	//Reverb
 	juce::Slider m_reverbDecayTime, m_reverbDaming, m_reverbColoration, m_reverbPredelay, m_reverbFeedback;
-	juce::ComboBox m_reverbClock;
 	juce::ComboBox m_reverbType;
 
     //Vocoder

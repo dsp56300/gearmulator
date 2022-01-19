@@ -66,18 +66,20 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     };
 
     uint8_t index = 0;
-
-    applyToSections([this, index](Component *s) mutable { 
-        if (currentTab == index) {
+    applyToSections([this, index](Component *s) mutable 
+    { 
+        if (currentTab == index) 
+        {
             s->setVisible(true);
         }
         index++;
     });
 
     index = 0;
-
-    m_mainButtons.applyToMainButtons([this, &index](DrawableButton *s) mutable {
-        if (currentTab == index) {
+    m_mainButtons.applyToMainButtons([this, &index](DrawableButton *s) mutable 
+    {
+        if (currentTab == index) 
+        {
             s->setToggleState(true, juce::dontSendNotification);
         }
         index++;
@@ -87,11 +89,9 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     m_mainMenu.onClick = [this]()
     {
-		juce::PopupMenu selector;
-		juce::PopupMenu SubSkinSizeSelector;
-
-        selector.setLookAndFeel(&m_landfButtons);
+        selectorMenu.setLookAndFeel(&m_landfButtons);
         SubSkinSizeSelector.setLookAndFeel(&m_landfButtons);
+        SubSkinSizeSelector.clear();
 
 		for (float d = 375; d < 1250; d = d + 125)
 		{
@@ -105,9 +105,9 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
             });
 		}        
               
-        selector.addSubMenu("Skin size", SubSkinSizeSelector, true);
-		selector.addItem("About", [this]() { AboutWindow(); });
-        selector.showMenu(juce::PopupMenu::Options());
+        selectorMenu.addSubMenu("Skin size", SubSkinSizeSelector, true);
+		selectorMenu.addItem("About", [this]() { AboutWindow(); });
+        selectorMenu.showMenu(juce::PopupMenu::Options());
 	};
 
     //draw Main Menu Button	
@@ -118,7 +118,6 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_patchName.setBounds(1473, 35, 480, 58);
     m_patchName.setJustificationType(Justification::left);
     m_patchName.setFont(juce::Font("Register", "Normal", 30.f));
-    m_patchName.setColour(juce::Label::textColourId, juce::Colours::red);
     m_patchName.setEditable(false, true, true);
     m_patchName.onTextChange = [this]() 
     {
@@ -135,14 +134,12 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     //MainDisplay 
     m_controlLabel.setBounds(1473, 35, 650, 58);
-    m_controlLabel.setColour(juce::Label::textColourId, juce::Colours::red);
     m_controlLabel.setFont(juce::Font("Register", "Normal", 30.f));
     addAndMakeVisible(m_controlLabel);
 
     //ToolTip
     //m_ToolTip.setLookAndFeel(&m_landfToolTip);
     m_ToolTip.setBounds(200, 50, 200, 200);
-    m_ToolTip.setColour(juce::Label::textColourId, juce::Colours::red);
     m_ToolTip.setFont(juce::Font("Register", "Normal", 15.f));
     m_ToolTip.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
     m_ToolTip.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
@@ -153,7 +150,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     //MainDisplay Value
     m_controlLabelValue.setBounds(1900, 35, 197, 58);
     m_controlLabelValue.setJustificationType(Justification::centredRight);
-    m_controlLabelValue.setColour(juce::Label::textColourId, juce::Colours::red);
+    //m_controlLabelValue.setColour(juce::Label::textColourId, juce::Colours::red);
     m_controlLabelValue.setFont(juce::Font("Register", "Normal", 30.f));
     addAndMakeVisible(m_controlLabelValue);
 
@@ -218,10 +215,19 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 	updateParts();
 }
 
+VirusEditor::~VirusEditor()
+{
+    m_mainMenu.onClick = nullptr;	
+    selectorMenu.setLookAndFeel(nullptr);
+	SubSkinSizeSelector.setLookAndFeel(nullptr);
+	m_mainMenu.setLookAndFeel (nullptr);
+    selector.setLookAndFeel (nullptr); 
+	m_controller.onProgramChange = nullptr; 
+    setLookAndFeel(nullptr);
+}
 
 void VirusEditor::updateParts() 
 {
-    // ugly (polling!) way for refreshing presets names as this is temporary ui
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
     {
@@ -244,17 +250,15 @@ void VirusEditor::updateParts()
                 m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
                     +"][" + getCurrentPartBankStr(m_controller.getCurrentPartBank(m_controller.getCurrentPart())) + "] "                    
                     + sZero
-                    + juce::String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart()))+": " + patchName, NotificationType::dontSendNotification);
+                    + juce::String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart())+1)+": " + patchName, NotificationType::dontSendNotification);
             } 
         }
     } 
 }
 
 
-
 void VirusEditor::ShowMenuePatchList()
 {
-    juce::PopupMenu selector;
     auto pt = m_controller.getCurrentPart();
     
     selector.setLookAndFeel (&m_landfButtons);    
@@ -279,13 +283,6 @@ void VirusEditor::ShowMenuePatchList()
     selector.showMenu(juce::PopupMenu::Options());
 }
 
-
-VirusEditor::~VirusEditor() 
-{ 	
-    setLookAndFeel(nullptr);
-	m_controller.onProgramChange = nullptr;
-}
-
 void VirusEditor::applyToSections(std::function<void(Component *)> action)
 {
     for (auto *section : {static_cast<Component *>(m_arpEditor.get()), static_cast<Component *>(m_fxEditor.get()),
@@ -295,6 +292,7 @@ void VirusEditor::applyToSections(std::function<void(Component *)> action)
         action(section);
     }
 }
+
 void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableButton *)> action)
 {
     for (auto *section : {static_cast<juce::DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),

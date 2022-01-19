@@ -12,10 +12,12 @@ class ArpEditor : public juce::Component, private juce::Timer
 {
 public:
     ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
+    ArpEditor::~ArpEditor();
     static constexpr auto kPartGroupId = 0x3FBBC;
 private:
     void updateMidiInput(int index);
     void updateMidiOutput(int index);
+    Virus::LookAndFeelSmallButton m_lookAndFeelSmallButton;
 
     //WorkingMode
     juce::ComboBox m_WorkingMode;

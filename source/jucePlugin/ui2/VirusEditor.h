@@ -48,6 +48,9 @@ private:
 
     Buttons::ButtonMenu m_mainMenu;
 	juce::PopupMenu m_mainMenuSubSkinsize;
+    juce::PopupMenu selector;
+	juce::PopupMenu selectorMenu;
+    juce::PopupMenu SubSkinSizeSelector;
 
     struct MainButtons : juce::Component, juce::Value::Listener
     {

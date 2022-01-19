@@ -2,7 +2,6 @@
 
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
-#include "Virus_LookAndFeel.h"
 
 class VirusParameterBinding;
 
@@ -11,11 +10,9 @@ class OscEditor : public juce::Component
 public:
     OscEditor(VirusParameterBinding& _parameterBinding);
     void resized() override;
-	//Virus::BoxLookAndFeel landf;
-	
 
 private:
-
+            
     // OSC1
     juce::Slider m_osc1Shape, m_osc1PulseWidth, m_osc1Semitone, m_osc1KeyFollow;
 	juce::ComboBox m_osc1WaveSelect;

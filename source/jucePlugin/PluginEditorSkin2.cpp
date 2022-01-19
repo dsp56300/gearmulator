@@ -9,12 +9,10 @@
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p), m_virusEditor(new VirusEditor(m_parameterBinding, processorRef))
 {
-	double dScaleFactor = 0.75;
 	const auto config = processorRef.getController().getConfig();
 	
 	setResizable(true,false);
-	dScaleFactor = config->getDoubleValue("skin_scale_factor", 0.75f);
-	setScaleFactor(dScaleFactor);
+	setScaleFactor(config->getDoubleValue("skin_scale_factor", 0.75f));
 	setSize(m_virusEditor->iSkinSizeWidth, m_virusEditor->iSkinSizeHeight);
 	m_virusEditor->m_AudioPlugInEditor = (AudioPluginAudioProcessorEditor*)this;
 
@@ -23,6 +21,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 {
+	delete m_virusEditor;
 }
 
 //==============================================================================

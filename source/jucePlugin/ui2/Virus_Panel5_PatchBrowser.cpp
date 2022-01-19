@@ -3,6 +3,8 @@
 #include "Ui_Utils.h"
 #include "Virus_Panel5_PatchBrowser.h"
 #include <juce_gui_extra/juce_gui_extra.h>
+#include <juce_cryptography/juce_cryptography.h>
+#include "VirusEditor.h"
 
 using namespace juce;
 using namespace virusLib;
@@ -18,37 +20,36 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_controller(_processorRef.getController()),
     m_patchList("Patch browser"),
     m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
-    m_bankList(FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL)
+    m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
+    m_search("Search Box")
 {
 	setupBackground(*this, m_background, BinaryData::panel_5_png, BinaryData::panel_5_pngSize);    
     bRunning = false;
 
+    m_bankList.setLookAndFeel(&m_landf);
+
+    m_modeIndex = m_properties->getIntValue("patch_mode", 1);
+    m_bankList.setBounds(0, 50/fBrowserScaleFactor , 1030/fBrowserScaleFactor , 935/fBrowserScaleFactor );
+   
+    //PatchBrowser
     auto bankDir = m_properties->getValue("virus_bank_dir", "");
     if (bankDir != "" && juce::File(bankDir).isDirectory())
     {
         m_bankList.setRoot(bankDir);
     }
 
-    setLookAndFeel(&m_landf);
-
     setBounds(0, 0, kPanelWidth, kPanelHeight);
     
-    m_modeIndex = m_properties->getIntValue("patch_mode", 1);
-
-    m_bankList.setBounds(0, 50/fBrowserScaleFactor , 1030/fBrowserScaleFactor , 935/fBrowserScaleFactor );
-    //m_bankList.setLookAndFeel (&m_landf);
-
-
     //PatchList
     m_patchList.setBounds(1049/fBrowserScaleFactor , 50/fBrowserScaleFactor , 1010/fBrowserScaleFactor , 930/fBrowserScaleFactor );
-    //m_patchList.setLookAndFeel (&m_landf);
 
     m_patchList.getHeader().addColumn("#", ColumnsPatch::INDEX, 32);
-    m_patchList.getHeader().addColumn("Name", ColumnsPatch::NAME, 140);
-    m_patchList.getHeader().addColumn("Category 1", ColumnsPatch::CAT1, 90);
-    m_patchList.getHeader().addColumn("Category 2", ColumnsPatch::CAT2, 90);
+    m_patchList.getHeader().addColumn("Name", ColumnsPatch::NAME, 130);
+    m_patchList.getHeader().addColumn("Category1", ColumnsPatch::CAT1, 84);
+    m_patchList.getHeader().addColumn("Category2", ColumnsPatch::CAT2, 84);
     m_patchList.getHeader().addColumn("Arp", ColumnsPatch::ARP, 32);
     m_patchList.getHeader().addColumn("Uni", ColumnsPatch::UNI, 32);
+    m_patchList.getHeader().addColumn("ST+-", ColumnsPatch::ST, 32);
     m_patchList.getHeader().addColumn("Ver", ColumnsPatch::VER, 32);
 
     addAndMakeVisible(m_patchList);
@@ -59,24 +60,45 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_bankList.addListener(this);
     m_patchList.setModel(this);
 
+    //Search
+    m_search.setSize(m_patchList.getWidth(), 20);
+    m_search.setColour(TextEditor::textColourId, juce::Colours::white);
+    m_search.setTopLeftPosition(m_patchList.getBounds().getBottomLeft().translated(0, 8));
+    m_search.onTextChange = [this] {
+        m_filteredPatches.clear();
+        for(auto patch : m_patches) {
+            const auto searchValue = m_search.getText();
+            if (searchValue.isEmpty()) {
+                m_filteredPatches.add(patch);
+            }
+            else if(patch.name.containsIgnoreCase(searchValue)) {
+                m_filteredPatches.add(patch);
+            }
+        }
+        m_patchList.updateContent();
+        m_patchList.deselectAllRows();
+        m_patchList.repaint();
+    };
+    m_search.setTextToShowWhenEmpty("search...", juce::Colours::grey);
+    addAndMakeVisible(m_search);
+
     //ROM Bank
     m_romBankList.setBounds(10, 50/fBrowserScaleFactor , 970/fBrowserScaleFactor , 935/fBrowserScaleFactor );
     m_romBankList.getHeader().addColumn("ROM BANK", ColumnsRomBanks::ROM_BANK_NAME, 450);
     m_romBankList.setTransform(AffineTransform::scale(fBrowserScaleFactor));
     
-    RomBank rRomBank;
+    /*RomBank rRomBank;
     for (int i=1;i<=m_controller.getBankCount();i++)
     {
         rRomBank.m_RomNumber = static_cast<virusLib::BankNumber>(static_cast<int>(rRomBank.m_RomNumber) + 1) ;
         m_romBankes.add(rRomBank);
-    }
+    }*/
 
     m_romBankList.setModel(this);
     m_romBankList.updateContent();
     m_romBankList.deselectAllRows();
     m_romBankList.repaint(); // force repaint since row number doesn't often change
     m_romBankList.selectRow(0);
-
 
     //Show Options Buttons/Cmb
     addAndMakeVisible(m_LoadBank);
@@ -95,46 +117,44 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
 
     m_Mode.onChange = [this]() 
     { 
-        if(bRunning)
+        if (m_Mode.getSelectedItemIndex()==0) 
         {
-            if (m_Mode.getSelectedItemIndex()==0) 
-            {
-                //ROM
-                m_romBankList.setVisible(true);
-                m_bankList.setVisible(false);
-                m_romBankList.updateContent();
-                m_romBankList.deselectAllRows();
-                m_romBankList.repaint(); // force repaint since row number doesn't often change
-                m_romBankList.selectRow(0);
-            }
-            else
-            {
-                //FILE
-                m_romBankList.setVisible(false);
-                m_bankList.setVisible(true);
-            }
-            m_properties->setValue("patch_mode", m_Mode.getSelectedItemIndex()); 
-            m_properties->save();
-            m_modeIndex = m_Mode.getSelectedItemIndex();
+            //ROM
+            m_romBankList.setVisible(true);
+            m_bankList.setVisible(false);
+            m_romBankList.updateContent();
+            m_romBankList.deselectAllRows();
+            m_romBankList.repaint(); // force repaint since row number doesn't often change
+            m_romBankList.selectRow(0);
         }
+        else
+        {
+            //FILE
+            m_romBankList.setVisible(false);
+            m_bankList.setVisible(true);
+        }
+        m_properties->setValue("patch_mode", m_Mode.getSelectedItemIndex()); 
+        m_properties->save();
+        m_modeIndex = m_Mode.getSelectedItemIndex();
     };
 
     m_Mode.setSelectedItemIndex(m_modeIndex);
 
     m_LoadBank.onClick = [this]() { loadFile(); };
     m_SavePreset.onClick = [this]() { savePreset(); };
-
-	startTimerHz(4);
 }
 
-void PatchBrowser::timerCallback()
+PatchBrowser::~PatchBrowser()
 {
-
+	setLookAndFeel(nullptr);
+    m_Mode.setLookAndFeel(nullptr);
+    m_bankList.setLookAndFeel(nullptr);
 }
+
 
 void PatchBrowser::selectionChanged() 
 {
-    bRunning=true; //ugly
+
 }
 
 VirusModel guessVersion(uint8_t *data) 
@@ -160,21 +180,18 @@ VirusModel guessVersion(uint8_t *data)
     //return VirusModel::C;
 
 }
-void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
-{
+
+int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0, const bool dedupe = false) {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
-    juce::MemoryBlock data;
-
-    file.loadFileAsData(data);
-
-    m_properties->setValue("virus_bank_dir", path);
+    int loadedCount = 0;
+    int index = _startIndex;
     if (ext == ".syx")
     {
-        m_patches.clear();
-        loadBankFileToRom(file);  
-
-        int index = 0;
+        juce::MemoryBlock data;
+        if (!file.loadFileAsData(data)) {
+            return 0;
+        }
         for (auto it = data.begin(); it != data.end(); it += 267)
         {
             if ((uint8_t)*it == (uint8_t)0xf0
@@ -191,28 +208,29 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                 patch.category1 = patch.data[251];
                 patch.category2 = patch.data[252];
                 patch.unison = patch.data[97];
+                patch.transpose = patch.data[93];
                 if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                 }
                 else {
                     patch.model = guessVersion(patch.data);
                 }
-                m_patches.add(patch);
-                index++;
+                auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                if(!dedupe || !m_checksums.contains(md5)) {
+                    m_checksums.set(md5, true);
+                    m_patches.add(patch);
+                    index++;
+                }
             }
         }
-
-        m_patchList.updateContent();
-        m_patchList.deselectAllRows();
-        m_patchList.repaint(); // force repaint since row number doesn't often change
-        m_patchList.selectRow(0);
     }
     else if (ext == ".mid" || ext == ".midi")
     {
-        m_patches.clear();
-        loadBankFileToRom(file);  
-
-        uint8_t index = 0;
+        juce::MemoryBlock data;
+        if (!file.loadFileAsData(data))
+        {
+            return 0;
+        }
 
         const uint8_t *ptr = (uint8_t *)data.getData();
         const auto end = ptr + data.getSize();
@@ -238,14 +256,20 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    m_patches.add(patch);
-                    index++;
+                    auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                    if(!dedupe || !m_checksums.contains(md5)) {
+                        m_checksums.set(md5, true);
+                        m_patches.add(patch);
+                        index++;
+                    }
+
                     it += 266;
                 }
                 else if((uint8_t)*(it+3) == 0x00 // some midi files have two bytes after the 0xf0
@@ -270,28 +294,79 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
                     patch.category1 = patch.data[251];
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
+                    patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
                         patch.model = VirusModel::TI;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    m_patches.add(patch);
-                    index++;
+                    auto md5 = juce::MD5(it+2+9 + 17, 256-17-3).toHexString();
+                    if(!dedupe || !m_checksums.contains(md5)) {
+                        m_checksums.set(md5, true);
+                        m_patches.add(patch);
+                        index++;
+                    }
+                    loadedCount++;
 
                     it += 266;
                 }
-
             }
-
-            
         }
+    }
+    return index;
+}
 
+void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
+{
+    auto ext = file.getFileExtension().toLowerCase();
+    auto path = file.getParentDirectory().getFullPathName();
+    if (file.isDirectory() && e.mods.isRightButtonDown()) {
+        auto p = juce::PopupMenu();
+        p.addItem("Add directory contents to patch list", [this, file]() {
+            m_patches.clear();
+            m_checksums.clear();
+            int lastIndex = 0;
+            for (auto f : juce::RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", juce::File::findFiles)) {
+                lastIndex = loadBankFile(f.getFile(), lastIndex, true);
+            }
+            m_filteredPatches.clear();
+            for(auto patch : m_patches) {
+                const auto searchValue = m_search.getText();
+                if (searchValue.isEmpty()) {
+                    m_filteredPatches.add(patch);
+                }
+                else if(patch.name.containsIgnoreCase(searchValue)) {
+                    m_filteredPatches.add(patch);
+                }
+            }
+            m_patchList.updateContent();
+            m_patchList.deselectAllRows();
+            m_patchList.repaint();    
+        });
+        p.showMenu(juce::PopupMenu::Options());
+        
+        return;
+    }
+    m_properties->setValue("virus_bank_dir", path);
+    if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid") {
+        m_patches.clear();
+        loadBankFile(file);
+        m_filteredPatches.clear();
+        for(auto patch : m_patches) {
+            const auto searchValue = m_search.getText();
+            if (searchValue.isEmpty()) {
+                m_filteredPatches.add(patch);
+            }
+            else if(patch.name.containsIgnoreCase(searchValue)) {
+                m_filteredPatches.add(patch);
+            }
+        }
         m_patchList.updateContent();
         m_patchList.deselectAllRows();
         m_patchList.repaint();
-        m_patchList.selectRow(0);
     }
+
 }
 
 void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
@@ -326,12 +401,12 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     //Banks from file
     if(m_modeIndex==1)
     {
-        g.setColour(rowIsSelected ? juce::Colours::darkblue: getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
-        juce::String text = "";
-
-        auto rowElement = m_patches[rowNumber];
+        g.setColour(rowIsSelected ? juce::Colours::darkblue
+                                : getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
+    
+        auto rowElement = m_filteredPatches[rowNumber];
         //auto text = rowElement.name;
-
+        juce::String text = "";
         if (columnId == ColumnsPatch::INDEX)
             text = juce::String(rowElement.progNumber);
         else if (columnId == ColumnsPatch::NAME)
@@ -344,94 +419,81 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
             text = rowElement.data[129] != 0 ? "Y" : " ";
         else if(columnId == ColumnsPatch::UNI)
             text = rowElement.unison == 0 ? " " : juce::String(rowElement.unison+1);
-        else if (columnId == ColumnsPatch::VER) 
-        {
+        else if(columnId == ColumnsPatch::ST)
+            text = rowElement.transpose != 64 ? juce::String(rowElement.transpose - 64) : " ";
+        else if (columnId == ColumnsPatch::VER) {
             if(rowElement.model < ModelList.size())
                 text = ModelList[rowElement.model];
         }
-        g.drawText(text, 2, 0, width - 4, 20, juce::Justification::centredLeft, true); // [6]
+        g.drawText(text, 2, 0, width - 4, height, juce::Justification::centredLeft, true); // [6]
         g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
-        g.fillRect(width - 1, 0, 1, 20); // [7]
+        g.fillRect(width - 1, 0, 1, height); // [7]
     }
     else if (m_modeIndex==0)
     {
         g.setColour(rowIsSelected ? juce::Colours::darkblue: getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
-        juce::String text = "";
-
-        auto rowElement = m_romBankes[rowNumber];
-        juce::String sBankName="ERR";
-        text = "Bank: ";
-
-		switch (virusLib::BankNumber(rowNumber+1))
-		{
-			case virusLib::BankNumber::A: text += "A"; break;
-			case virusLib::BankNumber::B: text += "B"; break;
-			case virusLib::BankNumber::C: text += "C"; break;
-			case virusLib::BankNumber::D: text += "D"; break;
-			case virusLib::BankNumber::E: text += "E"; break;
-			case virusLib::BankNumber::F: text += "F"; break;
-			case virusLib::BankNumber::G: text += "G"; break;
-			case virusLib::BankNumber::H: text += "H"; break;
-        }
-
-        g.drawText(text, 2, 0, width - 4, 20, juce::Justification::centredLeft, true); // [6]
+        g.drawText("Bank: " + getCurrentPartBankStr(virusLib::BankNumber(rowNumber+1)), 2, 0, width - 4, 20, juce::Justification::centredLeft, true); // [6]
         g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
         g.fillRect(width - 1, 0, 1, 20); // [7]
     }
 }
 
+
+
+
 void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     auto idx = m_patchList.getSelectedRow();
-    
     if (idx == -1) {
         return;
     }
+    
+    if(m_modeIndex==1)
+    {
+        uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
+        syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
+        const uint8_t syxEof = 0xF7;
+        uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
+        uint8_t data[256];
+        for (int i = 0; i < 256; i++)
+        {
+            data[i] = m_filteredPatches[idx].data[i];
+            cs += data[i];
+        }
+        cs = cs & 0x7f;
+        Virus::SysEx syx;
+        for (auto i : syxHeader)
+        {
+            syx.push_back(i);
+        }
+        for (auto i : data)
+        {
+            syx.push_back(i);
+        }
+        syx.push_back(cs);
+        syx.push_back(syxEof);
+        m_controller.sendSysEx(syx); // send to edit buffer
+        m_controller.parseMessage(syx); // update ui
+        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+    }
+    else if (m_modeIndex==0)
+    {
+        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(),m_controller.getCurrentPartBank(m_controller.getCurrentPart()),lastRowSelected);
+    }    
+    
+    
 
-    m_controller.setCurrentPartPreset(m_controller.getCurrentPart(),m_controller.getCurrentPartBank(m_controller.getCurrentPart()),lastRowSelected);
-
-    /*uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
-    syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
-    const uint8_t syxEof = 0xF7;
-    uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-    uint8_t data[256];
-    for (int i = 0; i < 256; i++)
-    {
-        data[i] = m_patches[idx].data[i];
-        cs += data[i];
-    }
-    cs = cs & 0x7f;
-    Virus::SysEx syx;
-    for (auto i : syxHeader)
-    {
-        syx.push_back(i);
-    }
-    for (auto i : data)
-    {
-        syx.push_back(i);
-    }
-    syx.push_back(cs);
-    syx.push_back(syxEof);*/
-    //m_controller.sendSysEx(syx); // send to edit buffer
-    //m_controller.parseMessage(syx); // update ui
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
 {
-
-    if(m_modeIndex==1)
+   /* if(m_modeIndex==1)
     {
-        if(rowNumber == m_patchList.getSelectedRow()) 
-        {
-        selectedRowsChanged(0);
-        }
+         selectedRowsChanged(0);
     }
     else if (m_modeIndex==0)
     {
-        if(rowNumber == m_romBankList.getSelectedRow()) 
-        {
-            selectedRowsChanged(0);
-        }
-    }
+        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(),m_controller.getCurrentPartBank(m_controller.getCurrentPart()),lastRowSelected);
+    }*/
 }
 
 
