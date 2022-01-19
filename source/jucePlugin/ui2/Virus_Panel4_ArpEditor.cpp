@@ -7,8 +7,6 @@
 using namespace juce;
 using namespace virusLib;
 
-Virus::LookAndFeelSmallButton m_lookAndFeelSmallButton;
-
 static uint8_t g_playMode = 0;
 
 ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef): 
@@ -17,7 +15,6 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
 	setupBackground(*this, m_background, BinaryData::panel_4_png, BinaryData::panel_4_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
     bRunning = false;
-    //setLookAndFeel(&m_lookAndFeel);
 
     //Mode
     m_WorkingMode.addItem("Single",1);
@@ -240,10 +237,17 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
         m_btMultiMode.setToggleState(true, juce::dontSendNotification);
     }*/
 
-
-
     startTimerHz(5);
 
+}
+
+ArpEditor::~ArpEditor()
+{
+    for (auto pt = 0; pt < 16; pt++)
+    {
+	    m_partVolumes[pt].setLookAndFeel(nullptr);
+ 	    m_partPans[pt].setLookAndFeel(nullptr);
+    }
 }
 
 void ArpEditor::changePart(uint8_t _part)

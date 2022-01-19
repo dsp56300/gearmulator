@@ -158,9 +158,6 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding)
 	m_reverbPredelay.setBounds(909 - knobSize / 2, 854 - knobSize / 2, knobSize, knobSize);
 	m_reverbFeedback.setBounds(1052 - knobSize / 2, 854 - knobSize / 2, knobSize, knobSize);
 
-	addAndMakeVisible(m_reverbClock);
-	m_reverbClock.setBounds(467+comboBoxXMargin - comboBox3Width / 2, 803 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
-
 	addAndMakeVisible(m_reverbType);
 	m_reverbType.setBounds(467+comboBoxXMargin - comboBox3Width / 2, 900 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
 
@@ -169,9 +166,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding)
 	_parameterBinding.bind(m_reverbColoration, Virus::Param_DelayColor);
 	_parameterBinding.bind(m_reverbPredelay, Virus::Param_DelayTime);
 	_parameterBinding.bind(m_reverbFeedback, Virus::Param_DelayFeedback);
-	_parameterBinding.bind(m_reverbClock, Virus::Param_DelayClock);
 	_parameterBinding.bind(m_reverbType, Virus::Param_DelayDepthReverbRoomSize);
-
 
 	// todo Need to check these parameters bindings for delay and reverb
 	// Delay
@@ -256,9 +251,9 @@ void FxEditor::timerCallback()
 	//Delay/Reverb
 	int iSelectedIndex = m_delayReverbMode.getSelectedItemIndex();
     bool bReverb = (iSelectedIndex >= 2 && iSelectedIndex <= 4);
-	float fReverbAlpha = (iSelectedIndex >= 2 && iSelectedIndex <= 4)?1.0f:0.3f; 
+	float fReverbAlpha = (bReverb)?1.0f:0.3f; 
 	bool bDelay = (iSelectedIndex ==1 || iSelectedIndex > 5); 
-	float fDelayAlpha = (iSelectedIndex ==1 || iSelectedIndex > 5)?1.0f:0.3f; 
+	float fDelayAlpha = (bDelay)?1.0f:0.3f; 
 
 	m_reverbDecayTime.setEnabled(bReverb);
 	m_reverbDecayTime.setAlpha(fReverbAlpha);
@@ -270,8 +265,6 @@ void FxEditor::timerCallback()
 	m_reverbPredelay.setAlpha(fReverbAlpha);
 	m_reverbFeedback.setEnabled(bReverb);
 	m_reverbFeedback.setAlpha(fReverbAlpha);
-	m_reverbClock.setEnabled(bReverb);
-	m_reverbClock.setAlpha(fReverbAlpha);
 	m_reverbType.setEnabled(bReverb);
 	m_reverbType.setAlpha(fReverbAlpha);
 
@@ -294,7 +287,7 @@ void FxEditor::timerCallback()
 	//m_vocoderMode
 	iSelectedIndex = m_vocoderMode.getSelectedItemIndex();
 	bool bVocoder = (iSelectedIndex > 0); 
-	float fAlpha = (iSelectedIndex > 0)?1.0f:0.3f; 
+	float fAlpha = (bVocoder)?1.0f:0.3f; 
 	 
     m_vocoderCenterFreq.setEnabled(bVocoder);
 	m_vocoderCenterFreq.setAlpha(fAlpha);

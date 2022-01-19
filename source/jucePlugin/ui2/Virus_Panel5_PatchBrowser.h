@@ -20,6 +20,7 @@ struct Patch
     uint8_t data[256];
     virusLib::VirusModel model;
     uint8_t unison;
+    uint8_t transpose;
 };
 
 struct RomBank
@@ -27,17 +28,17 @@ struct RomBank
     virusLib::BankNumber m_RomNumber;
 };
 
-class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel, private juce::Timer
+class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel
 {
 
 public:
     PatchBrowser(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
+    ~PatchBrowser();
     void loadFile();
     void loadBankFileToRom(const juce::File &file);
     void savePreset();
 
 private:
-    void timerCallback() override;
     bool bRunning;
 
     Virus::LookAndFeelPatchBrowser m_landf;
@@ -57,10 +58,14 @@ private:
     juce::FileBrowserComponent m_bankList;
     juce::TableListBox m_patchList;
     juce::TableListBox m_romBankList;
+    juce::TextEditor m_search;
     juce::Array<RomBank> m_romBankes;
     juce::Array<Patch> m_patches;
+    juce::Array<Patch> m_filteredPatches;
     juce::PropertiesFile *m_properties;
-
+    juce::HashMap<juce::String, bool> m_checksums;
+    int loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
+    // Inherited via FileBrowserListener
     Buttons::OptionButtonLoadBank m_LoadBank;
     Buttons::OptionButtonSavePreset m_SavePreset;
     juce::ComboBox m_Mode;
@@ -94,7 +99,8 @@ private:
         CAT2 = 4,
         ARP = 5,
         UNI = 6,
-        VER = 7
+        ST = 7,
+        VER = 8,
     };
 
     enum ColumnsRomBanks {
@@ -108,12 +114,13 @@ private:
 class PatchBrowser::PatchBrowserSorter
 {
 public:
-    PatchBrowserSorter (int attributeToSortBy, bool forwards) : attributeToSort (attributeToSortBy), direction (forwards ? 1 : -1)
+    PatchBrowserSorter (int attributeToSortBy, bool forwards)
+        : attributeToSort (attributeToSortBy),
+            direction (forwards ? 1 : -1)
     {}
 
     int compareElements (Patch first, Patch second) const
     {
-
         if(attributeToSort == ColumnsPatch::INDEX) {
             return direction * (first.progNumber - second.progNumber);
         }
@@ -134,6 +141,9 @@ public:
         }
         else if (attributeToSort == ColumnsPatch::VER) {
             return direction * (first.model - second.model);
+        }
+        else if (attributeToSort == ColumnsPatch::ST) {
+            return direction * (first.transpose - second.transpose);
         }
         return direction * (first.progNumber - second.progNumber);
     }

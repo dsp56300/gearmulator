@@ -25,11 +25,12 @@ namespace Virus
 									   float rotaryStartAngle, float rotaryEndAngle, Slider &s)
 	{
 		Drawable *knob = m_genKnob.get();
-        //s.setPopupDisplayEnabled(true, true, nullptr, 2000);
 
-		const auto step = roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional));
+		int step;
+		(s.isEnabled())?step=roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)):step=0;
+
 		knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
-
+		
 		// this won't support scaling!
 		knob->drawAt(g, x, y, 1.0f);
 	}
@@ -45,21 +46,22 @@ namespace Virus
  
 	void LookAndFeel::drawRotarySlider(Graphics &g, int x, int y, int width, int height, float sliderPosProportional,
 									   float rotaryStartAngle, float rotaryEndAngle, Slider &s)
-	{
+	{	
 		Drawable *knob = m_genKnob.get();
-        //s.setPopupDisplayEnabled(true, true, nullptr, 2000);
 
-		const auto step = roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional));
+		int step;
+		(s.isEnabled())?step=roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)):step=0;
+
 		knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
-
+		
 		// this won't support scaling!
 		knob->drawAt(g, x, y, 1.0f);
 	}
 
     void LookAndFeel::drawComboBox (juce::Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, juce::ComboBox& box)
     {
-        gGrafik.setOpacity(0);
-        box.setColour(juce::ComboBox::textColourId, juce::Colours::red);
+        //gGrafik.setOpacity(0);
+        //box.setColour(juce::ComboBox::textColourId, juce::Colours::red);
     };
 
 	//LookAndFeelPatchBrowser
