@@ -8,12 +8,13 @@
 
 class VirusParameterBinding;
 
-class ArpEditor : public juce::Component, private juce::Timer
+class ArpEditor : public juce::Component
 {
 public:
     ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
     ArpEditor::~ArpEditor();
     static constexpr auto kPartGroupId = 0x3FBBC;
+    void refreshParts();
 private:
     void updateMidiInput(int index);
     void updateMidiOutput(int index);
@@ -25,8 +26,7 @@ private:
     //Channels
     void changePart(uint8_t _part);
     void setPlayMode(uint8_t _mode);
-    void timerCallback() override;
-    bool bRunning;
+    void updatePlayModeButtons();
     Virus::Controller &m_controller;
     VirusParameterBinding &m_parameterBinding;   
 
@@ -39,7 +39,7 @@ private:
     juce::Slider m_partVolumes[16];
     juce::Slider m_partPans[16];
  
-    //juce::TextButton m_btSingleMode;
+    Buttons::Button2 m_btWorkingMode;
     //juce::TextButton m_btMultiSingleMode;
     //juce::TextButton m_btMultiMode;
 

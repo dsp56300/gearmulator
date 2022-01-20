@@ -6,13 +6,15 @@
 
 class VirusParameterBinding;
 
-class FxEditor : public juce::Component, private juce::Timer
+class FxEditor : public juce::Component
 {
 public:
-    FxEditor(VirusParameterBinding& _parameterBinding);
+    FxEditor(VirusParameterBinding& _parameterBinding, AudioPluginAudioProcessor &_processorRef);
 
 private:
-	void timerCallback();
+	void DelayReverb();
+	void Vocoder();
+    Virus::Controller &m_controller;
 
     // Env Follower
 	juce::Slider m_envFollowLevel, m_envFollowAttack, m_eEnvFollowRelease;

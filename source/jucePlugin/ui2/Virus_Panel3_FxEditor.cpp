@@ -6,7 +6,7 @@
 using namespace juce;
 
 
-FxEditor::FxEditor(VirusParameterBinding &_parameterBinding) 
+FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef): m_controller(_processorRef.getController())
 {
 	setupBackground(*this, m_background, BinaryData::panel_3_png, BinaryData::panel_3_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
@@ -144,6 +144,17 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding)
 
 	_parameterBinding.bind(m_delayReverbSend, Virus::Param_EffectSend);
 	_parameterBinding.bind(m_delayReverbMode, Virus::Param_DelayReverbMode);
+	 
+    auto p = m_controller.getParameter(Virus::Param_DelayReverbMode, 0);
+    if (p) {
+        const auto val = (int)p->getValueObject().getValueSource().getValue();
+        DelayReverb();
+
+        p->onValueChanged = nullptr;
+        p->onValueChanged = [this, p]() {
+            DelayReverb();
+        };
+    }
 
 	//Reverb selected
 	// Reverb
@@ -194,7 +205,6 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding)
 	_parameterBinding.bind(m_delayClock, Virus::Param_DelayClock);
 	_parameterBinding.bind(m_delayShape, Virus::Param_DelayLfoShape);
 
-
     // Vocoder
 	for (auto *s : {&m_vocoderCenterFreq, &m_vocoderModOffset, &m_vocoderModQ, &m_vocoderModSpread, &m_vocoderCarrQ,
 					&m_vocoderCarrSpread, &m_vocoderSpectralBal, &m_vocoderBands, &m_vocoderAttack, &m_vocoderRelease,
@@ -243,49 +253,28 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding)
 	_parameterBinding.bind(m_vocoderModInput, Virus::Param_InputSelect);
 	_parameterBinding.bind(m_vocoderLink, Virus::Param_Filter2CutoffLink);
 
-	startTimerHz(2);
+    auto p1 = m_controller.getParameter(Virus::Param_VocoderMode, 0);
+    if (p1) {
+        const auto val = (int)p1->getValueObject().getValueSource().getValue();
+        Vocoder();
+
+        p1->onValueChanged = nullptr;
+        p1->onValueChanged = [this, p1]() {
+            Vocoder();
+        };
+    }
+
 }
 
-void FxEditor::timerCallback()
+void FxEditor::Vocoder()
 {
-	//Delay/Reverb
-	int iSelectedIndex = m_delayReverbMode.getSelectedItemIndex();
-    bool bReverb = (iSelectedIndex >= 2 && iSelectedIndex <= 4);
-	float fReverbAlpha = (bReverb)?1.0f:0.3f; 
-	bool bDelay = (iSelectedIndex ==1 || iSelectedIndex > 5); 
-	float fDelayAlpha = (bDelay)?1.0f:0.3f; 
-
-	m_reverbDecayTime.setEnabled(bReverb);
-	m_reverbDecayTime.setAlpha(fReverbAlpha);
-	m_reverbDaming.setEnabled(bReverb);
-	m_reverbDaming.setAlpha(fReverbAlpha);
-	m_reverbColoration.setEnabled(bReverb);
-	m_reverbColoration.setAlpha(fReverbAlpha);
-	m_reverbPredelay.setEnabled(bReverb);
-	m_reverbPredelay.setAlpha(fReverbAlpha);
-	m_reverbFeedback.setEnabled(bReverb);
-	m_reverbFeedback.setAlpha(fReverbAlpha);
-	m_reverbType.setEnabled(bReverb);
-	m_reverbType.setAlpha(fReverbAlpha);
-
-	m_delayTime.setEnabled(bDelay);
-	m_delayTime.setAlpha(fDelayAlpha);
-	m_delayRate.setEnabled(bDelay);
-	m_delayRate.setAlpha(fDelayAlpha);
-	m_delayFeedback.setEnabled(bDelay);
-	m_delayFeedback.setAlpha(fDelayAlpha);
-	m_delayColoration.setEnabled(bDelay);
-	m_delayColoration.setAlpha(fDelayAlpha);
-	m_delayDepth.setEnabled(bDelay);
-	m_delayDepth.setAlpha(fDelayAlpha);
-	m_delayClock.setEnabled(bDelay);
-	m_delayClock.setAlpha(fDelayAlpha);
-	m_delayShape.setEnabled(bDelay);
-	m_delayShape.setAlpha(fDelayAlpha);
-
 	//Vocoder
 	//m_vocoderMode
-	iSelectedIndex = m_vocoderMode.getSelectedItemIndex();
+	auto p = m_controller.getParameter(Virus::Param_VocoderMode, 0);
+    const auto value = (int)p->getValueObject().getValueSource().getValue();
+    m_vocoderMode.setSelectedId(value + 1, juce::dontSendNotification);
+
+	int iSelectedIndex = m_vocoderMode.getSelectedItemIndex();
 	bool bVocoder = (iSelectedIndex > 0); 
 	float fAlpha = (bVocoder)?1.0f:0.3f; 
 	 
@@ -316,4 +305,47 @@ void FxEditor::timerCallback()
 	m_vocoderModInput.setAlpha(fAlpha);
 	m_vocoderLink.setEnabled(bVocoder);
 	m_vocoderLink.setAlpha(fAlpha);
+}
+
+void FxEditor::DelayReverb()
+{
+    //rebind();
+	auto p = m_controller.getParameter(Virus::Param_DelayReverbMode, 0);
+    const auto value = (int)p->getValueObject().getValueSource().getValue();
+    m_delayReverbMode.setSelectedId(value + 1, juce::dontSendNotification);
+
+	//Delay/Reverb
+	int iSelectedIndex = m_delayReverbMode.getSelectedItemIndex();
+    bool bReverb = (iSelectedIndex >= 2 && iSelectedIndex <= 4);
+	float fReverbAlpha = (bReverb)?1.0f:0.3f; 
+	bool bDelay = (iSelectedIndex ==1 || iSelectedIndex >= 5); 
+	float fDelayAlpha = (bDelay)?1.0f:0.3f; 
+
+	m_reverbDecayTime.setEnabled(bReverb);
+	m_reverbDecayTime.setAlpha(fReverbAlpha);
+	m_reverbDaming.setEnabled(bReverb);
+	m_reverbDaming.setAlpha(fReverbAlpha);
+	m_reverbColoration.setEnabled(bReverb);
+	m_reverbColoration.setAlpha(fReverbAlpha);
+	m_reverbPredelay.setEnabled(bReverb);
+	m_reverbPredelay.setAlpha(fReverbAlpha);
+	m_reverbFeedback.setEnabled(bReverb);
+	m_reverbFeedback.setAlpha(fReverbAlpha);
+	m_reverbType.setEnabled(bReverb);
+	m_reverbType.setAlpha(fReverbAlpha);
+
+	m_delayTime.setEnabled(bDelay);
+	m_delayTime.setAlpha(fDelayAlpha);
+	m_delayRate.setEnabled(bDelay);
+	m_delayRate.setAlpha(fDelayAlpha);
+	m_delayFeedback.setEnabled(bDelay);
+	m_delayFeedback.setAlpha(fDelayAlpha);
+	m_delayColoration.setEnabled(bDelay);
+	m_delayColoration.setAlpha(fDelayAlpha);
+	m_delayDepth.setEnabled(bDelay);
+	m_delayDepth.setAlpha(fDelayAlpha);
+	m_delayClock.setEnabled(bDelay);
+	m_delayClock.setAlpha(fDelayAlpha);
+	m_delayShape.setEnabled(bDelay);
+	m_delayShape.setAlpha(fDelayAlpha);
 }

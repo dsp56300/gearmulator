@@ -14,34 +14,10 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
 {
 	setupBackground(*this, m_background, BinaryData::panel_4_png, BinaryData::panel_4_pngSize);
     setBounds(m_background->getDrawableBounds().toNearestIntEdges());
-    bRunning = false;
-
-    //Mode
-    m_WorkingMode.addItem("Single",1);
-    m_WorkingMode.addItem("Multi & Single",2);
-    m_WorkingMode.addItem("Multi",3);
-	m_WorkingMode.setBounds(1234 + comboBoxXMargin - comboBox3Width / 2, 868 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
-    m_WorkingMode.setSelectedItemIndex(0);
-
-    m_WorkingMode.onChange = [this]() 
-    { 
-        if (bRunning )
-        {
-            if (m_WorkingMode.getSelectedItemIndex()==0)
-                setPlayMode(virusLib::PlayMode::PlayModeSingle); 
-            else if (m_WorkingMode.getSelectedItemIndex()==1)
-                setPlayMode(virusLib::PlayMode::PlayModeMultiSingle);
-            else
-                setPlayMode(virusLib::PlayMode::PlayModeMulti);
-        }
-    };
-
-    addAndMakeVisible(m_WorkingMode);
-
 
     //MIDI settings
-    auto midiIn = m_properties->getValue("midi_input", "");
-    auto midiOut = m_properties->getValue("midi_output", "");
+    juce::String midiIn = m_properties->getValue("midi_input", "");
+    juce::String midiOut = m_properties->getValue("midi_output", "");
     
     if (midiIn != "")
     {
@@ -98,6 +74,7 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
     m_cmbMidiInput.onChange = [this]() { updateMidiInput(m_cmbMidiInput.getSelectedItemIndex()); };
     m_cmbMidiOutput.onChange = [this]() { updateMidiOutput(m_cmbMidiOutput.getSelectedItemIndex()); };
 
+
     int iMarginYChannels = 118;
     int iMarginXChannels = 0;
     int iIndex = 0;
@@ -105,13 +82,6 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
     //Channels
     for (auto pt = 0; pt < 16; pt++)
     {
-        /*m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
-        m_partLabels[pt].setText(juce::String(pt + 1), juce::dontSendNotification);
-        m_partLabels[pt].setColour(0, juce::Colours::white);
-        m_partLabels[pt].setColour(1, juce::Colour(45, 24, 24));
-        m_partLabels[pt].setJustificationType(Justification::centred);
-        addAndMakeVisible(m_partLabels[pt]);*/
-
         if (pt==8)
         {
             iIndex=0;
@@ -148,6 +118,7 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
                     p.addItem(presetNames[j], [this, bank, j, pt, presetName] {
                         m_controller.setCurrentPartPreset(pt, bank, j);
                         m_PresetPatch[pt].setButtonText(presetName);
+                        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
                     });
                 }
                 std::stringstream bankName;
@@ -164,15 +135,14 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
         
         m_prevPatch[pt].onClick = [this, pt]() 
         {
-            m_controller.setCurrentPartPreset(
-                pt, m_controller.getCurrentPartBank(pt),
-                std::max(0, m_controller.getCurrentPartProgram(pt) - 1));
+            m_controller.setCurrentPartPreset(pt, m_controller.getCurrentPartBank(pt),std::max(0, m_controller.getCurrentPartProgram(pt) - 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
+
         m_nextPatch[pt].onClick = [this, pt]() 
         {
-            m_controller.setCurrentPartPreset(
-                pt, m_controller.getCurrentPartBank(pt),
-                std::min(127, m_controller.getCurrentPartProgram(pt) + 1));
+            m_controller.setCurrentPartPreset(pt, m_controller.getCurrentPartBank(pt),std::min(127, m_controller.getCurrentPartProgram(pt) + 1));
+            getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
         };
         
         addAndMakeVisible(m_prevPatch[pt]);
@@ -186,59 +156,33 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
 
         m_partVolumes[pt].setLookAndFeel(&m_lookAndFeelSmallButton);
         m_partVolumes[pt].setBounds(407 - knobSizeSmall / 2 + iMarginXChannels, 98 - knobSizeSmall / 2 + iIndex * (iMarginYChannels), knobSizeSmall, knobSizeSmall);
-        m_parameterBinding.bind(m_partVolumes[pt], Virus::Param_PartVolume, pt);
+        _parameterBinding.bind(m_partVolumes[pt], Virus::Param_PartVolume, pt);
         addAndMakeVisible(m_partVolumes[pt]);
         
         m_partPans[pt].setLookAndFeel(&m_lookAndFeelSmallButton);
         m_partPans[pt].setBounds(495 - knobSizeSmall / 2 + iMarginXChannels, 98 - knobSizeSmall / 2 + iIndex * (iMarginYChannels), knobSizeSmall, knobSizeSmall);
-        m_parameterBinding.bind(m_partPans[pt], Virus::Param_Panorama, pt);
+        _parameterBinding.bind(m_partPans[pt], Virus::Param_Panorama, pt);
         addAndMakeVisible(m_partPans[pt]);
 
         iIndex++;
     }
-    m_partSelect[m_controller.getCurrentPart()].setToggleState(true, NotificationType::sendNotification);
 
-    /*m_btSingleMode.setRadioGroupId(0x3cf);
-    m_btMultiMode.setRadioGroupId(0x3cf);
-    m_btMultiSingleMode.setRadioGroupId(0x3cf);
-    addAndMakeVisible(m_btSingleMode);
-    addAndMakeVisible(m_btMultiMode);
-    addAndMakeVisible(m_btMultiSingleMode);
-    /m_btSingleMode.setTopLeftPosition(102, 756);
-    m_btSingleMode.setSize(70, 30);
+    m_btWorkingMode.setBounds(1203 - m_btWorkingMode.kWidth / 2, 868 - m_btWorkingMode.kHeight / 2, m_btWorkingMode.kWidth, m_btWorkingMode.kHeight);
+    addAndMakeVisible(m_btWorkingMode);
+    m_btWorkingMode.onClick = [this]() 
+    { 
+        if (m_btWorkingMode.getToggleState()==1)
+		{
+            setPlayMode(virusLib::PlayMode::PlayModeSingle); 
+        }
+		else
+		{
+            setPlayMode(virusLib::PlayMode::PlayModeMulti); 
+        }
+        updatePlayModeButtons();
+    };  
 
-    m_btMultiMode.getToggleStateValue().referTo(*m_controller.getParamValue(Virus::Param_PlayMode));
-    m_btSingleMode.setClickingTogglesState(true);
-    m_btMultiMode.setClickingTogglesState(true);
-    m_btMultiSingleMode.setClickingTogglesState(true);
-
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    
-    m_btSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-    m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
-    m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
-
-    m_btMultiSingleMode.setBounds(m_btSingleMode.getBounds().translated(m_btSingleMode.getWidth()+4, 0));
-    m_btMultiMode.setBounds(m_btMultiSingleMode.getBounds().translated(m_btMultiSingleMode.getWidth()+4, 0));
-
-    const uint8_t playMode = g_playMode;
-    if (playMode == virusLib::PlayModeSingle) {
-        m_btSingleMode.setToggleState(true, juce::dontSendNotification);
-    }
-    else if (playMode == virusLib::PlayModeMultiSingle) {
-        m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
-    }
-    else if (playMode == virusLib::PlayModeMulti) {
-        m_btMultiMode.setToggleState(true, juce::dontSendNotification);
-    }*/
-
-    startTimerHz(5);
-
+    refreshParts();
 }
 
 ArpEditor::~ArpEditor()
@@ -250,25 +194,7 @@ ArpEditor::~ArpEditor()
     }
 }
 
-void ArpEditor::changePart(uint8_t _part)
-{
-    for (auto &p : m_partSelect)
-    {
-        p.setToggleState(false, juce::dontSendNotification);
-    }
-    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
-    m_parameterBinding.setPart(_part);
-    //getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
-}
-
-void ArpEditor::setPlayMode(uint8_t _mode) 
-{
-    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
-    g_playMode = _mode;
-    //getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
-}
-
-void ArpEditor::timerCallback()
+void ArpEditor::refreshParts() 
 {
     const auto multiMode = m_controller.isMultiMode();
     for (auto pt = 0; pt < 16; pt++)
@@ -295,8 +221,52 @@ void ArpEditor::timerCallback()
         }
         if (singlePartOrInMulti)
             m_presetNames[pt].setText(m_controller.getCurrentPartPresetName(pt),  juce::dontSendNotification);
+        else
+            m_presetNames[pt].setText("",  juce::dontSendNotification);
     }
-    bRunning=true;
+
+    updatePlayModeButtons();
+}
+
+void ArpEditor::changePart(uint8_t _part)
+{
+    for (auto &p : m_partSelect)
+    {
+        p.setToggleState(false, juce::dontSendNotification);
+    }
+    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
+    m_parameterBinding.setPart(_part);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
+}
+
+void ArpEditor::setPlayMode(uint8_t _mode) 
+{
+
+    m_controller.getParameter(Virus::Param_PlayMode)->setValue(_mode);
+    if (_mode == virusLib::PlayModeSingle && m_controller.getCurrentPart() != 0) 
+    {
+        changePart(0);
+    }
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
+}
+
+
+void ArpEditor::updatePlayModeButtons()
+{
+    const auto modeParam = m_controller.getParameter(Virus::Param_PlayMode, 0);
+    if (modeParam == nullptr) {
+        return;
+    }
+    const auto _mode = (int)modeParam->getValue();
+    if (_mode == virusLib::PlayModeSingle)
+    {
+        m_btWorkingMode.setToggleState(true, juce::dontSendNotification);
+    }
+    else if (_mode == virusLib::PlayModeMulti || _mode == virusLib::PlayModeMultiSingle)
+    {
+        m_btWorkingMode.setToggleState(false, juce::dontSendNotification);
+    }
 }
 
 void ArpEditor::updateMidiInput(int index)

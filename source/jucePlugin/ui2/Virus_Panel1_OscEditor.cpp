@@ -186,7 +186,7 @@ OscEditor::OscEditor(VirusParameterBinding& _parameterBinding)
 	m_filterMode2.setBounds(1710+comboBoxXMargin - comboBox3Width / 2, 353 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
 	m_filterRouting.setBounds(2017+comboBoxXMargin - comboBox3Width / 2, 242 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
 	m_saturationCurve.setBounds(2017+comboBoxXMargin - comboBox3Width / 2, 353 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
-	m_keyFollowBase.setBounds(1884+comboBoxXMargin - comboBox2Width / 2, 303 - comboBox2Height / 2, comboBox2Width, comboBox2Height);
+	m_keyFollowBase.setBounds(1876+comboBoxXMargin - comboBox2Width / 2, 303 - comboBox2Height / 2, comboBox2Width, comboBox2Height);
 
 	addAndMakeVisible(m_filterMode1);
 	addAndMakeVisible(m_filterMode2);
