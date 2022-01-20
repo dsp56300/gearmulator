@@ -24,6 +24,7 @@ public:
     void recreateControls();
     void updatePartsPresetNames();
     void ShowMenuePatchList();
+    void ShowMainMenue();
     void updateParts();
 
     enum Commands {

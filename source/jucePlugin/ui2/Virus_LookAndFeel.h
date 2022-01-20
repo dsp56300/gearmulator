@@ -6,8 +6,8 @@
 constexpr auto comboBoxHeight = 38;
 constexpr auto comboBoxWidth = 126;
 
-constexpr auto comboBox2Height = 60;
-constexpr auto comboBox2Width = 49;
+constexpr auto comboBox2Height = 52;
+constexpr auto comboBox2Width = 74;
 
 constexpr auto comboBox3Height = 52;
 constexpr auto comboBox3Width = 186;

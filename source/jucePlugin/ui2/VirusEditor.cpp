@@ -34,7 +34,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     addAndMakeVisible (m_mainButtons);
 
     m_arpEditor = std::make_unique<ArpEditor>(_parameterBinding, processorRef);
-    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(_parameterBinding, processorRef);
     m_lfoEditor = std::make_unique<LfoEditor>(_parameterBinding);
     m_oscEditor = std::make_unique<OscEditor>(_parameterBinding);
     m_patchBrowser = std::make_unique<PatchBrowser>(_parameterBinding, processorRef);
@@ -85,51 +85,21 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         index++;
     });
     
-    m_mainMenu.setLookAndFeel (&m_landfButtons);
-
-    m_mainMenu.onClick = [this]()
-    {
-        selectorMenu.setLookAndFeel(&m_landfButtons);
-        SubSkinSizeSelector.setLookAndFeel(&m_landfButtons);
-        SubSkinSizeSelector.clear();
-
-		for (float d = 375; d < 1250; d = d + 125)
-		{
-			SubSkinSizeSelector.addItem(std::to_string(200 * int(d) / 1000) + "%", [this, d] 
-            {
-				double dScaleFactor = float(d / 1000.0);               
-	            m_AudioPlugInEditor->setScaleFactor(dScaleFactor);
-	            (*this).setSize(iSkinSizeWidth, iSkinSizeHeight);                
-                m_properties->setValue("skin_scale_factor", juce::String(dScaleFactor));
-                m_properties->save();
-            });
-		}        
-              
-        selectorMenu.addSubMenu("Skin size", SubSkinSizeSelector, true);
-		selectorMenu.addItem("About", [this]() { AboutWindow(); });
-        selectorMenu.showMenu(juce::PopupMenu::Options());
-	};
-
-    //draw Main Menu Button	
-    m_mainMenu.setBounds(2301 - m_mainMenu.kWidth / 2, 62 - m_mainMenu.kHeight / 2, m_mainMenu.kWidth, m_mainMenu.kHeight);  
-    addAndMakeVisible(m_mainMenu);
+    //Draw Main Menu
+    ShowMainMenue();
 
     //MainDisplay (Patchname)
     m_patchName.setBounds(1473, 35, 480, 58);
     m_patchName.setJustificationType(Justification::left);
     m_patchName.setFont(juce::Font("Register", "Normal", 30.f));
     m_patchName.setEditable(false, true, true);
-    m_patchName.onTextChange = [this]() 
-    {
+    m_patchName.onTextChange = [this]() {
         auto text = m_patchName.getText();
         if(text.trim().length() > 0) {
-            if (text == "/pv") { // stupid debug thing to remove later
-                m_paramDisplayLocal = !m_paramDisplayLocal;
-                return;
-            }
             m_controller.setSinglePresetName(m_controller.getCurrentPart(), text);
+            m_arpEditor->refreshParts();
         }
-    };
+    };    
     addAndMakeVisible(m_patchName);
 
     //MainDisplay 
@@ -152,9 +122,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_controlLabelValue.setJustificationType(Justification::centredRight);
     //m_controlLabelValue.setColour(juce::Label::textColourId, juce::Colours::red);
     m_controlLabelValue.setFont(juce::Font("Register", "Normal", 30.f));
-    addAndMakeVisible(m_controlLabelValue);
-
-     //m_controller.setCurrentPartPreset(0,virusLib::BankNumber::A,0);    
+    addAndMakeVisible(m_controlLabelValue); 
 
     //PresetsSwitch
     addAndMakeVisible(m_PresetLeft);
@@ -165,11 +133,13 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 	m_PresetLeft.onClick = [this]() {
 		processorRef.getController().setCurrentPartPreset(m_controller.getCurrentPart(), processorRef.getController().getCurrentPartBank(m_controller.getCurrentPart()),
 															std::max(0, processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart()) - 1));
+        postCommandMessage(VirusEditor::Commands::UpdateParts);
 	};
 	m_PresetRight.onClick = [this]() 
     {
 		processorRef.getController().setCurrentPartPreset(m_controller.getCurrentPart(), processorRef.getController().getCurrentPartBank(m_controller.getCurrentPart()),
 															std::min(127, processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart()) + 1));
+        postCommandMessage(VirusEditor::Commands::UpdateParts);
 	};
 
     addAndMakeVisible(m_PresetPatchList);
@@ -178,7 +148,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     //Show Version
     m_version.setText(std::string(g_pluginVersionString), NotificationType::dontSendNotification);
-    m_version.setBounds(250, 1124, 50, 17);
+    m_version.setBounds(250, 1123, 50, 17);
     m_version.setColour(juce::Label::textColourId, juce::Colours::silver);
     m_version.setFont(juce::Font("Arial", "Bold", 20.f));
     m_version.setJustificationType(Justification::left);
@@ -187,7 +157,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     
     //Show Synth Model
     m_SynthModel.setText(m_controller.getVirusModel() == virusLib::VirusModel::B ? "B" : "C", NotificationType::dontSendNotification);
-    m_SynthModel.setBounds(430, 1124, 50, 17);
+    m_SynthModel.setBounds(430, 1123, 50, 17);
     m_SynthModel.setFont(juce::Font("Arial", "Bold", 20.f));
     m_SynthModel.setJustificationType(Justification::left);
     m_SynthModel.setColour(juce::Label::textColourId, juce::Colours::silver);
@@ -196,7 +166,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
     //Show RomName
     m_RomName.setText(_processorRef.getRomName()+".bin", NotificationType::dontSendNotification);
-    m_RomName.setBounds(642, 1124, 150, 17);
+    m_RomName.setBounds(642, 1123, 150, 17);
     m_RomName.setColour(juce::Label::textColourId, juce::Colours::silver);
     m_RomName.setFont(juce::Font("Arial", "Bold", 20.f));
     m_RomName.setJustificationType(Justification::left);
@@ -206,6 +176,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_controller.onProgramChange = [this]() 
     {
         updateParts();
+        m_arpEditor->refreshParts();
     };
 
     m_controller.getBankCount();
@@ -257,12 +228,46 @@ void VirusEditor::updateParts()
 }
 
 
+void VirusEditor::ShowMainMenue()
+{
+    m_mainMenu.setLookAndFeel (&m_landfButtons);
+
+    m_mainMenu.onClick = [this]()
+    {
+        selectorMenu.setLookAndFeel(&m_landfButtons);
+        selectorMenu.clear();
+        SubSkinSizeSelector.setLookAndFeel(&m_landfButtons);
+        SubSkinSizeSelector.clear();
+
+		for (float d = 375; d < 1250; d = d + 125)
+		{
+			SubSkinSizeSelector.addItem(std::to_string(200 * int(d) / 1000) + "%", [this, d] 
+            {
+				double dScaleFactor = float(d / 1000.0);               
+	            m_AudioPlugInEditor->setScaleFactor(dScaleFactor);
+	            (*this).setSize(iSkinSizeWidth, iSkinSizeHeight);                
+                m_properties->setValue("skin_scale_factor", juce::String(dScaleFactor));
+                m_properties->save();
+            });
+		}        
+              
+        selectorMenu.addSubMenu("Skin size", SubSkinSizeSelector, true);
+		selectorMenu.addItem("About", [this]() { AboutWindow(); });
+        selectorMenu.showMenu(juce::PopupMenu::Options());
+	};
+
+    //draw Main Menu Button	
+    m_mainMenu.setBounds(2301 - m_mainMenu.kWidth / 2, 62 - m_mainMenu.kHeight / 2, m_mainMenu.kWidth, m_mainMenu.kHeight);  
+    addAndMakeVisible(m_mainMenu);
+}
+
 void VirusEditor::ShowMenuePatchList()
 {
     auto pt = m_controller.getCurrentPart();
     
     selector.setLookAndFeel (&m_landfButtons);    
-    
+    selector.clear();
+
     for (uint8_t b = 0; b < m_controller.getBankCount(); ++b)
     {
         const auto bank = virusLib::fromArrayIndex(b);
@@ -273,6 +278,7 @@ void VirusEditor::ShowMenuePatchList()
             const auto presetName = presetNames[j];
             p.addItem(presetNames[j], [this, bank, j, pt, presetName] {
                 m_controller.setCurrentPartPreset(pt, bank, j);
+                postCommandMessage(VirusEditor::Commands::UpdateParts);
                 //m_presetNames[pt].setButtonText(presetName);
             });
         }
@@ -393,7 +399,7 @@ void VirusEditor::handleCommandMessage(int commandId)
 {
     switch (commandId) {
         case Commands::Rebind: recreateControls();
-        case Commands::UpdateParts: { updateParts();};
+        case Commands::UpdateParts: { updateParts(); m_arpEditor->refreshParts();};
         default: return;
     }
 }
@@ -404,7 +410,7 @@ void VirusEditor::recreateControls()
     removeChildComponent(m_lfoEditor.get());
     removeChildComponent(m_fxEditor.get());
     removeChildComponent(m_arpEditor.get());
-    removeChildComponent(m_patchBrowser.get());
+    //removeChildComponent(m_patchBrowser.get());
 
     m_oscEditor	= std::make_unique<OscEditor>(m_parameterBinding);
     addChildComponent(m_oscEditor.get());
@@ -412,14 +418,14 @@ void VirusEditor::recreateControls()
     m_lfoEditor = std::make_unique<LfoEditor>(m_parameterBinding);
     addChildComponent(m_lfoEditor.get());
 
-    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding);
+    m_fxEditor = std::make_unique<FxEditor>(m_parameterBinding, processorRef);
     addChildComponent(m_fxEditor.get());
 
     m_arpEditor = std::make_unique<ArpEditor>(m_parameterBinding, processorRef);
     addChildComponent(m_arpEditor.get());
 
-    m_patchBrowser = std::make_unique<PatchBrowser>(m_parameterBinding, processorRef);
-    addChildComponent(m_patchBrowser.get());
+    /*m_patchBrowser = std::make_unique<PatchBrowser>(m_parameterBinding, processorRef);
+    addChildComponent(m_patchBrowser.get());*/
 
     m_mainButtons.updateSection();
     resized();
