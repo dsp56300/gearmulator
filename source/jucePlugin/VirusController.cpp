@@ -354,7 +354,7 @@ namespace Virus
 			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
 			for (auto i = 0; i < kDataSizeInBytes; i++)
 			{
-				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize)) {
+				if (auto *p = findSynthParam(ch, i >= bankSize ? 0x71 : 0x70, i % bankSize)) {
 					if((p->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
 						continue;
 					else
