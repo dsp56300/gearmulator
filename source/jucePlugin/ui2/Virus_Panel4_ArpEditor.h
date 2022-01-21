@@ -40,8 +40,6 @@ private:
     juce::Slider m_partPans[16];
  
     Buttons::Button2 m_btWorkingMode;
-    //juce::TextButton m_btMultiSingleMode;
-    //juce::TextButton m_btMultiMode;
 
     //MIDI Settings
     juce::AudioDeviceManager deviceManager;

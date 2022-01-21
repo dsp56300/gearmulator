@@ -24,14 +24,11 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_search("Search Box")
 {
 	setupBackground(*this, m_background, BinaryData::panel_5_png, BinaryData::panel_5_pngSize);    
-    bRunning = false;
-
+    
     m_bankList.setLookAndFeel(&m_landf);
 
-    m_modeIndex = m_properties->getIntValue("patch_mode", 1);
-    m_bankList.setBounds(0, 50/fBrowserScaleFactor , 1030/fBrowserScaleFactor , 935/fBrowserScaleFactor );
-   
     //PatchBrowser
+    m_bankList.setBounds(0, 185/fBrowserScaleFactor , 1030/fBrowserScaleFactor , 810/fBrowserScaleFactor );
     auto bankDir = m_properties->getValue("virus_bank_dir", "");
     if (bankDir != "" && juce::File(bankDir).isDirectory())
     {
@@ -41,7 +38,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     setBounds(0, 0, kPanelWidth, kPanelHeight);
     
     //PatchList
-    m_patchList.setBounds(1049/fBrowserScaleFactor , 50/fBrowserScaleFactor , 1010/fBrowserScaleFactor , 930/fBrowserScaleFactor );
+    m_patchList.setBounds(1049/fBrowserScaleFactor , 50/fBrowserScaleFactor , 1010/fBrowserScaleFactor , 870/fBrowserScaleFactor );
 
     m_patchList.getHeader().addColumn("#", ColumnsPatch::INDEX, 32);
     m_patchList.getHeader().addColumn("Name", ColumnsPatch::NAME, 130);
@@ -61,9 +58,12 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_patchList.setModel(this);
 
     //Search
+    m_search.setTransform(AffineTransform::scale(fBrowserScaleFactor));
     m_search.setSize(m_patchList.getWidth(), 20);
     m_search.setColour(TextEditor::textColourId, juce::Colours::white);
+
     m_search.setTopLeftPosition(m_patchList.getBounds().getBottomLeft().translated(0, 8));
+
     m_search.onTextChange = [this] {
         m_filteredPatches.clear();
         for(auto patch : m_patches) {
@@ -82,104 +82,74 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_search.setTextToShowWhenEmpty("search...", juce::Colours::grey);
     addAndMakeVisible(m_search);
 
-    //ROM Bank
-    m_romBankList.setBounds(10, 50/fBrowserScaleFactor , 970/fBrowserScaleFactor , 935/fBrowserScaleFactor );
-    m_romBankList.getHeader().addColumn("ROM BANK", ColumnsRomBanks::ROM_BANK_NAME, 450);
-    m_romBankList.setTransform(AffineTransform::scale(fBrowserScaleFactor));
-    
-    /*RomBank rRomBank;
-    for (int i=1;i<=m_controller.getBankCount();i++)
-    {
-        rRomBank.m_RomNumber = static_cast<virusLib::BankNumber>(static_cast<int>(rRomBank.m_RomNumber) + 1) ;
-        m_romBankes.add(rRomBank);
-    }*/
-
-    m_romBankList.setModel(this);
-    m_romBankList.updateContent();
-    m_romBankList.deselectAllRows();
-    m_romBankList.repaint(); // force repaint since row number doesn't often change
-    m_romBankList.selectRow(0);
-
     //Show Options Buttons/Cmb
-    addAndMakeVisible(m_LoadBank);
     addAndMakeVisible(m_SavePreset);
-    addAndMakeVisible(m_Mode);
-    addAndMakeVisible(m_romBankList);
+    addAndMakeVisible(m_ROMBankSelect);
     addAndMakeVisible(m_bankList);
 
-	m_LoadBank.setBounds(2195 - m_LoadBank.kWidth / 2, 182 - m_LoadBank.kHeight / 2, m_LoadBank.kWidth, m_LoadBank.kHeight);  
-	m_SavePreset.setBounds(2195 - m_SavePreset.kWidth / 2, 241 - m_SavePreset.kHeight / 2, m_SavePreset.kWidth, m_SavePreset.kHeight);  
-	m_Mode.setBounds(2206+comboBoxXMargin - comboBox3Width / 2, 83 - comboBox3Height / 2, comboBox3Width+5, comboBox3Height-5);
-    
-    m_Mode.setLookAndFeel(&m_lookAndFeel);
-    m_Mode.addItem("ROM",1);
-    m_Mode.addItem("FILE",2);
+    m_ROMBankSelect.setBounds(510 - 961 / 2, 78 - 51  / 2, 961, 51);
+    for (int i=1; i<=m_controller.getBankCount()-1;i++)
+	{
+        m_ROMBankSelect.addItem("BANK: " + getCurrentPartBankStr((virusLib::BankNumber)i),i);
+    }
 
-    m_Mode.onChange = [this]() 
+    m_ROMBankSelect.onChange = [this]() 
     { 
-        if (m_Mode.getSelectedItemIndex()==0) 
-        {
-            //ROM
-            m_romBankList.setVisible(true);
-            m_bankList.setVisible(false);
-            m_romBankList.updateContent();
-            m_romBankList.deselectAllRows();
-            m_romBankList.repaint(); // force repaint since row number doesn't often change
-            m_romBankList.selectRow(0);
-        }
-        else
-        {
-            //FILE
-            m_romBankList.setVisible(false);
-            m_bankList.setVisible(true);
-        }
-        m_properties->setValue("patch_mode", m_Mode.getSelectedItemIndex()); 
-        m_properties->save();
-        m_modeIndex = m_Mode.getSelectedItemIndex();
+        m_selectedBankNo = m_ROMBankSelect.getSelectedItemIndex() + 1;
+        LoadBankNr(m_selectedBankNo); 
+        bIsFileMode = false;
+        m_search.setText("", true);
     };
 
-    m_Mode.setSelectedItemIndex(m_modeIndex);
-
-    m_LoadBank.onClick = [this]() { loadFile(); };
+	m_SavePreset.setBounds(2197 - m_SavePreset.kWidth / 2, 72 - m_SavePreset.kHeight / 2, m_SavePreset.kWidth, m_SavePreset.kHeight);  
     m_SavePreset.onClick = [this]() { savePreset(); };
+
+    bIsFileMode=true;
 }
 
 PatchBrowser::~PatchBrowser()
 {
 	setLookAndFeel(nullptr);
-    m_Mode.setLookAndFeel(nullptr);
     m_bankList.setLookAndFeel(nullptr);
 }
 
+void PatchBrowser::selectionChanged() {}
 
-void PatchBrowser::selectionChanged() 
+void PatchBrowser::LoadBankNr(int iBankNo) 
 {
+    juce::StringArray patches = m_controller.getSinglePresetNames((virusLib::BankNumber)(m_selectedBankNo));
+    m_patches.clear();
 
+    for (int i=0 ; i<128 ; i++)
+	{
+        Patch patch;
+        patch.progNumber = i+1;
+        //data.copyTo(patch.data, 267*index + 9, 256);
+        patch.name = patches.strings[i];
+        patch.category1 = 0;
+        patch.category2 = 0;
+        patch.unison = 0;
+        patch.transpose = 0;
+        patch.model = VirusModel::A;
+        m_patches.add(patch);
+    } 
+
+    m_filteredPatches.clear();
+    for(auto patch : m_patches) {
+        const auto searchValue = m_search.getText();
+        if (searchValue.isEmpty()) {
+            m_filteredPatches.add(patch);
+        }
+        else if(patch.name.containsIgnoreCase(searchValue)) {
+            m_filteredPatches.add(patch);
+        }
+    }
+
+    m_patchList.updateContent();
+    m_patchList.deselectAllRows();
+    m_patchList.repaint();
 }
 
-VirusModel guessVersion(uint8_t *data) 
-{
-    if (data[51] > 3) 
-    {
-        // check extra filter modes
-        return VirusModel::C;
-    }
-    if(data[179] == 0x40 && data[180] == 0x40) // soft knobs don't exist on B so they have fixed value
-    {
-        return VirusModel::B;
-    }
-    /*if (data[232] != 0x03 || data[235] != 0x6c || data[238] != 0x01) { // extra mod slots
-        return VirusModel::C;
-    }*/
-    /*if(data[173] != 0x00 || data[174] != 0x00) // EQ
-        return VirusModel::C;*/
-    /*if (data[220] != 0x40 || data[221] != 0x54 || data[222] != 0x20 || data[223] != 0x40 || data[224] != 0x40) {
-        // eq controls
-        return VirusModel::C;
-    }*/
-    //return VirusModel::C;
-
-}
 
 int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0, const bool dedupe = false) {
     auto ext = file.getFileExtension().toLowerCase();
@@ -366,7 +336,8 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
         m_patchList.deselectAllRows();
         m_patchList.repaint();
     }
-
+    bIsFileMode = true;
+    m_search.setText("", true);
 }
 
 void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
@@ -375,14 +346,7 @@ void PatchBrowser::browserRootChanged(const File &newRoot) {}
 
 int PatchBrowser::getNumRows() 
 { 
-    if(m_modeIndex==1)
-    {
-        return m_patches.size(); 
-    }
-    else if (m_modeIndex==0)
-    {
-        return m_romBankes.size(); 
-    }
+    return m_patches.size(); 
 }
 
 void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int height, bool rowIsSelected) 
@@ -399,14 +363,15 @@ void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int
 void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) 
 {
     //Banks from file
-    if(m_modeIndex==1)
-    {
-        g.setColour(rowIsSelected ? juce::Colours::darkblue
-                                : getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
+    g.setColour(rowIsSelected ? juce::Colours::darkblue
+                            : getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
     
-        auto rowElement = m_filteredPatches[rowNumber];
-        //auto text = rowElement.name;
-        juce::String text = "";
+    auto rowElement = m_filteredPatches[rowNumber];
+    //auto text = rowElement.name;
+    juce::String text = "";
+
+    if (bIsFileMode)
+    {
         if (columnId == ColumnsPatch::INDEX)
             text = juce::String(rowElement.progNumber);
         else if (columnId == ColumnsPatch::NAME)
@@ -425,19 +390,20 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
             if(rowElement.model < ModelList.size())
                 text = ModelList[rowElement.model];
         }
-        g.drawText(text, 2, 0, width - 4, height, juce::Justification::centredLeft, true); // [6]
-        g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
-        g.fillRect(width - 1, 0, 1, height); // [7]
     }
-    else if (m_modeIndex==0)
-    {
-        g.setColour(rowIsSelected ? juce::Colours::darkblue: getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
-        g.drawText("Bank: " + getCurrentPartBankStr(virusLib::BankNumber(rowNumber+1)), 2, 0, width - 4, 20, juce::Justification::centredLeft, true); // [6]
-        g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
-        g.fillRect(width - 1, 0, 1, 20); // [7]
+	else
+	{
+        if (columnId == ColumnsPatch::INDEX)
+            text = juce::String(rowElement.progNumber);
+        else if (columnId == ColumnsPatch::NAME)
+            text = rowElement.name;
     }
-}
 
+    g.drawText(text, 2, 0, width - 4, height, juce::Justification::centredLeft, true); // [6]
+    g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
+    g.fillRect(width - 1, 0, 1, height); // [7]
+
+}
 
 
 
@@ -447,7 +413,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
         return;
     }
     
-    if(m_modeIndex==1)
+    if (bIsFileMode)
     {
         uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
         syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
@@ -475,13 +441,10 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
         m_controller.parseMessage(syx); // update ui
         getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     }
-    else if (m_modeIndex==0)
+    else 
     {
-        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(),m_controller.getCurrentPartBank(m_controller.getCurrentPart()),lastRowSelected);
+        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(), (virusLib::BankNumber) m_selectedBankNo, m_filteredPatches[idx].progNumber-1);
     }    
-    
-    
-
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
@@ -617,10 +580,12 @@ void PatchBrowser::savePreset() {
 
     if (!chooser.browseForFileToSave(true))
         return;
+
     bool sentData = false;
     const auto result = chooser.getResult();
     m_previousPath = result.getParentDirectory().getFullPathName();
     const auto ext = result.getFileExtension().toLowerCase();
+
     const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
     const uint8_t syxEof[1] = {0xF7};
     uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];

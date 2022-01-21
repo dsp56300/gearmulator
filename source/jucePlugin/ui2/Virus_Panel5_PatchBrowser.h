@@ -4,9 +4,9 @@
 #include "Virus_Buttons.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "../VirusController.h"
-#include "Virus_LookAndFeel.h"
+//#include "Virus_LookAndFeel.h"
 
-class VirusParameterBinding;
+//class VirusParameterBinding;
 class Virus::LookAndFeelPatchBrowser;
 
 const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
@@ -23,10 +23,11 @@ struct Patch
     uint8_t transpose;
 };
 
+/*
 struct RomBank
 {
     virusLib::BankNumber m_RomNumber;
-};
+};*/
 
 class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel
 {
@@ -39,13 +40,13 @@ public:
     void savePreset();
 
 private:
-    bool bRunning;
 
     Virus::LookAndFeelPatchBrowser m_landf;
-    Virus::LookAndFeel m_lookAndFeel;
+    //Virus::LookAndFeel m_lookAndFeel;
 
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;
+
     template <typename T> juce::String parseAsciiText(const T &msg, const int start) const
     {
         char text[Virus::Controller::kNameLength + 1];
@@ -54,23 +55,26 @@ private:
             text[pos] = msg[start + pos];
         return juce::String(text);
     }
+
     juce::WildcardFileFilter m_fileFilter;
     juce::FileBrowserComponent m_bankList;
     juce::TableListBox m_patchList;
-    juce::TableListBox m_romBankList;
+    //juce::TableListBox m_romBankList;
     juce::TextEditor m_search;
-    juce::Array<RomBank> m_romBankes;
     juce::Array<Patch> m_patches;
     juce::Array<Patch> m_filteredPatches;
     juce::PropertiesFile *m_properties;
     juce::HashMap<juce::String, bool> m_checksums;
     int loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
     // Inherited via FileBrowserListener
-    Buttons::OptionButtonLoadBank m_LoadBank;
+    //Buttons::OptionButtonLoadBank m_LoadBank;
     Buttons::OptionButtonSavePreset m_SavePreset;
-    juce::ComboBox m_Mode;
-    int m_modeIndex;
-
+    
+    //Buttons::Button2 m_btModeRomFile;
+    void LoadBankNr(int iBankNo);
+    int m_selectedBankNo;
+    juce::ComboBox m_ROMBankSelect;
+    bool bIsFileMode;
 
     juce::String m_previousPath;
 
@@ -101,10 +105,6 @@ private:
         UNI = 6,
         ST = 7,
         VER = 8,
-    };
-
-    enum ColumnsRomBanks {
-        ROM_BANK_NAME = 1,
     };
 
     std::unique_ptr<juce::Drawable> m_background;
