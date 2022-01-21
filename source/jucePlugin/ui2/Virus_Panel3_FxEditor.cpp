@@ -170,7 +170,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioPro
 	m_reverbFeedback.setBounds(1052 - knobSize / 2, 854 - knobSize / 2, knobSize, knobSize);
 
 	addAndMakeVisible(m_reverbType);
-	m_reverbType.setBounds(467+comboBoxXMargin - comboBox3Width / 2, 900 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
+	m_reverbType.setBounds(467+comboBoxXMargin - comboBox3Width / 2, 854 - comboBox3Height / 2, comboBox3Width, comboBox3Height);
 
 	_parameterBinding.bind(m_reverbDecayTime, Virus::Param_DelayRateReverbDecayTime);
 	_parameterBinding.bind(m_reverbDaming, Virus::Param_DelayLfoShape);

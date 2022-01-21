@@ -72,7 +72,8 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
                 m_filteredPatches.add(patch);
             }
             else if(patch.name.containsIgnoreCase(searchValue)) {
-                m_filteredPatches.add(patch);
+                if (patch.name!="")                                   
+                    m_filteredPatches.add(patch);
             }
         }
         m_patchList.updateContent();
@@ -90,21 +91,23 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_ROMBankSelect.setBounds(510 - 961 / 2, 78 - 51  / 2, 961, 51);
     for (int i=1; i<=m_controller.getBankCount()-1;i++)
 	{
-        m_ROMBankSelect.addItem("BANK: " + getCurrentPartBankStr((virusLib::BankNumber)i),i);
+        m_ROMBankSelect.addItem("BANK: " + getCurrentPartBankStr((virusLib::BankNumber)i),i+1);
     }
 
     m_ROMBankSelect.onChange = [this]() 
     { 
-        m_selectedBankNo = m_ROMBankSelect.getSelectedItemIndex() + 1;
-        LoadBankNr(m_selectedBankNo); 
-        bIsFileMode = false;
+        m_LastBankRomNoUsed = m_ROMBankSelect.getSelectedItemIndex()+1;
+        //m_LastPatchNoUsed = 0;
+        LoadBankNr(m_LastBankRomNoUsed); 
+        m_bIsFileMode = false;
         m_search.setText("", true);
+        getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
+        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+        SaveSettings();
     };
 
 	m_SavePreset.setBounds(2197 - m_SavePreset.kWidth / 2, 72 - m_SavePreset.kHeight / 2, m_SavePreset.kWidth, m_SavePreset.kHeight);  
     m_SavePreset.onClick = [this]() { savePreset(); };
-
-    bIsFileMode=true;
 }
 
 PatchBrowser::~PatchBrowser()
@@ -113,17 +116,62 @@ PatchBrowser::~PatchBrowser()
     m_bankList.setLookAndFeel(nullptr);
 }
 
+void PatchBrowser::IntiPatches() 
+{
+    //Read Last Patch used from config file
+    //m_LastPatchNoUsed = m_properties->getIntValue("last_patch_no_used", 1) - 1;
+    m_bIsFileMode = m_properties->getBoolValue("is_file_used", false);
+    m_LastBankRomNoUsed = m_properties->getIntValue("last_bank_rom_no_used", 1);
+    m_LastFileUsed = m_properties->getValue("last_file_used", "");
+
+    if(!m_bIsFileMode)
+	{
+        m_ROMBankSelect.setSelectedItemIndex(m_LastBankRomNoUsed-1, dontSendNotification);    
+        LoadBankNr(m_LastBankRomNoUsed); 
+        m_search.setText("", true);
+        //getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
+    }
+	else
+    {
+        m_bankList.setFileName(m_LastFileUsed);
+        m_bankList.selectionChanged();
+        const juce::File &file(m_LastFileUsed);
+        LoadPatchesFromFile(file);
+    }
+
+    //getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
+    //getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+
+    //m_patchList.selectRow(m_LastPatchNoUsed,true,true);  
+    //getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+}
+
+void PatchBrowser::SaveSettings() 
+{
+    m_properties->setValue("last_file_used", m_LastFileUsed);
+    //m_properties->setValue("last_patch_no_used", m_LastPatchNoUsed+1);
+    m_properties->setValue("is_file_used", m_bIsFileMode);
+    m_properties->setValue("last_bank_rom_no_used", m_LastBankRomNoUsed);
+    m_properties->save();
+}
+
+
+bool PatchBrowser::GetIsFileMode() 
+{
+    return m_bIsFileMode;
+}
+
 void PatchBrowser::selectionChanged() {}
 
 void PatchBrowser::LoadBankNr(int iBankNo) 
 {
-    juce::StringArray patches = m_controller.getSinglePresetNames((virusLib::BankNumber)(m_selectedBankNo));
+    juce::StringArray patches = m_controller.getSinglePresetNames((virusLib::BankNumber)(iBankNo));
     m_patches.clear();
 
     for (int i=0 ; i<128 ; i++)
-	{
+	{       
         Patch patch;
-        patch.progNumber = i+1;
+        patch.progNumber = i;
         //data.copyTo(patch.data, 267*index + 9, 256);
         patch.name = patches.strings[i];
         patch.category1 = 0;
@@ -144,7 +192,6 @@ void PatchBrowser::LoadBankNr(int iBankNo)
             m_filteredPatches.add(patch);
         }
     }
-
     m_patchList.updateContent();
     m_patchList.deselectAllRows();
     m_patchList.repaint();
@@ -291,6 +338,8 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
 {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
+
+    //Show popup only on directory
     if (file.isDirectory() && e.mods.isRightButtonDown()) {
         auto p = juce::PopupMenu();
         p.addItem("Add directory contents to patch list", [this, file]() {
@@ -312,33 +361,46 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
             }
             m_patchList.updateContent();
             m_patchList.deselectAllRows();
-            m_patchList.repaint();    
+            m_patchList.repaint();   
         });
         p.showMenu(juce::PopupMenu::Options());
         
         return;
     }
+
     m_properties->setValue("virus_bank_dir", path);
+    
     if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid") {
-        m_patches.clear();
-        loadBankFile(file);
-        m_filteredPatches.clear();
-        for(auto patch : m_patches) {
-            const auto searchValue = m_search.getText();
-            if (searchValue.isEmpty()) {
-                m_filteredPatches.add(patch);
-            }
-            else if(patch.name.containsIgnoreCase(searchValue)) {
-                m_filteredPatches.add(patch);
-            }
-        }
-        m_patchList.updateContent();
-        m_patchList.deselectAllRows();
-        m_patchList.repaint();
+        LoadPatchesFromFile(file); 
+        m_LastFileUsed = file.getFullPathName();
     }
-    bIsFileMode = true;
+    m_bIsFileMode = true;
     m_search.setText("", true);
+    m_ROMBankSelect.setText("",true);
+    SaveSettings();
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
+    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
+
+void PatchBrowser::LoadPatchesFromFile(const juce::File &file)
+{
+    m_patches.clear();
+    loadBankFile(file);
+    m_filteredPatches.clear();
+    for(auto patch : m_patches) {
+        const auto searchValue = m_search.getText();
+        if (searchValue.isEmpty()) {
+            m_filteredPatches.add(patch);
+        }
+        else if(patch.name.containsIgnoreCase(searchValue)) {
+            m_filteredPatches.add(patch);
+        }
+    }
+    m_patchList.updateContent();
+    m_patchList.deselectAllRows();
+    m_patchList.repaint();
+}
+
 
 void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
 
@@ -346,7 +408,7 @@ void PatchBrowser::browserRootChanged(const File &newRoot) {}
 
 int PatchBrowser::getNumRows() 
 { 
-    return m_patches.size(); 
+    return m_filteredPatches.size(); 
 }
 
 void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int height, bool rowIsSelected) 
@@ -370,10 +432,10 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     //auto text = rowElement.name;
     juce::String text = "";
 
-    if (bIsFileMode)
+    if (m_bIsFileMode)
     {
         if (columnId == ColumnsPatch::INDEX)
-            text = juce::String(rowElement.progNumber);
+            text = juce::String(rowElement.progNumber+1);
         else if (columnId == ColumnsPatch::NAME)
             text = rowElement.name;
         else if (columnId == ColumnsPatch::CAT1)
@@ -394,7 +456,7 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
 	else
 	{
         if (columnId == ColumnsPatch::INDEX)
-            text = juce::String(rowElement.progNumber);
+            text = juce::String(rowElement.progNumber+1);
         else if (columnId == ColumnsPatch::NAME)
             text = rowElement.name;
     }
@@ -406,14 +468,13 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
 }
 
 
-
 void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     auto idx = m_patchList.getSelectedRow();
     if (idx == -1) {
         return;
     }
     
-    if (bIsFileMode)
+    if (m_bIsFileMode)
     {
         uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
         syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
@@ -443,8 +504,11 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     }
     else 
     {
-        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(), (virusLib::BankNumber) m_selectedBankNo, m_filteredPatches[idx].progNumber-1);
-    }    
+        m_controller.setCurrentPartPreset(m_controller.getCurrentPart(), (virusLib::BankNumber) m_LastBankRomNoUsed, m_filteredPatches[idx].progNumber);
+        getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+    }
+
+    //m_LastPatchNoUsed = m_filteredPatches[idx].progNumber;
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
@@ -548,7 +612,6 @@ void PatchBrowser::loadBankFileToRom(const juce::File &file)
 
     if (sentData)
     {
-        //Load first patch
         m_controller.onStateLoaded();
     }
 }

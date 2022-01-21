@@ -18,6 +18,7 @@ public:
 private:
     void updateMidiInput(int index);
     void updateMidiOutput(int index);
+    void MidiInit();
     Virus::LookAndFeelSmallButton m_lookAndFeelSmallButton;
 
     //WorkingMode
@@ -32,10 +33,10 @@ private:
 
     Buttons::Button3 m_partSelect[16];
     //juce::Label m_partLabels[16];
-    Buttons::PresetButtonDown m_PresetPatch[16];
+    //Buttons::PresetButtonDown m_PresetPatch[16];
     juce::Label m_presetNames[16];
-    Buttons::PresetButtonRight m_nextPatch[16];
-    Buttons::PresetButtonLeft m_prevPatch[16];
+    //Buttons::PresetButtonRight m_nextPatch[16];
+    //Buttons::PresetButtonLeft m_prevPatch[16];
     juce::Slider m_partVolumes[16];
     juce::Slider m_partPans[16];
  
@@ -59,7 +60,7 @@ private:
 	Buttons::Button3 m_arpHold;
 
     //SoftKnobs
-	juce::ComboBox m_softknob1, m_softknob2;
+	juce::ComboBox m_softknobFunc1, m_softknobFunc2, m_softknobName1, m_softknobName2;
 
     //PatchSettings
     juce::Slider m_patchVolume, m_panning, m_outputBalance, m_transpose;

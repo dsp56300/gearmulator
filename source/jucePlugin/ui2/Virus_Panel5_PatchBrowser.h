@@ -38,7 +38,9 @@ public:
     void loadFile();
     void loadBankFileToRom(const juce::File &file);
     void savePreset();
-
+    bool GetIsFileMode();
+    juce::TableListBox m_patchList;
+    void IntiPatches();
 private:
 
     Virus::LookAndFeelPatchBrowser m_landf;
@@ -58,7 +60,7 @@ private:
 
     juce::WildcardFileFilter m_fileFilter;
     juce::FileBrowserComponent m_bankList;
-    juce::TableListBox m_patchList;
+
     //juce::TableListBox m_romBankList;
     juce::TextEditor m_search;
     juce::Array<Patch> m_patches;
@@ -72,11 +74,16 @@ private:
     
     //Buttons::Button2 m_btModeRomFile;
     void LoadBankNr(int iBankNo);
-    int m_selectedBankNo;
-    juce::ComboBox m_ROMBankSelect;
-    bool bIsFileMode;
+    void SaveSettings();
+    void LoadPatchesFromFile(const juce::File &file);
 
+    juce::ComboBox m_ROMBankSelect;
     juce::String m_previousPath;
+    juce::String m_LastFileUsed;
+    //int m_LastPatchNoUsed;
+    int m_LastBankRomNoUsed;
+
+    bool m_bIsFileMode;
 
     // Inherited via FileBrowserListener
     void selectionChanged() override;
