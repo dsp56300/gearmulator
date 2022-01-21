@@ -553,6 +553,8 @@ void VirusEditor::saveFile() {
     }
     cs = cs & 0x7f;
 
+	result.deleteFile();
+	result.create();
     result.appendData(syxHeader, 9);
     result.appendData(data, 256);
     result.appendData(&cs, 1);
