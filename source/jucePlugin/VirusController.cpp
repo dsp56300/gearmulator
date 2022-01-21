@@ -32,7 +32,7 @@ namespace Virus
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 
     	for(uint8_t i=3; i<=8; ++i)
-			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));
+			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));		 
     	startTimer(5);
 	}
 
@@ -1835,7 +1835,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 36, "Part High Key", {0,127}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 37, "Part Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 38, "Part Detune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 39, "Part Volume", {0,127}, paramTo7bitSigned,textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 39, "Part Volume", {0,127}, paramTo7bitSigned,textTo7bitSigned, true, false, false, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 40, "Part Midi Volume Init", {0,127}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 41, "Part Output Select", {0,14}, numToOutputSelect,{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 45, "Second Output Select", {0,15}, {},{}, false, true, false},
@@ -2035,7 +2035,19 @@ namespace Virus
 				parseControllerDump(msg);
 			}
             else
-                parseMessage(msg.sysex);
+			{
+                if (msg.sysex[6] == MessageType::DUMP_SINGLE)
+				{
+					//only call up when we have received the dump first 
+					if (onMsgDone) {
+						onMsgDone();
+					}
+				}
+				parseMessage(msg.sysex);
+
+				
+
+			}
         }
         m_virusOut.clear();
     }

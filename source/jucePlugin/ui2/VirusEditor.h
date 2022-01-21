@@ -31,6 +31,10 @@ public:
         None,
         Rebind = 0x100,
         UpdateParts = 0x101,
+        InitPatches = 0x102,
+        NextPatch = 0x103,
+        PrevPatch = 0x104,
+        SelectFirstPatch = 0x105
     };
 
     const int iSkinSizeWidth = 2501, iSkinSizeHeight = 1152;
@@ -70,7 +74,7 @@ private:
 
     Buttons::PresetButtonLeft m_PresetLeft;
     Buttons::PresetButtonRight m_PresetRight;
-    Buttons::PresetButtonDown m_PresetPatchList;
+    //Buttons::PresetButtonDown m_PresetPatchList;
 
     struct PartButtons : juce::Component {
         PartButtons();
