@@ -38,6 +38,7 @@ namespace synthLib
 		float* getDummyBuffer(size_t _minimumSize);
 		void updateDeviceLatency();
 		void processMidiInEvents();
+		void processMidiInEvent(const SMidiEvent& _ev);
 
 		dsp56k::RingBuffer<SMidiEvent, 1024, false> m_midiInRingBuffer;
 		std::vector<SMidiEvent> m_midiIn;

@@ -30,14 +30,67 @@ juce_add_plugin(jucePlugin
 target_sources(jucePlugin 
 PRIVATE
     PluginEditor.cpp
-    PluginProcessor.cpp
-    VirusController.cpp
-    VirusParameter.cpp
     PluginEditor.h
+    PluginProcessor.cpp
     PluginProcessor.h
-    VirusController.h
-    VirusParameter.h
+    ui/Virus_Buttons.cpp
+    ui/Virus_LookAndFeel.cpp
+    ui/VirusEditor.cpp
+    ui/Virus_ArpEditor.cpp
+    ui/Virus_FxEditor.cpp
+    ui/Virus_LfoEditor.cpp
+    ui/Virus_OscEditor.cpp
+    ui/Virus_PatchBrowser.cpp
+    ui/Virus_Parts.cpp
+    ui/Virus_Buttons.h
+    ui/Virus_LookAndFeel.h
+    ui/VirusEditor.h
+    ui/Virus_ArpEditor.h
+    ui/Virus_FxEditor.h
+    ui/Virus_LfoEditor.h
+    ui/Virus_OscEditor.h
+    ui/Virus_PatchBrowser.h
+    ui/Virus_Parts.h
+    ui/Ui_Utils.h
+	VirusController.cpp
+	VirusController.h
+	VirusParameter.cpp
+	VirusParameter.h
+	VirusParameterBinding.cpp
+	VirusParameterBinding.h
 	version.h
+)
+
+# https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
+# "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
+juce_add_binary_data(jucePlugin_BinaryData
+    SOURCES
+        "assets/bg_1377x800.png"
+        "assets/panels/bg_arp_1018x620.png"
+        "assets/panels/bg_fx_1018x620.png"
+        "assets/panels/bg_lfo_1018x620.png"
+        "assets/panels/bg_osc_1018x620.png"
+        "assets/panels/bg_fxreverb_481x234.png"
+        "assets/panels/bg_fxdelay_481x234.png"
+        "assets/buttons/GLOBAL_btn_arp_settings_141x26.png"
+        "assets/buttons/GLOBAL_btn_effects_141x26.png"
+        "assets/buttons/GLOBAL_btn_lfo_matrix_141x26.png"
+        "assets/buttons/GLOBAL_btn_osc_filter_141x26.png"
+        "assets/buttons/GLOBAL_btn_patch_browser_141x26.png"
+        "assets/buttons/env_pol_50x34.png"
+        "assets/buttons/lfo_btn_23_19.png"
+        "assets/buttons/link_vert_12x36.png"
+        "assets/buttons/link_horizon_36x12.png"
+        "assets/buttons/presets_btn_43_15.png"
+        "assets/buttons/Handle_18x47.png"
+        "assets/buttons/sync2_54x25.png"
+        "assets/buttons/part_select_btn_36x36.png"
+        "assets/buttons/arphold_btn_36x36.png"
+        "assets/knobs/Gen_70x70_100.png"
+        "assets/knobs/Gen_pol_70x70_100.png"
+        "assets/knobs/GenBlue_70x70_100.png"
+        "assets/knobs/GenRed_70x70_100.png"
+        "assets/knobs/multi_18x18_100.png"
 )
 
 target_compile_definitions(jucePlugin 
@@ -50,8 +103,9 @@ PUBLIC
 
 target_link_libraries(jucePlugin 
 PRIVATE
-    # AudioPluginData           # If we'd created a binary data target, we'd link to it here
+    jucePlugin_BinaryData
     juce::juce_audio_utils
+    juce::juce_cryptography
 PUBLIC
 	virusLib
     #juce::juce_recommended_config_flags

@@ -23,7 +23,7 @@ namespace synthLib
 		if(m_midiInRingBuffer.full())
 		{
 			std::lock_guard lock(m_lock);
-			processMidiInEvents();
+			processMidiInEvent(m_midiInRingBuffer.pop_front());
 		}
 		m_midiInRingBuffer.push_back(_ev);
 	}
@@ -44,7 +44,6 @@ namespace synthLib
 
 		setFlushDenormalsToZero();
 
-		processMidiInEvents();
 
 		float* inputs[8] {};
 		float* outputs[8] {};
@@ -56,6 +55,7 @@ namespace synthLib
 
 		std::lock_guard lock(m_lock);
 
+		processMidiInEvents();
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
@@ -221,40 +221,45 @@ namespace synthLib
 		{
 			const auto ev = m_midiInRingBuffer.pop_front();
 
-			// sysex might be send in multiple chunks. Happens if coming from hardware
-			if (!ev.sysex.empty())
+			processMidiInEvent(ev);
+		}
+	}
+
+	void Plugin::processMidiInEvent(const SMidiEvent& _ev)
+	{
+		// sysex might be send in multiple chunks. Happens if coming from hardware
+		if (!_ev.sysex.empty())
+		{
+			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+
+			if (isComplete)
 			{
-				const bool isComplete = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
-
-				if (isComplete)
-				{
-					m_midiIn.push_back(ev);
-					continue;
-				}
-
-				const bool isStart = ev.sysex.front() == M_STARTOFSYSEX && ev.sysex.back() != M_ENDOFSYSEX;
-				const bool isEnd = ev.sysex.front() != M_STARTOFSYSEX && ev.sysex.back() == M_ENDOFSYSEX;
-
-				if (isStart)
-				{
-					m_pendingSysexInput = ev;
-					continue;
-				}
-
-				if (!m_pendingSysexInput.sysex.empty())
-				{
-					m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), ev.sysex.begin(), ev.sysex.end());
-
-					if (isEnd)
-					{
-						m_midiIn.push_back(m_pendingSysexInput);
-						m_pendingSysexInput.sysex.clear();
-					}
-				}
+				m_midiIn.push_back(_ev);
+				return;
 			}
 
-			m_midiIn.push_back(ev);
+			const bool isStart = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() != M_ENDOFSYSEX;
+			const bool isEnd = _ev.sysex.front() != M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;
+
+			if (isStart)
+			{
+				m_pendingSysexInput = _ev;
+				return;
+			}
+
+			if (!m_pendingSysexInput.sysex.empty())
+			{
+				m_pendingSysexInput.sysex.insert(m_pendingSysexInput.sysex.end(), _ev.sysex.begin(), _ev.sysex.end());
+
+				if (isEnd)
+				{
+					m_midiIn.push_back(m_pendingSysexInput);
+					m_pendingSysexInput.sysex.clear();
+				}
+			}
 		}
+
+		m_midiIn.push_back(_ev);
 	}
 
 	void Plugin::setBlockSize(const uint32_t _blockSize)
