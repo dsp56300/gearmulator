@@ -243,6 +243,9 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 
 bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
 {
+	if (_data.size() < 7)
+		return true;	// invalid sysex or not directed to us
+
 	const auto manufacturerA = _data[1];
 	const auto manufacturerB = _data[2];
 	const auto manufacturerC = _data[3];
@@ -500,7 +503,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const auto param = _data[8];
 				const auto value = _data[9];
 
-				if(page == PAGE_C)
+				if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
 				{
 					applyToMultiEditBuffer(part, param, value);
 
@@ -911,7 +914,13 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 
 void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
-	// TODO: This is horrible. We need to remap everything
+	// remap page C parameters into the multi edit buffer
+	if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT) {
+		m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
+	}
+	else if (_param == CLOCK_TEMPO) {
+		m_multiEditBuffer[MD_CLOCK_TEMPO] = _value;
+	}
 }
 
 }

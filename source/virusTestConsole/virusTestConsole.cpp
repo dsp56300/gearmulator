@@ -198,10 +198,16 @@ int main(int _argc, char* _argv[])
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
 
+	auto waitReturn = []()
+	{
+		std::cin.ignore();
+	};
+
 	const auto romFile = findROM(1024 * 1024);
 	if(romFile.empty())
 	{
 		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
+		waitReturn();
 		return -1;
 	}
 	ROMFile v(romFile);
@@ -212,6 +218,7 @@ int main(int _argc, char* _argv[])
 		if(!loadSingle(v, _argv[1]))
 		{
 			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;
+			waitReturn();
 			return -1;
 		}
 	}
