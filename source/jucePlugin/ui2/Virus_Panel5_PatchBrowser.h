@@ -6,9 +6,6 @@
 #include "../VirusController.h"
 //#include "Virus_LookAndFeel.h"
 
-//class VirusParameterBinding;
-class Virus::LookAndFeelPatchBrowser;
-
 const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 
 struct Patch
