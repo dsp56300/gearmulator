@@ -148,6 +148,7 @@ namespace virusLib
 		PAGE_A = 0x70,
 		PAGE_B = 0x71,
 		PAGE_C = 0x72,
+		PAGE_D = 0x73,
 	};
 
 	enum ProgramType
