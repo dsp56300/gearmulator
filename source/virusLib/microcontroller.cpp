@@ -587,17 +587,28 @@ void Microcontroller::waitUntilBufferEmpty() const
 
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 {
-	int idx = 0;
+	size_t idx = 0;
+
+	const auto size = (_preset.size() + 2) / 3;
 
 	std::vector<TWord> preset;
-	preset.resize(0x56);
+	preset.resize(size);
 
-	for (int i = 0; i < 0x56; i++)
+	for (size_t i = 0; i < size; i++)
 	{
-		if (i == 0x55)
-			preset[i] = _preset[idx] << 16;
+		if (i == (size-1))
+		{
+			if(idx < _preset.size())
+				preset[i] = _preset[idx] << 16;
+			if ((idx+1) < _preset.size())
+				preset[i] |= _preset[idx+1] << 8;
+			if ((idx+2) < _preset.size())
+				preset[i] |= _preset[idx+2] << 16;
+		}
 		else
+		{
 			preset[i] = ((_preset[idx] << 16) | (_preset[idx + 1] << 8) | _preset[idx + 2]);
+		}
 		idx += 3;
 	}
 
