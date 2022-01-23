@@ -1,6 +1,6 @@
 #include "Virus_LookAndFeel.h"
 #include "../VirusController.h"
-#include "../virusLib/microcontrollerTypes.h"
+#include "../../virusLib/microcontrollerTypes.h"
 
 constexpr auto knobSize = Virus::LookAndFeel::kKnobSize;
 constexpr auto knobSizeSmall = Virus::LookAndFeelSmallButton::kKnobSize;

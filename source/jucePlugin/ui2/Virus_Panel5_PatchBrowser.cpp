@@ -89,7 +89,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     addAndMakeVisible(m_bankList);
 
     m_ROMBankSelect.setBounds(510 - 961 / 2, 78 - 51  / 2, 961, 51);
-    for (int i=1; i<=m_controller.getBankCount()-1;i++)
+    for (int i=1; i<=m_controller.getBankCount();i++)
 	{
         m_ROMBankSelect.addItem("BANK: " + getCurrentPartBankStr((virusLib::BankNumber)i),i+1);
     }
@@ -153,6 +153,17 @@ void PatchBrowser::SaveSettings()
     m_properties->setValue("is_file_used", m_bIsFileMode);
     m_properties->setValue("last_bank_rom_no_used", m_LastBankRomNoUsed);
     m_properties->save();
+}
+
+
+juce::String PatchBrowser::GetLastPatchSelected()
+{
+    return m_LastPatchSelected;
+}
+
+juce::TableListBox* PatchBrowser::GetTablePatchList()
+{
+    return &m_patchList;
 }
 
 
@@ -474,6 +485,9 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
         return;
     }
     
+    juce::Component *c;
+    c = m_patchList.getCellComponent(1,idx);
+
     if (m_bIsFileMode)
     {
         uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
@@ -500,6 +514,8 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
         syx.push_back(syxEof);
         m_controller.sendSysEx(syx); // send to edit buffer
         m_controller.parseMessage(syx); // update ui
+
+        m_LastPatchSelected = parseAsciiText(data, 128 + 112);
         getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     }
     else 
