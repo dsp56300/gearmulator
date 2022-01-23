@@ -39,7 +39,9 @@ public:
     void loadBankFileToRom(const juce::File &file);
     void savePreset();
     bool GetIsFileMode();
-    juce::TableListBox m_patchList;
+    juce::String GetLastPatchSelected();
+    juce::TableListBox* GetTablePatchList(); 
+
     void IntiPatches();
 private:
 
@@ -80,7 +82,9 @@ private:
     juce::ComboBox m_ROMBankSelect;
     juce::String m_previousPath;
     juce::String m_LastFileUsed;
-    //int m_LastPatchNoUsed;
+    juce::TableListBox m_patchList;
+    juce::String m_LastPatchSelected;
+
     int m_LastBankRomNoUsed;
 
     bool m_bIsFileMode;

@@ -41,6 +41,10 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     
     applyToSections([this](Component *s) { addChildComponent(s); });
 
+    //Init Keyboard
+    setWantsKeyboardFocus(true); 
+    addKeyListener(this);
+
     // show/hide section from buttons..
     m_mainButtons.updateSection = [this]() {
         if (m_mainButtons.m_arpSettings.getToggleState()) {
@@ -162,6 +166,15 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_RomName.setJustificationType(Justification::centred);
     addAndMakeVisible(m_RomName);
 
+    //Hyperlink
+    m_hyperLink.setBounds(900, 1115, 400, 35);
+    m_hyperLink.setColour(juce::Label::textColourId, juce::Colours::silver);
+    m_hyperLink.setFont(juce::Font("Arial", "Bold", 20.f), true, dontSendNotification);
+    m_hyperLink.setJustificationType(Justification::left);
+    m_hyperLink.setJustificationType(Justification::centred);
+    addAndMakeVisible(m_hyperLink);
+
+
     m_controller.onProgramChange = [this]() 
     {
         updateParts();
@@ -182,13 +195,28 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
 
 VirusEditor::~VirusEditor()
 {
+	m_controller.onProgramChange = nullptr; 
     m_mainMenu.onClick = nullptr;	
     selectorMenu.setLookAndFeel(nullptr);
 	SubSkinSizeSelector.setLookAndFeel(nullptr);
 	m_mainMenu.setLookAndFeel (nullptr);
     selector.setLookAndFeel (nullptr); 
-	m_controller.onProgramChange = nullptr; 
     setLookAndFeel(nullptr);
+}
+
+bool VirusEditor::keyPressed(const KeyPress &k, Component *c)
+{
+    if( k.getKeyCode() == 65573) 
+    {
+        postCommandMessage(VirusEditor::Commands::PrevPatch);
+    }
+    if( k.getKeyCode() == 65575) 
+    {
+        postCommandMessage(VirusEditor::Commands::NextPatch);
+    }
+    //43 +
+    //45 -
+    return true;
 }
 
 void VirusEditor::updateParts() 
@@ -199,27 +227,23 @@ void VirusEditor::updateParts()
         bool singlePartOrInMulti = pt == 0 || multiMode;
         if (pt == m_controller.getCurrentPart())
         {
-            int CurrentPart = m_controller.getCurrentPartProgram(m_controller.getCurrentPart());
-
-            const auto patchName = m_controller.getCurrentPartPresetName(pt);
-            if(m_patchName.getText() != patchName) 
-            {
-                String sZero;
-                if (m_patchBrowser->GetIsFileMode())
-				{
-                    m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
-                        +"][FILE] "                    
-                        + sZero.paddedLeft('0',(CurrentPart<10)?2:(CurrentPart<100)?1:0)
-                        + juce::String(m_patchBrowser->m_patchList.getSelectedRow(0))+": " + patchName, dontSendNotification);
-                }
-                else
-			    {
+            if (m_patchBrowser->GetIsFileMode())
+			{
+                m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
+                    +"][FILE] "                    
+                    + juce::String(m_patchBrowser->GetTablePatchList()->getSelectedRow(0)+1)+": " + m_patchBrowser->GetLastPatchSelected(), dontSendNotification);
+            }
+			else
+			{
+                const auto patchName = m_controller.getCurrentPartPresetName(pt);
+                if(m_patchName.getText() != patchName) 
+                {
+                    String sZero;
                     m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
                         +"][" + getCurrentPartBankStr(m_controller.getCurrentPartBank(m_controller.getCurrentPart())) + "] "                    
-                        + sZero.paddedLeft('0',(CurrentPart<10)?2:(CurrentPart<100)?1:0)
                         + juce::String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart())+1)+": " + patchName, dontSendNotification);
-                }
-            } 
+                } 
+            }
         }
     } 
 }
@@ -372,17 +396,32 @@ void VirusEditor::handleCommandMessage(int commandId)
 {
     switch (commandId) {
         case Commands::Rebind: recreateControls();
-        case Commands::UpdateParts: { updateParts(); m_arpEditor->refreshParts();}; break;
-        case Commands::InitPatches: { 
-            m_patchBrowser->IntiPatches();}; break;
-        case Commands::PrevPatch: {
-            m_patchBrowser->m_patchList.selectRow(m_patchBrowser->m_patchList.getSelectedRow(0)-1,false,false);    
+        case Commands::UpdateParts: 
+        { 
+            updateParts(); 
+            m_arpEditor->refreshParts();
+        }; break;
+        case Commands::InitPatches: 
+        { 
+            m_patchBrowser->IntiPatches();
+        }; break;
+        case Commands::PrevPatch: 
+        {
+            if (m_patchBrowser->GetTablePatchList()->getSelectedRow(0)>0)
+            {
+                m_patchBrowser->GetTablePatchList()->selectRow(m_patchBrowser->GetTablePatchList()->getSelectedRow(0)-1,false,false);    
+            }
         };break;
-        case Commands::NextPatch: {
-            m_patchBrowser->m_patchList.selectRow(m_patchBrowser->m_patchList.getSelectedRow(0)+1,false,false);    
+        case Commands::NextPatch: 
+        {
+            if (m_patchBrowser->GetTablePatchList()->getSelectedRow(0)<m_patchBrowser->GetTablePatchList()->getNumRows()-1)
+            {
+                m_patchBrowser->GetTablePatchList()->selectRow(m_patchBrowser->GetTablePatchList()->getSelectedRow(0)+1,false,false);    
+            }
         };break;
-        case Commands::SelectFirstPatch: {
-            m_patchBrowser->m_patchList.selectRow(0,false,false);  
+        case Commands::SelectFirstPatch: 
+        {
+            m_patchBrowser->GetTablePatchList()->selectRow(0,false,false);  
         };break;
      
         default: return;

@@ -15,7 +15,7 @@ class ArpEditor;
 class PatchBrowser;
 class AudioProcessorEditor;
 
-class VirusEditor : public juce::Component
+class VirusEditor : public juce::Component, private KeyListener
 {
 public:
     VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
@@ -26,6 +26,7 @@ public:
     void ShowMenuePatchList();
     void ShowMainMenue();
     void updateParts();
+    bool keyPressed(const KeyPress &k, Component *c) override;
 
     enum Commands {
         None,
@@ -45,6 +46,7 @@ private:
 
     juce::Label m_version;
     juce::Label m_SynthModel;
+    HyperlinkButton m_hyperLink { "donate: paypal.me/dsp56300", { "http://www.paypal.me/dsp56300" } };
     juce::Label m_RomName;
     juce::Label m_patchName;
     juce::Label m_controlLabel;
