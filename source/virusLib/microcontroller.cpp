@@ -97,6 +97,26 @@ void Microcontroller::sendInitControlCommands()
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
 	sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
 	sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
+
+	sendControlCommand(UNK1a, 0x1);
+	sendControlCommand(UNK1b, 0x1);
+	sendControlCommand(UNK1c, 0x0);
+	sendControlCommand(UNK1d, 0x0);
+	sendControlCommand(UNK35, 0x40);
+	sendControlCommand(UNK36, 0xc);
+	sendControlCommand(UNK36, 0xc); // duplicate
+	sendControlCommand(SECOND_OUTPUT_SELECT, 0x0);
+	sendControlCommand(UNK76, 0x0);
+	sendControlCommand(INPUT_THRU_LEVEL, 0x0);
+	sendControlCommand(INPUT_BOOST, 0x0);
+	sendControlCommand(DEVICE_ID, 0x0);
+	sendControlCommand(MIDI_ARPEGGIATOR_SEND, 0x0);
+	sendControlCommand(MIDI_CLOCK_RX, 0x1);
+	sendControlCommand(GLOBAL_CHANNEL, 0x0);
+	sendControlCommand(LED_MODE, 0x2);
+	sendControlCommand(LCD_CONTRAST, 0x40);
+	sendControlCommand(PANEL_DESTINATION, 0x1);
+	sendControlCommand(UNK6d, 0x6c);
 }
 
 void Microcontroller::createDefaultState()
