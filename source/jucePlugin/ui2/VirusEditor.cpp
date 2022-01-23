@@ -240,7 +240,7 @@ void VirusEditor::updateParts()
                 {
                     String sZero;
                     m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
-                        +"][" + getCurrentPartBankStr(m_controller.getCurrentPartBank(m_controller.getCurrentPart())) + "] "                    
+                        +"][" + m_patchBrowser->GetSelectBankNum() + "] "                    
                         + juce::String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart())+1)+": " + patchName, dontSendNotification);
                 } 
             }

@@ -4,7 +4,6 @@
 #include "Virus_Buttons.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "../VirusController.h"
-//#include "Virus_LookAndFeel.h"
 
 const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 
@@ -20,11 +19,6 @@ struct Patch
     uint8_t transpose;
 };
 
-/*
-struct RomBank
-{
-    virusLib::BankNumber m_RomNumber;
-};*/
 
 class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::TableListBoxModel
 {
@@ -36,6 +30,7 @@ public:
     void loadBankFileToRom(const juce::File &file);
     void savePreset();
     bool GetIsFileMode();
+    juce::String GetSelectBankNum();
     juce::String GetLastPatchSelected();
     juce::TableListBox* GetTablePatchList(); 
 
@@ -43,7 +38,6 @@ public:
 private:
 
     Virus::LookAndFeelPatchBrowser m_landf;
-    //Virus::LookAndFeel m_lookAndFeel;
 
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;
@@ -60,7 +54,6 @@ private:
     juce::WildcardFileFilter m_fileFilter;
     juce::FileBrowserComponent m_bankList;
 
-    //juce::TableListBox m_romBankList;
     juce::TextEditor m_search;
     juce::Array<Patch> m_patches;
     juce::Array<Patch> m_filteredPatches;
@@ -68,10 +61,8 @@ private:
     juce::HashMap<juce::String, bool> m_checksums;
     int loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
     // Inherited via FileBrowserListener
-    //Buttons::OptionButtonLoadBank m_LoadBank;
     Buttons::OptionButtonSavePreset m_SavePreset;
     
-    //Buttons::Button2 m_btModeRomFile;
     void LoadBankNr(int iBankNo);
     void SaveSettings();
     void LoadPatchesFromFile(const juce::File &file);

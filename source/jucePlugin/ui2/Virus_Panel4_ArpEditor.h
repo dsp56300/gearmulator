@@ -33,11 +33,7 @@ private:
     VirusParameterBinding &m_parameterBinding;   
 
     Buttons::Button3 m_partSelect[16];
-    //juce::Label m_partLabels[16];
-    //Buttons::PresetButtonDown m_PresetPatch[16];
     juce::Label m_presetNames[16];
-    //Buttons::PresetButtonRight m_nextPatch[16];
-    //Buttons::PresetButtonLeft m_prevPatch[16];
     juce::Slider m_partVolumes[16];
     juce::Slider m_partPans[16];
  

@@ -27,6 +27,11 @@ namespace Virus
 			const uint8_t prg = isMultiMode() ? 0x0 : 0x40;
 			sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, prg}));
 			sendSysEx(constructMessage({MessageType::REQUEST_MULTI, 0x0, prg}));
+
+			if (onMsgDone) 
+			{
+				onMsgDone();
+			}
 		};
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
@@ -2036,17 +2041,7 @@ namespace Virus
 			}
             else
 			{
-                if (msg.sysex[6] == MessageType::DUMP_SINGLE)
-				{
-					//only call up when we have received the dump first 
-					if (onMsgDone) {
-						onMsgDone();
-					}
-				}
-				parseMessage(msg.sysex);
-
-				
-
+				parseMessage(msg.sysex);               
 			}
         }
         m_virusOut.clear();

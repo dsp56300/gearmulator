@@ -97,7 +97,6 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, AudioPlugi
     m_ROMBankSelect.onChange = [this]() 
     { 
         m_LastBankRomNoUsed = m_ROMBankSelect.getSelectedItemIndex()+1;
-        //m_LastPatchNoUsed = 0;
         LoadBankNr(m_LastBankRomNoUsed); 
         m_bIsFileMode = false;
         m_search.setText("", true);
@@ -119,17 +118,17 @@ PatchBrowser::~PatchBrowser()
 void PatchBrowser::IntiPatches() 
 {
     //Read Last Patch used from config file
-    //m_LastPatchNoUsed = m_properties->getIntValue("last_patch_no_used", 1) - 1;
     m_bIsFileMode = m_properties->getBoolValue("is_file_used", false);
     m_LastBankRomNoUsed = m_properties->getIntValue("last_bank_rom_no_used", 1);
     m_LastFileUsed = m_properties->getValue("last_file_used", "");
 
     if(!m_bIsFileMode)
 	{
+        m_controller.setCurrentPartPreset(0,(virusLib::BankNumber)(m_LastBankRomNoUsed),0);
         m_ROMBankSelect.setSelectedItemIndex(m_LastBankRomNoUsed-1, dontSendNotification);    
         LoadBankNr(m_LastBankRomNoUsed); 
         m_search.setText("", true);
-        //getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
+        
     }
 	else
     {
@@ -138,18 +137,11 @@ void PatchBrowser::IntiPatches()
         const juce::File &file(m_LastFileUsed);
         LoadPatchesFromFile(file);
     }
-
-    //getParentComponent()->postCommandMessage(VirusEditor::Commands::SelectFirstPatch);
-    //getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
-
-    //m_patchList.selectRow(m_LastPatchNoUsed,true,true);  
-    //getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
 
 void PatchBrowser::SaveSettings() 
 {
     m_properties->setValue("last_file_used", m_LastFileUsed);
-    //m_properties->setValue("last_patch_no_used", m_LastPatchNoUsed+1);
     m_properties->setValue("is_file_used", m_bIsFileMode);
     m_properties->setValue("last_bank_rom_no_used", m_LastBankRomNoUsed);
     m_properties->save();
@@ -165,6 +157,13 @@ juce::TableListBox* PatchBrowser::GetTablePatchList()
 {
     return &m_patchList;
 }
+
+juce::String PatchBrowser::GetSelectBankNum()
+{
+    return getCurrentPartBankStr((virusLib::BankNumber)m_LastBankRomNoUsed);
+}
+
+
 
 
 bool PatchBrowser::GetIsFileMode() 
@@ -523,8 +522,6 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
         m_controller.setCurrentPartPreset(m_controller.getCurrentPart(), (virusLib::BankNumber) m_LastBankRomNoUsed, m_filteredPatches[idx].progNumber);
         getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     }
-
-    //m_LastPatchNoUsed = m_filteredPatches[idx].progNumber;
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
