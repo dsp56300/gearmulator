@@ -29,7 +29,7 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	using TPreset = std::array<uint8_t, 256>;
+	using TPreset = std::array<uint8_t, 512>;
 
 	explicit ROMFile(const std::string& _path);
 
