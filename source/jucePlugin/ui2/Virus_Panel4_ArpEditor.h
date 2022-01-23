@@ -12,7 +12,7 @@ class ArpEditor : public juce::Component
 {
 public:
     ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef);
-    ArpEditor::~ArpEditor();
+    ArpEditor::~ArpEditor() override;
     static constexpr auto kPartGroupId = 0x3FBBC;
     void refreshParts();
 private:
