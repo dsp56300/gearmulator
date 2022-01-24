@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.15)
-project(jucePlugin1 VERSION ${CMAKE_PROJECT_VERSION}) 
+project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
@@ -10,7 +10,7 @@ else()
     set(VST "")
 endif()
 
-juce_add_plugin(jucePlugin1
+juce_add_plugin(jucePlugin
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
@@ -25,9 +25,9 @@ juce_add_plugin(jucePlugin1
     PLUGIN_CODE TusV                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 ${VST} Standalone           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "DSP56300Emu_Skin1"            # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "DSP56300Emu"                  # The name of the final executable, which can differ from the target name
 )
-target_sources(jucePlugin1 
+target_sources(jucePlugin 
 PRIVATE
     PluginEditor.cpp
     PluginEditor.h
@@ -63,7 +63,7 @@ PRIVATE
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
-juce_add_binary_data(jucePlugin_BinaryData1
+juce_add_binary_data(jucePlugin_BinaryData
     SOURCES
         "assets/bg_1377x800.png"
         "assets/panels/bg_arp_1018x620.png"
@@ -93,7 +93,7 @@ juce_add_binary_data(jucePlugin_BinaryData1
         "assets/knobs/multi_18x18_100.png"
 )
 
-target_compile_definitions(jucePlugin1 
+target_compile_definitions(jucePlugin 
 PUBLIC
 	# JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
 	JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
@@ -102,9 +102,9 @@ PUBLIC
     JUCE_WIN_PER_MONITOR_DPI_AWARE=0
 )
 
-target_link_libraries(jucePlugin1
+target_link_libraries(jucePlugin
 PRIVATE
-    jucePlugin_BinaryData1
+    jucePlugin_BinaryData
     juce::juce_audio_utils
     juce::juce_cryptography
 PUBLIC
@@ -115,7 +115,7 @@ PUBLIC
 )
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(jucePlugin1 PUBLIC -static-libgcc -static-libstdc++)
+	target_link_libraries(jucePlugin PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
 
@@ -123,7 +123,7 @@ endif()
 #SKIN2---------------------------------------------------------------------------------------------------------------------------------------
 
 cmake_minimum_required(VERSION 3.15)
-project(jucePlugin2 VERSION ${CMAKE_PROJECT_VERSION}) 
+project(jucePlugin_Dark VERSION ${CMAKE_PROJECT_VERSION}) 
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
@@ -133,7 +133,7 @@ else()
     set(VST "")
 endif()
 
-juce_add_plugin(jucePlugin2
+juce_add_plugin(jucePlugin_Dark
     # VERSION ...                               # Set this if the plugin version is different to the project version
     # ICON_BIG ...                              # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
     # ICON_SMALL ...
@@ -148,9 +148,9 @@ juce_add_plugin(jucePlugin2
     PLUGIN_CODE TusV                            # A unique four-character plugin id with exactly one upper-case character
                                                 # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
     FORMATS AU VST3 ${VST} Standalone           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
-    PRODUCT_NAME "DSP56300Emu_Skin2"                  # The name of the final executable, which can differ from the target name
+    PRODUCT_NAME "DSP56300Emu_Dark"             # The name of the final executable, which can differ from the target name
 )
-target_sources(jucePlugin2 
+target_sources(jucePlugin_Dark 
 PRIVATE
     PluginEditorSkin2.cpp
     PluginEditorSkin2.h
@@ -184,7 +184,7 @@ PRIVATE
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
-juce_add_binary_data(jucePlugin_BinaryData2
+juce_add_binary_data(jucePlugin_BinaryData_Dark
     SOURCES
         "assets2/main_background.png"
         "assets2/panels/panel_1.png"
@@ -214,7 +214,7 @@ juce_add_binary_data(jucePlugin_BinaryData2
         "assets2/font/Digital"  
 )
 
-target_compile_definitions(jucePlugin2 
+target_compile_definitions(jucePlugin_Dark 
 PUBLIC
 	# JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
 	JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
@@ -223,9 +223,9 @@ PUBLIC
     JUCE_WIN_PER_MONITOR_DPI_AWARE=0
 )
 
-target_link_libraries(jucePlugin2
+target_link_libraries(jucePlugin_Dark
 PRIVATE
-    jucePlugin_BinaryData2
+    jucePlugin_BinaryData_Dark
     juce::juce_audio_utils
     juce::juce_cryptography
 PUBLIC
@@ -236,5 +236,5 @@ PUBLIC
 )
 
 if(UNIX AND NOT APPLE)
-	target_link_libraries(jucePlugin2 PUBLIC -static-libgcc -static-libstdc++)
+	target_link_libraries(jucePlugin_Dark PUBLIC -static-libgcc -static-libstdc++)
 endif()
