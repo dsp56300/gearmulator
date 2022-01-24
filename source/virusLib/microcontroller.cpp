@@ -121,12 +121,28 @@ void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) 
 	m_hdi08.setHostFlags(flag1, flag2);
 }
 
-bool Microcontroller::sendPreset(uint8_t program, const std::vector<TWord>& preset, bool isMulti)
+bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>& preset, const bool isMulti)
 {
 	std::lock_guard lock(m_mutex);
 
 	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
+		// if we write a multi or a multi mode single, remove a pending single for single mode
+		// If we write a single-mode single, remove all multi-related pending writes
+		const auto multiRelated = isMulti || program != SINGLE;
+
+		for (auto it = m_pendingPresetWrites.begin(); it != m_pendingPresetWrites.end();)
+		{
+			const auto& pendingPreset = *it;
+
+			const auto pendingIsMultiRelated = pendingPreset.isMulti || pendingPreset.program != SINGLE;
+
+			if (multiRelated != pendingIsMultiRelated)
+				it = m_pendingPresetWrites.erase(it);
+			else
+				++it;
+		}
+
 		for(auto it = m_pendingPresetWrites.begin(); it != m_pendingPresetWrites.end();)
 		{
 			const auto& pendingPreset = *it;
