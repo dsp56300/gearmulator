@@ -623,7 +623,7 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 			if ((idx+1) < _preset.size())
 				preset[i] |= _preset[idx+1] << 8;
 			if ((idx+2) < _preset.size())
-				preset[i] |= _preset[idx+2] << 16;
+				preset[i] |= _preset[idx+2];
 		}
 		else
 		{
