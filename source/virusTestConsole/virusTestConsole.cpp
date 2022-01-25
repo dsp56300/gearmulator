@@ -63,8 +63,8 @@ void audioCallback(dsp56k::Audio* audio)
 		break;
 	case 512:
 		LOG("Sending Note On");
-		microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x7f));	// Note On
-		microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x7f));	// Note On
+//		microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 		break;
 	}
 
