@@ -429,6 +429,8 @@ namespace Virus
         void onStateLoaded();
 		juce::PropertiesFile* getConfig() { return m_config; }
 		std::function<void()> onProgramChange = {};
+		std::function<void()> onMsgDone = {};
+
     private:
 		void timerCallback() override;
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
