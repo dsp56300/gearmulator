@@ -75,7 +75,10 @@ void audioCallback(dsp56k::Audio* audio)
 
 	
 	ctr++;
-	if((ctr & 0xfff) == 0) {LOG("Deliver Audio");}
+	if((ctr & 0x1fff) == 0)
+	{
+		LOG("Deliver Audio");
+	}
 
 	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
