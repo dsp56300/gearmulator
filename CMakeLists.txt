@@ -43,7 +43,6 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		endif()
 		install(TARGETS jucePlugin_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
 	endif()
-	endif()
 
 	if(MSVC OR APPLE)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
@@ -59,6 +58,7 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		endif()
 		install(TARGETS jucePlugin_Dark_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
 	endif()
+endif()
 
 # ----------------- Test Console
 
