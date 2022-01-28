@@ -46,17 +46,17 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 
 	if(MSVC OR APPLE)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
-			install(TARGETS jucePlugin_Dark_VST DESTINATION . COMPONENT VST2)
+			install(TARGETS jucePlugin_Dark_VST DESTINATION . COMPONENT VST2_Dark)
 		endif()
-		install(TARGETS jucePlugin_Dark_VST3 DESTINATION . COMPONENT VST3)
+		install(TARGETS jucePlugin_Dark_VST3 DESTINATION . COMPONENT VST3_Dark)
 		if(APPLE)
-			install(TARGETS jucePlugin_Dark_AU DESTINATION . COMPONENT AU)
+			install(TARGETS jucePlugin_Dark_AU DESTINATION . COMPONENT AU_Dark)
 		endif()
 	elseif(UNIX)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
-			install(TARGETS jucePlugin_Dark_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2)
+			install(TARGETS jucePlugin_Dark_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2_Dark)
 		endif()
-		install(TARGETS jucePlugin_Dark_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
+		install(TARGETS jucePlugin_Dark_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3_Dark)
 	endif()
 endif()
 
@@ -80,7 +80,7 @@ endif()
 
 # ----------------- CPack
 
-set(CPACK_COMPONENTS_ALL VST2 VST3 AU testConsole)
+set(CPACK_COMPONENTS_ALL VST2 VST3 AU VST2_Dark VST3_Dark AU_Dark testConsole)
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
