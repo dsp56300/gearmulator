@@ -83,7 +83,10 @@ void audioCallback(dsp56k::Audio* audio)
 
 	
 	ctr++;
-	if((ctr & 0xfff) == 0) {LOG("Deliver Audio");}
+	if((ctr & 0x1fff) == 0)
+	{
+		LOG("Deliver Audio");
+	}
 
 	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
@@ -183,15 +186,29 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 	return false;
 }
 
+auto waitReturn = []()
+{
+	std::cin.ignore();
+};
+
 int main(int _argc, char* _argv[])
 {
 	if(true)
 	{
-		puts("Running Unit Tests...");
-//		UnitTests tests;
-		JitUnittests jitTests;
-//		return 0;
-		puts("Unit Tests finished.");
+		try
+		{
+			puts("Running Unit Tests...");
+			//		UnitTests tests;
+			JitUnittests jitTests;
+			//		return 0;
+			puts("Unit Tests finished.");
+		}
+		catch(const std::string& _err)
+		{
+			std::cout << "Unit test failed: " << _err << std::endl;
+			waitReturn();
+			return -1;
+		}
 	}
 
 	// Create the DSP with peripherals
@@ -204,11 +221,6 @@ int main(int _argc, char* _argv[])
 
 	periph.getEsai().setCallback(audioCallback,4,1);
 	periph.getEsai().writeEmptyAudioIn(4, 2);
-
-	auto waitReturn = []()
-	{
-		std::cin.ignore();
-	};
 
 	const auto romFile = findROM(1024 * 1024);
 	if(romFile.empty())

@@ -6,7 +6,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.4)
+project(gearmulator VERSION 1.2.5)
 
 include(base.cmake)
 
@@ -28,6 +28,7 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/JUCE)
 	add_subdirectory(source/jucePlugin)
+	
 	if(MSVC OR APPLE)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS jucePlugin_VST DESTINATION . COMPONENT VST2)
@@ -41,6 +42,21 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 			install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2)
 		endif()
 		install(TARGETS jucePlugin_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
+	endif()
+
+	if(MSVC OR APPLE)
+		if(JUCE_GLOBAL_VST2_SDK_PATH)
+			install(TARGETS jucePlugin_Dark_VST DESTINATION . COMPONENT VST2_Dark)
+		endif()
+		install(TARGETS jucePlugin_Dark_VST3 DESTINATION . COMPONENT VST3_Dark)
+		if(APPLE)
+			install(TARGETS jucePlugin_Dark_AU DESTINATION . COMPONENT AU_Dark)
+		endif()
+	elseif(UNIX)
+		if(JUCE_GLOBAL_VST2_SDK_PATH)
+			install(TARGETS jucePlugin_Dark_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2_Dark)
+		endif()
+		install(TARGETS jucePlugin_Dark_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3_Dark)
 	endif()
 endif()
 
@@ -64,7 +80,7 @@ endif()
 
 # ----------------- CPack
 
-set(CPACK_COMPONENTS_ALL VST2 VST3 AU testConsole)
+set(CPACK_COMPONENTS_ALL VST2 VST3 AU VST2_Dark VST3_Dark AU_Dark testConsole)
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
