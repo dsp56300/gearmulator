@@ -12,6 +12,23 @@
 
 namespace virusLib
 {
+void ROMFile::dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename)
+{
+	FILE* hFile = fopen(_filename.c_str(), "wb");
+
+	for(size_t i=0; i<_data.size(); ++i)
+	{
+		const auto d = _data[i];
+		const auto hsb = (d >> 16) & 0xff;
+		const auto msb = (d >> 8) & 0xff;
+		const auto lsb = d & 0xff;
+		fwrite(&hsb, 1, 1, hFile);
+		fwrite(&msb, 1, 1, hFile);
+		fwrite(&lsb, 1, 1, hFile);
+	}
+	fclose(hFile);
+}
+
 ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 {
 	LOG("Init access virus");
@@ -39,6 +56,9 @@ ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 			commandStream.emplace_back(chunks[j].items[i]);
 		i = 0;
 	}
+
+	dumpToBin(bootRom.data, _path + "_bootloader.bin");
+	dumpToBin(commandStream, _path + "_commandstream.bin");
 
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);

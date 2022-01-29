@@ -3,6 +3,8 @@
 #include <thread>
 #include <vector>
 
+#include "dsp56kEmu/types.h"
+
 namespace dsp56k
 {
 	class Peripherals56362;
@@ -30,6 +32,8 @@ public:
 	};
 
 	using TPreset = std::array<uint8_t, 512>;
+
+	void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
 
 	explicit ROMFile(const std::string& _path);
 
