@@ -1,5 +1,16 @@
 Release Notes 
 
+1.2.5 (2022.01.29):
+
+- [Imp] Performance improvements between 5% - 10%
+- [Imp] Additional performance improvements for ARMv8 based CPUs (including Apple M1)
+
+- [Fix] CPU spikes in complex patches or multi mode
+- [Fix] Part Select buttons were visually broken (always appeared as being selected)
+- [Fix] Presets were stored with incorrect version number, causing Virus B & C features to be disabled by the DSP when being loaded (Reverb, Osc 3, EQ, ....)
+- [Fix] Preset was corrupted when saving to an already existing file
+- [Fix] Some presets caused the emu to crash
+
 1.2.5b (2022.01.29):
 
 - [Imp] Smaller general performance improvements
