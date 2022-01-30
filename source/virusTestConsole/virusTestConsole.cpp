@@ -193,7 +193,7 @@ auto waitReturn = []()
 
 int main(int _argc, char* _argv[])
 {
-	if(true)
+	if(false)
 	{
 		try
 		{
