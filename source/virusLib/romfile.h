@@ -31,7 +31,7 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	using TPreset = std::array<uint8_t, 512>;
+	using TPreset = std::array<uint8_t, 513>;
 
 	void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
 
