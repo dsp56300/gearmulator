@@ -199,7 +199,7 @@ OscEditor::Filters::Filters(VirusParameterBinding &_parameterBinding) :	m_filter
     _parameterBinding.bind(m_filterMode[1], Virus::Param_FilterModeB);
     _parameterBinding.bind(m_filterRouting, Virus::Param_FilterRouting);
     _parameterBinding.bind(m_saturationCurve, Virus::Param_SaturationCurve);
-    _parameterBinding.bind(m_keyFollowBase, Virus::Param_FilterKeyFollowA); // maybe not right
+    _parameterBinding.bind(m_keyFollowBase, Virus::Param_FilterKeytrackBase);
     _parameterBinding.bind(m_link1, Virus::Param_Filter2CutoffLink);
     _parameterBinding.bind(m_envPol[0].m_pos, Virus::Param_Filter1EnvPolarity);
     _parameterBinding.bind(m_envPol[1].m_pos, Virus::Param_Filter2EnvPolarity);
