@@ -34,15 +34,17 @@ namespace synthLib
 
 		void dummyProcess(uint32_t _numSamples);
 
-		dsp56k::HDI08& getHDI08() { return m_periph.getHDI08(); }
-		dsp56k::Peripherals56362& getPeriph() { return m_periph; }
+		dsp56k::HDI08& getHDI08() { return m_periphX.getHDI08(); }
+		dsp56k::Peripherals56362& getPeriph() { return m_periphX; }
 		dsp56k::DSP& getDSP() { return *m_dsp; }
 	
 	private:
 		std::vector<uint8_t> m_buffer;
 
 		dsp56k::DefaultMemoryValidator m_memoryValidator;
-		dsp56k::Peripherals56362 m_periph;
+		dsp56k::Peripherals56367 m_periphY;
+		dsp56k::Peripherals56362 m_periphX;
+		dsp56k::PeripheralsNop m_periphNop;
 
 		dsp56k::Memory* m_memory = nullptr;
 		dsp56k::DSP* m_dsp = nullptr;

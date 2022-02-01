@@ -7,7 +7,7 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress)
+	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress) : m_periphX(&m_periphY)
 	{
 		const size_t g_requiredMemSize	= alignedSize<DSP>() + alignedSize<Memory>() + _memorySize * MemArea_COUNT * sizeof(uint32_t);
 
@@ -20,13 +20,13 @@ namespace synthLib
 		auto* bufMem = bufDSP + alignedSize<DSP>();
 		auto* bufBuf = bufMem + alignedSize<Memory>();
 
-		m_periph.getEsai().setCallback([this](Audio* _audio)
+		m_periphX.getEsai().setCallback([this](Audio* _audio)
 		{
 			onAudioWritten();
 		}, 0, 1);
 
 		m_memory = new (bufMem)Memory(m_memoryValidator, _memorySize, reinterpret_cast<TWord*>(bufBuf));
-		m_dsp = new (buf)DSP(*m_memory, &m_periph, &m_periph);
+		m_dsp = new (buf)DSP(*m_memory, &m_periphX, &m_periphNop);
 
 		if(_externalMemStartAddress)
 			m_memory->setExternalMemory(_externalMemStartAddress, true);
@@ -65,7 +65,7 @@ namespace synthLib
 		for (const auto& ev : _midiIn)
 			sendMidi(ev, _midiOut);
 
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
+		m_periphX.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
 		readMidiOut(_midiOut);
 	}
 
