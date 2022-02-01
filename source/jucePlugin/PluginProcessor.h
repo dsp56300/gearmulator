@@ -60,6 +60,9 @@ public:
 	juce::MidiInput* getMidiInput() const;
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
+    std::string getRomName() {
+        return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
+    }
 	// _____________
 	//
 private:
@@ -74,4 +77,5 @@ private:
 	virusLib::Device					m_device;
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
+    std::string						m_romName;
 };

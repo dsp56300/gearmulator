@@ -1,5 +1,108 @@
 Release Notes 
 
+1.2.5 (2022.01.29):
+
+- [Imp] Performance improvements between 5% - 10%
+- [Imp] Additional performance improvements for ARMv8 based CPUs (including Apple M1)
+
+- [Fix] CPU spikes in complex patches or multi mode
+- [Fix] Part Select buttons were visually broken (always appeared as being selected)
+- [Fix] Presets were stored with incorrect version number, causing Virus B & C features to be disabled by the DSP when being loaded (Reverb, Osc 3, EQ, ....)
+- [Fix] Preset was corrupted when saving to an already existing file
+- [Fix] Some presets caused the emu to crash
+
+1.2.5b (2022.01.29):
+
+- [Imp] Smaller general performance improvements
+- [Imp] Additional performance improvements for ARMv8 based CPUs (including Apple M1)
+
+- [Fix] Some presets caused the emu to crash
+
+1.2.5a (2022.01.26):
+
+- [Imp] Smaller general performance improvements
+- [Imp] Additional performance improvements for ARMv8 based CPUs (including Apple M1)
+
+- [Fix] CPU spikes in complex patches or multi mode
+- [Fix] Part Select buttons were visually broken (always appeared as being selected)
+- [Fix] Presets were stored with incorrect version number, causing Virus B & C features to be disabled by the DSP when being loaded (Reverb, Osc 3, EQ, ....)
+- [Fix] Preset was corrupted when saving to an already existing file
+- [Fix] Some presets caused the emu to crash
+
+1.2.4c (2022.01.18):
+
+- [Fix] Freezing of plugins for some seconds because DSP skipped processing peripheral devices in certain circumstances
+
+1.2.4b (2022.01.18):
+
+- [Fix] Possible crash at startup
+- [Fix] Plugin doesn't emit any sound in some circumstances
+- [Fix] Possible crash when closing editor window, reopening it and switching presets
+- [Fix] Possible crash when invalid sysex message received
+- [Fix] Memory leaks
+- [Fix] Broken Combo Box selection
+- [Fix] Preset name not being displayed after reopening editor window
+
+1.2.4 (2022.01.18):
+
+- [Imp] UI scale selector. Higher quality image assets for larger sizes will be included in a future release.
+- [Imp] Name search in patch browser.
+- [Imp] Show transpose column in patch browser.
+- [Imp] Right click a directory in patch browser to dedupe and add all syx/midi files within to the patch list.
+- [Imp] Mouse hover now shows parameter value.
+- [Imp] Scroll wheel now cycles through combobox options.
+- [Imp] DSP emulation code has been optimized and is now 10% to 20% faster
+
+- [Change] Save preset location now defaults to the patch browsers last directory
+- [Change] Multi-Single removed.
+- [Change] In multi mode, FX are no longer applied when loading a patch. (previously they did on part 1 only)
+
+- [Fix] Reverb/Delay now show correct controls for the selected mode.
+- [Fix] Some parameters in UI showing wrong values in multi mode.
+- [Fix] Moving parameters now sends automation to DAW.
+- [Fix] Crash when loading second instance on some platforms.
+- [Fix] Crash when removing track
+- [Fix] Some better double click default values
+
+1.2.3 (2022.01.14):
+
+- [Imp] Add double click to edit preset name.
+- [Imp] Add missing reverb controls. 
+- [Imp] Connect unassigned GUI controls (Bend, Category, SoftKnob config, Input follower)
+- [Imp] Control changes now show their value in the main display
+- [Imp] Add Part Volume and part pan control
+- [Imp] Add Multi-Single mode.
+- [Imp] Add part output selection for main and aux buses.
+- [Imp] Sync internal virus clock to host bpm
+- [Imp] Patch Browser sorting by column headers
+- [Imp] Flag for TI patches in browser.
+
+- [Fix] Fix selected part not being remembered when reopening editor
+- [Fix] Patch browser not switching if selected index doesn't change.
+- [Fix] Double now click resets to to center instead of 0 on bipolar controls.
+- [Fix] Matrix slot 4/5/6 not working on C rom.
+- [Fix] Osc sync button
+- [Fix] Crash when removing the track with GUI open in some DAWs.
+- [Fix] Update some art assets
+
+1.2.2 (2022.01.08):
+
+- [Imp] First version that uses the new User Interface instead of the temporary one
+
+1.2.1 (2022.01.03):
+
+- [Change] Switch default play mode to Single
+- [Imp] Add ability to load a sound bank via Midi/Sysex (thx to @balls)
+- [Imp] Added native Midi ports support to allow to make it easier to use external editors for the emulator (thx to @balls)
+- [Imp] Add ability to resize temporary UI (thx to @lol_catz)
+- [Imp] Oscillator 3 Mode is now a dropdown menu instead of a Slider (thx to @lol_catz)
+
+- [Fix] Fix presets sent via Sysex to Bank A were stored in Bank B
+- [Fix] Fix parameter changes not remembered in single mode if sent for part 0
+- [Fix] Fix master tune being off after reloading a project
+- [Fix] Added missing distortion curves (thx to @balls)
+- [Fix] Various parameter range or naming issues (thx to @lol_catz)
+
 1.2.0 (2021.09.23):
 
 - [Imp] A temporary GUI has been added that allows to: modify parameters without needing external editors and allows to switch presets 

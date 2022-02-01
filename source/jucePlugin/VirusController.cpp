@@ -13,20 +13,39 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
+		assert(m_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
+		juce::PropertiesFile::Options opts;
+		opts.applicationName = "DSP56300 Emulator";
+		opts.filenameSuffix = ".settings";
+		opts.folderName = "DSP56300 Emulator";
+		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		m_config = new juce::PropertiesFile(opts);
+
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
 			const uint8_t prg = isMultiMode() ? 0x0 : 0x40;
 			sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, prg}));
+			sendSysEx(constructMessage({MessageType::REQUEST_MULTI, 0x0, prg}));
+
+			if (onMsgDone) 
+			{
+				onMsgDone();
+			}
 		};
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 
     	for(uint8_t i=3; i<=8; ++i)
-			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));
-
+			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));		 
     	startTimer(5);
 	}
+
+    Controller::~Controller()
+    {
+	    stopTimer();
+		delete m_config;
+    }
 
     void Controller::registerParams()
     {
@@ -38,9 +57,17 @@ namespace Virus
 			const auto partNumber = juce::String(pt + 1);
 			auto group =
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
-			for (auto desc : m_paramsDescription)
+
+			uint32_t parameterDescIndex = 0;
+			for (const auto& desc : m_paramsDescription)
 			{
-				ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
+				++parameterDescIndex;
+
+				const ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+
+				m_paramTypeToParamIndex.insert(std::make_pair(paramType, idx));
+
 				auto p = std::make_unique<Parameter>(*this, desc, pt);
 				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) ||
 					(desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
@@ -119,23 +146,32 @@ namespace Virus
         }
     }
 
-	Parameter *Controller::findSynthParam(const uint8_t ch, const uint8_t bank, const uint8_t paramIndex)
+	Parameter *Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
 	{
-		auto it = m_synthParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+		const ParamIndex paramIndex{ _page, _part, _paramIndex };
+
+		return findSynthParam(paramIndex);
+	}
+
+    Parameter* Controller::findSynthParam(const ParamIndex& _paramIndex)
+    {
+		const auto it = m_synthParams.find(_paramIndex);
+
 		if (it == m_synthParams.end())
 		{
-			auto iti = m_synthInternalParams.find({static_cast<uint8_t>(bank), ch, paramIndex});
+			const auto iti = m_synthInternalParams.find(_paramIndex);
+
 			if (iti == m_synthInternalParams.end())
 				return nullptr;
-			else
-				return iti->second.get();
+
+			return iti->second.get();
 		}
 		return it->second;
 	}
 
-	juce::Value *Controller::getParam(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+    juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
-		auto *param = findSynthParam(ch, static_cast<uint8_t>(0x70 + bank), paramIndex);
+		auto *param = findSynthParam(ch, static_cast<uint8_t>(Parameter::Page::A + bank), paramIndex);
 		if (param == nullptr)
 		{
             // unregistered param?
@@ -145,7 +181,36 @@ namespace Virus
 		return &param->getValueObject();
 	}
 
-	void Controller::parseParamChange(const SysEx &msg)
+    juce::Value* Controller::getParamValue(const ParameterType _param)
+    {
+		auto res = getParameter(_param);
+		return res ? &res->getValueObject() : nullptr;
+    }
+
+    Parameter* Controller::getParameter(const ParameterType _param)
+    {
+		const auto it = m_paramTypeToParamIndex.find(_param);
+		if (it == m_paramTypeToParamIndex.end())
+			return nullptr;
+
+		const auto& index = it->second;
+
+		return findSynthParam(index);
+	}
+
+	Parameter *Controller::getParameter(const ParameterType _param, const uint8_t _part)
+	{
+		const auto it = m_paramTypeToParamIndex.find(_param);
+		if (it == m_paramTypeToParamIndex.end())
+			return nullptr;
+
+		const auto &index = it->second;
+		
+		ParamIndex paramIndex{index.page, _part, index.paramNum};
+		return findSynthParam(paramIndex);
+	}
+
+    void Controller::parseParamChange(const SysEx &msg)
     {
         const auto pos = kHeaderWithMsgCodeLen - 1;
         const auto value = msg[pos + 3];
@@ -179,7 +244,10 @@ namespace Virus
         ignored
          */
     }
-
+	uint8_t Controller::getVirusModel()
+	{
+		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
+	}
     juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
 		if (_bank == virusLib::BankNumber::EditBuffer)
@@ -208,7 +276,13 @@ namespace Virus
             bankNames.add(parseAsciiText(m_multis[i].data, 0));
         return bankNames;
     }
-
+	void Controller::setSinglePresetName(uint8_t part, juce::String _name) {
+		constexpr uint8_t asciiStart = 112;
+		_name = _name.substring(0,kNameLength).paddedRight(' ', kNameLength);
+		for (int i = 0; i < kNameLength; i++) {
+			getParamValue(part, 1, asciiStart+i)->setValue((uint8_t)_name[i]);
+		}
+	}
 	juce::String Controller::getCurrentPartPresetName(uint8_t part)
 	{
 		// expensive but fresh!
@@ -216,7 +290,7 @@ namespace Virus
 		char text[kNameLength + 1];
 		text[kNameLength] = 0; // termination
 		for (auto pos = 0; pos < kNameLength; ++pos)
-			text[pos] = static_cast<int>(getParam(part, 1, asciiStart + pos)->getValue());
+			text[pos] = static_cast<int>(getParamValue(part, 1, asciiStart + pos)->getValue());
 		return juce::String(text);
 	}
 
@@ -242,7 +316,8 @@ namespace Virus
 		for (auto i = 0; i < kDataSizeInBytes; ++i)
 			patch.push_back(preset.data[i]);
 		sendSysEx(constructMessage(patch));
-		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		//sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, pt}));
 		m_currentBank[part] = _bank;
 		m_currentProgram[part] = prg;
 	}
@@ -284,8 +359,15 @@ namespace Virus
 			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
 			for (auto i = 0; i < kDataSizeInBytes; i++)
 			{
-				if (auto *p = findSynthParam(ch, i > bankSize ? 0x71 : 0x70, i % bankSize))
-					p->setValueFromSynth(patch.data[i], true);
+				if (auto *p = findSynthParam(ch, i >= bankSize ? 0x71 : 0x70, i % bankSize)) {
+					if((p->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
+						continue;
+					else
+						p->setValueFromSynth(patch.data[i], true);
+				}
+			}
+			if (onProgramChange) {
+				onProgramChange();
 			}
 		}
 		else
@@ -312,6 +394,25 @@ namespace Virus
         patch.progNumber = msg[startPos + 1];
         auto progName = parseAsciiText(msg, startPos + 2 + 3);
         [[maybe_unused]] auto dataSum = copyData(msg, startPos + 2, patch.data);
+
+		/* If it's a multi edit buffer, set the part page C single parameters to their multi equivalents */
+		if (patch.bankNumber == 0) {
+			for (auto pt = 0; pt < 16; pt++) {
+				for(int i = 0; i < 8; i++) {
+					if (auto* p = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL+i)) {
+						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i*16) + pt], true);
+					}
+				}
+				if (auto* p = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO)) {
+					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
+				}
+/*				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
+					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
+				}*/
+				m_currentBank[pt] = (virusLib::BankNumber)(patch.data[virusLib::MD_PART_BANK_NUMBER + pt]+1);
+				m_currentProgram[pt] = patch.data[virusLib::MD_PART_PROGRAM_NUMBER + pt];
+			}
+		}
         if (hasChecksum)
         {
             const int expectedChecksum = msg[msg.size() - 2];
@@ -319,7 +420,11 @@ namespace Virus
             const int checksum = (msgDeviceId + 0x11 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
             assert(checksum == expectedChecksum);
         }
-        m_multis[patch.progNumber] = patch;
+		if (patch.bankNumber == 0) {
+			m_currentMulti = patch;
+		} else {
+			m_multis[patch.progNumber] = patch;
+		}
     }
 
 	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
@@ -474,6 +579,19 @@ namespace Virus
 		}
 	}
 
+	juce::String numToFilter2Mode(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "LowPass";
+		case 1:  return "HighPass";
+		case 2:  return "BandPass";
+		case 3:  return "BandStop";
+		default: return juce::String(idx);
+		}
+	}
+
 	juce::String numToFilterRouting(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -576,7 +694,20 @@ namespace Virus
 		default: return juce::String(idx);
 		}
 	}
-
+	juce::String numToDelayLfoShape(float idx, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+		case 0:  return "Sine";
+		case 1:  return "Triangle";
+		case 2:  return "Saw";
+		case 3:  return "Square";
+		case 4:  return "S&H";
+		case 5:  return "S&G";
+			default: return juce::String("");
+		}
+	}
 	juce::String numToOsc3Mode(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
@@ -702,7 +833,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToOutputDelaySelect(float idx, Parameter::Description)
+	juce::String numToOutputSelect(float idx, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -710,19 +841,19 @@ namespace Virus
 		case 0:  return "OUT 1 L";
 		case 1:  return "OUT 1 L+R";
 		case 2:  return "OUT 1 R";
-		case 3:  return "OUT 2 L";
+/*		case 3:  return "OUT 2 L";
 		case 4:  return "OUT 2 L+R";
 		case 5:  return "OUT 2 R";
 		case 6:  return "OUT 3 L";
 		case 7:  return "OUT 3 L+R";
-		case 8:  return "OUT 3 R";
+		case 8:  return "OUT 3 R";*/
 		case 9:  return "AUX 1 L";
 		case 10:  return "AUX 1 L+R";
 		case 11:  return "AUX 1 R";
 		case 12:  return "AUX 2 L";
 		case 13:  return "AUX 2 L+R";
 		case 14:  return "AUX 2 R";
-		default: return juce::String(idx);
+		default: return juce::String("");
 		}
 	}
 
@@ -736,8 +867,28 @@ namespace Virus
 		case 2:  return "Reverb";
 		case 3:  return "Reverb + Feedback 1";
 		case 4:  return "Reverb + Feedback 2";
-		case 5:  return "Delay X:Y";
-		case 6:  return "Pattern X+Y";
+		case 5:  return "Delay2:1";
+		case 6: return "Delay4:3";
+		case 7: return "Delay4:1";
+		case 8: return "Delay8:7";
+		case 9: return "Pattern1+1";
+		case 10: return "Pattern2+1";
+		case 11: return "Pattern3+1";
+		case 12: return "Pattern4+1";
+		case 13: return "Pattern5+1";
+		case 14: return "Pattern2+3";
+		case 15: return "Pattern2+5";
+		case 16: return "Pattern3+2";
+		case 17: return "Pattern3+3";
+		case 18: return "Pattern3+4";
+		case 19: return "Pattern3+5";
+		case 20: return "Pattern4+3";
+		case 21: return "Pattern4+5";
+		case 22: return "Pattern5+2";
+		case 23: return "Pattern5+3";
+		case 24: return "Pattern5+4";
+		case 25: return "Pattern5+5";
+		case 26: return "Pattern X+Y";
 		default: return juce::String(idx);
 		}
 	}
@@ -1107,6 +1258,25 @@ namespace Virus
 		}
 	}
 
+	juce::String numToSoftKnobName(float idx, Parameter::Description) {
+		const char *softKnobNames[] = {"~Para","+3rds","+4ths","+5ths",
+			"+7ths","+Octave","Access","ArpMode","ArpOct","Attack",
+			"Balance","Chorus","Cutoff","Decay","Delay","Depth",
+			"Destroy","Detune","Disolve","Distort","Dive","Effects",
+			"Elevate","Energy","EqHigh","EqLow","EqMid","Fast","Fear",
+			"Filter","FM","Glide","Hold","Hype","Infect","Length","Mix",
+			"Morph","Mutate","Noise","Open","Orbit","Pan","Phaser","Phatter",
+			"Pitch","Pulsate","Push","PWM","Rate","Release","Reso","Reverb",
+			"Scream","Shape","Sharpen","Slow","Soften","Speed","SubOsc",
+			"Sustain","Sweep","Swing","Tempo","Thinner","Tone","Tremolo",
+			"Vibrato","WahWah","Warmth","Warp","Width"};
+		const auto ridx = juce::roundToInt(idx);
+		if (ridx < sizeof(softKnobNames)-1) {
+			return softKnobNames[ridx];
+		}
+		return juce::String(idx);
+	}
+
 	juce::String numToUnisonMode(float v, Parameter::Description)
 	{
 		const auto ridx = juce::roundToInt(v);
@@ -1129,6 +1299,143 @@ namespace Virus
 		case 14: return "15";
 		case 15: return "16";
 		default: return juce::String(v);
+		}
+	}
+
+	juce::String filterKeytrackBase(float v, Parameter::Description)
+	{
+		const auto ridx = juce::roundToInt(v);
+		switch (ridx)
+		{
+		case 0:   return "C-1";
+		case 1:   return "C#-1";
+		case 2:   return "D-1";
+		case 3:   return "D#-1";
+		case 4:   return "E-1";
+		case 5:   return "F-1";
+		case 6:   return "F#-1";
+		case 7:   return "G-1";
+		case 8:   return "G#-1";
+		case 9:   return "A-1";
+		case 10:  return "A#-1";
+		case 11:  return "B-1";
+		case 12:  return "C0";
+		case 13:  return "C#0";
+		case 14:  return "D0";
+		case 15:  return "D#0";
+		case 16:  return "E0";
+		case 17:  return "F0";
+		case 18:  return "F#0";
+		case 19:  return "G0";
+		case 20:  return "G#0";
+		case 21:  return "A0";
+		case 22:  return "A#0";
+		case 23:  return "B0";
+		case 24:  return "C1";
+		case 25:  return "C#1";
+		case 26:  return "D1";
+		case 27:  return "D#1";
+		case 28:  return "E1";
+		case 29:  return "F1";
+		case 30:  return "F#1";
+		case 31:  return "G1";
+		case 32:  return "G#1";
+		case 33:  return "A1";
+		case 34:  return "A#1";
+		case 35:  return "B1";
+		case 36:  return "C2";
+		case 37:  return "C#2";
+		case 38:  return "D2";
+		case 39:  return "D#2";
+		case 40:  return "E2";
+		case 41:  return "F2";
+		case 42:  return "F#2";
+		case 43:  return "G2";
+		case 44:  return "G#2";
+		case 45:  return "A2";
+		case 46:  return "A#2";
+		case 47:  return "B2";
+		case 48:  return "C3";
+		case 49:  return "C#3";
+		case 50:  return "D3";
+		case 51:  return "D#3";
+		case 52:  return "E3";
+		case 53:  return "F3";
+		case 54:  return "F#3";
+		case 55:  return "G3";
+		case 56:  return "G#3";
+		case 57:  return "A3";
+		case 58:  return "A#3";
+		case 59:  return "B3";
+		case 60:  return "C4";
+		case 61:  return "C#4";
+		case 62:  return "D4";
+		case 63:  return "D#4";
+		case 64:  return "E4";
+		case 65:  return "F4";
+		case 66:  return "F#4";
+		case 67:  return "G4";
+		case 68:  return "G#4";
+		case 69:  return "A4";
+		case 70:  return "A#4";
+		case 71:  return "B4";
+		case 72:  return "C5";
+		case 73:  return "C#5";
+		case 74:  return "D5";
+		case 75:  return "D#5";
+		case 76:  return "E5";
+		case 77:  return "F5";
+		case 78:  return "F#5";
+		case 79:  return "G5";
+		case 80:  return "G#5";
+		case 81:  return "A5";
+		case 82:  return "A#5";
+		case 83:  return "B5";
+		case 84:  return "C6";
+		case 85:  return "C#6";
+		case 86:  return "D6";
+		case 87:  return "D#6";
+		case 88:  return "E6";
+		case 89:  return "F6";
+		case 90:  return "F#6";
+		case 91:  return "G6";
+		case 92:  return "G#6";
+		case 93:  return "A6";
+		case 94:  return "A#6";
+		case 95:  return "B6";
+		case 96:  return "C7";
+		case 97:  return "C#7";
+		case 98:  return "D7";
+		case 99:  return "D#7";
+		case 100: return "E7";
+		case 101: return "F7";
+		case 102: return "F#7";
+		case 103: return "G7";
+		case 104: return "G#7";
+		case 105: return "A7";
+		case 106: return "A#7";
+		case 107: return "B7";
+		case 108: return "C8";
+		case 109: return "C#8";
+		case 110: return "D8";
+		case 111: return "D#8";
+		case 112: return "E8";
+		case 113: return "F8";
+		case 114: return "F#8";
+		case 115: return "G8";
+		case 116: return "G#8";
+		case 117: return "A8";
+		case 118: return "A#8";
+		case 119: return "B8";
+		case 120: return "C9";
+		case 121: return "C#9";
+		case 122: return "D9";
+		case 123: return"D#9";
+		case 124: return "E9";
+		case 125: return "F9";
+		case 126: return "F#9";
+		case 127: return "G9";
+		default:  return juce::String(v);
 		}
 	}
 
@@ -1231,7 +1538,7 @@ namespace Virus
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
 		{
-		case 0:  return "Off";
+		case 0:  return "";
 		case 1:  return "1 Stage";
 		case 2:  return "2 Stages";
 		case 3:  return "3 Stages";
@@ -1254,6 +1561,56 @@ namespace Virus
 		}
 	}
 
+	juce::String numToCategory(float idx, Parameter::Description)
+	{
+		const juce::Array<juce::String> categories = {"--", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
+                             "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
+                             "Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3"};
+
+		const auto ridx = juce::roundToInt(idx);
+		if(ridx < categories.size())
+			return categories[ridx];
+		return "Undefined";
+	}
+
+	juce::String numToBendRange(float idx, Parameter::Description) {
+		const auto ridx = juce::roundToInt(idx);
+		switch (ridx)
+		{
+			case 40: return "-2oct";
+			case 52: return "-1oct";
+			case 57: return "-7st";
+			case 58: return "-6st";
+			case 59: return "-5st";
+			case 60: return "-4st";
+			case 61: return "-3st";
+			case 62: return "-2st";
+			case 63: return "-1st";
+			case 64: return "None";
+			case 65: return "+1st";
+			case 66: return "+2st";
+			case 67: return "+3st";
+			case 68: return "+4st";
+			case 69: return "+5st";
+			case 70: return "+6st";
+			case 71: return "+7st";
+			case 76: return "+1oct";
+			case 88: return "+2oct";
+		default: return juce::String("");
+		}
+	}
+	juce::String numToReverbRoomSize(float idx, Parameter::Description) {
+		const auto ridx = juce::roundToInt(idx);
+
+		switch (ridx) {
+			case 0: return "Ambience";
+			case 1: return "Small Room";
+			case 2: return "Large Room";
+			case 3: return "Hall";
+			default: return juce::String("");
+		}
+	}
+
 	const std::initializer_list<Parameter::Description> Controller::m_paramsDescription =
 {
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 0, "Bank Select", {0, 3 + 26}, numToBank, {}, false, true, false}, // The Virus TI contains 4 banks of RAM, followed by 26 banks of ROM
@@ -1266,58 +1623,58 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 7, "Channel Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 8, "Balance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 9, "Contr 9", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 10, "Panorama", {0,127}, numToPan,{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 10, "Panorama", {0,127}, numToPan,{}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 11, "Expression", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 12, "Contr 12", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 13, "Contr 13", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 14, "Contr 14", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 15, "Contr 15", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 16, "Contr 16", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 17, "Osc1 Shape", {0,127}, numToOscShape,{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 17, "Osc1 Shape", {0,127}, numToOscShape,{}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 18, "Osc1 Pulsewidth", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,64}, numToOscWaveSelect, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 20, "Osc1 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, numToOscShape, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 20, "Osc1 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, numToOscShape, {}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 23, "Osc2 Pulsewidth", {0,127}, {}, {}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,64}, numToOscWaveSelect,{}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 25, "Osc2 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 25, "Osc2 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 26, "Osc2 Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 27, "Osc2 FM Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 28, "Osc2 Sync", {0,1}, {},{}, true, false, true},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 29, "Osc2 Filt Env Amt", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 30, "FM Filt Env Amt", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 31, "Osc2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 29, "Osc2 Filt Env Amt", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 30, "FM Filt Env Amt", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 31, "Osc2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 32, "Bank Select", {0, 3 + 26}, numToBank,{}, false, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 33, "Osc Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 33, "Osc Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 34, "Suboscillator Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 35, "Suboscillator Shape", {0,1}, [](float v, Parameter::Description){ return juce::roundToInt(v) == 0 ? "Square" : "Triangle"; },{}, true, true, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 36, "Osc Mainvolume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 37, "Noise Volume", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 38, "Ringmodulator Volume", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::VIRUS_C, 39, "Noise Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::VIRUS_C, 39, "Noise Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 40, "Cutoff", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 41, "Cutoff2", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 41, "Cutoff2", {0,127}, {},{}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 42, "Filter1 Resonance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 43, "Filter2 Resonance", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 44, "Filter1 Env Amt", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 45, "Filter2 Env Amt", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 46, "Filter1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 47, "Filter2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 46, "Filter1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 47, "Filter2 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 48, "Filter Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 49, "Saturation Curve", {0,14}, numToSatCurv, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 51, "Filter1 Mode", {0,7}, numToFilterMode, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,7}, numToFilterMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 52, "Filter2 Mode", {0,3}, numToFilter2Mode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 53, "Filter Routing", {0,3}, numToFilterRouting, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 54, "Filter Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 55, "Filter Env Decay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 56, "Filter Env Sustain", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 57, "Filter Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 57, "Filter Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 58, "Filter Env Release", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 59, "Amp Env Attack", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 60, "Amp Env Decay", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 61, "Amp Env Sustain", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 62, "Amp Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 62, "Amp Env Sustain Time", {0,127}, numToEnvSusTime, {}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 63, "Amp Env Release", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 64, "Hold Pedal", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 65, "Portamento Pedal", {0,127}, {},{}, false, false, false},
@@ -1326,50 +1683,50 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 68, "Lfo1 Shape", {0,67}, numToLfoShape, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 69, "Lfo1 Env Mode", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 70, "Lfo1 Mode", {0,1}, numToLfoMode, {}, true, false, true},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 71, "Lfo1 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 71, "Lfo1 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 72, "Lfo1 Keyfollow", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 73, "Lfo1 Keytrigger", {0,127}, {}, {}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 74, "Osc1 Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 75, "Osc2 Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 76, "PW Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 77, "Reso Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 78, "FiltGain Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 74, "Osc1 Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 75, "Osc2 Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 76, "PW Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 77, "Reso Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 78, "FiltGain Lfo1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 79, "Lfo2 Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 80, "Lfo2 Shape", {0,67}, numToLfoShape,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 81, "Lfo2 Env Mode", {0,1}, {},{}, true, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 82, "Lfo2 Mode", {0,1}, numToLfoMode, {}, true, false, true},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 83, "Lfo2 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 83, "Lfo2 Symmetry", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 84, "Lfo2 Keyfollow", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 85, "Lfo2 Keytrigger", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 86, "OscShape Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 87, "FmAmount Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 88, "Cutoff1 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 89, "Cutoff2 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 90, "Panorama Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 86, "Shape Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 87, "FM Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 88, "Cutoff1 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 89, "Cutoff2 Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 90, "Pan Lfo2 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 91, "Patch Volume", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 93, "Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 93, "Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 94, "Key Mode", {0,5}, numToKeyMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 97, "Unison Mode", {0,15}, numToUnisonMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 98, "Unison Detune", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Panorama Spread", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 99, "Unison Pan Spread", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 100, "Unison Lfo Phase", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 101, "Input Mode", {0,3}, numToInputMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 102, "Input Select", {0,8}, numToInputSelect,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 105, "Chorus Mix", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 106, "Chorus Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 107, "Chorus Depth", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 108, "Chorus Delay", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 109, "Chorus Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 110, "Chorus Lfo Shape", {0,67}, numToLfoShape, {}, true, true, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 112, "Delay/Reverb Mode", {0,6}, numToDelayReverbMode, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 112, "Delay/Reverb Mode", {0,26}, numToDelayReverbMode, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE, 113, "Effect Send", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 114, "Delay Time", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 115, "Delay Feedback", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Delay Rate / Reverb Decay Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Delay Depth / Reverb Room Size", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,5}, numToLfoShape, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 116, "Dly Rate / Rev Decay", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 117, "Dly Depth / Rev Size", {0,127}, numToReverbRoomSize,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Delay Lfo Shape", {0,127}, numToDelayLfoShape, {}, true, true, false},
 //    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 118, "Reverb Damping", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 119, "Delay Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 119, "Delay Color", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 122, "Keyb Local", {0,1}, {},{}, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 123, "All Notes Off", {0,127}, {},{}, false, false, false},
 
@@ -1377,7 +1734,7 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 2, "Arp Pattern Selct", {0,63}, numToNumPlusOne, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 3, "Arp Octave Range", {0,3}, numToNumPlusOne,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 4, "Arp Hold Enable", {0,1}, {},{}, true, false, true},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 5, "Arp Note Length", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 6, "Arp Swing", {0,127}, numToArpSwing, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 7, "Lfo3 Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 8, "Lfo3 Shape", {0,67}, numToLfoShape, {}, true, true, false},
@@ -1386,20 +1743,20 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 11, "Lfo3 Destination", {0,5}, numToLfoDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 12, "Osc Lfo3 Amount", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 13, "Lfo3 Fade-In Time", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 16, "Clock Tempo", {0,127}, numToClockTempo, {}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 17, "Arp Clock", {0,17}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 18, "Lfo1 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 19, "Lfo2 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::MULTI_OR_SINGLE|Parameter::Class::NON_PART_SENSITIVE, 20, "Delay Clock", {0,16}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 21, "Lfo3 Clock", {0,21}, numToMusicDivision, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 25, "Control Smooth Mode", {0,3}, numToControlSmoothMode,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 26, "Bender Range Up", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 27, "Bender Range Down", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 28, "Bender Scale", {0,1}, numToLinExp, {}, true, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 26, "Bender Range Up", {0,127}, numToBendRange, {}, true, true, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 27, "Bender Range Down", {0,127}, numToBendRange, {}, true, true, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 28, "Bender Scale", {0,1}, numToLinExp, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 30, "Filter1 Env Polarity", {0,1}, numToNegPos, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 31, "Filter1 Env Polarity", {0,1}, numToNegPos, {}, true, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 32, "Filter2 Cutoff Link", {0,1}, {},{}, true, false, true},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 33, "Filter Keytrack Base", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 33, "Filter Keytrack Base", {0,127}, filterKeytrackBase,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 34, "Osc FM Mode", {0,12}, numToOscFmMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 35, "Osc Init Phase", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 36, "Punch Intensity", {0,127}, {},{}, true, false, false},
@@ -1407,50 +1764,50 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 39, "Vocoder Mode", {0,12}, numToVocoderMode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 41, "Osc3 Mode", {0,67}, numToOsc3Mode,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 42, "Osc3 Volume", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 43, "Osc3 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 43, "Osc3 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 44, "Osc3 Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 45, "LowEQ Frequency", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 46, "HighEQ Frequency", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 47, "Osc1 Shape Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 48, "Osc2 Shape Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 49, "PulseWidth Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 50, "Fm Amount Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 51, "Soft Knob1 ShortName", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 52, "Soft Knob2 ShortName", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 54, "Filter1 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 55, "Filter2 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 56, "Resonance1 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 57, "Resonance2 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 47, "Osc1 Shape Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 48, "Osc2 Shape Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 49, "PulseWidth Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 50, "Fm Amount Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 51, "Soft Knob1 ShortName", {0,71}, numToSoftKnobName,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 52, "Soft Knob2 ShortName", {0,71}, numToSoftKnobName,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 54, "Flt1 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 55, "Flt2 EnvAmt Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 56, "Resonance1 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 57, "Resonance2 Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 58, "Second Output Balance", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 60, "Amp Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 61, "Panorama Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 60, "Amp Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 61, "Panorama Velocity", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 62, "Soft Knob-1 Single", {0,117}, numToSoftKnobDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 63, "Soft Knob-2 Single", {0,117}, numToSoftKnobDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 64, "Assign1 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 65, "Assign1 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 66, "Assign1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 66, "Assign1 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 67, "Assign2 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 68, "Assign2 Destination1", {0,122}, numToModMatrixDest,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 69, "Assign2 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 69, "Assign2 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 70, "Assign2 Destination2", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 71, "Assign2 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 71, "Assign2 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 72, "Assign3 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 73, "Assign3 Destination1", {0,122}, numToModMatrixDest,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 74, "Assign3 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 74, "Assign3 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 75, "Assign3 Destination2", {0,122}, numToModMatrixDest,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 76, "Assign3 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 76, "Assign3 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 77, "Assign2 Destination3", {0,122}, numToModMatrixDest,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 78, "Assign2 Amount3", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 78, "Assign2 Amount3", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 79, "LFO1 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 80, "LFO1 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 80, "LFO1 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 81, "LFO2 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 82, "LFO2 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 82, "LFO2 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 84, "Phaser Mode", {0,6}, numToPhaserMode, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 85, "Phaser Mix", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 86, "Phaser Rate", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 87, "Phaser Depth", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 88, "Phaser Frequency", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 89, "Phaser Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 89, "Phaser Feedback", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 90, "Phaser Spread", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 92, "MidEQ Gain", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 93, "MidEQ Frequency", {0,127}, {},{}, true, false, false},
@@ -1462,34 +1819,35 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 99, "Input Ringmodulator", {0,127}, {},{}, true, false, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 100, "Distortion Curve", {0,11}, numToDistortionCurv,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 101, "Distortion Intensity", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 102, "Assign 4 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C,104, "Assign 4 Amount", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 5 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 106, "Assign 5 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 107, "Assign 5 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 6 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 109, "Assign 6 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 110, "Assign 6 Amount", {0,127}, paramTo7bitSigned, {}, true, false, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 103, "Assign 4 Source", {0,27}, numToModMatrixSource,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 104, "Assign 4 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 105, "Assign 4 Amount", {0,127}, {},{}, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 106, "Assign 5 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 107, "Assign 5 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 108, "Assign 5 Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 109, "Assign 6 Source", {0,27}, numToModMatrixSource, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 110, "Assign 6 Destination", {0,122}, numToModMatrixDest, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 111, "Assign 6 Amount", {0,127}, paramTo7bitSigned, {}, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B|Parameter::Class::VIRUS_C, 122, "Filter Select", {0,2}, numToFilterSelect, {}, true, true, false},
-
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, numToOutputDelaySelect, {}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 123, "Category1", {0,16}, numToCategory, {}, true, true, false},
+	{Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 124, "Category2", {0,16}, numToCategory, {}, true, true, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::NON_PART_SENSITIVE, 22, "Delay Output Select", {0,14}, numToOutputSelect, {}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 31, "Part Bank Select", {0, 3 + 26}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 32, "Part Bank Change", {0, 3 + 26}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM|Parameter::Class::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT, 33, "Part Program Change", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 34, "Part Midi Channel", {0,15}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 35, "Part Low Key", {0,127}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 36, "Part High Key", {0,127}, {},{}, false, true, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 37, "Part Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 38, "Part Detune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 39, "Part Volume", {0,127}, {},{}, true, false, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 37, "Part Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 38, "Part Detune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 39, "Part Volume", {0,127}, paramTo7bitSigned,textTo7bitSigned, true, false, false, false},
     {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 40, "Part Midi Volume Init", {0,127}, {},{}, false, true, false},
-    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 41, "Part Output Select", {0,14}, {},{}, false, true, false},
+    {Parameter::Page::C, Parameter::Class::MULTI_PARAM, 41, "Part Output Select", {0,14}, numToOutputSelect,{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 45, "Second Output Select", {0,15}, {},{}, false, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 63, "Keyb Transpose Buttons", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 64, "Keyb Local", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 65, "Keyb Mode", {0,1}, {},{}, false, false, true},
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 66, "Keyb Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 66, "Keyb Transpose", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 67, "Keyb ModWheel Contr", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 68, "Keyb Pedal 1 Contr", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 69, "Keyb Pedal 2 Contr", {0,127}, {},{}, false, false, false},
@@ -1505,7 +1863,7 @@ namespace Virus
     {Parameter::Page::C, Parameter::Class::GLOBAL, 87, "Glob Midi Volume Enable", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 90, "Input Thru Level", {0,127}, {},{}, false, false, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 91, "Input Boost", {0,127}, {},{}, false, false, false},
-    {Parameter::Page::C, Parameter::Class::GLOBAL, 92, "Master Tune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false},
+    {Parameter::Page::C, Parameter::Class::GLOBAL, 92, "Master Tune", {0,127}, paramTo7bitSigned, textTo7bitSigned, false, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 93, "Device ID", {0,16}, {},{}, true, true, false},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 94, "Midi Control Low Page", {0,1}, {},{}, false, false, true},
     {Parameter::Page::C, Parameter::Class::GLOBAL, 95, "Midi Control High Page", {0,1}, {},{}, false, false, true},
@@ -1682,7 +2040,9 @@ namespace Virus
 				parseControllerDump(msg);
 			}
             else
-                parseMessage(msg.sysex);
+			{
+				parseMessage(msg.sysex);               
+			}
         }
         m_virusOut.clear();
     }
