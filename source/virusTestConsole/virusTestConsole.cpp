@@ -75,7 +75,10 @@ void audioCallback(dsp56k::Audio* audio)
 
 	
 	ctr++;
-	if((ctr & 0xfff) == 0) {LOG("Deliver Audio");}
+	if((ctr & 0x1fff) == 0)
+	{
+		LOG("Deliver Audio");
+	}
 
 	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
@@ -175,15 +178,29 @@ bool loadSingle(ROMFile& r, const std::string& _preset)
 	return false;
 }
 
+auto waitReturn = []()
+{
+	std::cin.ignore();
+};
+
 int main(int _argc, char* _argv[])
 {
 	if(true)
 	{
-		puts("Running Unit Tests...");
-//		UnitTests tests;
-		JitUnittests jitTests;
-//		return 0;
-		puts("Unit Tests finished.");
+		try
+		{
+			puts("Running Unit Tests...");
+			//		UnitTests tests;
+			JitUnittests jitTests;
+			//		return 0;
+			puts("Unit Tests finished.");
+		}
+		catch(const std::string& _err)
+		{
+			std::cout << "Unit test failed: " << _err << std::endl;
+			waitReturn();
+			return -1;
+		}
 	}
 
 	// Create the DSP with peripherals
@@ -201,6 +218,7 @@ int main(int _argc, char* _argv[])
 	if(romFile.empty())
 	{
 		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
+		waitReturn();
 		return -1;
 	}
 	ROMFile v(romFile);
@@ -211,6 +229,7 @@ int main(int _argc, char* _argv[])
 		if(!loadSingle(v, _argv[1]))
 		{
 			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;
+			waitReturn();
 			return -1;
 		}
 	}

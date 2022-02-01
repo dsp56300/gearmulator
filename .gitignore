@@ -1,3 +1,8 @@
 temp/
 vtune/
 *.aps
+/.vs
+/out/build/x64-Debug
+/temp2/cmake_win64
+/source/jucePlugin_24.01.2022.zip
+/build_win64_VS2019.bat

@@ -9,7 +9,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
     AudioProcessor(BusesProperties()
                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
-	MidiInputCallback(), m_device(synthLib::findROM()), m_plugin(&m_device)
+	MidiInputCallback(), m_romName(synthLib::findROM()), m_device(synthLib::findROM()), m_plugin(&m_device)
 {
 	getController(); // init controller
 }
@@ -191,13 +191,23 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     juce::AudioPlayHead::CurrentPositionInfo pos{};
 
 	auto* playHead = getPlayHead();
-	if(playHead)
+	if(playHead) {
 		playHead->getCurrentPosition(pos);
 
-	m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm), static_cast<float>(pos.ppqPosition), pos.isPlaying);
+		if(pos.bpm > 0) { // sync virus interal clock to host
+			const uint8_t bpmValue = juce::jmin(127, juce::jmax(0, (int)pos.bpm-63)); // clamp to virus range, 63-190
+			auto clockParam = getController().getParameter(Virus::Param_ClockTempo, 0);
+			if (clockParam != nullptr && (int)clockParam->getValueObject().getValue() != bpmValue) {
+				clockParam->getValueObject().setValue(bpmValue);
+			}
+		}
+	}
 
-	m_midiOut.clear();
-	m_plugin.getMidiOut(m_midiOut);
+    m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
+                     static_cast<float>(pos.ppqPosition), pos.isPlaying);
+
+    m_midiOut.clear();
+    m_plugin.getMidiOut(m_midiOut);
 
     if (!m_midiOut.empty())
 	{

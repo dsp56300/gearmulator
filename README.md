@@ -14,7 +14,7 @@ Contributions are welcome! Feel free to send PRs.
 
 ### Join us on Discord
 
-If you want to help or just want to follow the state of the project, feel free to join us on Discord: https://discord.gg/mveFUNbNCK
+If you want to help or just want to follow the state of the project, feel free to join us on Discord: https://discord.gg/WJ9cxySnsM
 
 ### Visit our Homepage
 
