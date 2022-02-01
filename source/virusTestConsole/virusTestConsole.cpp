@@ -216,11 +216,12 @@ int main(int _argc, char* _argv[])
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
-	Peripherals56362 periph;
-	DSP dsp(memory, &periph, &periph);
+	Peripherals56362 periphX;
+	PeripheralsNop periphY;
+	DSP dsp(memory, &periphX, &periphY);
 
-	periph.getEsai().setCallback(audioCallback,4,1);
-	periph.getEsai().writeEmptyAudioIn(4, 2);
+	periphX.getEsai().setCallback(audioCallback,4,1);
+	periphX.getEsai().writeEmptyAudioIn(4, 2);
 
 	const auto romFile = findROM(1024 * 1024);
 	if(romFile.empty())
@@ -230,7 +231,7 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 	ROMFile v(romFile);
-	auto loader = v.bootDSP(dsp, periph);
+	auto loader = v.bootDSP(dsp, periphX);
 
 	if(_argc > 1)
 	{
@@ -267,7 +268,7 @@ int main(int _argc, char* _argv[])
 	}
 	// Load preset
 
-	Microcontroller uc(periph.getHDI08(), v);
+	Microcontroller uc(periphX.getHDI08(), v);
 	microcontroller = &uc;
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
@@ -280,7 +281,7 @@ int main(int _argc, char* _argv[])
 	{
 		while(true)
 		{
-			const auto word = periph.getHDI08().readTX();
+			const auto word = periphX.getHDI08().readTX();
 			midiOut.append(word);
 		}
 	});
