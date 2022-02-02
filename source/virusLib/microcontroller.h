@@ -39,6 +39,7 @@ public:
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
 	bool sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const;
+	void sendMIDItoDSP(uint8_t _midiByte) const;
 
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 

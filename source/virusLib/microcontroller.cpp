@@ -1039,9 +1039,10 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool can
 {
 	std::lock_guard lock(m_mutex);
 
-	if(cancelIfFull && (needsToWaitForHostBits(1,1) || m_hdi08.dataRXFull()))
+	if(cancelIfFull && (needsToWaitForHostBits(0,1) || m_hdi08.dataRXFull()))
 		return false;
-	writeHostBitsWithWait(1,1);
+
+	writeHostBitsWithWait(0,1);
 
 	switch (_a)
 	{
@@ -1050,19 +1051,25 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool can
 	case M_CONTINUE:
 	case M_STOP:
 		{
-			const auto temp = static_cast<TWord>(_a) << 16;
-			m_hdi08.writeRX(&temp, 1);
+			sendMIDItoDSP(_a);
 		}
 		break;
 	default:
 		{
-			TWord buf[3] = { static_cast<TWord>(_a) << 16, static_cast<TWord>(_b) << 16, static_cast<TWord>(_c) << 16 };
-			m_hdi08.writeRX(buf, 3);
+			sendMIDItoDSP(_a);
+			sendMIDItoDSP(_b);
+			sendMIDItoDSP(_c);
 		}
 		break;
 	}
 
 	return true;
+}
+
+void Microcontroller::sendMIDItoDSP(uint8_t _midiByte) const
+{
+	const TWord word = static_cast<TWord>(_midiByte) << 16;
+	m_hdi08.writeRX(&word, 1);
 }
 
 void Microcontroller::sendPendingMidiEvents(uint32_t _maxOffset)
