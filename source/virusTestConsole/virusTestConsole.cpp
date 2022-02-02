@@ -216,8 +216,8 @@ int main(int _argc, char* _argv[])
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
-	Peripherals56362 periphX;
 	Peripherals56367 periphY;
+	Peripherals56362 periphX(&periphY);
 	DSP dsp(memory, &periphX, &periphY);
 
 	periphX.getEsai().setCallback(audioCallback,4,1);
