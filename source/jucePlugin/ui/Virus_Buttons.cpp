@@ -109,10 +109,10 @@ namespace Buttons
         auto on =
             Drawable::createFromImageData(BinaryData::part_select_btn_36x36_png, BinaryData::part_select_btn_36x36_pngSize);
 
-		const auto empty = new DrawableText();
+		const auto empty = std::make_unique<DrawableText>();
 
         setColour(DrawableButton::ColourIds::backgroundColourId, Colours::transparentBlack);
         setColour(DrawableButton::ColourIds::backgroundOnColourId, Colours::transparentBlack);
-        setImages(empty, nullptr, on.get(), nullptr, on.get(), nullptr, nullptr);
+        setImages(empty.get(), nullptr, on.get(), nullptr, on.get(), nullptr, nullptr);
     }
 }; // namespace Buttons
