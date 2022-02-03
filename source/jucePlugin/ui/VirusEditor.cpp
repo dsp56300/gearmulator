@@ -443,120 +443,132 @@ VirusEditor::PartButtons::PartButtons()
 
 void VirusEditor::loadFile()
 {
-    juce::FileChooser chooser(
+    m_fileChooser = std::make_unique<FileChooser>(
         "Choose syx/midi banks to import",
         m_previousPath.isEmpty()
-            ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+            ? File::getSpecialLocation(File::currentApplicationFile).getParentDirectory()
             : m_previousPath,
         "*.syx,*.mid,*.midi", true);
+    
+    const auto flags = FileBrowserComponent::openMode | FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-    if (!chooser.browseForFileToOpen())
-        return;
-    bool sentData = false;
-    const auto result = chooser.getResult();
-    m_previousPath = result.getParentDirectory().getFullPathName();
-    const auto ext = result.getFileExtension().toLowerCase();
-    if (ext == ".syx")
+    std::function<void (const FileChooser &)> onFileChooser = [this](const FileChooser& chooser)
     {
-        juce::MemoryBlock data;
-        result.loadFileAsData(data);
-
-        for (auto it = data.begin(); it != data.end(); it += 267)
-        {
-            if ((it + 267) <= data.end())
-            {
-                m_controller.sendSysEx(Virus::SysEx(it, it + 267));
-                sentData = true;
-            }
-        }
-    }
-    else if (ext == ".mid" || ext == ".midi")
-    {
-        juce::MemoryBlock data;
-        if (!result.loadFileAsData(data))
-        {
+        if (chooser.getResults().isEmpty())
             return;
-        }
-        const uint8_t *ptr = (uint8_t *)data.getData();
-        const auto end = ptr + data.getSize();
-
-        for (auto it = ptr; it < end; it += 1)
+        bool sentData = false;
+        const auto result = chooser.getResult();
+        m_previousPath = result.getParentDirectory().getFullPathName();
+        const auto ext = result.getFileExtension().toLowerCase();
+        if (ext == ".syx")
         {
-            if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
+            juce::MemoryBlock data;
+            result.loadFileAsData(data);
+
+            for (auto it = data.begin(); it != data.end(); it += 267)
             {
-                if ((uint8_t)*(it+1) == 0x00
-                    && (uint8_t)*(it+2) == 0x20
-                    && (uint8_t)*(it+3) == 0x33
-                    && (uint8_t)*(it+4) == 0x01
-                    && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
+                if ((it + 267) <= data.end())
                 {
-                    auto syx = Virus::SysEx(it, it + 267);
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
-
-                    m_controller.sendSysEx(syx);
-
-                    it += 266;
+                    m_controller.sendSysEx(Virus::SysEx(it, it + 267));
+                    sentData = true;
                 }
-                else if((uint8_t)*(it+3) == 0x00
-                    && (uint8_t)*(it+4) == 0x20
-                    && (uint8_t)*(it+5) == 0x33
-                    && (uint8_t)*(it+6) == 0x01
-                    && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
-                {
-                    auto syx = Virus::SysEx();
-                    syx.push_back(0xf0);
-                    for (auto i = it + 3; i < it + 3 + 266; i++)
-                    {
-                        syx.push_back((uint8_t)*i);
-                    }
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
-                    m_controller.sendSysEx(syx);
-                    it += 266;
-                }
-
-                sentData = true;
             }
         }
-    }
+        else if (ext == ".mid" || ext == ".midi")
+        {
+            juce::MemoryBlock data;
+            if (!result.loadFileAsData(data))
+            {
+                return;
+            }
+            const uint8_t *ptr = (uint8_t *)data.getData();
+            const auto end = ptr + data.getSize();
 
-    if (sentData)
-        m_controller.onStateLoaded();
+            for (auto it = ptr; it < end; it += 1)
+            {
+                if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
+                {
+                    if ((uint8_t)*(it+1) == 0x00
+                        && (uint8_t)*(it+2) == 0x20
+                        && (uint8_t)*(it+3) == 0x33
+                        && (uint8_t)*(it+4) == 0x01
+                        && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
+                    {
+                        auto syx = Virus::SysEx(it, it + 267);
+                        syx[7] = 0x01; // force to bank a
+                        syx[266] = 0xf7;
+
+                        m_controller.sendSysEx(syx);
+
+                        it += 266;
+                    }
+                    else if((uint8_t)*(it+3) == 0x00
+                        && (uint8_t)*(it+4) == 0x20
+                        && (uint8_t)*(it+5) == 0x33
+                        && (uint8_t)*(it+6) == 0x01
+                        && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
+                    {
+                        auto syx = Virus::SysEx();
+                        syx.push_back(0xf0);
+                        for (auto i = it + 3; i < it + 3 + 266; i++)
+                        {
+                            syx.push_back((uint8_t)*i);
+                        }
+                        syx[7] = 0x01; // force to bank a
+                        syx[266] = 0xf7;
+                        m_controller.sendSysEx(syx);
+                        it += 266;
+                    }
+
+                    sentData = true;
+                }
+            }
+        }
+
+        if (sentData)
+            m_controller.onStateLoaded();
+    };
+    m_fileChooser->launchAsync (flags, onFileChooser);
 }
 
 void VirusEditor::saveFile() {
     auto path = m_controller.getConfig()->getValue("virus_bank_dir", "");
-    juce::FileChooser chooser(
+    m_fileChooser = std::make_unique<FileChooser>(
         "Save preset as syx",
         m_previousPath.isEmpty()
-            ? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
+            ? (path.isEmpty() ? File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
             : m_previousPath,
         "*.syx", true);
+    const auto flags = FileBrowserComponent::saveMode | FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-    if (!chooser.browseForFileToSave(true))
-        return;
-    bool sentData = false;
-    const auto result = chooser.getResult();
-    m_previousPath = result.getParentDirectory().getFullPathName();
-    const auto ext = result.getFileExtension().toLowerCase();
-    const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
-    const uint8_t syxEof[1] = {0xF7};
-    uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-    uint8_t data[256];
-    for (int i = 0; i < 256; i++)
+
+    std::function<void (const FileChooser &)> onFileChooser = [this](const FileChooser& chooser)
     {
-        auto param = m_controller.getParamValue(m_controller.getCurrentPart(), i < 128 ? 0 : 1, i % 128);
+        if (chooser.getResults().isEmpty())
+            return;
+        bool sentData = false;
+        const auto result = chooser.getResult();
+        m_previousPath = result.getParentDirectory().getFullPathName();
+        const auto ext = result.getFileExtension().toLowerCase();
+        const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
+        const uint8_t syxEof[1] = {0xF7};
+        uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
+        uint8_t data[256];
+        for (int i = 0; i < 256; i++)
+        {
+            auto param = m_controller.getParamValue(m_controller.getCurrentPart(), i < 128 ? 0 : 1, i % 128);
 
-        data[i] = param ? (int)param->getValue() : 0;
-        cs += data[i];
-    }
-    cs = cs & 0x7f;
+            data[i] = param ? (int)param->getValue() : 0;
+            cs += data[i];
+        }
+        cs = cs & 0x7f;
 
-	result.deleteFile();
-	result.create();
-    result.appendData(syxHeader, 9);
-    result.appendData(data, 256);
-    result.appendData(&cs, 1);
-    result.appendData(syxEof, 1);
+        result.deleteFile();
+        result.create();
+        result.appendData(syxHeader, 9);
+        result.appendData(data, 256);
+        result.appendData(&cs, 1);
+        result.appendData(syxEof, 1);
+    };
+    m_fileChooser->launchAsync (flags, onFileChooser);
 }

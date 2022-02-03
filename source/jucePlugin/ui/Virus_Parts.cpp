@@ -53,7 +53,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
                 bankName << "Bank " << static_cast<char>('A' + b);
                 selector.addSubMenu(std::string(bankName.str()), p);
             }
-            selector.showMenu(juce::PopupMenu::Options());
+            selector.showMenuAsync(juce::PopupMenu::Options());
         };
         addAndMakeVisible(m_presetNames[pt]);
 
