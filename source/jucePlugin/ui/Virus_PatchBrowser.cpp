@@ -252,7 +252,7 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
             m_patchList.deselectAllRows();
             m_patchList.repaint();    
         });
-        p.showMenu(juce::PopupMenu::Options());
+        p.showMenuAsync(juce::PopupMenu::Options());
         
         return;
     }
