@@ -41,6 +41,20 @@ void writeWord(const TWord _word)
 	audioData.push_back(d[2]);
 }
 
+void audioCallback2(dsp56k::Audio* audio)
+{
+	constexpr size_t sampleCount = 4;
+	constexpr size_t channelsIn = 2;
+	constexpr size_t channelsOut = 2;
+
+	TWord inputData[channelsIn][sampleCount] = { {0,0,0,0}, {0,0,0,0} };
+	TWord* audioIn[channelsIn] = { inputData[0],  inputData[1] };
+	TWord outputData[channelsOut][sampleCount] = { {0, 0,   0,    0},	{0, 0,   0,    0} };
+	TWord* audioOut[channelsOut] = { outputData[0], outputData[1] };
+
+	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
+}
+
 void audioCallback(dsp56k::Audio* audio)
 {
 	switch (audioCallbackCount)
@@ -222,6 +236,9 @@ int main(int _argc, char* _argv[])
 
 	periphX.getEsai().setCallback(audioCallback,4,1);
 	periphX.getEsai().writeEmptyAudioIn(4, 2);
+
+	periphY.getEsai().setCallback(audioCallback2, 4, 1);
+	periphY.getEsai().writeEmptyAudioIn(4, 2);
 
 	const auto romFile = findROM(1024 * 1024);
 	if(romFile.empty())
