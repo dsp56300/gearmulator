@@ -62,8 +62,7 @@ ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
-	printf("Program BootROM len = 0x%x\n", static_cast<uint32_t>(bootRom.data.size()));
-	printf("Program Commands len = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
+	printf("Program commandstream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
 }
 
 std::vector<ROMFile::Chunk> ROMFile::get_dsp_chunks() const
