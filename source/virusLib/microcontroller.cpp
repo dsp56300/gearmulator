@@ -99,6 +99,16 @@ void Microcontroller::sendInitControlCommands()
 //	const std::vector<TWord> magic = { 0xf4f473, 0x407f00, 0xf4f46e, 0x407f01, 0xf4f46f, 0x407f02, 0xf4f477, 0x407f03 };
 //	m_hdi08.writeRX(magic);
 
+	const auto sendSwapped = [&](std::vector<TWord> data)
+	{
+		for(size_t i=0; i<data.size(); ++i)
+		{
+			auto d = data[i];
+			data[i] = (d & 0x00ff00) | ((d >> 16) & 0xff) | ((d & 0xff) << 16);
+		}
+		m_hdi08.writeRX(data);
+	};
+
 	const std::vector<TWord> tiSnowUCEmuOutput = {
 		0xf4f473,0x407f00,
 		0xf4f473,0x401000
