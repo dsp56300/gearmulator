@@ -56,7 +56,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, Virus::Controller& 
     if (p) {
         const auto val = (int)p->getValueObject().getValueSource().getValue();
         if (val > 1 && val < 5) {
-            m_fxMode.setSelectedId(val + 1, juce::dontSendNotification);
+            m_fxMode.setSelectedId(val + 1, dontSendNotification);
             const bool isReverb = (val > 1 && val < 5);
             m_reverb->setVisible(isReverb);
             m_delay->setVisible(!isReverb);
@@ -65,7 +65,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, Virus::Controller& 
         p->onValueChanged = [this, p]() {
             rebind();
             const auto value = (int)p->getValueObject().getValueSource().getValue();
-            m_fxMode.setSelectedId(value + 1, juce::dontSendNotification);
+            m_fxMode.setSelectedId(value + 1, dontSendNotification);
             const bool isReverb = (value > 1 && value < 5);
             m_reverb->setVisible(isReverb);
             m_delay->setVisible(!isReverb);
