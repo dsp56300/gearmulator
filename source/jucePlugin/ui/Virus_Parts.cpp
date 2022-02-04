@@ -12,14 +12,14 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     for (auto pt = 0; pt < 16; pt++)
     {
         m_partLabels[pt].setBounds(34, 161 + pt * (36), 24, 36);
-        m_partLabels[pt].setText(juce::String(pt + 1), juce::dontSendNotification);
-        m_partLabels[pt].setColour(0, juce::Colours::white);
-        m_partLabels[pt].setColour(1, juce::Colour(45, 24, 24));
+        m_partLabels[pt].setText(String(pt + 1), dontSendNotification);
+        m_partLabels[pt].setColour(0, Colours::white);
+        m_partLabels[pt].setColour(1, Colour(45, 24, 24));
         m_partLabels[pt].setJustificationType(Justification::centred);
         addAndMakeVisible(m_partLabels[pt]);
 
         m_partSelect[pt].setBounds(35, 161 + pt*(36), 36, 36);
-        m_partSelect[pt].setButtonText(juce::String(pt));
+        m_partSelect[pt].setButtonText(String(pt));
         m_partSelect[pt].setRadioGroupId(kPartGroupId);
         m_partSelect[pt].setClickingTogglesState(true);
         m_partSelect[pt].onClick = [this, pt]() {
@@ -29,17 +29,17 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
 
         m_presetNames[pt].setBounds(80, 171 + pt * (36) - 2, 136, 16 + 4);
         m_presetNames[pt].setButtonText(m_controller.getCurrentPartPresetName(pt));
-        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255,113,128));
-        m_presetNames[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
+        m_presetNames[pt].setColour(TextButton::ColourIds::textColourOnId, Colour(255,113,128));
+        m_presetNames[pt].setColour(TextButton::ColourIds::textColourOffId, Colour(255, 113, 128));
 
         m_presetNames[pt].onClick = [this, pt]() {
-            juce::PopupMenu selector;
+            PopupMenu selector;
 
             for (uint8_t b = 0; b < m_controller.getBankCount(); ++b)
             {
                 const auto bank = virusLib::fromArrayIndex(b);
                 auto presetNames = m_controller.getSinglePresetNames(bank);
-                juce::PopupMenu p;
+                PopupMenu p;
                 for (uint8_t j = 0; j < 128; j++)
                 {
                     const auto presetName = presetNames[j];
@@ -53,7 +53,7 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
                 bankName << "Bank " << static_cast<char>('A' + b);
                 selector.addSubMenu(std::string(bankName.str()), p);
             }
-            selector.showMenuAsync(juce::PopupMenu::Options());
+            selector.showMenuAsync(PopupMenu::Options());
         };
         addAndMakeVisible(m_presetNames[pt]);
 
@@ -61,10 +61,10 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
         m_nextPatch[pt].setBounds(247, 173 + 36*pt - 2, 16, 14);
         m_prevPatch[pt].setButtonText("<");
         m_nextPatch[pt].setButtonText(">");
-        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
-        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOnId, juce::Colour(255, 113, 128));
-        m_prevPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
-        m_nextPatch[pt].setColour(juce::TextButton::ColourIds::textColourOffId, juce::Colour(255, 113, 128));
+        m_prevPatch[pt].setColour(TextButton::ColourIds::textColourOnId, Colour(255, 113, 128));
+        m_nextPatch[pt].setColour(TextButton::ColourIds::textColourOnId, Colour(255, 113, 128));
+        m_prevPatch[pt].setColour(TextButton::ColourIds::textColourOffId, Colour(255, 113, 128));
+        m_nextPatch[pt].setColour(TextButton::ColourIds::textColourOffId, Colour(255, 113, 128));
         m_prevPatch[pt].onClick = [this, pt]() {
             m_controller.setCurrentPartPreset(
                 pt, m_controller.getCurrentPartBank(pt),
@@ -80,8 +80,8 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
         addAndMakeVisible(m_prevPatch[pt]);
         addAndMakeVisible(m_nextPatch[pt]);
 
-        m_partVolumes[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        m_partVolumes[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+        m_partVolumes[pt].setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+        m_partVolumes[pt].setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         m_partVolumes[pt].setBounds(m_nextPatch[pt].getBounds().translated(m_nextPatch[pt].getWidth()+8, 0));
         m_partVolumes[pt].setSize(18,18);
         m_partVolumes[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
@@ -89,8 +89,8 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
         _parameterBinding.bind(m_partVolumes[pt], Virus::Param_PartVolume, pt);
         addAndMakeVisible(m_partVolumes[pt]);
 
-        m_partPans[pt].setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-        m_partPans[pt].setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+        m_partPans[pt].setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+        m_partPans[pt].setTextBoxStyle(Slider::NoTextBox, false, 0, 0);
         m_partPans[pt].setBounds(m_partVolumes[pt].getBounds().translated(m_partVolumes[pt].getWidth()+4, 0));
         m_partPans[pt].setSize(18,18);
         m_partPans[pt].getProperties().set(Virus::LookAndFeel::KnobStyleProp, Virus::LookAndFeel::KnobStyle::GENERIC_MULTI);
@@ -109,12 +109,12 @@ Parts::Parts(VirusParameterBinding & _parameterBinding, Virus::Controller& _cont
     m_btSingleMode.setTopLeftPosition(102, 756);
     m_btSingleMode.setSize(103, 30);
 
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOnId, juce::Colours::white);
-    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOffId, juce::Colours::grey);
+    m_btSingleMode.setColour(TextButton::ColourIds::textColourOnId, Colours::white);
+    m_btSingleMode.setColour(TextButton::ColourIds::textColourOffId, Colours::grey);
+    m_btMultiMode.setColour(TextButton::ColourIds::textColourOnId, Colours::white);
+    m_btMultiMode.setColour(TextButton::ColourIds::textColourOffId, Colours::grey);
+    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOnId, Colours::white);
+    m_btMultiSingleMode.setColour(TextButton::ColourIds::textColourOffId, Colours::grey);
     m_btSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeSingle); };
     m_btMultiSingleMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMultiSingle); };
     m_btMultiMode.onClick = [this]() { setPlayMode(virusLib::PlayMode::PlayModeMulti); };
@@ -134,15 +134,15 @@ void Parts::updatePlayModeButtons()
     const auto _mode = (int)modeParam->getValue();
     if (_mode == virusLib::PlayModeSingle)
     {
-        m_btSingleMode.setToggleState(true, juce::dontSendNotification);
+        m_btSingleMode.setToggleState(true, dontSendNotification);
     }
     /*else if (_mode == virusLib::PlayModeMultiSingle) // disabled for now
     {
-        m_btMultiSingleMode.setToggleState(true, juce::dontSendNotification);
+        m_btMultiSingleMode.setToggleState(true, dontSendNotification);
     }*/
     else if (_mode == virusLib::PlayModeMulti || _mode == virusLib::PlayModeMultiSingle)
     {
-        m_btMultiMode.setToggleState(true, juce::dontSendNotification);
+        m_btMultiMode.setToggleState(true, dontSendNotification);
     }
 }
 void Parts::refreshParts() {
@@ -162,9 +162,9 @@ void Parts::changePart(uint8_t _part)
     {
     for (auto &p : m_partSelect)
     {
-        p.setToggleState(false, juce::dontSendNotification);
+        p.setToggleState(false, dontSendNotification);
     }
-    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
+    m_partSelect[_part].setToggleState(true, dontSendNotification);
     m_parameterBinding.setPart(_part);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);

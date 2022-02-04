@@ -272,7 +272,7 @@ void FxEditor::Vocoder()
 	//m_vocoderMode
 	auto p = m_controller.getParameter(Virus::Param_VocoderMode, 0);
     const auto value = (int)p->getValueObject().getValueSource().getValue();
-    m_vocoderMode.setSelectedId(value + 1, juce::dontSendNotification);
+    m_vocoderMode.setSelectedId(value + 1, dontSendNotification);
 
 	int iSelectedIndex = m_vocoderMode.getSelectedItemIndex();
 	bool bVocoder = (iSelectedIndex > 0); 
@@ -312,7 +312,7 @@ void FxEditor::DelayReverb()
     //rebind();
 	auto p = m_controller.getParameter(Virus::Param_DelayReverbMode, 0);
     const auto value = (int)p->getValueObject().getValueSource().getValue();
-    m_delayReverbMode.setSelectedId(value + 1, juce::dontSendNotification);
+    m_delayReverbMode.setSelectedId(value + 1, dontSendNotification);
 
 	//Delay/Reverb
 	int iSelectedIndex = m_delayReverbMode.getSelectedItemIndex();

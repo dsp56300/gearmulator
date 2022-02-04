@@ -84,7 +84,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     {
         if (currentTab == index) 
         {
-            s->setToggleState(true, juce::dontSendNotification);
+            s->setToggleState(true, dontSendNotification);
         }
         index++;
     });
@@ -95,21 +95,21 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     //MainDisplay (Patchname)
     m_patchName.setBounds(1473, 35, 480, 58);
     m_patchName.setJustificationType(Justification::left);
-    m_patchName.setFont(juce::Font("Register", "Normal", 30.f));
+    m_patchName.setFont(Font("Register", "Normal", 30.f));
     m_patchName.setEditable(false, true, true);
     addAndMakeVisible(m_patchName);
 
     //MainDisplay 
     m_controlLabel.setBounds(1473, 35, 650, 58);
-    m_controlLabel.setFont(juce::Font("Register", "Normal", 30.f));
+    m_controlLabel.setFont(Font("Register", "Normal", 30.f));
     addAndMakeVisible(m_controlLabel);
 
     //ToolTip
     //m_ToolTip.setLookAndFeel(&m_landfToolTip);
     m_ToolTip.setBounds(200, 50, 200, 200);
-    m_ToolTip.setFont(juce::Font("Register", "Normal", 15.f));
-    m_ToolTip.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
-    m_ToolTip.setColour(juce::Label::ColourIds::textColourId, juce::Colours::white);
+    m_ToolTip.setFont(Font("Register", "Normal", 15.f));
+    m_ToolTip.setColour(Label::ColourIds::backgroundColourId, Colours::black);
+    m_ToolTip.setColour(Label::ColourIds::textColourId, Colours::white);
     m_ToolTip.setJustificationType(Justification::centred);
     m_ToolTip.setAlpha(0.90);
     addAndMakeVisible(m_ToolTip);
@@ -118,8 +118,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     //MainDisplay Value
     m_controlLabelValue.setBounds(1900, 35, 197, 58);
     m_controlLabelValue.setJustificationType(Justification::centredRight);
-    //m_controlLabelValue.setColour(juce::Label::textColourId, juce::Colours::red);
-    m_controlLabelValue.setFont(juce::Font("Register", "Normal", 30.f));
+    //m_controlLabelValue.setColour(Label::textColourId, Colours::red);
+    m_controlLabelValue.setFont(Font("Register", "Normal", 30.f));
     addAndMakeVisible(m_controlLabelValue); 
 
     //PresetsSwitch
@@ -142,8 +142,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     //Show Version
     m_version.setText(std::string(g_pluginVersionString), NotificationType::dontSendNotification);
     m_version.setBounds(250, 1123, 50, 17);
-    m_version.setColour(juce::Label::textColourId, juce::Colours::silver);
-    m_version.setFont(juce::Font("Arial", "Bold", 20.f));
+    m_version.setColour(Label::textColourId, Colours::silver);
+    m_version.setFont(Font("Arial", "Bold", 20.f));
     m_version.setJustificationType(Justification::left);
     m_version.setJustificationType(Justification::centred);
     addAndMakeVisible(m_version);
@@ -151,25 +151,25 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     //Show Synth Model
     m_SynthModel.setText(m_controller.getVirusModel() == virusLib::VirusModel::B ? "B" : "C", NotificationType::dontSendNotification);
     m_SynthModel.setBounds(430, 1123, 50, 17);
-    m_SynthModel.setFont(juce::Font("Arial", "Bold", 20.f));
+    m_SynthModel.setFont(Font("Arial", "Bold", 20.f));
     m_SynthModel.setJustificationType(Justification::left);
-    m_SynthModel.setColour(juce::Label::textColourId, juce::Colours::silver);
+    m_SynthModel.setColour(Label::textColourId, Colours::silver);
     m_SynthModel.setJustificationType(Justification::centred);
     addAndMakeVisible(m_SynthModel);
 
     //Show RomName
     m_RomName.setText(_processorRef.getRomName()+".bin", NotificationType::dontSendNotification);
     m_RomName.setBounds(642, 1123, 150, 17);
-    m_RomName.setColour(juce::Label::textColourId, juce::Colours::silver);
-    m_RomName.setFont(juce::Font("Arial", "Bold", 20.f));
+    m_RomName.setColour(Label::textColourId, Colours::silver);
+    m_RomName.setFont(Font("Arial", "Bold", 20.f));
     m_RomName.setJustificationType(Justification::left);
     m_RomName.setJustificationType(Justification::centred);
     addAndMakeVisible(m_RomName);
 
     //Hyperlink
     m_hyperLink.setBounds(900, 1115, 400, 35);
-    m_hyperLink.setColour(juce::Label::textColourId, juce::Colours::silver);
-    m_hyperLink.setFont(juce::Font("Arial", "Bold", 20.f), true, dontSendNotification);
+    m_hyperLink.setColour(Label::textColourId, Colours::silver);
+    m_hyperLink.setFont(Font("Arial", "Bold", 20.f), true, dontSendNotification);
     m_hyperLink.setJustificationType(Justification::left);
     m_hyperLink.setJustificationType(Justification::centred);
     addAndMakeVisible(m_hyperLink);
@@ -229,9 +229,9 @@ void VirusEditor::updateParts()
         {
             if (m_patchBrowser->GetIsFileMode())
 			{
-                m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
+                m_patchName.setText("["+String(m_controller.getCurrentPart()+1)
                     +"][FILE] "                    
-                    + juce::String(m_patchBrowser->GetTablePatchList()->getSelectedRow(0)+1)+": " + m_patchBrowser->GetLastPatchSelected(), dontSendNotification);
+                    + String(m_patchBrowser->GetTablePatchList()->getSelectedRow(0)+1)+": " + m_patchBrowser->GetLastPatchSelected(), dontSendNotification);
             }
 			else
 			{
@@ -239,9 +239,9 @@ void VirusEditor::updateParts()
                 if(m_patchName.getText() != patchName) 
                 {
                     String sZero;
-                    m_patchName.setText("["+juce::String(m_controller.getCurrentPart()+1)
+                    m_patchName.setText("["+String(m_controller.getCurrentPart()+1)
                         +"][" + m_patchBrowser->GetSelectBankNum() + "] "                    
-                        + juce::String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart())+1)+": " + patchName, dontSendNotification);
+                        + String(processorRef.getController().getCurrentPartProgram(m_controller.getCurrentPart())+1)+": " + patchName, dontSendNotification);
                 } 
             }
         }
@@ -267,14 +267,14 @@ void VirusEditor::ShowMainMenue()
 				double dScaleFactor = float(d / 1000.0);               
 	            m_AudioPlugInEditor->setScaleFactor(dScaleFactor);
 	            (*this).setSize(iSkinSizeWidth, iSkinSizeHeight);                
-                m_properties->setValue("skin_scale_factor", juce::String(dScaleFactor));
+                m_properties->setValue("skin_scale_factor", String(dScaleFactor));
                 m_properties->save();
             });
 		}        
               
         selectorMenu.addSubMenu("Skin size", SubSkinSizeSelector, true);
 		selectorMenu.addItem("About", [this]() { AboutWindow(); });
-        selectorMenu.showMenu(juce::PopupMenu::Options());
+        selectorMenu.showMenu(PopupMenu::Options());
 	};
 
     //draw Main Menu Button	
@@ -295,7 +295,7 @@ void VirusEditor::applyToSections(std::function<void(Component *)> action)
 
 void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableButton *)> action)
 {
-    for (auto *section : {static_cast<juce::DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),
+    for (auto *section : {static_cast<DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),
                           static_cast<DrawableButton *>(&m_lfoMatrix), static_cast<DrawableButton *>(&m_oscFilter),
                           static_cast<DrawableButton *>(&m_patches)})
     {
@@ -309,14 +309,14 @@ void VirusEditor::updateControlLabel(Component* eventComponent)
     auto props = eventComponent->getProperties();
     if(props.contains("type") && props["type"] == "slider") {
         
-        auto comp = dynamic_cast<juce::Slider*>(eventComponent);
+        auto comp = dynamic_cast<Slider*>(eventComponent);
         if(comp && comp->isEnabled()) 
         {
-            int iValue = (props.contains("bipolar") && props["bipolar"])?juce::roundToInt(comp->getValue())-64:juce::roundToInt(comp->getValue());
+            int iValue = (props.contains("bipolar") && props["bipolar"])?roundToInt(comp->getValue())-64:roundToInt(comp->getValue());
             
             //ToolTip handle
             m_ToolTip.setVisible(true);
-            m_ToolTip.setText(std::to_string(iValue), juce::dontSendNotification);
+            m_ToolTip.setText(std::to_string(iValue), dontSendNotification);
             //todo --> ugly --> Need to be fixed
             m_ToolTip.setBounds(comp->getX()+comp->getWidth()*2-43, comp->getY()+comp->getHeight()*2+83, 70,30);
             m_ToolTip.toFront(true);
@@ -328,22 +328,22 @@ void VirusEditor::updateControlLabel(Component* eventComponent)
 
             if(m_paramDisplayLocal) 
             {
-                m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
-                m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white); 
+                m_controlLabel.setColour(Label::ColourIds::backgroundColourId, Colours::black);
+                m_controlLabel.setColour(Label::ColourIds::outlineColourId, Colours::white);
             }
 
-            m_controlLabel.setText(props["name"].toString(), juce::dontSendNotification);
-            m_controlLabelValue.setText(juce::String(iValue), juce::dontSendNotification);
+            m_controlLabel.setText(props["name"].toString(), dontSendNotification);
+            m_controlLabelValue.setText(String(iValue), dontSendNotification);
         }
     }
 
 }
-void VirusEditor::mouseDrag(const juce::MouseEvent & event)
+void VirusEditor::mouseDrag(const MouseEvent & event)
 {
     updateControlLabel(event.eventComponent);
 }
 
-void VirusEditor::mouseEnter(const juce::MouseEvent& event) 
+void VirusEditor::mouseEnter(const MouseEvent& event)
 {
     if (event.mouseWasDraggedSinceMouseDown()) {
         return;
@@ -351,31 +351,31 @@ void VirusEditor::mouseEnter(const juce::MouseEvent& event)
     updateControlLabel(event.eventComponent);
 }
 
-void VirusEditor::mouseExit(const juce::MouseEvent& event) 
+void VirusEditor::mouseExit(const MouseEvent& event)
 {
     if (event.mouseWasDraggedSinceMouseDown()) {
         return;
     }
-    m_controlLabel.setText("", juce::dontSendNotification);
+    m_controlLabel.setText("", dontSendNotification);
     m_controlLabel.setVisible(false); 
     m_controlLabelValue.setVisible(false);
     m_patchName.setVisible(true);
     m_ToolTip.setVisible(false);
 }
 
-void VirusEditor::mouseDown(const juce::MouseEvent &event) 
+void VirusEditor::mouseDown(const MouseEvent &event)
 {
 }
 
-void VirusEditor::mouseUp(const juce::MouseEvent & event)
+void VirusEditor::mouseUp(const MouseEvent & event)
 {
-    m_controlLabel.setText("", juce::dontSendNotification);
+    m_controlLabel.setText("", dontSendNotification);
     m_controlLabel.setVisible(false); 
     m_controlLabelValue.setVisible(false);
     m_patchName.setVisible(true);
     m_ToolTip.setVisible(false);
 }
-void VirusEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) 
+void VirusEditor::mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel)
 {
     updateControlLabel(event.eventComponent);
 }
@@ -472,9 +472,9 @@ VirusEditor::MainButtons::MainButtons()
 }
 
 
-void VirusEditor::MainButtons::valueChanged(juce::Value &) { updateSection(); }
+void VirusEditor::MainButtons::valueChanged(Value &) { updateSection(); }
 
-void VirusEditor::MainButtons::setupButton (int i, std::unique_ptr<Drawable>&& btnImage, juce::DrawableButton& btn)
+void VirusEditor::MainButtons::setupButton (int i, std::unique_ptr<Drawable>&& btnImage, DrawableButton& btn)
 {
     auto onImage = btnImage->createCopy();
     onImage->setOriginWithOriginalSize({0, -kButtonHeight});

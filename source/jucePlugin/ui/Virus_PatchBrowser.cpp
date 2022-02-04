@@ -8,7 +8,7 @@
 using namespace juce;
 using namespace virusLib;
 constexpr auto comboBoxWidth = 98;
-const juce::Array<juce::String> categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
+const Array<String> categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
                              "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
                              "Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3"};
 
@@ -23,7 +23,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     m_properties = m_controller.getConfig();
     
     auto bankDir = m_properties->getValue("virus_bank_dir", "");
-    if (bankDir != "" && juce::File(bankDir).isDirectory())
+    if (bankDir != "" && File(bankDir).isDirectory())
     {
         m_bankList.setRoot(bankDir);
     }
@@ -45,7 +45,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     addAndMakeVisible(m_patchList);
 
     m_search.setSize(m_patchList.getWidth(), 20);
-    m_search.setColour(TextEditor::textColourId, juce::Colours::white);
+    m_search.setColour(TextEditor::textColourId, Colours::white);
     m_search.setTopLeftPosition(m_patchList.getBounds().getBottomLeft().translated(0, 8));
     m_search.onTextChange = [this] {
         m_filteredPatches.clear();
@@ -62,7 +62,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
         m_patchList.deselectAllRows();
         m_patchList.repaint();
     };
-    m_search.setTextToShowWhenEmpty("search...", juce::Colours::grey);
+    m_search.setTextToShowWhenEmpty("search...", Colours::grey);
     addAndMakeVisible(m_search);
     m_bankList.addListener(this);
     m_patchList.setModel(this);
@@ -89,14 +89,14 @@ VirusModel guessVersion(uint8_t *data) {
     return VirusModel::C;
 
 }
-int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0, const bool dedupe = false) {
+int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false) {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
     int loadedCount = 0;
     int index = _startIndex;
     if (ext == ".syx")
     {
-        juce::MemoryBlock data;
+        MemoryBlock data;
         if (!file.loadFileAsData(data)) {
             return 0;
         }
@@ -123,7 +123,7 @@ int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0
                 else {
                     patch.model = guessVersion(patch.data);
                 }
-                auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
                 if(!dedupe || !m_checksums.contains(md5)) {
                     m_checksums.set(md5, true);
                     m_patches.add(patch);
@@ -134,7 +134,7 @@ int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0
     }
     else if (ext == ".mid" || ext == ".midi")
     {
-        juce::MemoryBlock data;
+        MemoryBlock data;
         if (!file.loadFileAsData(data))
         {
             return 0;
@@ -171,7 +171,7 @@ int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    auto md5 = juce::MD5(it+9 + 17, 256-17-3).toHexString();
+                    auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
                     if(!dedupe || !m_checksums.contains(md5)) {
                         m_checksums.set(md5, true);
                         m_patches.add(patch);
@@ -209,7 +209,7 @@ int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0
                     else {
                         patch.model = guessVersion(patch.data);
                     }
-                    auto md5 = juce::MD5(it+2+9 + 17, 256-17-3).toHexString();
+                    auto md5 = MD5(it+2+9 + 17, 256-17-3).toHexString();
                     if(!dedupe || !m_checksums.contains(md5)) {
                         m_checksums.set(md5, true);
                         m_patches.add(patch);
@@ -225,17 +225,17 @@ int PatchBrowser::loadBankFile(const juce::File& file, const int _startIndex = 0
     return index;
 }
 
-void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e)
+void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
 {
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
     if (file.isDirectory() && e.mods.isRightButtonDown()) {
-        auto p = juce::PopupMenu();
+        auto p = PopupMenu();
         p.addItem("Add directory contents to patch list", [this, file]() {
             m_patches.clear();
             m_checksums.clear();
             int lastIndex = 0;
-            for (auto f : juce::RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", juce::File::findFiles)) {
+            for (auto f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles)) {
                 lastIndex = loadBankFile(f.getFile(), lastIndex, true);
             }
             m_filteredPatches.clear();
@@ -252,7 +252,7 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
             m_patchList.deselectAllRows();
             m_patchList.repaint();    
         });
-        p.showMenuAsync(juce::PopupMenu::Options());
+        p.showMenuAsync(PopupMenu::Options());
         
         return;
     }
@@ -277,7 +277,7 @@ void PatchBrowser::fileClicked(const juce::File &file, const juce::MouseEvent &e
 
 }
 
-void PatchBrowser::fileDoubleClicked(const juce::File &file) {}
+void PatchBrowser::fileDoubleClicked(const File &file) {}
 
 void PatchBrowser::browserRootChanged(const File &newRoot) {}
 
@@ -285,23 +285,23 @@ int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
 
 void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int height, bool rowIsSelected) {
     auto alternateColour = getLookAndFeel()
-                               .findColour(juce::ListBox::backgroundColourId)
-                               .interpolatedWith(getLookAndFeel().findColour(juce::ListBox::textColourId), 0.03f);
+                               .findColour(ListBox::backgroundColourId)
+                               .interpolatedWith(getLookAndFeel().findColour(ListBox::textColourId), 0.03f);
     if (rowIsSelected)
-        g.fillAll(juce::Colours::lightblue);
+        g.fillAll(Colours::lightblue);
     else if (rowNumber % 2)
         g.fillAll(alternateColour);
 }
 
 void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) {
-    g.setColour(rowIsSelected ? juce::Colours::darkblue
-                                : getLookAndFeel().findColour(juce::ListBox::textColourId)); // [5]
+    g.setColour(rowIsSelected ? Colours::darkblue
+                                : getLookAndFeel().findColour(ListBox::textColourId)); // [5]
     
     auto rowElement = m_filteredPatches[rowNumber];
     //auto text = rowElement.name;
-    juce::String text = "";
+    String text = "";
     if (columnId == Columns::INDEX)
-        text = juce::String(rowElement.progNumber);
+        text = String(rowElement.progNumber);
     else if (columnId == Columns::NAME)
         text = rowElement.name;
     else if (columnId == Columns::CAT1)
@@ -311,15 +311,15 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     else if (columnId == Columns::ARP)
         text = rowElement.data[129] != 0 ? "Y" : " ";
     else if(columnId == Columns::UNI)
-        text = rowElement.unison == 0 ? " " : juce::String(rowElement.unison+1);
+        text = rowElement.unison == 0 ? " " : String(rowElement.unison+1);
     else if(columnId == Columns::ST)
-        text = rowElement.transpose != 64 ? juce::String(rowElement.transpose - 64) : " ";
+        text = rowElement.transpose != 64 ? String(rowElement.transpose - 64) : " ";
     else if (columnId == Columns::VER) {
         if(rowElement.model < ModelList.size())
             text = ModelList[rowElement.model];
     }
-    g.drawText(text, 2, 0, width - 4, height, juce::Justification::centredLeft, true); // [6]
-    g.setColour(getLookAndFeel().findColour(juce::ListBox::backgroundColourId));
+    g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true); // [6]
+    g.setColour(getLookAndFeel().findColour(ListBox::backgroundColourId));
     g.fillRect(width - 1, 0, 1, height); // [7]
 }
 
@@ -355,7 +355,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
     getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
 }
 
-void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const juce::MouseEvent &)
+void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent &)
 {
     if(rowNumber == m_patchList.getSelectedRow()) {
         selectedRowsChanged(0);
