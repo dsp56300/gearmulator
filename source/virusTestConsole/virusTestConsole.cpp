@@ -4,7 +4,7 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/dspthread.h"
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
-#include "../dsp56300/source/dsp56kEmu/unittests.h"
+#include "../dsp56300/source/dsp56kEmu/interpreterunittests.h"
 
 #include "../synthLib/wavWriter.h"
 #include "../synthLib/os.h"
@@ -212,9 +212,8 @@ int main(int _argc, char* _argv[])
 		try
 		{
 			puts("Running Unit Tests...");
-			//		UnitTests tests;
+//			InterpreterUnitTests tests;
 			JitUnittests jitTests;
-			//		return 0;
 			puts("Unit Tests finished.");
 		}
 		catch(const std::string& _err)
