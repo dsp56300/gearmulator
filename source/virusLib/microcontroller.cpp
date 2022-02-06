@@ -522,7 +522,18 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const uint8_t program = _data[8];
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset dump;
-				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				if(_data.size() == 524)
+				{
+					// D preset
+					auto data(_data);
+
+					data.erase(data.begin() + 0x100 + g_sysexPresetHeaderSize);	// A/B/C checksum, not needed on D
+					std::copy_n(data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				}
+				else
+				{
+					std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				}
 				return writeSingle(bank, program, dump);
 			}
 		case DUMP_MULTI:
