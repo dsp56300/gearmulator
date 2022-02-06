@@ -1144,7 +1144,7 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool can
 
 void Microcontroller::sendMIDItoDSP(uint8_t _midiByte) const
 {
-	const TWord word = static_cast<TWord>(_midiByte) << 16;
+	const TWord word = static_cast<TWord>(_midiByte) << 16 | 0xffff;
 	m_hdi08.writeRX(&word, 1);
 }
 
