@@ -83,7 +83,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     index = 0;
     m_mainButtons.applyToMainButtons([this, &index](DrawableButton *s) mutable {
         if (currentTab == index) {
-            s->setToggleState(true, juce::dontSendNotification);
+            s->setToggleState(true, dontSendNotification);
         }
         index++;
     });
@@ -112,8 +112,8 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     addAndMakeVisible(m_cmbMidiInput);
     addAndMakeVisible(m_cmbMidiOutput);
     m_cmbMidiInput.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
-    auto midiInputs = juce::MidiInput::getAvailableDevices();
-    juce::StringArray midiInputNames;
+    auto midiInputs = MidiInput::getAvailableDevices();
+    StringArray midiInputNames;
     midiInputNames.add(" - Midi In - ");
     auto inIndex = 0;
     for (int i = 0; i < midiInputs.size(); i++)
@@ -126,10 +126,10 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         midiInputNames.add(input.name);
     }
     m_cmbMidiInput.addItemList(midiInputNames, 1);
-    m_cmbMidiInput.setSelectedItemIndex(inIndex, juce::dontSendNotification);
+    m_cmbMidiInput.setSelectedItemIndex(inIndex, dontSendNotification);
     m_cmbMidiOutput.setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
-    auto midiOutputs = juce::MidiOutput::getAvailableDevices();
-    juce::StringArray midiOutputNames;
+    auto midiOutputs = MidiOutput::getAvailableDevices();
+    StringArray midiOutputNames;
     midiOutputNames.add(" - Midi Out - ");
     auto outIndex = 0;
     for (int i = 0; i < midiOutputs.size(); i++)
@@ -143,7 +143,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
         midiOutputNames.add(output.name);
     }
     m_cmbMidiOutput.addItemList(midiOutputNames, 1);
-    m_cmbMidiOutput.setSelectedItemIndex(outIndex, juce::dontSendNotification);
+    m_cmbMidiOutput.setSelectedItemIndex(outIndex, dontSendNotification);
     m_cmbMidiInput.onChange = [this]() { updateMidiInput(m_cmbMidiInput.getSelectedItemIndex()); };
     m_cmbMidiOutput.onChange = [this]() { updateMidiOutput(m_cmbMidiOutput.getSelectedItemIndex()); };
 
@@ -156,14 +156,14 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     message += "\n\nROM Loaded: " + _processorRef.getRomName();
     m_version.setText(message, NotificationType::dontSendNotification);
     m_version.setBounds(94, 2, 220, 150);
-    m_version.setColour(juce::Label::textColourId, juce::Colours::white);
+    m_version.setColour(Label::textColourId, Colours::white);
     m_version.setJustificationType(Justification::centred);
     addAndMakeVisible(m_version);
 
     m_patchName.setBounds(410, 48, 362, 36);
     m_patchName.setJustificationType(Justification::left);
-    m_patchName.setFont(juce::Font(32.0f, juce::Font::bold));
-    m_patchName.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
+    m_patchName.setFont(Font(32.0f, Font::bold));
+    m_patchName.setColour(Label::textColourId, Colour(255, 113, 128));
     m_patchName.setEditable(false, true, true);
     m_patchName.onTextChange = [this]() {
         auto text = m_patchName.getText();
@@ -177,10 +177,10 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     m_controlLabel.setBounds(m_patchName.getBounds().translated(m_controlLabel.getWidth(), 0));
     m_controlLabel.setSize(m_patchName.getWidth()/2, m_patchName.getHeight());
     m_controlLabel.setJustificationType(Justification::topRight);
-    m_controlLabel.setColour(juce::Label::textColourId, juce::Colour(255, 113, 128));
-    m_controlLabel.setFont(juce::Font(16.0f, juce::Font::bold));
-    //m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
-    //m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
+    m_controlLabel.setColour(Label::textColourId, Colour(255, 113, 128));
+    m_controlLabel.setFont(Font(16.0f, Font::bold));
+    //m_controlLabel.setColour(Label::ColourIds::backgroundColourId, Colours::black);
+    //m_controlLabel.setColour(Label::ColourIds::outlineColourId, Colours::white);
 
     addAndMakeVisible(m_controlLabel);
 
@@ -220,14 +220,14 @@ void VirusEditor::updateParts() {
 
 void VirusEditor::updateMidiInput(int index)
 {
-    auto list = juce::MidiInput::getAvailableDevices();
+    auto list = MidiInput::getAvailableDevices();
 
     if (index == 0)
     {
         m_properties->setValue("midi_input", "");
         m_properties->save();
         m_lastInputIndex = index;
-        m_cmbMidiInput.setSelectedItemIndex(index, juce::dontSendNotification);
+        m_cmbMidiInput.setSelectedItemIndex(index, dontSendNotification);
         return;
     }
     index--;
@@ -238,7 +238,7 @@ void VirusEditor::updateMidiInput(int index)
 
     if (!processorRef.setMidiInput(newInput.identifier))
     {
-        m_cmbMidiInput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_cmbMidiInput.setSelectedItemIndex(0, dontSendNotification);
         m_lastInputIndex = 0;
         return;
     }
@@ -246,18 +246,18 @@ void VirusEditor::updateMidiInput(int index)
     m_properties->setValue("midi_input", newInput.identifier);
     m_properties->save();
 
-    m_cmbMidiInput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_cmbMidiInput.setSelectedItemIndex(index + 1, dontSendNotification);
     m_lastInputIndex = index;
 }
 void VirusEditor::updateMidiOutput(int index)
 {
-    auto list = juce::MidiOutput::getAvailableDevices();
+    auto list = MidiOutput::getAvailableDevices();
 
     if (index == 0)
     {
         m_properties->setValue("midi_output", "");
         m_properties->save();
-        m_cmbMidiOutput.setSelectedItemIndex(index, juce::dontSendNotification);
+        m_cmbMidiOutput.setSelectedItemIndex(index, dontSendNotification);
         m_lastOutputIndex = index;
         processorRef.setMidiOutput("");
         return;
@@ -266,14 +266,14 @@ void VirusEditor::updateMidiOutput(int index)
     auto newOutput = list[index];
     if (!processorRef.setMidiOutput(newOutput.identifier))
     {
-        m_cmbMidiOutput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_cmbMidiOutput.setSelectedItemIndex(0, dontSendNotification);
         m_lastOutputIndex = 0;
         return;
     }
     m_properties->setValue("midi_output", newOutput.identifier);
     m_properties->save();
 
-    m_cmbMidiOutput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_cmbMidiOutput.setSelectedItemIndex(index + 1, dontSendNotification);
     m_lastOutputIndex = index;
 }
 void VirusEditor::applyToSections(std::function<void(Component *)> action)
@@ -287,7 +287,7 @@ void VirusEditor::applyToSections(std::function<void(Component *)> action)
 }
 void VirusEditor::MainButtons::applyToMainButtons(std::function<void(DrawableButton *)> action)
 {
-    for (auto *section : {static_cast<juce::DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),
+    for (auto *section : {static_cast<DrawableButton *>(&m_arpSettings), static_cast<DrawableButton *>(&m_effects),
                           static_cast<DrawableButton *>(&m_lfoMatrix), static_cast<DrawableButton *>(&m_oscFilter),
                           static_cast<DrawableButton *>(&m_patches)})
     {
@@ -299,58 +299,58 @@ void VirusEditor::updateControlLabel(Component* eventComponent) {
     auto props = eventComponent->getProperties();
     if(props.contains("type") && props["type"] == "slider") {
         m_controlLabel.setVisible(true);
-        auto comp = dynamic_cast<juce::Slider*>(eventComponent);
+        auto comp = dynamic_cast<Slider*>(eventComponent);
         if(comp) {
             auto name = props["name"];
             if(m_paramDisplayLocal) {
                 m_controlLabel.setTopLeftPosition(getTopLevelComponent()->getLocalPoint(comp->getParentComponent(), comp->getPosition().translated(0, -16)));
                 m_controlLabel.setSize(comp->getWidth(), 20);
-                m_controlLabel.setColour(juce::Label::ColourIds::backgroundColourId, juce::Colours::black);
-                m_controlLabel.setColour(juce::Label::ColourIds::outlineColourId, juce::Colours::white);
+                m_controlLabel.setColour(Label::ColourIds::backgroundColourId, Colours::black);
+                m_controlLabel.setColour(Label::ColourIds::outlineColourId, Colours::white);
                 if (props.contains("bipolar") && props["bipolar"]) {
-                    m_controlLabel.setText(juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
+                    m_controlLabel.setText(String(roundToInt(comp->getValue())-64), dontSendNotification);
                 } else {
-                    m_controlLabel.setText(juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+                    m_controlLabel.setText(String(roundToInt(comp->getValue())), dontSendNotification);
                 }
             }
             else {
                 m_controlLabel.setBounds(m_patchName.getBounds().translated(m_controlLabel.getWidth(), 0));
                 m_controlLabel.setSize(m_patchName.getWidth()/2, m_patchName.getHeight());
                 if (props.contains("bipolar") && props["bipolar"]) {
-                    m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())-64), juce::dontSendNotification);
+                    m_controlLabel.setText(name.toString() + "\n" + String(roundToInt(comp->getValue())-64), dontSendNotification);
                 } else {
-                    m_controlLabel.setText(name.toString() + "\n" + juce::String(juce::roundToInt(comp->getValue())), juce::dontSendNotification);
+                    m_controlLabel.setText(name.toString() + "\n" + String(roundToInt(comp->getValue())), dontSendNotification);
                 }
             }
         }
     }
 }
-void VirusEditor::mouseDrag(const juce::MouseEvent & event)
+void VirusEditor::mouseDrag(const MouseEvent & event)
 {
     updateControlLabel(event.eventComponent);
 }
 
-void VirusEditor::mouseEnter(const juce::MouseEvent& event) {
+void VirusEditor::mouseEnter(const MouseEvent& event) {
     if (event.mouseWasDraggedSinceMouseDown()) {
         return;
     }
     updateControlLabel(event.eventComponent);
 }
-void VirusEditor::mouseExit(const juce::MouseEvent& event) {
+void VirusEditor::mouseExit(const MouseEvent& event) {
     if (event.mouseWasDraggedSinceMouseDown()) {
         return;
     }
-    m_controlLabel.setText("", juce::dontSendNotification);
+    m_controlLabel.setText("", dontSendNotification);
 }
-void VirusEditor::mouseDown(const juce::MouseEvent &event) {
+void VirusEditor::mouseDown(const MouseEvent &event) {
     
 }
-void VirusEditor::mouseUp(const juce::MouseEvent & event)
+void VirusEditor::mouseUp(const MouseEvent & event)
 {
-    m_controlLabel.setText("", juce::dontSendNotification);
+    m_controlLabel.setText("", dontSendNotification);
     m_controlLabel.setVisible(false);
 }
-void VirusEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) {
+void VirusEditor::mouseWheelMove(const MouseEvent& event, const MouseWheelDetails& wheel) {
     updateControlLabel(event.eventComponent);
 }
 void VirusEditor::resized()
@@ -410,9 +410,9 @@ VirusEditor::MainButtons::MainButtons()
 }
 
 
-void VirusEditor::MainButtons::valueChanged(juce::Value &) { updateSection(); }
+void VirusEditor::MainButtons::valueChanged(Value &) { updateSection(); }
 
-void VirusEditor::MainButtons::setupButton (int i, std::unique_ptr<Drawable>&& btnImage, juce::DrawableButton& btn)
+void VirusEditor::MainButtons::setupButton (int i, std::unique_ptr<Drawable>&& btnImage, DrawableButton& btn)
 {
     auto onImage = btnImage->createCopy();
     onImage->setOriginWithOriginalSize({0, -kButtonHeight});
@@ -443,120 +443,132 @@ VirusEditor::PartButtons::PartButtons()
 
 void VirusEditor::loadFile()
 {
-    juce::FileChooser chooser(
+    m_fileChooser = std::make_unique<FileChooser>(
         "Choose syx/midi banks to import",
         m_previousPath.isEmpty()
-            ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+            ? File::getSpecialLocation(File::currentApplicationFile).getParentDirectory()
             : m_previousPath,
         "*.syx,*.mid,*.midi", true);
+    
+    const auto flags = FileBrowserComponent::openMode | FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-    if (!chooser.browseForFileToOpen())
-        return;
-    bool sentData = false;
-    const auto result = chooser.getResult();
-    m_previousPath = result.getParentDirectory().getFullPathName();
-    const auto ext = result.getFileExtension().toLowerCase();
-    if (ext == ".syx")
+    std::function<void (const FileChooser &)> onFileChooser = [this](const FileChooser& chooser)
     {
-        juce::MemoryBlock data;
-        result.loadFileAsData(data);
-
-        for (auto it = data.begin(); it != data.end(); it += 267)
-        {
-            if ((it + 267) <= data.end())
-            {
-                m_controller.sendSysEx(Virus::SysEx(it, it + 267));
-                sentData = true;
-            }
-        }
-    }
-    else if (ext == ".mid" || ext == ".midi")
-    {
-        juce::MemoryBlock data;
-        if (!result.loadFileAsData(data))
-        {
+        if (chooser.getResults().isEmpty())
             return;
-        }
-        const uint8_t *ptr = (uint8_t *)data.getData();
-        const auto end = ptr + data.getSize();
-
-        for (auto it = ptr; it < end; it += 1)
+        bool sentData = false;
+        const auto result = chooser.getResult();
+        m_previousPath = result.getParentDirectory().getFullPathName();
+        const auto ext = result.getFileExtension().toLowerCase();
+        if (ext == ".syx")
         {
-            if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
+            MemoryBlock data;
+            result.loadFileAsData(data);
+
+            for (auto it = data.begin(); it != data.end(); it += 267)
             {
-                if ((uint8_t)*(it+1) == 0x00
-                    && (uint8_t)*(it+2) == 0x20
-                    && (uint8_t)*(it+3) == 0x33
-                    && (uint8_t)*(it+4) == 0x01
-                    && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
+                if ((it + 267) <= data.end())
                 {
-                    auto syx = Virus::SysEx(it, it + 267);
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
-
-                    m_controller.sendSysEx(syx);
-
-                    it += 266;
+                    m_controller.sendSysEx(Virus::SysEx(it, it + 267));
+                    sentData = true;
                 }
-                else if((uint8_t)*(it+3) == 0x00
-                    && (uint8_t)*(it+4) == 0x20
-                    && (uint8_t)*(it+5) == 0x33
-                    && (uint8_t)*(it+6) == 0x01
-                    && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
-                {
-                    auto syx = Virus::SysEx();
-                    syx.push_back(0xf0);
-                    for (auto i = it + 3; i < it + 3 + 266; i++)
-                    {
-                        syx.push_back((uint8_t)*i);
-                    }
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
-                    m_controller.sendSysEx(syx);
-                    it += 266;
-                }
-
-                sentData = true;
             }
         }
-    }
+        else if (ext == ".mid" || ext == ".midi")
+        {
+            MemoryBlock data;
+            if (!result.loadFileAsData(data))
+            {
+                return;
+            }
+            const uint8_t *ptr = (uint8_t *)data.getData();
+            const auto end = ptr + data.getSize();
 
-    if (sentData)
-        m_controller.onStateLoaded();
+            for (auto it = ptr; it < end; it += 1)
+            {
+                if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
+                {
+                    if ((uint8_t)*(it+1) == 0x00
+                        && (uint8_t)*(it+2) == 0x20
+                        && (uint8_t)*(it+3) == 0x33
+                        && (uint8_t)*(it+4) == 0x01
+                        && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
+                    {
+                        auto syx = Virus::SysEx(it, it + 267);
+                        syx[7] = 0x01; // force to bank a
+                        syx[266] = 0xf7;
+
+                        m_controller.sendSysEx(syx);
+
+                        it += 266;
+                    }
+                    else if((uint8_t)*(it+3) == 0x00
+                        && (uint8_t)*(it+4) == 0x20
+                        && (uint8_t)*(it+5) == 0x33
+                        && (uint8_t)*(it+6) == 0x01
+                        && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
+                    {
+                        auto syx = Virus::SysEx();
+                        syx.push_back(0xf0);
+                        for (auto i = it + 3; i < it + 3 + 266; i++)
+                        {
+                            syx.push_back((uint8_t)*i);
+                        }
+                        syx[7] = 0x01; // force to bank a
+                        syx[266] = 0xf7;
+                        m_controller.sendSysEx(syx);
+                        it += 266;
+                    }
+
+                    sentData = true;
+                }
+            }
+        }
+
+        if (sentData)
+            m_controller.onStateLoaded();
+    };
+    m_fileChooser->launchAsync (flags, onFileChooser);
 }
 
 void VirusEditor::saveFile() {
     auto path = m_controller.getConfig()->getValue("virus_bank_dir", "");
-    juce::FileChooser chooser(
+    m_fileChooser = std::make_unique<FileChooser>(
         "Save preset as syx",
         m_previousPath.isEmpty()
-            ? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
+            ? (path.isEmpty() ? File::getSpecialLocation(File::currentApplicationFile).getParentDirectory() : File(path))
             : m_previousPath,
         "*.syx", true);
+    const auto flags = FileBrowserComponent::saveMode | FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-    if (!chooser.browseForFileToSave(true))
-        return;
-    bool sentData = false;
-    const auto result = chooser.getResult();
-    m_previousPath = result.getParentDirectory().getFullPathName();
-    const auto ext = result.getFileExtension().toLowerCase();
-    const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
-    const uint8_t syxEof[1] = {0xF7};
-    uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-    uint8_t data[256];
-    for (int i = 0; i < 256; i++)
+
+    std::function<void (const FileChooser &)> onFileChooser = [this](const FileChooser& chooser)
     {
-        auto param = m_controller.getParamValue(m_controller.getCurrentPart(), i < 128 ? 0 : 1, i % 128);
+        if (chooser.getResults().isEmpty())
+            return;
+        bool sentData = false;
+        const auto result = chooser.getResult();
+        m_previousPath = result.getParentDirectory().getFullPathName();
+        const auto ext = result.getFileExtension().toLowerCase();
+        const uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00};
+        const uint8_t syxEof[1] = {0xF7};
+        uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
+        uint8_t data[256];
+        for (int i = 0; i < 256; i++)
+        {
+            auto param = m_controller.getParamValue(m_controller.getCurrentPart(), i < 128 ? 0 : 1, i % 128);
 
-        data[i] = param ? (int)param->getValue() : 0;
-        cs += data[i];
-    }
-    cs = cs & 0x7f;
+            data[i] = param ? (int)param->getValue() : 0;
+            cs += data[i];
+        }
+        cs = cs & 0x7f;
 
-	result.deleteFile();
-	result.create();
-    result.appendData(syxHeader, 9);
-    result.appendData(data, 256);
-    result.appendData(&cs, 1);
-    result.appendData(syxEof, 1);
+        result.deleteFile();
+        result.create();
+        result.appendData(syxHeader, 9);
+        result.appendData(data, 256);
+        result.appendData(&cs, 1);
+        result.appendData(syxEof, 1);
+    };
+    m_fileChooser->launchAsync (flags, onFileChooser);
 }
