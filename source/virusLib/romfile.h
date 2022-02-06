@@ -31,30 +31,69 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	using TPreset = std::array<uint8_t, 513>;
+	enum Model
+	{
+		Invalid = -1,
+		ModelABC,
+		ModelD
+	};
 
-	void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
+	using TPreset = std::array<uint8_t, 512>;
+
+	static void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
 
 	explicit ROMFile(const std::string& _path);
 
 	bool getMulti(int _presetNumber, TPreset& _out) const;
-	bool getSingle(int bank, int presetNumber, TPreset& _out) const;
+	bool getSingle(int _bank, int _presetNumber, TPreset& _out) const;
 	bool getPreset(uint32_t _offset, TPreset& _out) const;
 	
 	static std::string getSingleName(const TPreset& _preset);
 	static std::string getMultiName(const TPreset& _preset);
 	static std::string getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last);
 
-	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph);
+	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph) const;
 
 	bool isValid() const { return bootRom.size > 0; }
 
+	Model getModel() const { return m_model; }
+
+	uint32_t getMultiPresetSize() const
+	{
+		switch (m_model)
+		{
+		case ModelD:
+			return 256;
+		default:
+			return 256;
+		}
+	}
+	uint32_t getSinglePresetSize() const
+	{
+		switch (m_model)
+		{
+		case ModelD:
+			return 512;
+		default:
+			return 256;
+		}
+	}
+	uint32_t getSinglesPerBank() const
+	{
+		return 128;
+	}
 private:
-	std::vector<Chunk> get_dsp_chunks() const;
+	std::vector<Chunk> readChunks();
+	bool loadPresetFiles();
+	bool loadPresetFile(const std::string& _filename);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
 
-	const std::string m_path;
+	const std::string m_file;
+	Model m_model = Invalid;
+
+	std::vector<TPreset> m_singles;
+	std::vector<TPreset> m_multis;
 };
 }
