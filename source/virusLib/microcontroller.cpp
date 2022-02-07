@@ -254,7 +254,7 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 {
 	std::lock_guard lock(m_mutex);
 
-	waitUntilReady();
+//	waitUntilReady();	// waits for the receive interrupt to be enabled, but why? Its not needed as we have a queue
 
 	if(cancelIfFull && needsToWaitForHostBits(0,1))
 		return false;
