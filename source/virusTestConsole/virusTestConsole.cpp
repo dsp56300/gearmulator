@@ -114,8 +114,8 @@ int main(int _argc, char* _argv[])
 		try
 		{
 			puts("Running Unit Tests...");
-			InterpreterUnitTests tests;
-//			JitUnittests jitTests;
+//			InterpreterUnitTests tests;
+			JitUnittests jitTests;
 			puts("Unit Tests finished.");
 		}
 		catch(const std::string& _err)
