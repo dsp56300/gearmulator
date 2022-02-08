@@ -50,7 +50,7 @@ private:
 	void writeHostBitsWithWait(char flag1,char flag2) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
-	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
+	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
 
 	bool partBankSelect(uint8_t _part, uint8_t _value, bool _immediatelySelectSingle);

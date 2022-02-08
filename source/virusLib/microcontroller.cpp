@@ -681,11 +681,15 @@ void Microcontroller::waitUntilBufferEmpty() const
 	}
 }
 
-std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
+std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
 {
 	size_t idx = 0;
 
-	const auto size = (_preset.size() + 2) / 3;
+	const auto targetSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
+
+	const auto presetSize = std::min(static_cast<uint32_t>(_preset.size()), targetSize);
+
+	const auto size = (presetSize + 2) / 3;
 
 	std::vector<TWord> preset;
 	preset.resize(size);
@@ -694,11 +698,11 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset)
 	{
 		if (i == (size-1))
 		{
-			if(idx < _preset.size())
+			if(idx < presetSize)
 				preset[i] = _preset[idx] << 16;
-			if ((idx+1) < _preset.size())
+			if ((idx+1) < presetSize)
 				preset[i] |= _preset[idx+1] << 8;
-			if ((idx+2) < _preset.size())
+			if ((idx+2) < presetSize)
 				preset[i] |= _preset[idx+2];
 		}
 		else
@@ -794,10 +798,10 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 	else
 		m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
 
-	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
+	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << static_cast<int>(_program));
 
 	// Send to DSP
-	return sendPreset(_program, presetToDSPWords(_data), false);
+	return sendPreset(_program, presetToDSPWords(_data, false), false);
 }
 
 bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
@@ -813,7 +817,7 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
 
 	// Convert array of uint8_t to vector of 24bit TWord
-	return sendPreset(_program, presetToDSPWords(_data), true);
+	return sendPreset(_program, presetToDSPWords(_data, true), true);
 }
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
