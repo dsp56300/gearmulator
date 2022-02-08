@@ -70,7 +70,7 @@ void LookAndFeel::drawComboBox (Graphics& g, int width, int height, bool isButto
 {
     // panels draws combo box... so it's invisible :)
 }
-void LookAndFeel::drawButtonBackground(juce::Graphics &, juce::Button &, const juce::Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+void LookAndFeel::drawButtonBackground(Graphics &, Button &, const Colour &backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
 
 }

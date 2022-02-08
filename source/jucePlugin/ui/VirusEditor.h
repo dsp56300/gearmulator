@@ -84,6 +84,8 @@ private:
     std::unique_ptr<Parts> m_partList;
     std::unique_ptr<juce::Drawable> m_background;
 
+    std::unique_ptr<juce::FileChooser> m_fileChooser;
+
     Virus::LookAndFeel m_lookAndFeel;
 
     juce::String m_previousPath;
