@@ -950,44 +950,41 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c, bool cancelIfFull) const
 {
 	std::lock_guard lock(m_mutex);
 
-	if(cancelIfFull && (needsToWaitForHostBits(0,1) || m_hdi08.dataRXFull()))
+	const auto isModelD = m_rom.getModel() == ROMFile::ModelD;
+
+	const char flagA = isModelD ? 0 : 1;
+
+	if (cancelIfFull && (needsToWaitForHostBits(flagA, 1) || m_hdi08.dataRXFull()))
 		return false;
 
-	writeHostBitsWithWait(0,1);
+	writeHostBitsWithWait(flagA, 1);
 
-	switch (_a)
+	auto sendMIDItoDSP = [this, isModelD](const uint8_t _midiByte)
 	{
-	case M_TIMINGCLOCK:
-	case M_START:
-	case M_CONTINUE:
-	case M_STOP:
-		{
-			sendMIDItoDSP(_a);
-		}
-		break;
-	default:
-		{
-			sendMIDItoDSP(_a);
-			sendMIDItoDSP(_b);
-			sendMIDItoDSP(_c);
-		}
-		break;
+		const TWord word = static_cast<TWord>(_midiByte) << 16 | (isModelD ? 0xffff : 0);
+		m_hdi08.writeRX(&word, 1);
+	};
+
+	if((_a & 0xf0) == 0xf0)
+	{
+		// single-byte status message
+		sendMIDItoDSP(_a);
+	}
+	else
+	{
+		sendMIDItoDSP(_a);
+		sendMIDItoDSP(_b);
+		sendMIDItoDSP(_c);
 	}
 
 	return true;
 }
 
-void Microcontroller::sendMIDItoDSP(uint8_t _midiByte) const
-{
-	const TWord word = static_cast<TWord>(_midiByte) << 16 | 0xffff;
-	m_hdi08.writeRX(&word, 1);
-}
-
-void Microcontroller::sendPendingMidiEvents(uint32_t _maxOffset)
+void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 {
 	auto size = m_pendingMidiEvents.size();
 
