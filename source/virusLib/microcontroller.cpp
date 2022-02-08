@@ -247,7 +247,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 void Microcontroller::sendControlCommand(const ControlCommand _command, const uint8_t _value)
 {
-	send(PAGE_C, 0x0, _command, _value);
+	send(m_rom.getModel() == ROMFile::ModelD ? PAGE_D : PAGE_C, 0x0, _command, _value);
 }
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value, bool cancelIfFull/* = false*/)
