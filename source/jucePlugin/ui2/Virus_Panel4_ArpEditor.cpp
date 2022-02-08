@@ -130,8 +130,8 @@ ArpEditor::ArpEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioP
         addAndMakeVisible(m_partSelect[pt]);
 
         m_presetNames[pt].setBounds(245 - 225/2 + iMarginXChannels, 97 - 70/2 + iIndex * (iMarginYChannels), 225, 70);
-        m_presetNames[pt].setText(m_controller.getCurrentPartPresetName(pt),  juce::dontSendNotification);
-        m_presetNames[pt].setFont(juce::Font("Register", "Normal", 23.f));
+        m_presetNames[pt].setText(m_controller.getCurrentPartPresetName(pt),  dontSendNotification);
+        m_presetNames[pt].setFont(Font("Register", "Normal", 23.f));
         m_presetNames[pt].setJustificationType(Justification::left);
  
         addAndMakeVisible(m_presetNames[pt]);
@@ -188,8 +188,8 @@ ArpEditor::~ArpEditor()
 void ArpEditor::MidiInit() 
 {
     //MIDI settings
-    juce::String midiIn = m_properties->getValue("midi_input", "");
-    juce::String midiOut = m_properties->getValue("midi_output", "");
+    String midiIn = m_properties->getValue("midi_input", "");
+    String midiOut = m_properties->getValue("midi_output", "");
     
     if (midiIn != "")
     {
@@ -207,8 +207,8 @@ void ArpEditor::MidiInit()
     addAndMakeVisible(m_cmbMidiOutput);
 
     m_cmbMidiInput.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
-    auto midiInputs = juce::MidiInput::getAvailableDevices();
-    juce::StringArray midiInputNames;
+    auto midiInputs = MidiInput::getAvailableDevices();
+    StringArray midiInputNames;
     midiInputNames.add(" - Midi In - ");
     auto inIndex = 0;
 
@@ -223,10 +223,10 @@ void ArpEditor::MidiInit()
     }
 
     m_cmbMidiInput.addItemList(midiInputNames, 1);
-    m_cmbMidiInput.setSelectedItemIndex(inIndex, juce::dontSendNotification);
+    m_cmbMidiInput.setSelectedItemIndex(inIndex, dontSendNotification);
     m_cmbMidiOutput.setTextWhenNoChoicesAvailable("No MIDI Outputs Enabled");
-    auto midiOutputs = juce::MidiOutput::getAvailableDevices();
-    juce::StringArray midiOutputNames;
+    auto midiOutputs = MidiOutput::getAvailableDevices();
+    StringArray midiOutputNames;
     midiOutputNames.add(" - Midi Out - ");
     auto outIndex = 0;
     
@@ -242,7 +242,7 @@ void ArpEditor::MidiInit()
     }
 
     m_cmbMidiOutput.addItemList(midiOutputNames, 1);
-    m_cmbMidiOutput.setSelectedItemIndex(outIndex, juce::dontSendNotification);
+    m_cmbMidiOutput.setSelectedItemIndex(outIndex, dontSendNotification);
     m_cmbMidiInput.onChange = [this]() { updateMidiInput(m_cmbMidiInput.getSelectedItemIndex()); };
     m_cmbMidiOutput.onChange = [this]() { updateMidiOutput(m_cmbMidiOutput.getSelectedItemIndex()); };
 }
@@ -268,9 +268,9 @@ void ArpEditor::refreshParts()
             m_presetNames[pt].setAlpha(fAlpha);
         }
         if (singlePartOrInMulti)
-            m_presetNames[pt].setText(m_controller.getCurrentPartPresetName(pt),  juce::dontSendNotification);
+            m_presetNames[pt].setText(m_controller.getCurrentPartPresetName(pt),  dontSendNotification);
         else
-            m_presetNames[pt].setText("",  juce::dontSendNotification);
+            m_presetNames[pt].setText("",  dontSendNotification);
     }
 
     updatePlayModeButtons();
@@ -280,9 +280,9 @@ void ArpEditor::changePart(uint8_t _part)
 {
     for (auto &p : m_partSelect)
     {
-        p.setToggleState(false, juce::dontSendNotification);
+        p.setToggleState(false, dontSendNotification);
     }
-    m_partSelect[_part].setToggleState(true, juce::dontSendNotification);
+    m_partSelect[_part].setToggleState(true, dontSendNotification);
     m_parameterBinding.setPart(_part);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
     getParentComponent()->postCommandMessage(VirusEditor::Commands::Rebind);
@@ -308,24 +308,24 @@ void ArpEditor::updatePlayModeButtons()
     const auto _mode = (int)modeParam->getValue();
     if (_mode == virusLib::PlayModeSingle)
     {
-        m_btWorkingMode.setToggleState(true, juce::dontSendNotification);
+        m_btWorkingMode.setToggleState(true, dontSendNotification);
     }
     else if (_mode == virusLib::PlayModeMulti || _mode == virusLib::PlayModeMultiSingle)
     {
-        m_btWorkingMode.setToggleState(false, juce::dontSendNotification);
+        m_btWorkingMode.setToggleState(false, dontSendNotification);
     }
 }
 
 void ArpEditor::updateMidiInput(int index)
 {
-    auto list = juce::MidiInput::getAvailableDevices();
+    auto list = MidiInput::getAvailableDevices();
 
     if (index == 0)
     {
         m_properties->setValue("midi_input", "");
         m_properties->save();
         m_lastInputIndex = index;
-        m_cmbMidiInput.setSelectedItemIndex(index, juce::dontSendNotification);
+        m_cmbMidiInput.setSelectedItemIndex(index, dontSendNotification);
         return;
     }
     index--;
@@ -336,7 +336,7 @@ void ArpEditor::updateMidiInput(int index)
 
     if (!processorRef.setMidiInput(newInput.identifier))
     {
-        m_cmbMidiInput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_cmbMidiInput.setSelectedItemIndex(0, dontSendNotification);
         m_lastInputIndex = 0;
         return;
     }
@@ -344,19 +344,19 @@ void ArpEditor::updateMidiInput(int index)
     m_properties->setValue("midi_input", newInput.identifier);
     m_properties->save();
 
-    m_cmbMidiInput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_cmbMidiInput.setSelectedItemIndex(index + 1, dontSendNotification);
     m_lastInputIndex = index;
 }
 
 void ArpEditor::updateMidiOutput(int index)
 {
-    auto list = juce::MidiOutput::getAvailableDevices();
+    auto list = MidiOutput::getAvailableDevices();
 
     if (index == 0)
     {
         m_properties->setValue("midi_output", "");
         m_properties->save();
-        m_cmbMidiOutput.setSelectedItemIndex(index, juce::dontSendNotification);
+        m_cmbMidiOutput.setSelectedItemIndex(index, dontSendNotification);
         m_lastOutputIndex = index;
         processorRef.setMidiOutput("");
         return;
@@ -365,13 +365,13 @@ void ArpEditor::updateMidiOutput(int index)
     auto newOutput = list[index];
     if (!processorRef.setMidiOutput(newOutput.identifier))
     {
-        m_cmbMidiOutput.setSelectedItemIndex(0, juce::dontSendNotification);
+        m_cmbMidiOutput.setSelectedItemIndex(0, dontSendNotification);
         m_lastOutputIndex = 0;
         return;
     }
     m_properties->setValue("midi_output", newOutput.identifier);
     m_properties->save();
 
-    m_cmbMidiOutput.setSelectedItemIndex(index + 1, juce::dontSendNotification);
+    m_cmbMidiOutput.setSelectedItemIndex(index + 1, dontSendNotification);
     m_lastOutputIndex = index;
 }

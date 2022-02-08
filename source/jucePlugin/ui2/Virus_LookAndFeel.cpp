@@ -5,10 +5,10 @@ using namespace juce;
 
 namespace Virus
 {
-    const juce::Font getCustomFont()
+    const Font getCustomFont()
     {
-        static auto typefaceDigiFont = juce::Typeface::createSystemTypefaceFor(BinaryData::Digital, BinaryData::DigitalSize);  
-        return juce::Font (typefaceDigiFont);
+        static auto typefaceDigiFont = Typeface::createSystemTypefaceFor(BinaryData::Digital, BinaryData::DigitalSize);
+        return Font (typefaceDigiFont);
     }
 
 	//LookAndFeel
@@ -58,10 +58,10 @@ namespace Virus
 		knob->drawAt(g, x, y, 1.0f);
 	}
 
-    void LookAndFeel::drawComboBox (juce::Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, juce::ComboBox& box)
+    void LookAndFeel::drawComboBox (Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
     {
         //gGrafik.setOpacity(0);
-        //box.setColour(juce::ComboBox::textColourId, juce::Colours::red);
+        //box.setColour(ComboBox::textColourId, Colours::red);
     };
 
 	//LookAndFeelPatchBrowser
@@ -74,7 +74,7 @@ namespace Virus
 	{
 	}
 
-    void LookAndFeelButtons::drawComboBox (juce::Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, juce::ComboBox& box)
+    void LookAndFeelButtons::drawComboBox (Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
     {
         gGrafik.setOpacity(0);
     };
