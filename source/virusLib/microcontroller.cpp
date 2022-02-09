@@ -14,7 +14,6 @@ constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
 constexpr uint32_t g_singleRamBankCount = 2;
-constexpr uint32_t g_presetsPerBank = 128;
 
 constexpr uint8_t g_pageA[] = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
 							   0x1E, 0x1F, 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28, 0x29, 0x2A, 0x2B, 0x2C, 0x2D,
@@ -69,7 +68,7 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi
 
 		const auto bank = b >= g_singleRamBankCount ? b - g_singleRamBankCount : b;
 
-		for(uint32_t p=0; p<g_presetsPerBank; ++p)
+		for(uint32_t p=0; p<m_rom.getPresetsPerBank(); ++p)
 		{
 			TPreset single;
 			m_rom.getSingle(bank, p, single);
@@ -450,7 +449,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		if(_bank == BankNumber::A)
 		{
 			// eat this, host, whoever you are. 128 multi packets
-			for(uint8_t i=0; i<g_presetsPerBank; ++i)
+			for(uint8_t i=0; i<m_rom.getPresetsPerBank(); ++i)
 			{
 				TPreset data;
 				const auto res = requestMulti(_bank, i, data);
@@ -1036,11 +1035,9 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
 }
 
-void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
+void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value) const
 {
-	// The manual does not have a Single dump specification, therefore I assume that its a 1:1 mapping of pages A and B
-
-	const uint32_t offset = (_page - PAGE_A) * g_presetsPerBank + _param;
+	const uint32_t offset = (_page - PAGE_A) * m_rom.getPresetsPerBank() + _param;
 
 	if(offset >= _single.size())
 		return;

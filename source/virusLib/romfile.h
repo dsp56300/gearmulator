@@ -47,7 +47,7 @@ public:
 	bool getMulti(int _presetNumber, TPreset& _out) const;
 	bool getSingle(int _bank, int _presetNumber, TPreset& _out) const;
 	bool getPreset(uint32_t _offset, TPreset& _out) const;
-	
+
 	static std::string getSingleName(const TPreset& _preset);
 	static std::string getMultiName(const TPreset& _preset);
 	static std::string getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last);
@@ -84,7 +84,7 @@ public:
 		return getSinglePresetSize(m_model);
 	}
 
-	static uint32_t getSinglesPerBank()
+	static uint8_t getSinglesPerBank()
 	{
 		return 128;
 	}
@@ -97,6 +97,11 @@ public:
 	static constexpr uint32_t getRomSizeModelABC()
 	{
 		return 1024 * 512;
+	}
+
+	uint8_t getPresetsPerBank() const
+	{
+		return 128;
 	}
 
 	static std::string findROM();
