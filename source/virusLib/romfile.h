@@ -82,6 +82,19 @@ public:
 	{
 		return 128;
 	}
+
+	static constexpr uint32_t getRomSizeModelD()
+	{
+		return 1024 * 1024;
+	}
+
+	static constexpr uint32_t getRomSizeModelABC()
+	{
+		return 1024 * 512;
+	}
+
+	static std::string findROM();
+
 private:
 	std::vector<Chunk> readChunks();
 	bool loadPresetFiles();
