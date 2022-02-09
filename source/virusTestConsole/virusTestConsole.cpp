@@ -36,7 +36,14 @@ void audioCallback(EsaiListener*, uint32_t audioCallbackCount)
 		break;
 	case 512:
 		LOG("Sending Note On");
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 36, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 48, 0x5f));	// Note On
 		microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 63, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 67, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 72, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 75, 0x5f));	// Note On
+//		microcontroller->sendMIDI(SMidiEvent(0x90, 79, 0x5f));	// Note On
 //		microcontroller->sendMIDI(SMidiEvent(0xb0, 1, 0));	// Modwheel 0
 		microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 		break;
