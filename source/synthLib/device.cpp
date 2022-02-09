@@ -7,7 +7,7 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress) : m_periphX(&m_periphY)
+	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals/* = false*/) : m_periphX(&m_periphY)
 	{
 		const size_t g_requiredMemSize	= alignedSize<DSP>() + alignedSize<Memory>() + _memorySize * MemArea_COUNT * sizeof(uint32_t);
 
@@ -26,7 +26,12 @@ namespace synthLib
 		}, 0, 1);
 
 		m_memory = new (bufMem)Memory(m_memoryValidator, _memorySize, reinterpret_cast<TWord*>(bufBuf));
-		m_dsp = new (buf)DSP(*m_memory, &m_periphX, &m_periphNop);
+
+		IPeripherals* periphY = &m_periphNop;
+		if (_use56367Peripherals)
+			periphY = &m_periphY;
+
+		m_dsp = new (buf)DSP(*m_memory, &m_periphX, periphY);
 
 		if(_externalMemStartAddress)
 			m_memory->setExternalMemory(_externalMemStartAddress, true);

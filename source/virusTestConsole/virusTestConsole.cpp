@@ -131,11 +131,8 @@ int main(int _argc, char* _argv[])
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
-	Peripherals56367 periphY;
-	Peripherals56362 periphX(&periphY);
-	DSP dsp(memory, &periphX, &periphY);
 
-	const auto romFile = findROM(1024 * 1024);
+	const auto romFile = findROM(ROMFile::getRomSizeModelABC());
 	if(romFile.empty())
 	{
 		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
@@ -143,6 +140,18 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 	ROMFile v(romFile);
+
+	Peripherals56367 periphY;
+	Peripherals56362 periphX(&periphY);
+	PeripheralsNop periphNop;
+
+	IPeripherals* pY = &periphNop;
+
+	if (v.getModel() == ROMFile::ModelD)
+		pY = &periphY;
+
+	DSP dsp(memory, &periphX, pY);
+
 	auto loader = v.bootDSP(dsp, periphX);
 
 	if(_argc > 1)

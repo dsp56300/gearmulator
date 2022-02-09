@@ -72,10 +72,11 @@ private:
     void setState(const void *_data, size_t _sizeInBytes);
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 
+	std::string							m_romName;
+	virusLib::ROMFile					m_rom;
 	virusLib::Device					m_device;
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
-    std::string						m_romName;
 };

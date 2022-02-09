@@ -12,7 +12,7 @@ namespace virusLib
 	class Device final : public synthLib::Device
 	{
 	public:
-		Device(const std::string& _romFileName);
+		Device(const ROMFile& _rom);
 
 		float getSamplerate() const override;
 		bool isValid() const override;
@@ -29,7 +29,7 @@ namespace virusLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void onAudioWritten() override;
 
-		ROMFile m_rom;
+		const ROMFile& m_rom;
 		Microcontroller m_syx;
 		MidiOutParser m_midiOutParser;
 		uint32_t m_numSamplesWritten = 0;

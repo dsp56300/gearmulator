@@ -3,13 +3,11 @@
 
 namespace virusLib
 {
-	// 128k words beginning at $20000
 	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
-	constexpr dsp56k::TWord g_memorySize		= 0x040000;
 
-	Device::Device(const std::string& _romFileName)
-		: synthLib::Device(g_memorySize, g_externalMemStart)
-		, m_rom(_romFileName)
+	Device::Device(const ROMFile& _romFile)
+		: synthLib::Device(_romFile.getModel() == ROMFile::ModelD ? 0x100000 : 0x040000, g_externalMemStart)
+		, m_rom(_romFile)
 		, m_syx(getHDI08(), m_rom)
 	{
 		if(!m_rom.isValid())

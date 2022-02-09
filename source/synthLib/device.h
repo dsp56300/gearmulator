@@ -13,7 +13,7 @@ namespace synthLib
 	class Device
 	{
 	public:
-		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress);
+		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals = false);
 		virtual ~Device();
 		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 		void setLatencySamples(uint32_t _size);
