@@ -527,7 +527,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const uint8_t program = _data[8];
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset dump;
-				if(_data.size() == 524)
+				if(_data.size() == 524 && m_rom.getModel() == ROMFile::ModelD)
 				{
 					// D preset
 					auto data(_data);
@@ -537,7 +537,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				}
 				else
 				{
-					std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+					std::copy_n(_data.data() + g_sysexPresetHeaderSize, m_rom.getSinglePresetSize(), dump.begin());
 				}
 				return writeSingle(bank, program, dump);
 			}
