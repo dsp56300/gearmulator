@@ -68,9 +68,10 @@ public:
 			return 256;
 		}
 	}
-	uint32_t getSinglePresetSize() const
+
+	static uint32_t getSinglePresetSize(Model _model)
 	{
-		switch (m_model)
+		switch (_model)
 		{
 		case ModelD:
 			return 512;
@@ -78,7 +79,12 @@ public:
 			return 256;
 		}
 	}
-	uint32_t getSinglesPerBank() const
+	uint32_t getSinglePresetSize() const
+	{
+		return getSinglePresetSize(m_model);
+	}
+
+	static uint32_t getSinglesPerBank()
 	{
 		return 128;
 	}
