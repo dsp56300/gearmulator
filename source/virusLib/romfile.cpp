@@ -7,6 +7,8 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
+#include "../synthLib/os.h"
+
 #ifdef _WIN32
 #define NOMINMAX
 #include <Windows.h>
@@ -70,6 +72,14 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	{
 		loadPresetFiles();
 	}
+}
+
+std::string ROMFile::findROM()
+{
+	const auto res = synthLib::findROM(getRomSizeModelD());
+	if (!res.empty())
+		return res;
+	return synthLib::findROM(getRomSizeModelABC());
 }
 
 std::vector<ROMFile::Chunk> ROMFile::readChunks()
