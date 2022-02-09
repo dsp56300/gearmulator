@@ -39,6 +39,18 @@ constexpr uint8_t g_pageC_multiPart[]  = {31,32,33,34,35,36,37,38,39,40,41,72,73
 
 namespace virusLib
 {
+
+static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset)
+{
+	uint8_t cs = 0;
+
+	for (size_t i = _offset; i < _data.size(); ++i)
+		cs += _data[i];
+
+	return cs & 0x7f;
+}
+
+
 Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile)
 {
 	if(!_romFile.isValid())
@@ -376,18 +388,22 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 		const auto size = _type == DUMP_SINGLE ? m_rom.getSinglePresetSize() : m_rom.getMultiPresetSize();
 
-		for(size_t i=0; i<std::min(size, static_cast<uint32_t>(_dump.size())); ++i)
-		{
+		const auto modelABCsize = ROMFile::getSinglePresetSize(ROMFile::ModelABC);
+
+		for(size_t i=0; i<modelABCsize; ++i)
 			response.push_back(_dump[i]);
+
+		// checksum for ABC models comes after 256 bytes of preset data
+		response.push_back(calcChecksum(response, 5));
+
+		if(size > modelABCsize)
+		{
+			for (size_t i = modelABCsize; i < size; ++i)
+				response.push_back(_dump[i]);
+
+			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
+			response.push_back(calcChecksum(response, 5));
 		}
-
-		// checksum
-		uint8_t cs = 0;
-
-		for(size_t i=5; i<response.size(); ++i)
-			cs += response[i];
-
-		response.push_back(cs & 0x7f);
 
 		response.push_back(M_ENDOFSYSEX);
 
