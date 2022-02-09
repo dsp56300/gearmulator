@@ -20,7 +20,7 @@ class Microcontroller
 public:
 	using TPreset = ROMFile::TPreset;
 
-	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
+	explicit Microcontroller(dsp56k::HDI08& hdi08, const ROMFile& romFile);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
 	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
@@ -65,7 +65,7 @@ private:
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	
 	dsp56k::HDI08& m_hdi08;
-	ROMFile& m_rom;
+	const ROMFile& m_rom;
 
 	TPreset m_multiEditBuffer;
 
