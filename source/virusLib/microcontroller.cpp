@@ -39,7 +39,7 @@ constexpr uint8_t g_pageC_multiPart[]  = {31,32,33,34,35,36,37,38,39,40,41,72,73
 
 namespace virusLib
 {
-Microcontroller::Microcontroller(HDI08& _hdi08, ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile)
+Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
