@@ -104,7 +104,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks()
 		// ABC
 		m_model = ModelABC;
 		offset = 0x18000;
-		lastChunkId = 5;
+		lastChunkId = 4;
 	}
 
 	if(!file.is_open())
