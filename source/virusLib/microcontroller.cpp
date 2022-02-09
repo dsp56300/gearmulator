@@ -374,9 +374,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		response.push_back(toMidiByte(_bank));
 		response.push_back(_program);
 
-		for(const auto value : _dump)
+		const auto size = _type == DUMP_SINGLE ? m_rom.getSinglePresetSize() : m_rom.getMultiPresetSize();
+
+		for(size_t i=0; i<std::min(size, static_cast<uint32_t>(_dump.size())); ++i)
 		{
-			response.push_back(value);
+			response.push_back(_dump[i]);
 		}
 
 		// checksum
