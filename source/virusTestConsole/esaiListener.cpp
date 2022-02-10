@@ -10,10 +10,11 @@ size_t g_writeBlockSize = 8192;
 size_t g_writeBlockSize = 65536;
 #endif
 
-EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, const uint8_t _outChannels, TCallback _callback)
+EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, const uint8_t _outChannels, TCallback _callback, uint32_t _samplerate)
 	: m_esai(_esai)
     , m_outChannels(_outChannels), audioFilename(std::move(_audioFilename)), g_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
+	, m_samplerate(_samplerate)
 {
 	uint32_t callbackChannel;
 
@@ -91,7 +92,7 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
 
 		if (audioData.size() >= g_nextWriteSize)
 		{
-			if (writer.write(audioFilename, 24, false, 2, 12000000 / 256, audioData))
+			if (writer.write(audioFilename, 24, false, 2, m_samplerate, audioData))
 			{
 				audioData.clear();
 				g_nextWriteSize = g_writeBlockSize;
