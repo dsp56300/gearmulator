@@ -513,7 +513,7 @@ namespace Virus
 			return "Sine";
 		if (idx == 1)
 			return "Triangle";
-		return "Wave " + juce::String(idx);
+		return "Wave " + juce::String(idx + 1);
 	}
 
 	juce::String numToSatCurv(float idx, Parameter::Description)
@@ -1632,12 +1632,12 @@ namespace Virus
     {Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 16, "Contr 16", {0,127}, {},{}, false, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 17, "Osc1 Shape", {0,127}, numToOscShape,{}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 18, "Osc1 Pulsewidth", {0,127}, {},{}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,64}, numToOscWaveSelect, {}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 19, "Osc1 Wave Select", {0,63}, numToOscWaveSelect, {}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 20, "Osc1 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 21, "Osc1 Keyfollow", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 22, "Osc2 Shape", {0,127}, numToOscShape, {}, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 23, "Osc2 Pulsewidth", {0,127}, {}, {}, true, false, false},
-    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,64}, numToOscWaveSelect,{}, true, true, false},
+    {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 24, "Osc2 Wave Select", {0,63}, numToOscWaveSelect,{}, true, true, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 25, "Osc2 Semitone", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 26, "Osc2 Detune", {0,127}, {},{}, true, false, false},
     {Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 27, "Osc2 FM Amount", {0,127}, {},{}, true, false, false},
@@ -1796,8 +1796,8 @@ namespace Virus
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 74, "Assign3 Amount1", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 75, "Assign3 Destination2", {0,122}, numToModMatrixDest,{}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 76, "Assign3 Amount2", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 77, "Assign2 Destination3", {0,122}, numToModMatrixDest,{}, true, true, false},
-    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 78, "Assign2 Amount3", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 77, "Assign3 Destination3", {0,122}, numToModMatrixDest,{}, true, true, false},
+    {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 78, "Assign3 Amount3", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 79, "LFO1 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 80, "LFO1 Assign Amount", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
     {Parameter::Page::B, Parameter::Class::SOUNDBANK_B, 81, "LFO2 Assign Dest", {0,122}, numToModMatrixDest, {}, true, true, false},
