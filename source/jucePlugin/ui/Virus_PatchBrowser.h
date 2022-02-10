@@ -6,7 +6,6 @@
 #include "../VirusController.h"
 class VirusParameterBinding;
 
-const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 struct Patch
 {
     int progNumber;
@@ -14,7 +13,7 @@ struct Patch
     uint8_t category1;
     uint8_t category2;
     uint8_t data[256];
-    virusLib::VirusModel model;
+    virusLib::PresetVersion model;
     uint8_t unison;
     uint8_t transpose;
 };

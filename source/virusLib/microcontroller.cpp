@@ -13,6 +13,8 @@ using namespace synthLib;
 constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
+constexpr uint32_t g_sysexPresetFooterSize = 2;	// checksum, f7
+
 constexpr uint32_t g_singleRamBankCount = 2;
 
 constexpr uint8_t g_pageA[] = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
@@ -541,20 +543,21 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
-				TPreset dump;
+				TPreset preset;
+				preset.fill(0);
 				if(_data.size() == 524 && m_rom.getModel() == ROMFile::ModelD)
 				{
 					// D preset
 					auto data(_data);
 
 					data.erase(data.begin() + 0x100 + g_sysexPresetHeaderSize);	// A/B/C checksum, not needed on D
-					std::copy_n(data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+					std::copy_n(data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
 				}
 				else
 				{
-					std::copy_n(_data.data() + g_sysexPresetHeaderSize, m_rom.getSinglePresetSize(), dump.begin());
+					std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
 				}
-				return writeSingle(bank, program, dump);
+				return writeSingle(bank, program, preset);
 			}
 		case DUMP_MULTI:
 			{
@@ -562,7 +565,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const uint8_t program = _data[8];
 				LOG("Received Multi dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset dump;
-				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize, dump.begin());
 				return writeMulti(bank, program, dump);
 			}
 		case REQUEST_SINGLE:
@@ -703,32 +706,35 @@ void Microcontroller::waitUntilBufferEmpty() const
 
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
 {
-	size_t idx = 0;
+	const auto deviceType = getPresetVersion(_preset);
+	const auto presetModel = deviceType <= C ? ROMFile::ModelABC : ROMFile::ModelD;
 
-	const auto targetSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
+	const auto targetByteSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
+	const auto sourceByteSize = _isMulti ? ROMFile::getMultiPresetSize(presetModel) : ROMFile::getSinglePresetSize(presetModel);
 
-	const auto presetSize = std::min(static_cast<uint32_t>(_preset.size()), targetSize);
-
-	const auto size = (presetSize + 2) / 3;
+	const auto sourceWordSize = (sourceByteSize + 2) / 3;
+	const auto targetWordSize = (targetByteSize + 2) / 3;
 
 	std::vector<TWord> preset;
-	preset.resize(size);
+	preset.resize(targetWordSize, 0);
 
-	for (size_t i = 0; i < size; i++)
+	size_t idx = 0;
+	for (size_t i = 0; i < sourceWordSize; i++)
 	{
-		if (i == (size-1))
+		if (i == (sourceWordSize - 1))
 		{
-			if(idx < presetSize)
+			if (idx < sourceByteSize)
 				preset[i] = _preset[idx] << 16;
-			if ((idx+1) < presetSize)
-				preset[i] |= _preset[idx+1] << 8;
-			if ((idx+2) < presetSize)
-				preset[i] |= _preset[idx+2];
+			if ((idx + 1) < sourceByteSize)
+				preset[i] |= _preset[idx + 1] << 8;
+			if ((idx + 2) < sourceByteSize)
+				preset[i] |= _preset[idx + 2];
 		}
-		else
+		else if (i < sourceWordSize)
 		{
 			preset[i] = ((_preset[idx] << 16) | (_preset[idx + 1] << 8) | _preset[idx + 2]);
 		}
+
 		idx += 3;
 	}
 
@@ -1025,6 +1031,11 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 		m_pendingMidiEvents.pop_front();
 		--size;
 	}	
+}
+
+PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
+{
+	return static_cast<PresetVersion>(_preset[0]);
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
