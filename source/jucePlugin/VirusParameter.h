@@ -27,7 +27,8 @@ namespace Virus
         {
             A = 0x70,
             B = 0x71,
-            C = 0x72
+            C = 0x72,
+			D = 0x73
         };
 
         struct Description
