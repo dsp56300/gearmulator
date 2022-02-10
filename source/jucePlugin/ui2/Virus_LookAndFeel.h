@@ -1,7 +1,6 @@
 #pragma once
 
 #include <juce_gui_extra/juce_gui_extra.h>
-#include "BinaryData.h"
 
 constexpr auto comboBoxHeight = 38;
 constexpr auto comboBoxWidth = 126;
@@ -24,18 +23,18 @@ namespace Virus
     class CustomLAF : public juce::LookAndFeel_V4
     {
     public:
-        void drawLabel(Graphics& g, Label& l) override
+        void drawLabel(juce::Graphics& g, juce::Label& l) override
         {
             // g.fillAll (label.findColour (Label::backgroundColourId));
-            g.setColour (l.findColour (Label::backgroundColourId));
+            g.setColour (l.findColour (juce::Label::backgroundColourId));
             g.fillRoundedRectangle (l.getLocalBounds().toFloat(), 5);
    
             // g.drawRect (label.getLocalBounds());
             g.drawRoundedRectangle (l.getLocalBounds().toFloat(), 10, 1); 
         }
-        juce::Font getLabelFont(Label& label) override
+        juce::Font getLabelFont(juce::Label& label) override
         {
-            Font fFont(getCustomFont().getTypeface());
+			juce::Font fFont(getCustomFont().getTypeface());
             fFont.setHeight(20.f);
             return fFont;
         }
@@ -71,7 +70,7 @@ namespace Virus
                               float rotaryStartAngle, float rotaryEndAngle, juce::Slider &sSlider) override;
 
 
-        Typeface::Ptr getTypefaceForFont (const juce::Font& f) override
+		juce::Typeface::Ptr getTypefaceForFont (const juce::Font& f) override
         {
             return getCustomFont().getTypeface();
         }
@@ -80,21 +79,21 @@ namespace Virus
 
         juce::Font getComboBoxFont (juce::ComboBox& ) override
         {
-            Font fFont(getCustomFont().getTypeface());
+			juce::Font fFont(getCustomFont().getTypeface());
             fFont.setHeight(20.f);
             return fFont;
         }
 
-        juce::Font getTextButtonFont(TextButton& button, int buttonHeight) override
+        juce::Font getTextButtonFont(juce::TextButton& button, int buttonHeight) override
         {
-            Font fFont(getCustomFont().getTypeface());
+			juce::Font fFont(getCustomFont().getTypeface());
             fFont.setHeight(20.f);
             return fFont;
         }
 
 	    juce::Font getPopupMenuFont() override
 	    { 
-            Font fFont(getCustomFont().getTypeface());
+			juce::Font fFont(getCustomFont().getTypeface());
             fFont.setHeight(20.f);
             return fFont;
 	    }
