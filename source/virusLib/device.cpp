@@ -13,7 +13,13 @@ namespace virusLib
 		if(!m_rom.isValid())
 			return;
 
-		auto loader = m_rom.bootDSP(getDSP(), getPeriph());
+		if(m_rom.getModel() == ROMFile::ModelD)
+		{
+			getPeriphX().getEsai().setSamplerate(getSamplerate());
+			getPeriphY().getEsai().setSamplerate(getSamplerate());
+		}
+
+		auto loader = m_rom.bootDSP(getDSP(), getPeriphX());
 
 		startDSPThread();
 
@@ -30,6 +36,9 @@ namespace virusLib
 
 	float Device::getSamplerate() const
 	{
+		if (m_rom.getModel() == ROMFile::ModelD)
+			return 44100.0f;
+
 		return 12000000.0f / 256.0f;
 	}
 
