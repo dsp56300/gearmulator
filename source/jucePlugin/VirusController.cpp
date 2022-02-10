@@ -246,7 +246,7 @@ namespace Virus
     }
 	uint8_t Controller::getVirusModel()
 	{
-		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
+		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::PresetVersion::B : virusLib::PresetVersion::C;
 	}
     juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {

@@ -70,24 +70,11 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
 
 void PatchBrowser::selectionChanged() {}
 
-VirusModel guessVersion(uint8_t *data) {
-    if (data[51] > 3) {
-        // check extra filter modes
-        return VirusModel::C;
-    }
-    if(data[179] == 0x40 && data[180] == 0x40) // soft knobs don't exist on B so they have fixed value
-        return VirusModel::B;
-    /*if (data[232] != 0x03 || data[235] != 0x6c || data[238] != 0x01) { // extra mod slots
-        return VirusModel::C;
-    }*/
-    /*if(data[173] != 0x00 || data[174] != 0x00) // EQ
-        return VirusModel::C;*/
-    /*if (data[220] != 0x40 || data[221] != 0x54 || data[222] != 0x20 || data[223] != 0x40 || data[224] != 0x40) {
-        // eq controls
-        return VirusModel::C;
-    }*/
-    return VirusModel::C;
-
+PresetVersion guessVersion(const uint8_t* _data)
+{
+	if(_data)
+		return static_cast<PresetVersion>(_data[0]);
+	return PresetVersion::A;
 }
 int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false) {
     auto ext = file.getFileExtension().toLowerCase();
@@ -118,7 +105,7 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                 patch.unison = patch.data[97];
                 patch.transpose = patch.data[93];
                 if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
+                        patch.model = PresetVersion::D;
                 }
                 else {
                     patch.model = guessVersion(patch.data);
@@ -166,7 +153,7 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                     patch.unison = patch.data[97];
                     patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
+                        patch.model = PresetVersion::D;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
@@ -204,7 +191,7 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                     patch.unison = patch.data[97];
                     patch.transpose = patch.data[93];
                     if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
+                        patch.model = PresetVersion::D;
                     }
                     else {
                         patch.model = guessVersion(patch.data);
@@ -314,9 +301,24 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
         text = rowElement.unison == 0 ? " " : String(rowElement.unison+1);
     else if(columnId == Columns::ST)
         text = rowElement.transpose != 64 ? String(rowElement.transpose - 64) : " ";
-    else if (columnId == Columns::VER) {
-        if(rowElement.model < ModelList.size())
-            text = ModelList[rowElement.model];
+    else if (columnId == Columns::VER)
+	{
+		switch (rowElement.model)
+		{
+		case A:	text = "A"; break;
+		case B: text = "B"; break;
+		case C: text = "C"; break;
+		case D: text = "TI"; break;
+		case D2: text = "TI2"; break;
+		default:
+			if (rowElement.model < B)
+				text = "A";
+			else if (rowElement.model >= D)
+				text = "TI";
+			else
+				text = "";
+			break;
+		}
     }
     g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true); // [6]
     g.setColour(getLookAndFeel().findColour(ListBox::backgroundColourId));
