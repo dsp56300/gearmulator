@@ -13,7 +13,8 @@ struct Patch
     juce::String name;
     uint8_t category1;
     uint8_t category2;
-    uint8_t data[256];
+    std::vector<uint8_t> data;
+    std::vector<uint8_t> sysex;
     virusLib::VirusModel model;
     uint8_t unison;
     uint8_t transpose;
@@ -44,7 +45,9 @@ private:
     juce::Array<Patch> m_filteredPatches;
     juce::PropertiesFile *m_properties;
     juce::HashMap<juce::String, bool> m_checksums;
-    int loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
+	uint32_t load(const std::vector<std::vector<uint8_t>>& _packets, bool dedupe);
+	bool load(const std::vector<uint8_t>& _data, bool dedupe);
+    uint32_t loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;
@@ -72,4 +75,6 @@ private:
         ST = 7,
         VER = 8,
     };
+
+    static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src);
 };
