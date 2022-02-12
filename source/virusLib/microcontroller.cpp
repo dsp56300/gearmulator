@@ -556,9 +556,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
 				LOG("Received Multi dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
-				TPreset dump;
-				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize, dump.begin());
-				return writeMulti(bank, program, dump);
+				TPreset preset;
+				std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
+				return writeMulti(bank, program, preset);
 			}
 		case REQUEST_SINGLE:
 			{
