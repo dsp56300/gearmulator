@@ -49,7 +49,7 @@ namespace Virus
 		void setSinglePresetName(uint8_t part, juce::String _name);
 		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
-		void setCurrentPartPreset(uint8_t part, virusLib::BankNumber bank, uint8_t prg);
+		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
         virusLib::BankNumber getCurrentPartBank(uint8_t part) const;
 		uint8_t getCurrentPartProgram(uint8_t part) const;
 		juce::String getCurrentPartPresetName(uint8_t part);
