@@ -179,6 +179,14 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 			ev.a = message.getRawData()[0];
 			ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
 			ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
+
+			const auto status = ev.a & 0xf0;
+
+			if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
+			{
+				// forward to UI to react to control input changes that should move knobs
+				getController().dispatchVirusOut(std::vector<synthLib::SMidiEvent>{ev});
+			}
 		}
 
 		ev.offset = metadata.samplePosition;
@@ -211,7 +219,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if (!m_midiOut.empty())
 	{
-		m_controller->dispatchVirusOut(m_midiOut);
+		getController().dispatchVirusOut(m_midiOut);
 	}
 
     for (auto& e : m_midiOut)

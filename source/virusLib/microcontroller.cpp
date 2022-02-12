@@ -575,6 +575,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 					}
 				}
 
+				// bounce back to UI
+				SMidiEvent ev;
+				ev.sysex = _data;
+				ev.source = MidiEventSourceEditor;	// don't send to output
+				_responses.push_back(ev);
+
 				return send(page, part, param, value, _cancelIfFull);
 			}
 		default:
