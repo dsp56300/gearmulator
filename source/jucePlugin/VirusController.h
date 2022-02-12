@@ -419,7 +419,7 @@ namespace Virus
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, virusLib::BankNumber bank, uint8_t prg);
         virusLib::BankNumber getCurrentPartBank(uint8_t part);
-		uint8_t getCurrentPartProgram(uint8_t part);
+		uint8_t getCurrentPartProgram(uint8_t part) const;
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		uint8_t getCurrentPart() const { return m_currentPart; }
@@ -439,14 +439,14 @@ namespace Virus
         {
             uint8_t bankNumber = 0;
             uint8_t progNumber = 0;
-            uint8_t data[kDataSizeInBytes]{};
+			std::array<uint8_t, kDataSizeInBytes> data{};
         };
 
         struct SinglePatch
         {
 	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
             uint8_t progNumber = 0;
-            uint8_t data[kDataSizeInBytes]{};
+			std::array<uint8_t, kDataSizeInBytes> data{};
         };
 
         MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
@@ -482,7 +482,7 @@ namespace Virus
 		Parameter* findSynthParam(const ParamIndex& _paramIndex);
 
 		// unchecked copy for patch data bytes
-        static inline uint8_t copyData(const SysEx &src, int startPos, uint8_t *dst);
+        static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);
 
         template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
         void parseSingle(const SysEx &);
