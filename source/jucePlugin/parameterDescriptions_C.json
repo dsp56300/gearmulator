@@ -1,9 +1,9 @@
 {
-	parameterdescriptiondefaults":
+	"parameterdescriptiondefaults":
 	{
-		"isPublic":true
-		"isBipolar":false
-		"toText":"unsignedZero"
+		"isPublic":true,
+		"isBipolar":false,
+		"toText":"unsignedZero",
 		"name":"",
 		"class":"",
 		"min":0,
