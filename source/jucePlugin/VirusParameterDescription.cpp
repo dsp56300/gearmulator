@@ -4,7 +4,7 @@
 
 namespace Virus
 {
-	juce::String numToBank(float bankIdx, Parameter::Description)
+	juce::String numToBank(float bankIdx, const Parameter::Description&)
 	{
 		jassert(bankIdx >= 0);
 		juce::String prefix = "RAM";
@@ -21,18 +21,18 @@ namespace Virus
 		return sign + juce::String(juce::roundToInt(idx - 64));
 	}
 
-	juce::String paramTo7bitSigned(const float idx, Parameter::Description)
+	juce::String paramTo7bitSigned(const float idx, const Parameter::Description&)
 	{
 		return numTo7bitSigned(juce::roundToInt(idx));
 	}
 
-	float textTo7bitSigned(juce::String text, Parameter::Description)
+	float textTo7bitSigned(const juce::String& text, const Parameter::Description&)
 	{
 		const auto val = std::clamp(text.getIntValue(), -64, 63);
 		return static_cast<float>(val) + 64.0f;
 	}
 
-	juce::String numToPan(float panIdx, Parameter::Description)
+	juce::String numToPan(float panIdx, const Parameter::Description&)
 	{
 		// handles rounding due to continuous...
 		const auto idx = juce::roundToInt(panIdx);
@@ -67,7 +67,7 @@ namespace Virus
 		return "Wave " + juce::String(idx + 1);
 	}
 
-	juce::String numToSatCurv(float idx, Parameter::Description)
+	juce::String numToSatCurv(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -92,7 +92,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToDistortionCurv(float idx, Parameter::Description)
+	juce::String numToDistortionCurv(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -113,7 +113,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToFilterMode(float idx, Parameter::Description)
+	juce::String numToFilterMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -130,7 +130,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToFilter2Mode(float idx, Parameter::Description)
+	juce::String numToFilter2Mode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -143,7 +143,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToFilterRouting(float idx, Parameter::Description)
+	juce::String numToFilterRouting(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -156,7 +156,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToEnvSusTime(float idx, Parameter::Description)
+	juce::String numToEnvSusTime(float idx, const Parameter::Description&)
 	{
 		// handles rounding due to continuous...
 		const auto ridx = juce::roundToInt(idx);
@@ -169,7 +169,7 @@ namespace Virus
 		return numTo7bitSigned(ridx);
 	}
 
-	juce::String numToLfoShape(float idx, Parameter::Description)
+	juce::String numToLfoShape(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -245,7 +245,7 @@ namespace Virus
 		default: return juce::String(idx);
 		}
 	}
-	juce::String numToDelayLfoShape(float idx, Parameter::Description)
+	juce::String numToDelayLfoShape(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -259,7 +259,7 @@ namespace Virus
 		default: return juce::String("");
 		}
 	}
-	juce::String numToOsc3Mode(float idx, Parameter::Description)
+	juce::String numToOsc3Mode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -336,9 +336,9 @@ namespace Virus
 		}
 	}
 
-	juce::String numToLfoMode(float v, Parameter::Description) { return juce::roundToInt(v) == 0 ? "Poly" : "Mono"; }
+	juce::String numToLfoMode(float v, const Parameter::Description&) { return juce::roundToInt(v) == 0 ? "Poly" : "Mono"; }
 
-	juce::String numToKeyMode(float idx, Parameter::Description)
+	juce::String numToKeyMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -353,7 +353,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToInputMode(float idx, Parameter::Description)
+	juce::String numToInputMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -366,7 +366,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToInputSelect(float idx, Parameter::Description)
+	juce::String numToInputSelect(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -384,7 +384,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToOutputSelect(float idx, Parameter::Description)
+	juce::String numToOutputSelect(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -408,7 +408,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToDelayReverbMode(float idx, Parameter::Description)
+	juce::String numToDelayReverbMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -444,7 +444,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToArpMode(float idx, Parameter::Description)
+	juce::String numToArpMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -460,7 +460,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToLfoDest(float idx, Parameter::Description)
+	juce::String numToLfoDest(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -475,22 +475,22 @@ namespace Virus
 		}
 	}
 
-	juce::String numToArpSwing(float idx, Parameter::Description)
+	juce::String numToArpSwing(float idx, const Parameter::Description&)
 	{
 		return juce::String(juce::roundToInt(50 + (75 - 50) * (idx / 127))) + "%";
 	}
 
-	juce::String numToNumPlusOne(float idx, Parameter::Description)
+	juce::String numToNumPlusOne(float idx, const Parameter::Description&)
 	{
 		return juce::String(juce::roundToInt(idx + 1));
 	}
 
-	juce::String numToClockTempo(float idx, Parameter::Description)
+	juce::String numToClockTempo(float idx, const Parameter::Description&)
 	{
 		return juce::String(juce::roundToInt(63 + (190 - 63) * (idx / 127))) + "BPM";
 	}
 
-	juce::String numToControlSmoothMode(float idx, Parameter::Description)
+	juce::String numToControlSmoothMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -503,17 +503,17 @@ namespace Virus
 		}
 	}
 
-	juce::String numToNegPos(float v, Parameter::Description)
+	juce::String numToNegPos(float v, const Parameter::Description&)
 	{
 		return juce::roundToInt(v) == 0 ? "Negative" : "Positive";
 	}
 
-	juce::String numToLinExp(float v, Parameter::Description)
+	juce::String numToLinExp(float v, const Parameter::Description&)
 	{
 		return juce::roundToInt(v) == 0 ? "Linear" : "Exponential";
 	}
 
-	juce::String numToModMatrixSource(float v, Parameter::Description)
+	juce::String numToModMatrixSource(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -550,7 +550,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToModMatrixDest(float v, Parameter::Description)
+	juce::String numToModMatrixDest(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -682,7 +682,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToSoftKnobDest(float v, Parameter::Description)
+	juce::String numToSoftKnobDest(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -809,7 +809,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToSoftKnobName(float idx, Parameter::Description) {
+	juce::String numToSoftKnobName(float idx, const Parameter::Description&) {
 		const char *softKnobNames[] = { "~Para","+3rds","+4ths","+5ths",
 			"+7ths","+Octave","Access","ArpMode","ArpOct","Attack",
 			"Balance","Chorus","Cutoff","Decay","Delay","Depth",
@@ -828,7 +828,7 @@ namespace Virus
 		return juce::String(idx);
 	}
 
-	juce::String numToUnisonMode(float v, Parameter::Description)
+	juce::String numToUnisonMode(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -853,7 +853,7 @@ namespace Virus
 		}
 	}
 
-	juce::String filterKeytrackBase(float v, Parameter::Description)
+	juce::String filterKeytrackBase(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -990,7 +990,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToOscFmMode(float idx, Parameter::Description)
+	juce::String numToOscFmMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -1012,7 +1012,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToVocoderMode(float idx, Parameter::Description)
+	juce::String numToVocoderMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -1034,7 +1034,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToInputFollowerMode(float idx, Parameter::Description)
+	juce::String numToInputFollowerMode(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -1053,7 +1053,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToMusicDivision(float idx, Parameter::Description)
+	juce::String numToMusicDivision(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -1084,7 +1084,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToPhaserMode(float v, Parameter::Description)
+	juce::String numToPhaserMode(float v, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(v);
 		switch (ridx)
@@ -1100,7 +1100,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToFilterSelect(float idx, Parameter::Description)
+	juce::String numToFilterSelect(float idx, const Parameter::Description&)
 	{
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
@@ -1112,7 +1112,7 @@ namespace Virus
 		}
 	}
 
-	juce::String numToCategory(float idx, Parameter::Description)
+	juce::String numToCategory(float idx, const Parameter::Description&)
 	{
 		const juce::Array<juce::String> categories = { "--", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
 							 "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
@@ -1124,7 +1124,7 @@ namespace Virus
 		return "Undefined";
 	}
 
-	juce::String numToBendRange(float idx, Parameter::Description) {
+	juce::String numToBendRange(float idx, const Parameter::Description&) {
 		const auto ridx = juce::roundToInt(idx);
 		switch (ridx)
 		{
@@ -1150,7 +1150,7 @@ namespace Virus
 		default: return juce::String("");
 		}
 	}
-	juce::String numToReverbRoomSize(float idx, Parameter::Description) {
+	juce::String numToReverbRoomSize(float idx, const Parameter::Description&) {
 		const auto ridx = juce::roundToInt(idx);
 
 		switch (ridx) {
@@ -1199,7 +1199,7 @@ namespace Virus
 		{Parameter::Page::A, Parameter::Class::PERFORMANCE_CONTROLLER, 32, "Bank Select", {0, 3 + 26}, numToBank,{}, false, true, false},
 		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 33, "Osc Balance", {0,127}, paramTo7bitSigned, textTo7bitSigned, true, false, false, true},
 		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 34, "Suboscillator Volume", {0,127}, {},{}, true, false, false},
-		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 35, "Suboscillator Shape", {0,1}, [](float v, Parameter::Description) { return juce::roundToInt(v) == 0 ? "Square" : "Triangle"; },{}, true, true, true},
+		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 35, "Suboscillator Shape", {0,1}, [](float v, const Parameter::Description&) { return juce::roundToInt(v) == 0 ? "Square" : "Triangle"; },{}, true, true, true},
 		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 36, "Osc Mainvolume", {0,127}, {},{}, true, false, false},
 		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 37, "Noise Volume", {0,127}, {},{}, true, false, false},
 		{Parameter::Page::A, Parameter::Class::SOUNDBANK_A, 38, "Ringmodulator Volume", {0,127}, {},{}, true, false, false},
