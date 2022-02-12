@@ -139,7 +139,7 @@ int main(int _argc, char* _argv[])
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
 
-	const auto romFile = findROM(ROMFile::getRomSizeModelABC());
+	const auto romFile = findROM(0);
 	if(romFile.empty())
 	{
 		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;

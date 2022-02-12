@@ -153,6 +153,13 @@ namespace synthLib
 
                     return file;
                 }
+                else
+                {
+	                LOG("Found ROM at path " << file);
+
+	                return file;
+                }
+
             }
             closedir(dir);
         }

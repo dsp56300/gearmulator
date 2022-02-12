@@ -107,9 +107,9 @@ public:
 	static std::string findROM();
 
 private:
-	std::vector<Chunk> readChunks();
+	std::vector<Chunk> readChunks(std::istream& _file);
 	bool loadPresetFiles();
-	bool loadPresetFile(const std::string& _filename);
+	bool loadPresetFile(std::istream& _file);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
@@ -120,4 +120,5 @@ private:
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;
 };
+
 }

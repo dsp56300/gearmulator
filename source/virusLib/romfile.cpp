@@ -3,6 +3,8 @@
 #include <algorithm>
 
 #include "romfile.h"
+#include "unpacker.h"
+#include "utils.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
@@ -37,9 +39,37 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 {
 	LOG("Init access virus");
 
-	auto chunks = readChunks();
+	// Open file
+	LOG("Loading ROM at " << m_file);
+	std::ifstream file(this->m_file, std::ios::binary | std::ios::ate);
+	if (!file.is_open()) {
+		LOG("Failed to load ROM at '" << m_file << "'");
+#ifdef _WIN32
+		const std::string errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
+		::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
+#endif
+		return;
+	}
 
-	if(chunks.empty())
+	std::istream *dsp = &file;
+	ROMUnpacker::Firmware fw;
+
+	// Check if we are dealing with a TI installer file, if so, unpack it first
+	if (ROMUnpacker::isValidInstaller(file)) {
+		fw = ROMUnpacker::getFirmware(file, ROMUnpacker::VirusTISnow);
+		if (!fw.isValid()) {
+			LOG("Could not unpack ROM file")
+			return;
+		}
+
+		// Wrap into a stream so we can pass it into readChunks
+		dsp = new imemstream(fw.DSP);  // TODO: will this be free'd?
+	}
+
+	const auto chunks = readChunks(*dsp);
+	file.close();
+
+	if (chunks.empty())
 		return;
 
 	bootRom.size = chunks[0].items[0];
@@ -70,7 +100,18 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 
 	if(m_model == ModelD)
 	{
-		loadPresetFiles();
+		if (!fw.Presets.empty())
+		{
+			for (auto& presetFile: fw.Presets)
+			{
+				imemstream stream(presetFile);
+				loadPresetFile(stream);
+			}
+		}
+		else
+		{
+			loadPresetFiles();
+		}
 	}
 }
 
@@ -82,42 +123,31 @@ std::string ROMFile::findROM()
 	return synthLib::findROM(getRomSizeModelABC());
 }
 
-std::vector<ROMFile::Chunk> ROMFile::readChunks()
+std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 {
-	// Open file
-	std::ifstream file(this->m_file, std::ios::binary | std::ios::ate);
-
-	const auto fileSize = file.tellg();
+	_file.seekg(0, std::ios_base::end);
+	const int fileSize = _file.tellg();
 
 	uint32_t offset = 0x70000;
 	int lastChunkId = 14;
 
-	if(fileSize >= 1024 * 1024)
+	if(fileSize == 1024 * 1024)
 	{
 		// D
 		m_model = ModelD;
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
-	else
+	else if (fileSize == 1024 * 512)
 	{
 		// ABC
 		m_model = ModelABC;
 		offset = 0x18000;
 		lastChunkId = 4;
-	}
-
-	if(!file.is_open())
-	{
-		LOG("Failed to load ROM at '" << m_file << "'");
-#ifdef _WIN32
-		const std::string errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
-		::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
-#endif
+	} else {
+		LOG("Invalid ROM, unexpected filesize")
 		return {};
 	}
-
-	LOG("Loading ROM at " << m_file);
 
 	std::vector<Chunk> chunks;
 	chunks.reserve(lastChunkId + 1);
@@ -125,14 +155,14 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks()
 	// Read all the chunks
 	for (int i = 0; i <= lastChunkId; i++)
 	{
-		file.seekg(offset);
+		_file.seekg(offset);
 
 		// Read buffer
 		Chunk chunk;
 		//file.read(reinterpret_cast<char *>(&chunk->chunk_id), 1);
-		file.read(reinterpret_cast<char*>(&chunk.chunk_id), 1);
-		file.read(reinterpret_cast<char*>(&chunk.size1), 1);
-		file.read(reinterpret_cast<char*>(&chunk.size2), 1);
+		_file.read(reinterpret_cast<char*>(&chunk.chunk_id), 1);
+		_file.read(reinterpret_cast<char*>(&chunk.size1), 1);
+		_file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
 		assert(chunk.chunk_id == lastChunkId - i);
 
@@ -142,7 +172,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks()
 		for (uint32_t j = 0; j < len; j++)
 		{
 			uint8_t buf[3];
-			file.read(reinterpret_cast<char*>(buf), 3);
+			_file.read(reinterpret_cast<char*>(buf), 3);
 			chunk.items.emplace_back((buf[0] << 16) | (buf[1] << 8) | buf[2]);
 		}
 
@@ -151,29 +181,31 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks()
 		offset += 0x8000;
 	}
 
-	file.close();
-
 	return chunks;
 }
 
 bool ROMFile::loadPresetFiles()
 {
-	bool res = loadPresetFile("S.bin");
-	res &= loadPresetFile("P.bin");
+	bool res;
+	for (auto &filename: {"S.bin", "P.bin"})
+	{
+		std::ifstream file(filename, std::ios::binary | std::ios::ate);
+		if (!file.is_open())
+		{
+			LOG("Failed to open preset file " << filename);
+			res &= false;
+			continue;
+		}
+		res &= loadPresetFile(file);
+		file.close();
+	}
 	return res;
 }
 
-bool ROMFile::loadPresetFile(const std::string& _filename)
+bool ROMFile::loadPresetFile(std::istream& _file)
 {
-	std::ifstream file(_filename, std::ios::binary | std::ios::ate);
-
-	const auto fileSize = file.tellg();
-
-	if (!file.is_open())
-	{
-		LOG("Failed to open preset file " << _filename);
-		return false;
-	}
+	_file.seekg(0, std::ios_base::end);
+	const auto fileSize = _file.tellg();
 
 	uint32_t singleCount = 0;
 	uint32_t multiCount = 0;
@@ -192,16 +224,16 @@ bool ROMFile::loadPresetFile(const std::string& _filename)
 	}
 	else
 	{
-		LOG("Unknown file size " << fileSize << " for preset file " << _filename);
+		LOG("Unknown file size " << fileSize << " for preset file");
 		return false;
 	}
 
-	file.seekg(0);
+	_file.seekg(0);
 
 	for(uint32_t i=0; i<singleCount; ++i)
 	{
 		TPreset single;
-		file.read(reinterpret_cast<char*>(&single), sizeof(single));
+		_file.read(reinterpret_cast<char*>(&single), sizeof(single));
 		m_singles.emplace_back(single);
 
 		LOG("Loaded single " << i << ", name = " << getSingleName(single));
@@ -210,12 +242,12 @@ bool ROMFile::loadPresetFile(const std::string& _filename)
 	if(multiCount)
 	{
 		const auto off = std::max(singleCount, multiOffset);
-		file.seekg(off);
+		_file.seekg(off);
 
 		for (uint32_t i = 0; i < multiCount; ++i)
 		{
 			TPreset multi;
-			file.read(reinterpret_cast<char*>(&multi), sizeof(multi));
+			_file.read(reinterpret_cast<char*>(&multi), sizeof(multi));
 			m_multis.emplace_back(multi);
 		}
 	}
@@ -288,6 +320,7 @@ bool ROMFile::getPreset(const uint32_t _offset, TPreset& _out) const
 	file.close();
 	return true;
 }
+
 std::string ROMFile::getSingleName(const TPreset& _preset)
 {
 	return getPresetName(_preset, 240, 249);
