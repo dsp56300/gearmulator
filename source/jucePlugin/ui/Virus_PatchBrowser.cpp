@@ -1,10 +1,11 @@
 #include "../VirusParameterBinding.h"
-#include "BinaryData.h"
-#include "Ui_Utils.h"
 #include "Virus_PatchBrowser.h"
 #include "VirusEditor.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_cryptography/juce_cryptography.h>
+
+#include "../../synthLib/midiToSysex.h"
+
 using namespace juce;
 using namespace virusLib;
 constexpr auto comboBoxWidth = 98;
@@ -15,14 +16,13 @@ const Array<String> categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "
 PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Controller& _controller) :
     m_parameterBinding(_parameterBinding),
     m_controller(_controller),
-    m_patchList("Patch browser"),
     m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
-    m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
-    m_search("Search Box")
+	m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
+    m_search("Search Box"),
+    m_patchList("Patch browser"),
+    m_properties(m_controller.getConfig())
 {
-    m_properties = m_controller.getConfig();
-    
-    auto bankDir = m_properties->getValue("virus_bank_dir", "");
+	const auto bankDir = m_properties->getValue("virus_bank_dir", "");
     if (bankDir != "" && File(bankDir).isDirectory())
     {
         m_bankList.setRoot(bankDir);
@@ -76,140 +76,88 @@ PresetVersion guessVersion(const uint8_t* _data)
 		return static_cast<PresetVersion>(_data[0]);
 	return PresetVersion::A;
 }
-int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false) {
+
+uint32_t PatchBrowser::load(const std::vector<std::vector<uint8_t>>& _packets, bool dedupe)
+{
+	uint32_t count = 0;
+	for (const auto& packet : _packets)
+	{
+		if (load(packet, dedupe))
+			++count;
+	}
+	return count;
+}
+
+bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
+{
+	if (_data.size() < 267)
+		return false;
+
+	auto* it = &_data.front();
+
+	if (*it == (uint8_t)0xf0
+		&& *(it + 1) == (uint8_t)0x00
+		&& *(it + 2) == (uint8_t)0x20
+		&& *(it + 3) == (uint8_t)0x33
+		&& *(it + 4) == (uint8_t)0x01
+		&& *(it + 6) == (uint8_t)virusLib::DUMP_SINGLE)
+	{
+		Patch patch;
+		patch.progNumber = m_patches.size();
+		patch.sysex = _data;
+		patch.data.insert(patch.data.begin(), _data.begin() + 9, _data.end());
+		patch.name = parseAsciiText(patch.data, 128 + 112);
+		patch.category1 = patch.data[251];
+		patch.category2 = patch.data[252];
+		patch.unison = patch.data[97];
+		patch.transpose = patch.data[93];
+		patch.model = guessVersion(&patch.data[0]);
+		auto md5 = MD5(it + 9 + 17, 256 - 17 - 3).toHexString();
+		if (!dedupe || !m_checksums.contains(md5)) {
+			m_checksums.set(md5, true);
+			m_patches.add(patch);
+		}
+
+		return true;
+	}
+	return false;
+}
+
+uint32_t PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false)
+{
     auto ext = file.getFileExtension().toLowerCase();
     auto path = file.getParentDirectory().getFullPathName();
-    int loadedCount = 0;
-    int index = _startIndex;
-    if (ext == ".syx")
+
+	if (ext == ".syx")
     {
         MemoryBlock data;
         if (!file.loadFileAsData(data)) {
             return 0;
         }
-        for (auto it = data.begin(); it != data.end(); it += 267)
-        {
-            if ((uint8_t)*it == (uint8_t)0xf0
-                    && (uint8_t)*(it+1) == (uint8_t)0x00
-                    && (uint8_t)*(it+2) == (uint8_t)0x20
-                    && (uint8_t)*(it+3) == (uint8_t)0x33
-                    && (uint8_t)*(it+4) == (uint8_t)0x01
-                    && (uint8_t)*(it+6) == (uint8_t)virusLib::DUMP_SINGLE)
-            {
-                Patch patch;
-                patch.progNumber = index;
-                data.copyTo(patch.data, 267*index + 9, 256);
-                patch.name = parseAsciiText(patch.data, 128 + 112);
-                patch.category1 = patch.data[251];
-                patch.category2 = patch.data[252];
-                patch.unison = patch.data[97];
-                patch.transpose = patch.data[93];
-                if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = PresetVersion::D;
-                }
-                else {
-                    patch.model = guessVersion(patch.data);
-                }
-                auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
-                if(!dedupe || !m_checksums.contains(md5)) {
-                    m_checksums.set(md5, true);
-                    m_patches.add(patch);
-                    index++;
-                }
-            }
-        }
+
+		std::vector<uint8_t> d;
+		d.resize(data.getSize());
+		memcpy(&d[0], data.getData(), data.getSize());
+
+        std::vector<std::vector<uint8_t>> packets;
+		splitMultipleSysex(packets, d);
+
+		return load(packets, dedupe);
     }
-    else if (ext == ".mid" || ext == ".midi")
+
+	if (ext == ".mid" || ext == ".midi")
     {
-        MemoryBlock data;
-        if (!file.loadFileAsData(data))
-        {
-            return 0;
-        }
+	    std::vector<uint8_t> data;
 
-        const uint8_t *ptr = (uint8_t *)data.getData();
-        const auto end = ptr + data.getSize();
+	    if (!synthLib::MidiToSysex::readFile(data, file.getFullPathName().getCharPointer()))
+		    return 0;
 
-        for (auto it = ptr; it < end; it += 1)
-        {
-            if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end) // we don't check for sysex eof so we can load TI banks
-            {
-                if ((uint8_t) *(it+1) == (uint8_t)0x00
-                    && (uint8_t)*(it+2) == 0x20
-                    && (uint8_t)*(it+3) == 0x33
-                    && (uint8_t)*(it+4) == 0x01
-                    && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
-                {
-                    auto syx = Virus::SysEx(it, it + 267);
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
+	    std::vector<std::vector<uint8_t>> packets;
+	    splitMultipleSysex(packets, data);
 
-                    Patch patch;
-                    patch.progNumber = index;
-                    std::copy(syx.begin() + 9, syx.end() - 2, patch.data);
-                    patch.name = parseAsciiText(patch.data, 128 + 112);
-                    patch.category1 = patch.data[251];
-                    patch.category2 = patch.data[252];
-                    patch.unison = patch.data[97];
-                    patch.transpose = patch.data[93];
-                    if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = PresetVersion::D;
-                    }
-                    else {
-                        patch.model = guessVersion(patch.data);
-                    }
-                    auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
-                    if(!dedupe || !m_checksums.contains(md5)) {
-                        m_checksums.set(md5, true);
-                        m_patches.add(patch);
-                        index++;
-                    }
-
-                    it += 266;
-                }
-                else if((uint8_t)*(it+3) == 0x00 // some midi files have two bytes after the 0xf0
-                    && (uint8_t)*(it+4) == 0x20
-                    && (uint8_t)*(it+5) == 0x33
-                    && (uint8_t)*(it+6) == 0x01
-                    && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)
-                {
-                    auto syx = Virus::SysEx();
-                    syx.push_back(0xf0);
-                    for (auto i = it + 3; i < it + 3 + 266; i++)
-                    {
-                        syx.push_back((uint8_t)*i);
-                    }
-                    syx[7] = 0x01; // force to bank a
-                    syx[266] = 0xf7;
-                    
-                    Patch patch;
-                    std::memcpy(patch.data, syx.data()+9, 256);
-                    patch.progNumber = index;
-                    patch.name = parseAsciiText(patch.data, 128 + 112);
-                    patch.category1 = patch.data[251];
-                    patch.category2 = patch.data[252];
-                    patch.unison = patch.data[97];
-                    patch.transpose = patch.data[93];
-                    if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
-                        patch.model = PresetVersion::D;
-                    }
-                    else {
-                        patch.model = guessVersion(patch.data);
-                    }
-                    auto md5 = MD5(it+2+9 + 17, 256-17-3).toHexString();
-                    if(!dedupe || !m_checksums.contains(md5)) {
-                        m_checksums.set(md5, true);
-                        m_patches.add(patch);
-                        index++;
-                    }
-                    loadedCount++;
-
-                    it += 266;
-                }
-            }
-        }
+	    return load(packets, dedupe);
     }
-    return index;
+    return 0;
 }
 
 void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
@@ -221,9 +169,9 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
         p.addItem("Add directory contents to patch list", [this, file]() {
             m_patches.clear();
             m_checksums.clear();
-            int lastIndex = 0;
+
             for (auto f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles)) {
-                lastIndex = loadBankFile(f.getFile(), lastIndex, true);
+                loadBankFile(f.getFile(), 0, true);
             }
             m_filteredPatches.clear();
             for(auto patch : m_patches) {
@@ -325,36 +273,23 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     g.fillRect(width - 1, 0, 1, height); // [7]
 }
 
-void PatchBrowser::selectedRowsChanged(int lastRowSelected) {
-    auto idx = m_patchList.getSelectedRow();
-    if (idx == -1) {
+void PatchBrowser::selectedRowsChanged(int lastRowSelected)
+{
+    const auto idx = m_patchList.getSelectedRow();
+
+	if (idx == -1)
         return;
-    }
-    uint8_t syxHeader[9] = {0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x00, 0x00};
-    syxHeader[8] = m_controller.isMultiMode() ? m_controller.getCurrentPart() : virusLib::ProgramType::SINGLE; // set edit buffer
-    const uint8_t syxEof = 0xF7;
-    uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-    uint8_t data[256];
-    for (int i = 0; i < 256; i++)
-    {
-        data[i] = m_filteredPatches[idx].data[i];
-        cs += data[i];
-    }
-    cs = cs & 0x7f;
-    Virus::SysEx syx;
-    for (auto i : syxHeader)
-    {
-        syx.push_back(i);
-    }
-    for (auto i : data)
-    {
-        syx.push_back(i);
-    }
-    syx.push_back(cs);
-    syx.push_back(syxEof);
-    m_controller.sendSysEx(syx); // send to edit buffer
-    m_controller.parseMessage(syx); // update ui
-    getParentComponent()->postCommandMessage(VirusEditor::Commands::UpdateParts);
+
+	// force to edit buffer
+    const auto part = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
+
+	auto sysex = m_filteredPatches[idx].sysex;
+	sysex[7] = 0;
+	sysex[8] = part;
+
+	m_controller.sendSysEx(sysex);
+
+	m_controller.sendSysEx(m_controller.constructMessage({ virusLib::REQUEST_SINGLE, 0x0, part }));
 }
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent &)
@@ -414,4 +349,27 @@ void PatchBrowser::sortOrderChanged(int newSortColumnId, bool isForwards)
         m_filteredPatches.sort(sorter);
         m_patchList.updateContent();
     }
+}
+
+void PatchBrowser::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src)
+{
+	for(size_t i=0; i<_src.size(); ++i)
+	{
+		if(_src[i] != 0xf0)
+			continue;
+
+		for(size_t j=i+1; j < _src.size(); ++j)
+		{
+			if(_src[j] == 0xf7)
+			{
+				std::vector<uint8_t> entry;
+				entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
+
+				_dst.emplace_back(entry);
+
+				i = j;
+				break;
+			}
+		}
+	}
 }
