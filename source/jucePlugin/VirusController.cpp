@@ -24,7 +24,7 @@ namespace Virus
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
-			const uint8_t prg = isMultiMode() ? 0x0 : 0x40;
+			const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 			sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, prg}));
 			sendSysEx(constructMessage({MessageType::REQUEST_MULTI, 0x0, prg}));
 
@@ -310,10 +310,10 @@ namespace Virus
 			return;
 		}
 
-		uint8_t pt = isMultiMode() ? part : 0x40;
-		auto &preset = m_singles[bank][prg];
+		uint8_t pt = isMultiMode() ? part : virusLib::SINGLE;
+        const auto &preset = m_singles[bank][prg];
 		SysEx patch = {MessageType::DUMP_SINGLE, 0x0, pt};
-		for (auto i = 0; i < kDataSizeInBytes; ++i)
+		for (size_t i = 0; i < std::size(preset.data); ++i)
 			patch.push_back(preset.data[i]);
 		sendSysEx(constructMessage(patch));
 		//sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
@@ -323,7 +323,7 @@ namespace Virus
 	}
 
 	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) { return m_currentBank[part]; }
-	uint8_t Controller::getCurrentPartProgram(uint8_t part) { return m_currentProgram[part]; }
+	uint8_t Controller::getCurrentPartProgram(uint8_t part) const { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
         constexpr auto pageSize = 128;
@@ -355,25 +355,24 @@ namespace Virus
 			else if (!isMultiMode() && patch.progNumber == 0x0)
 				return;
 
-			constexpr auto bankSize = kDataSizeInBytes / 2;
-			const auto ch = patch.progNumber == 0x40 ? 0 : patch.progNumber;
-			for (auto i = 0; i < kDataSizeInBytes; i++)
+			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
+			for (size_t i = 0; i < std::size(patch.data); i++)
 			{
-				if (auto *p = findSynthParam(ch, i >= bankSize ? 0x71 : 0x70, i % bankSize)) {
+				const uint8_t page = virusLib::PAGE_A + static_cast<uint8_t>(i / pageSize);
+				if (auto *p = findSynthParam(ch, page, i % pageSize))
+				{
 					if((p->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
 						continue;
-					else
-						p->setValueFromSynth(patch.data[i], true);
+					p->setValueFromSynth(patch.data[i], true);
 				}
 			}
-			if (onProgramChange) {
+			if (onProgramChange)
 				onProgramChange();
-			}
 		}
 		else
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
 
-        const auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
+        constexpr auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
         auto progName = parseAsciiText(msg, namePos);
         DBG(progName);
@@ -430,7 +429,7 @@ namespace Virus
 	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
 	{
 		uint8_t bank = 0xFF;
-		uint8_t part = 0x40;
+		uint8_t part = virusLib::SINGLE;
 		if (m.a & synthLib::M_CONTROLCHANGE)
 		{
 			part = m.a ^ synthLib::M_CONTROLCHANGE;
@@ -1979,7 +1978,7 @@ namespace Virus
     // TODO: B51-52 shortname?!? B54-B55 (same name?!)
 };
 
-    uint8_t Controller::copyData(const SysEx &src, int startPos, uint8_t *dst)
+    uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
     {
         uint8_t sum = 0;
         for (auto i = 0; i < kDataSizeInBytes; i++)
