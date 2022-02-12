@@ -4,7 +4,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_cryptography/juce_cryptography.h>
 
-#include "../synthLib/midiToSysex.h"
+#include "../../synthLib/midiToSysex.h"
 
 using namespace juce;
 using namespace virusLib;
