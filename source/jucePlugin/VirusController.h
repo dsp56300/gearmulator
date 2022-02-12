@@ -42,7 +42,7 @@ namespace Virus
         juce::Value *getParamValue(ParameterType _param);
         Parameter* getParameter(ParameterType _param);
         Parameter *getParameter(ParameterType _param, uint8_t _part);
-		uint8_t getVirusModel();
+		uint8_t getVirusModel() const;
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         juce::StringArray getMultiPresetsName() const;
@@ -50,15 +50,15 @@ namespace Virus
 		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t part, virusLib::BankNumber bank, uint8_t prg);
-        virusLib::BankNumber getCurrentPartBank(uint8_t part);
+        virusLib::BankNumber getCurrentPartBank(uint8_t part) const;
 		uint8_t getCurrentPartProgram(uint8_t part) const;
 		juce::String getCurrentPartPresetName(uint8_t part);
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(uint8_t _part) { m_currentPart = _part; }
 		void parseMessage(const SysEx &);
-		void sendSysEx(const SysEx &);
-        void onStateLoaded();
+		void sendSysEx(const SysEx &) const;
+        void onStateLoaded() const;
 		juce::PropertiesFile* getConfig() { return m_config; }
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
@@ -121,14 +121,14 @@ namespace Virus
         void parseParamChange(const SysEx &);
         void parseControllerDump(synthLib::SMidiEvent &);
 
-        std::vector<uint8_t> constructMessage(SysEx msg);
+        std::vector<uint8_t> constructMessage(SysEx msg) const;
 
         AudioPluginAudioProcessor &m_processor;
         juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
-        virusLib::BankNumber m_currentBank[16];
-        uint8_t m_currentProgram[16];
+        virusLib::BankNumber m_currentBank[16]{};
+        uint8_t m_currentProgram[16]{};
 		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
     };
