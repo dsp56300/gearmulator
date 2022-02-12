@@ -428,17 +428,17 @@ namespace Virus
 
 	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
 	{
-		uint8_t bank;
+		uint8_t page;
 		uint8_t part;
 		if (m.a & synthLib::M_CONTROLCHANGE)
 		{
 			part = m.a ^ synthLib::M_CONTROLCHANGE;
-			bank = 0x0;
+			page = 0x0;
 		}
 		else if (m.a & synthLib::M_POLYPRESSURE)
 		{
 			part = m.a ^ synthLib::M_POLYPRESSURE;
-			bank = 0x1;
+			page = 0x1;
 		}
 		else
 		{
@@ -447,7 +447,7 @@ namespace Virus
 		}
 		jassert(bank != 0xFF);
 		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, bank == 0 ? "A" : "B", m.b, m.c));
-		findSynthParam(part, bank, m.b)->setValueFromSynth(m.c, true);
+		findSynthParam(part, page, m.b)->setValueFromSynth(m.c, true);
 	}
 
     uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
