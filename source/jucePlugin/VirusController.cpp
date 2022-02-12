@@ -104,7 +104,7 @@ namespace Virus
         if (msg[msg.size() - 1] != 0xf7)
             return; // invalid end?!?
 
-        for (auto i = 0; i < msg.size(); ++i)
+        for (size_t i = 0; i < msg.size(); ++i)
         {
             if (i < 5)
             {
@@ -183,7 +183,7 @@ namespace Virus
 
     juce::Value* Controller::getParamValue(const ParameterType _param)
     {
-		auto res = getParameter(_param);
+	    const auto res = getParameter(_param);
 		return res ? &res->getValueObject() : nullptr;
     }
 
@@ -205,14 +205,14 @@ namespace Virus
 			return nullptr;
 
 		const auto &index = it->second;
-		
-		ParamIndex paramIndex{index.page, _part, index.paramNum};
+
+		const ParamIndex paramIndex{index.page, _part, index.paramNum};
 		return findSynthParam(paramIndex);
 	}
 
     void Controller::parseParamChange(const SysEx &msg)
     {
-        const auto pos = kHeaderWithMsgCodeLen - 1;
+        constexpr auto pos = kHeaderWithMsgCodeLen - 1;
         const auto value = msg[pos + 3];
 		const auto bank = msg[pos];
 		const auto ch = msg[pos + 1];
@@ -244,7 +244,7 @@ namespace Virus
         ignored
          */
     }
-	uint8_t Controller::getVirusModel()
+	uint8_t Controller::getVirusModel() const
 	{
 		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
 	}
@@ -272,15 +272,15 @@ namespace Virus
     juce::StringArray Controller::getMultiPresetsName() const
     {
         juce::StringArray bankNames;
-        for (auto i = 0; i < 128; i++)
-            bankNames.add(parseAsciiText(m_multis[i].data, 0));
+        for (const auto& m_multi : m_multis)
+	        bankNames.add(parseAsciiText(m_multi.data, 0));
         return bankNames;
     }
 	void Controller::setSinglePresetName(uint8_t part, juce::String _name) {
 		constexpr uint8_t asciiStart = 112;
 		_name = _name.substring(0,kNameLength).paddedRight(' ', kNameLength);
 		for (int i = 0; i < kNameLength; i++) {
-			getParamValue(part, 1, asciiStart+i)->setValue((uint8_t)_name[i]);
+			getParamValue(part, 1, asciiStart+i)->setValue(static_cast<uint8_t>(_name[i]));
 		}
 	}
 	juce::String Controller::getCurrentPartPresetName(uint8_t part)
@@ -291,7 +291,7 @@ namespace Virus
 		text[kNameLength] = 0; // termination
 		for (auto pos = 0; pos < kNameLength; ++pos)
 			text[pos] = static_cast<int>(getParamValue(part, 1, asciiStart + pos)->getValue());
-		return juce::String(text);
+		return {text};
 	}
 
 	void Controller::setCurrentPartPreset(uint8_t part, virusLib::BankNumber _bank, uint8_t prg)
@@ -322,7 +322,7 @@ namespace Virus
 		m_currentProgram[part] = prg;
 	}
 
-	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) { return m_currentBank[part]; }
+	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) const { return m_currentBank[part]; }
 	uint8_t Controller::getCurrentPartProgram(uint8_t part) const { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
@@ -352,7 +352,7 @@ namespace Virus
 			// the logic to maintain this is done by listening the global single/multi param.
 			if (isMultiMode() && patch.progNumber == virusLib::SINGLE)
 				return;
-			else if (!isMultiMode() && patch.progNumber == 0x0)
+			if (!isMultiMode() && patch.progNumber == 0x0)
 				return;
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
@@ -396,7 +396,7 @@ namespace Virus
 
 		/* If it's a multi edit buffer, set the part page C single parameters to their multi equivalents */
 		if (patch.bankNumber == 0) {
-			for (auto pt = 0; pt < 16; pt++) {
+			for (uint8_t pt = 0; pt < 16; pt++) {
 				for(int i = 0; i < 8; i++) {
 					if (auto* p = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL+i)) {
 						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i*16) + pt], true);
@@ -408,7 +408,7 @@ namespace Virus
 /*				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
 				}*/
-				m_currentBank[pt] = (virusLib::BankNumber)(patch.data[virusLib::MD_PART_BANK_NUMBER + pt]+1);
+				m_currentBank[pt] = static_cast<virusLib::BankNumber>(patch.data[virusLib::MD_PART_BANK_NUMBER + pt] + 1);
 				m_currentProgram[pt] = patch.data[virusLib::MD_PART_PROGRAM_NUMBER + pt];
 			}
 		}
@@ -428,33 +428,28 @@ namespace Virus
 
 	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
 	{
-		uint8_t bank = 0xFF;
-		uint8_t part = virusLib::SINGLE;
-		if (m.a & synthLib::M_CONTROLCHANGE)
-		{
-			part = m.a ^ synthLib::M_CONTROLCHANGE;
-			bank = 0x0;
-		}
-		else if (m.a & synthLib::M_POLYPRESSURE)
-		{
-			part = m.a ^ synthLib::M_POLYPRESSURE;
-			bank = 0x1;
-		}
+		const uint8_t status = m.a & 0xf0;
+    	const uint8_t part = m.a & 0x0f;
+
+		uint8_t page;
+
+		if (status == synthLib::M_CONTROLCHANGE)
+			page = virusLib::PAGE_A;
+		else if (status == synthLib::M_POLYPRESSURE)
+			page = virusLib::PAGE_B;
 		else
-		{
-			jassertfalse;
 			return;
-		}
-		jassert(bank != 0xFF);
-		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, bank == 0 ? "A" : "B", m.b,
-									m.c));
-		findSynthParam(part, bank, m.b)->setValueFromSynth(m.c, true);
+
+		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, page == 0 ? "A" : "B", m.b, m.c));
+		auto* p = findSynthParam(part, page, m.b);
+		if(p)
+			p->setValueFromSynth(m.c, true);
 	}
 
     uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
     {
         uint8_t sum = 0;
-        for (auto i = 0; i < kDataSizeInBytes; i++)
+        for (size_t i = 0; i < src.size(); i++)
         {
             dst[i] = src[startPos + i];
             sum += dst[i];
@@ -468,19 +463,19 @@ namespace Virus
         text[kNameLength] = 0; // termination
         for (auto pos = 0; pos < kNameLength; ++pos)
             text[pos] = msg[start + pos];
-        return juce::String(text);
+        return {text};
     }
 
     void Controller::printMessage(const SysEx &msg) const
     {
         for (auto &m : msg)
         {
-            std::cout << std::hex << (int)m << ",";
+            std::cout << std::hex << static_cast<int>(m) << ",";
         }
         std::cout << std::endl;
     }
 
-    void Controller::sendSysEx(const SysEx &msg)
+    void Controller::sendSysEx(const SysEx &msg) const
     {
         synthLib::SMidiEvent ev;
         ev.sysex = msg;
@@ -488,12 +483,12 @@ namespace Virus
         m_processor.addMidiEvent(ev);
     }
 
-    void Controller::onStateLoaded()
+    void Controller::onStateLoaded() const
     {
 		sendSysEx(constructMessage({ MessageType::REQUEST_TOTAL }));
 	}
 
-    std::vector<uint8_t> Controller::constructMessage(SysEx msg)
+    std::vector<uint8_t> Controller::constructMessage(SysEx msg) const
     {
         const uint8_t start[] = {0xf0, 0x00, 0x20, 0x33, 0x01, static_cast<uint8_t>(m_deviceId)};
         msg.insert(msg.begin(), std::begin(start), std::end(start));
@@ -506,7 +501,7 @@ namespace Virus
         const juce::ScopedLock sl(m_eventQueueLock);
         for (auto msg : m_virusOut)
         {
-            if (msg.sysex.size() == 0)
+            if (msg.sysex.empty())
             {
                 // no sysex
 				parseControllerDump(msg);
