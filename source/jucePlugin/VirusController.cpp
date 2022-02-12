@@ -448,10 +448,13 @@ namespace Virus
     uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
     {
         uint8_t sum = 0;
-        for (size_t i = 0; i < src.size(); i++)
+
+    	size_t iSrc = startPos;
+
+        for (size_t iDst = 0; iSrc < src.size() && iDst < dst.size(); ++iSrc, ++iDst)
         {
-            dst[i] = src[startPos + i];
-            sum += dst[i];
+            dst[iDst] = src[iSrc];
+            sum += dst[iDst];
         }
         return sum;
     }
