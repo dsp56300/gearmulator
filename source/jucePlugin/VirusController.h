@@ -62,6 +62,7 @@ namespace Virus
 		juce::PropertiesFile* getConfig() { return m_config; }
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
+		std::vector<uint8_t> constructMessage(SysEx msg) const;
 
     private:
 		void timerCallback() override;
@@ -120,8 +121,6 @@ namespace Virus
         void parseMulti(const SysEx &);
         void parseParamChange(const SysEx &);
         void parseControllerDump(synthLib::SMidiEvent &);
-
-        std::vector<uint8_t> constructMessage(SysEx msg) const;
 
         AudioPluginAudioProcessor &m_processor;
         juce::CriticalSection m_eventQueueLock;
