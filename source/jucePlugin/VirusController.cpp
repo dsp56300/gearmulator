@@ -13,7 +13,7 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
-		assert(m_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
+		assert(g_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
 		opts.filenameSuffix = ".settings";
@@ -448,10 +448,13 @@ namespace Virus
     uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
     {
         uint8_t sum = 0;
-        for (size_t i = 0; i < src.size(); i++)
+
+    	size_t iSrc = startPos;
+
+        for (size_t iDst = 0; iSrc < src.size() && iDst < dst.size(); ++iSrc, ++iDst)
         {
-            dst[i] = src[startPos + i];
-            sum += dst[i];
+            dst[iDst] = src[iSrc];
+            sum += dst[iDst];
         }
         return sum;
     }
