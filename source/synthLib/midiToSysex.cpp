@@ -39,9 +39,9 @@ namespace synthLib
 				while (bReadNextEvent)
 				{
 					int numBytesRead;
-					const auto len = readVarLen(hFile, &numBytesRead);
+					const auto timestamp = readVarLen(hFile, &numBytesRead);
 
-					if (len == ~0)
+					if (timestamp == -1)
 					{
 						LOG("Failed to read variable length variable");
 						fclose(hFile);
@@ -53,39 +53,38 @@ namespace synthLib
 					switch (event)
 					{
 					case 0xf0: // that's what we're searching for, sysex data
-					{
-						const auto sysExLen = readVarLen(hFile, &numBytesRead);
+						{
+							const auto sysExLen = readVarLen(hFile, &numBytesRead);
 
-						std::vector<uint8_t> sysex;
-						sysex.resize(sysExLen + 1);
+							std::vector<uint8_t> sysex;
+							sysex.resize(sysExLen + 1);
 
-						sysex[0] = 0xf0;
+							sysex[0] = 0xf0;
 
-						fread(&sysex[1], sysExLen, 1, hFile);
+							fread(&sysex[1], sysExLen, 1, hFile);
 
-						_sysexMessages.insert(_sysexMessages.end(), sysex.begin(), sysex.end());
-						
-					}
-					break;
+							_sysexMessages.insert(_sysexMessages.end(), sysex.begin(), sysex.end());
+						}
+						break;
 
 					case 0xff:	// meta event
-					{
-						const auto metaEvent = getc(hFile);
-						const auto eventLen = getc(hFile);
-
-						switch (metaEvent)
 						{
-						case 0x2f:
-							// track end
-							bReadNextEvent = false;
-							break;
-						default:
-							std::vector<char> buffer;
-							buffer.resize(eventLen);
-							fread(&buffer[0], eventLen, 1, hFile);
+							const auto metaEvent = getc(hFile);
+							const auto eventLen = getc(hFile);
+
+							switch (metaEvent)
+							{
+							case 0x2f:
+								// track end
+								bReadNextEvent = false;
+								break;
+							default:
+								std::vector<char> buffer;
+								buffer.resize(eventLen);
+								fread(&buffer[0], eventLen, 1, hFile);
+							}
 						}
-					}
-					break;
+						break;
 					default:
 						// Other events like notes, .....
 						break;
@@ -103,7 +102,8 @@ namespace synthLib
 	{
 		char readChunk[4];
 
-		fread(readChunk, 4, 1, hFile);
+		if (!fread(readChunk, 4, 1, hFile))
+			return false;
 
 		if (readChunk[0] == _pCompareChunk[0] && readChunk[1] == _pCompareChunk[1] &&
 			readChunk[2] == _pCompareChunk[2] && readChunk[3] == _pCompareChunk[3])
@@ -133,7 +133,7 @@ namespace synthLib
 		return true;
 	}
 
-	uint32_t MidiToSysex::readVarLen(FILE* hFile, int* _pNumBytesRead)
+	int32_t MidiToSysex::readVarLen(FILE* hFile, int* _pNumBytesRead)
 	{
 		uint32_t value;
 		uint8_t c;
