@@ -294,9 +294,9 @@ namespace Virus
 		return {text};
 	}
 
-	void Controller::setCurrentPartPreset(uint8_t part, virusLib::BankNumber _bank, uint8_t prg)
+	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)
 	{
-    	if(_bank == virusLib::BankNumber::EditBuffer || prg < 0 || prg > 127)
+    	if(_bank == virusLib::BankNumber::EditBuffer || _prg > 127)
     	{
 			jassertfalse;
 			return;
@@ -310,16 +310,15 @@ namespace Virus
 			return;
 		}
 
-		uint8_t pt = isMultiMode() ? part : virusLib::SINGLE;
-        const auto &preset = m_singles[bank][prg];
-		SysEx patch = {MessageType::DUMP_SINGLE, 0x0, pt};
-		for (size_t i = 0; i < std::size(preset.data); ++i)
-			patch.push_back(preset.data[i]);
-		sendSysEx(constructMessage(patch));
-		//sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		const uint8_t pt = isMultiMode() ? _part : virusLib::SINGLE;
+
+		sendSysEx(constructMessage({ MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank) }));
+		sendSysEx(constructMessage({ MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg }));
+
 		sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, pt}));
-		m_currentBank[part] = _bank;
-		m_currentProgram[part] = prg;
+
+		m_currentBank[_part] = _bank;
+		m_currentProgram[_part] = _prg;
 	}
 
 	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) const { return m_currentBank[part]; }
