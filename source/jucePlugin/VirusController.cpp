@@ -13,7 +13,7 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
     {
-		assert(m_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
+		assert(g_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
 		opts.filenameSuffix = ".settings";
