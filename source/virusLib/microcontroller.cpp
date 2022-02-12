@@ -301,28 +301,16 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 	{
 	case M_PROGRAMCHANGE:
 		{
-			TPreset single;
-
 			if(singleMode)
-			{
-				if(getSingle(fromArrayIndex(m_currentBank), _ev.b, single))
-				{
-					m_currentSingle = _ev.b;
-					return writeSingle(BankNumber::EditBuffer, SINGLE, single);
-				}
-			}
-			else
-			{
-				return partProgramChange(channel, _ev.b);
-			}
+				return partProgramChange(SINGLE, _ev.b);
+			return partProgramChange(channel, _ev.b);
 		}
-		break;
 	case M_CONTROLCHANGE:
 		switch(_ev.b)
 		{
 		case MC_BANKSELECTLSB:
 			if(singleMode)
-				m_currentBank = _ev.c % m_singles.size();
+				partBankSelect(SINGLE, _ev.c, false);
 			else
 				partBankSelect(channel, _ev.c, false);
 			return true;
@@ -854,7 +842,14 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
 {
-	m_multiEditBuffer[MD_PART_BANK_NUMBER + _part] = _value % m_singles.size();
+	if(_part == SINGLE)
+	{
+		const auto bankIndex = static_cast<uint8_t>(toArrayIndex(fromMidiByte(_value)) % m_singles.size());
+		m_currentBank = bankIndex;
+		return true;
+	}
+
+	m_multiEditBuffer[MD_PART_BANK_NUMBER + _part] = _value;
 
 	if(_immediatelySelectSingle)
 		return partProgramChange(_part, m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part]);
@@ -865,6 +860,16 @@ bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, 
 bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _value)
 {
 	TPreset single;
+
+	if(_part == SINGLE)
+	{
+		if (getSingle(fromArrayIndex(m_currentBank), _value, single))
+		{
+			m_currentSingle = _value;
+			return writeSingle(BankNumber::EditBuffer, SINGLE, single);
+		}
+		return false;
+	}
 
 	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
