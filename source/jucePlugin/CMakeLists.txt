@@ -29,6 +29,7 @@ juce_add_plugin(jucePlugin
 )
 target_sources(jucePlugin 
 PRIVATE
+	parameterDescriptions_C.json
     PluginEditor.cpp
     PluginEditor.h
     PluginProcessor.cpp
@@ -60,6 +61,8 @@ PRIVATE
 	VirusParameterBinding.h
 	VirusParameterDescription.cpp
 	VirusParameterDescription.h
+	VirusParameterDescriptions.cpp
+	VirusParameterDescriptions.h
 	version.h
 )
 
@@ -93,6 +96,7 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/knobs/GenBlue_70x70_100.png"
         "assets/knobs/GenRed_70x70_100.png"
         "assets/knobs/multi_18x18_100.png"
+		"parameterDescriptions_C.json"
 )
 
 target_compile_definitions(jucePlugin 
