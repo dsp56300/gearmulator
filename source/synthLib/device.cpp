@@ -76,7 +76,7 @@ namespace synthLib
 
 	void Device::setLatencySamples(const uint32_t _size)
 	{
-		const uint32_t maxLatency = static_cast<uint32_t>(getPeriph().getEsai().getAudioInputs()[0].capacity()) >> 1;
+		const uint32_t maxLatency = static_cast<uint32_t>(getPeriphX().getEsai().getAudioInputs()[0].capacity()) >> 1;
 
 		m_latency = std::min(_size, maxLatency);
 

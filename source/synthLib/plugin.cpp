@@ -115,8 +115,6 @@ namespace synthLib
 		if(_bpm < 1.0f)
 			return;
 
-		auto needsStart = false;
-
 		if(_isPlaying && !m_isPlaying)
 		{
 			const uint32_t beat = dsp56k::floor_int(_ppqPos);
@@ -125,7 +123,7 @@ namespace synthLib
 			{
 				// start
 				m_isPlaying = true;
-				needsStart = true;
+				m_needsStart = true;
 			}
 			m_lastKnownBeat = beat;
 		}
@@ -174,7 +172,7 @@ namespace synthLib
 					{
 						if(static_cast<int>(it->offset) > insertPos)
 						{
-							evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+							evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
 							evClock.offset = insertPos;
 							m_midiIn.insert(it, evClock);
 							found = true;
@@ -185,13 +183,14 @@ namespace synthLib
 
 				if(midiEventsEmpty || !found)
 				{
-					evClock.a = needsStart ? M_START : M_TIMINGCLOCK;
+					evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
 					evClock.offset = insertPos;
 					m_midiIn.push_back(evClock);
 				}
 
-				needsStart = false;
 				m_clockTickPos += 1.0f;
+
+				m_needsStart = false;
 			}
 		}
 	}

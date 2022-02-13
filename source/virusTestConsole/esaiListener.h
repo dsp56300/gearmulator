@@ -18,7 +18,7 @@ class EsaiListener
 public:
 	using TCallback = std::function<void(EsaiListener* _listener, uint32_t)>;
 
-	EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, uint8_t _outChannels, TCallback _callback);
+	EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, uint8_t _outChannels, TCallback _callback, uint32_t _samplerate);
 
 private:
 	void onAudioCallback(dsp56k::Audio* _audio);
@@ -33,4 +33,5 @@ private:
 	int ctr = 0;
 	size_t g_nextWriteSize;
 	const TCallback m_callback;
+	const uint32_t m_samplerate;
 };
