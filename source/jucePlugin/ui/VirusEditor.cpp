@@ -152,7 +152,7 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     if (!processorRef.isPluginValid())
         message += "\n\nNo ROM, no sound!\nCopy ROM next to plugin, must end with .bin";
     message += "\n\nTo donate: paypal.me/dsp56300";
-    std::string model(m_controller.getVirusModel() == virusLib::VirusModel::B ? "B" : "C");
+    std::string model(m_controller.getVirusModel() == virusLib::PresetVersion::B ? "B" : "C");
     message += "\n\nROM Loaded: " + _processorRef.getRomName();
     m_version.setText(message, NotificationType::dontSendNotification);
     m_version.setBounds(94, 2, 220, 150);

@@ -58,6 +58,8 @@ PRIVATE
 	VirusParameter.h
 	VirusParameterBinding.cpp
 	VirusParameterBinding.h
+	VirusParameterDescription.cpp
+	VirusParameterDescription.h
 	version.h
 )
 
@@ -179,6 +181,8 @@ PRIVATE
 	VirusParameter.h
 	VirusParameterBinding.cpp
 	VirusParameterBinding.h
+	VirusParameterDescription.cpp
+	VirusParameterDescription.h
 	version.h
 )
 

@@ -58,9 +58,9 @@ public:
 
 	Model getModel() const { return m_model; }
 
-	uint32_t getMultiPresetSize() const
+	static uint32_t getMultiPresetSize(const Model _model)
 	{
-		switch (m_model)
+		switch (_model)
 		{
 		case ModelD:
 			return 256;
@@ -68,8 +68,12 @@ public:
 			return 256;
 		}
 	}
+	uint32_t getMultiPresetSize() const
+	{
+		return getMultiPresetSize(m_model);
+	}
 
-	static uint32_t getSinglePresetSize(Model _model)
+	static uint32_t getSinglePresetSize(const Model _model)
 	{
 		switch (_model)
 		{

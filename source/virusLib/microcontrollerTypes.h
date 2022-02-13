@@ -143,7 +143,7 @@ namespace virusLib
 		MD_PART_PROG_CHANGE_ENABLE
 	};
 
-	enum Page
+	enum Page : uint8_t
 	{
 		PAGE_A = 0x70,
 		PAGE_B = 0x71,
@@ -178,13 +178,16 @@ namespace virusLib
 		H,
 		Count
 	};
-	enum VirusModel : uint8_t
+
+	enum PresetVersion : uint8_t
 	{
-		A,
-		B,
-		C,
-		TI
+		A = 0x00,		// 0-4 = OS 1 & OS 2, 5 = OS 3
+		B = 0x06,		// OS 4
+		C = 0x07,		// OS 6
+		D = 0x08,
+		D2 = 0x0C,
 	};
+
 	uint8_t toMidiByte(BankNumber _bank);
 	BankNumber fromMidiByte(uint8_t _byte);
 	uint32_t toArrayIndex(BankNumber _bank);

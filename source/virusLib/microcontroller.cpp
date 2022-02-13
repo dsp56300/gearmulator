@@ -13,6 +13,8 @@ using namespace synthLib;
 constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
 constexpr uint32_t g_sysexPresetHeaderSize = 9;
+constexpr uint32_t g_sysexPresetFooterSize = 2;	// checksum, f7
+
 constexpr uint32_t g_singleRamBankCount = 2;
 
 constexpr uint8_t g_pageA[] = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D,
@@ -299,28 +301,16 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 	{
 	case M_PROGRAMCHANGE:
 		{
-			TPreset single;
-
 			if(singleMode)
-			{
-				if(getSingle(fromArrayIndex(m_currentBank), _ev.b, single))
-				{
-					m_currentSingle = _ev.b;
-					return writeSingle(BankNumber::EditBuffer, SINGLE, single);
-				}
-			}
-			else
-			{
-				return partProgramChange(channel, _ev.b);
-			}
+				return partProgramChange(SINGLE, _ev.b);
+			return partProgramChange(channel, _ev.b);
 		}
-		break;
 	case M_CONTROLCHANGE:
 		switch(_ev.b)
 		{
 		case MC_BANKSELECTLSB:
 			if(singleMode)
-				m_currentBank = _ev.c % m_singles.size();
+				partBankSelect(SINGLE, _ev.c, false);
 			else
 				partBankSelect(channel, _ev.c, false);
 			return true;
@@ -395,13 +385,17 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 		// checksum for ABC models comes after 256 bytes of preset data
 		response.push_back(calcChecksum(response, 5));
 
-		if(size > modelABCsize)
+		// editor cannot handle D presets yet
+		if(_source != MidiEventSourceEditor)
 		{
-			for (size_t i = modelABCsize; i < size; ++i)
-				response.push_back(_dump[i]);
+			if (size > modelABCsize)
+			{
+				for (size_t i = modelABCsize; i < size; ++i)
+					response.push_back(_dump[i]);
 
-			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
-			response.push_back(calcChecksum(response, 5));
+				// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
+				response.push_back(calcChecksum(response, 5));
+			}
 		}
 
 		response.push_back(M_ENDOFSYSEX);
@@ -541,29 +535,30 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
-				TPreset dump;
+				TPreset preset;
+				preset.fill(0);
 				if(_data.size() == 524 && m_rom.getModel() == ROMFile::ModelD)
 				{
 					// D preset
 					auto data(_data);
 
 					data.erase(data.begin() + 0x100 + g_sysexPresetHeaderSize);	// A/B/C checksum, not needed on D
-					std::copy_n(data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
+					std::copy_n(data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
 				}
 				else
 				{
-					std::copy_n(_data.data() + g_sysexPresetHeaderSize, m_rom.getSinglePresetSize(), dump.begin());
+					std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
 				}
-				return writeSingle(bank, program, dump);
+				return writeSingle(bank, program, preset);
 			}
 		case DUMP_MULTI:
 			{
 				const auto bank = fromMidiByte(_data[7]);
 				const uint8_t program = _data[8];
 				LOG("Received Multi dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
-				TPreset dump;
-				std::copy_n(_data.data() + g_sysexPresetHeaderSize, dump.size(), dump.begin());
-				return writeMulti(bank, program, dump);
+				TPreset preset;
+				std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
+				return writeMulti(bank, program, preset);
 			}
 		case REQUEST_SINGLE:
 			{
@@ -683,6 +678,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 					}
 				}
 
+				// bounce back to UI
+				SMidiEvent ev;
+				ev.sysex = _data;
+				ev.source = MidiEventSourceEditor;	// don't send to output
+				_responses.push_back(ev);
+
 				return send(page, part, param, value, _cancelIfFull);
 			}
 		default:
@@ -703,32 +704,35 @@ void Microcontroller::waitUntilBufferEmpty() const
 
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
 {
-	size_t idx = 0;
+	const auto deviceType = getPresetVersion(_preset);
+	const auto presetModel = deviceType <= C ? ROMFile::ModelABC : ROMFile::ModelD;
 
-	const auto targetSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
+	const auto targetByteSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
+	const auto sourceByteSize = _isMulti ? ROMFile::getMultiPresetSize(presetModel) : ROMFile::getSinglePresetSize(presetModel);
 
-	const auto presetSize = std::min(static_cast<uint32_t>(_preset.size()), targetSize);
-
-	const auto size = (presetSize + 2) / 3;
+	const auto sourceWordSize = (sourceByteSize + 2) / 3;
+	const auto targetWordSize = (targetByteSize + 2) / 3;
 
 	std::vector<TWord> preset;
-	preset.resize(size);
+	preset.resize(targetWordSize, 0);
 
-	for (size_t i = 0; i < size; i++)
+	size_t idx = 0;
+	for (size_t i = 0; i < sourceWordSize; i++)
 	{
-		if (i == (size-1))
+		if (i == (sourceWordSize - 1))
 		{
-			if(idx < presetSize)
+			if (idx < sourceByteSize)
 				preset[i] = _preset[idx] << 16;
-			if ((idx+1) < presetSize)
-				preset[i] |= _preset[idx+1] << 8;
-			if ((idx+2) < presetSize)
-				preset[i] |= _preset[idx+2];
+			if ((idx + 1) < sourceByteSize)
+				preset[i] |= _preset[idx + 1] << 8;
+			if ((idx + 2) < sourceByteSize)
+				preset[i] |= _preset[idx + 2];
 		}
-		else
+		else if (i < sourceWordSize)
 		{
 			preset[i] = ((_preset[idx] << 16) | (_preset[idx + 1] << 8) | _preset[idx + 2]);
 		}
+
 		idx += 3;
 	}
 
@@ -842,7 +846,14 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
 {
-	m_multiEditBuffer[MD_PART_BANK_NUMBER + _part] = _value % m_singles.size();
+	if(_part == SINGLE)
+	{
+		const auto bankIndex = static_cast<uint8_t>(toArrayIndex(fromMidiByte(_value)) % m_singles.size());
+		m_currentBank = bankIndex;
+		return true;
+	}
+
+	m_multiEditBuffer[MD_PART_BANK_NUMBER + _part] = _value;
 
 	if(_immediatelySelectSingle)
 		return partProgramChange(_part, m_multiEditBuffer[MD_PART_PROGRAM_NUMBER + _part]);
@@ -853,6 +864,16 @@ bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, 
 bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _value)
 {
 	TPreset single;
+
+	if(_part == SINGLE)
+	{
+		if (getSingle(fromArrayIndex(m_currentBank), _value, single))
+		{
+			m_currentSingle = _value;
+			return writeSingle(BankNumber::EditBuffer, SINGLE, single);
+		}
+		return false;
+	}
 
 	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
@@ -1025,6 +1046,11 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 		m_pendingMidiEvents.pop_front();
 		--size;
 	}	
+}
+
+PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
+{
+	return static_cast<PresetVersion>(_preset[0]);
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
