@@ -43,7 +43,8 @@ namespace Virus
 			bool isDiscrete;
 			bool isBool;
 			bool isBipolar;
-        };
+			std::string toText;
+		};
 
         Parameter(Controller &, const Description desc, uint8_t partNum = 0x40);
 
