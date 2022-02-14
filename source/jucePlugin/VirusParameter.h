@@ -109,7 +109,7 @@ namespace Virus
         Controller &m_ctrl;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
-		uint8_t m_paramNum, m_partNum;
+		uint8_t m_partNum;
 		int m_lastValue{-1};
 		juce::Value m_value;
     };
