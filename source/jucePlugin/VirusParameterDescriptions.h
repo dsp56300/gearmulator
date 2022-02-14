@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "VirusParameter.h"
+#include "VirusParameterDescription.h"
 
 namespace Virus
 {
@@ -13,10 +13,15 @@ namespace Virus
 	public:
 		explicit ParameterDescriptions(const std::string& _jsonString);
 
+		const std::vector<Description>& getDescriptions() const
+		{
+			return m_descriptions;
+		}
+
 	private:
 		std::string loadJson(const std::string& _jsonString);
 
-		std::map<std::string, std::vector<std::string>> m_valueList;
-		std::vector<Parameter::Description> m_descriptions;
+		std::map<std::string, ValueList> m_valueLists;
+		std::vector<Description> m_descriptions;
 	};
 }

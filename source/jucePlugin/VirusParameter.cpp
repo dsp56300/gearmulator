@@ -4,10 +4,9 @@
 
 namespace Virus
 {
-	Parameter::Parameter(Controller &ctrl, const Description desc, const uint8_t partNum) :
-		m_ctrl(ctrl), m_desc(desc),
-		m_partNum(partNum), juce::RangedAudioParameter(genId(desc, partNum),
-													   "Ch " + juce::String(partNum + 1) + " " + desc.name)
+	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum) :
+		juce::RangedAudioParameter(genId(desc, partNum), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
+		m_desc(desc), m_partNum(partNum)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());

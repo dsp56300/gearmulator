@@ -1,7 +1,5 @@
 #include "VirusParameterDescriptions.h"
 
-#include <cassert>
-
 #include "VirusParameter.h"
 #include "VirusParameterDescription.h"
 
@@ -77,19 +75,26 @@ namespace Virus
 				const auto key = std::string(entryProps.getName(i).toString().toUTF8());
 				const auto values = entryProps.getValueAt(i).getArray();
 
-				if(m_valueList.find(key) != m_valueList.end())
+				if(m_valueLists.find(key) != m_valueLists.end())
 					return "value list " + key + " is defined twice";
 
 				if(!values || values->isEmpty())
 					return std::string("value list ") + key + " is not a valid array of strings";
 
-				std::vector<std::string> stringList;
-				stringList.reserve(values->size());
+				ValueList vl;
+				vl.texts.reserve(values->size());
 
 				for (auto&& value : *values)
-					stringList.push_back(static_cast<std::string>(value.toString().toUTF8()));
+				{
+					const auto text = static_cast<std::string>(value.toString().toUTF8());
 
-				m_valueList.insert(std::make_pair(key, stringList));
+					if (vl.textToValueMap.find(text) == vl.textToValueMap.end())
+						vl.textToValueMap.insert(std::make_pair(text, static_cast<uint32_t>(vl.texts.size())));
+
+					vl.texts.push_back(text);
+				}
+
+				m_valueLists.insert(std::make_pair(key, vl));
 			}
 		}
 
@@ -182,8 +187,8 @@ namespace Virus
 
 			const auto valueList = readPropertyString("toText");
 
-			const auto it = m_valueList.find(valueList);
-			if(it == m_valueList.end())
+			const auto it = m_valueLists.find(valueList);
+			if(it == m_valueLists.end())
 			{
 				errors << name << ": Value list " << valueList << " not found" << std::endl;
 				continue;
@@ -191,12 +196,12 @@ namespace Virus
 
 			const auto& list = *it;
 
-			if((maxValue - minValue + 1) > static_cast<int>(list.second.size()))
+			if((maxValue - minValue + 1) > static_cast<int>(list.second.texts.size()))
 			{
-				errors << name << ": value list " << valueList << " contains only " << list.second.size() << " entries but parameter range is " << minValue << "-" << maxValue << std::endl;
+				errors << name << ": value list " << valueList << " contains only " << list.second.texts.size() << " entries but parameter range is " << minValue << "-" << maxValue << std::endl;
 			}
 
-			Parameter::Description d;
+			Description d;
 
 			d.name = name;
 
@@ -206,10 +211,12 @@ namespace Virus
 			d.isBipolar = readPropertyBool("isBipolar");
 
 			d.toText = valueList;
-			d.index = readPropertyInt("index");
+			d.index = static_cast<uint8_t>(readPropertyInt("index"));
 
 			d.range.setStart(minValue);
 			d.range.setEnd(maxValue);
+
+			d.valueList = it->second;
 
 			{
 				d.classFlags = 0;
@@ -270,9 +277,9 @@ namespace Virus
 
 				switch (page[0])
 				{
-				case 'A':	d.page = Parameter::A;	break;
-				case 'B':	d.page = Parameter::B;	break;
-				case 'C':	d.page = Parameter::C;	break;
+				case 'A':	d.page = virusLib::PAGE_A;	break;
+				case 'B':	d.page = virusLib::PAGE_B;	break;
+				case 'C':	d.page = virusLib::PAGE_C;	break;
 				default:
 					errors << name << ": Page " << page << " is an invalid value" << std::endl;
 					break;
@@ -282,36 +289,6 @@ namespace Virus
 			m_descriptions.push_back(d);
 		}
 
-		assert(m_descriptions.size() == g_paramsDescription.size());
-
-		// DEBUG compare json parsed result to what we currently have in
-		size_t i = 0;
-		for(auto it = g_paramsDescription.begin(); it != g_paramsDescription.end(); ++it, ++i)
-		{
-			const auto& a = *it;
-			const auto& b = m_descriptions[i];
-
-			assert(a.name == b.name);
-			assert(a.range == b.range);
-			assert(a.index == b.index);
-			assert(a.classFlags == b.classFlags);
-
-			assert(a.isBool == b.isBool);
-			assert(a.isBipolar == b.isBipolar);
-			assert(a.isDiscrete == b.isDiscrete);
-			assert(a.isPublic == b.isPublic);
-
-			if(a.valueToTextFunction)
-			{
-				const auto textA = std::string(a.valueToTextFunction(0.0f, a).toUTF8());
-				const auto textB = m_valueList[b.toText][0];
-
-				if (textA != textB)
-				{
-					LOG("Text doesn't match, param " << a.name << ", expected " << textA << " but got " << textB);
-				}
-			}
-		}
 		return errors.str();
 	}
 }
