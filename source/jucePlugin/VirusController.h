@@ -5,6 +5,7 @@
 #include "../synthLib/plugin.h"
 #include "VirusParameter.h"
 #include "VirusParameterDescription.h"
+#include "VirusParameterDescriptions.h"
 
 namespace virusLib
 {
@@ -130,5 +131,6 @@ namespace Virus
         uint8_t m_currentProgram[16]{};
 		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
+		ParameterDescriptions m_descriptions;
     };
 }; // namespace Virus
