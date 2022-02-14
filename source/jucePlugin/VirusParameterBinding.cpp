@@ -65,7 +65,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _p
 	_combo.setSelectedId((int)v->getValueObject().getValueSource().getValue() + 1, juce::dontSendNotification);
 	_combo.onChange = [this, &_combo, v]() {
 		v->beginChangeGesture();
-		v->setValueNotifyingHost(v->convertTo0to1(_combo.getSelectedId()-1));
+		v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(_combo.getSelectedId() - 1)));
 		v->endChangeGesture();
 		v->getValueObject().getValueSource().setValue((int)_combo.getSelectedId() - 1);
 	};
