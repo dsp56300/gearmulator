@@ -27,13 +27,29 @@ juce_add_plugin(jucePlugin
     FORMATS AU VST3 ${VST} Standalone           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3
     PRODUCT_NAME "DSP56300Emu"                  # The name of the final executable, which can differ from the target name
 )
-target_sources(jucePlugin 
-PRIVATE
+
+set(SOURCES
 	parameterDescriptions_C.json
-    PluginEditor.cpp
-    PluginEditor.h
     PluginProcessor.cpp
     PluginProcessor.h
+	VirusController.cpp
+	VirusController.h
+	VirusParameter.cpp
+	VirusParameter.h
+	VirusParameterBinding.cpp
+	VirusParameterBinding.h
+	VirusParameterDescription.cpp
+	VirusParameterDescription.h
+	VirusParameterDescriptions.cpp
+	VirusParameterDescriptions.h
+	version.h
+)
+
+target_sources(jucePlugin 
+PRIVATE
+	${SOURCES}
+    PluginEditor.cpp
+    PluginEditor.h
     ui/Virus_Buttons.cpp
     ui/Virus_LookAndFeel.cpp
     ui/VirusEditor.cpp
@@ -53,17 +69,6 @@ PRIVATE
     ui/Virus_PatchBrowser.h
     ui/Virus_Parts.h
     ui/Ui_Utils.h
-	VirusController.cpp
-	VirusController.h
-	VirusParameter.cpp
-	VirusParameter.h
-	VirusParameterBinding.cpp
-	VirusParameterBinding.h
-	VirusParameterDescription.cpp
-	VirusParameterDescription.h
-	VirusParameterDescriptions.cpp
-	VirusParameterDescriptions.h
-	version.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
@@ -158,10 +163,9 @@ juce_add_plugin(jucePlugin_Dark
 )
 target_sources(jucePlugin_Dark 
 PRIVATE
+	${SOURCES}
     PluginEditorSkin2.cpp
     PluginEditorSkin2.h
-    PluginProcessor.cpp
-    PluginProcessor.h
     ui2/Virus_Buttons.cpp
     ui2/Virus_LookAndFeel.cpp
     ui2/VirusEditor.cpp
@@ -179,15 +183,6 @@ PRIVATE
     ui2/Virus_Panel1_OscEditor.h
     ui2/Virus_Panel5_PatchBrowser.h
     ui2/Ui_Utils.h
-	VirusController.cpp
-	VirusController.h
-	VirusParameter.cpp
-	VirusParameter.h
-	VirusParameterBinding.cpp
-	VirusParameterBinding.h
-	VirusParameterDescription.cpp
-	VirusParameterDescription.h
-	version.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
@@ -219,7 +214,8 @@ juce_add_binary_data(jucePlugin_BinaryData_Dark
         "assets2/combobox/cmb_2.png"
         "assets2/knobs/knob_1_128.png"
         "assets2/knobs/knob_2_128.png"
-        "assets2/font/Digital"  
+        "assets2/font/Digital"
+		"parameterDescriptions_C.json"
 )
 
 target_compile_definitions(jucePlugin_Dark 
