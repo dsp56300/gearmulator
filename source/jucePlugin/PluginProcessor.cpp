@@ -241,7 +241,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		}
 		else
 		{
-			const juce::MidiMessage message(&e.sysex[0], e.sysex.size(), 0.0);
+			const juce::MidiMessage message(&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0);
 			midiMessages.addEvent(message, 0);
 
 			// additionally send to the midi output we've selected in the editor

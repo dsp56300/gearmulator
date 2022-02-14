@@ -1,6 +1,9 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include "VirusController.h"
+
+#include "BinaryData.h"
 #include "PluginProcessor.h"
+#include "VirusParameterDescriptions.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 
@@ -11,9 +14,9 @@ namespace Virus
     static constexpr uint8_t kSysExStart[] = {0xf0, 0x00, 0x20, 0x33, 0x01};
     static constexpr auto kHeaderWithMsgCodeLen = 7;
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId), m_descriptions(BinaryData::parameterDescriptions_C_json)
     {
-		assert(g_paramsDescription.size() == Param_Count && "size of enum must match size of parameter descriptions");
+		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
 		opts.filenameSuffix = ".settings";
@@ -59,7 +62,7 @@ namespace Virus
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
 
 			uint32_t parameterDescIndex = 0;
-			for (const auto& desc : g_paramsDescription)
+			for (const auto& desc : m_descriptions.getDescriptions())
 			{
 				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
 				++parameterDescIndex;
@@ -171,7 +174,7 @@ namespace Virus
 
     juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
-		auto *param = findSynthParam(ch, static_cast<uint8_t>(Parameter::Page::A + bank), paramIndex);
+		auto *param = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
 		if (param == nullptr)
 		{
             // unregistered param?
