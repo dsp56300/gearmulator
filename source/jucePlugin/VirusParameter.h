@@ -2,9 +2,11 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "VirusParameterDescription.h"
+
 namespace Virus
 {
-    class Controller;
+	class Controller;
 
 	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
 	{
@@ -23,29 +25,7 @@ namespace Virus
             VIRUS_C = 0x100,
         };
 
-        enum Page
-        {
-            A = 0x70,
-            B = 0x71,
-            C = 0x72
-        };
-
-        struct Description
-        {
-            Page page;
-            int classFlags;
-            uint8_t index;
-            juce::String name;
-            juce::Range<int> range;
-			std::function<juce::String(float, Description ctx)> valueToTextFunction;
-			std::function<float(const juce::String &, Description ctx)> textToValueFunction;
-			bool isPublic;
-			bool isDiscrete;
-			bool isBool;
-			bool isBipolar;
-        };
-
-        Parameter(Controller &, const Description desc, uint8_t partNum = 0x40);
+        Parameter(Controller &, const Description& desc, uint8_t partNum = 0x40);
 
         juce::Value &getValueObject() { return m_value; };
         const juce::Value &getValueObject() const { return m_value; };
@@ -77,24 +57,14 @@ namespace Virus
 
 		float getValueForText(const juce::String &text) const override
 		{
-			if (m_desc.textToValueFunction)
-				return convertTo0to1(m_desc.textToValueFunction(text, m_desc));
-			if (m_desc.valueToTextFunction)
-			{
-				// brute force but this should be O(1) of 128...
-				for (auto i = 0; i < 128; i++)
-					if (m_desc.valueToTextFunction(static_cast<float>(i), m_desc) == text)
-						return convertTo0to1(static_cast<float>(i));
-			}
-			return convertTo0to1(text.getFloatValue());
+			const auto res = m_desc.valueList.textToValue(std::string(text.getCharPointer()));
+			return convertTo0to1(static_cast<float>(res));
 		}
 
 		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
 		{
-			if (m_desc.valueToTextFunction)
-				return m_desc.valueToTextFunction(convertFrom0to1(normalisedValue), m_desc);
-			else
-				return juce::String(juce::roundToInt(convertFrom0to1(normalisedValue)));
+			const auto v = convertFrom0to1(normalisedValue);
+			return m_desc.valueList.valueToText(juce::roundToInt(v));
 		}
 
 		// allow 'injecting' additional code for specific parameter.
@@ -102,13 +72,13 @@ namespace Virus
 		std::function<void()> onValueChanged = {};
 
 	private:
-		juce::String genId(const Description &d, int part);
+        static juce::String genId(const Description &d, int part);
 		void valueChanged(juce::Value &) override;
 
         Controller &m_ctrl;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
-		uint8_t m_paramNum, m_partNum;
+		uint8_t m_partNum;
 		int m_lastValue{-1};
 		juce::Value m_value;
     };
