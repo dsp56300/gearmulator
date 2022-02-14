@@ -9,9 +9,9 @@ namespace Virus
 		m_partNum(partNum), juce::RangedAudioParameter(genId(desc, partNum),
 													   "Ch " + juce::String(partNum + 1) + " " + desc.name)
 	{
-		m_range.start = m_desc.range.getStart();
-		m_range.end = m_desc.range.getEnd();
-		m_range.interval = m_desc.isDiscrete || m_desc.isBool ? 1 : 0;
+		m_range.start = static_cast<float>(m_desc.range.getStart());
+		m_range.end = static_cast<float>(m_desc.range.getEnd());
+		m_range.interval = m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f;
 		m_value.addListener(this);
     }
 
@@ -34,7 +34,7 @@ namespace Virus
 	{
 		m_lastValue = newValue;
 		if (notifyHost)
-			setValueNotifyingHost(convertTo0to1(newValue));
+			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
 		else
 			m_value.setValue(newValue);
 	}
