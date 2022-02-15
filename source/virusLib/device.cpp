@@ -15,8 +15,8 @@ namespace virusLib
 
 		if(m_rom.getModel() == ROMFile::ModelD)
 		{
-			getPeriphX().getEsai().setSamplerate(getSamplerate());
-			getPeriphY().getEsai().setSamplerate(getSamplerate());
+			getPeriphX().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
+			getPeriphY().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
 		}
 
 		auto loader = m_rom.bootDSP(getDSP(), getPeriphX());
