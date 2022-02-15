@@ -36,7 +36,7 @@ namespace virusLib
 		                 std::ios_base::openmode which = std::ios_base::in) override
 		{
 			if (dir == std::ios_base::cur)
-				gbump(off);
+				gbump(static_cast<int>(off));
 			else if (dir == std::ios_base::end)
 				setg(eback(), egptr() + off, egptr());
 			else if (dir == std::ios_base::beg)

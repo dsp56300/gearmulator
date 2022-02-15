@@ -126,7 +126,7 @@ std::string ROMFile::findROM()
 std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 {
 	_file.seekg(0, std::ios_base::end);
-	const int fileSize = _file.tellg();
+	const auto fileSize = _file.tellg();
 
 	uint32_t offset = 0x70000;
 	int lastChunkId = 14;

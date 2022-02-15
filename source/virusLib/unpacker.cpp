@@ -1,4 +1,3 @@
-#include <iostream>
 #include <vector>
 
 #include "unpacker.h"
@@ -107,6 +106,7 @@ namespace virusLib
 			case VirusTISnow:
 				return "vti_snow.bin";
 		}
+		return {};
 	}
 
 	std::vector<ROMUnpacker::Chunk> ROMUnpacker::getChunks(std::istream& _file)
