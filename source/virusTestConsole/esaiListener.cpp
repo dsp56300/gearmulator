@@ -12,7 +12,7 @@ size_t g_writeBlockSize = 65536;
 
 EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, const uint8_t _outChannels, TCallback _callback, uint32_t _samplerate)
 	: m_esai(_esai)
-    , m_outChannels(_outChannels), audioFilename(std::move(_audioFilename)), g_nextWriteSize(g_writeBlockSize)
+    , m_outChannels(_outChannels), m_audioFilename(std::move(_audioFilename)), m_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
 	, m_samplerate(_samplerate)
 {
@@ -51,15 +51,15 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
 		(m_outChannels & 4) ? outputData[5] : nullptr
 	};
 
-	ctr++;
-	if ((ctr & 0x1fff) == 0)
+	m_counter++;
+	if ((m_counter & 0x1fff) == 0)
 	{
 		LOG("Deliver Audio");
 	}
 
 	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
-	if (!audioData.capacity())
+	if (!m_audioData.capacity())
 	{
 		for (int c = 0; c < channelsOut; ++c)
 		{
@@ -67,19 +67,19 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
 			{
 				if (audioOut[c] && audioOut[c][i])
 				{
-					audioData.reserve(2048);
+					m_audioData.reserve(2048);
 					break;
 				}
 			}
 		}
 
-		if(audioData.capacity())
+		if(m_audioData.capacity())
 		{
-			LOG("Begin writing audio to file " << audioFilename);
+			LOG("Begin writing audio to file " << m_audioFilename);
 		}
 	}
 
-	if (audioData.capacity())
+	if (m_audioData.capacity() && !m_audioFilename.empty())
 	{
 		for (int i = 0; i < sampleCount; ++i)
 		{
@@ -90,25 +90,25 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
 			}
 		}
 
-		if (audioData.size() >= g_nextWriteSize)
+		if (m_audioData.size() >= m_nextWriteSize)
 		{
-			if (writer.write(audioFilename, 24, false, 2, m_samplerate, audioData))
+			if (m_writer.write(m_audioFilename, 24, false, 2, m_samplerate, m_audioData))
 			{
-				audioData.clear();
-				g_nextWriteSize = g_writeBlockSize;
+				m_audioData.clear();
+				m_nextWriteSize = g_writeBlockSize;
 			}
 			else
-				g_nextWriteSize += g_writeBlockSize;
+				m_nextWriteSize += g_writeBlockSize;
 		}
 	}
 
-	m_callback(this, ctr);
+	m_callback(this, m_counter);
 }
 void EsaiListener::writeWord(const TWord _word)
 {
 	const auto d = reinterpret_cast<const uint8_t*>(&_word);
-	audioData.push_back(d[0]);
-	audioData.push_back(d[1]);
-	audioData.push_back(d[2]);
+	m_audioData.push_back(d[0]);
+	m_audioData.push_back(d[1]);
+	m_audioData.push_back(d[2]);
 }
 

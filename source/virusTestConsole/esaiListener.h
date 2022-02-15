@@ -27,11 +27,11 @@ private:
 	dsp56k::Esai& m_esai;
 	const uint8_t m_outChannels;
 
-	std::vector<uint8_t> audioData;
-	std::string audioFilename;
-	synthLib::WavWriter writer;
-	int ctr = 0;
-	size_t g_nextWriteSize;
+	std::vector<uint8_t> m_audioData;
+	std::string m_audioFilename;
+	synthLib::WavWriter m_writer;
+	int m_counter = 0;
+	size_t m_nextWriteSize;
 	const TCallback m_callback;
 	const uint32_t m_samplerate;
 };
