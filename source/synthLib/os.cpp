@@ -111,7 +111,7 @@ namespace synthLib
         return std::string();
     }
 
-    std::string findROM(const size_t _expectedSize)
+    std::string findROM(size_t _minSize, size_t _maxSize)
     {
         std::string path = getModulePath();
 
@@ -137,7 +137,7 @@ namespace synthLib
                 if (ext != ".bin")
                     continue;
 
-                if (_expectedSize)
+                if (_minSize || _maxSize)
                 {
                     FILE *hFile = fopen(file.c_str(), "rb");
                     if (!hFile)
@@ -146,8 +146,11 @@ namespace synthLib
                     fseek(hFile, 0, SEEK_END);
                     const auto size = ftell(hFile);
                     fclose(hFile);
-                    if (size != _expectedSize)
+
+                	if (_minSize && size < _minSize)
                         continue;
+					if (_maxSize && size > _maxSize)
+						continue;
 
                     LOG("Found ROM at path " << file);
 
@@ -173,8 +176,10 @@ namespace synthLib
                 if (!file.has_extension())
                     continue;
 
-                if (_expectedSize && entry.file_size() != _expectedSize)
+                if (_minSize && entry.file_size() < _minSize)
                     continue;
+				if (_maxSize && entry.file_size() > _maxSize)
+					continue;
 
                 std::string ext = lowercase(file.extension().string());
 
@@ -192,6 +197,11 @@ namespace synthLib
 #endif
 
         return std::string();
+    }
+
+    std::string findROM(const size_t _expectedSize)
+    {
+	    return findROM(_expectedSize, _expectedSize);
     }
 
     void setFlushDenormalsToZero()
