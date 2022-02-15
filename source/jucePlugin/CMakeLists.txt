@@ -30,6 +30,7 @@ juce_add_plugin(jucePlugin
 
 set(SOURCES
 	parameterDescriptions_C.json
+	parameterDescriptions_Snow.json
     PluginProcessor.cpp
     PluginProcessor.h
 	VirusController.cpp
@@ -102,6 +103,7 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/knobs/GenRed_70x70_100.png"
         "assets/knobs/multi_18x18_100.png"
 		"parameterDescriptions_C.json"
+		"parameterDescriptions_Snow.json"
 )
 
 target_compile_definitions(jucePlugin 
@@ -215,7 +217,6 @@ juce_add_binary_data(jucePlugin_BinaryData_Dark
         "assets2/knobs/knob_1_128.png"
         "assets2/knobs/knob_2_128.png"
         "assets2/font/Digital"
-		"parameterDescriptions_C.json"
 )
 
 target_compile_definitions(jucePlugin_Dark 
