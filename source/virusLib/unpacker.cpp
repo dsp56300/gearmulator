@@ -130,7 +130,7 @@ namespace virusLib
 			if (chunk.size > 0)
 			{
 				chunk.data.resize(chunk.size);
-				_file.read(reinterpret_cast<char*>(chunk.data.data()), chunk.size);
+				_file.read(chunk.data.data(), chunk.size);
 				result.emplace_back(chunk);
 			}
 		}
@@ -140,7 +140,8 @@ namespace virusLib
 
 	std::vector<char> ROMUnpacker::unpackFile(std::vector<Chunk>& _chunks, const char _fileId)
 	{
-		std::vector<char> content{};
+		std::vector<char> content;
+
 		for (auto& chunk: _chunks)
 		{
 			if (chunk.name[0] != _fileId)
