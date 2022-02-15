@@ -10,10 +10,10 @@ namespace virusLib
 	bool ROMUnpacker::isValidInstaller(std::istream& _file)
 	{
 		_file.seekg(0);
-		std::string magic(4, ' ');
-		_file.read(reinterpret_cast<char*>(&magic), 4);
+		char magic[5] = {0};
+		_file.read(magic, 4);
 		_file.seekg(-4, std::ios_base::cur);  // restore cursor
-		return magic == "FORM";
+		return std::string(magic) == "FORM";
 	}
 
 	ROMUnpacker::Firmware ROMUnpacker::getFirmware(std::istream& _file, const AccessVirusTIModel _model)
