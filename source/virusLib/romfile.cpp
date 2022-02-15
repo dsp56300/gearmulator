@@ -65,7 +65,8 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 		}
 
 		// Wrap into a stream so we can pass it into readChunks
-		dsp = new imemstream(fw.DSP);  // TODO: will this be free'd?
+		m_memStream.reset(new imemstream(fw.DSP));
+		dsp = m_memStream.get();
 	}
 
 	const auto chunks = readChunks(*dsp);
