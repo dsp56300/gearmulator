@@ -24,7 +24,7 @@ namespace virusLib
 
 		// The first chunk should be the _file table containing filenames
 		Chunk table = chunks[0];
-		if (table.name != "TABL")
+		if (std::string(table.name) != "TABL")
 		{
 			LOG("Installer file table not found")
 			return Firmware{};
@@ -112,10 +112,9 @@ namespace virusLib
 	std::vector<ROMUnpacker::Chunk> ROMUnpacker::getChunks(std::istream& _file)
 	{
 		std::vector<Chunk> result;
-		std::string filename;
+		char filename[5] = {0};
 		uint32_t filesize;
-		filename.resize(4);
-		_file.read(reinterpret_cast<char*>(&filename), 4);
+		_file.read(filename, 4);
 		_file.read(reinterpret_cast<char*>(&filesize), 4);
 		filesize = swap32(filesize);
 
@@ -125,8 +124,7 @@ namespace virusLib
 		while (!_file.eof())
 		{
 			Chunk chunk{};
-			chunk.name.resize(4);
-			_file.read(reinterpret_cast<char*>(&chunk.name), 4);
+			_file.read(chunk.name, 4);
 			_file.read(reinterpret_cast<char*>(&chunk.size), 4);
 			chunk.size = swap32(chunk.size);
 			if (chunk.size > 0)
