@@ -10,6 +10,7 @@ set(SOURCES
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
+	utils.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})
