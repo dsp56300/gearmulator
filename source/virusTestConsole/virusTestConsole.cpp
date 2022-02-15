@@ -201,7 +201,7 @@ int main(int _argc, char* _argv[])
 	const auto sr = v.getModel() == ROMFile::ModelD ? 44100 : 12000000 / 256;
 
 	EsaiListener esaiListener(periphX.getEsai(), audioFilename, 0b001, audioCallback, sr);
-	EsaiListener esaiListener1(periphY.getEsai(), "virusEmu_ESAI_1.wav", 0b100, [](EsaiListener*, uint32_t){}, sr);
+	EsaiListener esaiListener1(periphY.getEsai(), "", 0b100, [](EsaiListener*, uint32_t){}, sr);
 
 	DSPThread dspThread(dsp);
 
