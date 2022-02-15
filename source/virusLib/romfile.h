@@ -3,6 +3,7 @@
 #include <thread>
 #include <vector>
 
+#include "utils.h"
 #include "dsp56kEmu/types.h"
 
 namespace dsp56k
@@ -123,6 +124,7 @@ private:
 
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;
+	std::unique_ptr<imemstream> m_memStream;
 };
 
 }
