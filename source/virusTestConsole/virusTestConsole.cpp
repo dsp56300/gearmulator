@@ -146,7 +146,15 @@ int main(int _argc, char* _argv[])
 		waitReturn();
 		return -1;
 	}
+
 	ROMFile v(romFile);
+
+	if(!v.isValid())
+	{
+		std::cout << "ROM file " << romFile << " is not valid and couldn't be loaded. Place a valid ROM file with .bin extension next to this program." << std::endl;
+		waitReturn();
+		return -1;
+	}
 
 	Peripherals56367 periphY;
 	Peripherals56362 periphX(&periphY);
