@@ -98,6 +98,11 @@ public:
 		return 1024 * 1024;
 	}
 
+	static constexpr uint32_t getRomSizeModelDInstaller()
+	{
+		return 1024 * 1024 * 8;
+	}
+
 	static constexpr uint32_t getRomSizeModelABC()
 	{
 		return 1024 * 512;

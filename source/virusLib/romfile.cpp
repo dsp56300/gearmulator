@@ -122,9 +122,17 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 
 std::string ROMFile::findROM()
 {
-	const auto res = synthLib::findROM(getRomSizeModelD());
+	// Try installer version first
+	auto res = synthLib::findROM(getRomSizeModelDInstaller(), 0);
 	if (!res.empty())
 		return res;
+
+	// If not found, try unpacked versions, based on a 1meg ROM plus separate preset files
+	res = synthLib::findROM(getRomSizeModelD());
+	if (!res.empty())
+		return res;
+
+	// other roms (B,c)
 	return synthLib::findROM(getRomSizeModelABC());
 }
 
