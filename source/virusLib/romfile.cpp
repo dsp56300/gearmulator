@@ -55,9 +55,11 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	ROMUnpacker::Firmware fw;
 
 	// Check if we are dealing with a TI installer file, if so, unpack it first
-	if (ROMUnpacker::isValidInstaller(file)) {
+	if (ROMUnpacker::isValidInstaller(file))
+	{
 		fw = ROMUnpacker::getFirmware(file, ROMUnpacker::VirusTISnow);
-		if (!fw.isValid()) {
+		if (!fw.isValid())
+		{
 			LOG("Could not unpack ROM file")
 			return;
 		}
