@@ -38,7 +38,7 @@ namespace virusLib
 	private:
 		struct Chunk
 		{
-			std::string name;
+			char name[5];
 			uint32_t size;
 			std::vector<char> data;
 		};
