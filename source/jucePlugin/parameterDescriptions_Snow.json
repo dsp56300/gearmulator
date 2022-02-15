@@ -30,7 +30,7 @@
  		{"page":"A", "class":"PerformanceController", "index":16, "name":"Contr 16", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"A", "class":"SoundbankA", "index":17, "name":"Osc1 Shape", "min":0, "max":127, "toText":"oscShape", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":"A", "class":"SoundbankA", "index":18, "name":"Osc1 Pulsewidth", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false},
- 		{"page":"A", "class":"SoundbankA", "index":19, "name":"Osc1 Wave Select", "min":0, "max":128, "toText":"oscWave", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"A", "class":"SoundbankA", "index":19, "name":"Osc1 Wave Select", "min":0, "max":127, "toText":"oscWave", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":"A", "class":"SoundbankA", "index":20, "name":"Osc1 Semitone", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":"A", "class":"SoundbankA", "index":21, "name":"Osc1 Keyfollow", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":"A", "class":"SoundbankA", "index":22, "name":"Osc2 Shape", "min":0, "max":127, "toText":"oscShape", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
