@@ -54,6 +54,8 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	std::istream *dsp = &file;
 	ROMUnpacker::Firmware fw;
 
+	std::unique_ptr<imemstream> memStream;
+
 	// Check if we are dealing with a TI installer file, if so, unpack it first
 	if (ROMUnpacker::isValidInstaller(file))
 	{
@@ -65,8 +67,8 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 		}
 
 		// Wrap into a stream so we can pass it into readChunks
-		m_memStream.reset(new imemstream(fw.DSP));
-		dsp = m_memStream.get();
+		memStream.reset(new imemstream(fw.DSP));
+		dsp = memStream.get();
 	}
 
 	const auto chunks = readChunks(*dsp);
