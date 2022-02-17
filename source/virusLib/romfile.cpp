@@ -40,6 +40,7 @@ ROMFile::ROMFile(const std::string& _path) : m_path(_path)
 		i = 0;
 	}
 
+	printf("ROM File: %s", _path.c_str());
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program BootROM len = 0x%x\n", static_cast<uint32_t>(bootRom.data.size()));
