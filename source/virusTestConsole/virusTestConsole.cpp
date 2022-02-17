@@ -221,7 +221,14 @@ int main(int _argc, char* _argv[])
 		waitReturn();
 		return -1;
 	}
+
 	ROMFile v(romFile);
+
+	auto& jit = dsp.getJit();
+	auto conf = jit.getConfig();
+	conf.aguSupportBitreverse = false;	// not needed on B & C
+	jit.setConfig(conf);
+
 	auto loader = v.bootDSP(dsp, periphX);
 
 	if(_argc > 1)
