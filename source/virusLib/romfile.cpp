@@ -99,6 +99,7 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 //	dumpToBin(bootRom.data, _path + "_bootloader.bin");
 //	dumpToBin(commandStream, _path + "_commandstream.bin");
 
+	printf("ROM File: %s", _path.c_str());
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
