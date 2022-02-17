@@ -167,6 +167,11 @@ int main(int _argc, char* _argv[])
 
 	DSP dsp(memory, &periphX, pY);
 
+	auto& jit = dsp.getJit();
+	auto conf = jit.getConfig();
+	conf.aguSupportBitreverse = v.getModel() == ROMFile::ModelD;	// not used on B & C
+	jit.setConfig(conf);
+
 	auto loader = v.bootDSP(dsp, periphX);
 
 	if(_argc > 1)
