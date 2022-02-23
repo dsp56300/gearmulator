@@ -125,7 +125,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 {
 	std::lock_guard lock(m_mutex);
 
-	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
+	if(m_loadingState || m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
@@ -368,7 +368,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildGlobalResponses = [&]()
 	{
-		for (auto globalParam : g_pageC_global)
+		for (const auto globalParam : g_pageC_global)
 			buildGlobalResponse(globalParam);
 	};
 
@@ -851,6 +851,9 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	if(events.empty())
 		return false;
 
+	// delay all preset loads until everything is loaded
+	m_loadingState = true;
+
 	std::vector<SMidiEvent> unusedResponses;
 
 	for (const auto& event : events)
@@ -858,6 +861,8 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		sendSysex(event.sysex, false, unusedResponses, MidiEventSourcePlugin);
 		unusedResponses.clear();
 	}
+
+	m_loadingState = false;
 
 	return true;
 }

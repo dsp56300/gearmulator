@@ -92,6 +92,7 @@ private:
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	mutable std::recursive_mutex m_mutex;
+	bool m_loadingState = false;
 };
 
 }
