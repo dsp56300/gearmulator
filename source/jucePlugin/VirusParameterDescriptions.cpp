@@ -25,7 +25,7 @@ namespace Virus
 			const auto end = _json.find(_end, pos + 1);
 
 			if (end != std::string::npos)
-				_json.erase(pos, end - pos - 1);
+				_json.erase(pos, end - pos + 1);
 			else
 				_json.erase(pos);
 
