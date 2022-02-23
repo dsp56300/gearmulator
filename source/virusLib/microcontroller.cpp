@@ -515,15 +515,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 							{
 							case PlayModeSingle:
 								{
-									m_globalSettings[PLAY_MODE] = playMode;
-
 									LOG("Switch to Single mode");
 									return writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
 								}
 							case PlayModeMultiSingle:
 							case PlayModeMulti:
 								{
-									m_globalSettings[PLAY_MODE] = PlayModeMulti;
 									writeMulti(BankNumber::EditBuffer, 0, m_multiEditBuffer);
 									for(uint8_t i=0; i<16; ++i)
 										writeSingle(BankNumber::EditBuffer, i, m_singleEditBuffers[i]);
@@ -691,6 +688,9 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
 
+	if(_program == SINGLE)
+		m_globalSettings[PLAY_MODE] = PlayModeSingle;
+
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data), false);
 }
@@ -706,6 +706,8 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 	m_multiEditBuffer = _data;
 
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
+
+	m_globalSettings[PLAY_MODE] = PlayModeMulti;
 
 	// Convert array of uint8_t to vector of 24bit TWord
 	return sendPreset(_program, presetToDSPWords(_data), true);
