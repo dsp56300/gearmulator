@@ -125,7 +125,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 {
 	std::lock_guard lock(m_mutex);
 
-	if(m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
+	if(m_loadingState || m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
@@ -368,7 +368,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 	auto buildGlobalResponses = [&]()
 	{
-		for (auto globalParam : g_pageC_global)
+		for (const auto globalParam : g_pageC_global)
 			buildGlobalResponse(globalParam);
 	};
 
@@ -515,15 +515,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 							{
 							case PlayModeSingle:
 								{
-									m_globalSettings[PLAY_MODE] = playMode;
-
 									LOG("Switch to Single mode");
 									return writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
 								}
 							case PlayModeMultiSingle:
 							case PlayModeMulti:
 								{
-									m_globalSettings[PLAY_MODE] = PlayModeMulti;
 									writeMulti(BankNumber::EditBuffer, 0, m_multiEditBuffer);
 									for(uint8_t i=0; i<16; ++i)
 										writeSingle(BankNumber::EditBuffer, i, m_singleEditBuffers[i]);
@@ -691,6 +688,9 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << (int)_program);
 
+	if(_program == SINGLE)
+		m_globalSettings[PLAY_MODE] = PlayModeSingle;
+
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data), false);
 }
@@ -706,6 +706,8 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 	m_multiEditBuffer = _data;
 
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
+
+	m_globalSettings[PLAY_MODE] = PlayModeMulti;
 
 	// Convert array of uint8_t to vector of 24bit TWord
 	return sendPreset(_program, presetToDSPWords(_data), true);
@@ -851,6 +853,9 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	if(events.empty())
 		return false;
 
+	// delay all preset loads until everything is loaded
+	m_loadingState = true;
+
 	std::vector<SMidiEvent> unusedResponses;
 
 	for (const auto& event : events)
@@ -858,6 +863,8 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		sendSysex(event.sysex, false, unusedResponses, MidiEventSourcePlugin);
 		unusedResponses.clear();
 	}
+
+	m_loadingState = false;
 
 	return true;
 }
