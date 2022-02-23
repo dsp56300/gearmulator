@@ -140,10 +140,10 @@ namespace Virus
                 case MessageType::REQUEST_TOTAL:
                     sendSysEx(msg);
                     break;
-                default:
-                    std::cout << "Controller: Begin Unhandled SysEx! --" << std::endl;
+				default:
+					LOG("Controller: Begin Unhandled SysEx! --");
                     printMessage(msg);
-                    std::cout << "Controller: End Unhandled SysEx! --" << std::endl;
+					LOG("Controller: End Unhandled SysEx! --");
                 }
             }
         }
@@ -473,11 +473,12 @@ namespace Virus
 
     void Controller::printMessage(const SysEx &msg) const
     {
+		std::stringstream ss;
         for (auto &m : msg)
         {
-            std::cout << std::hex << static_cast<int>(m) << ",";
+            ss << std::hex << static_cast<int>(m) << ",";
         }
-        std::cout << std::endl;
+		LOG((ss.str()));
     }
 
     void Controller::sendSysEx(const SysEx &msg) const
