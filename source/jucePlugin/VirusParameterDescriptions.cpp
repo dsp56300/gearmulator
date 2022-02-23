@@ -15,7 +15,7 @@ namespace Virus
 
 	std::string removeComments(std::string _json)
 	{
-		auto removeBlock = [&](const char* _begin, const char* _end)
+		auto removeBlock = [&](const std::string& _begin, const std::string& _end)
 		{
 			const auto pos = _json.find(_begin);
 
@@ -25,7 +25,7 @@ namespace Virus
 			const auto end = _json.find(_end, pos + 1);
 
 			if (end != std::string::npos)
-				_json.erase(pos, end - pos - 1);
+				_json.erase(pos, end - pos + _end.size());
 			else
 				_json.erase(pos);
 

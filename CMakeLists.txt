@@ -6,7 +6,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.5)
+project(gearmulator VERSION 1.2.6)
 
 include(base.cmake)
 
@@ -66,7 +66,8 @@ add_subdirectory(source/virusTestConsole)
 
 # ----------------- CPack
 
-set(CPACK_COMPONENTS_ALL VST2 VST3 AU VST2_Dark VST3_Dark AU_Dark testConsole)
+get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
+list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
