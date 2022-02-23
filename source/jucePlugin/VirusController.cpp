@@ -140,10 +140,10 @@ namespace Virus
                 case MessageType::REQUEST_TOTAL:
                     sendSysEx(msg);
                     break;
-                default:
-                    std::cout << "Controller: Begin Unhandled SysEx! --" << std::endl;
+				default:
+					LOG("Controller: Begin Unhandled SysEx! --");
                     printMessage(msg);
-                    std::cout << "Controller: End Unhandled SysEx! --" << std::endl;
+					LOG("Controller: End Unhandled SysEx! --");
                 }
             }
         }
@@ -216,15 +216,15 @@ namespace Virus
     void Controller::parseParamChange(const SysEx &msg)
     {
         constexpr auto pos = kHeaderWithMsgCodeLen - 1;
-        const auto value = msg[pos + 3];
-		const auto bank = msg[pos];
+		const auto page = msg[pos];
 		const auto ch = msg[pos + 1];
 		const auto index = msg[pos + 2];
-		auto param = findSynthParam(ch, bank, index);
+		const auto value = msg[pos + 3];
+		auto param = findSynthParam(ch, page, index);
 		if (param == nullptr && ch != 0)
 		{
             // ensure it's not global
-			param = findSynthParam(0, bank, index);
+			param = findSynthParam(0, page, index);
 			if (param == nullptr)
 			{
                 jassertfalse;
@@ -473,11 +473,12 @@ namespace Virus
 
     void Controller::printMessage(const SysEx &msg) const
     {
+		std::stringstream ss;
         for (auto &m : msg)
         {
-            std::cout << std::hex << static_cast<int>(m) << ",";
+            ss << std::hex << static_cast<int>(m) << ",";
         }
-        std::cout << std::endl;
+		LOG((ss.str()));
     }
 
     void Controller::sendSysEx(const SysEx &msg) const
@@ -491,6 +492,7 @@ namespace Virus
     void Controller::onStateLoaded() const
     {
 		sendSysEx(constructMessage({ MessageType::REQUEST_TOTAL }));
+		sendSysEx(constructMessage({ MessageType::REQUEST_ARRANGEMENT }));
 	}
 
     std::vector<uint8_t> Controller::constructMessage(SysEx msg) const
