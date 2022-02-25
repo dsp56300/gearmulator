@@ -1,5 +1,22 @@
 Release Notes 
 
+1.2.6 (2022.02.25):
+
+- [Imp] UI knobs now react to parameter changes via Midi Control Change, Poly Pressure and Sysex
+- [Imp] Various performance improvements
+
+- [Fix] Presets were not always loaded correctly
+- [Fix] Loading of presets didn't (properly) update the UI
+- [Fix] Patch Browser failed to load some midi file which resulted in no presets being displayed
+- [Fix] Patch Browser didn't display the proper Virus Model in all circumstances
+- [Fix] Midi bank select (sent as Midi CC) was off-by-one in single mode
+- [Fix] Part bank select and part program change (as sysex) didn't work for single mode
+- [Fix] Various midi clock issues due to midi clock start event being missing
+- [Fix] "Assign3 Destination3" was named "Assign2 Destination3" (automation name)
+- [Fix] "Assign3 Amount3" was named "Assign2 Amount3" (automation name)
+- [Fix] Osc 1 & 2 Wave Select parameter was off-by-one
+- [Fix] Key follow base UI element not working
+
 1.2.5 (2022.01.29):
 
 - [Imp] Performance improvements between 5% - 10%
