@@ -87,18 +87,18 @@ VirusModel guessVersion(const uint8_t* _data)
 	return VirusModel::TI;
 }
 
-uint32_t PatchBrowser::load(const std::vector<std::vector<uint8_t>>& _packets, bool dedupe)
+uint32_t PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets)
 {
 	uint32_t count = 0;
 	for (const auto& packet : _packets)
 	{
-		if (load(packet, dedupe))
+		if (load(_result, _dedupeChecksums, packet))
 			++count;
 	}
 	return count;
 }
 
-bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
+bool PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data)
 {
 	if (_data.size() < 267)
 		return false;
@@ -113,7 +113,7 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 		&& *(it + 6) == (uint8_t)virusLib::DUMP_SINGLE)
 	{
 		Patch patch;
-		patch.progNumber = m_patches.size();
+		patch.progNumber = static_cast<int>(_result.size());
 		patch.sysex = _data;
 		patch.data.insert(patch.data.begin(), _data.begin() + 9, _data.end());
 		patch.name = parseAsciiText(patch.data, 128 + 112);
@@ -127,10 +127,20 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 		else {
 			patch.model = guessVersion(&patch.data[0]);
 		}
-		const auto md5 = MD5(it + 9 + 17, 256 - 17 - 3).toHexString();
-		if (!dedupe || !m_checksums.contains(md5)) {
-			m_checksums.set(md5, true);
-			m_patches.add(patch);
+
+		if(!_dedupeChecksums)
+		{
+			_result.push_back(patch);
+		}
+		else
+		{
+			const auto md5 = std::string(MD5(it + 9 + 17, 256 - 17 - 3).toHexString().toRawUTF8());
+
+			if (_dedupeChecksums->find(md5) == _dedupeChecksums->end())
+			{
+				_dedupeChecksums->insert(md5);
+				_result.push_back(patch);
+			}
 		}
 
 		return true;
@@ -138,7 +148,7 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 	return false;
 }
 
-uint32_t PatchBrowser::loadBankFile(const File& file, const bool dedupe = false)
+uint32_t PatchBrowser::loadBankFile(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const File& file)
 {
 	const auto ext = file.getFileExtension().toLowerCase();
     const auto path = file.getParentDirectory().getFullPathName();
@@ -157,7 +167,7 @@ uint32_t PatchBrowser::loadBankFile(const File& file, const bool dedupe = false)
         std::vector<std::vector<uint8_t>> packets;
 		splitMultipleSysex(packets, d);
 
-		return load(packets, dedupe);
+		return load(_result, _dedupeChecksums, packets);
     }
 
 	if (ext == ".mid" || ext == ".midi")
@@ -170,7 +180,7 @@ uint32_t PatchBrowser::loadBankFile(const File& file, const bool dedupe = false)
 	    std::vector<std::vector<uint8_t>> packets;
 	    splitMultipleSysex(packets, data);
 
-	    return load(packets, dedupe);
+	    return load(_result, _dedupeChecksums, packets);
     }
     return 0;
 }
@@ -186,19 +196,23 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
 		{
             m_patches.clear();
             m_checksums.clear();
+			std::set<std::string> dedupeChecksums;
+
+			std::vector<Patch> patches;
 
             for (const auto& f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles))
-			{
-                loadBankFile(f.getFile(), true);
-            }
+                loadBankFile(patches, &dedupeChecksums, f.getFile());
+
             m_filteredPatches.clear();
-            for(const auto& patch : m_patches)
+
+            for(const auto& patch : patches)
 			{
                 const auto searchValue = m_search.getText();
-                if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
-				{
+
+				m_patches.add(patch);
+
+            	if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
                     m_filteredPatches.add(patch);
-                }
             }
             m_patchList.updateContent();
             m_patchList.deselectAllRows();
@@ -213,12 +227,14 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
     if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
 	{
         m_patches.clear();
-        loadBankFile(file);
+		std::vector<Patch> patches;
+        loadBankFile(patches, nullptr, file);
         m_filteredPatches.clear();
-        for(const auto& patch : m_patches)
+        for(const auto& patch : patches)
 		{
             const auto searchValue = m_search.getText();
-            if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
+			m_patches.add(patch);
+			if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
                 m_filteredPatches.add(patch);
         }
         m_patchList.updateContent();
@@ -240,7 +256,7 @@ void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int
 	                             .interpolatedWith(getLookAndFeel().findColour(ListBox::textColourId), 0.03f);
     if (rowIsSelected)
         g.fillAll(Colours::lightblue);
-    else if (rowNumber % 2)
+    else if (rowNumber & 1)
         g.fillAll(alternateColour);
 }
 
@@ -295,58 +311,49 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected)
 
 void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent &)
 {
-    if(rowNumber == m_patchList.getSelectedRow()) {
+    if(rowNumber == m_patchList.getSelectedRow())
         selectedRowsChanged(0);
-    }
 }
 
 class PatchBrowser::PatchBrowserSorter
 {
 public:
-    PatchBrowserSorter (int attributeToSortBy, bool forwards)
+    PatchBrowserSorter (const int attributeToSortBy, const bool forwards)
         : attributeToSort (attributeToSortBy),
             direction (forwards ? 1 : -1)
     {}
 
-    int compareElements (Patch first, Patch second) const
+    int compareElements (const Patch& first, const Patch& second) const
     {
-        if(attributeToSort == Columns::INDEX) {
+        if(attributeToSort == Columns::INDEX)
             return direction * (first.progNumber - second.progNumber);
-        }
-        else if (attributeToSort == Columns::NAME) {
+        if (attributeToSort == Columns::NAME)
             return direction * first.name.compareIgnoreCase(second.name);
-        }
-        else if (attributeToSort == Columns::CAT1) {
+        if (attributeToSort == Columns::CAT1)
             return direction * (first.category1 - second.category1);
-        }
-        else if (attributeToSort == Columns::CAT2) {
+        if (attributeToSort == Columns::CAT2)
             return direction * (first.category2 - second.category2);
-        }
-        else if (attributeToSort == Columns::ARP) {
+        if (attributeToSort == Columns::ARP)
             return direction * (first.data[129]- second.data[129]);
-        }
-        else if (attributeToSort == Columns::UNI) {
+        if (attributeToSort == Columns::UNI)
             return direction * (first.unison - second.unison);
-        }
-        else if (attributeToSort == Columns::VER) {
+        if (attributeToSort == Columns::VER)
             return direction * (first.model - second.model);
-        }
-        else if (attributeToSort == Columns::ST) {
+        if (attributeToSort == Columns::ST)
             return direction * (first.transpose - second.transpose);
-        }
         return direction * (first.progNumber - second.progNumber);
     }
 
 private:
-    int attributeToSort;
-    int direction;
+    const int attributeToSort;
+	const int direction;
 };
 
 void PatchBrowser::sortOrderChanged(int newSortColumnId, bool isForwards)
 {
     if (newSortColumnId != 0)
     {
-        PatchBrowser::PatchBrowserSorter sorter (newSortColumnId, isForwards);
+        PatchBrowserSorter sorter (newSortColumnId, isForwards);
         m_filteredPatches.sort(sorter);
         m_patchList.updateContent();
     }
