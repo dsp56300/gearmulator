@@ -8,8 +8,8 @@
 
 using namespace juce;
 using namespace virusLib;
-constexpr auto comboBoxWidth = 98;
-const Array<String> categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
+
+const Array<String> g_categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
                              "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
                              "Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3"};
 
@@ -17,7 +17,7 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     m_parameterBinding(_parameterBinding),
     m_controller(_controller),
     m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
-	m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, NULL),
+	m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
     m_search("Search Box"),
     m_patchList("Patch browser"),
     m_properties(m_controller.getConfig())
@@ -47,14 +47,18 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
     m_search.setSize(m_patchList.getWidth(), 20);
     m_search.setColour(TextEditor::textColourId, Colours::white);
     m_search.setTopLeftPosition(m_patchList.getBounds().getBottomLeft().translated(0, 8));
-    m_search.onTextChange = [this] {
+    m_search.onTextChange = [this]
+	{
         m_filteredPatches.clear();
-        for(auto patch : m_patches) {
+        for(const auto& patch : m_patches)
+		{
             const auto searchValue = m_search.getText();
-            if (searchValue.isEmpty()) {
+            if (searchValue.isEmpty()) 
+			{
                 m_filteredPatches.add(patch);
             }
-            else if(patch.name.containsIgnoreCase(searchValue)) {
+            else if(patch.name.containsIgnoreCase(searchValue))
+			{
                 m_filteredPatches.add(patch);
             }
         }
@@ -123,7 +127,7 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 		else {
 			patch.model = guessVersion(&patch.data[0]);
 		}
-		auto md5 = MD5(it + 9 + 17, 256 - 17 - 3).toHexString();
+		const auto md5 = MD5(it + 9 + 17, 256 - 17 - 3).toHexString();
 		if (!dedupe || !m_checksums.contains(md5)) {
 			m_checksums.set(md5, true);
 			m_patches.add(patch);
@@ -136,8 +140,8 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 
 uint32_t PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false)
 {
-    auto ext = file.getFileExtension().toLowerCase();
-    auto path = file.getParentDirectory().getFullPathName();
+	const auto ext = file.getFileExtension().toLowerCase();
+    const auto path = file.getParentDirectory().getFullPathName();
 
 	if (ext == ".syx")
     {
@@ -173,24 +177,26 @@ uint32_t PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0,
 
 void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
 {
-    auto ext = file.getFileExtension().toLowerCase();
-    auto path = file.getParentDirectory().getFullPathName();
-    if (file.isDirectory() && e.mods.isRightButtonDown()) {
+    const auto ext = file.getFileExtension().toLowerCase();
+    const auto path = file.getParentDirectory().getFullPathName();
+    if (file.isDirectory() && e.mods.isRightButtonDown())
+	{
         auto p = PopupMenu();
-        p.addItem("Add directory contents to patch list", [this, file]() {
+        p.addItem("Add directory contents to patch list", [this, file]() 
+		{
             m_patches.clear();
             m_checksums.clear();
 
-            for (auto f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles)) {
+            for (const auto& f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles))
+			{
                 loadBankFile(f.getFile(), 0, true);
             }
             m_filteredPatches.clear();
-            for(auto patch : m_patches) {
+            for(const auto& patch : m_patches)
+			{
                 const auto searchValue = m_search.getText();
-                if (searchValue.isEmpty()) {
-                    m_filteredPatches.add(patch);
-                }
-                else if(patch.name.containsIgnoreCase(searchValue)) {
+                if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
+				{
                     m_filteredPatches.add(patch);
                 }
             }
@@ -203,18 +209,17 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
         return;
     }
     m_properties->setValue("virus_bank_dir", path);
-    if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid") {
+
+    if(file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
+	{
         m_patches.clear();
         loadBankFile(file);
         m_filteredPatches.clear();
-        for(auto patch : m_patches) {
+        for(const auto& patch : m_patches)
+		{
             const auto searchValue = m_search.getText();
-            if (searchValue.isEmpty()) {
+            if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
                 m_filteredPatches.add(patch);
-            }
-            else if(patch.name.containsIgnoreCase(searchValue)) {
-                m_filteredPatches.add(patch);
-            }
         }
         m_patchList.updateContent();
         m_patchList.deselectAllRows();
@@ -230,9 +235,9 @@ void PatchBrowser::browserRootChanged(const File &newRoot) {}
 int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
 
 void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int height, bool rowIsSelected) {
-    auto alternateColour = getLookAndFeel()
-                               .findColour(ListBox::backgroundColourId)
-                               .interpolatedWith(getLookAndFeel().findColour(ListBox::textColourId), 0.03f);
+	const auto alternateColour = getLookAndFeel()
+	                             .findColour(ListBox::backgroundColourId)
+	                             .interpolatedWith(getLookAndFeel().findColour(ListBox::textColourId), 0.03f);
     if (rowIsSelected)
         g.fillAll(Colours::lightblue);
     else if (rowNumber % 2)
@@ -242,8 +247,8 @@ void PatchBrowser::paintRowBackground(Graphics &g, int rowNumber, int width, int
 void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) {
     g.setColour(rowIsSelected ? Colours::darkblue
                                 : getLookAndFeel().findColour(ListBox::textColourId)); // [5]
-    
-    auto rowElement = m_filteredPatches[rowNumber];
+
+    const auto rowElement = m_filteredPatches[rowNumber];
     //auto text = rowElement.name;
     String text = "";
     if (columnId == Columns::INDEX)
@@ -251,9 +256,9 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     else if (columnId == Columns::NAME)
         text = rowElement.name;
     else if (columnId == Columns::CAT1)
-        text = categories[rowElement.category1];
+        text = g_categories[rowElement.category1];
     else if (columnId == Columns::CAT2)
-        text = categories[rowElement.category2];
+        text = g_categories[rowElement.category2];
     else if (columnId == Columns::ARP)
         text = rowElement.data[129] != 0 ? "Y" : " ";
     else if(columnId == Columns::UNI)
@@ -356,16 +361,16 @@ void PatchBrowser::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, c
 
 		for(size_t j=i+1; j < _src.size(); ++j)
 		{
-			if(_src[j] == 0xf7)
-			{
-				std::vector<uint8_t> entry;
-				entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
+			if(_src[j] != 0xf7)
+				continue;
 
-				_dst.emplace_back(entry);
+			std::vector<uint8_t> entry;
+			entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
 
-				i = j;
-				break;
-			}
+			_dst.emplace_back(entry);
+
+			i = j;
+			break;
 		}
 	}
 }
