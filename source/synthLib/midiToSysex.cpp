@@ -49,21 +49,39 @@ namespace synthLib
 						return false;
 					}
 
-					const uint8_t event = getc(hFile);
-					switch (event)
+					const auto ch = getc(hFile);
+
+					if (ch == EOF)
+						break;
+
+					const auto ev = static_cast<uint8_t>(ch);
+
+					switch (ev)
 					{
 					case 0xf0: // that's what we're searching for, sysex data
 						{
 							const auto sysExLen = readVarLen(hFile, &numBytesRead);
 
 							std::vector<uint8_t> sysex;
-							sysex.resize(sysExLen + 1);
+							sysex.reserve(sysExLen + 1);
 
-							sysex[0] = 0xf0;
+							sysex.push_back(0xf0);
 
-							fread(&sysex[1], sysExLen, 1, hFile);
+							// we ignore the provided sysex length as I've seen files that do not have the length encoded properly
+							while(true)
+							{
+								const auto c = getc(hFile);
+								sysex.push_back(static_cast<uint8_t>(c));
 
-							_sysexMessages.insert(_sysexMessages.end(), sysex.begin(), sysex.end());
+								if(c == 0xf7)
+								{
+									_sysexMessages.insert(_sysexMessages.end(), sysex.begin(), sysex.end());
+									break;
+								}
+
+								if (feof(hFile))
+									break;
+							}
 						}
 						break;
 
@@ -135,6 +153,12 @@ namespace synthLib
 
 	int32_t MidiToSysex::readVarLen(FILE* hFile, int* _pNumBytesRead)
 	{
+		if (feof(hFile))
+		{
+			*_pNumBytesRead = 0;
+			return -1;
+		}
+
 		uint32_t value;
 		uint8_t c;
 
