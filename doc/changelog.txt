@@ -1,9 +1,10 @@
 Release Notes 
 
-1.2.6 (2022.02.25):
+1.2.6 (2022.02.26):
 
 - [Imp] UI knobs now react to parameter changes via Midi Control Change, Poly Pressure and Sysex
-- [Imp] Various performance improvements
+- [Imp] Patches loaded via "Load" button that only contain a single preset are now loaded to the edit buffer of the selected part
+- [Imp] Emulation performance improvements (5% - 10%)
 
 - [Fix] Presets were not always loaded correctly
 - [Fix] Loading of presets didn't (properly) update the UI
@@ -16,6 +17,7 @@ Release Notes
 - [Fix] "Assign3 Amount3" was named "Assign2 Amount3" (automation name)
 - [Fix] Osc 1 & 2 Wave Select parameter was off-by-one
 - [Fix] Key follow base UI element not working
+- [Fix] Do not crash when attempting to load a preset that is not a Virus preset
 
 1.2.5 (2022.01.29):
 
