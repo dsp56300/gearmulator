@@ -6,9 +6,28 @@
 
 namespace synthLib
 {
+#ifdef _MSC_VER
+#include <Windows.h>
+	std::wstring ToUtf16(const std::string& str)
+	{
+		std::wstring ret;
+		int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+		if (len > 0)
+		{
+			ret.resize(len);
+			MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), &ret[0], len);
+		}
+		return ret;
+	}
+#endif
+
 	bool MidiToSysex::readFile(std::vector<uint8_t>& _sysexMessages, const char* _filename)
 	{
+#ifdef _MSC_VER
+		FILE* hFile = _wfopen(ToUtf16(_filename).c_str(), L"rb");
+#else
 		FILE* hFile = fopen(_filename, "rb");
+#endif
 
 		if (hFile == nullptr)
 		{
