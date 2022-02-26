@@ -47,7 +47,7 @@ private:
     juce::HashMap<juce::String, bool> m_checksums;
 	uint32_t load(const std::vector<std::vector<uint8_t>>& _packets, bool dedupe);
 	bool load(const std::vector<uint8_t>& _data, bool dedupe);
-    uint32_t loadBankFile(const juce::File &file, const int _startIndex, const bool dedupe);
+    uint32_t loadBankFile(const juce::File& file, const bool dedupe);
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;
