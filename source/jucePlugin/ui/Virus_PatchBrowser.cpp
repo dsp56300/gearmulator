@@ -138,7 +138,7 @@ bool PatchBrowser::load(const std::vector<uint8_t>& _data, bool dedupe)
 	return false;
 }
 
-uint32_t PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, const bool dedupe = false)
+uint32_t PatchBrowser::loadBankFile(const File& file, const bool dedupe = false)
 {
 	const auto ext = file.getFileExtension().toLowerCase();
     const auto path = file.getParentDirectory().getFullPathName();
@@ -146,9 +146,9 @@ uint32_t PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0,
 	if (ext == ".syx")
     {
         MemoryBlock data;
-        if (!file.loadFileAsData(data)) {
+
+		if (!file.loadFileAsData(data))
             return 0;
-        }
 
 		std::vector<uint8_t> d;
 		d.resize(data.getSize());
@@ -189,7 +189,7 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
 
             for (const auto& f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles))
 			{
-                loadBankFile(f.getFile(), 0, true);
+                loadBankFile(f.getFile(), true);
             }
             m_filteredPatches.clear();
             for(const auto& patch : m_patches)
