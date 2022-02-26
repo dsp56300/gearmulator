@@ -24,12 +24,16 @@ class PatchBrowser : public juce::Component, juce::FileBrowserListener, juce::Ta
 {
 
 public:
-    PatchBrowser(VirusParameterBinding &_parameterBinding, Virus::Controller& _controller);
+	PatchBrowser(VirusParameterBinding &_parameterBinding, Virus::Controller& _controller);
+
+	static uint32_t load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets);
+	static bool load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
+	static uint32_t loadBankFile(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const juce::File& file);
 
 private:
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;
-    template <typename T> juce::String parseAsciiText(const T &msg, const int start) const
+    template <typename T> static juce::String parseAsciiText(const T &msg, const int start)
     {
         char text[Virus::Controller::kNameLength + 1];
         text[Virus::Controller::kNameLength] = 0; // termination
@@ -45,9 +49,6 @@ private:
     juce::Array<Patch> m_filteredPatches;
     juce::PropertiesFile *m_properties;
     juce::HashMap<juce::String, bool> m_checksums;
-	uint32_t load(const std::vector<std::vector<uint8_t>>& _packets, bool dedupe);
-	bool load(const std::vector<uint8_t>& _data, bool dedupe);
-    uint32_t loadBankFile(const juce::File& file, const bool dedupe);
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;
