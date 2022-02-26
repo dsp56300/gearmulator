@@ -452,81 +452,44 @@ void VirusEditor::loadFile()
     
     const auto flags = FileBrowserComponent::openMode | FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-    std::function<void (const FileChooser &)> onFileChooser = [this](const FileChooser& chooser)
+    const std::function onFileChooser = [this](const FileChooser& chooser)
     {
         if (chooser.getResults().isEmpty())
             return;
-        bool sentData = false;
+
         const auto result = chooser.getResult();
         m_previousPath = result.getParentDirectory().getFullPathName();
         const auto ext = result.getFileExtension().toLowerCase();
-        if (ext == ".syx")
-        {
-            MemoryBlock data;
-            result.loadFileAsData(data);
 
-            for (auto it = data.begin(); it != data.end(); it += 267)
-            {
-                if ((it + 267) <= data.end())
-                {
-                    m_controller.sendSysEx(Virus::SysEx(it, it + 267));
-                    sentData = true;
-                }
-            }
+        std::vector<Patch> patches;
+		PatchBrowser::loadBankFile(patches, nullptr, result);
+
+		if(patches.empty())
+			return;
+
+    	if(patches.size() == 1)
+        {
+	        // load to edit buffer of current part
+	        auto data = patches.front().sysex;
+	        data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
+	        if (m_controller.isMultiMode())
+		        data[8] = m_controller.getCurrentPart();
+	        else
+		        data[8] = virusLib::SINGLE;
+	        m_controller.sendSysEx(data);
         }
-        else if (ext == ".mid" || ext == ".midi")
+        else
         {
-            MemoryBlock data;
-            if (!result.loadFileAsData(data))
-            {
-                return;
-            }
-            const uint8_t *ptr = (uint8_t *)data.getData();
-            const auto end = ptr + data.getSize();
-
-            for (auto it = ptr; it < end; it += 1)
-            {
-                if ((uint8_t)*it == (uint8_t)0xf0 && (it + 267) < end)
-                {
-                    if ((uint8_t)*(it+1) == 0x00
-                        && (uint8_t)*(it+2) == 0x20
-                        && (uint8_t)*(it+3) == 0x33
-                        && (uint8_t)*(it+4) == 0x01
-                        && (uint8_t)*(it+6) == virusLib::DUMP_SINGLE)
-                    {
-                        auto syx = Virus::SysEx(it, it + 267);
-                        syx[7] = 0x01; // force to bank a
-                        syx[266] = 0xf7;
-
-                        m_controller.sendSysEx(syx);
-
-                        it += 266;
-                    }
-                    else if((uint8_t)*(it+3) == 0x00
-                        && (uint8_t)*(it+4) == 0x20
-                        && (uint8_t)*(it+5) == 0x33
-                        && (uint8_t)*(it+6) == 0x01
-                        && (uint8_t)*(it+8) == virusLib::DUMP_SINGLE)// some midi files have two bytes after the 0xf0
-                    {
-                        auto syx = Virus::SysEx();
-                        syx.push_back(0xf0);
-                        for (auto i = it + 3; i < it + 3 + 266; i++)
-                        {
-                            syx.push_back((uint8_t)*i);
-                        }
-                        syx[7] = 0x01; // force to bank a
-                        syx[266] = 0xf7;
-                        m_controller.sendSysEx(syx);
-                        it += 266;
-                    }
-
-                    sentData = true;
-                }
-            }
+	        // load to bank A
+	        for (const auto& p : patches)
+	        {
+		        auto data = p.sysex;
+		        data[7] = virusLib::toMidiByte(virusLib::BankNumber::A);
+		        m_controller.sendSysEx(data);
+	        }
         }
 
-        if (sentData)
-            m_controller.onStateLoaded();
+        m_controller.onStateLoaded();
     };
     m_fileChooser->launchAsync (flags, onFileChooser);
 }
