@@ -301,7 +301,7 @@ void PatchBrowser::selectedRowsChanged(int lastRowSelected)
     const auto part = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
 
 	auto sysex = m_filteredPatches[idx].sysex;
-	sysex[7] = 0;
+	sysex[7] = toMidiByte(virusLib::BankNumber::EditBuffer);
 	sysex[8] = part;
 
 	m_controller.sendSysEx(sysex);
