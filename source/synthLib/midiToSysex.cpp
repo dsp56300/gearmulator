@@ -139,7 +139,7 @@ namespace synthLib
 	{
 		char readChunk[4];
 
-		if (!fread(readChunk, 4, 1, hFile))
+		if (fread(readChunk, 1, 4, hFile) != 4)
 			return false;
 
 		if (readChunk[0] == _pCompareChunk[0] && readChunk[1] == _pCompareChunk[1] &&
@@ -150,16 +150,21 @@ namespace synthLib
 	}
 	uint32_t MidiToSysex::getChunkLength(FILE* hFile)
 	{
-		return ((uint32_t)getc(hFile) << 24 |
-			(uint32_t)getc(hFile) << 16 |
-			(uint32_t)getc(hFile) << 8 |
-			(uint32_t)getc(hFile));
+		const auto a = getc(hFile);
+		const auto b = getc(hFile);
+		const auto c = getc(hFile);
+		const auto d = getc(hFile);
+		
+		if(a == EOF || b == EOF || c == EOF || d == EOF)
+			return -1;
+
+		return (uint32_t(a) << 24 | uint32_t(b) << 16 | uint32_t(c) << 8 | uint32_t(d));
 	}
 	bool MidiToSysex::ignoreChunk(FILE* hFile)
 	{
 		uint32_t len = getChunkLength(hFile);
 
-		if ((long)len == -1)
+		if ((int32_t)len == -1)
 			return false;
 
 		fseek(hFile, len, SEEK_CUR);
