@@ -11,7 +11,7 @@ namespace synthLib
 	std::wstring ToUtf16(const std::string& str)
 	{
 		std::wstring ret;
-		int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+		const int len = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), nullptr, 0);
 		if (len > 0)
 		{
 			ret.resize(len);
