@@ -31,6 +31,8 @@ namespace Virus
 
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
 	{
+		if (newValue == m_lastValue)
+			return;
 		m_lastValue = newValue;
 		if (notifyHost)
 			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
