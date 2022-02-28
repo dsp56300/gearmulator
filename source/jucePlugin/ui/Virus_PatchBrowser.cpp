@@ -264,6 +264,9 @@ void PatchBrowser::paintCell(Graphics &g, int rowNumber, int columnId, int width
     g.setColour(rowIsSelected ? Colours::darkblue
                                 : getLookAndFeel().findColour(ListBox::textColourId)); // [5]
 
+	if (rowNumber >= getNumRows())
+		return;	// Juce what are you up to?
+
     const auto rowElement = m_filteredPatches[rowNumber];
     //auto text = rowElement.name;
     String text = "";
