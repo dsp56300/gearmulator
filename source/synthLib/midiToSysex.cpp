@@ -90,13 +90,15 @@ namespace synthLib
 							while(true)
 							{
 								const auto c = getc(hFile);
-								sysex.push_back(static_cast<uint8_t>(c));
 
 								if(c == 0xf7 || c == 0xf8)	// Virus Powercore writes f8 instead of f7
 								{
+									sysex.push_back(0xf7);
 									_sysexMessages.insert(_sysexMessages.end(), sysex.begin(), sysex.end());
 									break;
 								}
+
+								sysex.push_back(static_cast<uint8_t>(c));
 
 								if (feof(hFile))
 									break;
