@@ -6,8 +6,10 @@
 #include "Virus_LookAndFeel.h"
 #include "../VirusController.h"
 #include "Virus_LookAndFeel.h"
-
 class VirusParameterBinding;
+namespace Trancy
+{
+
 class OscEditor;
 class LfoEditor;
 class FxEditor;
@@ -100,9 +102,9 @@ private:
     std::unique_ptr<PatchBrowser> m_patchBrowser;
     std::unique_ptr<juce::Drawable> m_background;
 
-    Virus::LookAndFeel m_lookAndFeel;
-    Virus::LookAndFeelButtons m_landfButtons;
-    Virus::CustomLAF m_landfToolTip;
+    VirusUI::LookAndFeel m_lookAndFeel;
+    VirusUI::LookAndFeelButtons m_landfButtons;
+    VirusUI::CustomLAF m_landfToolTip;
 
     juce::String m_previousPath;
     bool m_paramDisplayLocal = false;
@@ -116,3 +118,4 @@ private:
     void mouseWheelMove (const juce::MouseEvent &event, const juce::MouseWheelDetails &wheel) override;
 
 };
+} // namespace Trancy
