@@ -3,12 +3,8 @@
 #include "../PluginProcessor.h"
 #include "Virus_Buttons.h"
 class VirusParameterBinding;
-
 namespace Trancy
 {
-
-	
-
 	class FxEditor : public juce::Component
 	{
 	public:

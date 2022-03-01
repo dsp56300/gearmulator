@@ -5,7 +5,7 @@
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_cryptography/juce_cryptography.h>
 #include "VirusEditor.h"
-class VirusParameterBinding;
+
 namespace Trancy
 {
 	
