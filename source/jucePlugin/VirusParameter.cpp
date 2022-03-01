@@ -34,10 +34,17 @@ namespace Virus
 		if (newValue == m_lastValue)
 			return;
 		m_lastValue = newValue;
+
 		if (notifyHost)
+		{
+			beginChangeGesture();
 			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			endChangeGesture();
+		}
 		else
+		{
 			m_value.setValue(newValue);
+		}
 	}
 
 	juce::String Parameter::genId(const Description &d, const int part)
