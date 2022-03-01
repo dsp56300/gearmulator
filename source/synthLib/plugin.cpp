@@ -110,6 +110,26 @@ namespace synthLib
 		return m_device->setState(state, stateType);
 	}
 
+	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
+	{
+		if(m_midiIn.empty() || m_midiIn.back().offset <= _ev.offset)
+		{
+			m_midiIn.push_back(_ev);
+			return;
+		}
+
+		for (auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
+		{
+			if (it->offset > _ev.offset)
+			{
+				m_midiIn.insert(it, _ev);
+				return;
+			}
+		}
+
+		m_midiIn.push_back(_ev);
+	}
+
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
 		if(_bpm < 1.0f)
@@ -156,41 +176,28 @@ namespace synthLib
 
 			const auto max = static_cast<float>(_sampleCount);
 
-			SMidiEvent evClock;
-
-			const auto midiEventsEmpty = m_midiIn.empty();
-
 			for(float pos = std::floor(firstSamplePos); pos < max; pos += samplesPerClock)
 			{
 				const int insertPos = dsp56k::floor_int(pos);
 
-				bool found = false;
+				SMidiEvent evClock;
+				evClock.a = M_TIMINGCLOCK;
+				evClock.offset = insertPos;
 
-				if(!midiEventsEmpty)
+				if(m_needsStart)
 				{
-					for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
-					{
-						if(static_cast<int>(it->offset) > insertPos)
-						{
-							evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
-							evClock.offset = insertPos;
-							m_midiIn.insert(it, evClock);
-							found = true;
-							break;
-						}
-					}
-				}
+					evClock.a = M_START;
+					insertMidiEvent(evClock);
+					evClock.a = M_TIMINGCLOCK;
 
-				if(midiEventsEmpty || !found)
-				{
-					evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
-					evClock.offset = insertPos;
-					m_midiIn.push_back(evClock);
+					m_needsStart = false;
 				}
-
-				m_clockTickPos += 1.0f;
 
 				m_needsStart = false;
+
+				insertMidiEvent(evClock);
+
+				m_clockTickPos += 1.0f;
 			}
 		}
 	}

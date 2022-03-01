@@ -33,6 +33,8 @@ namespace synthLib
 		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state);
 
+		void insertMidiEvent(const SMidiEvent& _ev);
+
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
