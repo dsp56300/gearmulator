@@ -69,6 +69,24 @@ PRIVATE
     ui/Virus_PatchBrowser.h
     ui/Virus_Parts.h
     ui/Ui_Utils.h
+
+    ui2/Ui_Utils.h
+    ui2/Virus_Buttons.cpp
+    ui2/Virus_Buttons.h
+    ui2/Virus_LookAndFeel.cpp
+    ui2/Virus_LookAndFeel.h
+    ui2/Virus_Panel1_OscEditor.cpp
+    ui2/Virus_Panel1_OscEditor.h
+    ui2/Virus_Panel2_LfoEditor.cpp
+    ui2/Virus_Panel2_LfoEditor.h
+    ui2/Virus_Panel3_FxEditor.cpp
+    ui2/Virus_Panel3_FxEditor.h
+    ui2/Virus_Panel4_ArpEditor.cpp
+    ui2/Virus_Panel4_ArpEditor.h
+    ui2/Virus_Panel5_PatchBrowser.cpp
+    ui2/Virus_Panel5_PatchBrowser.h
+    ui2/VirusEditor.cpp
+    ui2/VirusEditor.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
@@ -101,6 +119,32 @@ juce_add_binary_data(jucePlugin_BinaryData
         "assets/knobs/GenBlue_70x70_100.png"
         "assets/knobs/GenRed_70x70_100.png"
         "assets/knobs/multi_18x18_100.png"
+        "assets2/main_background.png"
+        "assets2/panels/panel_1.png"
+        "assets2/panels/panel_2.png"
+        "assets2/panels/panel_3.png"
+        "assets2/panels/panel_4.png"
+        "assets2/panels/panel_5.png"
+        "assets2/buttons/btn_main_1.png"
+        "assets2/buttons/btn_main_2.png"
+        "assets2/buttons/btn_main_3.png"
+        "assets2/buttons/btn_main_4.png"
+        "assets2/buttons/btn_main_5.png"
+        "assets2/buttons/btn_1.png"
+        "assets2/buttons/btn_2.png"
+        "assets2/buttons/btn_3.png"
+        "assets2/buttons/btn_4.png"
+        "assets2/buttons/btn_left.png"
+        "assets2/buttons/btn_right.png"
+        "assets2/buttons/btn_down.png"
+        "assets2/buttons/btn_menu.png"
+        "assets2/buttons/btn_load_bank.png"
+        "assets2/buttons/btn_save_preset.png"
+        "assets2/combobox/cmb_1.png"
+        "assets2/combobox/cmb_2.png"
+        "assets2/knobs/knob_1_128.png"
+        "assets2/knobs/knob_2_128.png"
+        "assets2/font/Digital"
 		"parameterDescriptions_C.json"
 )
 
