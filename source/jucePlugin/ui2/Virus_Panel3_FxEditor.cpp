@@ -2,12 +2,10 @@
 #include "BinaryData.h"
 #include "Ui_Utils.h"
 #include "../VirusParameterBinding.h"
-class VirusParameterBinding;
+
 namespace Trancy
 {
-
 	using namespace juce;
-
 
 	FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioProcessor &_processorRef) :
 		m_controller(_processorRef.getController())

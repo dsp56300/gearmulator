@@ -2,7 +2,7 @@
 #include "BinaryData.h"
 #include "Ui_Utils.h"
 #include "../VirusParameterBinding.h"
-class VirusParameterBinding;
+
 namespace Trancy
 {
 	using namespace juce;

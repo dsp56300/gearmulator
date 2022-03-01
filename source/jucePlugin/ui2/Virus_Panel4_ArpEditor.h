@@ -8,7 +8,6 @@
 class VirusParameterBinding;
 namespace Trancy
 {
-	
 	class ArpEditor : public juce::Component
 	{
 	public:
