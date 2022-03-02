@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "esaiListenerToCallback.h"
 #include "esaiListenerToFile.h"
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/memory.h"
@@ -161,7 +162,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 	}
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename)
+void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TCallback _callback, uint32_t _maxSampleCount/* = 0*/)
 {
 	auto loader = bootDSP();
 
@@ -169,7 +170,14 @@ void ConsoleApp::run(const std::string& _audioOutputFilename)
 
 	const auto sr = v.getSamplerate();
 
-	EsaiListenerToFile esaiListener(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename);
+	std::unique_ptr<EsaiListener> esaiListener;
+
+	if (!_audioOutputFilename.empty())
+		esaiListener.reset(new EsaiListenerToFile(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename));
+	else
+		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), 0b001, std::move(_callback)));
+
+	esaiListener->setMaxSamplecount(_maxSampleCount);
 
 	EsaiListenerToFile esaiListener1(periphY.getEsai(), 0b100, [](EsaiListener*, uint32_t) {}, sr, "");
 
@@ -179,7 +187,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename)
 
 	std::thread midiThread([&]()
 	{
-		while (!esaiListener.limitReached())
+		while (!esaiListener->limitReached())
 		{
 			if(periphX.getHDI08().hasTX())
 			{
@@ -195,9 +203,20 @@ void ConsoleApp::run(const std::string& _audioOutputFilename)
 
 	loader.join();
 
-	while (!esaiListener.limitReached())
+	while (!esaiListener->limitReached())
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
 	midiThread.join();
 	dspThread.join();
+}
+
+void ConsoleApp::run(const std::string& _audioOutputFilename)
+{
+	assert(!_audioOutputFilename.empty());
+	run(_audioOutputFilename, [](const std::vector<dsp56k::TWord>&) {return true; });
+}
+
+void ConsoleApp::run(EsaiListenerToCallback::TCallback _callback)
+{
+	run(std::string(), std::move(_callback));
 }

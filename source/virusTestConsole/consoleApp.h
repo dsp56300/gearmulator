@@ -2,6 +2,7 @@
 #include <string>
 
 #include "esaiListener.h"
+#include "esaiListenerToCallback.h"
 #include "dsp56kEmu/memory.h"
 #include "dsp56kEmu/dsp.h"
 
@@ -22,8 +23,11 @@ public:
 	static void waitReturn();
 
 	void run(const std::string& _audioOutputFilename);
+	void run(EsaiListenerToCallback::TCallback _callback);
 
 private:
+	void run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TCallback _callback, uint32_t _maxSampleCount = 0);
+
 	std::thread bootDSP();
 	dsp56k::IPeripherals& getYPeripherals();
 	void audioCallback(uint32_t audioCallbackCount);
