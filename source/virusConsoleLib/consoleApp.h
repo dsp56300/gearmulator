@@ -22,7 +22,7 @@ public:
 
 	static void waitReturn();
 
-	void run(const std::string& _audioOutputFilename);
+	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0);
 	void run(EsaiListenerToCallback::TCallback _callback);
 
 private:

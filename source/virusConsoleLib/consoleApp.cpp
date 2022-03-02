@@ -210,10 +210,10 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 	dspThread.join();
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/)
 {
 	assert(!_audioOutputFilename.empty());
-	run(_audioOutputFilename, [](const std::vector<dsp56k::TWord>&) {return true; });
+	run(_audioOutputFilename, [](const std::vector<dsp56k::TWord>&) {return true; }, _maxSampleCount);
 }
 
 void ConsoleApp::run(EsaiListenerToCallback::TCallback _callback)

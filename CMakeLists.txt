@@ -14,6 +14,7 @@ option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
+add_subdirectory(source/virusConsoleLib)
 add_subdirectory(source/libresample)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
