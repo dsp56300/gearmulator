@@ -26,8 +26,7 @@ ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, 
 	if (!v.isValid())
 	{
 		std::cout << "ROM file " << _romFile << " is not valid and couldn't be loaded. Place a valid ROM file with .bin extension next to this program." << std::endl;
-		waitReturn();
-		throw std::exception();
+		return;
 	}
 
 	memory.setExternalMemory(_extMemAddress, true);
@@ -37,7 +36,12 @@ ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, 
 	conf.aguSupportBitreverse = v.getModel() == ROMFile::ModelD;	// not used on B & C
 
 	jit.setConfig(conf);
-}	
+}
+
+bool ConsoleApp::isValid() const
+{
+	return v.isValid();
+}
 
 void ConsoleApp::waitReturn()
 {
