@@ -1,22 +1,17 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(dsp56kDisassemble)
+project(virusTestConsole)
 
 add_executable(virusTestConsole)
 
 set(SOURCES
-	esaiListener.cpp esaiListener.h
-	esaiListenerToCallback.cpp esaiListenerToCallback.h
-	esaiListenerToFile.cpp esaiListenerToFile.h
 	virusTestConsole.cpp
-	consoleApp.cpp consoleApp.h
-	integrationTest.cpp
 )
 
 target_sources(virusTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(virusTestConsole PUBLIC virusLib)
+target_link_libraries(virusTestConsole PUBLIC virusConsoleLib)
 
 if(UNIX AND NOT APPLE)
 	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)

@@ -1,12 +1,10 @@
 #include <iostream>
 
-#include "consoleApp.h"
+#include "../virusConsoleLib/consoleApp.h"
 
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 
 #include "../synthLib/os.h"
-
-#include "../virusLib/romfile.h"
 
 using namespace dsp56k;
 using namespace virusLib;
@@ -14,7 +12,7 @@ using namespace synthLib;
 
 int main(int _argc, char* _argv[])
 {
-	if(true)
+	if constexpr(true)
 	{
 		try
 		{
