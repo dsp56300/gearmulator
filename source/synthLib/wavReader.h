@@ -18,12 +18,12 @@ namespace synthLib
 
 	struct Data
 	{
-		const void* data;
-		size_t dataByteSize;
-		uint32_t bitsPerSample;
-		uint32_t channels;
-		uint32_t samplerate;
-		bool isFloat;
+		const void* data = nullptr;
+		size_t dataByteSize = 0;
+		uint32_t bitsPerSample = 0;
+		uint32_t channels = 0;
+		uint32_t samplerate = 0;
+		bool isFloat = false;
 	};
 
 	class WavLoader
