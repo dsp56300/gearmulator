@@ -1,0 +1,182 @@
+#include "consoleApp.h"
+
+#include <iostream>
+
+#include "dsp56kEmu/dspthread.h"
+#include "dsp56kEmu/memory.h"
+
+#include "../virusLib/midiOutParser.h"
+
+using namespace virusLib;
+using namespace synthLib;
+
+class EsaiListener;
+const dsp56k::DefaultMemoryValidator g_memoryMap;
+
+ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, const uint32_t _extMemAddress)
+: memory(g_memoryMap, _memorySize)
+, v(_romFile)
+, periphX(&periphY)
+, dsp(memory, &periphX, &getYPeripherals())
+, uc(periphX.getHDI08(), v)
+, preset({})
+{
+	if (!v.isValid())
+	{
+		std::cout << "ROM file " << _romFile << " is not valid and couldn't be loaded. Place a valid ROM file with .bin extension next to this program." << std::endl;
+		waitReturn();
+		throw std::exception();
+	}
+
+	memory.setExternalMemory(_extMemAddress, true);
+
+	auto& jit = dsp.getJit();
+	auto conf = jit.getConfig();
+	conf.aguSupportBitreverse = v.getModel() == ROMFile::ModelD;	// not used on B & C
+
+	jit.setConfig(conf);
+}	
+
+void ConsoleApp::waitReturn()
+{
+	std::cin.ignore();
+}
+
+std::thread ConsoleApp::bootDSP()
+{
+	return v.bootDSP(dsp, periphX);
+}
+
+dsp56k::IPeripherals& ConsoleApp::getYPeripherals()
+{
+	if (v.getModel() == ROMFile::ModelD)
+		return periphY;
+
+	return periphNop;
+}
+
+
+void ConsoleApp::loadSingle(int b, int p)
+{
+	v.getSingle(b, p, preset);
+}
+
+bool ConsoleApp::loadSingle(const std::string& _preset)
+{
+	auto isDigit = true;
+	for (size_t i = 0; i < _preset.size(); ++i)
+	{
+		if (!isdigit(_preset[i]))
+		{
+			isDigit = false;
+			break;
+		}
+	}
+
+	if (isDigit)
+	{
+		int preset = atoi(_preset.c_str());
+		const int bank = preset / v.getPresetsPerBank();
+		preset -= bank * v.getPresetsPerBank();
+		loadSingle(bank, preset);
+		return true;
+	}
+
+	for (uint32_t b = 0; b < 8; ++b)
+	{
+		for (uint32_t p = 0; p < v.getPresetsPerBank(); ++p)
+		{
+			Microcontroller::TPreset data;
+			v.getSingle(b, p, data);
+
+			const std::string name = ROMFile::getSingleName(data);
+			if (name.empty())
+			{
+				return false;
+			}
+			if (name == _preset)
+			{
+				loadSingle(b, p);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+std::string ConsoleApp::getSingleName() const
+{
+	return ROMFile::getSingleName(preset);
+}
+
+
+void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
+{
+	switch (audioCallbackCount)
+	{
+	case 1:
+		LOG("Sending Init Control Commands");
+		uc.sendInitControlCommands();
+		break;
+	case 256:
+		LOG("Sending Preset");
+		uc.writeSingle(BankNumber::EditBuffer, SINGLE, preset);
+		break;
+	case 512:
+		LOG("Sending Note On");
+//		uc.sendMIDI(SMidiEvent(0x90, 36, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 48, 0x5f));	// Note On
+		uc.sendMIDI(SMidiEvent(0x90, 60, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 63, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 67, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 72, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 75, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0x90, 79, 0x5f));	// Note On
+//		uc.sendMIDI(SMidiEvent(0xb0, 1, 0));		// Modwheel 0
+		uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		break;
+/*	case 8000:
+		LOG("Sending 2nd Note On");
+		uc.sendMIDI(SMidiEvent(0x90, 67, 0x7f));	// Note On
+		uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		break;
+	case 16000:
+		LOG("Sending 3rd Note On");
+		uc.sendMIDI(SMidiEvent(0x90, 63, 0x7f));	// Note On
+		uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		break;
+*/
+	}
+}
+
+void ConsoleApp::run(const std::string& _audioOutputFilename)
+{
+	auto loader = bootDSP();
+
+//	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
+
+	const auto sr = v.getSamplerate();
+
+	EsaiListener esaiListener(periphX.getEsai(), _audioOutputFilename, 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr);
+	EsaiListener esaiListener1(periphY.getEsai(), "", 0b100, [](EsaiListener*, uint32_t) {}, sr);
+
+	dsp56k::DSPThread dspThread(dsp);
+
+	MidiOutParser midiOut;
+
+	std::thread midiThread([&]()
+	{
+		while (true)
+		{
+			const auto word = periphX.getHDI08().readTX();
+			midiOut.append(word);
+		}
+	});
+
+	loader.join();
+
+	while (true)
+	{
+		std::this_thread::sleep_for(std::chrono::seconds(1));
+	}
+}

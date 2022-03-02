@@ -58,6 +58,11 @@ public:
 
 	Model getModel() const { return m_model; }
 
+	uint32_t getSamplerate() const
+	{
+		return getModel() == ModelD ? 44100 : 12000000 / 256;
+	}
+
 	static uint32_t getMultiPresetSize(const Model _model)
 	{
 		switch (_model)
