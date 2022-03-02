@@ -20,11 +20,10 @@ public:
 
 	static void waitReturn();
 
-	std::thread bootDSP();
-
 	void run(const std::string& _audioOutputFilename);
 
 private:
+	std::thread bootDSP();
 	dsp56k::IPeripherals& getYPeripherals();
 	void audioCallback(uint32_t audioCallbackCount);
 

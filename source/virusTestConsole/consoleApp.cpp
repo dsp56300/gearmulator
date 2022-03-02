@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "esaiListenerToFile.h"
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/memory.h"
 
@@ -157,8 +158,9 @@ void ConsoleApp::run(const std::string& _audioOutputFilename)
 
 	const auto sr = v.getSamplerate();
 
-	EsaiListener esaiListener(periphX.getEsai(), _audioOutputFilename, 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr);
-	EsaiListener esaiListener1(periphY.getEsai(), "", 0b100, [](EsaiListener*, uint32_t) {}, sr);
+	EsaiListenerToFile esaiListener(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename);
+
+	EsaiListenerToFile esaiListener1(periphY.getEsai(), 0b100, [](EsaiListener*, uint32_t) {}, sr, "");
 
 	dsp56k::DSPThread dspThread(dsp);
 
@@ -166,17 +168,25 @@ void ConsoleApp::run(const std::string& _audioOutputFilename)
 
 	std::thread midiThread([&]()
 	{
-		while (true)
+		while (!esaiListener.limitReached())
 		{
-			const auto word = periphX.getHDI08().readTX();
-			midiOut.append(word);
+			if(periphX.getHDI08().hasTX())
+			{
+				const auto word = periphX.getHDI08().readTX();
+				midiOut.append(word);
+			}
+			else
+			{
+				std::this_thread::sleep_for(std::chrono::seconds(1));
+			}
 		}
 	});
 
 	loader.join();
 
-	while (true)
-	{
+	while (!esaiListener.limitReached())
 		std::this_thread::sleep_for(std::chrono::seconds(1));
-	}
+
+	midiThread.join();
+	dspThread.join();
 }
