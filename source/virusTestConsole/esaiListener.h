@@ -19,19 +19,21 @@ class EsaiListener
 public:
 	using TCallback = std::function<void(EsaiListener*, uint32_t)>;
 
-	EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, uint8_t _outChannels, TCallback _callback, uint32_t _samplerate);
+	EsaiListener(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _callback);
+	virtual ~EsaiListener() = default;
 
 private:
+	virtual bool onDeliverAudioData(const std::vector<dsp56k::TWord>& _audioData) = 0;
+	virtual void onBeginDeliverAudioData() {};
+
 	void onAudioCallback(dsp56k::Audio* _audio);
-	void writeWord(dsp56k::TWord _word);
 
 	const uint8_t m_outChannels;
 
-	std::vector<uint8_t> m_audioData;
-	std::string m_audioFilename;
-	synthLib::WavWriter m_writer;
+	std::vector<dsp56k::TWord> m_audioData;
 	int m_counter = 0;
 	size_t m_nextWriteSize;
 	const TCallback m_callback;
-	const uint32_t m_samplerate;
+	uint32_t m_maxSampleCount = 0;
+	uint32_t m_processedSampleCount = 0;
 };
