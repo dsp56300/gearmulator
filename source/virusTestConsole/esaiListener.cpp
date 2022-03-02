@@ -11,8 +11,7 @@ size_t g_writeBlockSize = 65536;
 #endif
 
 EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, const uint8_t _outChannels, TCallback _callback, uint32_t _samplerate)
-	: m_esai(_esai)
-    , m_outChannels(_outChannels), m_audioFilename(std::move(_audioFilename)), m_nextWriteSize(g_writeBlockSize)
+	: m_outChannels(_outChannels), m_audioFilename(std::move(_audioFilename)), m_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
 	, m_samplerate(_samplerate)
 {
@@ -33,7 +32,7 @@ EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, cons
 	_esai.writeEmptyAudioIn(4, 2);
 }
 
-void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
+void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 {
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
@@ -57,7 +56,7 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* audio)
 		LOG("Deliver Audio");
 	}
 
-	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
+	_audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
 	if (!m_audioData.capacity())
 	{

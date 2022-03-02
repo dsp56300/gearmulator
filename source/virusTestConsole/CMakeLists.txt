@@ -7,6 +7,8 @@ add_executable(virusTestConsole)
 set(SOURCES
 	esaiListener.cpp esaiListener.h
 	virusTestConsole.cpp
+	consoleApp.cpp consoleApp.h
+	integrationTest.cpp
 )
 
 target_sources(virusTestConsole PRIVATE ${SOURCES})
