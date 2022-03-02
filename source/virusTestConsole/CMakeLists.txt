@@ -6,6 +6,8 @@ add_executable(virusTestConsole)
 
 set(SOURCES
 	esaiListener.cpp esaiListener.h
+	esaiListenerToCallback.cpp esaiListenerToCallback.h
+	esaiListenerToFile.cpp esaiListenerToFile.h
 	virusTestConsole.cpp
 	consoleApp.cpp consoleApp.h
 	integrationTest.cpp

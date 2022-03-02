@@ -10,10 +10,9 @@ size_t g_writeBlockSize = 8192;
 size_t g_writeBlockSize = 65536;
 #endif
 
-EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, const uint8_t _outChannels, TCallback _callback, uint32_t _samplerate)
-	: m_outChannels(_outChannels), m_audioFilename(std::move(_audioFilename)), m_nextWriteSize(g_writeBlockSize)
+EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, TCallback _callback)
+	: m_outChannels(_outChannels), m_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
-	, m_samplerate(_samplerate)
 {
 	uint32_t callbackChannel;
 
@@ -30,6 +29,11 @@ EsaiListener::EsaiListener(dsp56k::Esai& _esai, std::string _audioFilename, cons
 	}, 4, callbackChannel);
 
 	_esai.writeEmptyAudioIn(4, 2);
+}
+
+void EsaiListener::setMaxSamplecount(uint32_t _max)
+{
+	m_maxSampleCount = _max;
 }
 
 void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
@@ -58,6 +62,9 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 
 	_audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
 
+	if (limitReached())
+		return;
+
 	if (!m_audioData.capacity())
 	{
 		for (int c = 0; c < channelsOut; ++c)
@@ -73,25 +80,26 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 		}
 
 		if(m_audioData.capacity())
-		{
-			LOG("Begin writing audio to file " << m_audioFilename);
-		}
+			onBeginDeliverAudioData();
 	}
 
-	if (m_audioData.capacity() && !m_audioFilename.empty())
+	if (m_audioData.capacity())
 	{
 		for (int i = 0; i < sampleCount; ++i)
 		{
 			for (int c = 0; c < 6; ++c)
 			{
-				if(audioOut[c])
-					writeWord(audioOut[c][i]);
+				if(audioOut[c] && !limitReached())
+				{
+					m_audioData.push_back(audioOut[c][i]);
+					++m_processedSampleCount;
+				}
 			}
 		}
 
-		if (m_audioData.size() >= m_nextWriteSize)
+		if (m_audioData.size() >= m_nextWriteSize || limitReached())
 		{
-			if (m_writer.write(m_audioFilename, 24, false, 2, m_samplerate, m_audioData))
+			if (onDeliverAudioData(m_audioData))
 			{
 				m_audioData.clear();
 				m_nextWriteSize = g_writeBlockSize;
@@ -103,11 +111,3 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 
 	m_callback(this, m_counter);
 }
-void EsaiListener::writeWord(const TWord _word)
-{
-	const auto d = reinterpret_cast<const uint8_t*>(&_word);
-	m_audioData.push_back(d[0]);
-	m_audioData.push_back(d[1]);
-	m_audioData.push_back(d[2]);
-}
-
