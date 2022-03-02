@@ -110,6 +110,17 @@ std::string ConsoleApp::getSingleName() const
 	return ROMFile::getSingleName(preset);
 }
 
+std::string ConsoleApp::getSingleNameAsFilename() const
+{
+	auto audioFilename = getSingleName();
+
+	for (size_t i = 0; i < audioFilename.size(); ++i)
+	{
+		if (audioFilename[i] == ' ')
+			audioFilename[i] = '_';
+	}
+	return "virusEmu_" + audioFilename + ".wav";
+}
 
 void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 {

@@ -57,14 +57,7 @@ int main(int _argc, char* _argv[])
 		app.loadSingle(0, 51);		// IndiArp BC
 	}
 
-	std::string audioFilename = app.getSingleName();
-
-	for (size_t i = 0; i < audioFilename.size(); ++i)
-	{
-		if (audioFilename[i] == ' ')
-			audioFilename[i] = '_';
-	}
-	audioFilename = "virusEmu_" + audioFilename + ".wav";
+	const std::string audioFilename = app.getSingleNameAsFilename();
 
 	app.run(audioFilename);
 
