@@ -14,6 +14,8 @@ class ConsoleApp
 public:
 	ConsoleApp(const std::string& _romFile, uint32_t _memorySize, uint32_t _extMemAddress);
 
+	bool isValid() const;
+
 	void loadSingle(int b, int p);
 	bool loadSingle(const std::string& _preset);
 

@@ -40,6 +40,13 @@ int main(int _argc, char* _argv[])
 
 	ConsoleApp app(romFile, 0x100000, 0x020000);
 
+	if(!app.isValid())
+	{
+		std::cout << "ROM file " << romFile << " couldn't be loaded. Make sure tha the ROM file is valid" << std::endl;
+		ConsoleApp::waitReturn();
+		return -1;
+	}
+
 	if(_argc > 1)
 	{
 		if(!app.loadSingle(_argv[1]))
