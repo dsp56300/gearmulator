@@ -22,6 +22,12 @@ public:
 	EsaiListener(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _callback);
 	virtual ~EsaiListener() = default;
 
+	void setMaxSamplecount(uint32_t _max);
+
+	bool limitReached() const
+	{
+		return m_maxSampleCount && m_processedSampleCount >= m_maxSampleCount;
+	}
 private:
 	virtual bool onDeliverAudioData(const std::vector<dsp56k::TWord>& _audioData) = 0;
 	virtual void onBeginDeliverAudioData() {};
