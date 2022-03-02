@@ -17,6 +17,7 @@ public:
 	bool loadSingle(const std::string& _preset);
 
 	std::string getSingleName() const;
+	std::string getSingleNameAsFilename() const;
 
 	static void waitReturn();
 
