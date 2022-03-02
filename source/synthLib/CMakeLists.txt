@@ -13,6 +13,8 @@ set(SOURCES
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
+	wavReader.cpp wavReader.h
+	wavTypes.h
 	wavWriter.cpp wavWriter.h
 )
 
