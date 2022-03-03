@@ -161,6 +161,7 @@ int IntegrationTest::runCompare()
 
 			errorPosition = static_cast<int32_t>(offset / 6);
 			std::cout << "Audio output differs at frame position " << errorPosition << std::endl;
+			break;
 		}
 		return true;
 	}, static_cast<uint32_t>(sampleCount));
