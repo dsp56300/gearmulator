@@ -28,11 +28,16 @@ void EsaiListenerToFile::onBeginDeliverAudioData()
 {
 	LOG("Begin writing audio to file " << m_audioFilename);
 }
+
 void EsaiListenerToFile::writeWord(const dsp56k::TWord _word)
 {
-	const auto d = reinterpret_cast<const uint8_t*>(&_word);
-	m_audioData.push_back(d[0]);
-	m_audioData.push_back(d[1]);
-	m_audioData.push_back(d[2]);
+	writeWord(m_audioData, _word);
 }
 
+void EsaiListenerToFile::writeWord(std::vector<uint8_t>& _dst, dsp56k::TWord _word)
+{
+	const auto d = reinterpret_cast<const uint8_t*>(&_word);
+	_dst.push_back(d[0]);
+	_dst.push_back(d[1]);
+	_dst.push_back(d[2]);
+}
