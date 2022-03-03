@@ -27,6 +27,8 @@ public:
 	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0);
 	void run(EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
+	const virusLib::ROMFile& getRom() const { return v; }
+
 private:
 	void run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
