@@ -168,6 +168,12 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 
 void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount/* = 0*/)
 {
+	if (v.getModel() == ROMFile::ModelD)
+	{
+		periphX.getEsai().setSamplerate(v.getSamplerate());
+		periphY.getEsai().setSamplerate(v.getSamplerate());
+	}
+
 	auto loader = bootDSP();
 
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
@@ -182,6 +188,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, std::move(_callback)));
 
 	esaiListener->setMaxSamplecount(_maxSampleCount);
+
 
 	EsaiListenerToFile esaiListener1(periphY.getEsai(), 0b100, [](EsaiListener*, uint32_t) {}, sr, "");
 
