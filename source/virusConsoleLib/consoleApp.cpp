@@ -166,7 +166,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 	}
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TCallback _callback, uint32_t _maxSampleCount/* = 0*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount/* = 0*/)
 {
 	auto loader = bootDSP();
 
@@ -179,7 +179,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 	if (!_audioOutputFilename.empty())
 		esaiListener.reset(new EsaiListenerToFile(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename));
 	else
-		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), 0b001, std::move(_callback)));
+		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, std::move(_callback)));
 
 	esaiListener->setMaxSamplecount(_maxSampleCount);
 
@@ -220,7 +220,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	run(_audioOutputFilename, [](const std::vector<dsp56k::TWord>&) {return true; }, _maxSampleCount);
 }
 
-void ConsoleApp::run(EsaiListenerToCallback::TCallback _callback)
+void ConsoleApp::run(EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount/* = 0*/)
 {
-	run(std::string(), std::move(_callback));
+	run(std::string(), std::move(_callback), _maxSampleCount);
 }

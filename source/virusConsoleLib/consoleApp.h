@@ -25,10 +25,10 @@ public:
 	static void waitReturn();
 
 	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0);
-	void run(EsaiListenerToCallback::TCallback _callback);
+	void run(EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
 private:
-	void run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TCallback _callback, uint32_t _maxSampleCount = 0);
+	void run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
 	std::thread bootDSP();
 	dsp56k::IPeripherals& getYPeripherals();
