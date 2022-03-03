@@ -60,9 +60,10 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	endif()
 endif()
 
-# ----------------- Test Console
+# ----------------- Console Programs
 
 add_subdirectory(source/virusTestConsole)
+add_subdirectory(source/virusIntegrationTest)
 
 # ----------------- CPack
 
