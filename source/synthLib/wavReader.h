@@ -26,7 +26,7 @@ namespace synthLib
 		bool isFloat = false;
 	};
 
-	class WavLoader
+	class WavReader
 	{
 	public:
 		static bool load(Data& _data, std::vector<CuePoint>* _cuePoints, const uint8_t* _buffer, size_t _bufferSize);

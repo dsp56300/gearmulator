@@ -10,7 +10,7 @@
 
 namespace synthLib
 {
-bool WavLoader::load(Data& _data, std::vector<CuePoint>* _cuePoints, const uint8_t* _buffer, size_t _bufferSize)
+bool WavReader::load(Data& _data, std::vector<CuePoint>* _cuePoints, const uint8_t* _buffer, size_t _bufferSize)
 {
 //	const unsigned int totalFileLength = _bufferSize;
 
