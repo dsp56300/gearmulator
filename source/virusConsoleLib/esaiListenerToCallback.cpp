@@ -1,8 +1,8 @@
 #include "esaiListenerToCallback.h"
 
-EsaiListenerToCallback::EsaiListenerToCallback(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _callback)
-: EsaiListener(_esai, _outChannels, [](EsaiListener*, uint32_t){})
-, m_callback(std::move(_callback))
+EsaiListenerToCallback::EsaiListenerToCallback(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _countCallback, TDataCallback _dataCallback)
+: EsaiListener(_esai, _outChannels, std::move(_countCallback))
+, m_callback(std::move(_dataCallback))
 {
 }
 

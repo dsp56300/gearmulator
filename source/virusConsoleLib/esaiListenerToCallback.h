@@ -4,12 +4,12 @@
 class EsaiListenerToCallback : public EsaiListener
 {
 public:
-	using TCallback = std::function<bool(const std::vector<dsp56k::TWord>&)>;
+	using TDataCallback = std::function<bool(const std::vector<dsp56k::TWord>&)>;
 
-	EsaiListenerToCallback(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _callback);
+	EsaiListenerToCallback(dsp56k::Esai& _esai, uint8_t _outChannels, TCallback _countCallback, TDataCallback _dataCallback);
 
 private:
 	bool onDeliverAudioData(const std::vector<dsp56k::TWord>& _audioData) override;
 
-	const TCallback m_callback;
+	const TDataCallback m_callback;
 };
