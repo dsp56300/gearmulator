@@ -83,14 +83,3 @@ void VirusParameterBinding::bind(juce::DrawableButton &_btn, Virus::ParameterTyp
 	}
 	_btn.getToggleStateValue().referTo(v->getValueObject());
 }
-
-void VirusParameterBinding::bind(juce::Component &_btn, Virus::ParameterType _param)
-{
-	const auto v = m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart());
-	if (!v)
-	{
-		assert(false && "Failed to find parameter");
-		return;
-	}
-
-}
