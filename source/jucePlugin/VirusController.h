@@ -106,7 +106,7 @@ namespace Virus
 
 		std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthInternalParams;
 		std::map<ParamIndex, Parameter *> m_synthParams; // exposed and managed by audio processor
-		std::map<ParameterType, ParamIndex> m_paramTypeToParamIndex;
+		std::array<std::vector<Parameter*>, 16> m_paramsByParamType;
 
 		void registerParams();
 		// tries to find synth param in both internal and host.
