@@ -55,9 +55,12 @@ namespace Virus
         // 16 parts * 3 pages * 128 params
         // TODO: not register internal/unused params?
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
-		for (uint8_t pt = 0; pt < 16; pt++)
+
+    	for (uint8_t part = 0; part < 16; part++)
 		{
-			const auto partNumber = juce::String(pt + 1);
+			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
+
+    		const auto partNumber = juce::String(part + 1);
 			auto group =
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
 
@@ -67,16 +70,16 @@ namespace Virus
 				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
 				++parameterDescIndex;
 
-				const ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
 
-				m_paramTypeToParamIndex.insert(std::make_pair(paramType, idx));
+				auto p = std::make_unique<Parameter>(*this, desc, part);
 
-				auto p = std::make_unique<Parameter>(*this, desc, pt);
-				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) ||
-					(desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
+				m_paramsByParamType[part].push_back(p.get());
+
+				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) || (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
 				if (isNonPartExclusive)
 				{
-					if (pt != 0)
+					if (part != 0)
 						continue; // only register on first part!
 				}
 				if (p->getDescription().isPublic)
@@ -192,25 +195,18 @@ namespace Virus
 
     Parameter* Controller::getParameter(const ParameterType _param)
     {
-		const auto it = m_paramTypeToParamIndex.find(_param);
-		if (it == m_paramTypeToParamIndex.end())
-			return nullptr;
-
-		const auto& index = it->second;
-
-		return findSynthParam(index);
+		return getParameter(_param, 0);
 	}
 
 	Parameter *Controller::getParameter(const ParameterType _param, const uint8_t _part)
 	{
-		const auto it = m_paramTypeToParamIndex.find(_param);
-		if (it == m_paramTypeToParamIndex.end())
+		if (_part >= m_paramsByParamType.size())
 			return nullptr;
 
-		const auto &index = it->second;
+		if (_param >= m_paramsByParamType[_part].size())
+			return nullptr;
 
-		const ParamIndex paramIndex{index.page, _part, index.paramNum};
-		return findSynthParam(paramIndex);
+		return m_paramsByParamType[_part][_param];
 	}
 
     void Controller::parseParamChange(const SysEx &msg)
