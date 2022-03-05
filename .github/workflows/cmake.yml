@@ -10,7 +10,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-latest, windows-latest ]
+        os: [ ubuntu-latest, macos-latest, windows-2019 ]
         cmake_generator: [ default, Ninja ]
       fail-fast: false
     name:  ${{ matrix.os }} build with ${{ matrix.cmake_generator }} cmake generator
@@ -28,7 +28,7 @@ jobs:
       uses: seanmiddleditch/gha-setup-ninja@master
 
     - name: Set up MSVC compiler
-      if: matrix.os == 'windows-latest'
+      if: matrix.os == 'windows-2019'
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure CMake with ${{ matrix.cmake_generator }}
