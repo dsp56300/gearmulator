@@ -188,7 +188,7 @@ void PatchBrowser::LoadBankNr(int iBankNo)
         patch.category2 = 0;
         patch.unison = 0;
         patch.transpose = 0;
-        patch.model = VirusModel::A;
+        patch.model = PresetVersion::A;
         m_patches.add(patch);
     } 
 
@@ -236,12 +236,8 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                 patch.category2 = patch.data[252];
                 patch.unison = patch.data[97];
                 patch.transpose = patch.data[93];
-                if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
-                }
-                else {
-                    patch.model = guessVersion(patch.data);
-                }
+            	patch.model = guessVersion(patch.data);
+
                 auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
                 if(!dedupe || !m_checksums.contains(md5)) {
                     m_checksums.set(md5, true);
@@ -284,12 +280,7 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
                     patch.transpose = patch.data[93];
-                    if ((uint8_t)*(it + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
-                    }
-                    else {
-                        patch.model = guessVersion(patch.data);
-                    }
+					patch.model = guessVersion(patch.data);
                     auto md5 = MD5(it+9 + 17, 256-17-3).toHexString();
                     if(!dedupe || !m_checksums.contains(md5)) {
                         m_checksums.set(md5, true);
@@ -322,12 +313,8 @@ int PatchBrowser::loadBankFile(const File& file, const int _startIndex = 0, cons
                     patch.category2 = patch.data[252];
                     patch.unison = patch.data[97];
                     patch.transpose = patch.data[93];
-                    if ((uint8_t)*(it + 2 + 266) != (uint8_t)0xf7 && (uint8_t)*(it + 2 + 266) != (uint8_t)0xf8) {
-                        patch.model = VirusModel::TI;
-                    }
-                    else {
-                        patch.model = guessVersion(patch.data);
-                    }
+                	patch.model = guessVersion(patch.data);
+
                     auto md5 = MD5(it+2+9 + 17, 256-17-3).toHexString();
                     if(!dedupe || !m_checksums.contains(md5)) {
                         m_checksums.set(md5, true);
