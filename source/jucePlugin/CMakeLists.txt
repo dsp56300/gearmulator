@@ -217,6 +217,8 @@ juce_add_binary_data(jucePlugin_BinaryData_Dark
         "assets2/knobs/knob_1_128.png"
         "assets2/knobs/knob_2_128.png"
         "assets2/font/Digital"
+		"parameterDescriptions_C.json"
+		"parameterDescriptions_Snow.json"
 )
 
 target_compile_definitions(jucePlugin_Dark 
