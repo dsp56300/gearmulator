@@ -1,0 +1,207 @@
+pipeline {
+	agent { label "${params.AgentLabel}" }
+	
+	environment {
+		GIT_URL = credentials('dsp56300_gitUrl')
+		BUILD_JUCE = needsJuce()
+		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
+	}
+	parameters
+	{
+		string(name: 'Branch', defaultValue: "master", description: '')
+		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
+		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
+		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
+	}
+	stages {
+		stage("Checkout") {
+			steps {
+				script {
+					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch}"
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
+				}
+				doCheckout()
+			}
+		}
+		stage('Compile') {
+			steps {
+				cmakeBuild();
+			}
+		}
+		stage('Integration Tests') {
+			when {
+				expression {
+					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests && !"${env.NODE_LABELS}".contains('atom')
+				}
+			}
+			steps {
+				doIntegrationTests();
+			}
+		}
+		stage('Deploy') {
+			when {
+				expression {
+					return params.Deploy
+				}
+			}
+			steps {
+				doDeploy();
+			}
+		}
+	}
+}
+
+def genericSh(cmd)
+{
+	if (isUnix())
+	{
+		sh cmd
+	}
+	else
+	{
+		bat cmd
+	}
+}
+
+def needsJuce()
+{
+	return params.Deploy ? 'ON' : 'OFF'
+}
+def cmakeBuildDir()
+{
+	return "${CMAKE_BUILD_DIR}_${params.Branch}"
+}
+def copyDataFrom(from, to)
+{
+	if(isUnix())
+	{
+		sh	"""
+			eval `ssh-agent -s` && ssh-add
+			rclone sync --sftp-host fileserver --sftp-user dsp56300 :sftp:${from} ${to}
+			"""
+	}
+	else
+	{
+		bat "rclone sync dsp56300:${from} ${to}"
+	}
+}
+
+def doCheckout()
+{
+	checkout(
+		[$class: 'GitSCM'
+		, branches: [[name: "*/${params.Branch}"]]
+		, extensions: [
+			[$class: 'SubmoduleOption'
+			, disableSubmodules: false
+			, parentCredentials: false
+			, recursiveSubmodules: true
+			, reference: ''
+			, trackingSubmodules: false]]
+			, userRemoteConfigs: [[ url: "$GIT_URL" ]]
+		]
+	)
+}
+
+def cmakeBuild()
+{
+	if(needsJuce()) {
+		copyVst2Sdk()
+	}
+	def buildDir = cmakeBuildDir();
+	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -DCMAKE_BUILD_TYPE=Release"
+	dir("${buildDir}") {
+		genericSh 'cmake --build . --config Release'
+	}
+}
+
+def copyTestData()
+{
+	copyDataFrom('integrationtests', './testData')
+}
+
+def copyVst2Sdk()
+{
+	copyDataFrom('vstsdk2.4.2/', 'source/vstsdk2.4.2/')
+}
+
+def getIntegrationTestRunner()
+{
+	def buildDir = cmakeBuildDir()
+	if(isUnix()) {
+		return "${env.WORKSPACE}/${buildDir}/source/virusIntegrationTest/virusIntegrationTest"
+	} else {
+		def foo = "${env.WORKSPACE}\\${buildDir}\\source\\virusIntegrationTest\\Release\\virusIntegrationTest.exe"
+		echo "${foo}"
+		return "${foo}"
+	}
+}
+
+def doIntegrationTests()
+{
+	dir(cmakeBuildDir()) {
+		def runner = getIntegrationTestRunner()
+		
+		copyTestData()
+		
+		dir('testData') {
+			def files = findFiles() 
+	 
+			files.each{ f -> 
+				if(f.directory) {
+					dir(f.name) {
+						def file = readFile 'presets.txt'
+						file.readLines().each {
+							genericSh "${runner} -rom \"${f.name}\" -preset \"${it}\""
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
+def copyArtefacts()
+{
+	if(isUnix())
+	{
+		sh	"""
+			eval `ssh-agent -s` && ssh-add
+			rclone copy --sftp-host fileserver --sftp-user dsp56300 --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . :sftp:deploy/${params.Branch}
+			"""
+	}
+	else
+	{
+		bat "rclone copy --include \"*.zip\" --min-size 100 --max-depth 1 . dsp56300:deploy/${params.Branch}"
+	}
+}
+
+def deleteFile(name)
+{
+	if(isUnix())
+		sh "rm -f ${name}"
+	else
+		bat "del ${name}"
+}
+
+def doDeploy()
+{
+	dir(cmakeBuildDir()) {
+		deleteFile('*.zip')
+		deleteFile('*.rpm')
+		deleteFile('*.deb')
+		genericSh 'cpack -G ZIP'
+		
+		if(isUnix())
+		{
+			sh '''
+			if [ "$(uname)" != "Darwin" ]; then
+				cpack -G DEB
+				cpack -G RPM
+			fi
+			'''
+		}
+		
+		copyArtefacts();
+	}
+}
