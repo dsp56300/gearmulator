@@ -2,19 +2,24 @@ pipeline {
 	agent { label "${params.AgentLabel}" }
 	
 	environment {
+		GIT_URL = credentials('dsp56300_gitUrl')
 		BUILD_JUCE = needsJuce()
 		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
 	}
 	parameters
 	{
 		string(name: 'Branch', defaultValue: "master", description: '')
-		string(name: 'AgentLabel', defaultValue: "any", description: '')
+		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 	}
 	stages {
 		stage("Checkout") {
 			steps {
+				script {
+					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch}"
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
+				}
 				doCheckout()
 			}
 		}
@@ -24,10 +29,9 @@ pipeline {
 			}
 		}
 		stage('Integration Tests') {
-			agent { label '!atom' }
 			when {
 				expression {
-					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests
+					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests && !"${env.NODE_LABELS}".contains('atom')
 				}
 			}
 			steps {
@@ -84,7 +88,19 @@ def copyDataFrom(from, to)
 
 def doCheckout()
 {
-	checkout scm
+	checkout(
+		[$class: 'GitSCM'
+		, branches: [[name: "*/${params.Branch}"]]
+		, extensions: [
+			[$class: 'SubmoduleOption'
+			, disableSubmodules: false
+			, parentCredentials: false
+			, recursiveSubmodules: true
+			, reference: ''
+			, trackingSubmodules: false]]
+			, userRemoteConfigs: [[ url: "$GIT_URL" ]]
+		]
+	)
 }
 
 def cmakeBuild()
@@ -95,7 +111,7 @@ def cmakeBuild()
 	def buildDir = cmakeBuildDir();
 	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -DCMAKE_BUILD_TYPE=Release"
 	dir("${buildDir}") {
-		genericSh 'cmake --build . --config Release -j 4'
+		genericSh 'cmake --build . --config Release'
 	}
 }
 
@@ -120,7 +136,7 @@ def getIntegrationTestRunner()
 		return "${foo}"
 	}
 }
-		
+
 def doIntegrationTests()
 {
 	dir(cmakeBuildDir()) {
@@ -136,7 +152,7 @@ def doIntegrationTests()
 					dir(f.name) {
 						def file = readFile 'presets.txt'
 						file.readLines().each {
-							bat "${runner} -rom \"${f.name}\" -preset \"${it}\""
+							genericSh "${runner} -rom \"${f.name}\" -preset \"${it}\""
 						}
 					}
 				}
@@ -149,14 +165,14 @@ def copyArtefacts()
 {
 	if(isUnix())
 	{
-		sh	'''
+		sh	"""
 			eval `ssh-agent -s` && ssh-add
-			rclone copy --sftp-host fileserver --sftp-user dsp56300 --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . :sftp:deploy
-			'''
+			rclone copy --sftp-host fileserver --sftp-user dsp56300 --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . :sftp:deploy/${params.Branch}
+			"""
 	}
 	else
 	{
-		bat 'rclone copy --include "*.zip" --min-size 100 --max-depth 1 . dsp56300:deploy'
+		bat "rclone copy --include \"*.zip\" --min-size 100 --max-depth 1 . dsp56300:deploy/${params.Branch}"
 	}
 }
 
