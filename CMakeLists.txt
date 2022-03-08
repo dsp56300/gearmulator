@@ -12,8 +12,6 @@ include(base.cmake)
 set(ASMJIT_STATIC TRUE)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
-option(${PROJECT_NAME}_BUILD_DARK_SKIN "Build plugin with dark skin" off)
-option(${PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
 
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
