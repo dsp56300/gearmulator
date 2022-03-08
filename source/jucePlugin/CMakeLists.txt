@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
+option(${CMAKE_PROJECT_NAME}_BUILD_DARK_SKIN "Build plugin with dark skin" off)
+option(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
 if(JUCE_GLOBAL_VST2_SDK_PATH)
@@ -95,7 +98,7 @@ macro(createJucePlugins postfix sourcesUI assets)
 
 	createJucePlugin(jucePlugin${postfix} "DSP56300Emu" TRUE "TusV" "${sourcesUI}" jucePlugin_BinaryData${postfix} "${postfix}")
 	
-	if(${PROJECT_NAME}_BUILD_FX_PLUGIN)
+	if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
 		createJucePlugin(jucePlugin${postfix}_FX "DSP56300EmuFX" FALSE "TusF" "${sourcesUI}" jucePlugin_BinaryData${postfix} "${postfix}_FX")
 	endif()
 endmacro()
@@ -212,6 +215,6 @@ set(DARK_ASSETS
 	"parameterDescriptions_C.json"
 )
 
-if(${PROJECT_NAME}_BUILD_DARK_SKIN)
+if(${CMAKE_PROJECT_NAME}_BUILD_DARK_SKIN)
 	createJucePlugins("_Dark" "${DARK_SOURCES_UI}" "${DARK_ASSETS}")
 endif()
