@@ -4,8 +4,8 @@
 
 namespace Virus
 {
-	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum) :
-		juce::RangedAudioParameter(genId(desc, partNum), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
+	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum, const int uniqueId) :
+		RangedAudioParameter(genId(desc, partNum, uniqueId), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
 		m_desc(desc), m_partNum(partNum)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
@@ -47,9 +47,11 @@ namespace Virus
 		}
 	}
 
-	juce::String Parameter::genId(const Description &d, const int part)
+	juce::String Parameter::genId(const Description &d, const int part, const int uniqueId)
 	{
-		return juce::String::formatted("%d_%d_%d", (int)d.page, part, d.index);
+		if(uniqueId > 0)
+			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
+		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
 	}
 
 } // namespace Virus

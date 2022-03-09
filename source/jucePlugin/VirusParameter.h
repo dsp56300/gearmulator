@@ -25,7 +25,7 @@ namespace Virus
             VIRUS_C = 0x100,
         };
 
-        Parameter(Controller &, const Description& desc, uint8_t partNum = 0x40);
+        Parameter(Controller &, const Description& desc, uint8_t partNum, int uniqueId);
 
         juce::Value &getValueObject() { return m_value; };
         const juce::Value &getValueObject() const { return m_value; };
@@ -72,7 +72,7 @@ namespace Virus
 		std::function<void()> onValueChanged = {};
 
 	private:
-        static juce::String genId(const Description &d, int part);
+        static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
 
         Controller &m_ctrl;
