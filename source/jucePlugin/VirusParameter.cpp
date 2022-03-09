@@ -35,7 +35,7 @@ namespace Virus
 			return;
 		m_lastValue = newValue;
 
-		if (notifyHost)
+		if (notifyHost && getDescription().isPublic)
 		{
 			beginChangeGesture();
 			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
