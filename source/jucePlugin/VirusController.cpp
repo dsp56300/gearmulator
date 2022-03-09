@@ -89,6 +89,14 @@ namespace Virus
 
 				auto p = std::make_unique<Parameter>(*this, desc, part, uid);
 
+				if(uid > 0)
+				{
+					const auto& existingParams = findSynthParam(idx);
+
+					for (auto& existingParam : existingParams)
+						existingParam->addLinkedParameter(p.get());
+				}
+
 				m_paramsByParamType[part].push_back(p.get());
 
 				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) || (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
