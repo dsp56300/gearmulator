@@ -60,6 +60,8 @@ namespace Virus
         // TODO: not register internal/unused params?
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
 
+		std::map<ParamIndex, int> knownParameterIndices;
+
     	for (uint8_t part = 0; part < 16; part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
@@ -76,7 +78,24 @@ namespace Virus
 
 				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
 
-				auto p = std::make_unique<Parameter>(*this, desc, part);
+				int uid = 0;
+
+				auto itKnownParamIdx = knownParameterIndices.find(idx);
+
+				if(itKnownParamIdx == knownParameterIndices.end())
+					knownParameterIndices.insert(std::make_pair(idx, 0));
+				else
+					uid = ++itKnownParamIdx->second;
+
+				auto p = std::make_unique<Parameter>(*this, desc, part, uid);
+
+				if(uid > 0)
+				{
+					const auto& existingParams = findSynthParam(idx);
+
+					for (auto& existingParam : existingParams)
+						existingParam->addLinkedParameter(p.get());
+				}
 
 				m_paramsByParamType[part].push_back(p.get());
 
