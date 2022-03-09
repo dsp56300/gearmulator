@@ -221,7 +221,7 @@ FxEditor::Delay::Delay(VirusParameterBinding &_parameterBinding)
 
     _parameterBinding.bind(m_time, Virus::Param_DelayTime, 0);
     _parameterBinding.bind(m_rate, Virus::Param_DelayRateReverbDecayTime, 0);
-    _parameterBinding.bind(m_depth, Virus::Param_DelayDepthReverbRoomSize, 0);
+    _parameterBinding.bind(m_depth, Virus::Param_DelayDepth, 0);
     _parameterBinding.bind(m_color, Virus::Param_DelayColor, 0);
     _parameterBinding.bind(m_feedback, Virus::Param_DelayFeedback, 0);
 }
@@ -240,10 +240,10 @@ FxEditor::Reverb::Reverb(VirusParameterBinding &_parameterBinding)
     m_reverbMode.setBounds(18, 116+2+22, comboBoxWidth, comboBoxHeight);
     addAndMakeVisible(m_reverbMode);
 
-    _parameterBinding.bind(m_reverbMode, Virus::Param_DelayDepthReverbRoomSize, 0);
+    _parameterBinding.bind(m_reverbMode, Virus::Param_ReverbRoomSize, 0);
     _parameterBinding.bind(m_time, Virus::Param_DelayTime, 0);
     _parameterBinding.bind(m_rate, Virus::Param_DelayRateReverbDecayTime, 0);
-    _parameterBinding.bind(m_damping, Virus::Param_DelayLfoShape, 0);
+    _parameterBinding.bind(m_damping, Virus::Param_ReverbDamping, 0);
     _parameterBinding.bind(m_color, Virus::Param_DelayColor, 0);
     _parameterBinding.bind(m_feedback, Virus::Param_DelayFeedback, 0);
 }
