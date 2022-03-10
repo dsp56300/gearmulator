@@ -93,18 +93,18 @@ private:
     VirusParameterBinding& m_parameterBinding;
     AudioPluginAudioProcessor &processorRef;
 
+	VirusUI::LookAndFeel m_lookAndFeel;
+	VirusUI::LookAndFeelButtons m_landfButtons;
+	VirusUI::CustomLAF m_landfToolTip;
 
     Virus::Controller& m_controller;
-    std::unique_ptr<OscEditor> m_oscEditor;
+
+	std::unique_ptr<OscEditor> m_oscEditor;
     std::unique_ptr<LfoEditor> m_lfoEditor;
     std::unique_ptr<FxEditor> m_fxEditor;
     std::unique_ptr<ArpEditor> m_arpEditor;
     std::unique_ptr<PatchBrowser> m_patchBrowser;
     std::unique_ptr<juce::Drawable> m_background;
-
-    VirusUI::LookAndFeel m_lookAndFeel;
-    VirusUI::LookAndFeelButtons m_landfButtons;
-    VirusUI::CustomLAF m_landfToolTip;
 
     juce::String m_previousPath;
     bool m_paramDisplayLocal = false;

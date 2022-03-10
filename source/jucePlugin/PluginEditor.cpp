@@ -1,10 +1,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "VirusController.h"
-#include "version.h"
 
 #include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
+
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p), m_scale("Scale"), m_skin("Skin")
@@ -13,8 +13,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
 	setSize(1377, 800);
 	const auto config = processorRef.getController().getConfig();
-	auto scale = config->getIntValue("scale", 100);
-	int skinId = config->getIntValue("skin", 0);
+    const auto scale = config->getIntValue("scale", 100);
+    const int skinId = config->getIntValue("skin", 0);
 	//m_virusEditor->setTopLeftPosition(0, 0);
 	m_scale.setBounds(0,0,74,24);
 	m_scale.addItem("50%", 50);
@@ -27,9 +27,9 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	m_scale.setSelectedId(scale, juce::dontSendNotification);
 	m_scale.setColour(juce::ComboBox::textColourId, juce::Colours::white);
 	m_scale.onChange = [this, config]() {
-		float value = m_scale.getSelectedIdAsValue().getValue();
+		const float value = m_scale.getSelectedIdAsValue().getValue();
 		setScaleFactor(value/100.0f);
-		config->setValue("scale", (int)value);
+		config->setValue("scale", static_cast<int>(value));
 		config->saveIfNeeded();
 	};
 	setScaleFactor(scale/100.0f);
@@ -43,7 +43,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	addAndMakeVisible(m_scale);
 	addAndMakeVisible(m_skin);
 	m_skin.onChange = [this, config]() {
-		int skinId = m_skin.getSelectedItemIndex();
+		const int skinId = m_skin.getSelectedItemIndex();
 		config->setValue("skin", skinId);
 		config->saveIfNeeded();
 		LoadSkin(m_skin.getSelectedItemIndex());
@@ -54,31 +54,32 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 }
 
 void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
-	if (m_virusEditor != nullptr && getIndexOfChildComponent(m_virusEditor) > -1)
+	if (m_virusEditor)
 	{
-		removeChildComponent(m_virusEditor);
-		delete m_virusEditor;
+		if(getIndexOfChildComponent(m_virusEditor.get()) > -1)
+			removeChildComponent(m_virusEditor.get());
+		m_virusEditor.reset();
 	}
-	
+
 	if (index == 1)
 	{
-		auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
+		const auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
 		setSize(virusEditor->iSkinSizeWidth, virusEditor->iSkinSizeHeight);
-		virusEditor->m_AudioPlugInEditor = (AudioPluginAudioProcessorEditor *)this;
-		m_virusEditor = (VirusEditor*)virusEditor;
+		virusEditor->m_AudioPlugInEditor = this;
+		m_virusEditor.reset(virusEditor);
 	}
 	else {
-		m_virusEditor = new VirusEditor(m_parameterBinding, processorRef);
+		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
 		setSize(1377, 800);
 	}
 	m_virusEditor->setTopLeftPosition(0, 0);
-	addAndMakeVisible(m_virusEditor);
-	m_scale.toFront(0);
-	m_skin.toFront(0);
+	addAndMakeVisible(m_virusEditor.get());
+	m_scale.toFront(false);
+	m_skin.toFront(false);
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
-	delete m_virusEditor;
+	m_virusEditor.reset();
 }
 
 //==============================================================================

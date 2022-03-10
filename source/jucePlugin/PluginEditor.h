@@ -24,8 +24,7 @@ private:
 	AudioPluginAudioProcessor& processorRef;
 	VirusParameterBinding m_parameterBinding;
 
-	// New "real" editor
-	VirusEditor *m_virusEditor;
+	std::unique_ptr<juce::Component> m_virusEditor;
 	juce::ComboBox m_scale;
 	juce::ComboBox m_skin;
 
