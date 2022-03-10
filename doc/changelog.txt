@@ -1,5 +1,33 @@
 Release Notes 
 
+1.2.11 (2022.03.10):
+
+- [Imp] The plugin is now available as FX unit. The FX unit has a different plugin ID so both can be used at the same time
+- [Imp] Dark skin is now included in official builds, thanks to @trancy for creating the skin
+- [Imp] Added linux builds for aarch64 aka ARMv8
+
+- [Fix] Rewritten midi clock code to fix various out-of-sync-issues for arps, delays, etc
+- [Fix] drop downs for Reverb Room Type and Delay LFO Type displayed too many entries
+
+1.2.10 (2022.03.04):
+
+- [Imp] UI knobs now react to parameter changes via Midi Control Change, Poly Pressure and Sysex
+- [Imp] Patches loaded via "Load" button that only contain a single preset are now loaded to the edit buffer of the selected part
+- [Imp] Emulation performance improvements (5% - 10%)
+
+- [Fix] Presets were not always loaded correctly
+- [Fix] Loading of presets didn't (properly) update the UI
+- [Fix] Patch Browser failed to load some midi file which resulted in no presets being displayed
+- [Fix] Patch Browser didn't display the proper Virus Model in all circumstances
+- [Fix] Midi bank select (sent as Midi CC) was off-by-one in single mode
+- [Fix] Part bank select and part program change (as sysex) didn't work for single mode
+- [Fix] Various midi clock issues due to midi clock start event being missing
+- [Fix] "Assign3 Destination3" was named "Assign2 Destination3" (automation name)
+- [Fix] "Assign3 Amount3" was named "Assign2 Amount3" (automation name)
+- [Fix] Osc 1 & 2 Wave Select parameter was off-by-one
+- [Fix] Key follow base UI element not working
+- [Fix] Do not crash when attempting to load a preset that is not a Virus preset
+
 1.2.6 (2022.02.26):
 
 - [Imp] UI knobs now react to parameter changes via Midi Control Change, Poly Pressure and Sysex
