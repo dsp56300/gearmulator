@@ -1,82 +1,85 @@
 #include "Virus_LookAndFeel.h"
 #include "BinaryData.h"
-
-using namespace juce;
-
-namespace Virus
+namespace Trancy
 {
-    const Font getCustomFont()
-    {
-        static auto typefaceDigiFont = Typeface::createSystemTypefaceFor(BinaryData::Digital, BinaryData::DigitalSize);
-        return Font (typefaceDigiFont);
-    }
 
-	//LookAndFeel
-    LookAndFeelSmallButton::LookAndFeelSmallButton()
+	using namespace juce;
+
+	namespace VirusUI
 	{
-		// setup knobs...
-		m_genKnob = Drawable::createFromImageData(BinaryData::knob_2_128_png, BinaryData::knob_2_128_pngSize);
+		const Font getCustomFont()
+		{
+			static auto typefaceDigiFont =
+				Typeface::createSystemTypefaceFor(BinaryData::Digital, BinaryData::DigitalSize);
+			return Font(typefaceDigiFont);
+		}
 
-		m_knobImageSteps.start = 1;
-		m_knobImageSteps.end = 127;
-	}
+		// LookAndFeel
+		LookAndFeelSmallButton::LookAndFeelSmallButton()
+		{
+			// setup knobs...
+			m_genKnob = Drawable::createFromImageData(BinaryData::knob_2_128_png, BinaryData::knob_2_128_pngSize);
 
-    void LookAndFeelSmallButton::drawRotarySlider(Graphics &g, int x, int y, int width, int height, float sliderPosProportional,
-									   float rotaryStartAngle, float rotaryEndAngle, Slider &s)
-	{
-		Drawable *knob = m_genKnob.get();
+			m_knobImageSteps.start = 1;
+			m_knobImageSteps.end = 127;
+		}
 
-		int step;
-		(s.isEnabled())?step=roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)):step=0;
+		void LookAndFeelSmallButton::drawRotarySlider(Graphics &g, int x, int y, int width, int height,
+													  float sliderPosProportional, float rotaryStartAngle,
+													  float rotaryEndAngle, Slider &s)
+		{
+			Drawable *knob = m_genKnob.get();
 
-		knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
-		
-		// this won't support scaling!
-		knob->drawAt(g, x, y, 1.0f);
-	}
+			int step;
+			(s.isEnabled()) ? step = roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)) : step = 0;
 
-	LookAndFeel::LookAndFeel()
-	{
-		// setup knobs...
-		m_genKnob = Drawable::createFromImageData(BinaryData::knob_1_128_png, BinaryData::knob_1_128_pngSize);
+			knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
 
-		m_knobImageSteps.start = 1;
-		m_knobImageSteps.end = 127;
-	}
- 
-	void LookAndFeel::drawRotarySlider(Graphics &g, int x, int y, int width, int height, float sliderPosProportional,
-									   float rotaryStartAngle, float rotaryEndAngle, Slider &s)
-	{	
-		Drawable *knob = m_genKnob.get();
+			// this won't support scaling!
+			knob->drawAt(g, x, y, 1.0f);
+		}
 
-		int step;
-		(s.isEnabled())?step=roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)):step=0;
+		LookAndFeel::LookAndFeel()
+		{
+			// setup knobs...
+			m_genKnob = Drawable::createFromImageData(BinaryData::knob_1_128_png, BinaryData::knob_1_128_pngSize);
 
-		knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
-		
-		// this won't support scaling!
-		knob->drawAt(g, x, y, 1.0f);
-	}
+			m_knobImageSteps.start = 1;
+			m_knobImageSteps.end = 127;
+		}
 
-    void LookAndFeel::drawComboBox (Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
-    {
-        //gGrafik.setOpacity(0);
-        //box.setColour(ComboBox::textColourId, Colours::red);
-    };
+		void LookAndFeel::drawRotarySlider(Graphics &g, int x, int y, int width, int height,
+										   float sliderPosProportional, float rotaryStartAngle, float rotaryEndAngle,
+										   Slider &s)
+		{
+			Drawable *knob = m_genKnob.get();
 
-	//LookAndFeelPatchBrowser
-	LookAndFeelPatchBrowser::LookAndFeelPatchBrowser()
-	{
-	}
+			int step;
+			(s.isEnabled()) ? step = roundToInt(m_knobImageSteps.convertFrom0to1(sliderPosProportional)) : step = 0;
 
-	//LookAndFeelButtons
-	LookAndFeelButtons::LookAndFeelButtons()
-	{
-	}
+			knob->setOriginWithOriginalSize({0.0f, -float(kKnobSize) * step});
 
-    void LookAndFeelButtons::drawComboBox (Graphics& gGrafik, int width, int height, bool isButtonDown, int buttonX, int buttonY, int buttonW, int buttonH, ComboBox& box)
-    {
-        gGrafik.setOpacity(0);
-    };
+			// this won't support scaling!
+			knob->drawAt(g, x, y, 1.0f);
+		}
 
-} // namespace Virus
+		void LookAndFeel::drawComboBox(Graphics &gGrafik, int width, int height, bool isButtonDown, int buttonX,
+									   int buttonY, int buttonW, int buttonH, ComboBox &box){
+			// gGrafik.setOpacity(0);
+			// box.setColour(ComboBox::textColourId, Colours::red);
+		};
+
+		// LookAndFeelPatchBrowser
+		LookAndFeelPatchBrowser::LookAndFeelPatchBrowser() {}
+
+		// LookAndFeelButtons
+		LookAndFeelButtons::LookAndFeelButtons() {}
+
+		void LookAndFeelButtons::drawComboBox(Graphics &gGrafik, int width, int height, bool isButtonDown, int buttonX,
+											  int buttonY, int buttonW, int buttonH, ComboBox &box)
+		{
+			gGrafik.setOpacity(0);
+		};
+
+	} // namespace Virus
+} // namespace Trancy

@@ -18,15 +18,15 @@ public:
 
 private:
 	void timerCallback() override;
-
+	void LoadSkin(int index);
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
 	AudioPluginAudioProcessor& processorRef;
 	VirusParameterBinding m_parameterBinding;
 
-	// New "real" editor
-	VirusEditor *m_virusEditor;
+	std::unique_ptr<juce::Component> m_virusEditor;
 	juce::ComboBox m_scale;
+	juce::ComboBox m_skin;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include "VirusParameterDescription.h"
@@ -25,7 +27,7 @@ namespace Virus
             VIRUS_C = 0x100,
         };
 
-        Parameter(Controller &, const Description& desc, uint8_t partNum = 0x40);
+        Parameter(Controller &, const Description& desc, uint8_t partNum, int uniqueId);
 
         juce::Value &getValueObject() { return m_value; };
         const juce::Value &getValueObject() const { return m_value; };
@@ -35,7 +37,7 @@ namespace Virus
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
-		void setValue(float newValue) override { return m_value.setValue(convertFrom0to1(newValue)); };
+		void setValue(float newValue) override;
 		void setValueFromSynth(int newValue, bool notifyHost = true);
 		float getDefaultValue() const override {
 			// default value should probably be in description instead of hardcoded like this.
@@ -71,15 +73,23 @@ namespace Virus
 		// eg. multi/single value change requires triggering more logic.
 		std::function<void()> onValueChanged = {};
 
+		void addLinkedParameter(Parameter* _param);
+
+		int getUniqueId() const { return m_uniqueId; }
+
 	private:
-        static juce::String genId(const Description &d, int part);
+        static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
+		void setLinkedValue(int _value);
 
         Controller &m_ctrl;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
-		uint8_t m_partNum;
+		const uint8_t m_partNum;
+		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
 		int m_lastValue{-1};
 		juce::Value m_value;
+		std::set<Parameter*> m_linkedParameters;
+		bool m_changingLinkedValues = false;
     };
 } // namespace Virus
