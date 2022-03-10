@@ -39,10 +39,10 @@ namespace Virus
         // ch - [0-15]
         // bank - [0-2] (ABC)
         // paramIndex - [0-127]
-        juce::Value *getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
-        juce::Value *getParamValue(ParameterType _param);
-        Parameter* getParameter(ParameterType _param);
-        Parameter *getParameter(ParameterType _param, uint8_t _part);
+        juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
+        juce::Value* getParamValue(ParameterType _param);
+        Parameter* getParameter(ParameterType _param) const;
+        Parameter *getParameter(ParameterType _param, uint8_t _part) const;
 		uint8_t getVirusModel() const;
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
@@ -104,15 +104,18 @@ namespace Virus
 			}
         };
 
-		std::map<ParamIndex, std::unique_ptr<Parameter>> m_synthInternalParams;
-		std::map<ParamIndex, Parameter *> m_synthParams; // exposed and managed by audio processor
-		std::map<ParameterType, ParamIndex> m_paramTypeToParamIndex;
+		using ParameterList = std::vector<Parameter*>;
+
+    	std::map<ParamIndex, ParameterList> m_synthInternalParams;
+		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
+		std::array<ParameterList, 16> m_paramsByParamType;
+		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 
 		void registerParams();
 		// tries to find synth param in both internal and host.
 		// @return found parameter or nullptr if none found.
-		Parameter *findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
-		Parameter* findSynthParam(const ParamIndex& _paramIndex);
+		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
+		const ParameterList& findSynthParam(const ParamIndex& _paramIndex);
 
 		// unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);

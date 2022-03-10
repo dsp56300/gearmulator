@@ -5,12 +5,14 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.9)
+project(gearmulator VERSION 1.2.11)
 
 include(base.cmake)
 
 set(ASMJIT_STATIC TRUE)
+
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
+
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
@@ -27,36 +29,6 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/JUCE)
 	add_subdirectory(source/jucePlugin)
-	
-	if(MSVC OR APPLE)
-		if(JUCE_GLOBAL_VST2_SDK_PATH)
-			install(TARGETS jucePlugin_VST DESTINATION . COMPONENT VST2)
-		endif()
-		install(TARGETS jucePlugin_VST3 DESTINATION . COMPONENT VST3)
-		if(APPLE)
-			install(TARGETS jucePlugin_AU DESTINATION . COMPONENT AU)
-		endif()
-	elseif(UNIX)
-		if(JUCE_GLOBAL_VST2_SDK_PATH)
-			install(TARGETS jucePlugin_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2)
-		endif()
-		install(TARGETS jucePlugin_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3)
-	endif()
-
-#	if(MSVC OR APPLE)
-#		if(JUCE_GLOBAL_VST2_SDK_PATH)
-#			install(TARGETS jucePlugin_Dark_VST DESTINATION . COMPONENT VST2_Dark)
-#		endif()
-#		install(TARGETS jucePlugin_Dark_VST3 DESTINATION . COMPONENT VST3_Dark)
-#		if(APPLE)
-#			install(TARGETS jucePlugin_Dark_AU DESTINATION . COMPONENT AU_Dark)
-#		endif()
-#	elseif(UNIX)
-#		if(JUCE_GLOBAL_VST2_SDK_PATH)
-#			install(TARGETS jucePlugin_Dark_VST LIBRARY DESTINATION /usr/local/lib/lxvst/ COMPONENT VST2_Dark)
-#		endif()
-#		install(TARGETS jucePlugin_Dark_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3_Dark)
-#	endif()
 endif()
 
 # ----------------- Test Console
@@ -81,6 +53,15 @@ endif()
 
 get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
 list(REMOVE_ITEM CPACK_COMPONENTS_ALL "Unspecified")
+
+message("CMAKE_SYSTEM_NAME: " ${CMAKE_SYSTEM_NAME})
+message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
+
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+	set(CPACK_SYSTEM_NAME ${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR})
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+	set(CPACK_SYSTEM_NAME "MacOS")
+endif()
 
 set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)

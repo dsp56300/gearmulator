@@ -5,6 +5,12 @@
 
 #include "os.h"
 
+#if 0
+#define LOGMC(S)	LOG(S)
+#else
+#define LOGMC(S)	{}
+#endif
+
 using namespace synthLib;
 
 namespace synthLib
@@ -110,88 +116,87 @@ namespace synthLib
 		return m_device->setState(state, stateType);
 	}
 
+	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
+	{
+		if(m_midiIn.empty() || m_midiIn.back().offset <= _ev.offset)
+		{
+			m_midiIn.push_back(_ev);
+			return;
+		}
+
+		for (auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
+		{
+			if (it->offset > _ev.offset)
+			{
+				m_midiIn.insert(it, _ev);
+				return;
+			}
+		}
+
+		m_midiIn.push_back(_ev);
+	}
+
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
 		if(_bpm < 1.0f)
 			return;
 
+		const double ppqPos = _ppqPos;
+
+		constexpr double clockTicksPerQuarter = 24.0;
+
 		if(_isPlaying && !m_isPlaying)
 		{
-			const uint32_t beat = dsp56k::floor_int(_ppqPos);
-
-			if(beat > m_lastKnownBeat)
-			{
-				// start
-				m_isPlaying = true;
-				m_needsStart = true;
-			}
-			m_lastKnownBeat = beat;
+			m_clockTickPos = (ppqPos - std::floor(ppqPos + 1.0)) * clockTicksPerQuarter;
+			LOGMC("Start at ppqPos=" << ppqPos << ", clock tick offset " << m_clockTickPos);
+			m_isPlaying = true;
+			m_needsStart = true;
 		}
 		else if(m_isPlaying && !_isPlaying)
 		{
+			LOGMC("Stop at ppqPos=" << ppqPos);
+
 			m_isPlaying = false;
 
 			SMidiEvent evStop;
 			evStop.a = M_STOP;
 			m_midiIn.insert(m_midiIn.begin(), evStop);
-			m_clockTickPos = 0.0f;
+			m_clockTickPos = 0.0;
 		}
 
-		if(m_isPlaying)
+		if(!m_isPlaying)
+			return;
+
+		const double quartersPerSecond = _bpm / 60.0;
+		const double clockTicksPerSecond = clockTicksPerQuarter * quartersPerSecond;
+
+		const double clocksPerSample = clockTicksPerSecond * m_hostSamplerateInv;
+
+		for(uint32_t i=0; i<static_cast<uint32_t>(_sampleCount); ++i)
 		{
-			constexpr float clockTicksPerQuarter = 24.0f;
+			m_clockTickPos += clocksPerSample;
 
-			const float quartersPerSecond = _bpm / 60.0f;
-			const float clockTicksPerSecond = clockTicksPerQuarter * quartersPerSecond;
-			const float samplesPerClock = m_hostSamplerate / clockTicksPerSecond;
+			if (m_clockTickPos < 0.0f)
+				continue;
 
-			const auto clockTickPos = _ppqPos * clockTicksPerQuarter;
+			m_clockTickPos -= 1.0;
 
-			if(m_clockTickPos <= 0.001f || clockTickPos < m_clockTickPos)
-				m_clockTickPos = std::floor(clockTickPos);
-
-			const float offset = clockTickPos - m_clockTickPos;
-
-			const float firstSamplePos = std::max((1.0f - offset) * samplesPerClock, 0.0f);
-
-			const auto max = static_cast<float>(_sampleCount);
+			LOGMC("insert tick at " << i);
 
 			SMidiEvent evClock;
+			evClock.a = M_TIMINGCLOCK;
+			evClock.offset = i;
 
-			const auto midiEventsEmpty = m_midiIn.empty();
-
-			for(float pos = std::floor(firstSamplePos); pos < max; pos += samplesPerClock)
+			if(m_needsStart)
 			{
-				const int insertPos = dsp56k::floor_int(pos);
-
-				bool found = false;
-
-				if(!midiEventsEmpty)
-				{
-					for(auto it = m_midiIn.begin(); it != m_midiIn.end(); ++it)
-					{
-						if(static_cast<int>(it->offset) > insertPos)
-						{
-							evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
-							evClock.offset = insertPos;
-							m_midiIn.insert(it, evClock);
-							found = true;
-							break;
-						}
-					}
-				}
-
-				if(midiEventsEmpty || !found)
-				{
-					evClock.a = m_needsStart ? M_START : M_TIMINGCLOCK;
-					evClock.offset = insertPos;
-					m_midiIn.push_back(evClock);
-				}
-
-				m_clockTickPos += 1.0f;
+				evClock.a = M_START;
+				insertMidiEvent(evClock);
+				evClock.a = M_TIMINGCLOCK;
 
 				m_needsStart = false;
 			}
+
+			insertMidiEvent(evClock);
 		}
 	}
 

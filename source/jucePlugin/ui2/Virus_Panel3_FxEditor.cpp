@@ -180,12 +180,12 @@ namespace Trancy
 		m_reverbType.setBounds(467 + comboBoxXMargin - comboBox3Width / 2, 854 - comboBox3Height / 2, comboBox3Width,
 							   comboBox3Height);
 
-		_parameterBinding.bind(m_reverbDecayTime, Virus::Param_DelayRateReverbDecayTime);
-		_parameterBinding.bind(m_reverbDaming, Virus::Param_DelayLfoShape);
-		_parameterBinding.bind(m_reverbColoration, Virus::Param_DelayColor);
-		_parameterBinding.bind(m_reverbPredelay, Virus::Param_DelayTime);
-		_parameterBinding.bind(m_reverbFeedback, Virus::Param_DelayFeedback);
-		_parameterBinding.bind(m_reverbType, Virus::Param_DelayDepthReverbRoomSize);
+	_parameterBinding.bind(m_reverbDecayTime, Virus::Param_DelayRateReverbDecayTime);
+	_parameterBinding.bind(m_reverbDaming, Virus::Param_DelayLfoShape);
+	_parameterBinding.bind(m_reverbColoration, Virus::Param_DelayColor);
+	_parameterBinding.bind(m_reverbPredelay, Virus::Param_DelayTime);
+	_parameterBinding.bind(m_reverbFeedback, Virus::Param_DelayFeedback);
+	_parameterBinding.bind(m_reverbType, Virus::Param_ReverbRoomSize);
 
 		// todo Need to check these parameters bindings for delay and reverb
 		// Delay
@@ -207,13 +207,13 @@ namespace Trancy
 		m_delayShape.setBounds(467 + comboBoxXMargin - comboBox3Width / 2, 653 - comboBox3Height / 2, comboBox3Width,
 							   comboBox3Height);
 
-		_parameterBinding.bind(m_delayTime, Virus::Param_DelayTime);
-		_parameterBinding.bind(m_delayRate, Virus::Param_DelayRateReverbDecayTime);
-		_parameterBinding.bind(m_delayFeedback, Virus::Param_DelayFeedback);
-		_parameterBinding.bind(m_delayColoration, Virus::Param_DelayColor);
-		_parameterBinding.bind(m_delayDepth, Virus::Param_DelayDepthReverbRoomSize);
-		_parameterBinding.bind(m_delayClock, Virus::Param_DelayClock);
-		_parameterBinding.bind(m_delayShape, Virus::Param_DelayLfoShape);
+	_parameterBinding.bind(m_delayTime, Virus::Param_DelayTime);
+	_parameterBinding.bind(m_delayRate, Virus::Param_DelayRateReverbDecayTime);
+	_parameterBinding.bind(m_delayFeedback, Virus::Param_DelayFeedback);
+	_parameterBinding.bind(m_delayColoration, Virus::Param_DelayColor);
+	_parameterBinding.bind(m_delayDepth, Virus::Param_DelayDepth);
+	_parameterBinding.bind(m_delayClock, Virus::Param_DelayClock);
+	_parameterBinding.bind(m_delayShape, Virus::Param_DelayLfoShape);
 
 		// Vocoder
 		for (auto *s : {&m_vocoderCenterFreq, &m_vocoderModOffset, &m_vocoderModQ, &m_vocoderModSpread, &m_vocoderCarrQ,

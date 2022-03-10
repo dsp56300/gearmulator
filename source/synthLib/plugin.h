@@ -33,6 +33,8 @@ namespace synthLib
 		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state);
 
+		void insertMidiEvent(const SMidiEvent& _ev);
+
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
@@ -64,7 +66,6 @@ namespace synthLib
 		// MIDI Clock
 		bool m_isPlaying = false;
 		bool m_needsStart = false;
-		uint32_t m_lastKnownBeat = 0;
-		float m_clockTickPos = 0.0f;
+		double m_clockTickPos = 0.0;
 	};
 }

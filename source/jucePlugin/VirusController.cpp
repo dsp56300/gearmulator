@@ -26,16 +26,20 @@ namespace Virus
 
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
-		(findSynthParam(0, 0x72, 0x7a))->onValueChanged = [this] {
-			const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
-			sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, prg}));
-			sendSysEx(constructMessage({MessageType::REQUEST_MULTI, 0x0, prg}));
+		const auto& params = findSynthParam(0, 0x72, 0x7a);
+		for (const auto& parameter : params)
+		{
+			parameter->onValueChanged = [this] {
+				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
+				sendSysEx(constructMessage({ MessageType::REQUEST_SINGLE, 0x0, prg }));
+				sendSysEx(constructMessage({ MessageType::REQUEST_MULTI, 0x0, prg }));
 
-			if (onMsgDone) 
-			{
-				onMsgDone();
-			}
-		};
+				if (onMsgDone)
+				{
+					onMsgDone();
+				}
+			};
+		}
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 
@@ -55,9 +59,14 @@ namespace Virus
         // 16 parts * 3 pages * 128 params
         // TODO: not register internal/unused params?
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
-		for (uint8_t pt = 0; pt < 16; pt++)
+
+		std::map<ParamIndex, int> knownParameterIndices;
+
+    	for (uint8_t part = 0; part < 16; part++)
 		{
-			const auto partNumber = juce::String(pt + 1);
+			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
+
+    		const auto partNumber = juce::String(part + 1);
 			auto group =
 				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
 
@@ -67,32 +76,76 @@ namespace Virus
 				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
 				++parameterDescIndex;
 
-				const ParamIndex idx = {static_cast<uint8_t>(desc.page), pt, desc.index};
+				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
 
-				m_paramTypeToParamIndex.insert(std::make_pair(paramType, idx));
+				int uid = 0;
 
-				auto p = std::make_unique<Parameter>(*this, desc, pt);
-				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) ||
-					(desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
+				auto itKnownParamIdx = knownParameterIndices.find(idx);
+
+				if(itKnownParamIdx == knownParameterIndices.end())
+					knownParameterIndices.insert(std::make_pair(idx, 0));
+				else
+					uid = ++itKnownParamIdx->second;
+
+				auto p = std::make_unique<Parameter>(*this, desc, part, uid);
+
+				if(uid > 0)
+				{
+					const auto& existingParams = findSynthParam(idx);
+
+					for (auto& existingParam : existingParams)
+						existingParam->addLinkedParameter(p.get());
+				}
+
+				m_paramsByParamType[part].push_back(p.get());
+
+				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) || (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
 				if (isNonPartExclusive)
 				{
-					if (pt != 0)
+					if (part != 0)
 						continue; // only register on first part!
 				}
 				if (p->getDescription().isPublic)
 				{
-					// lifecycle managed by host
-					m_synthParams.insert_or_assign(idx, p.get());
+					// lifecycle managed by Juce
+
+					auto itExisting = m_synthParams.find(idx);
+					if (itExisting != m_synthParams.end())
+					{
+						itExisting->second.push_back(p.get());
+					}
+					else
+					{
+						ParameterList params;
+						params.emplace_back(p.get());
+						m_synthParams.insert(std::make_pair(idx, std::move(params)));
+					}
+
 					if (isNonPartExclusive)
 					{
-						jassert(pt == 0);
+						jassert(part == 0);
 						globalParams->addChild(std::move(p));
 					}
 					else
 						group->addChild(std::move(p));
 				}
 				else
-					m_synthInternalParams.insert_or_assign(idx, std::move(p));
+				{
+					// lifecycle handled by us
+
+					auto itExisting = m_synthInternalParams.find(idx);
+					if (itExisting != m_synthInternalParams.end())
+					{
+						itExisting->second.push_back(p.get());
+					}
+					else
+					{
+						ParameterList params;
+						params.emplace_back(p.get());
+						m_synthInternalParams.insert(std::make_pair(idx, std::move(params)));
+					}
+					m_synthInternalParamList.emplace_back(std::move(p));
+				}
 			}
 			m_processor.addParameterGroup(std::move(group));
 		}
@@ -149,39 +202,41 @@ namespace Virus
         }
     }
 
-	Parameter *Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
 	{
 		const ParamIndex paramIndex{ _page, _part, _paramIndex };
 
 		return findSynthParam(paramIndex);
 	}
 
-    Parameter* Controller::findSynthParam(const ParamIndex& _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex)
     {
 		const auto it = m_synthParams.find(_paramIndex);
 
-		if (it == m_synthParams.end())
+		if (it != m_synthParams.end())
+			return it->second;
+
+    	const auto iti = m_synthInternalParams.find(_paramIndex);
+
+		if (iti == m_synthInternalParams.end())
 		{
-			const auto iti = m_synthInternalParams.find(_paramIndex);
-
-			if (iti == m_synthInternalParams.end())
-				return nullptr;
-
-			return iti->second.get();
+			static ParameterList empty;
+			return empty;
 		}
-		return it->second;
-	}
 
-    juce::Value *Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
+		return iti->second;
+    }
+
+    juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
-		auto *param = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
-		if (param == nullptr)
+		const auto& params = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
+		if (params.empty())
 		{
             // unregistered param?
             jassertfalse;
             return nullptr;
         }
-		return &param->getValueObject();
+		return &params.front()->getValueObject();
 	}
 
     juce::Value* Controller::getParamValue(const ParameterType _param)
@@ -190,27 +245,20 @@ namespace Virus
 		return res ? &res->getValueObject() : nullptr;
     }
 
-    Parameter* Controller::getParameter(const ParameterType _param)
+    Parameter* Controller::getParameter(const ParameterType _param) const
     {
-		const auto it = m_paramTypeToParamIndex.find(_param);
-		if (it == m_paramTypeToParamIndex.end())
-			return nullptr;
-
-		const auto& index = it->second;
-
-		return findSynthParam(index);
+		return getParameter(_param, 0);
 	}
 
-	Parameter *Controller::getParameter(const ParameterType _param, const uint8_t _part)
+	Parameter* Controller::getParameter(const ParameterType _param, const uint8_t _part) const
 	{
-		const auto it = m_paramTypeToParamIndex.find(_param);
-		if (it == m_paramTypeToParamIndex.end())
+		if (_part >= m_paramsByParamType.size())
 			return nullptr;
 
-		const auto &index = it->second;
+		if (_param >= m_paramsByParamType[_part].size())
+			return nullptr;
 
-		const ParamIndex paramIndex{index.page, _part, index.paramNum};
-		return findSynthParam(paramIndex);
+		return m_paramsByParamType[_part][_param];
 	}
 
     void Controller::parseParamChange(const SysEx &msg)
@@ -220,24 +268,32 @@ namespace Virus
 		const auto ch = msg[pos + 1];
 		const auto index = msg[pos + 2];
 		const auto value = msg[pos + 3];
-		auto param = findSynthParam(ch, page, index);
-		if (param == nullptr && ch != 0)
+
+        const auto& partParams = findSynthParam(ch, page, index);
+
+    	if (partParams.empty() && ch != 0)
 		{
             // ensure it's not global
-			param = findSynthParam(0, page, index);
-			if (param == nullptr)
+			const auto& globalParams = findSynthParam(0, page, index);
+			if (globalParams.empty())
 			{
                 jassertfalse;
                 return;
             }
-			auto flags = param->getDescription().classFlags;
-			if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
+            for (const auto& param : globalParams)
             {
-                jassertfalse;
-                return;
+				auto flags = param->getDescription().classFlags;
+				if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
+				{
+					jassertfalse;
+					return;
+				}
             }
-        }
-		param->setValueFromSynth(value, true);
+			for (const auto& param : globalParams)
+				param->setValueFromSynth(value, true);
+		}
+		for (const auto& param : partParams)
+			param->setValueFromSynth(value, true);
 		// TODO:
         /**
          If a
@@ -361,11 +417,15 @@ namespace Virus
 			for (size_t i = 0; i < std::size(patch.data); i++)
 			{
 				const uint8_t page = virusLib::PAGE_A + static_cast<uint8_t>(i / pageSize);
-				if (auto *p = findSynthParam(ch, page, i % pageSize))
+				const auto& params = findSynthParam(ch, page, i % pageSize);
+				if (!params.empty())
 				{
-					if((p->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
-						continue;
-					p->setValueFromSynth(patch.data[i], true);
+					for (const auto& param : params)
+					{
+						if ((param->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
+							continue;
+						param->setValueFromSynth(patch.data[i], true);
+					}
 				}
 			}
 			if (onProgramChange)
@@ -400,13 +460,13 @@ namespace Virus
 		if (patch.bankNumber == 0) {
 			for (uint8_t pt = 0; pt < 16; pt++) {
 				for(int i = 0; i < 8; i++) {
-					if (auto* p = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL+i)) {
-						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i*16) + pt], true);
-					}
+					const auto& params = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL + i);
+					for (const auto& p : params)
+						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i * 16) + pt], true);
 				}
-				if (auto* p = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO)) {
+				const auto& params = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO);
+				for (const auto& p : params)
 					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
-				}
 /*				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
 					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
 				}*/
@@ -443,8 +503,8 @@ namespace Virus
 			return;
 
 		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, page == 0 ? "A" : "B", m.b, m.c));
-		auto* p = findSynthParam(part, page, m.b);
-		if(p)
+		const auto& params = findSynthParam(part, page, m.b);
+		for (const auto & p : params)
 			p->setValueFromSynth(m.c, true);
 	}
 
