@@ -34,7 +34,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	};
 	setScaleFactor(scale/100.0f);
 
-	m_skin.setBounds(m_scale.getBounds().getRight() + 4, 0, 74, 24);
+	m_skin.setBounds(m_scale.getBounds().getX(), m_scale.getBounds().getY() + m_scale.getBounds().getHeight(), 74, 24);
 	m_skin.addItem("Modern", 1);
 	m_skin.addItem("Classic", 2);
 	m_skin.setSelectedId(1, juce::dontSendNotification);
