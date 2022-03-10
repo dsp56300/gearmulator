@@ -6,12 +6,33 @@ pipeline {
 		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
-		//string(name: 'Branch', defaultValue: "master", description: '')
 		choice(name: 'Branch', choices: ['master', 'snow'], description: '')
-		booleanParam(name: 'IntegrationTest', defaultValue: true, description: '')
+		booleanParam(name: 'FXPlugins', defaultValue: false, description: '')
+		booleanParam(name: 'DarkSkin', defaultValue: false, description: '')
+		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
 		booleanParam(name: 'Deploy', defaultValue: true, description: '')
+		booleanParam(name: 'Upload', defaultValue: false, description: '')
 	}
 	stages {
+		stage('Prepare') {
+			steps {
+				script {
+					currentBuild.displayName += " - ${params.Branch} -"
+
+					if(params.LinuxARM)					currentBuild.displayName += " La"
+					if(params.LinuxX86)					currentBuild.displayName += " Lx"
+					if(params.Mac)						currentBuild.displayName += " M"
+					if(params.Win)						currentBuild.displayName += " W"
+					if(params.FXPlugins)				 currentBuild.displayName += " FX"
+					if(params.DarkSkin)					currentBuild.displayName += " Dark"
+					if(params.IntegrationTests)			currentBuild.displayName += " i"
+					if(params.Deploy)					currentBuild.displayName += " d"
+					if(params.Upload)					currentBuild.displayName += " u"
+
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
+				}
+			}
+		}
 		stage('Parallel Build') {
 			parallel {
 				stage('Windows') {
@@ -41,6 +62,14 @@ pipeline {
 			}
 		}
 	}
+	post {
+		always {
+			mqttNotification(
+				brokerUrl: "${env.MQTT_URL}",
+				credentialsId: 'mqtt',
+				message: currentBuild.displayName + ' - ' + currentBuild.currentResult)
+		}
+	}
 }
 
 def startBuildJob(label)
@@ -50,7 +79,10 @@ def startBuildJob(label)
 	[
 		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
 		[$class: 'StringParameterValue', name: 'Branch', value: params.Branch], 
-		[$class: 'BooleanParameterValue', name: 'Deploy', value: Boolean.valueOf(params.Deploy)], 
-		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: Boolean.valueOf(params.IntegrationTest)]
+		[$class: 'BooleanParameterValue', name: 'Deploy', value: params.Deploy], 
+		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
+		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
+		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
+		[$class: 'BooleanParameterValue', name: 'DarkSkin', value: params.DarkSkin]
 	]
 }
