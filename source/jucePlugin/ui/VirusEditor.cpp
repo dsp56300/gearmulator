@@ -106,9 +106,9 @@ VirusEditor::VirusEditor(VirusParameterBinding &_parameterBinding, AudioPluginAu
     }
 
     m_cmbMidiInput.setSize(160, 30);
-    m_cmbMidiInput.setTopLeftPosition(350, 760);
+    m_cmbMidiInput.setTopLeftPosition(350, 767);
     m_cmbMidiOutput.setSize(160, 30);
-    m_cmbMidiOutput.setTopLeftPosition(350+164, 760);
+    m_cmbMidiOutput.setTopLeftPosition(350+164, 767);
     addAndMakeVisible(m_cmbMidiInput);
     addAndMakeVisible(m_cmbMidiOutput);
     m_cmbMidiInput.setTextWhenNoChoicesAvailable("No MIDI Inputs Enabled");
