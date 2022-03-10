@@ -177,7 +177,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioPro
 	_parameterBinding.bind(m_reverbColoration, Virus::Param_DelayColor);
 	_parameterBinding.bind(m_reverbPredelay, Virus::Param_DelayTime);
 	_parameterBinding.bind(m_reverbFeedback, Virus::Param_DelayFeedback);
-	_parameterBinding.bind(m_reverbType, Virus::Param_DelayDepthReverbRoomSize);
+	_parameterBinding.bind(m_reverbType, Virus::Param_ReverbRoomSize);
 
 	// todo Need to check these parameters bindings for delay and reverb
 	// Delay
@@ -201,7 +201,7 @@ FxEditor::FxEditor(VirusParameterBinding &_parameterBinding, AudioPluginAudioPro
 	_parameterBinding.bind(m_delayRate, Virus::Param_DelayRateReverbDecayTime);
 	_parameterBinding.bind(m_delayFeedback, Virus::Param_DelayFeedback);
 	_parameterBinding.bind(m_delayColoration, Virus::Param_DelayColor);
-	_parameterBinding.bind(m_delayDepth, Virus::Param_DelayDepthReverbRoomSize);
+	_parameterBinding.bind(m_delayDepth, Virus::Param_DelayDepth);
 	_parameterBinding.bind(m_delayClock, Virus::Param_DelayClock);
 	_parameterBinding.bind(m_delayShape, Virus::Param_DelayLfoShape);
 
