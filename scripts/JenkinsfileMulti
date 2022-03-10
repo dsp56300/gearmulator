@@ -8,7 +8,6 @@ pipeline {
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
 		choice(name: 'Branch', choices: ['master', 'snow'], description: '')
 		booleanParam(name: 'FXPlugins', defaultValue: false, description: '')
-		booleanParam(name: 'DarkSkin', defaultValue: false, description: '')
 		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
 		booleanParam(name: 'Deploy', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '')
@@ -24,7 +23,6 @@ pipeline {
 					if(params.Mac)						currentBuild.displayName += " M"
 					if(params.Win)						currentBuild.displayName += " W"
 					if(params.FXPlugins)				 currentBuild.displayName += " FX"
-					if(params.DarkSkin)					currentBuild.displayName += " Dark"
 					if(params.IntegrationTests)			currentBuild.displayName += " i"
 					if(params.Deploy)					currentBuild.displayName += " d"
 					if(params.Upload)					currentBuild.displayName += " u"
@@ -83,6 +81,5 @@ def startBuildJob(label)
 		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
 		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
 		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
-		[$class: 'BooleanParameterValue', name: 'DarkSkin', value: params.DarkSkin]
 	]
 }

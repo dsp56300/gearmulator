@@ -4,7 +4,6 @@ pipeline {
 	environment {
 		GIT_URL = credentials('dsp56300_gitUrl')
 		BUILD_JUCE = needsJuce()
-		BUILD_DARK_SKIN = buildDarkSkin()
 		BUILD_FX_PLUGIN = buildFxPlugins()
 		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
 	}
@@ -13,7 +12,6 @@ pipeline {
 		string(name: 'Branch', defaultValue: "master", description: '')
 		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
 		booleanParam(name: 'FXPlugins', defaultValue: false, description: '') 
-		booleanParam(name: 'DarkSkin', defaultValue: false, description: '') 
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '') 
@@ -92,10 +90,6 @@ def needsJuce()
 {
 	return params.Deploy ? 'ON' : 'OFF'
 }
-def buildDarkSkin()
-{
-	return params.DarkSkin ? 'ON' : 'OFF'
-}
 def buildFxPlugins()
 {
 	return params.FXPlugins ? 'ON' : 'OFF'
@@ -138,7 +132,7 @@ def cmakeBuild()
 		deleteFile('CMakeCache.txt')	// we need to do this to be able to change option in the command line below. Otherwise, they won't change for an existing project
 	}
 	def buildDir = cmakeBuildDir();
-	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -Dgearmulator_BUILD_DARK_SKIN=${BUILD_DARK_SKIN} -DCMAKE_BUILD_TYPE=Release"
+	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
 	dir("${buildDir}") {
 		genericSh 'cmake --build . --config Release'
 	}
