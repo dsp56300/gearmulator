@@ -14,6 +14,8 @@ endif()
 
 set(SOURCES
 	parameterDescriptions_C.json
+    PluginEditor.cpp
+    PluginEditor.h
     PluginProcessor.cpp
     PluginProcessor.h
 	VirusController.cpp
@@ -29,7 +31,7 @@ set(SOURCES
 	version.h
 )
 
-macro(createJucePlugin targetName productName isSynth plugin4CC sourcesUI binaryDataProject componentName)
+macro(createJucePlugin targetName productName isSynth plugin4CC sourcesUI sourcesUI2 binaryDataProject componentName)
 
 	juce_add_plugin(${targetName}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -49,7 +51,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC sourcesUI binary
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${sourcesUI})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${sourcesUI} ${sourcesUI2})
+	source_group("source" FILES ${SOURCES})
+	source_group("source\\ui" FILES ${sourcesUI})
+	source_group("source\\ui2" FILES ${sourcesUI2})
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
@@ -92,19 +97,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC sourcesUI binary
 	endif()
 endmacro()
 
-macro(createJucePlugins postfix sourcesUI assets)
+macro(createJucePlugins postfix sourcesUI sourcesUI2 assets)
 	juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${assets})
 
-	createJucePlugin(jucePlugin${postfix} "DSP56300Emu" TRUE "TusV" "${sourcesUI}" jucePlugin_BinaryData${postfix} "${postfix}")
+	createJucePlugin(jucePlugin${postfix} "DSP56300Emu" TRUE "TusV" "${sourcesUI}" "${sourcesUI2}" jucePlugin_BinaryData${postfix} "${postfix}")
 	
 	if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
-		createJucePlugin(jucePlugin${postfix}_FX "DSP56300EmuFX" FALSE "TusF" "${sourcesUI}" jucePlugin_BinaryData${postfix} "${postfix}_FX")
+		createJucePlugin(jucePlugin${postfix}_FX "DSP56300EmuFX" FALSE "TusF" "${sourcesUI}" "${sourcesUI2}" jucePlugin_BinaryData${postfix} "${postfix}_FX")
 	endif()
 endmacro()
 
 set(SOURCES_UI
-    PluginEditor.cpp
-    PluginEditor.h
     ui/Virus_Buttons.cpp
     ui/Virus_LookAndFeel.cpp
     ui/VirusEditor.cpp
@@ -124,7 +127,9 @@ set(SOURCES_UI
     ui/Virus_PatchBrowser.h
     ui/Virus_Parts.h
     ui/Ui_Utils.h
+)
 
+set(SOURCES_UI2
     ui2/Ui_Utils.h
     ui2/Virus_Buttons.cpp
     ui2/Virus_Buttons.h
@@ -173,6 +178,7 @@ SET(ASSETS
         "assets/knobs/GenBlue_70x70_100.png"
         "assets/knobs/GenRed_70x70_100.png"
         "assets/knobs/multi_18x18_100.png"
+
         "assets2/main_background.png"
         "assets2/panels/panel_1.png"
         "assets2/panels/panel_2.png"
@@ -202,4 +208,4 @@ SET(ASSETS
 		"parameterDescriptions_C.json"
 )
 
-createJucePlugins("" "${SOURCES_UI}" "${ASSETS}")
+createJucePlugins("" "${SOURCES_UI}" "${SOURCES_UI2}" "${ASSETS}")
