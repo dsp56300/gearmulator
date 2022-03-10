@@ -4,9 +4,9 @@
 
 namespace Virus
 {
-	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum) :
-		juce::RangedAudioParameter(genId(desc, partNum), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
-		m_desc(desc), m_partNum(partNum)
+	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum, const int uniqueId) :
+		RangedAudioParameter(genId(desc, partNum, uniqueId), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
+		m_desc(desc), m_partNum(partNum), m_uniqueId(uniqueId)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
@@ -29,20 +29,93 @@ namespace Virus
 			onValueChanged();
 	}
 
+    void Parameter::setLinkedValue(const int _value)
+    {
+		const int newValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
+
+		if (newValue == m_lastValue)
+			return;
+
+		m_lastValue = newValue;
+
+		if(getDescription().isPublic)
+		{
+			beginChangeGesture();
+			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			endChangeGesture();
+		}
+		else
+		{
+			m_value.setValue(newValue);
+		}
+	}
+
+    void Parameter::setValue(float newValue)
+	{
+		if (m_changingLinkedValues)
+			return;
+
+		m_value.setValue(convertFrom0to1(newValue));
+
+		m_changingLinkedValues = true;
+
+		for (const auto& parameter : m_linkedParameters)
+		{
+			if(!parameter->m_changingLinkedValues)
+				parameter->setLinkedValue(m_value.getValue());
+		}
+
+		m_changingLinkedValues = false;
+	}
+
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
 	{
 		if (newValue == m_lastValue)
 			return;
+
 		m_lastValue = newValue;
-		if (notifyHost)
+
+		if (notifyHost && getDescription().isPublic)
+		{
+			beginChangeGesture();
 			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			endChangeGesture();
+		}
 		else
+		{
 			m_value.setValue(newValue);
+		}
+
+		if (m_changingLinkedValues)
+			return;
+
+		m_changingLinkedValues = true;
+
+		for (const auto& p : m_linkedParameters)
+			p->setLinkedValue(newValue);
+
+		m_changingLinkedValues = false;
 	}
 
-	juce::String Parameter::genId(const Description &d, const int part)
+	juce::String Parameter::genId(const Description &d, const int part, const int uniqueId)
 	{
-		return juce::String::formatted("%d_%d_%d", (int)d.page, part, d.index);
+		if(uniqueId > 0)
+			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
+		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
 	}
 
+	void Parameter::addLinkedParameter(Parameter* _param)
+	{
+		if (_param == this)
+			return;
+
+		for (auto* p : m_linkedParameters)
+		{
+			_param->m_linkedParameters.insert(p);
+			p->m_linkedParameters.insert(_param);
+		}
+
+		m_linkedParameters.insert(_param);
+		_param->m_linkedParameters.insert(this);
+	}
 } // namespace Virus

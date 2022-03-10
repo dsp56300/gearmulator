@@ -35,7 +35,6 @@ public:
 	void bind(juce::ComboBox &_control, Virus::ParameterType _param);
 	void bind(juce::ComboBox &_control, Virus::ParameterType _param, uint8_t _part);
 	void bind(juce::DrawableButton &_control, Virus::ParameterType _param);
-	void bind(juce::Component &_control, Virus::ParameterType _param);
 
 	AudioPluginAudioProcessor& m_processor;
 	juce::Array<Virus::Parameter*> m_bindings;
