@@ -4,21 +4,24 @@ pipeline {
 	environment {
 		GIT_URL = credentials('dsp56300_gitUrl')
 		BUILD_JUCE = needsJuce()
+		BUILD_FX_PLUGIN = buildFxPlugins()
 		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
 	}
 	parameters
 	{
 		string(name: 'Branch', defaultValue: "master", description: '')
 		string(name: 'AgentLabel', defaultValue: "git && cmake", description: '')
+		booleanParam(name: 'FXPlugins', defaultValue: false, description: '') 
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
+		booleanParam(name: 'Upload', defaultValue: false, description: '') 
 	}
 	stages {
 		stage("Checkout") {
 			steps {
 				script {
 					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch}"
-					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}"
 				}
 				doCheckout()
 			}
@@ -38,6 +41,16 @@ pipeline {
 				doIntegrationTests();
 			}
 		}
+		stage('Pack') {
+			when {
+				expression {
+					return params.Deploy || params.Upload
+				}
+			}
+			steps {
+				doPack();
+			}
+		}
 		stage('Deploy') {
 			when {
 				expression {
@@ -46,6 +59,16 @@ pipeline {
 			}
 			steps {
 				doDeploy();
+			}
+		}
+		stage('Upload') {
+			when {
+				expression {
+					return params.Upload
+				}
+			}
+			steps {
+				doUpload();
 			}
 		}
 	}
@@ -67,22 +90,19 @@ def needsJuce()
 {
 	return params.Deploy ? 'ON' : 'OFF'
 }
+def buildFxPlugins()
+{
+	return params.FXPlugins ? 'ON' : 'OFF'
+}
 def cmakeBuildDir()
 {
 	return "${CMAKE_BUILD_DIR}_${params.Branch}"
 }
+
 def copyDataFrom(from, to)
 {
-	if(isUnix())
-	{
-		sh	"""
-			eval `ssh-agent -s` && ssh-add
-			rclone sync --sftp-host fileserver --sftp-user dsp56300 :sftp:${from} ${to}
-			"""
-	}
-	else
-	{
-		bat "rclone sync dsp56300:${from} ${to}"
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+		genericSh 'rclone --config ' + formatArg('rcloneConfig') + " sync dsp56300:${from} ${to}"
 	}
 }
 
@@ -98,7 +118,7 @@ def doCheckout()
 			, recursiveSubmodules: true
 			, reference: ''
 			, trackingSubmodules: false]]
-			, userRemoteConfigs: [[ url: "$GIT_URL" ]]
+			, userRemoteConfigs: [[ url: GIT_URL ]]
 		]
 	)
 }
@@ -108,8 +128,11 @@ def cmakeBuild()
 	if(needsJuce()) {
 		copyVst2Sdk()
 	}
+	dir(cmakeBuildDir()) {
+		deleteFile('CMakeCache.txt')	// we need to do this to be able to change option in the command line below. Otherwise, they won't change for an existing project
+	}
 	def buildDir = cmakeBuildDir();
-	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -DCMAKE_BUILD_TYPE=Release"
+	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
 	dir("${buildDir}") {
 		genericSh 'cmake --build . --config Release'
 	}
@@ -161,18 +184,19 @@ def doIntegrationTests()
 	}
 }
 
-def copyArtefacts()
+def formatArg(_arg)
 {
+	echo 'Formatting arg ' + _arg
+
 	if(isUnix())
-	{
-		sh	"""
-			eval `ssh-agent -s` && ssh-add
-			rclone copy --sftp-host fileserver --sftp-user dsp56300 --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . :sftp:deploy/${params.Branch}
-			"""
-	}
+		return '$' + _arg
 	else
-	{
-		bat "rclone copy --include \"*.zip\" --min-size 100 --max-depth 1 . dsp56300:deploy/${params.Branch}"
+		return '%' + _arg + '%'
+}
+def copyArtefacts(rcloneConfig, targetFolder)
+{
+	dir(cmakeBuildDir()) {
+		genericSh 'rclone copy --config ' + formatArg('rcloneConfig') + ' --transfers=1 -v --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . ' + "${targetFolder}/${params.Branch}"
 	}
 }
 
@@ -184,7 +208,7 @@ def deleteFile(name)
 		bat "del ${name}"
 }
 
-def doDeploy()
+def doPack()
 {
 	dir(cmakeBuildDir()) {
 		deleteFile('*.zip')
@@ -201,7 +225,19 @@ def doDeploy()
 			fi
 			'''
 		}
-		
-		copyArtefacts();
+	}
+}
+
+def doDeploy()
+{
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+		copyArtefacts("${rcloneConfig}", "dsp56300:deploy");
+	}
+}
+
+def doUpload()
+{
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+		copyArtefacts("${rcloneConfig}", "dsp56300_ftp:builds")
 	}
 }
