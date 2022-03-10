@@ -29,6 +29,8 @@ public:
 	static bool load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
 	static uint32_t loadBankFile(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const juce::File& file);
 
+	static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src);
+
 private:
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;
@@ -75,6 +77,4 @@ private:
         ST = 7,
         VER = 8,
     };
-
-    static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src);
 };

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Virus_LookAndFeel.h"
 
 constexpr auto knobSize = Virus::LookAndFeel::kKnobSize;
