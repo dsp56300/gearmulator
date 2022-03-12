@@ -1,6 +1,5 @@
 #pragma once
 
-#include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 #include "Virus_Buttons.h"
 #include "Virus_LookAndFeel.h"

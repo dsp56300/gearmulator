@@ -1,9 +1,9 @@
 #pragma once
 
 #include "VirusParameterBinding.h"
-#include "ui/VirusEditor.h"
+
 #include "PluginProcessor.h"
-#include <juce_audio_devices/juce_audio_devices.h>
+
 //==============================================================================
 class AudioPluginAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
