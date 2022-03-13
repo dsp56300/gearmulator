@@ -1,6 +1,9 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+
+#include "BinaryData.h"
 #include "VirusController.h"
+#include "genericUI/editor.h"
 
 #include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
@@ -36,6 +39,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	m_skin.setBounds(m_scale.getBounds().getX(), m_scale.getBounds().getY() + m_scale.getBounds().getHeight(), 74, 24);
 	m_skin.addItem("Modern", 1);
 	m_skin.addItem("Classic", 2);
+	m_skin.addItem("Generic", 3);
 	m_skin.setSelectedId(1, juce::dontSendNotification);
 	m_skin.setColour(juce::ComboBox::textColourId, juce::Colours::white);
 	m_skin.setSelectedItemIndex(skinId, juce::dontSendNotification);
@@ -70,6 +74,11 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 		setSize(virusEditor->iSkinSizeWidth, virusEditor->iSkinSizeHeight);
 		virusEditor->m_AudioPlugInEditor = this;
 		m_virusEditor.reset(virusEditor);
+	}
+	else if(index == 2)
+	{
+		m_virusEditor.reset(new genericUI::Editor(std::string(BinaryData::VirusC_json), m_parameterBinding, processorRef.getController()));
+		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 	}
 	else {
 		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
