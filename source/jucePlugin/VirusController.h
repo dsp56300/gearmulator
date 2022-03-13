@@ -34,6 +34,8 @@ namespace Virus
 
         void printMessage(const SysEx &) const;
 
+        ParameterType getParameterTypeByName(const std::string& _name) const;
+
         // currently Value as I figure out what's the best approach
         // ch - [0-15]
         // bank - [0-2] (ABC)
