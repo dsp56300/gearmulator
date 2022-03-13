@@ -8,9 +8,12 @@ namespace genericUI
 	{
 	public:
 		void apply(Editor& _editor, const UiObject& _object) override;
-		void setImages(juce::DrawableButton& _button) const;
+		void apply(juce::DrawableButton& _button) const;
 
 	private:
+		bool m_isToggle = false;
+		int m_radioGroupId = 0;
+
 		juce::Drawable* m_normalImage = nullptr;
 		juce::Drawable* m_overImage = nullptr;
 		juce::Drawable* m_downImage = nullptr;

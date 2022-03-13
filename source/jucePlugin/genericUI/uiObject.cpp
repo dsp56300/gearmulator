@@ -88,7 +88,7 @@ namespace genericUI
 		apply(_editor, static_cast<juce::Component&>(_target));
 		auto* s = new ButtonStyle();
 		createStyle(_editor, _target, s);
-		s->setImages(_target);
+		s->apply(_target);
 		bindParameter(_editor, _target);
 	}
 
