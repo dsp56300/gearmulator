@@ -11,7 +11,6 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 {
     ignoreUnused (processorRef);
 
-	setSize(1377, 800);
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
     const int skinId = config->getIntValue("skin", 0);
@@ -54,6 +53,10 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 }
 
 void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
+	if(m_currentSkinId == index)
+		return;
+
+	m_currentSkinId = index;
 	if (m_virusEditor)
 	{
 		if(getIndexOfChildComponent(m_virusEditor.get()) > -1)
