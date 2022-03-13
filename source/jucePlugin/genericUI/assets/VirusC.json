@@ -1,0 +1,498 @@
+{
+    "name" : "Root",
+    "root" : {
+        "x" : "0",
+        "y" : "0",
+        "width" : "2754",
+        "height" : "1600"
+    },
+    "children" : [
+        {
+            "name" : "bg",
+            "image" : {
+                "x" : "0",
+                "y" : "0",
+                "width" : "2754",
+                "height" : "1600",
+                "texture" : "VC_x2_N"
+            }
+        },
+        {
+            "name" : "page_osc",
+            "image" : {
+                "x" : "676",
+                "y" : "268",
+                "width" : "2034",
+                "height" : "1238",
+                "texture" : "OSC_2034x1238_x2"
+            },
+            "children" : [
+                {
+                    "name" : "Osc1Shape",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "246",
+                        "y" : "90",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc1PW",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "370",
+                        "y" : "90",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc1Semi",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "497,2",
+                        "y" : "89",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc1Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "629",
+                        "y" : "89",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2Shape",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "245",
+                        "y" : "328",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2PW",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "369",
+                        "y" : "328",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2Semi",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "496,2",
+                        "y" : "327",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "628",
+                        "y" : "327",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2FM",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 FM Amount"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "245",
+                        "y" : "518",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2Detune",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Detune"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "369",
+                        "y" : "518",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2EnvFM",
+                    "parameterAttachment" : {
+                        "parameter" : "FM Filt Env Amt"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "496,2",
+                        "y" : "517",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc2Env",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Filt Env Amt"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "628",
+                        "y" : "517",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc3Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc3 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "247",
+                        "y" : "761",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc3Detune",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc3 Detune"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "369",
+                        "y" : "761",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc3Level",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc3 Volume"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "496",
+                        "y" : "761",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "UnisonDetune",
+                    "parameterAttachment" : {
+                        "parameter" : "Unison Detune"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "245",
+                        "y" : "998,7",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "UnisonPanSpread",
+                    "parameterAttachment" : {
+                        "parameter" : "Unison Pan Spread"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "369",
+                        "y" : "998,7",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "UnisonLfoPhase",
+                    "parameterAttachment" : {
+                        "parameter" : "Unison Lfo Phase"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "496,2",
+                        "y" : "997,7",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "UnisonPhaseInit",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc Init Phase"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "628",
+                        "y" : "997,7",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Osc1WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "30",
+                        "x" : "86",
+                        "y" : "138",
+                        "width" : "162",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Osc2WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "30",
+                        "x" : "86",
+                        "y" : "376",
+                        "width" : "162",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Osc2FMMode",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "30",
+                        "x" : "86",
+                        "y" : "572",
+                        "width" : "162",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc FM Mode"
+                    }
+                },
+                {
+                    "name" : "Osc3Mode",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "30",
+                        "x" : "86",
+                        "y" : "810",
+                        "width" : "162",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc3 Mode"
+                    }
+                },
+                {
+                    "name" : "UnisonVoices",
+                    "combobox" : {
+                        "text" : "8",
+                        "textHeight" : "30",
+                        "x" : "86",
+                        "y" : "1043",
+                        "width" : "162",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Unison Mode"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "TabOsc",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "0",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "786,9999",
+                "y" : "216",
+                "width" : "282",
+                "height" : "52",
+                "texture" : "OSC_282x52_x2",
+                "tileSizeX" : "282",
+                "tileSizeY" : "52"
+            }
+        },
+        {
+            "name" : "TabLfo",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "0",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1080",
+                "y" : "216",
+                "width" : "282",
+                "height" : "52",
+                "texture" : "LFO_282x52_x2",
+                "tileSizeX" : "282",
+                "tileSizeY" : "52"
+            }
+        },
+        {
+            "name" : "TabEffects",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "0",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1370",
+                "y" : "216",
+                "width" : "282",
+                "height" : "52",
+                "texture" : "FX_282x52_x2",
+                "tileSizeX" : "282",
+                "tileSizeY" : "52"
+            }
+        },
+        {
+            "name" : "TabArp",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "0",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1662",
+                "y" : "216",
+                "width" : "282",
+                "height" : "52",
+                "texture" : "ARP_282x52_x2",
+                "tileSizeX" : "282",
+                "tileSizeY" : "52"
+            }
+        }
+    ]
+}

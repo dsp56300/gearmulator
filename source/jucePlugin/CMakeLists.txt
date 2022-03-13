@@ -73,6 +73,18 @@ set(SOURCES_UI2
     ui2/VirusEditor.h
 )
 
+set(SOURCES_GENERICUI
+	genericUI/editor.cpp genericUI/editor.h
+	genericUI/image.cpp genericUI/image.h
+	genericUI/rotaryStyle.cpp genericUI/rotaryStyle.h
+	genericUI/comboboxStyle.cpp genericUI/comboboxStyle.h
+	genericUI/buttonStyle.cpp genericUI/buttonStyle.h
+	genericUI/uiObject.cpp genericUI/uiObject.h
+	genericUI/uiObjectStyle.cpp genericUI/uiObjectStyle.h
+
+	genericUI/assets/VirusC.json
+)
+
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
@@ -133,6 +145,16 @@ SET(ASSETS
 	"parameterDescriptions_C.json"
 )
 
+set(ASSETS_GENERICUI
+	genericUI/assets/Gen_140x140_x2.png
+	genericUI/assets/OSC_2034x1238_x2.png
+	genericUI/assets/VC_x2_N.png
+	genericUI/assets/ARP_282x52_x2.png
+	genericUI/assets/FX_282x52_x2.png
+	genericUI/assets/LFO_282x52_x2.png
+	genericUI/assets/OSC_282x52_x2.png
+	genericUI/assets/VirusC.json
+)
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -152,11 +174,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_GENERICUI})
 
 	source_group("source" FILES ${SOURCES})
 	source_group("source\\ui" FILES ${SOURCES_UI})
 	source_group("source\\ui2" FILES ${SOURCES_UI2})
+	source_group("source\\genericUI" FILES ${SOURCES_GENERICUI})
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
@@ -199,7 +222,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_GENERICUI})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	
