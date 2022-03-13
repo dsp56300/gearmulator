@@ -153,6 +153,8 @@ set(ASSETS_GENERICUI
 	genericUI/assets/FX_282x52_x2.png
 	genericUI/assets/LFO_282x52_x2.png
 	genericUI/assets/OSC_282x52_x2.png
+	genericUI/assets/sync2_108x100_x2.png
+	genericUI/assets/handle_72x94_x2.png
 	genericUI/assets/VirusC.json
 )
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)

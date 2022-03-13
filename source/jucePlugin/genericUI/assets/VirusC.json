@@ -419,16 +419,177 @@
                     "parameterAttachment" : {
                         "parameter" : "Unison Mode"
                     }
+                },
+                {
+                    "name" : "SyncSwitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc2 Sync"
+                    },
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "downImageOn" : "0",
+                        "x" : "636",
+                        "y" : "270",
+                        "width" : "108",
+                        "height" : "50",
+                        "texture" : "sync2_108x100_x2",
+                        "tileSizeX" : "108",
+                        "tileSizeY" : "50"
+                    }
+                },
+                {
+                    "name" : "OscBalance",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc Balance"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "836",
+                        "y" : "90,5",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "OscLevel",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc Mainvolume"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "975",
+                        "y" : "90,5",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "NoiseLevel",
+                    "parameterAttachment" : {
+                        "parameter" : "Noise Volume"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "835",
+                        "y" : "329,5",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "RingModLevel",
+                    "parameterAttachment" : {
+                        "parameter" : "Ringmodulator Volume"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "975",
+                        "y" : "329,5",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "NoiseColor",
+                    "parameterAttachment" : {
+                        "parameter" : "Noise Color"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "835",
+                        "y" : "519",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "SubLevel",
+                    "parameterAttachment" : {
+                        "parameter" : "Suboscillator Volume"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "976",
+                        "y" : "764",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "Portamento",
+                    "parameterAttachment" : {
+                        "parameter" : "Portamento Time"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "828",
+                        "y" : "1000",
+                        "width" : "140",
+                        "height" : "140",
+                        "texture" : "Gen_140x140_x2",
+                        "tileSizeX" : "140",
+                        "tileSizeY" : "140"
+                    }
+                },
+                {
+                    "name" : "SubOscTypeSwitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Suboscillator Shape"
+                    },
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "downImageOn" : "0",
+                        "x" : "865",
+                        "y" : "796",
+                        "width" : "36",
+                        "height" : "94",
+                        "texture" : "handle_72x94_x2",
+                        "tileSizeX" : "36",
+                        "tileSizeY" : "94"
+                    }
                 }
             ]
         },
         {
             "name" : "TabOsc",
             "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
                 "normalImage" : "0",
                 "overImage" : "1",
                 "downImage" : "1",
-                "normalImageOn" : "0",
+                "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "786,9999",
@@ -443,10 +604,12 @@
         {
             "name" : "TabLfo",
             "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
                 "normalImage" : "0",
                 "overImage" : "1",
                 "downImage" : "1",
-                "normalImageOn" : "0",
+                "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "1080",
@@ -461,10 +624,12 @@
         {
             "name" : "TabEffects",
             "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
                 "normalImage" : "0",
                 "overImage" : "1",
                 "downImage" : "1",
-                "normalImageOn" : "0",
+                "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "1370",
@@ -479,10 +644,12 @@
         {
             "name" : "TabArp",
             "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
                 "normalImage" : "0",
                 "overImage" : "1",
                 "downImage" : "1",
-                "normalImageOn" : "0",
+                "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "1662",
