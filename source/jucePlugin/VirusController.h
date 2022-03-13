@@ -27,7 +27,8 @@ namespace Virus
         static constexpr auto kNameLength = 10;
 
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
-		~Controller();
+		~Controller() override;
+
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
