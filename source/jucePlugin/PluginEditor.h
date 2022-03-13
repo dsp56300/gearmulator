@@ -27,6 +27,7 @@ private:
 	std::unique_ptr<juce::Component> m_virusEditor;
 	juce::ComboBox m_scale;
 	juce::ComboBox m_skin;
+	int m_currentSkinId = -1;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 
