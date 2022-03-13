@@ -1,4 +1,4 @@
-#include "rotarystyle.h"
+#include "rotaryStyle.h"
 
 namespace genericUI
 {
