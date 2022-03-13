@@ -13,7 +13,7 @@ namespace Virus
 		LOG(err);
 	}
 
-	std::string removeComments(std::string _json)
+	std::string ParameterDescriptions::removeComments(std::string _json)
 	{
 		auto removeBlock = [&](const std::string& _begin, const std::string& _end)
 		{
