@@ -1,6 +1,7 @@
 #include "uiObject.h"
 
 #include <cassert>
+
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include <utility>
@@ -127,30 +128,22 @@ namespace genericUI
 
 		if(hasComponent("root"))
 		{
-			auto c = std::make_unique<juce::Component>();
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::Component>(_editor);
 		}
 		else if(hasComponent("rotary"))
 		{
-			auto c = std::make_unique<juce::Slider>();
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::Slider>(_editor);
 		}
 		else if(hasComponent("image"))
 		{
-			auto c = std::make_unique<juce::Component>();
-			apply(_editor, *c);
+			auto* c = createJuceObject<juce::Component>(_editor);
 			auto img = _editor.createImageDrawable(getProperty("texture"));
 			c->addAndMakeVisible(img.get());
-			m_juceObjects.emplace_back(std::move(c));
 			m_juceObjects.emplace_back(std::move(img));
 		}
 		else if(hasComponent("combobox"))
 		{
-			auto c = std::make_unique<juce::ComboBox>();
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::ComboBox>(_editor);
 		}
 		else if(hasComponent("button"))
 		{
@@ -160,24 +153,20 @@ namespace genericUI
 		}
 		else if(hasComponent("textbutton"))
 		{
-			auto c = std::make_unique<juce::TextButton>(m_name);
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::TextButton>(_editor);
 		}
 		else if(hasComponent("label"))
 		{
-			auto c = std::make_unique<juce::Label>(m_name);
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::Label>(_editor);
 		}
 		else if(hasComponent("component"))
 		{
-			auto c = std::make_unique<juce::Component>();
-			apply(_editor, *c);
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject<juce::Component>(_editor);
 		}
 		else
+		{
 			assert(false && "unknown object type");
+		}
 
 		return m_juceObjects.empty() ? nullptr : m_juceObjects.front().get();
 	}
@@ -256,6 +245,14 @@ namespace genericUI
 		}
 
 		return true;
+	}
+
+	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
+	{
+		auto c = std::make_unique<T>();
+		apply(_editor, *c);
+		m_juceObjects.emplace_back(std::move(c));
+		return c.get();
 	}
 
 	template<typename T>
