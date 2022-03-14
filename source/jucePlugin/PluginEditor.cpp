@@ -7,6 +7,7 @@
 
 #include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
+#include "ui3/VirusEditor.h"
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
@@ -79,7 +80,7 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	{
 		try
 		{
-			m_virusEditor.reset(new genericUI::Editor(std::string(BinaryData::VirusC_json), m_parameterBinding, processorRef.getController()));
+			m_virusEditor.reset(new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController()));
 			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 		}
 		catch(const std::runtime_error& _err)
