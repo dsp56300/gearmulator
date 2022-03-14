@@ -26,6 +26,11 @@ namespace genericUI
 		VirusParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 		Virus::Controller& getController() const { return m_controller; }
 
+		void registerComponent(const std::string& _name, juce::Component* _component);
+
+		const std::vector<juce::Component*>& findComponents(const std::string& _name) const;
+		juce::Component* findComponent(const std::string& _name) const;
+
 	private:
 		static const char* getResourceByFilename(const std::string& _filename, int& _outDataSize);
 
@@ -34,5 +39,7 @@ namespace genericUI
 
 		VirusParameterBinding& m_parameterBinding;
 		Virus::Controller& m_controller;
+
+		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
 	};
 }

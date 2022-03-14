@@ -27,7 +27,7 @@ namespace genericUI
 			int dataSize;
 			const auto* data = getResourceByFilename(dataName, dataSize);
 			if (!data)
-				throw std::runtime_error("Failed to find data named " + dataName);
+				throw std::runtime_error("Failed to find image named " + dataName);
 			auto drawable = juce::Drawable::createFromImageData(data, dataSize);
 			m_drawables.insert(std::make_pair(texture, std::move(drawable)));
 		}
@@ -45,6 +45,38 @@ namespace genericUI
 	{
 		const auto existing = getImageDrawable(_texture);
 		return existing ? existing->createCopy() : nullptr;
+	}
+
+	void Editor::registerComponent(const std::string& _name, juce::Component* _component)
+	{
+		const auto itExisting = m_componentsByName.find(_name);
+
+		if(itExisting != m_componentsByName.end())
+		{
+			itExisting->second.push_back(_component);
+		}
+		else
+		{
+			m_componentsByName.insert(std::make_pair(_name, std::vector{_component}));
+		}
+	}
+
+	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name) const
+	{
+		const auto it = m_componentsByName.find(_name);
+		if(it != m_componentsByName.end())
+			return it->second;
+
+		static std::vector<juce::Component*> empty;
+		return empty;
+	}
+
+	juce::Component* Editor::findComponent(const std::string& _name) const
+	{
+		const auto comps = findComponents(_name);
+		if(comps.size() > 1)
+			throw std::runtime_error("Failed to find unique component named " + _name + ", found more than one object with that name");
+		return comps.empty() ? nullptr : comps.front();
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _filename, int& _outDataSize)

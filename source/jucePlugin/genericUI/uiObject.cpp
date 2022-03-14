@@ -1,7 +1,5 @@
 #include "uiObject.h"
 
-#include <cassert>
-
 #include <juce_audio_processors/juce_audio_processors.h>
 
 #include <utility>
@@ -61,7 +59,12 @@ namespace genericUI
 		const auto w = getPropertyInt("width");
 		const auto h = getPropertyInt("height");
 
-		assert(w > 0 && h > 0);
+		if(w < 1 || h < 1)
+		{
+			std::stringstream ss;
+			ss << "Size " << w << "x" << h << " for object named " << m_name << " is invalid, each side must be > 0";
+			throw std::runtime_error(ss.str());
+		}
 
 		_target.setTopLeftPosition(x, y);
 		_target.setSize(w, h);
@@ -126,11 +129,7 @@ namespace genericUI
 	{
 		m_juceObjects.clear();
 
-		if(hasComponent("root"))
-		{
-			createJuceObject<juce::Component>(_editor);
-		}
-		else if(hasComponent("rotary"))
+		if(hasComponent("rotary"))
 		{
 			createJuceObject<juce::Slider>(_editor);
 		}
@@ -159,13 +158,13 @@ namespace genericUI
 		{
 			createJuceObject<juce::Label>(_editor);
 		}
-		else if(hasComponent("component"))
+		else if(hasComponent("root") || hasComponent("component"))
 		{
 			createJuceObject<juce::Component>(_editor);
 		}
 		else
 		{
-			assert(false && "unknown object type");
+			throw std::runtime_error("Failed to determine object type for object named " + m_name);
 		}
 
 		return m_juceObjects.empty() ? nullptr : m_juceObjects.front().get();
@@ -251,8 +250,13 @@ namespace genericUI
 	{
 		auto c = std::make_unique<T>();
 		apply(_editor, *c);
+		auto* comp = c.get();
 		m_juceObjects.emplace_back(std::move(c));
-		return c.get();
+
+		if(!m_name.empty())
+			_editor.registerComponent(m_name, comp);
+
+		return comp;
 	}
 
 	template<typename T>
@@ -264,7 +268,9 @@ namespace genericUI
 			return;
 
 		const auto index = _editor.getController().getParameterTypeByName(param);
-		assert(index >= 0 && "parameter type not found");
+
+		if(index == Virus::Param_Invalid)
+			throw std::runtime_error("Parameter named " + param + " not found");
 
 		auto& binding = _editor.getParameterBinding();
 
