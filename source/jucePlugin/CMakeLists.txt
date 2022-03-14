@@ -73,6 +73,15 @@ set(SOURCES_UI2
     ui2/VirusEditor.h
 )
 
+set(SOURCES_UI3
+    ui3/Parts.cpp
+    ui3/Parts.h
+    ui3/Tabs.cpp
+    ui3/Tabs.h
+    ui3/VirusEditor.cpp
+    ui3/VirusEditor.h
+)
+
 set(SOURCES_GENERICUI
 	genericUI/editor.cpp genericUI/editor.h
 	genericUI/image.cpp genericUI/image.h
@@ -168,11 +177,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_GENERICUI})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_UI3} ${SOURCES_GENERICUI})
 
 	source_group("source" FILES ${SOURCES})
 	source_group("source\\ui" FILES ${SOURCES_UI})
 	source_group("source\\ui2" FILES ${SOURCES_UI2})
+	source_group("source\\ui3" FILES ${SOURCES_UI3})
 	source_group("source\\genericUI" FILES ${SOURCES_GENERICUI})
 
 	target_compile_definitions(${targetName} 
