@@ -91,7 +91,7 @@
                 "isToggle" : "1",
                 "radioGroupId" : "42",
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
