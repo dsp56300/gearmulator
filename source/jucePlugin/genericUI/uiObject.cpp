@@ -148,6 +148,8 @@ namespace genericUI
 		{
 			auto c = std::make_unique<juce::DrawableButton>(m_name, juce::DrawableButton::ImageRaw);
 			apply(_editor, *c);
+			if(!m_name.empty())
+				_editor.registerComponent(m_name, c.get());
 			m_juceObjects.emplace_back(std::move(c));
 		}
 		else if(hasComponent("textbutton"))
@@ -195,8 +197,6 @@ namespace genericUI
 	{
 		if (!_obj)
 			return false;
-
-		m_name = _obj->getProperty("name").toString().toStdString();
 
 		const auto& props = _obj->getProperties();
 
