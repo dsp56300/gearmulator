@@ -50,6 +50,7 @@ namespace genericUI
 
 	private:
 		bool hasComponent(const std::string& _component) const;
+		template<typename T> T* createJuceObject(Editor& _editor);
 
 		bool parse(juce::DynamicObject* _obj);
 
