@@ -77,8 +77,16 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	}
 	else if(index == 2)
 	{
-		m_virusEditor.reset(new genericUI::Editor(std::string(BinaryData::VirusC_json), m_parameterBinding, processorRef.getController()));
-		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
+		try
+		{
+			m_virusEditor.reset(new genericUI::Editor(std::string(BinaryData::VirusC_json), m_parameterBinding, processorRef.getController()));
+			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
+		}
+		catch(const std::runtime_error& _err)
+		{
+			LOG("ERROR: Failed to create editor: " << _err.what());
+			return;
+		}
 	}
 	else {
 		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
