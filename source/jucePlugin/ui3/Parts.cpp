@@ -42,7 +42,7 @@ namespace genericVirusUI
 
 	void Parts::selectPart(const size_t _part)
 	{
-		m_editor.getController().setCurrentPart(static_cast<uint8_t>(_part));
+		m_editor.getParameterBinding().setPart(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectPrevPreset(const size_t _part)
