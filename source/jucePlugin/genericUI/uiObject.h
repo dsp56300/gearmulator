@@ -8,6 +8,8 @@
 
 namespace juce
 {
+	class TextButton;
+	class Label;
 	class DrawableButton;
 	class ComboBox;
 	class LookAndFeel_V4;
@@ -36,6 +38,8 @@ namespace genericUI
 		void apply(Editor& _editor, juce::Slider& _target);
 		void apply(Editor& _editor, juce::ComboBox& _target);
 		void apply(Editor& _editor, juce::DrawableButton& _target);
+		void apply(Editor& _editor, juce::Label& _target);
+		void apply(Editor& _editor, juce::TextButton& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 

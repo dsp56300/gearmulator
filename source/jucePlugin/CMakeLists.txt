@@ -79,6 +79,8 @@ set(SOURCES_GENERICUI
 	genericUI/rotaryStyle.cpp genericUI/rotaryStyle.h
 	genericUI/comboboxStyle.cpp genericUI/comboboxStyle.h
 	genericUI/buttonStyle.cpp genericUI/buttonStyle.h
+	genericUI/labelStyle.cpp genericUI/labelStyle.h
+	genericUI/textbuttonStyle.cpp genericUI/textbuttonStyle.h
 	genericUI/uiObject.cpp genericUI/uiObject.h
 	genericUI/uiObjectStyle.cpp genericUI/uiObjectStyle.h
 

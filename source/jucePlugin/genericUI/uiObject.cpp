@@ -10,6 +10,8 @@
 #include "rotaryStyle.h"
 #include "comboboxStyle.h"
 #include "buttonStyle.h"
+#include "textbuttonStyle.h"
+#include "labelStyle.h"
 
 #include "../VirusController.h"
 #include "../VirusParameterBinding.h"
@@ -92,6 +94,22 @@ namespace genericUI
 		bindParameter(_editor, _target);
 	}
 
+	void UiObject::apply(Editor& _editor, juce::Label& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		auto* s = new LabelStyle();
+		createStyle(_editor, _target, s);
+		s->apply(_target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::TextButton& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		auto* s = new TextButtonStyle();
+		createStyle(_editor, _target, s);
+		s->apply(_target);
+	}
+
 	void UiObject::collectVariants(std::set<std::string>& _dst, const std::string& _property) const
 	{
 		const std::string res = getProperty(_property);
@@ -137,6 +155,24 @@ namespace genericUI
 		else if(hasComponent("button"))
 		{
 			auto c = std::make_unique<juce::DrawableButton>(m_name, juce::DrawableButton::ImageRaw);
+			apply(_editor, *c);
+			m_juceObjects.emplace_back(std::move(c));
+		}
+		else if(hasComponent("textbutton"))
+		{
+			auto c = std::make_unique<juce::TextButton>(m_name);
+			apply(_editor, *c);
+			m_juceObjects.emplace_back(std::move(c));
+		}
+		else if(hasComponent("label"))
+		{
+			auto c = std::make_unique<juce::Label>(m_name);
+			apply(_editor, *c);
+			m_juceObjects.emplace_back(std::move(c));
+		}
+		else if(hasComponent("component"))
+		{
+			auto c = std::make_unique<juce::Component>();
 			apply(_editor, *c);
 			m_juceObjects.emplace_back(std::move(c));
 		}
