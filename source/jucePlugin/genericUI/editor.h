@@ -4,6 +4,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "uiObject.h"
+
 namespace Virus
 {
 	class Controller;
@@ -13,8 +15,6 @@ class VirusParameterBinding;
 
 namespace genericUI
 {
-	class UiObject;
-
 	class Editor : public juce::Component
 	{
 	public:
@@ -29,6 +29,19 @@ namespace genericUI
 		void registerComponent(const std::string& _name, juce::Component* _component);
 
 		const std::vector<juce::Component*>& findComponents(const std::string& _name) const;
+
+		template<typename T>
+		void findComponents(std::vector<T*>& _dst, const std::string& _name) const
+		{
+			const auto& res = findComponents(_name);
+			for (auto* s : res)
+			{
+				auto* t = dynamic_cast<T*>(s);
+				if(t)
+					_dst.push_back(t);
+			}
+		}
+
 		juce::Component* findComponent(const std::string& _name) const;
 
 	private:
