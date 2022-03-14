@@ -14,6 +14,8 @@ namespace genericVirusUI
 		explicit Parts(VirusEditor& _editor);
 		virtual ~Parts();
 
+		void onProgramChange();
+
 	private:
 		void selectPart(size_t _part);
 		void selectPrevPreset(size_t _part);

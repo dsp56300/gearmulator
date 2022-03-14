@@ -29,16 +29,15 @@ namespace genericVirusUI
 		}
 
 		updateAll();
-
-		m_editor.getController().onProgramChange = [this]
-		{
-			updateAll();
-		};
 	}
 
 	Parts::~Parts()
 	{
-		m_editor.getController().onProgramChange = nullptr;
+	}
+
+	void Parts::onProgramChange()
+	{
+		updateAll();
 	}
 
 	void Parts::selectPart(const size_t _part)
