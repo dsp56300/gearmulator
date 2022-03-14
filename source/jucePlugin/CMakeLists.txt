@@ -147,18 +147,8 @@ SET(ASSETS
 	"parameterDescriptions_C.json"
 )
 
-set(ASSETS_GENERICUI
-	genericUI/assets/Gen_140x140_x2.png
-	genericUI/assets/OSC_2034x1238_x2.png
-	genericUI/assets/VC_x2_N.png
-	genericUI/assets/ARP_282x52_x2.png
-	genericUI/assets/FX_282x52_x2.png
-	genericUI/assets/LFO_282x52_x2.png
-	genericUI/assets/OSC_282x52_x2.png
-	genericUI/assets/sync2_108x100_x2.png
-	genericUI/assets/handle_72x94_x2.png
-	genericUI/assets/VirusC.json
-)
+include(genericUI/assets/assets.cmake)
+
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -226,7 +216,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_GENERICUI})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	
