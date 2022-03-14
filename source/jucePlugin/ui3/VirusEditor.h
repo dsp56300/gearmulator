@@ -13,7 +13,11 @@ namespace genericVirusUI
 		VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller);
 
 	private:
+		void onProgramChange();
+
 		Parts m_parts;
 		Tabs m_tabs;
+
+		juce::Label* m_presetName = nullptr;
 	};
 }
