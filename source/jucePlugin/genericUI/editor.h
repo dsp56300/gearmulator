@@ -44,6 +44,13 @@ namespace genericUI
 
 		juce::Component* findComponent(const std::string& _name) const;
 
+		template<typename T>
+		T* findComponentT(const std::string& _name) const
+		{
+			juce::Component* c = findComponent(_name);
+			return dynamic_cast<T*>(c);
+		}
+
 	private:
 		static const char* getResourceByFilename(const std::string& _filename, int& _outDataSize);
 
