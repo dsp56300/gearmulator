@@ -4706,6 +4706,22 @@
                                 "tileSizeX" : "140",
                                 "tileSizeY" : "140"
                             }
+                        },
+                        {
+                            "name" : "DelayReverbLfoShape",
+                            "combobox" : {
+                                "text" : "Wave 42",
+                                "textHeight" : "30",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "x" : "254",
+                                "y" : "280",
+                                "width" : "162",
+                                "height" : "36"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Lfo Shape"
+                            }
                         }
                     ]
                 },
@@ -4739,22 +4755,6 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Delay Clock"
-                    }
-                },
-                {
-                    "name" : "DelayReverbLfoShape",
-                    "combobox" : {
-                        "text" : "Wave 42",
-                        "textHeight" : "30",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "x" : "1333",
-                        "y" : "334",
-                        "width" : "162",
-                        "height" : "36"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Lfo Shape"
                     }
                 },
                 {
@@ -5284,8 +5284,8 @@
                         "isToggle" : "1",
                         "normalImage" : "1",
                         "downImage" : "0",
-                        "normalImageOn" : "1",
-                        "downImageOn" : "0",
+                        "normalImageOn" : "0",
+                        "downImageOn" : "1",
                         "x" : "1362",
                         "y" : "187",
                         "width" : "72",
