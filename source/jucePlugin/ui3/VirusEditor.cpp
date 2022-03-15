@@ -23,6 +23,7 @@ namespace genericVirusUI
 
 		m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
 		m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+		updatePlayModeButtons();
 
 		if(m_romSelector)
 		{
@@ -60,6 +61,7 @@ namespace genericVirusUI
 	{
 		m_parts.onPlayModeChanged();
 		updatePresetName();
+		updatePlayModeButtons();
 	}
 
 	void VirusEditor::onCurrentPartChanged()
@@ -128,6 +130,12 @@ namespace genericVirusUI
 	void VirusEditor::updatePresetName() const
 	{
 		m_presetName->setText(getController().getCurrentPartPresetName(getController().getCurrentPart()), juce::dontSendNotification);
+	}
+
+	void VirusEditor::updatePlayModeButtons() const
+	{
+		m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
+		m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
 	}
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
