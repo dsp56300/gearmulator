@@ -58,7 +58,8 @@ namespace genericUI
 			}
 			m_align = a;
 		}
-		const auto alignV = _object.getProperty("alignH");
+
+		const auto alignV = _object.getProperty("alignV");
 		if(!alignV.empty())
 		{
 			juce::Justification a = 0;
