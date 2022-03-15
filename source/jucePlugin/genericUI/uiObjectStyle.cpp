@@ -70,6 +70,9 @@ namespace genericUI
 			}
 			m_align = m_align.getFlags() | a.getFlags();
 		}
+
+		m_bold = _object.getPropertyInt("bold") != 0;
+		m_italic = _object.getPropertyInt("italic") != 0;
 	}
 
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)
@@ -104,5 +107,7 @@ namespace genericUI
 	{
 		if(m_textHeight)
 			_font.setHeight(static_cast<float>(m_textHeight));
+		_font.setBold(m_bold);
+		_font.setItalic(m_italic);
 	}
 }
