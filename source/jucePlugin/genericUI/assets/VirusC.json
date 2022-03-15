@@ -21,7 +21,7 @@
             "name" : "singleLabel",
             "label" : {
                 "text" : "SINGLE",
-                "textHeight" : "16",
+                "textHeight" : "18",
                 "color" : "EBEBEBFF",
                 "alignH" : "R",
                 "alignV" : "C",
@@ -76,7 +76,7 @@
             "name" : "multiLabel",
             "label" : {
                 "text" : "MULTI",
-                "textHeight" : "16",
+                "textHeight" : "18",
                 "color" : "EBEBEBFF",
                 "alignH" : "L",
                 "alignV" : "C",
@@ -2064,7 +2064,7 @@
                         "y" : "761",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenRed_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2249,7 +2249,7 @@
                         "y" : "90,5",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenPol_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2266,7 +2266,7 @@
                         "y" : "90,5",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenRed_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2283,7 +2283,7 @@
                         "y" : "329,5",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenRed_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2300,7 +2300,7 @@
                         "y" : "329,5",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenRed_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2334,7 +2334,7 @@
                         "y" : "764",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenRed_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -2664,7 +2664,7 @@
                         "y" : "327",
                         "width" : "140",
                         "height" : "140",
-                        "texture" : "Gen_140x140_x2",
+                        "texture" : "GenPol_140x140_x2",
                         "tileSizeX" : "140",
                         "tileSizeY" : "140"
                     }
@@ -5616,11 +5616,7 @@
                         "x" : "954,88",
                         "y" : "1116",
                         "width" : "124,2466",
-                        "height" : "36",
-                        "tooltip" : "Select an additional physical Midi Input device for "
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Category1"
+                        "height" : "36"
                     }
                 },
                 {
@@ -5634,9 +5630,6 @@
                         "y" : "1116",
                         "width" : "124,2466",
                         "height" : "36"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Category1"
                     }
                 }
             ]
@@ -5671,7 +5664,7 @@
                 "color" : "FF7180FF",
                 "x" : "74",
                 "y" : "1543",
-                "width" : "730",
+                "width" : "627,718",
                 "height" : "45"
             }
         },
