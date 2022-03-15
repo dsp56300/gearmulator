@@ -10,6 +10,7 @@
 #include "comboboxStyle.h"
 #include "buttonStyle.h"
 #include "textbuttonStyle.h"
+#include "hyperlinkbuttonStyle.h"
 #include "labelStyle.h"
 
 #include "../VirusController.h"
@@ -85,8 +86,10 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::ComboBox& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		createStyle(_editor, _target, new ComboboxStyle());
+		auto* s = new ComboboxStyle();
+		createStyle(_editor, _target, s);
 		bindParameter(_editor, _target);
+		s->apply(_target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::DrawableButton& _target)
@@ -114,6 +117,14 @@ namespace genericUI
 		s->apply(_target);
 	}
 
+	void UiObject::apply(Editor& _editor, juce::HyperlinkButton& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		auto* s = new HyperlinkButtonStyle();
+		createStyle(_editor, _target, s);
+		s->apply(_target);
+	}
+
 	void UiObject::collectVariants(std::set<std::string>& _dst, const std::string& _property) const
 	{
 		const std::string res = getProperty(_property);
@@ -135,6 +146,7 @@ namespace genericUI
 		}
 		else if(hasComponent("image"))
 		{
+			// @Juce: Juce does not respect translations on drawables by using setPositionAndSize, even though a Drawable is a component?! Doesn't make sense to me
 			auto* c = createJuceObject<juce::Component>(_editor);
 			auto img = _editor.createImageDrawable(getProperty("texture"));
 			c->addAndMakeVisible(img.get());
@@ -146,11 +158,11 @@ namespace genericUI
 		}
 		else if(hasComponent("button"))
 		{
-			auto c = std::make_unique<juce::DrawableButton>(m_name, juce::DrawableButton::ImageRaw);
-			apply(_editor, *c);
-			if(!m_name.empty())
-				_editor.registerComponent(m_name, c.get());
-			m_juceObjects.emplace_back(std::move(c));
+			createJuceObject(_editor, new juce::DrawableButton(m_name, juce::DrawableButton::ImageRaw));
+		}
+		else if(hasComponent("hyperlinkbutton"))
+		{
+			createJuceObject<juce::HyperlinkButton>(_editor);
 		}
 		else if(hasComponent("textbutton"))
 		{
@@ -248,13 +260,28 @@ namespace genericUI
 
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
 	{
-		auto c = std::make_unique<T>();
+		return createJuceObject(_editor, new T());
+	}
+
+	template <typename T> T* UiObject::createJuceObject(Editor& _editor, T* _object)
+	{
+		std::unique_ptr<T> c(_object);
 		apply(_editor, *c);
 		auto* comp = c.get();
 		m_juceObjects.emplace_back(std::move(c));
 
 		if(!m_name.empty())
 			_editor.registerComponent(m_name, comp);
+
+		auto* tooltipClient = dynamic_cast<juce::SettableTooltipClient*>(_object);
+
+		if(tooltipClient)
+		{
+			const auto tooltip = getProperty("tooltip");
+
+			if(!tooltip.empty())
+				tooltipClient->setTooltip(tooltip);
+		}
 
 		return comp;
 	}

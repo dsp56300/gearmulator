@@ -6,7 +6,7 @@ namespace genericUI
 	{
 	}
 
-	void TextButtonStyle::apply(juce::TextButton& _target) const
+	void TextButtonStyle::apply(juce::Button& _target) const
 	{
 		_target.setColour(juce::TextButton::ColourIds::textColourOffId, m_color);
 		_target.setColour(juce::TextButton::ColourIds::textColourOnId, m_color);

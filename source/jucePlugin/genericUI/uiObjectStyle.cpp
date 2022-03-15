@@ -74,6 +74,7 @@ namespace genericUI
 
 		m_bold = _object.getPropertyInt("bold") != 0;
 		m_italic = _object.getPropertyInt("italic") != 0;
+		m_url = _object.getProperty("url");
 	}
 
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)

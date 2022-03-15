@@ -8,6 +8,7 @@
 
 namespace juce
 {
+	class HyperlinkButton;
 	class TextButton;
 	class Label;
 	class DrawableButton;
@@ -40,6 +41,7 @@ namespace genericUI
 		void apply(Editor& _editor, juce::DrawableButton& _target);
 		void apply(Editor& _editor, juce::Label& _target);
 		void apply(Editor& _editor, juce::TextButton& _target);
+		void apply(Editor& _editor, juce::HyperlinkButton& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 
@@ -51,6 +53,7 @@ namespace genericUI
 	private:
 		bool hasComponent(const std::string& _component) const;
 		template<typename T> T* createJuceObject(Editor& _editor);
+		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
 
 		bool parse(juce::DynamicObject* _obj);
 
