@@ -30,6 +30,8 @@ namespace genericVirusUI
 
 		void updateControlLabel(juce::Component* _component) const;
 		void updatePresetName() const;
+		void updatePlayModeButtons() const;
+
 
 		void setPlayMode(uint8_t _playMode);
 
