@@ -49,6 +49,11 @@ namespace genericVirusUI
 			versionInfo->setText(message, juce::dontSendNotification);
 		}
 
+		auto* presetSave = findComponentT<juce::Button>("PresetSave");
+		presetSave->onClick = [this] { savePreset(); };
+
+		auto* presetLoad = findComponentT<juce::Button>("PresetLoad");
+		presetLoad->onClick = [this] { loadPreset(); };
 	}
 
 	void VirusEditor::onProgramChange()
@@ -136,6 +141,102 @@ namespace genericVirusUI
 	{
 		m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
 		m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+	}
+
+	void VirusEditor::savePreset()
+	{
+		const auto path = getController().getConfig()->getValue("virus_bank_dir", "");
+		m_fileChooser = std::make_unique<juce::FileChooser>(
+			"Save preset as syx",
+			m_previousPath.isEmpty()
+			? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
+			: m_previousPath,
+			"*.syx", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		auto onFileChooser = [this](const juce::FileChooser& chooser)
+		{
+			if (chooser.getResults().isEmpty())
+				return;
+
+			const auto result = chooser.getResult();
+			m_previousPath = result.getParentDirectory().getFullPathName();
+			const auto ext = result.getFileExtension().toLowerCase();
+			const uint8_t syxHeader[9] = { 0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00 };
+			constexpr uint8_t syxEof[1] = { 0xF7 };
+			uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
+			uint8_t data[256];
+			for (int i = 0; i < 256; i++)
+			{
+				const auto param = getController().getParamValue(getController().getCurrentPart(), i < 128 ? 0 : 1, i & 127);
+
+				data[i] = param ? static_cast<int>(param->getValue()) : 0;
+				cs += data[i];
+			}
+			cs = cs & 0x7f;
+
+			result.deleteFile();
+			result.create();
+			result.appendData(syxHeader, 9);
+			result.appendData(data, 256);
+			result.appendData(&cs, 1);
+			result.appendData(syxEof, 1);
+		};
+		m_fileChooser->launchAsync(flags, onFileChooser);
+	}
+
+	void VirusEditor::loadPreset()
+	{
+		m_fileChooser = std::make_unique<juce::FileChooser>(
+			"Choose syx/midi banks to import",
+			m_previousPath.isEmpty()
+			? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
+			: m_previousPath,
+			"*.syx,*.mid,*.midi", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		const std::function onFileChooser = [this](const juce::FileChooser& chooser)
+		{
+			if (chooser.getResults().isEmpty())
+				return;
+
+			const auto result = chooser.getResult();
+			m_previousPath = result.getParentDirectory().getFullPathName();
+			const auto ext = result.getFileExtension().toLowerCase();
+
+			std::vector<Patch> patches;
+			::PatchBrowser::loadBankFile(patches, nullptr, result);
+
+			if (patches.empty())
+				return;
+
+			if (patches.size() == 1)
+			{
+				// load to edit buffer of current part
+				auto data = patches.front().sysex;
+				data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
+				if (getController().isMultiMode())
+					data[8] = getController().getCurrentPart();
+				else
+					data[8] = virusLib::SINGLE;
+				getController().sendSysEx(data);
+			}
+			else
+			{
+				// load to bank A
+				for (const auto& p : patches)
+				{
+					auto data = p.sysex;
+					data[7] = virusLib::toMidiByte(virusLib::BankNumber::A);
+					getController().sendSysEx(data);
+				}
+			}
+
+			getController().onStateLoaded();
+		};
+		m_fileChooser->launchAsync(flags, onFileChooser);
 	}
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)

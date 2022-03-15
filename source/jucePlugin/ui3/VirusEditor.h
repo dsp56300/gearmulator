@@ -32,6 +32,8 @@ namespace genericVirusUI
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 
+		void savePreset();
+		void loadPreset();
 
 		void setPlayMode(uint8_t _playMode);
 
@@ -48,5 +50,8 @@ namespace genericVirusUI
 		juce::TooltipWindow m_tooltipWindow;
 
 		PatchBrowser m_patchBrowser;
+
+		std::unique_ptr<juce::FileChooser> m_fileChooser;
+		juce::String m_previousPath;
 	};
 }
