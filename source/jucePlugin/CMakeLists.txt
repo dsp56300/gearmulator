@@ -76,6 +76,8 @@ set(SOURCES_UI2
 set(SOURCES_UI3
     ui3/Parts.cpp
     ui3/Parts.h
+	ui3/PatchBrowser.cpp
+	ui3/PatchBrowser.h
     ui3/Tabs.cpp
     ui3/Tabs.h
     ui3/VirusEditor.cpp

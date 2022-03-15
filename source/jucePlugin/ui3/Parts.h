@@ -14,18 +14,20 @@ namespace genericVirusUI
 		explicit Parts(VirusEditor& _editor);
 		virtual ~Parts();
 
-		void onProgramChange();
+		void onProgramChange() const;
+		void onPlayModeChanged() const;
+		void onCurrentPartChanged() const;
 
 	private:
-		void selectPart(size_t _part);
-		void selectPrevPreset(size_t _part);
-		void selectNextPreset(size_t _part);
-		void selectPreset(size_t _part);
+		void selectPart(size_t _part) const;
+		void selectPrevPreset(size_t _part) const;
+		void selectNextPreset(size_t _part) const;
+		void selectPreset(size_t _part) const;
 
-		void updatePresetNames();
-		void updateSelectedPart();
-		void updateAll();
-		void updateSingleOrMultiMode();
+		void updatePresetNames() const;
+		void updateSelectedPart() const;
+		void updateAll() const;
+		void updateSingleOrMultiMode() const;
 
 		VirusEditor& m_editor;
 

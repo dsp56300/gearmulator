@@ -32,7 +32,7 @@ namespace Virus
         juce::Value &getValueObject() { return m_value; };
         const juce::Value &getValueObject() const { return m_value; };
 
-        const Description getDescription() const { return m_desc; };
+        const Description& getDescription() const { return m_desc; };
 
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 

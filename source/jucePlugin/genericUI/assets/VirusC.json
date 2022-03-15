@@ -18,6 +18,76 @@
             }
         },
         {
+            "name" : "singleLabel",
+            "label" : {
+                "text" : "SINGLE",
+                "textHeight" : "16",
+                "color" : "EBEBEBFF",
+                "alignH" : "R",
+                "alignV" : "C",
+                "bold" : "1",
+                "x" : "154",
+                "y" : "281",
+                "width" : "70",
+                "height" : "30"
+            }
+        },
+        {
+            "name" : "PlayModeSingle",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "5",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "234",
+                "y" : "281",
+                "width" : "86",
+                "height" : "30",
+                "texture" : "presest_btn_select_86x60_x2",
+                "tileSizeX" : "86",
+                "tileSizeY" : "30"
+            }
+        },
+        {
+            "name" : "PlayModeMulti",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "5",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "506",
+                "y" : "281",
+                "width" : "86",
+                "height" : "30",
+                "texture" : "presest_btn_select_86x60_x2",
+                "tileSizeX" : "86",
+                "tileSizeY" : "30"
+            }
+        },
+        {
+            "name" : "multiLabel",
+            "label" : {
+                "text" : "MULTI",
+                "textHeight" : "16",
+                "color" : "EBEBEBFF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "bold" : "1",
+                "x" : "600",
+                "y" : "281",
+                "width" : "70",
+                "height" : "30"
+            }
+        },
+        {
             "name" : "PatchName",
             "label" : {
                 "text" : "OvertureCK",
@@ -25,7 +95,8 @@
                 "color" : "FF7180FF",
                 "alignH" : "L",
                 "alignV" : "C",
-                "x" : "828,6",
+                "bold" : "1",
+                "x" : "824,6",
                 "y" : "80,9",
                 "width" : "470",
                 "height" : "100"
@@ -34,15 +105,16 @@
         {
             "name" : "ControlLabel",
             "label" : {
-                "text" : "Osc 1 Semitone -45",
+                "text" : "Osc 1 Semitone\n-12",
                 "textHeight" : "32",
                 "color" : "FF7180FF",
                 "alignH" : "R",
                 "alignV" : "T",
-                "x" : "1243,326",
+                "bold" : "1",
+                "x" : "1190,6",
                 "y" : "92,9",
-                "width" : "312,3241",
-                "height" : "100"
+                "width" : "368",
+                "height" : "80"
             }
         },
         {
@@ -106,10 +178,14 @@
             "combobox" : {
                 "text" : "Virus_C_OS_6.5.bin",
                 "textHeight" : "24",
-                "x" : "2024,012",
-                "y" : "119,4953",
-                "width" : "508,4647",
-                "height" : "37,0013"
+                "color" : "FD9595FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "x" : "2024",
+                "y" : "119",
+                "width" : "508",
+                "height" : "37",
+                "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin"
             }
         },
         {
@@ -2066,6 +2142,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "138",
                         "width" : "162",
@@ -2080,6 +2158,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "376",
                         "width" : "162",
@@ -2094,6 +2174,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "572",
                         "width" : "162",
@@ -2108,6 +2190,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "810",
                         "width" : "162",
@@ -2122,6 +2206,8 @@
                     "combobox" : {
                         "text" : "8",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "1043",
                         "width" : "162",
@@ -2397,6 +2483,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1210",
                         "y" : "310",
                         "width" : "162",
@@ -2533,6 +2621,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1210",
                         "y" : "409,8",
                         "width" : "162",
@@ -2584,6 +2674,8 @@
                     "combobox" : {
                         "text" : "Parallel 4",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1578",
                         "y" : "309",
                         "width" : "162",
@@ -2598,6 +2690,8 @@
                     "combobox" : {
                         "text" : "Parallel 4",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1578",
                         "y" : "407",
                         "width" : "162",
@@ -2612,6 +2706,8 @@
                     "combobox" : {
                         "text" : "Parallel 4",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1782,4",
                         "y" : "309",
                         "width" : "162",
@@ -2845,6 +2941,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "128",
                         "width" : "162",
@@ -2859,6 +2957,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "213",
                         "width" : "162",
@@ -3083,6 +3183,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "835",
                         "y" : "298",
                         "width" : "193",
@@ -3114,6 +3216,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "508",
                         "width" : "162",
@@ -3128,6 +3232,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "593",
                         "width" : "162",
@@ -3352,6 +3458,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "835",
                         "y" : "678",
                         "width" : "193",
@@ -3383,6 +3491,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "887",
                         "width" : "162",
@@ -3397,6 +3507,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "71",
                         "y" : "972",
                         "width" : "162",
@@ -3499,6 +3611,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "835",
                         "y" : "905",
                         "width" : "193",
@@ -3530,6 +3644,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "184",
                         "width" : "190",
@@ -3544,6 +3660,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "300",
                         "width" : "190",
@@ -3575,6 +3693,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1289",
                         "y" : "779",
                         "width" : "190",
@@ -3589,6 +3709,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1289",
                         "y" : "895",
                         "width" : "190",
@@ -3620,6 +3742,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1289",
                         "y" : "1047,8",
                         "width" : "190",
@@ -3651,6 +3775,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1291",
                         "y" : "185",
                         "width" : "190",
@@ -3665,6 +3791,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1291",
                         "y" : "301",
                         "width" : "190",
@@ -3696,6 +3824,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1291",
                         "y" : "453,8",
                         "width" : "190",
@@ -3727,6 +3857,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1291",
                         "y" : "605",
                         "width" : "190",
@@ -3758,6 +3890,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "433",
                         "width" : "190",
@@ -3772,6 +3906,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "549",
                         "width" : "190",
@@ -3803,6 +3939,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "681,7",
                         "width" : "190",
@@ -3817,6 +3955,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "797,7",
                         "width" : "190",
@@ -3848,6 +3988,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "930",
                         "width" : "190",
@@ -3862,6 +4004,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1758",
                         "y" : "1046",
                         "width" : "190",
@@ -3888,6 +4032,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "138",
                         "width" : "162",
@@ -3953,6 +4099,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "372",
                         "width" : "162",
@@ -4069,6 +4217,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "610",
                         "width" : "162",
@@ -4287,6 +4437,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "86",
                         "y" : "1058",
                         "width" : "162",
@@ -4562,6 +4714,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1109",
                         "y" : "137",
                         "width" : "162",
@@ -4576,6 +4730,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1109",
                         "y" : "334",
                         "width" : "162",
@@ -4590,6 +4746,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1333",
                         "y" : "334",
                         "width" : "162",
@@ -4621,6 +4779,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1109",
                         "y" : "608",
                         "width" : "162",
@@ -4822,6 +4982,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1109",
                         "y" : "1004",
                         "width" : "162",
@@ -5018,6 +5180,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "137",
                         "y" : "609",
                         "width" : "162",
@@ -5032,6 +5196,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "340",
                         "y" : "609",
                         "width" : "162",
@@ -5063,6 +5229,9 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "24",
+                        "color" : "FD9595FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1164",
                         "y" : "121",
                         "width" : "170",
@@ -5077,6 +5246,9 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "24",
+                        "color" : "FD9595FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1164",
                         "y" : "187",
                         "width" : "170",
@@ -5091,6 +5263,9 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "24",
+                        "color" : "FD9595FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1377",
                         "y" : "121",
                         "width" : "170",
@@ -5176,6 +5351,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "969",
                         "y" : "381",
                         "width" : "162",
@@ -5190,6 +5367,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1180,55",
                         "y" : "381",
                         "width" : "162",
@@ -5204,6 +5383,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1609",
                         "y" : "381",
                         "width" : "162",
@@ -5218,6 +5399,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1820,55",
                         "y" : "381",
                         "width" : "162",
@@ -5232,6 +5415,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "969",
                         "y" : "617,4",
                         "width" : "162",
@@ -5280,6 +5465,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "969",
                         "y" : "776,5",
                         "width" : "162",
@@ -5328,6 +5515,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1608",
                         "y" : "617,4",
                         "width" : "160",
@@ -5342,6 +5531,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1822",
                         "y" : "617,4",
                         "width" : "160",
@@ -5356,6 +5547,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1608",
                         "y" : "716,4",
                         "width" : "160",
@@ -5370,6 +5563,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1822",
                         "y" : "716,4",
                         "width" : "160",
@@ -5384,6 +5579,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1608",
                         "y" : "815,4",
                         "width" : "160",
@@ -5398,6 +5595,8 @@
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "30",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1822",
                         "y" : "815,4",
                         "width" : "160",
@@ -5410,12 +5609,15 @@
                 {
                     "name" : "MidiIn",
                     "combobox" : {
-                        "text" : "Wave 42",
+                        "text" : "In Device X",
                         "textHeight" : "24",
+                        "alignH" : "R",
+                        "alignV" : "C",
                         "x" : "954,88",
                         "y" : "1116",
                         "width" : "124,2466",
-                        "height" : "36"
+                        "height" : "36",
+                        "tooltip" : "Select an additional physical Midi Input device for "
                     },
                     "parameterAttachment" : {
                         "parameter" : "Category1"
@@ -5424,8 +5626,10 @@
                 {
                     "name" : "MidiOut",
                     "combobox" : {
-                        "text" : "Wave 42",
+                        "text" : "Out Device X",
                         "textHeight" : "24",
+                        "alignH" : "L",
+                        "alignV" : "C",
                         "x" : "1116,35",
                         "y" : "1116",
                         "width" : "124,2466",
@@ -5445,6 +5649,44 @@
                 "width" : "2034",
                 "height" : "1238",
                 "texture" : "Pres_2034x1238_x2"
+            },
+            "children" : [
+                {
+                    "name" : "ContainerPresetBrowser",
+                    "component" : {
+                        "x" : "88",
+                        "y" : "96",
+                        "width" : "1857",
+                        "height" : "1055"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "DonateInfo",
+            "hyperlinkbutton" : {
+                "url" : "https://paypal.me/dsp56300",
+                "text" : "To donate: https://paypal.me/dsp56300",
+                "textHeight" : "28",
+                "color" : "FF7180FF",
+                "x" : "74",
+                "y" : "1543",
+                "width" : "730",
+                "height" : "45"
+            }
+        },
+        {
+            "name" : "VersionInfo",
+            "label" : {
+                "text" : "DSP56300 Emulator Version 1.2.11 - March 8 2022 20:03:57",
+                "textHeight" : "28",
+                "color" : "FF7180FF",
+                "alignH" : "R",
+                "alignV" : "C",
+                "x" : "1416",
+                "y" : "1543",
+                "width" : "1280",
+                "height" : "45"
             }
         }
     ]
