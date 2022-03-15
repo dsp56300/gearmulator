@@ -80,7 +80,7 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	{
 		try
 		{
-			m_virusEditor.reset(new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController()));
+			m_virusEditor.reset(new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef));
 			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 		}
 		catch(const std::runtime_error& _err)

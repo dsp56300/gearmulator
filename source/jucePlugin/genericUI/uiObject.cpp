@@ -302,6 +302,8 @@ namespace genericUI
 		auto& binding = _editor.getParameterBinding();
 
 		binding.bind(_target, index);
+
+		_target.getProperties().set("parameter", static_cast<int>(index));
 	}
 
 	template <typename Target, typename Style> void UiObject::createStyle(Editor& _editor, Target& _target, Style* _style)

@@ -31,21 +31,29 @@ namespace genericVirusUI
 		updateAll();
 	}
 
-	Parts::~Parts()
-	{
-	}
+	Parts::~Parts() = default;
 
-	void Parts::onProgramChange()
+	void Parts::onProgramChange() const
 	{
 		updateAll();
 	}
 
-	void Parts::selectPart(const size_t _part)
+	void Parts::onPlayModeChanged() const
 	{
-		m_editor.getParameterBinding().setPart(static_cast<uint8_t>(_part));
+		updateAll();
 	}
 
-	void Parts::selectPrevPreset(const size_t _part)
+	void Parts::onCurrentPartChanged() const
+	{
+		updateSelectedPart();
+	}
+
+	void Parts::selectPart(const size_t _part) const
+	{
+		m_editor.setPart(_part);
+	}
+
+	void Parts::selectPrevPreset(const size_t _part) const
 	{
 		Virus::Controller& controller = m_editor.getController();
 
@@ -57,7 +65,7 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::selectNextPreset(const size_t _part)
+	void Parts::selectNextPreset(const size_t _part) const
 	{
 		Virus::Controller& controller = m_editor.getController();
 
@@ -68,7 +76,7 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::selectPreset(size_t _part)
+	void Parts::selectPreset(size_t _part) const
 	{
 		juce::PopupMenu selector;
 
@@ -82,7 +90,7 @@ namespace genericVirusUI
             for (uint8_t j = 0; j < presetNames.size(); j++)
             {
                 const auto presetName = presetNames[j];
-                p.addItem(presetNames[j], [this, bank, j, pt, presetName] 
+                p.addItem(presetName, [this, bank, j, pt] 
                 {
                     m_editor.getController().setCurrentPartPreset(pt, bank, j);
                 });
@@ -94,13 +102,13 @@ namespace genericVirusUI
 		selector.showMenuAsync(juce::PopupMenu::Options());
 	}
 
-	void Parts::updatePresetNames()
+	void Parts::updatePresetNames() const
 	{
 		for(size_t i=0; i<m_presetName.size(); ++i)
 			m_presetName[i]->setButtonText(m_editor.getController().getCurrentPartPresetName(static_cast<uint8_t>(i)));
 	}
 
-	void Parts::updateSelectedPart()
+	void Parts::updateSelectedPart() const
 	{
 		const auto part = m_editor.getController().getCurrentPart();
 
@@ -115,7 +123,7 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::updateSingleOrMultiMode()
+	void Parts::updateSingleOrMultiMode() const
 	{
 	    const auto multiMode = m_editor.getController().isMultiMode();
 
@@ -132,7 +140,7 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::updateAll()
+	void Parts::updateAll() const
 	{
 		updatePresetNames();
 		updateSelectedPart();
