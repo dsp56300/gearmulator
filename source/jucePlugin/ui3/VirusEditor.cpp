@@ -1,9 +1,11 @@
 #include "VirusEditor.h"
 
 #include "BinaryData.h"
+
 #include "../PluginProcessor.h"
 #include "../VirusController.h"
 #include "../VirusParameterBinding.h"
+#include "../version.h"
 
 namespace genericVirusUI
 {
@@ -37,6 +39,15 @@ namespace genericVirusUI
 		addMouseListener(this, true);
 
 		m_controlLabel->setText("", juce::dontSendNotification);
+
+		auto* versionInfo = findComponentT<juce::Label>("VersionInfo");
+
+		if(versionInfo)
+		{
+		    const std::string message = "DSP 56300 Emulator Version " + std::string(g_pluginVersionString) + " - " __DATE__ " " __TIME__;
+			versionInfo->setText(message, juce::dontSendNotification);
+		}
+
 	}
 
 	void VirusEditor::onProgramChange()
