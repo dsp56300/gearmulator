@@ -33,5 +33,7 @@ namespace genericUI
 		std::string m_text;
 		juce::Colour m_color = juce::Colour(0xffffffff);
 		juce::Justification m_align = 0;
+		bool m_bold = false;
+		bool m_italic = false;
 	};
 }
