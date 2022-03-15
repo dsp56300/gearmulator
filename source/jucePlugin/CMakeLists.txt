@@ -74,6 +74,10 @@ set(SOURCES_UI2
 )
 
 set(SOURCES_UI3
+	ui3/FxPage.cpp
+	ui3/FxPage.h
+	ui3/MidiPorts.cpp
+	ui3/MidiPorts.h
     ui3/Parts.cpp
     ui3/Parts.h
 	ui3/PatchBrowser.cpp
