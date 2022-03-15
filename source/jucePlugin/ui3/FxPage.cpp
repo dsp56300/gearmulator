@@ -12,8 +12,22 @@ namespace genericVirusUI
 		const auto p = m_editor.getController().getParameter(Virus::Param_DelayReverbMode, 0);
 
 		if (p)
-			p->onValueChanged = [this]() { updateReverbDelay(); };
+		{
+			p->getValueObject().addListener(this);
+		}
 
+		updateReverbDelay();
+	}
+
+	FxPage::~FxPage()
+	{
+		const auto p = m_editor.getController().getParameter(Virus::Param_DelayReverbMode, 0);
+		if(p)
+			p->getValueObject().removeListener(this);
+	}
+
+	void FxPage::valueChanged(juce::Value& value)
+	{
 		updateReverbDelay();
 	}
 
