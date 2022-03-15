@@ -5610,10 +5610,10 @@
                     "name" : "MidiIn",
                     "combobox" : {
                         "text" : "In Device X",
-                        "textHeight" : "24",
-                        "alignH" : "R",
+                        "textHeight" : "20",
+                        "alignH" : "L",
                         "alignV" : "C",
-                        "x" : "954,88",
+                        "x" : "992",
                         "y" : "1116",
                         "width" : "124,2466",
                         "height" : "36"
@@ -5623,10 +5623,10 @@
                     "name" : "MidiOut",
                     "combobox" : {
                         "text" : "Out Device X",
-                        "textHeight" : "24",
+                        "textHeight" : "20",
                         "alignH" : "L",
                         "alignV" : "C",
-                        "x" : "1116,35",
+                        "x" : "1116",
                         "y" : "1116",
                         "width" : "124,2466",
                         "height" : "36"
