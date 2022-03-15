@@ -35,5 +35,6 @@ namespace genericUI
 		juce::Justification m_align = 0;
 		bool m_bold = false;
 		bool m_italic = false;
+		std::string m_url;
 	};
 }

@@ -90,6 +90,7 @@ set(SOURCES_GENERICUI
 	genericUI/buttonStyle.cpp genericUI/buttonStyle.h
 	genericUI/labelStyle.cpp genericUI/labelStyle.h
 	genericUI/textbuttonStyle.cpp genericUI/textbuttonStyle.h
+	genericUI/hyperlinkbuttonStyle.cpp genericUI/hyperlinkbuttonStyle.h
 	genericUI/uiObject.cpp genericUI/uiObject.h
 	genericUI/uiObjectStyle.cpp genericUI/uiObjectStyle.h
 
