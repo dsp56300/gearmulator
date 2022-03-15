@@ -9,9 +9,13 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef) : Editor(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize), _binding, _controller),
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef) :
+		Editor(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize), _binding, _controller),
+		m_processor(_processorRef),
 		m_parts(*this),
 		m_tabs(*this),
+		m_midiPorts(*this),
+		m_fxPage(*this),
 		m_patchBrowser(*this)
 	{
 		m_presetName = findComponentT<juce::Label>("PatchName");

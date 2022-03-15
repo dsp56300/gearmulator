@@ -4,7 +4,8 @@
 
 #include "Parts.h"
 #include "Tabs.h"
-
+#include "FxPage.h"
+#include "MidiPorts.h"
 #include "PatchBrowser.h"
 
 class AudioPluginAudioProcessor;
@@ -17,6 +18,8 @@ namespace genericVirusUI
 		VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef);
 
 		void setPart(size_t _part);
+
+		AudioPluginAudioProcessor& getProcessor() { return m_processor; }
 
 	private:
 		void onProgramChange();
@@ -37,6 +40,8 @@ namespace genericVirusUI
 
 		void setPlayMode(uint8_t _playMode);
 
+		AudioPluginAudioProcessor& m_processor;
+
 		Parts m_parts;
 		Tabs m_tabs;
 
@@ -49,6 +54,8 @@ namespace genericVirusUI
 
 		juce::TooltipWindow m_tooltipWindow;
 
+		MidiPorts m_midiPorts;
+		FxPage m_fxPage;
 		PatchBrowser m_patchBrowser;
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
