@@ -13,9 +13,6 @@
 #include "hyperlinkbuttonStyle.h"
 #include "labelStyle.h"
 
-#include "../VirusController.h"
-#include "../VirusParameterBinding.h"
-
 namespace genericUI
 {
 	UiObject::UiObject(const juce::var& _json)
@@ -302,16 +299,14 @@ namespace genericUI
 		if(param.empty())
 			return;
 
-		const auto index = _editor.getController().getParameterTypeByName(param);
+		const auto index = _editor.getInterface().getParameterIndexByName(param);
 
-		if(index == Virus::Param_Invalid)
+		if(index < 0)
 			throw std::runtime_error("Parameter named " + param + " not found");
 
-		auto& binding = _editor.getParameterBinding();
+		_editor.getInterface().bindParameter(_target, index);
 
-		binding.bind(_target, index);
-
-		_target.getProperties().set("parameter", static_cast<int>(index));
+		_target.getProperties().set("parameter", index);
 	}
 
 	template <typename Target, typename Style> void UiObject::createStyle(Editor& _editor, Target& _target, Style* _style)

@@ -6,27 +6,25 @@
 
 #include "uiObject.h"
 
-namespace Virus
-{
-	class Controller;
-}
-
-class VirusParameterBinding;
+#include "editorInterface.h"
 
 namespace genericUI
 {
 	class Editor : public juce::Component
 	{
 	public:
-		explicit Editor(const std::string& _json, VirusParameterBinding& _binding, Virus::Controller& _controller);
+		explicit Editor(EditorInterface& _interface);
+		Editor(const Editor&) = delete;
+		Editor(Editor&&) = delete;
+
+		void create(const std::string& _json);
 
 		juce::Drawable* getImageDrawable(const std::string& _texture);
 		std::unique_ptr<juce::Drawable> createImageDrawable(const std::string& _texture);
 
-		VirusParameterBinding& getParameterBinding() const { return m_parameterBinding; }
-		Virus::Controller& getController() const { return m_controller; }
-
 		void registerComponent(const std::string& _name, juce::Component* _component);
+
+		EditorInterface& getInterface() const { return m_interface; }
 
 		const std::vector<juce::Component*>& findComponents(const std::string& _name, uint32_t _expectedCount = 0) const;
 
@@ -54,13 +52,10 @@ namespace genericUI
 		float getScale() const { return m_scale; }
 
 	private:
-		static const char* getResourceByFilename(const std::string& _filename, int& _outDataSize);
+		EditorInterface& m_interface;
 
 		std::map<std::string, std::unique_ptr<juce::Drawable>> m_drawables;
 		std::unique_ptr<UiObject> m_rootObject;
-
-		VirusParameterBinding& m_parameterBinding;
-		Virus::Controller& m_controller;
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
 

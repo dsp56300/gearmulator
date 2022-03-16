@@ -10,14 +10,18 @@
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef) :
-		Editor(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize), _binding, _controller),
+		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
-		m_parts(*this),
-		m_tabs(*this),
-		m_midiPorts(*this),
-		m_fxPage(*this),
-		m_patchBrowser(*this)
+		m_parameterBinding(_binding)
 	{
+		create(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize));
+
+		m_parts.reset(new Parts(*this));
+		m_tabs.reset(new Tabs(*this));
+		m_midiPorts.reset(new MidiPorts(*this));
+		m_fxPage.reset(new FxPage(*this));
+		m_patchBrowser.reset(new PatchBrowser(*this));
+
 		m_presetName = findComponentT<juce::Label>("PatchName");
 		m_controlLabel = findComponentT<juce::Label>("ControlLabel");
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
@@ -71,22 +75,67 @@ namespace genericVirusUI
 		};
 	}
 
+	Virus::Controller& VirusEditor::getController() const
+	{
+		return m_processor.getController();
+	}
+
+	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
+	{
+		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
+		{
+			if (BinaryData::originalFilenames[i] != _name)
+				continue;
+
+			int size = 0;
+			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
+			_dataSize = static_cast<uint32_t>(size);
+			return res;
+		}
+
+		_dataSize = 0;
+		return nullptr;
+	}
+
+	int VirusEditor::getParameterIndexByName(const std::string& _name)
+	{
+		return getController().getParameterTypeByName(_name);
+	}
+
+	bool VirusEditor::bindParameter(juce::Button& _target, int _parameterIndex)
+	{
+		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		return true;
+	}
+
+	bool VirusEditor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
+	{
+		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		return true;
+	}
+
+	bool VirusEditor::bindParameter(juce::Slider& _target, int _parameterIndex)
+	{
+		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		return true;
+	}
+
 	void VirusEditor::onProgramChange()
 	{
-		m_parts.onProgramChange();
+		m_parts->onProgramChange();
 		updatePresetName();
 	}
 
 	void VirusEditor::onPlayModeChanged()
 	{
-		m_parts.onPlayModeChanged();
+		m_parts->onPlayModeChanged();
 		updatePresetName();
 		updatePlayModeButtons();
 	}
 
 	void VirusEditor::onCurrentPartChanged()
 	{
-		m_parts.onCurrentPartChanged();
+		m_parts->onCurrentPartChanged();
 		updatePresetName();
 	}
 
@@ -258,14 +307,14 @@ namespace genericVirusUI
 	{
 	    getController().getParameter(Virus::Param_PlayMode)->setValue(_playMode);
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
-			getParameterBinding().setPart(0);
+			m_parameterBinding.setPart(0);
 
 		onPlayModeChanged();
 	}
 
 	void VirusEditor::setPart(size_t _part)
 	{
-		getParameterBinding().setPart(static_cast<uint8_t>(_part));
+		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
 		onCurrentPartChanged();
 	}
 }

@@ -90,6 +90,7 @@ set(SOURCES_UI3
 
 set(SOURCES_GENERICUI
 	genericUI/editor.cpp genericUI/editor.h
+	genericUI/editorInterface.h
 	genericUI/image.cpp genericUI/image.h
 	genericUI/rotaryStyle.cpp genericUI/rotaryStyle.h
 	genericUI/comboboxStyle.cpp genericUI/comboboxStyle.h

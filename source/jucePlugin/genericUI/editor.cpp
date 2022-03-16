@@ -2,11 +2,13 @@
 
 #include "uiObject.h"
 
-#include "BinaryData.h"
-
 namespace genericUI
 {
-	Editor::Editor(const std::string& _json, VirusParameterBinding& _binding, Virus::Controller& _controller) : m_parameterBinding(_binding), m_controller(_controller)
+	Editor::Editor(EditorInterface& _interface) : m_interface(_interface)
+	{
+	}
+
+	void Editor::create(const std::string& _json)
 	{
 		juce::var json;
 
@@ -24,8 +26,8 @@ namespace genericUI
 		{
 			const auto dataName = texture + ".png";
 
-			int dataSize;
-			const auto* data = getResourceByFilename(dataName, dataSize);
+			uint32_t dataSize;
+			const auto* data = m_interface.getResourceByFilename(dataName, dataSize);
 			if (!data)
 				throw std::runtime_error("Failed to find image named " + dataName);
 			auto drawable = juce::Drawable::createFromImageData(data, dataSize);
@@ -96,19 +98,5 @@ namespace genericUI
 		if(_mustExist && comps.empty())
 			throw std::runtime_error("Failed to find component named " + _name);
 		return comps.empty() ? nullptr : comps.front();
-	}
-
-	const char* Editor::getResourceByFilename(const std::string& _filename, int& _outDataSize)
-	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			return BinaryData::getNamedResource(BinaryData::namedResourceList[i], _outDataSize);
-		}
-
-		_outDataSize = 0;
-		return nullptr;
 	}
 }
