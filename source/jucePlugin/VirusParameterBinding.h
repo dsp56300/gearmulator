@@ -15,19 +15,19 @@ public:
 	}
 	Virus::Parameter *m_param;
 	juce::Slider* m_slider;
-	void mouseDown(const juce::MouseEvent &event) { m_param->beginChangeGesture(); };
-	void mouseUp(const juce::MouseEvent &event) { m_param->endChangeGesture(); };
-	void mouseDrag(const juce::MouseEvent &event) { m_param->setValueNotifyingHost(m_param->convertTo0to1((float)m_slider->getValue())); };
+	void mouseDown(const juce::MouseEvent &event) override { m_param->beginChangeGesture(); }
+	void mouseUp(const juce::MouseEvent &event) override { m_param->endChangeGesture(); }
+	void mouseDrag(const juce::MouseEvent &event) override { m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue()))); }
 };
 
-class VirusParameterBinding : juce::MouseListener
+class VirusParameterBinding final : juce::MouseListener
 {
 public:
 	VirusParameterBinding(AudioPluginAudioProcessor &_processor) : m_processor(_processor)
 	{
 
 	}
-	~VirusParameterBinding();
+	~VirusParameterBinding() override;
 	void clearBindings();
 	void setPart(uint8_t _part);
 	void bind(juce::Slider& _control, Virus::ParameterType _param);

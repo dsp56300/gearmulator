@@ -18,6 +18,8 @@ namespace Virus
 			return m_descriptions;
 		}
 
+		static std::string removeComments(std::string _json);
+
 	private:
 		std::string loadJson(const std::string& _jsonString);
 

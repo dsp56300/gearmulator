@@ -1,4 +1,3 @@
-#include <juce_audio_processors/juce_audio_processors.h>
 #include "VirusController.h"
 
 #include "BinaryData.h"
@@ -539,6 +538,18 @@ namespace Virus
             ss << std::hex << static_cast<int>(m) << ",";
         }
 		LOG((ss.str()));
+    }
+
+    ParameterType Controller::getParameterTypeByName(const std::string& _name) const
+    {
+		for(size_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
+		{
+			const auto& description = m_descriptions.getDescriptions()[i];
+		    if(description.name.toStdString() == _name)
+				return static_cast<ParameterType>(i);
+		}
+
+		return Param_Invalid;
     }
 
     void Controller::sendSysEx(const SysEx &msg) const

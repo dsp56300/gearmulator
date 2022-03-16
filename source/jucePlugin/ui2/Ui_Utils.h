@@ -1,13 +1,15 @@
+#pragma once
+
 #include "Virus_LookAndFeel.h"
-#include "../VirusController.h"
+
 #include "../../virusLib/microcontrollerTypes.h"
+
 namespace Trancy
 {
 	using namespace VirusUI;
 	constexpr auto knobSize = LookAndFeel::kKnobSize;
 	constexpr auto knobSizeSmall = LookAndFeelSmallButton::kKnobSize;
 
-	class Controller;
 	using namespace virusLib;
 
 	static void setupBackground(juce::Component &parent, std::unique_ptr<juce::Drawable> &bg, const void *data,

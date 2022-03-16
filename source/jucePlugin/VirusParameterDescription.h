@@ -11,6 +11,8 @@ namespace Virus
 {
 	enum ParameterType
 	{
+		Param_Invalid = -1,
+
 		Param_BankSelect,
 		Param_ModWheel,
 		Param_BreathControl,
