@@ -36,6 +36,8 @@ namespace Virus
 
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 
+		bool isMetaParameter() const override;
+
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
 		void setValue(float newValue) override;
 		void setValueFromSynth(int newValue, bool notifyHost = true);
