@@ -32,6 +32,10 @@ public:
 
 	static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src);
 
+    juce::FileBrowserComponent& getBankList() {return m_bankList; }
+    juce::TableListBox& getPatchList() {return m_patchList; }
+    juce::TextEditor& getSearchBox() {return m_search; }
+
 private:
     VirusParameterBinding &m_parameterBinding;
     Virus::Controller& m_controller;

@@ -73,6 +73,21 @@ set(SOURCES_UI2
     ui2/VirusEditor.h
 )
 
+set(SOURCES_UI3
+	ui3/FxPage.cpp
+	ui3/FxPage.h
+	ui3/MidiPorts.cpp
+	ui3/MidiPorts.h
+    ui3/Parts.cpp
+    ui3/Parts.h
+	ui3/PatchBrowser.cpp
+	ui3/PatchBrowser.h
+    ui3/Tabs.cpp
+    ui3/Tabs.h
+    ui3/VirusEditor.cpp
+    ui3/VirusEditor.h
+)
+
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
@@ -133,6 +148,8 @@ SET(ASSETS
 	"parameterDescriptions_C.json"
 )
 
+include(genericUI/assets/assets.cmake)
+
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -152,11 +169,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_UI3})
 
 	source_group("source" FILES ${SOURCES})
 	source_group("source\\ui" FILES ${SOURCES_UI})
 	source_group("source\\ui2" FILES ${SOURCES_UI2})
+	source_group("source\\ui3" FILES ${SOURCES_UI3})
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
@@ -170,6 +188,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	target_link_libraries(${targetName}
 	PRIVATE
 		${binaryDataProject}
+		juceUiLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC
@@ -199,7 +218,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	
