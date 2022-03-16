@@ -59,6 +59,8 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	m_currentSkinId = index;
 	if (m_virusEditor)
 	{
+		m_parameterBinding.clearBindings();
+
 		if(getIndexOfChildComponent(m_virusEditor.get()) > -1)
 			removeChildComponent(m_virusEditor.get());
 		m_virusEditor.reset();
