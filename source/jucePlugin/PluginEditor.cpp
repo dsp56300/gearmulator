@@ -114,7 +114,6 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 	juce::PopupMenu skinMenu;
 	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
 	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
-	skinMenu.addItem("Generic", true, skinId == 2,[this] {loadSkin(2);});
 
 	juce::PopupMenu scaleMenu;
 	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
