@@ -1,5 +1,5 @@
 #pragma once
-#include "VirusController.h"
+
 #include "VirusParameter.h"
 #include "ui/Virus_Buttons.h"
 namespace juce {
@@ -34,8 +34,19 @@ public:
 	void bind(juce::Slider& _control, Virus::ParameterType _param, uint8_t _part);
 	void bind(juce::ComboBox &_control, Virus::ParameterType _param);
 	void bind(juce::ComboBox &_control, Virus::ParameterType _param, uint8_t _part);
-	void bind(juce::DrawableButton &_control, Virus::ParameterType _param);
+	void bind(juce::Button &_control, Virus::ParameterType _param);
 
 	AudioPluginAudioProcessor& m_processor;
-	juce::Array<Virus::Parameter*> m_bindings;
+
+	static constexpr uint8_t CurrentPart = 0xff;
+
+	struct BoundParameter
+	{
+		Virus::Parameter* parameter = nullptr;
+		juce::Component* component = nullptr;
+		Virus::ParameterType type = Virus::Param_Invalid;
+		uint8_t part = CurrentPart;
+	};
+
+	std::vector<BoundParameter> m_bindings;
 };
