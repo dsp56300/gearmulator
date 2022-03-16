@@ -48,6 +48,7 @@ namespace genericUI
 		juce::Component* createJuceObject(Editor& _editor);
 
 		int getPropertyInt(const std::string& _key, int _default = 0) const;
+		float getPropertyFloat(const std::string& _key, float _default = 0.0f) const;
 		std::string getProperty(const std::string& _key, const std::string& _default = std::string()) const;
 
 	private:

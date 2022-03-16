@@ -192,6 +192,14 @@ namespace genericUI
 		return strtol(res.c_str(), nullptr, 10);
 	}
 
+	float UiObject::getPropertyFloat(const std::string& _key, float _default) const
+	{
+		const auto res = getProperty(_key);
+		if (res.empty())
+			return _default;
+		return static_cast<float>(atof(res.c_str()));
+	}
+
 	std::string UiObject::getProperty(const std::string& _key, const std::string& _default) const
 	{
 		for (const auto& properties : m_components)
