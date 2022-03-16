@@ -28,7 +28,6 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/JUCE)
-	add_subdirectory(source/juceUiLib)
 	add_subdirectory(source/jucePlugin)
 endif()
 

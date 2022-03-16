@@ -16,10 +16,10 @@ const Array<String> g_categories = {"", "Lead",	 "Bass",	  "Pad",	   "Decay",	  
 PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Controller& _controller) :
     m_parameterBinding(_parameterBinding),
     m_controller(_controller),
-    m_fileFilter("*.syx;*.mid;*.midi", "*", "Virus Patch Dumps"),
+    m_fileFilter("*.syx;*.mid;*.midi", "*", "virus patch dumps"),
 	m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
     m_search("Search Box"),
-    m_patchList("Patch Browser"),
+    m_patchList("Patch browser"),
     m_properties(m_controller.getConfig())
 {
 	const auto bankDir = m_properties->getValue("virus_bank_dir", "");

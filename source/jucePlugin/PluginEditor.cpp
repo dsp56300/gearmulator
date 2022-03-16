@@ -1,34 +1,62 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-
 #include "VirusController.h"
 
 #include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
-#include "ui3/VirusEditor.h"
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
-	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p)
+	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p), m_scale("Scale"), m_skin("Skin")
 {
-	addMouseListener(this, true);
+    ignoreUnused (processorRef);
 
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
     const int skinId = config->getIntValue("skin", 0);
+	//m_virusEditor->setTopLeftPosition(0, 0);
+	m_scale.setBounds(0,0,74,24);
+	m_scale.addItem("50%", 50);
+	m_scale.addItem("75%", 75);
+	m_scale.addItem("100%", 100);
+	m_scale.addItem("125%", 125);
+	m_scale.addItem("150%", 150);
+	m_scale.addItem("200%", 200);
+	
+	m_scale.setSelectedId(scale, juce::dontSendNotification);
+	m_scale.setColour(juce::ComboBox::textColourId, juce::Colours::white);
+	m_scale.onChange = [this, config]() {
+		const float value = m_scale.getSelectedIdAsValue().getValue();
+		setScaleFactor(value/100.0f);
+		config->setValue("scale", static_cast<int>(value));
+		config->saveIfNeeded();
+	};
+	setScaleFactor(scale/100.0f);
 
-	loadSkin(skinId);
+	m_skin.setBounds(m_scale.getBounds().getX(), m_scale.getBounds().getY() + m_scale.getBounds().getHeight(), 74, 24);
+	m_skin.addItem("Modern", 1);
+	m_skin.addItem("Classic", 2);
+	m_skin.setSelectedId(1, juce::dontSendNotification);
+	m_skin.setColour(juce::ComboBox::textColourId, juce::Colours::white);
+	m_skin.setSelectedItemIndex(skinId, juce::dontSendNotification);
+	addAndMakeVisible(m_scale);
+	addAndMakeVisible(m_skin);
+	m_skin.onChange = [this, config]() {
+		const int skinId = m_skin.getSelectedItemIndex();
+		config->setValue("skin", skinId);
+		config->saveIfNeeded();
+		LoadSkin(m_skin.getSelectedItemIndex());
+	};
 
-	setGuiScale(scale);
+	LoadSkin(skinId);
+	//addAndMakeVisible(m_virusEditor);
 }
 
-void AudioPluginAudioProcessorEditor::loadSkin(int index)
-{
+void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	if(m_currentSkinId == index)
 		return;
 
 	m_currentSkinId = index;
-
 	if (m_virusEditor)
 	{
 		m_parameterBinding.clearBindings();
@@ -38,8 +66,6 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 		m_virusEditor.reset();
 	}
 
-	m_rootScale = 1.0f;
-
 	if (index == 1)
 	{
 		const auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
@@ -47,39 +73,17 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 		virusEditor->m_AudioPlugInEditor = this;
 		m_virusEditor.reset(virusEditor);
 	}
-	else if(index == 2)
-	{
-		try
-		{
-			auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
-			m_virusEditor.reset(editor);
-			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
-			m_rootScale = editor->getScale();
-		}
-		catch(const std::runtime_error& _err)
-		{
-			LOG("ERROR: Failed to create editor: " << _err.what());
-			return;
-		}
-	}
 	else {
 		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
 		setSize(1377, 800);
 	}
 	m_virusEditor->setTopLeftPosition(0, 0);
 	addAndMakeVisible(m_virusEditor.get());
+	m_scale.toFront(false);
+	m_skin.toFront(false);
 }
 
-void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
-{
-	setScaleFactor(static_cast<float>(percent)/100.0f * m_rootScale);
-	auto* config = processorRef.getController().getConfig();
-	config->setValue("scale", percent);
-	config->saveIfNeeded();
-}
-
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
-{
+AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
 	m_virusEditor.reset();
 }
 
@@ -99,38 +103,4 @@ void AudioPluginAudioProcessorEditor::resized()
 	// subcomponents in your editor..
 	auto area = getLocalBounds();
 	area.removeFromTop(35);
-}
-
-void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
-{
-	if(!event.mods.isPopupMenu())
-	{
-		AudioProcessorEditor::mouseDown(event);
-		return;
-	}
-
-	const auto config = processorRef.getController().getConfig();
-    const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
-
-	juce::PopupMenu menu;
-
-	juce::PopupMenu skinMenu;
-	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
-	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
-	skinMenu.addItem("Generic", true, skinId == 2,[this] {loadSkin(2);});
-
-	juce::PopupMenu scaleMenu;
-	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
-
-	menu.addSubMenu("GUI Skin", skinMenu);
-	menu.addSubMenu("GUI Scale", scaleMenu);
-
-	menu.showMenuAsync(juce::PopupMenu::Options());
 }
