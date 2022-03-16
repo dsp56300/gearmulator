@@ -88,22 +88,6 @@ set(SOURCES_UI3
     ui3/VirusEditor.h
 )
 
-set(SOURCES_GENERICUI
-	genericUI/editor.cpp genericUI/editor.h
-	genericUI/editorInterface.h
-	genericUI/image.cpp genericUI/image.h
-	genericUI/rotaryStyle.cpp genericUI/rotaryStyle.h
-	genericUI/comboboxStyle.cpp genericUI/comboboxStyle.h
-	genericUI/buttonStyle.cpp genericUI/buttonStyle.h
-	genericUI/labelStyle.cpp genericUI/labelStyle.h
-	genericUI/textbuttonStyle.cpp genericUI/textbuttonStyle.h
-	genericUI/hyperlinkbuttonStyle.cpp genericUI/hyperlinkbuttonStyle.h
-	genericUI/uiObject.cpp genericUI/uiObject.h
-	genericUI/uiObjectStyle.cpp genericUI/uiObjectStyle.h
-
-	genericUI/assets/VirusC.json
-)
-
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
@@ -185,13 +169,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_UI3} ${SOURCES_GENERICUI})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_UI3})
 
 	source_group("source" FILES ${SOURCES})
 	source_group("source\\ui" FILES ${SOURCES_UI})
 	source_group("source\\ui2" FILES ${SOURCES_UI2})
 	source_group("source\\ui3" FILES ${SOURCES_UI3})
-	source_group("source\\genericUI" FILES ${SOURCES_GENERICUI})
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
@@ -205,6 +188,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	target_link_libraries(${targetName}
 	PRIVATE
 		${binaryDataProject}
+		juceUiLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC

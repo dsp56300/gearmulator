@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../genericUI/editor.h"
+#include "../../juceUiLib/editor.h"
 
 #include "Parts.h"
 #include "Tabs.h"
