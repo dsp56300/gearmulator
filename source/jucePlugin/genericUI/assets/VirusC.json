@@ -4,7 +4,8 @@
         "x" : "0",
         "y" : "0",
         "width" : "2754",
-        "height" : "1600"
+        "height" : "1600",
+        "scale" : "0.5"
     },
     "children" : [
         {
