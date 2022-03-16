@@ -27,7 +27,7 @@ namespace genericVirusUI
 		setPage(0);
 	}
 
-	void Tabs::setPage(const size_t _page)
+	void Tabs::setPage(const size_t _page) const
 	{
 		for(size_t i=0; i<m_tabs.size(); ++i)
 		{
