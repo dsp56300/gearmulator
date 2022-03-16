@@ -58,6 +58,17 @@ namespace genericVirusUI
 
 		auto* presetLoad = findComponentT<juce::Button>("PresetLoad");
 		presetLoad->onClick = [this] { loadPreset(); };
+
+		m_presetName->setEditable(false, true, true);
+		m_presetName->onTextChange = [this]()
+		{
+			const auto text = m_presetName->getText();
+			if (text.trim().length() > 0)
+			{
+				getController().setSinglePresetName(getController().getCurrentPart(), text);
+				onProgramChange();
+			}
+		};
 	}
 
 	void VirusEditor::onProgramChange()
