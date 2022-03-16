@@ -1,10 +1,8 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_gui_extra/juce_gui_extra.h>
 #include "../synthLib/plugin.h"
 #include "VirusParameter.h"
-#include "VirusParameterDescription.h"
+
 #include "VirusParameterDescriptions.h"
 
 namespace virusLib
@@ -29,11 +27,14 @@ namespace Virus
         static constexpr auto kNameLength = 10;
 
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
-		~Controller();
+		~Controller() override;
+
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
         void printMessage(const SysEx &) const;
+
+        ParameterType getParameterTypeByName(const std::string& _name) const;
 
         // currently Value as I figure out what's the best approach
         // ch - [0-15]
