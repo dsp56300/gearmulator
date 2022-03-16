@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../PluginProcessor.h"
-#include "Virus_Buttons.h"
 #include <juce_gui_extra/juce_gui_extra.h>
 #include "../VirusController.h"
 class VirusParameterBinding;
@@ -58,8 +57,8 @@ private:
     // Inherited via FileBrowserListener
     void selectionChanged() override;
     void fileClicked(const juce::File &file, const juce::MouseEvent &e) override;
-    void fileDoubleClicked(const juce::File &file) override;
-    void browserRootChanged(const juce::File &newRoot) override;
+    void fileDoubleClicked(const juce::File &file) override {}
+    void browserRootChanged(const juce::File &newRoot) override {}
 
     // Inherited via TableListBoxModel
     virtual int getNumRows() override;
