@@ -33,7 +33,7 @@ namespace genericVirusUI
 
 	void FxPage::updateReverbDelay() const
 	{
-		auto p = m_editor.getController().getParameter(Virus::Param_DelayReverbMode, 0);
+		const auto p = m_editor.getController().getParameter(Virus::Param_DelayReverbMode, 0);
 
 		if (!p)
 			return;

@@ -17,7 +17,7 @@ namespace genericVirusUI
 	public:
 		explicit Tabs(VirusEditor& _editor);
 	private:
-		void setPage(size_t _page);
+		void setPage(size_t _page) const;
 
 		VirusEditor& m_editor;
 
