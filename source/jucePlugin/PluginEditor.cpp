@@ -2,7 +2,6 @@
 #include "PluginEditor.h"
 
 #include "VirusController.h"
-#include "genericUI/editor.h"
 
 #include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
