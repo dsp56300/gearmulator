@@ -174,8 +174,10 @@ uint32_t PatchBrowser::loadBankFile(std::vector<Patch>& _result, std::set<std::s
     {
 	    std::vector<uint8_t> data;
 
-	    if (!synthLib::MidiToSysex::readFile(data, file.getFullPathName().getCharPointer()))
-		    return 0;
+	    synthLib::MidiToSysex::readFile(data, file.getFullPathName().getCharPointer());
+
+		if(data.empty())
+			return 0;
 
 	    std::vector<std::vector<uint8_t>> packets;
 	    splitMultipleSysex(packets, data);
