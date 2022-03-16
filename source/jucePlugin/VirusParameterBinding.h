@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VirusParameter.h"
-#include "ui/Virus_Buttons.h"
+
 namespace juce {
 	class Value;
 }

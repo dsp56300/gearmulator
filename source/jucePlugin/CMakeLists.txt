@@ -31,28 +31,6 @@ set(SOURCES
 	version.h
 )
 
-set(SOURCES_UI
-    ui/Virus_Buttons.cpp
-    ui/Virus_LookAndFeel.cpp
-    ui/VirusEditor.cpp
-    ui/Virus_ArpEditor.cpp
-    ui/Virus_FxEditor.cpp
-    ui/Virus_LfoEditor.cpp
-    ui/Virus_OscEditor.cpp
-    ui/Virus_PatchBrowser.cpp
-    ui/Virus_Parts.cpp
-    ui/Virus_Buttons.h
-    ui/Virus_LookAndFeel.h
-    ui/VirusEditor.h
-    ui/Virus_ArpEditor.h
-    ui/Virus_FxEditor.h
-    ui/Virus_LfoEditor.h
-    ui/Virus_OscEditor.h
-    ui/Virus_PatchBrowser.h
-    ui/Virus_Parts.h
-    ui/Ui_Utils.h
-)
-
 set(SOURCES_UI2
     ui2/Ui_Utils.h
     ui2/Virus_Buttons.cpp
@@ -86,38 +64,13 @@ set(SOURCES_UI3
     ui3/Tabs.h
     ui3/VirusEditor.cpp
     ui3/VirusEditor.h
+	ui3/VirusPatchBrowser.cpp
+	ui3/VirusPatchBrowser.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
-	"assets/bg_1377x800.png"
-	"assets/panels/bg_arp_1018x620.png"
-	"assets/panels/bg_fx_1018x620.png"
-	"assets/panels/bg_lfo_1018x620.png"
-	"assets/panels/bg_osc_1018x620.png"
-	"assets/panels/bg_fxreverb_481x234.png"
-	"assets/panels/bg_fxdelay_481x234.png"
-	"assets/buttons/GLOBAL_btn_arp_settings_141x26.png"
-	"assets/buttons/GLOBAL_btn_effects_141x26.png"
-	"assets/buttons/GLOBAL_btn_lfo_matrix_141x26.png"
-	"assets/buttons/GLOBAL_btn_osc_filter_141x26.png"
-	"assets/buttons/GLOBAL_btn_patch_browser_141x26.png"
-	"assets/buttons/env_pol_50x34.png"
-	"assets/buttons/lfo_btn_23_19.png"
-	"assets/buttons/link_vert_12x36.png"
-	"assets/buttons/link_horizon_36x12.png"
-	"assets/buttons/presets_btn_43_15.png"
-	"assets/buttons/Handle_18x47.png"
-	"assets/buttons/sync2_54x25.png"
-	"assets/buttons/part_select_btn_36x36.png"
-	"assets/buttons/arphold_btn_36x36.png"
-	"assets/knobs/Gen_70x70_100.png"
-	"assets/knobs/Gen_pol_70x70_100.png"
-	"assets/knobs/GenBlue_70x70_100.png"
-	"assets/knobs/GenRed_70x70_100.png"
-	"assets/knobs/multi_18x18_100.png"
-
 	"assets2/main_background.png"
 	"assets2/panels/panel_1.png"
 	"assets2/panels/panel_2.png"
@@ -169,10 +122,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2} ${SOURCES_UI3})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI2} ${SOURCES_UI3})
 
 	source_group("source" FILES ${SOURCES})
-	source_group("source\\ui" FILES ${SOURCES_UI})
 	source_group("source\\ui2" FILES ${SOURCES_UI2})
 	source_group("source\\ui3" FILES ${SOURCES_UI3})
 

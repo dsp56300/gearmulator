@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../ui/Virus_PatchBrowser.h"
+#include "VirusPatchBrowser.h"
 
 namespace genericVirusUI
 {

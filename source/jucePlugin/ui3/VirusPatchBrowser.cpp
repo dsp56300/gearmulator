@@ -1,6 +1,7 @@
+#include "VirusPatchBrowser.h"
+
 #include "../VirusParameterBinding.h"
-#include "Virus_PatchBrowser.h"
-#include "VirusEditor.h"
+
 #include <juce_gui_extra/juce_gui_extra.h>
 #include <juce_cryptography/juce_cryptography.h>
 
@@ -53,15 +54,11 @@ PatchBrowser::PatchBrowser(VirusParameterBinding & _parameterBinding, Virus::Con
         for(const auto& patch : m_patches)
 		{
             const auto searchValue = m_search.getText();
-            if (searchValue.isEmpty()) 
-			{
-                m_filteredPatches.add(patch);
-            }
+            if (searchValue.isEmpty())
+	            m_filteredPatches.add(patch);
             else if(patch.name.containsIgnoreCase(searchValue))
-			{
-                m_filteredPatches.add(patch);
-            }
-        }
+	            m_filteredPatches.add(patch);
+		}
         m_patchList.updateContent();
         m_patchList.deselectAllRows();
         m_patchList.repaint();
@@ -243,12 +240,7 @@ void PatchBrowser::fileClicked(const File &file, const MouseEvent &e)
         m_patchList.deselectAllRows();
         m_patchList.repaint();
     }
-
 }
-
-void PatchBrowser::fileDoubleClicked(const File &file) {}
-
-void PatchBrowser::browserRootChanged(const File &newRoot) {}
 
 int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
 

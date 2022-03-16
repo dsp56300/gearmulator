@@ -3,7 +3,6 @@
 
 #include "VirusController.h"
 
-#include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
 #include "ui3/VirusEditor.h"
 
@@ -47,7 +46,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 		virusEditor->m_AudioPlugInEditor = this;
 		m_virusEditor.reset(virusEditor);
 	}
-	else if(index == 2)
+	else
 	{
 		try
 		{
@@ -59,13 +58,10 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 		catch(const std::runtime_error& _err)
 		{
 			LOG("ERROR: Failed to create editor: " << _err.what());
-			return;
+			m_virusEditor->setSize(400,300);
 		}
 	}
-	else {
-		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
-		setSize(1377, 800);
-	}
+
 	m_virusEditor->setTopLeftPosition(0, 0);
 	addAndMakeVisible(m_virusEditor.get());
 }
