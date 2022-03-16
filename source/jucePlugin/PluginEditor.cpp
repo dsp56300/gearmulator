@@ -1,7 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-#include "BinaryData.h"
 #include "VirusController.h"
 #include "genericUI/editor.h"
 
