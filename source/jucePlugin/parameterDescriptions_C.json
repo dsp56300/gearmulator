@@ -153,7 +153,7 @@
  		{"page":"B", "class":"SoundbankB", "index":27, "name":"Bender Range Down", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":true, "isBool":false, "isBipolar":true},
  		{"page":"B", "class":"SoundbankB", "index":28, "name":"Bender Scale", "min":0, "max":1, "toText":"linExp", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":"B", "class":"SoundbankB", "index":30, "name":"Filter1 Env Polarity", "min":0, "max":1, "toText":"negPos", "isPublic":true, "isDiscrete":false, "isBool":true},
- 		{"page":"B", "class":"SoundbankB", "index":31, "name":"Filter1 Env Polarity", "min":0, "max":1, "toText":"negPos", "isPublic":true, "isDiscrete":false, "isBool":true},
+ 		{"page":"B", "class":"SoundbankB", "index":31, "name":"Filter2 Env Polarity", "min":0, "max":1, "toText":"negPos", "isPublic":true, "isDiscrete":false, "isBool":true},
  		{"page":"B", "class":"SoundbankB", "index":32, "name":"Filter2 Cutoff Link", "min":0, "max":1, "isPublic":true, "isDiscrete":false, "isBool":true},
  		{"page":"B", "class":"SoundbankB", "index":33, "name":"Filter Keytrack Base", "min":0, "max":127, "toText":"filterKeytrackBase", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":"B", "class":"SoundbankB|VirusC", "index":34, "name":"Osc FM Mode", "min":0, "max":12, "toText":"oscFMMode", "isPublic":true, "isDiscrete":true, "isBool":false},

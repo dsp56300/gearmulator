@@ -201,6 +201,7 @@ namespace Trancy
 
 	VirusEditor::~VirusEditor()
 	{
+		m_controller.onMsgDone = nullptr;
 		m_controller.onProgramChange = nullptr;
 		m_mainMenu.onClick = nullptr;
 		selectorMenu.setLookAndFeel(nullptr);
