@@ -14,7 +14,9 @@ namespace genericVirusUI
 		m_processor(_processorRef),
 		m_parameterBinding(_binding)
 	{
-		create(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize));
+		uint32_t jsonSize;
+		const auto json = getResourceByFilename("VirusC.json", jsonSize);
+		create(std::string(json, jsonSize));
 
 		m_parts.reset(new Parts(*this));
 		m_tabs.reset(new Tabs(*this));
@@ -93,8 +95,7 @@ namespace genericVirusUI
 			return res;
 		}
 
-		_dataSize = 0;
-		return nullptr;
+		throw std::runtime_error("Failed to find file named " + _name);
 	}
 
 	int VirusEditor::getParameterIndexByName(const std::string& _name)
