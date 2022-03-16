@@ -50,6 +50,11 @@ namespace Virus
 		}
 	}
 
+    bool Parameter::isMetaParameter() const
+    {
+	    return !m_linkedParameters.empty();
+    }
+
     void Parameter::setValue(float newValue)
 	{
 		if (m_changingLinkedValues)

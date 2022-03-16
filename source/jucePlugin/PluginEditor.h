@@ -1,9 +1,9 @@
 #pragma once
 
 #include "VirusParameterBinding.h"
-#include "ui/VirusEditor.h"
+
 #include "PluginProcessor.h"
-#include <juce_audio_devices/juce_audio_devices.h>
+
 //==============================================================================
 class AudioPluginAudioProcessorEditor : public juce::AudioProcessorEditor, private juce::Timer
 {
@@ -27,6 +27,7 @@ private:
 	std::unique_ptr<juce::Component> m_virusEditor;
 	juce::ComboBox m_scale;
 	juce::ComboBox m_skin;
+	int m_currentSkinId = -1;
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessorEditor)
 
