@@ -51,6 +51,8 @@ namespace genericUI
 			return dynamic_cast<T*>(c);
 		}
 
+		float getScale() const { return m_scale; }
+
 	private:
 		static const char* getResourceByFilename(const std::string& _filename, int& _outDataSize);
 
@@ -61,5 +63,7 @@ namespace genericUI
 		Virus::Controller& m_controller;
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
+
+		float m_scale = 1.0f;
 	};
 }

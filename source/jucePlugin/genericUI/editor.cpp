@@ -33,6 +33,8 @@ namespace genericUI
 		}
 
 		m_rootObject->createJuceTree(*this);
+
+		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 	}
 
 	juce::Drawable* Editor::getImageDrawable(const std::string& _texture)

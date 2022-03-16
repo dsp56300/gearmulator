@@ -69,6 +69,8 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 		m_virusEditor.reset();
 	}
 
+	m_rootScale = 1.0f;
+
 	if (index == 1)
 	{
 		const auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
@@ -80,8 +82,10 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	{
 		try
 		{
-			m_virusEditor.reset(new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef));
+			auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
+			m_virusEditor.reset(editor);
 			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
+			m_rootScale = editor->getScale();
 		}
 		catch(const std::runtime_error& _err)
 		{
@@ -99,7 +103,16 @@ void AudioPluginAudioProcessorEditor::LoadSkin(int index) {
 	m_skin.toFront(false);
 }
 
-AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor() {
+void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
+{
+	setScaleFactor(static_cast<float>(percent)/100.0f * m_rootScale);
+	auto* config = processorRef.getController().getConfig();
+	config->setValue("scale", percent);
+	config->saveIfNeeded();
+}
+
+AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
+{
 	m_virusEditor.reset();
 }
 
