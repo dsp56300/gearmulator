@@ -61,21 +61,38 @@ namespace genericUI
 		}
 	}
 
-	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name) const
+	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name, uint32_t _expectedCount/* = 0*/) const
 	{
 		const auto it = m_componentsByName.find(_name);
 		if(it != m_componentsByName.end())
+		{
+			if(_expectedCount && it->second.size() != _expectedCount)
+			{
+				std::stringstream ss;
+				ss << "Expected to find " << _expectedCount << " components named " << _name << " but found " << it->second.size();
+				throw std::runtime_error(ss.str());
+			}
 			return it->second;
+		}
+
+		if(_expectedCount)
+		{
+			std::stringstream ss;
+			ss << "Unable to find component named " << _name << ", expected to find " << _expectedCount << " components";
+			throw std::runtime_error(ss.str());
+		}
 
 		static std::vector<juce::Component*> empty;
 		return empty;
 	}
 
-	juce::Component* Editor::findComponent(const std::string& _name) const
+	juce::Component* Editor::findComponent(const std::string& _name, bool _mustExist/* = true*/) const
 	{
 		const auto comps = findComponents(_name);
 		if(comps.size() > 1)
 			throw std::runtime_error("Failed to find unique component named " + _name + ", found more than one object with that name");
+		if(_mustExist && comps.empty())
+			throw std::runtime_error("Failed to find component named " + _name);
 		return comps.empty() ? nullptr : comps.front();
 	}
 

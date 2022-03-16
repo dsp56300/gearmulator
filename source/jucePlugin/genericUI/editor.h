@@ -28,12 +28,12 @@ namespace genericUI
 
 		void registerComponent(const std::string& _name, juce::Component* _component);
 
-		const std::vector<juce::Component*>& findComponents(const std::string& _name) const;
+		const std::vector<juce::Component*>& findComponents(const std::string& _name, uint32_t _expectedCount = 0) const;
 
 		template<typename T>
-		void findComponents(std::vector<T*>& _dst, const std::string& _name) const
+		void findComponents(std::vector<T*>& _dst, const std::string& _name, uint32_t _expectedCount = 0) const
 		{
-			const auto& res = findComponents(_name);
+			const auto& res = findComponents(_name, _expectedCount);
 			for (auto* s : res)
 			{
 				auto* t = dynamic_cast<T*>(s);
@@ -42,12 +42,12 @@ namespace genericUI
 			}
 		}
 
-		juce::Component* findComponent(const std::string& _name) const;
+		juce::Component* findComponent(const std::string& _name, bool _mustExist = true) const;
 
 		template<typename T>
-		T* findComponentT(const std::string& _name) const
+		T* findComponentT(const std::string& _name, bool _mustExist = true) const
 		{
-			juce::Component* c = findComponent(_name);
+			juce::Component* c = findComponent(_name, _mustExist);
 			return dynamic_cast<T*>(c);
 		}
 
