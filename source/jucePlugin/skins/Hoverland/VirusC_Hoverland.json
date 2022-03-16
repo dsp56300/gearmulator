@@ -5691,7 +5691,7 @@
         {
             "name" : "VersionInfo",
             "label" : {
-                "text" : "DSP56300 Emulator Version 1.2.11 - March 8 2022 20:03:57",
+                "text" : "DSP56300 Emulator Version 0.8.15 - March 12 2042 12:34:56",
                 "textHeight" : "28",
                 "color" : "FF7180FF",
                 "alignH" : "R",

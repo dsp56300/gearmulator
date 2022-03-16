@@ -101,7 +101,7 @@ SET(ASSETS
 	"parameterDescriptions_C.json"
 )
 
-include(genericUI/assets/assets.cmake)
+include(skins/Hoverland/assets.cmake)
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
@@ -170,7 +170,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Hoverland})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	

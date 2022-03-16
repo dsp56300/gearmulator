@@ -1,4 +1,4 @@
-set(ASSETS_VirusC
+set(ASSETS_VirusC_Hoverland
 	${CMAKE_CURRENT_LIST_DIR}/ARP_2034x1238_x2.png
 	${CMAKE_CURRENT_LIST_DIR}/ARP_282x52_x2.png
 	${CMAKE_CURRENT_LIST_DIR}/arp_72x37_X2.png
@@ -25,5 +25,5 @@ set(ASSETS_VirusC
 	${CMAKE_CURRENT_LIST_DIR}/sync2_108x100_x2.png
 	${CMAKE_CURRENT_LIST_DIR}/VC_x2_N.png
 
-	${CMAKE_CURRENT_LIST_DIR}/VirusC.json
+	${CMAKE_CURRENT_LIST_DIR}/VirusC_Hoverland.json
 )
