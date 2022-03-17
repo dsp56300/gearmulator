@@ -1,0 +1,22 @@
+set(ASSETS_VirusC_Trancy
+	${CMAKE_CURRENT_LIST_DIR}/btn_1.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_2.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_3.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_4.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_main_1.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_main_2.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_main_3.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_main_4.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_main_5.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_save_preset.png
+	${CMAKE_CURRENT_LIST_DIR}/knob_1_128.png
+	${CMAKE_CURRENT_LIST_DIR}/knob_2_128.png
+	${CMAKE_CURRENT_LIST_DIR}/main_background.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_1.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_2.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_3.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_4.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_5.png
+
+	${CMAKE_CURRENT_LIST_DIR}/VirusC_Trancy.json
+)

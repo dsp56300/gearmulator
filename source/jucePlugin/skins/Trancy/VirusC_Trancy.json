@@ -1,0 +1,5101 @@
+{
+    "name" : "Root",
+    "root" : {
+        "x" : "0",
+        "y" : "0",
+        "width" : "2501",
+        "height" : "1152",
+        "scale" : "0.5"
+    },
+    "children" : [
+        {
+            "name" : "bg",
+            "image" : {
+                "x" : "0",
+                "y" : "0",
+                "width" : "2501",
+                "height" : "1152",
+                "texture" : "main_background"
+            }
+        },
+        {
+            "name" : "PatchName",
+            "label" : {
+                "text" : "Osc 1 Shape",
+                "textHeight" : "36",
+                "alignH" : "L",
+                "alignV" : "C",
+                "x" : "1477.7",
+                "y" : "37.2",
+                "width" : "391.35",
+                "height" : "51.289"
+            }
+        },
+        {
+            "name" : "ControlLabel",
+            "label" : {
+                "text" : "-42",
+                "textHeight" : "36",
+                "alignH" : "R",
+                "alignV" : "C",
+                "x" : "1757.85",
+                "y" : "37.1999",
+                "width" : "368",
+                "height" : "51.289"
+            }
+        },
+        {
+            "name" : "TabOsc",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "115",
+                "y" : "36",
+                "width" : "268",
+                "height" : "53",
+                "texture" : "btn_main_1",
+                "tileSizeX" : "268",
+                "tileSizeY" : "53"
+            }
+        },
+        {
+            "name" : "TabLfo",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "383",
+                "y" : "36",
+                "width" : "268",
+                "height" : "53",
+                "texture" : "btn_main_2",
+                "tileSizeX" : "268",
+                "tileSizeY" : "53"
+            }
+        },
+        {
+            "name" : "TabEffects",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "651",
+                "y" : "36",
+                "width" : "268",
+                "height" : "53",
+                "texture" : "btn_main_3",
+                "tileSizeX" : "268",
+                "tileSizeY" : "53"
+            }
+        },
+        {
+            "name" : "TabArp",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "919",
+                "y" : "36",
+                "width" : "268",
+                "height" : "53",
+                "texture" : "btn_main_4",
+                "tileSizeX" : "268",
+                "tileSizeY" : "53"
+            }
+        },
+        {
+            "name" : "Presets",
+            "button" : {
+                "isToggle" : "1",
+                "radioGroupId" : "42",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1187",
+                "y" : "36",
+                "width" : "268",
+                "height" : "53",
+                "texture" : "btn_main_5",
+                "tileSizeX" : "268",
+                "tileSizeY" : "53"
+            }
+        },
+        {
+            "name" : "page_osc",
+            "image" : {
+                "x" : "100",
+                "y" : "122",
+                "width" : "2300",
+                "height" : "995",
+                "texture" : "panel_1"
+            },
+            "children" : [
+                {
+                    "name" : "WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "59",
+                        "y" : "83",
+                        "width" : "120",
+                        "height" : "39"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Shape",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "250",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "PulseWidth",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "395",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "540",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "685",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "59",
+                        "y" : "291",
+                        "width" : "120",
+                        "height" : "39"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Shape",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "250",
+                        "y" : "274",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "PulseWidth",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "395",
+                        "y" : "274",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "540",
+                        "y" : "274",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "685",
+                        "y" : "274",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Toggle (1)",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "836",
+                        "y" : "274",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "59",
+                        "y" : "466",
+                        "width" : "120",
+                        "height" : "39"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Shape",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "250",
+                        "y" : "449",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "PulseWidth",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "395",
+                        "y" : "449",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Semitone"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "540",
+                        "y" : "449",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "685",
+                        "y" : "449",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "PhaseInit",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Keyfollow"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "830",
+                        "y" : "449",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "59",
+                        "y" : "675",
+                        "width" : "120",
+                        "height" : "39"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "250",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Detune",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "395",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "WaveSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "58.99213",
+                        "y" : "884",
+                        "width" : "120",
+                        "height" : "39"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Semitone",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "249.9921",
+                        "y" : "867",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Detune",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "394.9921",
+                        "y" : "867",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Detune (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "539.9921",
+                        "y" : "867",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Toggle",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "623",
+                        "y" : "659",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "NoiseColor",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "804",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Punch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Pulsewidth"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "804",
+                        "y" : "867",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "226",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "386",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "546",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "706",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1030.5",
+                        "y" : "866",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "66",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "226",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "386",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "546",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "706",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1221.5",
+                        "y" : "866",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Cutoff",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1436",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Resonance",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1580",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "EnvAmount",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1724",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1868",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ResVelo",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2012",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "EnvVelo",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2156",
+                        "y" : "65",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Cutoff",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1436",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Resonance",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1580",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "EnvAmount",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1724",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Keyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1868",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ResVelo",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2012",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "EnvVelo",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2156",
+                        "y" : "450",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "FilterBalance",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1484",
+                        "y" : "265",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Filter1Mode",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1628",
+                        "y" : "215",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "FilterRouting",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1935",
+                        "y" : "215",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Filter2Mode",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1628",
+                        "y" : "329",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "SaturationCurve",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1935",
+                        "y" : "329",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Env1Pol",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2131.9",
+                        "y" : "209",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "Env2Pol",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2131.9",
+                        "y" : "318",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LinkCutoff",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1383",
+                        "y" : "270",
+                        "width" : "36",
+                        "height" : "68",
+                        "texture" : "btn_1",
+                        "tileSizeX" : "36",
+                        "tileSizeY" : "68"
+                    }
+                },
+                {
+                    "name" : "LinkEnv",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2248",
+                        "y" : "270",
+                        "width" : "36",
+                        "height" : "68",
+                        "texture" : "btn_1",
+                        "tileSizeX" : "36",
+                        "tileSizeY" : "68"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "C3",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1845",
+                        "y" : "284",
+                        "width" : "65",
+                        "height" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "Attack",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1437",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Decay",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1610",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Sustain",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1792",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Time",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1979",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Release",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2157",
+                        "y" : "658",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Attack",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1437",
+                        "y" : "869",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Decay",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1610",
+                        "y" : "869",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Sustain",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1792",
+                        "y" : "869",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Time",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1979",
+                        "y" : "869",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Release",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2157",
+                        "y" : "869",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "page_lfo",
+            "image" : {
+                "x" : "100",
+                "y" : "122",
+                "width" : "2299",
+                "height" : "994",
+                "texture" : "panel_2"
+            },
+            "children" : [
+                {
+                    "name" : "LfoRate",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63",
+                        "y" : "88",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoSymmetry",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "379",
+                        "y" : "88",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc1Pitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc2Pitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "221",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoPW12",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "379",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoReso12",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoKeyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "221",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoKeytrigger",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "379",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoAssignAmount",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63",
+                        "y" : "667",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoFilterGain",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "379",
+                        "y" : "849",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoClock",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "200",
+                        "y" : "59",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoShape",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "200",
+                        "y" : "144",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoOscPitchLink",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "143",
+                        "y" : "398",
+                        "width" : "68",
+                        "height" : "36",
+                        "texture" : "btn_4",
+                        "tileSizeX" : "68",
+                        "tileSizeY" : "36"
+                    }
+                },
+                {
+                    "name" : "LfoEnvMode",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "408",
+                        "y" : "668",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LfoMode",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "67",
+                        "y" : "845",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LfoAssignDestination",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "200",
+                        "y" : "676",
+                        "width" : "175",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoRate",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "88",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoSymmetry",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911",
+                        "y" : "88",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc1Pitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc2Pitch",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "753",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoPW12",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911",
+                        "y" : "276",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoReso12",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoKeyfollow",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "753",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoKeytrigger",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911",
+                        "y" : "480",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoAssignAmount",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "667",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoFilterGain",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911",
+                        "y" : "849",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoClock",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "732",
+                        "y" : "59",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoShape",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "732",
+                        "y" : "144",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoOscPitchLink",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "675",
+                        "y" : "398",
+                        "width" : "68",
+                        "height" : "36",
+                        "texture" : "btn_4",
+                        "tileSizeX" : "68",
+                        "tileSizeY" : "36"
+                    }
+                },
+                {
+                    "name" : "LfoEnvMode",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "940",
+                        "y" : "668",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LfoMode",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "599",
+                        "y" : "845",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LfoAssignDestination",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "732",
+                        "y" : "676",
+                        "width" : "175",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoRate (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1128",
+                        "y" : "89",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc1Pitch (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1128",
+                        "y" : "277",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoOsc2Pitch (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1286",
+                        "y" : "277",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoReso12 (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1128",
+                        "y" : "481",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "LfoClock (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1265",
+                        "y" : "60",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoShape (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1265",
+                        "y" : "145",
+                        "width" : "122",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "LfoEnvMode (1)",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1270",
+                        "y" : "476",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "LfoAssignDestination (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1128",
+                        "y" : "649",
+                        "width" : "175",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1516",
+                        "y" : "57.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1516",
+                        "y" : "145.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1754",
+                        "y" : "88.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1921",
+                        "y" : "58.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1921",
+                        "y" : "146.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2159",
+                        "y" : "89.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1516",
+                        "y" : "286.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1516",
+                        "y" : "374.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1754",
+                        "y" : "317.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1921",
+                        "y" : "287.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1921",
+                        "y" : "375.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2159",
+                        "y" : "318.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1515.5",
+                        "y" : "551.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1515.5",
+                        "y" : "640.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1753.5",
+                        "y" : "587.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1921.6",
+                        "y" : "600.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2159.5",
+                        "y" : "587.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1129.5",
+                        "y" : "814.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1129.5",
+                        "y" : "903.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1367.5",
+                        "y" : "850.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1515.5",
+                        "y" : "862.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1753.5",
+                        "y" : "850.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (3)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1920.7",
+                        "y" : "862.5",
+                        "width" : "172",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2158.7",
+                        "y" : "850.5",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "page_fx",
+            "image" : {
+                "x" : "100",
+                "y" : "122",
+                "width" : "2299",
+                "height" : "994",
+                "texture" : "panel_3"
+            },
+            "children" : [
+                {
+                    "name" : "Switch",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "51",
+                        "y" : "79",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "181",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "326",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "471",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "867",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "661",
+                        "y" : "88",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1050",
+                        "y" : "87",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1260",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1401",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1542",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1683",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1824",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2021",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2162",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "38",
+                        "y" : "315",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "248",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "383",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "518",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "653",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "788",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "923",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1124",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1267",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1410",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1553",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1696",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1839",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (6)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1982",
+                        "y" : "304",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RingMod",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2174",
+                        "y" : "303",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "75",
+                        "y" : "569",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "260",
+                        "y" : "570",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "570",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "734",
+                        "y" : "570",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "873",
+                        "y" : "570",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1016",
+                        "y" : "570",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "388",
+                        "y" : "530",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (3)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "388",
+                        "y" : "627",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "260",
+                        "y" : "818",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "595",
+                        "y" : "818",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "734",
+                        "y" : "818",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "873",
+                        "y" : "818",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1016",
+                        "y" : "818",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "388",
+                        "y" : "828",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (4)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "35",
+                        "y" : "736",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1448",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1590.04",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1732.08",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1874.12",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (5)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2016.16",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (6)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2158.2",
+                        "y" : "588",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (7)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1448",
+                        "y" : "798.9",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (8)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1590.04",
+                        "y" : "798.9",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (9)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1732.08",
+                        "y" : "798.9",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (10)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1874.12",
+                        "y" : "798.9",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (11)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2016.16",
+                        "y" : "798.9",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox (4)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1196",
+                        "y" : "643",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (5)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1196",
+                        "y" : "761",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "SwitchSmallH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1953",
+                        "y" : "509",
+                        "width" : "68",
+                        "height" : "36",
+                        "texture" : "btn_4",
+                        "tileSizeX" : "68",
+                        "tileSizeY" : "36"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "page_arp",
+            "image" : {
+                "x" : "100",
+                "y" : "122",
+                "width" : "2299",
+                "height" : "994",
+                "texture" : "panel_4"
+            },
+            "children" : [
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "63",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "63",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "71",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "71",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "181",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "181",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "189",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "189",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "299",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "299",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "307",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "307",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "417",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "417",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "425",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "425",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "535",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "535",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "543",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "543",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "653",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "653",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "661",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "661",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "771",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "771",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "779",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "779",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "62.20001",
+                        "y" : "889",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "131",
+                        "y" : "889",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "381",
+                        "y" : "897",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "468",
+                        "y" : "897",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "63",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "63",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "71",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "71",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "181",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "181",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "189",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "189",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "299",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "299",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "307",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "307",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "417",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "417",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "425",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "425",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "535",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "535",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "543",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "543",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "653",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "653",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "661",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "661",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "771",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "771",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "779",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "779",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "SelectPart",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "611.2",
+                        "y" : "889",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PresetName",
+                    "textbutton" : {
+                        "text" : "New Text",
+                        "textHeight" : "30",
+                        "x" : "680",
+                        "y" : "889",
+                        "width" : "232",
+                        "height" : "67"
+                    }
+                },
+                {
+                    "name" : "PartVolume",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "930",
+                        "y" : "897",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "PartPan",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1017",
+                        "y" : "897",
+                        "width" : "55",
+                        "height" : "55",
+                        "texture" : "knob_2_128",
+                        "tileSizeX" : "55",
+                        "tileSizeY" : "55"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1170",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1333",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1496",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (3)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1659",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (4)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1822",
+                        "y" : "76",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1153",
+                        "y" : "233",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1359",
+                        "y" : "233",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1565",
+                        "y" : "233",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (3)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1771",
+                        "y" : "233",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (4)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1153",
+                        "y" : "354",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (5)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1359",
+                        "y" : "354",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (6)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1565",
+                        "y" : "354",
+                        "width" : "177",
+                        "height" : "55"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "2025",
+                        "y" : "58",
+                        "width" : "239",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "2025",
+                        "y" : "155",
+                        "width" : "239",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1153",
+                        "y" : "535",
+                        "width" : "170",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1153",
+                        "y" : "632",
+                        "width" : "170",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1698",
+                        "y" : "535",
+                        "width" : "170",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (3)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1698",
+                        "y" : "632",
+                        "width" : "170",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1387",
+                        "y" : "575",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (1)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1536",
+                        "y" : "575",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "RotaryLarge (2)",
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    },
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1932.4",
+                        "y" : "575",
+                        "width" : "75",
+                        "height" : "75",
+                        "texture" : "knob_1_128",
+                        "tileSizeX" : "75",
+                        "tileSizeY" : "75"
+                    }
+                },
+                {
+                    "name" : "Switch",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2096",
+                        "y" : "579",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_3",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "PlayMode",
+                    "button" : {
+                        "isToggle" : "1",
+                        "radioGroupId" : "42",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1169",
+                        "y" : "835",
+                        "width" : "69",
+                        "height" : "67",
+                        "texture" : "btn_2",
+                        "tileSizeX" : "69",
+                        "tileSizeY" : "67"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1410",
+                        "y" : "798",
+                        "width" : "174",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1410",
+                        "y" : "897",
+                        "width" : "174",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1679",
+                        "y" : "798",
+                        "width" : "173",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (1)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1679",
+                        "y" : "897",
+                        "width" : "173",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (2)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1906.1",
+                        "y" : "798",
+                        "width" : "173",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "ComboBox (3)",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1906.1",
+                        "y" : "897",
+                        "width" : "173",
+                        "height" : "48"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "page_presets",
+            "image" : {
+                "x" : "100",
+                "y" : "122",
+                "width" : "2299",
+                "height" : "994",
+                "texture" : "panel_5"
+            },
+            "children" : [
+                {
+                    "name" : "RomBankSelect",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "37",
+                        "y" : "52",
+                        "width" : "950",
+                        "height" : "54"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Wave Select"
+                    }
+                },
+                {
+                    "name" : "PresetLoad",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2110",
+                        "y" : "47",
+                        "width" : "171",
+                        "height" : "50",
+                        "texture" : "btn_save_preset",
+                        "tileSizeX" : "171",
+                        "tileSizeY" : "50"
+                    }
+                }
+            ]
+        },
+        {
+            "name" : "DonateInfo",
+            "hyperlinkbutton" : {
+                "url" : "https://paypal.me/dsp56300",
+                "text" : "To donate: https://paypal.me/dsp56300",
+                "textHeight" : "20",
+                "color" : "009BFFFF",
+                "x" : "925.6",
+                "y" : "1115",
+                "width" : "484.4337",
+                "height" : "37"
+            }
+        },
+        {
+            "name" : "VersionNumber",
+            "label" : {
+                "text" : "1.12.34",
+                "textHeight" : "16",
+                "color" : "009BFFFF",
+                "alignH" : "R",
+                "alignV" : "C",
+                "x" : "251.4",
+                "y" : "1115",
+                "width" : "54.4257",
+                "height" : "37"
+            }
+        },
+        {
+            "name" : "RomSelector",
+            "combobox" : {
+                "text" : "Virus_C_OS_6.5.bin",
+                "textHeight" : "16",
+                "color" : "009BFFFF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "x" : "651",
+                "y" : "1115",
+                "width" : "508",
+                "height" : "37",
+                "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin"
+            }
+        },
+        {
+            "name" : "DeviceModel",
+            "label" : {
+                "text" : "C",
+                "textHeight" : "16",
+                "color" : "009BFFFF",
+                "alignH" : "R",
+                "alignV" : "C",
+                "x" : "448",
+                "y" : "1115",
+                "width" : "54.4257",
+                "height" : "37"
+            }
+        }
+    ]
+}
