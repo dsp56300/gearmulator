@@ -15,7 +15,7 @@ namespace genericVirusUI
 		m_parameterBinding(_binding)
 	{
 		uint32_t jsonSize;
-		const auto json = getResourceByFilename("VirusC.json", jsonSize);
+		const auto json = getResourceByFilename("VirusC_Hoverland.json", jsonSize);
 		create(std::string(json, jsonSize));
 
 		m_parts.reset(new Parts(*this));
