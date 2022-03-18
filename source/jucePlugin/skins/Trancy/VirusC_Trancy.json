@@ -251,13 +251,13 @@
                         "height" : "39"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Osc2 Wave Select"
                     }
                 },
                 {
                     "name" : "Shape",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc2 Shape"
                     },
                     "rotary" : {
                     },
@@ -274,7 +274,7 @@
                 {
                     "name" : "PulseWidth",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Osc2 Pulsewidth"
                     },
                     "rotary" : {
                     },
@@ -291,7 +291,7 @@
                 {
                     "name" : "Semitone",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Semitone"
+                        "parameter" : "Osc2 Semitone"
                     },
                     "rotary" : {
                     },
@@ -308,7 +308,7 @@
                 {
                     "name" : "Keyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Keyfollow"
+                        "parameter" : "Osc2 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -323,7 +323,7 @@
                     }
                 },
                 {
-                    "name" : "Toggle (1)",
+                    "name" : "Osc2Sync",
                     "button" : {
                         "isToggle" : "1",
                         "radioGroupId" : "42",
@@ -340,6 +340,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -355,13 +358,13 @@
                         "height" : "39"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Osc FM Mode"
                     }
                 },
                 {
                     "name" : "Shape",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc2 FM Amount"
                     },
                     "rotary" : {
                     },
@@ -378,7 +381,7 @@
                 {
                     "name" : "PulseWidth",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Osc2 Detune"
                     },
                     "rotary" : {
                     },
@@ -395,7 +398,7 @@
                 {
                     "name" : "Semitone",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Semitone"
+                        "parameter" : "FM Filt Env Amt"
                     },
                     "rotary" : {
                     },
@@ -412,7 +415,7 @@
                 {
                     "name" : "Keyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Keyfollow"
+                        "parameter" : "Osc2 Filt Env Amt"
                     },
                     "rotary" : {
                     },
@@ -429,7 +432,7 @@
                 {
                     "name" : "PhaseInit",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Keyfollow"
+                        "parameter" : "Osc Init Phase"
                     },
                     "rotary" : {
                     },
@@ -462,7 +465,7 @@
                 {
                     "name" : "Semitone",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc3 Semitone"
                     },
                     "rotary" : {
                     },
@@ -479,7 +482,7 @@
                 {
                     "name" : "Detune",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Osc3 Detune"
                     },
                     "rotary" : {
                     },
@@ -578,12 +581,15 @@
                         "texture" : "btn_2",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Suboscillator Shape"
                     }
                 },
                 {
                     "name" : "NoiseColor",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Noise Color"
                     },
                     "rotary" : {
                     },
@@ -600,7 +606,7 @@
                 {
                     "name" : "Punch",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Punch Intensity"
                     },
                     "rotary" : {
                     },
@@ -615,9 +621,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "VeloModOsc1Shape",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc1 Shape Velocity"
                     },
                     "rotary" : {
                     },
@@ -632,9 +638,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "VeloModOsc2Shape",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc2 Shape Velocity"
                     },
                     "rotary" : {
                     },
@@ -649,9 +655,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "VeloModPW",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "PulseWidth Velocity"
                     },
                     "rotary" : {
                     },
@@ -666,9 +672,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "VeloModFMAmount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Fm Amount Velocity"
                     },
                     "rotary" : {
                     },
@@ -683,9 +689,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "VeloModAmp",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Velocity"
                     },
                     "rotary" : {
                     },
@@ -700,9 +706,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "VeloModPanorama",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Panorama Velocity"
                     },
                     "rotary" : {
                     },
@@ -717,9 +723,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "OscBalance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc Balance"
                     },
                     "rotary" : {
                     },
@@ -734,9 +740,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "OscLevel",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc Mainvolume"
                     },
                     "rotary" : {
                     },
@@ -751,9 +757,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "Osc3Level",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc3 Volume"
                     },
                     "rotary" : {
                     },
@@ -768,9 +774,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "SubLevel",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Suboscillator Volume"
                     },
                     "rotary" : {
                     },
@@ -785,9 +791,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "NoiseLevel",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Noise Volume"
                     },
                     "rotary" : {
                     },
@@ -802,9 +808,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "RingModLevel",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Ringmodulator Volume"
                     },
                     "rotary" : {
                     },
@@ -821,7 +827,7 @@
                 {
                     "name" : "Cutoff",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff"
                     },
                     "rotary" : {
                     },
@@ -838,7 +844,7 @@
                 {
                     "name" : "Resonance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter1 Resonance"
                     },
                     "rotary" : {
                     },
@@ -855,7 +861,7 @@
                 {
                     "name" : "EnvAmount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter1 Env Amt"
                     },
                     "rotary" : {
                     },
@@ -872,7 +878,7 @@
                 {
                     "name" : "Keyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter1 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -889,7 +895,7 @@
                 {
                     "name" : "ResVelo",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Resonance1 Velocity"
                     },
                     "rotary" : {
                     },
@@ -906,7 +912,7 @@
                 {
                     "name" : "EnvVelo",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Flt1 EnvAmt Velocity"
                     },
                     "rotary" : {
                     },
@@ -1025,7 +1031,7 @@
                 {
                     "name" : "FilterBalance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Balance"
                     },
                     "rotary" : {
                     },
@@ -1052,7 +1058,7 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Filter1 Mode"
                     }
                 },
                 {
@@ -1068,7 +1074,7 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Filter Routing"
                     }
                 },
                 {
@@ -1084,7 +1090,7 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Filter2 Mode"
                     }
                 },
                 {
@@ -1100,7 +1106,7 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Saturation Curve"
                     }
                 },
                 {
@@ -1121,6 +1127,9 @@
                         "texture" : "btn_2",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Filter1 Env Polarity"
                     }
                 },
                 {
@@ -1141,6 +1150,9 @@
                         "texture" : "btn_2",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Filter2 Env Polarity"
                     }
                 },
                 {
@@ -1161,6 +1173,9 @@
                         "texture" : "btn_1",
                         "tileSizeX" : "36",
                         "tileSizeY" : "68"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -1181,10 +1196,13 @@
                         "texture" : "btn_1",
                         "tileSizeX" : "36",
                         "tileSizeY" : "68"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "KeytrackBase",
                     "combobox" : {
                         "text" : "C3",
                         "textHeight" : "20",
@@ -1196,13 +1214,13 @@
                         "height" : "36"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Filter Keytrack Base"
                     }
                 },
                 {
                     "name" : "Attack",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Attack"
                     },
                     "rotary" : {
                     },
@@ -1219,7 +1237,7 @@
                 {
                     "name" : "Decay",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Decay"
                     },
                     "rotary" : {
                     },
@@ -1236,7 +1254,7 @@
                 {
                     "name" : "Sustain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Sustain"
                     },
                     "rotary" : {
                     },
@@ -1253,7 +1271,7 @@
                 {
                     "name" : "Time",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Sustain Time"
                     },
                     "rotary" : {
                     },
@@ -1270,7 +1288,7 @@
                 {
                     "name" : "Release",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Release"
                     },
                     "rotary" : {
                     },
@@ -1287,7 +1305,7 @@
                 {
                     "name" : "Attack",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Env Attack"
                     },
                     "rotary" : {
                     },
@@ -1304,7 +1322,7 @@
                 {
                     "name" : "Decay",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Env Decay"
                     },
                     "rotary" : {
                     },
@@ -1321,7 +1339,7 @@
                 {
                     "name" : "Sustain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Env Sustain"
                     },
                     "rotary" : {
                     },
@@ -1338,7 +1356,7 @@
                 {
                     "name" : "Time",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Env Sustain Time"
                     },
                     "rotary" : {
                     },
@@ -1355,7 +1373,7 @@
                 {
                     "name" : "Release",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Amp Env Release"
                     },
                     "rotary" : {
                     },
@@ -1384,7 +1402,7 @@
                 {
                     "name" : "LfoRate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo1 Rate"
                     },
                     "rotary" : {
                     },
@@ -1401,7 +1419,7 @@
                 {
                     "name" : "LfoSymmetry",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo1 Symmetry"
                     },
                     "rotary" : {
                     },
@@ -1418,7 +1436,7 @@
                 {
                     "name" : "LfoOsc1Pitch",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc1 Lfo1 Amount"
                     },
                     "rotary" : {
                     },
@@ -1435,7 +1453,7 @@
                 {
                     "name" : "LfoOsc2Pitch",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc2 Lfo1 Amount"
                     },
                     "rotary" : {
                     },
@@ -1452,7 +1470,7 @@
                 {
                     "name" : "LfoPW12",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "PW Lfo1 Amount"
                     },
                     "rotary" : {
                     },
@@ -1469,7 +1487,7 @@
                 {
                     "name" : "LfoReso12",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Reso Lfo1 Amount"
                     },
                     "rotary" : {
                     },
@@ -1486,7 +1504,7 @@
                 {
                     "name" : "LfoKeyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo1 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -1503,7 +1521,7 @@
                 {
                     "name" : "LfoKeytrigger",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo1 Keytrigger"
                     },
                     "rotary" : {
                     },
@@ -1520,7 +1538,7 @@
                 {
                     "name" : "LfoAssignAmount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "LFO1 Assign Amount"
                     },
                     "rotary" : {
                     },
@@ -1537,7 +1555,7 @@
                 {
                     "name" : "LfoFilterGain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "FiltGain Lfo1 Amount"
                     },
                     "rotary" : {
                     },
@@ -1564,7 +1582,7 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo1 Clock"
                     }
                 },
                 {
@@ -1580,7 +1598,7 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo1 Shape"
                     }
                 },
                 {
@@ -1601,6 +1619,9 @@
                         "texture" : "btn_4",
                         "tileSizeX" : "68",
                         "tileSizeY" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -1621,6 +1642,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -1641,6 +1665,9 @@
                         "texture" : "btn_2",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1 Mode"
                     }
                 },
                 {
@@ -1656,13 +1683,13 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "LFO1 Assign Dest"
                     }
                 },
                 {
                     "name" : "LfoRate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo2 Rate"
                     },
                     "rotary" : {
                     },
@@ -1679,7 +1706,7 @@
                 {
                     "name" : "LfoSymmetry",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo2 Symmetry"
                     },
                     "rotary" : {
                     },
@@ -1696,7 +1723,7 @@
                 {
                     "name" : "LfoOsc1Pitch",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff1 Lfo2 Amount"
                     },
                     "rotary" : {
                     },
@@ -1713,7 +1740,7 @@
                 {
                     "name" : "LfoOsc2Pitch",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff2 Lfo2 Amount"
                     },
                     "rotary" : {
                     },
@@ -1730,7 +1757,7 @@
                 {
                     "name" : "LfoPW12",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Shape Lfo2 Amount"
                     },
                     "rotary" : {
                     },
@@ -1747,7 +1774,7 @@
                 {
                     "name" : "LfoReso12",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Pan Lfo2 Amount"
                     },
                     "rotary" : {
                     },
@@ -1764,7 +1791,7 @@
                 {
                     "name" : "LfoKeyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo2 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -1781,7 +1808,7 @@
                 {
                     "name" : "LfoKeytrigger",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo2 Keytrigger"
                     },
                     "rotary" : {
                     },
@@ -1798,7 +1825,7 @@
                 {
                     "name" : "LfoAssignAmount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "LFO2 Assign Amount"
                     },
                     "rotary" : {
                     },
@@ -1815,7 +1842,7 @@
                 {
                     "name" : "LfoFilterGain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "FM Lfo2 Amount"
                     },
                     "rotary" : {
                     },
@@ -1842,7 +1869,7 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo2 Clock"
                     }
                 },
                 {
@@ -1858,7 +1885,7 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo2 Shape"
                     }
                 },
                 {
@@ -1879,6 +1906,9 @@
                         "texture" : "btn_4",
                         "tileSizeX" : "68",
                         "tileSizeY" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -1899,6 +1929,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2 Env Mode"
                     }
                 },
                 {
@@ -1919,6 +1952,9 @@
                         "texture" : "btn_2",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2 Mode"
                     }
                 },
                 {
@@ -1934,13 +1970,13 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "LFO2 Assign Dest"
                     }
                 },
                 {
-                    "name" : "LfoRate (1)",
+                    "name" : "Lfo3Rate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo3 Rate"
                     },
                     "rotary" : {
                     },
@@ -1955,9 +1991,9 @@
                     }
                 },
                 {
-                    "name" : "LfoOsc1Pitch (1)",
+                    "name" : "Lfo3FadeInTime",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo3 Fade-In Time"
                     },
                     "rotary" : {
                     },
@@ -1972,9 +2008,9 @@
                     }
                 },
                 {
-                    "name" : "LfoOsc2Pitch (1)",
+                    "name" : "Lfo3Keyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Lfo3 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -1989,9 +2025,9 @@
                     }
                 },
                 {
-                    "name" : "LfoReso12 (1)",
+                    "name" : "OscLfo3Amount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc Lfo3 Amount"
                     },
                     "rotary" : {
                     },
@@ -2006,7 +2042,7 @@
                     }
                 },
                 {
-                    "name" : "LfoClock (1)",
+                    "name" : "Lfo3Clock",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2018,11 +2054,11 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo3 Clock"
                     }
                 },
                 {
-                    "name" : "LfoShape (1)",
+                    "name" : "Lfo3Shape",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2034,11 +2070,11 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo3 Shape"
                     }
                 },
                 {
-                    "name" : "LfoEnvMode (1)",
+                    "name" : "Lfo3Mode",
                     "button" : {
                         "isToggle" : "1",
                         "radioGroupId" : "42",
@@ -2055,10 +2091,13 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3 Mode"
                     }
                 },
                 {
-                    "name" : "LfoAssignDestination (1)",
+                    "name" : "Lfo3Destination",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2070,11 +2109,11 @@
                         "height" : "50"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Lfo3 Destination"
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign1Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2086,11 +2125,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign1 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign1Dest",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2102,13 +2141,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign1 Destination"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign1Amount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign1 Amount"
                     },
                     "rotary" : {
                     },
@@ -2123,7 +2162,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign4Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2135,11 +2174,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 4 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign4Dest",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2151,13 +2190,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 4 Destination"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign4Amount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign 4 Amount"
                     },
                     "rotary" : {
                     },
@@ -2172,7 +2211,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign5Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2184,11 +2223,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 5 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign5Dest",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2200,13 +2239,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 5 Destination"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign5Amount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign 5 Amount"
                     },
                     "rotary" : {
                     },
@@ -2221,7 +2260,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign6Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2233,11 +2272,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 6 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign6Dest",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2249,13 +2288,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign 6 Destination"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign6Amount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign 6 Amount"
                     },
                     "rotary" : {
                     },
@@ -2270,7 +2309,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign2Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2282,11 +2321,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign2 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign2Dest1",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2298,13 +2337,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign2 Destination1"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign2Amount1",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign2 Amount1"
                     },
                     "rotary" : {
                     },
@@ -2319,7 +2358,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "Assign2Dest2",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2331,13 +2370,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign2 Destination2"
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "Assign2Amount2",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign2 Amount2"
                     },
                     "rotary" : {
                     },
@@ -2352,7 +2391,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "Assign3Source",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2364,11 +2403,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign3 Source"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "Assign3Dest1",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2380,13 +2419,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign3 Destination1"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Assign3Amount1",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign3 Amount1"
                     },
                     "rotary" : {
                     },
@@ -2401,7 +2440,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "Assign3Dest2",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2413,13 +2452,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign3 Destination2"
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "Assign3Amount2",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign3 Amount2"
                     },
                     "rotary" : {
                     },
@@ -2434,7 +2473,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (3)",
+                    "name" : "Assign3Dest3",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2446,13 +2485,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Assign3 Destination3"
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "Assign3Amount3",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Assign3 Amount3"
                     },
                     "rotary" : {
                     },
@@ -2479,7 +2518,7 @@
             },
             "children" : [
                 {
-                    "name" : "Switch",
+                    "name" : "InputFollowerMode",
                     "button" : {
                         "isToggle" : "1",
                         "radioGroupId" : "42",
@@ -2496,12 +2535,15 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Input Follower Mode"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "InputFollowerLevel",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Sustain"
                     },
                     "rotary" : {
                     },
@@ -2516,9 +2558,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "InputFollowerAttack",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Attack"
                     },
                     "rotary" : {
                     },
@@ -2533,9 +2575,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "InputFollowerRelease",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Release"
                     },
                     "rotary" : {
                     },
@@ -2550,9 +2592,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "DistortionIntensity",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Distortion Intensity"
                     },
                     "rotary" : {
                     },
@@ -2567,7 +2609,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "DistortionCurve",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2579,11 +2621,11 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Distortion Curve"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "ChorusShape",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2595,13 +2637,13 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Chorus Lfo Shape"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "ChorusRate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Chorus Rate"
                     },
                     "rotary" : {
                     },
@@ -2616,9 +2658,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "ChorusDepth",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Chorus Depth"
                     },
                     "rotary" : {
                     },
@@ -2633,9 +2675,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "ChorusFeedback",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Chorus Feedback"
                     },
                     "rotary" : {
                     },
@@ -2650,9 +2692,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "ChorusMix",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Chorus Mix"
                     },
                     "rotary" : {
                     },
@@ -2667,9 +2709,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "ChorusDelayTime",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Chorus Delay"
                     },
                     "rotary" : {
                     },
@@ -2684,9 +2726,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "AnalogBoostIntensity",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Bass Tune"
                     },
                     "rotary" : {
                     },
@@ -2701,9 +2743,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "AnalogBoostTune",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Bass Intensity"
                     },
                     "rotary" : {
                     },
@@ -2718,7 +2760,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "PhaserStages",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -2730,13 +2772,13 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Phaser Mode"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "PhaserMix",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Mix"
                     },
                     "rotary" : {
                     },
@@ -2751,9 +2793,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "PhaserSpread",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Spread"
                     },
                     "rotary" : {
                     },
@@ -2768,9 +2810,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "PhaserRate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Rate"
                     },
                     "rotary" : {
                     },
@@ -2785,9 +2827,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "PhaserDepth",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Depth"
                     },
                     "rotary" : {
                     },
@@ -2802,9 +2844,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "PhaerFrequency",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Frequency"
                     },
                     "rotary" : {
                     },
@@ -2819,9 +2861,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "PhaerFeedback",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Phaser Feedback"
                     },
                     "rotary" : {
                     },
@@ -2957,7 +2999,7 @@
                 {
                     "name" : "RingMod",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Input Ringmodulator"
                     },
                     "rotary" : {
                     },
@@ -2972,9 +3014,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "DelayReverbSend",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Effect Send"
                     },
                     "rotary" : {
                     },
@@ -2989,9 +3031,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "DelayTime",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Time"
                     },
                     "rotary" : {
                     },
@@ -3006,9 +3048,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "DelayRate",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Dly Rate / Rev Decay"
                     },
                     "rotary" : {
                     },
@@ -3023,9 +3065,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "DelayFeedback",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Feedback"
                     },
                     "rotary" : {
                     },
@@ -3040,9 +3082,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "DelayColor",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Color"
                     },
                     "rotary" : {
                     },
@@ -3057,9 +3099,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "DelayDepth",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Dly Depth "
                     },
                     "rotary" : {
                     },
@@ -3074,7 +3116,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "DelayClock",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -3086,11 +3128,11 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Delay Clock"
                     }
                 },
                 {
-                    "name" : "ComboBox (3)",
+                    "name" : "DelayShape",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -3102,13 +3144,13 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Delay Lfo Shape"
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "ReverbDecayTime",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Dly Rate / Rev Decay"
                     },
                     "rotary" : {
                     },
@@ -3123,9 +3165,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "ReverbDamping",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Reverb Damping"
                     },
                     "rotary" : {
                     },
@@ -3140,9 +3182,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "ReverbColor",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Color"
                     },
                     "rotary" : {
                     },
@@ -3157,9 +3199,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "ReverbPredelay",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Time"
                     },
                     "rotary" : {
                     },
@@ -3174,9 +3216,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "ReverbFeedback",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Delay Feedback"
                     },
                     "rotary" : {
                     },
@@ -3191,7 +3233,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "ReverbType",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -3203,11 +3245,11 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Rev Size"
                     }
                 },
                 {
-                    "name" : "ComboBox (4)",
+                    "name" : "DelayReverbMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -3219,13 +3261,13 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Delay/Reverb Mode"
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "VocCenterFreq",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff"
                     },
                     "rotary" : {
                     },
@@ -3240,9 +3282,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "VocModOffset",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff2"
                     },
                     "rotary" : {
                     },
@@ -3257,9 +3299,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "VocModQ",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter1 Resonance"
                     },
                     "rotary" : {
                     },
@@ -3274,9 +3316,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "VocModSpread",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter1 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -3291,9 +3333,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "VocCarrQ",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter2 Resonance"
                     },
                     "rotary" : {
                     },
@@ -3308,9 +3350,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (6)",
+                    "name" : "VocCarrSpread",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter2 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -3325,9 +3367,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (7)",
+                    "name" : "VocSpectralBalance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Sustain Time"
                     },
                     "rotary" : {
                     },
@@ -3342,9 +3384,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (8)",
+                    "name" : "VocBands",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Release"
                     },
                     "rotary" : {
                     },
@@ -3359,9 +3401,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (9)",
+                    "name" : "VocAttack",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Attack"
                     },
                     "rotary" : {
                     },
@@ -3376,9 +3418,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (10)",
+                    "name" : "VocRelease",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Env Decay"
                     },
                     "rotary" : {
                     },
@@ -3393,9 +3435,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (11)",
+                    "name" : "VocSourceBalance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter Balance"
                     },
                     "rotary" : {
                     },
@@ -3410,7 +3452,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox (4)",
+                    "name" : "VocoderMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -3422,27 +3464,11 @@
                         "height" : "52"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Vocoder Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (5)",
-                    "combobox" : {
-                        "text" : "Wave 42",
-                        "textHeight" : "20",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "x" : "1196",
-                        "y" : "761",
-                        "width" : "170",
-                        "height" : "52"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
-                    }
-                },
-                {
-                    "name" : "SwitchSmallH",
+                    "name" : "VocoderLink",
                     "button" : {
                         "isToggle" : "1",
                         "radioGroupId" : "42",
@@ -3459,6 +3485,25 @@
                         "texture" : "btn_4",
                         "tileSizeX" : "68",
                         "tileSizeY" : "36"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Filter2 Cutoff Link"
+                    }
+                },
+                {
+                    "name" : "VocoderModulationInput",
+                    "combobox" : {
+                        "text" : "Wave 42",
+                        "textHeight" : "20",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "x" : "1196",
+                        "y" : "761",
+                        "width" : "170",
+                        "height" : "52"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Input Select"
                     }
                 }
             ]
@@ -3491,6 +3536,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3556,6 +3604,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3621,6 +3672,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3686,6 +3740,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3751,6 +3808,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3816,6 +3876,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3881,6 +3944,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -3946,6 +4012,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4011,6 +4080,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4076,6 +4148,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4141,6 +4216,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4206,6 +4284,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4271,6 +4352,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4336,6 +4420,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4401,6 +4488,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4466,6 +4556,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : ""
                     }
                 },
                 {
@@ -4514,9 +4607,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "Portamento",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Portamento Time"
                     },
                     "rotary" : {
                     },
@@ -4531,9 +4624,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "PatchVolume",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Patch Volume"
                     },
                     "rotary" : {
                     },
@@ -4548,9 +4641,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "Panning",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Panorama"
                     },
                     "rotary" : {
                     },
@@ -4565,9 +4658,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "OutputBalance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Balance"
                     },
                     "rotary" : {
                     },
@@ -4582,9 +4675,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "Transpose",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Transpose"
                     },
                     "rotary" : {
                     },
@@ -4599,7 +4692,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "SmoothMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4611,11 +4704,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Control Smooth Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "BendScale",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4627,11 +4720,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Bender Scale"
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "BendUp",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4643,11 +4736,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Bender Range Up"
                     }
                 },
                 {
-                    "name" : "ComboBox (3)",
+                    "name" : "BendDown",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4659,11 +4752,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Bender Range Down"
                     }
                 },
                 {
-                    "name" : "ComboBox (4)",
+                    "name" : "Category1",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4675,11 +4768,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Category1"
                     }
                 },
                 {
-                    "name" : "ComboBox (5)",
+                    "name" : "Category2",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4691,11 +4784,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Category2"
                     }
                 },
                 {
-                    "name" : "ComboBox (6)",
+                    "name" : "KeyMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4707,11 +4800,11 @@
                         "height" : "55"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Key Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "MidiIn",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4721,13 +4814,10 @@
                         "y" : "58",
                         "width" : "239",
                         "height" : "48"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "MidiOut",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4737,13 +4827,10 @@
                         "y" : "155",
                         "width" : "239",
                         "height" : "48"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "ArpMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4755,11 +4842,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Arp Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "ArpPattern",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4771,11 +4858,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Arp Pattern Selct"
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "ArpOctRange",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4787,11 +4874,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Arp Octave Range"
                     }
                 },
                 {
-                    "name" : "ComboBox (3)",
+                    "name" : "ArpClock",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4803,13 +4890,13 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Arp Clock"
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "ArpNoteLength",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Arp Note Length"
                     },
                     "rotary" : {
                     },
@@ -4824,9 +4911,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "ArpNoteSwing",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Arp Swing"
                     },
                     "rotary" : {
                     },
@@ -4841,9 +4928,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "ArpGlobalTempo",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Clock Tempo"
                     },
                     "rotary" : {
                     },
@@ -4858,7 +4945,7 @@
                     }
                 },
                 {
-                    "name" : "Switch",
+                    "name" : "ArpHold",
                     "button" : {
                         "isToggle" : "1",
                         "radioGroupId" : "42",
@@ -4875,6 +4962,9 @@
                         "texture" : "btn_3",
                         "tileSizeX" : "69",
                         "tileSizeY" : "67"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp Hold Enable"
                     }
                 },
                 {
@@ -4898,7 +4988,7 @@
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "InputMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4910,11 +5000,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Input Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "InputSelect",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4926,11 +5016,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Input Select"
                     }
                 },
                 {
-                    "name" : "ComboBox",
+                    "name" : "SoftKnob1Mode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4942,11 +5032,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Soft Knob-1 Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (1)",
+                    "name" : "SoftKnob2Mode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4958,11 +5048,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Soft Knob-2 Mode"
                     }
                 },
                 {
-                    "name" : "ComboBox (2)",
+                    "name" : "SoftKnob1Name",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4974,11 +5064,11 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Soft Knob1 ShortName"
                     }
                 },
                 {
-                    "name" : "ComboBox (3)",
+                    "name" : "SoftKnob2Name",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -4990,7 +5080,7 @@
                         "height" : "48"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Soft Knob2 ShortName"
                     }
                 }
             ]
@@ -5069,6 +5159,20 @@
             }
         },
         {
+            "name" : "DeviceModel",
+            "label" : {
+                "text" : "C",
+                "textHeight" : "16",
+                "color" : "009BFFFF",
+                "alignH" : "R",
+                "alignV" : "C",
+                "x" : "448",
+                "y" : "1115",
+                "width" : "54.4257",
+                "height" : "37"
+            }
+        },
+        {
             "name" : "RomSelector",
             "combobox" : {
                 "text" : "Virus_C_OS_6.5.bin",
@@ -5081,20 +5185,6 @@
                 "width" : "508",
                 "height" : "37",
                 "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin"
-            }
-        },
-        {
-            "name" : "DeviceModel",
-            "label" : {
-                "text" : "C",
-                "textHeight" : "16",
-                "color" : "009BFFFF",
-                "alignH" : "R",
-                "alignV" : "C",
-                "x" : "448",
-                "y" : "1115",
-                "width" : "54.4257",
-                "height" : "37"
             }
         }
     ]
