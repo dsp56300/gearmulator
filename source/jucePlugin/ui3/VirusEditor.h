@@ -8,6 +8,7 @@
 #include "MidiPorts.h"
 #include "PatchBrowser.h"
 
+class VirusParameterBinding;
 class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
@@ -63,6 +64,7 @@ namespace genericVirusUI
 
 		juce::Button* m_playModeSingle = nullptr;
 		juce::Button* m_playModeMulti = nullptr;
+		juce::Button* m_playModeToggle = nullptr;
 
 		juce::TooltipWindow m_tooltipWindow;
 
