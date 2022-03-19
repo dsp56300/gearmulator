@@ -20,8 +20,13 @@ namespace genericVirusUI
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
 			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
-			m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
-			m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
+
+			if(!m_presetPrev.empty())
+				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
+
+			if(!m_presetNext.empty())
+				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
+
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
 
 			_editor.getParameterBinding().bind(*m_partVolume[i], Virus::Param_PartVolume, static_cast<uint8_t>(i));
@@ -134,8 +139,13 @@ namespace genericVirusUI
 			m_partSelect[i]->setVisible(visible);
 			m_partPan[i]->setVisible(visible);
 			m_partVolume[i]->setVisible(visible);
-			m_presetPrev[i]->setVisible(visible);
-			m_presetNext[i]->setVisible(visible);
+
+			if(i < m_presetPrev.size())
+				m_presetPrev[i]->setVisible(visible);
+
+			if(i < m_presetNext.size())
+				m_presetNext[i]->setVisible(visible);
+
 			m_presetName[i]->setVisible(visible);
 		}
 	}

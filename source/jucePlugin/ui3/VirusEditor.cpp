@@ -28,11 +28,20 @@ namespace genericVirusUI
 		m_controlLabel = findComponentT<juce::Label>("ControlLabel");
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
-		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle");
-		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti");
+		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
+		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti", false);
 
-		m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-		m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+		if(m_playModeSingle && m_playModeMulti)
+		{
+			m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
+			m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+		}
+		else
+		{
+			m_playModeToggle = findComponentT<juce::Button>("PlayModeToggle");
+			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
+		}
+
 		updatePlayModeButtons();
 
 		if(m_romSelector)
@@ -51,7 +60,7 @@ namespace genericVirusUI
 
 		m_controlLabel->setText("", juce::dontSendNotification);
 
-		auto* versionInfo = findComponentT<juce::Label>("VersionInfo");
+		auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false);
 
 		if(versionInfo)
 		{
@@ -59,11 +68,13 @@ namespace genericVirusUI
 			versionInfo->setText(message, juce::dontSendNotification);
 		}
 
-		auto* presetSave = findComponentT<juce::Button>("PresetSave");
-		presetSave->onClick = [this] { savePreset(); };
+		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
+		if(presetSave)
+			presetSave->onClick = [this] { savePreset(); };
 
-		auto* presetLoad = findComponentT<juce::Button>("PresetLoad");
-		presetLoad->onClick = [this] { loadPreset(); };
+		auto* presetLoad = findComponentT<juce::Button>("PresetLoad", false);
+		if(presetLoad)
+			presetLoad->onClick = [this] { loadPreset(); };
 
 		m_presetName->setEditable(false, true, true);
 		m_presetName->onTextChange = [this]()
@@ -204,8 +215,12 @@ namespace genericVirusUI
 
 	void VirusEditor::updatePlayModeButtons() const
 	{
-		m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
-		m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeSingle)
+			m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeMulti)
+			m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeToggle)
+			m_playModeToggle->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
 	}
 
 	void VirusEditor::savePreset()
