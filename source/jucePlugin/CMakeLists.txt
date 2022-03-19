@@ -31,26 +31,6 @@ set(SOURCES
 	version.h
 )
 
-set(SOURCES_UI2
-    ui2/Ui_Utils.h
-    ui2/Virus_Buttons.cpp
-    ui2/Virus_Buttons.h
-    ui2/Virus_LookAndFeel.cpp
-    ui2/Virus_LookAndFeel.h
-    ui2/Virus_Panel1_OscEditor.cpp
-    ui2/Virus_Panel1_OscEditor.h
-    ui2/Virus_Panel2_LfoEditor.cpp
-    ui2/Virus_Panel2_LfoEditor.h
-    ui2/Virus_Panel3_FxEditor.cpp
-    ui2/Virus_Panel3_FxEditor.h
-    ui2/Virus_Panel4_ArpEditor.cpp
-    ui2/Virus_Panel4_ArpEditor.h
-    ui2/Virus_Panel5_PatchBrowser.cpp
-    ui2/Virus_Panel5_PatchBrowser.h
-    ui2/VirusEditor.cpp
-    ui2/VirusEditor.h
-)
-
 set(SOURCES_UI3
 	ui3/FxPage.cpp
 	ui3/FxPage.h
@@ -69,37 +49,11 @@ set(SOURCES_UI3
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
-	"assets2/main_background.png"
-	"assets2/panels/panel_1.png"
-	"assets2/panels/panel_2.png"
-	"assets2/panels/panel_3.png"
-	"assets2/panels/panel_4.png"
-	"assets2/panels/panel_5.png"
-	"assets2/buttons/btn_main_1.png"
-	"assets2/buttons/btn_main_2.png"
-	"assets2/buttons/btn_main_3.png"
-	"assets2/buttons/btn_main_4.png"
-	"assets2/buttons/btn_main_5.png"
-	"assets2/buttons/btn_1.png"
-	"assets2/buttons/btn_2.png"
-	"assets2/buttons/btn_3.png"
-	"assets2/buttons/btn_4.png"
-	"assets2/buttons/btn_left.png"
-	"assets2/buttons/btn_right.png"
-	"assets2/buttons/btn_down.png"
-	"assets2/buttons/btn_menu.png"
-	"assets2/buttons/btn_load_bank.png"
-	"assets2/buttons/btn_save_preset.png"
-	"assets2/combobox/cmb_1.png"
-	"assets2/combobox/cmb_2.png"
-	"assets2/knobs/knob_1_128.png"
-	"assets2/knobs/knob_2_128.png"
-	"assets2/font/Digital"
-
 	"parameterDescriptions_C.json"
 )
 
 include(skins/Hoverland/assets.cmake)
+include(skins/Trancy/assets.cmake)
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
@@ -120,10 +74,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI2} ${SOURCES_UI3})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI3})
 
 	source_group("source" FILES ${SOURCES})
-	source_group("source\\ui2" FILES ${SOURCES_UI2})
 	source_group("source\\ui3" FILES ${SOURCES_UI3})
 
 	target_compile_definitions(${targetName} 
@@ -168,7 +121,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Hoverland})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	

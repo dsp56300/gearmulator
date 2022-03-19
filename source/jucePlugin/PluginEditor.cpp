@@ -39,27 +39,23 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 	m_rootScale = 1.0f;
 
-	if (index == 1)
+	try
 	{
-		const auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
-		setSize(virusEditor->iSkinSizeWidth, virusEditor->iSkinSizeHeight);
-		virusEditor->m_AudioPlugInEditor = this;
-		m_virusEditor.reset(virusEditor);
+		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
+		m_virusEditor.reset(editor);
+		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
+		m_rootScale = editor->getScale();
 	}
-	else
+	catch(const std::runtime_error& _err)
 	{
-		try
-		{
-			auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
-			m_virusEditor.reset(editor);
-			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
-			m_rootScale = editor->getScale();
-		}
-		catch(const std::runtime_error& _err)
-		{
-			LOG("ERROR: Failed to create editor: " << _err.what());
-			m_virusEditor->setSize(400,300);
-		}
+		LOG("ERROR: Failed to create editor: " << _err.what());
+
+		auto* errorLabel = new juce::Label();
+		errorLabel->setText(juce::String("Failed to load editor\n\n") + _err.what(), juce::dontSendNotification);
+		errorLabel->setJustificationType(juce::Justification::centred);
+		errorLabel->setSize(400, 300);
+
+		m_virusEditor.reset(errorLabel);
 	}
 
 	m_virusEditor->setTopLeftPosition(0, 0);
