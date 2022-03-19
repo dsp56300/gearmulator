@@ -41,7 +41,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 	try
 	{
-		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
+		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef, "VirusC_Trancy.json");
 		m_virusEditor.reset(editor);
 		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 		m_rootScale = editor->getScale();
