@@ -272,7 +272,7 @@ namespace genericVirusUI
 			const auto ext = result.getFileExtension().toLowerCase();
 
 			std::vector<Patch> patches;
-			::PatchBrowser::loadBankFile(patches, nullptr, result);
+			PatchBrowser::loadBankFile(patches, nullptr, result);
 
 			if (patches.empty())
 				return;

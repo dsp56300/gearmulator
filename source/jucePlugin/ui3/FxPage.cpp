@@ -2,6 +2,8 @@
 
 #include "VirusEditor.h"
 
+#include "../VirusController.h"
+
 namespace genericVirusUI
 {
 	FxPage::FxPage(VirusEditor& _editor) : m_editor(_editor)
