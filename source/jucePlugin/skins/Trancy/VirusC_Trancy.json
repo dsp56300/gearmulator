@@ -326,10 +326,9 @@
                     "name" : "Osc2Sync",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -342,7 +341,7 @@
                         "tileSizeY" : "67"
                     },
                     "parameterAttachment" : {
-                        "parameter" : ""
+                        "parameter" : "Osc2 Sync"
                     }
                 },
                 {
@@ -515,7 +514,7 @@
                 {
                     "name" : "Semitone",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Unison Detune"
                     },
                     "rotary" : {
                     },
@@ -532,7 +531,7 @@
                 {
                     "name" : "Detune",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Unison Pan Spread"
                     },
                     "rotary" : {
                     },
@@ -549,7 +548,7 @@
                 {
                     "name" : "Detune (1)",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Pulsewidth"
+                        "parameter" : "Unison Lfo Phase"
                     },
                     "rotary" : {
                     },
@@ -567,10 +566,9 @@
                     "name" : "Toggle",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -929,7 +927,7 @@
                 {
                     "name" : "Cutoff",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Cutoff2"
                     },
                     "rotary" : {
                     },
@@ -946,7 +944,7 @@
                 {
                     "name" : "Resonance",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter2 Resonance"
                     },
                     "rotary" : {
                     },
@@ -963,7 +961,7 @@
                 {
                     "name" : "EnvAmount",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter2 Env Amt"
                     },
                     "rotary" : {
                     },
@@ -980,7 +978,7 @@
                 {
                     "name" : "Keyfollow",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Filter2 Keyfollow"
                     },
                     "rotary" : {
                     },
@@ -997,7 +995,7 @@
                 {
                     "name" : "ResVelo",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Resonance2 Velocity"
                     },
                     "rotary" : {
                     },
@@ -1014,7 +1012,7 @@
                 {
                     "name" : "EnvVelo",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Flt2 EnvAmt Velocity"
                     },
                     "rotary" : {
                     },
@@ -1113,10 +1111,9 @@
                     "name" : "Env1Pol",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1136,10 +1133,9 @@
                     "name" : "Env2Pol",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1159,10 +1155,9 @@
                     "name" : "LinkCutoff",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1175,17 +1170,16 @@
                         "tileSizeY" : "68"
                     },
                     "parameterAttachment" : {
-                        "parameter" : ""
+                        "parameter" : "Filter2 Cutoff Link"
                     }
                 },
                 {
                     "name" : "LinkEnv",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1605,10 +1599,9 @@
                     "name" : "LfoOscPitchLink",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1628,10 +1621,9 @@
                     "name" : "LfoEnvMode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1651,10 +1643,9 @@
                     "name" : "LfoMode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1892,10 +1883,9 @@
                     "name" : "LfoOscPitchLink",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1915,10 +1905,9 @@
                     "name" : "LfoEnvMode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -1938,10 +1927,9 @@
                     "name" : "LfoMode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -2077,10 +2065,9 @@
                     "name" : "Lfo3Mode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -2521,10 +2508,9 @@
                     "name" : "InputFollowerMode",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -2878,9 +2864,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge",
+                    "name" : "EqLowGain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "LowEQ Gain"
                     },
                     "rotary" : {
                     },
@@ -2895,9 +2881,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (1)",
+                    "name" : "EqLowFreq",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "LowEQ Frequency"
                     },
                     "rotary" : {
                     },
@@ -2912,9 +2898,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (2)",
+                    "name" : "EqMidGain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "MidEQ Gain"
                     },
                     "rotary" : {
                     },
@@ -2929,9 +2915,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (3)",
+                    "name" : "EqMidFreq",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "MidEQ Frequency"
                     },
                     "rotary" : {
                     },
@@ -2946,9 +2932,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (4)",
+                    "name" : "EqMidQ",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "MidEQ Q-Factor"
                     },
                     "rotary" : {
                     },
@@ -2963,9 +2949,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (5)",
+                    "name" : "EqHighGain",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "HighEQ Gain"
                     },
                     "rotary" : {
                     },
@@ -2980,9 +2966,9 @@
                     }
                 },
                 {
-                    "name" : "RotaryLarge (6)",
+                    "name" : "EqHighFreq",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "HighEQ Frequency"
                     },
                     "rotary" : {
                     },
@@ -3031,222 +3017,244 @@
                     }
                 },
                 {
-                    "name" : "DelayTime",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Time"
+                    "name" : "ContainerDelay",
+                    "component" : {
+                        "x" : "226",
+                        "y" : "490",
+                        "width" : "911",
+                        "height" : "245"
                     },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "260",
-                        "y" : "570",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
+                    "children" : [
+                        {
+                            "name" : "DelayTime",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Time"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "34",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "DelayRate",
+                            "parameterAttachment" : {
+                                "parameter" : "Dly Rate / Rev Decay"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "369",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "DelayFeedback",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Feedback"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "508",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "DelayColor",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Color"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "647",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "DelayDepth",
+                            "parameterAttachment" : {
+                                "parameter" : "Dly Depth "
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "790",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "DelayClock",
+                            "combobox" : {
+                                "text" : "Wave 42",
+                                "textHeight" : "20",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "x" : "162",
+                                "y" : "40",
+                                "width" : "170",
+                                "height" : "52"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Clock"
+                            }
+                        },
+                        {
+                            "name" : "DelayShape",
+                            "combobox" : {
+                                "text" : "Wave 42",
+                                "textHeight" : "20",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "x" : "162",
+                                "y" : "137",
+                                "width" : "170",
+                                "height" : "52"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Lfo Shape"
+                            }
+                        }
+                    ]
                 },
                 {
-                    "name" : "DelayRate",
-                    "parameterAttachment" : {
-                        "parameter" : "Dly Rate / Rev Decay"
+                    "name" : "ContainerReverb",
+                    "component" : {
+                        "x" : "226",
+                        "y" : "738",
+                        "width" : "911",
+                        "height" : "245"
                     },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "595",
-                        "y" : "570",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "DelayFeedback",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Feedback"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "734",
-                        "y" : "570",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "DelayColor",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Color"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "873",
-                        "y" : "570",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "DelayDepth",
-                    "parameterAttachment" : {
-                        "parameter" : "Dly Depth "
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "1016",
-                        "y" : "570",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "DelayClock",
-                    "combobox" : {
-                        "text" : "Wave 42",
-                        "textHeight" : "20",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "x" : "388",
-                        "y" : "530",
-                        "width" : "170",
-                        "height" : "52"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Clock"
-                    }
-                },
-                {
-                    "name" : "DelayShape",
-                    "combobox" : {
-                        "text" : "Wave 42",
-                        "textHeight" : "20",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "x" : "388",
-                        "y" : "627",
-                        "width" : "170",
-                        "height" : "52"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Lfo Shape"
-                    }
-                },
-                {
-                    "name" : "ReverbDecayTime",
-                    "parameterAttachment" : {
-                        "parameter" : "Dly Rate / Rev Decay"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "260",
-                        "y" : "818",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "ReverbDamping",
-                    "parameterAttachment" : {
-                        "parameter" : "Reverb Damping"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "595",
-                        "y" : "818",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "ReverbColor",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Color"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "734",
-                        "y" : "818",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "ReverbPredelay",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Time"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "873",
-                        "y" : "818",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "ReverbFeedback",
-                    "parameterAttachment" : {
-                        "parameter" : "Delay Feedback"
-                    },
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
-                        "x" : "1016",
-                        "y" : "818",
-                        "width" : "75",
-                        "height" : "75",
-                        "texture" : "knob_1_128",
-                        "tileSizeX" : "75",
-                        "tileSizeY" : "75"
-                    }
-                },
-                {
-                    "name" : "ReverbType",
-                    "combobox" : {
-                        "text" : "Wave 42",
-                        "textHeight" : "20",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "x" : "388",
-                        "y" : "828",
-                        "width" : "170",
-                        "height" : "52"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Rev Size"
-                    }
+                    "children" : [
+                        {
+                            "name" : "ReverbDecayTime",
+                            "parameterAttachment" : {
+                                "parameter" : "Dly Rate / Rev Decay"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "34",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "ReverbDamping",
+                            "parameterAttachment" : {
+                                "parameter" : "Reverb Damping"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "369",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "ReverbColor",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Color"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "508",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "ReverbPredelay",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Time"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "647",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "ReverbFeedback",
+                            "parameterAttachment" : {
+                                "parameter" : "Delay Feedback"
+                            },
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "790",
+                                "y" : "80",
+                                "width" : "75",
+                                "height" : "75",
+                                "texture" : "knob_1_128",
+                                "tileSizeX" : "75",
+                                "tileSizeY" : "75"
+                            }
+                        },
+                        {
+                            "name" : "ReverbType",
+                            "combobox" : {
+                                "text" : "Wave 42",
+                                "textHeight" : "20",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "x" : "162",
+                                "y" : "90",
+                                "width" : "170",
+                                "height" : "52"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Rev Size"
+                            }
+                        }
+                    ]
                 },
                 {
                     "name" : "DelayReverbMode",
@@ -3471,10 +3479,9 @@
                     "name" : "VocoderLink",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3522,10 +3529,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3590,10 +3596,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3658,10 +3663,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3726,10 +3730,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3794,10 +3797,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3862,10 +3864,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3930,10 +3931,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -3998,10 +3998,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4066,10 +4065,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4134,10 +4132,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4202,10 +4199,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4270,10 +4266,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4338,10 +4333,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4406,10 +4400,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4474,10 +4467,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4542,10 +4534,9 @@
                     "name" : "SelectPart",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4948,10 +4939,9 @@
                     "name" : "ArpHold",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
                         "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
@@ -4968,16 +4958,15 @@
                     }
                 },
                 {
-                    "name" : "PlayMode",
+                    "name" : "PlayModeToggle",
                     "button" : {
                         "isToggle" : "1",
-                        "radioGroupId" : "42",
-                        "normalImage" : "0",
+                        "normalImage" : "1",
                         "overImage" : "1",
                         "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
+                        "normalImageOn" : "0",
+                        "overImageOn" : "0",
+                        "downImageOn" : "0",
                         "x" : "1169",
                         "y" : "835",
                         "width" : "69",
@@ -5106,13 +5095,37 @@
                         "y" : "52",
                         "width" : "950",
                         "height" : "54"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
                     }
                 },
                 {
-                    "name" : "PresetLoad",
+                    "name" : "ContainerFileSelector",
+                    "component" : {
+                        "x" : "6",
+                        "y" : "181",
+                        "width" : "1008",
+                        "height" : "813"
+                    }
+                },
+                {
+                    "name" : "ContainerPatchList",
+                    "component" : {
+                        "x" : "1034",
+                        "y" : "30",
+                        "width" : "1041",
+                        "height" : "914"
+                    }
+                },
+                {
+                    "name" : "ContainerPatchListSearchBox",
+                    "component" : {
+                        "x" : "1034",
+                        "y" : "944",
+                        "width" : "1041",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "PresetSave",
                     "button" : {
                         "normalImage" : "0",
                         "overImage" : "0",
