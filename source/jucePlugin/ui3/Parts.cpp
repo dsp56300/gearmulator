@@ -31,6 +31,9 @@ namespace genericVirusUI
 
 			_editor.getParameterBinding().bind(*m_partVolume[i], Virus::Param_PartVolume, static_cast<uint8_t>(i));
 			_editor.getParameterBinding().bind(*m_partPan[i], Virus::Param_Panorama, static_cast<uint8_t>(i));
+
+			m_partVolume[i]->getProperties().set("parameter", (int)Virus::Param_PartVolume);
+			m_partPan[i]->getProperties().set("parameter", (int)Virus::Param_Panorama);
 		}
 
 		updateAll();
