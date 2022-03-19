@@ -7,6 +7,8 @@ namespace genericUI
 	class ComboboxStyle : public UiObjectStyle
 	{
 	public:
+		explicit ComboboxStyle(Editor& _editor)	: UiObjectStyle(_editor) {}
+
 		void apply(juce::ComboBox& _target) const;
 
 	private:

@@ -34,6 +34,21 @@ namespace genericUI
 			m_drawables.insert(std::make_pair(texture, std::move(drawable)));
 		}
 
+		std::set<std::string> fonts;
+		m_rootObject->collectVariants(fonts, "fontFile");
+
+		for(const auto& fontFile : fonts)
+		{
+			const auto dataName = fontFile + ".ttf";
+
+			uint32_t dataSize;
+			const auto* data = m_interface.getResourceByFilename(dataName, dataSize);
+			if (!data)
+				throw std::runtime_error("Failed to find font named " + dataName);
+			auto font = juce::Font(juce::Typeface::createSystemTypefaceFor(data, dataSize));
+			m_fonts.insert(std::make_pair(fontFile, std::move(font)));
+		}
+
 		m_rootObject->createJuceTree(*this);
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
@@ -49,6 +64,14 @@ namespace genericUI
 	{
 		const auto existing = getImageDrawable(_texture);
 		return existing ? existing->createCopy() : nullptr;
+	}
+
+	const juce::Font& Editor::getFont(const std::string& _fontFile)
+	{
+		const auto it = m_fonts.find(_fontFile);
+		if(it == m_fonts.end())
+			throw std::runtime_error("Unable to find font named " + _fontFile);
+		return it->second;
 	}
 
 	void Editor::registerComponent(const std::string& _name, juce::Component* _component)

@@ -75,7 +75,7 @@ namespace genericUI
 
 		apply(_editor, static_cast<juce::Component&>(_target));
 
-		createStyle(_editor, _target, new RotaryStyle());
+		createStyle(_editor, _target, new RotaryStyle(_editor));
 
 		bindParameter(_editor, _target);
 	}
@@ -83,7 +83,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::ComboBox& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new ComboboxStyle();
+		auto* s = new ComboboxStyle(_editor);
 		createStyle(_editor, _target, s);
 		bindParameter(_editor, _target);
 		s->apply(_target);
@@ -92,7 +92,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::DrawableButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new ButtonStyle();
+		auto* s = new ButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 		bindParameter(_editor, _target);
@@ -101,7 +101,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new LabelStyle();
+		auto* s = new LabelStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}
@@ -109,7 +109,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::TextButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new TextButtonStyle();
+		auto* s = new TextButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}
@@ -117,7 +117,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::HyperlinkButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new HyperlinkButtonStyle();
+		auto* s = new HyperlinkButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}

@@ -7,6 +7,8 @@ namespace genericUI
 	class ButtonStyle : public UiObjectStyle
 	{
 	public:
+		explicit ButtonStyle(Editor& _editor) : UiObjectStyle(_editor) {}
+
 		void apply(Editor& _editor, const UiObject& _object) override;
 		void apply(juce::DrawableButton& _button) const;
 
