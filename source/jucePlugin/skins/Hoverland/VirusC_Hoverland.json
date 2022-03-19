@@ -98,7 +98,7 @@
                 "alignV" : "C",
                 "bold" : "1",
                 "x" : "818.6",
-                "y" : "95.9",
+                "y" : "95.90002",
                 "width" : "440",
                 "height" : "75"
             }
@@ -113,7 +113,7 @@
                 "alignV" : "T",
                 "bold" : "1",
                 "x" : "1190.6",
-                "y" : "92.9",
+                "y" : "92.90002",
                 "width" : "368",
                 "height" : "80"
             }
@@ -1111,7 +1111,7 @@
             },
             "spritesheet" : {
                 "x" : "552.3",
-                "y" : "916.13",
+                "y" : "916.1299",
                 "width" : "36",
                 "height" : "36",
                 "texture" : "Mult_36x36_x2i",
@@ -1125,7 +1125,7 @@
             },
             "spritesheet" : {
                 "x" : "614.38",
-                "y" : "916.13",
+                "y" : "916.1299",
                 "width" : "36",
                 "height" : "36",
                 "texture" : "Mult_36x36_x2i",
@@ -1207,7 +1207,7 @@
             },
             "spritesheet" : {
                 "x" : "552.3",
-                "y" : "988.13",
+                "y" : "988.1299",
                 "width" : "36",
                 "height" : "36",
                 "texture" : "Mult_36x36_x2i",
@@ -1221,7 +1221,7 @@
             },
             "spritesheet" : {
                 "x" : "614.38",
-                "y" : "988.13",
+                "y" : "988.1299",
                 "width" : "36",
                 "height" : "36",
                 "texture" : "Mult_36x36_x2i",
@@ -3276,7 +3276,7 @@
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
                         "x" : "178",
-                        "y" : "679.4",
+                        "y" : "679.3999",
                         "width" : "46",
                         "height" : "38",
                         "texture" : "lfo_btn_46x76_x2",
@@ -5438,7 +5438,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "969",
-                        "y" : "617.4",
+                        "y" : "617.3999",
                         "width" : "162",
                         "height" : "36"
                     },
@@ -5538,7 +5538,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1608",
-                        "y" : "617.4",
+                        "y" : "617.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5554,7 +5554,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1822",
-                        "y" : "617.4",
+                        "y" : "617.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5570,7 +5570,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1608",
-                        "y" : "716.4",
+                        "y" : "716.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5586,7 +5586,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1822",
-                        "y" : "716.4",
+                        "y" : "716.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5602,7 +5602,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1608",
-                        "y" : "815.4",
+                        "y" : "815.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5618,7 +5618,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "x" : "1822",
-                        "y" : "815.4",
+                        "y" : "815.3999",
                         "width" : "160",
                         "height" : "36"
                     },
@@ -5665,12 +5665,30 @@
             },
             "children" : [
                 {
-                    "name" : "ContainerPresetBrowser",
+                    "name" : "ContainerFileSelector",
                     "component" : {
                         "x" : "88",
                         "y" : "96",
-                        "width" : "1857",
+                        "width" : "928",
                         "height" : "1055"
+                    }
+                },
+                {
+                    "name" : "ContainerPatchList",
+                    "component" : {
+                        "x" : "1016",
+                        "y" : "96",
+                        "width" : "929",
+                        "height" : "1005"
+                    }
+                },
+                {
+                    "name" : "ContainerPatchListSearchBox",
+                    "component" : {
+                        "x" : "1016",
+                        "y" : "1101",
+                        "width" : "929",
+                        "height" : "50"
                     }
                 }
             ]

@@ -64,8 +64,6 @@ set(SOURCES_UI3
     ui3/Tabs.h
     ui3/VirusEditor.cpp
     ui3/VirusEditor.h
-	ui3/VirusPatchBrowser.cpp
-	ui3/VirusPatchBrowser.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
