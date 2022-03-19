@@ -9,13 +9,13 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef) :
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding)
 	{
 		uint32_t jsonSize;
-		const auto json = getResourceByFilename("VirusC_Hoverland.json", jsonSize);
+		const auto json = getResourceByFilename(_jsonFilename, jsonSize);
 		create(std::string(json, jsonSize));
 
 		m_parts.reset(new Parts(*this));
