@@ -52,6 +52,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 		auto* errorLabel = new juce::Label();
 		errorLabel->setText(juce::String("Failed to load editor\n\n") + _err.what(), juce::dontSendNotification);
+		errorLabel->setFont(juce::Font(juce::Font::getDefaultSansSerifFontName(), 36, 0));
 		errorLabel->setJustificationType(juce::Justification::centred);
 		errorLabel->setSize(400, 300);
 
