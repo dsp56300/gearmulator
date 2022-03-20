@@ -2,6 +2,8 @@
 
 #include "uiObject.h"
 
+#include "../synthLib/os.h"
+
 namespace genericUI
 {
 	Editor::Editor(EditorInterface& _interface) : m_interface(_interface)
@@ -56,6 +58,68 @@ namespace genericUI
 		m_rootObject->createJuceTree(*this);
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
+	}
+
+	std::string Editor::exportToFolder(const std::string& _folder) const
+	{
+		if(!m_rootObject)
+			return "Nothing to export";
+
+		synthLib::createDirectory(_folder);
+
+		std::string subfolder = m_jsonFilename;
+		const auto dotIndex = m_jsonFilename.rfind('.');
+		if(dotIndex != std::string::npos)
+			subfolder = subfolder.substr(0, dotIndex);
+		const auto underscoreIndex = m_jsonFilename.find('_');
+		if(underscoreIndex != std::string::npos)
+			subfolder = subfolder.substr(underscoreIndex+1);
+
+		const auto folder = _folder + subfolder + '/';
+
+		synthLib::createDirectory(folder);
+
+		std::stringstream errors;
+
+		auto writeFile = [this, &folder, &errors](const std::string& _name)
+		{
+			uint32_t dataSize;
+			const auto data = m_interface.getResourceByFilename(_name, dataSize);
+
+			FILE* hFile = fopen((folder + _name).c_str(), "wb");
+
+			if(!hFile)
+			{
+				errors << "Failed to create file " << folder << _name << std::endl;
+			}
+			else
+			{
+				fwrite(data, dataSize, 1, hFile);
+				fclose(hFile);
+			}
+		};
+
+		auto writeData = [this, writeFile](const std::set<std::string>& _names, const std::string& _ext)
+		{
+			for (const auto& name : _names)
+			{
+				const auto dataName = name + _ext;
+				writeFile(dataName);
+			}
+		};
+
+		std::set<std::string> textures;
+		std::set<std::string> fonts;
+
+		m_rootObject->collectVariants(textures, "texture");
+		m_rootObject->collectVariants(fonts, "fontFile");
+
+		writeFile(m_jsonFilename);
+
+		writeData(textures, ".png");
+		writeData(fonts, ".ttf");
+
+		return errors.str();
 	}
 
 	juce::Drawable* Editor::getImageDrawable(const std::string& _texture)

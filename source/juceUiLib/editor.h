@@ -19,6 +19,8 @@ namespace genericUI
 
 		void create(const std::string& _jsonFilename);
 
+		std::string exportToFolder(const std::string& _folder) const;
+
 		juce::Drawable* getImageDrawable(const std::string& _texture);
 		std::unique_ptr<juce::Drawable> createImageDrawable(const std::string& _texture);
 		const juce::Font& getFont(const std::string& _fontFile);

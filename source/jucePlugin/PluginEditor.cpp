@@ -83,6 +83,16 @@ void AudioPluginAudioProcessorEditor::openMenu()
 	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
 	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
 
+	if(m_virusEditor)
+	{
+		auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(m_virusEditor.get());
+		if(editor)
+		{
+			skinMenu.addSeparator();
+			skinMenu.addItem("Export current skin to folder", true, false, [this]{exportCurrentSkin();});
+		}
+	}
+
 	juce::PopupMenu scaleMenu;
 	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
 	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
@@ -96,6 +106,28 @@ void AudioPluginAudioProcessorEditor::openMenu()
 	menu.addSubMenu("GUI Scale", scaleMenu);
 
 	menu.showMenuAsync(juce::PopupMenu::Options());
+}
+
+void AudioPluginAudioProcessorEditor::exportCurrentSkin() const
+{
+	if(!m_virusEditor)
+		return;
+
+	auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(m_virusEditor.get());
+
+	if(!editor)
+		return;
+
+	const auto res = editor->exportToFolder("skins/");
+
+	if(!res.empty())
+	{
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, "OK", m_virusEditor.get());
+	}
+	else
+	{
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "Export finished", "Skin successfully exported");
+	}
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()

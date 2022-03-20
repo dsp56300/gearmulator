@@ -20,6 +20,7 @@ private:
 	void loadSkin(int index);
 	void setGuiScale(int percent);
 	void openMenu();
+	void exportCurrentSkin() const;
 
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.
