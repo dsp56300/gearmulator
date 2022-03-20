@@ -232,7 +232,7 @@ namespace genericVirusUI
 	{
 		const auto ext = file.getFileExtension().toLowerCase();
 		const auto path = file.getParentDirectory().getFullPathName();
-		if (file.isDirectory() && e.mods.isRightButtonDown())
+		if (file.isDirectory() && e.mods.isPopupMenu())
 		{
 			auto p = PopupMenu();
 			p.addItem("Add directory contents to patch list", [this, file]()
