@@ -6,27 +6,39 @@
 #include "ui2/VirusEditor.h"
 #include "ui3/VirusEditor.h"
 
+#include "../synthLib/os.h"
+
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p)
 {
+	m_includedSkins.push_back({"Hoverland", "VirusC_Hoverland.json", ""});
+	m_includedSkins.push_back({"Trancy", "VirusC_Trancy.json", ""});
+
 	addMouseListener(this, true);
 
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
+    
+	Skin skin = readSkinFromConfig();
 
-	loadSkin(skinId);
+	if(skin.jsonFilename.empty())
+	{
+		skin = m_includedSkins[0];
+	}
+
+	loadSkin(skin);
 
 	setGuiScale(scale);
 }
 
-void AudioPluginAudioProcessorEditor::loadSkin(int index)
+void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
 {
-	if(m_currentSkinId == index)
+	if(m_currentSkin == _skin)
 		return;
 
-	m_currentSkinId = index;
+	m_currentSkin = _skin;
+	writeSkinToConfig(_skin);
 
 	if (m_virusEditor)
 	{
@@ -41,26 +53,24 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 	try
 	{
-		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef, "VirusC_Trancy.json", [this] { openMenu(); });
+		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef, _skin.jsonFilename, _skin.folder, [this] { openMenu(); });
 		m_virusEditor.reset(editor);
 		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 		m_rootScale = editor->getScale();
+
+		m_virusEditor->setTopLeftPosition(0, 0);
+		addAndMakeVisible(m_virusEditor.get());
 	}
 	catch(const std::runtime_error& _err)
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
-		auto* errorLabel = new juce::Label();
-		errorLabel->setText(juce::String("Failed to load editor\n\n") + _err.what(), juce::dontSendNotification);
-		errorLabel->setFont(juce::Font(juce::Font::getDefaultSansSerifFontName(), 36, 0));
-		errorLabel->setJustificationType(juce::Justification::centred);
-		errorLabel->setSize(400, 300);
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
+		m_virusEditor.reset();
 
-		m_virusEditor.reset(errorLabel);
+		if(!_skin.folder.empty())
+			loadSkin(m_includedSkins[0]);
 	}
-
-	m_virusEditor->setTopLeftPosition(0, 0);
-	addAndMakeVisible(m_virusEditor.get());
 }
 
 void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
@@ -80,10 +90,50 @@ void AudioPluginAudioProcessorEditor::openMenu()
 	juce::PopupMenu menu;
 
 	juce::PopupMenu skinMenu;
-	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
-	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
 
-	if(m_virusEditor)
+	auto addSkinEntry = [this, &skinMenu](const Skin& _skin)
+	{
+		skinMenu.addItem(_skin.displayName, true, _skin == m_currentSkin,[this, _skin] {loadSkin(_skin);});
+	};
+
+	for (const auto & skin : m_includedSkins)
+		addSkinEntry(skin);
+
+	bool haveSkinsOnDisk = false;
+
+	// find more skins on disk
+	const auto modulePath = synthLib::getModulePath();
+
+	std::vector<std::string> entries;
+	synthLib::getDirectoryEntries(entries, modulePath + "skins");
+
+	for (const auto& entry : entries)
+	{
+		std::vector<std::string> files;
+		synthLib::getDirectoryEntries(files, entry);
+
+		for (const auto& file : files)
+		{
+			if(synthLib::hasExtension(file, ".json"))
+			{
+				if(!haveSkinsOnDisk)
+				{
+					haveSkinsOnDisk = true;
+					skinMenu.addSeparator();
+				}
+
+				const auto relativePath = entry.substr(modulePath.size());
+				auto jsonName = file;
+				const auto pathEndPos = jsonName.find_last_of("/\\");
+				if(pathEndPos != std::string::npos)
+					jsonName = file.substr(pathEndPos+1);
+				const Skin skin{jsonName + " (" + relativePath + ")", jsonName, relativePath};
+				addSkinEntry(skin);
+			}
+		}
+	}
+
+	if(m_virusEditor && m_currentSkin.folder.empty())
 	{
 		auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(m_virusEditor.get());
 		if(editor)
@@ -128,6 +178,26 @@ void AudioPluginAudioProcessorEditor::exportCurrentSkin() const
 	{
 		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "Export finished", "Skin successfully exported");
 	}
+}
+
+AudioPluginAudioProcessorEditor::Skin AudioPluginAudioProcessorEditor::readSkinFromConfig() const
+{
+	const auto* config = processorRef.getController().getConfig();
+
+	Skin skin;
+	skin.displayName = config->getValue("skinDisplayName", "").toStdString();
+	skin.jsonFilename = config->getValue("skinFile", "").toStdString();
+	skin.folder = config->getValue("skinFolder", "").toStdString();
+	return skin;
+}
+
+void AudioPluginAudioProcessorEditor::writeSkinToConfig(const Skin& _skin) const
+{
+	auto* config = processorRef.getController().getConfig();
+
+	config->setValue("skinDisplayName", _skin.displayName.c_str());
+	config->setValue("skinFile", _skin.jsonFilename.c_str());
+	config->setValue("skinFolder", _skin.folder.c_str());
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()

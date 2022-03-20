@@ -179,9 +179,7 @@ namespace synthLib
 
         for (const auto& file : files)
         {
-            const std::string ext = lowercase(getExtension(file));
-
-            if (ext != ".bin")
+            if(!hasExtension(file, ".bin"))
                 continue;
 
             if (!_minSize && !_maxSize)
@@ -213,6 +211,11 @@ namespace synthLib
     std::string findROM(const size_t _expectedSize)
     {
 	    return findROM(_expectedSize, _expectedSize);
+    }
+
+    bool hasExtension(const std::string& _filename, const std::string& _extension)
+    {
+        return lowercase(getExtension(_filename)) == lowercase(_extension);
     }
 
     void setFlushDenormalsToZero()

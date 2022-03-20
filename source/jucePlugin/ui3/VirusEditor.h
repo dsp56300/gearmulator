@@ -16,7 +16,7 @@ namespace genericVirusUI
 	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor
 	{
 	public:
-		VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::function<void()> _openMenuCallback);
+		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, const std::string& _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
@@ -56,6 +56,8 @@ namespace genericVirusUI
 		AudioPluginAudioProcessor& m_processor;
 		VirusParameterBinding& m_parameterBinding;
 
+		const std::string m_skinFolder;
+
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Tabs> m_tabs;
 		std::unique_ptr<MidiPorts> m_midiPorts;
@@ -77,5 +79,7 @@ namespace genericVirusUI
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
+
+		std::map<std::string, std::vector<char>> m_fileCache;
 	};
 }
