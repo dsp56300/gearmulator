@@ -64,6 +64,7 @@ namespace genericVirusUI
 		juce::Label* m_presetName = nullptr;
 		juce::Label* m_focusedParameterName = nullptr;
 		juce::Label* m_focusedParameterValue = nullptr;
+		juce::Label* m_focusedParameterTooltip = nullptr;
 		juce::ComboBox* m_romSelector = nullptr;
 
 		juce::Button* m_playModeSingle = nullptr;
