@@ -7,12 +7,15 @@
 #include "../VirusParameterBinding.h"
 #include "../version.h"
 
+#include "../synthLib/os.h"
+
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, const std::string& _skinFolder, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
+		m_skinFolder(_skinFolder),
 		m_openMenuCallback(std::move(_openMenuCallback))
 	{
 		create(_jsonFilename);
@@ -144,6 +147,51 @@ namespace genericVirusUI
 
 	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
+		if(!m_skinFolder.empty())
+		{
+			auto readFromCache = [this, &_name, &_dataSize]()
+			{
+				const auto it = m_fileCache.find(_name);
+				if(it == m_fileCache.end())
+				{
+					_dataSize = 0;
+					return static_cast<char*>(nullptr);
+				}
+				_dataSize = static_cast<uint32_t>(it->second.size());
+				return &it->second.front();
+			};
+
+			auto* res = readFromCache();
+
+			if(res)
+				return res;
+
+			const auto modulePath = synthLib::getModulePath();
+			const auto folder = m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder;
+
+			// try to load from disk first
+			FILE* hFile = fopen((folder + _name).c_str(), "rb");
+			if(hFile)
+			{
+				fseek(hFile, 0, SEEK_END);
+				_dataSize = ftell(hFile);
+				fseek(hFile, 0, SEEK_SET);
+
+				std::vector<char> data;
+				data.resize(_dataSize);
+				const auto readCount = fread(&data.front(), 1, _dataSize, hFile);
+				fclose(hFile);
+
+				if(readCount == _dataSize)
+					m_fileCache.insert(std::make_pair(_name, std::move(data)));
+
+				res = readFromCache();
+
+				if(res)
+					return res;
+			}
+		}
+
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
 		{
 			if (BinaryData::originalFilenames[i] != _name)
