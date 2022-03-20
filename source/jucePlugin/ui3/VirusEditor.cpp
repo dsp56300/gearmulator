@@ -7,7 +7,7 @@
 #include "../VirusParameterBinding.h"
 #include "../version.h"
 
-#include "../synthLib/os.h"
+#include "../../synthLib/os.h"
 
 namespace genericVirusUI
 {
