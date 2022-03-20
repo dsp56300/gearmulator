@@ -21,10 +21,10 @@ namespace genericVirusUI
 		{
 			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
 
-			if(!m_presetPrev.empty())
+			if(i < m_presetPrev.size())
 				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
 
-			if(!m_presetNext.empty())
+			if(i < m_presetNext.size())
 				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
 
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
@@ -61,8 +61,11 @@ namespace genericVirusUI
 		m_editor.setPart(_part);
 	}
 
-	void Parts::selectPrevPreset(const size_t _part) const
+	void Parts::selectPrevPreset(size_t _part) const
 	{
+		if(m_presetPrev.size() == 1)
+			_part = m_editor.getController().getCurrentPart();
+
 		Virus::Controller& controller = m_editor.getController();
 
 		const auto pt = static_cast<uint8_t>(_part);
@@ -73,8 +76,11 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::selectNextPreset(const size_t _part) const
+	void Parts::selectNextPreset(size_t _part) const
 	{
+		if(m_presetNext.size() == 1)
+			_part = m_editor.getController().getCurrentPart();
+
 		Virus::Controller& controller = m_editor.getController();
 
 		const auto pt = static_cast<uint8_t>(_part);

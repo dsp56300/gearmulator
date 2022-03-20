@@ -3,12 +3,14 @@ set(ASSETS_VirusC_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/btn_2.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_3.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_4.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_left.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_main_1.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_main_2.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_main_3.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_main_4.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_main_5.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_menu.png
+	${CMAKE_CURRENT_LIST_DIR}/btn_right.png
 	${CMAKE_CURRENT_LIST_DIR}/btn_save_preset.png
 	${CMAKE_CURRENT_LIST_DIR}/Digital.ttf
 	${CMAKE_CURRENT_LIST_DIR}/knob_1_128.png
