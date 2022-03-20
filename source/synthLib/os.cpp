@@ -1,8 +1,5 @@
 #include "os.h"
 
-#include <cassert>
-
-#include "../dsp56300/source/dsp56kEmu/buildconfig.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #ifndef _WIN32
@@ -14,6 +11,7 @@
 #ifdef USE_DIRENT
 #include <dirent.h>
 #include <unistd.h>
+#include <sys/stat.h>
 #else
 #include <filesystem>
 #endif
@@ -45,12 +43,12 @@ namespace synthLib
                               reinterpret_cast<LPCSTR>(&getModulePath), &hm) == 0)
         {
             LOG("GetModuleHandle failed, error = " << GetLastError());
-            return std::string();
+            return {};
         }
         if (GetModuleFileName(hm, buffer, sizeof(buffer)) == 0)
         {
             LOG("GetModuleFileName failed, error = " << GetLastError());
-            return std::string();
+            return {};
         }
 
         path = buffer;
@@ -95,11 +93,68 @@ namespace synthLib
         return path;
     }
 
+    std::string getCurrentDirectory()
+    {
+#ifdef USE_DIRENT
+        char temp[1024];
+        getcwd(temp, sizeof(temp));
+        return temp;
+#else
+		return std::filesystem::current_path().string();
+#endif
+    }
+
+    bool createDirectory(const std::string& _dir)
+    {
+#ifdef USE_DIRENT
+        return mkdir(_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0;
+#else
+        return std::filesystem::create_directories(_dir);
+#endif
+    }
+
+    bool getDirectoryEntries(std::vector<std::string>& _files, const std::string& _folder)
+    {
+#ifdef USE_DIRENT
+        DIR *dir;
+        struct dirent *ent;
+        if ((dir = opendir(_folder.c_str())))
+        {
+            while ((ent = readdir(dir)))
+            {
+                const std::string file = _folder + ent->d_name;
+
+                _files.push_back(file);
+            }
+            closedir(dir);
+        }
+        else
+        {
+            return false;
+        }
+#else
+    	try
+        {
+            for (const std::filesystem::directory_entry &entry : std::filesystem::directory_iterator(_folder))
+            {
+                const auto &file = entry.path();
+
+                _files.push_back(file.string());
+            }
+        }
+        catch (...)
+        {
+            return false;
+        }
+#endif
+        return !_files.empty();
+    }
+
     static std::string lowercase(const std::string &_src)
     {
         std::string str(_src);
-        for (size_t i = 0; i < str.size(); ++i)
-            str[i] = tolower(str[i]);
+        for (char& i : str)
+	        i = static_cast<char>(tolower(i));
         return str;
     }
 
@@ -108,107 +163,59 @@ namespace synthLib
         const auto pos = _name.find_last_of('.');
         if (pos != std::string::npos)
             return _name.substr(pos);
-        return std::string();
+        return {};
     }
 
-    std::string findROM(size_t _minSize, size_t _maxSize)
+    std::string findROM(const size_t _minSize, const size_t _maxSize)
     {
         std::string path = getModulePath();
 
-#ifdef USE_DIRENT
-        if (path.empty())
-        {
-            char temp[1024];
-            getcwd(temp, sizeof(temp));
-            path = temp;
-        }
+        if(path.empty())
+            path = getCurrentDirectory();
 
-        DIR *dir;
-        struct dirent *ent;
-        if ((dir = opendir(path.c_str())))
+        std::vector<std::string> files;
+
+        getDirectoryEntries(files, path);
+
+        for (const auto& file : files)
         {
-            /* print all the files and directories within directory */
-            while ((ent = readdir(dir)))
+            if(!hasExtension(file, ".bin"))
+                continue;
+
+            if (!_minSize && !_maxSize)
             {
-                const std::string file = path + ent->d_name;
-
-                const std::string ext = lowercase(getExtension(file));
-
-                if (ext != ".bin")
-                    continue;
-
-                if (_minSize || _maxSize)
-                {
-                    FILE *hFile = fopen(file.c_str(), "rb");
-                    if (!hFile)
-                        continue;
-
-                    fseek(hFile, 0, SEEK_END);
-                    const auto size = ftell(hFile);
-                    fclose(hFile);
-
-                	if (_minSize && size < _minSize)
-                        continue;
-					if (_maxSize && size > _maxSize)
-						continue;
-
-                    LOG("Found ROM at path " << file);
-
-                    return file;
-                }
-                else
-                {
-	                LOG("Found ROM at path " << file);
-
-	                return file;
-                }
-
+	            LOG("Found ROM at path " << file);
+                return file;
             }
-            closedir(dir);
+
+            FILE *hFile = fopen(file.c_str(), "rb");
+            if (!hFile)
+	            continue;
+
+            fseek(hFile, 0, SEEK_END);
+            const auto size = static_cast<size_t>(ftell(hFile));
+            fclose(hFile);
+
+            if (_minSize && size < _minSize)
+	            continue;
+            if (_maxSize && size > _maxSize)
+	            continue;
+
+            LOG("Found ROM at path " << file);
+
+            return file;
         }
-        else
-        {
-            return std::string();
-        }
-#else
-        if (path.empty())
-            path = std::filesystem::current_path().string();
-
-        try
-        {
-            for (const std::filesystem::directory_entry &entry : std::filesystem::directory_iterator(path))
-            {
-                const auto &file = entry.path();
-
-                if (!file.has_extension())
-                    continue;
-
-                if (_minSize && entry.file_size() < _minSize)
-                    continue;
-				if (_maxSize && entry.file_size() > _maxSize)
-					continue;
-
-                std::string ext = lowercase(file.extension().string());
-
-                if (ext != ".bin")
-                    continue;
-
-                LOG("Found ROM at path " << file);
-
-                return file.string();
-            }
-        }
-        catch (...)
-        {
-        }
-#endif
-
-        return std::string();
+        return {};
     }
 
     std::string findROM(const size_t _expectedSize)
     {
 	    return findROM(_expectedSize, _expectedSize);
+    }
+
+    bool hasExtension(const std::string& _filename, const std::string& _extension)
+    {
+        return lowercase(getExtension(_filename)) == lowercase(_extension);
     }
 
     void setFlushDenormalsToZero()
