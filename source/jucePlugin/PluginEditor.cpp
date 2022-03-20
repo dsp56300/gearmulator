@@ -139,7 +139,7 @@ void AudioPluginAudioProcessorEditor::openMenu()
 		if(editor)
 		{
 			skinMenu.addSeparator();
-			skinMenu.addItem("Export current skin to folder", true, false, [this]{exportCurrentSkin();});
+			skinMenu.addItem("Export current skin to 'skins' folder on disk", true, false, [this]{exportCurrentSkin();});
 		}
 	}
 
