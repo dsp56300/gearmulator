@@ -145,15 +145,15 @@ namespace genericVirusUI
 		{
 			const bool visible = multiMode || !i;
 
-			m_partSelect[i]->setVisible(visible);
-			m_partPan[i]->setVisible(visible);
-			m_partVolume[i]->setVisible(visible);
+			VirusEditor::setEnabled(*m_partSelect[i], visible);
+			VirusEditor::setEnabled(*m_partPan[i], visible);
+			VirusEditor::setEnabled(*m_partVolume[i], visible);
 
 			if(i < m_presetPrev.size())
-				m_presetPrev[i]->setVisible(visible);
+				VirusEditor::setEnabled(*m_presetPrev[i], visible);
 
 			if(i < m_presetNext.size())
-				m_presetNext[i]->setVisible(visible);
+				VirusEditor::setEnabled(*m_presetNext[i], visible);
 
 			m_presetName[i]->setVisible(visible);
 		}
