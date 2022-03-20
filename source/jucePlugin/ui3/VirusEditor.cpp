@@ -15,9 +15,7 @@ namespace genericVirusUI
 		m_parameterBinding(_binding),
 		m_openMenuCallback(std::move(_openMenuCallback))
 	{
-		uint32_t jsonSize;
-		const auto json = getResourceByFilename(_jsonFilename, jsonSize);
-		create(std::string(json, jsonSize));
+		create(_jsonFilename);
 
 		m_parts.reset(new Parts(*this));
 		m_tabs.reset(new Tabs(*this));

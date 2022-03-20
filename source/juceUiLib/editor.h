@@ -17,7 +17,7 @@ namespace genericUI
 		Editor(const Editor&) = delete;
 		Editor(Editor&&) = delete;
 
-		void create(const std::string& _json);
+		void create(const std::string& _jsonFilename);
 
 		juce::Drawable* getImageDrawable(const std::string& _texture);
 		std::unique_ptr<juce::Drawable> createImageDrawable(const std::string& _texture);
@@ -54,6 +54,8 @@ namespace genericUI
 
 	private:
 		EditorInterface& m_interface;
+
+		std::string m_jsonFilename;
 
 		std::map<std::string, std::unique_ptr<juce::Drawable>> m_drawables;
 		std::map<std::string, juce::Font> m_fonts;

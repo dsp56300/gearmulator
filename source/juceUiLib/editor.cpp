@@ -8,14 +8,18 @@ namespace genericUI
 	{
 	}
 
-	void Editor::create(const std::string& _json)
+	void Editor::create(const std::string& _jsonFilename)
 	{
-		juce::var json;
+		uint32_t jsonSize;
+		const auto jsonData = m_interface.getResourceByFilename(_jsonFilename, jsonSize);
 
-		const auto error = juce::JSON::parse(juce::String(_json), json);
+		juce::var json;
+		const auto error = juce::JSON::parse(juce::String(std::string(jsonData, jsonSize)), json);
 
 		if (error.failed())
 			throw std::runtime_error("Failed to load json");
+
+		m_jsonFilename = _jsonFilename;
 
 		m_rootObject.reset(new UiObject(json));
 
