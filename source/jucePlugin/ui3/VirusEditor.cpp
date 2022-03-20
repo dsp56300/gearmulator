@@ -116,6 +116,10 @@ namespace genericVirusUI
 
 		if(menuButton)
 			menuButton->onClick = m_openMenuCallback;
+
+		updatePresetName();
+		updatePlayModeButtons();
+		updateControlLabel(nullptr);
 	}
 
 	VirusEditor::~VirusEditor()
@@ -134,7 +138,7 @@ namespace genericVirusUI
 	{
 		if(_component.getProperties().contains("disabledAlpha"))
 		{
-			float a = _component.getProperties()["disabledAlpha"];
+			const float a = _component.getProperties()["disabledAlpha"];
 
 			_component.setAlpha(_enable ? 1.0f : a);
 			_component.setEnabled(_enable);
