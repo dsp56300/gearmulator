@@ -39,12 +39,20 @@ namespace genericUI
 		m_text = _object.getProperty("text");
 		const auto color = _object.getProperty("color");
 
-		if(color.size() == 8)
+		auto parseColor = [&_object](juce::Colour& _target, const std::string& _prop)
 		{
+			const auto color = _object.getProperty(_prop);
+
+			if(color.size() != 8)
+				return;
+
 			uint32_t r,g,b,a;
 			sscanf(color.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
-			m_color = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
-		}
+			_target = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
+		};
+
+		parseColor(m_color, "color");
+		parseColor(m_bgColor, "backgroundColor");
 
 		const auto alignH = _object.getProperty("alignH");
 		if(!alignH.empty())

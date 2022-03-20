@@ -37,6 +37,7 @@ namespace genericUI
 		int m_textHeight = 0;
 		std::string m_text;
 		juce::Colour m_color = juce::Colour(0xffffffff);
+		juce::Colour m_bgColor = juce::Colour(0);
 		juce::Justification m_align = 0;
 		bool m_bold = false;
 		bool m_italic = false;
