@@ -101,6 +101,21 @@ namespace genericVirusUI
 		return m_processor.getController();
 	}
 
+	void VirusEditor::setEnabled(juce::Component& _component, bool _enable)
+	{
+		if(_component.getProperties().contains("disabledAlpha"))
+		{
+			float a = _component.getProperties()["disabledAlpha"];
+
+			_component.setAlpha(_enable ? 1.0f : a);
+			_component.setEnabled(_enable);
+		}
+		else
+		{
+			_component.setVisible(_enable);
+		}
+	}
+
 	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
