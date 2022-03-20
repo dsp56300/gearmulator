@@ -25,7 +25,8 @@ namespace genericVirusUI
 		m_patchBrowser.reset(new PatchBrowser(*this));
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
-		m_controlLabel = findComponentT<juce::Label>("ControlLabel");
+		m_focusedParameterName = findComponentT<juce::Label>("FocusedParameterName");
+		m_focusedParameterValue = findComponentT<juce::Label>("FocusedParameterValue");
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
 		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
@@ -58,7 +59,8 @@ namespace genericVirusUI
 
 		addMouseListener(this, true);
 
-		m_controlLabel->setText("", juce::dontSendNotification);
+		m_focusedParameterName->setVisible(false);
+		m_focusedParameterValue->setVisible(false);
 
 		auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false);
 
@@ -187,7 +189,8 @@ namespace genericVirusUI
 
 		if(!_component || !_component->getProperties().contains("parameter"))
 		{
-			m_controlLabel->setText("", juce::dontSendNotification);
+			m_focusedParameterName->setVisible(false);
+			m_focusedParameterValue->setVisible(false);
 			return;
 		}
 
@@ -197,7 +200,8 @@ namespace genericVirusUI
 
 		if(!p)
 		{
-			m_controlLabel->setText("", juce::dontSendNotification);
+			m_focusedParameterName->setVisible(false);
+			m_focusedParameterValue->setVisible(false);
 			return;
 		}
 
@@ -205,7 +209,11 @@ namespace genericVirusUI
 
 		const auto& desc = p->getDescription();
 
-		m_controlLabel->setText(desc.name + "\n" + value, juce::dontSendNotification);
+		m_focusedParameterName->setText(desc.name, juce::dontSendNotification);
+		m_focusedParameterValue->setText(value, juce::dontSendNotification);
+
+		m_focusedParameterName->setVisible(true);
+		m_focusedParameterValue->setVisible(true);
 	}
 
 	void VirusEditor::updatePresetName() const

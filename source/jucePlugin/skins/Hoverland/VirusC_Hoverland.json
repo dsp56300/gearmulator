@@ -104,9 +104,9 @@
             }
         },
         {
-            "name" : "ControlLabel",
+            "name" : "FocusedParameterName",
             "label" : {
-                "text" : "Osc 1 Semitone\n-12",
+                "text" : "Osc 1 Semitone",
                 "textHeight" : "32",
                 "color" : "FF7180FF",
                 "alignH" : "R",
@@ -115,7 +115,22 @@
                 "x" : "1190.6",
                 "y" : "92.90002",
                 "width" : "368",
-                "height" : "80"
+                "height" : "35.759"
+            }
+        },
+        {
+            "name" : "FocusedParameterValue",
+            "label" : {
+                "text" : "-12",
+                "textHeight" : "32",
+                "color" : "FF7180FF",
+                "alignH" : "R",
+                "alignV" : "T",
+                "bold" : "1",
+                "x" : "1190.6",
+                "y" : "128.6589",
+                "width" : "368",
+                "height" : "42.241"
             }
         },
         {

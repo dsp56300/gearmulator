@@ -34,18 +34,35 @@
             }
         },
         {
-            "name" : "ControlLabel",
+            "name" : "FocusedParameterValue",
             "label" : {
                 "text" : "-42",
                 "textHeight" : "36",
+                "backgroundColor" : "230303FF",
                 "alignH" : "R",
                 "alignV" : "C",
                 "fontFile" : "Digital",
                 "fontName" : "Register",
-                "x" : "1757.85",
-                "y" : "37.1999",
-                "width" : "368",
-                "height" : "51.289"
+                "x" : "1869.05",
+                "y" : "44.2",
+                "width" : "256.7",
+                "height" : "38"
+            }
+        },
+        {
+            "name" : "FocusedParameterName",
+            "label" : {
+                "text" : "Osc",
+                "textHeight" : "36",
+                "backgroundColor" : "230303FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "1477.7",
+                "y" : "44.2",
+                "width" : "391.35",
+                "height" : "38"
             }
         },
         {
