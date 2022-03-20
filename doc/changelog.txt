@@ -1,5 +1,14 @@
 Release Notes 
 
+1.2.12 (2022.03.17):
+
+- [Imp] Both skins are now part of one plugin, the skin can be switched from a drop down menu in the upper left corner
+
+- [Fix] AU validation failed on Mac
+- [Fix] Virus Powercore banks failed to load
+- [Fix] Toggle switches displayed the opposing state (Suboscillator Type, LFO Poly/Mono switches)
+- [Fix] Small Hoverland UI tweaks
+
 1.2.11 (2022.03.10):
 
 - [Imp] The plugin is now available as FX unit. The FX unit has a different plugin ID so both can be used at the same time
