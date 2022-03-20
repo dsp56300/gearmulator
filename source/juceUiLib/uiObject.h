@@ -60,6 +60,8 @@ namespace genericUI
 
 		template<typename T> void bindParameter(const Editor& _editor, T& _target) const;
 
+		void readProperties(juce::Component& _target);
+
 		template<typename Target, typename Style>
 		void createStyle(Editor& _editor, Target& _target, Style* _style);
 

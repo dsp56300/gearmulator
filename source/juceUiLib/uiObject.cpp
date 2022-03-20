@@ -75,7 +75,7 @@ namespace genericUI
 
 		apply(_editor, static_cast<juce::Component&>(_target));
 
-		createStyle(_editor, _target, new RotaryStyle());
+		createStyle(_editor, _target, new RotaryStyle(_editor));
 
 		bindParameter(_editor, _target);
 	}
@@ -83,7 +83,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::ComboBox& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new ComboboxStyle();
+		auto* s = new ComboboxStyle(_editor);
 		createStyle(_editor, _target, s);
 		bindParameter(_editor, _target);
 		s->apply(_target);
@@ -92,7 +92,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::DrawableButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new ButtonStyle();
+		auto* s = new ButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 		bindParameter(_editor, _target);
@@ -101,7 +101,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new LabelStyle();
+		auto* s = new LabelStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}
@@ -109,7 +109,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::TextButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new TextButtonStyle();
+		auto* s = new TextButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}
@@ -117,7 +117,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::HyperlinkButton& _target)
 	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new HyperlinkButtonStyle();
+		auto* s = new HyperlinkButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
 	}
@@ -263,6 +263,18 @@ namespace genericUI
 		return true;
 	}
 
+	void UiObject::readProperties(juce::Component& _target)
+	{
+		const auto it = m_components.find("componentProperties");
+		if(it == m_components.end())
+			return;
+
+		const auto props = it->second;
+
+		for (const auto& prop : props)
+			_target.getProperties().set(juce::Identifier(prop.first.c_str()), juce::var(prop.second.c_str()));
+	}
+
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
 	{
 		return createJuceObject(_editor, new T());
@@ -287,6 +299,8 @@ namespace genericUI
 			if(!tooltip.empty())
 				tooltipClient->setTooltip(tooltip);
 		}
+
+		readProperties(*_object);
 
 		return comp;
 	}

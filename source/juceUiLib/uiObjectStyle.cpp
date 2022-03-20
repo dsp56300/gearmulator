@@ -5,7 +5,7 @@
 
 namespace genericUI
 {
-	UiObjectStyle::UiObjectStyle() = default;
+	UiObjectStyle::UiObjectStyle(Editor& _editor) : m_editor(_editor) {}
 
 	void UiObjectStyle::setTileSize(int _w, int _h)
 	{
@@ -39,12 +39,20 @@ namespace genericUI
 		m_text = _object.getProperty("text");
 		const auto color = _object.getProperty("color");
 
-		if(color.size() == 8)
+		auto parseColor = [&_object](juce::Colour& _target, const std::string& _prop)
 		{
+			const auto color = _object.getProperty(_prop);
+
+			if(color.size() != 8)
+				return;
+
 			uint32_t r,g,b,a;
 			sscanf(color.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
-			m_color = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
-		}
+			_target = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
+		};
+
+		parseColor(m_color, "color");
+		parseColor(m_bgColor, "backgroundColor");
 
 		const auto alignH = _object.getProperty("alignH");
 		if(!alignH.empty())
@@ -72,13 +80,23 @@ namespace genericUI
 			m_align = m_align.getFlags() | a.getFlags();
 		}
 
+		m_fontFile = _object.getProperty("fontFile");
+		m_fontName = _object.getProperty("fontName");
+
 		m_bold = _object.getPropertyInt("bold") != 0;
 		m_italic = _object.getPropertyInt("italic") != 0;
+
 		m_url = _object.getProperty("url");
 	}
 
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)
 	{
+		if(!m_fontFile.empty())
+		{
+			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
+			applyFontProperties(font);
+			return font;
+		}
 		auto font = LookAndFeel_V4::getComboBoxFont(_comboBox);
 		applyFontProperties(font);
 		return font;
@@ -86,6 +104,12 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getLabelFont(juce::Label& _label)
 	{
+		if(!m_fontFile.empty())
+		{
+			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
+			applyFontProperties(font);
+			return font;
+		}
 		auto font = LookAndFeel_V4::getLabelFont(_label);
 		applyFontProperties(font);
 		return font;
@@ -93,6 +117,12 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getPopupMenuFont()
 	{
+		if(!m_fontFile.empty())
+		{
+			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
+			applyFontProperties(font);
+			return font;
+		}
 		auto font = LookAndFeel_V4::getPopupMenuFont();
 		applyFontProperties(font);
 		return font;
@@ -100,6 +130,12 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)
 	{
+		if(!m_fontFile.empty())
+		{
+			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
+			applyFontProperties(font);
+			return font;
+		}
 		auto font = LookAndFeel_V4::getTextButtonFont(_textButton, buttonHeight);
 		applyFontProperties(font);
 		return font;

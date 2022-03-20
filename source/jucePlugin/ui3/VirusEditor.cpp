@@ -7,14 +7,18 @@
 #include "../VirusParameterBinding.h"
 #include "../version.h"
 
+#include "../synthLib/os.h"
+
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef) :
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, const std::string& _skinFolder, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
-		m_parameterBinding(_binding)
+		m_parameterBinding(_binding),
+		m_skinFolder(_skinFolder),
+		m_openMenuCallback(std::move(_openMenuCallback))
 	{
-		create(std::string(BinaryData::VirusC_json, BinaryData::VirusC_jsonSize));
+		create(_jsonFilename);
 
 		m_parts.reset(new Parts(*this));
 		m_tabs.reset(new Tabs(*this));
@@ -23,14 +27,29 @@ namespace genericVirusUI
 		m_patchBrowser.reset(new PatchBrowser(*this));
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
-		m_controlLabel = findComponentT<juce::Label>("ControlLabel");
+		m_focusedParameterName = findComponentT<juce::Label>("FocusedParameterName");
+		m_focusedParameterValue = findComponentT<juce::Label>("FocusedParameterValue");
+		m_focusedParameterTooltip = findComponentT<juce::Label>("FocusedParameterTooltip", false);
+
+		if(m_focusedParameterTooltip)
+			m_focusedParameterTooltip->setVisible(false);
+
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
-		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle");
-		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti");
+		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
+		m_playModeMulti = findComponentT<juce::Button>("PlayModeMulti", false);
 
-		m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-		m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+		if(m_playModeSingle && m_playModeMulti)
+		{
+			m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
+			m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+		}
+		else
+		{
+			m_playModeToggle = findComponentT<juce::Button>("PlayModeToggle");
+			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
+		}
+
 		updatePlayModeButtons();
 
 		if(m_romSelector)
@@ -47,21 +66,40 @@ namespace genericVirusUI
 
 		addMouseListener(this, true);
 
-		m_controlLabel->setText("", juce::dontSendNotification);
+		m_focusedParameterName->setVisible(false);
+		m_focusedParameterValue->setVisible(false);
 
-		auto* versionInfo = findComponentT<juce::Label>("VersionInfo");
-
-		if(versionInfo)
+		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
 		{
 		    const std::string message = "DSP 56300 Emulator Version " + std::string(g_pluginVersionString) + " - " __DATE__ " " __TIME__;
 			versionInfo->setText(message, juce::dontSendNotification);
 		}
 
-		auto* presetSave = findComponentT<juce::Button>("PresetSave");
-		presetSave->onClick = [this] { savePreset(); };
+		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
+		{
+			versionNumber->setText(g_pluginVersionString, juce::dontSendNotification);
+		}
 
-		auto* presetLoad = findComponentT<juce::Button>("PresetLoad");
-		presetLoad->onClick = [this] { loadPreset(); };
+		if(auto* deviceModel = findComponentT<juce::Label>("DeviceModel", false))
+		{
+			std::string m;
+			switch(getController().getVirusModel())
+			{
+			case virusLib::A: m = "A";		break;
+			case virusLib::B: m = "B";		break;
+			case virusLib::C: m = "C";		break;
+			case virusLib::TI: m = "TI";	break;
+			}
+			deviceModel->setText(m, juce::dontSendNotification);
+		}
+
+		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
+		if(presetSave)
+			presetSave->onClick = [this] { savePreset(); };
+
+		auto* presetLoad = findComponentT<juce::Button>("PresetLoad", false);
+		if(presetLoad)
+			presetLoad->onClick = [this] { loadPreset(); };
 
 		m_presetName->setEditable(false, true, true);
 		m_presetName->onTextChange = [this]()
@@ -73,6 +111,22 @@ namespace genericVirusUI
 				onProgramChange();
 			}
 		};
+
+		auto* menuButton = findComponentT<juce::Button>("Menu", false);
+
+		if(menuButton)
+			menuButton->onClick = m_openMenuCallback;
+
+		updatePresetName();
+		updatePlayModeButtons();
+		updateControlLabel(nullptr);
+	}
+
+	VirusEditor::~VirusEditor()
+	{
+		m_parameterBinding.clearBindings();
+
+		getController().onProgramChange = nullptr;
 	}
 
 	Virus::Controller& VirusEditor::getController() const
@@ -80,8 +134,68 @@ namespace genericVirusUI
 		return m_processor.getController();
 	}
 
+	void VirusEditor::setEnabled(juce::Component& _component, bool _enable)
+	{
+		if(_component.getProperties().contains("disabledAlpha"))
+		{
+			const float a = _component.getProperties()["disabledAlpha"];
+
+			_component.setAlpha(_enable ? 1.0f : a);
+			_component.setEnabled(_enable);
+		}
+		else
+		{
+			_component.setVisible(_enable);
+		}
+	}
+
 	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
+		if(!m_skinFolder.empty())
+		{
+			auto readFromCache = [this, &_name, &_dataSize]()
+			{
+				const auto it = m_fileCache.find(_name);
+				if(it == m_fileCache.end())
+				{
+					_dataSize = 0;
+					return static_cast<char*>(nullptr);
+				}
+				_dataSize = static_cast<uint32_t>(it->second.size());
+				return &it->second.front();
+			};
+
+			auto* res = readFromCache();
+
+			if(res)
+				return res;
+
+			const auto modulePath = synthLib::getModulePath();
+			const auto folder = m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder;
+
+			// try to load from disk first
+			FILE* hFile = fopen((folder + _name).c_str(), "rb");
+			if(hFile)
+			{
+				fseek(hFile, 0, SEEK_END);
+				_dataSize = ftell(hFile);
+				fseek(hFile, 0, SEEK_SET);
+
+				std::vector<char> data;
+				data.resize(_dataSize);
+				const auto readCount = fread(&data.front(), 1, _dataSize, hFile);
+				fclose(hFile);
+
+				if(readCount == _dataSize)
+					m_fileCache.insert(std::make_pair(_name, std::move(data)));
+
+				res = readFromCache();
+
+				if(res)
+					return res;
+			}
+		}
+
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
 		{
 			if (BinaryData::originalFilenames[i] != _name)
@@ -93,8 +207,7 @@ namespace genericVirusUI
 			return res;
 		}
 
-		_dataSize = 0;
-		return nullptr;
+		throw std::runtime_error("Failed to find file named " + _name);
 	}
 
 	int VirusEditor::getParameterIndexByName(const std::string& _name)
@@ -175,7 +288,10 @@ namespace genericVirusUI
 
 		if(!_component || !_component->getProperties().contains("parameter"))
 		{
-			m_controlLabel->setText("", juce::dontSendNotification);
+			m_focusedParameterName->setVisible(false);
+			m_focusedParameterValue->setVisible(false);
+			if(m_focusedParameterTooltip)
+				m_focusedParameterTooltip->setVisible(false);
 			return;
 		}
 
@@ -185,7 +301,10 @@ namespace genericVirusUI
 
 		if(!p)
 		{
-			m_controlLabel->setText("", juce::dontSendNotification);
+			m_focusedParameterName->setVisible(false);
+			m_focusedParameterValue->setVisible(false);
+			if(m_focusedParameterTooltip)
+				m_focusedParameterTooltip->setVisible(false);
 			return;
 		}
 
@@ -193,7 +312,48 @@ namespace genericVirusUI
 
 		const auto& desc = p->getDescription();
 
-		m_controlLabel->setText(desc.name + "\n" + value, juce::dontSendNotification);
+		m_focusedParameterName->setText(desc.name, juce::dontSendNotification);
+		m_focusedParameterValue->setText(value, juce::dontSendNotification);
+
+		m_focusedParameterName->setVisible(true);
+		m_focusedParameterValue->setVisible(true);
+
+		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component))
+		{
+			int x = _component->getX();
+			int y = _component->getY();
+
+			// local to global
+			auto parent = _component->getParentComponent();
+
+			while(parent && parent != this)
+			{
+				x += parent->getX();
+				y += parent->getY();
+				parent = parent->getParentComponent();
+			}
+
+			x += (_component->getWidth()>>1) - (m_focusedParameterTooltip->getWidth()>>1);
+			y += _component->getHeight() + (m_focusedParameterTooltip->getHeight()>>1);
+
+			// global to local of tooltip parent
+			parent = m_focusedParameterTooltip->getParentComponent();
+
+			while(parent && parent != this)
+			{
+				x -= parent->getX();
+				y -= parent->getY();
+				parent = parent->getParentComponent();
+			}
+
+			if(m_focusedParameterTooltip->getProperties().contains("offsetY"))
+				y += static_cast<int>(m_focusedParameterTooltip->getProperties()["offsetY"]);
+
+			m_focusedParameterTooltip->setTopLeftPosition(x,y);
+			m_focusedParameterTooltip->setText(value, juce::dontSendNotification);
+			m_focusedParameterTooltip->setVisible(true);
+			m_focusedParameterTooltip->toFront(false);
+		}
 	}
 
 	void VirusEditor::updatePresetName() const
@@ -203,8 +363,12 @@ namespace genericVirusUI
 
 	void VirusEditor::updatePlayModeButtons() const
 	{
-		m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
-		m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeSingle)
+			m_playModeSingle->setToggleState(!getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeMulti)
+			m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+		if(m_playModeToggle)
+			m_playModeToggle->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
 	}
 
 	void VirusEditor::savePreset()
@@ -271,7 +435,7 @@ namespace genericVirusUI
 			const auto ext = result.getFileExtension().toLowerCase();
 
 			std::vector<Patch> patches;
-			::PatchBrowser::loadBankFile(patches, nullptr, result);
+			PatchBrowser::loadBankFile(patches, nullptr, result);
 
 			if (patches.empty())
 				return;

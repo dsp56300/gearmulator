@@ -2,6 +2,9 @@
 
 #include "VirusEditor.h"
 
+#include "../VirusController.h"
+#include "../PluginProcessor.h"
+
 namespace genericVirusUI
 {
 	MidiPorts::MidiPorts(VirusEditor& _editor) : m_editor(_editor)
