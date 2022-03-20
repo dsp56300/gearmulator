@@ -3,31 +3,42 @@
 
 #include "VirusController.h"
 
-#include "ui/VirusEditor.h"
 #include "ui2/VirusEditor.h"
 #include "ui3/VirusEditor.h"
+
+#include "../synthLib/os.h"
 
 //==============================================================================
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p)
 {
+	m_includedSkins.push_back({"Hoverland", "VirusC_Hoverland.json", ""});
+	m_includedSkins.push_back({"Trancy", "VirusC_Trancy.json", ""});
+
 	addMouseListener(this, true);
 
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
+    
+	Skin skin = readSkinFromConfig();
 
-	loadSkin(skinId);
+	if(skin.jsonFilename.empty())
+	{
+		skin = m_includedSkins[0];
+	}
+
+	loadSkin(skin);
 
 	setGuiScale(scale);
 }
 
-void AudioPluginAudioProcessorEditor::loadSkin(int index)
+void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
 {
-	if(m_currentSkinId == index)
+	if(m_currentSkin == _skin)
 		return;
 
-	m_currentSkinId = index;
+	m_currentSkin = _skin;
+	writeSkinToConfig(_skin);
 
 	if (m_virusEditor)
 	{
@@ -40,34 +51,26 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 	m_rootScale = 1.0f;
 
-	if (index == 1)
+	try
 	{
-		const auto virusEditor = new Trancy::VirusEditor(m_parameterBinding, processorRef);
-		setSize(virusEditor->iSkinSizeWidth, virusEditor->iSkinSizeHeight);
-		virusEditor->m_AudioPlugInEditor = this;
-		m_virusEditor.reset(virusEditor);
+		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef, _skin.jsonFilename, _skin.folder, [this] { openMenu(); });
+		m_virusEditor.reset(editor);
+		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
+		m_rootScale = editor->getScale();
+
+		m_virusEditor->setTopLeftPosition(0, 0);
+		addAndMakeVisible(m_virusEditor.get());
 	}
-	else if(index == 2)
+	catch(const std::runtime_error& _err)
 	{
-		try
-		{
-			auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef);
-			m_virusEditor.reset(editor);
-			setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
-			m_rootScale = editor->getScale();
-		}
-		catch(const std::runtime_error& _err)
-		{
-			LOG("ERROR: Failed to create editor: " << _err.what());
-			return;
-		}
+		LOG("ERROR: Failed to create editor: " << _err.what());
+
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
+		m_virusEditor.reset();
+
+		if(!_skin.folder.empty())
+			loadSkin(m_includedSkins[0]);
 	}
-	else {
-		m_virusEditor.reset(new VirusEditor(m_parameterBinding, processorRef));
-		setSize(1377, 800);
-	}
-	m_virusEditor->setTopLeftPosition(0, 0);
-	addAndMakeVisible(m_virusEditor.get());
 }
 
 void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
@@ -76,6 +79,125 @@ void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
 	auto* config = processorRef.getController().getConfig();
 	config->setValue("scale", percent);
 	config->saveIfNeeded();
+}
+
+void AudioPluginAudioProcessorEditor::openMenu()
+{
+	const auto config = processorRef.getController().getConfig();
+    const auto scale = config->getIntValue("scale", 100);
+    const int skinId = config->getIntValue("skin", 0);
+
+	juce::PopupMenu menu;
+
+	juce::PopupMenu skinMenu;
+
+	auto addSkinEntry = [this, &skinMenu](const Skin& _skin)
+	{
+		skinMenu.addItem(_skin.displayName, true, _skin == m_currentSkin,[this, _skin] {loadSkin(_skin);});
+	};
+
+	for (const auto & skin : m_includedSkins)
+		addSkinEntry(skin);
+
+	bool haveSkinsOnDisk = false;
+
+	// find more skins on disk
+	const auto modulePath = synthLib::getModulePath();
+
+	std::vector<std::string> entries;
+	synthLib::getDirectoryEntries(entries, modulePath + "skins");
+
+	for (const auto& entry : entries)
+	{
+		std::vector<std::string> files;
+		synthLib::getDirectoryEntries(files, entry);
+
+		for (const auto& file : files)
+		{
+			if(synthLib::hasExtension(file, ".json"))
+			{
+				if(!haveSkinsOnDisk)
+				{
+					haveSkinsOnDisk = true;
+					skinMenu.addSeparator();
+				}
+
+				const auto relativePath = entry.substr(modulePath.size());
+				auto jsonName = file;
+				const auto pathEndPos = jsonName.find_last_of("/\\");
+				if(pathEndPos != std::string::npos)
+					jsonName = file.substr(pathEndPos+1);
+				const Skin skin{jsonName + " (" + relativePath + ")", jsonName, relativePath};
+				addSkinEntry(skin);
+			}
+		}
+	}
+
+	if(m_virusEditor && m_currentSkin.folder.empty())
+	{
+		auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(m_virusEditor.get());
+		if(editor)
+		{
+			skinMenu.addSeparator();
+			skinMenu.addItem("Export current skin to 'skins' folder on disk", true, false, [this]{exportCurrentSkin();});
+		}
+	}
+
+	juce::PopupMenu scaleMenu;
+	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
+	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
+	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
+
+	menu.addSubMenu("GUI Skin", skinMenu);
+	menu.addSubMenu("GUI Scale", scaleMenu);
+
+	menu.showMenuAsync(juce::PopupMenu::Options());
+}
+
+void AudioPluginAudioProcessorEditor::exportCurrentSkin() const
+{
+	if(!m_virusEditor)
+		return;
+
+	auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(m_virusEditor.get());
+
+	if(!editor)
+		return;
+
+	const auto res = editor->exportToFolder("skins/");
+
+	if(!res.empty())
+	{
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, "OK", m_virusEditor.get());
+	}
+	else
+	{
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "Export finished", "Skin successfully exported");
+	}
+}
+
+AudioPluginAudioProcessorEditor::Skin AudioPluginAudioProcessorEditor::readSkinFromConfig() const
+{
+	const auto* config = processorRef.getController().getConfig();
+
+	Skin skin;
+	skin.displayName = config->getValue("skinDisplayName", "").toStdString();
+	skin.jsonFilename = config->getValue("skinFile", "").toStdString();
+	skin.folder = config->getValue("skinFolder", "").toStdString();
+	return skin;
+}
+
+void AudioPluginAudioProcessorEditor::writeSkinToConfig(const Skin& _skin) const
+{
+	auto* config = processorRef.getController().getConfig();
+
+	config->setValue("skinDisplayName", _skin.displayName.c_str());
+	config->setValue("skinFile", _skin.jsonFilename.c_str());
+	config->setValue("skinFolder", _skin.folder.c_str());
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -109,28 +231,9 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 		return;
 	}
 
-	const auto config = processorRef.getController().getConfig();
-    const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
+	// file browsers have their own menu, do not display two menus at once
+	if(event.eventComponent && event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
+		return;
 
-	juce::PopupMenu menu;
-
-	juce::PopupMenu skinMenu;
-	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
-	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
-	skinMenu.addItem("Generic", true, skinId == 2,[this] {loadSkin(2);});
-
-	juce::PopupMenu scaleMenu;
-	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
-
-	menu.addSubMenu("GUI Skin", skinMenu);
-	menu.addSubMenu("GUI Scale", scaleMenu);
-
-	menu.showMenuAsync(juce::PopupMenu::Options());
+	openMenu();
 }

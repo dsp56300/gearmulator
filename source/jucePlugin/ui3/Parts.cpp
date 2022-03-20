@@ -20,12 +20,20 @@ namespace genericVirusUI
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
 			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
-			m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
-			m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
+
+			if(i < m_presetPrev.size())
+				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
+
+			if(i < m_presetNext.size())
+				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
+
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
 
 			_editor.getParameterBinding().bind(*m_partVolume[i], Virus::Param_PartVolume, static_cast<uint8_t>(i));
 			_editor.getParameterBinding().bind(*m_partPan[i], Virus::Param_Panorama, static_cast<uint8_t>(i));
+
+			m_partVolume[i]->getProperties().set("parameter", (int)Virus::Param_PartVolume);
+			m_partPan[i]->getProperties().set("parameter", (int)Virus::Param_Panorama);
 		}
 
 		updateAll();
@@ -53,8 +61,11 @@ namespace genericVirusUI
 		m_editor.setPart(_part);
 	}
 
-	void Parts::selectPrevPreset(const size_t _part) const
+	void Parts::selectPrevPreset(size_t _part) const
 	{
+		if(m_presetPrev.size() == 1)
+			_part = m_editor.getController().getCurrentPart();
+
 		Virus::Controller& controller = m_editor.getController();
 
 		const auto pt = static_cast<uint8_t>(_part);
@@ -65,8 +76,11 @@ namespace genericVirusUI
 		}
 	}
 
-	void Parts::selectNextPreset(const size_t _part) const
+	void Parts::selectNextPreset(size_t _part) const
 	{
+		if(m_presetNext.size() == 1)
+			_part = m_editor.getController().getCurrentPart();
+
 		Virus::Controller& controller = m_editor.getController();
 
 		const auto pt = static_cast<uint8_t>(_part);
@@ -131,11 +145,16 @@ namespace genericVirusUI
 		{
 			const bool visible = multiMode || !i;
 
-			m_partSelect[i]->setVisible(visible);
-			m_partPan[i]->setVisible(visible);
-			m_partVolume[i]->setVisible(visible);
-			m_presetPrev[i]->setVisible(visible);
-			m_presetNext[i]->setVisible(visible);
+			VirusEditor::setEnabled(*m_partSelect[i], visible);
+			VirusEditor::setEnabled(*m_partPan[i], visible);
+			VirusEditor::setEnabled(*m_partVolume[i], visible);
+
+			if(i < m_presetPrev.size())
+				VirusEditor::setEnabled(*m_presetPrev[i], visible);
+
+			if(i < m_presetNext.size())
+				VirusEditor::setEnabled(*m_presetNext[i], visible);
+
 			m_presetName[i]->setVisible(visible);
 		}
 	}

@@ -2,6 +2,8 @@
 
 #include "VirusEditor.h"
 
+#include "../VirusController.h"
+
 namespace genericVirusUI
 {
 	FxPage::FxPage(VirusEditor& _editor) : m_editor(_editor)
@@ -42,7 +44,7 @@ namespace genericVirusUI
 
 		const bool isReverb = (value > 1 && value < 5);
 
-		m_delayContainer->setVisible(!isReverb);
-		m_reverbContainer->setVisible(isReverb);
+		VirusEditor::setEnabled(*m_delayContainer, !isReverb);
+		VirusEditor::setEnabled(*m_reverbContainer, isReverb);
 	}
 }
