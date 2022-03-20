@@ -64,7 +64,7 @@ namespace Virus
         juce::Value* getParamValue(ParameterType _param);
         Parameter* getParameter(ParameterType _param) const;
         Parameter *getParameter(ParameterType _param, uint8_t _part) const;
-		uint8_t getVirusModel() const;
+		virusLib::VirusModel getVirusModel() const;
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
 

@@ -68,12 +68,28 @@ namespace genericVirusUI
 		m_focusedParameterName->setVisible(false);
 		m_focusedParameterValue->setVisible(false);
 
-		auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false);
-
-		if(versionInfo)
+		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
 		{
 		    const std::string message = "DSP 56300 Emulator Version " + std::string(g_pluginVersionString) + " - " __DATE__ " " __TIME__;
 			versionInfo->setText(message, juce::dontSendNotification);
+		}
+
+		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
+		{
+			versionNumber->setText(g_pluginVersionString, juce::dontSendNotification);
+		}
+
+		if(auto* deviceModel = findComponentT<juce::Label>("DeviceModel", false))
+		{
+			std::string m;
+			switch(getController().getVirusModel())
+			{
+			case virusLib::A: m = "A";		break;
+			case virusLib::B: m = "B";		break;
+			case virusLib::C: m = "C";		break;
+			case virusLib::TI: m = "TI";	break;
+			}
+			deviceModel->setText(m, juce::dontSendNotification);
 		}
 
 		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
