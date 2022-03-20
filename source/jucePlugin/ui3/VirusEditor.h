@@ -17,6 +17,7 @@ namespace genericVirusUI
 	{
 	public:
 		VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::function<void()> _openMenuCallback);
+		~VirusEditor() override;
 
 		void setPart(size_t _part);
 

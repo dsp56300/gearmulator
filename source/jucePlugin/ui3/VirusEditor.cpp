@@ -117,6 +117,13 @@ namespace genericVirusUI
 			menuButton->onClick = m_openMenuCallback;
 	}
 
+	VirusEditor::~VirusEditor()
+	{
+		m_parameterBinding.clearBindings();
+
+		getController().onProgramChange = nullptr;
+	}
+
 	Virus::Controller& VirusEditor::getController() const
 	{
 		return m_processor.getController();
