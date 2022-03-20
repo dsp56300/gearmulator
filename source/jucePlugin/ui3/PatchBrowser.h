@@ -62,7 +62,11 @@ namespace genericVirusUI
 		void selectedRowsChanged(int lastRowSelected) override;
 		void cellDoubleClicked (int rowNumber, int columnId, const juce::MouseEvent &) override;
 	    void sortOrderChanged(int newSortColumnId, bool isForwards) override;
-	    class PatchBrowserSorter;
+
+		void loadRomBank(uint32_t _bankIndex);
+
+		class PatchBrowserSorter;
+
 	    enum Columns
 		{
 	        INDEX = 1,
@@ -84,6 +88,7 @@ namespace genericVirusUI
 	    juce::Array<Patch> m_patches;
 	    juce::Array<Patch> m_filteredPatches;
 	    juce::PropertiesFile *m_properties;
+		juce::ComboBox* m_romBankSelect;
 	    juce::HashMap<juce::String, bool> m_checksums;
     };
 }
