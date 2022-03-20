@@ -19,6 +19,38 @@ const Array<String> g_categories = { "", "Lead",	 "Bass",	  "Pad",	   "Decay",	 
 
 namespace genericVirusUI
 {
+	virusLib::VirusModel guessVersion(const uint8_t* _data)
+	{
+		const auto v = _data[0];
+
+		if (v < 5)
+			return virusLib::A;
+		if (v == 6)
+			return virusLib::B;
+		if (v == 7)
+			return virusLib::C;
+		return virusLib::TI;
+	}
+
+	static juce::String parseAsciiText(const std::vector<uint8_t>& msg, const int start)
+	{
+	    char text[Virus::Controller::kNameLength + 1];
+	    text[Virus::Controller::kNameLength] = 0; // termination
+	    for (int pos = 0; pos < Virus::Controller::kNameLength; ++pos)
+	        text[pos] = static_cast<char>(msg[start + pos]);
+	    return {text};
+	}
+
+	static void initializePatch(Patch& _patch)
+	{
+		_patch.name = parseAsciiText(_patch.data, 128 + 112);
+		_patch.category1 = _patch.data[251];
+		_patch.category2 = _patch.data[252];
+		_patch.unison = _patch.data[97];
+		_patch.transpose = _patch.data[93];
+		_patch.model = guessVersion(&_patch.data[0]);
+	}
+
 	PatchBrowser::PatchBrowser(const VirusEditor& _editor) : m_editor(_editor), m_controller(_editor.getController()),
 		m_fileFilter("*.syx;*.mid;*.midi", "*", "Virus Patch Dumps"),
 		m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
@@ -63,6 +95,29 @@ namespace genericVirusUI
 
 		m_bankList.addListener(this);
 		m_patchList.setModel(this);
+
+		m_romBankSelect = _editor.findComponentT<juce::ComboBox>("RomBankSelect", false);
+
+		if(m_romBankSelect)
+		{
+			int id=1;
+
+			m_romBankSelect->addItem("-", 1);
+
+			for(uint32_t i=0; i<m_editor.getController().getBankCount(); ++i)
+			{
+				std::stringstream ss;
+				ss << "Bank " << static_cast<char>('A' + i);
+				m_romBankSelect->addItem(ss.str(), ++id);
+			}
+
+			m_romBankSelect->onChange = [this]
+			{
+				const auto index = m_romBankSelect->getSelectedItemIndex();
+				if(index > 0)
+					loadRomBank(index - 1);
+			};
+		}
 	}
 
 	void PatchBrowser::fitInParent(juce::Component& _component, const std::string& _parentName) const
@@ -82,19 +137,6 @@ namespace genericVirusUI
 
 	void PatchBrowser::selectionChanged() {}
 
-	virusLib::VirusModel guessVersion(const uint8_t* _data)
-	{
-		const auto v = _data[0];
-
-		if (v < 5)
-			return virusLib::A;
-		if (v == 6)
-			return virusLib::B;
-		if (v == 7)
-			return virusLib::C;
-		return virusLib::TI;
-	}
-
 	uint32_t PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets)
 	{
 		uint32_t count = 0;
@@ -105,16 +147,6 @@ namespace genericVirusUI
 		}
 		return count;
 	}
-
-	static juce::String parseAsciiText(const std::vector<uint8_t>& msg, const int start)
-	{
-	    char text[Virus::Controller::kNameLength + 1];
-	    text[Virus::Controller::kNameLength] = 0; // termination
-	    for (int pos = 0; pos < Virus::Controller::kNameLength; ++pos)
-	        text[pos] = static_cast<char>(msg[start + pos]);
-	    return {text};
-	}
-
 
 	bool PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data)
 	{
@@ -134,12 +166,7 @@ namespace genericVirusUI
 			patch.progNumber = static_cast<int>(_result.size());
 			patch.sysex = _data;
 			patch.data.insert(patch.data.begin(), _data.begin() + 9, _data.end());
-			patch.name = parseAsciiText(patch.data, 128 + 112);
-			patch.category1 = patch.data[251];
-			patch.category2 = patch.data[252];
-			patch.unison = patch.data[97];
-			patch.transpose = patch.data[93];
-			patch.model = guessVersion(&patch.data[0]);
+			initializePatch(patch);
 
 			if (!_dedupeChecksums)
 			{
@@ -197,6 +224,7 @@ namespace genericVirusUI
 
 			return load(_result, _dedupeChecksums, packets);
 		}
+
 		return 0;
 	}
 
@@ -256,6 +284,9 @@ namespace genericVirusUI
 			m_patchList.deselectAllRows();
 			m_patchList.repaint();
 		}
+
+		if(m_romBankSelect)
+			m_romBankSelect->setSelectedItemIndex(0);
 	}
 
 	int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
@@ -371,6 +402,62 @@ namespace genericVirusUI
 			m_filteredPatches.sort(sorter);
 			m_patchList.updateContent();
 		}
+	}
+
+	void PatchBrowser::loadRomBank(uint32_t _bankIndex)
+	{
+		const auto& singles = m_editor.getController().getSinglePresets();
+
+		if(_bankIndex >= singles.size())
+			return;
+
+		const auto& bank = singles[_bankIndex];
+
+		const auto searchValue = m_search.getText();
+
+		m_patches.clear();
+		m_filteredPatches.clear();
+
+		for(size_t s=0; s<bank.size(); ++s)
+		{
+			Patch patch;
+
+			patch.progNumber = static_cast<int>(s);
+			patch.data.insert(patch.data.begin(), bank[s].data.begin(), bank[s].data.end());
+
+			initializePatch(patch);
+
+			// build sysex message
+
+			patch.sysex.push_back(0xf0);
+			patch.sysex.push_back(0x00);	// Manufacturer
+			patch.sysex.push_back(0x20);
+			patch.sysex.push_back(0x33);
+			patch.sysex.push_back(0x01);	// Product Id = Virus
+			patch.sysex.push_back(m_editor.getController().getDeviceId());
+			patch.sysex.push_back(virusLib::DUMP_SINGLE);
+			patch.sysex.push_back(static_cast<uint8_t>(_bankIndex));			// bank
+			patch.sysex.push_back(static_cast<uint8_t>(patch.progNumber));
+			patch.sysex.insert(patch.sysex.end(), patch.data.begin(), patch.data.end());
+
+			// checksum
+			uint8_t cs = 0;
+
+			for(size_t i=5; i<patch.sysex.size(); ++i)
+				cs += patch.sysex[i];
+
+			patch.sysex.push_back(cs & 0x7f);
+			patch.sysex.push_back(0xf7);
+
+			m_patches.add(patch);
+
+			if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
+				m_filteredPatches.add(patch);
+		}
+
+		m_patchList.updateContent();
+		m_patchList.deselectAllRows();
+		m_patchList.repaint();
 	}
 
 	void PatchBrowser::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src)
