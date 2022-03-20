@@ -5550,13 +5550,13 @@
             "name" : "VersionNumber",
             "label" : {
                 "text" : "1.12.34",
-                "textHeight" : "20",
+                "textHeight" : "18",
                 "color" : "009BFFFF",
-                "alignH" : "R",
+                "alignH" : "L",
                 "alignV" : "C",
-                "x" : "251.4",
+                "x" : "251.9017",
                 "y" : "1117",
-                "width" : "54.4257",
+                "width" : "56.1816",
                 "height" : "28"
             }
         },
