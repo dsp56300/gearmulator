@@ -9,10 +9,11 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename) :
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, Virus::Controller& _controller, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
-		m_parameterBinding(_binding)
+		m_parameterBinding(_binding),
+		m_openMenuCallback(std::move(_openMenuCallback))
 	{
 		uint32_t jsonSize;
 		const auto json = getResourceByFilename(_jsonFilename, jsonSize);
@@ -88,6 +89,11 @@ namespace genericVirusUI
 				onProgramChange();
 			}
 		};
+
+		auto* menuButton = findComponentT<juce::Button>("Menu", false);
+
+		if(menuButton)
+			menuButton->onClick = m_openMenuCallback;
 	}
 
 	Virus::Controller& VirusEditor::getController() const
