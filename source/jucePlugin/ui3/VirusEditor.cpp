@@ -28,6 +28,11 @@ namespace genericVirusUI
 		m_presetName = findComponentT<juce::Label>("PatchName");
 		m_focusedParameterName = findComponentT<juce::Label>("FocusedParameterName");
 		m_focusedParameterValue = findComponentT<juce::Label>("FocusedParameterValue");
+		m_focusedParameterTooltip = findComponentT<juce::Label>("FocusedParameterTooltip", false);
+
+		if(m_focusedParameterTooltip)
+			m_focusedParameterTooltip->setVisible(false);
+
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
 		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
@@ -212,6 +217,8 @@ namespace genericVirusUI
 		{
 			m_focusedParameterName->setVisible(false);
 			m_focusedParameterValue->setVisible(false);
+			if(m_focusedParameterTooltip)
+				m_focusedParameterTooltip->setVisible(false);
 			return;
 		}
 
@@ -223,6 +230,8 @@ namespace genericVirusUI
 		{
 			m_focusedParameterName->setVisible(false);
 			m_focusedParameterValue->setVisible(false);
+			if(m_focusedParameterTooltip)
+				m_focusedParameterTooltip->setVisible(false);
 			return;
 		}
 
@@ -235,6 +244,43 @@ namespace genericVirusUI
 
 		m_focusedParameterName->setVisible(true);
 		m_focusedParameterValue->setVisible(true);
+
+		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component))
+		{
+			int x = _component->getX();
+			int y = _component->getY();
+
+			// local to global
+			auto parent = _component->getParentComponent();
+
+			while(parent && parent != this)
+			{
+				x += parent->getX();
+				y += parent->getY();
+				parent = parent->getParentComponent();
+			}
+
+			x += (_component->getWidth()>>1) - (m_focusedParameterTooltip->getWidth()>>1);
+			y += _component->getHeight() + (m_focusedParameterTooltip->getHeight()>>1);
+
+			// global to local of tooltip parent
+			parent = m_focusedParameterTooltip->getParentComponent();
+
+			while(parent && parent != this)
+			{
+				x -= parent->getX();
+				y -= parent->getY();
+				parent = parent->getParentComponent();
+			}
+
+			if(m_focusedParameterTooltip->getProperties().contains("offsetY"))
+				y += static_cast<int>(m_focusedParameterTooltip->getProperties()["offsetY"]);
+
+			m_focusedParameterTooltip->setTopLeftPosition(x,y);
+			m_focusedParameterTooltip->setText(value, juce::dontSendNotification);
+			m_focusedParameterTooltip->setVisible(true);
+			m_focusedParameterTooltip->toFront(false);
+		}
 	}
 
 	void VirusEditor::updatePresetName() const

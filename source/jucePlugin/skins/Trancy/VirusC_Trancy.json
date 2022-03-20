@@ -5588,6 +5588,25 @@
                 "height" : "28",
                 "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin"
             }
+        },
+        {
+            "name" : "FocusedParameterTooltip",
+            "label" : {
+                "text" : "42",
+                "textHeight" : "28",
+                "backgroundColor" : "000000FF",
+                "alignH" : "C",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "989",
+                "y" : "614.5",
+                "width" : "134",
+                "height" : "35"
+            },
+            "componentProperties" : {
+                "offsetY" : "25"
+            }
         }
     ]
 }
