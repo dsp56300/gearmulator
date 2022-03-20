@@ -66,6 +66,66 @@
             }
         },
         {
+            "name" : "Menu",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "0",
+                "disabledImage" : "0",
+                "normalImageOn" : "0",
+                "overImageOn" : "0",
+                "downImageOn" : "0",
+                "disabledImageOn" : "0",
+                "x" : "2216",
+                "y" : "37.344",
+                "width" : "172",
+                "height" : "50",
+                "texture" : "btn_menu",
+                "tileSizeX" : "172",
+                "tileSizeY" : "50"
+            }
+        },
+        {
+            "name" : "PresetPrev",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "0",
+                "disabledImage" : "0",
+                "normalImageOn" : "0",
+                "overImageOn" : "0",
+                "downImageOn" : "0",
+                "disabledImageOn" : "0",
+                "x" : "2148.73",
+                "y" : "36.844",
+                "width" : "33",
+                "height" : "51",
+                "texture" : "btn_left",
+                "tileSizeX" : "33",
+                "tileSizeY" : "51"
+            }
+        },
+        {
+            "name" : "PresetNext",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "0",
+                "disabledImage" : "0",
+                "normalImageOn" : "0",
+                "overImageOn" : "0",
+                "downImageOn" : "0",
+                "disabledImageOn" : "0",
+                "x" : "2183",
+                "y" : "36.844",
+                "width" : "33",
+                "height" : "51",
+                "texture" : "btn_right",
+                "tileSizeX" : "33",
+                "tileSizeY" : "51"
+            }
+        },
+        {
             "name" : "TabOsc",
             "button" : {
                 "isToggle" : "1",

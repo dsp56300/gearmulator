@@ -19,6 +19,7 @@ private:
 	void timerCallback() override;
 	void loadSkin(int index);
 	void setGuiScale(int percent);
+	void openMenu();
 
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.

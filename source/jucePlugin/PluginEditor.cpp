@@ -41,7 +41,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(int index)
 
 	try
 	{
-		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef, "VirusC_Trancy.json");
+		auto* editor = new genericVirusUI::VirusEditor(m_parameterBinding, processorRef.getController(), processorRef, "VirusC_Trancy.json", [this] { openMenu(); });
 		m_virusEditor.reset(editor);
 		setSize(m_virusEditor->getWidth(), m_virusEditor->getHeight());
 		m_rootScale = editor->getScale();
@@ -68,6 +68,33 @@ void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
 	auto* config = processorRef.getController().getConfig();
 	config->setValue("scale", percent);
 	config->saveIfNeeded();
+}
+
+void AudioPluginAudioProcessorEditor::openMenu()
+{
+	const auto config = processorRef.getController().getConfig();
+    const auto scale = config->getIntValue("scale", 100);
+    const int skinId = config->getIntValue("skin", 0);
+
+	juce::PopupMenu menu;
+
+	juce::PopupMenu skinMenu;
+	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
+	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
+
+	juce::PopupMenu scaleMenu;
+	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
+	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
+	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
+
+	menu.addSubMenu("GUI Skin", skinMenu);
+	menu.addSubMenu("GUI Scale", scaleMenu);
+
+	menu.showMenuAsync(juce::PopupMenu::Options());
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
@@ -101,27 +128,5 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 		return;
 	}
 
-	const auto config = processorRef.getController().getConfig();
-    const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
-
-	juce::PopupMenu menu;
-
-	juce::PopupMenu skinMenu;
-	skinMenu.addItem("Modern", true, skinId == 0,[this] {loadSkin(0);});
-	skinMenu.addItem("Classic", true, skinId == 1,[this] {loadSkin(1);});
-
-	juce::PopupMenu scaleMenu;
-	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
-	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
-	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
-	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
-	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
-	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
-	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
-
-	menu.addSubMenu("GUI Skin", skinMenu);
-	menu.addSubMenu("GUI Scale", scaleMenu);
-
-	menu.showMenuAsync(juce::PopupMenu::Options());
+	openMenu();
 }
