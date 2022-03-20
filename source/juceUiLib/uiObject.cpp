@@ -263,6 +263,18 @@ namespace genericUI
 		return true;
 	}
 
+	void UiObject::readProperties(juce::Component& _target)
+	{
+		const auto it = m_components.find("componentProperties");
+		if(it == m_components.end())
+			return;
+
+		const auto props = it->second;
+
+		for (const auto& prop : props)
+			_target.getProperties().set(juce::Identifier(prop.first.c_str()), juce::var(prop.second.c_str()));
+	}
+
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
 	{
 		return createJuceObject(_editor, new T());
@@ -287,6 +299,8 @@ namespace genericUI
 			if(!tooltip.empty())
 				tooltipClient->setTooltip(tooltip);
 		}
+
+		readProperties(*_object);
 
 		return comp;
 	}
