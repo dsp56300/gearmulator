@@ -59,7 +59,8 @@ namespace genericVirusUI
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
 
 		juce::Label* m_presetName = nullptr;
-		juce::Label* m_controlLabel = nullptr;
+		juce::Label* m_focusedParameterName = nullptr;
+		juce::Label* m_focusedParameterValue = nullptr;
 		juce::ComboBox* m_romSelector = nullptr;
 
 		juce::Button* m_playModeSingle = nullptr;
