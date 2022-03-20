@@ -23,8 +23,28 @@ namespace Virus
     class Controller : private juce::Timer
     {
     public:
-        friend Parameter;
-        static constexpr auto kNameLength = 10;
+        static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
+
+    	struct MultiPatch
+        {
+            uint8_t bankNumber = 0;
+            uint8_t progNumber = 0;
+			std::array<uint8_t, kDataSizeInBytes> data{};
+        };
+
+        struct SinglePatch
+        {
+	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
+            uint8_t progNumber = 0;
+			std::array<uint8_t, kDataSizeInBytes> data{};
+        };
+
+    	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
+        using Multis = std::array<MultiPatch, 128>;
+
+    	friend Parameter;
+
+    	static constexpr auto kNameLength = 10;
 
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 		~Controller() override;
@@ -47,6 +67,12 @@ namespace Virus
 		uint8_t getVirusModel() const;
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
+
+    	const Singles& getSinglePresets() const
+        {
+	        return m_singles;
+        }
+
         juce::StringArray getMultiPresetsName() const;
 		void setSinglePresetName(uint8_t part, juce::String _name);
 		bool isMultiMode() { return getParamValue(0, 2, 0x7a)->getValue(); }
@@ -66,26 +92,13 @@ namespace Virus
 		std::function<void()> onMsgDone = {};
 		std::vector<uint8_t> constructMessage(SysEx msg) const;
 
+        uint8_t getDeviceId() const { return m_deviceId; }
+
     private:
 		void timerCallback() override;
-        static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
-        struct MultiPatch
-        {
-            uint8_t bankNumber = 0;
-            uint8_t progNumber = 0;
-			std::array<uint8_t, kDataSizeInBytes> data{};
-        };
-
-        struct SinglePatch
-        {
-	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
-            uint8_t progNumber = 0;
-			std::array<uint8_t, kDataSizeInBytes> data{};
-        };
-
-        MultiPatch m_multis[128]; // RAM has 128 Multi 'snapshots'
-        std::array<std::array<SinglePatch, 128>, 8> m_singles;
+        Multis m_multis; // RAM has 128 Multi 'snapshots'
+        Singles m_singles;
 		MultiPatch m_currentMulti;
 
         struct ParamIndex
