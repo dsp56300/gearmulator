@@ -168,7 +168,7 @@ void AudioPluginAudioProcessorEditor::exportCurrentSkin() const
 	if(!editor)
 		return;
 
-	const auto res = editor->exportToFolder("skins/");
+	const auto res = editor->exportToFolder(synthLib::getModulePath() + "skins/");
 
 	if(!res.empty())
 	{
