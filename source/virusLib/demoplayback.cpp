@@ -10,6 +10,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include <cstring> // memcpy
+
 namespace virusLib
 {
 	constexpr auto g_timeScale_C = 57;	// C OS 6.6
