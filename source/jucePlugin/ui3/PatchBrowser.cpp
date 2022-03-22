@@ -205,7 +205,7 @@ namespace genericVirusUI
 			memcpy(&d[0], data.getData(), data.getSize());
 
 			std::vector<std::vector<uint8_t>> packets;
-			splitMultipleSysex(packets, d);
+			synthLib::MidiToSysex::splitMultipleSysex(packets, d);
 
 			return load(_result, _dedupeChecksums, packets);
 		}
@@ -220,7 +220,7 @@ namespace genericVirusUI
 				return 0;
 
 			std::vector<std::vector<uint8_t>> packets;
-			splitMultipleSysex(packets, data);
+			synthLib::MidiToSysex::splitMultipleSysex(packets, data);
 
 			return load(_result, _dedupeChecksums, packets);
 		}
@@ -458,28 +458,5 @@ namespace genericVirusUI
 		m_patchList.updateContent();
 		m_patchList.deselectAllRows();
 		m_patchList.repaint();
-	}
-
-	void PatchBrowser::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src)
-	{
-		for (size_t i = 0; i < _src.size(); ++i)
-		{
-			if (_src[i] != 0xf0)
-				continue;
-
-			for (size_t j = i + 1; j < _src.size(); ++j)
-			{
-				if (_src[j] != 0xf7)
-					continue;
-
-				std::vector<uint8_t> entry;
-				entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
-
-				_dst.emplace_back(entry);
-
-				i = j;
-				break;
-			}
-		}
 	}
 }
