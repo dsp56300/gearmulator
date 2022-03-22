@@ -110,6 +110,15 @@ bool ConsoleApp::loadSingle(const std::string& _preset)
 	return false;
 }
 
+bool ConsoleApp::loadDemo(const std::string& _filename)
+{
+	m_demo.reset(new DemoPlayback(uc));
+	if(m_demo->loadMidi(_filename))
+		return true;
+	m_demo.reset();
+	return false;
+}
+
 std::string ConsoleApp::getSingleName() const
 {
 	return ROMFile::getSingleName(preset);
@@ -136,21 +145,27 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		uc.sendInitControlCommands();
 		break;
 	case 256:
-		LOG("Sending Preset");
-		uc.writeSingle(BankNumber::EditBuffer, SINGLE, preset);
+		if(!m_demo)
+		{
+			LOG("Sending Preset");
+			uc.writeSingle(BankNumber::EditBuffer, SINGLE, preset);
+		}
 		break;
 	case 512:
-		LOG("Sending Note On");
-//		uc.sendMIDI(SMidiEvent(0x90, 36, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 48, 0x5f));	// Note On
-		uc.sendMIDI(SMidiEvent(0x90, 60, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 63, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 67, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 72, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 75, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0x90, 79, 0x5f));	// Note On
-//		uc.sendMIDI(SMidiEvent(0xb0, 1, 0));		// Modwheel 0
-		uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		if(!m_demo)
+		{
+			LOG("Sending Note On");
+//			uc.sendMIDI(SMidiEvent(0x90, 36, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 48, 0x5f));	// Note On
+			uc.sendMIDI(SMidiEvent(0x90, 60, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 63, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 67, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 72, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 75, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90, 79, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0xb0, 1, 0));		// Modwheel 0
+			uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		}
 		break;
 /*	case 8000:
 		LOG("Sending 2nd Note On");
@@ -164,6 +179,9 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		break;
 */
 	}
+
+	if(m_demo && audioCallbackCount >= 256)
+		m_demo->process(1);
 }
 
 void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount/* = 0*/)

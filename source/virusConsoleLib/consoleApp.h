@@ -8,6 +8,7 @@
 
 #include "../virusLib/romfile.h"
 #include "../virusLib/microcontroller.h"
+#include "../virusLib/demoplayback.h"
 
 class ConsoleApp
 {
@@ -18,6 +19,8 @@ public:
 
 	void loadSingle(int b, int p);
 	bool loadSingle(const std::string& _preset);
+
+	bool loadDemo(const std::string& _filename);
 
 	std::string getSingleName() const;
 	std::string getSingleNameAsFilename() const;
@@ -43,6 +46,7 @@ private:
 	dsp56k::PeripheralsNop periphNop;
 	dsp56k::DSP dsp;
 	virusLib::Microcontroller uc;
+	std::unique_ptr<virusLib::DemoPlayback> m_demo;
 
 	virusLib::Microcontroller::TPreset preset;
 };

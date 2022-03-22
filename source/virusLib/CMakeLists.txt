@@ -4,6 +4,7 @@ project(virusLib)
 add_library(virusLib STATIC)
 
 set(SOURCES
+	demoplayback.cpp demoplayback.h
 	device.cpp device.h
 	midiOutParser.cpp midiOutParser.h
 	unpacker.cpp unpacker.h
