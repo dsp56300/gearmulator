@@ -15,8 +15,11 @@
 
 namespace virusLib
 {
+class DemoPlayback;
+
 class Microcontroller
 {
+	friend class DemoPlayback;
 public:
 	using TPreset = ROMFile::TPreset;
 
