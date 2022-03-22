@@ -40,8 +40,6 @@ namespace genericVirusUI
 		static bool load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
 		static uint32_t loadBankFile(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const juce::File& file);
 
-		static void splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src);
-
 	private:
 	    juce::FileBrowserComponent& getBankList() {return m_bankList; }
 	    juce::TableListBox& getPatchList() {return m_patchList; }
