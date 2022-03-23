@@ -82,7 +82,7 @@ namespace virusLib
 				{
 					if(_data[j] == 0xf7)
 					{
-						e = parseSysex(&_data[i], j - i + 1);
+						e = parseSysex(&_data[i], static_cast<uint32_t>(j - i + 1));
 						i = j+1;
 						break;
 					}
