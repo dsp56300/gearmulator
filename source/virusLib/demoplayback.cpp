@@ -112,7 +112,7 @@ namespace virusLib
 	{
 		Event e;
 
-		e.type = Midi;
+		e.type = EventType::Midi;
 
 		const auto status = _data[0] < 0xf0 ? (_data[0] & 0xf0) : _data[0];
 
@@ -164,14 +164,14 @@ namespace virusLib
 			// Only seen for single and multi patches for now
 			e.data.resize(_count);
 			memcpy(&e.data.front(), _data, _count);
-			e.type = RawSerial;
+			e.type = EventType::RawSerial;
 		}
 		else
 		{
 			// regular midi sysex data, sent to the uC
 			e.data.resize(_count);
 			memcpy(&e.data.front(), _data, _count);
-			e.type = MidiSysex;
+			e.type = EventType::MidiSysex;
 		}
 		return e;
 	}
@@ -204,13 +204,13 @@ namespace virusLib
 	{
 		switch (_event.type)
 		{
-		case MidiSysex:
+		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
 				m_mc.sendSysex(_event.data, false, responses, synthLib::MidiEventSourcePlugin);
 			}
 			break;
-		case Midi:
+		case EventType::Midi:
 			{
 				synthLib::SMidiEvent ev;
 				ev.a = _event.data[0];
@@ -224,7 +224,7 @@ namespace virusLib
 				}
 			}
 			break;
-		case RawSerial:
+		case EventType::RawSerial:
 			{
 				std::vector<dsp56k::TWord> dspWords;
 
