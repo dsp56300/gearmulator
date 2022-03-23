@@ -12,6 +12,8 @@
 
 #include <cstring> // memcpy
 
+#include "demopacketvalidator.h"
+
 namespace virusLib
 {
 	constexpr auto g_timeScale_C = 57;	// C OS 6.6
@@ -32,50 +34,20 @@ namespace virusLib
 		std::vector<std::vector<uint8_t>> packets;
 		synthLib::MidiToSysex::splitMultipleSysex(packets, sysex);
 
-		std::vector<uint8_t> temp;
+		DemoPacketValidator validator;
 
-		for(size_t i=0; i<packets.size(); ++i)
+		for (const auto& packet : packets)
+			validator.add(packet);
+
+		if(!validator.isValid())
 		{
-			const auto& p = packets[i];
-
-			const auto cmd = p[5];
-
-			const uint32_t indexA = p[6];	// packet number MSB
-			const uint32_t indexB = p[7];	// packet number LSB
-
-			switch(cmd)
-			{
-			case 0x50:	// Virus A second
-			case 0x55:	// Virus B second
-			case 0x57:	// Virus C second
-				{
-					LOG("Packet " << i << " indexA = " << indexA << " indexB = " << indexB);
-
-					if(indexB > 3)
-					{
-						continue;
-					}
-
-					// midi bytes in a sysex fram can only carry 7 bit, not 8. They've chosen the easy way that costs more storage
-					// They transfer one nibble of a ROM byte in each midi byte to ensure that the most significant nibble is always zero
-					// By concating two nibbles together we get one ROM byte
-					for(size_t s=8; s<p.size()-2; s += 2)
-					{
-						const uint8_t a = p[s];
-						const uint8_t b = p[s+1];
-						assert(a <= 0xf);
-						assert(b <= 0xf);
-						temp.push_back(static_cast<uint8_t>(b << 4) | a);
-					}
-				}
-				break;
-			}
+			LOG("Packet validation failed, packets missing or invalid");
+			return false;
 		}
 
-		if(temp.empty())
-			return false;
+		const auto& data = validator.getData();
 
-		return loadBinData(temp);
+		return loadBinData(data);
 	}
 
 	bool DemoPlayback::loadBinData(const std::vector<uint8_t>& _data)
