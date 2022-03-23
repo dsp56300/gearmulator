@@ -194,13 +194,15 @@ namespace virusLib
 		m_remainingDelay -= _samples;
 		while(m_remainingDelay <= 0 && m_currentEvent < m_events.size())
 		{
-			const auto& e = m_events[m_currentEvent++];
-			processEvent(e);
+			const auto& e = m_events[m_currentEvent];
+			if(!processEvent(e))
+				return;
+			++m_currentEvent;
 			m_remainingDelay = e.delay * m_timeScale;
 		}
 	}
 
-	void DemoPlayback::processEvent(const Event& _event) const
+	bool DemoPlayback::processEvent(const Event& _event) const
 	{
 		switch (_event.type)
 		{
@@ -226,6 +228,9 @@ namespace virusLib
 			break;
 		case EventType::RawSerial:
 			{
+				if(m_mc.needsToWaitForHostBits(0,1))
+					return false;
+
 				std::vector<dsp56k::TWord> dspWords;
 
 				for(size_t i=0; i<_event.data.size(); i += 3)
@@ -243,5 +248,6 @@ namespace virusLib
 			}
 			break;
 		}
+		return true;
 	}
 }
