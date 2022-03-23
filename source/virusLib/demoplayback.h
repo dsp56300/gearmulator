@@ -37,7 +37,7 @@ namespace virusLib
 
 		bool parseData(const std::vector<uint8_t>& _data);
 
-		void processEvent(const Event& _event) const;
+		bool processEvent(const Event& _event) const;
 
 		Microcontroller& m_mc;
 
