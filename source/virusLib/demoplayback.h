@@ -18,7 +18,7 @@ namespace virusLib
 		void process(uint32_t _samples);
 		
 	private:
-		enum EventType
+		enum class EventType
 		{
 			MidiSysex,
 			Midi,
@@ -27,7 +27,7 @@ namespace virusLib
 
 		struct Event
 		{
-			EventType type = MidiSysex;
+			EventType type = EventType::MidiSysex;
 			std::vector<uint8_t> data;
 			uint8_t delay = 0;
 		};
@@ -37,7 +37,7 @@ namespace virusLib
 
 		bool parseData(const std::vector<uint8_t>& _data);
 
-		void processEvent(const Event& _event) const;
+		bool processEvent(const Event& _event) const;
 
 		Microcontroller& m_mc;
 
