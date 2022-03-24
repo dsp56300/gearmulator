@@ -239,14 +239,14 @@
                     "name" : "WaveSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
                         "fontName" : "Register",
-                        "x" : "59",
+                        "x" : "57",
                         "y" : "83",
-                        "width" : "120",
+                        "width" : "122",
                         "height" : "39"
                     },
                     "parameterAttachment" : {
@@ -325,14 +325,14 @@
                     "name" : "WaveSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
                         "fontName" : "Register",
-                        "x" : "59",
+                        "x" : "57",
                         "y" : "291",
-                        "width" : "120",
+                        "width" : "122",
                         "height" : "39"
                     },
                     "parameterAttachment" : {
@@ -536,14 +536,14 @@
                     "name" : "WaveSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
                         "fontName" : "Register",
-                        "x" : "59",
+                        "x" : "57",
                         "y" : "675",
-                        "width" : "120",
+                        "width" : "122",
                         "height" : "39"
                     },
                     "parameterAttachment" : {
@@ -585,7 +585,7 @@
                     }
                 },
                 {
-                    "name" : "WaveSelect",
+                    "name" : "UnisonMode",
                     "combobox" : {
                         "text" : "Wave 42",
                         "textHeight" : "20",
@@ -599,11 +599,11 @@
                         "height" : "39"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Wave Select"
+                        "parameter" : "Unison Mode"
                     }
                 },
                 {
-                    "name" : "Semitone",
+                    "name" : "UnisonDetune",
                     "parameterAttachment" : {
                         "parameter" : "Unison Detune"
                     },
@@ -620,7 +620,7 @@
                     }
                 },
                 {
-                    "name" : "Detune",
+                    "name" : "UnisonPanSpread",
                     "parameterAttachment" : {
                         "parameter" : "Unison Pan Spread"
                     },
@@ -637,7 +637,7 @@
                     }
                 },
                 {
-                    "name" : "Detune (1)",
+                    "name" : "UnisonPhase",
                     "parameterAttachment" : {
                         "parameter" : "Unison Lfo Phase"
                     },
@@ -1686,7 +1686,7 @@
                     "name" : "LfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
@@ -1976,7 +1976,7 @@
                     "name" : "LfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
@@ -2164,7 +2164,7 @@
                     "name" : "Lfo3Shape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "20",
+                        "textHeight" : "18",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "Digital",
