@@ -106,9 +106,17 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const Virus::ParameterT
 	_combo.clear();
 
 	int idx = 1;
+	uint32_t count = 0;
 	for (const auto& vs : v->getAllValueStrings()) {
 		if(vs.isNotEmpty())
+		{
 			_combo.addItem(vs, idx);
+			if(++count == 16)
+			{
+				_combo.getRootMenu()->addColumnBreak();
+				count = 0;
+			}
+		}
 		idx++;
 	}
 	//_combo.addItemList(v->getAllValueStrings(), 1);
