@@ -122,7 +122,12 @@ namespace synthLib
         {
             while ((ent = readdir(dir)))
             {
-                const std::string file = _folder + ent->d_name;
+                std::string file = _folder;
+
+            	if(file.back() != '/' && file.back() != '\\')
+                    file += '/';
+
+            	file += ent->d_name;
 
                 _files.push_back(file);
             }
