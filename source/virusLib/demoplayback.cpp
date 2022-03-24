@@ -12,6 +12,8 @@
 
 #include <cstring> // memcpy
 
+#include "demopacketvalidator.h"
+
 namespace virusLib
 {
 	constexpr auto g_timeScale_C = 57;	// C OS 6.6
@@ -32,50 +34,20 @@ namespace virusLib
 		std::vector<std::vector<uint8_t>> packets;
 		synthLib::MidiToSysex::splitMultipleSysex(packets, sysex);
 
-		std::vector<uint8_t> temp;
+		DemoPacketValidator validator;
 
-		for(size_t i=0; i<packets.size(); ++i)
+		for (const auto& packet : packets)
+			validator.add(packet);
+
+		if(!validator.isValid())
 		{
-			const auto& p = packets[i];
-
-			const auto cmd = p[5];
-
-			const uint32_t indexA = p[6];	// packet number MSB
-			const uint32_t indexB = p[7];	// packet number LSB
-
-			switch(cmd)
-			{
-			case 0x50:	// Virus A second
-			case 0x55:	// Virus B second
-			case 0x57:	// Virus C second
-				{
-					LOG("Packet " << i << " indexA = " << indexA << " indexB = " << indexB);
-
-					if(indexB > 3)
-					{
-						continue;
-					}
-
-					// midi bytes in a sysex fram can only carry 7 bit, not 8. They've chosen the easy way that costs more storage
-					// They transfer one nibble of a ROM byte in each midi byte to ensure that the most significant nibble is always zero
-					// By concating two nibbles together we get one ROM byte
-					for(size_t s=8; s<p.size()-2; s += 2)
-					{
-						const uint8_t a = p[s];
-						const uint8_t b = p[s+1];
-						assert(a <= 0xf);
-						assert(b <= 0xf);
-						temp.push_back(static_cast<uint8_t>(b << 4) | a);
-					}
-				}
-				break;
-			}
+			LOG("Packet validation failed, packets missing or invalid");
+			return false;
 		}
 
-		if(temp.empty())
-			return false;
+		const auto& data = validator.getData();
 
-		return loadBinData(temp);
+		return loadBinData(data);
 	}
 
 	bool DemoPlayback::loadBinData(const std::vector<uint8_t>& _data)
@@ -110,7 +82,7 @@ namespace virusLib
 				{
 					if(_data[j] == 0xf7)
 					{
-						e = parseSysex(&_data[i], j - i + 1);
+						e = parseSysex(&_data[i], static_cast<uint32_t>(j - i + 1));
 						i = j+1;
 						break;
 					}
@@ -140,7 +112,7 @@ namespace virusLib
 	{
 		Event e;
 
-		e.type = Midi;
+		e.type = EventType::Midi;
 
 		const auto status = _data[0] < 0xf0 ? (_data[0] & 0xf0) : _data[0];
 
@@ -192,14 +164,14 @@ namespace virusLib
 			// Only seen for single and multi patches for now
 			e.data.resize(_count);
 			memcpy(&e.data.front(), _data, _count);
-			e.type = RawSerial;
+			e.type = EventType::RawSerial;
 		}
 		else
 		{
 			// regular midi sysex data, sent to the uC
 			e.data.resize(_count);
 			memcpy(&e.data.front(), _data, _count);
-			e.type = MidiSysex;
+			e.type = EventType::MidiSysex;
 		}
 		return e;
 	}
@@ -222,23 +194,25 @@ namespace virusLib
 		m_remainingDelay -= _samples;
 		while(m_remainingDelay <= 0 && m_currentEvent < m_events.size())
 		{
-			const auto& e = m_events[m_currentEvent++];
-			processEvent(e);
+			const auto& e = m_events[m_currentEvent];
+			if(!processEvent(e))
+				return;
+			++m_currentEvent;
 			m_remainingDelay = e.delay * m_timeScale;
 		}
 	}
 
-	void DemoPlayback::processEvent(const Event& _event) const
+	bool DemoPlayback::processEvent(const Event& _event) const
 	{
 		switch (_event.type)
 		{
-		case MidiSysex:
+		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
 				m_mc.sendSysex(_event.data, false, responses, synthLib::MidiEventSourcePlugin);
 			}
 			break;
-		case Midi:
+		case EventType::Midi:
 			{
 				synthLib::SMidiEvent ev;
 				ev.a = _event.data[0];
@@ -252,8 +226,11 @@ namespace virusLib
 				}
 			}
 			break;
-		case RawSerial:
+		case EventType::RawSerial:
 			{
+				if(m_mc.needsToWaitForHostBits(0,1))
+					return false;
+
 				std::vector<dsp56k::TWord> dspWords;
 
 				for(size_t i=0; i<_event.data.size(); i += 3)
@@ -271,5 +248,6 @@ namespace virusLib
 			}
 			break;
 		}
+		return true;
 	}
 }
