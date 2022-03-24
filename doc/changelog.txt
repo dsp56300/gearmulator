@@ -1,5 +1,14 @@
 Release Notes 
 
+1.2.14 (2022.03.23):
+
+- [Imp] Performance improved in some circumstances when JIT compiler had to regenerate code
+- [Imp] Drop down menus with lots of entries now use multiple columns
+
+- [Fix] UI skins were not found on disk (Mac/Linux)
+- [Fix] [UI Trancy] Size of some labels reduced to be able to display more text
+- [Fix] [Trancy Skin] Unison Mode switch did not work
+
 1.2.13 (2022.03.23):
 
 UI only release
