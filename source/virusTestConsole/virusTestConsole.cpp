@@ -50,13 +50,16 @@ int main(int _argc, char* _argv[])
 	if(_argc > 1)
 	{
 		const std::string name = _argv[1];
-		if(hasExtension(name, ".mid") && !app.loadDemo(name))
+		if(hasExtension(name, ".mid"))
 		{
-			std::cout << "Failed to load demo from '" << name << "', make sure that the file contains a demo" << std::endl;
-			ConsoleApp::waitReturn();
-			return -1;
+			if(!app.loadDemo(name))
+			{
+				std::cout << "Failed to load demo from '" << name << "', make sure that the file contains a demo" << std::endl;
+				ConsoleApp::waitReturn();
+				return -1;
+			}
 		}
-		if(!app.loadSingle(name))
+		else if(!app.loadSingle(name))
 		{
 			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;
 			ConsoleApp::waitReturn();
