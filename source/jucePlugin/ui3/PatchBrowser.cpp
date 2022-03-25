@@ -3,6 +3,7 @@
 #include "VirusEditor.h"
 
 #include "../../virusLib/microcontrollerTypes.h"
+#include "../../virusLib/microcontroller.h"
 
 #include "../VirusController.h"
 #include "juce_cryptography/hashing/juce_MD5.h"
@@ -19,17 +20,12 @@ const Array<String> g_categories = { "", "Lead",	 "Bass",	  "Pad",	   "Decay",	 
 
 namespace genericVirusUI
 {
-	virusLib::VirusModel guessVersion(const uint8_t* _data)
+	virusLib::PresetVersion guessVersion(const uint8_t* _data)
 	{
-		const auto v = _data[0];
-
-		if (v < 5)
+		if(!_data)
 			return virusLib::A;
-		if (v == 6)
-			return virusLib::B;
-		if (v == 7)
-			return virusLib::C;
-		return virusLib::TI;
+
+		return virusLib::Microcontroller::getPresetVersion(_data[0]);
 	}
 
 	static juce::String parseAsciiText(const std::vector<uint8_t>& msg, const int start)
@@ -48,7 +44,7 @@ namespace genericVirusUI
 		_patch.category2 = _patch.data[252];
 		_patch.unison = _patch.data[97];
 		_patch.transpose = _patch.data[93];
-		_patch.model = guessVersion(&_patch.data[0]);
+		_patch.model = virusLib::Microcontroller::getPresetVersion(_patch.data[0]);
 	}
 
 	PatchBrowser::PatchBrowser(const VirusEditor& _editor) : m_editor(_editor), m_controller(_editor.getController()),
@@ -326,9 +322,17 @@ namespace genericVirusUI
 			text = rowElement.unison == 0 ? " " : String(rowElement.unison + 1);
 		else if (columnId == Columns::ST)
 			text = rowElement.transpose != 64 ? String(rowElement.transpose - 64) : " ";
-		else if (columnId == Columns::VER) {
-			if (rowElement.model < ModelList.size())
-				text = ModelList[rowElement.model];
+		else if (columnId == Columns::VER)
+		{
+			switch (rowElement.model)
+			{
+			case virusLib::A:	text = "A";	break;
+			case virusLib::B:	text = "B";	break;
+			case virusLib::C:	text = "C";	break;
+			case virusLib::D:	text = "TI";	break;
+			case virusLib::D2:  text = "TI2";	break;
+			default:			text = "?";	break;
+			}
 		}
 		g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true); // [6]
 		g.setColour(m_patchList.getLookAndFeel().findColour(ListBox::backgroundColourId));

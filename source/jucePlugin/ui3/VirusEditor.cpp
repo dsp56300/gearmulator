@@ -83,12 +83,14 @@ namespace genericVirusUI
 		if(auto* deviceModel = findComponentT<juce::Label>("DeviceModel", false))
 		{
 			std::string m;
-			switch(getController().getVirusModel())
+			switch(virusLib::Microcontroller::getPresetVersion(getController().getSinglePresets().front().front().data[0]))
 			{
-			case virusLib::A: m = "A";		break;
-			case virusLib::B: m = "B";		break;
-			case virusLib::C: m = "C";		break;
-			case virusLib::TI: m = "TI";	break;
+			case virusLib::A:	m = "A";	break;
+			case virusLib::B:	m = "B";	break;
+			case virusLib::C:	m = "C";	break;
+			case virusLib::D:	m = "TI";	break;
+			case virusLib::D2:	m = "TI2";	break;
+			default:			m = "?";	break;
 			}
 			deviceModel->setText(m, juce::dontSendNotification);
 		}

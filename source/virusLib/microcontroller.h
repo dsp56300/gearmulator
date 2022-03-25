@@ -46,6 +46,7 @@ public:
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
+	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
