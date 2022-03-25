@@ -90,7 +90,7 @@ namespace synthLib
         if (end != std::string::npos)
             path = path.substr(0, end + 1);
 
-        return path;
+        return validatePath(path);
     }
 
     std::string getCurrentDirectory()
@@ -111,6 +111,16 @@ namespace synthLib
 #else
         return std::filesystem::create_directories(_dir);
 #endif
+    }
+
+    std::string validatePath(std::string _path)
+    {
+        if(_path.empty())
+            return _path;
+        if(_path.back() == '/' || _path.back() == '\\')
+            return _path;
+        _path += '/';
+        return _path;
     }
 
     bool getDirectoryEntries(std::vector<std::string>& _files, const std::string& _folder)
