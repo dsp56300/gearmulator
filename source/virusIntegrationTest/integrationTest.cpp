@@ -23,7 +23,7 @@ int main(int _argc, char* _argv[])
 		{
 			puts("Running Unit Tests...");
 //			dsp56k::InterpreterUnitTests tests;
-			dsp56k::JitUnittests jitTests;
+			dsp56k::JitUnittests jitTests(false);
 			puts("Unit Tests finished.");
 		}
 		catch (const std::string& _err)
@@ -82,16 +82,16 @@ int IntegrationTest::run()
 	}
 	else
 	{
-		const auto compareFilename = m_app.getSingleNameAsFilename();
+		const auto referenceFile = m_app.getSingleNameAsFilename();
 
-		if (!loadReferenceFile(compareFilename))
+		if (!loadAudioFile(m_referenceFile, referenceFile))
 			return -1;
 
 		return runCompare();
 	}
 }
 
-bool IntegrationTest::loadReferenceFile(const std::string& _filename)
+bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) const
 {
 	const auto hFile = fopen(_filename.c_str(), "rb");
 	if (!hFile)
@@ -101,9 +101,9 @@ bool IntegrationTest::loadReferenceFile(const std::string& _filename)
 	}
 	fseek(hFile, 0, SEEK_END);
 	const auto size = ftell(hFile);
-	m_referenceFileData.resize(size);
+	_dst.file.resize(size);
 	fseek(hFile, 0, SEEK_SET);
-	if (fread(&m_referenceFileData.front(), 1, size, hFile) != size)
+	if (fread(&_dst.file.front(), 1, size, hFile) != size)
 	{
 		std::cout << "Failed to read data from file " << _filename << std::endl;
 		fclose(hFile);
@@ -111,23 +111,23 @@ bool IntegrationTest::loadReferenceFile(const std::string& _filename)
 	}
 	fclose(hFile);
 
-	m_referenceData.data = nullptr;
+	_dst.data.data = nullptr;
 
-	if (!synthLib::WavReader::load(m_referenceData, nullptr, &m_referenceFileData.front(), m_referenceFileData.size()))
+	if (!synthLib::WavReader::load(_dst.data, nullptr, &_dst.file.front(), _dst.file.size()))
 	{
 		std::cout << "Failed to interpret file " << _filename << " as wave data, make sure that the file is a valid 24 bit stereo wav file" << std::endl;
 		return false;
 	}
 
-	if(m_referenceData.samplerate != m_app.getRom().getSamplerate())
+	if(_dst.data.samplerate != m_app.getRom().getSamplerate())
 	{
-		std::cout << "Wave file " << _filename << " does not have the correct samplerate, expected " << m_app.getRom().getSamplerate() << " but got " << m_referenceData.samplerate << " instead" << std::endl;
+		std::cout << "Wave file " << _filename << " does not have the correct samplerate, expected " << m_app.getRom().getSamplerate() << " but got " << _dst.data.samplerate << " instead" << std::endl;
 		return false;
 	}
 
-	if (m_referenceData.bitsPerSample != 24 || m_referenceData.channels != 2 || m_referenceData.isFloat)
+	if (_dst.data.bitsPerSample != 24 || _dst.data.channels != 2 || _dst.data.isFloat)
 	{
-		std::cout << "Wave file " << _filename << " has an invalid format, expected 24 bit / 2 channels but got " << m_referenceData.bitsPerSample << " bit / " << m_referenceData.channels << " channels" << std::endl;
+		std::cout << "Wave file " << _filename << " has an invalid format, expected 24 bit / 2 channels but got " << _dst.data.bitsPerSample << " bit / " << _dst.data.channels << " channels" << std::endl;
 		return false;
 	}
 	return true;
@@ -135,52 +135,53 @@ bool IntegrationTest::loadReferenceFile(const std::string& _filename)
 
 int IntegrationTest::runCompare()
 {
-	const auto sampleCount = m_referenceData.dataByteSize * 8 / m_referenceData.bitsPerSample;
+	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample;
 
 	uint32_t offset = 0;
 
 	std::vector<uint8_t> temp;
-	const auto* const compareData = static_cast<const uint8_t*>(m_referenceData.data);
+	const auto* const compareData = static_cast<const uint8_t*>(m_referenceFile.data.data);
 
 	int32_t errorPosition = -1;
 
-	m_app.run([&](const std::vector<dsp56k::TWord>& _data)
+	File compareFile;
+	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(sampleCount));
+	if(res)
+		return res;
+
+	auto* ptrA = static_cast<const uint8_t*>(compareFile.data.data);
+	auto* ptrB = static_cast<const uint8_t*>(m_referenceFile.data.data);
+
+	for(uint32_t i=0; i<sampleCount; ++i)
 	{
-		if (errorPosition != -1)
-			return true;
+		const uint32_t a = (static_cast<uint32_t>(ptrA[0]) << 24) || (static_cast<uint32_t>(ptrA[1]) << 16) || ptrA[2];
+		const uint32_t b = (static_cast<uint32_t>(ptrB[0]) << 24) || (static_cast<uint32_t>(ptrB[1]) << 16) || ptrB[2];
 
-		temp.clear();
-
-		for (const auto& d : _data)
-			EsaiListenerToFile::writeWord(temp, d);
-
-		for (const auto& d : temp)
+		if(b != a)
 		{
-			if (d == compareData[offset++])
-				continue;
-
-			errorPosition = static_cast<int32_t>(offset / 6);
-			std::cout << "Audio output differs at frame position " << errorPosition << std::endl;
-			break;
+			std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << (i>>1) << std::endl;
+			return -2;
 		}
-		return true;
-	}, static_cast<uint32_t>(sampleCount));
 
-	if (errorPosition == -1)
-	{
-		std::cout << "Test succeeded, compared " << sampleCount << " samples" << std::endl;
-		return 0;
+		ptrA += 3;
+		ptrB += 3;
 	}
 
-	std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << errorPosition << std::endl;
-	return -2;
+	std::cout << "Test succeeded, compared " << sampleCount << " samples" << std::endl;
+	return 0;
 }
 
-int IntegrationTest::runCreate(int _lengthSeconds)
+int IntegrationTest::runCreate(const int _lengthSeconds)
 {
 	const auto sampleCount = m_app.getRom().getSamplerate() * _lengthSeconds * 2;
 
-	const auto filename = m_app.getSingleNameAsFilename();
+	File file;
+	return createAudioFile(file, "", sampleCount);
+}
+
+int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, const uint32_t _sampleCount)
+{
+	const auto filename = _prefix + m_app.getSingleNameAsFilename();
 
 	auto* hFile = fopen(filename.c_str(), "wb");
 
@@ -192,19 +193,19 @@ int IntegrationTest::runCreate(int _lengthSeconds)
 
 	fclose(hFile);
 
-	m_app.run(filename, sampleCount);
+	m_app.run(filename, _sampleCount);
 
-	if(!loadReferenceFile(filename))
+	if(!loadAudioFile(_dst, filename))
 	{
 		std::cout << "Failed to open written file " << filename << " for verification" << std::endl;
 		return -1;
 	}
 
-	const auto referenceSampleCount = m_referenceData.dataByteSize * 8 / m_referenceData.bitsPerSample;
+	const auto sampleCount = _dst.data.dataByteSize * 8 / _dst.data.bitsPerSample;
 
-	if(referenceSampleCount != sampleCount)
+	if(sampleCount != _sampleCount)
 	{
-		std::cout << "Verification of written file failed, expected " << sampleCount << " samples but file only has " << referenceSampleCount << " samples" << std::endl;
+		std::cout << "Verification of written file failed, expected " << _sampleCount << " samples but file only has " << sampleCount << " samples" << std::endl;
 		return -1;
 	}
 	return 0;
