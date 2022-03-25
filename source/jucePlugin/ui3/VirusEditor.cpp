@@ -171,7 +171,7 @@ namespace genericVirusUI
 				return res;
 
 			const auto modulePath = synthLib::getModulePath();
-			const auto folder = m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder;
+			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");
