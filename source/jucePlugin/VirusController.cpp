@@ -302,11 +302,8 @@ namespace Virus
         ignored
          */
     }
-	virusLib::VirusModel Controller::getVirusModel() const
-	{
-		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::PresetVersion::B : virusLib::PresetVersion::C;
-	}
-    juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
+
+	juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
 		if (_bank == virusLib::BankNumber::EditBuffer)
 		{

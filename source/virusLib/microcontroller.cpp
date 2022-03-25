@@ -1060,7 +1060,12 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
 {
-	return static_cast<PresetVersion>(_preset[0]);
+	return getPresetVersion(_preset[0]);
+}
+
+PresetVersion Microcontroller::getPresetVersion(const uint8_t _versionCode)
+{
+	return static_cast<PresetVersion>(_versionCode);
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
