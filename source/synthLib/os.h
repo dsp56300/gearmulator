@@ -8,6 +8,7 @@ namespace synthLib
 
 	std::string getCurrentDirectory();
 	bool createDirectory(const std::string& _dir);;
+	std::string validatePath(std::string _path);
 
 	bool getDirectoryEntries(std::vector<std::string>& _files, const std::string& _folder);
 
