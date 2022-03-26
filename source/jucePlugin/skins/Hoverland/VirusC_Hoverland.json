@@ -3635,7 +3635,7 @@
                         "height" : "36"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "LFO2 Assign Dest"
+                        "parameter" : "Lfo3 Destination"
                     }
                 },
                 {
@@ -4366,7 +4366,7 @@
                 {
                     "name" : "Gain",
                     "parameterAttachment" : {
-                        "parameter" : "LowEQ Gain"
+                        "parameter" : "MidEQ Gain"
                     },
                     "rotary" : {
                     },
@@ -4383,7 +4383,7 @@
                 {
                     "name" : "Freq",
                     "parameterAttachment" : {
-                        "parameter" : "LowEQ Frequency"
+                        "parameter" : "MidEQ Frequency"
                     },
                     "rotary" : {
                     },
