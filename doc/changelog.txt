@@ -1,5 +1,12 @@
 Release Notes 
 
+1.2.15 (2022.03.26):
+
+- [Fix] Skin files were not correctly loaded from disk
+- [Fix] [UI Hoverland] LFO3 destination was a duplicate of LFO2 destination
+- [Fix] [UI Hoverland] MidEQ Gain & Freq were duplicates of LowEQ Gain & Freq
+- [Fix] [UI Trancy] Broken Part Volume & Pan knobs
+
 1.2.14 (2022.03.25):
 
 - [Imp] Performance improved in some circumstances when JIT compiler had to regenerate code
