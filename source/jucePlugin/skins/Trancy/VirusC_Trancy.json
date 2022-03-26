@@ -3738,9 +3738,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3758,9 +3755,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3816,9 +3810,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3836,9 +3827,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3894,9 +3882,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3914,9 +3899,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3972,9 +3954,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3992,9 +3971,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4050,9 +4026,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4070,9 +4043,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4128,9 +4098,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4148,9 +4115,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4206,9 +4170,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4226,9 +4187,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4284,9 +4242,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4304,9 +4259,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4362,9 +4314,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4382,9 +4331,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4440,9 +4386,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4460,9 +4403,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4518,9 +4458,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4538,9 +4475,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4596,9 +4530,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4616,9 +4547,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4674,9 +4602,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4694,9 +4619,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4752,9 +4674,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4772,9 +4691,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4830,9 +4746,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4850,9 +4763,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4908,9 +4818,6 @@
                 },
                 {
                     "name" : "PartVolume",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -4928,9 +4835,6 @@
                 },
                 {
                     "name" : "PartPan",
-                    "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
-                    },
                     "rotary" : {
                     },
                     "spritesheet" : {
