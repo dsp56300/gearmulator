@@ -13,11 +13,22 @@ namespace virusLib
 		if(!m_rom.isValid())
 			return;
 
+		auto& jit = getDSP().getJit();
+		auto conf = jit.getConfig();
+
 		if(m_rom.getModel() == ROMFile::ModelD)
 		{
 			getPeriphX().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
 			getPeriphY().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
+
+			conf.aguSupportBitreverse = true;
 		}
+		else
+		{
+			conf.aguSupportBitreverse = false;
+		}
+
+		jit.setConfig(conf);
 
 		auto loader = m_rom.bootDSP(getDSP(), getPeriphX());
 
