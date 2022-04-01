@@ -40,6 +40,7 @@ private:
 	void audioCallback(uint32_t audioCallbackCount);
 
 	dsp56k::Memory memory;
+	const std::string m_romName;
 	virusLib::ROMFile v;
 	dsp56k::Peripherals56367 periphY;
 	dsp56k::Peripherals56362 periphX;

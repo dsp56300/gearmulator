@@ -17,6 +17,7 @@ const dsp56k::DefaultMemoryValidator g_memoryMap;
 
 ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, const uint32_t _extMemAddress)
 : memory(g_memoryMap, _memorySize)
+, m_romName(_romFile)
 , v(_romFile)
 , periphX(&periphY)
 , dsp(memory, &periphX, &getYPeripherals())
@@ -262,6 +263,15 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 	});
 
 	loader.join();
+
+/*
+	const std::string romFile = m_romName;
+	auto& mem = memory;
+
+//	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
+//	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
+	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, dsp.getPeriph(0), dsp.getPeriph(1));
+*/
 
 	while (!esaiListener->limitReached())
 		std::this_thread::sleep_for(std::chrono::seconds(1));
