@@ -104,7 +104,7 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
 
-	if(m_model == ModelSnow)
+	if(m_model == Model::Snow)
 	{
 		if (!fw.Presets.empty())
 		{
@@ -148,14 +148,14 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	if(fileSize == 1024 * 1024)
 	{
 		// D
-		m_model = ModelSnow;
+		m_model = Model::Snow;
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
 	else if (fileSize == 1024 * 512)
 	{
 		// ABC
-		m_model = ModelABC;
+		m_model = Model::ABC;
 		offset = 0x18000;
 		lastChunkId = 4;
 	} else {
@@ -295,7 +295,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 
 bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out) const
 {
-	if(m_model == ModelSnow)
+	if(m_model == Model::Snow)
 	{
 		const auto offset = _bank * getSinglesPerBank() + _presetNumber;
 		if (offset >= m_singles.size())
@@ -311,7 +311,7 @@ bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out)
 
 bool ROMFile::getMulti(const int _presetNumber, TPreset& _out) const
 {
-	if(m_model == ModelSnow)
+	if(m_model == Model::Snow)
 	{
 		if (_presetNumber >= m_multis.size())
 			return false;

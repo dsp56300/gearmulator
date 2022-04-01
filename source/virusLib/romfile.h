@@ -31,11 +31,11 @@ public:
 		std::vector<uint32_t> data;
 	};
 
-	enum Model
+	enum class Model
 	{
 		Invalid = -1,
-		ModelABC,
-		ModelSnow
+		ABC,
+		Snow
 	};
 
 	using TPreset = std::array<uint8_t, 512>;
@@ -60,14 +60,14 @@ public:
 
 	uint32_t getSamplerate() const
 	{
-		return getModel() == ModelSnow ? 44100 : 12000000 / 256;
+		return getModel() == Model::Snow ? 44100 : 12000000 / 256;
 	}
 
 	static uint32_t getMultiPresetSize(const Model _model)
 	{
 		switch (_model)
 		{
-		case ModelSnow:
+		case Model::Snow:
 			return 256;
 		default:
 			return 256;
@@ -82,7 +82,7 @@ public:
 	{
 		switch (_model)
 		{
-		case ModelSnow:
+		case Model::Snow:
 			return 512;
 		default:
 			return 256;
@@ -129,7 +129,7 @@ private:
 	std::vector<uint32_t> commandStream;
 
 	const std::string m_file;
-	Model m_model = Invalid;
+	Model m_model = Model::Invalid;
 
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;
