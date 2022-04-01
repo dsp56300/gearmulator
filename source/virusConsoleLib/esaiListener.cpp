@@ -37,7 +37,7 @@ EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, cons
 		onAudioCallback(_audio);
 	}, 4, callbackChannel);
 
-	_esai.writeEmptyAudioIn(4, 8);
+	_esai.writeEmptyAudioIn(4, m_inChannels<<1);
 }
 
 void EsaiListener::setMaxSamplecount(uint32_t _max)
