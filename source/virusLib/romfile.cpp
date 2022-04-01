@@ -104,7 +104,7 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
 
-	if(m_model == Model::Snow)
+	if(isTIFamily())
 	{
 		if (!fw.Presets.empty())
 		{
@@ -295,7 +295,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 
 bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out) const
 {
-	if(m_model == Model::Snow)
+	if(isTIFamily())
 	{
 		const auto offset = _bank * getSinglesPerBank() + _presetNumber;
 		if (offset >= m_singles.size())
@@ -311,7 +311,7 @@ bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out)
 
 bool ROMFile::getMulti(const int _presetNumber, TPreset& _out) const
 {
-	if(m_model == Model::Snow)
+	if(isTIFamily())
 	{
 		if (_presetNumber >= m_multis.size())
 			return false;
