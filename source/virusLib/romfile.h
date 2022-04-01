@@ -35,7 +35,8 @@ public:
 	{
 		Invalid = -1,
 		ABC,
-		Snow
+		Snow,
+		TI
 	};
 
 	using TPreset = std::array<uint8_t, 512>;
