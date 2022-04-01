@@ -4,20 +4,13 @@
 
 #include "dsp56kEmu/types.h"
 #include "utils.h"
+#include "romfile.h"
 
 namespace virusLib
 {
-
 	class ROMUnpacker
 	{
 	public:
-		enum class TIModel
-		{
-			TI = 1,
-			Snow = 2,
-			TI2 = 3,
-		};
-
 		struct Firmware
 		{
 			std::vector<char> DSP;
@@ -31,7 +24,7 @@ namespace virusLib
 
 		static bool isValidInstaller(std::istream& _file);
 
-		static Firmware getFirmware(std::istream& _file, TIModel _model);
+		static Firmware getFirmware(std::istream& _file, ROMFile::TIModel _model);
 
 	private:
 		struct Chunk
@@ -41,7 +34,7 @@ namespace virusLib
 			std::vector<char> data;
 		};
 
-		static std::string getVtiFilename(TIModel _model);
+		static std::string getVtiFilename(ROMFile::TIModel _model);
 
 		static std::vector<Chunk> getChunks(std::istream& _file);
 

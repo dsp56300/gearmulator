@@ -31,6 +31,13 @@ public:
 		std::vector<uint32_t> data;
 	};
 
+	enum class TIModel
+	{
+		TI = 1,
+		Snow = 2,
+		TI2 = 3,
+	};
+
 	enum class Model
 	{
 		Invalid = -1,
@@ -43,7 +50,7 @@ public:
 
 	static void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
 
-	explicit ROMFile(const std::string& _path);
+	explicit ROMFile(const std::string& _path, TIModel _wantedTIModel = TIModel::Snow);
 
 	bool getMulti(int _presetNumber, TPreset& _out) const;
 	bool getSingle(int _bank, int _presetNumber, TPreset& _out) const;
@@ -114,7 +121,7 @@ public:
 	static std::string findROM();
 
 private:
-	std::vector<Chunk> readChunks(std::istream& _file);
+	std::vector<Chunk> readChunks(std::istream& _file, TIModel _wantedTIModel);
 	bool loadPresetFiles();
 	bool loadPresetFile(std::istream& _file);
 

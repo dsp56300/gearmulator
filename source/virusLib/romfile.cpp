@@ -35,7 +35,7 @@ void ROMFile::dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::stri
 	fclose(hFile);
 }
 
-ROMFile::ROMFile(const std::string& _path) : m_file(_path)
+ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_path)
 {
 	LOG("Init access virus");
 
@@ -59,7 +59,7 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 	// Check if we are dealing with a TI installer file, if so, unpack it first
 	if (ROMUnpacker::isValidInstaller(file))
 	{
-		fw = ROMUnpacker::getFirmware(file, ROMUnpacker::TIModel::Snow);
+		fw = ROMUnpacker::getFirmware(file, _wantedTIModel);
 		if (!fw.isValid())
 		{
 			LOG("Could not unpack ROM file")
@@ -71,7 +71,7 @@ ROMFile::ROMFile(const std::string& _path) : m_file(_path)
 		dsp = memStream.get();
 	}
 
-	const auto chunks = readChunks(*dsp);
+	const auto chunks = readChunks(*dsp, _wantedTIModel);
 	file.close();
 
 	if (chunks.empty())
@@ -137,7 +137,7 @@ std::string ROMFile::findROM()
 	return synthLib::findROM(getRomSizeModelABC());
 }
 
-std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
+std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wantedTIModel)
 {
 	_file.seekg(0, std::ios_base::end);
 	const auto fileSize = _file.tellg();
@@ -148,7 +148,15 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	if(fileSize == 1024 * 1024)
 	{
 		// D
-		m_model = Model::Snow;
+		switch (_wantedTIModel)
+		{
+		case TIModel::Snow:
+			m_model = Model::Snow;
+			break;
+		default:
+			m_model = Model::TI;
+			break;
+		}
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
@@ -158,7 +166,9 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 		m_model = Model::ABC;
 		offset = 0x18000;
 		lastChunkId = 4;
-	} else {
+	}
+	else 
+	{
 		LOG("Invalid ROM, unexpected filesize")
 		return {};
 	}

@@ -16,7 +16,7 @@ namespace virusLib
 		return std::string(magic) == "FORM";
 	}
 
-	ROMUnpacker::Firmware ROMUnpacker::getFirmware(std::istream& _file, const TIModel _model)
+	ROMUnpacker::Firmware ROMUnpacker::getFirmware(std::istream& _file, const ROMFile::TIModel _model)
 	{
 		// First round of extraction
 		// This will yield the installer files (html, lcd firmware, vti firmware, etc)
@@ -95,16 +95,16 @@ namespace virusLib
 		return Firmware{dsp, presets};
 	}
 
-	std::string ROMUnpacker::getVtiFilename(const TIModel _model)
+	std::string ROMUnpacker::getVtiFilename(const ROMFile::TIModel _model)
 	{
 		switch (_model)
 		{
-			case TIModel::TI:
-				return "vti.bin";
-			case TIModel::TI2:
-				return "vti_2.bin";
-			case TIModel::Snow:
-				return "vti_snow.bin";
+		case ROMFile::TIModel::TI:
+			return "vti.bin";
+		case ROMFile::TIModel::TI2:
+			return "vti_2.bin";
+		case ROMFile::TIModel::Snow:
+			return "vti_snow.bin";
 		}
 		return {};
 	}
@@ -153,7 +153,7 @@ namespace virusLib
 			assert (chunk.data.size() % 35 == 2);  // each chunk has 2 remaining bytes (checksum?)
 			for (size_t i = 0; i < chunk.size - 2; i += 35)
 			{
-				auto idx = swap16(*reinterpret_cast<uint16_t*>(&chunk.data[i + 1]));
+				const auto idx = swap16(*reinterpret_cast<uint16_t*>(&chunk.data[i + 1]));
 				assert (idx == ctr);
 				for (size_t j = 0; j < 32; ++j)
 				{
