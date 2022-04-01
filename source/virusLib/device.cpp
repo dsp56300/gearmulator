@@ -6,7 +6,7 @@ namespace virusLib
 	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
 
 	Device::Device(const ROMFile& _romFile)
-		: synthLib::Device(_romFile.getModel() == ROMFile::Model::Snow ? 0x100000 : 0x040000, g_externalMemStart)
+		: synthLib::Device(_romFile.isTIFamily() ? 0x100000 : 0x040000, g_externalMemStart)
 		, m_rom(_romFile)
 		, m_syx(getHDI08(), m_rom)
 	{
@@ -16,7 +16,7 @@ namespace virusLib
 		auto& jit = getDSP().getJit();
 		auto conf = jit.getConfig();
 
-		if(m_rom.getModel() == ROMFile::Model::Snow)
+		if(m_rom.isTIFamily())
 		{
 			getPeriphX().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
 			getPeriphY().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
@@ -47,7 +47,7 @@ namespace virusLib
 
 	float Device::getSamplerate() const
 	{
-		if (m_rom.getModel() == ROMFile::Model::Snow)
+		if (m_rom.isTIFamily())
 			return 44100.0f;
 
 		return 12000000.0f / 256.0f;

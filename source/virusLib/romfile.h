@@ -59,20 +59,18 @@ public:
 
 	Model getModel() const { return m_model; }
 
+	static bool isTIFamily(Model _model) { return _model == Model::Snow || _model == Model::TI; }
+	bool isTIFamily() const { return isTIFamily(m_model); }
+
 	uint32_t getSamplerate() const
 	{
-		return getModel() == Model::Snow ? 44100 : 12000000 / 256;
+		return isTIFamily() ? 44100 : 12000000 / 256;
 	}
 
 	static uint32_t getMultiPresetSize(const Model _model)
 	{
-		switch (_model)
-		{
-		case Model::Snow:
-			return 256;
-		default:
-			return 256;
-		}
+		return 256;
+//		return isTIFamily(_model) ? 256 : 256;
 	}
 	uint32_t getMultiPresetSize() const
 	{
@@ -81,13 +79,7 @@ public:
 
 	static uint32_t getSinglePresetSize(const Model _model)
 	{
-		switch (_model)
-		{
-		case Model::Snow:
-			return 512;
-		default:
-			return 256;
-		}
+		return isTIFamily(_model) ? 512 : 256;
 	}
 	uint32_t getSinglePresetSize() const
 	{
