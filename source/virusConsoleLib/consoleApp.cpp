@@ -33,7 +33,7 @@ ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, 
 
 	auto& jit = dsp.getJit();
 	auto conf = jit.getConfig();
-	conf.aguSupportBitreverse = v.getModel() == ROMFile::ModelD;	// not used on B & C
+	conf.aguSupportBitreverse = v.getModel() == ROMFile::ModelSnow;	// not used on B & C
 
 	jit.setConfig(conf);
 }
@@ -55,7 +55,7 @@ std::thread ConsoleApp::bootDSP()
 
 dsp56k::IPeripherals& ConsoleApp::getYPeripherals()
 {
-	if (v.getModel() == ROMFile::ModelD)
+	if (v.getModel() == ROMFile::ModelSnow)
 		return periphY;
 
 	return periphNop;
@@ -217,7 +217,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 
 void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount/* = 0*/)
 {
-	if (v.getModel() == ROMFile::ModelD)
+	if (v.getModel() == ROMFile::ModelSnow)
 	{
 		periphX.getEsai().setSamplerate(v.getSamplerate());
 		periphY.getEsai().setSamplerate(v.getSamplerate());
