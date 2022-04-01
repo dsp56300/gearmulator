@@ -232,15 +232,33 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 
 	std::unique_ptr<EsaiListener> esaiListener;
 
+	uint8_t esai0OutChannels = 0b000001;
+	uint8_t esai0InChannels  = 0b0001;
+	uint8_t esai1OutChannels = 0b000001;
+	uint8_t esai1InChannels  = 0b0001;
+
+	if(v.getModel() == ROMFile::Model::Snow)
+	{
+		esai1OutChannels = 0b011100;
+	}
+	else if(v.getModel() == ROMFile::Model::TI)
+	{
+		esai0OutChannels = 0b011100;
+		esai0InChannels  = 0b0001;
+		esai1OutChannels = 0b000011;
+		esai1InChannels  = 0b0011;
+
+		// TODO: DSP 2
+	}
+
 	if (!_audioOutputFilename.empty())
-		esaiListener.reset(new EsaiListenerToFile(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename));
+		esaiListener.reset(new EsaiListenerToFile(periphX.getEsai(), esai0OutChannels, esai0InChannels, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, sr, _audioOutputFilename));
 	else
-		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), 0b001, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, std::move(_callback)));
+		esaiListener.reset(new EsaiListenerToCallback(periphX.getEsai(), esai0OutChannels, esai0InChannels, [&](EsaiListener*, uint32_t _count) { audioCallback(_count); }, std::move(_callback)));
+
+	EsaiListenerToFile esaiListener1(periphY.getEsai(), esai1OutChannels, esai1InChannels, [](EsaiListener*, uint32_t) {}, sr, "ESAI1_TI.wav");
 
 	esaiListener->setMaxSamplecount(_maxSampleCount);
-
-
-	EsaiListenerToFile esaiListener1(periphY.getEsai(), 0b100, [](EsaiListener*, uint32_t) {}, sr, "");
 
 	dsp56k::DSPThread dspThread(dsp);
 
