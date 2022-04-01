@@ -1,7 +1,5 @@
 #pragma once
 
-#include <thread>
-#include <utility>
 #include <vector>
 
 #include "dsp56kEmu/types.h"
@@ -13,11 +11,11 @@ namespace virusLib
 	class ROMUnpacker
 	{
 	public:
-		enum AccessVirusTIModel
+		enum class TIModel
 		{
-			VirusTI = 1,
-			VirusTISnow = 2,
-			VirusTI2 = 3,
+			TI = 1,
+			Snow = 2,
+			TI2 = 3,
 		};
 
 		struct Firmware
@@ -33,7 +31,7 @@ namespace virusLib
 
 		static bool isValidInstaller(std::istream& _file);
 
-		static Firmware getFirmware(std::istream& _file, AccessVirusTIModel _model);
+		static Firmware getFirmware(std::istream& _file, TIModel _model);
 
 	private:
 		struct Chunk
@@ -43,7 +41,7 @@ namespace virusLib
 			std::vector<char> data;
 		};
 
-		static std::string getVtiFilename(AccessVirusTIModel _model);
+		static std::string getVtiFilename(TIModel _model);
 
 		static std::vector<Chunk> getChunks(std::istream& _file);
 

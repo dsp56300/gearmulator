@@ -16,7 +16,7 @@ namespace virusLib
 		return std::string(magic) == "FORM";
 	}
 
-	ROMUnpacker::Firmware ROMUnpacker::getFirmware(std::istream& _file, const AccessVirusTIModel _model)
+	ROMUnpacker::Firmware ROMUnpacker::getFirmware(std::istream& _file, const TIModel _model)
 	{
 		// First round of extraction
 		// This will yield the installer files (html, lcd firmware, vti firmware, etc)
@@ -95,15 +95,15 @@ namespace virusLib
 		return Firmware{dsp, presets};
 	}
 
-	std::string ROMUnpacker::getVtiFilename(const AccessVirusTIModel _model)
+	std::string ROMUnpacker::getVtiFilename(const TIModel _model)
 	{
 		switch (_model)
 		{
-			case VirusTI:
+			case TIModel::TI:
 				return "vti.bin";
-			case VirusTI2:
+			case TIModel::TI2:
 				return "vti_2.bin";
-			case VirusTISnow:
+			case TIModel::Snow:
 				return "vti_snow.bin";
 		}
 		return {};
