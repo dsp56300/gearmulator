@@ -10,25 +10,34 @@ size_t g_writeBlockSize = 8192;
 size_t g_writeBlockSize = 65536;
 #endif
 
-EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, TCallback _callback)
-	: m_outChannels(_outChannels), m_nextWriteSize(g_writeBlockSize)
+EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, const uint8_t _inChannels, TCallback _callback)
+	: m_outChannels(_outChannels)
+	, m_inChannels(_inChannels)
+	, m_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
 {
 	uint32_t callbackChannel;
 
-	if (_outChannels & 4)
-		callbackChannel = 3;
-	else if (_outChannels & 2)
-		callbackChannel = 2;
-	else
-		callbackChannel = 1;
+	if (_outChannels & 32)		callbackChannel = 6;
+	else if (_outChannels & 16)	callbackChannel = 5;
+	else if (_outChannels & 8)	callbackChannel = 4;
+	else if (_outChannels & 4)	callbackChannel = 3;
+	else if (_outChannels & 2)	callbackChannel = 2;
+	else						callbackChannel = 1;
+
+	if (_outChannels & 32)		++m_outChannelCount;
+	if (_outChannels & 16)		++m_outChannelCount;
+	if (_outChannels & 8)		++m_outChannelCount;
+	if (_outChannels & 4)		++m_outChannelCount;
+	if (_outChannels & 2)		++m_outChannelCount;
+	if (_outChannels & 1)		++m_outChannelCount;
 
 	_esai.setCallback([&](Audio* _audio)
 	{
 		onAudioCallback(_audio);
 	}, 4, callbackChannel);
 
-	_esai.writeEmptyAudioIn(4, 2);
+	_esai.writeEmptyAudioIn(4, 8);
 }
 
 void EsaiListener::setMaxSamplecount(uint32_t _max)
@@ -39,19 +48,34 @@ void EsaiListener::setMaxSamplecount(uint32_t _max)
 void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 {
 	constexpr size_t sampleCount = 4;
-	constexpr size_t channelsIn = 2;
-	constexpr size_t channelsOut = 6;
+	constexpr size_t channelsIn = 8;
+	constexpr size_t channelsOut = 12;
 
-	TWord inputData[channelsIn][sampleCount] = { {0,0,0,0}, {0,0,0,0} };
-	TWord* audioIn[channelsIn] = { inputData[0],  inputData[1] };
-	TWord outputData[6][sampleCount] = { {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} };
-	TWord* audioOut[6] = {
-		(m_outChannels & 1) ? outputData[0] : nullptr,
-		(m_outChannels & 1) ? outputData[1] : nullptr,
-		(m_outChannels & 2) ? outputData[2] : nullptr,
-		(m_outChannels & 2) ? outputData[3] : nullptr,
-		(m_outChannels & 4) ? outputData[4] : nullptr,
-		(m_outChannels & 4) ? outputData[5] : nullptr
+	TWord inputData[channelsIn][sampleCount] = { {0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0} };
+	TWord* audioIn[channelsIn] = {
+		(m_inChannels & 0x01) ? inputData[0] : nullptr,
+		(m_inChannels & 0x01) ? inputData[1] : nullptr,
+		(m_inChannels & 0x02) ? inputData[2] : nullptr,
+		(m_inChannels & 0x02) ? inputData[3] : nullptr,
+		(m_inChannels & 0x04) ? inputData[4] : nullptr,
+		(m_inChannels & 0x04) ? inputData[5] : nullptr,
+		(m_inChannels & 0x08) ? inputData[6] : nullptr,
+		(m_inChannels & 0x08) ? inputData[7] : nullptr,
+	};
+	TWord outputData[channelsOut][sampleCount] = { {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0}, {0,0,0,0} };
+	TWord* audioOut[channelsOut] = {
+		(m_outChannels & 0x01) ? outputData[0] : nullptr,
+		(m_outChannels & 0x01) ? outputData[1] : nullptr,
+		(m_outChannels & 0x02) ? outputData[2] : nullptr,
+		(m_outChannels & 0x02) ? outputData[3] : nullptr,
+		(m_outChannels & 0x04) ? outputData[4] : nullptr,
+		(m_outChannels & 0x04) ? outputData[5] : nullptr,
+		(m_outChannels & 0x08) ? outputData[6] : nullptr,
+		(m_outChannels & 0x08) ? outputData[7] : nullptr,
+		(m_outChannels & 0x10) ? outputData[8] : nullptr,
+		(m_outChannels & 0x10) ? outputData[9] : nullptr,
+		(m_outChannels & 0x20) ? outputData[10] : nullptr,
+		(m_outChannels & 0x20) ? outputData[11] : nullptr
 	};
 
 	m_counter++;
@@ -87,7 +111,7 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 	{
 		for (int i = 0; i < sampleCount; ++i)
 		{
-			for (int c = 0; c < 6; ++c)
+			for (int c = 0; c < channelsOut; ++c)
 			{
 				if(audioOut[c] && !limitReached())
 				{
