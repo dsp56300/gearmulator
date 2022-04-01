@@ -179,7 +179,38 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		break;
 */
 	}
+	/*
+	static uint8_t cycle = 0;
 
+	if(audioCallbackCount >= 512 && (audioCallbackCount & 511) == 0)
+	{
+		static uint8_t note = 127;
+		if(note >= 96)
+		{
+			note = 24;
+
+			switch(cycle)
+			{
+			case 0:				note += 0;				break;
+			case 1:				note += 3;				break;
+			case 2:				note += 7;				break;
+			case 3:				note += 10;				break;
+			case 4:				note += 5;				break;
+			case 5:				note += 2;				break;
+			}
+			++cycle;
+			if(cycle == 6)
+				cycle = 0;
+		}
+		if(cycle < 7)
+		{
+			LOG("Sending Note On for note " << static_cast<int>(note));
+			uc.sendMIDI(SMidiEvent(0x90, note, 0x5f));	// Note On
+			uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		}
+		note += 12;
+	}
+	*/
 	if(m_demo && audioCallbackCount >= 256)
 		m_demo->process(1);
 }
