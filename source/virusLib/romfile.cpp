@@ -225,7 +225,12 @@ bool ROMFile::loadPresetFile(std::istream& _file)
 	uint32_t multiCount = 0;
 	uint32_t multiOffset = 0;
 
-	if(fileSize == 425984)
+	if(fileSize == 0x1b0000)
+	{
+		singleCount = 128 * 26;
+		multiCount = 128;
+	}
+	else if(fileSize == 425984)
 	{
 		singleCount = 512;
 		multiCount = 128;
