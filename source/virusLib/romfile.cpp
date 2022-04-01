@@ -280,7 +280,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	for (uint32_t i=0; i<bootRom.data.size(); i++)
 		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
 
-//	dsp.memory().saveAssembly("Virus_BootROM.asm", bootRom.offset, bootRom.size, false, false, &periph);
+//	dsp.memory().saveAssembly((m_file + "_BootROM.asm").c_str(), bootRom.offset, bootRom.size, false, false, &periph);
 
 	// Attach command stream
 	std::thread feedCommandStream([&]()
