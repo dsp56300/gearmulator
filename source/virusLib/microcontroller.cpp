@@ -114,7 +114,7 @@ void Microcontroller::sendInitControlCommands()
 
 	LOG("Sending Init Control Commands");
 
-	if(m_rom.getModel() == ROMFile::ModelSnow)
+	if(m_rom.getModel() == ROMFile::Model::Snow)
 	{
 		const std::vector<TWord> initCodeDS =
 		{
@@ -263,7 +263,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 void Microcontroller::sendControlCommand(const ControlCommand _command, const uint8_t _value)
 {
-	send(m_rom.getModel() == ROMFile::ModelSnow ? PAGE_D : PAGE_C, 0x0, _command, _value);
+	send(m_rom.getModel() == ROMFile::Model::Snow ? PAGE_D : PAGE_C, 0x0, _command, _value);
 }
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value, bool cancelIfFull/* = false*/)
@@ -377,7 +377,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 
 		const auto size = _type == DUMP_SINGLE ? m_rom.getSinglePresetSize() : m_rom.getMultiPresetSize();
 
-		const auto modelABCsize = ROMFile::getSinglePresetSize(ROMFile::ModelABC);
+		const auto modelABCsize = ROMFile::getSinglePresetSize(ROMFile::Model::ABC);
 
 		for(size_t i=0; i<modelABCsize; ++i)
 			response.push_back(_dump[i]);
@@ -537,7 +537,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset preset;
 				preset.fill(0);
-				if(_data.size() == 524 && m_rom.getModel() == ROMFile::ModelSnow)
+				if(_data.size() == 524 && m_rom.getModel() == ROMFile::Model::Snow)
 				{
 					// D preset
 					auto data(_data);
@@ -705,7 +705,7 @@ void Microcontroller::waitUntilBufferEmpty() const
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
 {
 	const auto deviceType = getPresetVersion(_preset);
-	const auto presetModel = deviceType <= C ? ROMFile::ModelABC : ROMFile::ModelSnow;
+	const auto presetModel = deviceType <= C ? ROMFile::Model::ABC : ROMFile::Model::Snow;
 
 	const auto targetByteSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
 	const auto sourceByteSize = _isMulti ? ROMFile::getMultiPresetSize(presetModel) : ROMFile::getSinglePresetSize(presetModel);
@@ -1009,7 +1009,7 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t 
 {
 	std::lock_guard lock(m_mutex);
 
-	const auto isModelD = m_rom.getModel() == ROMFile::ModelSnow;
+	const auto isModelD = m_rom.getModel() == ROMFile::Model::Snow;
 
 	const char flagA = isModelD ? 0 : 1;
 
