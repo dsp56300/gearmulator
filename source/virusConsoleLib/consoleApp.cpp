@@ -18,7 +18,7 @@ const dsp56k::DefaultMemoryValidator g_memoryMap;
 ConsoleApp::ConsoleApp(const std::string& _romFile, const uint32_t _memorySize, const uint32_t _extMemAddress)
 : memory(g_memoryMap, _memorySize)
 , m_romName(_romFile)
-, v(_romFile)
+, v(_romFile, ROMFile::TIModel::Snow)
 , periphX(&periphY)
 , dsp(memory, &periphX, &getYPeripherals())
 , uc(periphX.getHDI08(), v)
