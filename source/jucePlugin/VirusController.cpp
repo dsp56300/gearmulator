@@ -13,7 +13,7 @@ namespace Virus
     static constexpr uint8_t kSysExStart[] = {0xf0, 0x00, 0x20, 0x33, 0x01};
     static constexpr auto kHeaderWithMsgCodeLen = 7;
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId), m_descriptions(p.getModel() == virusLib::ROMFile::ModelD ? BinaryData::parameterDescriptions_Snow_json : BinaryData::parameterDescriptions_C_json)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId), m_descriptions(p.getModel() == virusLib::ROMFile::ModelSnow ? BinaryData::parameterDescriptions_Snow_json : BinaryData::parameterDescriptions_C_json)
     {
 		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
 		juce::PropertiesFile::Options opts;

@@ -35,7 +35,7 @@ public:
 	{
 		Invalid = -1,
 		ModelABC,
-		ModelD
+		ModelSnow
 	};
 
 	using TPreset = std::array<uint8_t, 512>;
@@ -60,14 +60,14 @@ public:
 
 	uint32_t getSamplerate() const
 	{
-		return getModel() == ModelD ? 44100 : 12000000 / 256;
+		return getModel() == ModelSnow ? 44100 : 12000000 / 256;
 	}
 
 	static uint32_t getMultiPresetSize(const Model _model)
 	{
 		switch (_model)
 		{
-		case ModelD:
+		case ModelSnow:
 			return 256;
 		default:
 			return 256;
@@ -82,7 +82,7 @@ public:
 	{
 		switch (_model)
 		{
-		case ModelD:
+		case ModelSnow:
 			return 512;
 		default:
 			return 256;
