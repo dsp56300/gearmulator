@@ -717,7 +717,7 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, con
 	preset.resize(targetWordSize, 0);
 
 	size_t idx = 0;
-	for (size_t i = 0; i < sourceWordSize; i++)
+	for (size_t i = 0; i < sourceWordSize && i < targetWordSize; i++)
 	{
 		if (i == (sourceWordSize - 1))
 		{
