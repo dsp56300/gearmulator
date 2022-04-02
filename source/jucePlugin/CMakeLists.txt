@@ -31,107 +31,29 @@ set(SOURCES
 	version.h
 )
 
-set(SOURCES_UI
-    ui/Virus_Buttons.cpp
-    ui/Virus_LookAndFeel.cpp
-    ui/VirusEditor.cpp
-    ui/Virus_ArpEditor.cpp
-    ui/Virus_FxEditor.cpp
-    ui/Virus_LfoEditor.cpp
-    ui/Virus_OscEditor.cpp
-    ui/Virus_PatchBrowser.cpp
-    ui/Virus_Parts.cpp
-    ui/Virus_Buttons.h
-    ui/Virus_LookAndFeel.h
-    ui/VirusEditor.h
-    ui/Virus_ArpEditor.h
-    ui/Virus_FxEditor.h
-    ui/Virus_LfoEditor.h
-    ui/Virus_OscEditor.h
-    ui/Virus_PatchBrowser.h
-    ui/Virus_Parts.h
-    ui/Ui_Utils.h
-)
-
-set(SOURCES_UI2
-    ui2/Ui_Utils.h
-    ui2/Virus_Buttons.cpp
-    ui2/Virus_Buttons.h
-    ui2/Virus_LookAndFeel.cpp
-    ui2/Virus_LookAndFeel.h
-    ui2/Virus_Panel1_OscEditor.cpp
-    ui2/Virus_Panel1_OscEditor.h
-    ui2/Virus_Panel2_LfoEditor.cpp
-    ui2/Virus_Panel2_LfoEditor.h
-    ui2/Virus_Panel3_FxEditor.cpp
-    ui2/Virus_Panel3_FxEditor.h
-    ui2/Virus_Panel4_ArpEditor.cpp
-    ui2/Virus_Panel4_ArpEditor.h
-    ui2/Virus_Panel5_PatchBrowser.cpp
-    ui2/Virus_Panel5_PatchBrowser.h
-    ui2/VirusEditor.cpp
-    ui2/VirusEditor.h
+set(SOURCES_UI3
+	ui3/FxPage.cpp
+	ui3/FxPage.h
+	ui3/MidiPorts.cpp
+	ui3/MidiPorts.h
+    ui3/Parts.cpp
+    ui3/Parts.h
+	ui3/PatchBrowser.cpp
+	ui3/PatchBrowser.h
+    ui3/Tabs.cpp
+    ui3/Tabs.h
+    ui3/VirusEditor.cpp
+    ui3/VirusEditor.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
-	"assets/bg_1377x800.png"
-	"assets/panels/bg_arp_1018x620.png"
-	"assets/panels/bg_fx_1018x620.png"
-	"assets/panels/bg_lfo_1018x620.png"
-	"assets/panels/bg_osc_1018x620.png"
-	"assets/panels/bg_fxreverb_481x234.png"
-	"assets/panels/bg_fxdelay_481x234.png"
-	"assets/buttons/GLOBAL_btn_arp_settings_141x26.png"
-	"assets/buttons/GLOBAL_btn_effects_141x26.png"
-	"assets/buttons/GLOBAL_btn_lfo_matrix_141x26.png"
-	"assets/buttons/GLOBAL_btn_osc_filter_141x26.png"
-	"assets/buttons/GLOBAL_btn_patch_browser_141x26.png"
-	"assets/buttons/env_pol_50x34.png"
-	"assets/buttons/lfo_btn_23_19.png"
-	"assets/buttons/link_vert_12x36.png"
-	"assets/buttons/link_horizon_36x12.png"
-	"assets/buttons/presets_btn_43_15.png"
-	"assets/buttons/Handle_18x47.png"
-	"assets/buttons/sync2_54x25.png"
-	"assets/buttons/part_select_btn_36x36.png"
-	"assets/buttons/arphold_btn_36x36.png"
-	"assets/knobs/Gen_70x70_100.png"
-	"assets/knobs/Gen_pol_70x70_100.png"
-	"assets/knobs/GenBlue_70x70_100.png"
-	"assets/knobs/GenRed_70x70_100.png"
-	"assets/knobs/multi_18x18_100.png"
-
-	"assets2/main_background.png"
-	"assets2/panels/panel_1.png"
-	"assets2/panels/panel_2.png"
-	"assets2/panels/panel_3.png"
-	"assets2/panels/panel_4.png"
-	"assets2/panels/panel_5.png"
-	"assets2/buttons/btn_main_1.png"
-	"assets2/buttons/btn_main_2.png"
-	"assets2/buttons/btn_main_3.png"
-	"assets2/buttons/btn_main_4.png"
-	"assets2/buttons/btn_main_5.png"
-	"assets2/buttons/btn_1.png"
-	"assets2/buttons/btn_2.png"
-	"assets2/buttons/btn_3.png"
-	"assets2/buttons/btn_4.png"
-	"assets2/buttons/btn_left.png"
-	"assets2/buttons/btn_right.png"
-	"assets2/buttons/btn_down.png"
-	"assets2/buttons/btn_menu.png"
-	"assets2/buttons/btn_load_bank.png"
-	"assets2/buttons/btn_save_preset.png"
-	"assets2/combobox/cmb_1.png"
-	"assets2/combobox/cmb_2.png"
-	"assets2/knobs/knob_1_128.png"
-	"assets2/knobs/knob_2_128.png"
-	"assets2/font/Digital"
-
 	"parameterDescriptions_C.json"
 )
+
+include(skins/Hoverland/assets.cmake)
+include(skins/Trancy/assets.cmake)
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
@@ -152,11 +74,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PRODUCT_NAME ${productName}                 # The name of the final executable, which can differ from the target name
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI} ${SOURCES_UI2})
+	target_sources(${targetName} PRIVATE ${SOURCES} ${SOURCES_UI3})
 
 	source_group("source" FILES ${SOURCES})
-	source_group("source\\ui" FILES ${SOURCES_UI})
-	source_group("source\\ui2" FILES ${SOURCES_UI2})
+	source_group("source\\ui3" FILES ${SOURCES_UI3})
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
@@ -170,6 +91,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	target_link_libraries(${targetName}
 	PRIVATE
 		${binaryDataProject}
+		juceUiLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC
@@ -199,7 +121,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	

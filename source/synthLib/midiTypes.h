@@ -17,17 +17,18 @@ namespace synthLib
 		M_PITCHBEND			= 0xe0,
 
 		// single status bytes
+		M_STARTOFSYSEX		= 0xf0,
+		M_QUARTERFRAME		= 0xf1,
 		M_SONGPOSITION		= 0xf2,
 		M_SONGSELECT		= 0xf3,
 		M_TUNEREQUEST		= 0xf5,
-		M_SYSTEMRESET		= 0xff,
+		M_ENDOFSYSEX		= 0xf7,
 		M_TIMINGCLOCK		= 0xf8,
 		M_START				= 0xfa,
 		M_CONTINUE			= 0xfb,
 		M_STOP				= 0xfc,
 		M_ACTIVESENSING		= 0xfe,
-		M_STARTOFSYSEX		= 0xf0,
-		M_ENDOFSYSEX		= 0xf7,
+		M_SYSTEMRESET		= 0xff,
 
 		// send as data byte 1 for control changes
 		M_LOCALOFF			= 0x7a,
