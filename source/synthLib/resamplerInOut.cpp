@@ -84,6 +84,12 @@ namespace synthLib
 		if(!m_in || !m_out)
 			return;
 
+		if(m_samplerateDevice == m_samplerateHost)
+		{
+			_processFunc(_inputs, _outputs, _numSamples, _midiIn, _midiOut);
+			return;
+		}
+
 		const auto devDivHost = m_samplerateDevice / m_samplerateHost;
 		const auto hostDivDev = m_samplerateHost / m_samplerateDevice;
 
