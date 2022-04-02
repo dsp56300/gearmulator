@@ -17,22 +17,7 @@
                 "height" : "1600",
                 "texture" : "main_bg"
             }
-        },
-        {
-            "name" : "singleLabel",
-            "label" : {
-                "text" : "SINGLE",
-                "textHeight" : "18",
-                "color" : "EBEBEBFF",
-                "alignH" : "R",
-                "alignV" : "C",
-                "bold" : "1",
-                "x" : "154",
-                "y" : "281",
-                "width" : "70",
-                "height" : "30"
-            }
-        },
+           },
         {
             "name" : "PlayModeSingle",
             "button" : {
@@ -44,13 +29,13 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "234",
-                "y" : "281",
-                "width" : "86",
-                "height" : "30",
-                "texture" : "presest_btn_select_86x60_x2",
-                "tileSizeX" : "86",
-                "tileSizeY" : "30"
+                "x" : "151",
+                "y" : "272",
+                "width" : "260",
+                "height" : "49",
+                "texture" : "sngl-btn49x260",
+                "tileSizeX" : "260",
+                "tileSizeY" : "49"
             }
         },
         {
@@ -64,31 +49,16 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "506",
-                "y" : "281",
-                "width" : "86",
-                "height" : "30",
-                "texture" : "presest_btn_select_86x60_x2",
-                "tileSizeX" : "86",
-                "tileSizeY" : "30"
+                "x" : "416",
+                "y" : "272",
+                "width" : "260",
+                "height" : "49",
+                "texture" : "mlt-btn49x260",
+                "tileSizeX" : "260",
+                "tileSizeY" : "49"
             }
         },
-        {
-            "name" : "multiLabel",
-            "label" : {
-                "text" : "MULTI",
-                "textHeight" : "18",
-                "color" : "EBEBEBFF",
-                "alignH" : "L",
-                "alignV" : "C",
-                "bold" : "1",
-                "x" : "600",
-                "y" : "281",
-                "width" : "70",
-                "height" : "30"
-            }
-        },
-        {
+         {
             "name" : "PatchName",
             "label" : {
                 "text" : "OvertureCK",
@@ -193,7 +163,7 @@
             "name" : "RomSelector",
             "combobox" : {
                 "text" : "Access_Virus_C_OS_6.5.bin",
-                "textHeight" : "30",
+                "textHeight" : "38",
                 "color" : "C8CCE0FF",
                 "alignH" : "L",
                 "alignV" : "C",
@@ -201,8 +171,8 @@
                 "fontName" : "Bebas Neue",
                 "x" : "2024",
                 "y" : "119",
-                "width" : "508",
-                "height" : "37",
+                "width" : "520",
+                "height" : "50",
                 "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin"
             }
         },
@@ -212,7 +182,7 @@
                 "isToggle" : "1",
                 "radioGroupId" : "42",
                 "normalImage" : "1",
-                "overImage" : "0",
+                "overImage" : "1",
                 "downImage" : "0",
                 "normalImageOn" : "0",
                 "overImageOn" : "0",
@@ -232,7 +202,7 @@
                 "isToggle" : "1",
                 "radioGroupId" : "42",
                 "normalImage" : "1",
-                "overImage" : "0",
+                "overImage" : "1",
                 "downImage" : "0",
                 "normalImageOn" : "0",
                 "overImageOn" : "0",
@@ -252,7 +222,7 @@
                 "isToggle" : "1",
                 "radioGroupId" : "42",
                 "normalImage" : "1",
-                "overImage" : "0",
+                "overImage" : "1",
                 "downImage" : "0",
                 "normalImageOn" : "0",
                 "overImageOn" : "0",
@@ -272,7 +242,7 @@
                 "isToggle" : "1",
                 "radioGroupId" : "42",
                 "normalImage" : "1",
-                "overImage" : "0",
+                "overImage" : "1",
                 "downImage" : "0",
                 "normalImageOn" : "0",
                 "overImageOn" : "0",
@@ -1935,16 +1905,16 @@
                     "name" : "Osc1WaveSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "25.70001",
-                        "y" : "96.30005",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "92.882",
+                        "width" : "185",
+                        "height" : "45"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Osc1 Wave Select"
@@ -1954,16 +1924,16 @@
                     "name" : "Osc2WaveSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
-                        "x" : "25.70001",
-                        "y" : "334.8",
-                        "width" : "162",
-                        "height" : "36"
+                        "x" : "26.20001",
+                        "y" : "330.8",
+                        "width" : "185",
+                        "height" : "45"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Osc2 Wave Select"
@@ -1973,16 +1943,16 @@
                     "name" : "Osc2FMMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "25.70001",
-                        "y" : "519",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "515",
+                        "width" : "185",
+                        "height" : "45"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Osc FM Mode"
@@ -1992,16 +1962,16 @@
                     "name" : "Osc3Mode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "25.70001",
-                        "y" : "764",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "760",
+                        "width" : "185",
+                        "height" : "45"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Osc3 Mode"
@@ -2011,16 +1981,16 @@
                     "name" : "UnisonVoices",
                     "combobox" : {
                         "text" : "Twin",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "25.70001",
-                        "y" : "991.1001",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "986",
+                        "width" : "185",
+                        "height" : "45"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Unison Mode"
@@ -2291,16 +2261,16 @@
                     "name" : "Mode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "1161.4",
-                        "y" : "251.8599",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "245.8599",
+                        "width" : "185",
+                        "height" : "50"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Filter1 Mode"
@@ -2434,16 +2404,16 @@
                     "name" : "Mode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "1161.2",
-                        "y" : "351.7078",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "345.7078",
+                        "width" : "185",
+                        "height" : "50"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Filter2 Mode"
@@ -2492,16 +2462,16 @@
                     "name" : "FilterRouting",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "1528.2",
-                        "y" : "253.1001",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "247.1001",
+                        "width" : "185",
+                        "height" : "50"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Filter Routing"
@@ -2511,16 +2481,16 @@
                     "name" : "FilterSaturationCurve",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "1528.2",
-                        "y" : "351.1001",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "345.1001",
+                        "width" : "185",
+                        "height" : "50"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Saturation Curve"
@@ -2530,16 +2500,16 @@
                     "name" : "FilterKeyfollowBase",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
                         "x" : "1732.6",
-                        "y" : "252.5",
-                        "width" : "162",
-                        "height" : "36"
+                        "y" : "246.5",
+                        "width" : "185",
+                        "height" : "50"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Filter Keytrack Base"
@@ -2772,7 +2742,7 @@
                     "name" : "LfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -2791,7 +2761,7 @@
                     "name" : "LfoClock",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -2817,8 +2787,8 @@
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
-                        "x" : "21.59998",
-                        "y" : "233.2",
+                        "x" : "18",
+                        "y" : "253.2",
                         "width" : "39",
                         "height" : "102",
                         "texture" : "toggle-btn-39x102",
@@ -2837,7 +2807,7 @@
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
-                        "x" : "129.9",
+                        "x" : "137.334",
                         "y" : "253.2",
                         "width" : "52",
                         "height" : "36",
@@ -3020,7 +2990,7 @@
                     "name" : "LfoAssignDestination",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3058,7 +3028,7 @@
                     "name" : "LfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3077,7 +3047,7 @@
                     "name" : "LfoClock",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3103,8 +3073,8 @@
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
-                        "x" : "22",
-                        "y" : "609.3",
+                        "x" : "18",
+                        "y" : "630.5",
                         "width" : "39",
                         "height" : "102",
                         "texture" : "toggle-btn-39x102",
@@ -3123,7 +3093,7 @@
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
-                        "x" : "129.5",
+                        "x" : "137.334",
                         "y" : "630",
                         "width" : "52",
                         "height" : "36",
@@ -3306,7 +3276,7 @@
                     "name" : "LfoAssignDestination",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3344,7 +3314,7 @@
                     "name" : "LfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3363,7 +3333,7 @@
                     "name" : "LfoClock",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3389,8 +3359,8 @@
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "downImageOn" : "0",
-                        "x" : "22.20001",
-                        "y" : "988.1001",
+                        "x" : "18",
+                        "y" : "1008.23",
                         "width" : "39",
                         "height" : "102",
                         "texture" : "toggle-btn-39x102",
@@ -3470,7 +3440,7 @@
                     "name" : "Lfo3AssignDestination",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3506,7 +3476,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3525,7 +3495,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3561,7 +3531,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3580,7 +3550,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3616,7 +3586,7 @@
                     "name" : "ModDest2",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3652,7 +3622,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3671,7 +3641,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3707,7 +3677,7 @@
                     "name" : "ModDest2",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3743,7 +3713,7 @@
                     "name" : "ModDest3",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3779,7 +3749,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3798,7 +3768,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3834,7 +3804,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3853,7 +3823,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3889,7 +3859,7 @@
                     "name" : "ModSource",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3908,7 +3878,7 @@
                     "name" : "ModDest",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -3939,7 +3909,7 @@
                     "name" : "DistortionType",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4009,7 +3979,7 @@
                     "name" : "PhaserStages",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4130,7 +4100,7 @@
                     "name" : "ChorusLfoShape",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4154,7 +4124,7 @@
                     },
                     "spritesheet" : {
                         "x" : "233",
-                        "y" : "509.8",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4171,7 +4141,7 @@
                     },
                     "spritesheet" : {
                         "x" : "389",
-                        "y" : "509.8",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4188,7 +4158,7 @@
                     },
                     "spritesheet" : {
                         "x" : "545",
-                        "y" : "509.8",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4205,7 +4175,7 @@
                     },
                     "spritesheet" : {
                         "x" : "701",
-                        "y" : "509.8",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4222,7 +4192,7 @@
                     },
                     "spritesheet" : {
                         "x" : "857",
-                        "y" : "509.8",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4353,7 +4323,7 @@
                     "name" : "InputFollowerMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4631,7 +4601,7 @@
                             "name" : "DelayReverbLfoShape",
                             "combobox" : {
                                 "text" : "Wave 42",
-                                "textHeight" : "30",
+                                "textHeight" : "38",
                                 "color" : "C8CCE0FF",
                                 "alignH" : "L",
                                 "alignV" : "C",
@@ -4652,7 +4622,7 @@
                     "name" : "DelayReverbMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4671,7 +4641,7 @@
                     "name" : "DelayReverbClock",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4707,7 +4677,7 @@
                     "name" : "VocoderMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -4731,7 +4701,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1278.6",
-                        "y" : "510.3999",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4748,7 +4718,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1403",
-                        "y" : "510.3999",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4765,7 +4735,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1528.6",
-                        "y" : "510.3999",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4782,7 +4752,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1653.3",
-                        "y" : "510.3999",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4799,7 +4769,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1778",
-                        "y" : "510.3999",
+                        "y" : "497.5",
                         "width" : "104",
                         "height" : "104",
                         "texture" : "knob_2-104x104",
@@ -4913,7 +4883,7 @@
                     "name" : "VocModulatorInput",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5114,7 +5084,7 @@
                     "name" : "InputMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5133,7 +5103,7 @@
                     "name" : "InputSelect",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5220,7 +5190,7 @@
                             "name" : "ArpModeComboBox",
                             "combobox" : {
                                 "text" : "Hold",
-                                "textHeight" : "30",
+                                "textHeight" : "38",
                                 "color" : "FFFFFF00",
                                 "alignH" : "L",
                                 "alignV" : "C",
@@ -5310,7 +5280,7 @@
                     "name" : "SoftKnobMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5329,7 +5299,7 @@
                     "name" : "SoftKnobName",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5348,7 +5318,7 @@
                     "name" : "SoftKnobMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5367,7 +5337,7 @@
                     "name" : "SoftKnobName",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5386,7 +5356,7 @@
                     "name" : "KeyMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5439,7 +5409,7 @@
                     "name" : "SecondaryOutput",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5492,7 +5462,7 @@
                     "name" : "BendUp",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5511,7 +5481,7 @@
                     "name" : "BendDown",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5530,7 +5500,7 @@
                     "name" : "BendScale",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5549,7 +5519,7 @@
                     "name" : "SmoothMode",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5568,7 +5538,7 @@
                     "name" : "Category1",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5587,7 +5557,7 @@
                     "name" : "Category2",
                     "combobox" : {
                         "text" : "Wave 42",
-                        "textHeight" : "30",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
@@ -5606,14 +5576,14 @@
                     "name" : "MidiIn",
                     "combobox" : {
                         "text" : "In Device X",
-                        "textHeight" : "24",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
-                        "x" : "66.0199",
-                        "y" : "968",
+                        "x" : "466.0199",
+                        "y" : "574.3999",
                         "width" : "167.4686",
                         "height" : "36"
                     }
@@ -5622,14 +5592,14 @@
                     "name" : "MidiOut",
                     "combobox" : {
                         "text" : "Out Device X",
-                        "textHeight" : "24",
+                        "textHeight" : "38",
                         "color" : "C8CCE0FF",
                         "alignH" : "L",
                         "alignV" : "C",
                         "fontFile" : "BEBASNEUE_REGULAR-_1_",
                         "fontName" : "Bebas Neue",
-                        "x" : "276.9418",
-                        "y" : "968",
+                        "x" : "676.9418",
+                        "y" : "574.3999",
                         "width" : "166.4393",
                         "height" : "36"
                     }

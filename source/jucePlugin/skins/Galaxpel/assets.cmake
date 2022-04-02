@@ -17,13 +17,14 @@ set(ASSETS_VirusC_Galaxpel
 	${CMAKE_CURRENT_LIST_DIR}/lfo-btn-306x83.png
 	${CMAKE_CURRENT_LIST_DIR}/load-push-btn-112x121.png
 	${CMAKE_CURRENT_LIST_DIR}/main_bg.png
+	${CMAKE_CURRENT_LIST_DIR}/mlt-btn49x260.png
 	${CMAKE_CURRENT_LIST_DIR}/Mult_36x36_x2i.png
 	${CMAKE_CURRENT_LIST_DIR}/osc_page-sub-fixed.png
 	${CMAKE_CURRENT_LIST_DIR}/osc-btn-306x83.png
-	${CMAKE_CURRENT_LIST_DIR}/presest_btn_select_86x60_x2.png
 	${CMAKE_CURRENT_LIST_DIR}/preset-selected-light-74x68.png
 	${CMAKE_CURRENT_LIST_DIR}/presets-push-btn-118x121.png
 	${CMAKE_CURRENT_LIST_DIR}/save-push-btn-80x121.png
+	${CMAKE_CURRENT_LIST_DIR}/sngl-btn49x260.png
 	${CMAKE_CURRENT_LIST_DIR}/sync-38x38.png
 	${CMAKE_CURRENT_LIST_DIR}/toggle-btn-39x102.png
 
