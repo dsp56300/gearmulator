@@ -1579,9 +1579,9 @@
             },
             "children" : [
                 {
-                    "name" : "Osc1Semi",
+                    "name" : "Osc1Shape",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Semitone"
+                        "parameter" : "Osc1 Shape"
                     },
                     "rotary" : {
                     },
@@ -1598,7 +1598,7 @@
                 {
                     "name" : "Osc1PW",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc1 Pulsewidth"
                     },
                     "rotary" : {
                     },
@@ -1613,9 +1613,9 @@
                     }
                 },
                 {
-                    "name" : "Osc1Shape",
+                    "name" : "Osc1Semi",
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "Osc1 Semitone"
                     },
                     "rotary" : {
                     },
