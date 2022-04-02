@@ -5,7 +5,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.12)
+project(gearmulator VERSION 1.2.15)
 
 include(base.cmake)
 
@@ -28,6 +28,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/JUCE)
+	add_subdirectory(source/juceUiLib)
 	add_subdirectory(source/jucePlugin)
 endif()
 

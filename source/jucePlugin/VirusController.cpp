@@ -302,7 +302,7 @@ namespace Virus
         ignored
          */
     }
-	uint8_t Controller::getVirusModel() const
+	virusLib::VirusModel Controller::getVirusModel() const
 	{
 		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
 	}

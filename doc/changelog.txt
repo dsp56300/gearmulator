@@ -1,5 +1,42 @@
 Release Notes 
 
+1.2.15 (2022.03.26):
+
+- [Fix] Skin files were not correctly loaded from disk
+- [Fix] [UI Hoverland] LFO3 destination was a duplicate of LFO2 destination
+- [Fix] [UI Hoverland] MidEQ Gain & Freq were duplicates of LowEQ Gain & Freq
+- [Fix] [UI Trancy] Broken Part Volume & Pan knobs
+
+1.2.14 (2022.03.25):
+
+- [Imp] Performance improved in some circumstances when JIT compiler had to regenerate code
+- [Imp] Drop down menus with lots of entries now use multiple columns
+
+- [Fix] UI skins were not found on disk (Mac/Linux)
+- [Fix] [UI Trancy] Size of some labels reduced to be able to display more text
+- [Fix] [UI Trancy] Unison Mode switch did not work
+
+1.2.13 (2022.03.23):
+
+UI only release
+
+The UI system has been rewritten and is now data-driven which allows custom skins.
+
+Some smaller changes & improvements have been integrated while reimplementing the UI
+
+- Debug-style drop down boxes in the upper left corner have been removed and replaced by a right-click context menu
+- UI base scale has been adjusted so that both skins have about the same size
+- The current skin can be exported to disk by right clicking and selecting "Export" in the context menu
+- Additional skins that are found in the "skins" folder next to the plugin can be selected in the context menu
+- Focused parameters now display the correct text instead of displaying a generic value of 0-127
+
+Hoverland skin specific:
+- Debug-style Single/Multi play mode switch buttons have been replaced with better graphics
+- Version number & Donate Info have moved to the bottom and use the skin text color
+- The duplicated Presets tab has been removed as a presets button was already there
+- The info about the loaded ROM has been moved to the upper right and is prepared for runtime ROM switching (not implemented yet)
+- Physical MIDI port selection has moved to the global page
+
 1.2.12 (2022.03.17):
 
 - [Imp] Both skins are now part of one plugin, the skin can be switched from a drop down menu in the upper left corner

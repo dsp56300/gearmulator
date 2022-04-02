@@ -12,6 +12,7 @@
 #include "../virusLib/romfile.h"
 #include "../virusLib/microcontroller.h"
 #include "../virusLib/midiOutParser.h"
+#include "../virusLib/demoplayback.h"
 
 using namespace dsp56k;
 using namespace virusLib;
@@ -30,6 +31,8 @@ size_t g_nextWriteSize = g_writeBlockSize;
 
 Microcontroller::TPreset preset;
 Microcontroller* microcontroller = nullptr;
+
+std::unique_ptr<DemoPlayback> demo;
 
 size_t audioCallbackCount = 0;
 
@@ -50,19 +53,27 @@ void audioCallback(dsp56k::Audio* audio)
 		microcontroller->sendInitControlCommands();
 		break;
 	case 64:
-		LOG("Sending Preset");
-		microcontroller->writeSingle(BankNumber::EditBuffer, SINGLE, preset);
+		if(!demo)
+		{
+			LOG("Sending Preset");
+			microcontroller->writeSingle(BankNumber::EditBuffer, SINGLE, preset);
+		}
 		break;
 	case 128:
-		LOG("Sending Note On");
-		microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x7f));	// Note On
-		microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		if(!demo)
+		{
+			LOG("Sending Note On");
+			microcontroller->sendMIDI(SMidiEvent(0x90, 60, 0x7f));	// Note On
+			microcontroller->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+		}
 		break;
 	}
 
+	if(audioCallbackCount > 128 && demo)
+		demo->process(1);
+
 	++audioCallbackCount;
 	
-	static FILE *hFile=0;
 	static int ctr=0;
 	constexpr size_t sampleCount = 4;
 	constexpr size_t channelsIn = 2;
@@ -97,14 +108,21 @@ void audioCallback(dsp56k::Audio* audio)
 
 		if(audioData.capacity())
 		{
-			audioFilename = ROMFile::getSingleName(preset);
-
-			for(size_t i=0; i<audioFilename.size(); ++i)
+			if(demo)
 			{
-				if(audioFilename[i] == ' ')
-					audioFilename[i] = '_';
+				audioFilename = "virusEmu_demo.wav";
 			}
-			audioFilename = "virusEmu_" + audioFilename + ".wav";
+			else
+			{
+				audioFilename = ROMFile::getSingleName(preset);
+
+				for(size_t i=0; i<audioFilename.size(); ++i)
+				{
+					if(audioFilename[i] == ' ')
+						audioFilename[i] = '_';
+				}
+				audioFilename = "virusEmu_" + audioFilename + ".wav";
+			}
 			LOG("Begin writing audio to file " << audioFilename);
 		}
 	}
@@ -224,9 +242,23 @@ int main(int _argc, char* _argv[])
 	ROMFile v(romFile);
 	auto loader = v.bootDSP(dsp, periph);
 
+	Microcontroller uc(periph.getHDI08(), v);
+	microcontroller = &uc;
+
 	if(_argc > 1)
 	{
-		if(!loadSingle(v, _argv[1]))
+		const std::string name(_argv[1]);
+
+		if(hasExtension(name, ".mid"))
+		{
+			// try to load demo
+			demo.reset(new DemoPlayback(uc));
+			if(!demo->loadMidi(name))
+			{
+				demo.reset();
+			}
+		}
+		if(!demo && !loadSingle(v, name))
 		{
 			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;
 			waitReturn();
@@ -258,9 +290,6 @@ int main(int _argc, char* _argv[])
 //		loadSingle(v, 0, 126);		// Init
 	}
 	// Load preset
-
-	Microcontroller uc(periph.getHDI08(), v);
-	microcontroller = &uc;
 
 	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
