@@ -14,6 +14,7 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 {
 	m_includedSkins.push_back({"Hoverland", "VirusC_Hoverland.json", ""});
 	m_includedSkins.push_back({"Trancy", "VirusC_Trancy.json", ""});
+	m_includedSkins.push_back({"Galaxpel", "VirusC_Galaxpel.json", ""});
 
 	addMouseListener(this, true);
 
