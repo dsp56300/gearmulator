@@ -60,7 +60,7 @@ namespace virusLib
 
 	uint32_t Device::getInternalLatencySamples() const
 	{
-//		return 300;		// hard to belive but this is what I figured out by measuring with the init patch
+//		return 300;		// hard to believe but this is what I figured out by measuring with the init patch
 
 		// more precise, measured by using an input init patch. Sent a click to the input and recorded both the input
 		// as direct signal plus the Virus output and checking the resulting latency in a wave editor
