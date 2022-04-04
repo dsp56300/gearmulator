@@ -132,6 +132,10 @@ namespace synthLib
 			}
 
 			m_inputLatency += offset;
+			if(offset)
+			{
+				LOG("Resampler input latency " << m_inputLatency << " samples");
+			}
 		});
 
 		const auto outputSize = m_out->process(_outputs, g_channelCount, _numSamples, false, [&](float** _outs, uint32_t _numProcessedSamples)
