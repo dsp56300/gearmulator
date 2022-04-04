@@ -18,7 +18,7 @@ set(ASSETS_VirusC_Galaxpel
 	${CMAKE_CURRENT_LIST_DIR}/load-push-btn-112x121.png
 	${CMAKE_CURRENT_LIST_DIR}/main_bg.png
 	${CMAKE_CURRENT_LIST_DIR}/mlt-btn49x260.png
-	${CMAKE_CURRENT_LIST_DIR}/Mult_36x36_x2i.png
+	${CMAKE_CURRENT_LIST_DIR}/Mult_36x36_x2i_blue.png
 	${CMAKE_CURRENT_LIST_DIR}/osc_page-sub-fixed.png
 	${CMAKE_CURRENT_LIST_DIR}/osc-btn-306x83.png
 	${CMAKE_CURRENT_LIST_DIR}/preset-selected-light-74x68.png
