@@ -3902,7 +3902,7 @@
                 "y" : "325",
                 "width" : "1970",
                 "height" : "1125",
-                "texture" : "fx_page_reverb"
+                "texture" : "fx_page"
             },
             "children" : [
                 {

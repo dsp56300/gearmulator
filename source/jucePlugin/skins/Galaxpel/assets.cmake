@@ -10,7 +10,7 @@ set(ASSETS_VirusC_Galaxpel
 	${CMAKE_CURRENT_LIST_DIR}/chain-btn-36x62.png
 	${CMAKE_CURRENT_LIST_DIR}/efcts-btn-306x83.png
 	${CMAKE_CURRENT_LIST_DIR}/env-pol-radio-btns-38x66.png
-	${CMAKE_CURRENT_LIST_DIR}/fx_page_reverb.png
+	${CMAKE_CURRENT_LIST_DIR}/fx_page.png
 	${CMAKE_CURRENT_LIST_DIR}/fx_page_reverbOverlay.png
 	${CMAKE_CURRENT_LIST_DIR}/knob_2-104x104.png
 	${CMAKE_CURRENT_LIST_DIR}/lfo_page.png

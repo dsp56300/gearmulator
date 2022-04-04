@@ -54,6 +54,7 @@ SET(ASSETS
 	"parameterDescriptions_Snow.json"
 )
 
+include(skins/Galaxpel/assets.cmake)
 include(skins/Hoverland/assets.cmake)
 include(skins/Trancy/assets.cmake)
 
@@ -123,7 +124,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	

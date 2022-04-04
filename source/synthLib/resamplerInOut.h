@@ -21,6 +21,9 @@ namespace synthLib
 
 		void process(float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
 
+		uint32_t getOutputLatency() const { return m_outputLatency; }
+		uint32_t getInputLatency() const { return m_inputLatency; }
+
 	private:
 		void recreate();
 		static void scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale);
@@ -45,7 +48,7 @@ namespace synthLib
 		TMidiVec m_midiIn;
 		TMidiVec m_midiOut;
 
-		size_t m_inputLatency = 0;
-		size_t m_outputLatency = 0;
+		uint32_t m_inputLatency = 0;
+		uint32_t m_outputLatency = 0;
 	};
 }
