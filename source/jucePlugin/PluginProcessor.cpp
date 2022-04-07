@@ -142,7 +142,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-	float* inputs[8] = {};
+	const float* inputs[8] = {};
 	float* outputs[8] = {};
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -150,7 +150,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	    const float* in = buffer.getReadPointer(channel);
 	    float* out = buffer.getWritePointer(channel);
 
-    	inputs[channel] = const_cast<float*>(in);	// TODO: fixme
+    	inputs[channel] = in;
     	outputs[channel] = out;
     }
 
