@@ -36,6 +36,9 @@ public:
 	void bind(juce::ComboBox &_control, Virus::ParameterType _param, uint8_t _part);
 	void bind(juce::Button &_control, Virus::ParameterType _param);
 
+private:
+	void removeMouseListener(juce::Slider& _slider);
+
 	AudioPluginAudioProcessor& m_processor;
 
 	static constexpr uint8_t CurrentPart = 0xff;
@@ -49,4 +52,5 @@ public:
 	};
 
 	std::vector<BoundParameter> m_bindings;
+	std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
 };
