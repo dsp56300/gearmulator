@@ -50,8 +50,6 @@ namespace genericVirusUI
 			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
 		}
 
-		updatePlayModeButtons();
-
 		if(m_romSelector)
 		{
 			if(!_processorRef.isPluginValid())
@@ -237,6 +235,7 @@ namespace genericVirusUI
 	{
 		m_parts->onProgramChange();
 		updatePresetName();
+		updatePlayModeButtons();
 	}
 
 	void VirusEditor::onPlayModeChanged()
@@ -298,7 +297,7 @@ namespace genericVirusUI
 		const auto& props = _component->getProperties();
 		const int v = props["parameter"];
 
-		const int part = props.contains("part") ? props["part"] : getController().getCurrentPart();
+		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
 
 		const auto* p = getController().getParameter(static_cast<Virus::ParameterType>(v), part);
 
