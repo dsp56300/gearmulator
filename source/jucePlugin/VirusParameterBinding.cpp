@@ -12,7 +12,15 @@ VirusParameterBinding::~VirusParameterBinding()
 void VirusParameterBinding::clearBindings()
 {
 	for (const auto b : m_bindings)
+	{
+		auto* slider = dynamic_cast<juce::Slider*>(b.component);
+
+		if(slider != nullptr)
+			removeMouseListener(*slider);
+
 		b.parameter->onValueChanged = nullptr;
+	}
+
 	m_bindings.clear();
 }
 
@@ -67,12 +75,19 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _param, const uint8_t _part)
 {
 	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
+
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");
 		return;
 	}
-	_slider.addMouseListener(new VirusParameterBindingMouseListener(v, _slider), false);
+
+	removeMouseListener(_slider);
+
+	auto* listener = new VirusParameterBindingMouseListener(v, _slider);
+	m_sliderMouseListeners.insert(std::make_pair(&_slider, listener));
+
+	_slider.addMouseListener(listener, false);
 	const auto range = v->getNormalisableRange();
 	_slider.setRange(range.start, range.end, range.interval);
 	_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
@@ -146,4 +161,16 @@ void VirusParameterBinding::bind(juce::Button &_btn, const Virus::ParameterType 
 	_btn.getToggleStateValue().referTo(v->getValueObject());
 	const BoundParameter p{v, &_btn, _param, CurrentPart};
 	m_bindings.emplace_back(p);
+}
+
+void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
+{
+	auto it = m_sliderMouseListeners.find(&_slider);
+
+	if(it != m_sliderMouseListeners.end())
+	{
+		_slider.removeMouseListener(it->second);
+		delete it->second;
+		m_sliderMouseListeners.erase(it);
+	}
 }
