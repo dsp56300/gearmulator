@@ -50,8 +50,6 @@ namespace genericVirusUI
 			m_playModeToggle->onClick = [this]{ setPlayMode(m_playModeToggle->getToggleState() ? virusLib::PlayMode::PlayModeMulti : virusLib::PlayMode::PlayModeSingle); };
 		}
 
-		updatePlayModeButtons();
-
 		if(m_romSelector)
 		{
 			if(!_processorRef.isPluginValid())
@@ -237,6 +235,7 @@ namespace genericVirusUI
 	{
 		m_parts->onProgramChange();
 		updatePresetName();
+		updatePlayModeButtons();
 	}
 
 	void VirusEditor::onPlayModeChanged()
