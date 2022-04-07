@@ -65,17 +65,17 @@ namespace synthLib
 		for (const auto& ev : _midiIn)
 			sendMidi(ev, _midiOut);
 
-		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_latency);
+		m_periph.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_extraLatency);
 		readMidiOut(_midiOut);
 	}
 
-	void Device::setLatencySamples(const uint32_t _size)
+	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
 		const uint32_t maxLatency = static_cast<uint32_t>(getPeriph().getEsai().getAudioInputs()[0].capacity()) >> 1;
 
-		m_latency = std::min(_size, maxLatency);
+		m_extraLatency = std::min(_size, maxLatency);
 
-		LOG("Latency set to " << m_latency << " samples at " << getSamplerate() << " Hz");
+		LOG("Latency set to " << m_extraLatency << " samples at " << getSamplerate() << " Hz");
 
 		if(_size > maxLatency)
 		{

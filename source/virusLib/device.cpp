@@ -58,11 +58,19 @@ namespace virusLib
 		return m_syx.setState(_state, _type);
 	}
 
-	uint32_t Device::getInternalLatencySamples() const
+	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
-//		return 300;		// hard to believe but this is what I figured out by measuring with the init patch
+		/*
+		 * hard to believe but this is what I figured out by measuring with a customized init patch
+		 *
+		 * Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples
+		 */
+		return 384 + 28;
+	}
 
-		// more precise, measured by using an input init patch. Sent a click to the input and recorded both the input
+	uint32_t Device::getInternalLatencyInputToOutput() const
+	{
+		// Measured by using an input init patch. Sent a click to the input and recorded both the input
 		// as direct signal plus the Virus output and checking the resulting latency in a wave editor
 		return 384;
 	}
@@ -73,7 +81,7 @@ namespace virusLib
 		{
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
-			ev.offset += m_numSamplesProcessed + getLatencySamples();
+			ev.offset += m_numSamplesProcessed + getExtraLatencySamples();
 			return m_syx.sendMIDI(ev, true);
 		}
 
