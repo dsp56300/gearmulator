@@ -34,6 +34,9 @@ namespace genericVirusUI
 
 			m_partVolume[i]->getProperties().set("parameter", (int)Virus::Param_PartVolume);
 			m_partPan[i]->getProperties().set("parameter", (int)Virus::Param_Panorama);
+
+			m_partVolume[i]->getProperties().set("part", static_cast<int>(i));
+			m_partPan[i]->getProperties().set("part", static_cast<int>(i));
 		}
 
 		updateAll();

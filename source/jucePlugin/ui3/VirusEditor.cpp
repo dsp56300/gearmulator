@@ -295,9 +295,12 @@ namespace genericVirusUI
 			return;
 		}
 
-		const int v = _component->getProperties()["parameter"];
+		const auto& props = _component->getProperties();
+		const int v = props["parameter"];
 
-		const auto* p = getController().getParameter(static_cast<Virus::ParameterType>(v));
+		const int part = props.contains("part") ? props["part"] : getController().getCurrentPart();
+
+		const auto* p = getController().getParameter(static_cast<Virus::ParameterType>(v), part);
 
 		if(!p)
 		{
