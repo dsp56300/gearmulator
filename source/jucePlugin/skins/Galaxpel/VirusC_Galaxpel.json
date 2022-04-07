@@ -4500,6 +4500,25 @@
                                 "tileSizeX" : "104",
                                 "tileSizeY" : "104"
                             }
+                        },
+                        {
+                            "name" : "ReverbSize",
+                            "combobox" : {
+                                "text" : "Ambience",
+                                "textHeight" : "38",
+                                "color" : "C8CCE0FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "fontFile" : "BEBASNEUE_REGULAR-_1_",
+                                "fontName" : "Bebas Neue",
+                                "x" : "279.4",
+                                "y" : "293.5",
+                                "width" : "162",
+                                "height" : "36"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Rev Size"
+                            }
                         }
                     ]
                 },
