@@ -80,7 +80,7 @@ void audioCallback(dsp56k::Audio* audio)
 	constexpr size_t channelsOut = 2;
 
 	TWord inputData[channelsIn][sampleCount] =	{{0,0,0,0}, {0,0,0,0}};
-	TWord* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
+	const TWord* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
 	TWord outputData[channelsOut][sampleCount] ={{0, 0,   0,    0},	{0, 0,   0,    0}};
 	TWord* audioOut[channelsOut] = {outputData[0], outputData[1]};
 
