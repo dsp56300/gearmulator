@@ -74,7 +74,7 @@ namespace synthLib
 		{
 			const auto& m = _src[i];
 			if(m.offset < static_cast<int>(_offsetMin) || m.offset > static_cast<int>(_offsetMax))
-				continue;;
+				continue;
 			_dst.push_back(m);
 		}
 	}
@@ -131,7 +131,7 @@ namespace synthLib
 				m_input.remove(count);
 			}
 
-			m_inputLatency += offset;
+			m_inputLatency += static_cast<uint32_t>(offset);
 			if(offset)
 			{
 				LOG("Resampler input latency " << m_inputLatency << " samples");
@@ -150,7 +150,7 @@ namespace synthLib
 				const auto diff = _numProcessedSamples - m_scaledInputSize;
 				m_scaledInput.insertZeroes(diff);
 				m_scaledInputSize += diff;
-				m_outputLatency += diff;
+				m_outputLatency += static_cast<uint32_t>(diff);
 				LOG("Resampler output latency " << m_outputLatency << " samples");
 			}
 			m_scaledInput.fillPointers(inputs);
