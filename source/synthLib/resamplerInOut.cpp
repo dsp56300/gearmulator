@@ -74,12 +74,12 @@ namespace synthLib
 		{
 			const auto& m = _src[i];
 			if(m.offset < static_cast<int>(_offsetMin) || m.offset > static_cast<int>(_offsetMax))
-				continue;;
+				continue;
 			_dst.push_back(m);
 		}
 	}
 
-	void ResamplerInOut::process(float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc)
+	void ResamplerInOut::process(const float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc)
 	{
 		if(!m_in || !m_out)
 			return;
@@ -131,7 +131,7 @@ namespace synthLib
 				m_input.remove(count);
 			}
 
-			m_inputLatency += offset;
+			m_inputLatency += static_cast<uint32_t>(offset);
 			if(offset)
 			{
 				LOG("Resampler input latency " << m_inputLatency << " samples");
@@ -143,14 +143,14 @@ namespace synthLib
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
-			float* inputs[g_channelCount];
+			const float* inputs[g_channelCount];
 			if(_numProcessedSamples > m_scaledInputSize)
 			{
 				// resampler prewarming, wants more data than we have
 				const auto diff = _numProcessedSamples - m_scaledInputSize;
 				m_scaledInput.insertZeroes(diff);
 				m_scaledInputSize += diff;
-				m_outputLatency += diff;
+				m_outputLatency += static_cast<uint32_t>(diff);
 				LOG("Resampler output latency " << m_outputLatency << " samples");
 			}
 			m_scaledInput.fillPointers(inputs);

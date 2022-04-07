@@ -13,11 +13,12 @@ namespace synthLib
 		void reserve(size_t _capacity);
 		void resize(size_t _capacity);
 		void append(const TBuffer& _data);
-		void append(float** _data, size_t _size);
+		void append(const float** _data, size_t _size);
 
 		void remove(size_t _count);
 		
 		void fillPointers(float** _pointers, size_t _offset = 0);
+		void fillPointers(const float** _pointers, size_t _offset = 0) const;
 		size_t size() const;
 
 		void ensureSize(size_t _size)

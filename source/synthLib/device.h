@@ -15,10 +15,13 @@ namespace synthLib
 	public:
 		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals = false);
 		virtual ~Device();
-		virtual void process(float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
-		void setLatencySamples(uint32_t _size);
-		uint32_t getLatencySamples() const { return m_latency; }
-		virtual uint32_t getInternalLatencySamples() const { return 0; }
+		virtual void process(const float** _inputs, float** _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
+
+		void setExtraLatencySamples(uint32_t _size);
+		uint32_t getExtraLatencySamples() const { return m_extraLatency; }
+
+		virtual uint32_t getInternalLatencyMidiToOutput() const { return 0; }
+		virtual uint32_t getInternalLatencyInputToOutput() const { return 0; }
 
 		void startDSPThread();
 
@@ -53,6 +56,6 @@ namespace synthLib
 
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
 		std::vector<SMidiEvent> m_midiIn;
-		uint32_t m_latency = 0;
+		uint32_t m_extraLatency = 0;
 	};
 }
