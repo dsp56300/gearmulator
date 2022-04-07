@@ -278,12 +278,12 @@ namespace synthLib
 	uint32_t Plugin::getLatencyMidiToOutput() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyMidiToOutput;
+		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyMidiToOutput + m_resampler.getOutputLatency();
 	}
 
 	uint32_t Plugin::getLatencyInputToOutput() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyInputToOutput;
+		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyInputToOutput + m_resampler.getOutputLatency() + m_resampler.getInputLatency();
 	}
 }
