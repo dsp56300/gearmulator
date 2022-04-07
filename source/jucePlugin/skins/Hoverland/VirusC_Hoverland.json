@@ -4626,6 +4626,22 @@
                                 "tileSizeX" : "140",
                                 "tileSizeY" : "140"
                             }
+                        },
+                        {
+                            "name" : "ReverbSize",
+                            "combobox" : {
+                                "text" : "Ambience",
+                                "textHeight" : "30",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "x" : "254",
+                                "y" : "280",
+                                "width" : "162",
+                                "height" : "36"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Rev Size"
+                            }
                         }
                     ]
                 },
