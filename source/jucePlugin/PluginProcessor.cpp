@@ -91,7 +91,11 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // initialisation that you need..
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
-	setLatencySamples(m_plugin.getLatencySamples());
+
+	if constexpr(JucePlugin_IsSynth)
+		setLatencySamples(m_plugin.getLatencyMidiToOutput());
+	else
+		setLatencySamples(m_plugin.getLatencyInputToOutput());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -141,7 +145,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-	float* inputs[8] = {};
+	const float* inputs[8] = {};
 	float* outputs[8] = {};
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
@@ -149,7 +153,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	    const float* in = buffer.getReadPointer(channel);
 	    float* out = buffer.getWritePointer(channel);
 
-    	inputs[channel] = const_cast<float*>(in);	// TODO: fixme
+    	inputs[channel] = in;
     	outputs[channel] = out;
     }
 

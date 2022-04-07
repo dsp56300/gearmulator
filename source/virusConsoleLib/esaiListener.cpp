@@ -52,7 +52,7 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 	constexpr size_t channelsOut = 12;
 
 	TWord inputData[channelsIn][sampleCount] = { {0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0},{0,0,0,0}, {0,0,0,0} };
-	TWord* audioIn[channelsIn] = {
+	const TWord* audioIn[channelsIn] = {
 		(m_inChannels & 0x01) ? inputData[0] : nullptr,
 		(m_inChannels & 0x01) ? inputData[1] : nullptr,
 		(m_inChannels & 0x02) ? inputData[2] : nullptr,
