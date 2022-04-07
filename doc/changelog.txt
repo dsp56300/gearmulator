@@ -1,5 +1,22 @@
 Release Notes 
 
+1.2.17 (2022.04.07):
+
+- [Fix] Reported latency values slightly adjusted, now different for FX and Synth versions of plugins
+- [Fix] [UI Trancy] Osc 3 Wave Select not working, modifies Osc 1 Wave Select instead
+- [Fix] [UI Hoverland/Galaxpel] Missing Reverb Room Type selection
+- [Fix] Knobs modified multiple parts in Multi Mode after switching the active part several times
+- [Fix] Hovering knobs always displayed values for part 1 even if another part was selected
+- [Fix] Oscillator Semitone knobs had a range larger than supported by the hardware, now limited to -48 ... +48
+- [Fix] Initial state of play mode selectors always displayed Single even when plugin restored in Multi mode
+
+1.2.16 (2022.04.04):
+
+- [Imp] Included the skin by @galaxpel#1604 
+
+- [Fix] Adjusted reported latency after having done some more precise measurements
+- [Fix] Fix DSP emulation JIT compiler issue resulted in corrupted sound
+
 1.2.15 (2022.03.26):
 
 - [Fix] Skin files were not correctly loaded from disk
