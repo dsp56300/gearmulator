@@ -23,7 +23,8 @@ namespace synthLib
 		void setSamplerate(float _samplerate);
 		void setBlockSize(uint32_t _blockSize);
 
-		uint32_t getLatencySamples() const;
+		uint32_t getLatencyMidiToOutput() const;
+		uint32_t getLatencyInputToOutput() const;
 
 		void process(float** _inputs, float** _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
@@ -61,7 +62,8 @@ namespace synthLib
 
 		uint32_t m_blockSize = 0;
 
-		uint32_t m_deviceLatency;
+		uint32_t m_deviceLatencyMidiToOutput = 0;
+		uint32_t m_deviceLatencyInputToOutput = 0;
 
 		// MIDI Clock
 		bool m_isPlaying = false;

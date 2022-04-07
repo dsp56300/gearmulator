@@ -16,8 +16,9 @@ using namespace synthLib;
 namespace synthLib
 {
 	constexpr uint8_t g_stateVersion = 1;
+	constexpr uint32_t g_extraLatencyBlocks = 1;
 
-	Plugin::Plugin(Device* _device) : m_device(_device), m_deviceLatency(0)
+	Plugin::Plugin(Device* _device) : m_device(_device)
 	{
 		m_resampler.setDeviceSamplerate(_device->getSamplerate());
 	}
@@ -213,10 +214,11 @@ namespace synthLib
 		if(m_blockSize <= 0 || m_hostSamplerate <= 0)
 			return;
 
-		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize) * m_device->getSamplerate() * m_hostSamplerateInv));
-		m_device->setLatencySamples(latency);
+		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize * g_extraLatencyBlocks) * m_device->getSamplerate() * m_hostSamplerateInv));
+		m_device->setExtraLatencySamples(latency);
 
-		m_deviceLatency = static_cast<uint32_t>(m_device->getInternalLatencySamples() * m_hostSamplerate / m_device->getSamplerate());
+		m_deviceLatencyMidiToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate());
+		m_deviceLatencyInputToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyInputToOutput()) * m_hostSamplerate / m_device->getSamplerate());
 	}
 
 	void Plugin::processMidiInEvents()
@@ -273,9 +275,15 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-	uint32_t Plugin::getLatencySamples() const
+	uint32_t Plugin::getLatencyMidiToOutput() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize + m_deviceLatency;
+		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyMidiToOutput;
+	}
+
+	uint32_t Plugin::getLatencyInputToOutput() const
+	{
+		std::lock_guard lock(m_lock);
+		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyInputToOutput;
 	}
 }

@@ -88,7 +88,11 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     // initialisation that you need..
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
-	setLatencySamples(m_plugin.getLatencySamples());
+
+	if constexpr(JucePlugin_IsSynth)
+		setLatencySamples(m_plugin.getLatencyMidiToOutput());
+	else
+		setLatencySamples(m_plugin.getLatencyInputToOutput());
 }
 
 void AudioPluginAudioProcessor::releaseResources()
