@@ -232,7 +232,6 @@ namespace Virus
 		if (params.empty())
 		{
             // unregistered param?
-            jassertfalse;
             return nullptr;
         }
 		return &params.front()->getValueObject();
@@ -334,8 +333,11 @@ namespace Virus
 	void Controller::setSinglePresetName(uint8_t part, juce::String _name) {
 		constexpr uint8_t asciiStart = 112;
 		_name = _name.substring(0,kNameLength).paddedRight(' ', kNameLength);
-		for (int i = 0; i < kNameLength; i++) {
-			getParamValue(part, 1, asciiStart+i)->setValue(static_cast<uint8_t>(_name[i]));
+		for (int i = 0; i < kNameLength; i++)
+		{
+			auto* value = getParamValue(part, 1, asciiStart+i);
+			jassert(value);
+			value->setValue(static_cast<uint8_t>(_name[i]));
 		}
 	}
 	juce::String Controller::getCurrentPartPresetName(uint8_t part)
@@ -345,7 +347,11 @@ namespace Virus
 		char text[kNameLength + 1];
 		text[kNameLength] = 0; // termination
 		for (auto pos = 0; pos < kNameLength; ++pos)
-			text[pos] = static_cast<int>(getParamValue(part, 1, asciiStart + pos)->getValue());
+		{
+			auto* value = getParamValue(part, 1, asciiStart + pos);
+			jassert(value);
+			text[pos] = static_cast<int>(value->getValue());
+		}
 		return {text};
 	}
 
