@@ -44,7 +44,7 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-	void Plugin::process(float** _inputs, float** _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
+	void Plugin::process(const float** _inputs, float** _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
 		if(!m_device->isValid())
 			return;
@@ -52,7 +52,7 @@ namespace synthLib
 		setFlushDenormalsToZero();
 
 
-		float* inputs[8] {};
+		const float* inputs[8] {};
 		float* outputs[8] {};
 
 		inputs[0] = _inputs && _inputs[0] ? _inputs[0] : getDummyBuffer(_count);
@@ -66,7 +66,7 @@ namespace synthLib
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
-			[&](float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
+			[&](const float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
 			m_device->process(_in, _out, _c, _midiIn, _midiOut);
 		});

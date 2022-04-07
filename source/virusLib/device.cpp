@@ -40,7 +40,7 @@ namespace virusLib
 		return m_rom.isValid();
 	}
 
-	void Device::process(float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+	void Device::process(const float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 		m_syx.process(_size);
