@@ -1,5 +1,7 @@
 #include "resamplerInOut.h"
 
+#include <array>
+
 #include "../dsp56300/source/dsp56kEmu/fastmath.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
@@ -39,6 +41,27 @@ namespace synthLib
 
 		m_scaledInputSize = 8;
 		m_scaledInput.resize(m_scaledInputSize);
+
+		m_inputLatency = 0;
+		m_outputLatency = 0;
+
+		// prewarm to calculate latency
+		std::array<std::vector<float>, g_channelCount> data;
+
+		std::array<const float*, g_channelCount> ins{};
+		std::array<float*, g_channelCount> outs{};
+
+		for(size_t i=0; i<data.size(); ++i)
+		{
+			data[i].resize(512, 0);
+			ins[i] = &data[i][0];
+			outs[i] = &data[i][0];
+		}
+
+		TMidiVec midiIn, midiOut;
+		process(&ins[0], &outs[0], TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()), [&](const float**, float**, size_t, const TMidiVec&, TMidiVec&)
+		{
+		});
 	}
 
 	void ResamplerInOut::scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale)
