@@ -76,13 +76,13 @@ void audioCallback(dsp56k::Audio* audio)
 	
 	static int ctr=0;
 	constexpr size_t sampleCount = 4;
-	constexpr size_t channelsIn = 2;
-	constexpr size_t channelsOut = 2;
+	constexpr size_t channelsIn = 8;
+	constexpr size_t channelsOut = 12;
 
 	TWord inputData[channelsIn][sampleCount] =	{{0,0,0,0}, {0,0,0,0}};
-	const TWord* audioIn [channelsIn ] = {inputData[0],  inputData[1] };
-	TWord outputData[channelsOut][sampleCount] ={{0, 0,   0,    0},	{0, 0,   0,    0}};
-	TWord* audioOut[channelsOut] = {outputData[0], outputData[1]};
+	const TWord* audioIn [channelsIn] = {inputData[0],  inputData[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+	TWord outputData[channelsOut][sampleCount] ={{0,0,0,0}, {0,0,0,0}};
+	TWord* audioOut[channelsOut] = {outputData[0], outputData[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 	
 	ctr++;
@@ -91,11 +91,11 @@ void audioCallback(dsp56k::Audio* audio)
 		LOG("Deliver Audio");
 	}
 
-	audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
+	audio->processAudioInterleaved(audioIn, audioOut, sampleCount);
 
 	if(!audioData.capacity())
 	{
-		for(int c=0; c<channelsOut; ++c)
+		for(int c=0; c<2; ++c)
 		{
 			for(int i=0; i<sampleCount; ++i)
 			{
@@ -225,12 +225,12 @@ int main(int _argc, char* _argv[])
 	const DefaultMemoryValidator memoryMap;
 	Memory memory(memoryMap, g_memorySize);
 	memory.setExternalMemory(0x020000, true);
-	Peripherals56362 periphX;
-	PeripheralsNop periphY;
-	DSP dsp(memory, &periphX, &periphY);
+	std::unique_ptr<Peripherals56362> periphX(new Peripherals56362());
+	std::unique_ptr<PeripheralsNop> periphY(new PeripheralsNop());
+	DSP dsp(memory, periphX.get(), periphY.get());
 
-	periphX.getEsai().setCallback(audioCallback,4,1);
-	periphX.getEsai().writeEmptyAudioIn(4, 2);
+	periphX->getEsai().setCallback(audioCallback,4);
+	periphX->getEsai().writeEmptyAudioIn(4);
 
 	const auto romFile = findROM();
 	if(romFile.empty())
@@ -247,9 +247,9 @@ int main(int _argc, char* _argv[])
 	conf.aguSupportBitreverse = false;	// not needed on B & C
 	jit.setConfig(conf);
 
-	auto loader = v.bootDSP(dsp, periphX);
+	auto loader = v.bootDSP(dsp, *periphX);
 
-	Microcontroller uc(periphX.getHDI08(), v);
+	Microcontroller uc(periphX->getHDI08(), v);
 	microcontroller = &uc;
 
 	if(_argc > 1)
@@ -308,7 +308,7 @@ int main(int _argc, char* _argv[])
 	{
 		while(true)
 		{
-			const auto word = periphX.getHDI08().readTX();
+			const auto word = periphX->getHDI08().readTX();
 			midiOut.append(word);
 		}
 	});

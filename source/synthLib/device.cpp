@@ -23,7 +23,7 @@ namespace synthLib
 		m_periphX.getEsai().setCallback([this](Audio* _audio)
 		{
 			onAudioWritten();
-		}, 0, 1);
+		}, 0);
 
 		m_memory = new (bufMem)Memory(m_memoryValidator, _memorySize, reinterpret_cast<TWord*>(bufBuf));
 		m_dsp = new (buf)DSP(*m_memory, &m_periphX, &m_periphNop);
@@ -52,8 +52,8 @@ namespace synthLib
 		buf.resize(_numSamples);
 		const auto ptr = &buf[0];
 
-		const float* in[2] = {ptr, ptr};
-		float* out[2] = {ptr, ptr};
+		const float* in[] = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		float* out[] = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		std::vector<SMidiEvent> midi;
 
@@ -65,13 +65,16 @@ namespace synthLib
 		for (const auto& ev : _midiIn)
 			sendMidi(ev, _midiOut);
 
-		m_periphX.getEsai().processAudioInterleaved(_inputs, _outputs, _size, 2, 2, m_extraLatency);
+		const float* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		float* outputs[] = {_outputs[0], _outputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+
+		m_periphX.getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_size), m_extraLatency);
 		readMidiOut(_midiOut);
 	}
 
 	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
-		const uint32_t maxLatency = static_cast<uint32_t>(getPeriph().getEsai().getAudioInputs()[0].capacity()) >> 1;
+		const uint32_t maxLatency = static_cast<uint32_t>(getPeriph().getEsai().getAudioInputs().capacity()) >> 1;
 
 		m_extraLatency = std::min(_size, maxLatency);
 
