@@ -79,7 +79,7 @@ namespace synthLib
 
 	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
-		const uint32_t maxLatency = static_cast<uint32_t>(getPeriphX().getEsai().getAudioInputs()[0].capacity()) >> 1;
+		const uint32_t maxLatency = static_cast<uint32_t>(getPeriphX().getEsai().getAudioInputs().capacity()) >> 1;
 
 		m_extraLatency = std::min(_size, maxLatency);
 

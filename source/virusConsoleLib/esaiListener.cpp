@@ -16,15 +16,6 @@ EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, cons
 	, m_nextWriteSize(g_writeBlockSize)
 	, m_callback(std::move(_callback))
 {
-	uint32_t callbackChannel;
-
-	if (_outChannels & 32)		callbackChannel = 6;
-	else if (_outChannels & 16)	callbackChannel = 5;
-	else if (_outChannels & 8)	callbackChannel = 4;
-	else if (_outChannels & 4)	callbackChannel = 3;
-	else if (_outChannels & 2)	callbackChannel = 2;
-	else						callbackChannel = 1;
-
 	if (_outChannels & 32)		++m_outChannelCount;
 	if (_outChannels & 16)		++m_outChannelCount;
 	if (_outChannels & 8)		++m_outChannelCount;
@@ -35,9 +26,9 @@ EsaiListener::EsaiListener(dsp56k::Esai& _esai, const uint8_t _outChannels, cons
 	_esai.setCallback([&](Audio* _audio)
 	{
 		onAudioCallback(_audio);
-	}, 4, callbackChannel);
+	}, 4);
 
-	_esai.writeEmptyAudioIn(4, m_inChannels<<1);
+	_esai.writeEmptyAudioIn(4);
 }
 
 void EsaiListener::setMaxSamplecount(uint32_t _max)
@@ -84,7 +75,7 @@ void EsaiListener::onAudioCallback(dsp56k::Audio* _audio)
 		LOG("Deliver Audio");
 	}
 
-	_audio->processAudioInterleaved(audioIn, audioOut, sampleCount, channelsIn, channelsOut);
+	_audio->processAudioInterleaved(audioIn, audioOut, sampleCount);
 
 	if (limitReached())
 		return;
