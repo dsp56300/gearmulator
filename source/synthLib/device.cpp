@@ -66,7 +66,7 @@ namespace synthLib
 			sendMidi(ev, _midiOut);
 
 		const float* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		float* outputs[] = {_outputs[0], _outputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		float* outputs[] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		m_periphX.getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_size), m_extraLatency);
 		readMidiOut(_midiOut);
