@@ -12,6 +12,8 @@ using namespace dsp56k;
 namespace synthLib
 {
 	constexpr uint32_t g_channelCount = 2;
+	constexpr uint32_t g_channelCountIn = 2;
+	constexpr uint32_t g_channelCountOut = 6;
 
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
 	{
@@ -46,10 +48,10 @@ namespace synthLib
 		m_outputLatency = 0;
 
 		// prewarm to calculate latency
-		std::array<std::vector<float>, g_channelCount> data;
+		std::array<std::vector<float>, std::max(g_channelCountIn, g_channelCountOut)> data;
 
-		std::array<const float*, g_channelCount> ins{};
-		std::array<float*, g_channelCount> outs{};
+		std::array<const float*, data.size()> ins{};
+		std::array<float*, data.size()> outs{};
 
 		for(size_t i=0; i<data.size(); ++i)
 		{
@@ -131,13 +133,13 @@ namespace synthLib
 		else
 			scaledSamples = static_cast<uint32_t>(ceil_int(static_cast<float>(_numSamples) * devDivHost));
 
-		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCount, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
+		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
 		{
 			const auto offset = _numRequestedSamples > m_input.size() ? _numRequestedSamples - m_input.size() : 0;
 			if(offset)
 			{
 				// resampler prewarming, wants more data than we have
-				for(size_t c=0; c<g_channelCount; ++c)
+				for(size_t c=0; c<g_channelCountIn; ++c)
 				{
 					memset(_data[c], 0, sizeof(float) * offset);
 					_data[c] += offset;
@@ -148,7 +150,7 @@ namespace synthLib
 
 			if(count)
 			{
-				for(size_t c=0; c<g_channelCount; ++c)
+				for(size_t c=0; c<g_channelCountIn; ++c)
 					memcpy(_data[c], &m_input.getChannel(c)[0], sizeof(float) * count);
 
 				m_input.remove(count);
@@ -161,12 +163,12 @@ namespace synthLib
 			}
 		});
 
-		const auto outputSize = m_out->process(_outputs, g_channelCount, _numSamples, false, [&](float** _outs, uint32_t _numProcessedSamples)
+		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, [&](float** _outs, uint32_t _numProcessedSamples)
 		{
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
-			const float* inputs[g_channelCount];
+			const float* inputs[g_channelCountIn];
 			if(_numProcessedSamples > m_scaledInputSize)
 			{
 				// resampler prewarming, wants more data than we have

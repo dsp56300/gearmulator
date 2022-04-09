@@ -55,10 +55,11 @@ namespace synthLib
 		const float* inputs[8] {};
 		float* outputs[8] {};
 
-		inputs[0] = _inputs && _inputs[0] ? _inputs[0] : getDummyBuffer(_count);
-		inputs[1] = _inputs && _inputs[1] ? _inputs[1] : getDummyBuffer(_count);
-		outputs[0] = _outputs && _outputs[0] ? _outputs[0] : getDummyBuffer(_count);
-		outputs[1] = _outputs && _outputs[1] ? _outputs[1] : getDummyBuffer(_count);
+		for(size_t i=0; i<8; ++i)
+		{
+			inputs[i] = _inputs && _inputs[i] ? _inputs[i] : getDummyBuffer(_count);
+			outputs[i] = _outputs && _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
+		}
 
 		std::lock_guard lock(m_lock);
 
