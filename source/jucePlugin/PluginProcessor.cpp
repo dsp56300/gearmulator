@@ -8,7 +8,12 @@
 AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
     AudioProcessor(BusesProperties()
                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("Output", juce::AudioChannelSet::stereo(), true)),
+                   .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#if JucePlugin_IsSynth
+                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
+#endif
+	),
 	MidiInputCallback(),
 	m_romName(virusLib::ROMFile::findROM()),
 	m_rom(m_romName),
@@ -113,8 +118,8 @@ bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
     if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
-    // This checks if the input layout matches the output layout
-    if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
+    // This checks if the input is stereo
+    if (layouts.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
     return true;
@@ -149,13 +154,10 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	float* outputs[8] = {};
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-	    const float* in = buffer.getReadPointer(channel);
-	    float* out = buffer.getWritePointer(channel);
+    	inputs[channel] = buffer.getReadPointer(channel);
 
-    	inputs[channel] = in;
-    	outputs[channel] = out;
-    }
+    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+    	outputs[channel] = buffer.getWritePointer(channel);
 
 	for(const auto metadata : midiMessages)
 	{
