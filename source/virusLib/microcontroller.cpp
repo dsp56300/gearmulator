@@ -175,7 +175,7 @@ void Microcontroller::sendInitControlCommands()
 
 		m_hdi08.writeRX(initCodeDS);
 
-//		sendControlCommand(PLAY_MODE, 1);
+		sendControlCommand(PLAY_MODE, PlayModeMulti);
 	}
 
 	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
