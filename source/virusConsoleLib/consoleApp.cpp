@@ -201,10 +201,12 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		break;
 */
 	}
-	/*
 	static uint8_t cycle = 0;
 
-	if(audioCallbackCount >= 512 && (audioCallbackCount & 511) == 0)
+	static uint8_t channel = 0;
+	static int totalNoteCount = 1;
+
+	if(audioCallbackCount >= 512 && (audioCallbackCount & 8191) == 0)
 	{
 		static uint8_t note = 127;
 		if(note >= 96)
@@ -226,13 +228,17 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		}
 		if(cycle < 7)
 		{
-			LOG("Sending Note On for note " << static_cast<int>(note));
-			uc.sendMIDI(SMidiEvent(0x90, note, 0x5f));	// Note On
+			totalNoteCount++;
+			LOG("Sending Note On for note " << static_cast<int>(note) << ", total notes " << totalNoteCount);
+			uc.sendMIDI(SMidiEvent(0x90 + channel * 2, note, 0x5f));	// Note On
+			channel ^= 1;
 			uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+
+//			if(totalNoteCount >= 40)
+//				dsp.enableTrace(static_cast<dsp56k::DSP::TraceMode>(dsp56k::DSP::Ops | dsp56k::DSP::Regs | dsp56k::DSP::StackIndent));
 		}
 		note += 12;
 	}
-	*/
 	if(m_demo && audioCallbackCount >= 256)
 		m_demo->process(1);
 }
