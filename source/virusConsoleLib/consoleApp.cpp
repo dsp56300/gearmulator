@@ -139,6 +139,8 @@ std::string ConsoleApp::getSingleNameAsFilename() const
 
 void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 {
+	uc.process(1);
+
 	switch (audioCallbackCount)
 	{
 	case 1:
@@ -149,8 +151,27 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		if(!m_demo)
 		{
 			LOG("Sending Preset");
-			uc.writeSingle(BankNumber::EditBuffer, SINGLE, preset);
-		}
+//			v.getSingle(1, 9, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 0, preset);
+			v.getSingle(1, 5, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 1, preset);
+			v.getSingle(1, 6, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 2, preset);
+
+/*			uc.writeSingle(BankNumber::EditBuffer, 3, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 4, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 5, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 6, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 7, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 8, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 9, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 10, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 11, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 12, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 13, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 14, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 15, preset);
+*/		}
 		break;
 	case 512:
 		if(!m_demo)
