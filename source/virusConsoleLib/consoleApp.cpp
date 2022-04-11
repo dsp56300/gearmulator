@@ -313,11 +313,11 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 	const std::string romFile = m_romName;
 	auto& mem = memory;
 
-//	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
-//	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
-	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, dsp.getPeriph(0), dsp.getPeriph(1));
+	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
+	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
+	mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
+//	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, dsp.getPeriph(0), dsp.getPeriph(1));
 */
-
 	while (!esaiListener->limitReached())
 		std::this_thread::sleep_for(std::chrono::seconds(1));
 
