@@ -36,6 +36,7 @@ endif()
 # ----------------- Console Programs
 
 add_subdirectory(source/virusTestConsole)
+add_subdirectory(source/logicAnalysisParser)
 add_subdirectory(source/virusIntegrationTest)
 
 # ----------------- CPack
