@@ -10,10 +10,12 @@ namespace virusLib
 {
 	bool MidiOutParser::append(const dsp56k::TWord word)
 	{
+//		LOG("HDI08 TX: " << HEX(word));
+
 		// Only support for single byte responses atm
 		if ((word & 0xff00ffff) != 0) 
 		{
-			LOG("Unexpected MIDI data: 0x" << HEX(word));
+//			LOG("Unexpected MIDI data: 0x" << HEX(word));
 			return false;
 		}
 
@@ -25,7 +27,7 @@ namespace virusLib
 			if (buf == 0 || buf == 0xf5)
 				return false;
 			if (buf != 0xf0) {
-				LOG("Unexpected MIDI bytes: 0x" << HEXN(buf, 2));
+//				LOG("Unexpected MIDI bytes: 0x" << HEXN(buf, 2));
 				return false;
 			}
 		}
