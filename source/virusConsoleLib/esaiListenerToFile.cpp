@@ -41,14 +41,12 @@ bool EsaiListenerToFile::onDeliverAudioData(const std::vector<dsp56k::TWord>& _a
 		}
 	}
 
-	auto res = true;
-
 	for(size_t i=0; i<getChannelCount(); ++i)
 	{
-		res &= m_writers[i].write(m_audioFilenames[i], 24, false, 2, m_samplerate, m_audioDatas[i]);
-		m_audioDatas[i].clear();
+		if(m_writers[i].write(m_audioFilenames[i], 24, false, 2, m_samplerate, m_audioDatas[i]))
+			m_audioDatas[i].clear();
 	}
-	return res;
+	return true;
 }
 
 void EsaiListenerToFile::onBeginDeliverAudioData()
