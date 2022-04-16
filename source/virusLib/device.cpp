@@ -18,8 +18,7 @@ namespace virusLib
 
 		if(m_rom.isTIFamily())
 		{
-			getPeriphX().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
-			getPeriphY().getEsai().setSamplerate(static_cast<int>(getSamplerate()));
+			getPeriphX().getEsaiClock().setSamplerate(static_cast<int>(getSamplerate()));
 
 			conf.aguSupportBitreverse = true;
 		}
