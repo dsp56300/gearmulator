@@ -141,6 +141,8 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 {
 	uc.process(1);
 
+	constexpr uint8_t baseChannel = 0;
+
 	switch (audioCallbackCount)
 	{
 	case 1:
@@ -151,12 +153,14 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		if(!m_demo)
 		{
 			LOG("Sending Preset");
-//			v.getSingle(1, 9, preset);
 			uc.writeSingle(BankNumber::EditBuffer, 0, preset);
-			v.getSingle(1, 5, preset);
 			uc.writeSingle(BankNumber::EditBuffer, 1, preset);
 			v.getSingle(1, 6, preset);
 			uc.writeSingle(BankNumber::EditBuffer, 2, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 3, preset);
+			v.getSingle(1, 9, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 4, preset);
+			uc.writeSingle(BankNumber::EditBuffer, 5, preset);
 
 /*			uc.writeSingle(BankNumber::EditBuffer, 3, preset);
 			uc.writeSingle(BankNumber::EditBuffer, 4, preset);
@@ -173,18 +177,20 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 			uc.writeSingle(BankNumber::EditBuffer, 15, preset);
 */		}
 		break;
-	case 512:
+	case 1024:
 		if(!m_demo)
 		{
 			LOG("Sending Note On");
-//			uc.sendMIDI(SMidiEvent(0x90, 36, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 48, 0x5f));	// Note On
-			uc.sendMIDI(SMidiEvent(0x90, 60, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 63, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 67, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 72, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 75, 0x5f));	// Note On
-//			uc.sendMIDI(SMidiEvent(0x90, 79, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 36, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 48, 0x5f));	// Note On
+			for(uint8_t i=0; i<6; ++i)
+				uc.sendMIDI(SMidiEvent(0x90 + i, 60, 0x5f));		// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 60, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 63, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 67, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 72, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 75, 0x5f));	// Note On
+//			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 79, 0x5f));	// Note On
 //			uc.sendMIDI(SMidiEvent(0xb0, 1, 0));		// Modwheel 0
 			uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 		}
@@ -201,12 +207,13 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		break;
 */
 	}
+#if 0
 	static uint8_t cycle = 0;
 
 	static uint8_t channel = 0;
 	static int totalNoteCount = 1;
 
-	if(audioCallbackCount >= 512 && (audioCallbackCount & 8191) == 0)
+	if(audioCallbackCount >= 1024 && (audioCallbackCount & 2047) == 0)
 	{
 		static uint8_t note = 127;
 		if(note >= 96)
@@ -230,8 +237,11 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		{
 			totalNoteCount++;
 			LOG("Sending Note On for note " << static_cast<int>(note) << ", total notes " << totalNoteCount);
-			uc.sendMIDI(SMidiEvent(0x90 + channel * 2, note, 0x5f));	// Note On
-			channel ^= 1;
+			uc.sendMIDI(SMidiEvent(0x90 + baseChannel + channel, note, 0x5f));	// Note On
+			channel++;
+			if(channel >= 6)
+//			if(channel >= 16)
+				channel = 0;
 			uc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 
 //			if(totalNoteCount >= 40)
@@ -239,6 +249,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		}
 		note += 12;
 	}
+#endif
 	if(m_demo && audioCallbackCount >= 256)
 		m_demo->process(1);
 }
