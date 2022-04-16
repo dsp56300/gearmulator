@@ -247,8 +247,12 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 {
 	if (v.isTIFamily())
 	{
-		periphX.getEsai().setSamplerate(v.getSamplerate());
-		periphY.getEsai().setSamplerate(v.getSamplerate());
+		const auto cycles = 150 * 1000000 / (v.getSamplerate() * 3);
+
+		periphX.getEsaiClock().setCyclesPerSample(cycles);
+
+		periphX.getEsaiClock().setEsaiDivider(&periphY.getEsai(), 0);
+		periphX.getEsaiClock().setEsaiDivider(&periphX.getEsai(), 2);
 	}
 
 	auto loader = bootDSP();
