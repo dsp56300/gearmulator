@@ -1087,7 +1087,9 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t 
 		m_hdi08.writeRX(&word, 1);
 	};
 
-	if((_a & 0xf0) == 0xf0)
+	const auto command = (_a & 0xf0);
+
+	if(command == 0xf0)
 	{
 		// single-byte status message
 		sendMIDItoDSP(_a);
@@ -1096,7 +1098,9 @@ bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t 
 	{
 		sendMIDItoDSP(_a);
 		sendMIDItoDSP(_b);
-		sendMIDItoDSP(_c);
+
+		if(command != M_AFTERTOUCH)
+			sendMIDItoDSP(_c);
 	}
 
 	return true;
