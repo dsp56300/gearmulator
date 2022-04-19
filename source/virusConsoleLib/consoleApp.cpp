@@ -180,7 +180,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 			uc.writeSingle(BankNumber::EditBuffer, 15, preset);
 */		}
 		break;
-	case 1024:
+	case 512:
 		if(!m_demo)
 		{
 			LOG("Sending Note On");
