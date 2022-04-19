@@ -243,24 +243,25 @@ void Microcontroller::createDefaultState()
 		loadMulti(0, m_multiEditBuffer);
 }
 
-bool Microcontroller::needsToWaitForHostBits(char flag1, char flag2) const
+bool Microcontroller::needsToWaitForHostBits(const uint8_t _flag0, const uint8_t _flag1) const
 {
-	const int target = (flag1?1:0)|(flag2?2:0);
+	const int target = (_flag0?1:0) | (_flag1?2:0);
 	const int hsr = m_hdi08.readStatusRegister();
 	if (((hsr>>3)&3)==target) 
 		return false;
 	return m_hdi08.hasDataToSend();
 }
 
-void Microcontroller::writeHostBitsWithWait(const char flag1, const char flag2) const
+void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t flag1) const
 {
 	std::lock_guard lock(m_mutex);
 
-	const int hsr=m_hdi08.readStatusRegister();
-	const int target=(flag1?1:0)|(flag2?2:0);
-	if (((hsr>>3)&3)==target) return;
+	const int hsr = m_hdi08.readStatusRegister();
+	const int target = (flag0 ? 1:0) | (flag1 ? 2:0);
+	if (((hsr>>3)&3)==target) 
+		return;
 	waitUntilBufferEmpty();
-	m_hdi08.setHostFlags(flag1, flag2);
+	m_hdi08.setHostFlags(flag0, flag1);
 }
 
 bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>& preset, const bool isMulti)

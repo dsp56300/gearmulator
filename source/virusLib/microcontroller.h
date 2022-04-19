@@ -52,8 +52,8 @@ private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
 	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
-	bool needsToWaitForHostBits(char flag1,char flag2) const;
-	void writeHostBitsWithWait(char flag1,char flag2) const;
+	bool needsToWaitForHostBits(uint8_t  _flag0, uint8_t  _flag1) const;
+	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1) const;
 	void waitUntilReady() const;
 	void waitUntilBufferEmpty() const;
 	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
