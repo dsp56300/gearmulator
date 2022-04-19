@@ -292,8 +292,6 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 		esai0InChannels  = 0b0001;
 		esai1OutChannels = 0b000011;
 		esai1InChannels  = 0b0011;
-
-		// TODO: DSP 2
 	}
 
 	if (!_audioOutputFilename.empty())
