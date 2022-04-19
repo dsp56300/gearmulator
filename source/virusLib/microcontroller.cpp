@@ -51,8 +51,9 @@ static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _off
 	return cs & 0x7f;
 }
 
+constexpr int g_presetWriteDelaySamples = 8;
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile)
+Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
 {
 	if(!_romFile.isValid())
 		return;
@@ -307,6 +308,8 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 	m_hdi08.writeRX(buf, 2);
 
 	m_hdi08.writeRX(preset);
+
+	m_pendingPresetWriteDelay = g_presetWriteDelaySamples;
 
 	return true;
 }
@@ -979,6 +982,14 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 void Microcontroller::process(size_t _size)
 {
 	std::lock_guard lock(m_mutex);
+
+	if(m_pendingPresetWriteDelay > 0)
+	{
+		m_pendingPresetWriteDelay -= static_cast<int>(_size);
+
+		if(m_pendingPresetWriteDelay > 0)
+			return;
+	}
 
 	if(!m_pendingPresetWrites.empty() && !m_hdi08.hasDataToSend())
 	{

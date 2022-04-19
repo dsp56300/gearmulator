@@ -95,6 +95,7 @@ private:
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
+	int m_pendingPresetWriteDelay;
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	mutable std::recursive_mutex m_mutex;
