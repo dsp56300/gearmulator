@@ -178,6 +178,7 @@ void Microcontroller::sendInitControlCommands()
 
 		m_hdi08.writeRX(initCodeDS);
 
+#if 1
 		constexpr uint8_t prts = 0x4f;
 
 		enum class Output : uint8_t
@@ -219,10 +220,10 @@ void Microcontroller::sendInitControlCommands()
 
 		sendControlCommand(PLAY_MODE, PlayModeMulti);
 
-		auto words = presetToDSPWords(data, true);
-		words.back() |= 0x007f7f;
+		const auto words = presetToDSPWords(data, true);
 
 		sendPreset(0x66, words, true);
+#endif
 	}
 	else
 	{
