@@ -248,23 +248,13 @@ void Microcontroller::createDefaultState()
 
 bool Microcontroller::needsToWaitForHostBits(const uint8_t _flag0, const uint8_t _flag1) const
 {
-	const int target = (_flag0?1:0) | (_flag1?2:0);
-	const int hsr = m_hdi08.readStatusRegister();
-	if (((hsr>>3)&3)==target) 
-		return false;
-	return m_hdi08.hasDataToSend();
+	return m_hdi08.needsToWaitForHostFlags(_flag0, _flag1);
 }
 
 void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t flag1) const
 {
 	std::lock_guard lock(m_mutex);
-
-	const int hsr = m_hdi08.readStatusRegister();
-	const int target = (flag0 ? 1:0) | (flag1 ? 2:0);
-	if (((hsr>>3)&3)==target) 
-		return;
-	waitUntilBufferEmpty();
-	m_hdi08.setHostFlags(flag0, flag1);
+	m_hdi08.setHostFlagsWithWait(flag0, flag1);
 }
 
 bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>& preset, const bool isMulti)
@@ -321,15 +311,12 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 	send(m_rom.isTIFamily() ? PAGE_D : PAGE_C, 0x0, _command, _value);
 }
 
-bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value, bool cancelIfFull/* = false*/)
+bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
 	std::lock_guard lock(m_mutex);
 
-//	waitUntilReady();	// waits for the receive interrupt to be enabled, but why? Its not needed as we have a queue
-
-	if(cancelIfFull && needsToWaitForHostBits(0,1))
-		return false;
 	writeHostBitsWithWait(0,1);
+
 	TWord buf[] = {0xf4f400, 0x0};
 	buf[0] = buf[0] | _page;
 	buf[1] = (_part << 16) | (_param << 8) | _value;
@@ -385,7 +372,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = fals
 	return true;
 }
 
-bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
+bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<SMidiEvent>& _responses, const MidiEventSource _source)
 {
 	if (_data.size() < 7)
 		return true;	// invalid sysex or not directed to us
@@ -739,22 +726,13 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, bool _cancelI
 					_responses.push_back(ev);
 				}
 
-				return send(page, part, param, value, _cancelIfFull);
+				return send(page, part, param, value);
 			}
 		default:
 			LOG("Unknown sysex command " << HEXN(cmd, 2));
 	}
 
 	return true;
-}
-
-void Microcontroller::waitUntilBufferEmpty() const
-{
-	while (m_hdi08.hasDataToSend())
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(10));
-		std::this_thread::yield();
-	}
 }
 
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
@@ -811,15 +789,6 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 
 	_result = s[_preset];
 	return true;
-}
-
-void Microcontroller::waitUntilReady() const
-{
-	while (!bittest(m_hdi08.readControlRegister(), HDI08::HCR_HRIE)) 
-	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(100));
-		std::this_thread::yield();
-	}
 }
 
 bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const
@@ -1009,9 +978,9 @@ bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateTy
 	std::vector<SMidiEvent> responses;
 
 	if(_type == StateTypeGlobal)
-		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, false, responses, MidiEventSourcePlugin);
+		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
 
-	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, false, responses, MidiEventSourcePlugin);
+	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
 
 	if(responses.empty())
 		return false;
@@ -1059,7 +1028,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 	for (const auto& event : events)
 	{
-		sendSysex(event.sysex, false, unusedResponses, MidiEventSourcePlugin);
+		sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
 		unusedResponses.clear();
 	}
 
@@ -1068,16 +1037,13 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c, bool cancelIfFull) const
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c) const
 {
 	std::lock_guard lock(m_mutex);
 
 	const auto isModelD = m_rom.isTIFamily();
 
 	const char flagA = isModelD ? 0 : 1;
-
-	if (cancelIfFull && (needsToWaitForHostBits(flagA, 1) || m_hdi08.dataRXFull()))
-		return false;
 
 	writeHostBitsWithWait(flagA, 1);
 
@@ -1117,7 +1083,7 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 	{
 		const auto& ev = m_pendingMidiEvents.front();
 
-		if(!sendMIDItoDSP(ev.a,ev.b,ev.c, true))
+		if(!sendMIDItoDSP(ev.a,ev.b,ev.c))
 			break;
 
 		m_pendingMidiEvents.pop_front();
