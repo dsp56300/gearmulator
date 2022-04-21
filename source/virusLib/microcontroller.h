@@ -26,7 +26,7 @@ public:
 	explicit Microcontroller(dsp56k::HDI08& hdi08, const ROMFile& romFile);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
-	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
+	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
@@ -41,7 +41,7 @@ public:
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
-	bool sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const;
+	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c) const;
 
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 
@@ -49,13 +49,11 @@ public:
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
 private:
-	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
+	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
 	bool needsToWaitForHostBits(uint8_t  _flag0, uint8_t  _flag1) const;
 	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1) const;
-	void waitUntilReady() const;
-	void waitUntilBufferEmpty() const;
 	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
 
