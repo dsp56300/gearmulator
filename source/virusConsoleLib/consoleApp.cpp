@@ -153,7 +153,15 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		if(!m_demo)
 		{
 			LOG("Sending Preset");
-#if 1
+#if 0
+			uc.writeSingle(BankNumber::EditBuffer, 0, preset);	// cmdline
+			v.getSingle(1, 6, preset);							// Anubis MS
+			uc.writeSingle(BankNumber::EditBuffer, 1, preset);
+			v.getSingle(1, 10, preset);						// Impact MS
+			uc.writeSingle(BankNumber::EditBuffer, 2, preset);
+			v.getSingle(1, 3, preset);						// Impact MS
+			uc.writeSingle(BankNumber::EditBuffer, 3, preset);
+#elif 1
 			uc.writeSingle(BankNumber::EditBuffer, 0, preset);	// cmdline
 			uc.writeSingle(BankNumber::EditBuffer, 1, preset);
 			v.getSingle(1, 6, preset);							// Anubis MS
