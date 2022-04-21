@@ -269,12 +269,19 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, EsaiListenerToCall
 {
 	if (v.isTIFamily())
 	{
-		const auto cycles = 150 * 1000000 / (v.getSamplerate() * 3);
+		if(v.getModel() == ROMFile::Model::Snow)
+		{
+			periphX.getEsaiClock().setSamplerate(44100);
+		}
+		else
+		{
+			const auto cycles = 150 * 1000000 / (v.getSamplerate() * 3);
 
-		periphX.getEsaiClock().setCyclesPerSample(cycles);
+			periphX.getEsaiClock().setCyclesPerSample(cycles);
 
-		periphX.getEsaiClock().setEsaiDivider(&periphY.getEsai(), 0);
-		periphX.getEsaiClock().setEsaiDivider(&periphX.getEsai(), 2);
+			periphX.getEsaiClock().setEsaiDivider(&periphY.getEsai(), 0);
+			periphX.getEsaiClock().setEsaiDivider(&periphX.getEsai(), 2);
+		}
 	}
 
 	auto loader = bootDSP();
