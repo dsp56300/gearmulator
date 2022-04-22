@@ -325,7 +325,7 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	return true;
 }
 
-bool Microcontroller::sendMIDI(const SMidiEvent& _ev, bool cancelIfFull/* = false*/)
+bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 {
 	const uint8_t channel = _ev.a & 0x0f;
 	const uint8_t status = _ev.a & 0xf0;
