@@ -100,7 +100,7 @@ namespace virusLib
 
 		std::vector<synthLib::SMidiEvent> responses;
 
-		if(!m_syx.sendSysex(_ev.sysex, true, responses, _ev.source))
+		if(!m_syx.sendSysex(_ev.sysex, responses, _ev.source))
 			return false;
 
 		for (const auto& response : responses)
