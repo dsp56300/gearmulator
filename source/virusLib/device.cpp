@@ -129,6 +129,14 @@ namespace virusLib
 		}
 	}
 
+	void Device::processAudio(const float** _inputs, float** _outputs, const size_t _samples)
+	{
+		const float* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		float* outputs[] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+
+		getPeriphX().getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
+	}
+
 	void Device::onAudioWritten()
 	{
 		m_numSamplesWritten += 1;

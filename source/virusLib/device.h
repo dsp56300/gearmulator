@@ -28,6 +28,7 @@ namespace virusLib
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
+		void processAudio(const float** _inputs, float** _outputs, size_t _samples) override;
 		void onAudioWritten() override;
 
 		const ROMFile& m_rom;
