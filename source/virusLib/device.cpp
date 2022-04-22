@@ -64,7 +64,7 @@ namespace virusLib
 		return m_rom.isValid();
 	}
 
-	void Device::process(const float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 		m_mc.process(_size);
@@ -129,7 +129,7 @@ namespace virusLib
 		}
 	}
 
-	void Device::processAudio(const float** _inputs, float** _outputs, const size_t _samples)
+	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
 	{
 		const float* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 		float* outputs[] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};

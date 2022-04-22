@@ -12,14 +12,14 @@ namespace synthLib
 	{
 	public:
 		using TMidiVec = std::vector<SMidiEvent>;
-		using TProcessFunc = std::function<void(const float**, float**, size_t, const TMidiVec&, TMidiVec&)>;
+		using TProcessFunc = std::function<void(const TAudioInputs&, const TAudioOutputs&, size_t, const TMidiVec&, TMidiVec&)>;
 
-		ResamplerInOut() = default;
+		ResamplerInOut();
 
 		void setDeviceSamplerate(float _samplerate);
 		void setHostSamplerate(float _samplerate);
 
-		void process(const float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
+		void process(const TAudioInputs& _inputs, TAudioOutputs& _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc);
 
 		uint32_t getOutputLatency() const { return m_outputLatency; }
 		uint32_t getInputLatency() const { return m_inputLatency; }
@@ -38,8 +38,6 @@ namespace synthLib
 
 		AudioBuffer m_scaledInput;
 		AudioBuffer m_input;
-		AudioBuffer m_scaledOutput;
-		AudioBuffer m_output;
 
 		size_t m_scaledInputSize = 0;
 

@@ -17,7 +17,7 @@ namespace virusLib
 		float getSamplerate() const override;
 		bool isValid() const override;
 
-		void process(const float** _inputs, float** _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
+		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
 
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
@@ -28,7 +28,7 @@ namespace virusLib
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
-		void processAudio(const float** _inputs, float** _outputs, size_t _samples) override;
+		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		void onAudioWritten() override;
 
 		const ROMFile& m_rom;

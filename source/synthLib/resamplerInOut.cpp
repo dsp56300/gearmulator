@@ -15,6 +15,11 @@ namespace synthLib
 	constexpr uint32_t g_channelCountIn = 2;
 	constexpr uint32_t g_channelCountOut = 6;
 
+	ResamplerInOut::ResamplerInOut() : m_input(g_channelCountIn), m_scaledInput(g_channelCountIn)
+	{
+		
+	}
+
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
 	{
 		if(m_samplerateDevice == _samplerate)
@@ -50,18 +55,20 @@ namespace synthLib
 		// prewarm to calculate latency
 		std::array<std::vector<float>, std::max(g_channelCountIn, g_channelCountOut)> data;
 
-		std::array<const float*, data.size()> ins{};
-		std::array<float*, data.size()> outs{};
+		TAudioInputs ins;
+		TAudioOutputs outs;
 
 		for(size_t i=0; i<data.size(); ++i)
-		{
 			data[i].resize(512, 0);
-			ins[i] = &data[i][0];
-			outs[i] = &data[i][0];
-		}
+
+		for(size_t i=0; i<ins.size(); ++i)
+			ins[i] = i >= data.size() ? nullptr : &data[i][0];
+
+		for(size_t i=0; i<outs.size(); ++i)
+			outs[i] = i >= data.size() ? nullptr : &data[i][0];
 
 		TMidiVec midiIn, midiOut;
-		process(&ins[0], &outs[0], TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()), [&](const float**, float**, size_t, const TMidiVec&, TMidiVec&)
+		process(ins, outs, TMidiVec(), midiOut, static_cast<uint32_t>(data[0].size()), [&](const TAudioInputs&, const TAudioOutputs&, size_t, const TMidiVec&, TMidiVec&)
 		{
 		});
 	}
@@ -104,7 +111,7 @@ namespace synthLib
 		}
 	}
 
-	void ResamplerInOut::process(const float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, const uint32_t _numSamples, const TProcessFunc& _processFunc)
+	void ResamplerInOut::process(const TAudioInputs& _inputs, TAudioOutputs& _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 	{
 		if(!m_in || !m_out)
 			return;
@@ -133,7 +140,7 @@ namespace synthLib
 		else
 			scaledSamples = static_cast<uint32_t>(ceil_int(static_cast<float>(_numSamples) * devDivHost));
 
-		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, scaledSamples, false, [&](float** _data, uint32_t _numRequestedSamples)
+		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, scaledSamples, false, [&](TAudioOutputs& _data, uint32_t _numRequestedSamples)
 		{
 			const auto offset = _numRequestedSamples > m_input.size() ? _numRequestedSamples - m_input.size() : 0;
 			if(offset)
@@ -163,12 +170,12 @@ namespace synthLib
 			}
 		});
 
-		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, [&](float** _outs, uint32_t _numProcessedSamples)
+		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, [&](TAudioOutputs& _outs, uint32_t _numProcessedSamples)
 		{
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
-			const float* inputs[g_channelCountIn];
+			TAudioInputs inputs;
 			if(_numProcessedSamples > m_scaledInputSize)
 			{
 				// resampler prewarming, wants more data than we have

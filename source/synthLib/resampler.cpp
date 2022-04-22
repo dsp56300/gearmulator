@@ -21,8 +21,10 @@ synthLib::Resampler::~Resampler()
 	destroyResamplers();
 }
 
-uint32_t synthLib::Resampler::process(float** _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
+uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, bool _allowLessOutput, const TProcessFunc& _processFunc)
 {
+	assert(_numChannels <= m_outputPtrs.size());
+
 	setChannelCount(_numChannels);
 
 	if (getSamplerateIn() == getSamplerateOut())
@@ -36,12 +38,10 @@ uint32_t synthLib::Resampler::process(float** _output, const uint32_t _numChanne
 
 	while (remaining > 0)
 	{
-		m_outputPtrs.resize(_numChannels);
-
 		for (uint32_t i = 0; i < _numChannels; ++i)
 			m_outputPtrs[i] = &_output[i][index];
 
-		const uint32_t outBufferUsed = processResample(&m_outputPtrs[0], _numChannels, remaining, _processFunc);
+		const uint32_t outBufferUsed = processResample(m_outputPtrs, _numChannels, remaining, _processFunc);
 
 		index += outBufferUsed;
 		remaining -= outBufferUsed;
@@ -55,7 +55,7 @@ uint32_t synthLib::Resampler::process(float** _output, const uint32_t _numChanne
 	return index;
 }
 
-uint32_t synthLib::Resampler::processResample(float ** _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
+uint32_t synthLib::Resampler::processResample(TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
 	const uint32_t inputLen = std::max(1, dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut));
 
@@ -63,7 +63,7 @@ uint32_t synthLib::Resampler::processResample(float ** _output, const uint32_t _
 
 	if (availableInputLen < inputLen)
 	{
-		float* tempBuffers[8];
+		TAudioOutputs tempBuffers;
 	
 		for (uint32_t i = 0; i < _numChannels; ++i)
 		{
