@@ -53,10 +53,12 @@ static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _off
 
 constexpr int g_presetWriteDelaySamples = 8;
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_hdi08(_hdi08), m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
+Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
 {
 	if(!_romFile.isValid())
 		return;
+
+	m_hdi08.addHDI08(_hdi08);
 
 	m_globalSettings.fill(0);
 
@@ -246,22 +248,16 @@ void Microcontroller::createDefaultState()
 		loadMulti(0, m_multiEditBuffer);
 }
 
-bool Microcontroller::needsToWaitForHostBits(const uint8_t _flag0, const uint8_t _flag1) const
+void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t flag1)
 {
-	return m_hdi08.needsToWaitForHostFlags(_flag0, _flag1);
-}
-
-void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t flag1) const
-{
-	std::lock_guard lock(m_mutex);
-	m_hdi08.setHostFlagsWithWait(flag0, flag1);
+	m_hdi08.writeHostFlags(flag0, flag1);
 }
 
 bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>& preset, const bool isMulti)
 {
 	std::lock_guard lock(m_mutex);
 
-	if(m_loadingState || m_hdi08.hasDataToSend() || needsToWaitForHostBits(0,1))
+	if(m_loadingState || m_pendingPresetWriteDelay > 0)
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
@@ -952,6 +948,8 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 
 void Microcontroller::process(size_t _size)
 {
+	m_hdi08.exec();
+
 	std::lock_guard lock(m_mutex);
 
 	if(m_pendingPresetWriteDelay > 0)
@@ -962,7 +960,7 @@ void Microcontroller::process(size_t _size)
 			return;
 	}
 
-	if(!m_pendingPresetWrites.empty() && !m_hdi08.hasDataToSend())
+	if(!m_pendingPresetWrites.empty())
 	{
 		const auto preset = m_pendingPresetWrites.front();
 		m_pendingPresetWrites.pop_front();
@@ -1037,7 +1035,7 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c) const
+bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c)
 {
 	std::lock_guard lock(m_mutex);
 
