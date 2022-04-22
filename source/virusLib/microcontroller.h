@@ -2,6 +2,7 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
+#include "../dsp56300/source/dsp56kEmu/hdi08queue.h"
 
 #include "romfile.h"
 
@@ -41,7 +42,7 @@ public:
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
-	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c) const;
+	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c);
 
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 
@@ -52,8 +53,7 @@ private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
-	bool needsToWaitForHostBits(uint8_t  _flag0, uint8_t  _flag1) const;
-	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1) const;
+	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1);
 	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
 
@@ -67,8 +67,8 @@ private:
 	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
 	void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value) const;
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
-	
-	dsp56k::HDI08& m_hdi08;
+
+	dsp56k::HDI08Queue m_hdi08;
 	const ROMFile& m_rom;
 
 	TPreset m_multiEditBuffer;

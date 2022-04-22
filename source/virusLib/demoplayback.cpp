@@ -228,9 +228,6 @@ namespace virusLib
 			break;
 		case EventType::RawSerial:
 			{
-				if(m_mc.needsToWaitForHostBits(0,1))
-					return false;
-
 				std::vector<dsp56k::TWord> dspWords;
 
 				for(size_t i=0; i<_event.data.size(); i += 3)
