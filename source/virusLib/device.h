@@ -31,7 +31,7 @@ namespace virusLib
 		void onAudioWritten() override;
 
 		const ROMFile& m_rom;
-		Microcontroller m_syx;
+		Microcontroller m_mc;
 		MidiOutParser m_midiOutParser;
 		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_numSamplesProcessed = 0;
