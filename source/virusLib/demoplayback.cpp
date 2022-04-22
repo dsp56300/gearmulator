@@ -209,7 +209,7 @@ namespace virusLib
 		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
-				m_mc.sendSysex(_event.data, false, responses, synthLib::MidiEventSourcePlugin);
+				m_mc.sendSysex(_event.data, responses, synthLib::MidiEventSourcePlugin);
 			}
 			break;
 		case EventType::Midi:
