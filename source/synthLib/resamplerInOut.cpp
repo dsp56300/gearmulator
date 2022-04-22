@@ -104,7 +104,7 @@ namespace synthLib
 		}
 	}
 
-	void ResamplerInOut::process(const float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, uint32_t _numSamples, const TProcessFunc& _processFunc)
+	void ResamplerInOut::process(const float** _inputs, float** _outputs, const TMidiVec& _midiIn, TMidiVec& _midiOut, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 	{
 		if(!m_in || !m_out)
 			return;
