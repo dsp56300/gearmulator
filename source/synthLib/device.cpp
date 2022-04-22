@@ -1,5 +1,6 @@
 #include "device.h"
 
+#include "audioTypes.h"
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 
@@ -57,15 +58,15 @@ namespace synthLib
 		buf.resize(_numSamples);
 		const auto ptr = &buf[0];
 
-		const float* in[] = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		float* out[] = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		TAudioInputs in = {ptr, ptr, nullptr, nullptr};//, nullptr, nullptr, nullptr, nullptr};
+		TAudioOutputs out = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		std::vector<SMidiEvent> midi;
 
 		process(in, out, _numSamples, midi, midi);
 	}
 
-	void Device::process(const float** _inputs, float** _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
+	void Device::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
 		for (const auto& ev : _midiIn)
 			sendMidi(ev, _midiOut);

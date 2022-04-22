@@ -57,6 +57,14 @@ namespace synthLib
 		}
 	}
 
+	void AudioBuffer::append(const TAudioInputs& _data, size_t _size)
+	{
+		const auto c = std::min(m_data.size(), _data.size());
+
+		for(size_t i=0; i<c; ++i)
+			append(m_data[i], _data[i], _size);
+	}
+
 	void AudioBuffer::remove(const size_t _count)
 	{
 		for(size_t c=0; c<m_data.size(); ++c)
@@ -68,13 +76,13 @@ namespace synthLib
 		}
 	}
 
-	void AudioBuffer::fillPointers(float** _pointers, size_t _offset)
+	void AudioBuffer::fillPointers(TAudioOutputs& _pointers, size_t _offset)
 	{
 		for(size_t c=0; c<m_data.size(); ++c)
 			_pointers[c] = &m_data[c][_offset];
 	}
 
-	void AudioBuffer::fillPointers(const float** _pointers, size_t _offset) const
+	void AudioBuffer::fillPointers(TAudioInputs& _pointers, size_t _offset) const
 	{
 		for(size_t c=0; c<m_data.size(); ++c)
 			_pointers[c] = &m_data[c][_offset];

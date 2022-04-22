@@ -150,8 +150,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-	const float* inputs[8] = {};
-	float* outputs[8] = {};
+    synthLib::TAudioInputs inputs{};
+    synthLib::TAudioOutputs outputs{};
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     	inputs[channel] = buffer.getReadPointer(channel);
