@@ -18,7 +18,14 @@ namespace virusLib
 
 		if(m_rom.isTIFamily())
 		{
-			getPeriphX().getEsaiClock().setSamplerate(static_cast<int>(getSamplerate()));
+			if(m_rom.getModel() == ROMFile::Model::Snow)
+			{
+				getPeriphX().getEsaiClock().setExternalClockFrequency(44100 * 256);
+			}
+			else
+			{
+				getPeriphX().getEsaiClock().setSamplerate(static_cast<int>(getSamplerate()));
+			}
 
 			conf.aguSupportBitreverse = true;
 		}
