@@ -222,7 +222,7 @@ void Microcontroller::sendInitControlCommands()
 
 		const auto words = presetToDSPWords(data, true);
 
-		sendPreset(0x66, words, true);
+		sendPreset(0, words, true);
 #endif
 	}
 	else
