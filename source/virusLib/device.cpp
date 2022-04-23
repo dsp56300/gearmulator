@@ -6,25 +6,37 @@ namespace virusLib
 	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
 
 	Device::Device(const ROMFile& _romFile)
-		: synthLib::Device(_romFile.isTIFamily() ? 0x100000 : 0x040000, g_externalMemStart)
+		: synthLib::Device()
 		, m_rom(_romFile)
-		, m_mc(getHDI08(), m_rom)
 	{
 		if(!m_rom.isValid())
 			return;
 
-		auto& jit = getDSP().getJit();
+		m_dsp.reset(new DspSingle(_romFile.isTIFamily() ? 0x100000 : 0x040000, g_externalMemStart, _romFile.isTIFamily()));
+
+		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
+		{
+			onAudioWritten();
+		}, 0);
+
+		auto& jit = m_dsp->getJIT();
 		auto conf = jit.getConfig();
 
 		if(m_rom.isTIFamily())
 		{
+			auto& clock = m_dsp->getPeriphX().getEsaiClock();
+
 			if(m_rom.getModel() == ROMFile::Model::Snow)
 			{
-				getPeriphX().getEsaiClock().setExternalClockFrequency(44100 * 256);
+				clock.setExternalClockFrequency(44100 * 256);
 			}
 			else
 			{
-				getPeriphX().getEsaiClock().setSamplerate(static_cast<int>(getSamplerate()));
+//				clock.setSamplerate(static_cast<int>(getSamplerate()));
+				clock.setExternalClockFrequency(44100 * 256);
+				clock.setSamplerate(44100 * 3);
+				clock.setEsaiDivider(&m_dsp->getPeriphY().getEsai(), 0);
+				clock.setEsaiDivider(&m_dsp->getPeriphX().getEsai(), 2);
 			}
 
 			conf.aguSupportBitreverse = true;
@@ -36,19 +48,28 @@ namespace virusLib
 
 		jit.setConfig(conf);
 
-		auto loader = m_rom.bootDSP(getDSP(), getPeriphX());
+		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _romFile));
 
-		startDSPThread();
+		auto loader = m_rom.bootDSP(m_dsp->getDSP(), m_dsp->getPeriphX());
+
+		m_dsp->startDSPThread();
 
 		loader.join();
 
 		dummyProcess(8);
 
-		m_mc.sendInitControlCommands();
+		m_mc->sendInitControlCommands();
 
 		dummyProcess(8);
 
-		m_mc.createDefaultState();
+		m_mc->createDefaultState();
+	}
+
+	Device::~Device()
+	{
+		m_dsp->getPeriphX().getEsai().setCallback(nullptr,0);
+		m_mc.reset();
+		m_dsp.reset();
 	}
 
 	float Device::getSamplerate() const
@@ -67,19 +88,18 @@ namespace virusLib
 	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
-		m_mc.process(_size);
 
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return m_mc.getState(_state, _type);
+		return m_mc->getState(_state, _type);
 	}
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		return m_mc.setState(_state, _type);
+		return m_mc->setState(_state, _type);
 	}
 
 	uint32_t Device::getInternalLatencyMidiToOutput() const
@@ -102,12 +122,12 @@ namespace virusLib
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
 			ev.offset += m_numSamplesProcessed + getExtraLatencySamples();
-			return m_mc.sendMIDI(ev);
+			return m_mc->sendMIDI(ev);
 		}
 
 		std::vector<synthLib::SMidiEvent> responses;
 
-		if(!m_mc.sendSysex(_ev.sysex, responses, _ev.source))
+		if(!m_mc->sendSysex(_ev.sysex, responses, _ev.source))
 			return false;
 
 		for (const auto& response : responses)
@@ -118,9 +138,9 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		while(getHDI08().hasTX())
+		while(m_dsp->getHDI08().hasTX())
 		{
-			if(m_midiOutParser.append(getHDI08().readTX()))
+			if(m_midiOutParser.append(m_dsp->getHDI08().readTX()))
 			{
 				const auto midi = m_midiOutParser.getMidiData();
 				_midiOut.insert(_midiOut.end(), midi.begin(), midi.end());
@@ -131,16 +151,15 @@ namespace virusLib
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
 	{
-		const float* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		float* outputs[] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-
-		getPeriphX().getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
+		m_dsp->processAudio(_inputs, _outputs, _samples, getExtraLatencySamples());
 	}
 
 	void Device::onAudioWritten()
 	{
+		m_mc->process(1);
+
 		m_numSamplesWritten += 1;
 
-		m_mc.sendPendingMidiEvents(m_numSamplesWritten >> 1);
+		m_mc->sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 }
