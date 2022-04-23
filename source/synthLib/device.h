@@ -14,7 +14,7 @@ namespace synthLib
 	class Device
 	{
 	public:
-		Device(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals = false);
+		Device();
 		virtual ~Device();
 		virtual void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 
@@ -23,8 +23,6 @@ namespace synthLib
 
 		virtual uint32_t getInternalLatencyMidiToOutput() const { return 0; }
 		virtual uint32_t getInternalLatencyInputToOutput() const { return 0; }
-
-		void startDSPThread();
 
 		virtual float getSamplerate() const = 0;
 		virtual bool isValid() const = 0;
@@ -38,25 +36,8 @@ namespace synthLib
 		virtual void onAudioWritten() {}
 
 		void dummyProcess(uint32_t _numSamples);
-
-		dsp56k::HDI08& getHDI08() { return m_periphX.getHDI08(); }
-		dsp56k::Peripherals56362& getPeriphX() { return m_periphX; }
-		dsp56k::Peripherals56367& getPeriphY() { return m_periphY; }
-		dsp56k::DSP& getDSP() { return *m_dsp; }
 	
 	private:
-		std::vector<uint8_t> m_buffer;
-
-		dsp56k::DefaultMemoryValidator m_memoryValidator;
-		dsp56k::Peripherals56367 m_periphY;
-		dsp56k::Peripherals56362 m_periphX;
-		dsp56k::PeripheralsNop m_periphNop;
-
-		dsp56k::Memory* m_memory = nullptr;
-		dsp56k::DSP* m_dsp = nullptr;
-		dsp56k::Jit* m_jit = nullptr;
-
-		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
 		std::vector<SMidiEvent> m_midiIn;
 		uint32_t m_extraLatency = 0;
 	};

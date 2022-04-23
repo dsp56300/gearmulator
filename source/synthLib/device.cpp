@@ -8,49 +8,8 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	Device::Device(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals/* = false*/) : m_periphX(&m_periphY)
-	{
-		const size_t g_requiredMemSize	= alignedSize<DSP>() + alignedSize<Memory>() + _memorySize * MemArea_COUNT * sizeof(uint32_t);
-
-		m_buffer.resize(alignedSize(g_requiredMemSize));
-
-		auto* buf = &m_buffer[0];
-		buf = alignedAddress(buf);
-
-		auto* bufDSP = buf;
-		auto* bufMem = bufDSP + alignedSize<DSP>();
-		auto* bufBuf = bufMem + alignedSize<Memory>();
-
-		m_periphX.getEsai().setCallback([this](Audio* _audio)
-		{
-			onAudioWritten();
-		}, 0);
-
-		m_memory = new (bufMem)Memory(m_memoryValidator, _memorySize, reinterpret_cast<TWord*>(bufBuf));
-
-		IPeripherals* periphY = &m_periphNop;
-		if (_use56367Peripherals)
-			periphY = &m_periphY;
-
-		m_dsp = new (buf)DSP(*m_memory, &m_periphX, periphY);
-
-		if(_externalMemStartAddress)
-			m_memory->setExternalMemory(_externalMemStartAddress, true);
-	}
-
-	Device::~Device()
-	{
-		m_dspThread.reset();
-
-		if(m_dsp)
-		{
-			m_dsp->~DSP();
-			m_memory->~Memory();
-
-			m_dsp = nullptr;
-			m_memory = nullptr;
-		}
-	}
+	Device::Device() = default;
+	Device::~Device() = default;
 
 	void Device::dummyProcess(const uint32_t _numSamples)
 	{
@@ -78,7 +37,7 @@ namespace synthLib
 
 	void Device::setExtraLatencySamples(const uint32_t _size)
 	{
-		const uint32_t maxLatency = static_cast<uint32_t>(getPeriphX().getEsai().getAudioInputs().capacity()) >> 1;
+		constexpr auto maxLatency = Audio::RingBufferSize >> 1;
 
 		m_extraLatency = std::min(_size, maxLatency);
 
@@ -88,10 +47,5 @@ namespace synthLib
 		{
 			LOG("Warning, limited requested latency " << _size << " to maximum value " << maxLatency << ", audio will be out of sync!");
 		}
-	}
-
-	void Device::startDSPThread()
-	{
-		m_dspThread.reset(new DSPThread(*m_dsp));
 	}
 }

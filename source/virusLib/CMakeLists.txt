@@ -7,6 +7,8 @@ set(SOURCES
 	demopacketvalidator.cpp demopacketvalidator.h
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
+	dspSingle.cpp dspSingle.h
+	dspMulti.cpp dspMulti.h
 	midiOutParser.cpp midiOutParser.h
 	unpacker.cpp unpacker.h
 	romfile.cpp romfile.h

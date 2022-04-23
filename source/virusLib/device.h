@@ -1,5 +1,6 @@
 #pragma once
 
+#include "dspSingle.h"
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/device.h"
 
@@ -13,6 +14,7 @@ namespace virusLib
 	{
 	public:
 		Device(const ROMFile& _rom);
+		~Device() override;
 
 		float getSamplerate() const override;
 		bool isValid() const override;
@@ -32,8 +34,12 @@ namespace virusLib
 		void onAudioWritten() override;
 
 		const ROMFile& m_rom;
-		Microcontroller m_mc;
+
+		std::unique_ptr<DspSingle> m_dsp;
+		std::unique_ptr<Microcontroller> m_mc;
+
 		MidiOutParser m_midiOutParser;
+
 		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_numSamplesProcessed = 0;
 	};
