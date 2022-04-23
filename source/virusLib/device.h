@@ -32,6 +32,8 @@ namespace virusLib
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		void onAudioWritten() override;
+		void configureDSP(DspSingle& _dsp) const;
+		std::thread bootDSP(DspSingle& _dsp) const;
 
 		const ROMFile& m_rom;
 
