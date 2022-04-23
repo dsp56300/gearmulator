@@ -19,7 +19,9 @@ namespace virusLib
 		}
 		else if(_romFile.getModel() == ROMFile::Model::TI)
 		{
-			m_dsp.reset(new DspMultiTI());
+			auto* dsp = new DspMultiTI();
+			m_dsp.reset(dsp);
+			m_dsp2 = &dsp->getDSP2();
 		}
 		else
 		{
@@ -31,43 +33,22 @@ namespace virusLib
 			onAudioWritten();
 		}, 0);
 
-		auto& jit = m_dsp->getJIT();
-		auto conf = jit.getConfig();
-
-		if(m_rom.isTIFamily())
-		{
-			auto& clock = m_dsp->getPeriphX().getEsaiClock();
-
-			if(m_rom.getModel() == ROMFile::Model::Snow)
-			{
-				clock.setExternalClockFrequency(44100 * 256);
-			}
-			else
-			{
-//				clock.setSamplerate(static_cast<int>(getSamplerate()));
-				clock.setExternalClockFrequency(44100 * 256);
-				clock.setSamplerate(44100 * 3);
-				clock.setEsaiDivider(&m_dsp->getPeriphY().getEsai(), 0);
-				clock.setEsaiDivider(&m_dsp->getPeriphX().getEsai(), 2);
-			}
-
-			conf.aguSupportBitreverse = true;
-		}
-		else
-		{
-			conf.aguSupportBitreverse = false;
-		}
-
-		jit.setConfig(conf);
+		configureDSP(*m_dsp);
+		if(m_dsp2)
+			configureDSP(*m_dsp2);
 
 		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _romFile));
 
 		if(m_dsp2)
 			m_mc->addHDI08(m_dsp2->getHDI08());
 
-		auto loader = m_rom.bootDSP(m_dsp->getDSP(), m_dsp->getPeriphX());
+		auto loader = bootDSP(*m_dsp);
 
-		m_dsp->startDSPThread();
+		if(m_dsp2)
+		{
+			auto loader2 = bootDSP(*m_dsp2);
+			loader2.join();
+		}
 
 		loader.join();
 
@@ -176,5 +157,44 @@ namespace virusLib
 		m_numSamplesWritten += 1;
 
 		m_mc->sendPendingMidiEvents(m_numSamplesWritten >> 1);
+	}
+
+	void Device::configureDSP(DspSingle& _dsp) const
+	{
+		auto& jit = _dsp.getJIT();
+		auto conf = jit.getConfig();
+
+		if(m_rom.isTIFamily())
+		{
+			auto& clock = _dsp.getPeriphX().getEsaiClock();
+
+			if(m_rom.getModel() == ROMFile::Model::Snow)
+			{
+				clock.setExternalClockFrequency(44100 * 256);
+			}
+			else
+			{
+//				clock.setSamplerate(static_cast<int>(getSamplerate()));
+				clock.setExternalClockFrequency(44100 * 256);
+				clock.setSamplerate(44100 * 3);
+				clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
+				clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
+			}
+
+			conf.aguSupportBitreverse = true;
+		}
+		else
+		{
+			conf.aguSupportBitreverse = false;
+		}
+
+		jit.setConfig(conf);
+	}
+
+	std::thread Device::bootDSP(DspSingle& _dsp) const
+	{
+		auto res = m_rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
+		_dsp.startDSPThread();
+		return res;
 	}
 }
