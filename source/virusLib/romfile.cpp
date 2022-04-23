@@ -314,6 +314,8 @@ bool ROMFile::loadPresetFile(std::istream& _file)
 			TPreset multi;
 			_file.read(reinterpret_cast<char*>(&multi), sizeof(multi));
 			m_multis.emplace_back(multi);
+
+			LOG("Loaded multi " << i << ", name = " << getMultiName(multi));
 		}
 	}
 
