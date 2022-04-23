@@ -36,6 +36,7 @@ namespace virusLib
 		const ROMFile& m_rom;
 
 		std::unique_ptr<DspSingle> m_dsp;
+		DspSingle* m_dsp2 = nullptr;
 		std::unique_ptr<Microcontroller> m_mc;
 
 		MidiOutParser m_midiOutParser;

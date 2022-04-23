@@ -36,6 +36,8 @@ uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _nu
 	uint32_t index = 0;
 	uint32_t remaining = _numSamples;
 
+	m_outputPtrs.fill(nullptr);
+
 	while (remaining > 0)
 	{
 		for (uint32_t i = 0; i < _numChannels; ++i)
@@ -64,7 +66,8 @@ uint32_t synthLib::Resampler::processResample(TAudioOutputs& _output, const uint
 	if (availableInputLen < inputLen)
 	{
 		TAudioOutputs tempBuffers;
-	
+		tempBuffers.fill(nullptr);
+
 		for (uint32_t i = 0; i < _numChannels; ++i)
 		{
 			m_tempOutput[i].resize(inputLen, 0.0f);

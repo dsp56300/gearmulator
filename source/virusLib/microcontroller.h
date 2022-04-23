@@ -46,6 +46,8 @@ public:
 
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 
+	void addHDI08(dsp56k::HDI08& _hdi08);
+
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
