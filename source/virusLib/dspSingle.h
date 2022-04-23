@@ -9,7 +9,7 @@ namespace virusLib
 	class DspSingle
 	{
 	public:
-		DspSingle(uint32_t _memorySize, bool _use56367Peripherals = false);
+		DspSingle(uint32_t _memorySize, bool _use56367Peripherals = false, const char* _name = nullptr);
 		virtual ~DspSingle();
 
 		dsp56k::HDI08& getHDI08() { return m_periphX.getHDI08(); }
@@ -23,6 +23,7 @@ namespace virusLib
 		virtual void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency);
 
 	private:
+		const std::string m_name;
 		std::vector<uint8_t> m_buffer;
 
 		dsp56k::DefaultMemoryValidator m_memoryValidator;
