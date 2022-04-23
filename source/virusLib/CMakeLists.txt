@@ -8,7 +8,8 @@ set(SOURCES
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
 	dspSingle.cpp dspSingle.h
-	dspMulti.cpp dspMulti.h
+	dspSingleSnow.cpp dspSingleSnow.h
+	dspMultiTI.cpp dspMultiTI.h
 	midiOutParser.cpp midiOutParser.h
 	unpacker.cpp unpacker.h
 	romfile.cpp romfile.h

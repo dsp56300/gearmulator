@@ -2,7 +2,9 @@
 
 namespace virusLib
 {
-	DspSingle::DspSingle(uint32_t _memorySize, uint32_t _externalMemStartAddress, bool _use56367Peripherals/* = false*/) : m_periphX(&m_periphY)
+	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
+
+	DspSingle::DspSingle(uint32_t _memorySize, bool _use56367Peripherals/* = false*/) : m_periphX(&m_periphY)
 	{
 		const size_t g_requiredMemSize	= dsp56k::alignedSize<dsp56k::DSP>() + dsp56k::alignedSize<dsp56k::Memory>() + _memorySize * dsp56k::MemArea_COUNT * sizeof(uint32_t);
 
@@ -25,8 +27,7 @@ namespace virusLib
 		m_dsp = new (buf)dsp56k::DSP(*m_memory, &m_periphX, periphY);
 		m_jit = &m_dsp->getJit();
 
-		if(_externalMemStartAddress)
-			m_memory->setExternalMemory(_externalMemStartAddress, true);
+		m_memory->setExternalMemory(g_externalMemStart, true);
 	}
 
 	DspSingle::~DspSingle()

@@ -1,10 +1,11 @@
 #include "device.h"
+
+#include "dspMultiTI.h"
+#include "dspSingleSnow.h"
 #include "romfile.h"
 
 namespace virusLib
 {
-	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
-
 	Device::Device(const ROMFile& _romFile)
 		: synthLib::Device()
 		, m_rom(_romFile)
@@ -12,7 +13,18 @@ namespace virusLib
 		if(!m_rom.isValid())
 			return;
 
-		m_dsp.reset(new DspSingle(_romFile.isTIFamily() ? 0x100000 : 0x040000, g_externalMemStart, _romFile.isTIFamily()));
+		if(_romFile.getModel() == ROMFile::Model::Snow)
+		{
+			m_dsp.reset(new DspSingleSnow());
+		}
+		else if(_romFile.getModel() == ROMFile::Model::TI)
+		{
+			m_dsp.reset(new DspMultiTI());
+		}
+		else
+		{
+			m_dsp.reset(new DspSingle(_romFile.isTIFamily() ? 0x100000 : 0x040000, _romFile.isTIFamily()));
+		}
 
 		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
 		{
@@ -49,6 +61,9 @@ namespace virusLib
 		jit.setConfig(conf);
 
 		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _romFile));
+
+		if(m_dsp2)
+			m_mc->addHDI08(m_dsp2->getHDI08());
 
 		auto loader = m_rom.bootDSP(m_dsp->getDSP(), m_dsp->getPeriphX());
 

@@ -1089,6 +1089,11 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 	}	
 }
 
+void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
+{
+	m_hdi08.addHDI08(_hdi08);
+}
+
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
 {
 	return getPresetVersion(_preset[0]);

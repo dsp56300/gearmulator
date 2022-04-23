@@ -86,6 +86,8 @@ namespace synthLib
 	{
 		for(size_t c=0; c<m_data.size(); ++c)
 			_pointers[c] = &m_data[c][_offset];
+		for(size_t c=m_data.size(); c<_pointers.size(); ++c)
+			_pointers[c] = nullptr;
 	}
 
 	size_t AudioBuffer::size() const
