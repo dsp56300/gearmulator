@@ -16,6 +16,8 @@ namespace virusLib
 		DspSingle& getDSP2() { return m_dsp2; }
 
 	private:
+		static void mixEsai1Output(float* _dstL, float* _dstR, const float* _srcL, const float* _srcR, uint32_t _samples, uint32_t _srcOffsetL, uint32_t _srcOffsetR);
+
 		DspSingle m_dsp2;
 		synthLib::AudioBuffer m_buffer;
 	};
