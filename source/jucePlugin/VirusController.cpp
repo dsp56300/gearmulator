@@ -438,8 +438,8 @@ namespace Virus
 
         constexpr auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
-        auto progName = parseAsciiText(msg, namePos);
-        DBG(progName);
+//        auto progName = parseAsciiText(msg, namePos);
+//        DBG(progName);
     }
 
     void Controller::parseMulti(const SysEx &msg)
