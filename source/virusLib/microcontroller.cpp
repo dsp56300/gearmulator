@@ -180,7 +180,7 @@ void Microcontroller::sendInitControlCommands()
 
 		m_hdi08.writeRX(initCodeDS);
 
-#if 1
+#if 0
 		constexpr uint8_t prts = 0x4f;
 
 		enum class Output : uint8_t
