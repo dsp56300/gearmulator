@@ -20,6 +20,7 @@ namespace virusLib
 		PARAM_CHANGE_A = 0x70,
 		PARAM_CHANGE_B = 0x71,
 		PARAM_CHANGE_C = 0x72,
+		PARAM_CHANGE_D = 0x73,
 	};
 
 	enum ControlCommand : uint8_t
@@ -145,6 +146,8 @@ namespace virusLib
 
 	enum Page : uint8_t
 	{
+		PAGE_6E = 0x6e,
+		PAGE_6F = 0x6f,
 		PAGE_A = 0x70,
 		PAGE_B = 0x71,
 		PAGE_C = 0x72,

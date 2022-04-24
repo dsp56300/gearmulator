@@ -69,6 +69,8 @@ private:
 	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
 	void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value) const;
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
+	Page globalSettingsPage() const;
+	bool isPageSupported(Page _page) const;
 
 	dsp56k::HDI08Queue m_hdi08;
 	const ROMFile& m_rom;
