@@ -231,7 +231,7 @@
  		{"page":"B", "class":"SoundbankB", "index":123, "name":"Category1", "min":0, "max":16, "toText":"category", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":"B", "class":"SoundbankB", "index":124, "name":"Category2", "min":0, "max":16, "toText":"category", "isPublic":true, "isDiscrete":true, "isBool":false},
  		
- 		{"page":"C", "class":"Multi|NonPartSensitive", "index":22, "name":"Delay Output Select", "min":0, "max":14, "toText":"outputSelect", "isPublic":false, "isDiscrete":true, "isBool":false},
+ 		{"page":"C", "class":"Multi|NonPartSensitive", "index":22, "name":"Delay Output Select", "min":0, "max":17, "toText":"outputSelect", "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":"C", "class":"Multi|BankProgramChangeParamBankSelect", "index":31, "name":"Part Bank Select", "min":0, "max":29, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":"C", "class":"Multi|BankProgramChangeParamBankSelect", "index":32, "name":"Part Bank Change", "min":0, "max":29, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":"C", "class":"Multi|BankProgramChangeParamBankSelect", "index":33, "name":"Part Program Change", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
@@ -242,7 +242,7 @@
  		{"page":"C", "class":"Multi", "index":38, "name":"Part Detune", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":"C", "class":"Multi", "index":39, "name":"Part Volume", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":"C", "class":"Multi", "index":40, "name":"Part Midi Volume Init", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false},
- 		{"page":"C", "class":"Multi", "index":41, "name":"Part Output Select", "min":0, "max":14, "toText":"outputSelect", "isPublic":false, "isDiscrete":true, "isBool":false},
+ 		{"page":"C", "class":"Multi", "index":41, "name":"Part Output Select", "min":0, "max":17, "toText":"outputSelect", "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":"C", "class":"Global", "index":45, "name":"Second Output Select", "min":0, "max":15, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":"C", "class":"Global", "index":63, "name":"Keyb Transpose Buttons", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":"C", "class":"Global", "index":64, "name":"Keyb Local", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
@@ -531,7 +531,12 @@
  		],
   		"outputSelect":
  		[
-			"OUT 1 L", "OUT 1 L+R", "OUT 1 R", "OUT 2 L", "OUT 2 L+R", "OUT 2 R", "OUT 3 L", "OUT 3 L+R", "OUT 3 R", "AUX 1 L", "AUX 1 L+R", "AUX 1 R", "AUX 2 L", "AUX 2 L+R", "AUX 2 R"
+            "OUT 1 L", "OUT 1 L+R", "OUT 1 R",
+            "OUT 2 L", "OUT 2 L+R", "OUT 2 R",
+            "OUT 3 L", "OUT 3 L+R", "OUT 3 R",
+            "USB 1 L", "USB 1 L+R", "USB 1 R",
+            "USB 2 L", "USB 2 L+R", "USB 2 R",
+            "USB 3 L", "USB 3 L+R", "USB 3 R"
  		],
   		"delayReverbMode":
  		[
@@ -663,7 +668,7 @@
 		],
  		"oscFMMode":
  		[
-		"Pos-Tri",	"Tri",	"Wave",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
+			"Pos-Tri",	"Tri",	"Wave",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
 		],
 		"vocoderMode":
 		[
