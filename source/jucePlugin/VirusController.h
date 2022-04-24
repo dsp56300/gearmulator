@@ -77,7 +77,8 @@ namespace Virus
 		void setSinglePresetName(uint8_t part, juce::String _name);
 		bool isMultiMode()
 		{
-            auto* value = getParamValue(0, 2, 0x7a);
+			const auto index = getParameterTypeByName("Play Mode");
+            auto* value = getParamValue(index);
             jassert(value);
 			return value->getValue();
 		}

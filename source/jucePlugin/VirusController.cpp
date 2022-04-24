@@ -25,20 +25,21 @@ namespace Virus
 
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
-		const auto& params = findSynthParam(0, 0x72, 0x7a);
-		for (const auto& parameter : params)
-		{
-			parameter->onValueChanged = [this] {
-				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
-				sendSysEx(constructMessage({ MessageType::REQUEST_SINGLE, 0x0, prg }));
-				sendSysEx(constructMessage({ MessageType::REQUEST_MULTI, 0x0, prg }));
+		const auto param = getParameterTypeByName("Play Mode");
 
-				if (onMsgDone)
-				{
-					onMsgDone();
-				}
-			};
-		}
+		auto* paramPlayMode = getParameter(param);
+
+		paramPlayMode->onValueChanged = [this] {
+			const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
+			sendSysEx(constructMessage({ MessageType::REQUEST_SINGLE, 0x0, prg }));
+			sendSysEx(constructMessage({ MessageType::REQUEST_MULTI, 0x0, prg }));
+
+			if (onMsgDone)
+			{
+				onMsgDone();
+			}
+		};
+
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 
