@@ -60,7 +60,7 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 
 	m_hdi08.addHDI08(_hdi08);
 
-	m_globalSettings.fill(0);
+	m_globalSettings.fill(0xffffffff);
 
 	m_rom.getMulti(0, m_multiEditBuffer);
 
@@ -501,7 +501,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		response.push_back(globalSettingsPage());
 		response.push_back(0);	// part = 0
 		response.push_back(_param);
-		response.push_back(m_globalSettings[_param]);
+		response.push_back(static_cast<uint8_t>(m_globalSettings[_param]));
 		response.push_back(M_ENDOFSYSEX);
 
 		_responses.emplace_back(std::move(ev));
@@ -509,8 +509,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	auto buildGlobalResponses = [&]()
 	{
-		for (const auto globalParam : g_pageC_global)
-			buildGlobalResponse(globalParam);
+		for (uint32_t i=0; i<m_globalSettings.size(); ++i)
+		{
+			if(m_globalSettings[i] <= 0xff)
+				buildGlobalResponse(static_cast<uint8_t>(i));
+		}
 	};
 
 	auto buildTotalResponse = [&]()
@@ -544,7 +547,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		TPreset _dump, _multi;
 		const auto res = requestSingle(BankNumber::EditBuffer, _part, _dump);
 		const auto resm = requestMulti(BankNumber::EditBuffer, 0, _multi);
-		const uint8_t channel = _part == SINGLE ? m_globalSettings[GLOBAL_CHANNEL] : _multi[static_cast<size_t>(MD_PART_MIDI_CHANNEL) + _part];
+		const uint8_t channel = _part == SINGLE ? static_cast<uint8_t>(m_globalSettings[GLOBAL_CHANNEL]) : _multi[static_cast<size_t>(MD_PART_MIDI_CHANNEL) + _part];
 		for (const auto cc : g_pageA)
 		{
 			SMidiEvent ev;
@@ -977,7 +980,7 @@ void Microcontroller::process(size_t _size)
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
-	const auto deviceId = m_globalSettings[DEVICE_ID];
+	const uint8_t deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
 
 	std::vector<SMidiEvent> responses;
 
