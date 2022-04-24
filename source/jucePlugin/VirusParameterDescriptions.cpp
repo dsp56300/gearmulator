@@ -275,12 +275,14 @@ namespace Virus
 					continue;
 				}
 
-				switch (page[0])
+				if      (page == "6E")	d.page = virusLib::PAGE_6E;
+				else if (page == "6F")	d.page = virusLib::PAGE_6F;
+				else if (page == "A")	d.page = virusLib::PAGE_A;
+				else if (page == "B")	d.page = virusLib::PAGE_B;
+				else if (page == "C")	d.page = virusLib::PAGE_C;
+				else if (page == "D")	d.page = virusLib::PAGE_D;
+				else
 				{
-				case 'A':	d.page = virusLib::PAGE_A;	break;
-				case 'B':	d.page = virusLib::PAGE_B;	break;
-				case 'C':	d.page = virusLib::PAGE_C;	break;
-				default:
 					errors << name << ": Page " << page << " is an invalid value" << std::endl;
 					break;
 				}

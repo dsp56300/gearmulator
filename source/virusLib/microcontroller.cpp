@@ -304,7 +304,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 void Microcontroller::sendControlCommand(const ControlCommand _command, const uint8_t _value)
 {
-	send(m_rom.isTIFamily() ? PAGE_D : PAGE_C, 0x0, _command, _value);
+	send(globalSettingsPage(), 0x0, _command, _value);
 }
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
@@ -318,7 +318,7 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
 
-	if(_page == (m_rom.isTIFamily() ? PAGE_D : PAGE_C))
+	if(_page == globalSettingsPage())
 	{
 		m_globalSettings[_param] = _value;
 	}
@@ -498,7 +498,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 		buildResponseHeader(ev);
 
-		response.push_back(PARAM_CHANGE_C);
+		response.push_back(globalSettingsPage());
 		response.push_back(0);	// part = 0
 		response.push_back(_param);
 		response.push_back(m_globalSettings[_param]);
@@ -642,11 +642,17 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		case REQUEST_ARRANGEMENT:
 			buildArrangementResponse();
 			break;
-		case PARAM_CHANGE_A:
-		case PARAM_CHANGE_B:
-		case PARAM_CHANGE_C:
+		case PAGE_6E:
+		case PAGE_6F:
+		case PAGE_A:
+		case PAGE_B:
+		case PAGE_C:
+		case PAGE_D:
 			{
 				const auto page = static_cast<Page>(cmd);
+
+				if(!isPageSupported(page))
+					break;
 
 				const auto part = _data[7];
 				const auto param = _data[8];
@@ -1133,4 +1139,25 @@ void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t 
 	}
 }
 
+Page Microcontroller::globalSettingsPage() const
+{
+	return m_rom.isTIFamily() ? PAGE_D : PAGE_C;
+}
+
+bool Microcontroller::isPageSupported(Page _page) const
+{
+	switch (_page)
+	{
+	case PAGE_6E:
+	case PAGE_6F:
+	case PAGE_D:
+		return m_rom.isTIFamily();
+	case PAGE_A:
+	case PAGE_B:
+	case PAGE_C:
+		return true;
+	default:
+		return false;
+	}
+}
 }
