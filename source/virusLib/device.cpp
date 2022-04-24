@@ -143,6 +143,13 @@ namespace virusLib
 				m_midiOutParser.clearMidiData();
 			}
 		}
+
+		if(m_dsp2)
+		{
+			// just throw it away
+			while(m_dsp2->getHDI08().hasTX())
+				m_dsp2->getHDI08().readTX();
+		}
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
