@@ -674,6 +674,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 						{
 							const auto playMode = value;
 
+							send(page, part, param, value);
+
 							switch(playMode)
 							{
 							case PlayModeSingle:
