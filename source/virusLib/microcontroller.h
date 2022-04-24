@@ -77,7 +77,7 @@ private:
 
 	TPreset m_multiEditBuffer;
 
-	std::array<uint8_t, 256> m_globalSettings;
+	std::array<uint32_t, 256> m_globalSettings;
 	std::vector<std::vector<TPreset>> m_singles;
 
 	// Multi mode
