@@ -660,42 +660,33 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				const auto param = _data[8];
 				const auto value = _data[9];
 
-				if(page == globalSettingsPage())
+				if(page == globalSettingsPage() && param == PLAY_MODE)
 				{
-					const auto command = static_cast<ControlCommand>(param);
+					const auto playMode = value;
 
-					switch(command)
+					send(page, part, param, value);
+
+					switch(playMode)
 					{
-					case PLAY_MODE:
+					case PlayModeSingle:
 						{
-							const auto playMode = value;
-
-							send(page, part, param, value);
-
-							switch(playMode)
-							{
-							case PlayModeSingle:
-								{
-									LOG("Switch to Single mode");
-									return writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
-								}
-							case PlayModeMultiSingle:
-							case PlayModeMulti:
-								{
-									writeMulti(BankNumber::EditBuffer, 0, m_multiEditBuffer);
-									for(uint8_t i=0; i<16; ++i)
-										writeSingle(BankNumber::EditBuffer, i, m_singleEditBuffers[i]);
-									return true;
-								}
-							default:
-								return true;
-							}
+							LOG("Switch to Single mode");
+							return writeSingle(BankNumber::EditBuffer, SINGLE, m_singleEditBuffer);
+						}
+					case PlayModeMultiSingle:
+					case PlayModeMulti:
+						{
+							writeMulti(BankNumber::EditBuffer, 0, m_multiEditBuffer);
+							for(uint8_t i=0; i<16; ++i)
+								writeSingle(BankNumber::EditBuffer, i, m_singleEditBuffers[i]);
+							return true;
 						}
 					default:
-						break;
+						return true;
 					}
 				}
-				else if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
+
+				if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
 				{
 					applyToMultiEditBuffer(part, param, value);
 
