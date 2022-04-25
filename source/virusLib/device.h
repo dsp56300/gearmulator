@@ -27,6 +27,9 @@ namespace virusLib
 		uint32_t getInternalLatencyMidiToOutput() const override;
 		uint32_t getInternalLatencyInputToOutput() const override;
 
+		uint32_t getChannelCountIn() override;
+		uint32_t getChannelCountOut() override;
+
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;

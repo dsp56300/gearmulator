@@ -11,12 +11,12 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	constexpr uint32_t g_channelCountIn = 2;
-	constexpr uint32_t g_channelCountOut = 6;
-
-	ResamplerInOut::ResamplerInOut() : m_scaledInput(g_channelCountIn), m_input(g_channelCountIn)
+	ResamplerInOut::ResamplerInOut(uint32_t _channelCountIn, uint32_t _channelCountOut)
+	: m_channelCountIn(_channelCountIn)
+	, m_channelCountOut(_channelCountOut)
+	, m_scaledInput(_channelCountIn)
+	, m_input(_channelCountIn)
 	{
-		
 	}
 
 	void ResamplerInOut::setDeviceSamplerate(float _samplerate)
@@ -50,7 +50,7 @@ namespace synthLib
 		m_outputLatency = 0;
 
 		// prewarm to calculate latency
-		std::array<std::vector<float>, std::max(g_channelCountIn, g_channelCountOut)> data;
+		std::array<std::vector<float>, 12> data;
 
 		TAudioInputs ins;
 		TAudioOutputs outs;
@@ -134,7 +134,7 @@ namespace synthLib
 			if(offset)
 			{
 				// resampler prewarming, wants more data than we have
-				for(size_t c=0; c<g_channelCountIn; ++c)
+				for(size_t c=0; c<m_channelCountIn; ++c)
 				{
 					memset(_data[c], 0, sizeof(float) * offset);
 					_data[c] += offset;
@@ -145,7 +145,7 @@ namespace synthLib
 
 			if(count)
 			{
-				for(size_t c=0; c<g_channelCountIn; ++c)
+				for(size_t c=0; c<m_channelCountIn; ++c)
 					memcpy(_data[c], &m_input.getChannel(c)[0], sizeof(float) * count);
 
 				m_input.remove(count);
@@ -160,7 +160,7 @@ namespace synthLib
 
 		auto feedOutput = [&](const TAudioOutputs& _outs, const uint32_t _numProcessedSamples)
 		{
-			m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, _numProcessedSamples, false, feedInput);
+			m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, m_channelCountIn, _numProcessedSamples, false, feedInput);
 
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
@@ -181,7 +181,7 @@ namespace synthLib
 			m_scaledInputSize -= _numProcessedSamples;
 		};
 
-		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, feedOutput);
+		const auto outputSize = m_out->process(_outputs, m_channelCountOut, _numSamples, false, feedOutput);
 
 		scaleMidiEvents(_midiOut, m_midiOut, hostDivDev);
 		m_midiOut.clear();

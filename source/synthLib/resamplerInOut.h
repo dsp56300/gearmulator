@@ -14,7 +14,7 @@ namespace synthLib
 		using TMidiVec = std::vector<SMidiEvent>;
 		using TProcessFunc = std::function<void(const TAudioInputs&, const TAudioOutputs&, size_t, const TMidiVec&, TMidiVec&)>;
 
-		ResamplerInOut();
+		ResamplerInOut(uint32_t _channelCountIn, uint32_t _channelCountOut);
 
 		void setDeviceSamplerate(float _samplerate);
 		void setHostSamplerate(float _samplerate);
@@ -29,6 +29,9 @@ namespace synthLib
 		static void scaleMidiEvents(TMidiVec& _dst, const TMidiVec& _src, float _scale);
 		static void clampMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
 		static void extractMidiEvents(TMidiVec& _dst, const TMidiVec& _src, uint32_t _offsetMin, uint32_t _offsetMax);
+
+		const uint32_t m_channelCountIn;
+		const uint32_t m_channelCountOut;
 
 		std::unique_ptr<Resampler> m_out = nullptr;
 		std::unique_ptr<Resampler> m_in = nullptr;
