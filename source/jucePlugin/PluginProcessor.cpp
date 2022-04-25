@@ -19,7 +19,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 	),
 	MidiInputCallback(),
 	m_romName(virusLib::ROMFile::findROM()),
-	m_rom(m_romName),
+	m_rom(m_romName, virusLib::ROMFile::TIModel::TI),
 	m_device(m_rom), m_plugin(&m_device)
 {
 	getController(); // init controller
