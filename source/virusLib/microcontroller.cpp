@@ -35,8 +35,8 @@ constexpr uint8_t
 	g_pageC_global[] = {45,  63,  64,  65,  66,  67,  68,  69,  70,  85,  86,  87,  90,  91,
 						92,  93,  94,  95,  96,  97,  98,  99,  105, 106, 110, 111, 112, 113,
 						114, 115, 116, 117, 118, 120, 121, 122, 123, 124, 125, 126, 127};
-constexpr uint8_t g_pageC_multi[]      = {5,6,7,8,9,10,11,12,13,14,22,31,32,33,34,35,36,37,38,39,40,41,72,73,74,75,77,78};
-constexpr uint8_t g_pageC_multiPart[]  = {31,32,33,34,35,36,37,38,39,40,41,72,73,74,75,77,78};
+
+constexpr int g_presetWriteDelaySamples = 256;
 
 namespace virusLib
 {
@@ -50,8 +50,6 @@ static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _off
 
 	return cs & 0x7f;
 }
-
-constexpr int g_presetWriteDelaySamples = 8;
 
 Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
 {
@@ -658,14 +656,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				if(!isPageSupported(page))
 					break;
 
-				const auto part = _data[7];
+				auto part = _data[7];
 				const auto param = _data[8];
 				const auto value = _data[9];
 
-				if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
+				if(page == globalSettingsPage())
 				{
-					applyToMultiEditBuffer(part, param, value);
-
 					const auto command = static_cast<ControlCommand>(param);
 
 					switch(command)
@@ -695,6 +691,18 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 								return true;
 							}
 						}
+					default:
+						break;
+					}
+				}
+				else if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
+				{
+					applyToMultiEditBuffer(part, param, value);
+
+					const auto command = static_cast<ControlCommand>(param);
+
+					switch(command)
+					{
 					case PART_BANK_SELECT:
 						return partBankSelect(part, value, false);
 					case PART_BANK_CHANGE:
@@ -707,8 +715,6 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 							return multiProgramChange(value);
 						}
 						return true;
-					default:
-						break;
 					}
 				}
 				else
