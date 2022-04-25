@@ -18,7 +18,7 @@ namespace synthLib
 	constexpr uint8_t g_stateVersion = 1;
 	constexpr uint32_t g_extraLatencyBlocks = 1;
 
-	Plugin::Plugin(Device* _device) : m_device(_device)
+	Plugin::Plugin(Device* _device) : m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut()), m_device(_device)
 	{
 		m_resampler.setDeviceSamplerate(_device->getSamplerate());
 	}

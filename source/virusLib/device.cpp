@@ -111,6 +111,16 @@ namespace virusLib
 		return 384;
 	}
 
+	uint32_t Device::getChannelCountIn()
+	{
+		return 2;
+	}
+
+	uint32_t Device::getChannelCountOut()
+	{
+		return m_rom.isTIFamily() ? 12 : 6;
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		if(_ev.sysex.empty())

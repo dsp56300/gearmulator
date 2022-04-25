@@ -29,6 +29,9 @@ namespace synthLib
 		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setState(const std::vector<uint8_t>& _state, StateType _type) = 0;
 
+		virtual uint32_t getChannelCountIn() = 0;
+		virtual uint32_t getChannelCountOut() = 0;
+
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual void processAudio(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _samples) = 0;
