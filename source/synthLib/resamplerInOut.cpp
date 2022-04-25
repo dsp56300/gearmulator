@@ -15,7 +15,7 @@ namespace synthLib
 	constexpr uint32_t g_channelCountIn = 2;
 	constexpr uint32_t g_channelCountOut = 6;
 
-	ResamplerInOut::ResamplerInOut() : m_input(g_channelCountIn), m_scaledInput(g_channelCountIn)
+	ResamplerInOut::ResamplerInOut() : m_scaledInput(g_channelCountIn), m_input(g_channelCountIn)
 	{
 		
 	}
