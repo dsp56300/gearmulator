@@ -269,12 +269,6 @@ namespace Virus
 			{
 				const auto page = readPropertyString("page");
 
-				if (page.size() != 1)
-				{
-					errors << name << ": Page " << page << " is an invalid value" << std::endl;
-					continue;
-				}
-
 				if      (page == "6E")	d.page = virusLib::PAGE_6E;
 				else if (page == "6F")	d.page = virusLib::PAGE_6F;
 				else if (page == "A")	d.page = virusLib::PAGE_A;

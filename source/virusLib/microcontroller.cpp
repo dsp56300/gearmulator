@@ -1126,7 +1126,20 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 
 void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value) const
 {
-	const uint32_t offset = (_page - PAGE_A) * m_rom.getPresetsPerBank() + _param;
+	constexpr uint32_t paramsPerPage = 128;
+
+	uint32_t offset;
+	switch(_page)
+	{
+	default:
+	case PAGE_A:	offset = 0;	break;
+	case PAGE_B:	offset = 1;	break;
+	case PAGE_6E:	offset = 2;	break;
+	case PAGE_6F:	offset = 3;	break;
+	}
+
+	offset *= paramsPerPage;
+	offset += _param;
 
 	if(offset >= _single.size())
 		return;

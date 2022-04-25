@@ -182,9 +182,12 @@ namespace Virus
                 case MessageType::DUMP_MULTI:
                     parseMulti(msg);
                     break;
-                case MessageType::PARAM_CHANGE_A:
-                case MessageType::PARAM_CHANGE_B:
-                case MessageType::PARAM_CHANGE_C:
+                case virusLib::PAGE_6E:
+                case virusLib::PAGE_6F:
+				case virusLib::PAGE_A:
+				case virusLib::PAGE_B:
+				case virusLib::PAGE_C:
+                case virusLib::PAGE_D:
                     parseParamChange(msg);
                     break;
                 case MessageType::REQUEST_SINGLE:
@@ -417,9 +420,12 @@ namespace Virus
 				return;
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
+
+			constexpr virusLib::Page pages[] = {virusLib::PAGE_A, virusLib::PAGE_B, virusLib::PAGE_6E, virusLib::PAGE_6F};
+
 			for (size_t i = 0; i < std::size(patch.data); i++)
 			{
-				const uint8_t page = virusLib::PAGE_A + static_cast<uint8_t>(i / pageSize);
+				const auto page = pages[i / pageSize];
 				const auto& params = findSynthParam(ch, page, i % pageSize);
 				if (!params.empty())
 				{
