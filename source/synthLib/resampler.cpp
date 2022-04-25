@@ -13,6 +13,7 @@ synthLib::Resampler::Resampler(const float _samplerateIn, const float _samplerat
 	, m_samplerateOut(_samplerateOut)
 	, m_factorInToOut(_samplerateIn / _samplerateOut)
 	, m_factorOutToIn(_samplerateOut / _samplerateIn)
+	, m_outputPtrs({})
 {
 }
 
@@ -36,8 +37,6 @@ uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _nu
 	uint32_t index = 0;
 	uint32_t remaining = _numSamples;
 
-	m_outputPtrs.fill(nullptr);
-
 	while (remaining > 0)
 	{
 		for (uint32_t i = 0; i < _numChannels; ++i)
@@ -57,7 +56,7 @@ uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _nu
 	return index;
 }
 
-uint32_t synthLib::Resampler::processResample(TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
+uint32_t synthLib::Resampler::processResample(const TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
 	const uint32_t inputLen = std::max(1, dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut));
 
@@ -84,12 +83,12 @@ uint32_t synthLib::Resampler::processResample(TAudioOutputs& _output, const uint
 	{
 		float* output = _output[i];
 
-		outBufferUsed = resample_process(m_resamplerOut[i], m_factorOutToIn, &m_tempOutput[i][0], inputLen, 0, &inBufferUsed, output, _numSamples);
+		outBufferUsed = resample_process(m_resamplerOut[i], m_factorOutToIn, &m_tempOutput[i][0], static_cast<int>(inputLen), 0, &inBufferUsed, output, static_cast<int>(_numSamples));
 
 		if (static_cast<uint32_t>(inBufferUsed) < inputLen)
 		{
 //			LOG("inBufferUsed " << inBufferUsed << " inputLen " << inputLen);
-			const size_t remaining = inputLen - inBufferUsed;
+			const auto remaining = inputLen - inBufferUsed;
 
 			m_tempOutput[i].erase(m_tempOutput[i].begin() + remaining, m_tempOutput[i].end());
 		}
@@ -104,7 +103,7 @@ uint32_t synthLib::Resampler::processResample(TAudioOutputs& _output, const uint
 
 void synthLib::Resampler::destroyResamplers()
 {
-	for (auto& resampler : m_resamplerOut)
+	for (const auto& resampler : m_resamplerOut)
 		resample_close(resampler);
 	m_resamplerOut.clear();
 }
