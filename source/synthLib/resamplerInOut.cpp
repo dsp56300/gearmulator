@@ -11,7 +11,6 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	constexpr uint32_t g_channelCount = 2;
 	constexpr uint32_t g_channelCountIn = 2;
 	constexpr uint32_t g_channelCountOut = 6;
 
@@ -46,9 +45,7 @@ namespace synthLib
 		m_out.reset(new Resampler(m_samplerateDevice, m_samplerateHost));
 		m_in.reset(new Resampler(m_samplerateHost, m_samplerateDevice));
 
-		m_scaledInputSize = 8;
-		m_scaledInput.resize(m_scaledInputSize);
-
+		m_scaledInputSize = 0;
 		m_inputLatency = 0;
 		m_outputLatency = 0;
 
@@ -131,16 +128,7 @@ namespace synthLib
 
 		m_input.append(_inputs, _numSamples);
 
-		// resample input to buffer scaledInput
-		uint32_t scaledSamples;
-
-		// input jitter
-		if(m_scaledInputSize > 1)
-			scaledSamples = static_cast<uint32_t>(floor_int(static_cast<float>(_numSamples) * devDivHost));
-		else
-			scaledSamples = static_cast<uint32_t>(ceil_int(static_cast<float>(_numSamples) * devDivHost));
-
-		m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, scaledSamples, false, [&](TAudioOutputs& _data, uint32_t _numRequestedSamples)
+		auto feedInput = [&](TAudioOutputs& _data, uint32_t _numRequestedSamples)
 		{
 			const auto offset = _numRequestedSamples > m_input.size() ? _numRequestedSamples - m_input.size() : 0;
 			if(offset)
@@ -168,10 +156,12 @@ namespace synthLib
 			{
 				LOG("Resampler input latency " << m_inputLatency << " samples");
 			}
-		});
+		};
 
-		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, [&](TAudioOutputs& _outs, uint32_t _numProcessedSamples)
+		auto feedOutput = [&](const TAudioOutputs& _outs, const uint32_t _numProcessedSamples)
 		{
+			m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, g_channelCountIn, _numProcessedSamples, false, feedInput);
+
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
@@ -189,7 +179,9 @@ namespace synthLib
 			_processFunc(inputs, _outs, _numProcessedSamples, m_processedMidiIn, m_midiOut);
 			m_scaledInput.remove(_numProcessedSamples);
 			m_scaledInputSize -= _numProcessedSamples;
-		});
+		};
+
+		const auto outputSize = m_out->process(_outputs, g_channelCountOut, _numSamples, false, feedOutput);
 
 		scaleMidiEvents(_midiOut, m_midiOut, hostDivDev);
 		m_midiOut.clear();
