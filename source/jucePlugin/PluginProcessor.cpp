@@ -12,6 +12,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 #if JucePlugin_IsSynth
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 1", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	),
 	MidiInputCallback(),
