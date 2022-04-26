@@ -296,6 +296,8 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 	m_hdi08.writeRX(preset);
 
+//	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
+
 	m_pendingPresetWriteDelay = g_presetWriteDelaySamples;
 
 	return true;
