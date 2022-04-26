@@ -4,7 +4,7 @@ namespace virusLib
 {
 	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
 
-	DspSingle::DspSingle(uint32_t _memorySize, bool _use56367Peripherals/* = false*/, const char* _name/* = nullptr*/) : m_name(_name ? _name : nullptr), m_periphX(&m_periphY)
+	DspSingle::DspSingle(uint32_t _memorySize, bool _use56367Peripherals/* = false*/, const char* _name/* = nullptr*/) : m_name(_name ? _name : std::string()), m_periphX(&m_periphY)
 	{
 		const size_t g_requiredMemSize	= dsp56k::alignedSize<dsp56k::DSP>() + dsp56k::alignedSize<dsp56k::Memory>() + _memorySize * dsp56k::MemArea_COUNT * sizeof(uint32_t);
 
