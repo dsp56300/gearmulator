@@ -194,7 +194,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 			LOG("Sending Note On");
 //			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 36, 0x5f));	// Note On
 //			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 48, 0x5f));	// Note On
-			for(uint8_t i=0; i<6; ++i)
+			for(uint8_t i=0; i<1; ++i)
 				uc.sendMIDI(SMidiEvent(0x90 + i, 60, 0x5f));		// Note On
 //			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 60, 0x5f));	// Note On
 //			uc.sendMIDI(SMidiEvent(0x90 + baseChannel, 63, 0x5f));	// Note On
