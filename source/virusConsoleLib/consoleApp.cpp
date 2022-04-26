@@ -161,7 +161,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 			uc.writeSingle(BankNumber::EditBuffer, 2, preset);
 			v.getSingle(1, 3, preset);						// Impact MS
 			uc.writeSingle(BankNumber::EditBuffer, 3, preset);
-#elif 1
+#elif 0
 			uc.writeSingle(BankNumber::EditBuffer, 0, preset);	// cmdline
 			uc.writeSingle(BankNumber::EditBuffer, 1, preset);
 			v.getSingle(1, 6, preset);							// Anubis MS
