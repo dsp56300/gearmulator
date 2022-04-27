@@ -49,11 +49,20 @@ namespace virusLib
 		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str()));
 	}
 
-	void DspSingle::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency)
+	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency)
 	{
-		const float* inputs[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		float* outputs[] = {_outputs[1], _outputs[0], _outputs[3], _outputs[2], _outputs[5], _outputs[4], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const T* inputs[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		T* outputs[] = {_outputs[1], _outputs[0], _outputs[3], _outputs[2], _outputs[5], _outputs[4], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
-		getPeriphX().getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_samples), _latency);
+		_dsp.getPeriphX().getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_samples), _latency);
+	}
+	void DspSingle::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples, uint32_t _latency)
+	{
+		virusLib::processAudio(*this, _inputs, _outputs, _samples, _latency);
+	}
+
+	void DspSingle::processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, const size_t _samples, uint32_t _latency)
+	{
+		virusLib::processAudio(*this, _inputs, _outputs, _samples, _latency);
 	}
 }
