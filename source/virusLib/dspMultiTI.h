@@ -12,13 +12,13 @@ namespace virusLib
 		DspMultiTI();
 
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency) override;
+		void processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, size_t _samples, uint32_t _latency) override;
 
 		DspSingle& getDSP2() { return m_dsp2; }
 
 	private:
-		static void mixEsai1Output(float* _dstL, float* _dstR, const float* _srcL, const float* _srcR, uint32_t _samples, uint32_t _srcOffsetL, uint32_t _srcOffsetR);
-
 		DspSingle m_dsp2;
-		synthLib::AudioBuffer m_buffer;
+		std::vector<std::vector<float>> m_bufferF;
+		std::vector<std::vector<dsp56k::TWord>> m_bufferI;
 	};
 }

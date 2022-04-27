@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "esaiListenerToFile.h"
 #include "../synthLib/audiobuffer.h"
 
 #include "../virusLib/device.h"
@@ -303,23 +304,31 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 	MidiOutParser midiOut;
 
+	constexpr uint32_t blockSize = 64;
+
 	uint32_t processedSampleCount = 0;
 
-	synthLib::TAudioInputs inputs{};
-	synthLib::TAudioOutputs outputs{};
+	synthLib::TAudioInputsInt inputs{};
+	synthLib::TAudioOutputsInt outputs{};
 
-	synthLib::AudioBuffer input;
-	synthLib::AudioBuffer output;
+	std::vector<std::vector<dsp56k::TWord>> output;
+	std::vector<std::vector<dsp56k::TWord>> input;
 
-	input.ensureSize(64);
-	output.ensureSize(64);
+	output.resize(2);
+	input.resize(2);
 
-	input.fillPointers(inputs);
-	output.fillPointers(outputs);
+	for(size_t i=0; i<output.size(); ++i)
+	{
+		output[i].resize(blockSize);
+		input[i].resize(blockSize);
+
+		inputs[i] = &input[i][0];
+		outputs[i] = &output[i][0];
+	}
 
 	std::mutex writeMutex;
 
-	std::vector<float> mixBuffer;
+	std::vector<dsp56k::TWord> mixBuffer;
 	mixBuffer.reserve(output.size() * 2);
 
 	bool runThread = true;
@@ -328,27 +337,35 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	{
 		WavWriter writer;
 
-		std::vector<float> buffer;
-		buffer.resize(output.size() * 2);
+		std::vector<dsp56k::TWord> wordBuffer;
+		wordBuffer.reserve(output.size() * 2);
+		std::vector<uint8_t> byteBuffer;
+		byteBuffer.reserve(wordBuffer.capacity() * 3);
 
 		while(runThread)
 		{
 			{
 				std::lock_guard lock(writeMutex);
-				buffer.insert(buffer.end(), mixBuffer.begin(), mixBuffer.end());
-				mixBuffer.clear();
+				std::swap(wordBuffer, mixBuffer);
 			}
 
-			if(writer.write(_audioOutputFilename, 32, true, 2, static_cast<int>(m_rom.getSamplerate()), &buffer[0], sizeof(float) * buffer.size()))
-				buffer.clear();
+			if(!wordBuffer.empty())
+			{
+				for (dsp56k::TWord w : wordBuffer)
+					EsaiListenerToFile::writeWord(byteBuffer, w);
+				wordBuffer.clear();
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				if(writer.write(_audioOutputFilename, 24, false, 2, static_cast<int>(m_rom.getSamplerate()), &byteBuffer[0], byteBuffer.size()))
+					byteBuffer.clear();
+
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			}
 		}
 	});
 
 	while(true)
 	{
-		uint32_t sampleCount = input.size();
+		auto sampleCount = static_cast<uint32_t>(input.size());
 
 		if(_maxSampleCount && processedSampleCount >= _maxSampleCount)
 			break;

@@ -22,6 +22,7 @@ namespace virusLib
 		void startDSPThread();
 
 		virtual void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency);
+		virtual void processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, size_t _samples, uint32_t _latency);
 
 	private:
 		const std::string m_name;
