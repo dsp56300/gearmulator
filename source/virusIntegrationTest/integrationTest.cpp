@@ -140,9 +140,6 @@ int IntegrationTest::runCompare()
 	uint32_t offset = 0;
 
 	std::vector<uint8_t> temp;
-	const auto* const compareData = static_cast<const uint8_t*>(m_referenceFile.data.data);
-
-	int32_t errorPosition = -1;
 
 	File compareFile;
 	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(sampleCount));

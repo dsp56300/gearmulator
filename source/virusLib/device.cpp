@@ -6,38 +6,23 @@
 
 namespace virusLib
 {
-	Device::Device(const ROMFile& _romFile)
+	Device::Device(const ROMFile& _rom)
 		: synthLib::Device()
-		, m_rom(_romFile)
+		, m_rom(_rom)
 	{
 		if(!m_rom.isValid())
 			return;
 
-		if(_romFile.getModel() == ROMFile::Model::Snow)
-		{
-			m_dsp.reset(new DspSingleSnow());
-		}
-		else if(_romFile.getModel() == ROMFile::Model::TI)
-		{
-			auto* dsp = new DspMultiTI();
-			m_dsp.reset(dsp);
-			m_dsp2 = &dsp->getDSP2();
-		}
-		else
-		{
-			m_dsp.reset(new DspSingle(_romFile.isTIFamily() ? 0x100000 : 0x040000, _romFile.isTIFamily()));
-		}
+		DspSingle* dsp1;
+		createDspInstances(dsp1, m_dsp2, m_rom);
+		m_dsp.reset(dsp1);
 
 		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
 		{
 			onAudioWritten();
 		}, 0);
 
-		configureDSP(*m_dsp);
-		if(m_dsp2)
-			configureDSP(*m_dsp2);
-
-		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _romFile));
+		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _rom));
 
 		if(m_dsp2)
 			m_mc->addHDI08(m_dsp2->getHDI08());
@@ -88,7 +73,7 @@ namespace virusLib
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
-	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
+	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
 	}
@@ -119,6 +104,29 @@ namespace virusLib
 	uint32_t Device::getChannelCountOut()
 	{
 		return m_rom.isTIFamily() ? 12 : 6;
+	}
+
+	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom)
+	{
+		if(_rom.getModel() == ROMFile::Model::Snow)
+		{
+			_dspA = new DspSingleSnow();
+		}
+		else if(_rom.getModel() == ROMFile::Model::TI)
+		{
+			auto* dsp = new DspMultiTI();
+			_dspA = dsp;
+			_dspB = &dsp->getDSP2();
+		}
+		else
+		{
+			_dspA = new DspSingle(_rom.isTIFamily() ? 0x100000 : 0x040000, _rom.isTIFamily());
+		}
+
+		configureDSP(*_dspA, _rom);
+
+		if(_dspB)
+			configureDSP(*_dspB, _rom);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -176,16 +184,16 @@ namespace virusLib
 		m_mc->sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 
-	void Device::configureDSP(DspSingle& _dsp) const
+	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
 	{
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
 
-		if(m_rom.isTIFamily())
+		if(_rom.isTIFamily())
 		{
 			auto& clock = _dsp.getPeriphX().getEsaiClock();
 
-			if(m_rom.getModel() == ROMFile::Model::Snow)
+			if(_rom.getModel() == ROMFile::Model::Snow)
 			{
 				clock.setExternalClockFrequency(44100 * 256);
 			}
