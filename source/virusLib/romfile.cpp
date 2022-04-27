@@ -115,46 +115,46 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 				imemstream stream(presetFile);
 				loadPresetFile(stream);
 			}
+		}
+		else
+		{
+			loadPresetFiles();
+		}
 
-			if(m_multis.empty())
+		if(m_multis.empty())
+		{
+			// there is no multi in the TI presets, but there is an init multi in the F.bin
+
+			const std::string search = "Init Multi";
+			const auto searchSize = search.size();
+
+			for(size_t i=0; i<fw.DSP.size() && m_multis.empty(); ++i)
 			{
-				// there is no multi in the TI presets, but there is an init multi in the F.bin
-
-				const std::string search = "Init Multi";
-				const auto searchSize = search.size();
-
-				for(size_t i=0; i<fw.DSP.size() && m_multis.empty(); ++i)
+				for(size_t j=0; j<searchSize && m_multis.empty(); ++j)
 				{
-					for(size_t j=0; j<searchSize && m_multis.empty(); ++j)
+					if(fw.DSP[i+j] != search[j])
+						break;
+
+					if(j == searchSize-1)
 					{
-						if(fw.DSP[i+j] != search[j])
-							break;
+						TPreset preset;
+						memcpy(&preset[0], &fw.DSP[i - 4], std::size(preset));
 
-						if(j == searchSize-1)
+						// validate that we found the correct data by checking part volumes. It might just be a string somewhere in the data
+						for(size_t k=0; k<16; ++k)
 						{
-							TPreset preset;
-							memcpy(&preset[0], &fw.DSP[i - 4], std::size(preset));
+							if(preset[k + 0x8b] != 0x40)
+								break;
 
-							// validate that we found the correct data by checking part volumes. It might just be a string somewhere in the data
-							for(size_t k=0; k<16; ++k)
+							if(k == 15)
 							{
-								if(preset[k + 0x8b] != 0x40)
-									break;
-
-								if(k == 15)
-								{
-									for(size_t k=0; k<getPresetsPerBank(); ++k)
-										m_multis.push_back(preset);
-								}
+								for(size_t k=0; k<getPresetsPerBank(); ++k)
+									m_multis.push_back(preset);
 							}
 						}
 					}
 				}
 			}
-		}
-		else
-		{
-			loadPresetFiles();
 		}
 	}
 }
