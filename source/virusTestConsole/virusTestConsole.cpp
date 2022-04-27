@@ -39,7 +39,7 @@ int main(int _argc, char* _argv[])
 	}
 
 	std::unique_ptr<ConsoleApp> app;
-	app.reset(new ConsoleApp(romFile, 0x100000, 0x020000));
+	app.reset(new ConsoleApp(romFile));
 
 	if(!app->isValid())
 	{
