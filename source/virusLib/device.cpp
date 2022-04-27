@@ -27,11 +27,11 @@ namespace virusLib
 		if(m_dsp2)
 			m_mc->addHDI08(m_dsp2->getHDI08());
 
-		auto loader = bootDSP(*m_dsp);
+		auto loader = bootDSP(*m_dsp, m_rom);
 
 		if(m_dsp2)
 		{
-			auto loader2 = bootDSP(*m_dsp2);
+			auto loader2 = bootDSP(*m_dsp2, m_rom);
 			loader2.join();
 		}
 
@@ -216,9 +216,9 @@ namespace virusLib
 		jit.setConfig(conf);
 	}
 
-	std::thread Device::bootDSP(DspSingle& _dsp) const
+	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom)
 	{
-		auto res = m_rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
+		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
 		_dsp.startDSPThread();
 		return res;
 	}

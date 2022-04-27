@@ -53,7 +53,7 @@ int main(int _argc, char* _argv[])
 IntegrationTest::IntegrationTest(const CommandLine& _commandLine)
 	: m_cmd(_commandLine)
 	, m_romFile(_commandLine.get("rom"))
-	, m_app(m_romFile, 0x100000, 0x020000)
+	, m_app(m_romFile)
 {
 }
 

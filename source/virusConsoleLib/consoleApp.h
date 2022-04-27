@@ -9,12 +9,12 @@
 #include "../virusLib/romfile.h"
 #include "../virusLib/microcontroller.h"
 #include "../virusLib/demoplayback.h"
-#include "../virusLib/demoplaybackTI.h"
+#include "../virusLib/dspSingle.h"
 
 class ConsoleApp
 {
 public:
-	ConsoleApp(const std::string& _romFile, uint32_t _memorySize, uint32_t _extMemAddress);
+	ConsoleApp(const std::string& _romFile);
 
 	bool isValid() const;
 
@@ -29,26 +29,21 @@ public:
 	static void waitReturn();
 
 	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0);
-	void run(EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
-	const virusLib::ROMFile& getRom() const { return v; }
+	const virusLib::ROMFile& getRom() const { return m_rom; }
 
 private:
-	void run(const std::string& _audioOutputFilename, EsaiListenerToCallback::TDataCallback _callback, uint32_t _maxSampleCount = 0);
 
-	std::thread bootDSP();
-	dsp56k::IPeripherals& getYPeripherals();
+	std::thread bootDSP() const;
+	dsp56k::IPeripherals& getYPeripherals() const;
 	void audioCallback(uint32_t audioCallbackCount);
 
-	dsp56k::Memory memory;
 	const std::string m_romName;
-	virusLib::ROMFile v;
-	dsp56k::Peripherals56367 periphY;
-	dsp56k::Peripherals56362 periphX;
-	dsp56k::PeripheralsNop periphNop;
-	dsp56k::DSP dsp;
-	virusLib::Microcontroller uc;
+	virusLib::ROMFile m_rom;
+	std::unique_ptr<virusLib::DspSingle> m_dsp1;
+	virusLib::DspSingle* m_dsp2 = nullptr;
+	std::unique_ptr<virusLib::Microcontroller> uc;
 	std::unique_ptr<virusLib::DemoPlayback> m_demo;
 
-	virusLib::Microcontroller::TPreset preset;
+	virusLib::Microcontroller::TPreset m_preset;
 };

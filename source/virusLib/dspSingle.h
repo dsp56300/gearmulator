@@ -15,6 +15,7 @@ namespace virusLib
 		dsp56k::HDI08& getHDI08() { return m_periphX.getHDI08(); }
 		dsp56k::Peripherals56362& getPeriphX() { return m_periphX; }
 		dsp56k::Peripherals56367& getPeriphY() { return m_periphY; }
+		dsp56k::PeripheralsNop& getPeriphNop() { return m_periphNop; }
 		dsp56k::DSP& getDSP() const { return *m_dsp; }
 		dsp56k::Jit& getJIT() const { return *m_jit; }
 
