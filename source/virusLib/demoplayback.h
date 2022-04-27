@@ -11,12 +11,17 @@ namespace virusLib
 	{
 	public:
 		DemoPlayback(Microcontroller& _mc) : m_mc(_mc) {}
+		virtual ~DemoPlayback() = default;
 
-		bool loadMidi(const std::string& _filename);
+		virtual bool loadFile(const std::string& _filename);
 		bool loadBinData(const std::vector<uint8_t>& _data);
 
-		void process(uint32_t _samples);
-		
+		virtual void process(uint32_t _samples);
+
+	protected:
+		void writeRawData(const std::vector<uint8_t>& _data) const;
+		void setTimeScale(const float _timeScale) { m_timeScale = _timeScale; }
+
 	private:
 		enum class EventType
 		{
@@ -39,12 +44,18 @@ namespace virusLib
 
 		bool processEvent(const Event& _event) const;
 
+		virtual size_t getEventCount() const						{ return m_events.size(); }
+		virtual uint32_t getEventDelay(const size_t _index) const	{ return m_events[_index].delay; }
+		virtual bool processEvent(const size_t _index)				{ return processEvent(m_events[_index]); }
+
+	protected:
 		Microcontroller& m_mc;
 
+	private:
 		std::vector<Event> m_events;
 		int32_t m_remainingDelay = 0;
 		uint32_t m_currentEvent = 0;
 
-		uint32_t m_timeScale = 54;
+		float m_timeScale = 54.0f;
 	};
 }

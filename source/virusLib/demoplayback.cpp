@@ -19,7 +19,7 @@ namespace virusLib
 	constexpr auto g_timeScale_C = 57;	// C OS 6.6
 	constexpr auto g_timeScale_A = 54;	// A OS 2.8
 
-	bool DemoPlayback::loadMidi(const std::string& _filename)
+	bool DemoPlayback::loadFile(const std::string& _filename)
 	{
 		std::vector<uint8_t> sysex;
 
@@ -188,18 +188,38 @@ namespace virusLib
 			return;
 		}
 
-		if(m_currentEvent >= m_events.size())
+		if(m_currentEvent >= getEventCount())
 			return;
 
-		m_remainingDelay -= _samples;
-		while(m_remainingDelay <= 0 && m_currentEvent < m_events.size())
+		m_remainingDelay -= static_cast<int32_t>(_samples);
+
+		while(m_remainingDelay <= 0 && m_currentEvent < getEventCount())
 		{
-			const auto& e = m_events[m_currentEvent];
-			if(!processEvent(e))
+			if(!processEvent(m_currentEvent))
 				return;
+
 			++m_currentEvent;
-			m_remainingDelay = e.delay * m_timeScale;
+
+			m_remainingDelay = static_cast<int32_t>(static_cast<float>(getEventDelay(m_currentEvent)) * m_timeScale);
 		}
+	}
+
+	void DemoPlayback::writeRawData(const std::vector<uint8_t>& _data) const
+	{
+		std::vector<dsp56k::TWord> dspWords;
+
+		for(size_t i=0; i<_data.size(); i += 3)
+		{
+			dsp56k::TWord d = static_cast<dsp56k::TWord>(_data[i]) << 16;
+			if(i+1 < _data.size())
+				d |= static_cast<dsp56k::TWord>(_data[i+1]) << 8;
+			if(i+2 < _data.size())
+				d |= static_cast<dsp56k::TWord>(_data[i+2]);
+			dspWords.push_back(d);
+		}
+
+		m_mc.writeHostBitsWithWait(0,1);
+		m_mc.m_hdi08.writeRX(dspWords);
 	}
 
 	bool DemoPlayback::processEvent(const Event& _event) const
@@ -227,22 +247,7 @@ namespace virusLib
 			}
 			break;
 		case EventType::RawSerial:
-			{
-				std::vector<dsp56k::TWord> dspWords;
-
-				for(size_t i=0; i<_event.data.size(); i += 3)
-				{
-					dsp56k::TWord d = static_cast<dsp56k::TWord>(_event.data[i]) << 16;
-					if(i+1 < _event.data.size())
-						d |= static_cast<dsp56k::TWord>(_event.data[i+1]) << 8;
-					if(i+2 < _event.data.size())
-						d |= static_cast<dsp56k::TWord>(_event.data[i+2]);
-					dspWords.push_back(d);
-				}
-
-				m_mc.writeHostBitsWithWait(0,1);
-				m_mc.m_hdi08.writeRX(dspWords);
-			}
+			writeRawData(_event.data);
 			break;
 		}
 		return true;

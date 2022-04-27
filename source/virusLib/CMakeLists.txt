@@ -6,6 +6,7 @@ add_library(virusLib STATIC)
 set(SOURCES
 	demopacketvalidator.cpp demopacketvalidator.h
 	demoplayback.cpp demoplayback.h
+	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
 	dspSingle.cpp dspSingle.h
 	dspSingleSnow.cpp dspSingleSnow.h
