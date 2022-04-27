@@ -51,7 +51,7 @@ int main(int _argc, char* _argv[])
 	if(_argc > 1)
 	{
 		const std::string name = _argv[1];
-		if(hasExtension(name, ".mid"))
+		if(hasExtension(name, ".mid") || hasExtension(name, ".bin"))
 		{
 			if(!app->loadDemo(name))
 			{

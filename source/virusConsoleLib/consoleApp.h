@@ -9,6 +9,7 @@
 #include "../virusLib/romfile.h"
 #include "../virusLib/microcontroller.h"
 #include "../virusLib/demoplayback.h"
+#include "../virusLib/demoplaybackTI.h"
 
 class ConsoleApp
 {

@@ -113,8 +113,9 @@ bool ConsoleApp::loadSingle(const std::string& _preset)
 
 bool ConsoleApp::loadDemo(const std::string& _filename)
 {
-	m_demo.reset(new DemoPlayback(uc));
-	if(m_demo->loadMidi(_filename))
+	m_demo.reset(v.isTIFamily() ? new DemoPlaybackTI(uc) : new DemoPlayback(uc));
+
+	if(m_demo->loadFile(_filename))
 		return true;
 	m_demo.reset();
 	return false;
