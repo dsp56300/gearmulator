@@ -30,12 +30,14 @@ namespace virusLib
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
 
+		static void createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom);
+
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		void onAudioWritten() override;
-		void configureDSP(DspSingle& _dsp) const;
+		static void configureDSP(DspSingle& _dsp, const ROMFile& _rom);
 		std::thread bootDSP(DspSingle& _dsp) const;
 
 		const ROMFile& m_rom;
