@@ -226,6 +226,9 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 		_file.read(reinterpret_cast<char*>(&chunk.size1), 1);
 		_file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
+		if(i == 0 && chunk.chunk_id == 3 && lastChunkId == 4)	// Virus A has one chunk less
+			lastChunkId = 3;
+
 		assert(chunk.chunk_id == lastChunkId - i);
 
 		// Format uses a special kind of size where the first byte should be decreased by 1
