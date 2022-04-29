@@ -18,6 +18,7 @@ namespace virusLib
 		dsp56k::PeripheralsNop& getPeriphNop() { return m_periphNop; }
 		dsp56k::DSP& getDSP() const { return *m_dsp; }
 		dsp56k::Jit& getJIT() const { return *m_jit; }
+		dsp56k::Memory& getMemory() const {return *m_memory; }
 
 		void startDSPThread();
 
