@@ -291,17 +291,15 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	}, 0);
 
 	bootDSP().join();
-
-/*
+	/*
 	const std::string romFile = m_romName;
-	auto& mem = memory;
+	auto& mem = m_dsp1->getMemory();
 
 	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
 	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
 	mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
-//	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, dsp.getPeriph(0), dsp.getPeriph(1));
-*/
-
+	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
+	*/
 	MidiOutParser midiOut;
 
 	constexpr uint32_t blockSize = 64;
