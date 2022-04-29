@@ -43,7 +43,7 @@ namespace Virus
 		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
 		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
 
-    	for(uint8_t i=3; i<=8; ++i)
+    	for(uint8_t i=3; i<=m_singles.size(); ++i)
 			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));		 
     	startTimer(5);
 	}
