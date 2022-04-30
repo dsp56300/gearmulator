@@ -85,7 +85,10 @@ namespace virusLib
 		for(size_t i=0; i<data.size();)
 		{
 			if(data[i] == 0xff)
+			{
+				stop();
 				return false;	// end
+			}
 
 			if(data[i] == 0xf4)
 			{

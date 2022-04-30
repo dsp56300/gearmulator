@@ -121,7 +121,9 @@ namespace virusLib
 		switch (status)
 		{
 		case synthLib::M_ACTIVESENSING:	// most probably used to define a pause that is > 0xff
+			break;
 		case synthLib::M_STOP:			// end of demo
+			stop();
 			break;
 		case synthLib::M_AFTERTOUCH:
 			e.data.push_back(_data[1]);
@@ -178,6 +180,9 @@ namespace virusLib
 
 	void DemoPlayback::process(const uint32_t _samples)
 	{
+		if(m_stop)
+			return;
+
 		if(m_currentEvent == 0 && m_remainingDelay == 0)
 		{
 			// switch to multi mode when playback starts
@@ -201,6 +206,11 @@ namespace virusLib
 			++m_currentEvent;
 
 			m_remainingDelay = static_cast<int32_t>(static_cast<float>(getEventDelay(m_currentEvent)) * m_timeScale);
+
+			if(m_currentEvent >= getEventCount())
+			{
+				stop();
+			}
 		}
 	}
 
@@ -220,6 +230,12 @@ namespace virusLib
 
 		m_mc.writeHostBitsWithWait(0,1);
 		m_mc.m_hdi08.writeRX(dspWords);
+	}
+
+	void DemoPlayback::stop()
+	{
+		m_stop = true;
+		LOG("Demo Playback end reached");
 	}
 
 	bool DemoPlayback::processEvent(const Event& _event) const
