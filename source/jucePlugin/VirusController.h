@@ -39,7 +39,7 @@ namespace Virus
 			std::array<uint8_t, kDataSizeInBytes> data{};
         };
 
-    	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
+    	using Singles = std::array<std::array<SinglePatch, 128>, 26>;
         using Multis = std::array<MultiPatch, 128>;
 
     	friend Parameter;
