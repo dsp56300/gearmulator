@@ -21,6 +21,7 @@ namespace virusLib
 	protected:
 		void writeRawData(const std::vector<uint8_t>& _data) const;
 		void setTimeScale(const float _timeScale) { m_timeScale = _timeScale; }
+		void stop();
 
 	private:
 		enum class EventType
@@ -57,5 +58,6 @@ namespace virusLib
 		uint32_t m_currentEvent = 0;
 
 		float m_timeScale = 54.0f;
+		bool m_stop = false;
 	};
 }
