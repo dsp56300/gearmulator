@@ -93,11 +93,21 @@ namespace virusLib
 			if(data[i] == 0xf4)
 			{
 				writeRawData(data);
-				m_remainingPresetBytes = 512 - static_cast<int32_t>(data.size());
+				m_remainingPresetBytes = 519 - static_cast<int32_t>(data.size());	// 512 + 6 for header + 1 to have 24 bit words
 				break;
 			}
 			if(m_remainingPresetBytes > 0)
 			{
+				if(data.size() > m_remainingPresetBytes)
+				{
+					std::vector<uint8_t> temp;
+					temp.insert(temp.begin(), data.begin(), data.begin() + m_remainingPresetBytes);
+					i = m_remainingPresetBytes;
+					writeRawData(temp);
+					m_remainingPresetBytes = 0;
+					continue;
+				}
+
 				writeRawData(data);
 				m_remainingPresetBytes -= static_cast<int32_t>(data.size());
 				break;
