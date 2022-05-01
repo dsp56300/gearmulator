@@ -119,6 +119,11 @@ namespace virusLib
 				ev.a = data[_offset];
 				ev.b = data.size() > _offset + 1 ? data[_offset + 1] : 0;
 				ev.c = data.size() > _offset + 2 ? data[_offset + 2] : 0;
+
+				// hack to re-enable the rate-reducing effect on the choir that is gone somehow, maybe they removed it in a later revision because it "sounds broken" or something
+//				if(ev.a == 0xae && ev.b == 0x66)
+//					ev.b = 0x65;
+
 				m_mc.sendMIDI(ev);
 				m_mc.sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 			};
