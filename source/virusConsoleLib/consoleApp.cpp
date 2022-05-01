@@ -97,7 +97,7 @@ bool ConsoleApp::loadSingle(const std::string& _preset)
 		return true;
 	}
 
-	for (uint32_t b = 0; b < 8; ++b)
+	for (uint32_t b = 0; b < 26; ++b)
 	{
 		for (uint32_t p = 0; p < m_rom.getPresetsPerBank(); ++p)
 		{
