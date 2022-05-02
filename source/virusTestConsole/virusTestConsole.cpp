@@ -60,6 +60,15 @@ int main(int _argc, char* _argv[])
 				return -1;
 			}
 		}
+		else if(name == "demo")
+		{
+			if(!app->loadInternalDemo())
+			{
+				std::cout << "Failed to internal demo, the ROM might not contain any demo song" << std::endl;
+				ConsoleApp::waitReturn();
+				return -1;
+			}
+		}
 		else if(!app->loadSingle(name))
 		{
 			std::cout << "Failed to find preset '" << _argv[1] << "', make sure to use a ROM that contains it" << std::endl;

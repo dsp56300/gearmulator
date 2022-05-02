@@ -26,31 +26,17 @@ namespace virusLib
 		if(numRead != size)
 			return false;
 
-		constexpr uint8_t key[] = "demoDrums Mixed                 ";
-		constexpr size_t keySize = std::size(key) - 1;
-
-		for(size_t i=0; i<data.size() - keySize; ++i)
-		{
-			for(size_t s=0; s<keySize; ++s)
-			{
-				if(data[i+s] != key[s])
-					break;
-
-				if(s == keySize - 1)
-				{
-					data.erase(data.begin(), data.begin() + static_cast<std::vector<uint8_t>::difference_type>(i + keySize));
-					parseData(data);
-					setTimeScale(10.89f);
-					return true;
-				}
-			}
-		}
+		if(findDemoData(data))
+			return loadBinData(data);
 
 		return false;
 	}
 
-	void DemoPlaybackTI::parseData(const std::vector<uint8_t>& _data)
+	bool DemoPlaybackTI::loadBinData(const std::vector<uint8_t>& _data)
 	{
+		if(_data[0] != 0xf8 || _data[1] != 0x50)
+			return false;
+
 		// skip 2 unknown bytes at startup
 		for(size_t i=2; i<_data.size();)
 		{
@@ -59,6 +45,34 @@ namespace virusLib
 
 			i += 3 + m_chunks.back().data.size();
 		}
+
+		if(m_chunks.empty())
+			return false;
+
+		setTimeScale(10.89f);
+		return true;
+	}
+
+	bool DemoPlaybackTI::findDemoData(std::vector<uint8_t>& _data)
+	{
+		constexpr uint8_t key[] = "demoDrums Mixed                 ";
+		constexpr size_t keySize = std::size(key) - 1;
+
+		for(size_t i=0; i<_data.size() - keySize; ++i)
+		{
+			for(size_t s=0; s<keySize; ++s)
+			{
+				if(_data[i+s] != key[s])
+					break;
+
+				if(s == keySize - 1)
+				{
+					_data.erase(_data.begin(), _data.begin() + static_cast<std::vector<uint8_t>::difference_type>(i + keySize));
+					return true;
+				}
+			}
+		}
+		return true;
 	}
 
 	bool DemoPlaybackTI::parseChunk(const std::vector<uint8_t>& _data, const size_t _offset)
@@ -67,6 +81,9 @@ namespace virusLib
 		chunk.deltaTime = static_cast<uint32_t>(_data[_offset]) << 8 | _data[_offset+1];
 
 		const auto size = _data[_offset+2];
+
+		if(!size)
+			return false;
 
 		if(_offset + 3 + size > _data.size())
 			return false;

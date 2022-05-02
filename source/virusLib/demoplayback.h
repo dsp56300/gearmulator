@@ -14,7 +14,7 @@ namespace virusLib
 		virtual ~DemoPlayback() = default;
 
 		virtual bool loadFile(const std::string& _filename);
-		bool loadBinData(const std::vector<uint8_t>& _data);
+		virtual bool loadBinData(const std::vector<uint8_t>& _data);
 
 		virtual void process(uint32_t _samples);
 

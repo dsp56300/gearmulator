@@ -13,6 +13,8 @@
 
 #include <cstring>	// memcpy
 
+#include "demoplaybackTI.h"
+
 #ifdef _WIN32
 #define NOMINMAX
 #include <Windows.h>
@@ -47,7 +49,7 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 	if (!file.is_open()) {
 		LOG("Failed to load ROM at '" << m_file << "'");
 #ifdef _WIN32
-		const std::string errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
+		const auto errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
 		::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
 #endif
 		return;
@@ -114,6 +116,15 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 			{
 				imemstream stream(presetFile);
 				loadPresetFile(stream);
+			}
+
+			for (const auto & preset : fw.Presets)
+			{
+				m_demoData.insert(m_demoData.begin(), preset.begin(), preset.end());
+				if(DemoPlaybackTI::findDemoData(m_demoData))
+					break;
+				else
+					m_demoData.clear();
 			}
 		}
 		else
@@ -251,14 +262,14 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 
 bool ROMFile::loadPresetFiles()
 {
-	bool res;
+	bool res = true;
 	for (auto &filename: {"S.bin", "P.bin"})
 	{
 		std::ifstream file(filename, std::ios::binary | std::ios::ate);
 		if (!file.is_open())
 		{
 			LOG("Failed to open preset file " << filename);
-			res &= false;
+			res = false;
 			continue;
 		}
 		res &= loadPresetFile(file);

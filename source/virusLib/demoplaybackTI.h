@@ -12,6 +12,9 @@ namespace virusLib
 		DemoPlaybackTI(Microcontroller& _mc) : DemoPlayback(_mc) {}
 
 		bool loadFile(const std::string& _filename) override;
+		bool loadBinData(const std::vector<uint8_t>& _data) override;
+
+		static bool findDemoData(std::vector<uint8_t>& _data);
 
 	private:
 		struct Chunk
@@ -20,7 +23,6 @@ namespace virusLib
 			std::vector<uint8_t> data;
 		};
 
-		void parseData(const std::vector<uint8_t>& _data);
 		bool parseChunk(const std::vector<uint8_t>& _data, size_t _offset);
 
 		size_t getEventCount() const override { return m_chunks.size(); }
