@@ -129,6 +129,19 @@ bool ConsoleApp::loadDemo(const std::string& _filename)
 	return false;
 }
 
+bool ConsoleApp::loadInternalDemo()
+{
+	if(m_rom.getDemoData().empty())
+		return false;
+
+	m_demo.reset(m_rom.isTIFamily() ? new DemoPlaybackTI(*uc) : new DemoPlayback(*uc));
+
+	if(m_demo->loadBinData(m_rom.getDemoData()))
+		return true;
+	m_demo.reset();
+	return false;
+}
+
 std::string ConsoleApp::getSingleName() const
 {
 	return ROMFile::getSingleName(m_preset);

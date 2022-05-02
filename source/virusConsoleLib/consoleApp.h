@@ -22,6 +22,7 @@ public:
 	bool loadSingle(const std::string& _preset);
 
 	bool loadDemo(const std::string& _filename);
+	bool loadInternalDemo();
 
 	std::string getSingleName() const;
 	std::string getSingleNameAsFilename() const;

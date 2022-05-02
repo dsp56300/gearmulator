@@ -120,6 +120,8 @@ public:
 
 	static std::string findROM();
 
+	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
+
 private:
 	std::vector<Chunk> readChunks(std::istream& _file, TIModel _wantedTIModel);
 	bool loadPresetFiles();
@@ -133,6 +135,7 @@ private:
 
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;
+	std::vector<uint8_t> m_demoData;
 };
 
 }
