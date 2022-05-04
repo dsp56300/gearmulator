@@ -78,8 +78,8 @@ int main(int _argc, char* _argv[])
 	}
 	else
 	{
-//		app->loadSingle(3, 56);		// Impact  MS
-		app->loadSingle(0, 0);		// IndiArp BC
+		if(!app->loadInternalDemo())
+			app->loadSingle(0, 0);
 	}
 
 	const std::string audioFilename = app->getSingleNameAsFilename();
