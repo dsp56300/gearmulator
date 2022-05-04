@@ -15,6 +15,7 @@ class ConsoleApp
 {
 public:
 	ConsoleApp(const std::string& _romFile);
+	~ConsoleApp();
 
 	bool isValid() const;
 

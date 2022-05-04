@@ -39,6 +39,14 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 		uc->addHDI08(m_dsp2->getHDI08());
 }
 
+ConsoleApp::~ConsoleApp()
+{
+	m_demo.reset();
+	uc.reset();
+	m_dsp1.reset();
+	m_dsp2 = nullptr;
+}
+
 bool ConsoleApp::isValid() const
 {
 	return m_rom.isValid();
@@ -69,7 +77,6 @@ dsp56k::IPeripherals& ConsoleApp::getYPeripherals() const
 
 	return m_dsp1->getPeriphNop();
 }
-
 
 void ConsoleApp::loadSingle(int b, int p)
 {
