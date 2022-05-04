@@ -361,6 +361,9 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 	bool runThread = true;
 
+	const bool terminateOnSilence = m_demo != nullptr;
+	uint32_t silenceDuration = 0;
+
 	std::thread threadWrite([&]()
 	{
 		WavWriter writer;
@@ -381,6 +384,28 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			{
 				for (dsp56k::TWord w : wordBuffer)
 					EsaiListenerToFile::writeWord(byteBuffer, w);
+
+				if(terminateOnSilence)
+				{
+					bool isSilence = true;
+
+					for (dsp56k::TWord w : wordBuffer)
+					{
+						constexpr dsp56k::TWord silenceThreshold = 0x1ff;
+						const bool silence = w < silenceThreshold || w >= (0xffffff - silenceThreshold);
+						if(!silence)
+						{
+							isSilence = false;
+							break;
+						}
+					}
+
+					if(isSilence)
+						silenceDuration += static_cast<uint32_t>(wordBuffer.size() >> 1);
+					else
+						silenceDuration = 0;
+				}
+
 				wordBuffer.clear();
 
 				if(writer.write(_audioOutputFilename, 24, false, 2, static_cast<int>(m_rom.getSamplerate()), &byteBuffer[0], byteBuffer.size()))
@@ -394,6 +419,9 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	while(true)
 	{
 		auto sampleCount = static_cast<uint32_t>(input.size());
+
+		if(terminateOnSilence && silenceDuration >= m_rom.getSamplerate() * 5)
+			break;
 
 		if(_maxSampleCount && processedSampleCount >= _maxSampleCount)
 			break;
