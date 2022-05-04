@@ -80,7 +80,10 @@ dsp56k::IPeripherals& ConsoleApp::getYPeripherals() const
 
 void ConsoleApp::loadSingle(int b, int p)
 {
-	m_rom.getSingle(b, p, m_preset);
+	if(m_rom.getSingle(b, p, m_preset))
+	{
+		std::cout << "Loaded Single " << ROMFile::getSingleName(m_preset) << std::endl;
+	}
 }
 
 bool ConsoleApp::loadSingle(const std::string& _preset)
@@ -131,7 +134,11 @@ bool ConsoleApp::loadDemo(const std::string& _filename)
 	m_demo.reset(m_rom.isTIFamily() ? new DemoPlaybackTI(*uc) : new DemoPlayback(*uc));
 
 	if(m_demo->loadFile(_filename))
+	{
+		std::cout << "Loaded demo song from file " << m_demo->loadFile(_filename) << std::endl;
 		return true;
+	}
+
 	m_demo.reset();
 	return false;
 }
@@ -144,7 +151,10 @@ bool ConsoleApp::loadInternalDemo()
 	m_demo.reset(m_rom.isTIFamily() ? new DemoPlaybackTI(*uc) : new DemoPlayback(*uc));
 
 	if(m_demo->loadBinData(m_rom.getDemoData()))
+	{
+		std::cout << "Loaded internal demo from ROM " << m_romName << std::endl;
 		return true;
+	}
 	m_demo.reset();
 	return false;
 }
