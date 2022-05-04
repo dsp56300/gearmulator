@@ -166,7 +166,7 @@ std::string ConsoleApp::getSingleName() const
 
 std::string ConsoleApp::getSingleNameAsFilename() const
 {
-	auto audioFilename = getSingleName();
+	auto audioFilename = m_demo ? "factorydemo" : getSingleName();
 
 	for (size_t i = 0; i < audioFilename.size(); ++i)
 	{
