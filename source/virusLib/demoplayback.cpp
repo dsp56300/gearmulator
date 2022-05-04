@@ -236,6 +236,7 @@ namespace virusLib
 	{
 		m_stop = true;
 		LOG("Demo Playback end reached");
+		std::cout << "Demo song has ended." << std::endl;
 	}
 
 	bool DemoPlayback::processEvent(const Event& _event) const
