@@ -453,7 +453,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			midiOut.append(word);
 		}
 
-		while(m_dsp2->getPeriphX().getHDI08().hasTX())
+		while(m_dsp2 && m_dsp2->getPeriphX().getHDI08().hasTX())
 			m_dsp2->getPeriphX().getHDI08().readTX();
 	}
 
