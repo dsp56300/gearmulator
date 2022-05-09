@@ -2,6 +2,8 @@
 
 #include <cstdint>
 #include <cstdio>
+#include <cstring>	// memcpy
+
 #include <vector>
 
 #include "microcontroller.h"
