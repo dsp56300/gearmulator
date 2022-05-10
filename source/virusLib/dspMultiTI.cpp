@@ -69,14 +69,14 @@ namespace virusLib
 		outputs[6] = _outputs[3];		outputs[7] = _outputs[2];
 		outputs[8] = _outputs[5];		outputs[9] = _outputs[4];
 
-		_dsp.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s, _latency);
+		_dsp.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s);
 
 		// USB outputs on the Slave are sent in regular fashion via ESAI
 		outputs[4] = _outputs[7];		outputs[5] = _outputs[6];
 		outputs[6] = _outputs[9];		outputs[7] = _outputs[8];
 		outputs[8] = _outputs[11];		outputs[9] = _outputs[10];
 
-		_dsp2.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s, _latency);
+		_dsp2.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s);
 
 		// ESAI_1 outputs
 		if(_buffer[0].size() < s*3)
@@ -88,14 +88,14 @@ namespace virusLib
 		T* outputsMix[] = {&_buffer[0][0], &_buffer[1][0], &_buffer[2][0], &_buffer[3][0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		// USB outputs on the Master are sent to the Slave via ESAI_1 in 1/3 interleaved format => unpack it
-		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s * 3, _latency);
+		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s * 3);
 
 		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMix[3], outputsMix[2], s, 2, 1);	// USB 1
 		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMix[0], outputsMix[1], s, 2, 0);	// USB 2
 		mixEsai1Output(_outputs[10], _outputs[11], outputsMix[2], outputsMix[3], s, 2, 0);	// USB 3
 
 		// DAC outputs on the Slave are send via ESAI_1 to the Master in 1/3 interleaved format => unpack it
-		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s*3, _latency);
+		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s*3);
 
 		mixEsai1Output(_outputs[0], _outputs[1], outputsMix[0], outputsMix[1], s, 1, 2);	// Out 1
 		mixEsai1Output(_outputs[2], _outputs[3], outputsMix[2], outputsMix[3], s, 1, 2);	// Out 2
