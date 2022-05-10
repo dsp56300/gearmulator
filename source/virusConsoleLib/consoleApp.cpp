@@ -320,6 +320,10 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 	esai.setCallback([&](dsp56k::Audio*)
 	{
+		// Reduce thread contention by waiting until we have nearly enough audio output data available.
+		// The DSP thread needs to lock & unlock a mutex to inform the waiting thread (us) that data is
+		// available if the output ring buffer was completely drained. We can omit this by ensuring that
+		// the output buffer never becomes completely empty.
 		const auto sizeReached = esai.getAudioOutputs().size() >= ((blockSize<<1) - 4);
 		if(notify && sizeReached)
 		{
