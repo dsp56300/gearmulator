@@ -4,6 +4,7 @@ project(virusConsoleLib)
 add_library(virusConsoleLib STATIC)
 
 set(SOURCES
+	audioProcessor.cpp audioProcessor.h
 	esaiListener.cpp esaiListener.h
 	esaiListenerToCallback.cpp esaiListenerToCallback.h
 	esaiListenerToFile.cpp esaiListenerToFile.h
