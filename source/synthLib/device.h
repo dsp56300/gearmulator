@@ -36,7 +36,6 @@ namespace synthLib
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual void processAudio(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _samples) = 0;
 		virtual bool sendMidi(const SMidiEvent& _ev, std::vector<SMidiEvent>& _response) = 0;
-		virtual void onAudioWritten() {}
 
 		void dummyProcess(uint32_t _numSamples);
 	
