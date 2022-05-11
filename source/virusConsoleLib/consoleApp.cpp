@@ -4,10 +4,8 @@
 
 #include "audioProcessor.h"
 #include "esaiListenerToFile.h"
-#include "../synthLib/audiobuffer.h"
 
 #include "../virusLib/device.h"
-#include "../virusLib/midiOutParser.h"
 #include "../virusLib/demoplaybackTI.h"
 
 namespace virusLib
@@ -312,11 +310,13 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 	constexpr uint32_t blockSize = 64;
 
+	constexpr uint32_t notifyThreshold = ((blockSize<<1) - 4);
+
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
 
 	auto& esai = m_dsp1->getPeriphX().getEsai();
-	bool notify = true;
+	int32_t notifyTimeout = 0;
 
 	esai.setCallback([&](dsp56k::Audio*)
 	{
@@ -324,15 +324,15 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		// The DSP thread needs to lock & unlock a mutex to inform the waiting thread (us) that data is
 		// available if the output ring buffer was completely drained. We can omit this by ensuring that
 		// the output buffer never becomes completely empty.
-		const auto sizeReached = esai.getAudioOutputs().size() >= ((blockSize<<1) - 4);
-		if(notify && sizeReached)
+		const auto sizeReached = esai.getAudioOutputs().size() >= notifyThreshold;
+
+		--notifyTimeout;
+
+//		LOG("Size " << esai.getAudioOutputs().size() << ", size reached " << (sizeReached ? "true" : "false") << ", notify " << (notify ? "true" : "false"));
+		if(notifyTimeout <= 0 && sizeReached)
 		{
+			notifyTimeout = static_cast<int>(notifyThreshold);
 			sem.notify();
-			notify = false;
-		}
-		else if(!sizeReached)
-		{
-			notify = true;
 		}
 
 		callbackCount++;
