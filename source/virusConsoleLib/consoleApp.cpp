@@ -359,4 +359,6 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		sem.wait();
 		proc.processBlock(blockSize);
 	}
+
+	esai.setCallback(nullptr,0);
 }
