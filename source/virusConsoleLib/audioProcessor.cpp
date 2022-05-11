@@ -151,7 +151,8 @@ void AudioProcessor::threadWriteFunc()
 			if(writer.write(m_outputFilname, 24, false, 2, static_cast<int>(m_samplerate), &m_byteBuffer[0], m_byteBuffer.size()))
 				m_byteBuffer.clear();
 
-			std::this_thread::sleep_for(std::chrono::milliseconds(500));
 		}
+
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
 	}
 }
