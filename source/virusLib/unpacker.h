@@ -1,5 +1,9 @@
 #pragma once
 
+#include "buildconfig.h"
+
+#if VIRUS_SUPPORT_TI
+
 #include <vector>
 
 #include "dsp56kEmu/types.h"
@@ -42,3 +46,5 @@ namespace virusLib
 	};
 
 }
+
+#endif

@@ -1,5 +1,7 @@
 #include "dspSingleSnow.h"
 
+#if VIRUS_SUPPORT_TI
+
 namespace virusLib
 {
 	DspSingleSnow::DspSingleSnow() : DspSingle(0x100000, true)
@@ -34,3 +36,5 @@ namespace virusLib
 		processAudioSnow(*this, _inputs, _outputs, _samples, _latency);
 	}
 }
+
+#endif

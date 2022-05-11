@@ -1,5 +1,7 @@
 #include "dspMultiTI.h"
 
+#if VIRUS_SUPPORT_TI
+
 namespace virusLib
 {
 	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "Master"), m_dsp2(0x100000, true, "Slave ")
@@ -112,3 +114,5 @@ namespace virusLib
 		processAudioTI(*this, m_dsp2, m_bufferI, _inputs, _outputs, _samples, _latency);
 	}
 }
+
+#endif
