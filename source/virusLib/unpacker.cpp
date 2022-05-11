@@ -1,9 +1,12 @@
-#include <vector>
-
 #include "unpacker.h"
+
+#if VIRUS_SUPPORT_TI
+
 #include "utils.h"
 
 #include "../dsp56300/source/dsp56kEmu/logging.h"
+
+#include <vector>
 
 namespace virusLib
 {
@@ -166,3 +169,5 @@ namespace virusLib
 		return content;
 	}
 }
+
+#endif

@@ -3,8 +3,9 @@
 #include <algorithm>
 
 #include "romfile.h"
-#include "unpacker.h"
 #include "utils.h"
+
+#include "unpacker.h"
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
@@ -56,6 +57,8 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 	}
 
 	std::istream *dsp = &file;
+
+#if VIRUS_SUPPORT_TI
 	ROMUnpacker::Firmware fw;
 
 	std::unique_ptr<imemstream> memStream;
@@ -74,7 +77,7 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 		memStream.reset(new imemstream(fw.DSP));
 		dsp = memStream.get();
 	}
-
+#endif
 	const auto chunks = readChunks(*dsp, _wantedTIModel);
 	file.close();
 
@@ -108,6 +111,7 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
 
+#if VIRUS_SUPPORT_TI
 	if(isTIFamily())
 	{
 		if (!fw.Presets.empty())
@@ -168,6 +172,7 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 			}
 		}
 	}
+#endif
 }
 
 std::string ROMFile::findROM()

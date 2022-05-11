@@ -1,4 +1,9 @@
 #pragma once
+
+#include "buildconfig.h"
+
+#if VIRUS_SUPPORT_TI
+
 #include "dspSingle.h"
 
 namespace virusLib
@@ -12,3 +17,5 @@ namespace virusLib
 		void processAudio(const synthLib::TAudioInputsInt& _inputs, const synthLib::TAudioOutputsInt& _outputs, size_t _samples, uint32_t _latency) override;
 	};
 }
+
+#endif

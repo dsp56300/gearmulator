@@ -3,7 +3,13 @@ project(virusLib)
 
 add_library(virusLib STATIC)
 
+option(VIRUS_SUPPORT_TI "Support Virus TI family" off)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h)
+
 set(SOURCES
+	buildconfig.h
+	buildconfig.h.in
 	demopacketvalidator.cpp demopacketvalidator.h
 	demoplayback.cpp demoplayback.h
 	demoplaybackTI.cpp demoplaybackTI.h

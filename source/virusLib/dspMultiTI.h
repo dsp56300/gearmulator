@@ -1,5 +1,9 @@
 #pragma once
 
+#include "buildconfig.h"
+
+#if VIRUS_SUPPORT_TI
+
 #include "dspSingle.h"
 
 #include "../synthLib/audiobuffer.h"
@@ -22,3 +26,5 @@ namespace virusLib
 		std::vector<std::vector<dsp56k::TWord>> m_bufferI;
 	};
 }
+
+#endif
