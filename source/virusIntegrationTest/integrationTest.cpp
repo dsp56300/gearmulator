@@ -62,6 +62,9 @@ int main(int _argc, char* _argv[])
 
 			for (auto& subfolder : subfolders)
 			{
+				if(subfolder == "." || subfolder == "..")
+					continue;
+
 				std::vector<std::string> files;
 				synthLib::getDirectoryEntries(files, subfolder);
 
