@@ -126,6 +126,8 @@ int main(int _argc, char* _argv[])
 
 				while(std::getline(ss, line))
 				{
+					while(!line.empty() && line.find_last_of("\r\n") != std::string::npos)
+						line = line.substr(0, line.size()-1);
 					if(!line.empty())
 						presets.push_back(line);
 				}
