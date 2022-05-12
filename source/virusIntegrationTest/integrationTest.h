@@ -9,7 +9,7 @@ class CommandLine;
 class IntegrationTest
 {
 public:
-	explicit IntegrationTest(const CommandLine& _commandLine);
+	explicit IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder);
 
 	int run();
 
@@ -27,6 +27,8 @@ private:
 
 	const CommandLine& m_cmd;
 	const std::string m_romFile;
+	const std::string m_presetName;
+	const std::string m_outputFolder;
 	ConsoleApp m_app;
 
 	File m_referenceFile;
