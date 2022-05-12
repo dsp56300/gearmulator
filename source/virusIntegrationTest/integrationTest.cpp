@@ -62,7 +62,7 @@ int main(int _argc, char* _argv[])
 
 			for (auto& subfolder : subfolders)
 			{
-				if(subfolder == "." || subfolder == "..")
+				if(subfolder.find("/.") != std::string::npos)
 					continue;
 
 				std::vector<std::string> files;
