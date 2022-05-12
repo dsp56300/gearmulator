@@ -2,13 +2,16 @@
 
 #include "integrationTest.h"
 
+#include <fstream>
+#include <utility>
+
 #include "../virusConsoleLib/consoleApp.h"
-#include "../virusConsoleLib/esaiListenerToFile.h"
 
 #include "../dsp56300/source/dsp56kEmu/jitunittests.h"
 #include "../dsp56300/source/disassemble/commandline.h"
 
 #include "../synthLib/wavReader.h"
+#include "../synthLib/os.h"
 
 namespace synthLib
 {
@@ -37,11 +40,97 @@ int main(int _argc, char* _argv[])
 	{
 		const CommandLine cmd(_argc, _argv);
 
-		const auto romFile = cmd.get("rom");
-		const auto preset = cmd.get("preset");
+		if(cmd.contains("rom") && cmd.contains("preset"))
+		{
+			const auto romFile = cmd.get("rom");
+			const auto preset = cmd.get("preset");
 
-		IntegrationTest test(cmd);
-		return test.run();
+			IntegrationTest test(cmd, romFile, preset, std::string());
+			return test.run();
+		}
+		if(cmd.contains("folder"))
+		{
+			std::vector<std::string> subfolders;
+			synthLib::getDirectoryEntries(subfolders, cmd.get("folder"));
+
+			if(subfolders.empty())
+			{
+				std::cout << "failed to test folders in specified folder " << cmd.get("folder") << std::endl;
+				return -1;
+			}
+
+			for (auto& subfolder : subfolders)
+			{
+				std::vector<std::string> files;
+				synthLib::getDirectoryEntries(files, subfolder);
+
+				std::string romFile;
+				std::string presetsFile;
+
+				if(files.empty())
+				{
+					std::cout << "Directory " << subfolder << " doesn't contain any files" << std::endl;
+					return -1;
+				}
+
+				for (auto& file : files)
+				{
+					if(synthLib::hasExtension(file, ".txt"))
+						presetsFile = file;
+					if(synthLib::hasExtension(file, ".bin"))
+						romFile = file;
+				}
+				if(romFile.empty())
+				{
+					std::cout << "Failed to find ROM in folder " << subfolder << std::endl;
+					return -1;
+				}
+				if(presetsFile.empty())
+				{
+					std::cout << "Failed to find presets file in folder " << subfolder << std::endl;
+					return -1;
+				}
+
+				std::vector<std::string> presets;
+
+				std::ifstream ss;
+				ss.open(presetsFile.c_str(), std::ios::in);
+
+				if(!ss.is_open())
+				{
+					std::cout << "Failed to open presets file " << presetsFile << std::endl;
+					return -1;
+				}
+
+				std::string line;
+
+				while(std::getline(ss, line))
+				{
+					if(!line.empty())
+						presets.push_back(line);
+				}
+
+				ss.close();
+
+				if(presets.empty())
+				{
+					std::cout << "Presets file " << presetsFile << "  is empty" << std::endl;
+					return -1;
+				}
+
+				for (auto& preset : presets)
+				{
+					IntegrationTest test(cmd, romFile, preset, subfolder + '/');
+					if(test.run() != 0)
+						return -1;
+				}
+			}
+
+			return 0;
+		}
+
+		std::cout << "invalid command line arguments" << std::endl;
+		return -1;
 	}
 	catch(const std::runtime_error& _err)
 	{
@@ -50,9 +139,11 @@ int main(int _argc, char* _argv[])
 	}
 }
 
-IntegrationTest::IntegrationTest(const CommandLine& _commandLine)
+IntegrationTest::IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder)
 	: m_cmd(_commandLine)
-	, m_romFile(_commandLine.get("rom"))
+	, m_romFile(std::move(_romFile))
+	, m_presetName(std::move(_presetName))
+	, m_outputFolder(std::move(_outputFolder))
 	, m_app(m_romFile)
 {
 }
@@ -65,12 +156,9 @@ int IntegrationTest::run()
 		return -1;
 	}
 
-	const auto preset = m_cmd.get("preset");
-
-	if (!m_app.loadSingle(preset))
+	if (!m_app.loadSingle(m_presetName))
 	{
-		std::cout << "Failed to find preset '" << preset << "', make sure to use a ROM that contains it" << std::endl;
-		ConsoleApp::waitReturn();
+		std::cout << "Failed to find preset '" << m_presetName << "', make sure to use a ROM that contains it" << std::endl;
 		return -1;
 	}
 
@@ -80,15 +168,13 @@ int IntegrationTest::run()
 		// create reference file
 		return runCreate(lengthSeconds);
 	}
-	else
-	{
-		const auto referenceFile = m_app.getSingleNameAsFilename();
 
-		if (!loadAudioFile(m_referenceFile, referenceFile))
-			return -1;
+	const auto referenceFile = m_app.getSingleNameAsFilename();
 
-		return runCompare();
-	}
+	if (!loadAudioFile(m_referenceFile, m_outputFolder + referenceFile))
+		return -1;
+
+	return runCompare();
 }
 
 bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) const
@@ -100,7 +186,7 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 		return false;
 	}
 	fseek(hFile, 0, SEEK_END);
-	const auto size = ftell(hFile);
+	const size_t size = ftell(hFile);
 	_dst.file.resize(size);
 	fseek(hFile, 0, SEEK_SET);
 	if (fread(&_dst.file.front(), 1, size, hFile) != size)
@@ -136,8 +222,6 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 int IntegrationTest::runCompare()
 {
 	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample / 2;
-
-	uint32_t offset = 0;
 
 	std::vector<uint8_t> temp;
 
@@ -178,7 +262,7 @@ int IntegrationTest::runCreate(const int _lengthSeconds)
 
 int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, const uint32_t _sampleCount)
 {
-	const auto filename = _prefix + m_app.getSingleNameAsFilename();
+	const auto filename = m_outputFolder + _prefix + m_app.getSingleNameAsFilename();
 
 	auto* hFile = fopen(filename.c_str(), "wb");
 
