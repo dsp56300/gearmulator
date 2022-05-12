@@ -102,6 +102,9 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 
 	while(m_dsp2 && m_dsp2->getPeriphX().getHDI08().hasTX())
 		m_dsp2->getPeriphX().getHDI08().readTX();
+
+	if(m_maxSampleCount && m_processedSampleCount >= m_maxSampleCount)
+		m_finished = true;
 }
 
 void AudioProcessor::threadWriteFunc()
@@ -113,12 +116,15 @@ void AudioProcessor::threadWriteFunc()
 	std::vector<uint8_t> m_byteBuffer;
 	m_byteBuffer.reserve(m_wordBuffer.capacity() * 3);
 
-	while(!m_finished)
+	while(true)
 	{
 		{
 			std::lock_guard lock(m_writeMutex);
 			std::swap(m_wordBuffer, m_stereoOutput);
 		}
+
+		if(m_wordBuffer.empty() && m_byteBuffer.empty() && m_finished)
+			break;
 
 		if(!m_wordBuffer.empty())
 		{
@@ -147,10 +153,12 @@ void AudioProcessor::threadWriteFunc()
 			}
 
 			m_wordBuffer.clear();
+		}
 
+		if(!m_byteBuffer.empty())
+		{
 			if(writer.write(m_outputFilname, 24, false, 2, static_cast<int>(m_samplerate), &m_byteBuffer[0], m_byteBuffer.size()))
 				m_byteBuffer.clear();
-
 		}
 
 		std::this_thread::sleep_for(std::chrono::milliseconds(500));
