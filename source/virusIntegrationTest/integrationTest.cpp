@@ -135,7 +135,7 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 
 int IntegrationTest::runCompare()
 {
-	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample;
+	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample / 2;
 
 	uint32_t offset = 0;
 
