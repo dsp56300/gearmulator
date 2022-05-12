@@ -12,6 +12,7 @@
 
 #include "../synthLib/wavReader.h"
 #include "../synthLib/os.h"
+#include "../virusLib/buildconfig.h"
 
 namespace synthLib
 {
@@ -80,6 +81,7 @@ int main(int _argc, char* _argv[])
 					if(synthLib::hasExtension(file, ".bin"))
 						romFile = file;
 				}
+
 				if(romFile.empty())
 				{
 					std::cout << "Failed to find ROM in folder " << subfolder << std::endl;
@@ -91,6 +93,24 @@ int main(int _argc, char* _argv[])
 					return -1;
 				}
 
+#if !VIRUS_SUPPORT_TI
+				if(romFile.find("firmware") != std::string::npos)
+				{
+					auto* hFile = fopen(romFile.c_str(), "rb");
+					size_t size = 0;
+					if(hFile)
+					{
+						fseek(hFile, 0, SEEK_END);
+						size = ftell(hFile);
+						fclose(hFile);
+					}
+					if(size > virusLib::ROMFile::getRomSizeModelABC())
+					{
+						std::cout << "Ignoring TI verification tests, TI is not supported" << std::endl;
+						continue;
+					}
+				}
+#endif
 				std::vector<std::string> presets;
 
 				std::ifstream ss;
