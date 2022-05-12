@@ -198,7 +198,7 @@ int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, con
 		return -1;
 	}
 
-	const auto sampleCount = _dst.data.dataByteSize * 8 / _dst.data.bitsPerSample;
+	const auto sampleCount = _dst.data.dataByteSize * 8 / _dst.data.bitsPerSample / 2;
 
 	if(sampleCount != _sampleCount)
 	{
