@@ -56,7 +56,7 @@ int main(int _argc, char* _argv[])
 
 			if(subfolders.empty())
 			{
-				std::cout << "failed to test folders in specified folder " << cmd.get("folder") << std::endl;
+				std::cout << "Nothing found for testing in folder " << cmd.get("folder") << std::endl;
 				return -1;
 			}
 
