@@ -15,6 +15,7 @@ endif()
 set(SOURCES
 	parameterDescriptions_C.json
 	parameterDescriptions_Snow.json
+	ParameterNames.h
     PluginEditor.cpp
     PluginEditor.h
     PluginProcessor.cpp

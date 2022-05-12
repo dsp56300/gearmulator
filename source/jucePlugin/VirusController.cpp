@@ -6,6 +6,8 @@
 
 #include "../virusLib/microcontrollerTypes.h"
 
+#include "ParameterNames.h"
+
 using MessageType = virusLib::SysexMessageType;
 
 namespace Virus
@@ -15,7 +17,6 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId), m_descriptions(virusLib::ROMFile::isTIFamily(p.getModel()) ? BinaryData::parameterDescriptions_Snow_json : BinaryData::parameterDescriptions_C_json)
     {
-		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
 		opts.filenameSuffix = ".settings";
@@ -25,7 +26,7 @@ namespace Virus
 
         registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
-		const auto param = getParameterTypeByName("Play Mode");
+		const auto param = getParameterTypeByName(g_paramPlayMode);
 
 		auto* paramPlayMode = getParameter(param);
 
@@ -73,7 +74,6 @@ namespace Virus
 			uint32_t parameterDescIndex = 0;
 			for (const auto& desc : m_descriptions.getDescriptions())
 			{
-				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
 				++parameterDescIndex;
 
 				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
@@ -241,18 +241,18 @@ namespace Virus
 		return &params.front()->getValueObject();
 	}
 
-    juce::Value* Controller::getParamValue(const ParameterType _param)
+    juce::Value* Controller::getParamValue(const uint32_t _param)
     {
 	    const auto res = getParameter(_param);
 		return res ? &res->getValueObject() : nullptr;
     }
 
-    Parameter* Controller::getParameter(const ParameterType _param) const
+    Parameter* Controller::getParameter(const uint32_t _param) const
     {
 		return getParameter(_param, 0);
 	}
 
-	Parameter* Controller::getParameter(const ParameterType _param, const uint8_t _part) const
+	Parameter* Controller::getParameter(const uint32_t _param, const uint8_t _part) const
 	{
 		if (_part >= m_paramsByParamType.size())
 			return nullptr;
@@ -344,6 +344,15 @@ namespace Virus
 			value->setValue(static_cast<uint8_t>(_name[i]));
 		}
 	}
+
+	bool Controller::isMultiMode()
+	{
+		const auto index = getParameterTypeByName(g_paramPlayMode);
+		auto* value = getParamValue(index);
+		jassert(value);
+		return value->getValue();
+	}
+
 	juce::String Controller::getCurrentPartPresetName(uint8_t part)
 	{
 		// expensive but fresh!
@@ -550,16 +559,16 @@ namespace Virus
 		LOG((ss.str()));
     }
 
-    ParameterType Controller::getParameterTypeByName(const std::string& _name) const
+    uint32_t Controller::getParameterTypeByName(const std::string& _name) const
     {
-		for(size_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
+		for(uint32_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
 		{
 			const auto& description = m_descriptions.getDescriptions()[i];
 		    if(description.name.toStdString() == _name)
-				return static_cast<ParameterType>(i);
+				return i;
 		}
 
-		return Param_Invalid;
+		return 0xffffffff;
     }
 
     void Controller::sendSysEx(const SysEx &msg) const
