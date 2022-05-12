@@ -54,16 +54,16 @@ namespace Virus
 
         void printMessage(const SysEx &) const;
 
-        ParameterType getParameterTypeByName(const std::string& _name) const;
+        uint32_t getParameterTypeByName(const std::string& _name) const;
 
         // currently Value as I figure out what's the best approach
         // ch - [0-15]
         // bank - [0-2] (ABC)
         // paramIndex - [0-127]
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
-        juce::Value* getParamValue(ParameterType _param);
-        Parameter* getParameter(ParameterType _param) const;
-        Parameter *getParameter(ParameterType _param, uint8_t _part) const;
+        juce::Value* getParamValue(uint32_t _param);
+        Parameter* getParameter(uint32_t _param) const;
+        Parameter *getParameter(uint32_t _param, uint8_t _part) const;
 
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
@@ -75,14 +75,8 @@ namespace Virus
 
         juce::StringArray getMultiPresetsName() const;
 		void setSinglePresetName(uint8_t part, juce::String _name);
-		bool isMultiMode()
-		{
-			const auto index = getParameterTypeByName("Play Mode");
-            auto* value = getParamValue(index);
-            jassert(value);
-			return value->getValue();
-		}
-		// part 0 - 15 (ignored when single! 0x40...)
+		bool isMultiMode();
+        // part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
         virusLib::BankNumber getCurrentPartBank(uint8_t part) const;
 		uint8_t getCurrentPartProgram(uint8_t part) const;
