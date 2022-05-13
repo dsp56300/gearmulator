@@ -22,7 +22,11 @@ namespace genericVirusUI
 		create(_jsonFilename);
 
 		m_parts.reset(new Parts(*this));
-		m_tabs.reset(new Tabs(*this));
+
+		// be backwards compatible with old skins
+		if(getTabGroupCount() == 0)
+			m_tabs.reset(new Tabs(*this));
+
 		m_midiPorts.reset(new MidiPorts(*this));
 		m_fxPage.reset(new FxPage(*this));
 		m_patchBrowser.reset(new PatchBrowser(*this));
