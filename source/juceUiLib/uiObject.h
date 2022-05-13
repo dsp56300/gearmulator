@@ -6,6 +6,8 @@
 #include <string>
 #include <vector>
 
+#include "tabgroup.h"
+
 namespace juce
 {
 	class HyperlinkButton;
@@ -34,6 +36,7 @@ namespace genericUI
 
 		void createJuceTree(Editor& _editor) const;
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
+		void createTabGroups(Editor& _editor);
 
 		void apply(Editor& _editor, juce::Component& _target) const;
 		void apply(Editor& _editor, juce::Slider& _target);
@@ -71,6 +74,8 @@ namespace genericUI
 
 		std::vector<std::unique_ptr<juce::Component>> m_juceObjects;
 		std::unique_ptr<UiObjectStyle> m_style;
+
+		TabGroup m_tabGroup;
 	};
 
 	inline bool UiObject::hasComponent(const std::string& _component) const

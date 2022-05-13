@@ -26,6 +26,7 @@ namespace genericUI
 		const juce::Font& getFont(const std::string& _fontFile);
 
 		void registerComponent(const std::string& _name, juce::Component* _component);
+		void registerTabGroup(TabGroup* _group);
 
 		EditorInterface& getInterface() const { return m_interface; }
 
@@ -54,6 +55,23 @@ namespace genericUI
 
 		float getScale() const { return m_scale; }
 
+		TabGroup* findTabGroup(const std::string& _name, bool _mustExist = true)
+		{
+			const auto it = m_tabGroupsByName.find(_name);
+			if(it == m_tabGroupsByName.end())
+			{
+				if(_mustExist)
+					throw std::runtime_error("tab group with name " + _name + " not found");
+				return nullptr;
+			}
+			return it->second;
+		}
+
+		size_t getTabGroupCount() const
+		{
+			return m_tabGroupsByName.size();
+		}
+
 	private:
 		EditorInterface& m_interface;
 
@@ -65,6 +83,7 @@ namespace genericUI
 		std::unique_ptr<UiObject> m_rootObject;
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
+		std::map<std::string, TabGroup*> m_tabGroupsByName;
 
 		float m_scale = 1.0f;
 	};

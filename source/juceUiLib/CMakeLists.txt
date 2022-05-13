@@ -11,6 +11,7 @@ set(SOURCES
 	labelStyle.cpp labelStyle.h
 	textbuttonStyle.cpp textbuttonStyle.h
 	hyperlinkbuttonStyle.cpp hyperlinkbuttonStyle.h
+	tabgroup.cpp tabgroup.h
 	uiObject.cpp uiObject.h
 	uiObjectStyle.cpp uiObjectStyle.h
 )
