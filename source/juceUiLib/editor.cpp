@@ -56,6 +56,7 @@ namespace genericUI
 		}
 
 		m_rootObject->createJuceTree(*this);
+		m_rootObject->createTabGroups(*this);
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 	}
@@ -154,6 +155,16 @@ namespace genericUI
 		{
 			m_componentsByName.insert(std::make_pair(_name, std::vector{_component}));
 		}
+	}
+
+	void Editor::registerTabGroup(TabGroup* _group)
+	{
+		const auto& n = _group->getName();
+
+		if(m_tabGroupsByName.find(n) != m_tabGroupsByName.end())
+			throw std::runtime_error("tab group " + n + " is already defined");
+
+		m_tabGroupsByName.insert(std::make_pair(n, _group));
 	}
 
 	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name, uint32_t _expectedCount/* = 0*/) const
