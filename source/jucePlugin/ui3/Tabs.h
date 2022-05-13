@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "../../juceUiLib/tabgroup.h"
+
 namespace juce
 {
 	class Button;
@@ -12,16 +14,9 @@ namespace genericVirusUI
 {
 	class VirusEditor;
 
-	class Tabs
+	class Tabs : genericUI::TabGroup
 	{
 	public:
-		explicit Tabs(VirusEditor& _editor);
-	private:
-		void setPage(size_t _page) const;
-
-		VirusEditor& m_editor;
-
-		std::vector<juce::Component*> m_tabs;
-		std::vector<juce::Button*> m_tabButtons;
+		explicit Tabs(const VirusEditor& _editor);
 	};
 }

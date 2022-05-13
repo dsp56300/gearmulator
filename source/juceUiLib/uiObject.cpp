@@ -50,6 +50,20 @@ namespace genericUI
 		}
 	}
 
+	void UiObject::createTabGroups(Editor& _editor)
+	{
+		if(m_tabGroup.isValid())
+		{
+			m_tabGroup.create(_editor);
+			_editor.registerTabGroup(&m_tabGroup);
+		}
+
+		for (auto& ch : m_children)
+		{
+			ch->createTabGroups(_editor);
+		}
+	}
+
 	void UiObject::apply(Editor& _editor, juce::Component& _target) const
 	{
 		const auto x = getPropertyInt("x");
@@ -239,6 +253,43 @@ namespace genericUI
 						m_children.emplace_back(std::move(child));
 					}
 				}
+			}
+			else if(key == "tabgroup")
+			{
+				auto buttons = value["buttons"].getArray();
+				auto pages = value["pages"].getArray();
+				auto name = value["name"].toString().toStdString();
+
+				if(name.empty())
+					throw std::runtime_error("tab group needs to have a name");
+				if(buttons == nullptr)
+					throw std::runtime_error("tab group needs to define at least one button but 'buttons' array not found");
+				if(pages == nullptr)
+					throw std::runtime_error("tab group needs to define at least one page but 'pages' array not found");
+
+				std::vector<std::string> buttonVec;
+				std::vector<std::string> pagesVec;
+
+				for (const auto& button : *buttons)
+				{
+					const auto b = button.toString().toStdString();
+					if(b.empty())
+						throw std::runtime_error("tab group button name must not be empty");
+					buttonVec.push_back(b);
+				}
+
+				for (const auto& page : *pages)
+				{
+					const auto p = page.toString().toStdString();
+					if(p.empty())
+						throw std::runtime_error("tab group page name must not be empty");
+					pagesVec.push_back(p);
+				}
+
+				if(buttonVec.size() != pagesVec.size())
+					throw std::runtime_error("tab group page count must match tap group button count");
+
+				m_tabGroup = TabGroup(name, pagesVec, buttonVec);
 			}
 			else
 			{
