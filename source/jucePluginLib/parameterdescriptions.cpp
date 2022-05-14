@@ -406,19 +406,18 @@ namespace pluginLib
 			bytes.push_back(byte);
 		}
 
-		MidiPacket packet;
-		packet.bytes = bytes;
+		MidiPacket packet(std::move(bytes));
 
 		// post-read validation
-		for(size_t i=0; i<packet.bytes.size(); ++i)
+		for(size_t i=0; i<packet.bytes().size(); ++i)
 		{
-			const auto& p = packet.bytes[i];
+			const auto& p = packet.bytes()[i];
 
 			if(p.type == MidiDataType::Checksum)
 			{
-				if(p.checksumFirstIndex >= (packet.bytes.size()-1) || p.checksumLastIndex >= (packet.bytes.size()-1))
+				if(p.checksumFirstIndex >= (packet.size()-1) || p.checksumLastIndex >= (packet.size()-1))
 				{
-					_errors << "specified checksum range " << p.checksumFirstIndex << "-" << p.checksumLastIndex << " is out of range 0-" << packet.bytes.size() << i << std::endl;
+					_errors << "specified checksum range " << p.checksumFirstIndex << "-" << p.checksumLastIndex << " is out of range 0-" << packet.size() << i << std::endl;
 					return;
 				}
 			}

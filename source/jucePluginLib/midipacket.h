@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -34,6 +35,15 @@ namespace pluginLib
 			uint32_t checksumInitValue = 0;
 		};
 
-		std::vector<MidiByte> bytes;
+		MidiPacket() = default;
+		explicit MidiPacket(std::vector<MidiByte>&& bytes) : m_bytes(std::move(bytes)) {}
+
+		const std::vector<MidiByte>& bytes() { return m_bytes; }
+		size_t size() const { return m_bytes.size(); }
+
+		bool create(std::vector<uint8_t>& _dst, std::map<MidiDataType, uint8_t>& _data) const;
+
+	private:
+		std::vector<MidiByte> m_bytes;
 	};
 }
