@@ -220,33 +220,36 @@ namespace pluginLib
 
 				const auto classFlags = readPropertyString("class");
 
-				std::vector<std::string> flags;
-				size_t off = 0;
-
-				while (true)
+				if(!classFlags.empty())
 				{
-					const auto pos = classFlags.find('|', off);
+					std::vector<std::string> flags;
+					size_t off = 0;
 
-					if(pos == std::string::npos)
+					while (true)
 					{
-						flags.push_back(classFlags.substr(off));
-						break;
+						const auto pos = classFlags.find('|', off);
+
+						if(pos == std::string::npos)
+						{
+							flags.push_back(classFlags.substr(off));
+							break;
+						}
+
+						flags.push_back(classFlags.substr(off, pos - off));
+						off = pos + 1;
 					}
 
-					flags.push_back(classFlags.substr(off, pos - off));
-					off = pos + 1;
-				}
-
-				for (const auto & flag : flags)
-				{
-					if (flag == "Global")
-						d.classFlags |= static_cast<int>(ParameterClass::Global);
-					else if (flag == "MultiOrSingle")
-						d.classFlags |= static_cast<int>(ParameterClass::MultiOrSingle);
-					else if (flag == "NonPartSensitive")
-						d.classFlags |= static_cast<int>(ParameterClass::NonPartSensitive);
-					else
-						errors << "Class " << flag << " is unknown" << std::endl;
+					for (const auto & flag : flags)
+					{
+						if (flag == "Global")
+							d.classFlags |= static_cast<int>(ParameterClass::Global);
+						else if (flag == "MultiOrSingle")
+							d.classFlags |= static_cast<int>(ParameterClass::MultiOrSingle);
+						else if (flag == "NonPartSensitive")
+							d.classFlags |= static_cast<int>(ParameterClass::NonPartSensitive);
+						else
+							errors << "Class " << flag << " is unknown" << std::endl;
+					}
 				}
 			}
 			{
