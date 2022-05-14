@@ -1,5 +1,7 @@
 #include "parameterdescriptions.h"
 
+#include <cassert>
+
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 namespace pluginLib
@@ -275,7 +277,7 @@ namespace pluginLib
 					break;
 				}
 
-				d.page = static_cast<uint8_t>(::atoi(page.c_str()));
+				d.page = static_cast<uint8_t>(::strtol(page.c_str(), nullptr, 10));
 			}
 
 			m_descriptions.push_back(d);
