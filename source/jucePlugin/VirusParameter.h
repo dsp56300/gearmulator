@@ -4,7 +4,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#include "VirusParameterDescription.h"
+#include "../jucePluginLib/parameterdescription.h"
 
 namespace Virus
 {
@@ -13,26 +13,12 @@ namespace Virus
 	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
 	{
     public:
-        enum Class
-        {
-            UNDEFINED = 0x0,
-            GLOBAL = 0x1,
-            PERFORMANCE_CONTROLLER = 0x2,
-            SOUNDBANK_A = 0x4,
-            SOUNDBANK_B = 0x8,
-            MULTI_OR_SINGLE = 0x10,
-            MULTI_PARAM = 0x20,
-            NON_PART_SENSITIVE = 0x40,
-            BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT = 0x80,
-            VIRUS_C = 0x100,
-        };
-
-        Parameter(Controller &, const Description& desc, uint8_t partNum, int uniqueId);
+		Parameter(Controller &, const pluginLib::Description& desc, uint8_t partNum, int uniqueId);
 
         juce::Value &getValueObject() { return m_value; };
         const juce::Value &getValueObject() const { return m_value; };
 
-        const Description& getDescription() const { return m_desc; };
+        const pluginLib::Description& getDescription() const { return m_desc; };
 
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 
@@ -80,12 +66,12 @@ namespace Virus
 		int getUniqueId() const { return m_uniqueId; }
 
 	private:
-        static juce::String genId(const Description &d, int part, int uniqueId);
+        static juce::String genId(const pluginLib::Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
 		void setLinkedValue(int _value);
 
         Controller &m_ctrl;
-		const Description m_desc;
+		const pluginLib::Description m_desc;
 		juce::NormalisableRange<float> m_range;
 		const uint8_t m_partNum;
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter

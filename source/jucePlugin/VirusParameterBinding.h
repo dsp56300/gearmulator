@@ -1,6 +1,7 @@
 #pragma once
 
 #include "VirusParameter.h"
+#include "VirusParameterType.h"
 
 namespace juce {
 	class Value;

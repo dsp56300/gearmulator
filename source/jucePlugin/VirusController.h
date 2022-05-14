@@ -1,14 +1,13 @@
 #pragma once
 
-#include "../synthLib/plugin.h"
 #include "VirusParameter.h"
+#include "VirusParameterType.h"
 
-#include "VirusParameterDescriptions.h"
+#include "../jucePluginLib/parameterdescriptions.h"
 
-namespace virusLib
-{
-	enum class BankNumber : uint8_t;
-}
+#include "../virusLib/microcontrollerTypes.h"
+
+#include "../synthLib/plugin.h"
 
 class AudioPluginAudioProcessor;
 
@@ -153,6 +152,6 @@ namespace Virus
         uint8_t m_currentProgram[16]{};
 		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
-		ParameterDescriptions m_descriptions;
+        pluginLib::ParameterDescriptions m_descriptions;
     };
 }; // namespace Virus

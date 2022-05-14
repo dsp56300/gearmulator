@@ -4,7 +4,7 @@
 
 namespace Virus
 {
-	Parameter::Parameter(Controller &ctrl, const Description& desc, const uint8_t partNum, const int uniqueId) :
+	Parameter::Parameter(Controller &ctrl, const pluginLib::Description& desc, const uint8_t partNum, const int uniqueId) :
 		RangedAudioParameter(genId(desc, partNum, uniqueId), "Ch " + juce::String(partNum + 1) + " " + desc.name), m_ctrl(ctrl),
 		m_desc(desc), m_partNum(partNum), m_uniqueId(uniqueId)
 	{
@@ -102,7 +102,7 @@ namespace Virus
 		m_changingLinkedValues = false;
 	}
 
-	juce::String Parameter::genId(const Description &d, const int part, const int uniqueId)
+	juce::String Parameter::genId(const pluginLib::Description &d, const int part, const int uniqueId)
 	{
 		if(uniqueId > 0)
 			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);

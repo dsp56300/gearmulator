@@ -4,9 +4,9 @@
 #include <string>
 #include <vector>
 
-#include "VirusParameterDescription.h"
+#include "parameterdescription.h"
 
-namespace Virus
+namespace pluginLib
 {
 	class ParameterDescriptions
 	{
