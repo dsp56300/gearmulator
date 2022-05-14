@@ -549,7 +549,7 @@ namespace Virus
 		for(size_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
 		{
 			const auto& description = m_descriptions.getDescriptions()[i];
-		    if(description.name.toStdString() == _name)
+		    if(description.name == _name)
 				return static_cast<ParameterType>(i);
 		}
 

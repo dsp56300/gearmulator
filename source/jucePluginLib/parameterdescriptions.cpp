@@ -215,7 +215,7 @@ namespace pluginLib
 
 			Description d;
 
-			d.name = name;
+			d.name = name.toStdString();
 
 			d.isPublic = readPropertyBool("isPublic");
 			d.isDiscrete = readPropertyBool("isDiscrete");

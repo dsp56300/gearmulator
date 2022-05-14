@@ -39,7 +39,7 @@ namespace pluginLib
 		uint8_t page;
 		uint8_t index;
 		int classFlags;
-		juce::String name;
+		std::string name;
 		juce::Range<int> range;
 		ValueList valueList;
 		bool isPublic;
