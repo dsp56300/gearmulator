@@ -389,22 +389,14 @@ namespace pluginLib
 				byte.checksumLastIndex = last;
 				byte.checksumInitValue = init;
 			}
-			else if(type == "bank")
-				byte.type = MidiDataType::Bank;
-			else if(type == "program")
-				byte.type = MidiDataType::Program;
-			else if(type == "deviceid")
-				byte.type = MidiDataType::DeviceId;
-			else if(type == "page")
-				byte.type = MidiDataType::Page;
-			else if(type == "part")
-				byte.type = MidiDataType::Part;
-			else if(type == "paramindex")
-				byte.type = MidiDataType::ParameterIndex;
-			else if(type == "paramvalue")
-				byte.type = MidiDataType::ParameterValue;
-			else if(type == "null")
-				byte.type = MidiDataType::Null;
+			else if(type == "bank")				byte.type = MidiDataType::Bank;
+			else if(type == "program")			byte.type = MidiDataType::Program;
+			else if(type == "deviceid")			byte.type = MidiDataType::DeviceId;
+			else if(type == "page")				byte.type = MidiDataType::Page;
+			else if(type == "part")				byte.type = MidiDataType::Part;
+			else if(type == "paramindex")		byte.type = MidiDataType::ParameterIndex;
+			else if(type == "paramvalue")		byte.type = MidiDataType::ParameterValue;
+			else if(type == "null")				byte.type = MidiDataType::Null;
 			else
 			{
 				_errors << "Unknown midi packet data type " << type << ", midi packet " << _key << ", index " << i << std::endl;
