@@ -2,7 +2,6 @@
 
 #include "BinaryData.h"
 #include "PluginProcessor.h"
-#include "VirusParameterDescriptions.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 
@@ -72,7 +71,6 @@ namespace Virus
 			uint32_t parameterDescIndex = 0;
 			for (const auto& desc : m_descriptions.getDescriptions())
 			{
-				const auto paramType = static_cast<ParameterType>(parameterDescIndex);
 				++parameterDescIndex;
 
 				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
@@ -98,7 +96,7 @@ namespace Virus
 
 				m_paramsByParamType[part].push_back(p.get());
 
-				const bool isNonPartExclusive = (desc.classFlags & Parameter::Class::GLOBAL) || (desc.classFlags & Parameter::Class::NON_PART_SENSITIVE);
+				const bool isNonPartExclusive = (desc.classFlags & (int)pluginLib::ParameterClass::Global) || (desc.classFlags & (int)pluginLib::ParameterClass::NonPartSensitive);
 				if (isNonPartExclusive)
 				{
 					if (part != 0)
@@ -281,7 +279,7 @@ namespace Virus
             for (const auto& param : globalParams)
             {
 				auto flags = param->getDescription().classFlags;
-				if (!(flags & Parameter::Class::GLOBAL) && !(flags & Parameter::Class::NON_PART_SENSITIVE))
+				if (!(flags & (int)pluginLib::ParameterClass::Global) && !(flags & (int)pluginLib::ParameterClass::NonPartSensitive))
 				{
 					jassertfalse;
 					return;
@@ -427,7 +425,7 @@ namespace Virus
 				{
 					for (const auto& param : params)
 					{
-						if ((param->getDescription().classFlags & Parameter::MULTI_OR_SINGLE) && isMultiMode())
+						if ((param->getDescription().classFlags & (int)pluginLib::ParameterClass::MultiOrSingle) && isMultiMode())
 							continue;
 						param->setValueFromSynth(patch.data[i], true);
 					}

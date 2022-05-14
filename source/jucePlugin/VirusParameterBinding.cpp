@@ -42,7 +42,7 @@ void VirusParameterBinding::setPart(uint8_t _part)
 		}
 
 		const auto& desc = b.parameter->getDescription();
-		const bool isNonPartExclusive = (desc.classFlags & Virus::Parameter::Class::GLOBAL) || (desc.classFlags & Virus::Parameter::Class::NON_PART_SENSITIVE);
+		const bool isNonPartExclusive = (desc.classFlags & (int)pluginLib::ParameterClass::Global) || (desc.classFlags & (int)pluginLib::ParameterClass::NonPartSensitive);
 
 		if(isNonPartExclusive)
 			continue;

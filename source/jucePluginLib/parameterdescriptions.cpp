@@ -1,11 +1,8 @@
-#include "VirusParameterDescriptions.h"
+#include "parameterdescriptions.h"
 
-#include "VirusParameter.h"
-#include "VirusParameterDescription.h"
+#include "../dsp56300/source/dsp56kEmu/logging.h"
 
-#include "dsp56kEmu/logging.h"
-
-namespace Virus
+namespace pluginLib
 {
 	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString)
 	{
@@ -242,48 +239,25 @@ namespace Virus
 
 				for (const auto & flag : flags)
 				{
-					if (flag == "Undefined")
-						d.classFlags |= Parameter::UNDEFINED;
-					else if (flag == "Global")
-						d.classFlags |= Parameter::GLOBAL;
-					else if (flag == "PerformanceController")
-						d.classFlags |= Parameter::PERFORMANCE_CONTROLLER;
-					else if (flag == "SoundbankA")
-						d.classFlags |= Parameter::SOUNDBANK_A;
-					else if (flag == "SoundbankB")
-						d.classFlags |= Parameter::SOUNDBANK_B;
+					if (flag == "Global")
+						d.classFlags |= static_cast<int>(ParameterClass::Global);
 					else if (flag == "MultiOrSingle")
-						d.classFlags |= Parameter::MULTI_OR_SINGLE;
-					else if (flag == "Multi")
-						d.classFlags |= Parameter::MULTI_PARAM;
+						d.classFlags |= static_cast<int>(ParameterClass::MultiOrSingle);
 					else if (flag == "NonPartSensitive")
-						d.classFlags |= Parameter::NON_PART_SENSITIVE;
-					else if (flag == "BankProgramChangeParamBankSelect")
-						d.classFlags |= Parameter::BANK_PROGRAM_CHANGE_PARAM_BANK_SELECT;
-					else if (flag == "VirusC")
-						d.classFlags |= Parameter::VIRUS_C;
+						d.classFlags |= static_cast<int>(ParameterClass::NonPartSensitive);
 					else
 						errors << "Class " << flag << " is unknown" << std::endl;
 				}
 			}
 			{
 				const auto page = readPropertyString("page");
-
-				if (page.size() != 1)
+				if(page.empty())
 				{
-					errors << name << ": Page " << page << " is an invalid value" << std::endl;
-					continue;
-				}
-
-				switch (page[0])
-				{
-				case 'A':	d.page = virusLib::PAGE_A;	break;
-				case 'B':	d.page = virusLib::PAGE_B;	break;
-				case 'C':	d.page = virusLib::PAGE_C;	break;
-				default:
-					errors << name << ": Page " << page << " is an invalid value" << std::endl;
+					errors << name << ": Page parameter must not be empty" << std::endl;
 					break;
 				}
+
+				d.page = static_cast<uint8_t>(::atoi(page.c_str()));
 			}
 
 			m_descriptions.push_back(d);
