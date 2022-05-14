@@ -713,6 +713,19 @@
 			{"type": "program"},
 			{"type": "byte", "value": "f7"}
 		],
+		"parameterchange": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "page"},
+			{"type": "part"},
+			{"type": "paramindex"},
+			{"type": "paramvalue"},
+			{"type": "byte", "value": "f7"}
+		],
 		"singledump": [
 			{"type": "byte", "value": "f0"},
 			{"type": "byte", "value": "00"},
