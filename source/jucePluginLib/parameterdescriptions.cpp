@@ -36,6 +36,21 @@ namespace pluginLib
 		return _json;
 	}
 
+	bool ParameterDescriptions::getIndexByName(uint32_t& _index, const std::string& _name) const
+	{
+		for (uint32_t i=0; i<m_descriptions.size(); ++i)
+		{
+			const auto& description = m_descriptions[i];
+
+			if(description.name == _name)
+			{
+				_index = i;
+				return true;
+			}
+		}
+		return false;
+	}
+
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -265,7 +280,166 @@ namespace pluginLib
 
 			m_descriptions.push_back(d);
 		}
+		const auto midipackets = json["midipackets"].getDynamicObject();
 
-		return errors.str();
+		parseMidiPackets(errors, midipackets);
+
+		const auto res = errors.str();
+		assert(res.empty());
+		return res;
+	}
+
+	void ParameterDescriptions::parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets)
+	{
+		if(!_packets)
+			return;
+
+		const auto entryProps = _packets->getProperties();
+
+		for(int i=0; i<entryProps.size(); ++i)
+		{
+			const auto key = std::string(entryProps.getName(i).toString().toUTF8());
+			const auto& value = entryProps.getValueAt(i);
+
+			parseMidiPacket(_errors, key, value);
+		}
+	}
+
+	void ParameterDescriptions::parseMidiPacket(std::stringstream& _errors, const std::string& _key, const juce::var& _value)
+	{
+		if(_key.empty())
+		{
+			_errors << "midi packet name must not be empty" << std::endl;
+			return;
+		}
+
+		if(m_midiPackets.find(_key) != m_midiPackets.end())
+		{
+			_errors << "midi packet with name " << _key << " is already defined" << std::endl;
+			return;
+		}
+
+		const auto arr = _value.getArray();
+
+		if(!arr)
+		{
+			_errors << "midi packet " << _key << " is empty" << std::endl;
+			return;
+		}
+
+		std::vector<MidiPacket::MidiByte> bytes;
+
+		for(auto i=0; i<arr->size(); ++i)
+		{
+			auto entry = (*arr)[i];
+
+			auto type = entry["type"].toString().toStdString();
+
+			MidiPacket::MidiByte byte;
+
+			if(type == "byte")
+			{
+				auto value = entry["value"].toString().toStdString();
+
+				if(value.empty())
+				{
+					_errors << "no value specified for type byte, midi packet " << _key << ", index " << i << std::endl;
+					return;
+				}
+
+				const auto v = ::strtol(value.c_str(), nullptr, 16);
+
+				if(v < 0 || v > 0xff)
+				{
+					_errors << "Midi byte must be in range 0-255" << std::endl;
+					return;
+				}
+
+				byte.type = MidiDataType::Byte;
+				byte.byte = static_cast<uint8_t>(v);
+			}
+			else if(type == "param")
+			{
+				byte.name = entry["name"].toString().toStdString();
+
+				if(byte.name.empty())
+				{
+					_errors << "no parameter name specified for type param, midi packet " << _key << ", index " << i << std::endl;
+					return;
+				}
+
+				byte.type = MidiDataType::Parameter;
+			}
+			else if(type == "checksum")
+			{
+				const int first = entry["first"];
+				const int last = entry["last"];
+				const int init = entry["init"];
+
+				if(first < 0 || last < 0 || last <= first)
+				{
+					_errors << "specified checksum range " << first << "-" << last << " is not valid, midi packet " << _key << ", index " << i << std::endl;
+					return;
+				}
+
+				byte.type = MidiDataType::Checksum;
+				byte.checksumFirstIndex = first;
+				byte.checksumLastIndex = last;
+				byte.checksumInitValue = init;
+			}
+			else if(type == "bank")
+				byte.type = MidiDataType::Bank;
+			else if(type == "program")
+				byte.type = MidiDataType::Program;
+			else if(type == "deviceid")
+				byte.type = MidiDataType::DeviceId;
+			else if(type == "page")
+				byte.type = MidiDataType::Page;
+			else if(type == "part")
+				byte.type = MidiDataType::Part;
+			else if(type == "paramindex")
+				byte.type = MidiDataType::ParameterIndex;
+			else if(type == "paramvalue")
+				byte.type = MidiDataType::ParameterValue;
+			else if(type == "null")
+				byte.type = MidiDataType::Null;
+			else
+			{
+				_errors << "Unknown midi packet data type " << type << ", midi packet " << _key << ", index " << i << std::endl;
+				return;
+			}
+
+			bytes.push_back(byte);
+		}
+
+		MidiPacket packet;
+		packet.bytes = bytes;
+
+		// post-read validation
+		for(size_t i=0; i<packet.bytes.size(); ++i)
+		{
+			const auto& p = packet.bytes[i];
+
+			if(p.type == MidiDataType::Checksum)
+			{
+				if(p.checksumFirstIndex >= (packet.bytes.size()-1) || p.checksumLastIndex >= (packet.bytes.size()-1))
+				{
+					_errors << "specified checksum range " << p.checksumFirstIndex << "-" << p.checksumLastIndex << " is out of range 0-" << packet.bytes.size() << i << std::endl;
+					return;
+				}
+			}
+			else if(p.type == MidiDataType::Parameter)
+			{
+				uint32_t index;
+
+				if(!getIndexByName(index, p.name))
+				{
+					_errors << "specified parameter " << p.name << " does not exist" << std::endl;
+					return;
+				}
+			}
+		}
+
+		m_midiPackets.insert(std::make_pair(_key, packet));
 	}
 }
