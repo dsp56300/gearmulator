@@ -31,11 +31,11 @@ public:
 	~VirusParameterBinding() override;
 	void clearBindings();
 	void setPart(uint8_t _part);
-	void bind(juce::Slider& _control, Virus::ParameterType _param);
-	void bind(juce::Slider& _control, Virus::ParameterType _param, uint8_t _part);
-	void bind(juce::ComboBox &_control, Virus::ParameterType _param);
-	void bind(juce::ComboBox &_control, Virus::ParameterType _param, uint8_t _part);
-	void bind(juce::Button &_control, Virus::ParameterType _param);
+	void bind(juce::Slider& _control, uint32_t _param);
+	void bind(juce::Slider& _control, uint32_t _param, uint8_t _part);
+	void bind(juce::ComboBox &_control, uint32_t _param);
+	void bind(juce::ComboBox &_control, uint32_t _param, uint8_t _part);
+	void bind(juce::Button &_control, uint32_t _param);
 
 private:
 	void removeMouseListener(juce::Slider& _slider);
@@ -48,7 +48,7 @@ private:
 	{
 		Virus::Parameter* parameter = nullptr;
 		juce::Component* component = nullptr;
-		Virus::ParameterType type = Virus::Param_Invalid;
+		uint32_t type = 0xffffffff;
 		uint8_t part = CurrentPart;
 	};
 

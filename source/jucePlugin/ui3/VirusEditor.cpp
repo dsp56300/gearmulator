@@ -214,24 +214,24 @@ namespace genericVirusUI
 
 	int VirusEditor::getParameterIndexByName(const std::string& _name)
 	{
-		return getController().getParameterTypeByName(_name);
+		return getController().getParameterIndexByName(_name);
 	}
 
 	bool VirusEditor::bindParameter(juce::Button& _target, int _parameterIndex)
 	{
-		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		m_parameterBinding.bind(_target, _parameterIndex);
 		return true;
 	}
 
 	bool VirusEditor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
 	{
-		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		m_parameterBinding.bind(_target, _parameterIndex);
 		return true;
 	}
 
 	bool VirusEditor::bindParameter(juce::Slider& _target, int _parameterIndex)
 	{
-		m_parameterBinding.bind(_target, static_cast<Virus::ParameterType>(_parameterIndex));
+		m_parameterBinding.bind(_target, _parameterIndex);
 		return true;
 	}
 

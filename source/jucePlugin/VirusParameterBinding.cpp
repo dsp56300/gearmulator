@@ -68,11 +68,11 @@ void VirusParameterBinding::setPart(uint8_t _part)
 		assert(false && "unknown component type");
 	}
 }
-void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
 {
 	bind(_slider, _param, CurrentPart);
 }
-void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _param, const uint8_t _part)
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
 {
 	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
 
@@ -101,12 +101,12 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 	m_bindings.emplace_back(p);
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
 {
 	bind(_combo, _param, CurrentPart);
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, const Virus::ParameterType _param, uint8_t _part)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, uint8_t _part)
 {
 	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
 	if (!v)
@@ -150,7 +150,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const Virus::ParameterT
 	m_bindings.emplace_back(p);
 }
 
-void VirusParameterBinding::bind(juce::Button &_btn, const Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
 {
 	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart()));
 	if (!v)

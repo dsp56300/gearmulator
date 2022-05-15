@@ -402,14 +402,6 @@ namespace Virus
 		LOG((ss.str()));
     }
 
-    ParameterType Controller::getParameterTypeByName(const std::string& _name) const
-    {
-        const auto i = getParameterIndexByName(_name);
-        if(i == InvalidParameterIndex)
-            return Param_Invalid;
-        return static_cast<ParameterType>(i);
-    }
-
     void Controller::sendSysEx(const SysEx &msg) const
     {
         synthLib::SMidiEvent ev;
