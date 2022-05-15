@@ -51,7 +51,6 @@ namespace Virus
 
         static void printMessage(const SysEx &);
 
-        ParameterType getParameterTypeByName(const std::string& _name) const;
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
 		virusLib::VirusModel getVirusModel() const;
