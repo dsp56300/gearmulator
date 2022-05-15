@@ -4,6 +4,7 @@ project(jucePluginLib VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	controller.cpp controller.h
 	midipacket.cpp midipacket.h
+	parameter.cpp parameter.h
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 )

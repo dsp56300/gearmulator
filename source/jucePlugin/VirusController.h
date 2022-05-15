@@ -4,6 +4,7 @@
 #include "VirusParameterType.h"
 
 #include "../jucePluginLib/parameterdescriptions.h"
+#include "../jucePluginLib/controller.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 
@@ -13,13 +14,8 @@ class AudioPluginAudioProcessor;
 
 namespace Virus
 {
-	enum EnvelopeType
-	{
-		Env_Amp,
-		Env_Filter
-	};
     using SysEx = std::vector<uint8_t>;
-    class Controller : private juce::Timer
+    class Controller : public pluginLib::Controller, juce::Timer
     {
     public:
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
@@ -41,8 +37,6 @@ namespace Virus
     	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
         using Multis = std::array<MultiPatch, 128>;
 
-    	friend Parameter;
-
     	static constexpr auto kNameLength = 10;
 
         Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
@@ -51,18 +45,15 @@ namespace Virus
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
-        void printMessage(const SysEx &) const;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+
+    	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
+
+        static void printMessage(const SysEx &);
 
         ParameterType getParameterTypeByName(const std::string& _name) const;
-
-        // currently Value as I figure out what's the best approach
-        // ch - [0-15]
-        // bank - [0-2] (ABC)
-        // paramIndex - [0-127]
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
-        juce::Value* getParamValue(ParameterType _param);
-        Parameter* getParameter(ParameterType _param) const;
-        Parameter *getParameter(ParameterType _param, uint8_t _part) const;
+
 		virusLib::VirusModel getVirusModel() const;
         // bank - 0-1 (AB)
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
@@ -105,46 +96,16 @@ namespace Virus
         Singles m_singles;
 		MultiPatch m_currentMulti;
 
-        struct ParamIndex
-        {
-            uint8_t page;
-            uint8_t partNum;
-            uint8_t paramNum;
-            bool operator<(ParamIndex const &rhs) const
-            {
-				if (page < rhs.page)         return false;
-				if (page > rhs.page)         return true;
-				if (partNum < rhs.partNum)   return false;
-				if (partNum > rhs.partNum)   return true;
-				if (paramNum < rhs.paramNum) return false;
-				if (paramNum > rhs.paramNum) return true;
-				return false;
-			}
-        };
-
-		using ParameterList = std::vector<Parameter*>;
-
-    	std::map<ParamIndex, ParameterList> m_synthInternalParams;
-		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
-		std::array<ParameterList, 16> m_paramsByParamType;
-		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
-
-		void registerParams();
-		// tries to find synth param in both internal and host.
-		// @return found parameter or nullptr if none found.
-		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
-		const ParameterList& findSynthParam(const ParamIndex& _paramIndex);
-
 		// unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);
 
-        template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
+        template <typename T> static juce::String parseAsciiText(const T &, int startPos);
         void parseSingle(const SysEx &);
         void parseMulti(const SysEx &);
         void parseParamChange(const SysEx &);
         void parseControllerDump(synthLib::SMidiEvent &);
 
-        AudioPluginAudioProcessor &m_processor;
+        AudioPluginAudioProcessor& m_processor;
         juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
@@ -152,6 +113,5 @@ namespace Virus
         uint8_t m_currentProgram[16]{};
 		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
-        pluginLib::ParameterDescriptions m_descriptions;
     };
 }; // namespace Virus
