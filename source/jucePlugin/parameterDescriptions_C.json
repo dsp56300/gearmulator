@@ -712,7 +712,7 @@
 	],
  	"midipackets":
  	{
-		"singlerequest": [
+		"requestsingle": [
 			{"type": "byte", "value": "f0"},
 			{"type": "byte", "value": "00"},
 			{"type": "byte", "value": "20"},
@@ -722,6 +722,80 @@
 			{"type": "byte", "value": "30"},
 			{"type": "bank"},
 			{"type": "program"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestmulti": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "31"},
+			{"type": "bank"},
+			{"type": "program"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestsinglebank": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "32"},
+			{"type": "bank"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestmultibank": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "33"},
+			{"type": "bank"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestarrangement": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "34"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestglobal": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "35"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requesttotal": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "36"},
+			{"type": "byte", "value": "f7"}
+		],
+		"requestcontrollerdump": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "00"},
+			{"type": "byte", "value": "20"},
+			{"type": "byte", "value": "33"},
+			{"type": "byte", "value": "01"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "37"},
 			{"type": "byte", "value": "f7"}
 		],
 		"parameterchange": [
