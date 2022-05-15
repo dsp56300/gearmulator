@@ -1,7 +1,10 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ParameterNames.h"
+
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
+
 #include "../synthLib/os.h"
 
 //==============================================================================
@@ -12,6 +15,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 	MidiInputCallback(), m_romName(synthLib::findROM()), m_device(synthLib::findROM()), m_plugin(&m_device)
 {
 	getController(); // init controller
+	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() = default;
@@ -208,7 +212,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 		if(pos.bpm > 0) { // sync virus interal clock to host
 			const uint8_t bpmValue = juce::jmin(127, juce::jmax(0, (int)pos.bpm-63)); // clamp to virus range, 63-190
-			auto clockParam = getController().getParameter(Virus::Param_ClockTempo, 0);
+			const auto clockParam = getController().getParameter(m_clockTempoParam, 0);
 			if (clockParam != nullptr && (int)clockParam->getValueObject().getValue() != bpmValue) {
 				clockParam->getValueObject().setValue(bpmValue);
 			}

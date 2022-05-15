@@ -2,6 +2,7 @@
 
 #include "BinaryData.h"
 
+#include "../ParameterNames.h"
 #include "../PluginProcessor.h"
 #include "../VirusController.h"
 #include "../VirusParameterBinding.h"
@@ -303,7 +304,7 @@ namespace genericVirusUI
 
 		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
 
-		const auto* p = getController().getParameter(static_cast<Virus::ParameterType>(v), part);
+		const auto* p = getController().getParameter(v, part);
 
 		if(!p)
 		{
@@ -475,7 +476,8 @@ namespace genericVirusUI
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
 	{
-	    getController().getParameter(Virus::Param_PlayMode)->setValue(_playMode);
+		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
+	    getController().getParameter(playMode)->setValue(_playMode);
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			m_parameterBinding.setPart(0);
 

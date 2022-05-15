@@ -1,7 +1,6 @@
 #pragma once
 
 #include "VirusParameter.h"
-#include "VirusParameterType.h"
 
 #include "../jucePluginLib/parameterdescriptions.h"
 #include "../jucePluginLib/controller.h"
