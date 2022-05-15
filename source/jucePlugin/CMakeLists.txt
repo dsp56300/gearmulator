@@ -14,6 +14,7 @@ endif()
 
 set(SOURCES
 	parameterDescriptions_C.json
+	ParameterNames.h
     PluginEditor.cpp
     PluginEditor.h
     PluginProcessor.cpp
@@ -24,7 +25,6 @@ set(SOURCES
 	VirusParameter.h
 	VirusParameterBinding.cpp
 	VirusParameterBinding.h
-	VirusParameterType.h
 	version.h
 )
 
