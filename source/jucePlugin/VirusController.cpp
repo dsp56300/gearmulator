@@ -12,9 +12,12 @@ namespace Virus
     static constexpr uint8_t kSysExStart[] = {0xf0, 0x00, 0x20, 0x33, 0x01};
     static constexpr auto kHeaderWithMsgCodeLen = 7;
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : m_processor(p), m_deviceId(deviceId), m_descriptions(BinaryData::parameterDescriptions_C_json)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(BinaryData::parameterDescriptions_C_json), m_processor(p), m_deviceId(deviceId)
     {
-		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
+//		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
+
+        registerParams(p);
+
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
 		opts.filenameSuffix = ".settings";
@@ -22,7 +25,6 @@ namespace Virus
 		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
 		m_config = new juce::PropertiesFile(opts);
 
-        registerParams();
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		const auto& params = findSynthParam(0, 0x72, 0x7a);
 		for (const auto& parameter : params)
@@ -51,103 +53,6 @@ namespace Virus
 	    stopTimer();
 		delete m_config;
     }
-
-    void Controller::registerParams()
-    {
-        // 16 parts * 3 pages * 128 params
-        // TODO: not register internal/unused params?
-		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
-
-		std::map<ParamIndex, int> knownParameterIndices;
-
-    	for (uint8_t part = 0; part < 16; part++)
-		{
-			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
-
-    		const auto partNumber = juce::String(part + 1);
-			auto group =
-				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
-
-			uint32_t parameterDescIndex = 0;
-			for (const auto& desc : m_descriptions.getDescriptions())
-			{
-				++parameterDescIndex;
-
-				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
-
-				int uid = 0;
-
-				auto itKnownParamIdx = knownParameterIndices.find(idx);
-
-				if(itKnownParamIdx == knownParameterIndices.end())
-					knownParameterIndices.insert(std::make_pair(idx, 0));
-				else
-					uid = ++itKnownParamIdx->second;
-
-				auto p = std::make_unique<Parameter>(*this, desc, part, uid);
-
-				if(uid > 0)
-				{
-					const auto& existingParams = findSynthParam(idx);
-
-					for (auto& existingParam : existingParams)
-						existingParam->addLinkedParameter(p.get());
-				}
-
-				m_paramsByParamType[part].push_back(p.get());
-
-				const bool isNonPartExclusive = (desc.classFlags & (int)pluginLib::ParameterClass::Global) || (desc.classFlags & (int)pluginLib::ParameterClass::NonPartSensitive);
-				if (isNonPartExclusive)
-				{
-					if (part != 0)
-						continue; // only register on first part!
-				}
-				if (p->getDescription().isPublic)
-				{
-					// lifecycle managed by Juce
-
-					auto itExisting = m_synthParams.find(idx);
-					if (itExisting != m_synthParams.end())
-					{
-						itExisting->second.push_back(p.get());
-					}
-					else
-					{
-						ParameterList params;
-						params.emplace_back(p.get());
-						m_synthParams.insert(std::make_pair(idx, std::move(params)));
-					}
-
-					if (isNonPartExclusive)
-					{
-						jassert(part == 0);
-						globalParams->addChild(std::move(p));
-					}
-					else
-						group->addChild(std::move(p));
-				}
-				else
-				{
-					// lifecycle handled by us
-
-					auto itExisting = m_synthInternalParams.find(idx);
-					if (itExisting != m_synthInternalParams.end())
-					{
-						itExisting->second.push_back(p.get());
-					}
-					else
-					{
-						ParameterList params;
-						params.emplace_back(p.get());
-						m_synthInternalParams.insert(std::make_pair(idx, std::move(params)));
-					}
-					m_synthInternalParamList.emplace_back(std::move(p));
-				}
-			}
-			m_processor.addParameterGroup(std::move(group));
-		}
-		m_processor.addParameterGroup(std::move(globalParams));
-	}
 
 	void Controller::parseMessage(const SysEx &msg)
 	{
@@ -199,31 +104,6 @@ namespace Virus
         }
     }
 
-	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
-	{
-		const ParamIndex paramIndex{ _page, _part, _paramIndex };
-
-		return findSynthParam(paramIndex);
-	}
-
-	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex)
-    {
-		const auto it = m_synthParams.find(_paramIndex);
-
-		if (it != m_synthParams.end())
-			return it->second;
-
-    	const auto iti = m_synthInternalParams.find(_paramIndex);
-
-		if (iti == m_synthInternalParams.end())
-		{
-			static ParameterList empty;
-			return empty;
-		}
-
-		return iti->second;
-    }
-
     juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
 	{
 		const auto& params = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
@@ -233,28 +113,6 @@ namespace Virus
             return nullptr;
         }
 		return &params.front()->getValueObject();
-	}
-
-    juce::Value* Controller::getParamValue(const ParameterType _param)
-    {
-	    const auto res = getParameter(_param);
-		return res ? &res->getValueObject() : nullptr;
-    }
-
-    Parameter* Controller::getParameter(const ParameterType _param) const
-    {
-		return getParameter(_param, 0);
-	}
-
-	Parameter* Controller::getParameter(const ParameterType _param, const uint8_t _part) const
-	{
-		if (_part >= m_paramsByParamType.size())
-			return nullptr;
-
-		if (_param >= m_paramsByParamType[_part].size())
-			return nullptr;
-
-		return m_paramsByParamType[_part][_param];
 	}
 
     void Controller::parseParamChange(const SysEx &msg)
@@ -525,7 +383,7 @@ namespace Virus
         return sum;
     }
 
-    template <typename T> juce::String Controller::parseAsciiText(const T &msg, const int start) const
+    template <typename T> juce::String Controller::parseAsciiText(const T &msg, const int start)
     {
         char text[kNameLength + 1];
         text[kNameLength] = 0; // termination
@@ -534,7 +392,7 @@ namespace Virus
         return {text};
     }
 
-    void Controller::printMessage(const SysEx &msg) const
+    void Controller::printMessage(const SysEx &msg)
     {
 		std::stringstream ss;
         for (auto &m : msg)
@@ -546,14 +404,10 @@ namespace Virus
 
     ParameterType Controller::getParameterTypeByName(const std::string& _name) const
     {
-		for(size_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
-		{
-			const auto& description = m_descriptions.getDescriptions()[i];
-		    if(description.name == _name)
-				return static_cast<ParameterType>(i);
-		}
-
-		return Param_Invalid;
+        const auto i = getParameterIndexByName(_name);
+        if(i == InvalidParameterIndex)
+            return Param_Invalid;
+        return static_cast<ParameterType>(i);
     }
 
     void Controller::sendSysEx(const SysEx &msg) const
@@ -601,5 +455,16 @@ namespace Virus
         const juce::ScopedLock sl(m_eventQueueLock);
 
         m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
+    }
+
+    void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
+    {
+        const auto& desc = _parameter.getDescription();
+		sendSysEx(constructMessage({static_cast<uint8_t>(desc.page), _parameter.getPart(), desc.index, _value}));
+    }
+
+    pluginLib::Parameter* Controller::createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid)
+    {
+        return new Parameter(_controller, _desc, _part, _uid);
     }
 }; // namespace Virus
