@@ -343,15 +343,14 @@ namespace genericVirusUI
 			return;
 
 		// force to edit buffer
-		const auto part = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
+		const auto program = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
 
 		auto sysex = m_filteredPatches[idx].sysex;
 		sysex[7] = toMidiByte(virusLib::BankNumber::EditBuffer);
-		sysex[8] = part;
+		sysex[8] = program;
 
 		m_controller.sendSysEx(sysex);
-
-		m_controller.sendSysEx(m_controller.constructMessage({ virusLib::REQUEST_SINGLE, 0x0, part }));
+		m_controller.requestSingle(0x0, program);
 	}
 
 	void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent&)

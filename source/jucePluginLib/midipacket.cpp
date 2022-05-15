@@ -4,7 +4,7 @@
 
 namespace pluginLib
 {
-	bool MidiPacket::create(std::vector<uint8_t>& _dst, std::map<MidiDataType, uint8_t>& _data) const
+	bool MidiPacket::create(std::vector<uint8_t>& _dst, const std::map<MidiDataType, uint8_t>& _data) const
 	{
 		_dst.reserve(size());
 

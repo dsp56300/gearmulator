@@ -1,5 +1,7 @@
 #include "controller.h"
 
+#include <cassert>
+
 #include "parameter.h"
 
 namespace pluginLib
@@ -155,5 +157,26 @@ namespace pluginLib
 	{
 		uint32_t index;
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
+	}
+
+	const MidiPacket* Controller::getMidiPacket(const std::string& _name) const
+	{
+		return m_descriptions.getMidiPacket(_name);
+	}
+
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
+	{
+        const auto* m = getMidiPacket(_packetName);
+		assert(m && "midi packet not found");
+        if(!m)
+            return false;
+
+    	if(!m->create(_sysex, _params))
+    	{
+	        assert(false && "failed to create midi packet");
+			_sysex.clear();
+            return false;
+    	}
+		return true;
 	}
 }

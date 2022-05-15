@@ -12,6 +12,12 @@ namespace pluginLib
 		LOG(err);
 	}
 
+	const MidiPacket* ParameterDescriptions::getMidiPacket(const std::string& _name) const
+	{
+		const auto it = m_midiPackets.find(_name);
+		return it == m_midiPackets.end() ? nullptr : &it->second;
+	}
+
 	std::string ParameterDescriptions::removeComments(std::string _json)
 	{
 		auto removeBlock = [&](const std::string& _begin, const std::string& _end)
