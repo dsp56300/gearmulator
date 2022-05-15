@@ -19,6 +19,8 @@ namespace pluginLib
 			return m_descriptions;
 		}
 
+		const MidiPacket* getMidiPacket(const std::string& _name) const;
+
 		static std::string removeComments(std::string _json);
 
 		bool getIndexByName(uint32_t& _index, const std::string& _name) const;

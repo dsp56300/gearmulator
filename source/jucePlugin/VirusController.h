@@ -44,8 +44,6 @@ namespace Virus
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
-		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
-
     	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
 
         static void printMessage(const SysEx &);
@@ -83,9 +81,23 @@ namespace Virus
 		juce::PropertiesFile* getConfig() { return m_config; }
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
-		std::vector<uint8_t> constructMessage(SysEx msg) const;
 
-        uint8_t getDeviceId() const { return m_deviceId; }
+		bool requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const;
+		bool requestSingle(uint8_t _bank, uint8_t _program) const;
+		bool requestMulti(uint8_t _bank, uint8_t _program) const;
+
+    	bool requestSingleBank(uint8_t _bank) const;
+
+    	bool requestTotal() const;
+    	bool requestArrangement() const;
+        
+		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
+
+        bool sendSysEx(const std::string& _packetType) const;
+        bool sendSysEx(const std::string& _packetType, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+
+		uint8_t getDeviceId() const { return m_deviceId; }
 
     private:
 		void timerCallback() override;

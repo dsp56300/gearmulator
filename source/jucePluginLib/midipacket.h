@@ -41,7 +41,7 @@ namespace pluginLib
 		const std::vector<MidiByte>& bytes() { return m_bytes; }
 		size_t size() const { return m_bytes.size(); }
 
-		bool create(std::vector<uint8_t>& _dst, std::map<MidiDataType, uint8_t>& _data) const;
+		bool create(std::vector<uint8_t>& _dst, const std::map<MidiDataType, uint8_t>& _data) const;
 
 	private:
 		std::vector<MidiByte> m_bytes;

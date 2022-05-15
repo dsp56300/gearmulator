@@ -31,8 +31,8 @@ namespace Virus
 		{
 			parameter->onValueChanged = [this] {
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
-				sendSysEx(constructMessage({ MessageType::REQUEST_SINGLE, 0x0, prg }));
-				sendSysEx(constructMessage({ MessageType::REQUEST_MULTI, 0x0, prg }));
+				requestSingle(0, prg);
+                requestMulti(0, prg);
 
 				if (onMsgDone)
 				{
@@ -40,11 +40,12 @@ namespace Virus
 				}
 			};
 		}
-		sendSysEx(constructMessage({MessageType::REQUEST_TOTAL}));
-		sendSysEx(constructMessage({MessageType::REQUEST_ARRANGEMENT}));
+		requestTotal();
+		requestArrangement();
 
     	for(uint8_t i=3; i<=8; ++i)
-			sendSysEx(constructMessage({MessageType::REQUEST_BANK_SINGLE, i}));		 
+			requestSingleBank(i);
+
     	startTimer(5);
 	}
 
@@ -232,10 +233,10 @@ namespace Virus
 
 		const uint8_t pt = isMultiMode() ? _part : virusLib::SINGLE;
 
-		sendSysEx(constructMessage({ MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank) }));
-		sendSysEx(constructMessage({ MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg }));
+		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank));
+		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg);
 
-		sendSysEx(constructMessage({MessageType::REQUEST_SINGLE, 0x0, pt}));
+		requestSingle(0x0, pt);
 
 		m_currentBank[_part] = _bank;
 		m_currentProgram[_part] = _prg;
@@ -297,7 +298,7 @@ namespace Virus
 
         constexpr auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
         assert(namePos < msg.size());
-        auto progName = parseAsciiText(msg, namePos);
+        const auto progName = parseAsciiText(msg, namePos);
         DBG(progName);
     }
 
@@ -412,16 +413,65 @@ namespace Virus
 
     void Controller::onStateLoaded() const
     {
-		sendSysEx(constructMessage({ MessageType::REQUEST_TOTAL }));
-		sendSysEx(constructMessage({ MessageType::REQUEST_ARRANGEMENT }));
+		requestTotal();
+		requestArrangement();
 	}
 
-    std::vector<uint8_t> Controller::constructMessage(SysEx msg) const
+    bool Controller::requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const
     {
-        const uint8_t start[] = {0xf0, 0x00, 0x20, 0x33, 0x01, static_cast<uint8_t>(m_deviceId)};
-        msg.insert(msg.begin(), std::begin(start), std::end(start));
-        msg.push_back(0xf7);
-        return msg;
+        std::map<pluginLib::MidiDataType, uint8_t> data;
+
+        data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
+
+		return sendSysEx(_multi ? "requestmulti" : "requestsingle", data);
+    }
+
+    bool Controller::requestSingle(uint8_t _bank, uint8_t _program) const
+    {
+        return requestProgram(_bank, _program, false);
+    }
+
+    bool Controller::requestMulti(uint8_t _bank, uint8_t _program) const
+    {
+        return requestProgram(_bank, _program, true);
+    }
+
+    bool Controller::requestSingleBank(uint8_t _bank) const
+    {
+        std::map<pluginLib::MidiDataType, uint8_t> data;
+        data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
+
+        return sendSysEx("requestsinglebank", data);
+    }
+
+    bool Controller::requestTotal() const
+    {
+        return sendSysEx("requesttotal");
+    }
+
+    bool Controller::requestArrangement() const
+    {
+        return sendSysEx("requestarrangement");
+    }
+
+    bool Controller::sendSysEx(const std::string& _packetType) const
+    {
+	    std::map<pluginLib::MidiDataType, uint8_t> params;
+        return sendSysEx(_packetType, params);
+    }
+
+    bool Controller::sendSysEx(const std::string& _packetType, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+    {
+	    std::vector<uint8_t> sysex;
+
+        _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+
+    	if(!createMidiDataFromPacket(sysex, _packetType, _params))
+            return false;
+
+        sendSysEx(sysex);
+        return true;
     }
 
     void Controller::timerCallback()
@@ -452,7 +502,20 @@ namespace Virus
     void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
     {
         const auto& desc = _parameter.getDescription();
-		sendSysEx(constructMessage({static_cast<uint8_t>(desc.page), _parameter.getPart(), desc.index, _value}));
+
+        sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
+    }
+
+    bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
+    {
+        std::map<pluginLib::MidiDataType, uint8_t> data;
+
+        data.insert(std::make_pair(pluginLib::MidiDataType::Page, _page));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Part, _part));
+        data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
+        data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+
+    	return sendSysEx("parameterchange", data);
     }
 
     pluginLib::Parameter* Controller::createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid)
