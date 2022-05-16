@@ -47,5 +47,7 @@ namespace pluginLib
 		bool isBool;
 		bool isBipolar;
 		std::string toText;
+
+		bool isNonPartSensitive() const;
 	};
 }
