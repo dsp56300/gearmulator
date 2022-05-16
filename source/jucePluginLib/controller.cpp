@@ -178,4 +178,14 @@ namespace pluginLib
     	}
 		return true;
 	}
+
+	bool Controller::parseMidiPacket(const std::string& _name, std::map<pluginLib::MidiDataType, uint8_t>& _data, std::map<uint32_t, uint8_t>& _parameterValues, const std::vector<uint8_t>& _src) const
+	{
+		auto* m = getMidiPacket(_name);
+		assert(m);
+		if(!m)
+			return false;
+
+		return m->parse(_data, _parameterValues, m_descriptions, _src);
+	}
 }
