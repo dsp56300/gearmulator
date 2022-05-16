@@ -51,14 +51,17 @@ namespace pluginLib
 						existingParam->addLinkedParameter(p.get());
 				}
 
+				const bool isNonPartExclusive = desc.isNonPartSensitive();
+
+				if (isNonPartExclusive && part != 0)
+				{
+					// only register on first part!
+					m_paramsByParamType[part].push_back(m_paramsByParamType[0][m_paramsByParamType[part].size()]);
+					continue;
+				}
+
 				m_paramsByParamType[part].push_back(p.get());
 
-				const bool isNonPartExclusive = (desc.classFlags & (int)pluginLib::ParameterClass::Global) || (desc.classFlags & (int)pluginLib::ParameterClass::NonPartSensitive);
-				if (isNonPartExclusive)
-				{
-					if (part != 0)
-						continue; // only register on first part!
-				}
 				if (p->getDescription().isPublic)
 				{
 					// lifecycle managed by Juce
