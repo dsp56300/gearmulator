@@ -25,6 +25,8 @@ namespace pluginLib
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const;
 
+		bool parseMidiPacket(const std::string& _name, std::map<pluginLib::MidiDataType, uint8_t>& _data, std::map<uint32_t, uint8_t>& _parameterValues, const std::vector<uint8_t>& _src) const;
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid) = 0;
 		void registerParams(juce::AudioProcessor& _processor);

@@ -116,13 +116,18 @@ namespace Virus
 		return &params.front()->getValueObject();
 	}
 
-    void Controller::parseParamChange(const SysEx &msg)
+    void Controller::parseParamChange(const SysEx& msg)
     {
-        constexpr auto pos = kHeaderWithMsgCodeLen - 1;
-		const auto page = msg[pos];
-		const auto ch = msg[pos + 1];
-		const auto index = msg[pos + 2];
-		const auto value = msg[pos + 3];
+    	std::map<pluginLib::MidiDataType, uint8_t> params;
+        std::map<uint32_t, uint8_t> parameterValues;
+
+        if(!parseMidiPacket("parameterchange", params, parameterValues, msg))
+            return;
+
+    	const auto page = params[pluginLib::MidiDataType::Page];
+		const auto ch = params[pluginLib::MidiDataType::Part];
+		const auto index = params[pluginLib::MidiDataType::ParameterIndex];
+		const auto value = params[pluginLib::MidiDataType::ParameterValue];
 
         const auto& partParams = findSynthParam(ch, page, index);
 
