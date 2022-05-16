@@ -56,6 +56,8 @@ namespace pluginLib
 
 		int getUniqueId() const { return m_uniqueId; }
 
+		const std::set<Parameter*>& getLinkedParameters() { return m_linkedParameters; }
+
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
