@@ -251,28 +251,22 @@ namespace Virus
 	uint8_t Controller::getCurrentPartProgram(uint8_t part) const { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
-        constexpr auto pageSize = 128;
-        constexpr auto expectedDataSize = pageSize * 2 + 1 + 1; // we have 2 pages
-        constexpr auto checkSumSize = 1;
-        const auto dataSize = msg.size() - (kHeaderWithMsgCodeLen + 1); // 1 end byte, 1 bank, 1 prg
-        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
-        assert(hasChecksum || dataSize == expectedDataSize);
+		std::map<pluginLib::MidiDataType, uint8_t> data;
+        std::map<uint32_t, uint8_t> parameterValues;
+
+    	if(!parseMidiPacket("singledump", data, parameterValues, msg))
+            return;
 
         SinglePatch patch;
-        patch.bankNumber = virusLib::fromMidiByte(msg[kHeaderWithMsgCodeLen]);
-        patch.progNumber = msg[kHeaderWithMsgCodeLen + 1];
-        [[maybe_unused]] const auto dataSum = copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
 
-        if (hasChecksum)
-        {
-            const auto checksum = msg[msg.size() - 2];
-            const auto deviceId = msg[5];
-            [[maybe_unused]] const auto expectedSum = (deviceId + 0x10 + virusLib::toMidiByte(patch.bankNumber) + patch.progNumber + dataSum) & 0x7f;
-            assert(expectedSum == checksum);
-        }
+        patch.bankNumber = virusLib::fromMidiByte(data[pluginLib::MidiDataType::Bank]);
+        patch.progNumber = data[pluginLib::MidiDataType::Program];
+
+		copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
+
 		if (patch.bankNumber == virusLib::BankNumber::EditBuffer)
 		{
-			// virus sends also the single buffer not matter what's the mode.
+			// virus sends also the single buffer not matter what's the mode. (?? no, both is requested, so both is sent)
 			// instead of keeping both, we 'encapsulate' this into first channel.
 			// the logic to maintain this is done by listening the global single/multi param.
 			if (isMultiMode() && patch.progNumber == virusLib::SINGLE)
@@ -281,21 +275,17 @@ namespace Virus
 				return;
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
-			for (size_t i = 0; i < std::size(patch.data); i++)
-			{
-				const uint8_t page = virusLib::PAGE_A + static_cast<uint8_t>(i / pageSize);
-				const auto& params = findSynthParam(ch, page, i % pageSize);
-				if (!params.empty())
-				{
-					for (const auto& param : params)
-					{
-						if ((param->getDescription().classFlags & (int)pluginLib::ParameterClass::MultiOrSingle) && isMultiMode())
-							continue;
-						param->setValueFromSynth(patch.data[i], true);
-					}
-				}
-			}
-			if (onProgramChange)
+
+            for(auto it = parameterValues.begin(); it != parameterValues.end(); ++it)
+            {
+	            auto* p = getParameter(it->first, ch);
+				p->setValueFromSynth(it->second, true);
+
+	            for (const auto& linkedParam : p->getLinkedParameters())
+		            linkedParam->setValueFromSynth(it->second, true);
+            }
+
+            if (onProgramChange)
 				onProgramChange();
 		}
 		else
