@@ -32,6 +32,7 @@ namespace pluginLib
 
 		std::map<std::string, ValueList> m_valueLists;
 		std::vector<Description> m_descriptions;
+		std::map<std::string, uint32_t> m_nameToIndex;
 		std::map<std::string, MidiPacket> m_midiPackets;
 	};
 }

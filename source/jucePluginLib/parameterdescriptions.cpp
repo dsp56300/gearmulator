@@ -46,17 +46,11 @@ namespace pluginLib
 
 	bool ParameterDescriptions::getIndexByName(uint32_t& _index, const std::string& _name) const
 	{
-		for (uint32_t i=0; i<m_descriptions.size(); ++i)
-		{
-			const auto& description = m_descriptions[i];
-
-			if(description.name == _name)
-			{
-				_index = i;
-				return true;
-			}
-		}
-		return false;
+		const auto it = m_nameToIndex.find(_name);
+		if(it == m_nameToIndex.end())
+			return false;
+		_index = it->second;
+		return true;
 	}
 
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
@@ -288,11 +282,24 @@ namespace pluginLib
 
 			m_descriptions.push_back(d);
 		}
+
+		for (size_t i=0; i<m_descriptions.size(); ++i)
+		{
+			const auto& d = m_descriptions[i];
+
+			if(m_nameToIndex.find(d.name) != m_nameToIndex.end())
+			{
+				errors << "Parameter named " << d.name << " is already defined";
+				continue;
+			}
+			m_nameToIndex.insert(std::make_pair(d.name, i));
+		}
+
 		const auto midipackets = json["midipackets"].getDynamicObject();
 
 		parseMidiPackets(errors, midipackets);
 
-		const auto res = errors.str();
+		auto res = errors.str();
 		assert(res.empty());
 		return res;
 	}
