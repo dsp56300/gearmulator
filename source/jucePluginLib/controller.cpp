@@ -21,14 +21,10 @@ namespace pluginLib
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
 
     		const auto partNumber = juce::String(part + 1);
-			auto group =
-				std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
+			auto group = std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
 
-			uint32_t parameterDescIndex = 0;
 			for (const auto& desc : m_descriptions.getDescriptions())
 			{
-				++parameterDescIndex;
-
 				const ParamIndex idx = {static_cast<uint8_t>(desc.page), part, desc.index};
 
 				int uid = 0;
