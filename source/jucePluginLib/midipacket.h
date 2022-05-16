@@ -7,6 +7,8 @@
 
 namespace pluginLib
 {
+	class ParameterDescriptions;
+
 	enum class MidiDataType
 	{
 		Null,
@@ -42,6 +44,7 @@ namespace pluginLib
 		size_t size() const { return m_bytes.size(); }
 
 		bool create(std::vector<uint8_t>& _dst, const std::map<MidiDataType, uint8_t>& _data) const;
+		bool parse(std::map<MidiDataType, uint8_t>& _data, std::map<uint32_t, uint8_t>& _parameterValues, const ParameterDescriptions& _parameters, const std::vector<uint8_t>& _src) const;
 
 	private:
 		std::vector<MidiByte> m_bytes;
