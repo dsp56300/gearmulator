@@ -306,6 +306,8 @@
  		{"page":"112", "name":"A_Undefined92",  "index":92 , "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"112", "name":"A_Undefined95",  "index":95 , "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"112", "name":"A_Undefined96",  "index":96 , "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined103", "index":103, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined104", "index":104, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"112", "name":"A_Undefined111", "index":111, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"112", "name":"A_Undefined120", "index":120, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"112", "name":"A_Undefined121", "index":121, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
@@ -912,26 +914,26 @@
 			{"type": "param", "name":"Cutoff2 Lfo2 Amount"},                // 89
 			{"type": "param", "name":"Pan Lfo2 Amount"},                    // 90
 			{"type": "param", "name":"Patch Volume"},                       // 91
-			{"type": "null"},                                               // 92
+			{"type": "param", "name":"A_Undefined92"},                      // 92
 			{"type": "param", "name":"Transpose"},                          // 93
 			{"type": "param", "name":"Key Mode"},                           // 94
-			{"type": "null"},                                               // 95
-			{"type": "null"},                                               // 96
+			{"type": "param", "name":"A_Undefined95"},                      // 95
+			{"type": "param", "name":"A_Undefined96"},                      // 96
 			{"type": "param", "name":"Unison Mode"},                        // 97
 			{"type": "param", "name":"Unison Detune"},                      // 98
 			{"type": "param", "name":"Unison Pan Spread"},                  // 99
 			{"type": "param", "name":"Unison Lfo Phase"},                   // 100
 			{"type": "param", "name":"Input Mode"},                         // 101
 			{"type": "param", "name":"Input Select"},                       // 102
-			{"type": "null"},                                               // 103
-			{"type": "null"},                                               // 104
+			{"type": "param", "name":"A_Undefined103"},                     // 103
+			{"type": "param", "name":"A_Undefined104"},                     // 104
 			{"type": "param", "name":"Chorus Mix"},                         // 105
 			{"type": "param", "name":"Chorus Rate"},                        // 106
 			{"type": "param", "name":"Chorus Depth"},                       // 107
 			{"type": "param", "name":"Chorus Delay"},                       // 108
 			{"type": "param", "name":"Chorus Feedback"},                    // 109
 			{"type": "param", "name":"Chorus Lfo Shape"},                   // 110
-			{"type": "null"},                                               // 111
+			{"type": "param", "name":"A_Undefined111"},                     // 111
 			{"type": "param", "name":"Delay/Reverb Mode"},                  // 112
 			{"type": "param", "name":"Effect Send"},                        // 113
 			{"type": "param", "name":"Delay Time"},                         // 114
@@ -940,16 +942,16 @@
 			{"type": "param", "name":"Dly Depth "},                         // 117
 			{"type": "param", "name":"Reverb Damping"},                     // 118
 			{"type": "param", "name":"Delay Color"},                        // 119
-			{"type": "null"},                                               // 120
-			{"type": "null"},                                               // 121
+			{"type": "param", "name":"A_Undefined120"},                     // 120
+			{"type": "param", "name":"A_Undefined121"},                     // 121
 			{"type": "param", "name":"Keyb Local"},                         // 122
 			{"type": "param", "name":"All Notes Off"},                      // 123
-			{"type": "null"},                                               // 124
-			{"type": "null"},                                               // 125
-			{"type": "null"},                                               // 126
-			{"type": "null"},                                               // 127
+			{"type": "param", "name":"A_Undefined124"},                     // 124
+			{"type": "param", "name":"A_Undefined125"},                     // 125
+			{"type": "param", "name":"A_Undefined126"},                     // 126
+			{"type": "param", "name":"A_Undefined127"},                     // 127
 
-			{"type": "null"},												// 0
+			{"type": "param", "name":"B_Undefined0"},                       // 0
 			{"type": "param", "name":"Arp Mode"},                           // 1
 			{"type": "param", "name":"Arp Pattern Selct"},                  // 2
 			{"type": "param", "name":"Arp Octave Range"},                   // 3
@@ -963,22 +965,22 @@
 			{"type": "param", "name":"Lfo3 Destination"},                   // 11
 			{"type": "param", "name":"Osc Lfo3 Amount"},                    // 12
 			{"type": "param", "name":"Lfo3 Fade-In Time"},                  // 13
-			{"type": "null"},                                               // 14
-			{"type": "null"},                                               // 15
+			{"type": "param", "name":"B_Undefined14"},                      // 14
+			{"type": "param", "name":"B_Undefined15"},                      // 15
 			{"type": "param", "name":"Clock Tempo"},                        // 16
 			{"type": "param", "name":"Arp Clock"},                          // 17
 			{"type": "param", "name":"Lfo1 Clock"},                         // 18
 			{"type": "param", "name":"Lfo2 Clock"},                         // 19
 			{"type": "param", "name":"Delay Clock"},                        // 20
 			{"type": "param", "name":"Lfo3 Clock"},                         // 21
-			{"type": "null"},                                               // 22
-			{"type": "null"},                                               // 23
-			{"type": "null"},                                               // 24
+			{"type": "param", "name":"B_Undefined22"},                      // 22
+			{"type": "param", "name":"B_Undefined23"},                      // 23
+			{"type": "param", "name":"B_Undefined24"},                      // 24
 			{"type": "param", "name":"Control Smooth Mode"},                // 25
 			{"type": "param", "name":"Bender Range Up"},                    // 26
 			{"type": "param", "name":"Bender Range Down"},                  // 27
 			{"type": "param", "name":"Bender Scale"},                       // 28
-			{"type": "null"},                                               // 29
+			{"type": "param", "name":"B_Undefined29"},                      // 29
 			{"type": "param", "name":"Filter1 Env Polarity"},               // 30
 			{"type": "param", "name":"Filter2 Env Polarity"},               // 31
 			{"type": "param", "name":"Filter2 Cutoff Link"},                // 32
@@ -986,10 +988,10 @@
 			{"type": "param", "name":"Osc FM Mode"},                        // 34
 			{"type": "param", "name":"Osc Init Phase"},                     // 35
 			{"type": "param", "name":"Punch Intensity"},                    // 36
-			{"type": "null"},                                               // 37
+			{"type": "param", "name":"B_Undefined37"},                      // 37
 			{"type": "param", "name":"Input Follower Mode"},                // 38
 			{"type": "param", "name":"Vocoder Mode"},                       // 39
-			{"type": "null"},                                               // 40
+			{"type": "param", "name":"B_Undefined40"},                      // 40
 			{"type": "param", "name":"Osc3 Mode"},                          // 41
 			{"type": "param", "name":"Osc3 Volume"},                        // 42
 			{"type": "param", "name":"Osc3 Semitone"},                      // 43
@@ -1002,13 +1004,13 @@
 			{"type": "param", "name":"Fm Amount Velocity"},                 // 50
 			{"type": "param", "name":"Soft Knob1 ShortName"},               // 51
 			{"type": "param", "name":"Soft Knob2 ShortName"},               // 52
-			{"type": "null"},                                               // 53
+			{"type": "param", "name":"B_Undefined53"},                      // 53
 			{"type": "param", "name":"Flt1 EnvAmt Velocity"},               // 54
 			{"type": "param", "name":"Flt2 EnvAmt Velocity"},               // 55
 			{"type": "param", "name":"Resonance1 Velocity"},                // 56
 			{"type": "param", "name":"Resonance2 Velocity"},                // 57
 			{"type": "param", "name":"Second Output Balance"},              // 58
-			{"type": "null"},                                               // 59
+			{"type": "param", "name":"B_Undefined59"},                      // 59
 			{"type": "param", "name":"Amp Velocity"},                       // 60
 			{"type": "param", "name":"Panorama Velocity"},                  // 61
 			{"type": "param", "name":"Soft Knob-1 Single"},                 // 62
@@ -1032,7 +1034,7 @@
 			{"type": "param", "name":"LFO1 Assign Amount"},                 // 80
 			{"type": "param", "name":"LFO2 Assign Dest"},                   // 81
 			{"type": "param", "name":"LFO2 Assign Amount"},                 // 82
-			{"type": "null"},                                               // 83
+			{"type": "param", "name":"B_Undefined83"},                      // 83
 			{"type": "param", "name":"Phaser Mode"},                        // 84
 			{"type": "param", "name":"Phaser Mix"},                         // 85
 			{"type": "param", "name":"Phaser Rate"},                        // 86
@@ -1040,7 +1042,7 @@
 			{"type": "param", "name":"Phaser Frequency"},                   // 88
 			{"type": "param", "name":"Phaser Feedback"},                    // 89
 			{"type": "param", "name":"Phaser Spread"},                      // 90
-			{"type": "null"},                                               // 91
+			{"type": "param", "name":"B_Undefined91"},                      // 91
 			{"type": "param", "name":"MidEQ Gain"},                         // 92
 			{"type": "param", "name":"MidEQ Frequency"},                    // 93
 			{"type": "param", "name":"MidEQ Q-Factor"},                     // 94
@@ -1051,7 +1053,7 @@
 			{"type": "param", "name":"Input Ringmodulator"},                // 99
 			{"type": "param", "name":"Distortion Curve"},                   // 100
 			{"type": "param", "name":"Distortion Intensity"},               // 101
-			{"type": "null"},                                               // 102
+			{"type": "param", "name":"B_Undefined102"},                     // 102
 			{"type": "param", "name":"Assign 4 Source"},                    // 103
 			{"type": "param", "name":"Assign 4 Destination"},               // 104
 			{"type": "param", "name":"Assign 4 Amount"},                    // 105
@@ -1074,9 +1076,9 @@
 			{"type": "param", "name":"Filter Select"},                      // 122
 			{"type": "param", "name":"Category1"},                          // 123
 			{"type": "param", "name":"Category2"},                          // 124
-			{"type": "null"},                                               // 125
-			{"type": "null"},                                               // 126
-			{"type": "null"},                                               // 127
+			{"type": "param", "name":"B_Undefined125"},                     // 125
+			{"type": "param", "name":"B_Undefined126"},                     // 126
+			{"type": "param", "name":"B_Undefined127"},                     // 127
 			{"type": "checksum", "first": 5, "last": 264 },
 			{"type": "byte", "value": "f7"}
 		]
