@@ -292,7 +292,7 @@ namespace pluginLib
 				errors << "Parameter named " << d.name << " is already defined";
 				continue;
 			}
-			m_nameToIndex.insert(std::make_pair(d.name, i));
+			m_nameToIndex.insert(std::make_pair(d.name, static_cast<uint32_t>(i)));
 		}
 
 		const auto midipackets = json["midipackets"].getDynamicObject();
