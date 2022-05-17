@@ -23,7 +23,8 @@ namespace pluginLib
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
-		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const;
+
+		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const;
 
 		bool parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 

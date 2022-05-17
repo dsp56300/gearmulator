@@ -16,11 +16,15 @@ namespace pluginLib
 
 		if(m_name == "multidump")
 			int d=0;
+
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
 			const auto& d = m_definitions[i];
 
-			const uint8_t masked = (0xff & d.paramMask) << d.paramShift;
+			if(d.type == MidiDataType::Parameter)
+				m_hasParameters = true;
+
+			const auto masked = static_cast<uint8_t>((0xff & d.paramMask) << d.paramShift);
 
 			if(usedMask & masked)
 			{
@@ -38,9 +42,11 @@ namespace pluginLib
 		m_byteSize = byteIndex + 1;
 	}
 
-	bool MidiPacket::create(std::vector<uint8_t>& _dst, const std::map<MidiDataType, uint8_t>& _data) const
+	bool MidiPacket::create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const
 	{
 		_dst.assign(size(), 0);
+
+		std::map<uint32_t, uint32_t> pendingChecksums;	// byte index => description index
 
 		for(size_t i=0; i<size(); ++i)
 		{
@@ -58,6 +64,20 @@ namespace pluginLib
 				case MidiDataType::Byte:
 					_dst[i] = d.byte;
 					break;
+				case MidiDataType::Parameter:
+					{
+						const auto it = _paramValues.find(std::make_pair(d.paramPart, d.paramName));
+						if(it == _paramValues.end())
+						{
+							LOG("Failed to find value for parameter " << d.paramName << ", part " << d.paramPart);
+							return false;
+						}
+						_dst[i] |= (it->second & d.paramMask) << d.paramShift;
+					}
+					break;
+				case MidiDataType::Checksum:
+					pendingChecksums.insert(std::make_pair(static_cast<uint32_t>(i), itRange->second));
+					break;
 				default:
 					{
 						const auto it = _data.find(d.type);
@@ -68,12 +88,26 @@ namespace pluginLib
 							return false;
 						}
 
-						_dst[i] |= (it->second & d.paramMask) << d.paramShift;
+						_dst[i] = it->second;
 					}
 				}
 			}
 		}
+
+		for (auto& pendingChecksum : pendingChecksums)
+		{
+			const auto byteIndex = pendingChecksum.first;
+			const auto descIndex = pendingChecksum.second;
+
+			_dst[byteIndex] = calcChecksum(m_definitions[descIndex], _dst);
+		}
+
 		return true;
+	}
+
+	bool MidiPacket::create(std::vector<uint8_t>& _dst, const Data& _data) const
+	{
+		return create(_dst, _data, {});
 	}
 
 	bool MidiPacket::parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src) const
@@ -101,12 +135,7 @@ namespace pluginLib
 					break;
 				case MidiDataType::Checksum:
 					{
-						uint8_t checksum = 0;
-
-						for(uint32_t c = d.checksumFirstIndex; c <= d.checksumLastIndex; ++c)
-							checksum += _src[c];
-
-						checksum &= 0x7f;
+						const uint8_t checksum = calcChecksum(d, _src);
 
 						if(checksum != s)
 						{
@@ -143,5 +172,37 @@ namespace pluginLib
 			}
 		}
 		return true;
+	}
+
+	bool MidiPacket::getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const
+	{
+		if(!m_hasParameters)
+			return true;
+
+		for (const auto & d : m_definitions)
+		{
+			if(d.type != MidiDataType::Parameter)
+				continue;
+
+			uint32_t index;
+			if(!_parameters.getIndexByName(index, d.paramName))
+			{
+				LOG("Failed to retrieve index for parameter " << d.paramName);
+				return false;
+			}
+
+			_indices.insert(std::make_pair(d.paramPart, index));
+		}
+		return true;
+	}
+
+	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, Sysex& _src)
+	{
+		auto checksum = _d.checksumInitValue;
+
+		for(uint32_t c = _d.checksumFirstIndex; c <= _d.checksumLastIndex; ++c)
+			checksum += _src[c];
+
+		return checksum & 0x7f;
 	}
 }

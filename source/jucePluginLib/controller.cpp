@@ -163,20 +163,38 @@ namespace pluginLib
 		return m_descriptions.getMidiPacket(_name);
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const
 	{
         const auto* m = getMidiPacket(_packetName);
 		assert(m && "midi packet not found");
         if(!m)
             return false;
 
-    	if(!m->create(_sysex, _params))
-    	{
+		MidiPacket::NamedParamValues paramValues;
+
+        MidiPacket::ParamIndices indices;
+		m->getParameterIndices(indices, m_descriptions);
+
+		if(!indices.empty())
+		{
+			for (const auto& index : indices)
+			{
+				auto* p = getParameter(index.second, _part);
+				if(!p)
+					return false;
+
+				auto v = roundToInt(p->getValueObject().getValue());
+				paramValues.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
+			}
+		}
+
+		if(!m->create(_sysex, _params, paramValues))
+        {
 	        assert(false && "failed to create midi packet");
-			_sysex.clear();
-            return false;
-    	}
-		return true;
+	        _sysex.clear();
+	        return false;
+        }
+        return true;
 	}
 
 	bool Controller::parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const

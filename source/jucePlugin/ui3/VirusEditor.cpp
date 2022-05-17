@@ -398,25 +398,15 @@ namespace genericVirusUI
 			const auto result = chooser.getResult();
 			m_previousPath = result.getParentDirectory().getFullPathName();
 			const auto ext = result.getFileExtension().toLowerCase();
-			const uint8_t syxHeader[9] = { 0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00 };
-			constexpr uint8_t syxEof[1] = { 0xF7 };
-			uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-			uint8_t data[256];
-			for (int i = 0; i < 256; i++)
+
+			const auto data = getController().createSingleDump(getController().getCurrentPart(), virusLib::toMidiByte(virusLib::BankNumber::A), 0);
+
+			if(!data.empty())
 			{
-				const auto param = getController().getParamValue(getController().getCurrentPart(), i < 128 ? 0 : 1, i & 127);
-
-				data[i] = param ? static_cast<int>(param->getValue()) : 0;
-				cs += data[i];
+				result.deleteFile();
+				result.create();
+				result.appendData(&data[0], data.size());
 			}
-			cs = cs & 0x7f;
-
-			result.deleteFile();
-			result.create();
-			result.appendData(syxHeader, 9);
-			result.appendData(data, 256);
-			result.appendData(&cs, 1);
-			result.appendData(syxEof, 1);
 		};
 		m_fileChooser->launchAsync(flags, onFileChooser);
 	}

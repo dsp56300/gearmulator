@@ -38,6 +38,7 @@ namespace Virus
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
     	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
+        std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
 
         static void printMessage(const SysEx &);
 
@@ -53,13 +54,8 @@ namespace Virus
         }
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name);
-		bool isMultiMode()
-		{
-            auto* value = getParamValue(0, 2, 0x7a);
-            jassert(value);
-			return value->getValue();
-		}
-		// part 0 - 15 (ignored when single! 0x40...)
+		bool isMultiMode();
+        // part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
         virusLib::BankNumber getCurrentPartBank(uint8_t _part) const;
 		uint8_t getCurrentPartProgram(uint8_t _part) const;

@@ -437,7 +437,7 @@ namespace pluginLib
 				byte.type = MidiDataType::Checksum;
 				byte.checksumFirstIndex = first;
 				byte.checksumLastIndex = last;
-				byte.checksumInitValue = init;
+				byte.checksumInitValue = static_cast<uint8_t>(init);
 			}
 			else if(type == "bank")				byte.type = MidiDataType::Bank;
 			else if(type == "program")			byte.type = MidiDataType::Program;
