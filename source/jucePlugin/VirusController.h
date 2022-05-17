@@ -59,7 +59,6 @@ namespace Virus
 	        return m_singles;
         }
 
-        juce::StringArray getMultiPresetsName() const;
 		void setSinglePresetName(uint8_t part, juce::String _name);
 		bool isMultiMode()
 		{
@@ -102,9 +101,7 @@ namespace Virus
     private:
 		void timerCallback() override;
 
-        Multis m_multis; // RAM has 128 Multi 'snapshots'
         Singles m_singles;
-		MultiPatch m_currentMulti;
 
 		// unchecked copy for patch data bytes
         static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);

@@ -342,7 +342,7 @@ namespace pluginLib
 			return;
 		}
 
-		std::vector<MidiPacket::MidiByte> bytes;
+		std::vector<MidiPacket::MidiDataDefinition> bytes;
 
 		for(auto i=0; i<arr->size(); ++i)
 		{
@@ -350,7 +350,7 @@ namespace pluginLib
 
 			auto type = entry["type"].toString().toStdString();
 
-			MidiPacket::MidiByte byte;
+			MidiPacket::MidiDataDefinition byte;
 
 			if(type == "byte")
 			{
@@ -375,12 +375,49 @@ namespace pluginLib
 			}
 			else if(type == "param")
 			{
-				byte.name = entry["name"].toString().toStdString();
+				byte.paramName = entry["name"].toString().toStdString();
 
-				if(byte.name.empty())
+				if(byte.paramName.empty())
 				{
 					_errors << "no parameter name specified for type param, midi packet " << _key << ", index " << i << std::endl;
 					return;
+				}
+
+				const auto hasMask = entry.hasProperty("mask");
+				const auto hasShift = entry.hasProperty("shift");
+				const auto hasPart = entry.hasProperty("part");
+
+				if(hasMask)
+				{
+					const int mask = strtol(entry["mask"].toString().toStdString().c_str(), nullptr, 16);
+					if(mask < 0 || mask > 0xff)
+					{
+						_errors << "mask needs to be between 00 and ff but got " << std::hex << mask << std::endl;
+						return;
+					}
+					byte.paramMask = static_cast<uint8_t>(mask);
+				}
+
+				if(hasShift)
+				{
+					const int shift = entry["shift"];
+					if(shift < 0 || shift > 7)
+					{
+						_errors << "shift value needs to be between 0 and 7 but got " << shift << std::endl;
+						return;
+					}
+					byte.paramShift = static_cast<uint8_t>(shift);
+				}
+
+				if(hasPart)
+				{
+					const int part= entry["part"];
+					if(part < 0 || part > 15)
+					{
+						_errors << "part needs to be between 0 and 15 but got " << part << std::endl;
+						return;
+					}
+					byte.paramPart = static_cast<uint8_t>(part);
 				}
 
 				byte.type = MidiDataType::Parameter;
@@ -419,12 +456,12 @@ namespace pluginLib
 			bytes.push_back(byte);
 		}
 
-		MidiPacket packet(std::move(bytes));
+		MidiPacket packet(_key, std::move(bytes));
 
 		// post-read validation
-		for(size_t i=0; i<packet.bytes().size(); ++i)
+		for(size_t i=0; i<packet.definitions().size(); ++i)
 		{
-			const auto& p = packet.bytes()[i];
+			const auto& p = packet.definitions()[i];
 
 			if(p.type == MidiDataType::Checksum)
 			{
@@ -438,9 +475,9 @@ namespace pluginLib
 			{
 				uint32_t index;
 
-				if(!getIndexByName(index, p.name))
+				if(!getIndexByName(index, p.paramName))
 				{
-					_errors << "specified parameter " << p.name << " does not exist" << std::endl;
+					_errors << "specified parameter " << p.paramName << " does not exist" << std::endl;
 					return;
 				}
 			}
