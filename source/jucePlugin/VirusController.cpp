@@ -125,13 +125,13 @@ namespace Virus
             return;
 
     	const auto page = params[pluginLib::MidiDataType::Page];
-		const auto ch = params[pluginLib::MidiDataType::Part];
+		const auto part = params[pluginLib::MidiDataType::Part];
 		const auto index = params[pluginLib::MidiDataType::ParameterIndex];
 		const auto value = params[pluginLib::MidiDataType::ParameterValue];
 
-        const auto& partParams = findSynthParam(ch, page, index);
+        const auto& partParams = findSynthParam(part, page, index);
 
-    	if (partParams.empty() && ch != 0)
+    	if (partParams.empty() && part != 0)
 		{
             // ensure it's not global
 			const auto& globalParams = findSynthParam(0, page, index);
@@ -165,7 +165,7 @@ namespace Virus
     }
 	virusLib::VirusModel Controller::getVirusModel() const
 	{
-		return parseAsciiText(m_singles[2][0].data, 128 + 112) == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
+		return m_singles[2][0].name == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
 	}
     juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
@@ -185,32 +185,45 @@ namespace Virus
 
         juce::StringArray bankNames;
         for (auto i = 0; i < 128; i++)
-            bankNames.add(parseAsciiText(m_singles[bank][i].data, 128 + 112));
+            bankNames.add(m_singles[bank][i].name);
         return bankNames;
     }
-	void Controller::setSinglePresetName(uint8_t part, juce::String _name) {
-		constexpr uint8_t asciiStart = 112;
-		_name = _name.substring(0,kNameLength).paddedRight(' ', kNameLength);
-		for (int i = 0; i < kNameLength; i++)
+	void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name)
+	{
+		for (int i=0; i<kNameLength; i++)
 		{
-			auto* value = getParamValue(part, 1, asciiStart+i);
-			jassert(value);
-			value->setValue(static_cast<uint8_t>(_name[i]));
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            auto* param = getParameter(idx, _part);
+            if(!param)
+                break;
+            auto& v = param->getValueObject();
+            if(i >= _name.length())
+				v.setValue(static_cast<uint8_t>(' '));
+            else
+				v.setValue(static_cast<uint8_t>(_name[i]));
 		}
 	}
-	juce::String Controller::getCurrentPartPresetName(uint8_t part)
+	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
 	{
-		// expensive but fresh!
-		constexpr uint8_t asciiStart = 112;
-		char text[kNameLength + 1];
-		text[kNameLength] = 0; // termination
-		for (auto pos = 0; pos < kNameLength; ++pos)
+        std::string name;
+		for (int i=0; i<kNameLength; i++)
 		{
-			auto* value = getParamValue(part, 1, asciiStart + pos);
-			jassert(value);
-			text[pos] = static_cast<int>(value->getValue());
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            auto* param = getParameter(idx, _part);
+            if(!param)
+                break;
+            const int v = param->getValueObject().getValue();
+			name += static_cast<char>(v);
 		}
-		return {text};
+        return name;
 	}
 
 	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)
@@ -240,9 +253,15 @@ namespace Virus
 		m_currentProgram[_part] = _prg;
 	}
 
-	virusLib::BankNumber Controller::getCurrentPartBank(uint8_t part) const { return m_currentBank[part]; }
-	uint8_t Controller::getCurrentPartProgram(uint8_t part) const { return m_currentProgram[part]; }
-	void Controller::parseSingle(const SysEx &msg)
+	virusLib::BankNumber Controller::getCurrentPartBank(const uint8_t _part) const
+    {
+	    return m_currentBank[_part];
+    }
+	uint8_t Controller::getCurrentPartProgram(const uint8_t _part) const
+    {
+	    return m_currentProgram[_part];
+    }
+	void Controller::parseSingle(const SysEx& msg)
 	{
 		pluginLib::MidiPacket::Data data;
         pluginLib::MidiPacket::ParamValues parameterValues;
@@ -254,6 +273,20 @@ namespace Virus
 
         patch.bankNumber = virusLib::fromMidiByte(data[pluginLib::MidiDataType::Bank]);
         patch.progNumber = data[pluginLib::MidiDataType::Program];
+        
+        for(uint32_t i=0; i<kNameLength; ++i)
+        {
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            const auto it = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
+            if(it == parameterValues.end())
+                break;
+
+            patch.name += static_cast<char>(it->second);
+        }
 
 		copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
 
@@ -283,11 +316,6 @@ namespace Virus
 		}
 		else
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
-
-        constexpr auto namePos = kHeaderWithMsgCodeLen + 2 + 128 + 112;
-        assert(namePos < msg.size());
-        const auto progName = parseAsciiText(msg, namePos);
-        DBG(progName);
     }
 
     void Controller::parseMulti(const SysEx& _msg)
@@ -298,11 +326,7 @@ namespace Virus
     	if(!parseMidiPacket("multidump", data, paramValues, _msg))
             return;
 
-        constexpr auto startPos = kHeaderWithMsgCodeLen;
-
         const auto bankNumber = data[pluginLib::MidiDataType::Bank];
-
-        auto progName = parseAsciiText(_msg, 13);
 
 		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
 		if (bankNumber == 0)
@@ -359,15 +383,6 @@ namespace Virus
             sum += dst[iDst];
         }
         return sum;
-    }
-
-    template <typename T> juce::String Controller::parseAsciiText(const T &msg, const int start)
-    {
-        char text[kNameLength + 1];
-        text[kNameLength] = 0; // termination
-        for (auto pos = 0; pos < kNameLength; ++pos)
-            text[pos] = msg[start + pos];
-        return {text};
     }
 
     void Controller::printMessage(const SysEx &msg)

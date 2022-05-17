@@ -19,22 +19,15 @@ namespace Virus
     public:
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
 
-    	struct MultiPatch
-        {
-            uint8_t bankNumber = 0;
-            uint8_t progNumber = 0;
-			std::array<uint8_t, kDataSizeInBytes> data{};
-        };
-
         struct SinglePatch
         {
 	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
             uint8_t progNumber = 0;
+            std::string name;
 			std::array<uint8_t, kDataSizeInBytes> data{};
         };
 
     	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
-        using Multis = std::array<MultiPatch, 128>;
 
     	static constexpr auto kNameLength = 10;
 
@@ -59,7 +52,7 @@ namespace Virus
 	        return m_singles;
         }
 
-		void setSinglePresetName(uint8_t part, juce::String _name);
+		void setSinglePresetName(uint8_t _part, const juce::String& _name);
 		bool isMultiMode()
 		{
             auto* value = getParamValue(0, 2, 0x7a);
@@ -68,9 +61,9 @@ namespace Virus
 		}
 		// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
-        virusLib::BankNumber getCurrentPartBank(uint8_t part) const;
-		uint8_t getCurrentPartProgram(uint8_t part) const;
-		juce::String getCurrentPartPresetName(uint8_t part);
+        virusLib::BankNumber getCurrentPartBank(uint8_t _part) const;
+		uint8_t getCurrentPartProgram(uint8_t _part) const;
+		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(uint8_t _part) { m_currentPart = _part; }
