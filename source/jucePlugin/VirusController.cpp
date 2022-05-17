@@ -118,8 +118,8 @@ namespace Virus
 
     void Controller::parseParamChange(const SysEx& msg)
     {
-    	std::map<pluginLib::MidiDataType, uint8_t> params;
-        std::map<uint32_t, uint8_t> parameterValues;
+	    pluginLib::MidiPacket::Data params;
+        pluginLib::MidiPacket::ParamValues parameterValues;
 
         if(!parseMidiPacket("parameterchange", params, parameterValues, msg))
             return;
@@ -188,13 +188,6 @@ namespace Virus
             bankNames.add(parseAsciiText(m_singles[bank][i].data, 128 + 112));
         return bankNames;
     }
-    juce::StringArray Controller::getMultiPresetsName() const
-    {
-        juce::StringArray bankNames;
-        for (const auto& m_multi : m_multis)
-	        bankNames.add(parseAsciiText(m_multi.data, 0));
-        return bankNames;
-    }
 	void Controller::setSinglePresetName(uint8_t part, juce::String _name) {
 		constexpr uint8_t asciiStart = 112;
 		_name = _name.substring(0,kNameLength).paddedRight(' ', kNameLength);
@@ -251,8 +244,8 @@ namespace Virus
 	uint8_t Controller::getCurrentPartProgram(uint8_t part) const { return m_currentProgram[part]; }
 	void Controller::parseSingle(const SysEx &msg)
 	{
-		std::map<pluginLib::MidiDataType, uint8_t> data;
-        std::map<uint32_t, uint8_t> parameterValues;
+		pluginLib::MidiPacket::Data data;
+        pluginLib::MidiPacket::ParamValues parameterValues;
 
     	if(!parseMidiPacket("singledump", data, parameterValues, msg))
             return;
@@ -278,7 +271,7 @@ namespace Virus
 
             for(auto it = parameterValues.begin(); it != parameterValues.end(); ++it)
             {
-	            auto* p = getParameter(it->first, ch);
+	            auto* p = getParameter(it->first.second, ch);
 				p->setValueFromSynth(it->second, true);
 
 	            for (const auto& linkedParam : p->getLinkedParameters())
@@ -297,51 +290,40 @@ namespace Virus
         DBG(progName);
     }
 
-    void Controller::parseMulti(const SysEx &msg)
+    void Controller::parseMulti(const SysEx& _msg)
     {
-        constexpr auto expectedDataSize = 2 + 256;
-        constexpr auto checkSumSize = 1;
-        const auto dataSize = msg.size() - kHeaderWithMsgCodeLen - 1;
-        const auto hasChecksum = dataSize == expectedDataSize + checkSumSize;
-        assert(hasChecksum || dataSize == expectedDataSize);
+        pluginLib::MidiPacket::Data data;
+	    pluginLib::MidiPacket::ParamValues paramValues;
+
+    	if(!parseMidiPacket("multidump", data, paramValues, _msg))
+            return;
 
         constexpr auto startPos = kHeaderWithMsgCodeLen;
 
-        MultiPatch patch;
-        patch.bankNumber = msg[startPos];
-        patch.progNumber = msg[startPos + 1];
-        auto progName = parseAsciiText(msg, startPos + 2 + 3);
-        [[maybe_unused]] auto dataSum = copyData(msg, startPos + 2, patch.data);
+        const auto bankNumber = data[pluginLib::MidiDataType::Bank];
 
-		/* If it's a multi edit buffer, set the part page C single parameters to their multi equivalents */
-		if (patch.bankNumber == 0) {
-			for (uint8_t pt = 0; pt < 16; pt++) {
-				for(int i = 0; i < 8; i++) {
-					const auto& params = findSynthParam(pt, virusLib::PAGE_C, virusLib::PART_MIDI_CHANNEL + i);
-					for (const auto& p : params)
-						p->setValueFromSynth(patch.data[virusLib::MD_PART_MIDI_CHANNEL + (i * 16) + pt], true);
-				}
-				const auto& params = findSynthParam(pt, virusLib::PAGE_B, virusLib::CLOCK_TEMPO);
-				for (const auto& p : params)
-					p->setValueFromSynth(patch.data[virusLib::MD_CLOCK_TEMPO], true);
-/*				if (auto* p = findSynthParam(pt, virusLib::PAGE_A, virusLib::EFFECT_SEND)) {
-					p->setValueFromSynth(patch.data[virusLib::MD_PART_EFFECT_SEND], true);
-				}*/
-				m_currentBank[pt] = static_cast<virusLib::BankNumber>(patch.data[virusLib::MD_PART_BANK_NUMBER + pt] + 1);
-				m_currentProgram[pt] = patch.data[virusLib::MD_PART_PROGRAM_NUMBER + pt];
-			}
-		}
-        if (hasChecksum)
+        auto progName = parseAsciiText(_msg, 13);
+
+		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
+		if (bankNumber == 0)
         {
-            const int expectedChecksum = msg[msg.size() - 2];
-            const auto msgDeviceId = msg[5];
-            const int checksum = (msgDeviceId + 0x11 + patch.bankNumber + patch.progNumber + dataSum) & 0x7f;
-            assert(checksum == expectedChecksum);
-        }
-		if (patch.bankNumber == 0) {
-			m_currentMulti = patch;
-		} else {
-			m_multis[patch.progNumber] = patch;
+			for (const auto & paramValue : paramValues)
+			{
+                const auto part = paramValue.first.first;
+                const auto index = paramValue.first.second;
+                const auto value = paramValue.second;
+
+                auto* param = getParameter(index, part);
+                if(!param)
+                    continue;
+
+                const auto& desc = param->getDescription();
+
+                if(desc.page != virusLib::PAGE_C)
+                    continue;
+
+                param->setValueFromSynth(value);
+			}
 		}
     }
 
