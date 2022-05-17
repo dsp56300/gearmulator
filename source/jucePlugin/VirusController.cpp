@@ -207,6 +207,14 @@ namespace Virus
 				v.setValue(static_cast<uint8_t>(_name[i]));
 		}
 	}
+
+	bool Controller::isMultiMode()
+	{
+		auto* value = getParamValue(0, 2, 0x7a);
+		jassert(value);
+		return value->getValue();
+	}
+
 	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
 	{
         std::string name;
@@ -459,7 +467,7 @@ namespace Virus
 
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
 
-    	if(!createMidiDataFromPacket(sysex, _packetType, _params))
+    	if(!createMidiDataFromPacket(sysex, _packetType, _params, 0))
             return false;
 
         sendSysEx(sysex);
@@ -513,5 +521,21 @@ namespace Virus
     pluginLib::Parameter* Controller::createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid)
     {
         return new Parameter(_controller, _desc, _part, _uid);
+    }
+
+    std::vector<uint8_t> Controller::createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program)
+    {
+	    std::map<pluginLib::MidiDataType, uint8_t> data;
+
+        data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
+
+        std::vector<uint8_t> dst;
+
+    	if(!createMidiDataFromPacket(dst, "singledump", data, _part))
+            return {};
+
+        return dst;
     }
 }; // namespace Virus

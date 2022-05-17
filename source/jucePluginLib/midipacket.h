@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -42,11 +43,14 @@ namespace pluginLib
 
 			uint32_t checksumFirstIndex = 0;
 			uint32_t checksumLastIndex = 0;
-			uint32_t checksumInitValue = 0;
+			uint8_t checksumInitValue = 0;
 		};
 
 		using Data = std::map<MidiDataType, uint8_t>;
-		using ParamValues = std::map<std::pair<uint8_t,uint32_t>, uint8_t>;	// part, index => value
+		using ParamIndex = std::pair<uint8_t,uint32_t>;
+		using ParamIndices = std::set<ParamIndex>;
+		using ParamValues = std::map<ParamIndex, uint8_t>;	// part, index => value
+		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;	// part, name => value
 		using Sysex = const std::vector<uint8_t>;
 
 		MidiPacket() = default;
@@ -55,14 +59,19 @@ namespace pluginLib
 		const std::vector<MidiDataDefinition>& definitions() { return m_definitions; }
 		uint32_t size() const { return m_byteSize; }
 
-		bool create(std::vector<uint8_t>& _dst, const std::map<MidiDataType, uint8_t>& _data) const;
+		bool create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const;
+		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, Sysex& _src) const;
+		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
 
 	private:
+		static uint8_t calcChecksum(const MidiDataDefinition& _d, const Sysex& _src);
+
 		const std::string m_name;
 		std::vector<MidiDataDefinition> m_definitions;
 		std::map<uint32_t, uint32_t> m_definitionToByteIndex;
 		std::multimap<uint32_t, uint32_t> m_byteToDefinitionIndex;
 		uint32_t m_byteSize = 0;
+		bool m_hasParameters = false;
 	};
 }
