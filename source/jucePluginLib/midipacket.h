@@ -51,7 +51,7 @@ namespace pluginLib
 		using ParamIndices = std::set<ParamIndex>;
 		using ParamValues = std::map<ParamIndex, uint8_t>;	// part, index => value
 		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;	// part, name => value
-		using Sysex = const std::vector<uint8_t>;
+		using Sysex = std::vector<uint8_t>;
 
 		MidiPacket() = default;
 		explicit MidiPacket(std::string _name, std::vector<MidiDataDefinition>&& _bytes);
@@ -61,7 +61,7 @@ namespace pluginLib
 
 		bool create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const;
 		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
-		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, Sysex& _src) const;
+		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
 
 	private:
