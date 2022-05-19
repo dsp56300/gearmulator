@@ -18,7 +18,7 @@ namespace genericVirusUI
 {
 	virusLib::PresetVersion guessVersion(const uint8_t v)
 	{
-		return virusLib::Microcontroller::getPresetVersion(_v);
+		return virusLib::Microcontroller::getPresetVersion(v);
 	}
 
 	PatchBrowser::PatchBrowser(const VirusEditor& _editor) : m_editor(_editor), m_controller(_editor.getController()),
