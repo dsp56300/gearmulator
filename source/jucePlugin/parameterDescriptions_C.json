@@ -378,7 +378,7 @@
  		{"page":"114", "name":"C_Undefined102", "index":102, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"114", "name":"C_Undefined103", "index":103, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":"114", "name":"C_Undefined104", "index":104, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
- 		{"page":"114", "name":"C_Undefined119", "index":119, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"114", "name":"C_Undefined119", "index":119, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false}
  	],
  	"valuelists":
  	{
