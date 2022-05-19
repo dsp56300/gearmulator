@@ -25,6 +25,8 @@ namespace pluginLib
 
 		bool getIndexByName(uint32_t& _index, const std::string& _name) const;
 
+		const std::map<std::string, MidiPacket>& getMidiPackets() const { return m_midiPackets; }
+
 	private:
 		std::string loadJson(const std::string& _jsonString);
 		void parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets);

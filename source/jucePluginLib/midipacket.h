@@ -29,6 +29,7 @@ namespace pluginLib
 	{
 	public:
 		static constexpr uint8_t AnyPart = 0xff;
+		static constexpr uint32_t InvalidIndex = 0xffffffff;
 
 		struct MidiDataDefinition
 		{
@@ -63,6 +64,9 @@ namespace pluginLib
 		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
+
+		uint32_t getByteIndexForType(MidiDataType _type) const;
+		uint32_t getByteIndexForParameterName(const std::string& _name) const;
 
 	private:
 		static uint8_t calcChecksum(const MidiDataDefinition& _d, const Sysex& _src);
