@@ -42,7 +42,7 @@ void VirusParameterBinding::setPart(uint8_t _part)
 		}
 
 		const auto& desc = b.parameter->getDescription();
-		const bool isNonPartExclusive = (desc.classFlags & Virus::Parameter::Class::GLOBAL) || (desc.classFlags & Virus::Parameter::Class::NON_PART_SENSITIVE);
+		const bool isNonPartExclusive = (desc.classFlags & (int)pluginLib::ParameterClass::Global) || (desc.classFlags & (int)pluginLib::ParameterClass::NonPartSensitive);
 
 		if(isNonPartExclusive)
 			continue;
@@ -68,13 +68,13 @@ void VirusParameterBinding::setPart(uint8_t _part)
 		assert(false && "unknown component type");
 	}
 }
-void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
 {
 	bind(_slider, _param, CurrentPart);
 }
-void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _param, const uint8_t _part)
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
 {
-	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
+	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
 
 	if (!v)
 	{
@@ -93,7 +93,7 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 	_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
 	_slider.getValueObject().referTo(v->getValueObject());
 	_slider.getProperties().set("type", "slider");
-	_slider.getProperties().set("name", v->getDescription().name);
+	_slider.getProperties().set("name", juce::String(v->getDescription().name));
 	if (v->isBipolar()) {
 		_slider.getProperties().set("bipolar", true);
 	}
@@ -101,14 +101,14 @@ void VirusParameterBinding::bind(juce::Slider &_slider, Virus::ParameterType _pa
 	m_bindings.emplace_back(p);
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
 {
 	bind(_combo, _param, CurrentPart);
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, const Virus::ParameterType _param, uint8_t _part)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, uint8_t _part)
 {
-	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
+	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");
@@ -150,9 +150,9 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const Virus::ParameterT
 	m_bindings.emplace_back(p);
 }
 
-void VirusParameterBinding::bind(juce::Button &_btn, const Virus::ParameterType _param)
+void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
 {
-	const auto v = m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart());
+	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart()));
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");
