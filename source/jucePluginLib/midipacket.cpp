@@ -193,6 +193,36 @@ namespace pluginLib
 		return true;
 	}
 
+	uint32_t MidiPacket::getByteIndexForType(MidiDataType _type) const
+	{
+		for(uint32_t i=0; i<m_definitions.size(); ++i)
+		{
+			const auto& d = m_definitions[i];
+			if(d.type != _type)
+				continue;
+
+			return m_definitionToByteIndex.find(i)->second;
+		}
+		return InvalidIndex;
+	}
+
+	uint32_t MidiPacket::getByteIndexForParameterName(const std::string& _name) const
+	{
+		for(uint32_t i=0; i<m_definitions.size(); ++i)
+		{
+			const auto& d = m_definitions[i];
+
+			if(d.type != MidiDataType::Parameter)
+				continue;
+
+			if(d.paramName != _name)
+				continue;
+
+			return m_definitionToByteIndex.find(i)->second;
+		}
+		return InvalidIndex;
+	}
+
 	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, const Sysex& _src)
 	{
 		auto checksum = _d.checksumInitValue;
