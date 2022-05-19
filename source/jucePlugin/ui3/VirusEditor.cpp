@@ -432,7 +432,7 @@ namespace genericVirusUI
 			const auto ext = result.getFileExtension().toLowerCase();
 
 			std::vector<Patch> patches;
-			PatchBrowser::loadBankFile(patches, nullptr, result);
+			PatchBrowser::loadBankFile(getController(), patches, nullptr, result);
 
 			if (patches.empty())
 				return;
@@ -440,12 +440,8 @@ namespace genericVirusUI
 			if (patches.size() == 1)
 			{
 				// load to edit buffer of current part
-				auto data = patches.front().sysex;
-				data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
-				if (getController().isMultiMode())
-					data[8] = getController().getCurrentPart();
-				else
-					data[8] = virusLib::SINGLE;
+				const auto data = getController().modifySingleDump(patches.front().sysex, virusLib::BankNumber::EditBuffer, 
+					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
 				getController().sendSysEx(data);
 			}
 			else
@@ -453,8 +449,7 @@ namespace genericVirusUI
 				// load to bank A
 				for (const auto& p : patches)
 				{
-					auto data = p.sysex;
-					data[7] = virusLib::toMidiByte(virusLib::BankNumber::A);
+					const auto data = getController().modifySingleDump(p.sysex, virusLib::BankNumber::A, 0, true, false);
 					getController().sendSysEx(data);
 				}
 			}
@@ -467,7 +462,9 @@ namespace genericVirusUI
 	void VirusEditor::setPlayMode(uint8_t _playMode)
 	{
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
-	    getController().getParameter(playMode)->setValue(_playMode);
+
+		getController().getParameter(playMode)->setValue(_playMode);
+
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			m_parameterBinding.setPart(0);
 

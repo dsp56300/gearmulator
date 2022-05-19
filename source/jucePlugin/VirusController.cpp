@@ -11,13 +11,30 @@ using MessageType = virusLib::SysexMessageType;
 
 namespace Virus
 {
-    static constexpr uint8_t kSysExStart[] = {0xf0, 0x00, 0x20, 0x33, 0x01};
-    static constexpr auto kHeaderWithMsgCodeLen = 7;
+    constexpr const char* g_midiPacketNames[] =
+    {
+	    "requestsingle",
+	    "requestmulti",
+	    "requestsinglebank",
+	    "requestmultibank",
+	    "requestarrangement",
+	    "requestglobal",
+	    "requesttotal",
+	    "requestcontrollerdump",
+	    "parameterchange",
+	    "singledump",
+	    "multidump"
+    };
+
+    static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
+
+    const char* midiPacketName(Controller::MidiPacketType _type)
+    {
+	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
+    }
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(BinaryData::parameterDescriptions_C_json), m_processor(p), m_deviceId(deviceId)
     {
-//		assert(m_descriptions.getDescriptions().size() == Param_Count && "size of enum must match size of parameter descriptions");
-
         registerParams(p);
 
 		juce::PropertiesFile::Options opts;
@@ -57,54 +74,37 @@ namespace Virus
 		delete m_config;
     }
 
-	void Controller::parseMessage(const SysEx &msg)
+	void Controller::parseMessage(const SysEx& _msg)
 	{
-        if (msg.size() < 8)
-            return; // shorter than expected!
+        std::string name;
+    	pluginLib::MidiPacket::Data data;
+        pluginLib::MidiPacket::ParamValues parameterValues;
 
-        if (msg[msg.size() - 1] != 0xf7)
-            return; // invalid end?!?
-
-        for (size_t i = 0; i < msg.size(); ++i)
+        if(parseMidiPacket(name,  data, parameterValues, _msg))
         {
-            if (i < 5)
+            const auto deviceId = data[pluginLib::MidiDataType::DeviceId];
+
+            if(deviceId != m_deviceId && deviceId != virusLib::OMNI_DEVICE_ID)
+                return; // not intended to this device!
+
+            if(name == midiPacketName(MidiPacketType::SingleDump))
+                parseSingle(_msg, data, parameterValues);
+            else if(name == midiPacketName(MidiPacketType::MultiDump))
+                parseMulti(data, parameterValues);
+            else if(name == midiPacketName(MidiPacketType::ParameterChange))
+                parseParamChange(data);
+            else
             {
-                if (msg[i] != kSysExStart[i])
-                    return; // invalid header
+		        LOG("Controller: Begin unhandled SysEx! --");
+		        printMessage(_msg);
+		        LOG("Controller: End unhandled SysEx! --");
             }
-            else if (i == 5)
-            {
-                if (msg[i] != m_deviceId && msg[i] != 0x10)
-                    return; // not intended to this device!
-            }
-            else if (i == 6)
-            {
-                switch (msg[i])
-                {
-                case MessageType::DUMP_SINGLE:
-                    parseSingle(msg);
-                    break;
-                case MessageType::DUMP_MULTI:
-                    parseMulti(msg);
-                    break;
-                case MessageType::PARAM_CHANGE_A:
-                case MessageType::PARAM_CHANGE_B:
-                case MessageType::PARAM_CHANGE_C:
-                    parseParamChange(msg);
-                    break;
-                case MessageType::REQUEST_SINGLE:
-                case MessageType::REQUEST_MULTI:
-                case MessageType::REQUEST_GLOBAL:
-                case MessageType::REQUEST_TOTAL:
-                    sendSysEx(msg);
-                    break;
-				default:
-					LOG("Controller: Begin Unhandled SysEx! --");
-                    printMessage(msg);
-					LOG("Controller: End Unhandled SysEx! --");
-                }
-            }
+			return;
         }
+
+        LOG("Controller: Begin unknown SysEx! --");
+        printMessage(_msg);
+        LOG("Controller: End unknown SysEx! --");
     }
 
     juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
@@ -118,18 +118,12 @@ namespace Virus
 		return &params.front()->getValueObject();
 	}
 
-    void Controller::parseParamChange(const SysEx& msg)
+    void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data)
     {
-	    pluginLib::MidiPacket::Data params;
-        pluginLib::MidiPacket::ParamValues parameterValues;
-
-        if(!parseMidiPacket("parameterchange", params, parameterValues, msg))
-            return;
-
-    	const auto page = params[pluginLib::MidiDataType::Page];
-		const auto part = params[pluginLib::MidiDataType::Part];
-		const auto index = params[pluginLib::MidiDataType::ParameterIndex];
-		const auto value = params[pluginLib::MidiDataType::ParameterValue];
+    	const auto page  = _data.find(pluginLib::MidiDataType::Page)->second;
+		const auto part  = _data.find(pluginLib::MidiDataType::Part)->second;
+		const auto index = _data.find(pluginLib::MidiDataType::ParameterIndex)->second;
+		const auto value = _data.find(pluginLib::MidiDataType::ParameterValue)->second;
 
         const auto& partParams = findSynthParam(part, page, index);
 
@@ -190,7 +184,27 @@ namespace Virus
             bankNames.add(m_singles[bank][i].name);
         return bankNames;
     }
-	void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name)
+
+    std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const
+    {
+        std::string name;
+        for(uint32_t i=0; i<kNameLength; ++i)
+        {
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
+            if(it == _values.end())
+                break;
+
+            name += static_cast<char>(it->second);
+        }
+        return name;
+    }
+
+    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name)
 	{
 		for (int i=0; i<kNameLength; i++)
 		{
@@ -257,7 +271,7 @@ namespace Virus
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank));
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg);
 
-		requestSingle(0x0, pt);
+		requestSingle(virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), pt);
 
 		m_currentBank[_part] = _bank;
 		m_currentProgram[_part] = _prg;
@@ -271,34 +285,48 @@ namespace Virus
     {
 	    return m_currentProgram[_part];
     }
+
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const
+	{
+        const auto packetName = midiPacketName(MidiPacketType::SingleDump);
+
+    	auto* m = getMidiPacket(packetName);
+
+    	if(!m)
+            return false;
+
+        if(_msg.size() > m->size())
+        {
+            SysEx temp;
+            temp.insert(temp.begin(), _msg.begin(), _msg.begin() + (m->size()-1));
+            temp.push_back(0xf7);
+	    	return parseMidiPacket(*m, _data, _parameterValues, temp);
+        }
+
+    	return parseMidiPacket(*m, _data, _parameterValues, _msg);
+    }
+
 	void Controller::parseSingle(const SysEx& msg)
 	{
 		pluginLib::MidiPacket::Data data;
         pluginLib::MidiPacket::ParamValues parameterValues;
 
-    	if(!parseMidiPacket("singledump", data, parameterValues, msg))
+    	if(!parseSingle(data, parameterValues, msg))
             return;
 
+        parseSingle(msg, data, parameterValues);
+    }
+
+	void Controller::parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
+	{
         SinglePatch patch;
 
-        patch.bankNumber = virusLib::fromMidiByte(data[pluginLib::MidiDataType::Bank]);
-        patch.progNumber = data[pluginLib::MidiDataType::Program];
-        
-        for(uint32_t i=0; i<kNameLength; ++i)
-        {
-	        const std::string paramName = "SingleName" + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if(idx == InvalidParameterIndex)
-                break;
+        patch.bankNumber = virusLib::fromMidiByte(_data.find(pluginLib::MidiDataType::Bank)->second);
+        patch.progNumber = _data.find(pluginLib::MidiDataType::Program)->second;
 
-            const auto it = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
-            if(it == parameterValues.end())
-                break;
+        patch.name = getSinglePresetName(_parameterValues);
 
-            patch.name += static_cast<char>(it->second);
-        }
-
-		copyData(msg, kHeaderWithMsgCodeLen + 2, patch.data);
+        patch.data = _msg;
 
 		if (patch.bankNumber == virusLib::BankNumber::EditBuffer)
 		{
@@ -312,7 +340,7 @@ namespace Virus
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
 
-            for(auto it = parameterValues.begin(); it != parameterValues.end(); ++it)
+            for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
 	            auto* p = getParameter(it->first.second, ch);
 				p->setValueFromSynth(it->second, true);
@@ -326,22 +354,16 @@ namespace Virus
 		}
 		else
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
-    }
+	}
 
-    void Controller::parseMulti(const SysEx& _msg)
+	void Controller::parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
     {
-        pluginLib::MidiPacket::Data data;
-	    pluginLib::MidiPacket::ParamValues paramValues;
-
-    	if(!parseMidiPacket("multidump", data, paramValues, _msg))
-            return;
-
-        const auto bankNumber = data[pluginLib::MidiDataType::Bank];
+        const auto bankNumber = _data.find(pluginLib::MidiDataType::Bank)->second;
 
 		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
 		if (bankNumber == 0)
         {
-			for (const auto & paramValue : paramValues)
+			for (const auto & paramValue : _parameterValues)
 			{
                 const auto part = paramValue.first.first;
                 const auto index = paramValue.first.second;
@@ -381,20 +403,6 @@ namespace Virus
 			p->setValueFromSynth(m.c, true);
 	}
 
-    uint8_t Controller::copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst)
-    {
-        uint8_t sum = 0;
-
-    	size_t iSrc = startPos;
-
-        for (size_t iDst = 0; iSrc < src.size() && iDst < dst.size(); ++iSrc, ++iDst)
-        {
-            dst[iDst] = src[iSrc];
-            sum += dst[iDst];
-        }
-        return sum;
-    }
-
     void Controller::printMessage(const SysEx &msg)
     {
 		std::stringstream ss;
@@ -426,7 +434,7 @@ namespace Virus
         data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
         data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
 
-		return sendSysEx(_multi ? "requestmulti" : "requestsingle", data);
+		return sendSysEx(_multi ? MidiPacketType::RequestMulti : MidiPacketType::RequestSingle, data);
     }
 
     bool Controller::requestSingle(uint8_t _bank, uint8_t _program) const
@@ -444,32 +452,32 @@ namespace Virus
         std::map<pluginLib::MidiDataType, uint8_t> data;
         data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
 
-        return sendSysEx("requestsinglebank", data);
+        return sendSysEx(MidiPacketType::RequestSingleBank, data);
     }
 
     bool Controller::requestTotal() const
     {
-        return sendSysEx("requesttotal");
+        return sendSysEx(MidiPacketType::RequestTotal);
     }
 
     bool Controller::requestArrangement() const
     {
-        return sendSysEx("requestarrangement");
+        return sendSysEx(MidiPacketType::RequestArrangement);
     }
 
-    bool Controller::sendSysEx(const std::string& _packetType) const
+    bool Controller::sendSysEx(MidiPacketType _type) const
     {
 	    std::map<pluginLib::MidiDataType, uint8_t> params;
-        return sendSysEx(_packetType, params);
+        return sendSysEx(_type, params);
     }
 
-    bool Controller::sendSysEx(const std::string& _packetType, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+    bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
     {
 	    std::vector<uint8_t> sysex;
 
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
 
-    	if(!createMidiDataFromPacket(sysex, _packetType, _params, 0))
+    	if(!createMidiDataFromPacket(sysex, midiPacketName(_type), _params, 0))
             return false;
 
         sendSysEx(sysex);
@@ -517,7 +525,7 @@ namespace Virus
         data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
         data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
 
-    	return sendSysEx("parameterchange", data);
+    	return sendSysEx(MidiPacketType::ParameterChange, data);
     }
 
     pluginLib::Parameter* Controller::createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid)
@@ -527,7 +535,7 @@ namespace Virus
 
     std::vector<uint8_t> Controller::createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program)
     {
-	    std::map<pluginLib::MidiDataType, uint8_t> data;
+	    pluginLib::MidiPacket::Data data;
 
         data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
         data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
@@ -535,9 +543,51 @@ namespace Virus
 
         std::vector<uint8_t> dst;
 
-    	if(!createMidiDataFromPacket(dst, "singledump", data, _part))
+    	if(!createMidiDataFromPacket(dst, midiPacketName(MidiPacketType::SingleDump), data, _part))
             return {};
 
         return dst;
+    }
+
+    std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues)
+    {
+        const auto* m = getMidiPacket(midiPacketName(MidiPacketType::SingleDump));
+		assert(m && "midi packet not found");
+
+    	if(!m)
+			return {};
+
+		pluginLib::MidiPacket::Data data;
+		pluginLib::MidiPacket::NamedParamValues paramValues;
+
+        data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
+        data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
+
+        for (const auto& it : _paramValues)
+        {
+            const auto* p = getParameter(it.first.second);
+            assert(p);
+            if(!p)
+                return {};
+            const auto key = std::make_pair(it.first.first, p->getDescription().name);
+            paramValues.insert(std::make_pair(key, it.second));
+        }
+
+        pluginLib::MidiPacket::Sysex dst;
+        if(!m->create(dst, data, paramValues))
+            return {};
+        return dst;
+    }
+
+    std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram, const bool _modifyBank, const bool _modifyProgram)
+    {
+		pluginLib::MidiPacket::Data data;
+		pluginLib::MidiPacket::ParamValues parameterValues;
+
+		if(!parseSingle(data, parameterValues, _sysex))
+			return {};
+
+		return createSingleDump(_modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
     }
 }; // namespace Virus

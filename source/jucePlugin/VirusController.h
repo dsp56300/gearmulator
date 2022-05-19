@@ -22,14 +22,31 @@ namespace Virus
 	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
             uint8_t progNumber = 0;
             std::string name;
-			std::array<uint8_t, kDataSizeInBytes> data{};
+			std::vector<uint8_t> data;
         };
 
     	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
 
     	static constexpr auto kNameLength = 10;
 
-        Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
+		enum class MidiPacketType
+		{
+			RequestSingle,
+			RequestMulti,
+			RequestSingleBank,
+			RequestMultiBank,
+			RequestArrangement,
+			RequestGlobal,
+			RequestTotal,
+			RequestControllerDump,
+			ParameterChange,
+			SingleDump,
+			MultiDump,
+
+			Count
+		};
+
+    	Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 		~Controller() override;
 
         // this is called by the plug-in on audio thread!
@@ -37,14 +54,17 @@ namespace Virus
 
     	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
+        std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
+        std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);
 
         static void printMessage(const SysEx &);
 
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
 		virusLib::VirusModel getVirusModel() const;
-        // bank - 0-1 (AB)
+
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
+        std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
@@ -80,23 +100,23 @@ namespace Virus
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
 		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
 
-        bool sendSysEx(const std::string& _packetType) const;
-        bool sendSysEx(const std::string& _packetType, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+        bool sendSysEx(MidiPacketType _type) const;
+        bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
 		uint8_t getDeviceId() const { return m_deviceId; }
+
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
 
     private:
 		void timerCallback() override;
 
         Singles m_singles;
 
-		// unchecked copy for patch data bytes
-        static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);
+        void parseSingle(const SysEx& _msg);
+        void parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
-        template <typename T> static juce::String parseAsciiText(const T &, int startPos);
-        void parseSingle(const SysEx &);
-        void parseMulti(const SysEx &);
-        void parseParamChange(const SysEx &);
+        void parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+        void parseParamChange(const pluginLib::MidiPacket::Data& _data);
         void parseControllerDump(synthLib::SMidiEvent &);
 
         AudioPluginAudioProcessor& m_processor;

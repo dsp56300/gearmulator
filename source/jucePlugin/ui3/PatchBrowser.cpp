@@ -13,16 +13,10 @@ using namespace juce;
 
 const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 
-const Array<String> g_categories = { "", "Lead",	 "Bass",	  "Pad",	   "Decay",	   "Pluck",
-							 "Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
-							 "Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3" };
-
 namespace genericVirusUI
 {
-	virusLib::VirusModel guessVersion(const uint8_t* _data)
+	virusLib::VirusModel guessVersion(const uint8_t v)
 	{
-		const auto v = _data[0];
-
 		if (v < 5)
 			return virusLib::A;
 		if (v == 6)
@@ -30,25 +24,6 @@ namespace genericVirusUI
 		if (v == 7)
 			return virusLib::C;
 		return virusLib::TI;
-	}
-
-	static juce::String parseAsciiText(const std::vector<uint8_t>& msg, const int start)
-	{
-	    char text[Virus::Controller::kNameLength + 1];
-	    text[Virus::Controller::kNameLength] = 0; // termination
-	    for (int pos = 0; pos < Virus::Controller::kNameLength; ++pos)
-	        text[pos] = static_cast<char>(msg[start + pos]);
-	    return {text};
-	}
-
-	static void initializePatch(Patch& _patch)
-	{
-		_patch.name = parseAsciiText(_patch.data, 128 + 112);
-		_patch.category1 = _patch.data[251];
-		_patch.category2 = _patch.data[252];
-		_patch.unison = _patch.data[97];
-		_patch.transpose = _patch.data[93];
-		_patch.model = guessVersion(&_patch.data[0]);
 	}
 
 	PatchBrowser::PatchBrowser(const VirusEditor& _editor) : m_editor(_editor), m_controller(_editor.getController()),
@@ -104,7 +79,7 @@ namespace genericVirusUI
 
 			m_romBankSelect->addItem("-", 1);
 
-			for(uint32_t i=0; i<m_editor.getController().getBankCount(); ++i)
+			for(uint32_t i=0; i<m_controller.getBankCount(); ++i)
 			{
 				std::stringstream ss;
 				ss << "Bank " << static_cast<char>('A' + i);
@@ -137,58 +112,48 @@ namespace genericVirusUI
 
 	void PatchBrowser::selectionChanged() {}
 
-	uint32_t PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets)
+	uint32_t PatchBrowser::load(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets)
 	{
 		uint32_t count = 0;
 		for (const auto& packet : _packets)
 		{
-			if (load(_result, _dedupeChecksums, packet))
+			if (load(_controller, _result, _dedupeChecksums, packet))
 				++count;
 		}
 		return count;
 	}
 
-	bool PatchBrowser::load(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data)
+	bool PatchBrowser::load(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data)
 	{
 		if (_data.size() < 267)
 			return false;
 
-		auto* it = &_data.front();
+		Patch patch;
+		patch.sysex = _data;
+		if(!initializePatch(_controller, patch))
+			return false;
 
-		if (*it == (uint8_t)0xf0
-			&& *(it + 1) == (uint8_t)0x00
-			&& *(it + 2) == (uint8_t)0x20
-			&& *(it + 3) == (uint8_t)0x33
-			&& *(it + 4) == (uint8_t)0x01
-			&& *(it + 6) == (uint8_t)virusLib::DUMP_SINGLE)
+		patch.progNumber = static_cast<int>(_result.size());
+
+		if (!_dedupeChecksums)
 		{
-			Patch patch;
-			patch.progNumber = static_cast<int>(_result.size());
-			patch.sysex = _data;
-			patch.data.insert(patch.data.begin(), _data.begin() + 9, _data.end());
-			initializePatch(patch);
+			_result.push_back(patch);
+		}
+		else
+		{
+			const auto md5 = std::string(MD5(&_data.front() + 9 + 17, 256 - 17 - 3).toHexString().toRawUTF8());
 
-			if (!_dedupeChecksums)
+			if (_dedupeChecksums->find(md5) == _dedupeChecksums->end())
 			{
+				_dedupeChecksums->insert(md5);
 				_result.push_back(patch);
 			}
-			else
-			{
-				const auto md5 = std::string(MD5(it + 9 + 17, 256 - 17 - 3).toHexString().toRawUTF8());
-
-				if (_dedupeChecksums->find(md5) == _dedupeChecksums->end())
-				{
-					_dedupeChecksums->insert(md5);
-					_result.push_back(patch);
-				}
-			}
-
-			return true;
 		}
-		return false;
+
+		return true;
 	}
 
-	uint32_t PatchBrowser::loadBankFile(std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const File& file)
+	uint32_t PatchBrowser::loadBankFile(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const File& file)
 	{
 		const auto ext = file.getFileExtension().toLowerCase();
 		const auto path = file.getParentDirectory().getFullPathName();
@@ -207,7 +172,7 @@ namespace genericVirusUI
 			std::vector<std::vector<uint8_t>> packets;
 			synthLib::MidiToSysex::splitMultipleSysex(packets, d);
 
-			return load(_result, _dedupeChecksums, packets);
+			return load(_controller, _result, _dedupeChecksums, packets);
 		}
 
 		if (ext == ".mid" || ext == ".midi")
@@ -222,7 +187,7 @@ namespace genericVirusUI
 			std::vector<std::vector<uint8_t>> packets;
 			synthLib::MidiToSysex::splitMultipleSysex(packets, data);
 
-			return load(_result, _dedupeChecksums, packets);
+			return load(_controller, _result, _dedupeChecksums, packets);
 		}
 
 		return 0;
@@ -244,7 +209,7 @@ namespace genericVirusUI
 					std::vector<Patch> patches;
 
 					for (const auto& f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles))
-						loadBankFile(patches, &dedupeChecksums, f.getFile());
+						loadBankFile(m_controller, patches, &dedupeChecksums, f.getFile());
 
 					m_filteredPatches.clear();
 
@@ -271,7 +236,7 @@ namespace genericVirusUI
 		{
 			m_patches.clear();
 			std::vector<Patch> patches;
-			loadBankFile(patches, nullptr, file);
+			loadBankFile(m_controller, patches, nullptr, file);
 			m_filteredPatches.clear();
 			for (const auto& patch : patches)
 			{
@@ -317,11 +282,11 @@ namespace genericVirusUI
 		else if (columnId == Columns::NAME)
 			text = rowElement.name;
 		else if (columnId == Columns::CAT1)
-			text = g_categories[rowElement.category1];
+			text = rowElement.category1;
 		else if (columnId == Columns::CAT2)
-			text = g_categories[rowElement.category2];
+			text = rowElement.category2;
 		else if (columnId == Columns::ARP)
-			text = rowElement.data[129] != 0 ? "Y" : " ";
+			text = rowElement.arpMode != 0 ? "Y" : " ";
 		else if (columnId == Columns::UNI)
 			text = rowElement.unison == 0 ? " " : String(rowElement.unison + 1);
 		else if (columnId == Columns::ST)
@@ -342,14 +307,15 @@ namespace genericVirusUI
 		if (idx == -1)
 			return;
 
-		// force to edit buffer
+		// re-pack single, force to edit buffer
 		const auto program = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
 
-		auto sysex = m_filteredPatches[idx].sysex;
-		sysex[7] = toMidiByte(virusLib::BankNumber::EditBuffer);
-		sysex[8] = program;
+		const auto msg = m_controller.modifySingleDump(m_filteredPatches[idx].sysex, virusLib::BankNumber::EditBuffer, program, true, true);
 
-		m_controller.sendSysEx(sysex);
+		if(msg.empty())
+			return;
+
+		m_controller.sendSysEx(msg);
 		m_controller.requestSingle(0x0, program);
 	}
 
@@ -374,11 +340,11 @@ namespace genericVirusUI
 			if (m_attributeToSort == Columns::NAME)
 				return m_direction * first.name.compareIgnoreCase(second.name);
 			if (m_attributeToSort == Columns::CAT1)
-				return m_direction * (first.category1 - second.category1);
+				return m_direction * first.category1.compare(second.category1);
 			if (m_attributeToSort == Columns::CAT2)
-				return m_direction * (first.category2 - second.category2);
+				return m_direction * first.category2.compare(second.category2);
 			if (m_attributeToSort == Columns::ARP)
-				return m_direction * (first.data[129] - second.data[129]);
+				return m_direction * (first.arpMode - second.arpMode);
 			if (m_attributeToSort == Columns::UNI)
 				return m_direction * (first.unison - second.unison);
 			if (m_attributeToSort == Columns::VER)
@@ -405,7 +371,7 @@ namespace genericVirusUI
 
 	void PatchBrowser::loadRomBank(uint32_t _bankIndex)
 	{
-		const auto& singles = m_editor.getController().getSinglePresets();
+		const auto& singles = m_controller.getSinglePresets();
 
 		if(_bankIndex >= singles.size())
 			return;
@@ -421,32 +387,12 @@ namespace genericVirusUI
 		{
 			Patch patch;
 
+			patch.sysex = bank[s].data;
+
+			if(!initializePatch(m_controller, patch))
+				continue;
+
 			patch.progNumber = static_cast<int>(s);
-			patch.data.insert(patch.data.begin(), bank[s].data.begin(), bank[s].data.end());
-
-			initializePatch(patch);
-
-			// build sysex message
-
-			patch.sysex.push_back(0xf0);
-			patch.sysex.push_back(0x00);	// Manufacturer
-			patch.sysex.push_back(0x20);
-			patch.sysex.push_back(0x33);
-			patch.sysex.push_back(0x01);	// Product Id = Virus
-			patch.sysex.push_back(m_editor.getController().getDeviceId());
-			patch.sysex.push_back(virusLib::DUMP_SINGLE);
-			patch.sysex.push_back(static_cast<uint8_t>(_bankIndex));			// bank
-			patch.sysex.push_back(static_cast<uint8_t>(patch.progNumber));
-			patch.sysex.insert(patch.sysex.end(), patch.data.begin(), patch.data.end());
-
-			// checksum
-			uint8_t cs = 0;
-
-			for(size_t i=5; i<patch.sysex.size(); ++i)
-				cs += patch.sysex[i];
-
-			patch.sysex.push_back(cs & 0x7f);
-			patch.sysex.push_back(0xf7);
 
 			m_patches.add(patch);
 
@@ -458,4 +404,40 @@ namespace genericVirusUI
 		m_patchList.deselectAllRows();
 		m_patchList.repaint();
 	}
+
+	bool PatchBrowser::initializePatch(const Virus::Controller& _controller, Patch& _patch)
+	{
+		const auto& c = _controller;
+
+		pluginLib::MidiPacket::Data data;
+		pluginLib::MidiPacket::ParamValues parameterValues;
+
+		if(!c.parseSingle(data, parameterValues, _patch.sysex))
+			return false;
+
+		const auto idxVersion = c.getParameterIndexByName("Version");
+		const auto idxCategory1 = c.getParameterIndexByName("Category1");
+		const auto idxCategory2 = c.getParameterIndexByName("Category2");
+		const auto idxUnison = c.getParameterIndexByName("Unison Mode");
+		const auto idxTranspose = c.getParameterIndexByName("Transpose");
+		const auto idxArpMode = c.getParameterIndexByName("Arp Mode");
+
+		_patch.name = c.getSinglePresetName(parameterValues);
+		_patch.model = guessVersion(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxVersion))->second);
+		_patch.unison = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxUnison))->second;
+		_patch.transpose = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxTranspose))->second;
+		_patch.arpMode = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxArpMode))->second;
+
+		const auto category1 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory1))->second;
+		const auto category2 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory2))->second;
+
+		const auto* paramCategory1 = c.getParameter(idxCategory1, 0);
+		const auto* paramCategory2 = c.getParameter(idxCategory2, 0);
+		
+		_patch.category1 = paramCategory1->getDescription().valueList.valueToText(category1);
+		_patch.category2 = paramCategory2->getDescription().valueList.valueToText(category2);
+
+		return true;
+	}
+
 }
