@@ -1,5 +1,7 @@
 #include "VirusController.h"
 
+#include "VirusParameter.h"
+
 #include "BinaryData.h"
 #include "PluginProcessor.h"
 
