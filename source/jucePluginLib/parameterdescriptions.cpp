@@ -289,7 +289,7 @@ namespace pluginLib
 
 			if(m_nameToIndex.find(d.name) != m_nameToIndex.end())
 			{
-				errors << "Parameter named " << d.name << " is already defined";
+				errors << "Parameter named " << d.name << " is already defined" << std::endl;
 				continue;
 			}
 			m_nameToIndex.insert(std::make_pair(d.name, static_cast<uint32_t>(i)));
