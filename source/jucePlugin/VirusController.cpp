@@ -33,7 +33,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(BinaryData::parameterDescriptions_C_json), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(virusLib::ROMFile::isTIFamily(p.getModel()) ? BinaryData::parameterDescriptions_TI_json : BinaryData::parameterDescriptions_C_json), m_processor(p), m_deviceId(deviceId)
     {
         registerParams(p);
 
