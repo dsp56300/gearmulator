@@ -77,5 +77,6 @@ private:
 	virusLib::Device					m_device;
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
-    std::string						m_romName;
+	std::string							m_romName;
+    uint32_t							m_clockTempoParam = 0xffffffff;
 };

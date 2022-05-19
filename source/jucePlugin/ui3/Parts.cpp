@@ -1,8 +1,11 @@
 #include "Parts.h"
 
 #include "VirusEditor.h"
+
 #include "../VirusController.h"
 #include "../VirusParameterBinding.h"
+#include "../ParameterNames.h"
+
 #include "dsp56kEmu/logging.h"
 
 namespace genericVirusUI
@@ -29,11 +32,14 @@ namespace genericVirusUI
 
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
 
-			_editor.getParameterBinding().bind(*m_partVolume[i], Virus::Param_PartVolume, static_cast<uint8_t>(i));
-			_editor.getParameterBinding().bind(*m_partPan[i], Virus::Param_Panorama, static_cast<uint8_t>(i));
+			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
+			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
 
-			m_partVolume[i]->getProperties().set("parameter", (int)Virus::Param_PartVolume);
-			m_partPan[i]->getProperties().set("parameter", (int)Virus::Param_Panorama);
+			_editor.getParameterBinding().bind(*m_partVolume[i], partVolume, static_cast<uint8_t>(i));
+			_editor.getParameterBinding().bind(*m_partPan[i], partPanorama, static_cast<uint8_t>(i));
+
+			m_partVolume[i]->getProperties().set("parameter", static_cast<int>(partVolume));
+			m_partPan[i]->getProperties().set("parameter", static_cast<int>(partPanorama));
 
 			m_partVolume[i]->getProperties().set("part", static_cast<int>(i));
 			m_partPan[i]->getProperties().set("part", static_cast<int>(i));
