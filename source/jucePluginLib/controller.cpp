@@ -197,13 +197,34 @@ namespace pluginLib
         return true;
 	}
 
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	{
+		_data.clear();
+		_parameterValues.clear();
+		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
+	}
+
 	bool Controller::parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
 	{
 		auto* m = getMidiPacket(_name);
 		assert(m);
 		if(!m)
 			return false;
+		return parseMidiPacket(*m, _data, _parameterValues, _src);
+	}
 
-		return m->parse(_data, _parameterValues, m_descriptions, _src);
+	bool Controller::parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
+	{
+		const auto packets = m_descriptions.getMidiPackets();
+
+		for (const auto& packet : packets)
+		{
+			if(!parseMidiPacket(packet.second, _data, _parameterValues, _src))
+				continue;
+
+			_name = packet.first;
+			return true;
+		}
+		return false;
 	}
 }
