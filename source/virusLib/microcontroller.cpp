@@ -424,17 +424,13 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		// checksum for ABC models comes after 256 bytes of preset data
 		response.push_back(calcChecksum(response, 5));
 
-		// editor cannot handle D presets yet
-		if(_source != MidiEventSourceEditor)
+		if (size > modelABCsize)
 		{
-			if (size > modelABCsize)
-			{
-				for (size_t i = modelABCsize; i < size; ++i)
-					response.push_back(_dump[i]);
+			for (size_t i = modelABCsize; i < size; ++i)
+				response.push_back(_dump[i]);
 
-				// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
-				response.push_back(calcChecksum(response, 5));
-			}
+			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
+			response.push_back(calcChecksum(response, 5));
 		}
 
 		response.push_back(M_ENDOFSYSEX);
