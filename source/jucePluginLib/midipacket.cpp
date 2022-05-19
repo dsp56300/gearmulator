@@ -11,11 +11,7 @@ namespace pluginLib
 	MidiPacket::MidiPacket(std::string _name, std::vector<MidiDataDefinition>&& _bytes) : m_name(std::move(_name)), m_definitions(std::move(_bytes))
 	{
 		uint8_t usedMask = 0;
-
 		uint32_t byteIndex = 0;
-
-		if(m_name == "multidump")
-			int d=0;
 
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
