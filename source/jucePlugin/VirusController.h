@@ -61,8 +61,6 @@ namespace Virus
 
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
-		virusLib::VirusModel getVirusModel() const;
-
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
 

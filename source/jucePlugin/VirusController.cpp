@@ -158,10 +158,7 @@ namespace Virus
         ignored
          */
     }
-	virusLib::VirusModel Controller::getVirusModel() const
-	{
-		return m_singles[2][0].name == "Taurus  JS" ? virusLib::VirusModel::B : virusLib::VirusModel::C;
-	}
+	
     juce::StringArray Controller::getSinglePresetNames(virusLib::BankNumber _bank) const
     {
 		if (_bank == virusLib::BankNumber::EditBuffer)
