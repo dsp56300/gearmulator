@@ -458,6 +458,8 @@ namespace pluginLib
 
 		MidiPacket packet(_key, std::move(bytes));
 
+		bool hasErrors = false;
+
 		// post-read validation
 		for(size_t i=0; i<packet.definitions().size(); ++i)
 		{
@@ -477,12 +479,13 @@ namespace pluginLib
 
 				if(!getIndexByName(index, p.paramName))
 				{
+					hasErrors = true;
 					_errors << "specified parameter " << p.paramName << " does not exist" << std::endl;
-					return;
 				}
 			}
 		}
 
-		m_midiPackets.insert(std::make_pair(_key, packet));
+		if(!hasErrors)
+			m_midiPackets.insert(std::make_pair(_key, packet));
 	}
 }
