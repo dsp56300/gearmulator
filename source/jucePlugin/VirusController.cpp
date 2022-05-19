@@ -138,8 +138,7 @@ namespace Virus
             }
             for (const auto& param : globalParams)
             {
-				auto flags = param->getDescription().classFlags;
-				if (!(flags & (int)pluginLib::ParameterClass::Global) && !(flags & (int)pluginLib::ParameterClass::NonPartSensitive))
+				if (!param->getDescription().isNonPartSensitive())
 				{
 					jassertfalse;
 					return;
