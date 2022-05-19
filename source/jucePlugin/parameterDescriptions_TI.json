@@ -132,8 +132,11 @@
 		{"page":"112", "index":89, "name":"Cutoff2 Lfo2 Amount", "displayname":"LFO 2 > Cutoff 2", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"112", "index":90, "name":"Pan Lfo2 Amount", "displayname":"LFO 2 > Panorama", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"112", "index":91, "name":"Patch Volume", "displayname":"Patch Volume", "min":0, "max":127, "defaultValue":100, "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined92", "index":92, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"112", "index":93, "name":"Transpose", "displayname":"Patch Transposition", "min":0, "max":127, "defaultValue":64, "toText":"signedMidOff", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"112", "index":94, "name":"Key Mode", "displayname":"Oscillator Section Keyboard Mode", "min":0, "max":5, "defaultValue":0, "toText":"keyMode", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined95", "index":95, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined96", "index":96, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"112", "index":103, "name":"Chorus/Type", "displayname":"Chorus/Type", "min":0, "max":6, "defaultValue":0, "toText":"chorusType", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"112", "index":104, "name":"Chorus/Mix2", "displayname":"Chorus/Mix", "min":0, "max":127, "defaultValue":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"112", "index":105, "name":"Chorus Mix", "displayname":"Chorus/Mix", "min":0, "max":127, "defaultValue":0, "toText":"unsignedOff", "isPublic":true, "isDiscrete":false, "isBool":false},
@@ -148,20 +151,28 @@
 		{"page":"112", "index":109, "name":"Chorus/LowHigh Bal", "displayname":"Chorus/LowHigh Balance", "min":0, "max":127, "defaultValue":0, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"112", "index":110, "name":"Chorus Lfo Shape", "displayname":"Chorus/LFO Shape", "min":0, "max":5, "defaultValue":1, "toText":"lfoShape", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"112", "index":111, "name":"Chorus/X Over", "displayname":"Chorus/X Over", "min":0, "max":127, "defaultValue":64, "toText":"unsignedZero", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle", "index":112, "name":"Delay Mode", "displayname":"Delay Mode", "min":1, "max":22, "defaultValue":1, "toText":"delayMode", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle", "index":113, "name":"Delay Send", "displayname":"Delay Send", "min":0, "max":127, "defaultValue":0, "toText":"send", "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":112, "name":"Delay Mode", "displayname":"Delay Mode", "min":1, "max":22, "defaultValue":1, "toText":"delayMode", "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":"112", "index":113, "name":"Delay Send", "displayname":"Delay Send", "min":0, "max":127, "defaultValue":0, "toText":"send", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"112", "index":114, "name":"Delay/Tape Delay Time", "displayname":"Delay Tape Delay Time (ms)", "min":0, "max":127, "defaultValue":64, "toText":"delayTime", "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":114, "name":"Delay Time", "displayname":"Delay Time (ms)", "min":0, "max":127, "defaultValue":64, "toText":"delayTime", "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":115, "name":"Delay Feedback", "displayname":"Delay Feedback", "min":0, "max":127, "defaultValue":0, "toText":"unipolarPercentFeedback", "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":114, "name":"Delay Time", "displayname":"Delay Time (ms)", "min":0, "max":127, "defaultValue":64, "toText":"delayTime", "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":115, "name":"Delay Feedback", "displayname":"Delay Feedback", "min":0, "max":127, "defaultValue":0, "toText":"unipolarPercentFeedback", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"112", "index":115, "name":"Delay/Tape Delay Feedback", "displayname":"Delay Tape Delay Feedback", "min":0, "max":127, "defaultValue":0, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":116, "name":"Dly Rate / Rev Decay", "displayname":"Delay LFO Rate", "min":0, "max":127, "defaultValue":16, "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":117, "name":"Dly Depth ", "displayname":"Delay LFO Depth", "min":0, "max":127, "defaultValue":12, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":116, "name":"Dly Rate / Rev Decay", "displayname":"Delay LFO Rate", "min":0, "max":127, "defaultValue":16, "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":117, "name":"Dly Depth ", "displayname":"Delay LFO Depth", "min":0, "max":127, "defaultValue":12, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"112", "index":117, "name":"Delay/Tape Delay Modulation", "displayname":"Delay Tape Delay Modulation", "min":0, "max":127, "defaultValue":12, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":118, "name":"Delay Lfo Shape", "displayname":"Delay LFO Shape", "min":0, "max":5, "defaultValue":1, "toText":"delayLfoShape", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":119, "name":"Delay Color", "displayname":"Delay Color", "min":0, "max":127, "defaultValue":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+		{"page":"112", "index":118, "name":"Delay Lfo Shape", "displayname":"Delay LFO Shape", "min":0, "max":5, "defaultValue":1, "toText":"delayLfoShape", "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":"112", "index":119, "name":"Delay Color", "displayname":"Delay Color", "min":0, "max":127, "defaultValue":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"112", "index":119, "name":"Delay/Tape Delay Center Frequency", "displayname":"Delay Tape Delay Frequency", "min":0, "max":127, "defaultValue":64, "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"112", "class":"MultiOrSingle|NonPartSensitive", "index":123, "name":"All Notes Off", "displayname":"All Notes Off", "min":0, "max":127, "defaultValue":1, "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined120", "index":120, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined121", "index":121, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+		{"page":"112", "index":123, "name":"All Notes Off", "displayname":"All Notes Off", "min":0, "max":127, "defaultValue":1, "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined124", "index":124, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined125", "index":125, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined126", "index":126, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"112", "name":"A_Undefined127", "index":127, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 
+ 		{"page":"113", "name":"B_Undefined0", "index":0, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined1", "index":1, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":2, "name":"Arp Pattern Selct", "displayname":"Arpeggiator/Pattern", "min":0, "max":63, "defaultValue":1, "toText":"User1-64", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":3, "name":"Arp Octave Range", "displayname":"Arpeggiator Range In Octaves", "min":0, "max":3, "defaultValue":0, "toText":"MIDIChannels", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":4, "name":"Arp Hold Enable", "displayname":"Arpeggiator Hold Mode", "min":0, "max":1, "defaultValue":0, "toText":"OnOff", "isPublic":true, "isDiscrete":false, "isBool":true},
@@ -174,17 +185,22 @@
 		{"page":"113", "index":11, "name":"Lfo3 Destination", "displayname":"LFO 3 User Destination", "min":0, "max":6, "defaultValue":1, "toText":"lfoDest", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":12, "name":"Osc Lfo3 Amount", "displayname":"LFO 3 User Destination Amount", "min":0, "max":127, "defaultValue":0, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":13, "name":"Lfo3 Fade-In Time", "displayname":"LFO 3/Fade In Time", "min":0, "max":127, "defaultValue":0, "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined14", "index":14, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":15, "name":"Arp Mode", "displayname":"Arpeggiator Mode", "min":0, "max":7, "defaultValue":0, "toText":"arpModes", "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":"113", "class":"MultiOrSingle|NonPartSensitive", "index":16, "name":"Clock Tempo", "displayname":"Tempo (Disabled in Plug-In)", "min":0, "max":127, "defaultValue":57, "toText":"bpm", "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":"113", "index":16, "name":"Clock Tempo", "displayname":"Tempo (Disabled in Plug-In)", "min":0, "max":127, "defaultValue":57, "toText":"bpm", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":17, "name":"Arp Clock", "displayname":"Arpeggiator Clock", "min":0, "max":17, "defaultValue":4, "toText":"numArpClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":18, "name":"Lfo1 Clock", "displayname":"LFO 1/Clock", "min":0, "max":21, "defaultValue":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":19, "name":"Lfo2 Clock", "displayname":"LFO 2/Clock", "min":0, "max":21, "defaultValue":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "class":"MultiOrSingle|NonPartSensitive", "index":20, "name":"Delay Clock", "displayname":"Delay Clock", "min":0, "max":16, "defaultValue":0, "toText":"numDelayClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":21, "name":"Lfo3 Clock", "displayname":"LFO 3/Clock", "min":0, "max":21, "defaultValue":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined22", "index":22, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined23", "index":23, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined24", "index":24, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":25, "name":"Control Smooth Mode", "displayname":"Parameter Smooth Mode", "min":0, "max":20, "defaultValue":1, "toText":"controlSmoothMode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":26, "name":"Bender Range Up", "displayname":"Bender Up Range", "min":0, "max":127, "defaultValue":66, "toText":"signed", "isPublic":true, "isDiscrete":true, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":27, "name":"Bender Range Down", "displayname":"Bender Down Range", "min":0, "max":127, "defaultValue":62, "toText":"signed", "isPublic":true, "isDiscrete":true, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":28, "name":"Bender Scale", "displayname":"Bender Scale", "min":0, "max":1, "defaultValue":1, "toText":"linExp", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined29", "index":29, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":30, "name":"Filter1 Env Polarity", "displayname":"Filter 1 Envelope Polarity", "min":0, "max":1, "defaultValue":1, "toText":"negPos", "isPublic":true, "isDiscrete":false, "isBool":true},
 		{"page":"113", "index":31, "name":"Filter2 Env Polarity", "displayname":"Filter 2 Envelope Polarity", "min":0, "max":1, "defaultValue":1, "toText":"negPos", "isPublic":true, "isDiscrete":false, "isBool":true},
 		{"page":"113", "index":32, "name":"Filter2 Cutoff Link", "displayname":"Filter Cutoff Link", "min":0, "max":1, "defaultValue":1, "isPublic":true, "isDiscrete":false, "isBool":true},
@@ -193,8 +209,10 @@
 		{"page":"113", "index":34, "name":"Osc2 Wavetable/FM Mode WaveTable", "displayname":"Wavetable Oscillator FM Mode", "min":0, "max":1, "defaultValue":0, "toText":"oscFMModeWaveTable", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":35, "name":"Osc Init Phase", "displayname":"Oscillator Section Initial Phase", "min":0, "max":127, "defaultValue":0, "toText":"unsignedOff", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":36, "name":"Punch Intensity", "displayname":"Oscillator Punch Intensity", "min":0, "max":127, "defaultValue":64, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined37", "index":37, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":38, "name":"Input Follower Mode", "displayname":"Input Follower/Select", "min":0, "max":3, "defaultValue":0, "toText":"inputFollowerMode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":39, "name":"Vocoder Mode", "displayname":"Vocoder Mode", "min":0, "max":6, "defaultValue":0, "toText":"vocoderMode", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined40", "index":40, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":41, "name":"Osc3 Mode", "displayname":"Oscillator 3 Model", "min":0, "max":67, "defaultValue":0, "toText":"osc3Mode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":42, "name":"Osc3 Volume", "displayname":"Oscillator 3 Volume", "min":0, "max":127, "defaultValue":64, "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":43, "name":"Osc3 Semitone", "displayname":"Oscillator 3 Detune In Semitone", "min":16, "max":112, "defaultValue":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
@@ -213,6 +231,7 @@
 		{"page":"113", "index":56, "name":"Resonance1 Velocity", "displayname":"Velocity > Filter 1 Resonance", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":57, "name":"Resonance2 Velocity", "displayname":"Velocity > Filter 2 Resonance", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":58, "name":"Second Output Balance", "displayname":"Surround Channel Balance", "min":0, "max":127, "defaultValue":0, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":"113", "name":"B_Undefined59", "index":59, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":60, "name":"Amp Velocity", "displayname":"Velocity > Volume", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":61, "name":"Panorama Velocity", "displayname":"Velocity > Panorama", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":62, "name":"Soft Knob-1 Single", "displayname":"Soft Knob 1 Destination", "min":0, "max":117, "defaultValue":0, "toText":"softknobDest", "isPublic":true, "isDiscrete":true, "isBool":false},
@@ -236,6 +255,7 @@
 		{"page":"113", "index":80, "name":"LFO1 Assign Amount", "displayname":"LFO 1 User Destination Amount", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":81, "name":"LFO2 Assign Dest", "displayname":"LFO 2 User Destination", "min":0, "max":121, "defaultValue":0, "toText":"modmatrixDest", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":82, "name":"LFO2 Assign Amount", "displayname":"LFO 2 User Destination Amount", "min":0, "max":127, "defaultValue":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":"113", "name":"B_Undefined83", "index":83, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":84, "name":"Phaser Mode", "displayname":"Phaser/Stages", "min":0, "max":5, "defaultValue":3, "toText":"phaserMode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":85, "name":"Phaser Mix", "displayname":"Phaser/Mix", "min":0, "max":127, "defaultValue":0, "toText":"unsignedOff", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":86, "name":"Phaser Rate", "displayname":"Phaser/LFO Rate", "min":0, "max":127, "defaultValue":36, "isPublic":true, "isDiscrete":false, "isBool":false},
@@ -243,6 +263,7 @@
 		{"page":"113", "index":88, "name":"Phaser Frequency", "displayname":"Phaser/Frequency", "min":0, "max":127, "defaultValue":64, "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":89, "name":"Phaser Feedback", "displayname":"Phaser/Feedback", "min":0, "max":127, "defaultValue":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":90, "name":"Phaser Spread", "displayname":"Phaser/Spread", "min":0, "max":127, "defaultValue":127, "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined91", "index":91, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":92, "name":"MidEQ Gain", "displayname":"EQ/Mid Gain (dB)", "min":0, "max":127, "defaultValue":64, "toText":"NumEqInDB", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":93, "name":"MidEQ Frequency", "displayname":"EQ/Mid Frequency (Hz)", "min":0, "max":127, "defaultValue":84, "toText":"numEQMidFrequency", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":"113", "index":94, "name":"MidEQ Q-Factor", "displayname":"EQ/Mid Q-Factor", "min":0, "max":127, "defaultValue":32, "toText":"NumEQQ-factor", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
@@ -253,6 +274,7 @@
 		{"page":"113", "index":99, "name":"Input Ringmodulator", "displayname":"Ring Modulator Mix", "min":0, "max":127, "defaultValue":0, "toText":"unsignedOff", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":100, "name":"Distortion Curve", "displayname":"Distortion Type", "min":0, "max":25, "defaultValue":0, "toText":"NameDistortionModes", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":101, "name":"Distortion Intensity", "displayname":"Distortion Intensity", "min":0, "max":127, "defaultValue":0, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined102", "index":102, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":103, "name":"Assign 4 Source", "displayname":"Mod Matrix Slot 4/Source", "min":0, "max":39, "defaultValue":0, "toText":"modmatrixSource", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":104, "name":"Assign 4 Destination", "displayname":"Mod Matrix Slot 4/Destination 1", "min":0, "max":121, "defaultValue":0, "toText":"modmatrixDest", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":105, "name":"Assign 4 Amount", "displayname":"Assign Slot 4/Amount 1", "min":0, "max":127, "defaultValue":64, "toText":"signedMidOff", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
@@ -262,9 +284,21 @@
 		{"page":"113", "index":109, "name":"Assign 6 Source", "displayname":"Mod Matrix Slot 6/Source", "min":0, "max":39, "defaultValue":0, "toText":"modmatrixSource", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":110, "name":"Assign 6 Destination", "displayname":"Mod Matrix Slot 6/Destination 1", "min":0, "max":121, "defaultValue":0, "toText":"modmatrixDest", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":111, "name":"Assign 6 Amount", "displayname":"Mod Matrix Slot 6/Amount 1", "min":0, "max":127, "defaultValue":64, "toText":"signedMidOff", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":"113", "index":112, "name":"SingleName0", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":113, "name":"SingleName1", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":114, "name":"SingleName2", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":115, "name":"SingleName3", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":116, "name":"SingleName4", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":117, "name":"SingleName5", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":118, "name":"SingleName6", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":119, "name":"SingleName7", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":120, "name":"SingleName8", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "index":121, "name":"SingleName9", "min":0, "max":127, "toText":"ascii", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":122, "name":"Filter Select", "displayname":"Filter Select", "min":0, "max":2, "defaultValue":2, "toText":"filterSelect", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":123, "name":"Category1", "displayname":"Patch Category 1", "min":0, "max":22, "defaultValue":0, "toText":"category", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":"113", "index":124, "name":"Category2", "displayname":"Patch Category 2", "min":0, "max":22, "defaultValue":0, "toText":"category", "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined125", "index":125, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":"113", "name":"B_Undefined126", "index":126, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"113", "index":127, "name":"Oscillators/Select", "displayname":"Oscillators/Select", "min":0, "max":2, "defaultValue":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 
 		{"page":"110", "index":1, "name":"Reverb Mode", "displayname":"Reverb/Mode", "min":1, "max":3, "defaultValue":1, "toText":"reverbMode", "isPublic":true, "isDiscrete":true, "isBool":false},
@@ -468,7 +502,7 @@
  		{"page":"114", "name":"MultiName9", "index":14, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"114", "index":15, "name":"Parameters/Clock Tempo", "min":0, "max":127, "defaultValue":64, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":"114", "index":29, "name":"Parameters/Panel Part", "min":0, "max":15, "defaultValue":0, "toText":"MIDIChannels", "isPublic":false, "isDiscrete":true, "isBool":false},
-		{"page":"114", "index":32, "name":"Part Bank Change", "min":0, "max":29, "defaultValue":0, "toText":"locationRAM/ROM", "isPublic":false, "isDiscrete":true, "isBool":false},
+		{"page":"114", "index":32, "name":"Part Bank Select", "min":0, "max":29, "defaultValue":0, "toText":"locationRAM/ROM", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":"114", "index":33, "name":"Part Program Change", "min":0, "max":127, "defaultValue":0, "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":"114", "index":34, "name":"Part Midi Channel", "min":0, "max":15, "defaultValue":0, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":"114", "index":35, "name":"Part Low Key", "min":0, "max":127, "defaultValue":0, "toText":"filterKeytrackBase", "isPublic":false, "isDiscrete":true, "isBool":false},
@@ -485,7 +519,7 @@
 		{"page":"114", "index":74, "name":"Part Hold Pedal Enable", "min":0, "max":1, "defaultValue":1, "toText":"disabledEnabled", "isPublic":false, "isDiscrete":false, "isBool":true},
 		{"page":"114", "index":75, "name":"Keyb To Midi", "min":0, "max":1, "defaultValue":0, "toText":"disabledEnabled", "isPublic":false, "isDiscrete":false, "isBool":true},
 		{"page":"114", "index":77, "name":"Note Steal Priority", "min":0, "max":1, "defaultValue":0, "toText":"nameVoiceStealMode", "isPublic":false, "isDiscrete":false, "isBool":true},
-		{"page":"114", "index":78, "name":"Programchange Receive Enable", "min":0, "max":1, "defaultValue":0, "isPublic":false, "isDiscrete":false, "isBool":true},
+		{"page":"114", "index":78, "name":"Part Prog Change Enable", "min":0, "max":1, "defaultValue":0, "isPublic":false, "isDiscrete":false, "isBool":true},
 
 		{"page":"115", "index":8, "name":"Analog Input/Input Source", "min":0, "max":1, "defaultValue":0, "toText":"namesInputSource", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":"115", "index":9, "name":"USB/Virus Control USB IO Configuration", "min":0, "max":2, "defaultValue":0, "toText":"nameUSBOutputConfiguration", "isPublic":false, "isDiscrete":true, "isBool":false},
@@ -975,6 +1009,17 @@
 		"namesInputSelect":
 		[
 			"Analog", "S/PDIF"
+		],
+		"ascii":
+		[
+			"NUL","SOH","STX","ETX","EOT","ENQ","ACK","BEL","BS","HT","LF","VT","FF","CR","SO","SI","DLE","DC1","DC2","DC3","DC4","NAK","SYN","ETB","CAN","EM","SUB","ESC","FS","GS","RS","US",
+			" ","!",'"',"#","$","%","&","'","(",")","*","+",",","-",".","/",
+			"0","1","2","3","4","5","6","7","8","9",
+			":",";","<","=",">","?","@",
+			"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",
+			"[","\\","]","^","_","`",
+			"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
+			"{","|","}","~","DEL"
 		]
 	},
  	"midipackets":
@@ -1192,17 +1237,17 @@
 			{"type": "param", "name":"Unison Lfo Phase"},                   // 100
 			{"type": "param", "name":"Input Mode"},                         // 101
 			{"type": "param", "name":"Input Select"},                       // 102
-			{"type": "param", "name":"A_Undefined103"},                     // 103
-			{"type": "param", "name":"A_Undefined104"},                     // 104
+			{"type": "param", "name":"Chorus/Type"},                        // 103
+			{"type": "param", "name":"Chorus/Mix2"},                        // 104
 			{"type": "param", "name":"Chorus Mix"},                         // 105
 			{"type": "param", "name":"Chorus Rate"},                        // 106
 			{"type": "param", "name":"Chorus Depth"},                       // 107
 			{"type": "param", "name":"Chorus Delay"},                       // 108
 			{"type": "param", "name":"Chorus Feedback"},                    // 109
 			{"type": "param", "name":"Chorus Lfo Shape"},                   // 110
-			{"type": "param", "name":"A_Undefined111"},                     // 111
-			{"type": "param", "name":"Delay/Reverb Mode"},                  // 112
-			{"type": "param", "name":"Effect Send"},                        // 113
+			{"type": "param", "name":"Chorus/X Over"},                      // 111
+			{"type": "param", "name":"Delay Mode"},                         // 112
+			{"type": "param", "name":"Delay Send"},                         // 113
 			{"type": "param", "name":"Delay Time"},                         // 114
 			{"type": "param", "name":"Delay Feedback"},                     // 115
 			{"type": "param", "name":"Dly Rate / Rev Decay"},               // 116
@@ -1219,7 +1264,7 @@
 			{"type": "param", "name":"A_Undefined127"},                     // 127
 
 			{"type": "param", "name":"B_Undefined0"},                       // 0
-			{"type": "param", "name":"Arp Mode"},                           // 1
+			{"type": "param", "name":"B_Undefined1"},                       // 1
 			{"type": "param", "name":"Arp Pattern Selct"},                  // 2
 			{"type": "param", "name":"Arp Octave Range"},                   // 3
 			{"type": "param", "name":"Arp Hold Enable"},                    // 4
@@ -1233,7 +1278,7 @@
 			{"type": "param", "name":"Osc Lfo3 Amount"},                    // 12
 			{"type": "param", "name":"Lfo3 Fade-In Time"},                  // 13
 			{"type": "param", "name":"B_Undefined14"},                      // 14
-			{"type": "param", "name":"B_Undefined15"},                      // 15
+			{"type": "param", "name":"Arp Mode"},                           // 15
 			{"type": "param", "name":"Clock Tempo"},                        // 16
 			{"type": "param", "name":"Arp Clock"},                          // 17
 			{"type": "param", "name":"Lfo1 Clock"},                         // 18
@@ -1271,7 +1316,7 @@
 			{"type": "param", "name":"Fm Amount Velocity"},                 // 50
 			{"type": "param", "name":"Soft Knob1 ShortName"},               // 51
 			{"type": "param", "name":"Soft Knob2 ShortName"},               // 52
-			{"type": "param", "name":"B_Undefined53"},                      // 53
+			{"type": "param", "name":"Soft Knob3 ShortName"},               // 53
 			{"type": "param", "name":"Flt1 EnvAmt Velocity"},               // 54
 			{"type": "param", "name":"Flt2 EnvAmt Velocity"},               // 55
 			{"type": "param", "name":"Resonance1 Velocity"},                // 56
@@ -1345,7 +1390,7 @@
 			{"type": "param", "name":"Category2"},                          // 124
 			{"type": "param", "name":"B_Undefined125"},                     // 125
 			{"type": "param", "name":"B_Undefined126"},                     // 126
-			{"type": "param", "name":"B_Undefined127"},                     // 127
+			{"type": "param", "name":"Oscillators/Select"},                 // 127
 			{"type": "checksum", "first": 5, "last": 264 },
 			{"type": "byte", "value": "f7"}
 		],
@@ -1359,7 +1404,6 @@
 			{"type": "byte", "value": "11"},
 			{"type": "bank"},
 			{"type": "program"},
-
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
@@ -1376,15 +1420,15 @@
 			{"type": "param", "name":"MultiName9"},
 			{"type": "null"},
 			{"type": "param", "name":"Clock Tempo"},
-			{"type": "param", "name":"Delay/Reverb Mode"},
-			{"type": "param", "name":"Delay Time"},
-			{"type": "param", "name":"Delay Feedback"},
-			{"type": "param", "name":"Dly Rate / Rev Decay"},
-			{"type": "param", "name":"Dly Depth "},
-			{"type": "param", "name":"Delay Lfo Shape"},
-			{"type": "param", "name":"Delay Output Select"},
-			{"type": "param", "name":"Delay Clock"},
-			{"type": "param", "name":"Delay Color"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
@@ -1552,22 +1596,6 @@
 			{"type": "param", "name":"Part Output Select", "part":13},
 			{"type": "param", "name":"Part Output Select", "part":14},
 			{"type": "param", "name":"Part Output Select", "part":15},
-			{"type": "param", "name":"Effect Send", "part":0},
-			{"type": "param", "name":"Effect Send", "part":1},
-			{"type": "param", "name":"Effect Send", "part":2},
-			{"type": "param", "name":"Effect Send", "part":3},
-			{"type": "param", "name":"Effect Send", "part":4},
-			{"type": "param", "name":"Effect Send", "part":5},
-			{"type": "param", "name":"Effect Send", "part":6},
-			{"type": "param", "name":"Effect Send", "part":7},
-			{"type": "param", "name":"Effect Send", "part":8},
-			{"type": "param", "name":"Effect Send", "part":9},
-			{"type": "param", "name":"Effect Send", "part":10},
-			{"type": "param", "name":"Effect Send", "part":11},
-			{"type": "param", "name":"Effect Send", "part":12},
-			{"type": "param", "name":"Effect Send", "part":13},
-			{"type": "param", "name":"Effect Send", "part":14},
-			{"type": "param", "name":"Effect Send", "part":15},
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
@@ -1584,6 +1612,22 @@
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":0},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":1},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":2},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":3},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":4},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":5},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":6},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":7},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":8},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":9},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":10},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":11},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":12},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":13},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":14},
+			{"type": "param", "name":"Part Parameter/Panorama", "part":15},
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
