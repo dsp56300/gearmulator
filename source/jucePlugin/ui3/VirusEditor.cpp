@@ -217,7 +217,7 @@ namespace genericVirusUI
 
 	int VirusEditor::getParameterIndexByName(const std::string& _name)
 	{
-		return getController().getParameterTypeByName(_name);
+		return getController().getParameterIndexByName(_name);
 	}
 
 	bool VirusEditor::bindParameter(juce::Button& _target, int _parameterIndex)
@@ -400,25 +400,15 @@ namespace genericVirusUI
 			const auto result = chooser.getResult();
 			m_previousPath = result.getParentDirectory().getFullPathName();
 			const auto ext = result.getFileExtension().toLowerCase();
-			const uint8_t syxHeader[9] = { 0xF0, 0x00, 0x20, 0x33, 0x01, 0x00, 0x10, 0x01, 0x00 };
-			constexpr uint8_t syxEof[1] = { 0xF7 };
-			uint8_t cs = syxHeader[5] + syxHeader[6] + syxHeader[7] + syxHeader[8];
-			uint8_t data[256];
-			for (int i = 0; i < 256; i++)
+
+			const auto data = getController().createSingleDump(getController().getCurrentPart(), virusLib::toMidiByte(virusLib::BankNumber::A), 0);
+
+			if(!data.empty())
 			{
-				const auto param = getController().getParamValue(getController().getCurrentPart(), i < 128 ? 0 : 1, i & 127);
-
-				data[i] = param ? static_cast<int>(param->getValue()) : 0;
-				cs += data[i];
+				result.deleteFile();
+				result.create();
+				result.appendData(&data[0], data.size());
 			}
-			cs = cs & 0x7f;
-
-			result.deleteFile();
-			result.create();
-			result.appendData(syxHeader, 9);
-			result.appendData(data, 256);
-			result.appendData(&cs, 1);
-			result.appendData(syxEof, 1);
 		};
 		m_fileChooser->launchAsync(flags, onFileChooser);
 	}
@@ -444,7 +434,7 @@ namespace genericVirusUI
 			const auto ext = result.getFileExtension().toLowerCase();
 
 			std::vector<Patch> patches;
-			PatchBrowser::loadBankFile(patches, nullptr, result);
+			PatchBrowser::loadBankFile(getController(), patches, nullptr, result);
 
 			if (patches.empty())
 				return;
@@ -452,12 +442,8 @@ namespace genericVirusUI
 			if (patches.size() == 1)
 			{
 				// load to edit buffer of current part
-				auto data = patches.front().sysex;
-				data[7] = virusLib::toMidiByte(virusLib::BankNumber::EditBuffer);
-				if (getController().isMultiMode())
-					data[8] = getController().getCurrentPart();
-				else
-					data[8] = virusLib::SINGLE;
+				const auto data = getController().modifySingleDump(patches.front().sysex, virusLib::BankNumber::EditBuffer, 
+					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
 				getController().sendSysEx(data);
 			}
 			else
@@ -465,8 +451,7 @@ namespace genericVirusUI
 				// load to bank A
 				for (const auto& p : patches)
 				{
-					auto data = p.sysex;
-					data[7] = virusLib::toMidiByte(virusLib::BankNumber::A);
+					const auto data = getController().modifySingleDump(p.sysex, virusLib::BankNumber::A, 0, true, false);
 					getController().sendSysEx(data);
 				}
 			}
@@ -478,8 +463,10 @@ namespace genericVirusUI
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
 	{
-		const auto playMode = getController().getParameterTypeByName(Virus::g_paramPlayMode);
-	    getController().getParameter(playMode)->setValue(_playMode);
+		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
+
+		getController().getParameter(playMode)->setValue(_playMode);
+
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			m_parameterBinding.setPart(0);
 

@@ -12,7 +12,7 @@ namespace genericVirusUI
 		m_reverbContainer = _editor.findComponent("ContainerReverb");
 		m_delayContainer = _editor.findComponent("ContainerDelay");
 
-		const auto delayReverbMode = m_editor.getController().getParameterTypeByName(Virus::g_paramDelayReverbMode);
+		const auto delayReverbMode = m_editor.getController().getParameterIndexByName(Virus::g_paramDelayReverbMode);
 		const auto p = m_editor.getController().getParameter(delayReverbMode, 0);
 
 		if (p)
@@ -25,7 +25,7 @@ namespace genericVirusUI
 
 	FxPage::~FxPage()
 	{
-		const auto delayReverbMode = m_editor.getController().getParameterTypeByName(Virus::g_paramDelayReverbMode);
+		const auto delayReverbMode = m_editor.getController().getParameterIndexByName(Virus::g_paramDelayReverbMode);
 		const auto p = m_editor.getController().getParameter(delayReverbMode, 0);
 		if(p)
 			p->getValueObject().removeListener(this);
@@ -38,7 +38,7 @@ namespace genericVirusUI
 
 	void FxPage::updateReverbDelay() const
 	{
-		const auto delayReverbMode = m_editor.getController().getParameterTypeByName(Virus::g_paramDelayReverbMode);
+		const auto delayReverbMode = m_editor.getController().getParameterIndexByName(Virus::g_paramDelayReverbMode);
 		const auto p = m_editor.getController().getParameter(delayReverbMode, 0);
 
 		if (!p)
