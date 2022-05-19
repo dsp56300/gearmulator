@@ -26,7 +26,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 	m_device(m_rom), m_plugin(&m_device)
 {
 	getController(); // init controller
-	m_clockTempoParam = getController().getParameterTypeByName(Virus::g_paramClockTempo);
+	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() = default;

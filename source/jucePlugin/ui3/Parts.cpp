@@ -32,8 +32,8 @@ namespace genericVirusUI
 
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
 
-			const auto partVolume = _editor.getController().getParameterTypeByName(Virus::g_paramPartVolume);
-			const auto partPanorama = _editor.getController().getParameterTypeByName(Virus::g_paramPartPanorama);
+			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
+			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
 
 			_editor.getParameterBinding().bind(*m_partVolume[i], partVolume, static_cast<uint8_t>(i));
 			_editor.getParameterBinding().bind(*m_partPan[i], partPanorama, static_cast<uint8_t>(i));

@@ -1,86 +1,83 @@
 #pragma once
 
+#include "../jucePluginLib/parameterdescriptions.h"
+#include "../jucePluginLib/controller.h"
+
+#include "../virusLib/microcontrollerTypes.h"
+
 #include "../synthLib/plugin.h"
-#include "VirusParameter.h"
-
-#include "VirusParameterDescriptions.h"
-
-namespace virusLib
-{
-	enum class BankNumber : uint8_t;
-}
 
 class AudioPluginAudioProcessor;
 
 namespace Virus
 {
-	enum EnvelopeType
-	{
-		Env_Amp,
-		Env_Filter
-	};
     using SysEx = std::vector<uint8_t>;
-    class Controller : private juce::Timer
+    class Controller : public pluginLib::Controller, juce::Timer
     {
     public:
         static constexpr size_t kDataSizeInBytes = 256; // same for multi and single
-
-    	struct MultiPatch
-        {
-            uint8_t bankNumber = 0;
-            uint8_t progNumber = 0;
-			std::array<uint8_t, kDataSizeInBytes> data{};
-        };
 
         struct SinglePatch
         {
 	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
             uint8_t progNumber = 0;
-			std::array<uint8_t, kDataSizeInBytes> data{};
+            std::string name;
+			std::vector<uint8_t> data;
         };
 
-    	using Singles = std::array<std::array<SinglePatch, 128>, 26>;
-        using Multis = std::array<MultiPatch, 128>;
-
-    	friend Parameter;
+    	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
 
     	static constexpr auto kNameLength = 10;
 
-        Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
+		enum class MidiPacketType
+		{
+			RequestSingle,
+			RequestMulti,
+			RequestSingleBank,
+			RequestMultiBank,
+			RequestArrangement,
+			RequestGlobal,
+			RequestTotal,
+			RequestControllerDump,
+			ParameterChange,
+			SingleDump,
+			MultiDump,
+
+			Count
+		};
+
+    	Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 		~Controller() override;
 
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
-        void printMessage(const SysEx &) const;
+    	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
+        std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
+        std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
+        std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);
 
-        uint32_t getParameterTypeByName(const std::string& _name) const;
+        static void printMessage(const SysEx &);
 
-        // currently Value as I figure out what's the best approach
-        // ch - [0-15]
-        // bank - [0-2] (ABC)
-        // paramIndex - [0-127]
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
-        juce::Value* getParamValue(uint32_t _param);
-        Parameter* getParameter(uint32_t _param) const;
-        Parameter *getParameter(uint32_t _param, uint8_t _part) const;
 
-        // bank - 0-1 (AB)
+		virusLib::VirusModel getVirusModel() const;
+
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
+        std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
 	        return m_singles;
         }
 
-        juce::StringArray getMultiPresetsName() const;
-		void setSinglePresetName(uint8_t part, juce::String _name);
+		void setSinglePresetName(uint8_t _part, const juce::String& _name);
 		bool isMultiMode();
         // part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
-        virusLib::BankNumber getCurrentPartBank(uint8_t part) const;
-		uint8_t getCurrentPartProgram(uint8_t part) const;
-		juce::String getCurrentPartPresetName(uint8_t part);
+        virusLib::BankNumber getCurrentPartBank(uint8_t _part) const;
+		uint8_t getCurrentPartProgram(uint8_t _part) const;
+		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(uint8_t _part) { m_currentPart = _part; }
@@ -90,57 +87,39 @@ namespace Virus
 		juce::PropertiesFile* getConfig() { return m_config; }
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
-		std::vector<uint8_t> constructMessage(SysEx msg) const;
 
-        uint8_t getDeviceId() const { return m_deviceId; }
+		bool requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const;
+		bool requestSingle(uint8_t _bank, uint8_t _program) const;
+		bool requestMulti(uint8_t _bank, uint8_t _program) const;
+
+    	bool requestSingleBank(uint8_t _bank) const;
+
+    	bool requestTotal() const;
+    	bool requestArrangement() const;
+        
+		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
+
+        bool sendSysEx(MidiPacketType _type) const;
+        bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+
+		uint8_t getDeviceId() const { return m_deviceId; }
+
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
 
     private:
 		void timerCallback() override;
 
-        Multis m_multis; // RAM has 128 Multi 'snapshots'
         Singles m_singles;
-		MultiPatch m_currentMulti;
 
-        struct ParamIndex
-        {
-            uint8_t page;
-            uint8_t partNum;
-            uint8_t paramNum;
-            bool operator<(ParamIndex const &rhs) const
-            {
-				if (page < rhs.page)         return false;
-				if (page > rhs.page)         return true;
-				if (partNum < rhs.partNum)   return false;
-				if (partNum > rhs.partNum)   return true;
-				if (paramNum < rhs.paramNum) return false;
-				if (paramNum > rhs.paramNum) return true;
-				return false;
-			}
-        };
+        void parseSingle(const SysEx& _msg);
+        void parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
-		using ParameterList = std::vector<Parameter*>;
-
-    	std::map<ParamIndex, ParameterList> m_synthInternalParams;
-		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
-		std::array<ParameterList, 16> m_paramsByParamType;
-		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
-
-		void registerParams();
-		// tries to find synth param in both internal and host.
-		// @return found parameter or nullptr if none found.
-		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
-		const ParameterList& findSynthParam(const ParamIndex& _paramIndex);
-
-		// unchecked copy for patch data bytes
-        static inline uint8_t copyData(const SysEx &src, int startPos, std::array<uint8_t, kDataSizeInBytes>& dst);
-
-        template <typename T> juce::String parseAsciiText(const T &, int startPos) const;
-        void parseSingle(const SysEx &);
-        void parseMulti(const SysEx &);
-        void parseParamChange(const SysEx &);
+        void parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+        void parseParamChange(const pluginLib::MidiPacket::Data& _data);
         void parseControllerDump(synthLib::SMidiEvent &);
 
-        AudioPluginAudioProcessor &m_processor;
+        AudioPluginAudioProcessor& m_processor;
         juce::CriticalSection m_eventQueueLock;
         std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
@@ -148,6 +127,5 @@ namespace Virus
         uint8_t m_currentProgram[16]{};
 		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
-		ParameterDescriptions m_descriptions;
     };
 }; // namespace Virus

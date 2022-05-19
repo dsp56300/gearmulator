@@ -5,9 +5,7 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#include "../../virusLib/microcontrollerTypes.h"
-
-namespace Virus
+namespace pluginLib
 {
 	struct ValueList
 	{
@@ -29,13 +27,19 @@ namespace Virus
 			return texts[_value];
 		}
 	};
-
+	enum class ParameterClass
+	{
+		None             = 0x00,
+        Global           = 0x01,
+        MultiOrSingle    = 0x02,
+        NonPartSensitive = 0x04,
+	};
 	struct Description
 	{
-		virusLib::Page page;
-		int classFlags;
+		uint8_t page;
 		uint8_t index;
-		juce::String name;
+		int classFlags;
+		std::string name;
 		juce::Range<int> range;
 		ValueList valueList;
 		bool isPublic;
@@ -43,5 +47,7 @@ namespace Virus
 		bool isBool;
 		bool isBipolar;
 		std::string toText;
+
+		bool isNonPartSensitive() const;
 	};
 }

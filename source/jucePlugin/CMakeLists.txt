@@ -26,10 +26,6 @@ set(SOURCES
 	VirusParameter.h
 	VirusParameterBinding.cpp
 	VirusParameterBinding.h
-	VirusParameterDescription.cpp
-	VirusParameterDescription.h
-	VirusParameterDescriptions.cpp
-	VirusParameterDescriptions.h
 	version.h
 )
 
@@ -96,6 +92,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	PRIVATE
 		${binaryDataProject}
 		juceUiLib
+		jucePluginLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC
