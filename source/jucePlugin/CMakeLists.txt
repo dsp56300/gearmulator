@@ -15,6 +15,7 @@ endif()
 set(SOURCES
 	parameterDescriptions_C.json
 	parameterDescriptions_Snow.json
+	parameterDescriptions_TI.json
 	ParameterNames.h
     PluginEditor.cpp
     PluginEditor.h
@@ -49,6 +50,7 @@ set(SOURCES_UI3
 SET(ASSETS
 	"parameterDescriptions_C.json"
 	"parameterDescriptions_Snow.json"
+	"parameterDescriptions_TI.json"
 )
 
 include(skins/Galaxpel/assets.cmake)
