@@ -106,7 +106,7 @@ namespace pluginLib
 		return create(_dst, _data, {});
 	}
 
-	bool MidiPacket::parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src) const
+	bool MidiPacket::parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors/* = true*/) const
 	{
 		if(_src.size() != size())
 			return false;
@@ -135,8 +135,9 @@ namespace pluginLib
 
 						if(checksum != s)
 						{
-							LOG("Packet checksum error, calculated " << std::hex << checksum << " but data contains " << s);
-							return false;
+							LOG("Packet checksum error, calculated " << std::hex << static_cast<int>(checksum) << " but data contains " << static_cast<int>(s));
+							if(!_ignoreChecksumErrors)
+								return false;
 						}
 					}
 					continue;
@@ -192,7 +193,7 @@ namespace pluginLib
 		return true;
 	}
 
-	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, Sysex& _src)
+	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, const Sysex& _src)
 	{
 		auto checksum = _d.checksumInitValue;
 
