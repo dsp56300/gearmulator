@@ -108,6 +108,8 @@ namespace Virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
 
     private:
+        static std::string loadParameterDescriptions();
+
 		void timerCallback() override;
 
         Singles m_singles;

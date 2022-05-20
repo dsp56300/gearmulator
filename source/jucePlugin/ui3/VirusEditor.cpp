@@ -143,6 +143,21 @@ namespace genericVirusUI
 		}
 	}
 
+	const char* VirusEditor::findNamedResourceByFilename(const std::string& _filename, uint32_t& _size)
+	{
+		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
+		{
+			if (BinaryData::originalFilenames[i] != _filename)
+				continue;
+
+			int size = 0;
+			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
+			_size = static_cast<uint32_t>(size);
+			return res;
+		}
+		return nullptr;
+	}
+
 	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
 		if(!m_skinFolder.empty())
@@ -190,18 +205,12 @@ namespace genericVirusUI
 			}
 		}
 
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _name)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_dataSize = static_cast<uint32_t>(size);
-			return res;
-		}
-
-		throw std::runtime_error("Failed to find file named " + _name);
+		uint32_t size = 0;
+		const auto res = findNamedResourceByFilename(_name, size);
+		if(!res)
+			throw std::runtime_error("Failed to find file named " + _name);
+		_dataSize = size;
+		return res;
 	}
 
 	int VirusEditor::getParameterIndexByName(const std::string& _name)
