@@ -86,7 +86,6 @@ void AudioPluginAudioProcessorEditor::openMenu()
 {
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
 
 	juce::PopupMenu menu;
 
