@@ -69,8 +69,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
 		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
 		m_virusEditor.reset();
 
-		if(!_skin.folder.empty())
-			loadSkin(m_includedSkins[0]);
+		loadSkin(m_includedSkins[0]);
 	}
 }
 
@@ -86,7 +85,6 @@ void AudioPluginAudioProcessorEditor::openMenu()
 {
 	const auto config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
-    const int skinId = config->getIntValue("skin", 0);
 
 	juce::PopupMenu menu;
 

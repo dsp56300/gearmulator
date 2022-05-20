@@ -3,6 +3,7 @@
 #include "VirusParameter.h"
 
 #include "BinaryData.h"
+#include "ParameterNames.h"
 #include "PluginProcessor.h"
 
 #include "../virusLib/microcontrollerTypes.h"
@@ -223,11 +224,11 @@ namespace Virus
 		}
 	}
 
-	bool Controller::isMultiMode()
+	bool Controller::isMultiMode() const
 	{
-		auto* value = getParamValue(0, 2, 0x7a);
-		jassert(value);
-		return value->getValue();
+        const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
+		const auto& value = getParameter(paramIdx)->getValueObject();
+		return value.getValue();
 	}
 
 	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
@@ -405,11 +406,15 @@ namespace Virus
     void Controller::printMessage(const SysEx &msg)
     {
 		std::stringstream ss;
-        for (auto &m : msg)
+        ss << "[size " << msg.size() << "] ";
+        for(size_t i=0; i<msg.size(); ++i)
         {
-            ss << std::hex << static_cast<int>(m) << ",";
+            ss << HEXN(static_cast<int>(msg[i]), 2);
+            if(i < msg.size()-1)
+                ss << ',';
         }
-		LOG((ss.str()));
+        const auto s(ss.str());
+		LOG(s);
     }
 
     void Controller::sendSysEx(const SysEx &msg) const
