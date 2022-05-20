@@ -1,5 +1,7 @@
 #include "VirusController.h"
 
+#include <fstream>
+
 #include "VirusParameter.h"
 
 #include "BinaryData.h"
@@ -7,6 +9,9 @@
 #include "PluginProcessor.h"
 
 #include "../virusLib/microcontrollerTypes.h"
+#include "../synthLib/os.h"
+
+#include "ui3/VirusEditor.h"
 
 using MessageType = virusLib::SysexMessageType;
 
@@ -34,7 +39,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(BinaryData::parameterDescriptions_C_json), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
     {
         registerParams(p);
 
@@ -305,6 +310,26 @@ namespace Virus
 
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
+
+	std::string Controller::loadParameterDescriptions()
+	{
+        const auto name = "parameterDescriptions_C.json";
+        const auto path = synthLib::getModulePath() +  name;
+
+        const std::ifstream f(path.c_str(), std::ios::in);
+        if(f.is_open())
+        {
+			std::stringstream buf;
+			buf << f.rdbuf();
+            return buf.str();
+        }
+
+        uint32_t size;
+        const auto res = genericVirusUI::VirusEditor::findNamedResourceByFilename(name, size);
+        if(res)
+            return {res, size};
+        return {};
+	}
 
 	void Controller::parseSingle(const SysEx& msg)
 	{
