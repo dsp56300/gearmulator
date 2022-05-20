@@ -53,9 +53,10 @@ SET(ASSETS
 	"parameterDescriptions_TI.json"
 )
 
-include(skins/Galaxpel/assets.cmake)
-include(skins/Hoverland/assets.cmake)
-include(skins/Trancy/assets.cmake)
+#include(skins/Galaxpel/assets.cmake)
+#include(skins/Hoverland/assets.cmake)
+#include(skins/Trancy/assets.cmake)
+include(skins/TrancyTI/assets.cmake)
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
@@ -124,7 +125,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
+juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy} ${ASSETS_VirusTI_Trancy})
 
 createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
 	
