@@ -1106,9 +1106,13 @@ PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
 	return getPresetVersion(_preset[0]);
 }
 
-PresetVersion Microcontroller::getPresetVersion(const uint8_t _versionCode)
+PresetVersion Microcontroller::getPresetVersion(const uint8_t v)
 {
-	return static_cast<PresetVersion>(_versionCode);
+	if(v >= D2)		return D2;
+	if(v >= D)		return D;
+	if(v >= C)		return C;
+	if(v >= B)		return B;
+	return A;
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
