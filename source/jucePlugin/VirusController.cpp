@@ -3,6 +3,7 @@
 #include "VirusParameter.h"
 
 #include "BinaryData.h"
+#include "ParameterNames.h"
 #include "PluginProcessor.h"
 
 #include "../virusLib/microcontrollerTypes.h"
@@ -223,11 +224,11 @@ namespace Virus
 		}
 	}
 
-	bool Controller::isMultiMode()
+	bool Controller::isMultiMode() const
 	{
-		auto* value = getParamValue(0, 2, 0x7a);
-		jassert(value);
-		return value->getValue();
+        const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
+		const auto& value = getParameter(paramIdx)->getValueObject();
+		return value.getValue();
 	}
 
 	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
