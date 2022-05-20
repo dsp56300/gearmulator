@@ -67,8 +67,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
 		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
 		m_virusEditor.reset();
 
-		if(!_skin.folder.empty())
-			loadSkin(m_includedSkins[0]);
+		loadSkin(m_includedSkins[0]);
 	}
 }
 
