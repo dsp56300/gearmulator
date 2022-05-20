@@ -4,6 +4,7 @@
 #include "../jucePluginLib/controller.h"
 
 #include "../virusLib/microcontrollerTypes.h"
+#include "../virusLib/romfile.h"
 
 #include "../synthLib/plugin.h"
 
@@ -107,6 +108,8 @@ namespace Virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
 
     private:
+        static std::string loadParameterDescriptions(const virusLib::ROMFile::Model _model);
+
 		void timerCallback() override;
 
         Singles m_singles;
