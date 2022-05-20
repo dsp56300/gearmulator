@@ -48,6 +48,8 @@ namespace genericVirusUI
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 
+		void updateDeviceModel();
+
 		void savePreset();
 		void loadPreset();
 
@@ -73,6 +75,8 @@ namespace genericVirusUI
 		juce::Button* m_playModeSingle = nullptr;
 		juce::Button* m_playModeMulti = nullptr;
 		juce::Button* m_playModeToggle = nullptr;
+
+		juce::Label* m_deviceModel = nullptr;
 
 		juce::TooltipWindow m_tooltipWindow;
 
