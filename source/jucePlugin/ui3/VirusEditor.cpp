@@ -83,20 +83,9 @@ namespace genericVirusUI
 			versionNumber->setText(g_pluginVersionString, juce::dontSendNotification);
 		}
 
-		if(auto* deviceModel = findComponentT<juce::Label>("DeviceModel", false))
-		{
-			std::string m;
-			switch(virusLib::Microcontroller::getPresetVersion(getController().getSinglePresets().front().front().data[0]))
-			{
-			case virusLib::A:	m = "A";	break;
-			case virusLib::B:	m = "B";	break;
-			case virusLib::C:	m = "C";	break;
-			case virusLib::D:	m = "TI";	break;
-			case virusLib::D2:	m = "TI2";	break;
-			default:			m = "?";	break;
-			}
-			deviceModel->setText(m, juce::dontSendNotification);
-		}
+		m_deviceModel = findComponentT<juce::Label>("DeviceModel", false);
+
+		updateDeviceModel();
 
 		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
 		if(presetSave)
@@ -243,6 +232,7 @@ namespace genericVirusUI
 		m_parts->onProgramChange();
 		updatePresetName();
 		updatePlayModeButtons();
+		updateDeviceModel();
 	}
 
 	void VirusEditor::onPlayModeChanged()
@@ -378,6 +368,32 @@ namespace genericVirusUI
 			m_playModeMulti->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
 		if(m_playModeToggle)
 			m_playModeToggle->setToggleState(getController().isMultiMode(), juce::dontSendNotification);
+	}
+
+	void VirusEditor::updateDeviceModel()
+	{
+		if(!m_deviceModel)
+			return;
+
+		const auto& presets = getController().getSinglePresets();
+		const auto& data = presets.front().front().data;
+		if(data.empty())
+			return;
+
+		std::string m;
+
+		switch(virusLib::Microcontroller::getPresetVersion(data.front()))
+		{
+		case virusLib::A:	m = "A";	break;
+		case virusLib::B:	m = "B";	break;
+		case virusLib::C:	m = "C";	break;
+		case virusLib::D:	m = "TI";	break;
+		case virusLib::D2:	m = "TI2";	break;
+		default:			m = "?";	break;
+		}
+
+		m_deviceModel->setText(m, juce::dontSendNotification);
+		m_deviceModel = nullptr;	// only update once
 	}
 
 	void VirusEditor::savePreset()
