@@ -269,16 +269,8 @@ namespace pluginLib
 					}
 				}
 			}
-			{
-				const auto page = readPropertyString("page");
-				if(page.empty())
-				{
-					errors << name << ": Page parameter must not be empty" << std::endl;
-					break;
-				}
 
-				d.page = static_cast<uint8_t>(::strtol(page.c_str(), nullptr, 10));
-			}
+			d.page = static_cast<uint8_t>(readPropertyInt("page"));
 
 			m_descriptions.push_back(d);
 		}
