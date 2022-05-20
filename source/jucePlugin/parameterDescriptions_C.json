@@ -365,7 +365,7 @@
  		{"page":114, "class":"Global", "index":116, "name":"Expert Mode", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":117, "name":"Knob Mode", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":118, "name":"Memory Protect", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
- 		{"page":114, "name":"C_Undefined119", "index":119, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false}
+ 		{"page":114, "name":"C_Undefined119", "index":119, "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":120, "name":"Soft Thru", "min":0, "max":1, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":121, "name":"Panel Destination", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":122, "name":"Play Mode", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
