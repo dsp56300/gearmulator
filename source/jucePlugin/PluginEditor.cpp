@@ -12,9 +12,7 @@
 AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudioProcessor &p) :
 	AudioProcessorEditor(&p), processorRef(p), m_parameterBinding(p)
 {
-	m_includedSkins.push_back({"Hoverland", "VirusC_Hoverland.json", ""});
-	m_includedSkins.push_back({"Trancy", "VirusC_Trancy.json", ""});
-	m_includedSkins.push_back({"Galaxpel", "VirusC_Galaxpel.json", ""});
+	m_includedSkins.push_back({"TI Trancy", "VirusTI_Trancy.json", ""});
 
 	addMouseListener(this, true);
 
