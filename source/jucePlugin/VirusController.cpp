@@ -24,7 +24,8 @@ namespace Virus
 	    "requestcontrollerdump",
 	    "parameterchange",
 	    "singledump",
-	    "multidump"
+	    "multidump",
+	    "singledump_C",
     };
 
     static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -88,7 +89,7 @@ namespace Virus
             if(deviceId != m_deviceId && deviceId != virusLib::OMNI_DEVICE_ID)
                 return; // not intended to this device!
 
-            if(name == midiPacketName(MidiPacketType::SingleDump))
+            if(name == midiPacketName(MidiPacketType::SingleDump) || name == midiPacketName(MidiPacketType::SingleDump_C))
                 parseSingle(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::MultiDump))
                 parseMulti(data, parameterValues);
@@ -298,6 +299,14 @@ namespace Virus
             temp.insert(temp.begin(), _msg.begin(), _msg.begin() + (m->size()-1));
             temp.push_back(0xf7);
 	    	return parseMidiPacket(*m, _data, _parameterValues, temp);
+        }
+
+		if(_msg.size() < m->size())
+        {
+			const auto* mc = getMidiPacket(midiPacketName(MidiPacketType::SingleDump_C));
+	    	if(!mc)
+	            return false;
+	    	return parseMidiPacket(*mc, _data, _parameterValues, _msg);
         }
 
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);

@@ -42,6 +42,7 @@ namespace Virus
 			ParameterChange,
 			SingleDump,
 			MultiDump,
+            SingleDump_C,
 
 			Count
 		};
