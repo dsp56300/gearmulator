@@ -19,7 +19,7 @@ namespace virusLib
 	constexpr auto g_timeScale_C = 57;	// C OS 6.6
 	constexpr auto g_timeScale_A = 54;	// A OS 2.8
 
-	bool DemoPlayback::loadMidi(const std::string& _filename)
+	bool DemoPlayback::loadFile(const std::string& _filename)
 	{
 		std::vector<uint8_t> sysex;
 
@@ -121,7 +121,9 @@ namespace virusLib
 		switch (status)
 		{
 		case synthLib::M_ACTIVESENSING:	// most probably used to define a pause that is > 0xff
+			break;
 		case synthLib::M_STOP:			// end of demo
+			stop();
 			break;
 		case synthLib::M_AFTERTOUCH:
 			e.data.push_back(_data[1]);
@@ -178,6 +180,9 @@ namespace virusLib
 
 	void DemoPlayback::process(const uint32_t _samples)
 	{
+		if(m_stop)
+			return;
+
 		if(m_currentEvent == 0 && m_remainingDelay == 0)
 		{
 			// switch to multi mode when playback starts
@@ -188,18 +193,50 @@ namespace virusLib
 			return;
 		}
 
-		if(m_currentEvent >= m_events.size())
+		if(m_currentEvent >= getEventCount())
 			return;
 
-		m_remainingDelay -= _samples;
-		while(m_remainingDelay <= 0 && m_currentEvent < m_events.size())
+		m_remainingDelay -= static_cast<int32_t>(_samples);
+
+		while(m_remainingDelay <= 0 && m_currentEvent < getEventCount())
 		{
-			const auto& e = m_events[m_currentEvent];
-			if(!processEvent(e))
+			if(!processEvent(m_currentEvent))
 				return;
+
 			++m_currentEvent;
-			m_remainingDelay = e.delay * m_timeScale;
+
+			m_remainingDelay = static_cast<int32_t>(static_cast<float>(getEventDelay(m_currentEvent)) * m_timeScale);
+
+			if(m_currentEvent >= getEventCount())
+			{
+				stop();
+			}
 		}
+	}
+
+	void DemoPlayback::writeRawData(const std::vector<uint8_t>& _data) const
+	{
+		std::vector<dsp56k::TWord> dspWords;
+
+		for(size_t i=0; i<_data.size(); i += 3)
+		{
+			dsp56k::TWord d = static_cast<dsp56k::TWord>(_data[i]) << 16;
+			if(i+1 < _data.size())
+				d |= static_cast<dsp56k::TWord>(_data[i+1]) << 8;
+			if(i+2 < _data.size())
+				d |= static_cast<dsp56k::TWord>(_data[i+2]);
+			dspWords.push_back(d);
+		}
+
+		m_mc.writeHostBitsWithWait(0,1);
+		m_mc.m_hdi08.writeRX(dspWords);
+	}
+
+	void DemoPlayback::stop()
+	{
+		m_stop = true;
+		LOG("Demo Playback end reached");
+		std::cout << "Demo song has ended." << std::endl;
 	}
 
 	bool DemoPlayback::processEvent(const Event& _event) const
@@ -209,7 +246,7 @@ namespace virusLib
 		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
-				m_mc.sendSysex(_event.data, false, responses, synthLib::MidiEventSourcePlugin);
+				m_mc.sendSysex(_event.data, responses, synthLib::MidiEventSourcePlugin);
 			}
 			break;
 		case EventType::Midi:
@@ -227,25 +264,7 @@ namespace virusLib
 			}
 			break;
 		case EventType::RawSerial:
-			{
-				if(m_mc.needsToWaitForHostBits(0,1))
-					return false;
-
-				std::vector<dsp56k::TWord> dspWords;
-
-				for(size_t i=0; i<_event.data.size(); i += 3)
-				{
-					dsp56k::TWord d = static_cast<dsp56k::TWord>(_event.data[i]) << 16;
-					if(i+1 < _event.data.size())
-						d |= static_cast<dsp56k::TWord>(_event.data[i+1]) << 8;
-					if(i+2 < _event.data.size())
-						d |= static_cast<dsp56k::TWord>(_event.data[i+2]);
-					dspWords.push_back(d);
-				}
-
-				m_mc.writeHostBitsWithWait(0,1);
-				m_mc.m_hdi08.writeRX(dspWords);
-			}
+			writeRawData(_event.data);
 			break;
 		}
 		return true;

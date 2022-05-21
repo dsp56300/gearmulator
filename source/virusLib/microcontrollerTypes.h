@@ -20,6 +20,7 @@ namespace virusLib
 		PARAM_CHANGE_A = 0x70,
 		PARAM_CHANGE_B = 0x71,
 		PARAM_CHANGE_C = 0x72,
+		PARAM_CHANGE_D = 0x73,
 	};
 
 	enum ControlCommand : uint8_t
@@ -83,8 +84,8 @@ namespace virusLib
 		MIDI_ARPEGGIATOR_SEND = 96,
 		MULTI_PROGRAM_CHANGE = 105,
 		MIDI_CLOCK_RX = 106,
-		EFFECT_SEND = 113, // actually in bank A
 		UNK6d = 109,
+		EFFECT_SEND = 113, // actually in bank A
 		PLAY_MODE = 122,
 		PART_NUMBER = 123,
 		GLOBAL_CHANNEL = 124,
@@ -143,7 +144,7 @@ namespace virusLib
 		MD_PART_PROG_CHANGE_ENABLE
 	};
 
-	enum Page
+	enum Page : uint8_t
 	{
 		PAGE_A = 0x70,
 		PAGE_B = 0x71,
@@ -177,13 +178,16 @@ namespace virusLib
 		H,
 		Count
 	};
-	enum VirusModel : uint8_t
+
+	enum PresetVersion : uint8_t
 	{
-		A,
-		B,
-		C,
-		TI
+		A = 0x00,		// 0-4 = OS 1 & OS 2, 5 = OS 3
+		B = 0x06,		// OS 4
+		C = 0x07,		// OS 6
+		D = 0x08,
+		D2 = 0x0C,
 	};
+
 	uint8_t toMidiByte(BankNumber _bank);
 	BankNumber fromMidiByte(uint8_t _byte);
 	uint32_t toArrayIndex(BankNumber _bank);

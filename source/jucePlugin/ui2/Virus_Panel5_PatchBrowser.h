@@ -17,7 +17,7 @@ namespace Trancy
 		uint8_t category1;
 		uint8_t category2;
 		uint8_t data[256];
-		virusLib::VirusModel model;
+		virusLib::PresetVersion model;
 		uint8_t unison;
 		uint8_t transpose;
 	};

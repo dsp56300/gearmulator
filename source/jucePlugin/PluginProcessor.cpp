@@ -17,7 +17,10 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	),
-	MidiInputCallback(), m_romName(synthLib::findROM()), m_device(synthLib::findROM()), m_plugin(&m_device)
+	MidiInputCallback(),
+	m_romName(virusLib::ROMFile::findROM()),
+	m_rom(m_romName),
+	m_device(m_rom), m_plugin(&m_device)
 {
 	getController(); // init controller
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
@@ -151,8 +154,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     // Alternatively, you can process the samples with the channels
     // interleaved by keeping the same state.
 
-	const float* inputs[8] = {};
-	float* outputs[8] = {};
+    synthLib::TAudioInputs inputs{};
+    synthLib::TAudioOutputs outputs{};
 
     for (int channel = 0; channel < totalNumInputChannels; ++channel)
     	inputs[channel] = buffer.getReadPointer(channel);

@@ -2,6 +2,7 @@
 
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/hdi08.h"
+#include "../dsp56300/source/dsp56kEmu/hdi08queue.h"
 
 #include "romfile.h"
 
@@ -23,10 +24,10 @@ class Microcontroller
 public:
 	using TPreset = ROMFile::TPreset;
 
-	explicit Microcontroller(dsp56k::HDI08& hdi08, ROMFile& romFile);
+	explicit Microcontroller(dsp56k::HDI08& hdi08, const ROMFile& romFile);
 
-	bool sendMIDI(const synthLib::SMidiEvent& _ev, bool cancelIfFull = false);
-	bool sendSysex(const std::vector<uint8_t>& _data, bool _cancelIfFull, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
+	bool sendMIDI(const synthLib::SMidiEvent& _ev);
+	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
@@ -41,19 +42,21 @@ public:
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
-	bool sendMIDItoDSP(uint8_t _a, uint8_t _b, uint8_t _c, bool cancelIfFull) const;
+	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c);
 
 	void sendPendingMidiEvents(uint32_t _maxOffset);
 
+	void addHDI08(dsp56k::HDI08& _hdi08);
+
+	static PresetVersion getPresetVersion(const TPreset& _preset);
+	static PresetVersion getPresetVersion(uint8_t _versionCode);
+
 private:
-	bool send(Page page, uint8_t part, uint8_t param, uint8_t value, bool cancelIfFull = false);
+	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
 	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
-	bool needsToWaitForHostBits(char flag1,char flag2) const;
-	void writeHostBitsWithWait(char flag1,char flag2) const;
-	void waitUntilReady() const;
-	void waitUntilBufferEmpty() const;
-	static std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset);
+	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1);
+	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
 
 	bool partBankSelect(uint8_t _part, uint8_t _value, bool _immediatelySelectSingle);
@@ -64,15 +67,17 @@ private:
 	bool loadMultiSingle(uint8_t _part, const TPreset& _multi);
 
 	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
-	static void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value);
+	void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value) const;
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
-	
-	dsp56k::HDI08& m_hdi08;
-	ROMFile& m_rom;
+	Page globalSettingsPage() const;
+	bool isPageSupported(Page _page) const;
+
+	dsp56k::HDI08Queue m_hdi08;
+	const ROMFile& m_rom;
 
 	TPreset m_multiEditBuffer;
 
-	std::array<uint8_t, 256> m_globalSettings;
+	std::array<uint32_t, 256> m_globalSettings;
 	std::vector<std::vector<TPreset>> m_singles;
 
 	// Multi mode
@@ -92,6 +97,7 @@ private:
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
+	int m_pendingPresetWriteDelay;
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	mutable std::recursive_mutex m_mutex;
