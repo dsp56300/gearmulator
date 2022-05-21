@@ -7,10 +7,12 @@ set(SOURCES
 	demopacketvalidator.cpp demopacketvalidator.h
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
+	dspSingle.cpp dspSingle.h
 	midiOutParser.cpp midiOutParser.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
+	utils.h
 )
 
 target_sources(virusLib PRIVATE ${SOURCES})

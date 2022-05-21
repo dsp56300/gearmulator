@@ -384,14 +384,21 @@ namespace genericVirusUI
 		if(!m_deviceModel)
 			return;
 
+		const auto& presets = getController().getSinglePresets();
+		const auto& data = presets.front().front().data;
+		if(data.empty())
+			return;
+
 		std::string m;
 
-		switch(getController().getVirusModel())
+		switch(virusLib::Microcontroller::getPresetVersion(data.front()))
 		{
-		case virusLib::A: m = "A";		break;
-		case virusLib::B: m = "B";		break;
-		case virusLib::C: m = "C";		break;
-		case virusLib::TI: m = "TI";	break;
+		case virusLib::A:	m = "A";	break;
+		case virusLib::B:	m = "B";	break;
+		case virusLib::C:	m = "C";	break;
+		case virusLib::D:	m = "TI";	break;
+		case virusLib::D2:	m = "TI2";	break;
+		default:			m = "?";	break;
 		}
 
 		m_deviceModel->setText(m, juce::dontSendNotification);

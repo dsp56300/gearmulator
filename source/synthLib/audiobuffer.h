@@ -2,6 +2,8 @@
 #include <cstddef>
 #include <vector>
 
+#include "audioTypes.h"
+
 namespace synthLib
 {
 	class AudioBuffer
@@ -14,11 +16,12 @@ namespace synthLib
 		void resize(size_t _capacity);
 		void append(const TBuffer& _data);
 		void append(const float** _data, size_t _size);
+		void append(const TAudioInputs& _data, size_t _size);
 
 		void remove(size_t _count);
 		
-		void fillPointers(float** _pointers, size_t _offset = 0);
-		void fillPointers(const float** _pointers, size_t _offset = 0) const;
+		void fillPointers(TAudioOutputs& _pointers, size_t _offset = 0);
+		void fillPointers(TAudioInputs& _pointers, size_t _offset = 0) const;
 		size_t size() const;
 
 		void ensureSize(size_t _size)
@@ -28,7 +31,10 @@ namespace synthLib
 		}
 
 		void insertZeroes(size_t _size);
-		const std::vector<float>& getChannel(const size_t _channel) { return m_data[_channel]; }
+
+		const std::vector<float>& getChannel(const size_t _channel) const { return m_data[_channel]; }
+		float* getChannel(const size_t _channel) { return &m_data[_channel].front(); }
+
 		bool empty() const { return size() == 0; }
 
 		AudioBuffer(size_t _channelCount = 2, size_t _capacity = 1024);

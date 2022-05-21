@@ -16,6 +16,7 @@ option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
+add_subdirectory(source/virusConsoleLib)
 add_subdirectory(source/libresample)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
@@ -33,23 +34,11 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(source/jucePlugin)
 endif()
 
-# ----------------- Test Console
+# ----------------- Console Programs
 
-add_executable(virusTestConsole)
-target_sources(virusTestConsole PRIVATE source/virusTestConsole/virusTestConsole.cpp)
-target_link_libraries(virusTestConsole PUBLIC virusLib)
-
-if(UNIX AND NOT APPLE)
-	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
-endif()
-
-install(TARGETS virusTestConsole DESTINATION . COMPONENT testConsole)
-
-if(MSVC)
-	install(DIRECTORY deploy/win/ DESTINATION . COMPONENT testConsole)
-else()
-	install(DIRECTORY deploy/linux/ DESTINATION . COMPONENT testConsole)
-endif()
+add_subdirectory(source/virusTestConsole)
+add_subdirectory(source/logicAnalysisParser)
+add_subdirectory(source/virusIntegrationTest)
 
 # ----------------- CPack
 

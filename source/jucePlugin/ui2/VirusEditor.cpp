@@ -156,7 +156,7 @@ namespace Trancy
 		addAndMakeVisible(m_version);
 
 		// Show Synth Model
-		m_SynthModel.setText(m_controller.getVirusModel() == virusLib::VirusModel::B ? "B" : "C",
+		m_SynthModel.setText(m_controller.getVirusModel() == virusLib::PresetVersion::B ? "B" : "C",
 							 NotificationType::dontSendNotification);
 		m_SynthModel.setBounds(430, 1123, 50, 17);
 		m_SynthModel.setFont(Font("Arial", "Bold", 20.f));
