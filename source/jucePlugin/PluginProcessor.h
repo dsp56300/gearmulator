@@ -63,6 +63,9 @@ public:
     std::string getRomName() {
         return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
     }
+
+    void updateLatencySamples();
+
 	// _____________
 	//
 private:

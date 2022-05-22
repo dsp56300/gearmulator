@@ -36,6 +36,9 @@ namespace synthLib
 
 		void insertMidiEvent(const SMidiEvent& _ev);
 
+		bool setLatencyBlocks(uint32_t _latencyBlocks);
+		uint32_t getLatencyBlocks() const { return m_extraLatencyBlocks; }
+
 	private:
 		void processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount);
 		float* getDummyBuffer(size_t _minimumSize);
@@ -69,5 +72,6 @@ namespace synthLib
 		bool m_isPlaying = false;
 		bool m_needsStart = false;
 		double m_clockTickPos = 0.0;
+		uint32_t m_extraLatencyBlocks = 1;
 	};
 }
