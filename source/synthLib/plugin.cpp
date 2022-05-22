@@ -16,7 +16,6 @@ using namespace synthLib;
 namespace synthLib
 {
 	constexpr uint8_t g_stateVersion = 1;
-	constexpr uint32_t g_extraLatencyBlocks = 1;
 
 	Plugin::Plugin(Device* _device) : m_device(_device)
 	{
@@ -137,6 +136,18 @@ namespace synthLib
 		m_midiIn.push_back(_ev);
 	}
 
+	bool Plugin::setLatencyBlocks(uint32_t _latencyBlocks)
+	{
+		std::lock_guard lock(m_lock);
+
+		if(m_extraLatencyBlocks == _latencyBlocks)
+			return false;
+
+		m_extraLatencyBlocks = _latencyBlocks;
+		updateDeviceLatency();
+		return true;
+	}
+
 	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
 	{
 		if(_bpm < 1.0f)
@@ -214,7 +225,7 @@ namespace synthLib
 		if(m_blockSize <= 0 || m_hostSamplerate <= 0)
 			return;
 
-		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize * g_extraLatencyBlocks) * m_device->getSamplerate() * m_hostSamplerateInv));
+		const auto latency = static_cast<uint32_t>(std::ceil(static_cast<float>(m_blockSize * m_extraLatencyBlocks) * m_device->getSamplerate() * m_hostSamplerateInv));
 		m_device->setExtraLatencySamples(latency);
 
 		m_deviceLatencyMidiToOutput = static_cast<uint32_t>(static_cast<float>(m_device->getInternalLatencyMidiToOutput()) * m_hostSamplerate / m_device->getSamplerate());
@@ -278,12 +289,12 @@ namespace synthLib
 	uint32_t Plugin::getLatencyMidiToOutput() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyMidiToOutput + m_resampler.getOutputLatency();
+		return m_blockSize * m_extraLatencyBlocks + m_deviceLatencyMidiToOutput + m_resampler.getOutputLatency();
 	}
 
 	uint32_t Plugin::getLatencyInputToOutput() const
 	{
 		std::lock_guard lock(m_lock);
-		return m_blockSize * g_extraLatencyBlocks + m_deviceLatencyInputToOutput + m_resampler.getOutputLatency() + m_resampler.getInputLatency();
+		return m_blockSize * m_extraLatencyBlocks + m_deviceLatencyInputToOutput + m_resampler.getOutputLatency() + m_resampler.getInputLatency();
 	}
 }
