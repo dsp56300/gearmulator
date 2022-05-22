@@ -57,6 +57,7 @@ namespace Virus
     	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
         std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
+        std::vector<uint8_t> createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
         std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);
 
         static void printMessage(const SysEx &);
@@ -106,6 +107,7 @@ namespace Virus
 		uint8_t getDeviceId() const { return m_deviceId; }
 
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
         static std::string loadParameterDescriptions(const virusLib::ROMFile::Model _model);

@@ -291,12 +291,20 @@ namespace Virus
 
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const
 	{
+        MidiPacketType unused;
+        return parseSingle(_data, _parameterValues, _msg, unused);
+	}
+
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg, MidiPacketType& usedPacketType) const
+	{
         const auto packetName = midiPacketName(MidiPacketType::SingleDump);
 
     	auto* m = getMidiPacket(packetName);
 
     	if(!m)
             return false;
+
+    	usedPacketType = MidiPacketType::SingleDump;
 
         if(_msg.size() > m->size())
         {
@@ -311,6 +319,7 @@ namespace Virus
 			const auto* mc = getMidiPacket(midiPacketName(MidiPacketType::SingleDump_C));
 	    	if(!mc)
 	            return false;
+            usedPacketType = MidiPacketType::SingleDump_C;
 	    	return parseMidiPacket(*mc, _data, _parameterValues, _msg);
         }
 
@@ -586,7 +595,12 @@ namespace Virus
 
     std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues)
     {
-        const auto* m = getMidiPacket(midiPacketName(MidiPacketType::SingleDump));
+        return createSingleDump(MidiPacketType::SingleDump, _bank, _program, _paramValues);
+    }
+
+    std::vector<uint8_t> Controller::createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues)
+    {
+        const auto* m = getMidiPacket(midiPacketName(_packet));
 		assert(m && "midi packet not found");
 
     	if(!m)
@@ -620,9 +634,10 @@ namespace Virus
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::ParamValues parameterValues;
 
-		if(!parseSingle(data, parameterValues, _sysex))
+        MidiPacketType usedPacketType;
+		if(!parseSingle(data, parameterValues, _sysex, usedPacketType))
 			return {};
 
-		return createSingleDump(_modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
+		return createSingleDump(usedPacketType, _modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
     }
 }; // namespace Virus
