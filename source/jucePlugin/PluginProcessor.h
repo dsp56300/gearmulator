@@ -74,6 +74,7 @@ public:
     }
 
     void updateLatencySamples();
+
 	// _____________
 	//
 private:
