@@ -35,6 +35,7 @@ private:
 	void exportCurrentSkin() const;
 	Skin readSkinFromConfig() const;
 	void writeSkinToConfig(const Skin& _skin) const;
+	void setLatencyBlocks(uint32_t _blocks) const;
 
 	// This reference is provided as a quick way for your editor to
 	// access the processor object that created it.

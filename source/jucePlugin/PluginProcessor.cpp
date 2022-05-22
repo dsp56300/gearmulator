@@ -101,10 +101,7 @@ void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 	m_plugin.setSamplerate(static_cast<float>(sampleRate));
 	m_plugin.setBlockSize(samplesPerBlock);
 
-	if constexpr(JucePlugin_IsSynth)
-		setLatencySamples(m_plugin.getLatencyMidiToOutput());
-	else
-		setLatencySamples(m_plugin.getLatencyInputToOutput());
+	updateLatencySamples();
 }
 
 void AudioPluginAudioProcessor::releaseResources()
@@ -406,6 +403,14 @@ void AudioPluginAudioProcessor::handleIncomingMidiMessage(juce::MidiInput *sourc
 			addMidiEvent(sm);
 		}
 	}
+}
+
+void AudioPluginAudioProcessor::updateLatencySamples()
+{
+	if constexpr(JucePlugin_IsSynth)
+		setLatencySamples(m_plugin.getLatencyMidiToOutput());
+	else
+		setLatencySamples(m_plugin.getLatencyInputToOutput());
 }
 
 Virus::Controller &AudioPluginAudioProcessor::getController()
