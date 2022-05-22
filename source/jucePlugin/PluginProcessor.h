@@ -68,6 +68,12 @@ public:
     {
 		return m_rom.getModel();
     }
+    synthLib::Plugin& getPlugin()
+    {
+	    return m_plugin;
+    }
+
+    void updateLatencySamples();
 	// _____________
 	//
 private:
