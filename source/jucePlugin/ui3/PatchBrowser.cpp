@@ -26,6 +26,8 @@ namespace genericVirusUI
 		return virusLib::TI;
 	}
 
+	static PatchBrowser* s_lastPatchBrowser = nullptr;
+
 	PatchBrowser::PatchBrowser(const VirusEditor& _editor) : m_editor(_editor), m_controller(_editor.getController()),
 		m_fileFilter("*.syx;*.mid;*.midi", "*", "Virus Patch Dumps"),
 		m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
@@ -36,7 +38,26 @@ namespace genericVirusUI
 		const auto bankDir = m_properties->getValue("virus_bank_dir", "");
 
 		if (bankDir.isNotEmpty() && File(bankDir).isDirectory())
+		{
 			m_bankList.setRoot(bankDir);
+
+			s_lastPatchBrowser = this;
+			auto callbackPathBrowser = this;
+
+			juce::Timer::callAfterDelay(1000, [&, bankDir, callbackPathBrowser]()
+			{
+				if(s_lastPatchBrowser != callbackPathBrowser)
+					return;
+
+				const auto lastFile = m_properties->getValue("virus_selected_file", "");
+				const auto child = File(bankDir).getChildFile(lastFile);
+				if(child.existsAsFile())
+				{
+					m_bankList.setFileName(child.getFileName());
+					onFileSelected(child);
+				}
+			});
+		}
 
 		m_patchList.getHeader().addColumn("#", Columns::INDEX, 32);
 		m_patchList.getHeader().addColumn("Name", Columns::NAME, 130);
@@ -53,16 +74,7 @@ namespace genericVirusUI
 		m_search.setColour(TextEditor::textColourId, Colours::white);
 		m_search.onTextChange = [this]
 		{
-			m_filteredPatches.clear();
-			for (const auto& patch : m_patches)
-			{
-				const auto searchValue = m_search.getText();
-				if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
-					m_filteredPatches.add(patch);
-			}
-			m_patchList.updateContent();
-			m_patchList.deselectAllRows();
-			m_patchList.repaint();
+			refreshPatchList();
 		};
 		m_search.setTextToShowWhenEmpty("Search...", Colours::grey);
 
@@ -93,6 +105,12 @@ namespace genericVirusUI
 					loadRomBank(index - 1);
 			};
 		}
+	}
+
+	PatchBrowser::~PatchBrowser()
+	{
+		if(s_lastPatchBrowser == this)
+			s_lastPatchBrowser = nullptr;
 	}
 
 	void PatchBrowser::fitInParent(juce::Component& _component, const std::string& _parentName) const
@@ -211,47 +229,14 @@ namespace genericVirusUI
 					for (const auto& f : RangedDirectoryIterator(file, false, "*.syx;*.mid;*.midi", File::findFiles))
 						loadBankFile(m_controller, patches, &dedupeChecksums, f.getFile());
 
-					m_filteredPatches.clear();
-
-					for (const auto& patch : patches)
-					{
-						const auto searchValue = m_search.getText();
-
-						m_patches.add(patch);
-
-						if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
-							m_filteredPatches.add(patch);
-					}
-					m_patchList.updateContent();
-					m_patchList.deselectAllRows();
-					m_patchList.repaint();
+					fillPatchList(patches);
 				});
 			p.showMenuAsync(PopupMenu::Options());
 
 			return;
 		}
 		m_properties->setValue("virus_bank_dir", path);
-
-		if (file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
-		{
-			m_patches.clear();
-			std::vector<Patch> patches;
-			loadBankFile(m_controller, patches, nullptr, file);
-			m_filteredPatches.clear();
-			for (const auto& patch : patches)
-			{
-				const auto searchValue = m_search.getText();
-				m_patches.add(patch);
-				if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
-					m_filteredPatches.add(patch);
-			}
-			m_patchList.updateContent();
-			m_patchList.deselectAllRows();
-			m_patchList.repaint();
-		}
-
-		if(m_romBankSelect)
-			m_romBankSelect->setSelectedItemIndex(0);
+		onFileSelected(file);
 	}
 
 	int PatchBrowser::getNumRows() { return m_filteredPatches.size(); }
@@ -310,13 +295,17 @@ namespace genericVirusUI
 		// re-pack single, force to edit buffer
 		const auto program = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
 
-		const auto msg = m_controller.modifySingleDump(m_filteredPatches[idx].sysex, virusLib::BankNumber::EditBuffer, program, true, true);
+		const auto& patch = m_filteredPatches[idx];
+
+		const auto msg = m_controller.modifySingleDump(patch.sysex, virusLib::BankNumber::EditBuffer, program, true, true);
 
 		if(msg.empty())
 			return;
 
 		m_controller.sendSysEx(msg);
 		m_controller.requestSingle(0x0, program);
+
+		m_properties->setValue("virus_selected_patch", patch.name);
 	}
 
 	void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent&)
@@ -369,7 +358,7 @@ namespace genericVirusUI
 		}
 	}
 
-	void PatchBrowser::loadRomBank(uint32_t _bankIndex)
+	void PatchBrowser::loadRomBank(const uint32_t _bankIndex)
 	{
 		const auto& singles = m_controller.getSinglePresets();
 
@@ -380,8 +369,7 @@ namespace genericVirusUI
 
 		const auto searchValue = m_search.getText();
 
-		m_patches.clear();
-		m_filteredPatches.clear();
+		std::vector<Patch> patches;
 
 		for(size_t s=0; s<bank.size(); ++s)
 		{
@@ -394,15 +382,66 @@ namespace genericVirusUI
 
 			patch.progNumber = static_cast<int>(s);
 
-			m_patches.add(patch);
-
-			if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
-				m_filteredPatches.add(patch);
+			patches.push_back(patch);
 		}
 
+		fillPatchList(patches);
+	}
+
+	void PatchBrowser::onFileSelected(const juce::File& file)
+	{
+		const auto ext = file.getFileExtension().toLowerCase();
+		if (file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
+		{
+			m_properties->setValue("virus_selected_file", file.getFileName());
+
+			std::vector<Patch> patches;
+			loadBankFile(m_controller, patches, nullptr, file);
+
+			fillPatchList(patches);
+		}
+
+		if(m_romBankSelect)
+			m_romBankSelect->setSelectedItemIndex(0);
+	}
+
+	void PatchBrowser::fillPatchList(const std::vector<Patch>& _patches)
+	{
+		m_patches.clear();
+
+		for (const auto& patch : _patches)
+			m_patches.add(patch);
+
+		refreshPatchList();
+	}
+
+	void PatchBrowser::refreshPatchList()
+	{
+		const auto searchValue = m_search.getText();
+		const auto selectedPatchName = m_properties->getValue("virus_selected_patch", "");
+
+		m_filteredPatches.clear();
+		int i=0;
+		int selectIndex = -1;
+
+		for (const auto& patch : m_patches)
+		{
+			if (searchValue.isEmpty() || patch.name.containsIgnoreCase(searchValue))
+			{
+				m_filteredPatches.add(patch);
+
+				if(patch.name == selectedPatchName)
+					selectIndex = i;
+
+				++i;
+			}
+		}
 		m_patchList.updateContent();
 		m_patchList.deselectAllRows();
 		m_patchList.repaint();
+
+		if(selectIndex != -1)
+			m_patchList.selectRow(selectIndex);
 	}
 
 	bool PatchBrowser::initializePatch(const Virus::Controller& _controller, Patch& _patch)

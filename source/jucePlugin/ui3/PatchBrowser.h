@@ -35,6 +35,7 @@ namespace genericVirusUI
 	{
 	public:
 		explicit PatchBrowser(const VirusEditor& _editor);
+		~PatchBrowser() override;
 
 		static uint32_t load(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets);
 		static bool load(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
@@ -64,6 +65,10 @@ namespace genericVirusUI
 	    void sortOrderChanged(int newSortColumnId, bool isForwards) override;
 
 		void loadRomBank(uint32_t _bankIndex);
+
+		void onFileSelected(const juce::File& file);
+		void fillPatchList(const std::vector<Patch>& _patches);
+		void refreshPatchList();
 
 		class PatchBrowserSorter;
 
