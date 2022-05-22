@@ -86,5 +86,8 @@ int main(int _argc, char* _argv[])
 
 	app->run(audioFilename);
 
+	std::cout << "Program ended. Press key to exit." << std::endl;
+	ConsoleApp::waitReturn();
+
 	return 0;
 }
