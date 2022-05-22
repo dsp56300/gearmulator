@@ -3,7 +3,6 @@
 
 #include "VirusController.h"
 
-#include "ui2/VirusEditor.h"
 #include "ui3/VirusEditor.h"
 
 #include "../synthLib/os.h"
