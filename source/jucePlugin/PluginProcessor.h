@@ -63,7 +63,6 @@ public:
     std::string getRomName() {
         return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
     }
-
     virusLib::ROMFile::Model getModel() const
     {
 		return m_rom.getModel();
@@ -72,7 +71,6 @@ public:
     {
 	    return m_plugin;
     }
-
     void updateLatencySamples();
 
 	// _____________
