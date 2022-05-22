@@ -26,8 +26,10 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 	}
 
 	loadSkin(skin);
-
 	setGuiScale(scale);
+
+	const auto latencyBlocks = config->getIntValue("latencyBlocks", static_cast<int>(processorRef.getPlugin().getLatencyBlocks()));
+	setLatencyBlocks(latencyBlocks);
 }
 
 void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
@@ -148,8 +150,17 @@ void AudioPluginAudioProcessorEditor::openMenu()
 	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
 	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
 
+	const auto latency = processorRef.getPlugin().getLatencyBlocks();
+	juce::PopupMenu latencyMenu;
+	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this] { setLatencyBlocks(0); });
+	latencyMenu.addItem("1 (default)", true, latency == 1, [this] { setLatencyBlocks(1); });
+	latencyMenu.addItem("2", true, latency == 2, [this] { setLatencyBlocks(2); });
+	latencyMenu.addItem("4", true, latency == 4, [this] { setLatencyBlocks(4); });
+	latencyMenu.addItem("8", true, latency == 8, [this] { setLatencyBlocks(8); });
+
 	menu.addSubMenu("GUI Skin", skinMenu);
 	menu.addSubMenu("GUI Scale", scaleMenu);
+	menu.addSubMenu("Latency (blocks)", latencyMenu);
 
 	menu.showMenuAsync(juce::PopupMenu::Options());
 }
@@ -194,6 +205,20 @@ void AudioPluginAudioProcessorEditor::writeSkinToConfig(const Skin& _skin) const
 	config->setValue("skinDisplayName", _skin.displayName.c_str());
 	config->setValue("skinFile", _skin.jsonFilename.c_str());
 	config->setValue("skinFolder", _skin.folder.c_str());
+}
+
+void AudioPluginAudioProcessorEditor::setLatencyBlocks(uint32_t _blocks) const
+{
+	auto& p = processorRef.getPlugin();
+
+	if(p.setLatencyBlocks(_blocks))
+	{
+		processorRef.updateLatencySamples();
+
+		auto* config = processorRef.getController().getConfig();
+		config->setValue("latencyBlocks", static_cast<int>(_blocks));
+		config->saveIfNeeded();
+	}
 }
 
 AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
