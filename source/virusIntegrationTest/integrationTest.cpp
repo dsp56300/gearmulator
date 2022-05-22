@@ -95,6 +95,23 @@ int main(int _argc, char* _argv[])
 					return -1;
 				}
 
+				if(romFile.find("firmware") != std::string::npos)
+				{
+					auto* hFile = fopen(romFile.c_str(), "rb");
+					size_t size = 0;
+					if(hFile)
+					{
+						fseek(hFile, 0, SEEK_END);
+						size = ftell(hFile);
+						fclose(hFile);
+					}
+					if(size > virusLib::ROMFile::getRomSizeModelABC())
+					{
+						std::cout << "Ignoring TI verification tests, TI is not supported" << std::endl;
+						continue;
+					}
+				}
+
 				std::vector<std::string> presets;
 
 				std::ifstream ss;
