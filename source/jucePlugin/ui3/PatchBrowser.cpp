@@ -49,7 +49,9 @@ namespace genericVirusUI
 				if(child.existsAsFile())
 				{
 					m_bankList.setFileName(child.getFileName());
+					m_sendOnSelect = false;
 					onFileSelected(child);
+					m_sendOnSelect = true;
 				}
 			});
 		}
@@ -290,6 +292,9 @@ namespace genericVirusUI
 
 	void PatchBrowser::selectedRowsChanged(int lastRowSelected)
 	{
+		if(!m_sendOnSelect)
+			return;
+
 		const auto idx = m_patchList.getSelectedRow();
 
 		if (idx == -1)
