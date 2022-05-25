@@ -320,7 +320,7 @@ namespace genericVirusUI
 
 		const auto& desc = p->getDescription();
 
-		m_focusedParameterName->setText(desc.name, juce::dontSendNotification);
+		m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
 		m_focusedParameterValue->setText(value, juce::dontSendNotification);
 
 		m_focusedParameterName->setVisible(true);

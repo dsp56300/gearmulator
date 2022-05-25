@@ -128,6 +128,7 @@ namespace pluginLib
 			}
 
 			const auto name = props["name"].toString();
+			const auto displayName = props["displayName"].toString().toStdString();
 
 			if (name.isEmpty())
 			{
@@ -218,6 +219,7 @@ namespace pluginLib
 			Description d;
 
 			d.name = name.toStdString();
+			d.displayName = displayName.empty() ? d.name : displayName;
 
 			d.isPublic = readPropertyBool("isPublic");
 			d.isDiscrete = readPropertyBool("isDiscrete");
