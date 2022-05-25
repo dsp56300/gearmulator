@@ -95,5 +95,6 @@ namespace genericVirusUI
 	    juce::PropertiesFile *m_properties;
 		juce::ComboBox* m_romBankSelect;
 	    juce::HashMap<juce::String, bool> m_checksums;
+		bool m_sendOnSelect = true;
     };
 }
