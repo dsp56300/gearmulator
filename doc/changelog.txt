@@ -1,5 +1,22 @@
 Release Notes 
 
+1.2.19 (2022.05.25):
+
+- [Fix] Preset changes were discarded because the last selected patch browser preset was always loaded when opening UI
+
+1.2.18 (2022.05.23):
+
+- [Imp] Multichannel output support, the plugin now exposes three stereo outputs to the DAW
+- [Imp] Remember last used file & patch in patch browser
+- [Imp] Add ability to adjust plugin latency
+- [Imp] Performance improvements
+- [Imp] [Galaxpel Skin] integrate latest improvements by @galaxpel, thx a lot!
+- [Imp] Add support for generic tab groups to allow skins to use different tab layouts or none at all. Export one of the integrated ones to see how it works.
+
+- [Fix] [Hoverland Skin] many knobs were not bipolar even though they should (thx to ylmrx)
+- [Fix] Preset version not always detected correctly in patch browser list
+- [Fix] Possible latency issue for the FX version
+
 1.2.17 (2022.04.07):
 
 - [Fix] Reported latency values slightly adjusted, now different for FX and Synth versions of plugins
