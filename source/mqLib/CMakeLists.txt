@@ -5,6 +5,7 @@ add_library(mqLib STATIC)
 
 set(SOURCES
 	rom.cpp rom.h
+	mqmc.cpp mqmc.h
 )
 
 target_sources(mqLib PRIVATE ${SOURCES})
