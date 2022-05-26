@@ -16,7 +16,8 @@ namespace genericVirusUI
 	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor
 	{
 	public:
-		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, const std::string& _skinFolder, std::function<void()> _openMenuCallback);
+		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
+		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
@@ -26,8 +27,6 @@ namespace genericVirusUI
 
 		Virus::Controller& getController() const;
 
-		static void setEnabled(juce::Component& _component, bool _enable);
-
 		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
 
 	private:
@@ -36,6 +35,7 @@ namespace genericVirusUI
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
 		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
 		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
+		juce::Value* getParameterValue(int _parameterIndex) override;
 
 		void onProgramChange();
 		void onPlayModeChanged();
