@@ -1,3 +1,5 @@
+#include <memory>
+
 #include "../synthLib/os.h"
 
 #include "../mqLib/rom.h"
@@ -9,11 +11,12 @@ int main(int _argc, char* _argv[])
 
 	mqLib::ROM rom(romFile);
 
-	mqLib::MqMc mc(rom);
+	std::unique_ptr<mqLib::MqMc> mc;
+	mc.reset(new mqLib::MqMc(rom));
 
 	while(true)
 	{
-		mc.exec();
+		mc->exec();
 	}
 	return 0;
 }
