@@ -172,9 +172,33 @@ namespace virusLib
 		}
 	}
 
-	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, const size_t _samples)
+	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
-		m_dsp->processAudio(_inputs, _outputs, _samples, getExtraLatencySamples());
+		constexpr auto maxBlockSize = dsp56k::Audio::RingBufferSize>>2;
+
+		auto inputs(_inputs);
+		auto outputs(_outputs);
+
+		while(_samples > maxBlockSize)
+		{
+			m_dsp->processAudio(inputs, outputs, maxBlockSize, getExtraLatencySamples());
+
+			_samples -= maxBlockSize;
+
+			for (auto& input : inputs)
+			{
+				if(input)
+					input += maxBlockSize;
+			}
+
+			for (auto& output : outputs)
+			{
+				if(output)
+					output += maxBlockSize;
+			}
+		}
+
+		m_dsp->processAudio(inputs, outputs, _samples, getExtraLatencySamples());
 	}
 
 	void Device::onAudioWritten()

@@ -2,9 +2,6 @@
 
 #include <fstream>
 
-#include "VirusParameter.h"
-
-#include "BinaryData.h"
 #include "ParameterNames.h"
 #include "PluginProcessor.h"
 
@@ -570,11 +567,6 @@ namespace Virus
         data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
 
     	return sendSysEx(MidiPacketType::ParameterChange, data);
-    }
-
-    pluginLib::Parameter* Controller::createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid)
-    {
-        return new Parameter(_controller, _desc, _part, _uid);
     }
 
     std::vector<uint8_t> Controller::createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program)

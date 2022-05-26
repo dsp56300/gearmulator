@@ -23,8 +23,6 @@ set(SOURCES
     PluginProcessor.h
 	VirusController.cpp
 	VirusController.h
-	VirusParameter.cpp
-	VirusParameter.h
 	VirusParameterBinding.cpp
 	VirusParameterBinding.h
 	version.h
