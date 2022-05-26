@@ -12,6 +12,9 @@ namespace genericVirusUI
 		const auto delayReverbMode = _editor.getController().getParameterIndexByName(Virus::g_paramDelayReverbMode);
 		const auto p = _editor.getController().getParamValueObject(delayReverbMode);
 
+		if(!p)
+			return;
+
 		const auto containerReverb = _editor.findComponent("ContainerReverb");
 		const auto containerDelay = _editor.findComponent("ContainerDelay");
 
