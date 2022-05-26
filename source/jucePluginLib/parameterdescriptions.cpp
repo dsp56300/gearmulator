@@ -128,6 +128,7 @@ namespace pluginLib
 			}
 
 			const auto name = props["name"].toString();
+			const auto displayName = props["displayName"].toString().toStdString();
 
 			if (name.isEmpty())
 			{
@@ -135,13 +136,13 @@ namespace pluginLib
 				continue;
 			}
 
-			auto readProperty = [&](const char* _key)
+			auto readProperty = [&](const char* _key, bool _faiIfNotExisting = true)
 			{
 				auto result = props[_key];
 				if (!result.isVoid())
 					return result;
 				result = defaultProperties[_key];
-				if (result.isVoid())
+				if (_faiIfNotExisting && result.isVoid())
 					errors << "Property " << _key << " not found for parameter description " << name << " and no default provided" << std::endl;
 				return result;
 			};
@@ -166,6 +167,16 @@ namespace pluginLib
 				return static_cast<int>(res);
 			};
 
+			auto readPropertyIntWithDefault = [&](const char* _key, const int _defaultValue)
+			{
+				const auto res = readProperty(_key, false);
+
+				if (!res.isInt())
+					return _defaultValue;
+
+				return static_cast<int>(res);
+			};
+
 			auto readPropertyBool = [&](const char* _key)
 			{
 				const auto res = readProperty(_key);
@@ -182,6 +193,7 @@ namespace pluginLib
 
 			const auto minValue = readPropertyInt("min");
 			const auto maxValue = readPropertyInt("max");
+			const auto defaultValue = readPropertyIntWithDefault("default", Description::NoDefaultValue);
 
 			if (minValue < 0 || minValue > 127)
 			{
@@ -196,6 +208,12 @@ namespace pluginLib
 			if (maxValue < minValue)
 			{
 				errors << name << ": max value must be larger than min value but min is " << minValue << ", max is " << maxValue << std::endl;
+				continue;
+			}
+
+			if(defaultValue != Description::NoDefaultValue && (defaultValue < minValue || defaultValue > maxValue))
+			{
+				errors << name << ": default value must be within parameter range " << minValue << " to " << maxValue << " but default value is specified as " << defaultValue << std::endl;
 				continue;
 			}
 
@@ -218,6 +236,7 @@ namespace pluginLib
 			Description d;
 
 			d.name = name.toStdString();
+			d.displayName = displayName.empty() ? d.name : displayName;
 
 			d.isPublic = readPropertyBool("isPublic");
 			d.isDiscrete = readPropertyBool("isDiscrete");
@@ -229,6 +248,16 @@ namespace pluginLib
 
 			d.range.setStart(minValue);
 			d.range.setEnd(maxValue);
+
+			d.defaultValue = defaultValue;
+
+			if(defaultValue == Description::NoDefaultValue)
+			{
+				if(d.isBipolar)
+					d.defaultValue = juce::roundToInt((minValue + maxValue) * 0.5f);
+				else
+					d.defaultValue = minValue;
+			}
 
 			d.valueList = it->second;
 

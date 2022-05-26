@@ -5,7 +5,7 @@
 namespace pluginLib
 {
 	Parameter::Parameter(Controller &ctrl, const pluginLib::Description& _desc, const uint8_t _partNum, const int uniqueId) :
-		juce::RangedAudioParameter(genId(_desc, _partNum, uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.name), m_ctrl(ctrl),
+		juce::RangedAudioParameter(genId(_desc, _partNum, uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName), m_ctrl(ctrl),
 		m_desc(_desc), m_partNum(_partNum), m_uniqueId(uniqueId)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
@@ -107,6 +107,13 @@ namespace pluginLib
 		if(uniqueId > 0)
 			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
 		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
+	}
+
+	uint8_t Parameter::getDefault() const
+	{
+		if(m_desc.defaultValue  != Description::NoDefaultValue)
+			return static_cast<uint8_t>(m_desc.defaultValue);
+		return 0;
 	}
 
 	void Parameter::addLinkedParameter(Parameter* _param)

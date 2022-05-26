@@ -42,6 +42,13 @@ namespace pluginLib
 			return convertTo0to1(static_cast<float>(res));
 		}
 
+		float getDefaultValue() const override
+		{
+			return convertTo0to1((float)getDefault());
+		}
+
+		virtual uint8_t getDefault() const;
+
 		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
 		{
 			const auto v = convertFrom0to1(normalisedValue);

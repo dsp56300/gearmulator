@@ -1,6 +1,10 @@
 Release Notes 
 
-1.2.18 (2022.05.xx):
+1.2.19 (2022.05.25):
+
+- [Fix] Preset changes were discarded because the last selected patch browser preset was always loaded when opening UI
+
+1.2.18 (2022.05.23):
 
 - [Imp] Multichannel output support, the plugin now exposes three stereo outputs to the DAW
 - [Imp] Remember last used file & patch in patch browser
