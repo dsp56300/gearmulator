@@ -12,11 +12,11 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, const std::string& _skinFolder, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_skinFolder(_skinFolder),
+		m_skinFolder(std::move(_skinFolder)),
 		m_openMenuCallback(std::move(_openMenuCallback))
 	{
 		create(_jsonFilename);
@@ -28,7 +28,11 @@ namespace genericVirusUI
 			m_tabs.reset(new Tabs(*this));
 
 		m_midiPorts.reset(new MidiPorts(*this));
-		m_fxPage.reset(new FxPage(*this));
+
+		// be backwards compatible with old skins
+		if(!getConditionCountRecursive())
+			m_fxPage.reset(new FxPage(*this));
+
 		m_patchBrowser.reset(new PatchBrowser(*this));
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
@@ -128,21 +132,6 @@ namespace genericVirusUI
 		return m_processor.getController();
 	}
 
-	void VirusEditor::setEnabled(juce::Component& _component, bool _enable)
-	{
-		if(_component.getProperties().contains("disabledAlpha"))
-		{
-			const float a = _component.getProperties()["disabledAlpha"];
-
-			_component.setAlpha(_enable ? 1.0f : a);
-			_component.setEnabled(_enable);
-		}
-		else
-		{
-			_component.setVisible(_enable);
-		}
-	}
-
 	const char* VirusEditor::findNamedResourceByFilename(const std::string& _filename, uint32_t& _size)
 	{
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
@@ -234,6 +223,11 @@ namespace genericVirusUI
 	{
 		m_parameterBinding.bind(_target, _parameterIndex);
 		return true;
+	}
+
+	juce::Value* VirusEditor::getParameterValue(int _parameterIndex)
+	{
+		return getController().getParamValueObject(_parameterIndex);
 	}
 
 	void VirusEditor::onProgramChange()

@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include "condition.h"
 #include "tabgroup.h"
 
 namespace juce
@@ -34,11 +35,11 @@ namespace genericUI
 		explicit UiObject(const juce::var& _json);
 		~UiObject();
 
-		void createJuceTree(Editor& _editor) const;
+		void createJuceTree(Editor& _editor);
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
 		void createTabGroups(Editor& _editor);
 
-		void apply(Editor& _editor, juce::Component& _target) const;
+		void apply(Editor& _editor, juce::Component& _target);
 		void apply(Editor& _editor, juce::Slider& _target);
 		void apply(Editor& _editor, juce::ComboBox& _target);
 		void apply(Editor& _editor, juce::DrawableButton& _target);
@@ -54,10 +55,13 @@ namespace genericUI
 		float getPropertyFloat(const std::string& _key, float _default = 0.0f) const;
 		std::string getProperty(const std::string& _key, const std::string& _default = std::string()) const;
 
+		size_t getConditionCountRecursive() const;
+
 	private:
 		bool hasComponent(const std::string& _component) const;
 		template<typename T> T* createJuceObject(Editor& _editor);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
+		void createCondition(Editor& _editor, juce::Component& _target);
 
 		bool parse(juce::DynamicObject* _obj);
 
@@ -74,6 +78,8 @@ namespace genericUI
 
 		std::vector<std::unique_ptr<juce::Component>> m_juceObjects;
 		std::unique_ptr<UiObjectStyle> m_style;
+
+		std::unique_ptr<Condition> m_condition;
 
 		TabGroup m_tabGroup;
 	};
