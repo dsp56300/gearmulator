@@ -1,5 +1,5 @@
 #include "VirusParameterBinding.h"
-#include "VirusParameter.h"
+
 #include "PluginProcessor.h"
 
 class Parameter;
@@ -74,7 +74,7 @@ void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
 }
 void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
 {
-	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
+	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
 
 	if (!v)
 	{
@@ -108,7 +108,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
 
 void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, uint8_t _part)
 {
-	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part));
+	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");
@@ -152,7 +152,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, 
 
 void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
 {
-	const auto v = dynamic_cast<Virus::Parameter*>(m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart()));
+	const auto v = m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart());
 	if (!v)
 	{
 		assert(false && "Failed to find parameter");
