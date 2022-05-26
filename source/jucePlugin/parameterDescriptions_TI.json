@@ -644,7 +644,7 @@
 		{"page":115, "index":94, "name":"Midi Control Low Page", "min":0, "max":1, "default":1, "isPublic":false, "isDiscrete":false, "isBool":true},
 		{"page":115, "index":95, "name":"Midi Control High Page", "min":0, "max":1, "default":0, "isPublic":false, "isDiscrete":false, "isBool":true},
 		{"page":115, "index":96, "name":"Midi Arpeggiator Send", "min":0, "max":1, "default":0, "isPublic":false, "isDiscrete":false, "isBool":true},
-		{"page":115, "index":97, "name":"Knob Display", "min":0, "max":3, "default":64, "toText":"unsignedOff", "isPublic":false, "isDiscrete":true, "isBool":false},
+		{"page":115, "index":97, "name":"Knob Display", "min":0, "max":3, "default":0, "toText":"unsignedOff", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":98, "name":"Midi Dump Tx", "min":0, "max":4, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":99, "name":"Midi Dump Rx", "min":0, "max":4, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":106, "name":"Midi Clock Rx", "min":0, "max":3, "default":2, "isPublic":false, "isDiscrete":true, "isBool":false},
