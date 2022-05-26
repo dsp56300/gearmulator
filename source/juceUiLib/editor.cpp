@@ -201,4 +201,24 @@ namespace genericUI
 			throw std::runtime_error("Failed to find component named " + _name);
 		return comps.empty() ? nullptr : comps.front();
 	}
+
+	size_t Editor::getConditionCountRecursive() const
+	{
+		return m_rootObject ? m_rootObject->getConditionCountRecursive() : 0;
+	}
+
+	void Editor::setEnabled(juce::Component& _component, const bool _enable)
+	{
+		if(_component.getProperties().contains("disabledAlpha"))
+		{
+			const float a = _component.getProperties()["disabledAlpha"];
+
+			_component.setAlpha(_enable ? 1.0f : a);
+			_component.setEnabled(_enable);
+		}
+		else
+		{
+			_component.setVisible(_enable);
+		}
+	}
 }

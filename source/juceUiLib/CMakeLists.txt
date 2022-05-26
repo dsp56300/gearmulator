@@ -4,6 +4,7 @@ project(juceUiLib VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	editor.cpp editor.h
 	editorInterface.h
+	condition.cpp condition.h
 	image.cpp image.h
 	rotaryStyle.cpp rotaryStyle.h
 	comboboxStyle.cpp comboboxStyle.h
