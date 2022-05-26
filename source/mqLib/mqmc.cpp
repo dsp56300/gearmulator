@@ -11,7 +11,6 @@ namespace mqLib
 {
 	constexpr uint32_t g_romAddress = 0x80000;
 	constexpr uint32_t g_pcInitial = 0x80130;
-	constexpr uint32_t g_simBase = 0x00fffa00;
 
 	MqMc::MqMc(ROM& _rom) : m_rom(_rom)
 	{
@@ -31,7 +30,7 @@ namespace mqLib
 			char disasm[64];
 			disassemble(getPC(), disasm);
 			const auto opSize = disassemble(i, disasm);
-			f << HEXN(i,5) << ": " << disasm << std::endl   ;
+			f << HEXN(i,5) << ": " << disasm << std::endl;
 			if(!opSize)
 				++i;
 			else
@@ -53,8 +52,8 @@ namespace mqLib
 			fclose(hFile);
 		}
 
-#if 0
-		if(clock > 0xf11cc32a)
+#if 1
+		if(clock > 0x4213036)
 		{
 			char disasm[64];
 			disassemble(getPC(), disasm);
@@ -78,24 +77,7 @@ namespace mqLib
 			return r;
 		}
 
-		LOG("read16 addr=" << HEXN(addr, 8));
-
-		switch(addr)
-		{
-		case 0xfffa04:	//  $YFFA04 CLOCK SYNTHESIZER CONTROL (SYNCR)
-			{
-				auto v = readW(m_sim, addr - g_simBase);
-				v |= (1<<3);	// code waits until frequency has locked in
-				return v;
-			}
-		case 0xfffa11:
-			break;
-		}
-
-		if(addr >= g_simBase && addr < g_simBase + m_sim.size())
-			readW(m_sim, addr - g_simBase);
-
-		return 0;
+		return Mc68k::read16(addr);
 	}
 
 	moira::u8 MqMc::read8(moira::u32 addr)
@@ -106,18 +88,7 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 			return m_rom.getData()[addr - g_romAddress];
 
-		LOG("read8 addr=" << HEXN(addr, 8));
-
-		switch(addr)
-		{
-			case 0xfffa11:
-				m_sim[addr - g_simBase] |= (1<<5);	// code tests bit 5, seems to be an input
-				break;
-		}
-		if(addr >= g_simBase && addr < g_simBase + m_sim.size())
-			return m_sim[addr - g_simBase];
-
-		return 0;
+		return Mc68k::read8(addr);
 	}
 
 	void MqMc::write16(moira::u32 addr, moira::u16 val)
@@ -130,8 +101,7 @@ namespace mqLib
 
 		LOG("write16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4));
 
-		if(addr >= g_simBase && addr < g_simBase + m_sim.size())
-			writeW(m_sim, addr - g_simBase, val);
+		Mc68k::write16(addr, val);
 	}
 
 	void MqMc::write8(moira::u32 addr, moira::u8 val)
@@ -144,7 +114,6 @@ namespace mqLib
 
 		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << static_cast<char>(val));
 
-		if(addr >= g_simBase && addr < g_simBase + m_sim.size())
-			m_sim[addr - g_simBase] = val;
+		Mc68k::write8(addr, val);
 	}
 }
