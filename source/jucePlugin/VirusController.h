@@ -52,7 +52,6 @@ namespace Virus
         // this is called by the plug-in on audio thread!
         void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
 
-    	pluginLib::Parameter* createParameter(pluginLib::Controller& _controller, const pluginLib::Description& _desc, uint8_t _part, int _uid) override;
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
         std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
         std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);

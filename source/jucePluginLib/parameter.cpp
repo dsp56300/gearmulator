@@ -109,6 +109,13 @@ namespace pluginLib
 		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
 	}
 
+	uint8_t Parameter::getDefault() const
+	{
+		if(m_desc.defaultValue  != Description::NoDefaultValue)
+			return static_cast<uint8_t>(m_desc.defaultValue);
+		return 0;
+	}
+
 	void Parameter::addLinkedParameter(Parameter* _param)
 	{
 		if (_param == this)
