@@ -309,7 +309,7 @@
  		{"page":114, "index":36, "name":"Part High Key", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "index":37, "name":"Part Transpose", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":114, "index":38, "name":"Part Detune", "min":0, "max":127, "toText":"signed", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
- 		{"page":114, "index":39, "name":"Part Volume", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false},
+ 		{"page":114, "index":39, "name":"Part Volume", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":114, "index":40, "name":"Part Midi Volume Init", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "index":41, "name":"Part Output Select", "min":0, "max":14, "toText":"outputSelect", "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":45, "name":"Second Output Select", "min":0, "max":15, "isPublic":false, "isDiscrete":true, "isBool":false},
