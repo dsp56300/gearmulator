@@ -1,6 +1,6 @@
 #pragma once
 
-#include "VirusParameter.h"
+#include "../jucePluginLib/parameter.h"
 
 namespace juce {
 	class Value;
@@ -11,9 +11,9 @@ class Parameter;
 class VirusParameterBindingMouseListener : public juce::MouseListener
 {
 public:
-	VirusParameterBindingMouseListener(Virus::Parameter* _param, juce::Slider &_slider) : m_param(_param), m_slider(&_slider) {
+	VirusParameterBindingMouseListener(pluginLib::Parameter* _param, juce::Slider &_slider) : m_param(_param), m_slider(&_slider) {
 	}
-	Virus::Parameter *m_param;
+	pluginLib::Parameter *m_param;
 	juce::Slider* m_slider;
 	void mouseDown(const juce::MouseEvent &event) override { m_param->beginChangeGesture(); }
 	void mouseUp(const juce::MouseEvent &event) override { m_param->endChangeGesture(); }
@@ -45,7 +45,7 @@ private:
 
 	struct BoundParameter
 	{
-		Virus::Parameter* parameter = nullptr;
+		pluginLib::Parameter* parameter = nullptr;
 		juce::Component* component = nullptr;
 		uint32_t type = 0xffffffff;
 		uint8_t part = CurrentPart;
