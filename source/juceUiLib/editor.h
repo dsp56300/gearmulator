@@ -72,6 +72,10 @@ namespace genericUI
 			return m_tabGroupsByName.size();
 		}
 
+		size_t getConditionCountRecursive() const;
+
+		static void setEnabled(juce::Component& _component, bool _enable);
+
 	private:
 		EditorInterface& m_interface;
 

@@ -28,7 +28,7 @@ namespace genericUI
 		m_style.reset();
 	}
 
-	void UiObject::createJuceTree(Editor& _editor) const
+	void UiObject::createJuceTree(Editor& _editor)
 	{
 		apply(_editor, _editor);
 
@@ -64,7 +64,7 @@ namespace genericUI
 		}
 	}
 
-	void UiObject::apply(Editor& _editor, juce::Component& _target) const
+	void UiObject::apply(Editor& _editor, juce::Component& _target)
 	{
 		const auto x = getPropertyInt("x");
 		const auto y = getPropertyInt("y");
@@ -80,6 +80,8 @@ namespace genericUI
 
 		_target.setTopLeftPosition(x, y);
 		_target.setSize(w, h);
+
+		createCondition(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::Slider& _target)
@@ -238,6 +240,56 @@ namespace genericUI
 			}
 		}
 		return _default;
+	}
+
+	size_t UiObject::getConditionCountRecursive() const
+	{
+		size_t count = m_condition ? 1 : 0;
+
+		for (const auto & c : m_children)
+			count += c->getConditionCountRecursive();
+
+		return count;
+	}
+
+	void UiObject::createCondition(Editor& _editor, juce::Component& _target)
+	{
+		if(!hasComponent("condition"))
+			return;
+
+		const auto paramName = getProperty("enableOnParameter");
+
+		const auto index = _editor.getInterface().getParameterIndexByName(paramName);
+
+		if(index < 0)
+			throw std::runtime_error("Parameter named " + paramName + " not found");
+
+		const auto v = _editor.getInterface().getParameterValue(index);
+
+		if(!v)
+			throw std::runtime_error("Parameter named " + paramName + " not found");
+
+		const auto conditionValues = getProperty("enableOnValues");
+
+		size_t start = 0;
+
+		std::set<uint8_t> values;
+
+		for(size_t i=0; i<=conditionValues.size(); ++i)
+		{
+			const auto isEnd = i == conditionValues.size() || conditionValues[i] == ',' || conditionValues[i] == ';';
+
+			if(!isEnd)
+				continue;
+
+			const auto valueString = conditionValues.substr(start, i - start);
+			const int val = strtol(valueString.c_str(), nullptr, 10);
+			values.insert(static_cast<uint8_t>(val));
+
+			start = i + 1;
+		}
+
+		m_condition.reset(new Condition(_target, *v, values));
 	}
 
 	bool UiObject::parse(juce::DynamicObject* _obj)
