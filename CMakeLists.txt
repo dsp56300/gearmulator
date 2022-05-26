@@ -18,6 +18,8 @@ add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/virusConsoleLib)
 add_subdirectory(source/libresample)
+add_subdirectory(source/68kEmu)
+add_subdirectory(source/mqLib)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
@@ -39,6 +41,7 @@ endif()
 add_subdirectory(source/virusTestConsole)
 add_subdirectory(source/logicAnalysisParser)
 add_subdirectory(source/virusIntegrationTest)
+add_subdirectory(source/mqTestConsole)
 
 # ----------------- CPack
 
