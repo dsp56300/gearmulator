@@ -227,4 +227,9 @@ namespace pluginLib
 		}
 		return false;
 	}
+
+	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
+	{
+		return new Parameter(_controller, _desc, _part, _uid);
+	}
 }

@@ -31,7 +31,7 @@ namespace pluginLib
 		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 
 	protected:
-		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid) = 0;
+		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
 
 	private:
