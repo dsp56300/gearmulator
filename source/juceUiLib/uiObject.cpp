@@ -84,12 +84,28 @@ namespace genericUI
 
 	void UiObject::apply(Editor& _editor, juce::Slider& _target)
 	{
-		_target.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
 	    _target.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
 		apply(_editor, static_cast<juce::Component&>(_target));
 
-		createStyle(_editor, _target, new RotaryStyle(_editor));
+		auto* const s = new RotaryStyle(_editor);
+
+		createStyle(_editor, _target, s);
+
+		const auto sliderStyle = s->getStyle();
+
+	    switch (sliderStyle)
+	    {
+	    case RotaryStyle::Style::Rotary: 
+			_target.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+			break;
+	    case RotaryStyle::Style::LinearVertical:
+			_target.setSliderStyle(juce::Slider::LinearVertical);
+			break;
+	    case RotaryStyle::Style::LinearHorizontal:
+			_target.setSliderStyle(juce::Slider::LinearHorizontal);
+			break;
+	    }
 
 		bindParameter(_editor, _target);
 	}
