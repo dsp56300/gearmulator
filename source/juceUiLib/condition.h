@@ -4,8 +4,6 @@
 
 #include <set>
 
-#include "condition.h"
-
 namespace juce
 {
 	class Value;
