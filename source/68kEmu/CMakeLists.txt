@@ -29,7 +29,13 @@ set(SOURCES_MOIRA
 )
 
 set(SOURCES
+	gpt.cpp gpt.h
 	mc68k.cpp mc68k.h
+	peripheralBase.cpp peripheralBase.h
+	peripheralTypes.h
+	qsm.cpp qsm.h
+	qspi.cpp qspi.h
+	sim.cpp sim.h
 )
 
 target_sources(68kEmu PRIVATE ${SOURCES} ${SOURCES_MOIRA})
