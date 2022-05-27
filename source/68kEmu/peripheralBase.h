@@ -22,6 +22,7 @@ namespace mc68k
 		virtual void write8(PeriphAddress _addr, uint8_t _val);
 		virtual void write16(PeriphAddress _addr, uint16_t _val);
 
+		virtual void exec() {}
 	private:
 		const uint32_t m_baseAddress;
 		std::vector<uint8_t> m_buffer;
