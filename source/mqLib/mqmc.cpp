@@ -23,6 +23,7 @@ namespace mqLib
 		setPC(g_pcInitial);
 		setPC0(g_pcInitial);
 
+#if 0
 		std::ofstream f("mq_68k.asm", std::ios::out);
 
 		for(uint32_t i=g_pcInitial; i<g_romAddress + m_rom.getSize();)
@@ -36,7 +37,8 @@ namespace mqLib
 			else
 				i += opSize;
 		}
-		f.close();	
+		f.close();
+#endif
 	}
 
 	MqMc::~MqMc()
@@ -45,6 +47,7 @@ namespace mqLib
 
 	void MqMc::exec()
 	{
+		/*
 		for(auto it = m_lastPCs.begin(); it != m_lastPCs.end(); ++it)
 		{
 			if(*it == getPC())
@@ -57,7 +60,7 @@ namespace mqLib
 		m_lastPCs.push_back(getPC());
 		if(m_lastPCs.size() > 32)
 			m_lastPCs.pop_front();
-
+		*/
 		if(getPC() == 0x80cfe)
 			int foo=0;
 		if(clock == 0x011cc32a)
@@ -79,7 +82,8 @@ namespace mqLib
 			LOG("Exec @ " << HEXN(getPC(), 8) << "  = " << disasm << " (clock " << HEXN(clock, 8) << ')');
 		}
 #endif
-		execute();
+
+		Mc68k::exec();
 	}
 
 	moira::u16 MqMc::read16(moira::u32 addr)

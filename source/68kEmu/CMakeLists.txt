@@ -48,3 +48,5 @@ target_include_directories(68kEmu PUBLIC
 )
 
 set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 20)
+
+target_link_libraries(68kEmu PUBLIC dsp56kEmu)

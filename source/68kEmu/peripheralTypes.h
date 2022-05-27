@@ -30,14 +30,25 @@ namespace mc68k
 		PFPar			= 0xFFA1F,	// $YFFA1F Port F Pin Assignment Register
 
 		// QSM
-		Qsmcr			= 0xffc00,
-		Qtest			= 0xffc02,
-		Qivr			= 0xffc04,		Qilr,
+		Qsmcr			= 0xffc00,	// $YFFC00 QSM Configuration Register
+		Qtest			= 0xffc02,	// $YFFC02 QSM Test Register
+		Qilr			= 0xffc04,	// $YFFC04 QSM Interrupt Level Register
+		Qivr,						// $YFFC05 QSM Interrupt Vector Register
 		NotUsedFFC06	= 0xffc06,
-		SciControl0		= 0xffc08,
-		SciControl1		= 0xffc0A,
-		SciStatus		= 0xffc0C,
-		SciData			= 0xffc0E,
+		SciControl0		= 0xffc08,	// $YFFC08 SCI Control Register 0
+		SciControl1		= 0xffc0a,	// $YFFC0A SCI Control Register 1
+		SciStatus		= 0xffc0c,	// $YFFC0C SCI Status Register
+		SciData			= 0xffc0E,	// $YFFC0E SCI Data Register
+
+		Portqs			= 0xffc15,	// $YFFC15 Port QS Data Register
+		Pqspar			= 0xffc16,	// $YFFC16 PORT QS Pin Assignment Register
+		Ddrqs			= 0xffc17,	// $YFFC17 PORT QS Data Direction Register
+		Spcr0			= 0xFFC18,	// $YFFC18 QSPI Control Register 0
+		Spcr1			= 0xFFC1a,	// $YFFC1A QSPI Control Register 1
+		Spcr2			= 0xFFC1c,	// $YFFC1C QSPI Control Register 2
+		Spcr3			= 0xFFC1e,	// $YFFC1E QSPI Control Register 3
+		Spsr			= 0xFFC1f,	// $YFFC1F QSPI Status Register
+
 		ReceiveRam0		= 0xffd00,
 		TransmitRam0	= 0xffd20,
 		CommandRam0		= 0xffd40,

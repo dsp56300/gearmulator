@@ -1,12 +1,17 @@
 #pragma once
 
-#include "peripheralTypes.h"
-
 namespace mc68k
 {
+	class Qsm;
+
 	class Qspi
 	{
 	public:
-		Qspi() = default;
+		explicit Qspi(Qsm& _qsm);
+
+		void exec();
+
+	private:
+		Qsm& m_qsm;
 	};
 }
