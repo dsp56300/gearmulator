@@ -13,17 +13,18 @@ namespace mqLib
 	{
 	public:
 		explicit MqMc(ROM& _rom);
-		~MqMc() override;
+		~MqMc();
 
 		void exec();
 
 	private:
-		moira::u16 read16(moira::u32 addr) override;
-		moira::u8 read8(moira::u32 addr) override;
-		void write16(moira::u32 addr, moira::u16 val) override;
-		void write8(moira::u32 addr, moira::u8 val) override;
+		uint16_t read16(uint32_t addr) override;
+		uint8_t read8(uint32_t addr) override;
+		void write16(uint32_t addr, uint16_t val) override;
+		void write8(uint32_t addr, uint8_t val) override;
 
-		void signalResetInstr() override;
+		void dumpMemory(const char* _filename) const;
+		void onReset() override;
 
 		ROM& m_rom;
 		std::vector<uint8_t> m_memory;

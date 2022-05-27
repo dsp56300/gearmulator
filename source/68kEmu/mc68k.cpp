@@ -1,16 +1,88 @@
 #include "mc68k.h"
 
+#include <cassert>
+
+#include "Moira/Musashi/m68k.h"
+
+static mc68k::Mc68k* g_instance = nullptr;
+
+extern "C"
+{
+	unsigned int m68k_read_memory_8(unsigned int address)
+	{
+		return g_instance->read8(address);
+	}
+	unsigned int m68k_read_memory_16(unsigned int address)
+	{
+		return g_instance->read16(address);
+	}
+	unsigned int m68k_read_memory_32(unsigned int address)
+	{
+		return g_instance->read32(address);
+	}
+	void m68k_write_memory_8(unsigned int address, unsigned int value)
+	{
+		g_instance->write8(address, static_cast<uint8_t>(value));
+	}
+	void m68k_write_memory_16(unsigned int address, unsigned int value)
+	{
+		g_instance->write16(address, static_cast<uint16_t>(value));
+	}
+	void m68k_write_memory_32(unsigned int address, unsigned int value)
+	{
+		g_instance->write32(address, value);
+	}
+	int m68k_int_ack(int int_level)
+	{
+		return static_cast<int>(g_instance->readIrqUserVector(static_cast<uint8_t>(int_level)));
+	}
+	void m68k_reset()
+	{
+		g_instance->onReset();
+	}
+
+	int read_sp_on_reset(void)
+	{
+		return static_cast<int>(g_instance->getResetSP());
+	}
+	int read_pc_on_reset(void)
+	{
+		return static_cast<int>(g_instance->getResetPC());
+	}
+	unsigned int m68k_read_disassembler_8  (unsigned int address)
+	{
+		return m68k_read_memory_8(address);
+	}
+	unsigned int m68k_read_disassembler_16 (unsigned int address)
+	{
+		return m68k_read_memory_16(address);
+	}
+	unsigned int m68k_read_disassembler_32 (unsigned int address)
+	{
+		return m68k_read_memory_32(address);
+	}
+}
+
 namespace mc68k
 {
 	Mc68k::Mc68k() : m_qsm(*this)
 	{
-		irqMode = moira::IRQ_USER;
+		g_instance = this;
+
+		m68k_set_cpu_type(M68K_CPU_TYPE_68020);
+		m68k_init();
+		m68k_set_int_ack_callback(m68k_int_ack);
+		m68k_set_reset_instr_callback(m68k_reset);
+		m68k_pulse_reset();
 	}
-	Mc68k::~Mc68k()	= default;
+	Mc68k::~Mc68k()
+	{
+		g_instance = nullptr;
+	};
 
 	void Mc68k::exec()
 	{
-		execute();
+		m68k_execute(1);
 
 		m_gpt.exec();
 		m_sim.exec();
@@ -37,7 +109,7 @@ namespace mc68k
 		return static_cast<uint16_t>(a << 8 | b);
 	}
 
-	moira::u8 Mc68k::read8(moira::u32 _addr)
+	uint8_t Mc68k::read8(uint32_t _addr)
 	{
 		const auto addr = static_cast<PeriphAddress>(_addr & g_peripheralMask);
 
@@ -48,7 +120,7 @@ namespace mc68k
 		return 0;
 	}
 
-	moira::u16 Mc68k::read16(moira::u32 _addr)
+	uint16_t Mc68k::read16(uint32_t _addr)
 	{
 		const auto addr = static_cast<PeriphAddress>(_addr & g_peripheralMask);
 
@@ -59,7 +131,12 @@ namespace mc68k
 		return 0;
 	}
 
-	void Mc68k::write8(moira::u32 _addr, moira::u8 _val)
+	uint32_t Mc68k::read32(const uint32_t _addr)
+	{
+		return static_cast<uint32_t>(read16(_addr)) << 16 | read16(_addr + 2);
+	}
+
+	void Mc68k::write8(uint32_t _addr, uint8_t _val)
 	{
 		const auto addr = static_cast<PeriphAddress>(_addr & g_peripheralMask);
 
@@ -68,7 +145,7 @@ namespace mc68k
 		else if(m_qsm.isInRange(addr))		m_qsm.write8(addr, _val);
 	}
 
-	void Mc68k::write16(moira::u32 _addr, moira::u16 _val)
+	void Mc68k::write16(uint32_t _addr, uint16_t _val)
 	{
 		const auto addr = static_cast<PeriphAddress>(_addr & g_peripheralMask);
 
@@ -77,28 +154,56 @@ namespace mc68k
 		else if(m_qsm.isInRange(addr))		m_qsm.write16(addr, _val);
 	}
 
-	moira::u16 Mc68k::readIrqUserVector(moira::u8 level) const
+	void Mc68k::write32(uint32_t _addr, uint32_t _val)
 	{
-		auto* self = const_cast<Mc68k*>(this);
+		write16(_addr, _val >> 16);
+		write16(_addr + 2, _val & 0xffff);
+	}
 
-		auto& vecs = self->m_pendingInterrupts[level];
-		assert(!vecs.empty());
+	uint32_t Mc68k::readIrqUserVector(const uint8_t _level)
+	{
+		auto& vecs = m_pendingInterrupts[_level];
+
+		if(vecs.empty())
+			return M68K_INT_ACK_AUTOVECTOR;
+
 		const auto vec = vecs.front();
 		vecs.pop_front();
 
-		self->setIPL(0);
-		self->raiseIPL();
+		m68k_set_irq(0);
+		this->raiseIPL();
 
 		return vec;
 	}
 
+	void Mc68k::reset()
+	{
+		m68k_pulse_reset();
+	}
+
+	void Mc68k::setPC(uint32_t _pc)
+	{
+		m68k_set_reg(M68K_REG_PC, _pc);
+	}
+
+	uint32_t Mc68k::getPC()
+	{
+		return m68k_get_reg(nullptr, M68K_REG_PC);
+	}
+
+	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer)
+	{
+		return m68k_disassemble(_buffer, _pc, m68k_get_reg(nullptr, M68K_REG_CPU_TYPE));
+	}
+
 	void Mc68k::raiseIPL()
 	{
-		for(int i=static_cast<int>(m_pendingInterrupts.size())-1; i>static_cast<int>(ipl); --i)
+		for(int i=static_cast<int>(m_pendingInterrupts.size())-1; i>0; --i)
 		{
 			if(!m_pendingInterrupts[i].empty())
 			{
-				setIPL(static_cast<uint8_t>(i));
+				m68k_set_irq(static_cast<uint8_t>(i));
+				break;
 			}
 		}
 	}

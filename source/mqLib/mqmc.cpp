@@ -17,11 +17,10 @@ namespace mqLib
 		m_memory.resize(0x40000, 0);
 		m_sim.resize(128, 0);
 
-		clock = 0;
+//		clock = 0;
 		reset();
 
 		setPC(g_pcInitial);
-		setPC0(g_pcInitial);
 
 #if 0
 		std::ofstream f("mq_68k.asm", std::ios::out);
@@ -29,7 +28,6 @@ namespace mqLib
 		for(uint32_t i=g_pcInitial; i<g_romAddress + m_rom.getSize();)
 		{
 			char disasm[64];
-			disassemble(getPC(), disasm);
 			const auto opSize = disassemble(i, disasm);
 			f << HEXN(i,5) << ": " << disasm << std::endl;
 			if(!opSize)
@@ -47,7 +45,7 @@ namespace mqLib
 
 	void MqMc::exec()
 	{
-		/*
+#if 0
 		for(auto it = m_lastPCs.begin(); it != m_lastPCs.end(); ++it)
 		{
 			if(*it == getPC())
@@ -60,16 +58,20 @@ namespace mqLib
 		m_lastPCs.push_back(getPC());
 		if(m_lastPCs.size() > 32)
 			m_lastPCs.pop_front();
-		*/
-		if(getPC() == 0x80cfe)
-			int foo=0;
+#endif
+		if(getPC() == 0x80718)
+		{
+			m_memory[0x170] = 100;
+			dumpMemory("spinloop");
+		}
+#if 0
 		if(clock == 0x011cc32a)
 		{
 			FILE* hFile = fopen("dump.bin", "wb");
 			fwrite(&m_memory[0], 1, m_memory.size(), hFile);
 			fclose(hFile);
 		}
-
+#endif
 		if(getPC() == 0x80228)
 		{
 			int foo=0;
@@ -86,7 +88,7 @@ namespace mqLib
 		Mc68k::exec();
 	}
 
-	moira::u16 MqMc::read16(moira::u32 addr)
+	uint16_t MqMc::read16(uint32_t addr)
 	{
 		if(addr < m_memory.size())
 		{
@@ -99,11 +101,13 @@ namespace mqLib
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
+		
+		LOG("read16 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read16(addr);
 	}
 
-	moira::u8 MqMc::read8(moira::u32 addr)
+	uint8_t MqMc::read8(uint32_t addr)
 	{
 		if(addr < m_memory.size())
 			return m_memory[addr];
@@ -111,10 +115,14 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 			return m_rom.getData()[addr - g_romAddress];
 
+		if(addr == 0xffffd002)
+			return 1;
+		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
+
 		return Mc68k::read8(addr);
 	}
 
-	void MqMc::write16(moira::u32 addr, moira::u16 val)
+	void MqMc::write16(uint32_t addr, uint16_t val)
 	{
 		if(addr < m_memory.size())
 		{
@@ -122,29 +130,36 @@ namespace mqLib
 			return;
 		}
 
-		LOG("write16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4));
+		LOG("write16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
 
 		Mc68k::write16(addr, val);
 	}
 
-	void MqMc::write8(moira::u32 addr, moira::u8 val)
+	void MqMc::write8(uint32_t addr, uint8_t val)
 	{
+		if(addr >= 0xffffd000)
+			int foo=0;
+
 		if(addr < m_memory.size())
 		{
 			m_memory[addr] = val;
 			return;
 		}
 
-		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << static_cast<char>(val));
+		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << static_cast<char>(val) << ", pc=" << HEXN(getPC(), 8));
 
 		Mc68k::write8(addr, val);
 	}
 
-	void MqMc::signalResetInstr()
+	void MqMc::dumpMemory(const char* _filename) const
 	{
-		FILE* hFile = fopen("dump_reset.bin", "wb");
+		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
 		fwrite(&m_memory[0], 1, m_memory.size(), hFile);
 		fclose(hFile);
-		Mc68k::signalResetInstr();
+	}
+
+	void MqMc::onReset()
+	{
+		dumpMemory("dump_reset");
 	}
 }

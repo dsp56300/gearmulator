@@ -28,6 +28,23 @@ set(SOURCES_MOIRA
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Moira/StrWriter_cpp.h
 )
 
+set(SOURCES_MUSASHI
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68k.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kconf.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kcpu.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kcpu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kdasm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kfpu.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kops.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kops.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/mamesf.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/milieu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat-macros
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat-specialize
+)
+
 set(SOURCES
 	gpt.cpp gpt.h
 	mc68k.cpp mc68k.h
@@ -38,9 +55,10 @@ set(SOURCES
 	sim.cpp sim.h
 )
 
-target_sources(68kEmu PRIVATE ${SOURCES} ${SOURCES_MOIRA})
+target_sources(68kEmu PRIVATE ${SOURCES} ${SOURCES_MOIRA} ${SOURCES_MUSASHI})
 source_group("source" FILES ${SOURCES})
 source_group("source\\Moira" FILES ${SOURCES_MOIRA})
+source_group("source\\Musashi" FILES ${SOURCES_MUSASHI})
 
 # Add include paths
 target_include_directories(68kEmu PUBLIC
