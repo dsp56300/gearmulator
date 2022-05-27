@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <list>
 
 #include "../68kEmu/mc68k.h"
 
@@ -22,8 +23,11 @@ namespace mqLib
 		void write16(moira::u32 addr, moira::u16 val) override;
 		void write8(moira::u32 addr, moira::u8 val) override;
 
+		void signalResetInstr() override;
+
 		ROM& m_rom;
 		std::vector<uint8_t> m_memory;
 		std::vector<uint8_t> m_sim;
+		std::list<uint32_t> m_lastPCs;
 	};
 }

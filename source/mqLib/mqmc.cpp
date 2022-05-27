@@ -45,6 +45,21 @@ namespace mqLib
 
 	void MqMc::exec()
 	{
+		for(auto it = m_lastPCs.begin(); it != m_lastPCs.end(); ++it)
+		{
+			if(*it == getPC())
+			{
+				m_lastPCs.erase(it);
+				break;
+			}
+		}
+
+		m_lastPCs.push_back(getPC());
+		if(m_lastPCs.size() > 32)
+			m_lastPCs.pop_front();
+
+		if(getPC() == 0x80cfe)
+			int foo=0;
 		if(clock == 0x011cc32a)
 		{
 			FILE* hFile = fopen("dump.bin", "wb");
@@ -52,8 +67,12 @@ namespace mqLib
 			fclose(hFile);
 		}
 
-#if 1
-		if(clock > 0x4213036)
+		if(getPC() == 0x80228)
+		{
+			int foo=0;
+		}
+#if 0
+		if(clock > 0x14c704c)
 		{
 			char disasm[64];
 			disassemble(getPC(), disasm);
@@ -115,5 +134,13 @@ namespace mqLib
 		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << static_cast<char>(val));
 
 		Mc68k::write8(addr, val);
+	}
+
+	void MqMc::signalResetInstr()
+	{
+		FILE* hFile = fopen("dump_reset.bin", "wb");
+		fwrite(&m_memory[0], 1, m_memory.size(), hFile);
+		fclose(hFile);
+		Mc68k::signalResetInstr();
 	}
 }
