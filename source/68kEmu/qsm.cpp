@@ -27,10 +27,13 @@ namespace mc68k
 
 		switch (_addr)
 		{
-			case PeriphAddress::Spcr1:
-				if(!(prev & g_spcr1_speMask) && (_val & g_spcr1_speMask))
-					startTransmit();
-				break;
+		case PeriphAddress::Spcr1:
+			if(!(prev & g_spcr1_speMask) && (_val & g_spcr1_speMask))
+				startTransmit();
+			break;
+		case PeriphAddress::Pqspar:
+			LOG("Set PQSPAR to " << HEXN(_val, 4));
+			break;
 		}
 	}
 
@@ -49,12 +52,15 @@ namespace mc68k
 
 		switch (_addr)
 		{
-			case PeriphAddress::Spcr1:
-				if(!(prev & g_spcr1_speMask) && (newVal & g_spcr1_speMask))
-					startTransmit();
-				break;
+		case PeriphAddress::Spcr1:
+			if(!(prev & g_spcr1_speMask) && (newVal & g_spcr1_speMask))
+				startTransmit();
+			break;
 		case PeriphAddress::Ddrqs:
 			LOG("Set DDRQS to " << HEXN(_val, 2));
+			break;
+		case PeriphAddress::Pqspar:
+			LOG("Set PQSPAR to " << HEXN(_val, 2));
 			break;
 		}
 	}
