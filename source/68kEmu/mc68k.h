@@ -41,6 +41,9 @@ namespace mc68k
 		virtual uint32_t getResetSP() { return 0; }
 
 		uint32_t disassemble(uint32_t _pc, char* _buffer);
+
+		uint64_t getCycles() const { return m_cycles; }
+
 	private:
 		void raiseIPL();
 
@@ -50,5 +53,6 @@ namespace mc68k
 		Hdi08 m_hdi08;
 
 		std::array<std::deque<uint8_t>, 8> m_pendingInterrupts;
+		uint64_t m_cycles = 0;
 	};
 }
