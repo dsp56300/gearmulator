@@ -115,8 +115,6 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 			return m_rom.getData()[addr - g_romAddress];
 
-		if(addr == 0xffffd002)
-			return 1;
 		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read8(addr);
