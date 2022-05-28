@@ -82,7 +82,7 @@ namespace mc68k
 
 	void Mc68k::exec()
 	{
-		m68k_execute(1);
+		m_cycles += m68k_execute(1);
 
 		m_gpt.exec();
 		m_sim.exec();
