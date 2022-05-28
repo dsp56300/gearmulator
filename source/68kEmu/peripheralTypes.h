@@ -6,18 +6,28 @@ namespace mc68k
 {
 	static constexpr uint32_t g_peripheralMask	= 0xfffff;
 
-	static constexpr uint32_t g_peripheralBase	= 0xff000;
-
+	static constexpr uint32_t g_hdi08Base		= 0xfd000;
 	static constexpr uint32_t g_gptBase			= 0xff900;
 	static constexpr uint32_t g_simBase			= 0xffa00;
 	static constexpr uint32_t g_qsmBase			= 0xffc00;
 
+	static constexpr uint32_t g_hdi08Size		= 8;
 	static constexpr uint32_t g_gptSize			= 64;
 	static constexpr uint32_t g_simSize			= 128;
 	static constexpr uint32_t g_qsmSize			= 512;
 
 	enum class PeriphAddress
 	{
+		// HDI08
+		HdiICR			= 0xfd000,	// Interface Control Register (ICR)
+		HdiCVR			= 0xfd001,	// Command Vector Register (CVR)
+		HdiISR			= 0xfd002,	// Interface Status Register (ISR)
+		HdiIVR			= 0xfd003,	// Interrupt Vector Register (IVR)
+		HdiUnused4		= 0xfd004,
+		HdiTXH			= 0xfd005,	// Receive Byte Registers (RXH:RXM:RXL)
+		HdiTXM			= 0xfd006,	//   or Transmit Byte Registers (TXH:TXM:TXL)
+		HdiTXL			= 0xfd007,	//   byte order depends on HLEND endianess setting
+
 		// SIM
 		Syncr			= 0xFFA04,	// $YFFA04 CLOCK SYNTHESIZER CONTROL (SYNCR)
 		PortE0			= 0xFFA11,	// $YFFA11 Port E Data Register

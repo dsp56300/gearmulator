@@ -116,6 +116,7 @@ namespace mc68k
 		if(m_gpt.isInRange(addr))			return m_gpt.read8(addr);
 		if(m_sim.isInRange(addr))			return m_sim.read8(addr);
 		if(m_qsm.isInRange(addr))			return m_qsm.read8(addr);
+		if(m_hdi08.isInRange(addr))			return m_hdi08.read8(addr);
 
 		return 0;
 	}
@@ -127,6 +128,7 @@ namespace mc68k
 		if(m_gpt.isInRange(addr))			return m_gpt.read16(addr);
 		if(m_sim.isInRange(addr))			return m_sim.read16(addr);
 		if(m_qsm.isInRange(addr))			return m_qsm.read16(addr);
+		if(m_hdi08.isInRange(addr))			return m_hdi08.read16(addr);
 
 		return 0;
 	}
@@ -143,6 +145,7 @@ namespace mc68k
 		if(m_gpt.isInRange(addr))			m_gpt.write8(addr, _val);
 		else if(m_sim.isInRange(addr))		m_sim.write8(addr, _val);
 		else if(m_qsm.isInRange(addr))		m_qsm.write8(addr, _val);
+		else if(m_hdi08.isInRange(addr))	m_hdi08.write8(addr, _val);
 	}
 
 	void Mc68k::write16(uint32_t _addr, uint16_t _val)
@@ -152,6 +155,7 @@ namespace mc68k
 		if(m_gpt.isInRange(addr))			m_gpt.write16(addr, _val);
 		else if(m_sim.isInRange(addr))		m_sim.write16(addr, _val);
 		else if(m_qsm.isInRange(addr))		m_qsm.write16(addr, _val);
+		else if(m_hdi08.isInRange(addr))	m_hdi08.write16(addr, _val);
 	}
 
 	void Mc68k::write32(uint32_t _addr, uint32_t _val)

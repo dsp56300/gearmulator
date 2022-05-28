@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "gpt.h"
+#include "hdi08.h"
 #include "qsm.h"
 #include "sim.h"
 
@@ -46,6 +47,7 @@ namespace mc68k
 		Gpt m_gpt;
 		Sim m_sim;
 		Qsm m_qsm;
+		Hdi08 m_hdi08;
 
 		std::array<std::deque<uint8_t>, 8> m_pendingInterrupts;
 	};
