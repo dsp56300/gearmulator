@@ -12,6 +12,16 @@ namespace mqLib
 	constexpr uint32_t g_romAddress = 0x80000;
 	constexpr uint32_t g_pcInitial = 0x80130;
 
+	static std::string logChar(char _val)
+	{
+		std::stringstream ss;
+		if(_val > 32 && _val < 127)
+			ss << _val;
+		else
+			ss << "[" << HEXN(static_cast<uint8_t>(_val), 2) << "]";
+		return ss.str();
+	}
+
 	MqMc::MqMc(ROM& _rom) : m_rom(_rom)
 	{
 		m_memory.resize(0x40000, 0);
@@ -144,7 +154,7 @@ namespace mqLib
 			return;
 		}
 
-		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << static_cast<char>(val) << ", pc=" << HEXN(getPC(), 8));
+		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
 
 		Mc68k::write8(addr, val);
 	}
