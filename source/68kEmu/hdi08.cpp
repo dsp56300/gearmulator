@@ -29,6 +29,12 @@ namespace mc68k
 
 		switch (_addr)
 		{
+		case PeriphAddress::HdiICR:
+			if(_val & Init)
+			{
+				LOG("HDI08 Initialization, HREQ=" << (_val & Rreq) << ", TREQ=" << (_val & Treq));
+			}
+			break;
 		case PeriphAddress::HdiCVR:
 			if(_val & Hc)
 			{
