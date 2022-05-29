@@ -44,6 +44,8 @@ namespace mc68k
 
 		uint64_t getCycles() const { return m_cycles; }
 
+		Hdi08& hdi08();
+
 	private:
 		void raiseIPL();
 
