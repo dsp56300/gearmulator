@@ -120,6 +120,11 @@ namespace mqLib
 
 	void MqMc::write16(uint32_t addr, uint16_t val)
 	{
+		if(addr >= 0x814 && addr < 0x814 + 0x50)
+		{
+			LOG("LCD WRITE16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
+		}
+
 		if(addr < m_memory.size())
 		{
 			writeW(m_memory, addr, val);
@@ -135,6 +140,11 @@ namespace mqLib
 	{
 		if(addr >= 0xffffd000)
 			int foo=0;
+
+		if(addr >= 0x814 && addr < 0x814 + 0x50)
+		{
+			LOG("LCD WRITE8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
+		}
 
 		if(addr < m_memory.size())
 		{
