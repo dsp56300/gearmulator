@@ -196,7 +196,7 @@ namespace mc68k
 		return m68k_get_reg(nullptr, M68K_REG_PC);
 	}
 
-	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer)
+	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer) const
 	{
 		return m68k_disassemble(_buffer, _pc, m68k_get_reg(nullptr, M68K_REG_CPU_TYPE));
 	}

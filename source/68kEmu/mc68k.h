@@ -40,7 +40,7 @@ namespace mc68k
 		virtual uint32_t getResetPC() { return 0; }
 		virtual uint32_t getResetSP() { return 0; }
 
-		uint32_t disassemble(uint32_t _pc, char* _buffer);
+		uint32_t disassemble(uint32_t _pc, char* _buffer) const;
 
 		uint64_t getCycles() const { return m_cycles; }
 

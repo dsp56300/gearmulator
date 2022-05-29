@@ -24,6 +24,8 @@ namespace mqLib
 		void write8(uint32_t addr, uint8_t val) override;
 
 		void dumpMemory(const char* _filename) const;
+		void dumpAssembly(uint32_t _first, uint32_t _count) const;
+
 		void onReset() override;
 
 		ROM& m_rom;
