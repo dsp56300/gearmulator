@@ -1,5 +1,8 @@
 #pragma once
 
+#include <array>
+#include <deque>
+
 #include "peripheralBase.h"
 
 namespace mc68k
@@ -27,7 +30,7 @@ namespace mc68k
 			Hf0				= 1<<3,		// ICR Host Flag 0 (HF0) Bit 3
 			Hf1				= 1<<4,		// ICR Host Flag 1 (HF1) Bit 4
 			Hlend			= 1<<5,		// ICR Host Little Endian (HLEND) Bit 5
-			Hm0 = Hlend,
+			Hm0				= Hlend,
 			Hm1				= 1<<6,		// ICR Host Mode Control (HM1 and HM0 bits) Bits 5-6
 			Init			= 1<<7,		// ICR Initialize Bit (INIT) Bit 7
 		};
@@ -38,13 +41,54 @@ namespace mc68k
 			Hc				= (1<<7),	// CVR Host Command Bit (HC) Bit 7
 		};
 
-		Hdi08() : PeripheralBase(g_hdi08Base, g_hdi08Size)
-		{
-		}
+		Hdi08();
 
 		uint8_t read8(PeriphAddress _addr) override;
 		uint16_t read16(PeriphAddress _addr) override;
 		void write8(PeriphAddress _addr, uint8_t _val) override;
 		void write16(PeriphAddress _addr, uint16_t _val) override;
+
+		void pollTx(std::deque<uint32_t>& _dst)
+		{
+			std::swap(_dst, m_txData);
+		}
+
+		bool pollInterruptRequest(uint8_t& _addr);
+
+		void writeRx(uint32_t _word);
+
+		void exec() override;
+
+	private:
+		enum class WordFlags
+		{
+			None = 0,
+
+			H = 0,
+			M = 1,
+			L = 2,
+
+			HMask = (1<<H),
+			MMask = (1<<M),
+			LMask = (1<<L),
+
+			Mask = (HMask | MMask | LMask)
+		};
+
+		void writeTX(WordFlags _index, uint8_t _val);
+		static WordFlags makeMask(WordFlags _index);
+		static void addIndex(WordFlags& _existing, WordFlags _indexToAdd);
+		static void removeIndex(WordFlags& _existing, WordFlags _indexToRemove);
+		uint8_t littleEndian();
+		uint8_t readRX(WordFlags _index);
+
+		WordFlags m_writtenFlags = WordFlags::None;
+		WordFlags m_readFlags = WordFlags::None;
+
+		std::array<uint8_t, 3> m_txBytes{};
+
+		std::deque<uint32_t> m_txData;
+		std::deque<uint32_t> m_rxData;
+		std::deque<uint8_t> m_pendingInterruptRequests;
 	};
 }

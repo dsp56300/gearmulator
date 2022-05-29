@@ -201,6 +201,11 @@ namespace mc68k
 		return m68k_disassemble(_buffer, _pc, m68k_get_reg(nullptr, M68K_REG_CPU_TYPE));
 	}
 
+	Hdi08& Mc68k::hdi08()
+	{
+		return m_hdi08;
+	}
+
 	void Mc68k::raiseIPL()
 	{
 		for(int i=static_cast<int>(m_pendingInterrupts.size())-1; i>0; --i)
