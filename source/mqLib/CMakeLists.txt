@@ -6,6 +6,7 @@ add_library(mqLib STATIC)
 set(SOURCES
 	dspBootCode.h
 	rom.cpp rom.h
+	mqdsp.cpp mqdsp.h
 	mqmc.cpp mqmc.h
 )
 
