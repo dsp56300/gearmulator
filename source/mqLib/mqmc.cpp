@@ -33,19 +33,7 @@ namespace mqLib
 		setPC(g_pcInitial);
 
 #if 0
-		std::ofstream f("mq_68k.asm", std::ios::out);
-
-		for(uint32_t i=g_pcInitial; i<g_romAddress + m_rom.getSize();)
-		{
-			char disasm[64];
-			const auto opSize = disassemble(i, disasm);
-			f << HEXN(i,5) << ": " << disasm << std::endl;
-			if(!opSize)
-				++i;
-			else
-				i += opSize;
-		}
-		f.close();
+		dumpAssembly(g_romAddress, g_romSize);
 #endif
 	}
 
@@ -164,6 +152,26 @@ namespace mqLib
 		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
 		fwrite(&m_memory[0], 1, m_memory.size(), hFile);
 		fclose(hFile);
+	}
+
+	void MqMc::dumpAssembly(const uint32_t _first, const uint32_t _count) const
+	{
+		std::stringstream ss;
+		ss << "mq_68k_" << _first << '-' << (_first + _count) << ".asm";
+
+		std::ofstream f(ss.str(), std::ios::out);
+
+		for(uint32_t i=_first; i<_first + _count;)
+		{
+			char disasm[64];
+			const auto opSize = disassemble(i, disasm);
+			f << HEXN(i,5) << ": " << disasm << std::endl;
+			if(!opSize)
+				++i;
+			else
+				i += opSize;
+		}
+		f.close();
 	}
 
 	void MqMc::onReset()
