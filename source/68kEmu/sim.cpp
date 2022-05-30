@@ -1,9 +1,15 @@
 #include "sim.h"
 
+#include "mc68k.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 namespace mc68k
 {
+	Sim::Sim(Mc68k& _mc68k): PeripheralBase(g_simBase, g_simSize), m_mc68k(_mc68k)
+	{
+		write16(PeriphAddress::Picr, 0xf);
+	}
+
 	uint16_t Sim::read16(const PeriphAddress _addr)
 	{
 		auto r = PeripheralBase::read16(_addr);
@@ -67,6 +73,59 @@ namespace mc68k
 //			LOG("Port F write: " << HEXN(_val, 2));
 			m_portF.writeTX(_val);
 			break;
+		case PeriphAddress::Picr:
+		case PeriphAddress::Pitr:
+			initTimer();
+			break;
 		}
+	}
+
+	void Sim::write16(PeriphAddress _addr, uint16_t _val)
+	{
+		PeripheralBase::write16(_addr, _val);
+
+		switch (_addr)
+		{
+		case PeriphAddress::Picr:
+		case PeriphAddress::Pitr:
+			initTimer();
+			break;
+		}
+	}
+
+	void Sim::exec(uint32_t _deltaCycles)
+	{
+		if(!m_timerLoadValue)
+			return;
+
+		m_timerCurrentValue -= static_cast<int32_t>(_deltaCycles);
+
+		if(m_timerCurrentValue < 0)
+		{
+			const auto picr = read16(PeriphAddress::Picr);
+			const auto iv = picr & PivMask;
+			const auto il = (picr & PirqlMask) >> PirqlShift;
+
+			m_mc68k.injectInterrupt(static_cast<uint8_t>(iv), static_cast<uint8_t>(il));
+
+			m_timerCurrentValue += m_timerLoadValue;
+		}
+	}
+
+	void Sim::initTimer()
+	{
+		const auto picr = read16(PeriphAddress::Picr);
+		const auto pitr = read16(PeriphAddress::Pitr);
+
+		if(!(picr & PirqlMask))
+		{
+			m_timerLoadValue = 0;
+			return;
+		}
+
+		const auto prescale = pitr & Ptp ? 512 : 1;
+
+		// PIT Period = ((PIT Modulus)(Prescaler Value)(4)) / EXTAL Frequency
+		m_timerLoadValue = (pitr & Pitm) * prescale * 4 * 16 * 20 * 2;
 	}
 }
