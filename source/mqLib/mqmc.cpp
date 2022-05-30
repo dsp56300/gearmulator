@@ -85,6 +85,7 @@ namespace mqLib
 #endif
 
 		Mc68k::exec();
+		m_lcd.exec(getPortGP(), getPortF());
 	}
 
 	uint16_t MqMc::read16(uint32_t addr)
