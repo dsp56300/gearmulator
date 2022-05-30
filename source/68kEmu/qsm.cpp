@@ -80,7 +80,7 @@ namespace mc68k
 
 				const auto toBeSet = (gpios & inputs) & 0xff;
 				const auto res = PeripheralBase::read8(_addr);
-				return res | toBeSet;
+				return res | (1<<3);
 			}
 		}
 		return PeripheralBase::read8(_addr);
