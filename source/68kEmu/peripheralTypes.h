@@ -42,6 +42,8 @@ namespace mc68k
 		PortF1			= 0xFFA1B,	// $YFFA1B Port F Data Register
 		DdrF			= 0xFFA1D,	// $YFFA1D Port F Direction Register
 		PFPar			= 0xFFA1F,	// $YFFA1F Port F Pin Assignment Register
+		Picr			= 0xFFA22,	// $YFFA22 Periodic Interrupt Control Register
+		Pitr			= 0xFFA24,	// $YFFA24 Periodic Interrupt Timer Register
 
 		// QSM
 		Qsmcr			= 0xffc00,	// $YFFC00 QSM Configuration Register

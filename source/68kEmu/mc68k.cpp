@@ -65,7 +65,7 @@ extern "C"
 
 namespace mc68k
 {
-	Mc68k::Mc68k() : m_qsm(*this)
+	Mc68k::Mc68k() : m_qsm(*this), m_sim(*this)
 	{
 		g_instance = this;
 
