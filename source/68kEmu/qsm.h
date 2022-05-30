@@ -20,7 +20,7 @@ namespace mc68k
 		void write8(PeriphAddress _addr, uint8_t _val) override;
 		uint8_t read8(PeriphAddress _addr) override;
 
-		void exec() override;
+		void exec(uint32_t _deltaCycles) override;
 
 		uint16_t spcr0()		{ return read16(PeriphAddress::Spcr0); }
 		uint16_t spcr1()		{ return read16(PeriphAddress::Spcr1); }

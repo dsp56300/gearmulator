@@ -57,7 +57,7 @@ namespace mc68k
 
 		void writeRx(uint32_t _word);
 
-		void exec() override;
+		void exec(uint32_t _deltaCycles) override;
 
 	private:
 		enum class WordFlags
