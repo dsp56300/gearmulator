@@ -3,6 +3,7 @@
 #include <array>
 #include <list>
 
+#include "lcd.h"
 #include "../68kEmu/mc68k.h"
 
 namespace mqLib
@@ -29,6 +30,7 @@ namespace mqLib
 		void onReset() override;
 
 		ROM& m_rom;
+		LCD m_lcd;
 		std::vector<uint8_t> m_memory;
 		std::list<uint32_t> m_lastPCs;
 	};
