@@ -83,8 +83,10 @@ namespace mc68k
 		m_rxData.push_back(_word);
 	}
 
-	void Hdi08::exec()
+	void Hdi08::exec(uint32_t _deltaCycles)
 	{
+		PeripheralBase::exec(_deltaCycles);
+
 		if(m_rxData.empty())
 			return;
 

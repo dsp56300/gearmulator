@@ -86,9 +86,10 @@ namespace mc68k
 		return PeripheralBase::read8(_addr);
 	}
 
-	void Qsm::exec()
+	void Qsm::exec(uint32_t _deltaCycles)
 	{
-		PeripheralBase::exec();
+		PeripheralBase::exec(_deltaCycles);
+
 		m_qspi.exec();
 
 		if(m_nextQueue != 0xff)
