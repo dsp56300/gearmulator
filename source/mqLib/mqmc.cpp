@@ -25,9 +25,10 @@ namespace mqLib
 	MqMc::MqMc(ROM& _rom) : m_rom(_rom)
 	{
 		m_memory.resize(0x40000, 0);
-		m_sim.resize(128, 0);
 
-//		clock = 0;
+		// TODO code tests bit 5 and doesn't want to continue if that input is zero
+//		getPortF().writeRX((1<<5));
+
 		reset();
 
 		setPC(g_pcInitial);
@@ -59,7 +60,7 @@ namespace mqLib
 #endif
 		if(getPC() == 0x80718)
 		{
-			m_memory[0x170] = 100;
+			m_memory[0x170] = 32;
 			dumpMemory("spinloop");
 		}
 #if 0

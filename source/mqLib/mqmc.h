@@ -30,7 +30,6 @@ namespace mqLib
 
 		ROM& m_rom;
 		std::vector<uint8_t> m_memory;
-		std::vector<uint8_t> m_sim;
 		std::list<uint32_t> m_lastPCs;
 	};
 }
