@@ -20,13 +20,16 @@ namespace mc68k
 
 	uint8_t Sim::read8(const PeriphAddress _addr)
 	{
-		auto r = PeripheralBase::read8(_addr);
+		const auto r = PeripheralBase::read8(_addr);
 
 		switch (_addr)
 		{
 		case PeriphAddress::PortE0:
-			r |= (1<<5);	// TODO code tests bit 5, seems to be an input. Force to 1 for now
-			return r;
+		case PeriphAddress::PortE1:
+			return m_portE.read();
+		case PeriphAddress::PortF0:
+		case PeriphAddress::PortF1:
+			return m_portF.read();
 		default:
 			return r;
 		}
@@ -40,21 +43,29 @@ namespace mc68k
 		{
 		case PeriphAddress::DdrE:
 			LOG("Port E direction set to " << HEXN(_val, 2));
+			m_portE.setDirection(_val);
 			break;
 		case PeriphAddress::DdrF:
 			LOG("Port F direction set to " << HEXN(_val, 2));
+			m_portF.setDirection(_val);
 			break;
 		case PeriphAddress::PEPar:
 			LOG("Port E Pin assignment set to " << HEXN(_val, 2));
+			m_portE.enablePins(~_val);
 			break;
 		case PeriphAddress::PFPar:
 			LOG("Port F Pin assignment set to " << HEXN(_val, 2));
+			m_portF.enablePins(~_val);
 			break;
 		case PeriphAddress::PortE0:
-			LOG("Port E write: " << HEXN(_val, 2));
+		case PeriphAddress::PortE1:
+//			LOG("Port E write: " << HEXN(_val, 2));
+			m_portE.writeTX(_val);
 			break;
 		case PeriphAddress::PortF0:
-			LOG("Port F write: " << HEXN(_val, 2));
+		case PeriphAddress::PortF1:
+//			LOG("Port F write: " << HEXN(_val, 2));
+			m_portF.writeTX(_val);
 			break;
 		}
 	}
