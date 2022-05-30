@@ -46,6 +46,10 @@ namespace mc68k
 
 		Hdi08& hdi08();
 
+		Port& getPortE()	{ return m_sim.getPortE(); }
+		Port& getPortF()	{ return m_sim.getPortF(); }
+		Port& getPortGP()	{ return m_gpt.getPortGP(); }
+
 	private:
 		void raiseIPL();
 

@@ -51,6 +51,7 @@ set(SOURCES
 	mc68k.cpp mc68k.h
 	peripheralBase.cpp peripheralBase.h
 	peripheralTypes.h
+	port.cpp port.h
 	qsm.cpp qsm.h
 	qspi.cpp qspi.h
 	sim.cpp sim.h

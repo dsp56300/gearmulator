@@ -2,6 +2,7 @@
 
 #include "peripheralBase.h"
 #include "peripheralTypes.h"
+#include "port.h"
 
 namespace mc68k
 {
@@ -14,5 +15,11 @@ namespace mc68k
 		uint8_t read8(PeriphAddress _addr) override;
 
 		void write8(PeriphAddress _addr, uint8_t _val) override;
+
+		Port& getPortE() { return m_portE; }
+		Port& getPortF() { return m_portF; }
+
+	private:
+		Port m_portE, m_portF;
 	};
 }

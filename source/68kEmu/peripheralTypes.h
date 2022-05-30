@@ -28,6 +28,10 @@ namespace mc68k
 		HdiTXM			= 0xfd006,	//   or Transmit Byte Registers (TXH:TXM:TXL)
 		HdiTXL			= 0xfd007,	//   byte order depends on HLEND endianess setting
 
+		// GPT
+		DdrGp			= 0xFF906,	// Port GP Data Direction Register $YFF906
+		PortGp			= 0xFF907,	// Port GP Data Register $YFF907
+
 		// SIM
 		Syncr			= 0xFFA04,	// $YFFA04 CLOCK SYNTHESIZER CONTROL (SYNCR)
 		PortE0			= 0xFFA11,	// $YFFA11 Port E Data Register
