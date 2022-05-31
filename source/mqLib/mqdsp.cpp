@@ -21,6 +21,8 @@ namespace mqLib
 			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
 		}
 
+		m_memory.setExternalMemory(0x80000, true);
+
 		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(g_dspBootCode)), true, true, &m_periphX, nullptr);
 
 		m_dsp.setPC(g_bootCodeBase);
