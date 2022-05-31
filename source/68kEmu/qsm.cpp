@@ -42,6 +42,8 @@ namespace mc68k
 			break;
 		case PeriphAddress::SciControl1:
 			LOG("Set SCCR1 to " << HEXN(_val, 4));
+			if(bitTest(_val, Sccr1Bits::TransmitInterruptEnable) && !bitTest(prev, Sccr1Bits::TransmitInterruptEnable))
+				injectInterrupt(ScsrBits::TransmitDataRegisterEmpty);
 			break;
 		case PeriphAddress::SciStatus:
 			LOG("Set SCSR to " << HEXN(_val, 4));
@@ -57,17 +59,19 @@ namespace mc68k
 		switch (_addr)
 		{
 		case PeriphAddress::SciStatus:
-			{
-				const auto r = PeripheralBase::read16(_addr);
-				LOG("Read SCSR, res=" << HEXN(r, 4));
-				return r;
-			}
+			return readSciStatus();
 		}
 		return PeripheralBase::read16(_addr);
 	}
 
 	void Qsm::write8(PeriphAddress _addr, uint8_t _val)
 	{
+		if(_addr == PeriphAddress::SciControl1LSB)
+		{
+			write16(PeriphAddress::SciControl1, (read16(PeriphAddress::SciControl1) & 0xff00) | _val);
+			return;
+		}
+
 		const auto prev = read16(_addr);
 
 		PeripheralBase::write8(_addr, _val);
@@ -108,13 +112,16 @@ namespace mc68k
 				return res | (1<<3);
 			}
 		case PeriphAddress::SciStatus:
-			{
-				const auto r = PeripheralBase::read8(_addr);
-				LOG("Read SCSR, res=" << HEXN(r, 2));
-				return r;
-			}
+			return readSciStatus() >> 8;
 		}
 		return PeripheralBase::read8(_addr);
+	}
+
+	void Qsm::injectInterrupt(ScsrBits)
+	{
+		const auto vector = read8(PeriphAddress::Qivr);
+		const auto levelQsci = static_cast<uint8_t>(read8(PeriphAddress::Qilr) & 0x7);
+		m_mc68k.injectInterrupt(vector, levelQsci);
 	}
 
 	void Qsm::exec(uint32_t _deltaCycles)
@@ -126,6 +133,24 @@ namespace mc68k
 		if(m_nextQueue != 0xff)
 		{
 			execTransmit();
+		}
+
+		if(m_pendingTxDataCounter == 2)
+		{
+			--m_pendingTxDataCounter;
+			set(ScsrBits::TransmitDataRegisterEmpty);
+
+			if(bitTest(Sccr1Bits::TransmitInterruptEnable))
+				injectInterrupt(ScsrBits::TransmitDataRegisterEmpty);
+		}
+		else if(m_pendingTxDataCounter == 1)
+		{
+			--m_pendingTxDataCounter;
+
+			set(ScsrBits::TransmitComplete);
+
+			if(bitTest(Sccr1Bits::TransmitCompleteInterruptEnable))
+				injectInterrupt(ScsrBits::TransmitComplete);
 		}
 	}
 
@@ -173,9 +198,33 @@ namespace mc68k
 		}
 	}
 
+	uint16_t Qsm::bitTest(uint16_t _value, Sccr1Bits _bit)
+	{
+		return _value & (1<<static_cast<uint32_t>(_bit));
+	}
+
 	uint16_t Qsm::bitTest(Sccr1Bits _bit)
 	{
-		return read16(PeriphAddress::SciControl1) & (1<<static_cast<uint32_t>(_bit));
+		return bitTest(read16(PeriphAddress::SciControl1), _bit);
+	}
+
+	uint16_t Qsm::bitTest(ScsrBits _bit)
+	{
+		return read16(PeriphAddress::SciStatus) & (1<<static_cast<uint32_t>(_bit));
+	}
+
+	void Qsm::clear(ScsrBits _bit)
+	{
+		auto v = PeripheralBase::read16(PeriphAddress::SciStatus);
+		v &= ~(1<<static_cast<uint32_t>(_bit));
+		PeripheralBase::write16(PeriphAddress::SciStatus, v);
+	}
+
+	void Qsm::set(ScsrBits _bit)
+	{
+		auto v = PeripheralBase::read16(PeriphAddress::SciStatus);
+		v |= (1<<static_cast<uint32_t>(_bit));
+		PeripheralBase::write16(PeriphAddress::SciStatus, v);
 	}
 
 	void Qsm::finishTransfer()
@@ -206,8 +255,22 @@ namespace mc68k
 		return static_cast<PeriphAddress>(static_cast<uint32_t>(PeriphAddress::TransmitRam0) + (_offset<<1));
 	}
 
-	void Qsm::writeSciData(uint16_t _data)
+	void Qsm::writeSciData(const uint16_t _data)
 	{
+		if(!bitTest(Sccr1Bits::TransmitterEnable))
+			return;
+
 		m_sciTxData.push_back(_data);
+		m_pendingTxDataCounter = 2;
+	}
+
+	uint16_t Qsm::readSciStatus()
+	{
+		// we're always done with everything
+		set(ScsrBits::TransmitDataRegisterEmpty);
+		set(ScsrBits::TransmitComplete);
+		const auto r = PeripheralBase::read16(PeriphAddress::SciStatus);
+		LOG("Read SCSR, res=" << HEXN(r, 4));
+		return r;
 	}
 }

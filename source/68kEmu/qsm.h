@@ -33,6 +33,19 @@ namespace mc68k
 			LoopMode,
 		};
 
+		enum class ScsrBits
+		{
+			ParityError,
+			FramingError,
+			NoiseError,
+			OverrunError,
+			IdleLineDetected,
+			ReceiverActive,
+			ReceiveDataRegisterFull,
+			TransmitComplete,
+			TransmitDataRegisterEmpty
+		};
+
 		Qsm(Mc68k& _mc68k);
 
 		void write16(PeriphAddress _addr, uint16_t _val) override;
@@ -40,6 +53,7 @@ namespace mc68k
 		void write8(PeriphAddress _addr, uint8_t _val) override;
 		uint8_t read8(PeriphAddress _addr) override;
 
+		void injectInterrupt(ScsrBits _scsrBits);
 		void exec(uint32_t _deltaCycles) override;
 
 		uint16_t spcr0()		{ return read16(PeriphAddress::Spcr0); }
@@ -57,11 +71,16 @@ namespace mc68k
 		void startTransmit();
 		void finishTransfer();
 		void execTransmit();
+		static uint16_t bitTest(uint16_t _value, Sccr1Bits _bit);
 		uint16_t bitTest(Sccr1Bits _bit);
+		uint16_t bitTest(ScsrBits _bit);
+		void clear(ScsrBits _bit);
+		void set(ScsrBits _bit);
 
 		static PeriphAddress transmitRamAddr(uint8_t _offset);
 
 		void writeSciData(uint16_t _data);
+		uint16_t readSciStatus();
 
 		Mc68k& m_mc68k;
 
@@ -71,5 +90,6 @@ namespace mc68k
 		std::deque<uint16_t> m_spiTxData;
 		std::deque<uint16_t> m_sciTxData;
 		std::deque<uint16_t> m_sciRxData;
+		uint16_t m_pendingTxDataCounter = 0;
 	};
 }
