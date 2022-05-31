@@ -1,6 +1,5 @@
 #pragma once
 
-#include <array>
 #include <list>
 
 #include "buttons.h"
@@ -16,7 +15,7 @@ namespace mqLib
 	{
 	public:
 		explicit MqMc(ROM& _rom);
-		~MqMc();
+		~MqMc() override;
 
 		void exec() override;
 

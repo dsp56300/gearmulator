@@ -89,7 +89,7 @@ namespace mqLib
 				else if(g & (1<<7))
 				{
 					const int addr = g & 0x7f;
-					LOG("LCD Set DDRAM address, addr=" << addr);
+//					LOG("LCD Set DDRAM address, addr=" << addr);
 					m_dramAddr = addr;
 					m_addressMode = AddressMode::DDRam;
 				}
@@ -97,7 +97,7 @@ namespace mqLib
 				{
 					const int acg = g & 0x3f;
 
-					LOG("LCD Set CGRAM address, acg=" << acg);
+//					LOG("LCD Set CGRAM address, acg=" << acg);
 					m_cgramAddr = acg;
 					m_addressMode = AddressMode::CGRam;
 				}
@@ -116,7 +116,7 @@ namespace mqLib
 					m_cgramData[m_cgramAddr] = g;
 					m_cgramAddr += m_addrIncrement;
 
-					if((m_cgramAddr & 0x7) == 0)
+					if((false && (m_cgramAddr & 0x7) == 0))
 					{
 						std::stringstream ss;
 						ss << "CG RAM character " << (m_cgramAddr/8 - 1) << ':' << std::endl;
@@ -142,6 +142,8 @@ namespace mqLib
 				{
 //					LOG("LCD write data to DDRAM addr " << m_dramAddr << ", data=" << static_cast<int>(g) << ", char=" << static_cast<char>(g));
 
+					const auto old = m_dramData;
+
 					if(m_dramAddr >= 20 && m_dramAddr < 0x40)
 					{
 						for(size_t i=1; i<=20; ++i)
@@ -166,30 +168,33 @@ namespace mqLib
 					if(m_dramAddr != 20 && m_dramAddr != 0x54)
 						m_dramAddr += m_addrIncrement;
 
-					std::stringstream ss;
-					for(size_t i=0; i<m_dramData.size(); ++i)
+					if(m_dramData != old)
 					{
-						char c = m_dramData[i];
-						switch (m_dramData[i])
+						std::stringstream ss;
+						for(size_t i=0; i<m_dramData.size(); ++i)
 						{
-						case 0:	c = '0'; break;
-						case 1:	c = '1'; break;
-						case 2:	c = '2'; break;
-						case 3:	c = '3'; break;
-						case 4:	c = '4'; break;
-						case 5:	c = '5'; break;
-						case 6:	c = '6'; break;
-						case 7:	c = '7'; break;
-						default:
-							if(c < 32)
-								c = '?';
+							char c = m_dramData[i];
+							switch (m_dramData[i])
+							{
+							case 0:	c = '0'; break;
+							case 1:	c = '1'; break;
+							case 2:	c = '2'; break;
+							case 3:	c = '3'; break;
+							case 4:	c = '4'; break;
+							case 5:	c = '5'; break;
+							case 6:	c = '6'; break;
+							case 7:	c = '7'; break;
+							default:
+								if(c < 32)
+									c = '?';
+							}
+							if(i == 20)
+								ss << std::endl;
+							ss << c;
 						}
-						if(i == 20)
-							ss << std::endl;
-						ss << c;
+						std::string s(ss.str());
+						LOG("LCD ascii: " << std::endl << s);
 					}
-					std::string s(ss.str());
-					LOG("LCD ascii: " << std::endl << s);
 				}
 			}
 		}

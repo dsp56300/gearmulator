@@ -26,9 +26,6 @@ namespace mqLib
 	{
 		m_memory.resize(0x40000, 0);
 
-		// TODO code tests bit 5 and doesn't want to continue if that input is zero
-//		getPortF().writeRX((1<<5));
-
 		reset();
 
 		setPC(g_pcInitial);
@@ -38,9 +35,7 @@ namespace mqLib
 #endif
 	}
 
-	MqMc::~MqMc()
-	{
-	}
+	MqMc::~MqMc() = default;
 
 	void MqMc::exec()
 	{
@@ -60,30 +55,10 @@ namespace mqLib
 #endif
 		if(getPC() == 0x80718)
 		{
+			// TODO: hack to prevent getting stuck here
 			m_memory[0x170] = 32;
-			dumpMemory("spinloop");
 		}
-#if 0
-		if(clock == 0x011cc32a)
-		{
-			FILE* hFile = fopen("dump.bin", "wb");
-			fwrite(&m_memory[0], 1, m_memory.size(), hFile);
-			fclose(hFile);
-		}
-#endif
-		if(getPC() == 0x80228)
-		{
-			int foo=0;
-		}
-#if 0
-		if(clock > 0x14c704c)
-		{
-			char disasm[64];
-			disassemble(getPC(), disasm);
-			LOG("Exec @ " << HEXN(getPC(), 8) << "  = " << disasm << " (clock " << HEXN(clock, 8) << ')');
-		}
-#endif
-
+		
 		Mc68k::exec();
 
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
@@ -104,7 +79,7 @@ namespace mqLib
 			return r;
 		}
 		
-		LOG("read16 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
+//		LOG("read16 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read16(addr);
 	}
@@ -117,46 +92,43 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 			return m_rom.getData()[addr - g_romAddress];
 
-		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
+//		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
 		return Mc68k::read8(addr);
 	}
 
 	void MqMc::write16(uint32_t addr, uint16_t val)
 	{
-		if(addr >= 0x814 && addr < 0x814 + 0x50)
-		{
-			LOG("LCD WRITE16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
-		}
-
 		if(addr < m_memory.size())
 		{
 			writeW(m_memory, addr, val);
 			return;
 		}
 
-		LOG("write16 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
+		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
+		{
+			LOG("write16 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
+			return;
+		}
 
 		Mc68k::write16(addr, val);
 	}
 
 	void MqMc::write8(uint32_t addr, uint8_t val)
 	{
-		if(addr >= 0xffffd000)
-			int foo=0;
-
-		if(addr >= 0x814 && addr < 0x814 + 0x50)
-		{
-			LOG("LCD WRITE8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
-		}
-
 		if(addr < m_memory.size())
 		{
 			m_memory[addr] = val;
 			return;
 		}
 
-		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
+		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
+		{
+			LOG("write8 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
+			return;
+		}
+
+//		LOG("write8 addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
 
 		Mc68k::write8(addr, val);
 	}
