@@ -71,15 +71,8 @@ namespace mc68k
 		{
 		case PeriphAddress::Portqs:
 			{
-				const auto pqspar = read16(PeriphAddress::Pqspar);
-				const auto ddrqs = read8(PeriphAddress::Ddrqs);
-
-				// set all inputs to high as the code is waiting for a high
-				const auto gpios = ~(pqspar>>8);
-				const auto inputs = ~(ddrqs);
-
-				const auto toBeSet = (gpios & inputs) & 0xff;
 				const auto res = PeripheralBase::read8(_addr);
+				// set QS3 to high as the code is waiting for a high, connected to DSP reset line, indicates that DSP is alive
 				return res | (1<<3);
 			}
 		}
