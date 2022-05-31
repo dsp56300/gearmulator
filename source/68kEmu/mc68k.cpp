@@ -61,6 +61,10 @@ extern "C"
 	{
 		return m68k_read_memory_32(address);
 	}
+	int m68k_illegal_cbk(int opcode)
+	{
+		return static_cast<int>(g_instance->onIllegalInstruction(static_cast<uint32_t>(opcode)));
+	}
 }
 
 namespace mc68k
@@ -72,7 +76,7 @@ namespace mc68k
 		m68k_set_cpu_type(M68K_CPU_TYPE_68020);
 		m68k_init();
 		m68k_set_int_ack_callback(m68k_int_ack);
-		m68k_set_reset_instr_callback(m68k_reset);
+		m68k_set_illg_instr_callback(m68k_illegal_cbk);
 		m68k_pulse_reset();
 	}
 	Mc68k::~Mc68k()

@@ -21,6 +21,7 @@ namespace mc68k
 		void injectInterrupt(uint8_t _vector, uint8_t _level);
 
 		virtual void onReset() {}
+		virtual uint32_t onIllegalInstruction(uint32_t opcode) { return 0; }
 
 		static void writeW(std::vector<uint8_t>& _buf, size_t _offset, uint16_t _value);
 		static uint16_t readW(const std::vector<uint8_t>& _buf, size_t _offset);

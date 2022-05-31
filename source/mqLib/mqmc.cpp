@@ -59,6 +59,11 @@ namespace mqLib
 			m_memory[0x170] = 32;
 		}
 		
+		if(getPC() == 0x00081e18)
+		{
+			dumpMemory("0x00081e18");
+		}
+		
 		Mc68k::exec();
 
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
@@ -163,5 +168,14 @@ namespace mqLib
 	void MqMc::onReset()
 	{
 		dumpMemory("dump_reset");
+	}
+
+	uint32_t MqMc::onIllegalInstruction(uint32_t opcode)
+	{
+		std::stringstream ss;
+		ss << "illegalInstruction_" << HEXN(getPC(), 8) << "_op" << HEXN(opcode,8);
+		dumpMemory(ss.str().c_str());
+
+		return Mc68k::onIllegalInstruction(opcode);
 	}
 }
