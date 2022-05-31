@@ -17,6 +17,7 @@ namespace mc68k
 	{
 		write16(PeriphAddress::Spcr1, 0b0000010000000100);
 		write16(PeriphAddress::Qilr,  0b0000000000001111);
+		write16(PeriphAddress::SciStatus,    0b110000000);
 	}
 
 	void Qsm::write16(PeriphAddress _addr, uint16_t _val)
@@ -33,12 +34,35 @@ namespace mc68k
 			break;
 		case PeriphAddress::Pqspar:
 			LOG("Set PQSPAR to " << HEXN(_val, 4));
+			m_portQS.enablePins(~(_val >> 8));
+			m_portQS.setDirection(_val & 0xff);
+			break;
+		case PeriphAddress::SciControl0:
+			LOG("Set SCCR0 to " << HEXN(_val, 4));
+			break;
+		case PeriphAddress::SciControl1:
+			LOG("Set SCCR1 to " << HEXN(_val, 4));
+			break;
+		case PeriphAddress::SciStatus:
+			LOG("Set SCSR to " << HEXN(_val, 4));
+			break;
+		case PeriphAddress::SciData:
+			writeSciData(_val);
 			break;
 		}
 	}
 
 	uint16_t Qsm::read16(PeriphAddress _addr)
 	{
+		switch (_addr)
+		{
+		case PeriphAddress::SciStatus:
+			{
+				const auto r = PeripheralBase::read16(_addr);
+				LOG("Read SCSR, res=" << HEXN(r, 4));
+				return r;
+			}
+		}
 		return PeripheralBase::read16(_addr);
 	}
 
@@ -58,9 +82,17 @@ namespace mc68k
 			break;
 		case PeriphAddress::Ddrqs:
 			LOG("Set DDRQS to " << HEXN(_val, 2));
+			m_portQS.setDirection(_val);
 			break;
 		case PeriphAddress::Pqspar:
 			LOG("Set PQSPAR to " << HEXN(_val, 2));
+			m_portQS.enablePins(~_val);
+			break;
+		case PeriphAddress::SciData:
+			writeSciData(_val);
+			break;
+		case PeriphAddress::SciStatus:
+			LOG("Set SCSR to " << HEXN(_val, 2));
 			break;
 		}
 	}
@@ -74,6 +106,12 @@ namespace mc68k
 				const auto res = PeripheralBase::read8(_addr);
 				// set QS3 to high as the code is waiting for a high, connected to DSP reset line, indicates that DSP is alive
 				return res | (1<<3);
+			}
+		case PeriphAddress::SciStatus:
+			{
+				const auto r = PeripheralBase::read8(_addr);
+				LOG("Read SCSR, res=" << HEXN(r, 2));
+				return r;
 			}
 		}
 		return PeripheralBase::read8(_addr);
@@ -91,6 +129,17 @@ namespace mc68k
 		}
 	}
 
+	void Qsm::writeSciRX(uint16_t _data)
+	{
+		m_sciRxData.push_back(_data);
+	}
+
+	void Qsm::readSciTX(std::deque<uint16_t>& _dst)
+	{
+		m_sciTxData.swap(_dst);
+		m_sciTxData.clear();
+	}
+
 	void Qsm::startTransmit()
 	{
 		// are we master?
@@ -104,7 +153,7 @@ namespace mc68k
 	{
 		// push out data
 		const auto data = read16(transmitRamAddr(m_nextQueue));
-		m_txData.push_back(data);
+		m_spiTxData.push_back(data);
 
 		// update completed queue index
 		auto sr = spsr();
@@ -122,6 +171,11 @@ namespace mc68k
 		{
 			finishTransfer();
 		}
+	}
+
+	uint16_t Qsm::bitTest(Sccr1Bits _bit)
+	{
+		return read16(PeriphAddress::SciControl1) & (1<<static_cast<uint32_t>(_bit));
 	}
 
 	void Qsm::finishTransfer()
@@ -150,5 +204,10 @@ namespace mc68k
 	PeriphAddress Qsm::transmitRamAddr(uint8_t _offset)
 	{
 		return static_cast<PeriphAddress>(static_cast<uint32_t>(PeriphAddress::TransmitRam0) + (_offset<<1));
+	}
+
+	void Qsm::writeSciData(uint16_t _data)
+	{
+		m_sciTxData.push_back(_data);
 	}
 }
