@@ -47,7 +47,7 @@ namespace mc68k
 			if(_val & Hc)
 			{
 				const auto addr = static_cast<uint8_t>((_val & Hv) << 1);
-				LOG("HDI08 Host Vector Interrupt Request, interrupt vector = " << HEXN(addr, 2));
+//				LOG("HDI08 Host Vector Interrupt Request, interrupt vector = " << HEXN(addr, 2));
 				m_pendingInterruptRequests.push_back(addr);
 				write8(_addr, _val & ~Hc);
 			}
