@@ -1,4 +1,3 @@
-#include <iostream>
 #include <memory>
 
 #include "../mqLib/mqdsp.h"
@@ -42,13 +41,13 @@ int main(int _argc, char* _argv[])
 		while(dsp.get())
 		{
 			if(_kbhit())
-				ch = _getch();
+				ch = static_cast<char>(_getch());
 		}
 	});
 
 	auto& buttons = mc->getButtons();
 
-	while(true)
+	while(dsp.get())
 	{
 		mc->exec();
 
@@ -60,10 +59,10 @@ int main(int _argc, char* _argv[])
 			case '2':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst2);				break;
 			case '3':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst3);				break;
 			case '4':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst4);				break;
-			case '5':				buttons.toggleButton(mqLib::Buttons::ButtonType::Down);				break;
-			case '6':				buttons.toggleButton(mqLib::Buttons::ButtonType::Left);				break;
+			case '5':				buttons.toggleButton(mqLib::Buttons::ButtonType::Down);					break;
+			case '6':				buttons.toggleButton(mqLib::Buttons::ButtonType::Left);					break;
 			case '7':				buttons.toggleButton(mqLib::Buttons::ButtonType::Right);				break;
-			case '8':				buttons.toggleButton(mqLib::Buttons::ButtonType::Up);				break;
+			case '8':				buttons.toggleButton(mqLib::Buttons::ButtonType::Up);					break;
 			case 'q':				buttons.toggleButton(mqLib::Buttons::ButtonType::Global);				break;
 			case 'w':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multi);				break;
 			case 'e':				buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);					break;
@@ -87,6 +86,7 @@ int main(int _argc, char* _argv[])
 			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);					break;
 			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
 			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);					break;
+			default:;
 			}
 			ch = 0;
 		}

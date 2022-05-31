@@ -14,7 +14,7 @@ namespace mc68k
 	{
 	public:
 		Mc68k();
-		~Mc68k();
+		virtual ~Mc68k();
 
 		virtual void exec();
 
