@@ -31,6 +31,7 @@ namespace mqLib
 		void dumpAssembly(uint32_t _first, uint32_t _count) const;
 
 		void onReset() override;
+		uint32_t onIllegalInstruction(uint32_t opcode) override;
 
 		ROM& m_rom;
 		LCD m_lcd;
