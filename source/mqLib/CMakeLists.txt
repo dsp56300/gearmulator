@@ -4,6 +4,7 @@ project(mqLib)
 add_library(mqLib STATIC)
 
 set(SOURCES
+	buttons.cpp buttons.h
 	dspBootCode.h
 	lcd.cpp lcd.h
 	rom.cpp rom.h

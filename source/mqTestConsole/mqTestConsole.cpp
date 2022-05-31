@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #include "../mqLib/mqdsp.h"
@@ -6,6 +7,8 @@
 #include "../mqLib/rom.h"
 #include "../mqLib/mqmc.h"
 #include "dsp56kEmu/dspthread.h"
+
+#include <conio.h>
 
 namespace mqLib
 {
@@ -32,10 +35,61 @@ int main(int _argc, char* _argv[])
 	dsp56k::DSPThread dspThread(dsp->dsp());
 	bool dumpDSP = false;
 #endif
+
+	char ch = 0;
+	std::thread inputReader([&ch, &dsp]
+	{
+		while(dsp.get())
+		{
+			if(_kbhit())
+				ch = _getch();
+		}
+	});
+
+	auto& buttons = mc->getButtons();
+
 	while(true)
 	{
 		mc->exec();
 
+		if(ch)
+		{
+			switch (ch)
+			{
+			case '1':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst1);				break;
+			case '2':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst2);				break;
+			case '3':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst3);				break;
+			case '4':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst4);				break;
+			case '5':				buttons.toggleButton(mqLib::Buttons::ButtonType::Down);				break;
+			case '6':				buttons.toggleButton(mqLib::Buttons::ButtonType::Left);				break;
+			case '7':				buttons.toggleButton(mqLib::Buttons::ButtonType::Right);				break;
+			case '8':				buttons.toggleButton(mqLib::Buttons::ButtonType::Up);				break;
+			case 'q':				buttons.toggleButton(mqLib::Buttons::ButtonType::Global);				break;
+			case 'w':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multi);				break;
+			case 'e':				buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);					break;
+			case 'r':				buttons.toggleButton(mqLib::Buttons::ButtonType::Sound);				break;
+			case 't':				buttons.toggleButton(mqLib::Buttons::ButtonType::Shift);				break;
+			case 'y':
+			case 'z':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multimode);			break;
+			case 'u':				buttons.toggleButton(mqLib::Buttons::ButtonType::Peek);					break;
+			case 'i':				buttons.toggleButton(mqLib::Buttons::ButtonType::Play);					break;
+			case 's':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, 1);					break;
+			case 'x':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, -1);					break;
+			case 'd':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, 1);					break;
+			case 'c':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, -1);					break;
+			case 'f':				buttons.rotate(mqLib::Buttons::Encoders::Master, 1);					break;
+			case 'v':				buttons.rotate(mqLib::Buttons::Encoders::Master, -1);					break;
+			case 'g':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, 1);					break;
+			case 'b':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, -1);					break;
+			case 'h':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, 1);					break;
+			case 'n':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, -1);					break;
+			case 'j':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, 1);					break;
+			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);					break;
+			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
+			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);					break;
+			}
+			ch = 0;
+		}
 #if DSP
 		mc->hdi08().pollTx(txData);
 		for (const uint32_t data : txData)
