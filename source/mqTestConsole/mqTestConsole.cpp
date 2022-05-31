@@ -7,7 +7,21 @@
 #include "../mqLib/mqmc.h"
 #include "dsp56kEmu/dspthread.h"
 
+#ifdef __APPLE_CC__
+#include <stdio.h>
+#include <sys/select.h>
+#include <termios.h>
+
+int _kbhit() {
+	static const int STDIN = 0; static bool init=false;
+	if (!init) {termios term;tcgetattr(STDIN,&term);term.c_lflag&=~ICANON;tcsetattr(STDIN,TCSANOW,&term);setbuf(stdin,0);init=true;}
+	timeval timeout;fd_set rdset;FD_ZERO(&rdset);FD_SET(STDIN, &rdset);timeout.tv_sec  = 0;timeout.tv_usec = 0;
+	return select(STDIN + 1, &rdset, NULL, NULL, &timeout);
+}
+#define _getch() getchar()
+#else
 #include <conio.h>
+#endif
 
 namespace mqLib
 {
