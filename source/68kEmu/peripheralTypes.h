@@ -53,6 +53,7 @@ namespace mc68k
 		NotUsedFFC06	= 0xffc06,
 		SciControl0		= 0xffc08,	// $YFFC08 SCI Control Register 0
 		SciControl1		= 0xffc0a,	// $YFFC0A SCI Control Register 1
+		SciControl1LSB	= 0xffc0b,
 		SciStatus		= 0xffc0c,	// $YFFC0C SCI Status Register
 		SciData			= 0xffc0e,	// $YFFC0E SCI Data Register
 
