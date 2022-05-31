@@ -86,7 +86,7 @@ int main(int _argc, char* _argv[])
 			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);					break;
 			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
 			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);					break;
-			default:;
+			default:																						break;
 			}
 			ch = 0;
 		}
