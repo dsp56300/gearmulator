@@ -1,5 +1,7 @@
 #include "gpt.h"
 
+#include "dsp56kEmu/logging.h"
+
 namespace mc68k
 {
 	void Gpt::write8(PeriphAddress _addr, uint8_t _val)
@@ -10,11 +12,13 @@ namespace mc68k
 		{
 		case PeriphAddress::DdrGp:
 			m_portGP.setDirection(_val);
-			break;
+			return;
 		case PeriphAddress::PortGp:
 			m_portGP.writeTX(_val);
-			break;
+			return;
 		}
+
+//		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEX(static_cast<int>(_val),2));
 	}
 
 	uint8_t Gpt::read8(PeriphAddress _addr)
