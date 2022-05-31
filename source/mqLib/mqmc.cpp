@@ -86,7 +86,7 @@ namespace mqLib
 
 		Mc68k::exec();
 
-		getPortGP().writeRX(0);
+		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
 		m_lcd.exec(getPortGP(), getPortF());
 	}
 

@@ -3,7 +3,9 @@
 #include <array>
 #include <list>
 
+#include "buttons.h"
 #include "lcd.h"
+
 #include "../68kEmu/mc68k.h"
 
 namespace mqLib
@@ -16,7 +18,9 @@ namespace mqLib
 		explicit MqMc(ROM& _rom);
 		~MqMc();
 
-		void exec();
+		void exec() override;
+
+		Buttons& getButtons() { return m_buttons; }
 
 	private:
 		uint16_t read16(uint32_t addr) override;
@@ -31,6 +35,7 @@ namespace mqLib
 
 		ROM& m_rom;
 		LCD m_lcd;
+		Buttons m_buttons;
 		std::vector<uint8_t> m_memory;
 		std::list<uint32_t> m_lastPCs;
 	};
