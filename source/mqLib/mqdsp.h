@@ -20,6 +20,8 @@ namespace mqLib
 			return m_dsp;
 		}
 
+		void dumpPMem(const std::string& _filename);
+
 	private:
 		dsp56k::Peripherals56362 m_periphX;
 		dsp56k::PeripheralsNop m_periphNop;

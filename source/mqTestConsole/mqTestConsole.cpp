@@ -167,7 +167,7 @@ int main(int _argc, char* _argv[])
 
 		if(dumpDSP)
 		{
-			dsp->dsp().coreDump();
+			dsp->dumpPMem("mq_dump_P_" + std::to_string(dspCycles));
 			dumpDSP = false;
 		}
 
