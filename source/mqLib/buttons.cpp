@@ -22,6 +22,9 @@ namespace mqLib
 
 		const auto e = _e.read();
 
+		if (m_buttonStates[16] && !(e&0x20)) _e.writeRX(e|0x20);
+		if (!m_buttonStates[16] && (e&0x20)) _e.writeRX(e&~0x20);
+		
 		if(!(e&(1<<2)))
 		{
 			uint8_t res = 0;
@@ -39,10 +42,7 @@ namespace mqLib
 			_gp.writeRX(res);
 			return true;
 		}
-		
-		if (m_buttonStates[16] && !(e&0x20)) _e.writeRX(e|0x20);
-		if (!m_buttonStates[16] && (e&0x20)) _e.writeRX(e&~0x20);
-		
+				
 		if(!(e&(1<<0)))
 		{
 			uint8_t res = 0;
