@@ -5,10 +5,15 @@
 namespace mqLib
 {
 	static dsp56k::DefaultMemoryValidator g_memoryValidator;
-	static constexpr dsp56k::TWord g_bootCodeBase = 0x10000;
+
+	static constexpr dsp56k::TWord g_pMemSize		= 0x4000;	// only $0000 < $1400 for DSP, rest for us
+	static constexpr dsp56k::TWord g_bootCodeBase	= 0x2000;
 
 	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, 0x800000), m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
+		for(dsp56k::TWord i=0; i<m_memory.size(); ++i)
+			m_memory.set(dsp56k::MemArea_P, i, 0x000200);	// debug instruction
+
 		// rewrite to work at address g_bootCodeBase instead of $ff0000
 		for(uint32_t i=0; i<std::size(g_dspBootCode); ++i)
 		{
@@ -32,5 +37,10 @@ namespace mqLib
 	void MqDsp::exec()
 	{
 		m_dsp.exec();
+	}
+
+	void MqDsp::dumpPMem(const std::string& _filename)
+	{
+		m_memory.saveAssembly((_filename + ".asm").c_str(), 0, g_pMemSize, true, false, &m_periphX);
 	}
 }
