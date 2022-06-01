@@ -27,8 +27,6 @@ namespace mqLib
 	class MqDsp;
 }
 
-#define DSP 1
-
 int main(int _argc, char* _argv[])
 {
 	const auto romFile = synthLib::findROM(524288);
@@ -43,10 +41,12 @@ int main(int _argc, char* _argv[])
 
 	std::deque<uint32_t> txData;
 
-#if DSP
+	auto& hdiUC = mc->hdi08();
+	auto& hdiDSP = dsp->hdi08();
+	auto& buttons = mc->getButtons();
+
 	dsp56k::DSPThread dspThread(dsp->dsp());
 	bool dumpDSP = false;
-#endif
 
 	char ch = 0;
 	std::thread inputReader([&ch, &dsp]
@@ -58,10 +58,41 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	auto& buttons = mc->getButtons();
+	uint32_t hdiHF01 = 0;	// DSP => uc
+	uint32_t hdiHF23 = 0;	// uc => DSP
+	uint64_t dspCycles = 0;
+
+	dspThread.setCallback([&](uint32_t)
+	{
+		// transfer HF 2&3 from uc to DSP
+		auto hcr = hdiDSP.readControlRegister();
+		hcr &= ~0x18;
+		hcr |= (hdiHF23<<3);
+		hdiDSP.writeControlRegister(hcr);
+
+		const auto hf01 = (hdiDSP.readStatusRegister() >> 3) & 3;
+		if(hf01 != hdiHF01)
+		{
+			LOG("HDI HF01=" << HEXN(hf01,1));
+			hdiHF01 = hf01;
+		}
+	});
+
+	uint32_t prevInstructions = 0;
 
 	while(dsp.get())
 	{
+		const auto instructionCounter = dsp->dsp().getInstructionCounter();
+		const auto d = dsp56k::delta(instructionCounter, prevInstructions);
+		prevInstructions = instructionCounter;
+		dspCycles += d;
+
+		if(mc->getCycles() > dspCycles/6)
+		{
+			std::this_thread::yield();
+			continue;
+		}
+
 		mc->exec();
 
 		if(ch)
@@ -103,18 +134,33 @@ int main(int _argc, char* _argv[])
 			}
 			ch = 0;
 		}
-#if DSP
-		mc->hdi08().pollTx(txData);
+
+		const uint32_t hf23 = (hdiUC.icr() >> 3) & 3;
+
+		if(hf23 != hdiHF23)
+		{
+			LOG("HDI HF23=" << HEXN(hf23,1));
+			hdiHF23 = hf23;
+		}
+
+		// transfer DSP host flags HF0&1 to uc
+		auto icr = hdiUC.icr();
+		icr &= ~0x18;
+		icr |= (hdiHF01<<3);
+		hdiUC.icr(icr);
+
+		hdiUC.pollTx(txData);
+
 		for (const uint32_t data : txData)
-			dsp->hdi08().writeRX(&data, 1);
+			hdiDSP.writeRX(&data, 1);
 
 		uint8_t interruptAddr;
-		if(mc->hdi08().pollInterruptRequest(interruptAddr))
+		if(hdiUC.pollInterruptRequest(interruptAddr))
 			dsp->dsp().injectInterrupt(interruptAddr);
 
-		while(dsp->hdi08().hasTX())
+		while(hdiDSP.hasTX())
 		{
-			mc->hdi08().writeRx(dsp->hdi08().readTX());
+			hdiUC.writeRx(hdiDSP.readTX());
 		}
 
 		if(dumpDSP)
@@ -122,7 +168,7 @@ int main(int _argc, char* _argv[])
 			dsp->dsp().coreDump();
 			dumpDSP = false;
 		}
-#endif
+
 		txData.clear();
 	}
 
