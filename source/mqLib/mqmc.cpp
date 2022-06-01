@@ -66,8 +66,37 @@ namespace mqLib
 		
 		Mc68k::exec();
 
+		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
+		if(resetIsOutput)
+		{
+			if(!(getPortQS().read() & (1<<3)))
+			{
+				if(!m_dspResetRequest)
+				{
+					LOG("Request DSP RESET");
+					m_dspResetRequest = true;
+					m_dspResetCompleted = false;
+				}
+			}
+		}
+		else
+		{
+			if(m_dspResetCompleted)
+			{
+				m_dspResetRequest = false;
+				getPortQS().writeRX(1<<3);
+			}
+		}
+
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
 		m_lcd.exec(getPortGP(), getPortF());
+	}
+
+	void MqMc::notifyDSPBooted()
+	{
+		if(!m_dspResetCompleted)
+			LOG("DSP has booted");
+		m_dspResetCompleted = true;
 	}
 
 	uint16_t MqMc::read16(uint32_t addr)

@@ -50,6 +50,7 @@ namespace mc68k
 		Port& getPortE()	{ return m_sim.getPortE(); }
 		Port& getPortF()	{ return m_sim.getPortF(); }
 		Port& getPortGP()	{ return m_gpt.getPortGP(); }
+		Port& getPortQS()	{ return m_qsm.getPortQS(); }
 
 	private:
 		void raiseIPL();

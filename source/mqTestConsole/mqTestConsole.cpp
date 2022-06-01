@@ -97,6 +97,8 @@ int main(int _argc, char* _argv[])
 
 		mc->exec();
 
+		auto haveSentTXtoDSP = false;
+
 		if(ch)
 		{
 			switch (ch)
@@ -154,7 +156,10 @@ int main(int _argc, char* _argv[])
 		hdiUC.pollTx(txData);
 
 		for (const uint32_t data : txData)
+		{
+			haveSentTXtoDSP = true;
 			hdiDSP.writeRX(&data, 1);
+		}
 
 		uint8_t interruptAddr;
 		if(hdiUC.pollInterruptRequest(interruptAddr))
@@ -172,6 +177,12 @@ int main(int _argc, char* _argv[])
 		}
 
 		txData.clear();
+
+		if(mc->requestDSPReset())
+		{
+			assert(!haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
+			mc->notifyDSPBooted();
+		}
 	}
 
 	return 0;
