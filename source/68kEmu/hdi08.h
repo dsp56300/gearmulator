@@ -59,6 +59,12 @@ namespace mc68k
 
 		void exec(uint32_t _deltaCycles) override;
 
+		uint8_t isr()	{ return read8(PeriphAddress::HdiISR); }
+		uint8_t icr()	{ return read8(PeriphAddress::HdiICR); }
+
+		void isr(uint8_t _isr) { write8(PeriphAddress::HdiISR, _isr); }
+		void icr(uint8_t _icr) { write8(PeriphAddress::HdiICR, _icr); }
+
 	private:
 		enum class WordFlags
 		{
