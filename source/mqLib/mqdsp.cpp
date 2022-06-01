@@ -11,6 +11,9 @@ namespace mqLib
 
 	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, 0x800000), m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
+		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768);
+		m_periphX.getEsaiClock().setSamplerate(44100);
+
 		for(dsp56k::TWord i=0; i<m_memory.size(); ++i)
 			m_memory.set(dsp56k::MemArea_P, i, 0x000200);	// debug instruction
 
