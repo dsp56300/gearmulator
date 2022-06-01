@@ -67,6 +67,9 @@ namespace mc68k
 
 		void writeSciRX(uint16_t _data);
 		void readSciTX(std::deque<uint16_t>& _dst);
+
+		Port& getPortQS() { return m_portQS; }
+
 	private:
 		void startTransmit();
 		void finishTransfer();

@@ -92,6 +92,10 @@ namespace mc68k
 			LOG("Set PQSPAR to " << HEXN(_val, 2));
 			m_portQS.enablePins(~_val);
 			break;
+		case PeriphAddress::Portqs:
+			LOG("Set PortQS to " << HEXN(_val,2));
+			m_portQS.writeTX(_val);
+			break;
 		case PeriphAddress::SciData:
 			writeSciData(_val);
 			break;
@@ -106,11 +110,7 @@ namespace mc68k
 		switch (_addr)
 		{
 		case PeriphAddress::Portqs:
-			{
-				const auto res = PeripheralBase::read8(_addr);
-				// set QS3 to high as the code is waiting for a high, connected to DSP reset line, indicates that DSP is alive
-				return res | (1<<3);
-			}
+			return m_portQS.read();
 		case PeriphAddress::SciStatus:
 			return readSciStatus() >> 8;
 		}

@@ -21,6 +21,9 @@ namespace mqLib
 
 		Buttons& getButtons() { return m_buttons; }
 
+		bool requestDSPReset() const { return m_dspResetRequest; }
+		void notifyDSPBooted();
+
 	private:
 		uint16_t read16(uint32_t addr) override;
 		uint8_t read8(uint32_t addr) override;
@@ -38,5 +41,7 @@ namespace mqLib
 		Buttons m_buttons;
 		std::vector<uint8_t> m_memory;
 		std::list<uint32_t> m_lastPCs;
+		bool m_dspResetRequest = false;
+		bool m_dspResetCompleted = false;
 	};
 }
