@@ -58,23 +58,25 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	uint32_t hdiHF01 = 0;	// DSP => uc
-	uint32_t hdiHF23 = 0;	// uc => DSP
+	uint32_t hdiHF01 = 0;	// uc => DSP
+	uint32_t hdiHF23 = 0;	// DSP => uc
 	uint64_t dspCycles = 0;
 
 	dspThread.setCallback([&](uint32_t)
 	{
 		// transfer HF 2&3 from uc to DSP
-		auto hcr = hdiDSP.readControlRegister();
-		hcr &= ~0x18;
-		hcr |= (hdiHF23<<3);
-		hdiDSP.writeControlRegister(hcr);
+		auto hsr = hdiDSP.readStatusRegister();
+		const auto prevHsr = hsr;
+		hsr &= ~0x18;
+		hsr |= (hdiHF01<<3);
+		if(prevHsr != hsr)
+			hdiDSP.writeStatusRegister(hsr);
 
-		const auto hf01 = (hdiDSP.readStatusRegister() >> 3) & 3;
-		if(hf01 != hdiHF01)
+		const auto hf23 = (hdiDSP.readControlRegister() >> 3) & 3;
+		if(hf23 != hdiHF23)
 		{
-			LOG("HDI HF01=" << HEXN(hf01,1));
-			hdiHF01 = hf01;
+			LOG("HDI HF23=" << HEXN(hf23,1));
+			hdiHF23 = hf23;
 		}
 	});
 
@@ -87,7 +89,7 @@ int main(int _argc, char* _argv[])
 		prevInstructions = instructionCounter;
 		dspCycles += d;
 
-		if(mc->getCycles() > dspCycles/6)
+		if(false && mc->getCycles() > dspCycles/6)
 		{
 			std::this_thread::yield();
 			continue;
@@ -135,19 +137,19 @@ int main(int _argc, char* _argv[])
 			ch = 0;
 		}
 
-		const uint32_t hf23 = (hdiUC.icr() >> 3) & 3;
+		const uint32_t hf01 = (hdiUC.icr() >> 3) & 3;
 
-		if(hf23 != hdiHF23)
+		if(hf01 != hdiHF01)
 		{
-			LOG("HDI HF23=" << HEXN(hf23,1));
-			hdiHF23 = hf23;
+			LOG("HDI HF01=" << HEXN(hf01,1));
+			hdiHF01 = hf01;
 		}
 
-		// transfer DSP host flags HF0&1 to uc
-		auto icr = hdiUC.icr();
+		// transfer DSP host flags HF2&3 to uc
+		auto icr = hdiUC.isr();
 		icr &= ~0x18;
-		icr |= (hdiHF01<<3);
-		hdiUC.icr(icr);
+		icr |= (hdiHF23<<3);
+		hdiUC.isr(icr);
 
 		hdiUC.pollTx(txData);
 
