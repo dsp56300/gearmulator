@@ -82,6 +82,8 @@ namespace mc68k
 
 	void Hdi08::writeRx(uint32_t _word)
 	{
+		LOG("HDI RX=" << HEX(_word));
+
 		m_rxData.push_back(_word);
 	}
 
