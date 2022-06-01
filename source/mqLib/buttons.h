@@ -32,6 +32,8 @@ namespace mqLib
 			Multimode,
 			Peek,
 			Play,
+			
+			Power,
 
 			Count
 		};
