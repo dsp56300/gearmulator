@@ -81,7 +81,7 @@ int main(int _argc, char* _argv[])
 			case 'e':				buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);					break;
 			case 'r':				buttons.toggleButton(mqLib::Buttons::ButtonType::Sound);				break;
 			case 't':				buttons.toggleButton(mqLib::Buttons::ButtonType::Shift);				break;
-			case 'y':
+			case 'y':				buttons.toggleButton(mqLib::Buttons::ButtonType::Power);				break;
 			case 'z':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multimode);			break;
 			case 'u':				buttons.toggleButton(mqLib::Buttons::ButtonType::Peek);					break;
 			case 'i':				buttons.toggleButton(mqLib::Buttons::ButtonType::Play);					break;
