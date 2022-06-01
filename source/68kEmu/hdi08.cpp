@@ -1,5 +1,7 @@
 #include "hdi08.h"
 
+#include <cassert>
+
 #include "dsp56kEmu/logging.h"
 
 namespace mc68k
@@ -101,6 +103,7 @@ namespace mc68k
 		if(read8(PeriphAddress::HdiICR) & Hreq)
 		{
 			const auto ivr = read8(PeriphAddress::HdiIVR);
+			assert(false);
 		}
 	}
 
