@@ -6,6 +6,7 @@
 #include "../mqLib/rom.h"
 #include "../mqLib/mqmc.h"
 #include "dsp56kEmu/dspthread.h"
+#include "dsp56kEmu/interrupts.h"
 
 #ifdef __APPLE_CC__
 #include <stdio.h>
@@ -81,6 +82,10 @@ int main(int _argc, char* _argv[])
 	});
 
 	uint32_t prevInstructions = 0;
+	bool requestNMI = false;
+	auto haveSentTXtoDSP = false;
+
+	hdiDSP.setTransmitDataAlwaysEmpty(false);
 
 	while(dsp.get())
 	{
@@ -96,8 +101,6 @@ int main(int _argc, char* _argv[])
 		}
 
 		mc->exec();
-
-		auto haveSentTXtoDSP = false;
 
 		if(ch)
 		{
@@ -148,10 +151,12 @@ int main(int _argc, char* _argv[])
 		}
 
 		// transfer DSP host flags HF2&3 to uc
-		auto icr = hdiUC.isr();
-		icr &= ~0x18;
-		icr |= (hdiHF23<<3);
-		hdiUC.isr(icr);
+		auto isr = hdiUC.isr();
+		const auto prevIsr = isr;
+		isr &= ~0x18;
+		isr |= (hdiHF23<<3);
+		if(isr != prevIsr)
+			hdiUC.isr(isr);
 
 		hdiUC.pollTx(txData);
 
@@ -161,13 +166,24 @@ int main(int _argc, char* _argv[])
 			hdiDSP.writeRX(&data, 1);
 		}
 
-		uint8_t interruptAddr;
-		if(hdiUC.pollInterruptRequest(interruptAddr))
-			dsp->dsp().injectInterrupt(interruptAddr);
+		if(requestNMI && !mc->requestDSPinjectNMI())
+		{
+			LOG("uc request DSP NMI");
+			dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
+		}
+		else
+		{
+			uint8_t interruptAddr;
+			if(hdiUC.pollInterruptRequest(interruptAddr))
+				dsp->dsp().injectInterrupt(interruptAddr);
+		}
 
-		while(hdiDSP.hasTX())
+		requestNMI = mc->requestDSPinjectNMI();
+
+		while(hdiDSP.hasTX() && hdiUC.canReceiveData())
 		{
 			hdiUC.writeRx(hdiDSP.readTX());
+			hdiDSP.setTransmitDataEmpty();
 		}
 
 		if(dumpDSP)
@@ -182,6 +198,17 @@ int main(int _argc, char* _argv[])
 		{
 			assert(!haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
 			mc->notifyDSPBooted();
+		}
+
+		auto& esai = dsp->getPeriph().getEsai();
+		const auto count = esai.getAudioOutputs().size();
+
+		if(count)
+		{
+//			LOG("Drain ESAI");
+			const uint32_t* dummyInputs[16]{nullptr};
+			uint32_t* dummyOutputs[16]{nullptr};
+			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count>>1));
 		}
 	}
 

@@ -24,6 +24,8 @@ namespace mqLib
 		bool requestDSPReset() const { return m_dspResetRequest; }
 		void notifyDSPBooted();
 
+		uint8_t requestDSPinjectNMI() const { return m_dspInjectNmiRequest; }
+
 	private:
 		uint16_t read16(uint32_t addr) override;
 		uint8_t read8(uint32_t addr) override;
@@ -43,5 +45,6 @@ namespace mqLib
 		std::list<uint32_t> m_lastPCs;
 		bool m_dspResetRequest = false;
 		bool m_dspResetCompleted = false;
+		uint8_t m_dspInjectNmiRequest = 0;
 	};
 }

@@ -65,6 +65,7 @@ namespace mc68k
 		void isr(uint8_t _isr) { write8(PeriphAddress::HdiISR, _isr); }
 		void icr(uint8_t _icr) { write8(PeriphAddress::HdiICR, _icr); }
 
+		bool canReceiveData();
 	private:
 		enum class WordFlags
 		{
@@ -87,6 +88,7 @@ namespace mc68k
 		static void removeIndex(WordFlags& _existing, WordFlags _indexToRemove);
 		uint8_t littleEndian();
 		uint8_t readRX(WordFlags _index);
+		bool pollRx();
 
 		WordFlags m_writtenFlags = WordFlags::None;
 		WordFlags m_readFlags = WordFlags::None;
@@ -95,6 +97,8 @@ namespace mc68k
 
 		std::deque<uint32_t> m_txData;
 		std::deque<uint32_t> m_rxData;
+		uint32_t m_rxd;
 		std::deque<uint8_t> m_pendingInterruptRequests;
+		uint32_t m_readTimeoutCycles = 0;
 	};
 }

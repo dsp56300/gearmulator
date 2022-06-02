@@ -15,9 +15,15 @@ namespace mqLib
 		{
 			return m_periphX.getHDI08();
 		}
+
 		dsp56k::DSP& dsp()
 		{
 			return m_dsp;
+		}
+
+		dsp56k::Peripherals56362& getPeriph()
+		{
+			return m_periphX;
 		}
 
 		void dumpPMem(const std::string& _filename);
