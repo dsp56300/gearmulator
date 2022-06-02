@@ -84,8 +84,40 @@ int main(int _argc, char* _argv[])
 	uint32_t prevInstructions = 0;
 	bool requestNMI = false;
 	auto haveSentTXtoDSP = false;
-
+	
 	hdiDSP.setTransmitDataAlwaysEmpty(false);
+
+	auto injectUCtoDSPInterrupts = [&]()
+	{
+		if(requestNMI && !mc->requestDSPinjectNMI())
+		{
+			LOG("uc request DSP NMI");
+			dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
+		}
+		else
+		{
+			uint8_t interruptAddr;
+			if(hdiUC.pollInterruptRequest(interruptAddr))
+				dsp->dsp().injectInterrupt(interruptAddr);
+		}
+
+		requestNMI = mc->requestDSPinjectNMI();
+	};
+
+	hdiUC.setRxEmptyCallback([&]()
+	{
+		injectUCtoDSPInterrupts();
+
+		while(hdiDSP.hasTX())
+			hdiDSP.readTX();
+
+		hdiDSP.setTransmitDataEmpty();
+
+		while(!hdiDSP.hasTX())
+			std::this_thread::yield();
+
+		hdiUC.writeRx(hdiDSP.readTX());
+	});
 
 	while(dsp.get())
 	{
@@ -166,25 +198,7 @@ int main(int _argc, char* _argv[])
 			hdiDSP.writeRX(&data, 1);
 		}
 
-		if(requestNMI && !mc->requestDSPinjectNMI())
-		{
-			LOG("uc request DSP NMI");
-			dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
-		}
-		else
-		{
-			uint8_t interruptAddr;
-			if(hdiUC.pollInterruptRequest(interruptAddr))
-				dsp->dsp().injectInterrupt(interruptAddr);
-		}
-
-		requestNMI = mc->requestDSPinjectNMI();
-
-		while(hdiDSP.hasTX() && hdiUC.canReceiveData())
-		{
-			hdiUC.writeRx(hdiDSP.readTX());
-			hdiDSP.setTransmitDataEmpty();
-		}
+		injectUCtoDSPInterrupts();
 
 		if(dumpDSP)
 		{
@@ -196,6 +210,8 @@ int main(int _argc, char* _argv[])
 
 		if(mc->requestDSPReset())
 		{
+			if(haveSentTXtoDSP)
+				mc->dumpMemory("DSPreset");
 			assert(!haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
 			mc->notifyDSPBooted();
 		}

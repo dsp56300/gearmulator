@@ -2,6 +2,7 @@
 
 #include <array>
 #include <deque>
+#include <functional>
 
 #include "peripheralBase.h"
 
@@ -41,6 +42,8 @@ namespace mc68k
 			Hc				= (1<<7),	// CVR Host Command Bit (HC) Bit 7
 		};
 
+		using CallbackRxEmpty = std::function<void()>;
+
 		Hdi08();
 
 		uint8_t read8(PeriphAddress _addr) override;
@@ -66,6 +69,12 @@ namespace mc68k
 		void icr(uint8_t _icr) { write8(PeriphAddress::HdiICR, _icr); }
 
 		bool canReceiveData();
+
+		void setRxEmptyCallback(const CallbackRxEmpty& _rxEmptyCallback)
+		{
+			m_rxEmptyCallback = _rxEmptyCallback;
+		}
+
 	private:
 		enum class WordFlags
 		{
@@ -100,5 +109,7 @@ namespace mc68k
 		uint32_t m_rxd;
 		std::deque<uint8_t> m_pendingInterruptRequests;
 		uint32_t m_readTimeoutCycles = 0;
+
+		CallbackRxEmpty m_rxEmptyCallback;
 	};
 }
