@@ -112,11 +112,14 @@ namespace mc68k
 
 	void Hdi08::writeRx(uint32_t _word)
 	{
-//		LOG("HDI RX=" << HEX(_word));
+		LOG("HDI RX=" << HEX(_word));
 
-		const auto c = icr();
-		const auto s = isr();
 		m_rxData.push_back(_word);
+
+		const auto s = isr();
+
+		if(!(s & Rxdf))
+			pollRx();
 	}
 
 	void Hdi08::exec(uint32_t _deltaCycles)
@@ -126,13 +129,10 @@ namespace mc68k
 		auto isr = read8(PeriphAddress::HdiISR);
 
 		if(!(isr & Rxdf))
-		{
-			pollRx();
 			return;
-		}
 
-		if(m_rxData.empty())
-			return;
+//		if(m_rxData.empty())
+//			return;
 
 		m_readTimeoutCycles += _deltaCycles;
 
@@ -210,10 +210,15 @@ namespace mc68k
 
 		if(!hasRX)
 		{
-			const auto s = isr();
-			const auto c = icr();
-			LOG("Empty read of RX");
-			return 0;
+			m_rxEmptyCallback();
+
+			if(!(read8(PeriphAddress::HdiISR) & Rxdf))
+			{
+				const auto s = isr();
+				const auto c = icr();
+				LOG("Empty read of RX");
+				return 0;
+			}
 		}
 
 		const auto word = m_rxd;
