@@ -88,6 +88,13 @@ namespace mqLib
 			}
 		}
 
+		if(getPortQS().getDirection() & (1<<6))
+		{
+			m_dspInjectNmiRequest = (getPortQS().read() >> 6) & 1;
+			if(m_dspInjectNmiRequest)
+				int foo=0;
+		}
+
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
 		m_lcd.exec(getPortGP(), getPortF());
 	}

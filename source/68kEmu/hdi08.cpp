@@ -6,6 +6,8 @@
 
 namespace mc68k
 {
+	constexpr uint32_t g_readTimeoutCycles = 50;
+
 	Hdi08::Hdi08(): PeripheralBase(g_hdi08Base, g_hdi08Size)
 	{
 		write8(PeriphAddress::HdiIVR, 0xf);
@@ -30,6 +32,17 @@ namespace mc68k
 
 	uint16_t Hdi08::read16(PeriphAddress _addr)
 	{
+		switch (_addr)
+		{
+		case PeriphAddress::HdiUnused4:
+			return read8(PeriphAddress::HdiTXH);
+		case PeriphAddress::HdiTXM:
+			{
+				uint16_t r = (static_cast<uint16_t>(read8(PeriphAddress::HdiTXM)) << static_cast<uint16_t>(8));
+				r |= static_cast<uint16_t>(read8(PeriphAddress::HdiTXL));
+				return r;
+			}
+		}
 		return PeripheralBase::read16(_addr);
 	}
 
@@ -39,7 +52,11 @@ namespace mc68k
 
 		switch (_addr)
 		{
+		case PeriphAddress::HdiISR:
+//			LOG("HDI08 ISR set to " << HEXN(_val,2));
+			break;
 		case PeriphAddress::HdiICR:
+			LOG("HDI08 ICR set to " << HEXN(_val,2));
 			if(_val & Init)
 			{
 				LOG("HDI08 Initialization, HREQ=" << (_val & Rreq) << ", TREQ=" << (_val & Treq));
@@ -63,6 +80,19 @@ namespace mc68k
 	void Hdi08::write16(PeriphAddress _addr, uint16_t _val)
 	{
 		PeripheralBase::write16(_addr, _val);
+
+		switch (_addr)
+		{
+		case PeriphAddress::HdiUnused4:
+			write8(PeriphAddress::HdiTXH, _val & 0xff);
+			break;
+		case PeriphAddress::HdiTXM:
+			write8(PeriphAddress::HdiTXM, _val >> 8);
+			write8(PeriphAddress::HdiTXL, _val & 0xff);
+			break;
+		default:
+			break;
+		}
 	}
 
 	bool Hdi08::pollInterruptRequest(uint8_t& _addr)
@@ -82,8 +112,10 @@ namespace mc68k
 
 	void Hdi08::writeRx(uint32_t _word)
 	{
-		LOG("HDI RX=" << HEX(_word));
+//		LOG("HDI RX=" << HEX(_word));
 
+		const auto c = icr();
+		const auto s = isr();
 		m_rxData.push_back(_word);
 	}
 
@@ -91,32 +123,49 @@ namespace mc68k
 	{
 		PeripheralBase::exec(_deltaCycles);
 
+		auto isr = read8(PeriphAddress::HdiISR);
+
+		if(!(isr & Rxdf))
+		{
+			pollRx();
+			return;
+		}
+
 		if(m_rxData.empty())
 			return;
 
-		const auto isr = read8(PeriphAddress::HdiISR);
+		m_readTimeoutCycles += _deltaCycles;
 
-		if(isr & Rxdf)
-			return;
-
-		write8(PeriphAddress::HdiISR, isr | Rxdf);
-		m_readFlags = WordFlags::Mask;
-
-		if(read8(PeriphAddress::HdiICR) & Hreq)
+		if(m_readTimeoutCycles >= g_readTimeoutCycles)
 		{
-			const auto ivr = read8(PeriphAddress::HdiIVR);
-			assert(false);
+//			LOG("HDI RX read timeout on byte " << HEXN(m_rxd, 2));
+			isr &= ~Rxdf;
+			write8(PeriphAddress::HdiISR, isr);
+			pollRx();
 		}
+	}
+
+	bool Hdi08::canReceiveData()
+	{
+		return (isr() & Rxdf) == 0;
 	}
 
 	void Hdi08::writeTX(WordFlags _index, uint8_t _val)
 	{
 		m_txBytes[static_cast<uint32_t>(_index)] = _val;
 
+		const auto lastWritten = m_writtenFlags;
 		addIndex(m_writtenFlags, _index);
+		assert(lastWritten != m_writtenFlags && "byte written twice!");
 
+#if 1
 		if(m_writtenFlags != WordFlags::Mask)
 			return;
+#else
+		const auto le = littleEndian();
+		if((le && _index != WordFlags::L) || (!le && _index != WordFlags::H))
+			return;
+#endif
 
 		const uint32_t h = m_txBytes[0];
 		const uint32_t m = m_txBytes[1];
@@ -127,6 +176,10 @@ namespace mc68k
 			                  h << 16 | m << 8 | l;
 
 		m_txData.push_back(word);
+
+		LOG("HDI TX: " << HEXN(word, 6));
+
+		m_txBytes.fill(0);
 
 		m_writtenFlags = WordFlags::None;
 	}
@@ -153,38 +206,71 @@ namespace mc68k
 
 	uint8_t Hdi08::readRX(WordFlags _index)
 	{
-		if(m_rxData.empty())
+		const auto hasRX = read8(PeriphAddress::HdiISR) & Rxdf;
+
+		if(!hasRX)
 		{
+			const auto s = isr();
+			const auto c = icr();
 			LOG("Empty read of RX");
 			return 0;
 		}
 
-		const auto word = m_rxData.front();
+		const auto word = m_rxd;
 
 		std::array<uint8_t, 3> bytes{};
 
 		const auto le = littleEndian();
+
+		auto pop = [&]()
+		{
+			write8(PeriphAddress::HdiISR, read8(PeriphAddress::HdiISR) & ~(Rxdf));
+		};
+
 		if(le)
 		{
 			bytes[0] = (word >> 16) & 0xff;
 			bytes[1] = (word >> 8) & 0xff;
 			bytes[2] = (word) & 0xff;
+
+			if(_index == WordFlags::H)
+				pop();
 		}
 		else
 		{
 			bytes[0] = (word) & 0xff;
 			bytes[1] = (word >> 8) & 0xff;
 			bytes[2] = (word >> 16) & 0xff;
+
+			if(_index == WordFlags::L)
+				pop();
 		}
 
 		removeIndex(m_readFlags, _index);
 
-		if(m_readFlags == WordFlags::None)
+		return bytes[static_cast<uint32_t>(_index)];
+	}
+
+	bool Hdi08::pollRx()
+	{
+		if(m_rxData.empty())
+			return false;
+
+		m_readTimeoutCycles = 0;
+		m_rxd = m_rxData.front();
+		m_rxData.pop_front();
+
+		auto isr = read8(PeriphAddress::HdiISR);
+
+		write8(PeriphAddress::HdiISR, isr | Rxdf);
+		m_readFlags = WordFlags::Mask;
+
+		if(isr & Hreq)
 		{
-			write8(PeriphAddress::HdiISR, read8(PeriphAddress::HdiISR) & ~(Rxdf));
-			m_rxData.pop_front();
+			const auto ivr = read8(PeriphAddress::HdiIVR);
+			assert(false);
 		}
 
-		return bytes[static_cast<uint32_t>(_index)];
+		return true;
 	}
 }

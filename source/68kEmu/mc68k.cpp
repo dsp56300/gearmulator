@@ -141,7 +141,9 @@ namespace mc68k
 
 	uint32_t Mc68k::read32(const uint32_t _addr)
 	{
-		return static_cast<uint32_t>(read16(_addr)) << 16 | read16(_addr + 2);
+		uint32_t res = static_cast<uint32_t>(read16(_addr)) << 16;
+		res |= read16(_addr + 2);
+		return res;
 	}
 
 	void Mc68k::write8(uint32_t _addr, uint8_t _val)
