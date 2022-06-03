@@ -112,7 +112,7 @@ namespace mc68k
 
 	void Hdi08::writeRx(uint32_t _word)
 	{
-		LOG("HDI RX=" << HEX(_word));
+		LOG("HDI writeRX=" << HEX(_word));
 
 		m_rxData.push_back(_word);
 
@@ -131,14 +131,14 @@ namespace mc68k
 		if(!(isr & Rxdf))
 			return;
 
-//		if(m_rxData.empty())
-//			return;
+		if(m_rxData.empty())
+			return;
 
 		m_readTimeoutCycles += _deltaCycles;
 
 		if(m_readTimeoutCycles >= g_readTimeoutCycles)
 		{
-//			LOG("HDI RX read timeout on byte " << HEXN(m_rxd, 2));
+			LOG("HDI RX read timeout on byte " << HEXN(m_rxd, 2));
 			isr &= ~Rxdf;
 			write8(PeriphAddress::HdiISR, isr);
 			pollRx();
@@ -230,6 +230,7 @@ namespace mc68k
 		auto pop = [&]()
 		{
 			write8(PeriphAddress::HdiISR, read8(PeriphAddress::HdiISR) & ~(Rxdf));
+			m_rxEmptyCallback();
 		};
 
 		if(le)
