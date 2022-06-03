@@ -234,18 +234,18 @@ namespace mc68k
 
 		if(le)
 		{
-			bytes[0] = (word >> 16) & 0xff;
+			bytes[0] = (word) & 0xff;
 			bytes[1] = (word >> 8) & 0xff;
-			bytes[2] = (word) & 0xff;
+			bytes[2] = (word >> 16) & 0xff;
 
 			if(_index == WordFlags::H)
 				pop();
 		}
 		else
 		{
-			bytes[0] = (word) & 0xff;
+			bytes[0] = (word >> 16) & 0xff;
 			bytes[1] = (word >> 8) & 0xff;
-			bytes[2] = (word >> 16) & 0xff;
+			bytes[2] = (word) & 0xff;
 
 			if(_index == WordFlags::L)
 				pop();
