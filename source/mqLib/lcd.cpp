@@ -11,10 +11,10 @@ namespace mqLib
 	{
 	}
 
-	void LCD::exec(mc68k::Port& _portGp, mc68k::Port& _portF)
+	bool LCD::exec(mc68k::Port& _portGp, mc68k::Port& _portF)
 	{
 		if(_portF.getWriteCounter() == m_lastWriteCounter)
-			return;
+			return false;
 
 		m_lastWriteCounter = _portF.getWriteCounter();
 
@@ -33,7 +33,7 @@ namespace mqLib
 		m_lastOpState = opEnable;
 
 		if(!execute)
-			return;
+			return false;
 
 		if(!read)
 		{
@@ -226,5 +226,7 @@ namespace mqLib
 				}
 			}
 		}
+
+		return true;
 	}
 }
