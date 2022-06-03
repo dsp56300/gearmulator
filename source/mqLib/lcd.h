@@ -14,7 +14,9 @@ namespace mqLib
 	{
 	public:
 		LCD();
-		void exec(mc68k::Port& _portGp, mc68k::Port& _portF);
+		bool exec(mc68k::Port& _portGp, mc68k::Port& _portF);
+
+		const std::array<char, 40>& getDdRam() const { return m_dramData; }
 
 	private:
 		enum class CursorShiftMode
