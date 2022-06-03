@@ -96,7 +96,12 @@ namespace mqLib
 		}
 
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
-		m_lcd.exec(getPortGP(), getPortF());
+		if(m_lcd.exec(getPortGP(), getPortF()))
+		{
+			const std::string s(&m_lcd.getDdRam().front());
+			if(s.find("SIG") != std::string::npos)
+				dumpMemory("SIG");
+		}
 	}
 
 	void MqMc::notifyDSPBooted()
