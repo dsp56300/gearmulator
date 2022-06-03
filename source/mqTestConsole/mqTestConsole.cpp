@@ -104,19 +104,34 @@ int main(int _argc, char* _argv[])
 		requestNMI = mc->requestDSPinjectNMI();
 	};
 
+	auto hdiTransferDSPtoUC = [&]()
+	{
+		if(hdiDSP.hasTX() && hdiUC.canReceiveData())
+			hdiUC.writeRx(hdiDSP.readTX());
+	};
+
+	auto hdiTransferUCtoDSP = [&]()
+	{
+		hdiUC.pollTx(txData);
+
+		for (const uint32_t data : txData)
+		{
+			haveSentTXtoDSP = true;
+			hdiDSP.writeRX(&data, 1);
+		}
+		txData.clear();
+	};
+
 	hdiUC.setRxEmptyCallback([&]()
 	{
 		injectUCtoDSPInterrupts();
 
-		while(hdiDSP.hasTX())
-			hdiDSP.readTX();
-
-		hdiDSP.setTransmitDataEmpty();
+		hdiDSP.injectTXInterrupt();
 
 		while(!hdiDSP.hasTX())
 			std::this_thread::yield();
 
-		hdiUC.writeRx(hdiDSP.readTX());
+		hdiTransferDSPtoUC();
 	});
 
 	while(dsp.get())
@@ -190,23 +205,15 @@ int main(int _argc, char* _argv[])
 		if(isr != prevIsr)
 			hdiUC.isr(isr);
 
-		hdiUC.pollTx(txData);
-
-		for (const uint32_t data : txData)
-		{
-			haveSentTXtoDSP = true;
-			hdiDSP.writeRX(&data, 1);
-		}
-
+		hdiTransferUCtoDSP();
 		injectUCtoDSPInterrupts();
+		hdiTransferDSPtoUC();
 
 		if(dumpDSP)
 		{
 			dsp->dumpPMem("mq_dump_P_" + std::to_string(dspCycles));
 			dumpDSP = false;
 		}
-
-		txData.clear();
 
 		if(mc->requestDSPReset())
 		{

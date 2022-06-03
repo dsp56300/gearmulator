@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "dsp56kEmu/logging.h"
 #include "Moira/Musashi/m68k.h"
 
 static mc68k::Mc68k* g_instance = nullptr;
@@ -143,6 +144,10 @@ namespace mc68k
 	{
 		uint32_t res = static_cast<uint32_t>(read16(_addr)) << 16;
 		res |= read16(_addr + 2);
+		if((_addr & 0x0fffff) == static_cast<uint32_t>(PeriphAddress::HdiUnused4))
+		{
+			LOG("HDI readRX=" << HEXN(res, 8));
+		}
 		return res;
 	}
 
