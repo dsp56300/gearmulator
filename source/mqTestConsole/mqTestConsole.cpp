@@ -2,11 +2,14 @@
 
 #include "../mqLib/mqdsp.h"
 #include "../synthLib/os.h"
+#include "../synthLib/wavWriter.h"
 
 #include "../mqLib/rom.h"
 #include "../mqLib/mqmc.h"
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/interrupts.h"
+
+#include <vector>
 
 #ifdef __APPLE_CC__
 #include <stdio.h>
@@ -134,6 +137,13 @@ int main(int _argc, char* _argv[])
 		hdiTransferDSPtoUC();
 	});
 
+	std::array<std::vector<float>, 2> m_audioOutput;
+
+	for (auto& audioOutput : m_audioOutput)
+		audioOutput.resize(1024);
+
+	synthLib::WavWriter wavWriter;
+
 	while(dsp.get())
 	{
 		const auto instructionCounter = dsp->dsp().getInstructionCounter();
@@ -224,14 +234,24 @@ int main(int _argc, char* _argv[])
 		}
 
 		auto& esai = dsp->getPeriph().getEsai();
-		const auto count = esai.getAudioOutputs().size();
+		const auto count = std::min(esai.getAudioOutputs().size()>>1, m_audioOutput[0].size()>>1);
 
-		if(count)
+		if(count >= 512)
 		{
-//			LOG("Drain ESAI");
-			const uint32_t* dummyInputs[16]{nullptr};
-			uint32_t* dummyOutputs[16]{nullptr};
-			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count>>1));
+			LOG("Drain ESAI");
+			const float* dummyInputs[16]{nullptr};
+			float* dummyOutputs[16]{nullptr};
+			dummyOutputs[0] = &m_audioOutput[0].front();
+			dummyOutputs[1] = &m_audioOutput[1].front();
+			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count));
+
+			for(int i=static_cast<int>(count) - 1; i>=0; --i)
+			{
+				m_audioOutput[0][(i<<1)    ] = m_audioOutput[0][i];
+				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
+			}
+
+			wavWriter.write("mq_output.wav", 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
 		}
 	}
 
