@@ -56,6 +56,7 @@ namespace mc68k
 		SciControl1LSB	= 0xffc0b,
 		SciStatus		= 0xffc0c,	// $YFFC0C SCI Status Register
 		SciData			= 0xffc0e,	// $YFFC0E SCI Data Register
+		SciDataLSB		= 0xffc0f,
 
 		Portqs			= 0xffc15,	// $YFFC15 Port QS Data Register
 		Pqspar			= 0xffc16,	// $YFFC16 PORT QS Pin Assignment Register

@@ -232,6 +232,18 @@ int main(int _argc, char* _argv[])
 			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);					break;
 			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
 			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);					break;
+			case '9':
+				// Midi Note On
+				mc->getQSM().writeSciRX(0x90);
+				mc->getQSM().writeSciRX(60);
+				mc->getQSM().writeSciRX(0x7f);
+				break;
+			case '0':	
+				// Midi Note Off
+				mc->getQSM().writeSciRX(0x80);
+				mc->getQSM().writeSciRX(60);
+				mc->getQSM().writeSciRX(0x7f);
+				break;
 			default:																						break;
 			}
 			ch = 0;
