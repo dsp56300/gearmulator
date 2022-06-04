@@ -6,8 +6,10 @@
 
 #include "../mqLib/rom.h"
 #include "../mqLib/mqmc.h"
+
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/interrupts.h"
+#include "dsp56kEmu/interpreterunittests.h"
 
 #include <vector>
 
@@ -33,6 +35,16 @@ namespace mqLib
 
 int main(int _argc, char* _argv[])
 {
+	try
+	{
+		dsp56k::InterpreterUnitTests tests;
+	}
+	catch(std::string& _err)
+	{
+		LOG("Unit Test failed: " << _err);
+		return -1;
+	}
+
 	const auto romFile = synthLib::findROM(524288);
 
 	mqLib::ROM rom(romFile);
