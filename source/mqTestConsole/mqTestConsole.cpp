@@ -102,6 +102,7 @@ int main(int _argc, char* _argv[])
 		audioOutput.resize(1024);
 
 	synthLib::WavWriter wavWriter;
+	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
 	auto processAudio = [&]()
 	{
 		auto& esai = dsp->getPeriph().getEsai();
@@ -109,7 +110,7 @@ int main(int _argc, char* _argv[])
 
 		if(count >= 512)
 		{
-			LOG("Drain ESAI");
+//			LOG("Drain ESAI");
 			const float* dummyInputs[16]{nullptr};
 			float* dummyOutputs[16]{nullptr};
 			dummyOutputs[0] = &m_audioOutput[0].front();
@@ -122,7 +123,7 @@ int main(int _argc, char* _argv[])
 				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
 			}
 
-			wavWriter.write("mq_output.wav", 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
+			wavWriter.write(filename, 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
 		}
 	};
 
