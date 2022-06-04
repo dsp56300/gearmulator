@@ -79,6 +79,7 @@ namespace mc68k
 		uint16_t bitTest(ScsrBits _bit);
 		void clear(ScsrBits _bit);
 		void set(ScsrBits _bit);
+		uint16_t readSciRX();
 
 		static PeriphAddress transmitRamAddr(uint8_t _offset);
 

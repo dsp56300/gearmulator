@@ -60,6 +60,8 @@ namespace mc68k
 		{
 		case PeriphAddress::SciStatus:
 			return readSciStatus();
+		case PeriphAddress::SciData:
+			return readSciRX();
 		}
 		return PeripheralBase::read16(_addr);
 	}
@@ -113,6 +115,10 @@ namespace mc68k
 			return m_portQS.read();
 		case PeriphAddress::SciStatus:
 			return readSciStatus() >> 8;
+		case PeriphAddress::SciData:
+			return read16(PeriphAddress::SciData) >> 8;
+		case PeriphAddress::SciDataLSB:
+			return read16(PeriphAddress::SciData) & 0xff;
 		}
 		return PeripheralBase::read8(_addr);
 	}
@@ -151,6 +157,25 @@ namespace mc68k
 
 			if(bitTest(Sccr1Bits::TransmitCompleteInterruptEnable))
 				injectInterrupt(ScsrBits::TransmitComplete);
+		}
+
+		// SCI
+		if(m_sciRxData.empty())
+			return;
+
+		if(!bitTest(Sccr1Bits::ReceiverEnable))
+		{
+			LOG("Discarding SCI data " << HEXN(m_sciRxData.front(), 4) << ", receiver not enabled");
+			m_sciRxData.pop_front();
+			return;
+		}
+
+		if(!bitTest(ScsrBits::ReceiveDataRegisterFull))
+		{
+			set(ScsrBits::ReceiveDataRegisterFull);
+
+			if(bitTest(Sccr1Bits::ReceiverInterruptEnable))
+				injectInterrupt(ScsrBits::ReceiveDataRegisterFull);
 		}
 	}
 
@@ -225,6 +250,20 @@ namespace mc68k
 		auto v = PeripheralBase::read16(PeriphAddress::SciStatus);
 		v |= (1<<static_cast<uint32_t>(_bit));
 		PeripheralBase::write16(PeriphAddress::SciStatus, v);
+	}
+
+	uint16_t Qsm::readSciRX()
+	{
+		if(m_sciRxData.empty())
+		{
+			LOG("Empty SCI read");
+			return 0;
+		}
+
+		clear(ScsrBits::ReceiveDataRegisterFull);
+		const auto res = m_sciRxData.front();
+		m_sciRxData.pop_front();
+		return res;
 	}
 
 	void Qsm::finishTransfer()
