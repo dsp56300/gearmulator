@@ -189,7 +189,7 @@ int main(int _argc, char* _argv[])
 		prevInstructions = instructionCounter;
 		dspCycles += d;
 
-		if(false && mc->getCycles() > dspCycles/6)
+		if(mc->getCycles() > dspCycles/6)
 		{
 			std::this_thread::yield();
 			continue;
