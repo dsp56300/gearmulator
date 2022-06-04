@@ -96,6 +96,36 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
+	std::array<std::vector<float>, 2> m_audioOutput;
+
+	for (auto& audioOutput : m_audioOutput)
+		audioOutput.resize(1024);
+
+	synthLib::WavWriter wavWriter;
+	auto processAudio = [&]()
+	{
+		auto& esai = dsp->getPeriph().getEsai();
+		const auto count = std::min(esai.getAudioOutputs().size()>>1, m_audioOutput[0].size()>>1);
+
+		if(count >= 512)
+		{
+			LOG("Drain ESAI");
+			const float* dummyInputs[16]{nullptr};
+			float* dummyOutputs[16]{nullptr};
+			dummyOutputs[0] = &m_audioOutput[0].front();
+			dummyOutputs[1] = &m_audioOutput[1].front();
+			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count));
+
+			for(int i=static_cast<int>(count) - 1; i>=0; --i)
+			{
+				m_audioOutput[0][(i<<1)    ] = m_audioOutput[0][i];
+				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
+			}
+
+			wavWriter.write("mq_output.wav", 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
+		}
+	};
+
 	uint32_t prevInstructions = 0;
 	bool requestNMI = false;
 	auto haveSentTXtoDSP = false;
@@ -143,18 +173,14 @@ int main(int _argc, char* _argv[])
 
 		hdiDSP.injectTXInterrupt();
 
-		while(!hdiDSP.hasTX())
+		while(!hdiDSP.hasTX() && (hdiDSP.readHDR() & (1<<dsp56k::HDI08::HCR_HTIE)))
+		{
+			processAudio();
 			std::this_thread::yield();
+		}
 
 		hdiTransferDSPtoUC();
 	});
-
-	std::array<std::vector<float>, 2> m_audioOutput;
-
-	for (auto& audioOutput : m_audioOutput)
-		audioOutput.resize(1024);
-
-	synthLib::WavWriter wavWriter;
 
 	while(dsp.get())
 	{
@@ -245,26 +271,7 @@ int main(int _argc, char* _argv[])
 			mc->notifyDSPBooted();
 		}
 
-		auto& esai = dsp->getPeriph().getEsai();
-		const auto count = std::min(esai.getAudioOutputs().size()>>1, m_audioOutput[0].size()>>1);
-
-		if(count >= 512)
-		{
-			LOG("Drain ESAI");
-			const float* dummyInputs[16]{nullptr};
-			float* dummyOutputs[16]{nullptr};
-			dummyOutputs[0] = &m_audioOutput[0].front();
-			dummyOutputs[1] = &m_audioOutput[1].front();
-			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count));
-
-			for(int i=static_cast<int>(count) - 1; i>=0; --i)
-			{
-				m_audioOutput[0][(i<<1)    ] = m_audioOutput[0][i];
-				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
-			}
-
-			wavWriter.write("mq_output.wav", 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
-		}
+		processAudio();
 	}
 
 	return 0;
