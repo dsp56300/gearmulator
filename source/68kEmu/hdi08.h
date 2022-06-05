@@ -42,7 +42,7 @@ namespace mc68k
 			Hc				= (1<<7),	// CVR Host Command Bit (HC) Bit 7
 		};
 
-		using CallbackRxEmpty = std::function<void()>;
+		using CallbackRxEmpty = std::function<void(bool)>;
 
 		Hdi08();
 
