@@ -251,6 +251,9 @@ int main(int _argc, char* _argv[])
 				mc->getQSM().writeSciRX(60);
 				mc->getQSM().writeSciRX(0x7f);
 				break;
+			case '!':
+				dsp->dumpPMem("mq_dump_P_" + std::to_string(dspCycles));
+				break;
 			default:																						break;
 			}
 			ch = 0;
