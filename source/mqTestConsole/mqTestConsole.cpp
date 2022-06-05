@@ -155,17 +155,21 @@ int main(int _argc, char* _argv[])
 			LOG("uc request DSP NMI");
 			dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
 		}
-		else
-		{
-			uint8_t interruptAddr;
-			if(hdiUC.pollInterruptRequest(interruptAddr))
-				dsp->dsp().injectInterrupt(interruptAddr);
-		}
-
 		requestNMI = mc->requestDSPinjectNMI();
+
+		uint8_t interruptAddr;
+		bool injected = false;
+		while(hdiUC.pollInterruptRequest(interruptAddr))
+		{
+			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
+			injected = true;
+			dsp->dsp().injectInterrupt(interruptAddr);
+		}
 
 		while(dsp->dsp().hasPendingInterrupts())
 			std::this_thread::yield();
+		if(injected)
+			LOG("No interrupts pending");
 	};
 
 	auto hdiTransferDSPtoUC = [&]()
