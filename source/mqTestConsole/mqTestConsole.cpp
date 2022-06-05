@@ -192,6 +192,8 @@ int main(int _argc, char* _argv[])
 			hdiDSP.writeRX(&data, 1);
 		}
 		txData.clear();
+		while(hdiDSP.hasRXData())
+			std::this_thread::yield();
 	};
 
 	hdiUC.setRxEmptyCallback([&](bool needMoreData)
