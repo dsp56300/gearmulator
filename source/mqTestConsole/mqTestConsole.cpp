@@ -101,6 +101,8 @@ int main(int _argc, char* _argv[])
 	for (auto& audioOutput : m_audioOutput)
 		audioOutput.resize(1024);
 
+	bool silence = true;
+
 	synthLib::WavWriter wavWriter;
 	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
 	auto processAudio = [&]()
@@ -121,9 +123,13 @@ int main(int _argc, char* _argv[])
 			{
 				m_audioOutput[0][(i<<1)    ] = m_audioOutput[0][i];
 				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
+
+				if(silence && (m_audioOutput[0][i] != 0.0f || m_audioOutput[1][i] != 0.0f))
+					silence = false;
 			}
 
-			wavWriter.write(filename, 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
+			if(!silence)
+				wavWriter.write(filename, 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
 		}
 	};
 
