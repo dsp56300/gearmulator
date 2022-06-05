@@ -154,12 +154,19 @@ int main(int _argc, char* _argv[])
 		}
 
 		requestNMI = mc->requestDSPinjectNMI();
+
+		while(dsp->dsp().hasPendingInterrupts())
+			std::this_thread::yield();
 	};
 
 	auto hdiTransferDSPtoUC = [&]()
 	{
 		if(hdiDSP.hasTX() && hdiUC.canReceiveData())
+		{
 			hdiUC.writeRx(hdiDSP.readTX());
+			return true;
+		}
+		return false;
 	};
 
 	auto hdiTransferUCtoDSP = [&]()
@@ -174,21 +181,27 @@ int main(int _argc, char* _argv[])
 		txData.clear();
 	};
 
-	hdiUC.setRxEmptyCallback([&]()
+	hdiUC.setRxEmptyCallback([&](bool needMoreData)
 	{
 		injectUCtoDSPInterrupts();
 
 		hdiDSP.injectTXInterrupt();
 
-		while(!hdiDSP.hasTX() && (hdiDSP.readHDR() & (1<<dsp56k::HDI08::HCR_HTIE)))
+		if(needMoreData)
 		{
-			processAudio();
-			std::this_thread::yield();
+			while(!hdiDSP.hasTX() && hdiDSP.txInterruptEnabled())
+			{
+				processAudio();
+				std::this_thread::yield();
+			}
 		}
 
-		hdiTransferDSPtoUC();
+		if(!hdiTransferDSPtoUC())
+		{
+			int foo=0;
+		}
 	});
-
+	
 	while(dsp.get())
 	{
 		const auto instructionCounter = dsp->dsp().getInstructionCounter();
@@ -196,7 +209,7 @@ int main(int _argc, char* _argv[])
 		prevInstructions = instructionCounter;
 		dspCycles += d;
 
-		if(mc->getCycles() > dspCycles/6)
+		if(true && mc->getCycles() > dspCycles/6)
 		{
 			std::this_thread::yield();
 			continue;
@@ -267,6 +280,8 @@ int main(int _argc, char* _argv[])
 			hdiHF01 = hf01;
 		}
 
+		injectUCtoDSPInterrupts();
+
 		// transfer DSP host flags HF2&3 to uc
 		auto isr = hdiUC.isr();
 		const auto prevIsr = isr;
@@ -276,7 +291,6 @@ int main(int _argc, char* _argv[])
 			hdiUC.isr(isr);
 
 		hdiTransferUCtoDSP();
-		injectUCtoDSPInterrupts();
 		hdiTransferDSPtoUC();
 
 		if(dumpDSP)

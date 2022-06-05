@@ -56,7 +56,7 @@ namespace mc68k
 //			LOG("HDI08 ISR set to " << HEXN(_val,2));
 			break;
 		case PeriphAddress::HdiICR:
-			LOG("HDI08 ICR set to " << HEXN(_val,2));
+//			LOG("HDI08 ICR set to " << HEXN(_val,2));
 			if(_val & Init)
 			{
 				LOG("HDI08 Initialization, HREQ=" << (_val & Rreq) << ", TREQ=" << (_val & Treq));
@@ -210,7 +210,7 @@ namespace mc68k
 
 		if(!hasRX)
 		{
-			m_rxEmptyCallback();
+			m_rxEmptyCallback(true);
 
 			if(!(read8(PeriphAddress::HdiISR) & Rxdf))
 			{
@@ -230,7 +230,7 @@ namespace mc68k
 		auto pop = [&]()
 		{
 			write8(PeriphAddress::HdiISR, read8(PeriphAddress::HdiISR) & ~(Rxdf));
-			m_rxEmptyCallback();
+			m_rxEmptyCallback(false);
 		};
 
 		if(le)
