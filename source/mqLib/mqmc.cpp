@@ -58,12 +58,7 @@ namespace mqLib
 			// TODO: hack to prevent getting stuck here
 			m_memory[0x170] = 32;
 		}
-		
-		if(getPC() == 0x00081e18)
-		{
-			dumpMemory("0x00081e18");
-		}
-		
+
 		Mc68k::exec();
 
 		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
