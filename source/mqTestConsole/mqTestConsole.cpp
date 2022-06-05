@@ -80,7 +80,7 @@ int main(int _argc, char* _argv[])
 	uint32_t hdiHF23 = 0;	// DSP => uc
 	uint64_t dspCycles = 0;
 
-	dspThread.setCallback([&](uint32_t)
+	auto transferHostFlags = [&]()
 	{
 		// transfer HF 2&3 from uc to DSP
 		auto hsr = hdiDSP.readStatusRegister();
@@ -96,6 +96,13 @@ int main(int _argc, char* _argv[])
 			LOG("HDI HF23=" << HEXN(hf23,1));
 			hdiHF23 = hf23;
 		}
+	};
+
+	dsp->dsp().setExecCallback([&]()
+	{
+		transferHostFlags();
+//		if(hdiDSP.hasRXData())
+//			hdiDSP.exec();
 	});
 
 	std::array<std::vector<float>, 2> m_audioOutput;
