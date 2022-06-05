@@ -61,6 +61,8 @@ int main(int _argc, char* _argv[])
 	auto& hdiDSP = dsp->hdi08();
 	auto& buttons = mc->getButtons();
 
+	hdiDSP.setRXRateLimit(0);
+
 	dsp56k::DSPThread dspThread(dsp->dsp());
 	bool dumpDSP = false;
 
