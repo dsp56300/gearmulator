@@ -39,10 +39,13 @@ namespace mc68k
 
 	private:
 		void initTimer();
+		void updateClock();
 
 		Mc68k& m_mc68k;
 		int32_t m_timerLoadValue = 0;
 		int32_t m_timerCurrentValue = 0;
 		Port m_portE, m_portF;
+		uint32_t m_externalClockHz = 32768;
+		uint32_t m_systemClockHz = 0;
 	};
 }

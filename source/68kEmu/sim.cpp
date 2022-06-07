@@ -7,6 +7,7 @@ namespace mc68k
 {
 	Sim::Sim(Mc68k& _mc68k): PeripheralBase(g_simBase, g_simSize), m_mc68k(_mc68k)
 	{
+		write16(PeriphAddress::Syncr, 0x3f00);
 		write16(PeriphAddress::Picr, 0xf);
 	}
 
@@ -49,6 +50,9 @@ namespace mc68k
 
 		switch (_addr)
 		{
+		case PeriphAddress::Syncr:
+			updateClock();
+			return;
 		case PeriphAddress::DdrE:
 			LOG("Port E direction set to " << HEXN(_val, 2));
 			m_portE.setDirection(_val);
@@ -90,6 +94,9 @@ namespace mc68k
 
 		switch (_addr)
 		{
+		case PeriphAddress::Syncr:
+			updateClock();
+			return;
 		case PeriphAddress::Picr:
 		case PeriphAddress::Pitr:
 			initTimer();
@@ -129,8 +136,29 @@ namespace mc68k
 		}
 
 		const auto prescale = pitr & Ptp ? 512 : 1;
+		const auto pitm = pitr & Pitm;
 
 		// PIT Period = ((PIT Modulus)(Prescaler Value)(4)) / EXTAL Frequency
-		m_timerLoadValue = (pitr & Pitm) * prescale * 4 * 16 * 20 * 2;
+		const auto scale = m_systemClockHz / m_externalClockHz;
+		m_timerLoadValue = static_cast<int32_t>(pitm * prescale * 4 * scale);
+	}
+
+	void Sim::updateClock()
+	{
+		const auto syncr = PeripheralBase::read16(PeriphAddress::Syncr);
+
+		const auto w = (syncr>>15) & 1;
+		const auto x = (syncr>>14) & 1;
+		const auto y = (syncr>>8) & 0x3f;
+
+		const auto hz = m_externalClockHz * (4 * (y+1) * (1<<(2*w+x)));
+
+		const float mhz = static_cast<float>(hz) / 1000000.0f;
+
+		LOG("Fsys=" << hz << "Hz / " << mhz << "MHz, Fext=" << m_externalClockHz << "Hz, SYNCR=$" << HEXN(syncr,4) << ", W=" << w << ", X=" << x << ", Y=" << y );
+
+		m_systemClockHz = hz;
+
+		initTimer();
 	}
 }
