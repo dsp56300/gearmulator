@@ -93,7 +93,7 @@ int main(int _argc, char* _argv[])
 		const auto hf23 = (hdiDSP.readControlRegister() >> 3) & 3;
 		if(hf23 != hdiHF23)
 		{
-			LOG("HDI HF23=" << HEXN(hf23,1));
+//			LOG("HDI HF23=" << HEXN(hf23,1));
 			hdiHF23 = hf23;
 		}
 	};
@@ -101,8 +101,8 @@ int main(int _argc, char* _argv[])
 	dsp->dsp().setExecCallback([&]()
 	{
 		transferHostFlags();
-//		if(hdiDSP.hasRXData())
-//			hdiDSP.exec();
+		if(hdiDSP.hasRXData())
+			hdiDSP.exec();
 	});
 
 	std::array<std::vector<float>, 2> m_audioOutput;
@@ -161,15 +161,19 @@ int main(int _argc, char* _argv[])
 		bool injected = false;
 		while(hdiUC.pollInterruptRequest(interruptAddr))
 		{
-			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
+//			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
 			injected = true;
-			dsp->dsp().injectInterrupt(interruptAddr);
+			if(!dsp->dsp().injectInterrupt(interruptAddr))
+				LOG("Interrupt request FAILED, interrupt was masked");
 		}
 
 		while(dsp->dsp().hasPendingInterrupts())
+		{
+			processAudio();
 			std::this_thread::yield();
-		if(injected)
-			LOG("No interrupts pending");
+		}
+//		if(injected)
+//			LOG("No interrupts pending");
 	};
 
 	auto hdiTransferDSPtoUC = [&]()
@@ -186,14 +190,22 @@ int main(int _argc, char* _argv[])
 	{
 		hdiUC.pollTx(txData);
 
+		if(txData.empty())
+			return;
+
 		for (const uint32_t data : txData)
 		{
 			haveSentTXtoDSP = true;
+//			LOG("toDSP writeRX=" << HEX(data));
 			hdiDSP.writeRX(&data, 1);
 		}
 		txData.clear();
-		while(hdiDSP.hasRXData())
+		while((hdiDSP.hasRXData() && hdiDSP.rxInterruptEnabled()) || dsp->dsp().hasPendingInterrupts())
+		{
+			processAudio();
 			std::this_thread::yield();
+		}
+//		LOG("writeRX wait over");
 	};
 
 	hdiUC.setRxEmptyCallback([&](bool needMoreData)
@@ -226,6 +238,7 @@ int main(int _argc, char* _argv[])
 
 		if(true && mc->getCycles() > dspCycles/6)
 		{
+			processAudio();
 			std::this_thread::yield();
 			continue;
 		}
@@ -291,7 +304,7 @@ int main(int _argc, char* _argv[])
 
 		if(hf01 != hdiHF01)
 		{
-			LOG("HDI HF01=" << HEXN(hf01,1));
+//			LOG("HDI HF01=" << HEXN(hf01,1));
 			hdiHF01 = hf01;
 		}
 
