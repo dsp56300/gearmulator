@@ -22,7 +22,7 @@ namespace mqLib
 		return ss.str();
 	}
 
-	MqMc::MqMc(ROM& _rom) : m_rom(_rom)
+	MqMc::MqMc(ROM& _rom) : m_rom(_rom), m_romRuntimeData(_rom.getData())
 	{
 		m_memory.resize(0x40000, 0);
 
@@ -115,7 +115,7 @@ namespace mqLib
 
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 		{
-			const auto r = readW(m_rom.getData(), addr - g_romAddress);
+			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
@@ -131,7 +131,7 @@ namespace mqLib
 			return m_memory[addr];
 
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
-			return m_rom.getData()[addr - g_romAddress];
+			return m_romRuntimeData[addr - g_romAddress];
 
 //		LOG("read8 addr=" << HEXN(addr, 8) << ", pc=" << HEXN(getPC(), 8));
 
@@ -154,6 +154,7 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 		{
 			LOG("write16 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
+			writeW(m_romRuntimeData, addr - g_romAddress, val);
 			return;
 		}
 
@@ -177,6 +178,7 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 		{
 			LOG("write8 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
+			m_romRuntimeData[addr - g_romAddress] = val;
 			return;
 		}
 

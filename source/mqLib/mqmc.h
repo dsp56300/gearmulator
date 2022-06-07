@@ -39,6 +39,7 @@ namespace mqLib
 		uint32_t onIllegalInstruction(uint32_t opcode) override;
 
 		ROM& m_rom;
+		std::vector<uint8_t> m_romRuntimeData;
 		LCD m_lcd;
 		Buttons m_buttons;
 		std::vector<uint8_t> m_memory;
