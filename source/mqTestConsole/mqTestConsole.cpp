@@ -105,15 +105,16 @@ int main(int _argc, char* _argv[])
 			hdiDSP.exec();
 	});
 
-	std::array<std::vector<float>, 2> m_audioOutput;
+	std::array<std::vector<dsp56k::TWord>, 2> m_audioOutput;
 
 	for (auto& audioOutput : m_audioOutput)
 		audioOutput.resize(1024);
 
 	bool silence = true;
 
-	synthLib::WavWriter wavWriter;
 	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
+	synthLib::AsyncWriter wavWriter(filename, 44100);
+
 	auto processAudio = [&]()
 	{
 		auto& esai = dsp->getPeriph().getEsai();
@@ -122,8 +123,8 @@ int main(int _argc, char* _argv[])
 		if(count >= 512)
 		{
 //			LOG("Drain ESAI");
-			const float* dummyInputs[16]{nullptr};
-			float* dummyOutputs[16]{nullptr};
+			const dsp56k::TWord* dummyInputs[16]{nullptr};
+			dsp56k::TWord* dummyOutputs[16]{nullptr};
 			dummyOutputs[0] = &m_audioOutput[0].front();
 			dummyOutputs[1] = &m_audioOutput[1].front();
 			esai.processAudioInterleaved(dummyInputs, dummyOutputs, static_cast<uint32_t>(count));
@@ -133,12 +134,21 @@ int main(int _argc, char* _argv[])
 				m_audioOutput[0][(i<<1)    ] = m_audioOutput[0][i];
 				m_audioOutput[0][(i<<1) + 1] = m_audioOutput[1][i];
 
-				if(silence && (m_audioOutput[0][i] != 0.0f || m_audioOutput[1][i] != 0.0f))
+				if(silence && (m_audioOutput[0][i] || m_audioOutput[1][i]))
 					silence = false;
 			}
 
 			if(!silence)
-				wavWriter.write(filename, 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
+			{
+				wavWriter.append([&](auto& _dst)
+				{
+					_dst.reserve(_dst.size() + count * 2);
+					for(size_t i=0; i<count*2; ++i)
+						_dst.push_back(m_audioOutput[0][i]);
+				}
+				);
+//				wavWriter.write(filename, 32, true, 2, 44100, &m_audioOutput[0].front(), sizeof(float) * count * 2);
+			}
 		}
 	};
 
