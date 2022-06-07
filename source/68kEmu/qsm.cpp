@@ -31,27 +31,28 @@ namespace mc68k
 		case PeriphAddress::Spcr1:
 			if(!(prev & g_spcr1_speMask) && (_val & g_spcr1_speMask))
 				startTransmit();
-			break;
+			return;
 		case PeriphAddress::Pqspar:
 			LOG("Set PQSPAR to " << HEXN(_val, 4));
 			m_portQS.enablePins(~(_val >> 8));
 			m_portQS.setDirection(_val & 0xff);
-			break;
+			return;
 		case PeriphAddress::SciControl0:
 			LOG("Set SCCR0 to " << HEXN(_val, 4));
-			break;
+			return;
 		case PeriphAddress::SciControl1:
 			LOG("Set SCCR1 to " << HEXN(_val, 4));
 			if(bitTest(_val, Sccr1Bits::TransmitInterruptEnable) && !bitTest(prev, Sccr1Bits::TransmitInterruptEnable))
 				injectInterrupt(ScsrBits::TransmitDataRegisterEmpty);
-			break;
+			return;
 		case PeriphAddress::SciStatus:
 			LOG("Set SCSR to " << HEXN(_val, 4));
-			break;
+			return;
 		case PeriphAddress::SciData:
 			writeSciData(_val);
-			break;
+			return;
 		}
+		LOG("write16 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(_val,4));
 	}
 
 	uint16_t Qsm::read16(PeriphAddress _addr)
@@ -63,6 +64,8 @@ namespace mc68k
 		case PeriphAddress::SciData:
 			return readSciRX();
 		}
+
+		LOG("read16 addr=" << HEXN(_addr, 8));
 		return PeripheralBase::read16(_addr);
 	}
 
@@ -85,26 +88,27 @@ namespace mc68k
 		case PeriphAddress::Spcr1:
 			if(!(prev & g_spcr1_speMask) && (newVal & g_spcr1_speMask))
 				startTransmit();
-			break;
+			return;
 		case PeriphAddress::Ddrqs:
 			LOG("Set DDRQS to " << HEXN(_val, 2));
 			m_portQS.setDirection(_val);
-			break;
+			return;
 		case PeriphAddress::Pqspar:
 			LOG("Set PQSPAR to " << HEXN(_val, 2));
 			m_portQS.enablePins(~_val);
-			break;
+			return;
 		case PeriphAddress::Portqs:
 			LOG("Set PortQS to " << HEXN(_val,2));
 			m_portQS.writeTX(_val);
-			break;
+			return;
 		case PeriphAddress::SciData:
 			writeSciData(_val);
-			break;
+			return;
 		case PeriphAddress::SciStatus:
 			LOG("Set SCSR to " << HEXN(_val, 2));
-			break;
+			return;
 		}
+		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(static_cast<int>(_val),2));
 	}
 
 	uint8_t Qsm::read8(PeriphAddress _addr)
@@ -120,6 +124,7 @@ namespace mc68k
 		case PeriphAddress::SciDataLSB:
 			return read16(PeriphAddress::SciData) & 0xff;
 		}
+		LOG("read8 addr=" << HEXN(_addr, 8));
 		return PeripheralBase::read8(_addr);
 	}
 

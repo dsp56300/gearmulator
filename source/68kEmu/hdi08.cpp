@@ -23,10 +23,15 @@ namespace mc68k
 			// we want new data for transmission
 			r |= Txde;
 			return r;
+		case PeriphAddress::HdiCVR:
+			return r;
 		case PeriphAddress::HdiTXH:	return readRX(WordFlags::H);
 		case PeriphAddress::HdiTXM:	return readRX(WordFlags::M);
 		case PeriphAddress::HdiTXL:	return readRX(WordFlags::L);
+		case PeriphAddress::HdiICR:
+			return r;
 		}
+		LOG("read8 addr=" << HEXN(_addr, 8));
 		return r;
 	}
 
@@ -43,6 +48,7 @@ namespace mc68k
 				return r;
 			}
 		}
+		LOG("read16 addr=" << HEXN(_addr, 8));
 		return PeripheralBase::read16(_addr);
 	}
 
@@ -54,27 +60,28 @@ namespace mc68k
 		{
 		case PeriphAddress::HdiISR:
 //			LOG("HDI08 ISR set to " << HEXN(_val,2));
-			break;
+			return;
 		case PeriphAddress::HdiICR:
 //			LOG("HDI08 ICR set to " << HEXN(_val,2));
 			if(_val & Init)
 			{
 				LOG("HDI08 Initialization, HREQ=" << (_val & Rreq) << ", TREQ=" << (_val & Treq));
 			}
-			break;
+			return;
 		case PeriphAddress::HdiCVR:
 			if(_val & Hc)
 			{
 				const auto addr = static_cast<uint8_t>((_val & Hv) << 1);
-				LOG("HDI08 Host Vector Interrupt Request, interrupt vector = " << HEXN(addr, 2));
+//				LOG("HDI08 Host Vector Interrupt Request, interrupt vector = " << HEXN(addr, 2));
 				m_pendingInterruptRequests.push_back(addr);
 //				write8(_addr, _val & ~Hc);
 			}
-			break;
-		case PeriphAddress::HdiTXH:	writeTX(WordFlags::H, _val);	break;
-		case PeriphAddress::HdiTXM:	writeTX(WordFlags::M, _val);	break;
-		case PeriphAddress::HdiTXL:	writeTX(WordFlags::L, _val);	break;
+			return;
+		case PeriphAddress::HdiTXH:	writeTX(WordFlags::H, _val);	return;
+		case PeriphAddress::HdiTXM:	writeTX(WordFlags::M, _val);	return;
+		case PeriphAddress::HdiTXL:	writeTX(WordFlags::L, _val);	return;
 		}
+		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(static_cast<int>(_val),2));
 	}
 
 	void Hdi08::write16(PeriphAddress _addr, uint16_t _val)
@@ -85,12 +92,13 @@ namespace mc68k
 		{
 		case PeriphAddress::HdiUnused4:
 			write8(PeriphAddress::HdiTXH, _val & 0xff);
-			break;
+			return;
 		case PeriphAddress::HdiTXM:
 			write8(PeriphAddress::HdiTXM, _val >> 8);
 			write8(PeriphAddress::HdiTXL, _val & 0xff);
 			break;
 		default:
+			LOG("write16 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(_val,4));
 			break;
 		}
 	}
@@ -112,7 +120,7 @@ namespace mc68k
 
 	void Hdi08::writeRx(uint32_t _word)
 	{
-		LOG("HDI writeRX=" << HEX(_word));
+//		LOG("HDI writeRX=" << HEX(_word));
 
 		m_rxData.push_back(_word);
 
@@ -177,7 +185,7 @@ namespace mc68k
 
 		m_txData.push_back(word);
 
-		LOG("HDI TX: " << HEXN(word, 6));
+//		LOG("HDI TX: " << HEXN(word, 6));
 
 		m_txBytes.fill(0);
 
@@ -216,7 +224,7 @@ namespace mc68k
 			{
 				const auto s = isr();
 				const auto c = icr();
-				LOG("Empty read of RX");
+//				LOG("Empty read of RX");
 				return 0;
 			}
 		}

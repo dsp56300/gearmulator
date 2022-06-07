@@ -18,7 +18,7 @@ namespace mc68k
 			return;
 		}
 
-//		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEX(static_cast<int>(_val),2));
+		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(static_cast<int>(_val),2));
 	}
 
 	uint8_t Gpt::read8(PeriphAddress _addr)
@@ -28,6 +28,9 @@ namespace mc68k
 		case PeriphAddress::PortGp:
 			return m_portGP.read();
 		}
+
+		LOG("read8 addr=" << HEXN(_addr, 8));
+
 		return PeripheralBase::read8(_addr);
 	}
 
@@ -42,6 +45,7 @@ namespace mc68k
 			m_portGP.writeTX(_val>>8);
 			break;
 		}
+		LOG("write16 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(_val,4));
 	}
 
 	uint16_t Gpt::read16(PeriphAddress _addr)
@@ -56,6 +60,9 @@ namespace mc68k
 			}
 			break;
 		}
+
+		LOG("read16 addr=" << HEXN(_addr, 8));
+
 		return PeripheralBase::read16(_addr);
 	}
 }

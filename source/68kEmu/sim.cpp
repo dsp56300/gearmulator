@@ -20,6 +20,7 @@ namespace mc68k
 			r |= (1<<3);	// code waits until frequency has locked in, yes it has
 			return r;
 		default:
+			LOG("read16 addr=" << HEXN(_addr, 8));
 			return r;
 		}
 	}
@@ -37,6 +38,7 @@ namespace mc68k
 		case PeriphAddress::PortF1:
 			return m_portF.read();
 		default:
+			LOG("read16 addr=" << HEXN(_addr, 8));
 			return r;
 		}
 	}
@@ -50,34 +52,36 @@ namespace mc68k
 		case PeriphAddress::DdrE:
 			LOG("Port E direction set to " << HEXN(_val, 2));
 			m_portE.setDirection(_val);
-			break;
+			return;
 		case PeriphAddress::DdrF:
 			LOG("Port F direction set to " << HEXN(_val, 2));
 			m_portF.setDirection(_val);
-			break;
+			return;
 		case PeriphAddress::PEPar:
 			LOG("Port E Pin assignment set to " << HEXN(_val, 2));
 			m_portE.enablePins(~_val);
-			break;
+			return;
 		case PeriphAddress::PFPar:
 			LOG("Port F Pin assignment set to " << HEXN(_val, 2));
 			m_portF.enablePins(~_val);
-			break;
+			return;
 		case PeriphAddress::PortE0:
 		case PeriphAddress::PortE1:
 //			LOG("Port E write: " << HEXN(_val, 2));
 			m_portE.writeTX(_val);
-			break;
+			return;
 		case PeriphAddress::PortF0:
 		case PeriphAddress::PortF1:
 //			LOG("Port F write: " << HEXN(_val, 2));
 			m_portF.writeTX(_val);
-			break;
+			return;
 		case PeriphAddress::Picr:
 		case PeriphAddress::Pitr:
 			initTimer();
-			break;
+			return;
 		}
+
+		LOG("write8 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(static_cast<int>(_val),2));
 	}
 
 	void Sim::write16(PeriphAddress _addr, uint16_t _val)
@@ -89,8 +93,9 @@ namespace mc68k
 		case PeriphAddress::Picr:
 		case PeriphAddress::Pitr:
 			initTimer();
-			break;
+			return;
 		}
+		LOG("write16 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(_val,4));
 	}
 
 	void Sim::exec(uint32_t _deltaCycles)
@@ -102,7 +107,7 @@ namespace mc68k
 
 		if(m_timerCurrentValue < 0)
 		{
-			const auto picr = read16(PeriphAddress::Picr);
+			const auto picr = PeripheralBase::read16(PeriphAddress::Picr);
 			const auto iv = picr & PivMask;
 			const auto il = (picr & PirqlMask) >> PirqlShift;
 
