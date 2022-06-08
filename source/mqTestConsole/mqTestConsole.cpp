@@ -248,7 +248,7 @@ int main(int _argc, char* _argv[])
 		prevInstructions = instructionCounter;
 		dspCycles += d;
 
-		if(true && mc->getCycles() > dspCycles/6)
+		if(true && mc->getCycles() > dspCycles/5)
 		{
 			processAudio();
 			std::this_thread::yield();
