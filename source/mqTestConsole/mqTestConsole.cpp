@@ -304,6 +304,18 @@ int main(int _argc, char* _argv[])
 				mc->getQSM().writeSciRX(60);
 				mc->getQSM().writeSciRX(0x7f);
 				break;
+			case 'o':
+				// Modwheel Max
+				mc->getQSM().writeSciRX(0xb0);
+				mc->getQSM().writeSciRX(1);
+				mc->getQSM().writeSciRX(0x7f);
+				break;
+			case 'p':	
+				// Modwheel Min
+				mc->getQSM().writeSciRX(0xb0);
+				mc->getQSM().writeSciRX(1);
+				mc->getQSM().writeSciRX(0x0);
+				break;
 			case '!':
 				dsp->dumpPMem("dsp_dump_P_" + std::to_string(dspCycles));
 				break;
