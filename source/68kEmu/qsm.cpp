@@ -63,6 +63,8 @@ namespace mc68k
 			return readSciStatus();
 		case PeriphAddress::SciData:
 			return readSciRX();
+		case PeriphAddress::Portqs:
+			return m_portQS.read();
 		}
 
 		LOG("read16 addr=" << HEXN(_addr, 8));
