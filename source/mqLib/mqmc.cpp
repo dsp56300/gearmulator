@@ -194,6 +194,13 @@ namespace mqLib
 		fclose(hFile);
 	}
 
+	void MqMc::dumpROM(const char* _filename) const
+	{
+		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
+		fwrite(&m_romRuntimeData[0], 1, m_romRuntimeData.size(), hFile);
+		fclose(hFile);
+	}
+
 	void MqMc::dumpAssembly(const uint32_t _first, const uint32_t _count) const
 	{
 		std::stringstream ss;

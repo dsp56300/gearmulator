@@ -190,7 +190,9 @@ int main(int _argc, char* _argv[])
 	{
 		if(hdiDSP.hasTX() && hdiUC.canReceiveData())
 		{
-			hdiUC.writeRx(hdiDSP.readTX());
+			const auto v = hdiDSP.readTX();
+//			LOG("HDI uc2dsp=" << HEX(v));
+			hdiUC.writeRx(v);
 			return true;
 		}
 		return false;
@@ -306,7 +308,10 @@ int main(int _argc, char* _argv[])
 				dsp->dumpPMem("dsp_dump_P_" + std::to_string(dspCycles));
 				break;
 			case '"':
-				mc->dumpMemory("mc_dump_mem.bin");
+				mc->dumpMemory("mc_dump_mem");
+				break;
+			case '$':
+				mc->dumpROM("rom_runtime");
 				break;
 			case '%':
 				{
