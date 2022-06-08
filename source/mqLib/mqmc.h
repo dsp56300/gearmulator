@@ -27,6 +27,7 @@ namespace mqLib
 		uint8_t requestDSPinjectNMI() const { return m_dspInjectNmiRequest; }
 
 		void dumpMemory(const char* _filename) const;
+		void dumpROM(const char* _filename) const;
 		void dumpAssembly(uint32_t _first, uint32_t _count) const;
 
 	private:
