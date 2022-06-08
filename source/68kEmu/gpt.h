@@ -6,10 +6,12 @@
 
 namespace mc68k
 {
+	class Mc68k;
+
 	class Gpt : public PeripheralBase
 	{
 	public:
-		Gpt() : PeripheralBase(g_gptBase, g_gptSize) {}
+		Gpt(Mc68k& _mc68k) : PeripheralBase(g_gptBase, g_gptSize), m_mc68k(_mc68k) {}
 
 		void write8(PeriphAddress _addr, uint8_t _val) override;
 		uint8_t read8(PeriphAddress _addr) override;
@@ -19,6 +21,7 @@ namespace mc68k
 		Port& getPortGP() { return m_portGP; }
 
 	private:
+		Mc68k& m_mc68k;
 		Port m_portGP;
 	};
 }
