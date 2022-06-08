@@ -31,6 +31,8 @@ namespace mc68k
 		// GPT
 		DdrGp			= 0xFF906,	// Port GP Data Direction Register $YFF906
 		PortGp			= 0xFF907,	// Port GP Data Register $YFF907
+		Tcnt			= 0xFF90a,	// Timer Counter
+		TcntLSB			= 0xFF90b,
 
 		// SIM
 		Syncr			= 0xFFA04,	// $YFFA04 CLOCK SYNTHESIZER CONTROL (SYNCR)

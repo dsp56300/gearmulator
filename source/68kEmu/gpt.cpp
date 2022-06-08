@@ -1,5 +1,6 @@
 #include "gpt.h"
 
+#include "mc68k.h"
 #include "dsp56kEmu/logging.h"
 
 namespace mc68k
@@ -27,6 +28,10 @@ namespace mc68k
 		{
 		case PeriphAddress::PortGp:
 			return m_portGP.read();
+		case PeriphAddress::Tcnt:
+			return static_cast<uint8_t>(read16(PeriphAddress::Tcnt) >> 8);
+		case PeriphAddress::TcntLSB:
+			return static_cast<uint8_t>(read16(PeriphAddress::Tcnt) & 0xff);
 		}
 
 		LOG("read8 addr=" << HEXN(_addr, 8));
@@ -59,6 +64,12 @@ namespace mc68k
 				return dir << 8 | data;
 			}
 			break;
+		case PeriphAddress::Tcnt:
+			{
+				const auto r = (m_mc68k.getCycles() >> 2) & 0xffff;
+				LOG("Read TCNT=" << HEXN(r,4) << " at PC=" << m_mc68k.getPC());
+				return static_cast<uint16_t>(r);
+			}
 		}
 
 		LOG("read16 addr=" << HEXN(_addr, 8));
