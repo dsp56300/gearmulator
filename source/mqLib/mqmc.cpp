@@ -37,7 +37,7 @@ namespace mqLib
 
 	MqMc::~MqMc() = default;
 
-	void MqMc::exec()
+	uint32_t MqMc::exec()
 	{
 #if 0
 		for(auto it = m_lastPCs.begin(); it != m_lastPCs.end(); ++it)
@@ -59,7 +59,7 @@ namespace mqLib
 			m_memory[0x170] = 32;
 		}
 
-		Mc68k::exec();
+		const uint32_t deltaCycles = Mc68k::exec();
 
 		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
 		if(resetIsOutput)
@@ -97,6 +97,8 @@ namespace mqLib
 			if(s.find("SIG") != std::string::npos)
 				dumpMemory("SIG");
 		}
+
+		return deltaCycles;
 	}
 
 	void MqMc::notifyDSPBooted()

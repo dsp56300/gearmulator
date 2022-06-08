@@ -85,7 +85,7 @@ namespace mc68k
 		g_instance = nullptr;
 	};
 
-	void Mc68k::exec()
+	uint32_t Mc68k::exec()
 	{
 		const auto deltaCycles = m68k_execute(1);
 		m_cycles += deltaCycles;
@@ -94,6 +94,8 @@ namespace mc68k
 		m_sim.exec(deltaCycles);
 		m_qsm.exec(deltaCycles);
 		m_hdi08.exec(deltaCycles);
+
+		return deltaCycles;
 	}
 
 	void Mc68k::injectInterrupt(uint8_t _vector, uint8_t _level)

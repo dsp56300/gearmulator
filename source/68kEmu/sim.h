@@ -37,6 +37,8 @@ namespace mc68k
 		Port& getPortE() { return m_portE; }
 		Port& getPortF() { return m_portF; }
 
+		uint32_t getSystemClockHz() const { return m_systemClockHz; }
+
 	private:
 		void initTimer();
 		void updateClock();
