@@ -17,7 +17,7 @@ namespace mqLib
 		explicit MqMc(ROM& _rom);
 		~MqMc() override;
 
-		void exec() override;
+		uint32_t exec() override;
 
 		Buttons& getButtons() { return m_buttons; }
 

@@ -16,7 +16,7 @@ namespace mc68k
 		Mc68k();
 		virtual ~Mc68k();
 
-		virtual void exec();
+		virtual uint32_t exec();
 
 		void injectInterrupt(uint8_t _vector, uint8_t _level);
 
@@ -53,6 +53,7 @@ namespace mc68k
 		Port& getPortQS()	{ return m_qsm.getPortQS(); }
 
 		Qsm& getQSM()		{ return m_qsm; }
+		Sim& getSim()		{ return m_sim; }
 
 	private:
 		void raiseIPL();

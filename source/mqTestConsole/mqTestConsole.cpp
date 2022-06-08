@@ -240,7 +240,16 @@ int main(int _argc, char* _argv[])
 			int foo=0;
 		}
 	});
-	
+
+	uint32_t esaiFrameIndex = 0;
+	uint32_t lastEsaiFrameIndex = 0;
+	int32_t remainingMcCycles = 0;
+
+	dsp->getPeriph().getEsai().setCallback([&](dsp56k::Audio*)
+	{
+		++esaiFrameIndex;
+	}, 0);
+
 	while(dsp.get())
 	{
 		const auto instructionCounter = dsp->dsp().getInstructionCounter();
@@ -248,14 +257,34 @@ int main(int _argc, char* _argv[])
 		prevInstructions = instructionCounter;
 		dspCycles += d;
 
-		if(true && mc->getCycles() > dspCycles/5)
+		// we can only use ESAI once it has been enabled
+		if(esaiFrameIndex > lastEsaiFrameIndex)
+		{
+			const auto mcClock = mc->getSim().getSystemClockHz();
+			const auto mcCyclesPerFrame = mcClock / (44100 * 2);	// stereo interleaved
+
+			remainingMcCycles += mcCyclesPerFrame * (esaiFrameIndex - lastEsaiFrameIndex);
+			lastEsaiFrameIndex = esaiFrameIndex;
+		}
+		if(esaiFrameIndex > 0)
+		{
+			if(remainingMcCycles < 0)
+			{
+				processAudio();
+				std::this_thread::yield();
+				continue;
+			}
+		}
+		else if(mc->getCycles() > dspCycles/5)
 		{
 			processAudio();
 			std::this_thread::yield();
 			continue;
 		}
 
-		mc->exec();
+		const auto deltaCycles = mc->exec();
+		if(esaiFrameIndex > 0)
+			remainingMcCycles -= deltaCycles;
 
 		if(ch)
 		{
