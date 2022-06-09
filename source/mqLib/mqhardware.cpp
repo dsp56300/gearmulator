@@ -6,7 +6,7 @@ namespace mqLib
 {
 	Hardware::Hardware(std::string _romFilename)
 		: m_romFileName(std::move(_romFilename))
-		, m_rom(_romFilename)
+		, m_rom(m_romFileName)
 		, m_uc(m_rom)
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
@@ -25,6 +25,11 @@ namespace mqLib
 		{
 			dspExecCallback();
 		});
+
+		m_hdiUC.setRxEmptyCallback([&](bool needMoreData)
+		{
+			onUCRxEmpty(needMoreData);
+		});
 	}
 
 	Hardware::~Hardware()
@@ -34,6 +39,8 @@ namespace mqLib
 
 	void Hardware::process(uint32_t _frames)
 	{
+		m_requestedSampleFrames = _frames;
+
 		if(m_audioInputs.front().size() < _frames)
 		{
 			for (auto& input : m_audioInputs)
@@ -45,6 +52,9 @@ namespace mqLib
 			for (auto& output : m_audioOutputs)
 				output.resize(_frames);
 		}
+
+		while(m_requestedSampleFrames)
+			processUcCycle();
 	}
 
 	void Hardware::transferHostFlags()
@@ -74,30 +84,36 @@ namespace mqLib
 
 	void Hardware::injectUCtoDSPInterrupts()
 	{
-		if(m_requestNMI && !m_uc.requestDSPinjectNMI())
+		bool injected = false;
+
+		const uint8_t requestNMI = m_uc.requestDSPinjectNMI();
+
+		if(m_requestNMI && !requestNMI)
 		{
 			LOG("uc request DSP NMI");
-			m_dsp.dsp().injectInterrupt(dsp56k::Vba_NMI);
+			injected = true;
+			while(!m_dsp.dsp().injectInterrupt(dsp56k::Vba_NMI))
+				ucYield();
 		}
 
-		m_requestNMI = m_uc.requestDSPinjectNMI();
+		m_requestNMI = requestNMI;
 
 		uint8_t interruptAddr;
-		bool injected = false;
 		while(m_hdiUC.pollInterruptRequest(interruptAddr))
 		{
 //			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
 			injected = true;
-			if(!m_dsp.dsp().injectInterrupt(interruptAddr))
-				LOG("Interrupt request FAILED, interrupt was masked");
+			while(!m_dsp.dsp().injectInterrupt(interruptAddr))
+				ucYield();
 		}
 
+		if(!injected)
+			return;
+
 		while(m_dsp.dsp().hasPendingInterrupts())
-		{
 			ucYield();
-		}
-//		if(injected)
-//			LOG("No interrupts pending");
+
+//		LOG("No interrupts pending");
 	}
 
 	void Hardware::ucYield()
@@ -218,7 +234,7 @@ namespace mqLib
 		{
 			if(m_haveSentTXtoDSP)
 				m_uc.dumpMemory("DSPreset");
-			assert(!haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
+			assert(!m_haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
 			m_uc.notifyDSPBooted();
 		}
 
@@ -229,7 +245,7 @@ namespace mqLib
 	{
 		auto& esai = m_dsp.getPeriph().getEsai();
 
-		const auto count = static_cast<uint32_t>(esai.getAudioOutputs().size())>>1;
+		const auto count = std::min(static_cast<uint32_t>(esai.getAudioOutputs().size()>>1), m_requestedSampleFrames);
 
 		if(count < m_requestedSampleFrames)
 			return;
@@ -240,5 +256,6 @@ namespace mqLib
 		dummyOutputs[0] = &m_audioOutputs[0].front();
 		dummyOutputs[1] = &m_audioOutputs[1].front();
 		esai.processAudioInterleaved(dummyInputs, dummyOutputs, count);
+		m_requestedSampleFrames -= count;
 	}
 }
