@@ -20,6 +20,12 @@ namespace mqLib
 
 		void process(uint32_t _frames);
 
+		Buttons& getButtons() { return m_buttons; }
+		MqMc& getUC() { return m_uc; }
+		MqDsp& getDSP() { return m_dsp; }
+		uint64_t getDspCycles() const { return m_dspCycles; }
+		const auto& getAudioOutputs() { return m_audioOutputs; }
+
 	private:
 		void transferHostFlags();
 		void dspExecCallback();
@@ -45,7 +51,7 @@ namespace mqLib
 
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
 		uint32_t m_hdiHF23 = 0;	// DSP => uc
-		uint32_t m_dspCycles = 0;
+		uint64_t m_dspCycles = 0;
 		uint32_t m_dspInstructionCounter = 0;
 		bool m_requestNMI = false;
 		bool m_haveSentTXtoDSP = false;
