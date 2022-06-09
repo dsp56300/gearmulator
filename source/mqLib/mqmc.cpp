@@ -22,7 +22,7 @@ namespace mqLib
 		return ss.str();
 	}
 
-	MqMc::MqMc(ROM& _rom) : m_rom(_rom), m_romRuntimeData(_rom.getData())
+	MqMc::MqMc(const ROM& _rom) : m_rom(_rom), m_romRuntimeData(_rom.getData())
 	{
 		m_memory.resize(0x40000, 0);
 
