@@ -56,5 +56,5 @@ void EsaiListenerToFile::onBeginDeliverAudioData()
 
 void EsaiListenerToFile::writeWord(const uint8_t _channel, const dsp56k::TWord _word)
 {
-	writeWord(m_audioDatas[_channel], _word);
+	synthLib::WavWriter::writeWord(m_audioDatas[_channel], _word);
 }
