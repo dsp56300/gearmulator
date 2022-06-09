@@ -1,3 +1,4 @@
+#include <iostream>
 #include <memory>
 
 #include "../mqLib/mqdsp.h"
@@ -45,64 +46,69 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 
-	const auto romFile = synthLib::findROM(524288);
+	const auto romFile = synthLib::findROM(512 * 1024);
 
-	mqLib::ROM rom(romFile);
+	if(romFile.empty())
+	{
+		std::cout << "Failed to find ROM, make sure that a ROM file with extension .bin is placed next to this executable" << std::endl;
+		return -1;
+	}
 
-	std::unique_ptr<mqLib::MqMc> mc;
-	std::unique_ptr<mqLib::MqDsp> dsp;
+	mqLib::ROM m_rom(romFile);
 
-	mc.reset(new mqLib::MqMc(rom));
-	dsp.reset(new mqLib::MqDsp());
+	std::unique_ptr<mqLib::MqMc> m_uc;
+	std::unique_ptr<mqLib::MqDsp> m_dsp;
+
+	m_uc.reset(new mqLib::MqMc(m_rom));
+	m_dsp.reset(new mqLib::MqDsp());
 
 	std::deque<uint32_t> txData;
 
-	auto& hdiUC = mc->hdi08();
-	auto& hdiDSP = dsp->hdi08();
-	auto& buttons = mc->getButtons();
+	auto& m_hdiUC = m_uc->hdi08();
+	auto& m_hdiDSP = m_dsp->hdi08();
+	auto& m_buttons = m_uc->getButtons();
 
-	hdiDSP.setRXRateLimit(0);
+	m_hdiDSP.setRXRateLimit(0);
 
-	dsp56k::DSPThread dspThread(dsp->dsp());
-	bool dumpDSP = false;
+	dsp56k::DSPThread m_dspThread(m_dsp->dsp());
 
 	char ch = 0;
-	std::thread inputReader([&ch, &dsp]
+	std::thread inputReader([&ch, &m_dsp]
 	{
-		while(dsp.get())
+		while(m_dsp.get())
 		{
 			if(_kbhit())
 				ch = static_cast<char>(_getch());
 		}
 	});
 
-	uint32_t hdiHF01 = 0;	// uc => DSP
-	uint32_t hdiHF23 = 0;	// DSP => uc
-	uint64_t dspCycles = 0;
+	uint32_t m_hdiHF01 = 0;	// uc => DSP
+	uint32_t m_hdiHF23 = 0;	// DSP => uc
+	uint64_t m_dspCycles = 0;
 
 	auto transferHostFlags = [&]()
 	{
 		// transfer HF 2&3 from uc to DSP
-		auto hsr = hdiDSP.readStatusRegister();
+		auto hsr = m_hdiDSP.readStatusRegister();
 		const auto prevHsr = hsr;
 		hsr &= ~0x18;
-		hsr |= (hdiHF01<<3);
+		hsr |= (m_hdiHF01<<3);
 		if(prevHsr != hsr)
-			hdiDSP.writeStatusRegister(hsr);
+			m_hdiDSP.writeStatusRegister(hsr);
 
-		const auto hf23 = (hdiDSP.readControlRegister() >> 3) & 3;
-		if(hf23 != hdiHF23)
+		const auto hf23 = (m_hdiDSP.readControlRegister() >> 3) & 3;
+		if(hf23 != m_hdiHF23)
 		{
 //			LOG("HDI HF23=" << HEXN(hf23,1));
-			hdiHF23 = hf23;
+			m_hdiHF23 = hf23;
 		}
 	};
 
-	dsp->dsp().setExecCallback([&]()
+	m_dsp->dsp().setExecCallback([&]()
 	{
 		transferHostFlags();
-		if(hdiDSP.hasRXData())
-			hdiDSP.exec();
+		if(m_hdiDSP.hasRXData())
+			m_hdiDSP.exec();
 	});
 
 	std::array<std::vector<dsp56k::TWord>, 2> m_audioOutput;
@@ -117,7 +123,7 @@ int main(int _argc, char* _argv[])
 
 	auto processAudio = [&]()
 	{
-		auto& esai = dsp->getPeriph().getEsai();
+		auto& esai = m_dsp->getPeriph().getEsai();
 		const auto count = std::min(esai.getAudioOutputs().size()>>1, m_audioOutput[0].size()>>1);
 
 		if(count >= 512)
@@ -152,32 +158,32 @@ int main(int _argc, char* _argv[])
 		}
 	};
 
-	uint32_t prevInstructions = 0;
-	bool requestNMI = false;
-	auto haveSentTXtoDSP = false;
+	uint32_t m_dspInstructionCounter = 0;
+	bool m_requestNMI = false;
+	auto m_haveSentTXtoDSP = false;
 	
-	hdiDSP.setTransmitDataAlwaysEmpty(false);
+	m_hdiDSP.setTransmitDataAlwaysEmpty(false);
 
 	auto injectUCtoDSPInterrupts = [&]()
 	{
-		if(requestNMI && !mc->requestDSPinjectNMI())
+		if(m_requestNMI && !m_uc->requestDSPinjectNMI())
 		{
 			LOG("uc request DSP NMI");
-			dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
+			m_dsp->dsp().injectInterrupt(dsp56k::Vba_NMI);
 		}
-		requestNMI = mc->requestDSPinjectNMI();
+		m_requestNMI = m_uc->requestDSPinjectNMI();
 
 		uint8_t interruptAddr;
 		bool injected = false;
-		while(hdiUC.pollInterruptRequest(interruptAddr))
+		while(m_hdiUC.pollInterruptRequest(interruptAddr))
 		{
 //			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
 			injected = true;
-			if(!dsp->dsp().injectInterrupt(interruptAddr))
+			if(!m_dsp->dsp().injectInterrupt(interruptAddr))
 				LOG("Interrupt request FAILED, interrupt was masked");
 		}
 
-		while(dsp->dsp().hasPendingInterrupts())
+		while(m_dsp->dsp().hasPendingInterrupts())
 		{
 			processAudio();
 			std::this_thread::yield();
@@ -188,11 +194,11 @@ int main(int _argc, char* _argv[])
 
 	auto hdiTransferDSPtoUC = [&]()
 	{
-		if(hdiDSP.hasTX() && hdiUC.canReceiveData())
+		if(m_hdiDSP.hasTX() && m_hdiUC.canReceiveData())
 		{
-			const auto v = hdiDSP.readTX();
+			const auto v = m_hdiDSP.readTX();
 //			LOG("HDI uc2dsp=" << HEX(v));
-			hdiUC.writeRx(v);
+			m_hdiUC.writeRx(v);
 			return true;
 		}
 		return false;
@@ -200,19 +206,19 @@ int main(int _argc, char* _argv[])
 
 	auto hdiTransferUCtoDSP = [&]()
 	{
-		hdiUC.pollTx(txData);
+		m_hdiUC.pollTx(txData);
 
 		if(txData.empty())
 			return;
 
 		for (const uint32_t data : txData)
 		{
-			haveSentTXtoDSP = true;
+			m_haveSentTXtoDSP = true;
 //			LOG("toDSP writeRX=" << HEX(data));
-			hdiDSP.writeRX(&data, 1);
+			m_hdiDSP.writeRX(&data, 1);
 		}
 		txData.clear();
-		while((hdiDSP.hasRXData() && hdiDSP.rxInterruptEnabled()) || dsp->dsp().hasPendingInterrupts())
+		while((m_hdiDSP.hasRXData() && m_hdiDSP.rxInterruptEnabled()) || m_dsp->dsp().hasPendingInterrupts())
 		{
 			processAudio();
 			std::this_thread::yield();
@@ -220,15 +226,15 @@ int main(int _argc, char* _argv[])
 //		LOG("writeRX wait over");
 	};
 
-	hdiUC.setRxEmptyCallback([&](bool needMoreData)
+	m_hdiUC.setRxEmptyCallback([&](bool needMoreData)
 	{
 		injectUCtoDSPInterrupts();
 
-		hdiDSP.injectTXInterrupt();
+		m_hdiDSP.injectTXInterrupt();
 
 		if(needMoreData)
 		{
-			while(!hdiDSP.hasTX() && hdiDSP.txInterruptEnabled())
+			while(!m_hdiDSP.hasTX() && m_hdiDSP.txInterruptEnabled())
 			{
 				processAudio();
 				std::this_thread::yield();
@@ -241,118 +247,118 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	uint32_t esaiFrameIndex = 0;
-	uint32_t lastEsaiFrameIndex = 0;
-	int32_t remainingMcCycles = 0;
+	uint32_t m_esaiFrameIndex = 0;
+	uint32_t m_lastEsaiFrameIndex = 0;
+	int32_t m_remainingMcCycles = 0;
 
-	dsp->getPeriph().getEsai().setCallback([&](dsp56k::Audio*)
+	m_dsp->getPeriph().getEsai().setCallback([&](dsp56k::Audio*)
 	{
-		++esaiFrameIndex;
+		++m_esaiFrameIndex;
 	}, 0);
 
-	while(dsp.get())
+	while(m_dsp.get())
 	{
-		const auto instructionCounter = dsp->dsp().getInstructionCounter();
-		const auto d = dsp56k::delta(instructionCounter, prevInstructions);
-		prevInstructions = instructionCounter;
-		dspCycles += d;
+		const auto instructionCounter = m_dsp->dsp().getInstructionCounter();
+		const auto d = dsp56k::delta(instructionCounter, m_dspInstructionCounter);
+		m_dspInstructionCounter = instructionCounter;
+		m_dspCycles += d;
 
 		// we can only use ESAI once it has been enabled
-		if(esaiFrameIndex > lastEsaiFrameIndex)
+		if(m_esaiFrameIndex > m_lastEsaiFrameIndex)
 		{
-			const auto mcClock = mc->getSim().getSystemClockHz();
+			const auto mcClock = m_uc->getSim().getSystemClockHz();
 			const auto mcCyclesPerFrame = mcClock / (44100 * 2);	// stereo interleaved
 
-			remainingMcCycles += mcCyclesPerFrame * (esaiFrameIndex - lastEsaiFrameIndex);
-			lastEsaiFrameIndex = esaiFrameIndex;
+			m_remainingMcCycles += mcCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex);
+			m_lastEsaiFrameIndex = m_esaiFrameIndex;
 		}
-		if(esaiFrameIndex > 0)
+		if(m_esaiFrameIndex > 0)
 		{
-			if(remainingMcCycles < 0)
+			if(m_remainingMcCycles < 0)
 			{
 				processAudio();
 				std::this_thread::yield();
 				continue;
 			}
 		}
-		else if(mc->getCycles() > dspCycles/5)
+		/*else if(mc->getCycles() > dspCycles/5)
 		{
 			processAudio();
 			std::this_thread::yield();
 			continue;
-		}
+		}*/
 
-		const auto deltaCycles = mc->exec();
-		if(esaiFrameIndex > 0)
-			remainingMcCycles -= deltaCycles;
+		const auto deltaCycles = m_uc->exec();
+		if(m_esaiFrameIndex > 0)
+			m_remainingMcCycles -= deltaCycles;
 
 		if(ch)
 		{
 			switch (ch)
 			{
-			case '1':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst1);				break;
-			case '2':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst2);				break;
-			case '3':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst3);				break;
-			case '4':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst4);				break;
-			case '5':				buttons.toggleButton(mqLib::Buttons::ButtonType::Down);					break;
-			case '6':				buttons.toggleButton(mqLib::Buttons::ButtonType::Left);					break;
-			case '7':				buttons.toggleButton(mqLib::Buttons::ButtonType::Right);				break;
-			case '8':				buttons.toggleButton(mqLib::Buttons::ButtonType::Up);					break;
-			case 'q':				buttons.toggleButton(mqLib::Buttons::ButtonType::Global);				break;
-			case 'w':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multi);				break;
-			case 'e':				buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);					break;
-			case 'r':				buttons.toggleButton(mqLib::Buttons::ButtonType::Sound);				break;
-			case 't':				buttons.toggleButton(mqLib::Buttons::ButtonType::Shift);				break;
-			case 'y':				buttons.toggleButton(mqLib::Buttons::ButtonType::Power);				break;
-			case 'z':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multimode);			break;
-			case 'u':				buttons.toggleButton(mqLib::Buttons::ButtonType::Peek);					break;
-			case 'i':				buttons.toggleButton(mqLib::Buttons::ButtonType::Play);					break;
-			case 's':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, 1);					break;
-			case 'x':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, -1);					break;
-			case 'd':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, 1);					break;
-			case 'c':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, -1);					break;
-			case 'f':				buttons.rotate(mqLib::Buttons::Encoders::Master, 1);					break;
-			case 'v':				buttons.rotate(mqLib::Buttons::Encoders::Master, -1);					break;
-			case 'g':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, 1);					break;
-			case 'b':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, -1);					break;
-			case 'h':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, 1);					break;
-			case 'n':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, -1);					break;
-			case 'j':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, 1);					break;
-			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);					break;
-			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
-			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);					break;
+			case '1':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Inst1);				break;
+			case '2':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Inst2);				break;
+			case '3':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Inst3);				break;
+			case '4':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Inst4);				break;
+			case '5':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Down);				break;
+			case '6':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Left);				break;
+			case '7':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Right);				break;
+			case '8':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Up);					break;
+			case 'q':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Global);				break;
+			case 'w':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Multi);				break;
+			case 'e':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);				break;
+			case 'r':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Sound);				break;
+			case 't':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Shift);				break;
+			case 'y':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Power);				break;
+			case 'z':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Multimode);			break;
+			case 'u':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Peek);				break;
+			case 'i':				m_buttons.toggleButton(mqLib::Buttons::ButtonType::Play);				break;
+			case 's':				m_buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, 1);					break;
+			case 'x':				m_buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, -1);				break;
+			case 'd':				m_buttons.rotate(mqLib::Buttons::Encoders::LcdRight, 1);				break;
+			case 'c':				m_buttons.rotate(mqLib::Buttons::Encoders::LcdRight, -1);				break;
+			case 'f':				m_buttons.rotate(mqLib::Buttons::Encoders::Master, 1);					break;
+			case 'v':				m_buttons.rotate(mqLib::Buttons::Encoders::Master, -1);					break;
+			case 'g':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix1, 1);					break;
+			case 'b':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix1, -1);				break;
+			case 'h':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix2, 1);					break;
+			case 'n':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix2, -1);				break;
+			case 'j':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix3, 1);					break;
+			case 'm':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);				break;
+			case 'k':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);					break;
+			case ',':				m_buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);				break;
 			case '9':
 				// Midi Note On
-				mc->getQSM().writeSciRX(0x90);
-				mc->getQSM().writeSciRX(60);
-				mc->getQSM().writeSciRX(0x7f);
+				m_uc->getQSM().writeSciRX(0x90);
+				m_uc->getQSM().writeSciRX(60);
+				m_uc->getQSM().writeSciRX(0x7f);
 				break;
 			case '0':	
 				// Midi Note Off
-				mc->getQSM().writeSciRX(0x80);
-				mc->getQSM().writeSciRX(60);
-				mc->getQSM().writeSciRX(0x7f);
+				m_uc->getQSM().writeSciRX(0x80);
+				m_uc->getQSM().writeSciRX(60);
+				m_uc->getQSM().writeSciRX(0x7f);
 				break;
 			case 'o':
 				// Modwheel Max
-				mc->getQSM().writeSciRX(0xb0);
-				mc->getQSM().writeSciRX(1);
-				mc->getQSM().writeSciRX(0x7f);
+				m_uc->getQSM().writeSciRX(0xb0);
+				m_uc->getQSM().writeSciRX(1);
+				m_uc->getQSM().writeSciRX(0x7f);
 				break;
 			case 'p':	
 				// Modwheel Min
-				mc->getQSM().writeSciRX(0xb0);
-				mc->getQSM().writeSciRX(1);
-				mc->getQSM().writeSciRX(0x0);
+				m_uc->getQSM().writeSciRX(0xb0);
+				m_uc->getQSM().writeSciRX(1);
+				m_uc->getQSM().writeSciRX(0x0);
 				break;
 			case '!':
-				dsp->dumpPMem("dsp_dump_P_" + std::to_string(dspCycles));
+				m_dsp->dumpPMem("dsp_dump_P_" + std::to_string(m_dspCycles));
 				break;
 			case '"':
-				mc->dumpMemory("mc_dump_mem");
+				m_uc->dumpMemory("mc_dump_mem");
 				break;
 			case '$':
-				mc->dumpROM("rom_runtime");
+				m_uc->dumpROM("rom_runtime");
 				break;
 			case '%':
 				{
@@ -362,7 +368,7 @@ int main(int _argc, char* _argv[])
 					};
 
 					for (uint8_t byte : testPatch)
-						mc->getQSM().writeSciRX(byte);
+						m_uc->getQSM().writeSciRX(byte);
 				}
 				break;
 			default:																						break;
@@ -370,39 +376,33 @@ int main(int _argc, char* _argv[])
 			ch = 0;
 		}
 
-		const uint32_t hf01 = (hdiUC.icr() >> 3) & 3;
+		const uint32_t hf01 = (m_hdiUC.icr() >> 3) & 3;
 
-		if(hf01 != hdiHF01)
+		if(hf01 != m_hdiHF01)
 		{
 //			LOG("HDI HF01=" << HEXN(hf01,1));
-			hdiHF01 = hf01;
+			m_hdiHF01 = hf01;
 		}
 
 		injectUCtoDSPInterrupts();
 
 		// transfer DSP host flags HF2&3 to uc
-		auto isr = hdiUC.isr();
+		auto isr = m_hdiUC.isr();
 		const auto prevIsr = isr;
 		isr &= ~0x18;
-		isr |= (hdiHF23<<3);
+		isr |= (m_hdiHF23<<3);
 		if(isr != prevIsr)
-			hdiUC.isr(isr);
+			m_hdiUC.isr(isr);
 
 		hdiTransferUCtoDSP();
 		hdiTransferDSPtoUC();
 
-		if(dumpDSP)
+		if(m_uc->requestDSPReset())
 		{
-			dsp->dumpPMem("mq_dump_P_" + std::to_string(dspCycles));
-			dumpDSP = false;
-		}
-
-		if(mc->requestDSPReset())
-		{
-			if(haveSentTXtoDSP)
-				mc->dumpMemory("DSPreset");
+			if(m_haveSentTXtoDSP)
+				m_uc->dumpMemory("DSPreset");
 			assert(!haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
-			mc->notifyDSPBooted();
+			m_uc->notifyDSPBooted();
 		}
 
 		processAudio();
