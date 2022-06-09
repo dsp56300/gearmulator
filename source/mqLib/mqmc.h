@@ -14,7 +14,7 @@ namespace mqLib
 	class MqMc : public mc68k::Mc68k
 	{
 	public:
-		explicit MqMc(ROM& _rom);
+		explicit MqMc(const ROM& _rom);
 		~MqMc() override;
 
 		uint32_t exec() override;
@@ -39,7 +39,7 @@ namespace mqLib
 		void onReset() override;
 		uint32_t onIllegalInstruction(uint32_t opcode) override;
 
-		ROM& m_rom;
+		const ROM& m_rom;
 		std::vector<uint8_t> m_romRuntimeData;
 		LCD m_lcd;
 		Buttons m_buttons;
