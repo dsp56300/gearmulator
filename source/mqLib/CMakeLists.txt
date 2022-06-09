@@ -9,6 +9,7 @@ set(SOURCES
 	lcd.cpp lcd.h
 	rom.cpp rom.h
 	mqdsp.cpp mqdsp.h
+	mqhardware.cpp mqhardware.h
 	mqmc.cpp mqmc.h
 )
 
