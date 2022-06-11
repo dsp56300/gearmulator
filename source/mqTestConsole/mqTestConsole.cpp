@@ -137,6 +137,9 @@ int main(int _argc, char* _argv[])
 			case '!':
 				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getDspCycles()));
 				break;
+			case '&':
+				hw->getDSP().dumpXYMem("dsp_dump_mem_" + std::to_string(hw->getDspCycles()) + "_");
+				break;
 			case '"':
 				hw->getUC().dumpMemory("mc_dump_mem");
 				break;
