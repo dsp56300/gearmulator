@@ -17,8 +17,9 @@ namespace mqLib
 		auto config = m_dsp.getJit().getConfig();
 
 		config.aguSupportBitreverse = true;
-		config.linkJitBlocks = false;
+		config.linkJitBlocks = true;
 		config.dynamicPeripheralAddressing = true;
+		config.maxInstructionsPerBlock = 0;
 
 		m_dsp.getJit().setConfig(config);
 
