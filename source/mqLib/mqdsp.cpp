@@ -14,6 +14,14 @@ namespace mqLib
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768);
 		m_periphX.getEsaiClock().setSamplerate(44100);
 
+		auto config = m_dsp.getJit().getConfig();
+
+		config.aguSupportBitreverse = true;
+		config.linkJitBlocks = false;
+		config.dynamicPeripheralAddressing = true;
+
+		m_dsp.getJit().setConfig(config);
+
 		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
 			m_memory.set(dsp56k::MemArea_P, i, 0x000200);	// debug instruction
 
