@@ -9,6 +9,7 @@
 
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/interpreterunittests.h"
+#include "dsp56kEmu/jitunittests.h"
 
 #include <vector>
 
@@ -31,7 +32,9 @@ int main(int _argc, char* _argv[])
 {
 	try
 	{
-		dsp56k::InterpreterUnitTests tests;
+//		dsp56k::InterpreterUnitTests tests;
+		dsp56k::JitUnittests tests;
+//		return 0;
 	}
 	catch(std::string& _err)
 	{
