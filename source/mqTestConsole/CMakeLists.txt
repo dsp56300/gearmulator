@@ -11,7 +11,7 @@ set(SOURCES
 target_sources(mqTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(mqTestConsole PUBLIC mqLib)
+target_link_libraries(mqTestConsole PUBLIC mqLib cpp-terminal)
 
 if(UNIX AND NOT APPLE)
 	target_link_libraries(mqTestConsole PUBLIC -static-libgcc -static-libstdc++)

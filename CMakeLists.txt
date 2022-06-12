@@ -41,6 +41,14 @@ endif()
 add_subdirectory(source/virusTestConsole)
 add_subdirectory(source/logicAnalysisParser)
 add_subdirectory(source/virusIntegrationTest)
+
+# needed for mQ test console
+set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
+
+add_subdirectory(source/cpp-terminal)
+
 add_subdirectory(source/mqTestConsole)
 
 # ----------------- CPack
