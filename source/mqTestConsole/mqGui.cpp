@@ -17,9 +17,20 @@ Gui::Gui(mqLib::Hardware& _hw)
 
 void Gui::render()
 {
+	m_win.fill_fg(1,1,g_deviceW, 1, Term::fg::bright_yellow);
+	m_win.fill_fg(1,g_deviceH,g_deviceW, g_deviceH, Term::fg::bright_yellow);
+
+	for(int i=2; i<g_deviceH; ++i)
+	{
+		m_win.fill_fg(1,i,1,i, Term::fg::bright_yellow);
+		m_win.fill_fg(g_deviceW,i,g_deviceW,i, Term::fg::bright_yellow);
+	}
+
 	m_win.print_rect(1,1,g_deviceW, g_deviceH);
 
+	m_win.fill_fg(3, g_deviceH>>1, 9, g_deviceH>>1, Term::fg::bright_yellow);
 	m_win.print_str(3, g_deviceH >> 1, "microQ");
+	m_win.fill_fg((g_deviceW>>1) - 3, g_deviceH - 1, (g_deviceW>>1) + 7 , g_deviceH - 1, Term::fg::bright_blue);
 	m_win.print_str((g_deviceW>>1) - 3, g_deviceH - 1, "waldorf");
 
 	constexpr int lcdX = 10;
@@ -31,7 +42,7 @@ void Gui::render()
 	renderAlphaAndPlay(lcdX + 28, 7);
 
 	renderMultimodePeek(lcdX + 23, g_deviceH - 2);
-	renderVerticalLedsAndButtons(lcdX + 47, 3);
+	renderVerticalLedsAndButtons(lcdX + 46, 3);
 	renderCursorBlock(lcdX + 59, 6);
 
 	constexpr int rightBase = 81;
@@ -86,17 +97,21 @@ void Gui::renderLCD(int x, int y)
 
 	for(size_t i=0; i<text.size(); ++i)
 	{
+		// https://en.wikipedia.org/wiki/List_of_Unicode_characters
+
 		char32_t c = static_cast<uint8_t>(text[i]);
 		switch (c)
 		{
-		case 0:	c = 0x24EA; break;
-		case 1:	c = 0x2460; break;
-		case 2:	c = 0x2461; break;
-		case 3:	c = 0x2462; break;
-		case 4:	c = 0x2463; break;
-		case 5:	c = 0x2464; break;
-		case 6:	c = 0x2465; break;
-		case 7:	c = 0x2466; break;
+		case 0:		c = 0x24EA;		break;
+		case 1:		c = 0x2460;		break;
+		case 2:		c = 0x2461;		break;
+		case 3:		c = 0x2462;		break;
+		case 4:		c = 0x2463;		break;
+		case 5:		c = 0x2464;		break;
+		case 6:		c = 0x2465;		break;
+		case 7:		c = 0x2466;		break;
+		case 0xdf:	c = 0x2598;		break;	// Quadrant upper left
+		case 0xff:	c = 0x2588;		break;	// Full block
 		default:
 			if(c < 32 || c >= 0x0010FFFF)
 				c = '?';
