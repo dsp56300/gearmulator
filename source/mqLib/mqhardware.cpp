@@ -69,16 +69,21 @@ namespace mqLib
 
 	void Hardware::transferHostFlags()
 	{
-		// transfer HF 2&3 from uc to DSP
-		auto hsr = m_hdiDSP.readStatusRegister();
-		const auto prevHsr = hsr;
-		hsr &= ~0x18;
-		hsr |= (m_hdiHF01<<3);
-		if(prevHsr != hsr)
-			m_hdiDSP.writeStatusRegister(hsr);
+		if(m_hdiHF01 != m_prevHdiHF01)
+		{
+			// transfer HF 2&3 from uc to DSP
+			auto hsr = m_hdiDSP.readStatusRegister();
+			const auto prevHsr = hsr;
+			hsr &= ~0x18;
+			hsr |= (m_hdiHF01<<3);
+			if(prevHsr != hsr)
+				m_hdiDSP.writeStatusRegister(hsr);
+
+			m_prevHdiHF01 = m_hdiHF01;
+		}
 
 		const auto hf23 = (m_hdiDSP.readControlRegister() >> 3) & 3;
-		if(hf23 != m_hdiHF23)
+//		if(hf23 != m_hdiHF23)
 		{
 //			LOG("HDI HF23=" << HEXN(hf23,1));
 			m_hdiHF23 = hf23;
