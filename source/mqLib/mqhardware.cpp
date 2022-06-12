@@ -16,6 +16,7 @@ namespace mqLib
 		, m_dspThread(m_dsp.dsp())
 	{
 		m_dspThread.setLogToStdout(false);
+		m_dsp.getPeriph().disableTimers(true);
 
 		m_hdiDSP.setRXRateLimit(0);
 		m_hdiDSP.setTransmitDataAlwaysEmpty(false);
