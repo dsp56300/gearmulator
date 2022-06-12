@@ -15,6 +15,7 @@ namespace mc68k
 			m_portGP.setDirection(_val);
 			return;
 		case PeriphAddress::PortGp:
+//			LOG("Set PortGP to " << HEXN(_val,2));
 			m_portGP.writeTX(_val);
 			return;
 		}
