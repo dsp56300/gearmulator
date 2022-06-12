@@ -20,11 +20,16 @@ namespace mqLib
 
 		void process(uint32_t _frames);
 
-		Buttons& getButtons() { return m_buttons; }
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP() { return m_dsp; }
 		uint64_t getDspCycles() const { return m_dspCycles; }
 		const auto& getAudioOutputs() { return m_audioOutputs; }
+
+		Leds& getLeds() { return m_leds; }
+		Buttons& getButtons() { return m_buttons; }
+		LCD& getLcd() { return m_lcd; }
+
+		void sendMidi(uint8_t _byte);
 
 	private:
 		void transferHostFlags();
@@ -47,6 +52,8 @@ namespace mqLib
 		mc68k::Hdi08& m_hdiUC;
 		dsp56k::HDI08& m_hdiDSP;
 		Buttons& m_buttons;
+		Leds& m_leds;
+		LCD& m_lcd;
 		dsp56k::DSPThread m_dspThread;
 
 		uint32_t m_hdiHF01 = 0;	// uc => DSP

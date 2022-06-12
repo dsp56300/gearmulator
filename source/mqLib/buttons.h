@@ -59,6 +59,16 @@ namespace mqLib
 		void toggleButton(ButtonType _type);
 		void rotate(Encoders _encoder, int _amount);
 
+		uint8_t getButtonState(ButtonType _button) const
+		{
+			return m_buttonStates[static_cast<uint32_t>(_button)];
+		}
+
+		uint8_t getEncoderState(Encoders _encoder) const
+		{
+			return m_encoderValues[static_cast<uint32_t>(_encoder)];
+		}
+
 	private:
 		uint8_t processEncoder(Encoders _encoder, bool cycleEncoders);
 		uint8_t processStepEncoder(Encoders _encoder, bool cycleEncoders);

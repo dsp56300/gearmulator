@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cstdint>
+#include <functional>
 
 namespace mc68k
 {
@@ -13,11 +14,17 @@ namespace mqLib
 	class LCD
 	{
 	public:
+		using ChangeCallback = std::function<void()>;
+
 		LCD();
 		bool exec(mc68k::Port& _portGp, mc68k::Port& _portF);
 
 		const std::array<char, 40>& getDdRam() const { return m_dramData; }
 
+		void setChangeCallback(const ChangeCallback& _callback)
+		{
+			m_changeCallback = _callback;
+		}
 	private:
 		enum class CursorShiftMode
 		{
@@ -71,5 +78,7 @@ namespace mqLib
 		std::array<uint8_t, 0x40> m_cgramData{};
 		std::array<char, 40> m_dramData{};
 		uint32_t m_lastOpState = 0;
+
+		ChangeCallback m_changeCallback;
 	};
 }

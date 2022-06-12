@@ -11,29 +11,26 @@
 #include "dsp56kEmu/interpreterunittests.h"
 #include "dsp56kEmu/jitunittests.h"
 
+#include <cpp-terminal/window.hpp>
+#include <cpp-terminal/input.hpp>
+
 #include <vector>
 
-#ifdef __APPLE_CC__
-#include <stdio.h>
-#include <termios.h>
-#include <sys/ioctl.h>
+#include "mqGui.h"
 
-int _kbhit() {
-	static const int STDIN = 0; static bool init=false;
-	if (!init) {termios term;tcgetattr(STDIN,&term);term.c_lflag&=~ICANON;tcsetattr(STDIN,TCSANOW,&term);setbuf(stdin,0);init=true;}
-	int bytesWaiting;	ioctl(STDIN, FIONREAD, &bytesWaiting);	return bytesWaiting;
-}
-#define _getch() getchar()
-#else
-#include <conio.h>
-#endif
+using Term::Terminal;
+using Term::Key;
+using Term::Window;
+
+using ButtonType = mqLib::Buttons::ButtonType;
+using EncoderType = mqLib::Buttons::Encoders;
 
 int main(int _argc, char* _argv[])
 {
 	try
 	{
 //		dsp56k::InterpreterUnitTests tests;
-		dsp56k::JitUnittests tests;
+//		dsp56k::JitUnittests tests;
 //		return 0;
 	}
 	catch(std::string& _err)
@@ -41,6 +38,10 @@ int main(int _argc, char* _argv[])
 		LOG("Unit Test failed: " << _err);
 		return -1;
 	}
+
+	Terminal term(true, true, true, true);
+
+	Window winMQ(120,50);
 
 	const auto romFile = synthLib::findROM(512 * 1024);
 
@@ -54,18 +55,21 @@ int main(int _argc, char* _argv[])
 	hw.reset(new mqLib::Hardware(romFile));
 
 	auto& buttons = hw->getButtons();
-	auto& qsm = hw->getUC().getQSM();
 
-	char ch = 0;
-	std::thread inputReader([&ch, &hw]
+	Gui gui(*hw);
+
+	dsp56k::RingBuffer<int, 64, true> keyBuffer;
+
+	std::thread inputReader([&hw, &keyBuffer]
 	{
 		while(hw.get())
 		{
-			if(_kbhit())
-				ch = static_cast<char>(_getch());
+			const auto k = Term::read_key();
+			if(k)
+				keyBuffer.push_back(k);
 		}
 	});
-	
+
 	bool silence = true;
 
 	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
@@ -76,66 +80,109 @@ int main(int _argc, char* _argv[])
 	std::vector<dsp56k::TWord> m_stereoOutput;
 	m_stereoOutput.resize(blockSize<<1);
 
+	const auto startTime = std::chrono::system_clock::now();
+
+	bool waitForBootKeys = true;
+
+	dsp56k::RingBuffer<uint32_t, 1024, true> renderTrigger;
+
+	std::thread renderer([&]
+	{
+		while(hw)
+		{
+			renderTrigger.pop_front();
+			if(renderTrigger.empty())
+			{
+				gui.render();
+				std::this_thread::sleep_for(std::chrono::milliseconds(10));
+			}
+		}
+	});
+
+	auto toggleButton = [&](mqLib::Buttons::ButtonType _type)
+	{
+		buttons.toggleButton(_type);
+		renderTrigger.push_back(1);
+	};
+
+	auto encRotate = [&](mqLib::Buttons::Encoders _encoder, int _amount)
+	{
+		buttons.rotate(_encoder, _amount);
+		renderTrigger.push_back(1);
+	};
+
+	hw->getLeds().setChangeCallback([&]()
+	{
+		renderTrigger.push_back(1);
+	});
+
+	hw->getLcd().setChangeCallback([&]()
+	{
+		renderTrigger.push_back(1);
+	});
+
 	while(true)
 	{
-		if(ch)
+		while(!keyBuffer.empty())
 		{
+			const auto ch = keyBuffer.pop_front();
 			switch (ch)
 			{
-			case '1':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst1);			break;
-			case '2':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst2);			break;
-			case '3':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst3);			break;
-			case '4':				buttons.toggleButton(mqLib::Buttons::ButtonType::Inst4);			break;
-			case '5':				buttons.toggleButton(mqLib::Buttons::ButtonType::Down);				break;
-			case '6':				buttons.toggleButton(mqLib::Buttons::ButtonType::Left);				break;
-			case '7':				buttons.toggleButton(mqLib::Buttons::ButtonType::Right);			break;
-			case '8':				buttons.toggleButton(mqLib::Buttons::ButtonType::Up);				break;
-			case 'q':				buttons.toggleButton(mqLib::Buttons::ButtonType::Global);			break;
-			case 'w':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multi);			break;
-			case 'e':				buttons.toggleButton(mqLib::Buttons::ButtonType::Edit);				break;
-			case 'r':				buttons.toggleButton(mqLib::Buttons::ButtonType::Sound);			break;
-			case 't':				buttons.toggleButton(mqLib::Buttons::ButtonType::Shift);			break;
-			case 'y':				buttons.toggleButton(mqLib::Buttons::ButtonType::Power);			break;
-			case 'z':				buttons.toggleButton(mqLib::Buttons::ButtonType::Multimode);		break;
-			case 'u':				buttons.toggleButton(mqLib::Buttons::ButtonType::Peek);				break;
-			case 'i':				buttons.toggleButton(mqLib::Buttons::ButtonType::Play);				break;
-			case 's':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, 1);				break;
-			case 'x':				buttons.rotate(mqLib::Buttons::Encoders::LcdLeft, -1);				break;
-			case 'd':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, 1);				break;
-			case 'c':				buttons.rotate(mqLib::Buttons::Encoders::LcdRight, -1);				break;
-			case 'f':				buttons.rotate(mqLib::Buttons::Encoders::Master, 1);				break;
-			case 'v':				buttons.rotate(mqLib::Buttons::Encoders::Master, -1);				break;
-			case 'g':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, 1);				break;
-			case 'b':				buttons.rotate(mqLib::Buttons::Encoders::Matrix1, -1);				break;
-			case 'h':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, 1);				break;
-			case 'n':				buttons.rotate(mqLib::Buttons::Encoders::Matrix2, -1);				break;
-			case 'j':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, 1);				break;
-			case 'm':				buttons.rotate(mqLib::Buttons::Encoders::Matrix3, -1);				break;
-			case 'k':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, 1);				break;
-			case ',':				buttons.rotate(mqLib::Buttons::Encoders::Matrix4, -1);				break;
-			case '9':
+			case '1':					toggleButton(ButtonType::Inst1);			break;
+			case '2':					toggleButton(ButtonType::Inst2);			break;
+			case '3':					toggleButton(ButtonType::Inst3);			break;
+			case '4':					toggleButton(ButtonType::Inst4);			break;
+			case Key::ARROW_DOWN:		toggleButton(ButtonType::Down);				break;
+			case Key::ARROW_LEFT:		toggleButton(ButtonType::Left);				break;
+			case Key::ARROW_RIGHT:		toggleButton(ButtonType::Right);			break;
+			case Key::ARROW_UP:			toggleButton(ButtonType::Up);				break;
+			case 'g':					toggleButton(ButtonType::Global);			break;
+			case 'm':					toggleButton(ButtonType::Multi);			break;
+			case 'e':					toggleButton(ButtonType::Edit);				break;
+			case 's':					toggleButton(ButtonType::Sound);			break;
+			case 'S':					toggleButton(ButtonType::Shift);			break;
+			case 'q':					toggleButton(ButtonType::Power);			break;
+			case 'M':					toggleButton(ButtonType::Multimode);		break;
+			case 'P':					toggleButton(ButtonType::Peek);				break;
+			case 'p':					toggleButton(ButtonType::Play);				break;
+
+			case Key::F1:				encRotate(EncoderType::LcdLeft, -1);		break;
+			case Key::F2:				encRotate(EncoderType::LcdLeft, 1);			break;
+			case Key::F3:				encRotate(EncoderType::LcdRight, -1);		break;
+			case Key::F4:				encRotate(EncoderType::LcdRight, 1);		break;
+			case '5':					encRotate(EncoderType::Master, -1);			break;
+			case '6':					encRotate(EncoderType::Master, 1);			break;
+			case Key::F5:				encRotate(EncoderType::Matrix1, -1);		break;
+			case Key::F6:				encRotate(EncoderType::Matrix1, 1);			break;
+			case Key::F7:				encRotate(EncoderType::Matrix2, -1);		break;
+			case Key::F8:				encRotate(EncoderType::Matrix2, 1);			break;
+			case Key::F9:				encRotate(EncoderType::Matrix3, -1);		break;
+			case Key::F10:				encRotate(EncoderType::Matrix3, 1);			break;
+			case Key::F11:				encRotate(EncoderType::Matrix4, -1);		break;
+			case Key::F12:				encRotate(EncoderType::Matrix4, 1);			break;
+			case '7':
 				// Midi Note On
-				qsm.writeSciRX(0x90);
-				qsm.writeSciRX(60);
-				qsm.writeSciRX(0x7f);
+				hw->sendMidi(0x90);
+				hw->sendMidi(60);
+				hw->sendMidi(0x7f);
+				break;
+			case '8':	
+				// Midi Note Off
+				hw->sendMidi(0x80);
+				hw->sendMidi(60);
+				hw->sendMidi(0x7f);
+				break;
+			case '9':
+				// Modwheel Max
+				hw->sendMidi(0xb0);
+				hw->sendMidi(1);
+				hw->sendMidi(0x7f);
 				break;
 			case '0':	
-				// Midi Note Off
-				qsm.writeSciRX(0x80);
-				qsm.writeSciRX(60);
-				qsm.writeSciRX(0x7f);
-				break;
-			case 'o':
-				// Modwheel Max
-				qsm.writeSciRX(0xb0);
-				qsm.writeSciRX(1);
-				qsm.writeSciRX(0x7f);
-				break;
-			case 'p':	
 				// Modwheel Min
-				qsm.writeSciRX(0xb0);
-				qsm.writeSciRX(1);
-				qsm.writeSciRX(0x0);
+				hw->sendMidi(0xb0);
+				hw->sendMidi(1);
+				hw->sendMidi(0x0);
 				break;
 			case '!':
 				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getDspCycles()));
@@ -152,7 +199,18 @@ int main(int _argc, char* _argv[])
 			default:
 				break;
 			}
-			ch = 0;
+		}
+
+		if(waitForBootKeys)
+		{
+			const auto t = std::chrono::system_clock::now();
+			const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
+
+			if(d < 1000)
+				continue;
+
+			waitForBootKeys = false;
+			LOG("Wait for boot keys over");
 		}
 
 		hw->process(blockSize);
