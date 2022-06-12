@@ -57,6 +57,7 @@ namespace mqLib
 		dsp56k::DSPThread m_dspThread;
 
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
+		uint32_t m_prevHdiHF01 = 0;	// uc => DSP
 		uint32_t m_hdiHF23 = 0;	// DSP => uc
 		uint64_t m_dspCycles = 0;
 		uint32_t m_dspInstructionCounter = 0;
