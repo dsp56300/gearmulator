@@ -112,7 +112,7 @@ namespace mqLib
 			{
 				if(m_addressMode == AddressMode::CGRam)
 				{
-					changed = true;
+//					changed = true;
 //					LOG("LCD write data to CGRAM addr " << m_cgramAddr << ", data=" << static_cast<int>(g));
 
 					m_cgramData[m_cgramAddr] = g;
