@@ -7,3 +7,6 @@
 [submodule "source/68kEmu/Moira"]
 	path = source/68kEmu/Moira
 	url = ../Moira.git
+[submodule "source/cpp-terminal"]
+	path = source/cpp-terminal
+	url = ../cpp-terminal.git
