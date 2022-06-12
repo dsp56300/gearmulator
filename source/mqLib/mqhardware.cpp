@@ -93,8 +93,6 @@ namespace mqLib
 	void Hardware::dspExecCallback()
 	{
 		transferHostFlags();
-		if(m_hdiDSP.hasRXData())
-			m_hdiDSP.exec();
 	}
 
 	void Hardware::injectUCtoDSPInterrupts()
