@@ -19,7 +19,7 @@ namespace mqLib
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
 		config.dynamicPeripheralAddressing = true;
-		config.maxInstructionsPerBlock = 0;
+		config.maxInstructionsPerBlock = 0;	// needs to be 1 if DSP factory tests are run
 
 		m_dsp.getJit().setConfig(config);
 
