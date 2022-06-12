@@ -91,11 +91,16 @@ namespace mqLib
 		}
 
 		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
+
 		if(m_lcd.exec(getPortGP(), getPortF()))
 		{
-			const std::string s(&m_lcd.getDdRam().front());
-			if(s.find("SIG") != std::string::npos)
-				dumpMemory("SIG");
+//			const std::string s(&m_lcd.getDdRam().front());
+//			if(s.find("SIG") != std::string::npos)
+//				dumpMemory("SIG");
+		}
+		else
+		{
+			m_leds.exec(getPortF(), getPortGP(), getPortE());
 		}
 
 		return deltaCycles;

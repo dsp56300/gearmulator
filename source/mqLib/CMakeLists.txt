@@ -7,6 +7,7 @@ set(SOURCES
 	buttons.cpp buttons.h
 	dspBootCode.h
 	lcd.cpp lcd.h
+	leds.cpp leds.h
 	rom.cpp rom.h
 	mqdsp.cpp mqdsp.h
 	mqhardware.cpp mqhardware.h
