@@ -4,6 +4,7 @@
 
 #include "buttons.h"
 #include "lcd.h"
+#include "leds.h"
 
 #include "../68kEmu/mc68k.h"
 
@@ -20,6 +21,8 @@ namespace mqLib
 		uint32_t exec() override;
 
 		Buttons& getButtons() { return m_buttons; }
+		Leds& getLeds() { return m_leds; }
+		LCD& getLcd() { return m_lcd; }
 
 		bool requestDSPReset() const { return m_dspResetRequest; }
 		void notifyDSPBooted();
@@ -43,6 +46,7 @@ namespace mqLib
 		std::vector<uint8_t> m_romRuntimeData;
 		LCD m_lcd;
 		Buttons m_buttons;
+		Leds m_leds;
 		std::vector<uint8_t> m_memory;
 		std::list<uint32_t> m_lastPCs;
 		bool m_dspResetRequest = false;
