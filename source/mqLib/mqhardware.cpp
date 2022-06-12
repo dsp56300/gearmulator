@@ -11,8 +11,12 @@ namespace mqLib
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
 		, m_buttons(m_uc.getButtons())
+		, m_leds(m_uc.getLeds())
+		, m_lcd(m_uc.getLcd())
 		, m_dspThread(m_dsp.dsp())
 	{
+		m_dspThread.setLogToStdout(false);
+
 		m_hdiDSP.setRXRateLimit(0);
 		m_hdiDSP.setTransmitDataAlwaysEmpty(false);
 
@@ -55,6 +59,11 @@ namespace mqLib
 
 		while(m_requestedSampleFrames)
 			processUcCycle();
+	}
+
+	void Hardware::sendMidi(const uint8_t _byte)
+	{
+		m_uc.getQSM().writeSciRX(_byte);
 	}
 
 	void Hardware::transferHostFlags()

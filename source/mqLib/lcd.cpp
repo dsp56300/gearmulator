@@ -7,9 +7,7 @@
 
 namespace mqLib
 {
-	LCD::LCD()
-	{
-	}
+	LCD::LCD() = default;
 
 	bool LCD::exec(mc68k::Port& _portGp, mc68k::Port& _portF)
 	{
@@ -35,6 +33,8 @@ namespace mqLib
 		if(!execute)
 			return false;
 
+		bool changed = false;
+
 		if(!read)
 		{
 			if(!registerSelect)
@@ -43,6 +43,7 @@ namespace mqLib
 				{
 					LOG("LCD Clear Display");
 					m_dramData.fill(' ');
+					changed = true;
 				}
 				else if(g == 0x02)
 				{
@@ -111,6 +112,7 @@ namespace mqLib
 			{
 				if(m_addressMode == AddressMode::CGRam)
 				{
+					changed = true;
 //					LOG("LCD write data to CGRAM addr " << m_cgramAddr << ", data=" << static_cast<int>(g));
 
 					m_cgramData[m_cgramAddr] = g;
@@ -169,32 +171,7 @@ namespace mqLib
 						m_dramAddr += m_addrIncrement;
 
 					if(m_dramData != old)
-					{
-						std::stringstream ss;
-						for(size_t i=0; i<m_dramData.size(); ++i)
-						{
-							char c = m_dramData[i];
-							switch (m_dramData[i])
-							{
-							case 0:	c = '0'; break;
-							case 1:	c = '1'; break;
-							case 2:	c = '2'; break;
-							case 3:	c = '3'; break;
-							case 4:	c = '4'; break;
-							case 5:	c = '5'; break;
-							case 6:	c = '6'; break;
-							case 7:	c = '7'; break;
-							default:
-								if(c < 32)
-									c = '?';
-							}
-							if(i == 20)
-								ss << std::endl;
-							ss << c;
-						}
-						std::string s(ss.str());
-						LOG("LCD ascii: " << std::endl << s);
-					}
+						changed = true;
 				}
 			}
 		}
@@ -226,6 +203,9 @@ namespace mqLib
 				}
 			}
 		}
+
+		if(changed && m_changeCallback)
+			m_changeCallback();
 
 		return true;
 	}

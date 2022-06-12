@@ -5,6 +5,7 @@ project(mqTestConsole)
 add_executable(mqTestConsole)
 
 set(SOURCES
+	mqGui.cpp mqGui.h
 	mqTestConsole.cpp
 )
 
