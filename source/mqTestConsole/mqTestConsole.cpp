@@ -3,6 +3,7 @@
 
 #include "../synthLib/os.h"
 #include "../synthLib/wavWriter.h"
+#include "../synthLib/midiTypes.h"
 
 #include "../mqLib/mqmc.h"
 #include "../mqLib/mqhardware.h"
@@ -171,26 +172,26 @@ int main(int _argc, char* _argv[])
 			case Key::F12:				encRotate(EncoderType::Matrix4, 1);			break;
 			case '7':
 				// Midi Note On
-				hw->sendMidi(0x90);
-				hw->sendMidi(60);
+				hw->sendMidi(synthLib::M_NOTEON);
+				hw->sendMidi(synthLib::Note_C3);
 				hw->sendMidi(0x7f);
 				break;
 			case '8':	
 				// Midi Note Off
-				hw->sendMidi(0x80);
-				hw->sendMidi(60);
+				hw->sendMidi(synthLib::M_NOTEOFF);
+				hw->sendMidi(synthLib::Note_C3);
 				hw->sendMidi(0x7f);
 				break;
 			case '9':
 				// Modwheel Max
-				hw->sendMidi(0xb0);
-				hw->sendMidi(1);
+				hw->sendMidi(synthLib::M_CONTROLCHANGE);
+				hw->sendMidi(synthLib::MC_MODULATION);
 				hw->sendMidi(0x7f);
 				break;
 			case '0':	
 				// Modwheel Min
-				hw->sendMidi(0xb0);
-				hw->sendMidi(1);
+				hw->sendMidi(synthLib::M_CONTROLCHANGE);
+				hw->sendMidi(synthLib::MC_MODULATION);
 				hw->sendMidi(0x0);
 				break;
 			case '!':
