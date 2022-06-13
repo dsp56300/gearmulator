@@ -54,7 +54,7 @@ int main(int _argc, char* _argv[])
 	std::unique_ptr<mqLib::Hardware> hw;
 	hw.reset(new mqLib::Hardware(romFile));
 
-	auto& buttons = hw->getButtons();
+	auto& buttons = hw->getUC().getButtons();
 
 	Gui gui(*hw);
 
@@ -111,12 +111,12 @@ int main(int _argc, char* _argv[])
 		renderTrigger.push_back(1);
 	};
 
-	hw->getLeds().setChangeCallback([&]()
+	hw->getUC().getLeds().setChangeCallback([&]()
 	{
 		renderTrigger.push_back(1);
 	});
 
-	hw->getLcd().setChangeCallback([&]()
+	hw->getUC().getLcd().setChangeCallback([&]()
 	{
 		renderTrigger.push_back(1);
 	});

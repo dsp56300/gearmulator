@@ -8,12 +8,9 @@ namespace mqLib
 		: m_romFileName(std::move(_romFilename))
 		, m_rom(m_romFileName)
 		, m_uc(m_rom)
+		, m_dspThread(m_dsp.dsp())
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
-		, m_buttons(m_uc.getButtons())
-		, m_leds(m_uc.getLeds())
-		, m_lcd(m_uc.getLcd())
-		, m_dspThread(m_dsp.dsp())
 	{
 		m_dspThread.setLogToStdout(false);
 		m_dsp.getPeriph().disableTimers(true);
@@ -149,18 +146,18 @@ namespace mqLib
 
 	void Hardware::hdiTransferUCtoDSP()
 	{
-		m_hdiUC.pollTx(txData);
+		m_hdiUC.pollTx(m_txData);
 
-		if(txData.empty())
+		if(m_txData.empty())
 			return;
 
-		for (const uint32_t data : txData)
+		for (const uint32_t data : m_txData)
 		{
 			m_haveSentTXtoDSP = true;
 //			LOG("toDSP writeRX=" << HEX(data));
 			m_hdiDSP.writeRX(&data, 1);
 		}
-		txData.clear();
+		m_txData.clear();
 		while((m_hdiDSP.hasRXData() && m_hdiDSP.rxInterruptEnabled()) || m_dsp.dsp().hasPendingInterrupts())
 			ucYield();
 //		LOG("writeRX wait over");
@@ -182,7 +179,7 @@ namespace mqLib
 
 		if(!hdiTransferDSPtoUC())
 		{
-			int foo=0;
+			int d=0;
 		}
 	}
 
