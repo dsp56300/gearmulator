@@ -10,8 +10,8 @@ constexpr int g_deviceH = 16;
 Gui::Gui(mqLib::Hardware& _hw)
 	: m_hw(_hw)
 	, m_win(g_deviceW, g_deviceH + 6)
-	, m_lcd(_hw.getLcd())
-	, m_leds(_hw.getLeds())
+	, m_lcd(_hw.getUC().getLcd())
+	, m_leds(_hw.getUC().getLeds())
 {
 }
 
@@ -281,7 +281,7 @@ void Gui::renderLED(const bool on, int x, int y)
 
 void Gui::renderButton(mqLib::Buttons::ButtonType _button, int x, int y)
 {
-	const auto pressed = m_hw.getButtons().getButtonState(_button);
+	const auto pressed = m_hw.getUC().getButtons().getButtonState(_button);
 
 	if(pressed)
 	{
@@ -295,7 +295,7 @@ void Gui::renderButton(mqLib::Buttons::ButtonType _button, int x, int y)
 
 void Gui::renderEncoder(mqLib::Buttons::Encoders _encoder, int x, int y)
 {
-	const auto state = m_hw.getButtons().getEncoderState(_encoder);
+	const auto state = m_hw.getUC().getButtons().getEncoderState(_encoder);
 	constexpr char32_t overline = 0x0000203E;
 
 	const char c0 = state & 2 ? '*' : '.';

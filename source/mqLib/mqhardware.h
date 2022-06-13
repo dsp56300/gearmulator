@@ -25,10 +25,6 @@ namespace mqLib
 		uint64_t getDspCycles() const { return m_dspCycles; }
 		const auto& getAudioOutputs() { return m_audioOutputs; }
 
-		Leds& getLeds() { return m_leds; }
-		Buttons& getButtons() { return m_buttons; }
-		LCD& getLcd() { return m_lcd; }
-
 		void sendMidi(uint8_t _byte);
 
 	private:
@@ -46,33 +42,29 @@ namespace mqLib
 
 		const ROM m_rom;
 
-		MqMc m_uc;
-		MqDsp m_dsp;
-
-		mc68k::Hdi08& m_hdiUC;
-		dsp56k::HDI08& m_hdiDSP;
-		Buttons& m_buttons;
-		Leds& m_leds;
-		LCD& m_lcd;
-		dsp56k::DSPThread m_dspThread;
-
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
-		uint32_t m_prevHdiHF01 = 0;	// uc => DSP
 		uint32_t m_hdiHF23 = 0;	// DSP => uc
 		uint64_t m_dspCycles = 0;
 		uint32_t m_dspInstructionCounter = 0;
 		bool m_requestNMI = false;
 		bool m_haveSentTXtoDSP = false;
 
-		std::deque<uint32_t> txData;
-
-		std::array<std::vector<dsp56k::TWord>, 2> m_audioInputs;
-		std::array<std::vector<dsp56k::TWord>, 6> m_audioOutputs;
-
 		// timing
 		uint32_t m_esaiFrameIndex = 0;
 		uint32_t m_lastEsaiFrameIndex = 0;
 		int32_t m_remainingMcCycles = 0;
 		uint32_t m_requestedSampleFrames = 0;
+
+		MqMc m_uc;
+		MqDsp m_dsp;
+		dsp56k::DSPThread m_dspThread;
+
+		mc68k::Hdi08& m_hdiUC;
+		dsp56k::HDI08& m_hdiDSP;
+
+		std::deque<uint32_t> m_txData;
+
+		std::array<std::vector<dsp56k::TWord>, 2> m_audioInputs;
+		std::array<std::vector<dsp56k::TWord>, 6> m_audioOutputs;
 	};
 }
