@@ -99,6 +99,15 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
+	std::thread oneSecondUpdater([&]
+	{
+		while(hw)
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+			renderTrigger.push_back(1);
+		}
+	});
+
 	auto toggleButton = [&](mqLib::Buttons::ButtonType _type)
 	{
 		buttons.toggleButton(_type);
