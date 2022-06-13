@@ -52,7 +52,7 @@ namespace mqLib
 		// timing
 		uint32_t m_esaiFrameIndex = 0;
 		uint32_t m_lastEsaiFrameIndex = 0;
-		int32_t m_remainingMcCycles = 0;
+		int32_t m_remainingUcCycles = 0;
 		uint32_t m_requestedSampleFrames = 0;
 
 		MqMc m_uc;

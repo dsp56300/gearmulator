@@ -32,6 +32,7 @@ namespace mqLib
 	Hardware::~Hardware()
 	{
 		m_dsp.getPeriph().getEsai().setCallback({}, 0);
+		m_hdiUC.setRxEmptyCallback({});
 	}
 
 	void Hardware::process(uint32_t _frames)
@@ -160,15 +161,15 @@ namespace mqLib
 		// we can only use ESAI once it has been enabled
 		if(m_esaiFrameIndex > m_lastEsaiFrameIndex)
 		{
-			const auto mcClock = m_uc.getSim().getSystemClockHz();
-			const auto mcCyclesPerFrame = mcClock / (44100 * 2);	// stereo interleaved
+			const auto ucClock = m_uc.getSim().getSystemClockHz();
+			const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
 
-			m_remainingMcCycles += static_cast<int32_t>(mcCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
+			m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
 			m_lastEsaiFrameIndex = m_esaiFrameIndex;
 		}
 		if(m_esaiFrameIndex > 0)
 		{
-			if(m_remainingMcCycles < 0)
+			if(m_remainingUcCycles < 0)
 			{
 				processAudio();
 				std::this_thread::yield();
@@ -184,7 +185,7 @@ namespace mqLib
 
 		const auto deltaCycles = m_uc.exec();
 		if(m_esaiFrameIndex > 0)
-			m_remainingMcCycles -= static_cast<int32_t>(deltaCycles);
+			m_remainingUcCycles -= static_cast<int32_t>(deltaCycles);
 
 		const uint32_t hf01 = m_hdiUC.icr() & 0x18;
 
@@ -235,11 +236,11 @@ namespace mqLib
 			return;
 
 //		LOG("Drain ESAI");
-		const dsp56k::TWord* dummyInputs[16]{nullptr};
-		dsp56k::TWord* dummyOutputs[16]{nullptr};
-		dummyOutputs[0] = &m_audioOutputs[0].front();
-		dummyOutputs[1] = &m_audioOutputs[1].front();
-		esai.processAudioInterleaved(dummyInputs, dummyOutputs, count);
+		const dsp56k::TWord* inputs[16]{nullptr};
+		dsp56k::TWord* outputs[16]{nullptr};
+		outputs[0] = &m_audioOutputs[0].front();
+		outputs[1] = &m_audioOutputs[1].front();
+		esai.processAudioInterleaved(inputs, outputs, count);
 		m_requestedSampleFrames -= count;
 	}
 }
