@@ -55,6 +55,8 @@ void Gui::render()
 	renderLabel(g_deviceW - 2, g_deviceH - 1, "Power", true);
 
 	renderHelp(2, g_deviceH + 2);
+	renderDebug(2, g_deviceH + 5);
+
 	std::cout << m_win.render(1,1,true) << std::flush;
 }
 
@@ -256,6 +258,11 @@ void Gui::renderHelp(int x, int y)
 	renderLabel(x, y+2, "MIDI: 7 = Note ON | 8 = Note OFF | 9 = Modwheel Max | 0 = Modwheel Min");
 }
 
+void Gui::renderDebug(int x, int y)
+{
+	renderLabel(g_deviceW - 1, y, std::string("    DSP ") + m_hw.getDspThread().getMipsString(), true, Term::fg::red);
+}
+
 void Gui::renderLED(mqLib::Leds::Led _led, int x, int y)
 {
 	renderLED(m_leds.getLedState(_led), x, y);
@@ -313,11 +320,11 @@ void Gui::renderEncoder(mqLib::Buttons::Encoders _encoder, int x, int y)
 	m_win.set_char(x+3, y, overline);
 }
 
-void Gui::renderLabel(int x, int y, const std::string& _text, bool _rightAlign)
+void Gui::renderLabel(int x, int y, const std::string& _text, bool _rightAlign, Term::fg _color/* = Term::fg::gray*/)
 {
 	const int len = static_cast<int>(_text.size());
 	if(_rightAlign)
 		x -= len;
-	m_win.fill_fg(x, y, x + len - 1, y, Term::fg::gray);
+	m_win.fill_fg(x, y, x + len - 1, y, _color);
 	m_win.print_str(x,y,_text);
 }
