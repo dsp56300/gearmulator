@@ -28,7 +28,6 @@ namespace mqLib
 		void sendMidi(uint8_t _byte);
 
 	private:
-		void transferHostFlags();
 		void dspExecCallback();
 		void injectUCtoDSPInterrupts();
 		void ucYield();

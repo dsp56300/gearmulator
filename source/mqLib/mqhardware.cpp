@@ -23,11 +23,6 @@ namespace mqLib
 			++m_esaiFrameIndex;
 		}, 0);
 
-		m_dsp.dsp().setExecCallback([&]()
-		{
-			dspExecCallback();
-		});
-
 		m_hdiUC.setRxEmptyCallback([&](bool needMoreData)
 		{
 			onUCRxEmpty(needMoreData);
@@ -62,34 +57,6 @@ namespace mqLib
 	void Hardware::sendMidi(const uint8_t _byte)
 	{
 		m_uc.getQSM().writeSciRX(_byte);
-	}
-
-	void Hardware::transferHostFlags()
-	{
-		if(m_hdiHF01 != m_prevHdiHF01)
-		{
-			// transfer HF 2&3 from uc to DSP
-			auto hsr = m_hdiDSP.readStatusRegister();
-			const auto prevHsr = hsr;
-			hsr &= ~0x18;
-			hsr |= (m_hdiHF01<<3);
-			if(prevHsr != hsr)
-				m_hdiDSP.writeStatusRegister(hsr);
-
-			m_prevHdiHF01 = m_hdiHF01;
-		}
-
-		const auto hf23 = (m_hdiDSP.readControlRegister() >> 3) & 3;
-//		if(hf23 != m_hdiHF23)
-		{
-//			LOG("HDI HF23=" << HEXN(hf23,1));
-			m_hdiHF23 = hf23;
-		}
-	}
-
-	void Hardware::dspExecCallback()
-	{
-		transferHostFlags();
 	}
 
 	void Hardware::injectUCtoDSPInterrupts()
@@ -219,21 +186,28 @@ namespace mqLib
 		if(m_esaiFrameIndex > 0)
 			m_remainingMcCycles -= static_cast<int32_t>(deltaCycles);
 
-		const uint32_t hf01 = (m_hdiUC.icr() >> 3) & 3;
+		const uint32_t hf01 = m_hdiUC.icr() & 0x18;
 
 		if(hf01 != m_hdiHF01)
 		{
-//			LOG("HDI HF01=" << HEXN(hf01,1));
+//			LOG("HDI HF01=" << HEXN(hf01>>3,1));
 			m_hdiHF01 = hf01;
+			m_hdiDSP.setPendingHostFlags01(hf01);
 		}
 
 		injectUCtoDSPInterrupts();
 
 		// transfer DSP host flags HF2&3 to uc
+		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
+//		if(hf23 != m_hdiHF23)
+		{
+//			LOG("HDI HF23=" << HEXN(hf23>>3,1));
+			m_hdiHF23 = hf23;
+		}
 		auto isr = m_hdiUC.isr();
 		const auto prevIsr = isr;
 		isr &= ~0x18;
-		isr |= (m_hdiHF23<<3);
+		isr |= hf23;
 		if(isr != prevIsr)
 			m_hdiUC.isr(isr);
 
