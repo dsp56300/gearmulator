@@ -6,10 +6,12 @@ namespace mqLib
 {
 	static dsp56k::DefaultMemoryValidator g_memoryValidator;
 
-	static constexpr dsp56k::TWord g_pMemSize		= 0x4000;	// only $0000 < $1400 for DSP, rest for us
-	static constexpr dsp56k::TWord g_bootCodeBase	= 0x2000;
+	static constexpr dsp56k::TWord g_bridgedAddr	= 0x080000;	// start of external SRAM, mapped to X and Y
+	static constexpr dsp56k::TWord g_xyMemSize		= 0x800000;	// due to weird AAR mapping we just allocate enough so that everything fits into it
+	static constexpr dsp56k::TWord g_pMemSize		= 0x2000;	// only $0000 < $1400 for DSP, rest for us
+	static constexpr dsp56k::TWord g_bootCodeBase	= 0x1500;
 
-	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, 0x800000), m_dsp(m_memory, &m_periphX, &m_periphNop)
+	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr), m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768);
 		m_periphX.getEsaiClock().setSamplerate(44100);
@@ -37,8 +39,6 @@ namespace mqLib
 
 			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
 		}
-
-		m_memory.setExternalMemory(0x80000, true);
 
 //		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(g_dspBootCode)), true, true, &m_periphX, nullptr);
 
