@@ -16,7 +16,7 @@ AudioProcessor::AudioProcessor(uint32_t _samplerate, std::string _outputFilename
 , m_maxSampleCount(_maxSamplecount)
 , m_dsp1(_dsp1)
 , m_dsp2(_dsp2)
-, m_writer(_outputFilename, _samplerate, _terminateOnSilence)
+, m_writer(m_outputFilname, _samplerate, _terminateOnSilence)
 {
 	m_outputBuffers.resize(2);
 	m_inputBuffers.resize(2);
