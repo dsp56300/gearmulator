@@ -18,7 +18,7 @@ namespace mqLib
 		explicit Hardware(std::string _romFilename);
 		~Hardware();
 
-		void process(uint32_t _frames);
+		bool process(uint32_t _frames);
 
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP() { return m_dsp; }
