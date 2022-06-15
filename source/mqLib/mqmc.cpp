@@ -39,20 +39,6 @@ namespace mqLib
 
 	uint32_t MqMc::exec()
 	{
-#if 0
-		for(auto it = m_lastPCs.begin(); it != m_lastPCs.end(); ++it)
-		{
-			if(*it == getPC())
-			{
-				m_lastPCs.erase(it);
-				break;
-			}
-		}
-
-		m_lastPCs.push_back(getPC());
-		if(m_lastPCs.size() > 32)
-			m_lastPCs.pop_front();
-#endif
 		if(getPC() == 0x80718)
 		{
 			// TODO: hack to prevent getting stuck here
@@ -147,11 +133,13 @@ namespace mqLib
 
 	void MqMc::write16(uint32_t addr, uint16_t val)
 	{
+		// Dump memory if DSP test reaches error state
 		if(addr == 0x384A8)
 		{
 			if(val > 0 && val <= 0xff)
 				dumpMemory((std::string("DSPTest_Error_") + std::to_string(val)).c_str());
 		}
+
 		if(addr < m_memory.size())
 		{
 			writeW(m_memory, addr, val);
@@ -170,6 +158,7 @@ namespace mqLib
 
 	void MqMc::write8(uint32_t addr, uint8_t val)
 	{
+		// Dump memory if DSP test reaches error state
 		if(addr == 0x384A8)
 		{
 			if(val > 0)
