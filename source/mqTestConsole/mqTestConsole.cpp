@@ -226,7 +226,8 @@ int main(int _argc, char* _argv[])
 		}
 
 		// process until we've got an audio block of size 'blockSize'
-		hw->process(blockSize);
+		if(!hw->process(blockSize))
+			continue;
 
 		// convert to stereo and check for silence
 		auto& outputs = hw->getAudioOutputs();

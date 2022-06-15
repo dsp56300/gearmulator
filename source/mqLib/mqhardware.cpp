@@ -13,7 +13,7 @@ namespace mqLib
 		, m_hdiDSP(m_dsp.hdi08())
 	{
 		m_dspThread.setLogToStdout(false);
-		m_dsp.getPeriph().disableTimers(true);
+		m_dsp.getPeriph().disableTimers(true);	// only used to test DSP load, we report 0 all the time for now
 
 		m_hdiDSP.setRXRateLimit(0);
 		m_hdiDSP.setTransmitDataAlwaysEmpty(false);
@@ -35,7 +35,7 @@ namespace mqLib
 		m_hdiUC.setRxEmptyCallback({});
 	}
 
-	void Hardware::process(uint32_t _frames)
+	bool Hardware::process(uint32_t _frames)
 	{
 		m_requestedSampleFrames = _frames;
 
@@ -51,8 +51,14 @@ namespace mqLib
 				output.resize(_frames);
 		}
 
+		if(m_esaiFrameIndex <= 0)
+		{
+			processUcCycle();
+			return false;
+		}
 		while(m_requestedSampleFrames)
 			processUcCycle();
+		return true;
 	}
 
 	void Hardware::sendMidi(const uint8_t _byte)
@@ -159,7 +165,7 @@ namespace mqLib
 		m_dspInstructionCounter = instructionCounter;
 		m_dspCycles += d;
 
-		// we can only use ESAI once it has been enabled
+		// we can only use ESAI to clock the uc once it has been enabled
 		if(m_esaiFrameIndex > m_lastEsaiFrameIndex)
 		{
 			const auto ucClock = m_uc.getSim().getSystemClockHz();
@@ -172,18 +178,18 @@ namespace mqLib
 		{
 			if(m_remainingUcCycles < 0)
 			{
-				processAudio();
-				std::this_thread::yield();
+				ucYield();
 				return;
 			}
 		}
-		/*else if(mc->getCycles() > dspCycles/5)
+		// If ESAI is not enabled, we roughly clock the uc to execute one op for each 5 DSP ops.
+		/*
+		else if(m_uc.getCycles() > m_dspCycles/5)
 		{
-			processAudio();
-			std::this_thread::yield();
-			continue;
-		}*/
-
+			ucYield();
+			return;
+		}
+		*/
 		const auto deltaCycles = m_uc.exec();
 		if(m_esaiFrameIndex > 0)
 			m_remainingUcCycles -= static_cast<int32_t>(deltaCycles);
