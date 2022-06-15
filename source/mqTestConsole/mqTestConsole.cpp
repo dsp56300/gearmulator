@@ -9,10 +9,10 @@
 #include "../mqLib/mqhardware.h"
 
 #include "dsp56kEmu/dspthread.h"
+
 #include "dsp56kEmu/interpreterunittests.h"
 #include "dsp56kEmu/jitunittests.h"
 
-#include <cpp-terminal/window.hpp>
 #include <cpp-terminal/input.hpp>
 
 #include <vector>
@@ -21,7 +21,6 @@
 
 using Term::Terminal;
 using Term::Key;
-using Term::Window;
 
 using ButtonType = mqLib::Buttons::ButtonType;
 using EncoderType = mqLib::Buttons::Encoders;
@@ -30,8 +29,8 @@ int main(int _argc, char* _argv[])
 {
 	try
 	{
-//		dsp56k::InterpreterUnitTests tests;
-//		dsp56k::JitUnittests tests;
+//		dsp56k::InterpreterUnitTests tests;		// only valid if Interpreter is active
+		dsp56k::JitUnittests tests;				// only valid if JIT runtime is active
 //		return 0;
 	}
 	catch(std::string& _err)
@@ -40,10 +39,7 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 
-	Terminal term(true, true, true, true);
-
-	Window winMQ(120,50);
-
+	// load ROM
 	const auto romFile = synthLib::findROM(512 * 1024);
 
 	if(romFile.empty())
@@ -52,15 +48,14 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 
+	// create hardware
 	std::unique_ptr<mqLib::Hardware> hw;
 	hw.reset(new mqLib::Hardware(romFile));
 
 	auto& buttons = hw->getUC().getButtons();
 
-	Gui gui(*hw);
-
+	// threaded key reader
 	dsp56k::RingBuffer<int, 64, true> keyBuffer;
-
 	std::thread inputReader([&hw, &keyBuffer]
 	{
 		while(hw.get())
@@ -71,6 +66,11 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
+	// create terminal-GUI
+	Terminal term(true, true, true, true);
+	Gui gui(*hw);
+
+	// audio config: write 24 bit wav file of ESAI output to disk, but not as long as there is only silence
 	bool silence = true;
 
 	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
@@ -81,10 +81,7 @@ int main(int _argc, char* _argv[])
 	std::vector<dsp56k::TWord> m_stereoOutput;
 	m_stereoOutput.resize(blockSize<<1);
 
-	const auto startTime = std::chrono::system_clock::now();
-
-	bool waitForBootKeys = true;
-
+	// do not continously render our terminal GUI but only if something has changed
 	dsp56k::RingBuffer<uint32_t, 1024, true> renderTrigger;
 
 	std::thread renderer([&]
@@ -131,6 +128,11 @@ int main(int _argc, char* _argv[])
 		renderTrigger.push_back(1);
 	});
 
+	// we need a bit of time to press boot buttons (service mode, factory tests, etc)
+	const auto startTime = std::chrono::system_clock::now();
+	bool waitForBootKeys = true;
+
+	// now run forever
 	while(true)
 	{
 		while(!keyBuffer.empty())
@@ -223,8 +225,10 @@ int main(int _argc, char* _argv[])
 			LOG("Wait for boot keys over");
 		}
 
+		// process until we've got an audio block of size 'blockSize'
 		hw->process(blockSize);
 
+		// convert to stereo and check for silence
 		auto& outputs = hw->getAudioOutputs();
 
 		for(size_t i=0; i<blockSize; ++i)
@@ -238,6 +242,7 @@ int main(int _argc, char* _argv[])
 
 		if(!silence)
 		{
+			// continously write to disk if not silent anymore
 			wavWriter.append([&](auto& _dst)
 			{
 				_dst.reserve(_dst.size() + m_stereoOutput.size());

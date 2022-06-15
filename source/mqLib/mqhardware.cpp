@@ -64,6 +64,7 @@ namespace mqLib
 	{
 		bool injected = false;
 
+		// QS6 is connected to DSP NMI pin but I've never seen this being triggered
 		const uint8_t requestNMI = m_uc.requestDSPinjectNMI();
 
 		if(m_requestNMI && !requestNMI)
