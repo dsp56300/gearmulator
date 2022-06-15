@@ -12,6 +12,7 @@ set(SOURCES
 	mqdsp.cpp mqdsp.h
 	mqhardware.cpp mqhardware.h
 	mqmc.cpp mqmc.h
+	mqtypes.h
 )
 
 target_sources(mqLib PRIVATE ${SOURCES})

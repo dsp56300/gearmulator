@@ -1,7 +1,8 @@
 #include "buttons.h"
 
+#include "mqtypes.h"
+
 #include "../68kEmu/port.h"
-#include "dsp56kEmu/logging.h"
 
 namespace mqLib
 {
@@ -10,7 +11,7 @@ namespace mqLib
 		m_buttonStates.fill(0);
 	}
 
-	bool Buttons::processButtons(mc68k::Port& _gp, mc68k::Port& _e, mc68k::Port& _f)
+	bool Buttons::processButtons(mc68k::Port& _gp, mc68k::Port& _e)
 	{
 		if(_gp.getDirection() == 0xff)
 			return false;
@@ -22,10 +23,16 @@ namespace mqLib
 
 		const auto e = _e.read();
 
-		if (m_buttonStates[16] && !(e&0x20)) _e.writeRX(e|0x20);
-		if (!m_buttonStates[16] && (e&0x20)) _e.writeRX(e&~0x20);
+		if (getButtonState(ButtonType::Power) && !_e.bittest(BtPower))
+		{
+			_e.setBitRX(BtPower);
+		}
+		else if (!getButtonState(ButtonType::Power) && _e.bittest(BtPower))
+		{
+			_e.clearBitRX(BtPower);
+		}
 		
-		if(!(e&(1<<2)))
+		if(!_e.bittest(Buttons0CS))
 		{
 			uint8_t res = 0;
 			for(size_t i=0; i<8; ++i)
@@ -34,7 +41,7 @@ namespace mqLib
 			return true;
 		}
 
-		if(!(e&(1<<3)))
+		if(!_e.bittest(Buttons1CS))
 		{
 			uint8_t res = 0;
 			for(size_t i=0; i<8; ++i)
@@ -43,7 +50,7 @@ namespace mqLib
 			return true;
 		}
 				
-		if(!(e&(1<<0)))
+		if(!_e.bittest(Encoders0CS))
 		{
 			uint8_t res = 0;
 
@@ -54,7 +61,8 @@ namespace mqLib
 			_gp.writeRX(res);
 			return true;
 		}
-		if(!(e&(1<<1)))
+
+		if(!_e.bittest(Encoders1CS))
 		{
 			uint8_t res = 0;
 
@@ -91,31 +99,6 @@ namespace mqLib
 		current += _amount * (_encoder == Encoders::Master ? 4 : 3);
 	}
 
-	uint8_t Buttons::processEncoder(Encoders _encoder, bool cycleEncoders)
-	{
-		const auto i = static_cast<uint32_t>(_encoder);
-
-		auto& v = m_encoderValues[i];
-
-		if(!cycleEncoders)
-			return v;
-
-		auto& c = m_remainingRotations[i];
-
-		if(c > 0)
-		{
-			v = v ? static_cast<uint8_t>(v << 1) : 1;
-			--c;
-		}
-		else if(c < 0)
-		{
-			v = v ? (v>>1) : 2;
-			++c;
-		}
-		v &= 3;
-		return v;
-	}
-
 	uint8_t Buttons::processStepEncoder(Encoders _encoder, bool cycleEncoders)
 	{
 		const auto i = static_cast<uint32_t>(_encoder);
@@ -129,8 +112,6 @@ namespace mqLib
 
 		auto& c = m_remainingRotations[i];
 
-		const auto prev = v;
-
 		if(c > 0)
 		{
 			--v;
@@ -142,10 +123,5 @@ namespace mqLib
 			++c;
 		}
 		return pattern[v&3];
-//		v = rand() & 3;
-
-//		if(prev != v)
-//			LOG("RED ENC: " << (int)v);
-		return v;
 	}
 }

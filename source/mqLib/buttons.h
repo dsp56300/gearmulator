@@ -53,7 +53,7 @@ namespace mqLib
 
 		Buttons();
 
-		bool processButtons(mc68k::Port& _gp, mc68k::Port& _e, mc68k::Port& _f);
+		bool processButtons(mc68k::Port& _gp, mc68k::Port& _e);
 
 		void setButton(ButtonType _type, bool _pressed);
 		void toggleButton(ButtonType _type);
@@ -70,7 +70,6 @@ namespace mqLib
 		}
 
 	private:
-		uint8_t processEncoder(Encoders _encoder, bool cycleEncoders);
 		uint8_t processStepEncoder(Encoders _encoder, bool cycleEncoders);
 
 		std::array<uint8_t, static_cast<uint32_t>(ButtonType::Count)> m_buttonStates{};
