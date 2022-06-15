@@ -76,7 +76,7 @@ namespace mqLib
 				int foo=0;
 		}
 
-		m_buttons.processButtons(getPortGP(), getPortE(), getPortF());
+		m_buttons.processButtons(getPortGP(), getPortE());
 
 		if(m_lcd.exec(getPortGP(), getPortF()))
 		{

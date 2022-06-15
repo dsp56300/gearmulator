@@ -1,5 +1,6 @@
 #include "leds.h"
 
+#include "mqtypes.h"
 #include "dsp56kEmu/logging.h"
 
 namespace mqLib
@@ -8,9 +9,9 @@ namespace mqLib
 	{
 		bool changed = false;
 
-		if(_portE.getDirection() & (1<<6))
+		if(_portE.getDirection() & (1<<LedPower))
 		{
-			const uint32_t powerLedState = (_portE.read() >> 6) & 1;
+			const uint32_t powerLedState = (_portE.read() >> LedPower) & 1;
 
 			if(powerLedState != m_powerLedState)
 			{
@@ -19,14 +20,14 @@ namespace mqLib
 			}
 		}
 
-		if(!(_portF.getDirection() & (1<<7)))
+		if(!(_portF.getDirection() & (1<<LedWriteLatch)))
 			return ret(changed);
 
 		if(_portGP.getDirection() != 0xff)
 			return ret(changed);
 
 		const auto prevF7 = m_stateF7;
-		const auto stateF7 = _portF.read() & (1<<7);
+		const auto stateF7 = _portF.read() & (1<<LedWriteLatch);
 		m_stateF7 = stateF7;
 
 		if(!stateF7 || prevF7)

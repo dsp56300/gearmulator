@@ -20,6 +20,21 @@ namespace mc68k
 		void enablePins(uint8_t _pins) { m_enabledPins = _pins; }
 		uint32_t getWriteCounter() const { return m_writeCounter; }
 
+		uint8_t bittest(uint32_t _bit) const
+		{
+			return read() & (1<<_bit);
+		}
+
+		void setBitRX(uint32_t _bit)
+		{
+			writeRX(read() | static_cast<uint8_t>(1 << _bit));
+		}
+
+		void clearBitRX(uint32_t _bit)
+		{
+			writeRX(read() & ~(1<<_bit));
+		}
+
 	private:
 		uint8_t m_direction = 0;		// 0 = input, 1 = output
 		uint8_t m_enabledPins = 0xff;

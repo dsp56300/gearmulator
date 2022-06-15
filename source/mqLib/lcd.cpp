@@ -1,5 +1,7 @@
 ﻿#include "lcd.h"
 
+#include "mqtypes.h"
+
 #include <cassert>
 
 #include "../68kEmu/port.h"
@@ -21,9 +23,9 @@ namespace mqLib
 		const auto df = _portF.getDirection();
 		//const auto dg = _portGp.getDirection();
 
-		const auto registerSelect = (f>>1)&1;
-		const auto read = (f>>2)&1;
-		const auto opEnable = ((f & df)>>3)&1;
+		const auto registerSelect = (f>>LcdRS) & 1;
+		const auto read = (f>>LcdRW) & 1;
+		const auto opEnable = ((f & df)>>LcdLatch) & 1;
 
 		// falling edge triggered
 		const auto execute = m_lastOpState && !opEnable;
