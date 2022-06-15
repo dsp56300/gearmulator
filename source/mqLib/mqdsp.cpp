@@ -13,8 +13,8 @@ namespace mqLib
 
 	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr), m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
-		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768);
-		m_periphX.getEsaiClock().setSamplerate(44100);
+		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
+		m_periphX.getEsaiClock().setSamplerate(44100); // verified
 
 		auto config = m_dsp.getJit().getConfig();
 
@@ -25,10 +25,11 @@ namespace mqLib
 
 		m_dsp.getJit().setConfig(config);
 
+		// fill P memory with something that reminds us if we jump to garbage
 		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
 			m_memory.set(dsp56k::MemArea_P, i, 0x000200);	// debug instruction
 
-		// rewrite to work at address g_bootCodeBase instead of $ff0000
+		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
 		for(uint32_t i=0; i<std::size(g_dspBootCode); ++i)
 		{
 			uint32_t code = g_dspBootCode[i];
@@ -42,6 +43,7 @@ namespace mqLib
 
 //		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(g_dspBootCode)), true, true, &m_periphX, nullptr);
 
+		// set OMR pins so that bootcode wants program data via HDI08 RX
 		m_dsp.setPC(g_bootCodeBase);
 		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
 
