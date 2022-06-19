@@ -46,8 +46,10 @@ add_subdirectory(source/virusIntegrationTest)
 set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
-
 add_subdirectory(source/cpp-terminal)
+
+add_subdirectory(source/portmidi)
+add_subdirectory(source/portaudio)
 
 add_subdirectory(source/mqTestConsole)
 
