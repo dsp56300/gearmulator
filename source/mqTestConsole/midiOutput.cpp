@@ -1,0 +1,47 @@
+#include "midiOutput.h"
+
+#include "../portmidi/pm_common/portmidi.h"
+#include "../synthLib/midiTypes.h"
+#include "dsp56kEmu/logging.h"
+
+extern PmTimestamp returnTimeProc(void*);
+
+MidiOutput::MidiOutput()
+{
+	Pm_Initialize();
+
+	const auto deviceId = Pm_GetDefaultOutputDeviceID();
+
+	auto err = Pm_OpenOutput(&m_stream, deviceId, nullptr, 128, returnTimeProc, nullptr, 0);
+	if(err != pmNoError)
+	{
+		LOG("Failed to open Midi output");
+	}
+}
+
+void MidiOutput::write(const std::vector<uint8_t>& _data)
+{
+	m_parser.write(_data);
+	std::vector<synthLib::SMidiEvent> events;
+	m_parser.getEvents(events);
+	write(events);
+}
+
+void MidiOutput::write(const std::vector<synthLib::SMidiEvent>& _events) const
+{
+	for (const auto& e : _events)
+	{
+		if(!e.sysex.empty())
+		{
+			LOG("MIDI Out Write Sysex of length " << e.sysex.size());
+			Pm_WriteSysEx(m_stream, 0, const_cast<unsigned char*>(&e.sysex.front()));
+		}
+		else
+		{
+			PmEvent ev;
+			ev.message = Pm_Message(e.a, e.b, e.c);
+			LOG("MIDI Out Write " << HEXN(e.a, 2) << " " << HEXN(e.b, 2) << ' ' << HEXN(e.c, 2));
+			Pm_Write(m_stream, &ev, 1);
+		}
+	}
+}

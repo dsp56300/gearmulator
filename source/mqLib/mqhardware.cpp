@@ -47,6 +47,20 @@ namespace mqLib
 		m_uc.getQSM().writeSciRX(_byte);
 	}
 
+	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
+	{
+		std::deque<uint16_t> midiData;
+		m_uc.getQSM().readSciTX(midiData);
+		if(midiData.empty())
+			return;
+
+		_data.clear();
+		_data.reserve(midiData.size());
+
+		for (auto data : midiData)
+			_data.push_back(data & 0xff);
+	}
+
 	void Hardware::injectUCtoDSPInterrupts()
 	{
 		bool injected = false;
