@@ -8,6 +8,7 @@ class AudioOutputWAV : AudioOutput
 {
 public:
 	explicit AudioOutputWAV(ProcessCallback _callback);
+	~AudioOutputWAV() override;
 
 	void process() override;
 
@@ -15,5 +16,7 @@ private:
 	synthLib::AsyncWriter wavWriter;
 
 	std::vector<dsp56k::TWord> m_stereoOutput;
+	std::unique_ptr<std::thread> m_thread;
 	bool silence = true;
+	bool m_terminate = false;
 };

@@ -208,6 +208,14 @@ int main(int _argc, char* _argv[])
 
 	auto process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
 	{
+		hw->processAudio(_blockSize);
+		_dst = &hw->getAudioOutputs();
+	};
+
+	AudioOutputWAV audio(process);
+
+	while(true)
+	{
 		processKeys();
 
 		if(waitForBootKeys)
@@ -216,24 +224,24 @@ int main(int _argc, char* _argv[])
 			const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
 
 			if(d < 1000)
-				return;
+				continue;
 
 			waitForBootKeys = false;
 			LOG("Wait for boot keys over");
 		}
 
-		// process until we've got an audio block of size 'blockSize'
-		if(!hw->process(_blockSize))
-			return;
+		for(size_t i=0; i<32; ++i)
+		{
+			hw->process();
+			hw->process();
+			hw->process();
+			hw->process();
+			hw->process();
+			hw->process();
+			hw->process();
+			hw->process();
+		}
+	}
 
-		// convert to stereo and check for silence
-		auto& outputs = hw->getAudioOutputs();
-		_dst = &outputs;
-	};
-
-	AudioOutputWAV audio(process);
-
-	audio.process();
-	
 	return 0;
 }
