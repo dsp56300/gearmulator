@@ -9,42 +9,52 @@ const std::string g_filename = "mq_output_" + std::to_string(std::chrono::durati
 AudioOutputWAV::AudioOutputWAV(ProcessCallback _callback): AudioOutput(std::move(_callback)), wavWriter(g_filename, 44100)
 {
 	m_stereoOutput.resize(g_blockSize<<1);
+
+	m_thread.reset(new std::thread([&]()
+	{
+		while(!m_terminate)
+			process();
+	}));
+}
+
+AudioOutputWAV::~AudioOutputWAV()
+{
+	m_terminate = true;
+	m_thread->join();
+	m_thread.reset();
 }
 
 void AudioOutputWAV::process()
 {
-	while(true)
+	const mqLib::TAudioOutputs* outputs = nullptr;
+	m_processCallback(g_blockSize, outputs);
+
+	if(!outputs)
 	{
-		const mqLib::TAudioOutputs* outputs = nullptr;
-		m_processCallback(g_blockSize, outputs);
+		std::this_thread::yield();
+		return;
+	}
 
-		if(!outputs)
+	const auto& outs = *outputs;
+
+	for(size_t i=0; i<g_blockSize; ++i)
+	{
+		m_stereoOutput[i<<1] = outs[0][i];
+		m_stereoOutput[(i<<1) + 1] = outs[1][i];
+
+		if(silence && (outs[0][i] || outs[1][i]))
+			silence = false;
+	}
+
+	if(!silence)
+	{
+		// continously write to disk if not silent anymore
+		wavWriter.append([&](auto& _dst)
 		{
-			std::this_thread::yield();
-			continue;
+			_dst.reserve(_dst.size() + m_stereoOutput.size());
+			for (auto& d : m_stereoOutput)
+				_dst.push_back(d);
 		}
-
-		const auto& outs = *outputs;
-
-		for(size_t i=0; i<g_blockSize; ++i)
-		{
-			m_stereoOutput[i<<1] = outs[0][i];
-			m_stereoOutput[(i<<1) + 1] = outs[1][i];
-
-			if(silence && (outs[0][i] || outs[1][i]))
-				silence = false;
-		}
-
-		if(!silence)
-		{
-			// continously write to disk if not silent anymore
-			wavWriter.append([&](auto& _dst)
-			{
-				_dst.reserve(_dst.size() + m_stereoOutput.size());
-				for (auto& d : m_stereoOutput)
-					_dst.push_back(d);
-			}
-			);
-		}
+		);
 	}
 }

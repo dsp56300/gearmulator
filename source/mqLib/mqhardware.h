@@ -19,7 +19,7 @@ namespace mqLib
 		explicit Hardware(std::string _romFilename);
 		~Hardware();
 
-		bool process(uint32_t _frames);
+		bool process();
 
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP() { return m_dsp; }
@@ -29,6 +29,8 @@ namespace mqLib
 		void sendMidi(uint8_t _byte);
 		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
 
+		void processAudio(uint32_t _frames);
+
 	private:
 		void injectUCtoDSPInterrupts();
 		void ucYield();
@@ -36,7 +38,6 @@ namespace mqLib
 		void hdiTransferUCtoDSP();
 		void onUCRxEmpty(bool needMoreData);
 		void processUcCycle();
-		void processAudio();
 
 		const std::string m_romFileName;
 
@@ -53,7 +54,6 @@ namespace mqLib
 		uint32_t m_esaiFrameIndex = 0;
 		uint32_t m_lastEsaiFrameIndex = 0;
 		int32_t m_remainingUcCycles = 0;
-		uint32_t m_requestedSampleFrames = 0;
 
 		MqMc m_uc;
 		MqDsp m_dsp;

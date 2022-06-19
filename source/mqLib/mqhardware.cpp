@@ -35,42 +35,9 @@ namespace mqLib
 		m_hdiUC.setRxEmptyCallback({});
 	}
 
-	bool Hardware::process(uint32_t _frames)
+	bool Hardware::process()
 	{
-		m_requestedSampleFrames = _frames;
-
-		if(m_audioInputs.front().size() < _frames)
-		{
-			for (auto& input : m_audioInputs)
-				input.resize(_frames);
-		}
-
-		if(m_audioOutputs.front().size() < _frames)
-		{
-			for (auto& output : m_audioOutputs)
-				output.resize(_frames);
-		}
-
-		if(m_esaiFrameIndex <= 0)
-		{
-			// execute the number of uc cycles that are roughly needed for N sample frames to complete
-
-			const auto ucClock = m_uc.getSim().getSystemClockHz();
-			const auto ucCycles = _frames * ucClock / (44100 * 2);	// stereo interleaved
-
-			for(size_t i=0; i<ucCycles && m_esaiFrameIndex <= 0; ++i)
-				processUcCycle();
-			return false;
-		}
-
-		while(m_requestedSampleFrames)
-			processUcCycle();
-		/*
-		const auto& esai = m_dsp.getPeriph().getEsai();
-
-		while(m_remainingUcCycles > 0 && !esai.getAudioOutputs().full() && !esai.getAudioInputs().empty())
-			processUcCycle();
-		*/
+		processUcCycle();
 		return true;
 	}
 
@@ -116,7 +83,6 @@ namespace mqLib
 
 	void Hardware::ucYield()
 	{
-		processAudio();
 		std::this_thread::yield();
 	}
 
@@ -242,25 +208,30 @@ namespace mqLib
 			assert(!m_haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
 			m_uc.notifyDSPBooted();
 		}
-
-		processAudio();
 	}
 
-	void Hardware::processAudio()
+	void Hardware::processAudio(uint32_t _frames)
 	{
+		if(m_audioInputs.front().size() < _frames)
+		{
+			for (auto& input : m_audioInputs)
+				input.resize(_frames);
+		}
+
+		if(m_audioOutputs.front().size() < _frames)
+		{
+			for (auto& output : m_audioOutputs)
+				output.resize(_frames);
+		}
+
 		auto& esai = m_dsp.getPeriph().getEsai();
 
-		const auto count = std::min(static_cast<uint32_t>(esai.getAudioOutputs().size()>>1), m_requestedSampleFrames);
+		const auto count = _frames;
 
-		if(count < m_requestedSampleFrames)
-			return;
-
-//		LOG("Drain ESAI");
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
 		outputs[0] = &m_audioOutputs[0].front();
 		outputs[1] = &m_audioOutputs[1].front();
 		esai.processAudioInterleaved(inputs, outputs, count);
-		m_requestedSampleFrames -= count;
 	}
 }
