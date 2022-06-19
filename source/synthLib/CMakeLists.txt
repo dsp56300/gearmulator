@@ -6,6 +6,7 @@ add_library(synthLib STATIC)
 set(SOURCES
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
+	configfile.cpp configfile.h
 	device.cpp device.h
 	deviceTypes.h
 	midiToSysex.cpp midiToSysex.h
