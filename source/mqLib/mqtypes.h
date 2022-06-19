@@ -1,5 +1,10 @@
 #pragma once
 
+#include <array>
+#include <vector>
+
+#include "dsp56kEmu/types.h"
+
 namespace mqLib
 {
 	enum PortBits
@@ -21,4 +26,7 @@ namespace mqLib
 		// Port QS
 		DspNMI = 6,
 	};
+
+	using TAudioOutputs = std::array<std::vector<dsp56k::TWord>, 6>;
+	using TAudioInputs = std::array<std::vector<dsp56k::TWord>, 2>;
 }

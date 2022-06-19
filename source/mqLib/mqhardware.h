@@ -4,6 +4,7 @@
 
 #include "mqdsp.h"
 #include "mqmc.h"
+#include "mqtypes.h"
 #include "rom.h"
 
 #include "dsp56kEmu/dspthread.h"
@@ -64,7 +65,7 @@ namespace mqLib
 
 		std::deque<uint32_t> m_txData;
 
-		std::array<std::vector<dsp56k::TWord>, 2> m_audioInputs;
-		std::array<std::vector<dsp56k::TWord>, 6> m_audioOutputs;
+		TAudioInputs m_audioInputs;
+		TAudioOutputs m_audioOutputs;
 	};
 }
