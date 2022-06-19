@@ -10,13 +10,14 @@
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "dsp56kEmu/interpreterunittests.h"
 #include "dsp56kEmu/jitunittests.h"
 
 #include <cpp-terminal/input.hpp>
 
 #include <vector>
 
+#include "audioOutputPA.h"
+#include "audioOutputWAV.h"
 #include "mqGui.h"
 
 using Term::Terminal;
@@ -30,7 +31,7 @@ int main(int _argc, char* _argv[])
 	try
 	{
 //		dsp56k::InterpreterUnitTests tests;		// only valid if Interpreter is active
-		dsp56k::JitUnittests tests;				// only valid if JIT runtime is active
+//		dsp56k::JitUnittests tests;				// only valid if JIT runtime is active
 //		return 0;
 	}
 	catch(std::string& _err)
@@ -72,14 +73,6 @@ int main(int _argc, char* _argv[])
 
 	// audio config: write 24 bit wav file of ESAI output to disk, but not as long as there is only silence
 	bool silence = true;
-
-	const std::string filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
-	synthLib::AsyncWriter wavWriter(filename, 44100);
-
-	constexpr uint32_t blockSize = 64;
-
-	std::vector<dsp56k::TWord> m_stereoOutput;
-	m_stereoOutput.resize(blockSize<<1);
 
 	// do not continously render our terminal GUI but only if something has changed
 	dsp56k::RingBuffer<uint32_t, 1024, true> renderTrigger;
@@ -132,8 +125,7 @@ int main(int _argc, char* _argv[])
 	const auto startTime = std::chrono::system_clock::now();
 	bool waitForBootKeys = true;
 
-	// now run forever
-	while(true)
+	auto processKeys = [&]()
 	{
 		while(!keyBuffer.empty())
 		{
@@ -212,6 +204,11 @@ int main(int _argc, char* _argv[])
 				break;
 			}
 		}
+	};
+
+	auto process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
+	{
+		processKeys();
 
 		if(waitForBootKeys)
 		{
@@ -219,40 +216,24 @@ int main(int _argc, char* _argv[])
 			const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
 
 			if(d < 1000)
-				continue;
+				return;
 
 			waitForBootKeys = false;
 			LOG("Wait for boot keys over");
 		}
 
 		// process until we've got an audio block of size 'blockSize'
-		if(!hw->process(blockSize))
-			continue;
+		if(!hw->process(_blockSize))
+			return;
 
 		// convert to stereo and check for silence
 		auto& outputs = hw->getAudioOutputs();
+		_dst = &outputs;
+	};
 
-		for(size_t i=0; i<blockSize; ++i)
-		{
-			m_stereoOutput[i<<1] = outputs[0][i];
-			m_stereoOutput[(i<<1) + 1] = outputs[1][i];
+	AudioOutputWAV audio(process);
 
-			if(silence && (outputs[0][i] || outputs[1][i]))
-				silence = false;
-		}
-
-		if(!silence)
-		{
-			// continously write to disk if not silent anymore
-			wavWriter.append([&](auto& _dst)
-			{
-				_dst.reserve(_dst.size() + m_stereoOutput.size());
-				for (auto& d : m_stereoOutput)
-					_dst.push_back(d);
-			}
-			);
-		}
-	}
+	audio.process();
 	
 	return 0;
 }
