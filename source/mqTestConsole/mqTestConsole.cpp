@@ -18,6 +18,8 @@
 
 #include "audioOutputPA.h"
 #include "audioOutputWAV.h"
+#include "midiInput.h"
+#include "midiOutput.h"
 #include "mqGui.h"
 
 using Term::Terminal;
@@ -211,6 +213,12 @@ int main(int _argc, char* _argv[])
 
 	AudioOutputPA audio(process);
 
+	MidiInput midiIn;
+	MidiOutput midiOut;
+
+	std::vector<synthLib::SMidiEvent> midiInBuffer;
+	std::vector<uint8_t> midiOutBuffer;
+
 	while(true)
 	{
 		processKeys();
@@ -227,6 +235,39 @@ int main(int _argc, char* _argv[])
 			LOG("Wait for boot keys over");
 		}
 
+		midiIn.process(midiInBuffer);
+
+		for (const auto& e : midiInBuffer)
+		{
+			if(!e.sysex.empty())
+			{
+				for (uint8_t sysexByte : e.sysex)
+					hw->sendMidi(sysexByte);
+			}
+			else
+			{
+				hw->sendMidi(e.a);
+
+				const auto command = e.a & 0xf0;
+
+				if(command != 0xf0)
+				{
+					switch(command)
+					{
+					case synthLib::M_AFTERTOUCH:
+						hw->sendMidi(e.b);
+						break;
+					default:
+						hw->sendMidi(e.b);
+						hw->sendMidi(e.c);
+						break;
+					}
+				}
+			}
+		}
+
+		midiInBuffer.clear();
+
 		for(size_t i=0; i<32; ++i)
 		{
 			hw->process();
@@ -238,6 +279,10 @@ int main(int _argc, char* _argv[])
 			hw->process();
 			hw->process();
 		}
+
+		hw->receiveMidi(midiOutBuffer);
+		midiOut.write(midiOutBuffer);
+		midiOutBuffer.clear();
 	}
 
 	return 0;
