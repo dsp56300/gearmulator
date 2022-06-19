@@ -53,11 +53,24 @@ namespace mqLib
 
 		if(m_esaiFrameIndex <= 0)
 		{
-			processUcCycle();
+			// execute the number of uc cycles that are roughly needed for N sample frames to complete
+
+			const auto ucClock = m_uc.getSim().getSystemClockHz();
+			const auto ucCycles = _frames * ucClock / (44100 * 2);	// stereo interleaved
+
+			for(size_t i=0; i<ucCycles && m_esaiFrameIndex <= 0; ++i)
+				processUcCycle();
 			return false;
 		}
+
 		while(m_requestedSampleFrames)
 			processUcCycle();
+		/*
+		const auto& esai = m_dsp.getPeriph().getEsai();
+
+		while(m_remainingUcCycles > 0 && !esai.getAudioOutputs().full() && !esai.getAudioInputs().empty())
+			processUcCycle();
+		*/
 		return true;
 	}
 
