@@ -30,7 +30,6 @@ namespace mqLib
 		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
 
 	private:
-		void dspExecCallback();
 		void injectUCtoDSPInterrupts();
 		void ucYield();
 		bool hdiTransferDSPtoUC();
