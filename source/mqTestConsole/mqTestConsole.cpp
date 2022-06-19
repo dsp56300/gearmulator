@@ -209,7 +209,7 @@ int main(int _argc, char* _argv[])
 		_dst = &hw->getAudioOutputs();
 	};
 
-	AudioOutputWAV audio(process);
+	AudioOutputPA audio(process);
 
 	while(true)
 	{
