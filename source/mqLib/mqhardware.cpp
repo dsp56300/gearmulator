@@ -21,6 +21,7 @@ namespace mqLib
 		m_dsp.getPeriph().getEsai().setCallback([&](dsp56k::Audio*)
 		{
 			++m_esaiFrameIndex;
+			m_ucWakeupCv.notify_one();
 		}, 0);
 
 		m_hdiUC.setRxEmptyCallback([&](bool needMoreData)
@@ -157,6 +158,8 @@ namespace mqLib
 		{
 			if(m_remainingUcCycles < 0)
 			{
+				std::unique_lock uLock(m_ucWakeupMutex);
+				m_ucWakeupCv.wait(uLock);
 				ucYield();
 				return;
 			}
