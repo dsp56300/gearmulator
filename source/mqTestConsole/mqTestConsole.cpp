@@ -71,9 +71,6 @@ int main(int _argc, char* _argv[])
 	Terminal term(true, true, true, true);
 	Gui gui(*hw);
 
-	// audio config: write 24 bit wav file of ESAI output to disk, but not as long as there is only silence
-	bool silence = true;
-
 	// do not continously render our terminal GUI but only if something has changed
 	dsp56k::RingBuffer<uint32_t, 1024, true> renderTrigger;
 
