@@ -6,7 +6,7 @@
 #include "dsp56kEmu/audio.h"
 #include "dsp56kEmu/logging.h"
 
-constexpr uint32_t g_blocksize = 1024;
+constexpr uint32_t g_blocksize = 256;
 
 static int ourPortAudioCallback(const void*/* inputBuffer*/, void *outputBuffer,
                                 unsigned long framesPerBuffer,
