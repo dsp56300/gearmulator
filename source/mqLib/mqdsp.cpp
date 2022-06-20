@@ -60,7 +60,7 @@ namespace mqLib
 		m_memory.saveAssembly((_filename + ".asm").c_str(), 0, g_pMemSize, true, false, &m_periphX);
 	}
 
-	void MqDsp::dumpXYMem(const std::string& _filename)
+	void MqDsp::dumpXYMem(const std::string& _filename) const
 	{
 		m_memory.save((_filename + "_X.txt").c_str(), dsp56k::MemArea_X);
 		m_memory.save((_filename + "_Y.txt").c_str(), dsp56k::MemArea_Y);
