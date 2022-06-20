@@ -41,7 +41,7 @@ namespace mc68k
 			LOG("Set SCCR0 to " << HEXN(_val, 4));
 			return;
 		case PeriphAddress::SciControl1:
-			LOG("Set SCCR1 to " << HEXN(_val, 4));
+//			LOG("Set SCCR1 to " << HEXN(_val, 4));
 			if(bitTest(_val, Sccr1Bits::TransmitInterruptEnable) && !bitTest(prev, Sccr1Bits::TransmitInterruptEnable))
 				injectInterrupt(ScsrBits::TransmitDataRegisterEmpty);
 			return;
@@ -65,6 +65,9 @@ namespace mc68k
 			return readSciRX();
 		case PeriphAddress::Portqs:
 			return m_portQS.read();
+		case PeriphAddress::SciControl0:
+		case PeriphAddress::SciControl1:
+			return PeripheralBase::read16(_addr);
 		}
 
 		LOG("read16 addr=" << HEXN(_addr, 8));
@@ -125,6 +128,10 @@ namespace mc68k
 			return read16(PeriphAddress::SciData) >> 8;
 		case PeriphAddress::SciDataLSB:
 			return read16(PeriphAddress::SciData) & 0xff;
+		case PeriphAddress::SciControl1LSB:
+		case PeriphAddress::Qilr:
+		case PeriphAddress::Qivr:
+			return PeripheralBase::read8(_addr);
 		}
 		LOG("read8 addr=" << HEXN(_addr, 8));
 		return PeripheralBase::read8(_addr);
@@ -316,7 +323,7 @@ namespace mc68k
 		set(ScsrBits::TransmitDataRegisterEmpty);
 		set(ScsrBits::TransmitComplete);
 		const auto r = PeripheralBase::read16(PeriphAddress::SciStatus);
-		LOG("Read SCSR, res=" << HEXN(r, 4));
+//		LOG("Read SCSR, res=" << HEXN(r, 4));
 		return r;
 	}
 }
