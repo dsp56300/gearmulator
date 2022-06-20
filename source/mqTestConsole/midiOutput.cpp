@@ -19,7 +19,7 @@ int MidiOutput::getDefaultDeviceId() const
 
 bool MidiOutput::openDevice(int devId)
 {
-	const auto err = Pm_OpenOutput(&m_stream, devId, nullptr, 128, returnTimeProc, nullptr, 0);
+	const auto err = Pm_OpenOutput(&m_stream, devId, nullptr, 1024, returnTimeProc, nullptr, 0);
 	if(err != pmNoError)
 		LOG("Failed to open Midi output " << devId);
 	return err == pmNoError;
