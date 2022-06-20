@@ -1,9 +1,11 @@
+#include <fstream>
 #include <iostream>
 #include <memory>
 
 #include "../synthLib/os.h"
 #include "../synthLib/wavWriter.h"
 #include "../synthLib/midiTypes.h"
+#include "../synthLib/configFile.h"
 
 #include "../mqLib/mqmc.h"
 #include "../mqLib/mqhardware.h"
@@ -21,6 +23,7 @@
 #include "midiInput.h"
 #include "midiOutput.h"
 #include "mqGui.h"
+#include "mqSettingsGui.h"
 
 using Term::Terminal;
 using Term::Key;
@@ -73,6 +76,37 @@ int main(int _argc, char* _argv[])
 	Terminal term(true, true, true, true);
 	Gui gui(*hw);
 
+	SettingsGui settings;
+
+	int devIdMidiOut = -1;
+	int devIdMidiIn = -1;
+	int devIdAudioOut = -1;
+
+	std::string devNameMidiIn;
+	std::string devNameMidiOut;
+	std::string devNameAudioOut;
+
+	try
+	{
+		synthLib::ConfigFile cfg((synthLib::getModulePath() + "config.cfg").c_str());
+		for (const auto& v : cfg.getValues())
+		{
+			if(v.first == "MidiIn")
+				devNameMidiIn = v.second;
+			else if(v.first == "MidiOut")
+				devNameMidiOut = v.second;
+			else if(v.first == "AudioOut")
+				devNameAudioOut = v.second;
+		}
+	}
+	catch(const std::runtime_error&)
+	{
+		// no config file available
+	}
+
+	bool settingsChanged = false;
+	bool showSettings = false;
+
 	// do not continously render our terminal GUI but only if something has changed
 	dsp56k::RingBuffer<uint32_t, 1024, true> renderTrigger;
 
@@ -83,7 +117,25 @@ int main(int _argc, char* _argv[])
 			renderTrigger.pop_front();
 			if(renderTrigger.empty())
 			{
-				gui.render();
+				if(showSettings)
+				{
+					settings.render(devIdMidiIn, devIdMidiOut, devIdAudioOut);
+
+					bool changed = true;
+					if(!settings.getMidiInput().empty())
+						devNameMidiIn = settings.getMidiInput();
+					else if(!settings.getMidiOutput().empty())
+						devNameMidiOut = settings.getMidiOutput();
+					else if(!settings.getAudioOutput().empty())
+						devNameAudioOut = settings.getAudioOutput();
+					else
+						changed = false;
+
+					if(changed)
+						settingsChanged = true;
+				}
+				else
+					gui.render();
 				std::this_thread::sleep_for(std::chrono::milliseconds(10));
 			}
 		}
@@ -131,14 +183,57 @@ int main(int _argc, char* _argv[])
 			const auto ch = keyBuffer.pop_front();
 			switch (ch)
 			{
+			case Key::ENTER:
+				if(showSettings)
+				{
+					settings.onEnter();
+					renderTrigger.push_back(1);
+				}
+				break;
+			case Key::ESC:
+				showSettings = !showSettings;
+				renderTrigger.push_back(1);
+				break;
 			case '1':					toggleButton(ButtonType::Inst1);			break;
 			case '2':					toggleButton(ButtonType::Inst2);			break;
 			case '3':					toggleButton(ButtonType::Inst3);			break;
 			case '4':					toggleButton(ButtonType::Inst4);			break;
-			case Key::ARROW_DOWN:		toggleButton(ButtonType::Down);				break;
-			case Key::ARROW_LEFT:		toggleButton(ButtonType::Left);				break;
-			case Key::ARROW_RIGHT:		toggleButton(ButtonType::Right);			break;
-			case Key::ARROW_UP:			toggleButton(ButtonType::Up);				break;
+			case Key::ARROW_DOWN:
+				if(showSettings)
+				{
+					settings.onDown();
+					renderTrigger.push_back(1);
+				}
+				else
+					toggleButton(ButtonType::Down);
+				break;
+			case Key::ARROW_LEFT:
+				if(showSettings)
+				{
+					settings.onLeft();
+					renderTrigger.push_back(1);
+				}
+				else
+					toggleButton(ButtonType::Left);
+				break;
+			case Key::ARROW_RIGHT:
+				if(showSettings)
+				{
+					settings.onRight();
+					renderTrigger.push_back(1);
+				}
+				else
+					toggleButton(ButtonType::Right);
+				break;
+			case Key::ARROW_UP:
+				if(showSettings)
+				{
+					settings.onUp();
+					renderTrigger.push_back(1);
+				}
+				else
+					toggleButton(ButtonType::Up);
+				break;
 			case 'g':					toggleButton(ButtonType::Global);			break;
 			case 'm':					toggleButton(ButtonType::Multi);			break;
 			case 'e':					toggleButton(ButtonType::Edit);				break;
@@ -205,84 +300,130 @@ int main(int _argc, char* _argv[])
 		}
 	};
 
-	auto process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
+	std::function process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
 	{
 		hw->processAudio(_blockSize);
 		_dst = &hw->getAudioOutputs();
 	};
 
-	AudioOutputPA audio(process);
+	std::unique_ptr<AudioOutputPA> audio;
+	std::unique_ptr<MidiInput> midiIn;
+	std::unique_ptr<MidiOutput> midiOut;
 
-	MidiInput midiIn;
-	MidiOutput midiOut;
+	auto createDevices = [&]()
+	{
+		if(!audio || (!devNameAudioOut.empty() && audio->getDeviceName() != devNameAudioOut))
+		{
+			audio.reset();
+			audio.reset(new AudioOutputPA(process, devNameAudioOut));
+		}
+		if(!midiIn || (!devNameMidiIn.empty() && midiIn->getDeviceName() != devNameMidiIn))
+		{
+			midiIn.reset();
+			midiIn.reset(new MidiInput(devNameMidiIn));
+		}
+		if(!midiOut || (!devNameMidiOut.empty() && midiOut->getDeviceName() != devNameMidiOut))
+		{
+			midiOut.reset();
+			midiOut.reset(new MidiOutput(devNameMidiOut));
+		}
+
+		devNameMidiIn.clear();
+		devNameMidiOut.clear();
+		devNameAudioOut.clear();
+
+		std::ofstream fs(synthLib::getModulePath() + "config.cfg");
+
+		if(fs.is_open())
+		{
+			fs << "MidiIn=" << midiIn->getDeviceName() << std::endl;
+			fs << "MidiOut=" << midiOut->getDeviceName() << std::endl;
+			fs << "AudioOut=" << audio->getDeviceName() << std::endl;
+			fs.close();
+		}
+
+		devIdMidiIn = midiIn->getDeviceId();
+		devIdMidiOut = midiOut->getDeviceId();
+		devIdAudioOut = audio->getDeviceId();
+		settingsChanged = false;
+	};
+
+	createDevices();
 
 	std::vector<synthLib::SMidiEvent> midiInBuffer;
 	std::vector<uint8_t> midiOutBuffer;
 
 	while(true)
 	{
-		processKeys();
-
-		if(waitForBootKeys)
+		while(!settingsChanged)
 		{
-			const auto t = std::chrono::system_clock::now();
-			const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
+			processKeys();
 
-			if(d < 1000)
-				continue;
-
-			waitForBootKeys = false;
-			LOG("Wait for boot keys over");
-		}
-
-		midiIn.process(midiInBuffer);
-
-		for (const auto& e : midiInBuffer)
-		{
-			if(!e.sysex.empty())
+			if(waitForBootKeys)
 			{
-				for (uint8_t sysexByte : e.sysex)
-					hw->sendMidi(sysexByte);
+				const auto t = std::chrono::system_clock::now();
+				const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
+
+				if(d < 1000)
+					continue;
+
+				waitForBootKeys = false;
+				LOG("Wait for boot keys over");
 			}
-			else
+
+			midiIn->process(midiInBuffer);
+
+			for (const auto& e : midiInBuffer)
 			{
-				hw->sendMidi(e.a);
-
-				const auto command = e.a & 0xf0;
-
-				if(command != 0xf0)
+				if(!e.sysex.empty())
 				{
-					switch(command)
+					for (uint8_t sysexByte : e.sysex)
+						hw->sendMidi(sysexByte);
+				}
+				else
+				{
+					hw->sendMidi(e.a);
+
+					const auto command = e.a & 0xf0;
+
+					if(command != 0xf0)
 					{
-					case synthLib::M_AFTERTOUCH:
-						hw->sendMidi(e.b);
-						break;
-					default:
-						hw->sendMidi(e.b);
-						hw->sendMidi(e.c);
-						break;
+						switch(command)
+						{
+						case synthLib::M_AFTERTOUCH:
+							hw->sendMidi(e.b);
+							break;
+						default:
+							hw->sendMidi(e.b);
+							hw->sendMidi(e.c);
+							break;
+						}
 					}
 				}
 			}
+
+			midiInBuffer.clear();
+
+			for(size_t i=0; i<32; ++i)
+			{
+				hw->process();
+				hw->process();
+				hw->process();
+				hw->process();
+				hw->process();
+				hw->process();
+				hw->process();
+				hw->process();
+			}
+
+			hw->receiveMidi(midiOutBuffer);
+			midiOut->write(midiOutBuffer);
+			midiOutBuffer.clear();
+
+			audio->process();
 		}
 
-		midiInBuffer.clear();
-
-		for(size_t i=0; i<32; ++i)
-		{
-			hw->process();
-			hw->process();
-			hw->process();
-			hw->process();
-			hw->process();
-			hw->process();
-			hw->process();
-			hw->process();
-		}
-
-		hw->receiveMidi(midiOutBuffer);
-		midiOut.write(midiOutBuffer);
-		midiOutBuffer.clear();
+		createDevices();
 	}
 
 	return 0;

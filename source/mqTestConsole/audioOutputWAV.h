@@ -7,10 +7,10 @@
 class AudioOutputWAV : AudioOutput
 {
 public:
-	explicit AudioOutputWAV(ProcessCallback _callback);
+	explicit AudioOutputWAV(const ProcessCallback& _callback);
 	~AudioOutputWAV() override;
 
-	void process() override;
+	void threadFunc();
 
 private:
 	synthLib::AsyncWriter wavWriter;

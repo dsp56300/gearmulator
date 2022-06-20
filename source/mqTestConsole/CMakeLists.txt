@@ -9,10 +9,13 @@ set(SOURCES
 	audioOutput.cpp
 	audioOutputPA.cpp audioOutputPA.h
 	audioOutputWAV.cpp audioOutputWAV.h
+	device.cpp device.h
 	midi.cpp midi.h
+	midiDevice.cpp midiDevice.h
 	midiInput.cpp midiInput.h
 	midiOutput.cpp midiOutput.h
 	mqGui.cpp mqGui.h
+	mqSettingsGui.cpp mqSettingsGui.h
 	mqTestConsole.cpp
 	../portmidi/pm_common/portmidi.h
 )

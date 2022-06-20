@@ -1,14 +1,30 @@
 #pragma once
-#include "audioOutput.h"
 
-class AudioOutputPA : public AudioOutput
+#include "audioOutput.h"
+#include "device.h"
+
+class AudioOutputPA : public AudioOutput, public Device
 {
 public:
-	AudioOutputPA(ProcessCallback _callback);
+	AudioOutputPA(const ProcessCallback& _callback, const std::string& _deviceName);
+	~AudioOutputPA() override;
 
-	void portAudioCallback(void* _dst, uint32_t _frames) const;
+	int portAudioCallback(void* _dst, uint32_t _frames);
 
 	void process() override;
+
+	int deviceIdFromName(const std::string& _devName) const override;
+	std::string deviceNameFromId(int _devId) const override;
+
+	static std::string getDeviceNameFromId(int _devId);
+
+	bool openDevice(int _devId) override;
+
+	int getDefaultDeviceId() const override;
+
 private:
 	void* m_stream = nullptr;
+	const std::string m_deviceName;
+	bool m_exit = false;
+	bool m_callbackExited = false;
 };

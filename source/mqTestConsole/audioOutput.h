@@ -9,7 +9,7 @@ class AudioOutput
 public:
 	using ProcessCallback = std::function<void(uint32_t, const mqLib::TAudioOutputs*&)>;
 
-	AudioOutput(ProcessCallback _callback) : m_processCallback(std::move(_callback))
+	AudioOutput(const ProcessCallback& _callback) : m_processCallback(_callback)
 	{
 	}
 	virtual ~AudioOutput() = default;
@@ -17,5 +17,5 @@ public:
 	virtual void process() {}
 
 protected:
-	ProcessCallback m_processCallback;
+	const ProcessCallback& m_processCallback;
 };

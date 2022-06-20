@@ -18,15 +18,31 @@ PmTimestamp returnTimeProc(void*)
 	return static_cast<PmTimestamp>(std::chrono::duration_cast<std::chrono::milliseconds>(now).count());
 }
 
-MidiInput::MidiInput()
+MidiInput::MidiInput(const std::string& _deviceName) : MidiDevice(_deviceName)
 {
-	Pm_Initialize();
+	Device::openDevice();
+}
 
-	const auto inputDeviceId = Pm_GetDefaultInputDeviceID();
-	const auto err = Pm_OpenInput(&m_stream, inputDeviceId, nullptr, 8, returnTimeProc, this);
+MidiInput::~MidiInput()
+{
+	Pm_Close(m_stream);
+	m_stream = nullptr;
+	m_deviceId = -1;
+}
+
+int MidiInput::getDefaultDeviceId() const
+{
+	return Pm_GetDefaultInputDeviceID();
+}
+
+bool MidiInput::openDevice(int _devId)
+{
+	const auto err = Pm_OpenInput(&m_stream, _devId, nullptr, 8, returnTimeProc, this);
 
 	if(err != pmNoError)
-		LOG("Failed to open MIDI input device");
+		LOG("Failed to open MIDI input device " << deviceNameFromId(_devId));
+
+	return err == pmNoError;
 }
 
 bool MidiInput::process(std::vector<synthLib::SMidiEvent>& _events)

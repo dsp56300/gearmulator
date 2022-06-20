@@ -1,22 +1,35 @@
 #include "midiOutput.h"
 
+#include "midiInput.h"
 #include "../portmidi/pm_common/portmidi.h"
 #include "../synthLib/midiTypes.h"
 #include "dsp56kEmu/logging.h"
 
 extern PmTimestamp returnTimeProc(void*);
 
-MidiOutput::MidiOutput()
+MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName)
 {
-	Pm_Initialize();
+	Device::openDevice();
+}
 
-	const auto deviceId = Pm_GetDefaultOutputDeviceID();
+int MidiOutput::getDefaultDeviceId() const
+{
+	return Pm_GetDefaultOutputDeviceID();
+}
 
-	auto err = Pm_OpenOutput(&m_stream, deviceId, nullptr, 128, returnTimeProc, nullptr, 0);
+bool MidiOutput::openDevice(int devId)
+{
+	const auto err = Pm_OpenOutput(&m_stream, devId, nullptr, 128, returnTimeProc, nullptr, 0);
 	if(err != pmNoError)
-	{
-		LOG("Failed to open Midi output");
-	}
+		LOG("Failed to open Midi output " << devId);
+	return err == pmNoError;
+}
+
+MidiOutput::~MidiOutput()
+{
+	Pm_Close(m_stream);
+	m_stream = nullptr;
+	m_deviceId = -1;
 }
 
 void MidiOutput::write(const std::vector<uint8_t>& _data)

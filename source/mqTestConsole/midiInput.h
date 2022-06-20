@@ -1,14 +1,23 @@
 #pragma once
 
+#include <string>
 #include <vector>
+
+#include "midiDevice.h"
 
 #include "../synthLib/midiTypes.h"
 
-class MidiInput
+class MidiInput : public MidiDevice
 {
 public:
-	MidiInput();
+	MidiInput(const std::string& _deviceName);
+	~MidiInput() override;
+
 	bool process(std::vector<synthLib::SMidiEvent>& _events);
+
+	int getDefaultDeviceId() const override;
+
+	bool openDevice(int _devId) override;
 private:
 	void process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _message);
 
