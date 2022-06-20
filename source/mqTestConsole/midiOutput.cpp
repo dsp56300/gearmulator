@@ -47,7 +47,11 @@ void MidiOutput::write(const std::vector<synthLib::SMidiEvent>& _events) const
 		if(!e.sysex.empty())
 		{
 			LOG("MIDI Out Write Sysex of length " << e.sysex.size());
-			Pm_WriteSysEx(m_stream, 0, const_cast<unsigned char*>(&e.sysex.front()));
+			const auto err = Pm_WriteSysEx(m_stream, 0, const_cast<unsigned char*>(&e.sysex.front()));
+			if(err != pmNoError)
+			{
+				LOG("Failed to send sysex, err " << err << " => " << Pm_GetErrorText(err));
+			}
 		}
 		else
 		{

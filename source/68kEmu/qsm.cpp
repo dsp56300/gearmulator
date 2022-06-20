@@ -270,7 +270,7 @@ namespace mc68k
 	{
 		if(m_sciRxData.empty())
 		{
-			LOG("Empty SCI read");
+//			LOG("Empty SCI read");
 			return 0;
 		}
 

@@ -1,6 +1,7 @@
 #include "midiInput.h"
 
 #include <array>
+#include <cassert>
 
 #include "../portmidi/pm_common/portmidi.h"
 
@@ -78,6 +79,7 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 	{
 		if(byte == synthLib::M_STARTOFSYSEX)
 		{
+			assert(m_sysexBuffer.empty());
 			m_readSysex = true;
 			m_sysexBuffer.push_back(byte);
 		}
@@ -88,7 +90,12 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 				if(byte == synthLib::M_ENDOFSYSEX)
 				{
 					m_sysexBuffer.push_back(byte);
-					LOG("Received sysex of size " << m_sysexBuffer.size());
+					std::stringstream ss;
+					ss << HEXN(m_sysexBuffer.front(), 2);
+					for(size_t i=1; i<m_sysexBuffer.size(); ++i)
+						ss << ',' << HEXN(m_sysexBuffer[i], 2);
+					const std::string s(ss.str());
+					LOG("Received sysex of size " << m_sysexBuffer.size() << ": " << s);
 				}
 				else
 				{
