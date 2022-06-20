@@ -2,19 +2,25 @@
 #include <vector>
 
 #include "midi.h"
+#include "midiDevice.h"
 
 namespace synthLib
 {
 	struct SMidiEvent;
 }
 
-class MidiOutput
+class MidiOutput : public MidiDevice
 {
 public:
-	MidiOutput();
+	MidiOutput(const std::string& _deviceName);
+	~MidiOutput() override;
+
 	void write(const std::vector<uint8_t>& _data);
 	void write(const std::vector<synthLib::SMidiEvent>& _events) const;
 
+	int getDefaultDeviceId() const override;
+
+	bool openDevice(int devId) override;
 private:
 	void* m_stream = nullptr;
 	MidiBufferParser m_parser;

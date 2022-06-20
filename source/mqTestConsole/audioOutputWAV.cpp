@@ -6,14 +6,14 @@ constexpr uint32_t g_blockSize = 64;
 
 const std::string g_filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
 
-AudioOutputWAV::AudioOutputWAV(ProcessCallback _callback): AudioOutput(std::move(_callback)), wavWriter(g_filename, 44100)
+AudioOutputWAV::AudioOutputWAV(const ProcessCallback& _callback): AudioOutput(_callback), wavWriter(g_filename, 44100)
 {
 	m_stereoOutput.resize(g_blockSize<<1);
 
 	m_thread.reset(new std::thread([&]()
 	{
 		while(!m_terminate)
-			process();
+			threadFunc();
 	}));
 }
 
@@ -24,7 +24,7 @@ AudioOutputWAV::~AudioOutputWAV()
 	m_thread.reset();
 }
 
-void AudioOutputWAV::process()
+void AudioOutputWAV::threadFunc()
 {
 	const mqLib::TAudioOutputs* outputs = nullptr;
 	m_processCallback(g_blockSize, outputs);
