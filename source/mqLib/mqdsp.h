@@ -27,7 +27,7 @@ namespace mqLib
 		}
 
 		void dumpPMem(const std::string& _filename);
-		void dumpXYMem(const std::string& _filename);
+		void dumpXYMem(const std::string& _filename) const;
 
 	private:
 		dsp56k::Peripherals56362 m_periphX;
