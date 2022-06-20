@@ -77,15 +77,23 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 	for (const auto byte : bytes)
 	{
 		if(byte == synthLib::M_STARTOFSYSEX)
+		{
 			m_readSysex = true;
-
-		if(m_readSysex)
+			m_sysexBuffer.push_back(byte);
+		}
+		else if(m_readSysex)
 		{
 			if(byte >= 0x80)
 			{
 				if(byte == synthLib::M_ENDOFSYSEX)
+				{
 					m_sysexBuffer.push_back(byte);
-				//else: aborted sysex
+					LOG("Received sysex of size " << m_sysexBuffer.size());
+				}
+				else
+				{
+					LOG("Received ABORTED sysex of size " << m_sysexBuffer.size());
+				}
 
 				m_readSysex = false;
 				synthLib::SMidiEvent ev;
@@ -94,6 +102,8 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 				_events.emplace_back(ev);
 				return;
 			}
+
+			m_sysexBuffer.push_back(byte);
 		}
 	}
 
