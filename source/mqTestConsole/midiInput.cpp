@@ -37,7 +37,7 @@ int MidiInput::getDefaultDeviceId() const
 
 bool MidiInput::openDevice(int _devId)
 {
-	const auto err = Pm_OpenInput(&m_stream, _devId, nullptr, 8, returnTimeProc, this);
+	const auto err = Pm_OpenInput(&m_stream, _devId, nullptr, 1024, returnTimeProc, this);
 
 	if(err != pmNoError)
 		LOG("Failed to open MIDI input device " << deviceNameFromId(_devId));
