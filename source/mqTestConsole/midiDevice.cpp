@@ -2,7 +2,7 @@
 
 #include "../portmidi/pm_common/portmidi.h"
 
-MidiDevice::MidiDevice(const std::string& _deviceName): Device(_deviceName)
+MidiDevice::MidiDevice(const std::string& _deviceName, bool _output): Device(_deviceName), m_output(_output)
 {
 	Pm_Initialize();
 }
@@ -26,6 +26,13 @@ int MidiDevice::deviceIdFromName(const std::string& _devName) const
 
 	for(int i=0; i<count; ++i)
 	{
+		const auto* di = Pm_GetDeviceInfo(i);
+
+		if(m_output && !di->output)
+			continue;
+		if(!m_output && !di->input)
+			continue;
+
 		const auto name = deviceNameFromId(i);
 		if(name.empty())
 			continue;;

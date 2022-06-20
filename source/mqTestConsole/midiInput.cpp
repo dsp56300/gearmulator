@@ -18,7 +18,7 @@ PmTimestamp returnTimeProc(void*)
 	return static_cast<PmTimestamp>(std::chrono::duration_cast<std::chrono::milliseconds>(now).count());
 }
 
-MidiInput::MidiInput(const std::string& _deviceName) : MidiDevice(_deviceName)
+MidiInput::MidiInput(const std::string& _deviceName) : MidiDevice(_deviceName, false)
 {
 	Device::openDevice();
 }

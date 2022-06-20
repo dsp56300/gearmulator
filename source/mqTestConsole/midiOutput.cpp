@@ -7,7 +7,7 @@
 
 extern PmTimestamp returnTimeProc(void*);
 
-MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName)
+MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName, true)
 {
 	Device::openDevice();
 }
