@@ -34,10 +34,12 @@ namespace mqLib
 		void processAudio(uint32_t _frames);
 
 	private:
-		void injectUCtoDSPInterrupts();
+		void hdiProcessUCtoDSPNMIIrq();
+		void hdiSendIrqToDSP(uint8_t _irq);
 		void ucYield();
 		bool hdiTransferDSPtoUC();
-		void hdiTransferUCtoDSP();
+		void hdiTransferUCtoDSP(dsp56k::TWord _word);
+		void waitDspRxEmpty();
 		void onUCRxEmpty(bool needMoreData);
 		void processUcCycle();
 
@@ -61,8 +63,6 @@ namespace mqLib
 
 		mc68k::Hdi08& m_hdiUC;
 		dsp56k::HDI08& m_hdiDSP;
-
-		std::deque<uint32_t> m_txData;
 
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;

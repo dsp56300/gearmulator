@@ -24,9 +24,17 @@ namespace mqLib
 			m_ucWakeupCv.notify_one();
 		}, 0);
 
-		m_hdiUC.setRxEmptyCallback([&](bool needMoreData)
+		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
 		{
 			onUCRxEmpty(needMoreData);
+		});
+		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		{
+			hdiTransferUCtoDSP(_word);
+		});
+		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
+		{
+			hdiSendIrqToDSP(_irq);
 		});
 	}
 
@@ -61,39 +69,27 @@ namespace mqLib
 			_data.push_back(data & 0xff);
 	}
 
-	void Hardware::injectUCtoDSPInterrupts()
+	void Hardware::hdiProcessUCtoDSPNMIIrq()
 	{
-		bool injected = false;
-
 		// QS6 is connected to DSP NMI pin but I've never seen this being triggered
 		const uint8_t requestNMI = m_uc.requestDSPinjectNMI();
 
 		if(m_requestNMI && !requestNMI)
 		{
 			LOG("uc request DSP NMI");
-			injected = true;
-			while(!m_dsp.dsp().injectInterrupt(dsp56k::Vba_NMI))
-				ucYield();
+			hdiSendIrqToDSP(dsp56k::Vba_NMI);
 		}
 
 		m_requestNMI = requestNMI;
+	}
 
-		uint8_t interruptAddr;
-		while(m_hdiUC.pollInterruptRequest(interruptAddr))
-		{
-//			LOG("Inject interrupt " << HEXN(interruptAddr, 2));
-			injected = true;
-			while(!m_dsp.dsp().injectInterrupt(interruptAddr))
-				ucYield();
-		}
-
-		if(!injected)
-			return;
+	void Hardware::hdiSendIrqToDSP(uint8_t _irq)
+	{
+		while(!m_dsp.dsp().injectInterrupt(_irq))
+			ucYield();
 
 		while(m_dsp.dsp().hasPendingInterrupts())
 			ucYield();
-
-//		LOG("No interrupts pending");
 	}
 
 	void Hardware::ucYield()
@@ -113,20 +109,16 @@ namespace mqLib
 		return false;
 	}
 
-	void Hardware::hdiTransferUCtoDSP()
+	void Hardware::hdiTransferUCtoDSP(dsp56k::TWord _word)
 	{
-		m_hdiUC.pollTx(m_txData);
+		m_haveSentTXtoDSP = true;
+//		LOG("toDSP writeRX=" << HEX(_word));
+		m_hdiDSP.writeRX(&_word, 1);
+		waitDspRxEmpty();
+	}
 
-		if(m_txData.empty())
-			return;
-
-		for (const uint32_t data : m_txData)
-		{
-			m_haveSentTXtoDSP = true;
-//			LOG("toDSP writeRX=" << HEX(data));
-			m_hdiDSP.writeRX(&data, 1);
-		}
-		m_txData.clear();
+	void Hardware::waitDspRxEmpty()
+	{
 		while((m_hdiDSP.hasRXData() && m_hdiDSP.rxInterruptEnabled()) || m_dsp.dsp().hasPendingInterrupts())
 			ucYield();
 //		LOG("writeRX wait over");
@@ -134,8 +126,6 @@ namespace mqLib
 
 	void Hardware::onUCRxEmpty(bool needMoreData)
 	{
-		injectUCtoDSPInterrupts();
-
 		m_hdiDSP.injectTXInterrupt();
 
 		if(needMoreData)
@@ -194,7 +184,7 @@ namespace mqLib
 			m_hdiDSP.setPendingHostFlags01(hf01);
 		}
 
-		injectUCtoDSPInterrupts();
+		hdiProcessUCtoDSPNMIIrq();
 
 		// transfer DSP host flags HF2&3 to uc
 		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
@@ -210,7 +200,6 @@ namespace mqLib
 		if(isr != prevIsr)
 			m_hdiUC.isr(isr);
 
-		hdiTransferUCtoDSP();
 		hdiTransferDSPtoUC();
 
 		if(m_uc.requestDSPReset())
