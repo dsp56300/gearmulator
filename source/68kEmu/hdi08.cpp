@@ -10,6 +10,9 @@ namespace mc68k
 
 	Hdi08::Hdi08(): PeripheralBase(g_hdi08Base, g_hdi08Size)
 	{
+		setWriteTxCallback(nullptr);
+		setWriteIrqCallback(nullptr);
+
 		write8(PeriphAddress::HdiIVR, 0xf);
 	}
 
@@ -73,7 +76,11 @@ namespace mc68k
 			{
 				const auto addr = static_cast<uint8_t>((_val & Hv) << 1);
 //				LOG("HDI08 Host Vector Interrupt Request, interrupt vector = " << HEXN(addr, 2));
-				m_pendingInterruptRequests.push_back(addr);
+				m_writeIrqCallback(addr);
+
+				const auto val = read8(PeriphAddress::HdiCVR);
+				PeripheralBase::write8(PeriphAddress::HdiCVR, val & ~Hc);
+
 //				write8(_addr, _val & ~Hc);
 			}
 			return;
@@ -111,9 +118,6 @@ namespace mc68k
 		_addr = m_pendingInterruptRequests.front();
 
 		m_pendingInterruptRequests.pop_front();
-
-		const auto val = read8(PeriphAddress::HdiCVR);
-		write8(PeriphAddress::HdiCVR, val & ~Hc);
 
 		return true;
 	}
@@ -158,6 +162,36 @@ namespace mc68k
 		return (isr() & Rxdf) == 0;
 	}
 
+	void Hdi08::setWriteTxCallback(const CallbackWriteTx& _writeTxCallback)
+	{
+		if(_writeTxCallback)
+		{
+			m_writeTxCallback = _writeTxCallback;
+		}
+		else
+		{
+			m_writeTxCallback = [this] (const uint32_t _word)
+			{
+				m_txData.push_back(_word);
+			};
+		}
+	}
+
+	void Hdi08::setWriteIrqCallback(const CallbackWriteIrq& _writeIrqCallback)
+	{
+		if(_writeIrqCallback)
+		{
+			m_writeIrqCallback = _writeIrqCallback;
+		}
+		else
+		{
+			m_writeIrqCallback = [this](uint8_t _irq)
+			{
+				m_pendingInterruptRequests.push_back(_irq);
+			};
+		}
+	}
+
 	void Hdi08::writeTX(WordFlags _index, uint8_t _val)
 	{
 		m_txBytes[static_cast<uint32_t>(_index)] = _val;
@@ -183,7 +217,7 @@ namespace mc68k
 			                  l << 16 | m << 8 | h :
 			                  h << 16 | m << 8 | l;
 
-		m_txData.push_back(word);
+		m_writeTxCallback(word);
 
 //		LOG("HDI TX: " << HEXN(word, 6));
 

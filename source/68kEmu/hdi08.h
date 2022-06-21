@@ -43,6 +43,8 @@ namespace mc68k
 		};
 
 		using CallbackRxEmpty = std::function<void(bool)>;
+		using CallbackWriteTx = std::function<void(uint32_t)>;
+		using CallbackWriteIrq = std::function<void(uint8_t)>;
 
 		Hdi08();
 
@@ -74,7 +76,8 @@ namespace mc68k
 		{
 			m_rxEmptyCallback = _rxEmptyCallback;
 		}
-
+		void setWriteTxCallback(const CallbackWriteTx& _writeTxCallback);
+		void setWriteIrqCallback(const CallbackWriteIrq& _writeIrqCallback);
 	private:
 		enum class WordFlags
 		{
