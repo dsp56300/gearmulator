@@ -34,7 +34,7 @@ namespace mc68k
 		case PeriphAddress::HdiICR:
 			return r;
 		}
-		LOG("read8 addr=" << HEXN(_addr, 8));
+//		LOG("read8 addr=" << HEXN(_addr, 8));
 		return r;
 	}
 
