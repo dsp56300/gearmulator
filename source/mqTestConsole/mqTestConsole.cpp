@@ -283,10 +283,10 @@ int main(int _argc, char* _argv[])
 				hw->sendMidi(0x0);
 				break;
 			case '!':
-				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getDspCycles()));
+				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getUcCycles()));
 				break;
 			case '&':
-				hw->getDSP().dumpXYMem("dsp_dump_mem_" + std::to_string(hw->getDspCycles()) + "_");
+				hw->getDSP().dumpXYMem("dsp_dump_mem_" + std::to_string(hw->getUcCycles()) + "_");
 				break;
 			case '"':
 				hw->getUC().dumpMemory("mc_dump_mem");
