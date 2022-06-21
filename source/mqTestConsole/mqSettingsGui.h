@@ -4,7 +4,9 @@
 
 #include <cpp-terminal/window.hpp>
 
-class SettingsGui
+#include "mqGuiBase.h"
+
+class SettingsGui : GuiBase
 {
 public:
 	SettingsGui();

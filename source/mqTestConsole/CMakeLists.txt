@@ -15,6 +15,7 @@ set(SOURCES
 	midiInput.cpp midiInput.h
 	midiOutput.cpp midiOutput.h
 	mqGui.cpp mqGui.h
+	mqGuiBase.cpp mqGuiBase.h
 	mqSettingsGui.cpp mqSettingsGui.h
 	mqTestConsole.cpp
 	../portmidi/pm_common/portmidi.h
