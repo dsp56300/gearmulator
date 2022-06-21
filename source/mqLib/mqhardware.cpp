@@ -145,28 +145,28 @@ namespace mqLib
 
 	void Hardware::processUcCycle()
 	{
-		// we can only use ESAI to clock the uc once it has been enabled
-		if(m_esaiFrameIndex > m_lastEsaiFrameIndex)
+		if(m_remainingUcCycles <= 0)
 		{
-			const auto ucClock = m_uc.getSim().getSystemClockHz();
-			const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
-
-			m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
-			m_lastEsaiFrameIndex = m_esaiFrameIndex;
-		}
-		if(m_esaiFrameIndex > 0)
-		{
-			if(m_remainingUcCycles < 0)
+			// we can only use ESAI to clock the uc once it has been enabled
+			if(m_esaiFrameIndex > 0)
 			{
-				std::unique_lock uLock(m_ucWakeupMutex);
-				m_ucWakeupCv.wait(uLock);
-				ucYield();
-				return;
+				if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
+				{
+					std::unique_lock uLock(m_ucWakeupMutex);
+					m_ucWakeupCv.wait(uLock);
+				}
+
+				const auto ucClock = m_uc.getSim().getSystemClockHz();
+				const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
+
+				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
+				m_lastEsaiFrameIndex = m_esaiFrameIndex;
 			}
 		}
+
 		// If ESAI is not enabled, we roughly clock the uc to execute one op for each 5 DSP ops.
 		/*
-		else if(m_uc.getCycles() > m_dspCycles/5)
+		if(m_esaiFrameIndex == 0 && m_uc.getCycles() > m_dspCycles/5)
 		{
 			ucYield();
 			return;
