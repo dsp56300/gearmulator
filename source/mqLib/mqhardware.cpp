@@ -154,11 +154,6 @@ namespace mqLib
 
 	void Hardware::processUcCycle()
 	{
-		const auto instructionCounter = m_dsp.dsp().getInstructionCounter();
-		const auto d = dsp56k::delta(instructionCounter, m_dspInstructionCounter);
-		m_dspInstructionCounter = instructionCounter;
-		m_dspCycles += d;
-
 		// we can only use ESAI to clock the uc once it has been enabled
 		if(m_esaiFrameIndex > m_lastEsaiFrameIndex)
 		{

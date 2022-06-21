@@ -23,7 +23,7 @@ namespace mqLib
 
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP() { return m_dsp; }
-		uint64_t getDspCycles() const { return m_dspCycles; }
+		uint64_t getUcCycles() const { return m_uc.getCycles(); }
 		const auto& getAudioOutputs() { return m_audioOutputs; }
 
 		void sendMidi(uint8_t _byte);
@@ -47,8 +47,6 @@ namespace mqLib
 
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
 		uint32_t m_hdiHF23 = 0;	// DSP => uc
-		uint64_t m_dspCycles = 0;
-		uint32_t m_dspInstructionCounter = 0;
 		bool m_requestNMI = false;
 		bool m_haveSentTXtoDSP = false;
 
