@@ -1,5 +1,6 @@
 #include "mqGuiBase.h"
 
+#include <iostream>
 #include <cpp-terminal/base.hpp>
 
 bool GuiBase::handleTerminalSize()
@@ -10,7 +11,7 @@ bool GuiBase::handleTerminalSize()
 	if(w == m_termSizeX && h == m_termSizeY)
 		return false;
 
-	Term::clear_screen();
+	std::cout << Term::clear_screen();
 
 	m_termSizeX = w;
 	m_termSizeY = h;
