@@ -258,7 +258,7 @@ void Gui::renderHelp(int x, int y)
 	renderLabel(x, y  , "Buttons: 1-4=Inst | Arrows=Cursor | g=Global | m=Multi | e=Edit | s=Sound | S=Shift | M=Multimode | p=Play | P=Peek | q=Power");
 	renderLabel(x, y+1, "Encoders: F1/F2 & F3/F4=LCD Left/Right | 5/6=Alpha Dial | F5-F12=Matrix");
 	renderLabel(x, y+2, "MIDI: 7=Note ON | 8=Note OFF | 9=Modwheel Max | 0=Modwheel Min");
-	renderLabel(x, y+3, "Escape: Open Settings, select MIDI In/Out & Audio Out");
+	renderLabel(x, y+3, "Escape: Open Settings to select MIDI In/Out & Audio Out");
 }
 
 void Gui::renderDebug(int x, int y)
