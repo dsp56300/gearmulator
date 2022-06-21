@@ -85,6 +85,8 @@ namespace mqLib
 
 	void Hardware::hdiSendIrqToDSP(uint8_t _irq)
 	{
+		waitDspRxEmpty();
+
 		while(!m_dsp.dsp().injectInterrupt(_irq))
 			ucYield();
 
@@ -114,7 +116,6 @@ namespace mqLib
 		m_haveSentTXtoDSP = true;
 //		LOG("toDSP writeRX=" << HEX(_word));
 		m_hdiDSP.writeRX(&_word, 1);
-		waitDspRxEmpty();
 	}
 
 	void Hardware::waitDspRxEmpty()
@@ -180,6 +181,7 @@ namespace mqLib
 		if(hf01 != m_hdiHF01)
 		{
 //			LOG("HDI HF01=" << HEXN(hf01>>3,1));
+			waitDspRxEmpty();
 			m_hdiHF01 = hf01;
 			m_hdiDSP.setPendingHostFlags01(hf01);
 		}
