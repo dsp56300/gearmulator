@@ -12,7 +12,7 @@ constexpr auto g_itemDefault = Term::fg::white;
 constexpr auto g_itemHovered = Term::bg::gray;
 constexpr auto g_itemNotHovered = Term::bg::black;
 
-constexpr int32_t g_maxEntries = 12;
+constexpr int32_t g_maxEntries = 17;
 
 SettingsGui::SettingsGui()
 	: m_win(140, 21)
@@ -39,6 +39,9 @@ void SettingsGui::render(int _midiInput, int _midiOutput, int _audioOutput)
 	x = renderSettings(x, y, _midiInput, 0, "MIDI Input");	x += 3;
 	x = renderSettings(x, y, _midiOutput, 1, "MIDI Output");	x += 3;
 	renderSettings(x, y, _audioOutput, 2, "Audio Output");
+
+	m_win.fill_fg(1,21, 90, 21, Term::fg::gray);
+	m_win.print_str(1, 21, "Use Cursor Keys to navigate, Return to select a device. Escape to go back.");
 
 	std::cout << m_win.render(1,1,true) << std::flush;
 }
@@ -213,7 +216,7 @@ int SettingsGui::renderSettings(int x, int y, int _selectedId, const int _column
 
 		if(m_cursorY == idx && m_cursorX == _column)
 		{
-			m_win.fill_bg(x,y, x + len, y, g_itemHovered);
+			m_win.fill_bg(x,y, x + len - 1, y, g_itemHovered);
 			if(m_enter)
 			{
 				m_enter = false;
@@ -222,7 +225,7 @@ int SettingsGui::renderSettings(int x, int y, int _selectedId, const int _column
 		}
 		else
 		{
-			m_win.fill_bg(x,y, x + len, y, g_itemNotHovered);
+			m_win.fill_bg(x,y, x + len - 1, y, g_itemNotHovered);
 		}
 		m_win.fill_fg(x,y, x + len, y, s.devId == _selectedId ? g_itemActive : g_itemDefault);
 		m_win.print_str(x, y, s.name);
