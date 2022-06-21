@@ -76,7 +76,7 @@ int AudioOutputPA::portAudioCallback(void* _dst, uint32_t _frames)
 
 	while(_frames > 0)
 	{
-		auto f = std::min(static_cast<uint32_t>(64), _frames);
+		auto f = _frames;//std::min(static_cast<uint32_t>(64), _frames);
 		_frames -= f;
 
 		const mqLib::TAudioOutputs* outputs = nullptr;
