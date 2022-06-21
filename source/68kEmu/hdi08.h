@@ -114,5 +114,7 @@ namespace mc68k
 		uint32_t m_readTimeoutCycles = 0;
 
 		CallbackRxEmpty m_rxEmptyCallback;
+		CallbackWriteTx m_writeTxCallback;
+		CallbackWriteIrq m_writeIrqCallback;
 	};
 }
