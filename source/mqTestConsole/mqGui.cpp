@@ -17,6 +17,8 @@ Gui::Gui(mqLib::Hardware& _hw)
 
 void Gui::render()
 {
+	handleTerminalSize();
+
 	m_win.fill_fg(1,1,g_deviceW, 1, Term::fg::bright_yellow);
 	m_win.fill_fg(1,g_deviceH,g_deviceW, g_deviceH, Term::fg::bright_yellow);
 

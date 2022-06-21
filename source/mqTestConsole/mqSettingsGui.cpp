@@ -15,13 +15,14 @@ constexpr auto g_itemNotHovered = Term::bg::black;
 constexpr int32_t g_maxEntries = 12;
 
 SettingsGui::SettingsGui()
-	: m_win(140, 20)
+	: m_win(140, 21)
 {
 }
 
 void SettingsGui::render(int _midiInput, int _midiOutput, int _audioOutput)
 {
-	m_win.clear();
+	if(!handleTerminalSize())
+		m_win.clear();
 
 	m_midiInput.clear();
 	m_midiOutput.clear();

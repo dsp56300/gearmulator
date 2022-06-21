@@ -3,6 +3,8 @@
 #include <cpp-terminal/base.hpp>
 #include <cpp-terminal/window.hpp>
 
+#include "mqGuiBase.h"
+
 #include "../mqLib/buttons.h"
 #include "../mqLib/leds.h"
 
@@ -14,7 +16,7 @@ namespace mqLib
 	class Hardware;
 }
 
-class Gui
+class Gui : GuiBase
 {
 public:
 	explicit Gui(mqLib::Hardware& _hw);
