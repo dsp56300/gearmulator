@@ -1,5 +1,7 @@
 #pragma once
 
+#include <thread>
+
 #include "audioOutput.h"
 #include "device.h"
 
@@ -27,4 +29,5 @@ private:
 	const std::string m_deviceName;
 	bool m_exit = false;
 	bool m_callbackExited = false;
+	std::unique_ptr<std::thread> m_thread;
 };

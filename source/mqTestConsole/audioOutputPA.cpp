@@ -34,6 +34,15 @@ AudioOutputPA::AudioOutputPA(const ProcessCallback& _callback, const std::string
 	err = Pa_StartStream(m_stream);
 	if (err != paNoError)
 		LOG("Failed to start stream");
+
+	m_thread.reset(new std::thread([&]()
+	{
+		while(!m_exit)
+		{
+			std::this_thread::sleep_for(std::chrono::seconds(1));
+			process();
+		}
+	}));
 }
 
 AudioOutputPA::~AudioOutputPA()
@@ -42,6 +51,9 @@ AudioOutputPA::~AudioOutputPA()
 
 	while(!m_callbackExited)
 		std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+	m_thread->join();
+	m_thread.reset();
 
 	Pa_StopStream(m_stream);
 	Pa_CloseStream(m_stream);

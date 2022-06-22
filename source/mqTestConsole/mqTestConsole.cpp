@@ -429,8 +429,6 @@ int main(int _argc, char* _argv[])
 			hw->receiveMidi(midiOutBuffer);
 			midiOut->write(midiOutBuffer);
 			midiOutBuffer.clear();
-
-			audio->process();
 		}
 
 		createDevices();
