@@ -47,7 +47,7 @@ namespace mqLib
 		m_dsp.setPC(g_bootCodeBase);
 		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
 
-		m_periphX.getEsai().writeEmptyAudioIn(256);
+		m_periphX.getEsai().writeEmptyAudioIn(256 + 8);
 	}
 
 	void MqDsp::exec()
