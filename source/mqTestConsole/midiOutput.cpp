@@ -21,7 +21,10 @@ bool MidiOutput::openDevice(int devId)
 {
 	const auto err = Pm_OpenOutput(&m_stream, devId, nullptr, 1024, returnTimeProc, nullptr, 0);
 	if(err != pmNoError)
+	{
 		LOG("Failed to open Midi output " << devId);
+		m_stream = nullptr;
+	}
 	return err == pmNoError;
 }
 
@@ -42,6 +45,9 @@ void MidiOutput::write(const std::vector<uint8_t>& _data)
 
 void MidiOutput::write(const std::vector<synthLib::SMidiEvent>& _events) const
 {
+	if(!m_stream)
+		return;
+
 	for (const auto& e : _events)
 	{
 		if(!e.sysex.empty())

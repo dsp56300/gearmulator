@@ -41,13 +41,19 @@ bool MidiInput::openDevice(int _devId)
 	const auto err = Pm_OpenInput(&m_stream, _devId, nullptr, 1024, returnTimeProc, this);
 
 	if(err != pmNoError)
+	{
 		LOG("Failed to open MIDI input device " << deviceNameFromId(_devId));
+		m_stream = nullptr;
+	}
 
 	return err == pmNoError;
 }
 
 bool MidiInput::process(std::vector<synthLib::SMidiEvent>& _events)
 {
+	if(!m_stream)
+		return false;
+
 	if(Pm_Poll(m_stream) == pmNoData)
 		return false;
 
