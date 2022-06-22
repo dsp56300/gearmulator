@@ -236,12 +236,15 @@ namespace mqLib
 		outputs[0] = &m_audioOutputs[0].front();
 		outputs[1] = &m_audioOutputs[1].front();
 
+		esai.processAudioInputInterleaved(inputs, count);
+
 		// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 		const auto requiredSize = (_frames << 1) - 8;
 		while(esai.getAudioOutputs().size() < requiredSize)
-			std::this_thread::sleep_for(std::chrono::microseconds(200));
+			std::this_thread::yield();
+//			std::this_thread::sleep_for(std::chrono::microseconds(200));
 
 //		LOG("Out Size " << esai.getAudioOutputs().size() << ", in size " << esai.getAudioInputs().size());
-		esai.processAudioInterleaved(inputs, outputs, count);
+		esai.processAudioOutputInterleaved(outputs, count);
 	}
 }
