@@ -6,12 +6,13 @@
 
 #include "mqGuiBase.h"
 
-class SettingsGui : GuiBase
+class SettingsGui : public GuiBase
 {
 public:
 	SettingsGui();
 
 	void render(int _midiInput, int _midiOutput, int _audioOutput);
+	void onOpen() override;
 
 	void onEnter();
 	void onDown();
