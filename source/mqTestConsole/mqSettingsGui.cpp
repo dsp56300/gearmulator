@@ -7,6 +7,8 @@
 #include "../portmidi/pm_common/portmidi.h"
 #include "../portaudio/include/portaudio.h"
 
+#include "dsp56kEmu/logging.h"
+
 constexpr auto g_itemActive = Term::fg::bright_yellow;
 constexpr auto g_itemDefault = Term::fg::white;
 constexpr auto g_itemHovered = Term::bg::gray;
@@ -114,10 +116,21 @@ void SettingsGui::findSettings()
 		p.device = i;
 		p.suggestedLatency = di->defaultLowOutputLatency;
 
-		if(Pa_IsFormatSupported(nullptr, &p, 44100.0) != paFormatIsSupported)
-			continue;
+		const auto supportResult = Pa_IsFormatSupported(nullptr, &p, 44100.0);
+		if(supportResult != paFormatIsSupported)
+		{
+			std::stringstream ss;
 
-		const auto* api = Pa_GetHostApiInfo(di->hostApi);
+			ss << "Audio Device not supported: " << AudioOutputPA::getDeviceNameFromId(i) << ", result " << Pa_GetErrorText(supportResult);
+
+			const auto* hostError = Pa_GetLastHostErrorInfo();
+			if(hostError)
+				ss << ", host error info: " << hostError->errorCode << ", msg: " << (hostError->errorText ? hostError->errorText : "null");
+
+			const auto msg(ss.str());
+			LOG( msg);
+			continue;
+		}
 
 		const std::string name = AudioOutputPA::getDeviceNameFromId(i);
 
