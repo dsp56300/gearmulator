@@ -112,11 +112,21 @@ int main(int _argc, char* _argv[])
 
 	std::thread renderer([&]
 	{
+		bool prevShowSettings = true;
+
 		while(hw)
 		{
 			renderTrigger.pop_front();
 			if(renderTrigger.empty())
 			{
+				if(prevShowSettings != showSettings)
+				{
+					prevShowSettings = showSettings;
+					if(showSettings)
+						settings.onOpen();
+					else
+						gui.onOpen();
+				}
 				if(showSettings)
 				{
 					settings.render(devIdMidiIn, devIdMidiOut, devIdAudioOut);

@@ -28,8 +28,6 @@ void SettingsGui::render(int _midiInput, int _midiOutput, int _audioOutput)
 	m_midiOutput.clear();
 	m_audioOutput.clear();
 
-	findSettings();
-
 	int x = 1;
 	int y = 1;
 
@@ -44,6 +42,12 @@ void SettingsGui::render(int _midiInput, int _midiOutput, int _audioOutput)
 	m_win.print_str(1, 21, "Use Cursor Keys to navigate, Return to select a device. Escape to go back.");
 
 	std::cout << m_win.render(1,1,true) << std::flush;
+}
+
+void SettingsGui::onOpen()
+{
+	GuiBase::onOpen();
+	findSettings();
 }
 
 void SettingsGui::onEnter()
@@ -73,10 +77,10 @@ void SettingsGui::onUp()
 
 void SettingsGui::findSettings()
 {
-	// MIDI
 	for (auto& setting : m_settings)
 		setting.clear();
 
+	// MIDI
 	const auto devCount = Pm_CountDevices();
 
 	for(int i=0; i<devCount; ++i)

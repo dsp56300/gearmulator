@@ -2,6 +2,9 @@
 
 class GuiBase
 {
+public:
+	virtual ~GuiBase() = default;
+	virtual void onOpen() {}
 protected:
 	bool handleTerminalSize();
 private:

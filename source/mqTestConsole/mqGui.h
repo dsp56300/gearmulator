@@ -16,7 +16,7 @@ namespace mqLib
 	class Hardware;
 }
 
-class Gui : GuiBase
+class Gui : public GuiBase
 {
 public:
 	explicit Gui(mqLib::Hardware& _hw);
