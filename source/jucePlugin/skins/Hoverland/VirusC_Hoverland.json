@@ -5253,6 +5253,23 @@
                     }
                 },
                 {
+                                    "name" : "PureTuning",
+                                    "parameterAttachment" : {
+                                        "parameter" : "Pure Tuning"
+                                    },
+                                    "rotary" : {
+                                    },
+                                    "spritesheet" : {
+                                        "x" : "107",
+                                        "y" : "769",
+                                        "width" : "140",
+                                        "height" : "140",
+                                        "texture" : "Gen_140x140_x2",
+                                        "tileSizeX" : "140",
+                                        "tileSizeY" : "140"
+                                    }
+                                },
+                {
                     "name" : "ArpModeButton",
                     "parameterAttachment" : {
                         "parameter" : "Arp Mode"
