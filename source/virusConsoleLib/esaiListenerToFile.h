@@ -8,8 +8,6 @@ class EsaiListenerToFile : public EsaiListener
 public:
 	EsaiListenerToFile(dsp56k::Esai& _esai, uint8_t _outChannels, uint8_t _inChannels, TCallback _callback, uint32_t _samplerate, std::string _audioFilename);
 
-	static void writeWord(std::vector<uint8_t>& _dst, dsp56k::TWord _word);
-
 private:
 	bool onDeliverAudioData(const std::vector<dsp56k::TWord>& _audioData) override;
 	void onBeginDeliverAudioData() override;

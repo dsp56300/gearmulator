@@ -58,11 +58,3 @@ void EsaiListenerToFile::writeWord(const uint8_t _channel, const dsp56k::TWord _
 {
 	writeWord(m_audioDatas[_channel], _word);
 }
-
-void EsaiListenerToFile::writeWord(std::vector<uint8_t>& _dst, dsp56k::TWord _word)
-{
-	const auto d = reinterpret_cast<const uint8_t*>(&_word);
-	_dst.push_back(d[0]);
-	_dst.push_back(d[1]);
-	_dst.push_back(d[2]);
-}

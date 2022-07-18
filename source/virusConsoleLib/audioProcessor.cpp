@@ -1,6 +1,5 @@
 #include "audioProcessor.h"
 
-#include <mutex>
 #include <vector>
 
 #include "esaiListenerToFile.h"
@@ -17,21 +16,13 @@ AudioProcessor::AudioProcessor(uint32_t _samplerate, std::string _outputFilename
 , m_maxSampleCount(_maxSamplecount)
 , m_dsp1(_dsp1)
 , m_dsp2(_dsp2)
+, m_writer(_outputFilename, _samplerate, _terminateOnSilence)
 {
 	m_outputBuffers.resize(2);
 	m_inputBuffers.resize(2);
-
-	m_threadWrite.reset(new std::thread([this]()
-	{
-		threadWriteFunc();
-	}));
 }
 
-AudioProcessor::~AudioProcessor()
-{
-	m_threadWrite->join();
-	m_threadWrite.reset();
-}
+AudioProcessor::~AudioProcessor() = default;
 
 void AudioProcessor::processBlock(const uint32_t _blockSize)
 {
@@ -53,15 +44,15 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 
 	auto sampleCount = static_cast<uint32_t>(m_inputBuffers[0].size());
 
-	if(terminateOnSilence && m_silenceDuration >= m_samplerate * 5)
+	if(terminateOnSilence && m_writer.getSilenceDuration() >= m_samplerate * 5)
 	{
-		m_finished = true;
+		m_writer.setFinished();
 		return;
 	}
 
 	if(m_maxSampleCount && m_processedSampleCount >= m_maxSampleCount)
 	{
-		m_finished = true;
+		m_writer.setFinished();
 		return;
 	}
 
@@ -83,15 +74,16 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 	m_processedSampleCount += sampleCount;
 
 	{
-		std::lock_guard lock(m_writeMutex);
-
-		m_stereoOutput.reserve(m_stereoOutput.size() + sampleCount * 2);
-
-		for(size_t iSrc=0; iSrc<sampleCount; ++iSrc)
+		m_writer.append([&](std::vector<dsp56k::TWord>& _dst)
 		{
-			m_stereoOutput.push_back(m_outputs[0][iSrc]);
-			m_stereoOutput.push_back(m_outputs[1][iSrc]);
-		}
+			_dst.reserve(m_stereoOutput.size() + sampleCount * 2);
+
+			for(size_t iSrc=0; iSrc<sampleCount; ++iSrc)
+			{
+				_dst.push_back(m_outputs[0][iSrc]);
+				_dst.push_back(m_outputs[1][iSrc]);
+			}
+		});
 	}
 
 	while(m_dsp1->getPeriphX().getHDI08().hasTX())
@@ -104,63 +96,5 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 		m_dsp2->getPeriphX().getHDI08().readTX();
 
 	if(m_maxSampleCount && m_processedSampleCount >= m_maxSampleCount)
-		m_finished = true;
-}
-
-void AudioProcessor::threadWriteFunc()
-{
-	synthLib::WavWriter writer;
-
-	std::vector<dsp56k::TWord> m_wordBuffer;
-	m_wordBuffer.reserve(m_outputBuffers.size() * m_outputBuffers[0].size());
-	std::vector<uint8_t> m_byteBuffer;
-	m_byteBuffer.reserve(m_wordBuffer.capacity() * 3);
-
-	while(true)
-	{
-		{
-			std::lock_guard lock(m_writeMutex);
-			std::swap(m_wordBuffer, m_stereoOutput);
-		}
-
-		if(m_wordBuffer.empty() && m_byteBuffer.empty() && m_finished)
-			break;
-
-		if(!m_wordBuffer.empty())
-		{
-			for (const dsp56k::TWord w : m_wordBuffer)
-				EsaiListenerToFile::writeWord(m_byteBuffer, w);
-
-			if(m_terminateOnSilence)
-			{
-				bool isSilence = true;
-
-				for (const dsp56k::TWord w : m_wordBuffer)
-				{
-					constexpr dsp56k::TWord silenceThreshold = 0x1ff;
-					const bool silence = w < silenceThreshold || w >= (0xffffff - silenceThreshold);
-					if(!silence)
-					{
-						isSilence = false;
-						break;
-					}
-				}
-
-				if(isSilence)
-					m_silenceDuration += static_cast<uint32_t>(m_wordBuffer.size() >> 1);
-				else
-					m_silenceDuration = 0;
-			}
-
-			m_wordBuffer.clear();
-		}
-
-		if(!m_byteBuffer.empty())
-		{
-			if(writer.write(m_outputFilname, 24, false, 2, static_cast<int>(m_samplerate), &m_byteBuffer[0], m_byteBuffer.size()))
-				m_byteBuffer.clear();
-		}
-
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	}
+		m_writer.setFinished();
 }

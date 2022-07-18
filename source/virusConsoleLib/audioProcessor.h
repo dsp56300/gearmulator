@@ -1,14 +1,13 @@
 #pragma once
 
 #include <cstdint>
-#include <mutex>
 #include <string>
-#include <thread>
 #include <vector>
 
 #include "dsp56kEmu/types.h"
 
 #include "../synthLib/audioTypes.h"
+#include "../synthLib/wavWriter.h"
 
 #include "../virusLib/midiOutParser.h"
 
@@ -25,11 +24,9 @@ public:
 
 	void processBlock(uint32_t _blockSize);
 
-	bool finished() const { return m_finished; }
+	bool finished() const { return m_writer.isFinished(); }
 
 private:
-	void threadWriteFunc();
-
 	// constant data
 	const uint32_t m_samplerate;
 	const std::string m_outputFilname;
@@ -48,8 +45,6 @@ private:
 	virusLib::MidiOutParser m_midiOut;
 
 	uint32_t m_processedSampleCount = 0;
-	uint32_t m_silenceDuration = 0;
-	bool m_finished = false;
-	std::unique_ptr<std::thread> m_threadWrite;
-	std::mutex m_writeMutex;
+
+	synthLib::AsyncWriter m_writer;
 };
