@@ -146,6 +146,8 @@ namespace synthLib
 		std::vector<uint8_t> m_byteBuffer;
 		m_byteBuffer.reserve(m_wordBuffer.capacity() * 3);
 
+		bool foundNonSilence = false;
+
 		while(true)
 		{
 			{
@@ -176,10 +178,15 @@ namespace synthLib
 						}
 					}
 
-					if(isSilence)
+					if(foundNonSilence && isSilence)
+					{
 						m_silenceDuration += static_cast<uint32_t>(m_wordBuffer.size() >> 1);
+					}
 					else
+					{
 						m_silenceDuration = 0;
+						foundNonSilence = true;
+					}
 				}
 
 				m_wordBuffer.clear();
