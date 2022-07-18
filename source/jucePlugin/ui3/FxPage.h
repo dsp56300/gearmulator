@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../juceUiLib/condition.h"
+#include "../../juceUiLib/condition.h"
 
 namespace genericVirusUI
 {

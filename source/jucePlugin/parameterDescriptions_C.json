@@ -325,7 +325,7 @@
  		{"page":114, "index":73, "name":"Part Midi Volume Enable", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":74, "name":"Part Hold Pedal Enable", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":75, "name":"Keyb To Midi", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
- 		{"page":114, "index":76, "name":"C_Undefined76", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
+ 		{"page":114, "index":76, "name":"Pure Tuning", "min":0, "max":127, "toText":"unsignedZero", "isPublic":true, "isDiscrete":false, "isBool":false},
  		{"page":114, "index":77, "name":"Note Steal Priority", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":78, "name":"Part Prog Change Enable", "min":0, "max":1, "isPublic":false, "isDiscrete":false, "isBool":true},
  		{"page":114, "index":79, "name":"C_Undefined79", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
