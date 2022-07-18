@@ -130,7 +130,7 @@ bool ConsoleApp::loadDemo(const std::string& _filename)
 
 	if(m_demo->loadFile(_filename))
 	{
-		std::cout << "Loaded demo song from file " << m_demo->loadFile(_filename) << std::endl;
+		std::cout << "Loaded demo song from file " << _filename << std::endl;
 		return true;
 	}
 
