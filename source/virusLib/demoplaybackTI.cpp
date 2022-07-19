@@ -39,8 +39,8 @@ namespace virusLib
 		if(_data[0] != 0xf8 || _data[1] != 0x50)
 			return false;
 
-		// skip 2 unknown bytes at startup
-		for(size_t i=2; i<_data.size();)
+		// skip 4 unknown bytes at startup
+		for(size_t i=4; i<_data.size();)
 		{
 			if(!parseChunk(_data, i))
 				break;
@@ -80,9 +80,8 @@ namespace virusLib
 	bool DemoPlaybackTI::parseChunk(const std::vector<uint8_t>& _data, const size_t _offset)
 	{
 		Chunk chunk;
-		chunk.deltaTime = static_cast<uint32_t>(_data[_offset]) << 8 | _data[_offset+1];
 
-		const auto size = _data[_offset+2];
+		const auto size = _data[_offset];
 
 		if(!size)
 			return false;
@@ -91,7 +90,9 @@ namespace virusLib
 			return false;
 
 		chunk.data.resize(size);
-		memcpy(&chunk.data[0], &_data[_offset+3], size);
+		memcpy(&chunk.data[0], &_data[_offset+1], size);
+
+		chunk.deltaTime = static_cast<uint32_t>(_data[_offset + size + 1]) << 8 | _data[_offset + size + 2];
 
 		m_chunks.push_back(chunk);
 		return true;
