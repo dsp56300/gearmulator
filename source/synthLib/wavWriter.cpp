@@ -182,7 +182,7 @@ namespace synthLib
 					{
 						m_silenceDuration += static_cast<uint32_t>(m_wordBuffer.size() >> 1);
 					}
-					else
+					else if(!isSilence)
 					{
 						m_silenceDuration = 0;
 						foundNonSilence = true;
