@@ -57,7 +57,7 @@ set(SOURCES
 	sim.cpp sim.h
 )
 
-target_sources(68kEmu PRIVATE ${SOURCES} ${SOURCES_MOIRA} ${SOURCES_MUSASHI})
+target_sources(68kEmu PRIVATE ${SOURCES} ${SOURCES_MUSASHI})
 source_group("source" FILES ${SOURCES})
 source_group("source\\Moira" FILES ${SOURCES_MOIRA})
 source_group("source\\Musashi" FILES ${SOURCES_MUSASHI})
@@ -67,6 +67,6 @@ target_include_directories(68kEmu PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Moira
 )
 
-set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 20)
+set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 14)
 
 target_link_libraries(68kEmu PUBLIC dsp56kEmu)
