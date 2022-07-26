@@ -64,7 +64,7 @@ int main(int _argc, char* _argv[])
 		{
 			if(!app->loadInternalDemo())
 			{
-				std::cout << "Failed to internal demo, the ROM might not contain any demo song" << std::endl;
+				std::cout << "Failed to load internal demo, the ROM might not contain any demo song" << std::endl;
 				ConsoleApp::waitReturn();
 				return -1;
 			}
