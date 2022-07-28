@@ -386,7 +386,32 @@ namespace Virus
 		            linkedParam->setValueFromSynth(it->second, true);
             }
 
-            if (onProgramChange)
+            bool found = false;
+            for(size_t b=0; b<m_singles.size() && !found; ++b)
+            {
+	            const auto& singlePatches = m_singles[b];
+
+                for(size_t s=0; s<singlePatches.size(); ++s)
+                {
+                    const auto& singlePatch = singlePatches[s];
+
+                    if(singlePatch.name == patch.name)
+                    {
+                        m_currentBank[ch] = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
+                        m_currentProgram[ch] = static_cast<uint8_t>(s);
+                        found = true;
+                        break;
+                    }
+                }
+            }
+
+            if(!found)
+            {
+	            m_currentProgram[ch] = 0;
+                m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
+            }
+
+			if (onProgramChange)
 				onProgramChange();
 		}
 		else

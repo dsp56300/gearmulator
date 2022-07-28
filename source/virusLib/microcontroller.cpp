@@ -60,8 +60,11 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 
 	m_globalSettings.fill(0xffffffff);
 
-	m_rom.getMulti(0, m_multiEditBuffer);
+	for(size_t i=0; i<m_multis.size(); ++i)
+		m_rom.getMulti(0, m_multis[i]);
 
+	m_multiEditBuffer = m_multis.front();
+	
 	bool failed = false;
 
 	// read all singles from ROM and copy first ROM banks to RAM banks
@@ -803,11 +806,12 @@ bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& 
 		return true;
 	}
 
-	if (_bank != BankNumber::A)
+	if (_bank != BankNumber::A || _program >= m_multis.size())
 		return false;
 
 	// Load from flash
-	return m_rom.getMulti(_program, _data);
+	_data = m_multis[_program];
+	return true;
 }
 
 bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const
@@ -860,6 +864,12 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 
 bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
 {
+	if(_bank == BankNumber::A && _program < m_multis.size())
+	{
+		m_multis[_program] = _data;
+		return true;
+	}
+
 	if (_bank != BankNumber::EditBuffer) 
 	{
 		LOG("We do not support writing to RAM or ROM, attempt to write multi to bank " << static_cast<int>(toMidiByte(_bank)) << ", program " << static_cast<int>(_program));
@@ -920,12 +930,10 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 
 bool Microcontroller::multiProgramChange(uint8_t _value)
 {
-	TPreset multi;
-
-	if(!m_rom.getMulti(_value, multi))
+	if(_value >= m_multis.size())
 		return true;
 
-	return loadMulti(_value, multi);
+	return loadMulti(_value, m_multis[_value]);
 }
 
 bool Microcontroller::loadMulti(uint8_t _program, const TPreset& _multi)
