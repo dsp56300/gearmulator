@@ -246,7 +246,7 @@
  		{"page":113, "index":102, "name":"B_Undefined102", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":113, "index":103, "name":"Assign 4 Source", "min":0, "max":27, "toText":"modmatrixSource", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":104, "name":"Assign 4 Destination", "min":0, "max":122, "toText":"modmatrixDest", "isPublic":true, "isDiscrete":true, "isBool":false},
- 		{"page":113, "index":105, "name":"Assign 4 Amount", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
+ 		{"page":113, "index":105, "name":"Assign 4 Amount", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
  		{"page":113, "index":106, "name":"Assign 5 Source", "min":0, "max":27, "toText":"modmatrixSource", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":107, "name":"Assign 5 Destination", "min":0, "max":122, "toText":"modmatrixDest", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":108, "name":"Assign 5 Amount", "min":0, "max":127, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
