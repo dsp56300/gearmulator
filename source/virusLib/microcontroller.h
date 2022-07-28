@@ -70,6 +70,7 @@ private:
 	dsp56k::HDI08& m_hdi08;
 	ROMFile& m_rom;
 
+	std::array<TPreset,128> m_multis;
 	TPreset m_multiEditBuffer;
 
 	std::array<uint8_t, 256> m_globalSettings;
