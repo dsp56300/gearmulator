@@ -75,6 +75,7 @@ private:
 	dsp56k::HDI08Queue m_hdi08;
 	const ROMFile& m_rom;
 
+	std::array<TPreset,128> m_multis;
 	TPreset m_multiEditBuffer;
 
 	std::array<uint32_t, 256> m_globalSettings;
