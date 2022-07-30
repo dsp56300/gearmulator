@@ -1,5 +1,16 @@
 Release Notes 
 
+1.2.20 (2022.07.29):
+
+- [Imp] Performance has improved by 10% - 20% depending on the use case
+- [Imp] Additional performance improvements by reducing the amount of dynamic code that has to be rebuilt. Improves Multi Mode and Demo Playback
+- [Imp] Pure Tuning can now be adjusted in global settings (Hoverland skin only), thanks to @samstaton
+
+- [Fix] The 128 RAM Multis are now stored in plugin state, fixes #110
+- [Fix] Parameter "Assign 4 Amount" displayed values from 0 to 127 instead of -64 to +63, fixes #99
+- [Fix] Preset prev/next buttons do not work before a preset is selected via dropdown menu, fixes #98
+- [Fix] Unusual install location on linux, now /usr/local/lib/vst(3) is used, fixes #87
+
 1.2.19 (2022.05.25):
 
 - [Fix] Preset changes were discarded because the last selected patch browser preset was always loaded when opening UI

@@ -112,9 +112,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		endif()
 	elseif(UNIX)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
-			install(TARGETS ${targetName}_VST LIBRARY DESTINATION "$ENV{HOME}/.vst/" COMPONENT VST2${componentName})
+			install(TARGETS ${targetName}_VST LIBRARY DESTINATION /usr/local/lib/vst/ COMPONENT VST2${componentName})
 		endif()
-		install(TARGETS ${targetName}_VST3 LIBRARY DESTINATION "$ENV{HOME}/.vst3/" COMPONENT VST3${componentName})
+		install(TARGETS ${targetName}_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3${componentName})
 	endif()
 endmacro()
 
