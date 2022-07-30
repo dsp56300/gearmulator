@@ -18,10 +18,15 @@ namespace mqLib
 		m_hdiDSP.setRXRateLimit(0);
 		m_hdiDSP.setTransmitDataAlwaysEmpty(false);
 
-		m_dsp.getPeriph().getEsai().setCallback([&](dsp56k::Audio*)
+		auto& esai = m_dsp.getPeriph().getEsai();
+
+		esai.setCallback([&](dsp56k::Audio*)
 		{
 			++m_esaiFrameIndex;
-			m_ucWakeupCv.notify_one();
+			m_esaiFrameAddedCv.notify_one();
+
+			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
+				m_requestedFramesAvailableCv.notify_one();
 		}, 0);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
@@ -152,8 +157,8 @@ namespace mqLib
 			{
 				if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
 				{
-					std::unique_lock uLock(m_ucWakeupMutex);
-					m_ucWakeupCv.wait(uLock);
+					std::unique_lock uLock(m_esaiFrameAddedMutex);
+					m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
 				}
 
 				const auto ucClock = m_uc.getSim().getSystemClockHz();
@@ -238,15 +243,22 @@ namespace mqLib
 
 		esai.processAudioInputInterleaved(inputs, count);
 
-		// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
-
 		const auto requiredSize = (_frames << 1) - 8;
 
-		while(esai.getAudioOutputs().size() < requiredSize)
-			std::this_thread::yield();
-//			std::this_thread::sleep_for(std::chrono::microseconds(20));
+		if(esai.getAudioOutputs().size() < requiredSize)
+		{
+			// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 
-//		LOG("Out Size " << esai.getAudioOutputs().size() << ", in size " << esai.getAudioInputs().size());
+			m_requestedFrames = requiredSize;
+			std::unique_lock uLock(m_requestedFramesAvailableMutex);
+			m_requestedFramesAvailableCv.wait(uLock, [&]()
+			{
+				return esai.getAudioOutputs().size() >= requiredSize;
+			});
+
+			m_requestedFrames = 0;
+		}
+
 		esai.processAudioOutputInterleaved(outputs, count);
 	}
 }

@@ -67,7 +67,11 @@ namespace mqLib
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;
 
-		std::mutex m_ucWakeupMutex;
-		std::condition_variable m_ucWakeupCv;
+		std::mutex m_esaiFrameAddedMutex;
+		std::condition_variable m_esaiFrameAddedCv;
+
+		std::mutex m_requestedFramesAvailableMutex;
+		std::condition_variable m_requestedFramesAvailableCv;
+		size_t m_requestedFrames = 0;
 	};
 }
