@@ -164,7 +164,7 @@ namespace mqLib
 			}
 		}
 
-		// If ESAI is not enabled, we roughly clock the uc to execute one op for each 5 DSP ops.
+		// If ESAI is not enabled, we may roughly clock the uc to execute one op for each 5 DSP ops.
 		/*
 		if(m_esaiFrameIndex == 0 && m_uc.getCycles() > m_dspCycles/5)
 		{
