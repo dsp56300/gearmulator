@@ -8,7 +8,7 @@ namespace mc68k
 {
 	class Mc68k;
 
-	class Sim : public PeripheralBase
+	class Sim final : public PeripheralBase<g_simBase, g_simSize>
 	{
 	public:
 		enum PicrBits : uint16_t

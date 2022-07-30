@@ -8,7 +8,7 @@
 
 namespace mc68k
 {
-	class Hdi08 : public PeripheralBase
+	class Hdi08 final : public PeripheralBase<g_hdi08Base, g_hdi08Size>
 	{
 	public:
 		enum IsrBits
@@ -64,8 +64,20 @@ namespace mc68k
 
 		void exec(uint32_t _deltaCycles) override;
 
-		uint8_t isr()	{ return read8(PeriphAddress::HdiISR); }
-		uint8_t icr()	{ return read8(PeriphAddress::HdiICR); }
+		uint8_t isr()
+		{
+			auto isr = PeripheralBase::read8(PeriphAddress::HdiISR);
+
+			// we want new data for transmission
+			isr |= Txde;
+
+			return isr;
+		}
+
+		uint8_t icr()
+		{
+			return PeripheralBase::read8(PeriphAddress::HdiICR);
+		}
 
 		void isr(uint8_t _isr) { write8(PeriphAddress::HdiISR, _isr); }
 		void icr(uint8_t _icr) { write8(PeriphAddress::HdiICR, _icr); }

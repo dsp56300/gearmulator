@@ -5,7 +5,7 @@
 
 namespace mc68k
 {
-	Sim::Sim(Mc68k& _mc68k): PeripheralBase(g_simBase, g_simSize), m_mc68k(_mc68k)
+	Sim::Sim(Mc68k& _mc68k) : m_mc68k(_mc68k)
 	{
 		write16(PeriphAddress::Syncr, 0x3f00);
 		write16(PeriphAddress::Picr, 0xf);

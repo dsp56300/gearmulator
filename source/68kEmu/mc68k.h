@@ -23,8 +23,17 @@ namespace mc68k
 		virtual void onReset() {}
 		virtual uint32_t onIllegalInstruction(uint32_t opcode) { return 0; }
 
-		static void writeW(std::vector<uint8_t>& _buf, size_t _offset, uint16_t _value);
-		static uint16_t readW(const std::vector<uint8_t>& _buf, size_t _offset);
+		static void writeW(uint8_t* _buf, size_t _offset, uint16_t _value);
+		static void writeW(std::vector<uint8_t>& _buf, size_t _offset, uint16_t _value)
+		{
+			writeW(&_buf[0], _offset, _value);
+		}
+
+		static uint16_t readW(const uint8_t* _buf, size_t _offset);
+		static uint16_t readW(const std::vector<uint8_t>& _buf, size_t _offset)
+		{
+			return readW(&_buf[0], _offset);
+		}
 
 		virtual uint8_t read8(uint32_t _addr);
 		virtual uint16_t read16(uint32_t _addr);

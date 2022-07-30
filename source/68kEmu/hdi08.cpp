@@ -8,7 +8,7 @@ namespace mc68k
 {
 	constexpr uint32_t g_readTimeoutCycles = 50;
 
-	Hdi08::Hdi08(): PeripheralBase(g_hdi08Base, g_hdi08Size)
+	Hdi08::Hdi08()
 	{
 		setWriteTxCallback(nullptr);
 		setWriteIrqCallback(nullptr);
@@ -18,22 +18,19 @@ namespace mc68k
 
 	uint8_t Hdi08::read8(PeriphAddress _addr)
 	{
-		auto r = PeripheralBase::read8(_addr);
-
 		switch (_addr)
 		{
+		case PeriphAddress::HdiICR:
+			return icr();
 		case PeriphAddress::HdiISR:
-			// we want new data for transmission
-			r |= Txde;
-			return r;
-		case PeriphAddress::HdiCVR:
-			return r;
+			return isr();
 		case PeriphAddress::HdiTXH:	return readRX(WordFlags::H);
 		case PeriphAddress::HdiTXM:	return readRX(WordFlags::M);
 		case PeriphAddress::HdiTXL:	return readRX(WordFlags::L);
-		case PeriphAddress::HdiICR:
-			return r;
+		case PeriphAddress::HdiCVR:
+			return PeripheralBase::read8(_addr);
 		}
+		const auto r = PeripheralBase::read8(_addr);
 //		LOG("read8 addr=" << HEXN(_addr, 8));
 		return r;
 	}

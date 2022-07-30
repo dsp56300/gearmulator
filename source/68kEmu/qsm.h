@@ -11,7 +11,7 @@ namespace mc68k
 {
 	class Mc68k;
 
-	class Qsm : public PeripheralBase
+	class Qsm final : public PeripheralBase<g_qsmBase, g_qsmSize>
 	{
 	public:
 		enum class Sccr1Bits

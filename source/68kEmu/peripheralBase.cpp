@@ -4,28 +4,13 @@
 
 namespace mc68k
 {
-	PeripheralBase::PeripheralBase(const uint32_t _base, const uint32_t _size) : m_baseAddress(_base)
+	void periphBaseWriteW(uint8_t* _buffer, const uint32_t _addr, const uint16_t _val)
 	{
-		m_buffer.resize(_size, 0);
+		Mc68k::writeW(_buffer, _addr, _val);
 	}
 
-	uint8_t PeripheralBase::read8(const PeriphAddress _addr)
+	uint16_t periphBaseReadW(const uint8_t* _buffer, const uint32_t _addr)
 	{
-		return m_buffer[static_cast<size_t>(_addr) - m_baseAddress];
-	}
-
-	uint16_t PeripheralBase::read16(const PeriphAddress _addr)
-	{
-		return Mc68k::readW(m_buffer, static_cast<size_t>(_addr) - m_baseAddress);
-	}
-
-	void PeripheralBase::write8(PeriphAddress _addr, uint8_t _val)
-	{
-		m_buffer[static_cast<size_t>(_addr) - m_baseAddress] = _val;
-	}
-
-	void PeripheralBase::write16(PeriphAddress _addr, uint16_t _val)
-	{
-		return Mc68k::writeW(m_buffer, static_cast<size_t>(_addr) - m_baseAddress, _val);
+		return Mc68k::readW(_buffer, _addr);
 	}
 }

@@ -8,10 +8,10 @@ namespace mc68k
 {
 	class Mc68k;
 
-	class Gpt : public PeripheralBase
+	class Gpt final : public PeripheralBase<g_gptBase, g_gptSize>
 	{
 	public:
-		Gpt(Mc68k& _mc68k) : PeripheralBase(g_gptBase, g_gptSize), m_mc68k(_mc68k) {}
+		Gpt(Mc68k& _mc68k) : m_mc68k(_mc68k) {}
 
 		void write8(PeriphAddress _addr, uint8_t _val) override;
 		uint8_t read8(PeriphAddress _addr) override;
