@@ -19,8 +19,6 @@ namespace mqLib
 		fclose(hFile);
 
 		if(numRead != static_cast<size_t>(size))
-			return;
-
-		fclose(hFile);
+			m_data.clear();
 	}
 }
