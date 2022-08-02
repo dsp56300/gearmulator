@@ -56,6 +56,7 @@ namespace mqLib
 		uint32_t m_esaiFrameIndex = 0;
 		uint32_t m_lastEsaiFrameIndex = 0;
 		int32_t m_remainingUcCycles = 0;
+		double m_remainingUcCyclesD = 0;
 
 		MqMc m_uc;
 		MqDsp m_dsp;

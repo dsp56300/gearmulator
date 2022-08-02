@@ -180,9 +180,15 @@ namespace mqLib
 				const auto esaiFrameIndex = m_esaiFrameIndex;
 
 				const auto ucClock = m_uc.getSim().getSystemClockHz();
-				const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
 
-				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (esaiFrameIndex - m_lastEsaiFrameIndex));
+				constexpr double divInv = 1.0 / (44100.0 * 2.0);	// stereo interleaved
+				const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
+
+				const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
+				
+				m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
+				m_remainingUcCycles = static_cast<int32_t>(m_remainingUcCyclesD);
+				m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
 				if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
 				{
