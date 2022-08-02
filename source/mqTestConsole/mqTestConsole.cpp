@@ -73,7 +73,7 @@ int main(int _argc, char* _argv[])
 	});
 
 	// create terminal-GUI
-	Terminal term(true, true, true, true);
+	Terminal term(true, true, false, true);
 	Gui gui(*hw);
 
 	SettingsGui settings;
