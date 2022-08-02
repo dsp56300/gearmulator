@@ -177,12 +177,14 @@ namespace mqLib
 					m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
 				}
 
+				const auto esaiFrameIndex = m_esaiFrameIndex;
+
 				const auto ucClock = m_uc.getSim().getSystemClockHz();
 				const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
 
-				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
+				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (esaiFrameIndex - m_lastEsaiFrameIndex));
 
-				if((m_esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
+				if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
 				{
 					m_haltDSP = true;
 				}
@@ -192,7 +194,7 @@ namespace mqLib
 					m_haltDSPcv.notify_one();
 				}
 
-				m_lastEsaiFrameIndex = m_esaiFrameIndex;
+				m_lastEsaiFrameIndex = esaiFrameIndex;
 			}
 		}
 
