@@ -105,14 +105,14 @@ namespace mc68k
 		LOG("write16 addr=" << HEXN(_addr, 8) << ", val=" << HEXN(_val,4));
 	}
 
-	void Sim::exec(uint32_t _deltaCycles)
+	void Sim::exec(const uint32_t _deltaCycles)
 	{
 		if(!m_timerLoadValue)
 			return;
 
 		m_timerCurrentValue -= static_cast<int32_t>(_deltaCycles);
 
-		if(m_timerCurrentValue < 0)
+		if(m_timerCurrentValue <= 0)
 		{
 			const auto picr = PeripheralBase::read16(PeriphAddress::Picr);
 			const auto iv = picr & PivMask;
