@@ -31,7 +31,7 @@ namespace mqLib
 			if(m_haltDSP)
 			{
 				std::unique_lock<std::mutex> u(m_haltDSPmutex);
-				m_haltDSPcv.wait(u, [&]{ return m_haltDSP == false; });
+				m_haltDSPcv.wait_for(u, std::chrono::milliseconds(1), [&]{ return m_haltDSP == false; });
 			}
 		}, 0);
 
@@ -168,6 +168,11 @@ namespace mqLib
 			{
 				if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
 				{
+					if(m_haltDSP)
+					{
+						m_haltDSP = false;
+						m_haltDSPcv.notify_one();
+					}
 					std::unique_lock uLock(m_esaiFrameAddedMutex);
 					m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
 				}
@@ -176,9 +181,8 @@ namespace mqLib
 				const auto ucCyclesPerFrame = ucClock / (44100 * 2);	// stereo interleaved
 
 				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
-				m_lastEsaiFrameIndex = m_esaiFrameIndex;
 
-				if((m_esaiFrameIndex - m_lastEsaiFrameIndex) > 1)
+				if((m_esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
 				{
 					m_haltDSP = true;
 				}
@@ -187,6 +191,8 @@ namespace mqLib
 					m_haltDSP = false;
 					m_haltDSPcv.notify_one();
 				}
+
+				m_lastEsaiFrameIndex = m_esaiFrameIndex;
 			}
 		}
 
