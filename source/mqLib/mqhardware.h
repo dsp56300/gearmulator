@@ -73,5 +73,9 @@ namespace mqLib
 		std::mutex m_requestedFramesAvailableMutex;
 		std::condition_variable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
+
+		bool m_haltDSP = false;
+		std::condition_variable m_haltDSPcv;
+		std::mutex m_haltDSPmutex;
 	};
 }

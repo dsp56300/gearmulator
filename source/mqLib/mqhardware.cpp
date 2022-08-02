@@ -27,6 +27,12 @@ namespace mqLib
 
 			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
 				m_requestedFramesAvailableCv.notify_one();
+
+			if(m_haltDSP)
+			{
+				std::unique_lock<std::mutex> u(m_haltDSPmutex);
+				m_haltDSPcv.wait(u, [&]{ return m_haltDSP == false; });
+			}
 		}, 0);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
@@ -101,6 +107,11 @@ namespace mqLib
 
 	void Hardware::ucYield()
 	{
+		if(m_haltDSP)
+		{
+			m_haltDSP = false;
+			m_haltDSPcv.notify_one();
+		}
 		std::this_thread::yield();
 	}
 
@@ -166,6 +177,16 @@ namespace mqLib
 
 				m_remainingUcCycles += static_cast<int32_t>(ucCyclesPerFrame * (m_esaiFrameIndex - m_lastEsaiFrameIndex));
 				m_lastEsaiFrameIndex = m_esaiFrameIndex;
+
+				if((m_esaiFrameIndex - m_lastEsaiFrameIndex) > 1)
+				{
+					m_haltDSP = true;
+				}
+				else if(m_haltDSP)
+				{
+					m_haltDSP = false;
+					m_haltDSPcv.notify_one();
+				}
 			}
 		}
 
