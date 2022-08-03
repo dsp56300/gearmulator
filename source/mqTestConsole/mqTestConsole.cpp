@@ -186,6 +186,8 @@ int main(int _argc, char* _argv[])
 	const auto startTime = std::chrono::system_clock::now();
 	bool waitForBootKeys = true;
 
+	bool slow = false;
+
 	auto processKeys = [&]()
 	{
 		while(!keyBuffer.empty())
@@ -303,6 +305,9 @@ int main(int _argc, char* _argv[])
 				break;
 			case '$':
 				hw->getUC().dumpROM("rom_runtime");
+				break;
+			case '#':
+				slow = !slow;
 				break;
 			default:
 				break;
@@ -425,6 +430,9 @@ int main(int _argc, char* _argv[])
 				hw->process();
 				hw->process();
 			}
+
+			if(slow)
+				std::this_thread::sleep_for(std::chrono::microseconds(1));
 
 			hw->receiveMidi(midiOutBuffer);
 			midiOut->write(midiOutBuffer);
