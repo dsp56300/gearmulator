@@ -11,6 +11,7 @@ namespace mqLib
 {
 	constexpr uint32_t g_romAddress = 0x80000;
 	constexpr uint32_t g_pcInitial = 0x80130;
+	constexpr uint32_t g_memorySize = 0x40000;
 
 	static std::string logChar(char _val)
 	{
@@ -24,7 +25,7 @@ namespace mqLib
 
 	MqMc::MqMc(const ROM& _rom) : m_rom(_rom), m_romRuntimeData(_rom.getData())
 	{
-		m_memory.resize(0x40000, 0);
+		m_memory.resize(g_memorySize, 0);
 
 		reset();
 
@@ -101,7 +102,7 @@ namespace mqLib
 
 	uint16_t MqMc::read16(uint32_t addr)
 	{
-		if(addr < m_memory.size())
+		if(addr < g_memorySize)
 		{
 			return readW(m_memory, addr);
 		}
@@ -120,7 +121,7 @@ namespace mqLib
 
 	uint8_t MqMc::read8(uint32_t addr)
 	{
-		if(addr < m_memory.size())
+		if(addr < g_memorySize)
 			return m_memory[addr];
 
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
