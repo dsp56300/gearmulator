@@ -37,11 +37,14 @@ namespace mqLib
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
 		void ucYield();
+		void ucYieldLoop(const std::function<bool()>& _continue);
 		bool hdiTransferDSPtoUC();
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
 		void waitDspRxEmpty();
 		void onUCRxEmpty(bool needMoreData);
 		void processUcCycle();
+		void haltDSP();
+		void resumeDSP();
 
 		const std::string m_romFileName;
 

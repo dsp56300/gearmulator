@@ -28,11 +28,8 @@ namespace mqLib
 			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
 				m_requestedFramesAvailableCv.notify_one();
 
-			if(m_haltDSP)
-			{
-				std::unique_lock<std::mutex> u(m_haltDSPmutex);
-				m_haltDSPcv.wait_for(u, std::chrono::milliseconds(1), [&]{ return m_haltDSP == false; });
-			}
+			std::unique_lock uLock(m_haltDSPmutex);
+			m_haltDSPcv.wait(uLock, [&]{ return m_haltDSP == false; });
 		}, 0);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool needMoreData)
@@ -98,21 +95,32 @@ namespace mqLib
 	{
 		waitDspRxEmpty();
 
-		while(!m_dsp.dsp().injectInterrupt(_irq))
-			ucYield();
+		ucYieldLoop([&]()
+		{
+			return !m_dsp.dsp().injectInterrupt(_irq);
+		});
 
-		while(m_dsp.dsp().hasPendingInterrupts())
-			ucYield();
+		ucYieldLoop([&]()
+		{
+			return m_dsp.dsp().hasPendingInterrupts();
+		});
 	}
 
 	void Hardware::ucYield()
 	{
-		if(m_haltDSP)
-		{
-			m_haltDSP = false;
-			m_haltDSPcv.notify_one();
-		}
+		resumeDSP();
 		std::this_thread::yield();
+	}
+
+	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
+	{
+		const auto dspHalted = m_haltDSP;
+
+		while(_continue())
+			ucYield();
+
+		if(dspHalted)
+			haltDSP();
 	}
 
 	bool Hardware::hdiTransferDSPtoUC()
@@ -136,8 +144,10 @@ namespace mqLib
 
 	void Hardware::waitDspRxEmpty()
 	{
-		while((m_hdiDSP.hasRXData() && m_hdiDSP.rxInterruptEnabled()) || m_dsp.dsp().hasPendingInterrupts())
-			ucYield();
+		ucYieldLoop([&]()
+		{
+			return (m_hdiDSP.hasRXData() && m_hdiDSP.rxInterruptEnabled()) || m_dsp.dsp().hasPendingInterrupts();
+		});
 //		LOG("writeRX wait over");
 	}
 
@@ -147,10 +157,10 @@ namespace mqLib
 
 		if(needMoreData)
 		{
-			while(!m_hdiDSP.hasTX() && m_hdiDSP.txInterruptEnabled())
+			ucYieldLoop([&]()
 			{
-				ucYield();
-			}
+				return !m_hdiDSP.hasTX() && m_hdiDSP.txInterruptEnabled();
+			});
 		}
 
 		if(!hdiTransferDSPtoUC())
@@ -168,11 +178,7 @@ namespace mqLib
 			{
 				if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
 				{
-					if(m_haltDSP)
-					{
-						m_haltDSP = false;
-						m_haltDSPcv.notify_one();
-					}
+					resumeDSP();
 					std::unique_lock uLock(m_esaiFrameAddedMutex);
 					m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
 				}
@@ -192,12 +198,11 @@ namespace mqLib
 
 				if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
 				{
-					m_haltDSP = true;
+					haltDSP();
 				}
 				else if(m_haltDSP)
 				{
-					m_haltDSP = false;
-					m_haltDSPcv.notify_one();
+					resumeDSP();
 				}
 
 				m_lastEsaiFrameIndex = esaiFrameIndex;
@@ -251,6 +256,25 @@ namespace mqLib
 			assert(!m_haveSentTXtoDSP && "DSP needs reset even though it got data already. Needs impl");
 			m_uc.notifyDSPBooted();
 		}
+	}
+
+	void Hardware::haltDSP()
+	{
+		if(m_haltDSP)
+			return;
+
+		std::lock_guard uLockHalt(m_haltDSPmutex);
+		m_haltDSP = true;
+	}
+
+	void Hardware::resumeDSP()
+	{
+		if(!m_haltDSP)
+			return;
+
+		std::lock_guard uLockHalt(m_haltDSPmutex);
+		m_haltDSP = false;
+		m_haltDSPcv.notify_one();
 	}
 
 	void Hardware::processAudio(uint32_t _frames)
