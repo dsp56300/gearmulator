@@ -20,5 +20,8 @@ namespace mqLib
 
 		if(numRead != static_cast<size_t>(size))
 			m_data.clear();
+
+		if(numRead != getSize())
+			m_data.clear();
 	}
 }
