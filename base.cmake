@@ -18,6 +18,7 @@ if(MSVC)
 	# /Oi Enable Intrinsic Functions
 	# /Ot Favor Fast Code
 
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
 
 	set(ARCHITECTURE ${CMAKE_VS_PLATFORM_NAME})
