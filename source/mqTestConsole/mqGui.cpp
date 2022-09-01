@@ -53,7 +53,7 @@ void Gui::render()
 	renderRightEncoders(rightBase + 20, g_deviceH - 4);
 
 	renderButton(mqLib::Buttons::ButtonType::Power, g_deviceW - 6, g_deviceH - 2);
-	renderLED(m_leds.getPowerLEDState(), g_deviceW - 4, g_deviceH - 3);
+	renderLED(m_leds.getLedState(mqLib::Leds::Led::Power), g_deviceW - 4, g_deviceH - 3);
 	renderLabel(g_deviceW - 2, g_deviceH - 1, "Power", true);
 
 	renderHelp(2, g_deviceH + 2);

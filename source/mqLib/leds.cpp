@@ -1,7 +1,8 @@
 #include "leds.h"
 
 #include "mqtypes.h"
-#include "dsp56kEmu/logging.h"
+
+#include "../68kEmu/port.h"
 
 namespace mqLib
 {
@@ -13,11 +14,8 @@ namespace mqLib
 		{
 			const uint32_t powerLedState = (_portE.read() >> LedPower) & 1;
 
-			if(powerLedState != m_powerLedState)
-			{
+			if(setLed(static_cast<uint32_t>(Led::Power), powerLedState))
 				changed = true;
-				m_powerLedState = powerLedState;
-			}
 		}
 
 		if(!(_portF.getDirection() & (1<<LedWriteLatch)))
