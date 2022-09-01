@@ -211,4 +211,18 @@ namespace mqLib
 
 		return true;
 	}
+
+	bool LCD::getCgData(std::array<uint8_t, 8>& _data, uint32_t _charIndex) const
+	{
+		const auto idx = _charIndex * 8;
+		if(idx + 8 >= getCgRam().size())
+			return false;
+
+		uint32_t j = 0;
+
+		for(auto i = idx; i<idx+8; ++i)
+			_data[j++] = getCgRam()[i];
+
+		return true;
+	}
 }

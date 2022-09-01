@@ -160,13 +160,13 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	auto toggleButton = [&](mqLib::Buttons::ButtonType _type)
+	auto toggleButton = [&](const mqLib::Buttons::ButtonType _type)
 	{
 		buttons.toggleButton(_type);
 		renderTrigger.push_back(1);
 	};
 
-	auto encRotate = [&](mqLib::Buttons::Encoders _encoder, int _amount)
+	auto encRotate = [&](mqLib::Buttons::Encoders _encoder, const int _amount)
 	{
 		buttons.rotate(_encoder, _amount);
 		renderTrigger.push_back(1);

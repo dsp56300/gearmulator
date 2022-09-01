@@ -9,8 +9,6 @@
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "../synthLib/audioTypes.h"
-
 namespace mqLib
 {
 	class Hardware
@@ -24,7 +22,9 @@ namespace mqLib
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP() { return m_dsp; }
 		uint64_t getUcCycles() const { return m_uc.getCycles(); }
-		const auto& getAudioOutputs() { return m_audioOutputs; }
+
+		auto& getAudioInputs() { return m_audioInputs; }
+		auto& getAudioOutputs() { return m_audioOutputs; }
 
 		void sendMidi(uint8_t _byte);
 		void receiveMidi(std::vector<uint8_t>& _data);
@@ -32,6 +32,8 @@ namespace mqLib
 		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
 
 		void processAudio(uint32_t _frames);
+
+		void ensureBufferSize(uint32_t _frames);
 
 	private:
 		void hdiProcessUCtoDSPNMIIrq();

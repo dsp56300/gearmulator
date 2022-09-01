@@ -20,6 +20,8 @@ namespace mqLib
 		bool exec(mc68k::Port& _portGp, mc68k::Port& _portF);
 
 		const std::array<char, 40>& getDdRam() const { return m_dramData; }
+		const auto& getCgRam() const { return m_cgramData; }
+		bool getCgData(std::array<uint8_t, 8>& _data, uint32_t _charIndex) const;
 
 		void setChangeCallback(const ChangeCallback& _callback)
 		{

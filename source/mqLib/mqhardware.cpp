@@ -278,17 +278,7 @@ namespace mqLib
 
 	void Hardware::processAudio(uint32_t _frames)
 	{
-		if(m_audioInputs.front().size() < _frames)
-		{
-			for (auto& input : m_audioInputs)
-				input.resize(_frames);
-		}
-
-		if(m_audioOutputs.front().size() < _frames)
-		{
-			for (auto& output : m_audioOutputs)
-				output.resize(_frames);
-		}
+		ensureBufferSize(_frames);
 
 		auto& esai = m_dsp.getPeriph().getEsai();
 
@@ -318,5 +308,20 @@ namespace mqLib
 		}
 
 		esai.processAudioOutputInterleaved(outputs, count);
+	}
+
+	void Hardware::ensureBufferSize(uint32_t _frames)
+	{
+		if(m_audioInputs.front().size() < _frames)
+		{
+			for (auto& input : m_audioInputs)
+				input.resize(_frames);
+		}
+
+		if(m_audioOutputs.front().size() < _frames)
+		{
+			for (auto& output : m_audioOutputs)
+				output.resize(_frames);
+		}
 	}
 }
