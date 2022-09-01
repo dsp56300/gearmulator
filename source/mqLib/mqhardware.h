@@ -38,7 +38,7 @@ namespace mqLib
 		void hdiSendIrqToDSP(uint8_t _irq);
 		void ucYield();
 		void ucYieldLoop(const std::function<bool()>& _continue);
-		bool hdiTransferDSPtoUC();
+		bool hdiTransferDSPtoUC() const;
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
 		void waitDspRxEmpty();
 		void onUCRxEmpty(bool needMoreData);

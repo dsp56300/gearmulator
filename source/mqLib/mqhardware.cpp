@@ -123,7 +123,7 @@ namespace mqLib
 			haltDSP();
 	}
 
-	bool Hardware::hdiTransferDSPtoUC()
+	bool Hardware::hdiTransferDSPtoUC() const
 	{
 		if(m_hdiDSP.hasTX() && m_hdiUC.canReceiveData())
 		{
