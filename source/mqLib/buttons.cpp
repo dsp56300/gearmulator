@@ -21,8 +21,6 @@ namespace mqLib
 		const bool cycleEncoders = w != m_writeCounter;
 		m_writeCounter = w;
 
-		const auto e = _e.read();
-
 		if (getButtonState(ButtonType::Power) && !_e.bittest(BtPower))
 		{
 			_e.setBitRX(BtPower);

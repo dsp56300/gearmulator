@@ -165,7 +165,6 @@ namespace mqLib
 
 		if(!hdiTransferDSPtoUC())
 		{
-			int d=0;
 		}
 	}
 
