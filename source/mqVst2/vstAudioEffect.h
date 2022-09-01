@@ -3,10 +3,9 @@
 #include <cstdint>
 #include <vector>
 
-#include "../synthLib/plugin.h"
-#include "../virusLib/device.h"
-
 #include "public.sdk/source/vst2.x/audioeffectx.h"
+
+#include "../mqLib/microq.h"
 
 namespace synthLib
 {
@@ -67,4 +66,5 @@ private:
 
 	std::vector<uint8_t>				m_chunkData;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
+	mqLib::MicroQ						m_microQ;
 };

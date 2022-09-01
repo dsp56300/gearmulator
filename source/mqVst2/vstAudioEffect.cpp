@@ -5,7 +5,6 @@
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #include "../synthLib/midiTypes.h"
-#include "../synthLib/os.h"
 
 #ifndef _MSC_VER
 #define _stricmp strcasecmp
@@ -21,29 +20,18 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 VSTAudioEffect::VSTAudioEffect (audioMasterCallback am)
 : AudioEffectX		(am, 0, 0)	// 0 programs, 0 parameters
 {
-	LOG( "Initializing plugin" );
+	setNumInputs  (2);
+	setNumOutputs (6);
 
-	setNumInputs  (2);					// stereo input
-	setNumOutputs (2);					// stereo output
-
-	setUniqueID   ('tusV');				// identify - The Unknown Suspects Virus
+	setUniqueID   ('wmqe');				// identify - Waldorf MicroQ Emulator
 	canProcessReplacing ();				// supports replacing output
 
 	isSynth();
 
 	programsAreChunks();
-
-	setSampleRate( getSampleRate() );
-
-	LOG( "Initialization completed" );
 }
 
-// _____________________________________________________________________________
-// ~MyVSTAudioEffect
-// 
-VSTAudioEffect::~VSTAudioEffect()
-{
-}
+VSTAudioEffect::~VSTAudioEffect() = default;
 
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::setProgramName (char* name)
@@ -95,21 +83,21 @@ void VSTAudioEffect::getParameterLabel (VstInt32 index, char* label)
 //------------------------------------------------------------------------
 bool VSTAudioEffect::getEffectName (char* name)
 {
-	vst_strncpy (name, "Virus Emu", kVstMaxEffectNameLen);
+	vst_strncpy (name, "microQ Emulator", kVstMaxEffectNameLen);
 	return true;
 }
 
 //------------------------------------------------------------------------
 bool VSTAudioEffect::getProductString (char* text)
 {
-	vst_strncpy (text, "Virus Emu", kVstMaxProductStrLen);
+	vst_strncpy (text, "microQ Emulator", kVstMaxProductStrLen);
 	return true;
 }
 
 //------------------------------------------------------------------------
 bool VSTAudioEffect::getVendorString (char* text)
 {
-	vst_strncpy (text, "The Usual Suspects", kVstMaxVendorStrLen);
+	vst_strncpy (text, "Waldorf Music GmbH", kVstMaxVendorStrLen);
 	return true;
 }
 
@@ -130,8 +118,8 @@ VstPlugCategory VSTAudioEffect::getPlugCategory()
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
-//	m_plugin.process(inputs, outputs, sampleFrames);
-//	m_plugin.getMidiOut(m_midiOut);
+	m_microQ.process(const_cast<const float**>(inputs), outputs, sampleFrames);
+//	m_microQ.getMidiOutput(m_midiOut);
 	sendMidiEventsToHost(m_midiOut);
 	m_midiOut.clear();
 }
@@ -176,7 +164,7 @@ VstInt32 VSTAudioEffect::canDo( char* text )
 	if( !_stricmp( text, "receiveVstMidiEvents" ) )		return 1;
 	if( !_stricmp( text, "receiveVstEvents" ) )			return 1;
 	if( !_stricmp( text, "receiveVstTimeInfo" ) )		return 1;
-	if( !_stricmp (text, "2in2out") )					return 1;
+	if( !_stricmp (text, "2in6out") )					return 1;
 	if( !_stricmp (text, "sendVstMidiEvent") )			return 1;
 	if( !_stricmp (text, "sendVstMidiEvents") )			return 1;
 	if( !_stricmp (text, "sendVstEvents") )				return 1;	
@@ -196,7 +184,7 @@ VstInt32 VSTAudioEffect::processEvents( VstEvents* events )
 
 		if( eve->type == kVstMidiType )
 		{
-			const auto* ev = (const VstMidiEvent*)eve;
+			const auto* ev = reinterpret_cast<const VstMidiEvent*>(eve);
 
 			synthLib::SMidiEvent midiEvent;
 			midiEvent.a = ev->midiData[0];
@@ -204,22 +192,19 @@ VstInt32 VSTAudioEffect::processEvents( VstEvents* events )
 			midiEvent.c = ev->midiData[2];
 			midiEvent.offset = ev->deltaFrames;
 
-//			m_plugin.addMidiEvent(midiEvent);
-//			LOG("Midi " << (int)midiEvent.a << " " << (int)midiEvent.b << " " << (int)midiEvent.c);
+			m_microQ.sendMidiEvent(midiEvent);
 		}
 		else if( eve->type == kVstSysExType )
 		{
-			const VstMidiSysexEvent* ev = (const VstMidiSysexEvent*)eve;
-
-			LOG("Got Sysex! Length " << ev->dumpBytes);
-
+			auto* ev = reinterpret_cast<const VstMidiSysexEvent*>(eve);
+			
 			synthLib::SMidiEvent midiEvent;
 			midiEvent.sysex.resize(ev->dumpBytes);
 			midiEvent.offset = ev->deltaFrames;
 
 			memcpy(&midiEvent.sysex[0], ev->sysexDump, ev->dumpBytes);
 
-//			m_plugin.addMidiEvent(midiEvent);
+			m_microQ.sendMidiEvent(midiEvent);
 		}
 		else
 		{
