@@ -23,6 +23,7 @@ add_subdirectory(source/mqLib)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
 	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
+	set(MQ_VST2 TRUE)
 endif()
 
 # ----------------- Juce based audio plugin
@@ -54,6 +55,13 @@ set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
 add_subdirectory(source/portaudio)
 
 add_subdirectory(source/mqTestConsole)
+
+# ----------------- mQ VST2 Plugin
+
+if(MQ_VST2)
+	add_subdirectory(source/vstsdk2.4.2)
+	add_subdirectory(source/mqVst2)
+endif()
 
 # ----------------- CPack
 
