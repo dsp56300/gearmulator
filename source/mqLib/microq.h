@@ -4,6 +4,8 @@
 #include <mutex>
 #include <vector>
 
+#include <thread>
+
 #include "buttons.h"
 #include "leds.h"
 
