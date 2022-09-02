@@ -9,6 +9,7 @@ set(SOURCES
 	configfile.cpp configfile.h
 	device.cpp device.h
 	deviceTypes.h
+	midiBufferParser.cpp midiBufferParser.h
 	midiToSysex.cpp midiToSysex.h
 	midiTypes.h
 	os.cpp os.h

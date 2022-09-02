@@ -10,7 +10,6 @@ set(SOURCES
 	audioOutputPA.cpp audioOutputPA.h
 	audioOutputWAV.cpp audioOutputWAV.h
 	device.cpp device.h
-	midi.cpp midi.h
 	midiDevice.cpp midiDevice.h
 	midiInput.cpp midiInput.h
 	midiOutput.cpp midiOutput.h

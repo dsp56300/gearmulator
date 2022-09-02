@@ -1,7 +1,8 @@
 #pragma once
 #include <vector>
 
-#include "midi.h"
+#include "../synthLib/midiBufferParser.h"
+
 #include "midiDevice.h"
 
 namespace synthLib
@@ -23,5 +24,5 @@ public:
 	bool openDevice(int devId) override;
 private:
 	void* m_stream = nullptr;
-	MidiBufferParser m_parser;
+	synthLib::MidiBufferParser m_parser;
 };
