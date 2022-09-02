@@ -128,7 +128,7 @@ namespace mqLib
 		}
 	}
 
-	void MicroQ::getMidiOutput(std::vector<uint8_t>& _buffer)
+	void MicroQ::receiveMidi(std::vector<uint8_t>& _buffer)
 	{
 		std::lock_guard lock(m_mutex);
 		std::swap(_buffer, m_midiOutBuffer);

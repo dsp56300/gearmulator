@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "../synthLib/midiBufferParser.h"
+
 #include "public.sdk/source/vst2.x/audioeffectx.h"
 
 #include "../mqLib/microq.h"
@@ -65,6 +67,8 @@ private:
 	void			sendMidiEventsToHost		(const std::vector<synthLib::SMidiEvent>& _midiEvents);
 
 	std::vector<uint8_t>				m_chunkData;
+	std::vector<uint8_t>				m_midiOutBuffer;
+	synthLib::MidiBufferParser			m_midiOutParser;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
 	mqLib::MicroQ						m_microQ;
 };

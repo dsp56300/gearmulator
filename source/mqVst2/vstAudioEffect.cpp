@@ -119,7 +119,12 @@ VstPlugCategory VSTAudioEffect::getPlugCategory()
 void VSTAudioEffect::processReplacing (float** inputs, float** outputs, VstInt32 sampleFrames)
 {
 	m_microQ.process(const_cast<const float**>(inputs), outputs, sampleFrames);
-//	m_microQ.getMidiOutput(m_midiOut);
+
+	m_microQ.receiveMidi(m_midiOutBuffer);
+
+	m_midiOutParser.write(m_midiOutBuffer);
+	m_midiOutBuffer.clear();
+	m_midiOutParser.getEvents(m_midiOut);
 	sendMidiEventsToHost(m_midiOut);
 	m_midiOut.clear();
 }

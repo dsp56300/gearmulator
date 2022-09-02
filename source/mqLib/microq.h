@@ -37,7 +37,7 @@ namespace mqLib
 
 		// receive midi data that the device generated during the last call of process().
 		// Note that any midi output data not queried between two calls of process() is lost
-		void getMidiOutput(std::vector<uint8_t>& _buffer);
+		void receiveMidi(std::vector<uint8_t>& _buffer);
 
 		// set the status of one of the front panel buttons
 		void setButton(Buttons::ButtonType _button, bool _pressed);
