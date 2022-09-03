@@ -8,7 +8,11 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Info.plist.in ${CMAKE_CURRENT_SOURCE_
 
 add_library(mqVst2 STATIC)
 
-target_sources(mqVst2 PRIVATE version.h version.h.in vstAudioEffect.cpp vstAudioEffect.h)
+target_sources(mqVst2 PRIVATE 
+	version.h version.h.in
+	mqParameters.cpp mqParameters.h
+	vstAudioEffect.cpp vstAudioEffect.h
+)
 
 if(WIN32)
 	target_sources(mqVst2 PRIVATE version.rc)
