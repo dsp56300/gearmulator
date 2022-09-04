@@ -67,12 +67,12 @@ constexpr char g_sdatCsv[] =
 "87;00h 57h;107;00h 6Bh;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Envelope Modulation;\n"
 "88;00h 58h;108;00h 6Ch;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Velocity Modulation;\n"
 "89;00h 59h;109;00h 6Dh;;;;;00h::0Dh;0::13;Off, LFO1, LFO1*MW, LFO2, LFO2*Prs, LFO3, FilterEnv, AmpEnv, Env3, Env4, Velocity, ModWheel, Pitchbend, Pressure;Modulation Source;\n"
-"90;00h 5Ah;110;00h 6Eh;;;;;00h::40h::7Fh;;0::64::127;-63::0::+63;Cutoff Modulation\n"
-"91;00h 5Bh;111;00h 6Fh;;;;;00h::0Eh;;0::14;Off, Osc1, Osc2, Osc3, Noise, Ext Left, Ext Right, Ext L+R, LFO1, LFO2, LFO3, Filter Env, Amp Env, Env 3, Env 4;FM Source\n"
+"90;00h 5Ah;110;00h 6Eh;;;;;00h::40h::7Fh;0::64::127;-63::0::+63;Cutoff Modulation\n"
+"91;00h 5Bh;111;00h 6Fh;;;;;00h::0Eh;0::14;Off, Osc1, Osc2, Osc3, Noise, Ext Left, Ext Right, Ext L+R, LFO1, LFO2, LFO3, Filter Env, Amp Env, Env 3, Env 4;FM Source\n"
 "92;00h 5Ch;112;00h 70h;;;;;00h::7Fh;0::127;Off, 1::127;FM Amount;\n"
 "93;00h 5Dh;113;00h 71h;;;;;00h::40h::7Fh;0::64::127;Left 64::Center::Right 63;Pan;\n"
 "94;00h 5Eh;114;00h 72h;;;;;00h::0Dh;0::13;Off, LFO1, LFO1*MW, LFO2, LFO2*Prs, LFO3, FilterEnv, AmpEnv, Env3, Env4, Velocity, ModWheel, Pitchbend, Pressure;Pan Mod Source;\n"
-"95;00h 5Fh;115;00h 73h;;;;;00h::40h::7Fh;;0::64::127;-64::0::+63;Pan Modulation\n"
+"95;00h 5Fh;115;00h 73h;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Pan Modulation\n"
 "Filter;;;;;;;;;;;;\n"
 "Idx;PAH PAL;;;;;;;sndv16;;SNDV10;Description;Name\n"
 "117;00h 75h;;;;;;;00h, 01h;;0, 1;parallel, serial;Routing\n"
@@ -81,7 +81,7 @@ constexpr char g_sdatCsv[] =
 "121;00h 79h;;;;;;;00h::7Fh;0::127;;Volume;\n"
 "122;00h 7Ah;;;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Velocity;\n"
 "123;00h 7Bh;;;;;;;00h::0Dh;0::13;Off, LFO1, LFO1*MW, LFO2, LFO2*Prs, LFO3, FilterEnv, AmpEnv, Env3, Env4, Velocity, ModWheel, Pitchbend, Pressure;Modulation Source;\n"
-"124;00h 7Ch;;;;;;;00h::40h::7Fh;;0::64::127;-64::0::+63;Modulation Amount\n"
+"124;00h 7Ch;;;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Modulation Amount\n"
 "Effects;;;;;;;;;;;;\n"
 "FX1;;FX2;;;;;;;;;;\n"
 "Idx;PAH PAL;Idx;PAH PAL;;;;;sndv16;;SNDV10;Description;Name\n"
@@ -121,13 +121,13 @@ constexpr char g_sdatCsv[] =
 "136;01h 08h;152;01h 18h;;;;;00h::08h;0::8;External, Aux, FX1::FX4,Main In, Sub1 In, Sub2 In;Ring Mod Source;\n"
 "137;01h 09h;153;01h 19h;;;;;00h::7Fh;;0::127;;Ring Mod Level\n"
 "Vocoder FX1;;Vocoder FX2;;;;;;;;;;\n"
-"Idx;PAH PAL;Idx;PAH PAL;;;;;sndv16;;SNDV10;Description;Name\n"
-"130;01h 02h;146;01h 12h;;;;;00h::17h;;2::25;;Bands\n"
-"131;01h 03h;147;01h 13h;;;;;00h::08h;;0::8;External, Aux, FX1::FX4,Main In, Sub1 In, Sub2 In;Analysis Signal\n"
+"Idx;PAH PAL;Idx;PAH PAL;;;;;sndv16;SNDV10;Description;Name\n"
+"130;01h 02h;146;01h 12h;;;;;00h::17h;2::25;;Bands\n"
+"131;01h 03h;147;01h 13h;;;;;00h::08h;0::8;External, Aux, FX1::FX4,Main In, Sub1 In, Sub2 In;Analysis Signal\n"
 "132;01h 04h;148;01h 14h;;;;;00h::7Fh;0::127;10.9Hz::16.7KHz;A. Lo Freq;\n"
 "133;01h 05h;149;01h 15h;;;;;00h::7Fh;0::127;10.9Hz::16.7KHz;A. Hi Freq;\n"
 "134;01h 06h;150;01h 16h;;;;;00h::40h::7Fh;0::64::127 -128::-32(x3), -34::0::31(x1), +35::+128(x3);S. Offset;;\n"
-"135;01h 07h;151;01h 17h;;;;;00h::40h::7Fh;;0::64::127 -128::-32(x3), -34::0::31(x1), +35::+128(x3);Hi Offset;\n"
+"135;01h 07h;151;01h 17h;;;;;00h::40h::7Fh;0::64::127 -128::-32(x3), -34::0::31(x1), +35::+128(x3);Hi Offset;\n"
 "136;01h 08h;152;01h 18h;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Bandwidth;\n"
 "137;01h 09h;153;01h 19h;;;;;00h::40h::7Fh;0::64::127;-64::0::+63;Resonance;\n"
 "138;01h 0Ah;154;01h 1Ah;;;;;00h::7Fh;0::127;;Attack;\n"
@@ -168,7 +168,7 @@ constexpr char g_sdatCsv[] =
 "LFO1;;LFO2;;LFO3;;;;;;;;\n"
 "Idx;PAH PAL;Idx;PAH PAL;Idx;PAH PAL;;;sndv16;;SNDV10;Description;Name\n"
 "160;01h 20h;172;01h 2Ch;184;01h 38h;;;00h::05h;;0::5;Sine, Triangle, Square, Saw, Random, S&H;Shape\n"
-"161;01h 21h;173;01h 2Dh;185;01h 39h;;;00h::7Fh;;0 0;0::127 256,192,160,144, 128, 120, 96, 80, 72, 64, 48, 40, 36, 32, 24, 20, 18, 16,15, 14,12,10, 9, 8, 7, 6, 5, 4, 3.5, 3, 2.66, 2.4, 2, 1.75, 1.5, 1.33, 1.2,1,7/8, 1/2., 1/2T, 5/8, 1/2, 7/16, 1/4., 1/4T, 5/16, 1/4, 7/32, 1/8., 1/8T, 5/32, 1/8, 7/64, 1/16., 1/16T, 5/64, 1/16, 1/32., 1/32T, 1/32, 1/64T, 1/64, 1/96 bars;Speed (Clocked:=Off) Speed (Clocked:=On)\n"
+"161;01h 21h;173;01h 2Dh;185;01h 39h;;;00h::7Fh;;0 0;0::127 256,192,160,144, 128, 120, 96, 80, 72, 64, 48, 40, 36, 32, 24, 20, 18, 16,15, 14,12,10, 9, 8, 7, 6, 5, 4, 3.5, 3, 2.66, 2.4, 2, 1.75, 1.5, 1.33, 1.2,1,7/8, 1/2., 1/2T, 5/8, 1/2, 7/16, 1/4., 1/4T, 5/16, 1/4, 7/32, 1/8., 1/8T, 5/32, 1/8, 7/64, 1/16., 1/16T, 5/64, 1/16, 1/32., 1/32T, 1/32, 1/64T, 1/64, 1/96 bars;Speed\n"
 "163;01h 23h;175;01h 2Fh;187;01h 3Bh;;;00h, 01h;;0, 1;Off, On;Sync\n"
 "164;01h 24h;176;01h 30h;188;01h 3Ch;;;00h, 01h;;0, 1;Off, On;Clocked\n"
 "165;01h 25h;177;01h 31h;189;01h 3Dh;;;00h, 01h::7Fh;;0, 1::127;Free, 0::360;Start Phase\n"
@@ -339,15 +339,19 @@ mqParameters::mqParameters()
 
 					auto name = cell(idxName, y2);
 
-					if(name.empty() && idxName > 0)
+					if(name.find(':') != std::string::npos)
+						int foo=0;
+					if(name.empty())
 					{
-						do
+						auto i = cells[y2].size();
+
+						while(i > 0)
 						{
-							--idxName;
-							name = cell(idxName, y2);
+							--i;
+							name = cell(i, y2);
 							if(!name.empty())
 								break;
-						}while(idxName != 0);
+						}
 					}
 
 					if(!namePrefix.empty())
@@ -373,17 +377,81 @@ mqParameters::mqParameters()
 					sndv16.back() = 0;
 
 					Parameter p;
+
 					p.pah = static_cast<uint8_t>(pah);
 					p.pal = static_cast<uint8_t>(pal);
-					p.name = name;
+
 					p.valueMin = static_cast<uint8_t>(strtol(sndv16.c_str(), nullptr, 16));
 					p.valueMax = static_cast<uint8_t>(strtol(sndv16.c_str() + sndv16.size() - 3, nullptr, 16));
+
+					p.name = name;
+					p.shortName = createShortName(p.name);
 
 					m_parameters.push_back(p);
 				}
 			}
 		}
 	}
+}
+
+std::string mqParameters::getName(uint32_t _index) const
+{
+	if(_index >= m_parameters.size())
+		return {};
+
+	return m_parameters[_index].name;
+}
+
+std::string mqParameters::getShortName(uint32_t _index) const
+{
+	if(_index >= m_parameters.size())
+		return {};
+
+	return m_parameters[_index].shortName;
+}
+
+
+void replaceAll(std::string& _str, const std::string& _from, const std::string& _to)
+{
+	if (_from.empty())
+		return;
+	size_t pos = 0;
+	while ((pos = _str.find(_from, pos)) != std::string::npos)
+	{
+		_str.replace(pos, _from.length(), _to);
+		pos += _to.length();
+	}
+}
+
+std::string mqParameters::createShortName(std::string name)
+{
+	// do the best we can to fit into a length of 8
+
+	replaceAll(name, " ", "");
+	replaceAll(name, "Volume", "Vol");
+	replaceAll(name, "Envelope", "E");
+	replaceAll(name, "Env", "E");
+	replaceAll(name, "Osc", "O");
+	replaceAll(name, "LFO", "L");
+	replaceAll(name, "Filter", "F");
+	replaceAll(name, "AmpE", "AE");
+	replaceAll(name, "FiltE", "FE");
+	replaceAll(name, "PhaserFX", "Phs");
+	replaceAll(name, "ChorusFX", "Chr");
+	replaceAll(name, "FlangerFX", "Flg");
+	replaceAll(name, "VocoderFX", "Voc");
+	replaceAll(name, "ReverbFX", "Rvb");
+	replaceAll(name, "Step", "Stp");
+	replaceAll(name, "Char", "Ch");
+	replaceAll(name, "Noise", "N");
+	replaceAll(name, "FiveFX", "5");
+	replaceAll(name, "Attack", "Atk");
+	replaceAll(name, "Release", "Rel");
+	replaceAll(name, "Decay", "Dec");
+	replaceAll(name, "Sustain", "Sus");
+	replaceAll(name, "Overdrive", "Drv");
+
+	return name;
 }
 
 std::vector<std::string> mqParameters::split(const std::string& _s, char _delim)

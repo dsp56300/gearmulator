@@ -68,8 +68,7 @@ private:
 
 	void			sendMidiEventsToHost		(const std::vector<synthLib::SMidiEvent>& _midiEvents);
 
-	mqParameters						m_parameters;
-
+	std::vector<float>					m_parameters;
 	std::vector<uint8_t>				m_chunkData;
 	std::vector<uint8_t>				m_midiOutBuffer;
 	synthLib::MidiBufferParser			m_midiOutParser;

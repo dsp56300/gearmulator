@@ -10,6 +10,8 @@
 #define _stricmp strcasecmp
 #endif
 
+static mqParameters g_parameters;
+
 //-------------------------------------------------------------------------------------------------------
 AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 {
@@ -18,8 +20,10 @@ AudioEffect* createEffectInstance (audioMasterCallback audioMaster)
 
 //-------------------------------------------------------------------------------------------------------
 VSTAudioEffect::VSTAudioEffect (audioMasterCallback am)
-: AudioEffectX		(am, 0, 0)	// 0 programs, 0 parameters
+: AudioEffectX		(am, 0, static_cast<VstInt32>(g_parameters.size()))	// 0 programs, 0 parameters
 {
+	m_parameters.resize(g_parameters.size());
+
 	setNumInputs  (2);
 	setNumOutputs (6);
 
@@ -46,6 +50,7 @@ void VSTAudioEffect::getProgramName (char* name)
 
 bool VSTAudioEffect::getProgramNameIndexed(VstInt32 category, VstInt32 index, char* text)
 {
+	strcpy(text, "default");
 	return false;
 }
 
@@ -57,27 +62,46 @@ void VSTAudioEffect::setProgram(VstInt32 program)
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::setParameter (VstInt32 index, float value)
 {
+	if(index < 0 || index >= m_parameters.size())
+		return;
+
+	const auto current = m_parameters[index];
+
+	if(current == value)
+		return;
+
+	m_parameters[index] = value;
+	// TODO: send to device
 }
 
 //-----------------------------------------------------------------------------------------
 float VSTAudioEffect::getParameter (VstInt32 index)
 {
-	return 0.0f;
+	const auto v = m_parameters[index];
+	if(v < 0)
+		return 0;
+	if(v > 1)
+		return 1;
+	return v;
 }
 
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::getParameterName (VstInt32 index, char* label)
 {
+	const auto name = g_parameters.getShortName(index);
+	strncpy(label, name.c_str(), kVstMaxParamStrLen);
 }
 
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::getParameterDisplay (VstInt32 index, char* text)
 {
+	sprintf(text, "%.2f", getParameter(index));
 }
 
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::getParameterLabel (VstInt32 index, char* label)
 {
+	strcpy(label, "");
 }
 
 //------------------------------------------------------------------------
