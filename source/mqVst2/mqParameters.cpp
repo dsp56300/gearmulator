@@ -428,10 +428,7 @@ void mqParameters::encodeParameterChange(std::vector<uint8_t>& _buffer, size_t _
 
 	const auto& p = m_parameters[_parameter];
 
-	uint8_t v = p.valueMin;
-
-	if(p.valueMax > p.valueMin)
-		v = static_cast<uint8_t>(roundf(p.valueMin + (p.valueMax - p.valueMin) * _value));
+	const uint8_t v = toByteValue(_parameter, _value);;
 
 	_buffer.reserve(8);
 
@@ -445,6 +442,21 @@ void mqParameters::encodeParameterChange(std::vector<uint8_t>& _buffer, size_t _
 	_buffer.emplace_back(p.pal);	// PAL		Parameter Index 7 bits low
 	_buffer.emplace_back(v);		// SNDV		Parameter Value
 	_buffer.emplace_back(0xf7);		// EOX		End of SysEx
+}
+
+uint8_t mqParameters::toByteValue(size_t _parameter, float _value) const
+{
+	if(_parameter >= m_parameters.size())
+		return 0;
+
+	const auto& p = m_parameters[_parameter];
+
+	uint8_t v = p.valueMin;
+
+	if(p.valueMax > p.valueMin)
+		v = static_cast<uint8_t>(roundf(p.valueMin + (p.valueMax - p.valueMin) * _value));
+
+	return v;
 }
 
 std::string mqParameters::createShortName(std::string name)

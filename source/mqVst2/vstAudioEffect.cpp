@@ -98,7 +98,7 @@ void VSTAudioEffect::getParameterName (VstInt32 index, char* label)
 //-----------------------------------------------------------------------------------------
 void VSTAudioEffect::getParameterDisplay (VstInt32 index, char* text)
 {
-	sprintf(text, "%.2f", getParameter(index));
+	sprintf(text, "%d", static_cast<int>(g_parameters.toByteValue(index, getParameter(index))));
 }
 
 //-----------------------------------------------------------------------------------------
