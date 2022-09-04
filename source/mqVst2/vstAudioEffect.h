@@ -9,6 +9,8 @@
 
 #include "../mqLib/microq.h"
 
+#include "mqParameters.h"
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -65,6 +67,8 @@ private:
 	void			sendMidi					(const synthLib::SMidiEvent& _midi);
 
 	void			sendMidiEventsToHost		(const std::vector<synthLib::SMidiEvent>& _midiEvents);
+
+	mqParameters						m_parameters;
 
 	std::vector<uint8_t>				m_chunkData;
 	std::vector<uint8_t>				m_midiOutBuffer;
