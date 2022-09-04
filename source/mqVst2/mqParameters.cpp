@@ -339,8 +339,6 @@ mqParameters::mqParameters()
 
 					auto name = cell(idxName, y2);
 
-					if(name.find(':') != std::string::npos)
-						int foo=0;
 					if(name.empty())
 					{
 						auto i = cells[y2].size();
