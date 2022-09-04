@@ -23,6 +23,8 @@ public:
 
 	size_t size() const { return m_parameters.size(); }
 
+	void encodeParameterChange(std::vector<uint8_t>& _buffer, size_t _parameter, float _value) const;
+
 private:
 	static std::string createShortName(std::string name);
 	static std::vector<std::string> split(const std::string& _s, char _delim);

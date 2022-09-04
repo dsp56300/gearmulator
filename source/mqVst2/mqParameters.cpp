@@ -421,6 +421,32 @@ void replaceAll(std::string& _str, const std::string& _from, const std::string& 
 	}
 }
 
+void mqParameters::encodeParameterChange(std::vector<uint8_t>& _buffer, size_t _parameter, float _value) const
+{
+	if(_parameter >= m_parameters.size())
+		return;
+
+	const auto& p = m_parameters[_parameter];
+
+	uint8_t v = p.valueMin;
+
+	if(p.valueMax > p.valueMin)
+		v = static_cast<uint8_t>(roundf(p.valueMin + (p.valueMax - p.valueMin) * _value));
+
+	_buffer.reserve(8);
+
+	_buffer.emplace_back(0xf0);		// SOX		Start of SysEx
+	_buffer.emplace_back(0x3e);		// IDW		Manufacturer ID, 3eh = Waldorf
+	_buffer.emplace_back(0x10);		// IDE		Model ID, 10h = micro
+	_buffer.emplace_back(0x00);		// DEV		Device ID, 00h = default
+	_buffer.emplace_back(0x20);		// SNDP		Command = Sound Parameter Change
+	_buffer.emplace_back(0x00);		// SNDL		Location = Edit Buffer of current sound
+	_buffer.emplace_back(p.pah);	// PAH		Parameter Index 7 bits high
+	_buffer.emplace_back(p.pal);	// PAL		Parameter Index 7 bits low
+	_buffer.emplace_back(v);		// SNDV		Parameter Value
+	_buffer.emplace_back(0xf7);		// EOX		End of SysEx
+}
+
 std::string mqParameters::createShortName(std::string name)
 {
 	// do the best we can to fit into a length of 8

@@ -73,5 +73,6 @@ private:
 	std::vector<uint8_t>				m_midiOutBuffer;
 	synthLib::MidiBufferParser			m_midiOutParser;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
+	std::vector<uint8_t>				m_parameterSendBuffer;
 	mqLib::MicroQ						m_microQ;
 };

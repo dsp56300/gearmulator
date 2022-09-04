@@ -71,7 +71,10 @@ void VSTAudioEffect::setParameter (VstInt32 index, float value)
 		return;
 
 	m_parameters[index] = value;
-	// TODO: send to device
+
+	g_parameters.encodeParameterChange(m_parameterSendBuffer, index, value);
+	m_microQ.sendMidi(m_parameterSendBuffer);
+	m_parameterSendBuffer.clear();
 }
 
 //-----------------------------------------------------------------------------------------
