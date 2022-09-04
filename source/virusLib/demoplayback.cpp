@@ -172,7 +172,7 @@ namespace virusLib
 		return e;
 	}
 
-	DemoPlayback::Event DemoPlayback::parseSysex(const uint8_t* _data, const uint32_t _count)
+	DemoPlayback::Event DemoPlayback::parseSysex(const uint8_t* _data, const uint32_t _count) const
 	{
 		Event e;
 
@@ -182,6 +182,62 @@ namespace virusLib
 			// Only seen for single and multi patches for now
 			e.data.resize(_count);
 			memcpy(&e.data.front(), _data, _count);
+
+#if 0	// demo presets extraction
+			if(_count - 6 >= ROMFile::getSinglePresetSize())
+			{
+				int foo=0;
+				ROMFile::TPreset data;
+				memcpy(&data[0], &e.data[6], ROMFile::getSinglePresetSize());
+
+				const auto isMulti = _data[3] == 0x11;
+				const uint8_t program = _data[4];
+
+				const auto name = isMulti ? ROMFile::getMultiName(data) : ROMFile::getSingleName(data);
+
+				std::vector<synthLib::SMidiEvent> responses;
+
+				// use the uc to generate our sysex header
+				if(isMulti)
+				{
+					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x31, 0x01, 0x00, 0xf7}, responses, synthLib::MidiEventSourceEditor);
+				}
+				else
+				{
+					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x30, 0x01, program, 0xf7}, responses, synthLib::MidiEventSourceEditor);
+				}
+
+				auto& s = responses.front().sysex;
+				memcpy(&s[9], &data[0], data.size());
+
+				// checksum needs to be updated
+				s.pop_back();
+				Microcontroller::calcChecksum(s, 5);
+				s.push_back(0xf7);
+
+				std::stringstream ss;
+				ss << "demo_preset_" << (isMulti ? "multi" : "single") << '_' << std::setfill('0') << std::setw(2) << std::to_string(program) << '_' << name << ".syx";
+
+				auto filename = ss.str();
+				for(auto& f : filename)
+				{
+					switch (f)
+					{
+					case '?':
+					case '@':
+					case ';':
+					case ':':
+					case '/':
+					case '\\':
+						f = '_';
+						break;
+					}
+				}
+				FILE* hFile = fopen(filename.c_str(), "wb");
+				fwrite(&s.front(), 1, s.size(), hFile);
+				fclose(hFile);
+			}
+#endif
 			e.type = EventType::RawSerial;
 		}
 		else

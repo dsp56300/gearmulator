@@ -38,7 +38,7 @@ namespace virusLib
 			uint8_t delay = 0;
 		};
 
-		static Event parseSysex(const uint8_t* _data, uint32_t _count);
+		Event parseSysex(const uint8_t* _data, uint32_t _count) const;
 		Event parseMidi(const uint8_t* _data);
 
 		bool parseData(const std::vector<uint8_t>& _data);
