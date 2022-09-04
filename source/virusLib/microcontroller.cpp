@@ -41,16 +41,6 @@ constexpr int g_presetWriteDelaySamples = 256;
 namespace virusLib
 {
 
-static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset)
-{
-	uint8_t cs = 0;
-
-	for (size_t i = _offset; i < _data.size(); ++i)
-		cs += _data[i];
-
-	return cs & 0x7f;
-}
-
 Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
 {
 	if(!_romFile.isValid())
@@ -1121,6 +1111,16 @@ PresetVersion Microcontroller::getPresetVersion(const uint8_t v)
 	if(v >= C)		return C;
 	if(v >= B)		return B;
 	return A;
+}
+
+uint8_t Microcontroller::calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset)
+{
+	uint8_t cs = 0;
+
+	for (size_t i = _offset; i < _data.size(); ++i)
+		cs += _data[i];
+
+	return cs & 0x7f;
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
