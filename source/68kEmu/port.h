@@ -1,16 +1,25 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 
 namespace mc68k
 {
 	class Port
 	{
 	public:
-		Port() = default;
+		Port();
 
 		uint8_t getDirection() const { return m_direction; }
-		void setDirection(const uint8_t _dir) { m_direction = _dir; }
+
+		void setDirection(const uint8_t _dir)
+		{
+			if(m_direction == _dir)
+				return;
+
+			m_direction = _dir;
+			m_dirChangeCallback(*this);
+		}
 
 		void writeTX(uint8_t _data);
 		void writeRX(uint8_t _data);
@@ -35,10 +44,13 @@ namespace mc68k
 			writeRX(read() & ~(1<<_bit));
 		}
 
+		void setDirectionChangeCallback(const std::function<void(const Port&)>& _func);
+
 	private:
 		uint8_t m_direction = 0;		// 0 = input, 1 = output
 		uint8_t m_enabledPins = 0xff;
 		uint8_t m_data = 0;
 		uint32_t m_writeCounter = 0;
+		std::function<void(const Port&)> m_dirChangeCallback;
 	};
 }

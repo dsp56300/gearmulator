@@ -48,6 +48,7 @@ namespace mqLib
 		void processUcCycle();
 		void haltDSP();
 		void resumeDSP();
+		void setGlobalDefaultParameters();
 
 		const std::string m_romFileName;
 

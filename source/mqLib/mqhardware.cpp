@@ -44,6 +44,12 @@ namespace mqLib
 		{
 			hdiSendIrqToDSP(_irq);
 		});
+
+		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& port)
+		{
+			if(port.getDirection() == 0xff)
+				setGlobalDefaultParameters();
+		});
 	}
 
 	Hardware::~Hardware()
@@ -280,6 +286,12 @@ namespace mqLib
 		std::lock_guard uLockHalt(m_haltDSPmutex);
 		m_haltDSP = false;
 		m_haltDSPcv.notify_one();
+	}
+
+	void Hardware::setGlobalDefaultParameters()
+	{
+		sendMidi({0xf0,0x3e,0x10,0x00,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
+		sendMidi({0xf0,0x3e,0x10,0x00,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
 	}
 
 	void Hardware::processAudio(uint32_t _frames)

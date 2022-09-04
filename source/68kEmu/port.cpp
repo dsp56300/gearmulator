@@ -2,6 +2,10 @@
 
 namespace mc68k
 {
+	Port::Port() : m_dirChangeCallback([](const Port&){})
+	{
+	}
+
 	void Port::writeTX(uint8_t _data)
 	{
 		// only write pins that are enabled and that are set to output
@@ -22,5 +26,12 @@ namespace mc68k
 	uint8_t Port::read() const
 	{
 		return m_data;
+	}
+
+	void Port::setDirectionChangeCallback(const std::function<void(const Port&)>& _func)
+	{
+		m_dirChangeCallback = _func;
+		if(!m_dirChangeCallback)
+			m_dirChangeCallback = [](const Port&){};
 	}
 }
