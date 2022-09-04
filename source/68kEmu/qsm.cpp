@@ -179,8 +179,8 @@ namespace mc68k
 
 		if(!bitTest(Sccr1Bits::ReceiverEnable))
 		{
-			LOG("Discarding SCI data " << HEXN(m_sciRxData.front(), 4) << ", receiver not enabled");
-			m_sciRxData.pop_front();
+//			LOG("Discarding SCI data " << HEXN(m_sciRxData.front(), 4) << ", receiver not enabled");
+//			m_sciRxData.pop_front();
 			return;
 		}
 
