@@ -7,6 +7,7 @@
 
 #include "../synthLib/midiToSysex.h"
 #include "../synthLib/midiTypes.h"
+#include "../synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -21,6 +22,23 @@ namespace virusLib
 
 	bool DemoPlayback::loadMidi(const std::string& _filename)
 	{
+		if(synthLib::hasExtension(_filename, ".bin"))
+		{
+			std::vector<uint8_t> data;
+			auto hFile = fopen(_filename.c_str(), "rb");
+			if(!hFile)
+			{
+				LOG("Failed to open demo file " << _filename);
+				return false;
+			}
+			fseek(hFile, 0, SEEK_END);
+			data.resize(ftell(hFile));
+			fseek(hFile, 0, SEEK_SET);
+			fread(&data[0], 1, data.size(), hFile);
+			fclose(hFile);
+			return loadBinData(data);
+		}
+
 		std::vector<uint8_t> sysex;
 
 		synthLib::MidiToSysex::readFile(sysex, _filename.c_str());
