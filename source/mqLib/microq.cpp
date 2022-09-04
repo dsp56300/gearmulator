@@ -25,12 +25,18 @@ namespace mqLib
 		{
 			while(!m_destroy)
 				processUcThread();
+			m_destroy = false;
 		}));
 	}
 
 	MicroQ::~MicroQ()
 	{
 		m_destroy = true;
+
+		// DSP needs to run to let the uc thread wake up
+		while(m_destroy)
+			m_hw->processAudio(1);
+
 		m_ucThread->join();
 	}
 

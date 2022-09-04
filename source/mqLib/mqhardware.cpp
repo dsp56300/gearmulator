@@ -291,7 +291,7 @@ namespace mqLib
 
 		esai.processAudioInputInterleaved(inputs, count);
 
-		const auto requiredSize = (_frames << 1) - 8;
+		const auto requiredSize = _frames > 4 ? (_frames << 1) - 8 : 0;
 
 		if(esai.getAudioOutputs().size() < requiredSize)
 		{
