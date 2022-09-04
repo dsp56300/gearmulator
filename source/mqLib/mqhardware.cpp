@@ -63,6 +63,12 @@ namespace mqLib
 		m_uc.getQSM().writeSciRX(_byte);
 	}
 
+	void Hardware::sendMidi(const std::vector<uint8_t>& _data)
+	{
+		for (const auto mb : _data)
+			sendMidi(mb);
+	}
+
 	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
 	{
 		std::deque<uint16_t> midiData;

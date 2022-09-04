@@ -27,6 +27,7 @@ namespace mqLib
 		auto& getAudioOutputs() { return m_audioOutputs; }
 
 		void sendMidi(uint8_t _byte);
+		void sendMidi(const std::vector<uint8_t>& _data);
 		void receiveMidi(std::vector<uint8_t>& _data);
 
 		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
