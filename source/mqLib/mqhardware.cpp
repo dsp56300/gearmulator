@@ -208,7 +208,7 @@ namespace mqLib
 				{
 					haltDSP();
 				}
-				else if(m_haltDSP)
+				else
 				{
 					resumeDSP();
 				}
