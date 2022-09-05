@@ -107,10 +107,7 @@ namespace mqLib
 	{
 		waitDspRxEmpty();
 
-		ucYieldLoop([&]()
-		{
-			return !m_dsp.dsp().injectInterrupt(_irq);
-		});
+		m_dsp.dsp().injectInterrupt(_irq);
 
 		ucYieldLoop([&]()
 		{
