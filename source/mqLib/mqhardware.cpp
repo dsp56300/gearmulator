@@ -115,18 +115,14 @@ namespace mqLib
 		});
 	}
 
-	void Hardware::ucYield()
-	{
-		resumeDSP();
-		std::this_thread::yield();
-	}
-
 	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
 	{
 		const auto dspHalted = m_haltDSP;
 
+		resumeDSP();
+
 		while(_continue())
-			ucYield();
+			std::this_thread::yield();
 
 		if(dspHalted)
 			haltDSP();
@@ -172,50 +168,12 @@ namespace mqLib
 			});
 		}
 
-		if(!hdiTransferDSPtoUC())
-		{
-		}
+		hdiTransferDSPtoUC();
 	}
 
 	void Hardware::processUcCycle()
 	{
-		if(m_remainingUcCycles <= 0)
-		{
-			// we can only use ESAI to clock the uc once it has been enabled
-			if(m_esaiFrameIndex > 0)
-			{
-				if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
-				{
-					resumeDSP();
-					std::unique_lock uLock(m_esaiFrameAddedMutex);
-					m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
-				}
-
-				const auto esaiFrameIndex = m_esaiFrameIndex;
-
-				const auto ucClock = m_uc.getSim().getSystemClockHz();
-
-				constexpr double divInv = 1.0 / (44100.0 * 2.0);	// stereo interleaved
-				const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
-
-				const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
-				
-				m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
-				m_remainingUcCycles = static_cast<int32_t>(m_remainingUcCyclesD);
-				m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
-
-				if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
-				{
-					haltDSP();
-				}
-				else
-				{
-					resumeDSP();
-				}
-
-				m_lastEsaiFrameIndex = esaiFrameIndex;
-			}
-		}
+		syncUcToDSP();
 
 		// If ESAI is not enabled, we may roughly clock the uc to execute one op for each 5 DSP ops.
 		/*
@@ -243,11 +201,6 @@ namespace mqLib
 
 		// transfer DSP host flags HF2&3 to uc
 		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
-//		if(hf23 != m_hdiHF23)
-		{
-//			LOG("HDI HF23=" << HEXN(hf23>>3,1));
-			m_hdiHF23 = hf23;
-		}
 		auto isr = m_hdiUC.isr();
 		const auto prevIsr = isr;
 		isr &= ~0x18;
@@ -289,6 +242,47 @@ namespace mqLib
 	{
 		sendMidi({0xf0,0x3e,0x10,0x00,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
 		sendMidi({0xf0,0x3e,0x10,0x00,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
+	}
+
+	void Hardware::syncUcToDSP()
+	{
+		if(m_remainingUcCycles > 0)
+			return;
+
+		// we can only use ESAI to clock the uc once it has been enabled
+		if(m_esaiFrameIndex <= 0)
+			return;
+
+		if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
+		{
+			resumeDSP();
+			std::unique_lock uLock(m_esaiFrameAddedMutex);
+			m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
+		}
+
+		const auto esaiFrameIndex = m_esaiFrameIndex;
+
+		const auto ucClock = m_uc.getSim().getSystemClockHz();
+
+		constexpr double divInv = 1.0 / (44100.0 * 2.0);	// stereo interleaved
+		const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
+
+		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
+				
+		m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
+		m_remainingUcCycles = static_cast<int32_t>(m_remainingUcCyclesD);
+		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
+
+		if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
+		{
+			haltDSP();
+		}
+		else
+		{
+			resumeDSP();
+		}
+
+		m_lastEsaiFrameIndex = esaiFrameIndex;
 	}
 
 	void Hardware::processAudio(uint32_t _frames)

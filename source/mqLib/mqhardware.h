@@ -39,7 +39,6 @@ namespace mqLib
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
-		void ucYield();
 		void ucYieldLoop(const std::function<bool()>& _continue);
 		bool hdiTransferDSPtoUC() const;
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
@@ -49,13 +48,13 @@ namespace mqLib
 		void haltDSP();
 		void resumeDSP();
 		void setGlobalDefaultParameters();
+		void syncUcToDSP();
 
 		const std::string m_romFileName;
 
 		const ROM m_rom;
 
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
-		uint32_t m_hdiHF23 = 0;	// DSP => uc
 		bool m_requestNMI = false;
 		bool m_haveSentTXtoDSP = false;
 
