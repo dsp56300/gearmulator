@@ -12,6 +12,7 @@ namespace mc68k
 	{
 		setWriteTxCallback(nullptr);
 		setWriteIrqCallback(nullptr);
+		setReadIsrCallback(nullptr);
 
 		write8(PeriphAddress::HdiIVR, 0xf);
 	}
@@ -135,7 +136,7 @@ namespace mc68k
 	{
 		PeripheralBase::exec(_deltaCycles);
 
-		auto isr = read8(PeriphAddress::HdiISR);
+		auto isr = PeripheralBase::read8(PeriphAddress::HdiISR);//Hdi08::isr();
 
 		if(!(isr & Rxdf))
 			return;
@@ -186,6 +187,18 @@ namespace mc68k
 			{
 				m_pendingInterruptRequests.push_back(_irq);
 			};
+		}
+	}
+
+	void Hdi08::setReadIsrCallback(const CallbackReadIsr& _readIsrCallback)
+	{
+		if(_readIsrCallback)
+		{
+			m_readIsrCallback = _readIsrCallback;
+		}
+		else
+		{
+			m_readIsrCallback = [](const uint8_t _isr) { return _isr; };
 		}
 	}
 
@@ -245,16 +258,16 @@ namespace mc68k
 
 	uint8_t Hdi08::readRX(WordFlags _index)
 	{
-		const auto hasRX = read8(PeriphAddress::HdiISR) & Rxdf;
+		const auto hasRX = isr() & Rxdf;
 
 		if(!hasRX)
 		{
 			m_rxEmptyCallback(true);
 
-			if(!(read8(PeriphAddress::HdiISR) & Rxdf))
+			const auto s = isr();
+
+			if(!(s & Rxdf))
 			{
-				const auto s = isr();
-				const auto c = icr();
 //				LOG("Empty read of RX");
 				return 0;
 			}
@@ -268,7 +281,7 @@ namespace mc68k
 
 		auto pop = [&]()
 		{
-			write8(PeriphAddress::HdiISR, read8(PeriphAddress::HdiISR) & ~(Rxdf));
+			write8(PeriphAddress::HdiISR, isr() & ~(Rxdf));
 			m_rxEmptyCallback(false);
 		};
 
@@ -305,7 +318,7 @@ namespace mc68k
 		m_rxd = m_rxData.front();
 		m_rxData.pop_front();
 
-		auto isr = read8(PeriphAddress::HdiISR);
+		auto isr = Hdi08::isr();
 
 		write8(PeriphAddress::HdiISR, isr | Rxdf);
 		m_readFlags = WordFlags::Mask;

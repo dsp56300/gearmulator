@@ -45,6 +45,7 @@ namespace mc68k
 		using CallbackRxEmpty = std::function<void(bool)>;
 		using CallbackWriteTx = std::function<void(uint32_t)>;
 		using CallbackWriteIrq = std::function<void(uint8_t)>;
+		using CallbackReadIsr = std::function<uint8_t(uint8_t)>;
 
 		Hdi08();
 
@@ -66,7 +67,7 @@ namespace mc68k
 
 		uint8_t isr()
 		{
-			auto isr = PeripheralBase::read8(PeriphAddress::HdiISR);
+			auto isr = m_readIsrCallback(PeripheralBase::read8(PeriphAddress::HdiISR));
 
 			// we want new data for transmission
 			isr |= Txde;
@@ -90,6 +91,7 @@ namespace mc68k
 		}
 		void setWriteTxCallback(const CallbackWriteTx& _writeTxCallback);
 		void setWriteIrqCallback(const CallbackWriteIrq& _writeIrqCallback);
+		void setReadIsrCallback(const CallbackReadIsr& _readIsrCallback);
 	private:
 		enum class WordFlags
 		{
@@ -121,12 +123,13 @@ namespace mc68k
 
 		std::deque<uint32_t> m_txData;
 		std::deque<uint32_t> m_rxData;
-		uint32_t m_rxd;
+		uint32_t m_rxd = 0;
 		std::deque<uint8_t> m_pendingInterruptRequests;
 		uint32_t m_readTimeoutCycles = 0;
 
 		CallbackRxEmpty m_rxEmptyCallback;
 		CallbackWriteTx m_writeTxCallback;
 		CallbackWriteIrq m_writeIrqCallback;
+		CallbackReadIsr m_readIsrCallback;
 	};
 }

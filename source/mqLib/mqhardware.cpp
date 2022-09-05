@@ -44,6 +44,10 @@ namespace mqLib
 		{
 			hdiSendIrqToDSP(_irq);
 		});
+		m_hdiUC.setReadIsrCallback([&](const uint8_t _isr)
+		{
+			return hdiUcReadIsr(_isr);
+		});
 
 		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& port)
 		{
@@ -96,11 +100,11 @@ namespace mqLib
 
 		if(m_requestNMI && !requestNMI)
 		{
-			LOG("uc request DSP NMI");
+//			LOG("uc request DSP NMI");
 			hdiSendIrqToDSP(dsp56k::Vba_NMI);
-		}
 
-		m_requestNMI = requestNMI;
+			m_requestNMI = requestNMI;
+		}
 	}
 
 	void Hardware::hdiSendIrqToDSP(uint8_t _irq)
@@ -113,6 +117,15 @@ namespace mqLib
 		{
 			return m_dsp.dsp().hasPendingInterrupts();
 		});
+	}
+
+	uint8_t Hardware::hdiUcReadIsr(uint8_t _isr)
+	{
+		// transfer DSP host flags HF2&3 to uc
+		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
+		_isr &= ~0x18;
+		_isr |= hf23;
+		return _isr;
 	}
 
 	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
@@ -128,7 +141,7 @@ namespace mqLib
 			haltDSP();
 	}
 
-	bool Hardware::hdiTransferDSPtoUC() const
+	bool Hardware::hdiTransferDSPtoUC()
 	{
 		if(m_hdiDSP.hasTX() && m_hdiUC.canReceiveData())
 		{
@@ -175,17 +188,9 @@ namespace mqLib
 	{
 		syncUcToDSP();
 
-		// If ESAI is not enabled, we may roughly clock the uc to execute one op for each 5 DSP ops.
-		/*
-		if(m_esaiFrameIndex == 0 && m_uc.getCycles() > m_dspCycles/5)
-		{
-			ucYield();
-			return;
-		}
-		*/
 		const auto deltaCycles = m_uc.exec();
 		if(m_esaiFrameIndex > 0)
-			m_remainingUcCycles -= static_cast<int32_t>(deltaCycles);
+			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
 
 		const uint32_t hf01 = m_hdiUC.icr() & 0x18;
 
@@ -199,16 +204,8 @@ namespace mqLib
 
 		hdiProcessUCtoDSPNMIIrq();
 
-		// transfer DSP host flags HF2&3 to uc
-		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
-		auto isr = m_hdiUC.isr();
-		const auto prevIsr = isr;
-		isr &= ~0x18;
-		isr |= hf23;
-		if(isr != prevIsr)
-			m_hdiUC.isr(isr);
-
-		hdiTransferDSPtoUC();
+		// it works not to feed the rx port, but only rely on the uc callback if its empty. We seem to be lucky though, uc might rely on the status of the rxdf bit
+//		hdiTransferDSPtoUC();
 
 		if(m_uc.requestDSPReset())
 		{
@@ -268,9 +265,9 @@ namespace mqLib
 		const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
 
 		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
-				
+
 		m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
-		m_remainingUcCycles = static_cast<int32_t>(m_remainingUcCyclesD);
+		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
 		if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)

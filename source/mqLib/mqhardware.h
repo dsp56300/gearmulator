@@ -39,8 +39,9 @@ namespace mqLib
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
+		uint8_t hdiUcReadIsr(uint8_t _isr);
 		void ucYieldLoop(const std::function<bool()>& _continue);
-		bool hdiTransferDSPtoUC() const;
+		bool hdiTransferDSPtoUC();
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
 		void waitDspRxEmpty();
 		void onUCRxEmpty(bool needMoreData);
@@ -61,7 +62,7 @@ namespace mqLib
 		// timing
 		uint32_t m_esaiFrameIndex = 0;
 		uint32_t m_lastEsaiFrameIndex = 0;
-		int32_t m_remainingUcCycles = 0;
+		int64_t m_remainingUcCycles = 0;
 		double m_remainingUcCyclesD = 0;
 
 		MqMc m_uc;
