@@ -9,14 +9,8 @@ namespace mqLib
 {
 	MicroQ::MicroQ()
 	{
-		// load ROM
-		const auto romFile = synthLib::findROM(512 * 1024);
-
-		if(romFile.empty())
-			throw std::runtime_error("Failed to find ROM. Copy ROM file next to executable.");
-
-		// create hardware
-		m_hw.reset(new Hardware(romFile));
+		// create hardware, will use in-memory ROM if no ROM provided
+		m_hw.reset(new Hardware({}));
 
 		m_midiInBuffer.reserve(1024);
 		m_midiOutBuffer.reserve(1024);

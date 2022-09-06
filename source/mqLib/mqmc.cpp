@@ -23,8 +23,11 @@ namespace mqLib
 		return ss.str();
 	}
 
-	MqMc::MqMc(const ROM& _rom) : m_rom(_rom), m_romRuntimeData(_rom.getData())
+	MqMc::MqMc(const ROM& _rom) : m_rom(_rom)
 	{
+		m_romRuntimeData.resize(m_rom.getSize());
+		memcpy(&m_romRuntimeData[0], m_rom.getData(), m_rom.getSize());
+
 		m_memory.resize(g_memorySize, 0);
 
 		reset();
@@ -74,7 +77,7 @@ namespace mqLib
 		{
 			m_dspInjectNmiRequest = (getPortQS().read() >> 6) & 1;
 			if(m_dspInjectNmiRequest)
-				int foo=0;
+				int debug=0;
 		}
 
 		m_buttons.processButtons(getPortGP(), getPortE());
@@ -194,7 +197,7 @@ namespace mqLib
 	void MqMc::dumpROM(const char* _filename) const
 	{
 		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
-		fwrite(&m_romRuntimeData[0], 1, m_romRuntimeData.size(), hFile);
+		fwrite(&m_romRuntimeData[0], 1, m_rom.getSize(), hFile);
 		fclose(hFile);
 	}
 

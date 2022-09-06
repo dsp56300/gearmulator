@@ -2,11 +2,15 @@
 
 #include "dsp56kEmu/interrupts.h"
 
+#include "romData.h"
+
 namespace mqLib
 {
+	static_assert(ROM_DATA_SIZE == ROM::g_romSize);
+
 	Hardware::Hardware(std::string _romFilename)
 		: m_romFileName(std::move(_romFilename))
-		, m_rom(m_romFileName)
+		, m_rom(m_romFileName, ROM_DATA)
 		, m_uc(m_rom)
 		, m_dspThread(m_dsp.dsp())
 		, m_hdiUC(m_uc.hdi08())
