@@ -39,9 +39,9 @@ namespace mqLib
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
-		uint8_t hdiUcReadIsr(uint8_t _isr);
+		uint8_t hdiUcReadIsr(uint8_t _isr) const;
 		void ucYieldLoop(const std::function<bool()>& _continue);
-		bool hdiTransferDSPtoUC();
+		bool hdiTransferDSPtoUC() const;
 		void hdiTransferUCtoDSP(dsp56k::TWord _word);
 		void waitDspRxEmpty();
 		void onUCRxEmpty(bool needMoreData);

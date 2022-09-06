@@ -123,7 +123,7 @@ namespace mqLib
 		});
 	}
 
-	uint8_t Hardware::hdiUcReadIsr(uint8_t _isr)
+	uint8_t Hardware::hdiUcReadIsr(uint8_t _isr) const
 	{
 		// transfer DSP host flags HF2&3 to uc
 		const auto hf23 = m_hdiDSP.readControlRegister() & 0x18;
@@ -155,7 +155,7 @@ namespace mqLib
 			haltDSP();
 	}
 
-	bool Hardware::hdiTransferDSPtoUC()
+	bool Hardware::hdiTransferDSPtoUC() const
 	{
 		if(m_hdiDSP.hasTX() && m_hdiUC.canReceiveData())
 		{
