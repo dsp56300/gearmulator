@@ -85,5 +85,6 @@ namespace mqLib
 		bool m_haltDSP = false;
 		std::condition_variable m_haltDSPcv;
 		std::mutex m_haltDSPmutex;
+		bool m_processAudio = false;
 	};
 }

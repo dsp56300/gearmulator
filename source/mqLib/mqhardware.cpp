@@ -139,7 +139,17 @@ namespace mqLib
 		resumeDSP();
 
 		while(_continue())
-			std::this_thread::yield();
+		{
+			if(m_processAudio)
+			{
+				std::this_thread::yield();
+			}
+			else
+			{
+				std::unique_lock uLock(m_esaiFrameAddedMutex);
+				m_esaiFrameAddedCv.wait(uLock);
+			}
+		}
 
 		if(dspHalted)
 			haltDSP();
@@ -288,6 +298,8 @@ namespace mqLib
 
 	void Hardware::processAudio(uint32_t _frames)
 	{
+		m_processAudio = true;
+
 		ensureBufferSize(_frames);
 
 		auto& esai = m_dsp.getPeriph().getEsai();
@@ -318,6 +330,8 @@ namespace mqLib
 		}
 
 		esai.processAudioOutputInterleaved(outputs, count);
+
+		m_processAudio = false;
 	}
 
 	void Hardware::ensureBufferSize(uint32_t _frames)
