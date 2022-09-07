@@ -7,6 +7,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include <cstring>	// memcpy
+
 namespace mqLib
 {
 	constexpr uint32_t g_romAddress = 0x80000;
