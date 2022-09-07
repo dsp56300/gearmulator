@@ -60,7 +60,9 @@ namespace mqLib
 			{
 				if(!m_dspResetRequest)
 				{
+#ifdef _DEBUG
 					LOG("Request DSP RESET");
+#endif
 					m_dspResetRequest = true;
 					m_dspResetCompleted = false;
 				}
