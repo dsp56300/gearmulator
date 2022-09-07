@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <sstream>
+#include <cmath>
 
 #include "dsp56kEmu/logging.h"
 
