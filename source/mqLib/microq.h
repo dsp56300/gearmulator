@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <thread>
+#include <atomic>
 
 #include "buttons.h"
 #include "leds.h"
