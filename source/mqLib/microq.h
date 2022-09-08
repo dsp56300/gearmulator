@@ -8,6 +8,7 @@
 
 #include "buttons.h"
 #include "leds.h"
+#include "mqtypes.h"
 
 namespace synthLib
 {
@@ -70,8 +71,23 @@ namespace mqLib
 		// A set bit indicates a set pixel
 		bool readCustomLCDCharacter(std::array<uint8_t, 8>& _data, uint32_t _characterIndex);
 
+		// Dirty flags indicate that the front panel of the device has changed. To be retrieved via getDirtyFlags()
+		enum class DirtyFlags : uint32_t
+		{
+			None	= 0,
+			Leds	= 0x01,	// one or more LEDs changed its state
+			Lcd		= 0x02,	// the LCD has been refreshed and should be repainted
+		};
+
+		// Retrieve dirty flags for the front panel. See enum DirtyFlags for a description
+		// Dirty flags are sticky but are reset upon calling this function
+		DirtyFlags getDirtyFlags();
+
 	private:
 		void internalProcess(uint32_t _frames);
+		void onLedsChanged();
+		void onLcdChanged();
+
 		void processUcThread() const;
 
 		std::unique_ptr<Hardware> m_hw;
@@ -83,5 +99,6 @@ namespace mqLib
 
 		std::unique_ptr<std::thread> m_ucThread;
 		bool m_destroy = false;
+		std::atomic<uint32_t> m_dirtyFlags = 0;
 	};
 }

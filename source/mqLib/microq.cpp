@@ -21,6 +21,16 @@ namespace mqLib
 				processUcThread();
 			m_destroy = false;
 		}));
+
+		m_hw->getUC().getLeds().setChangeCallback([this]()
+		{
+			onLedsChanged();
+		});
+
+		m_hw->getUC().getLcd().setChangeCallback([this]()
+		{
+			onLcdChanged();
+		});
 	}
 
 	MicroQ::~MicroQ()
@@ -181,6 +191,22 @@ namespace mqLib
 	{
 		std::lock_guard lock(m_mutex);
 		return m_hw->getUC().getLcd().getCgData(_data, _characterIndex);
+	}
+
+	MicroQ::DirtyFlags MicroQ::getDirtyFlags()
+	{
+		const auto f = m_dirtyFlags.exchange(0);
+		return static_cast<DirtyFlags>(f);
+	}
+
+	void MicroQ::onLedsChanged()
+	{
+		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::Leds));
+	}
+
+	void MicroQ::onLcdChanged()
+	{
+		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::Lcd));
 	}
 
 	void MicroQ::processUcThread() const
