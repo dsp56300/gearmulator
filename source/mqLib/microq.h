@@ -28,6 +28,16 @@ namespace mqLib
 		// _frames means the number of samples per channel
 		void process(const float** _inputs, float** _outputs, uint32_t _frames);
 
+		// Process a block of audio data. Data conversion is not performed, this allows to access raw DSP data
+		// The used input and output buffers can be queried below
+		void process(uint32_t _frames);
+
+		// Retrieve the DSP audio input. Two channels, 24 bits. Only the 24 LSBs of each 32 bit word are used
+		TAudioInputs& getAudioInputs();
+
+		// Retrieve the DSP audio output. Two channels, 24 bits. Only the 24 LSBs of each 32 bit word are used
+		TAudioOutputs& getAudioOutputs();
+
 		// send midi to the midi input of the device
 		void sendMidi(uint8_t _byte);
 		void sendMidi(uint8_t _a, uint8_t _b);
@@ -61,6 +71,7 @@ namespace mqLib
 		bool readCustomLCDCharacter(std::array<uint8_t, 8>& _data, uint32_t _characterIndex);
 
 	private:
+		void internalProcess(uint32_t _frames);
 		void processUcThread() const;
 
 		std::unique_ptr<Hardware> m_hw;

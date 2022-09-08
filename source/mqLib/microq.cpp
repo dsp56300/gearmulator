@@ -38,14 +38,6 @@ namespace mqLib
 	{
 		std::lock_guard lock(m_mutex);
 
-		// send midi in
-
-		for(size_t i=0; i<m_midiInBuffer.size(); ++i)
-			m_hw->sendMidi(m_midiInBuffer[i]);
-		m_midiInBuffer.clear();
-
-		// process audio
-
 		m_hw->ensureBufferSize(_frames);
 
 		// convert inputs from float to DSP words
@@ -57,7 +49,7 @@ namespace mqLib
 				dspIns[c][i] = dsp56k::sample2dsp(_inputs[c][i]);
 		}
 
-		m_hw->processAudio(_frames);
+		internalProcess(_frames);
 
 		// convert outputs from DSP words to float
 		const auto& dspOuts = m_hw->getAudioOutputs();
@@ -67,9 +59,35 @@ namespace mqLib
 			for(uint32_t i=0; i<_frames; ++i)
 				_outputs[c][i] = dsp56k::dsp2sample<float>(dspOuts[c][i]);
 		}
+	}
+
+	void MicroQ::process(uint32_t _frames)
+	{
+		std::lock_guard lock(m_mutex);
+		internalProcess(_frames);
+	}
+
+	void MicroQ::internalProcess(uint32_t _frames)
+	{
+		// send midi in
+		m_hw->sendMidi(m_midiInBuffer);
+		m_midiInBuffer.clear();
+
+		// process audio
+		m_hw->processAudio(_frames);
 
 		// receive midi output
 		m_hw->receiveMidi(m_midiOutBuffer);
+	}
+
+	TAudioInputs& MicroQ::getAudioInputs()
+	{
+		return m_hw->getAudioInputs();
+	}
+
+	TAudioOutputs& MicroQ::getAudioOutputs()
+	{
+		return m_hw->getAudioOutputs();
 	}
 
 	void MicroQ::sendMidi(const uint8_t _byte)
