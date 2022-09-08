@@ -16,6 +16,7 @@ namespace mqLib
 
 		m_ucThread.reset(new std::thread([&]()
 		{
+			dsp56k::DSPThread::setCurrentThreadName("MC68331");
 			while(!m_destroy)
 				processUcThread();
 			m_destroy = false;
