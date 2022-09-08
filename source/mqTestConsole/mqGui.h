@@ -10,16 +10,13 @@
 
 namespace mqLib
 {
-	class Buttons;
-	class Leds;
-	class LCD;
-	class Hardware;
+	class MicroQ;
 }
 
 class Gui : public GuiBase
 {
 public:
-	explicit Gui(mqLib::Hardware& _hw);
+	explicit Gui(mqLib::MicroQ& _mq);
 
 	void render();
 
@@ -43,8 +40,6 @@ private:
 	void renderEncoder(mqLib::Buttons::Encoders _encoder, int x, int y);
 	void renderLabel(int x, int y, const std::string& _text, bool _rightAlign = false, Term::fg _color = Term::fg::gray);
 
-	mqLib::Hardware& m_hw;
+	mqLib::MicroQ& m_mq;
 	Term::Window m_win;
-	mqLib::LCD& m_lcd;
-	mqLib::Leds& m_leds;
 };

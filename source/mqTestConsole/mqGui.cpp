@@ -2,16 +2,15 @@
 
 #include <iostream>
 
+#include "../mqLib/microq.h"
 #include "../mqLib/mqhardware.h"
 
 constexpr int g_deviceW = 140;
 constexpr int g_deviceH = 16;
 
-Gui::Gui(mqLib::Hardware& _hw)
-	: m_hw(_hw)
+Gui::Gui(mqLib::MicroQ& _mq)
+	: m_mq(_mq)
 	, m_win(g_deviceW, g_deviceH + 6)
-	, m_lcd(_hw.getUC().getLcd())
-	, m_leds(_hw.getUC().getLeds())
 {
 }
 
@@ -53,7 +52,7 @@ void Gui::render()
 	renderRightEncoders(rightBase + 20, g_deviceH - 4);
 
 	renderButton(mqLib::Buttons::ButtonType::Power, g_deviceW - 6, g_deviceH - 2);
-	renderLED(m_leds.getLedState(mqLib::Leds::Led::Power), g_deviceW - 4, g_deviceH - 3);
+	renderLED(m_mq.getLedState(mqLib::Leds::Led::Power), g_deviceW - 4, g_deviceH - 3);
 	renderLabel(g_deviceW - 2, g_deviceH - 1, "Power", true);
 
 	renderHelp(2, g_deviceH + 2);
@@ -94,7 +93,8 @@ void Gui::renderLCD(int x, int y)
 	m_win.fill_bg(x+2, y+2, x+21, y+3, Term::bg::green);
 	m_win.fill_fg(x+2, y+2, x+21, y+3, Term::fg::black);
 
-	const auto& text = m_lcd.getDdRam();
+	std::array<char, 40> text{};
+	m_mq.readLCD(text);
 
 	int cx = x + 2;
 	int cy = y + 2;
@@ -263,12 +263,12 @@ void Gui::renderHelp(int x, int y)
 
 void Gui::renderDebug(int x, int y)
 {
-	renderLabel(g_deviceW - 1, y, std::string("    DSP ") + m_hw.getDspThread().getMipsString(), true, Term::fg::red);
+//	renderLabel(g_deviceW - 1, y, std::string("    DSP ") + m_hw.getDspThread().getMipsString(), true, Term::fg::red);
 }
 
 void Gui::renderLED(mqLib::Leds::Led _led, int x, int y)
 {
-	renderLED(m_leds.getLedState(_led), x, y);
+	renderLED(m_mq.getLedState(_led), x, y);
 }
 
 void Gui::renderLED(const bool on, int x, int y)
@@ -291,7 +291,7 @@ void Gui::renderLED(const bool on, int x, int y)
 
 void Gui::renderButton(mqLib::Buttons::ButtonType _button, int x, int y)
 {
-	const auto pressed = m_hw.getUC().getButtons().getButtonState(_button);
+	const auto pressed = m_mq.getButton(_button);
 
 	if(pressed)
 	{
@@ -305,7 +305,7 @@ void Gui::renderButton(mqLib::Buttons::ButtonType _button, int x, int y)
 
 void Gui::renderEncoder(mqLib::Buttons::Encoders _encoder, int x, int y)
 {
-	const auto state = m_hw.getUC().getButtons().getEncoderState(_encoder);
+	const auto state = m_mq.getEncoder(_encoder);
 	constexpr char32_t overline = 0x0000203E;
 
 	const char c0 = state & 2 ? '*' : '.';

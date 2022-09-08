@@ -7,7 +7,7 @@
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/configFile.h"
 
-#include "../mqLib/mqmc.h"
+#include "../mqLib/microq.h"
 #include "../mqLib/mqhardware.h"
 
 #include "dsp56kEmu/dspthread.h"
@@ -45,36 +45,14 @@ int main(int _argc, char* _argv[])
 		return -1;
 	}
 
-	// load ROM
-	const auto romFile = synthLib::findROM(512 * 1024);
-
-	if(romFile.empty())
-	{
-		std::cout << "Failed to find ROM, make sure that a ROM file with extension .bin is placed next to this executable" << std::endl;
-		return -1;
-	}
+	auto exit = false;
 
 	// create hardware
-	std::unique_ptr<mqLib::Hardware> hw;
-	hw.reset(new mqLib::Hardware(romFile));
-
-	auto& buttons = hw->getUC().getButtons();
-
-	// threaded key reader
-	dsp56k::RingBuffer<int, 64, true> keyBuffer;
-	std::thread inputReader([&hw, &keyBuffer]
-	{
-		while(hw.get())
-		{
-			const auto k = Term::read_key();
-			if(k)
-				keyBuffer.push_back(k);
-		}
-	});
+	mqLib::MicroQ mq;
 
 	// create terminal-GUI
 	Terminal term(true, true, false, true);
-	Gui gui(*hw);
+	Gui gui(mq);
 
 	SettingsGui settings;
 
@@ -112,9 +90,10 @@ int main(int _argc, char* _argv[])
 
 	std::thread renderer([&]
 	{
+		dsp56k::DSPThread::setCurrentThreadName("guiRender");
 		bool prevShowSettings = true;
 
-		while(hw)
+		while(!exit)
 		{
 			renderTrigger.pop_front();
 			if(renderTrigger.empty())
@@ -153,7 +132,8 @@ int main(int _argc, char* _argv[])
 
 	std::thread oneSecondUpdater([&]
 	{
-		while(hw)
+		dsp56k::DSPThread::setCurrentThreadName("1secUpdater");
+		while(!exit)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 			renderTrigger.push_back(1);
@@ -162,37 +142,20 @@ int main(int _argc, char* _argv[])
 
 	auto toggleButton = [&](const mqLib::Buttons::ButtonType _type)
 	{
-		buttons.toggleButton(_type);
+		mq.setButton(_type, mq.getButton(_type) ? false : true);
 		renderTrigger.push_back(1);
 	};
 
 	auto encRotate = [&](mqLib::Buttons::Encoders _encoder, const int _amount)
 	{
-		buttons.rotate(_encoder, _amount);
+		mq.rotateEncoder(_encoder, _amount);
 		renderTrigger.push_back(1);
 	};
 
-	hw->getUC().getLeds().setChangeCallback([&]()
-	{
-		renderTrigger.push_back(1);
-	});
-
-	hw->getUC().getLcd().setChangeCallback([&]()
-	{
-		renderTrigger.push_back(1);
-	});
-
 	// we need a bit of time to press boot buttons (service mode, factory tests, etc)
-	const auto startTime = std::chrono::system_clock::now();
-	bool waitForBootKeys = true;
-
-	bool slow = false;
-
-	auto processKeys = [&]()
+	auto processKey = [&](int ch)
 	{
-		while(!keyBuffer.empty())
 		{
-			const auto ch = keyBuffer.pop_front();
 			switch (ch)
 			{
 			case Key::ENTER:
@@ -272,29 +235,29 @@ int main(int _argc, char* _argv[])
 			case Key::F12:				encRotate(EncoderType::Matrix4, 1);			break;
 			case '7':
 				// Midi Note On
-				hw->sendMidi(synthLib::M_NOTEON);
-				hw->sendMidi(synthLib::Note_C3);
-				hw->sendMidi(0x7f);
+				mq.sendMidi(synthLib::M_NOTEON);
+				mq.sendMidi(synthLib::Note_C3);
+				mq.sendMidi(0x7f);
 				break;
 			case '8':	
 				// Midi Note Off
-				hw->sendMidi(synthLib::M_NOTEOFF);
-				hw->sendMidi(synthLib::Note_C3);
-				hw->sendMidi(0x7f);
+				mq.sendMidi(synthLib::M_NOTEOFF);
+				mq.sendMidi(synthLib::Note_C3);
+				mq.sendMidi(0x7f);
 				break;
 			case '9':
 				// Modwheel Max
-				hw->sendMidi(synthLib::M_CONTROLCHANGE);
-				hw->sendMidi(synthLib::MC_MODULATION);
-				hw->sendMidi(0x7f);
+				mq.sendMidi(synthLib::M_CONTROLCHANGE);
+				mq.sendMidi(synthLib::MC_MODULATION);
+				mq.sendMidi(0x7f);
 				break;
 			case '0':	
 				// Modwheel Min
-				hw->sendMidi(synthLib::M_CONTROLCHANGE);
-				hw->sendMidi(synthLib::MC_MODULATION);
-				hw->sendMidi(0x0);
+				mq.sendMidi(synthLib::M_CONTROLCHANGE);
+				mq.sendMidi(synthLib::MC_MODULATION);
+				mq.sendMidi(0x0);
 				break;
-			case '!':
+/* TODO 	case '!':
 				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getUcCycles()));
 				break;
 			case '&':
@@ -306,27 +269,60 @@ int main(int _argc, char* _argv[])
 			case '$':
 				hw->getUC().dumpROM("rom_runtime");
 				break;
-			case '#':
-				slow = !slow;
-				break;
-			default:
+*/			default:
 				break;
 			}
 		}
 	};
 
-	std::function process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
+	// threaded key reader
+	std::thread inputReader([&exit, &processKey]
 	{
-		hw->processAudio(_blockSize);
-		_dst = &hw->getAudioOutputs();
-	};
+		dsp56k::DSPThread::setCurrentThreadName("inputReader");
+		while(!exit)
+		{
+			const auto k = Term::read_key();
+			if(k)
+				processKey(k);
+		}
+	});
 
 	std::unique_ptr<AudioOutputPA> audio;
 	std::unique_ptr<MidiInput> midiIn;
 	std::unique_ptr<MidiOutput> midiOut;
 
+	std::vector<synthLib::SMidiEvent> midiInBuffer;
+	std::vector<uint8_t> midiOutBuffer;
+
+	std::mutex mutexDevices;
+
+	std::function process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
+	{
+		std::lock_guard lockDevices(mutexDevices);
+
+		if(midiIn)
+			midiIn->process(midiInBuffer);
+
+		for (const auto& e : midiInBuffer)
+			mq.sendMidiEvent(e);
+		midiInBuffer.clear();
+
+		mq.process(_blockSize);
+		_dst = &mq.getAudioOutputs();
+
+		if(mq.getDirtyFlags() != mqLib::MicroQ::DirtyFlags::None)
+			renderTrigger.push_back(1);
+
+		mq.receiveMidi(midiOutBuffer);
+		if(midiOut)
+			midiOut->write(midiOutBuffer);
+		midiOutBuffer.clear();
+	};
+	
 	auto createDevices = [&]()
 	{
+		std::lock_guard lockDevices(mutexDevices);
+
 		if(!audio || (!devNameAudioOut.empty() && audio->getDeviceName() != devNameAudioOut))
 		{
 			audio.reset();
@@ -365,81 +361,17 @@ int main(int _argc, char* _argv[])
 
 	createDevices();
 
-	std::vector<synthLib::SMidiEvent> midiInBuffer;
-	std::vector<uint8_t> midiOutBuffer;
+	dsp56k::DSPThread::setCurrentThreadName("main");
 
 	while(true)
 	{
-		while(!settingsChanged)
+		std::this_thread::sleep_for(std::chrono::milliseconds(250));
+
+		if(settingsChanged)
 		{
-			processKeys();
-
-			if(waitForBootKeys)
-			{
-				const auto t = std::chrono::system_clock::now();
-				const auto d = std::chrono::duration_cast<std::chrono::milliseconds>(t - startTime).count();
-
-				if(d < 1000)
-					continue;
-
-				waitForBootKeys = false;
-				LOG("Wait for boot keys over");
-			}
-
-			midiIn->process(midiInBuffer);
-
-			for (const auto& e : midiInBuffer)
-			{
-				if(!e.sysex.empty())
-				{
-					for (uint8_t sysexByte : e.sysex)
-						hw->sendMidi(sysexByte);
-				}
-				else
-				{
-					hw->sendMidi(e.a);
-
-					const auto command = e.a & 0xf0;
-
-					if(command != 0xf0)
-					{
-						switch(command)
-						{
-						case synthLib::M_AFTERTOUCH:
-							hw->sendMidi(e.b);
-							break;
-						default:
-							hw->sendMidi(e.b);
-							hw->sendMidi(e.c);
-							break;
-						}
-					}
-				}
-			}
-
-			midiInBuffer.clear();
-
-			for(size_t i=0; i<32; ++i)
-			{
-				hw->process();
-				hw->process();
-				hw->process();
-				hw->process();
-				hw->process();
-				hw->process();
-				hw->process();
-				hw->process();
-			}
-
-			if(slow)
-				std::this_thread::sleep_for(std::chrono::microseconds(1));
-
-			hw->receiveMidi(midiOutBuffer);
-			midiOut->write(midiOutBuffer);
-			midiOutBuffer.clear();
+			createDevices();
+			settingsChanged = false;
 		}
-
-		createDevices();
 	}
 
 	return 0;
