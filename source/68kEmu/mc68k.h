@@ -13,6 +13,12 @@ namespace mc68k
 	class Mc68k
 	{
 	public:
+		enum class HostEndian
+		{
+			Big,
+			Little
+		};
+
 		Mc68k();
 		virtual ~Mc68k();
 
@@ -63,6 +69,16 @@ namespace mc68k
 
 		Qsm& getQSM()		{ return m_qsm; }
 		Sim& getSim()		{ return m_sim; }
+
+		static constexpr HostEndian hostEndian()
+		{
+			constexpr uint32_t test32 = 0x01020304;
+			constexpr uint8_t test8 = static_cast<const uint8_t&>(test32);
+
+			static_assert(test8 == 0x01 || test8 == 0x04, "unable to determine endianess");
+
+			return test8 == 0x01 ? HostEndian::Big : HostEndian::Little;
+		}
 
 	private:
 		void raiseIPL();

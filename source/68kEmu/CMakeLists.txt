@@ -67,6 +67,6 @@ target_include_directories(68kEmu PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Moira
 )
 
-set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 14)
+set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 17)
 
 target_link_libraries(68kEmu PUBLIC dsp56kEmu)

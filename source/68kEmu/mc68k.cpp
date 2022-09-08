@@ -112,10 +112,16 @@ namespace mc68k
 
 	uint16_t Mc68k::readW(const uint8_t* _buf, size_t _offset)
 	{
-		const uint16_t a = _buf[_offset];
-		const uint16_t b = _buf[_offset+1];
+		const auto* ptr = &_buf[_offset];
 
-		return static_cast<uint16_t>(a << 8 | b);
+		const auto v16 = *reinterpret_cast<const uint16_t*>(ptr);
+
+		if constexpr (hostEndian() == HostEndian::Big)
+		{
+			return v16;
+		}
+
+		return static_cast<uint16_t>(v16 << 8 | v16 >> 8);
 	}
 
 	uint8_t Mc68k::read8(uint32_t _addr)
