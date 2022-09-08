@@ -163,10 +163,20 @@ namespace mqLib
 		m_midiOutBuffer.clear();
 	}
 
+	bool MicroQ::getButton(Buttons::ButtonType _button)
+	{
+		return m_hw->getUC().getButtons().getButtonState(_button) != 0;
+	}
+
 	void MicroQ::setButton(Buttons::ButtonType _button, bool _pressed)
 	{
 		std::lock_guard lock(m_mutex);
 		m_hw->getUC().getButtons().setButton(_button, _pressed);
+	}
+
+	uint8_t MicroQ::getEncoder(Buttons::Encoders _encoder)
+	{
+		return m_hw->getUC().getButtons().getEncoderState(_encoder);
 	}
 
 	void MicroQ::rotateEncoder(Buttons::Encoders _encoder, int _amount)

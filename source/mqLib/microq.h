@@ -50,10 +50,16 @@ namespace mqLib
 		// Note that any midi output data not queried between two calls of process() is lost
 		void receiveMidi(std::vector<uint8_t>& _buffer);
 
-		// set the status of one of the front panel buttons
+		// Get the status of one of the front panel buttons
+		bool getButton(Buttons::ButtonType _button);
+
+		// Set the status of one of the front panel buttons
 		void setButton(Buttons::ButtonType _button, bool _pressed);
 
-		// rotate an encoder by a specific amount
+		// retrieve the current value of a front panel encoder
+		uint8_t getEncoder(Buttons::Encoders _encoder);
+
+		// Rotate an encoder on the front panel by a specific amount
 		void rotateEncoder(Buttons::Encoders _encoder, int _amount);
 
 		// return the state of a front panel LED. true = lit
