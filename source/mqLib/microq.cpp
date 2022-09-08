@@ -1,7 +1,6 @@
 #include "microq.h"
 
 #include "../synthLib/midiTypes.h"
-#include "../synthLib/os.h"
 
 #include "mqhardware.h"
 
