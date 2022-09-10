@@ -15,6 +15,7 @@ pipeline {
 		booleanParam(name: 'Deploy', defaultValue: true, description: '') 
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '') 
+		string(name: 'UploadFolder', defaultValue: "", description: '')
 	}
 	stages {
 		stage("Checkout") {
@@ -85,7 +86,10 @@ def genericSh(cmd)
 		bat cmd
 	}
 }
-
+def supportTI()
+{
+	return params.Branch == 'snow' ? 'ON' : 'OFF'
+}
 def needsJuce()
 {
 	return params.Deploy ? 'ON' : 'OFF'
@@ -132,7 +136,8 @@ def cmakeBuild()
 		deleteFile('CMakeCache.txt')	// we need to do this to be able to change option in the command line below. Otherwise, they won't change for an existing project
 	}
 	def buildDir = cmakeBuildDir();
-	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
+	def ti = supportTI();
+	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release -DVIRUS_SUPPORT_TI=${ti}"
 	dir("${buildDir}") {
 		genericSh 'cmake --build . --config Release'
 	}
@@ -154,9 +159,7 @@ def getIntegrationTestRunner()
 	if(isUnix()) {
 		return "${env.WORKSPACE}/${buildDir}/source/virusIntegrationTest/virusIntegrationTest"
 	} else {
-		def foo = "${env.WORKSPACE}\\${buildDir}\\source\\virusIntegrationTest\\Release\\virusIntegrationTest.exe"
-		echo "${foo}"
-		return "${foo}"
+		return "${env.WORKSPACE}\\${buildDir}\\source\\virusIntegrationTest\\Release\\virusIntegrationTest.exe"
 	}
 }
 
@@ -166,21 +169,8 @@ def doIntegrationTests()
 		def runner = getIntegrationTestRunner()
 		
 		copyTestData()
-		
-		dir('testData') {
-			def files = findFiles() 
-	 
-			files.each{ f -> 
-				if(f.directory) {
-					dir(f.name) {
-						def file = readFile 'presets.txt'
-						file.readLines().each {
-							genericSh "${runner} -rom \"${f.name}\" -preset \"${it}\""
-						}
-					}
-				}
-			}
-		}
+
+		genericSh "${runner} -folder testData"
 	}
 }
 
@@ -196,7 +186,7 @@ def formatArg(_arg)
 def copyArtefacts(rcloneConfig, targetFolder)
 {
 	dir(cmakeBuildDir()) {
-		genericSh 'rclone copy --config ' + formatArg('rcloneConfig') + ' --transfers=1 -v --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . ' + "${targetFolder}/${params.Branch}"
+		genericSh 'rclone copy --config ' + formatArg('rcloneConfig') + ' --transfers=1 -v --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . ' + "${targetFolder}/${params.Branch}${params.UploadFolder}"
 	}
 }
 
