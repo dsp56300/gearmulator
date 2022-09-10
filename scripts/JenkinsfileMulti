@@ -11,6 +11,7 @@ pipeline {
 		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
 		booleanParam(name: 'Deploy', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '')
+		choice(name: 'UploadFolder', choices: ['', '/alpha', '/beta'], description: '')
 	}
 	stages {
 		stage('Prepare') {
@@ -81,5 +82,6 @@ def startBuildJob(label)
 		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
 		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
 		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
+		[$class: 'StringParameterValue', name: 'UploadFolder', value: params.UploadFolder], 
 	]
 }
