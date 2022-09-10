@@ -1,6 +1,7 @@
 #include "mc68k.h"
 
 #include <cassert>
+#include <atomic>
 
 #include "dsp56kEmu/logging.h"
 //#include "Moira/Musashi/m68k.h"
