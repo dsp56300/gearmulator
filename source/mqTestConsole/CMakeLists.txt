@@ -17,13 +17,21 @@ set(SOURCES
 	mqGuiBase.cpp mqGuiBase.h
 	mqSettingsGui.cpp mqSettingsGui.h
 	mqTestConsole.cpp
-	../portmidi/pm_common/portmidi.h
 )
+
+if(NOT ANDROID)
+	list(APPEND SOURCES ../portmidi/pm_common/portmidi.h)
+endif()
 
 target_sources(mqTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(mqTestConsole PUBLIC mqLib cpp-terminal portaudio_static portmidi-static)
+target_link_libraries(mqTestConsole PUBLIC mqLib cpp-terminal portaudio_static)
+target_compile_definitions(mqTestConsole PUBLIC "ANDROID")
+
+if(NOT ANDROID)
+	target_link_libraries(mqTestConsole PUBLIC portaudio_static)
+endif()
 
 if(UNIX AND NOT APPLE)
 	target_link_libraries(mqTestConsole PUBLIC -static-libgcc -static-libstdc++)

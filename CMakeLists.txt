@@ -49,7 +49,9 @@ set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
 add_subdirectory(source/cpp-terminal)
 
-add_subdirectory(source/portmidi)
+if(NOT ANDROID)
+	add_subdirectory(source/portmidi)
+endif()
 
 set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
 add_subdirectory(source/portaudio)
