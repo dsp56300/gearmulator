@@ -8,6 +8,8 @@
 #include "qsm.h"
 #include "sim.h"
 
+struct CpuState;
+
 namespace mc68k
 {
 	class Mc68k
@@ -79,6 +81,8 @@ namespace mc68k
 
 			return test8 == 0x01 ? HostEndian::Big : HostEndian::Little;
 		}
+
+		CpuState* getCpuState();
 
 	private:
 		void raiseIPL();

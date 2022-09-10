@@ -12,69 +12,74 @@ struct CpuState : m68ki_cpu_core
 	mc68k::Mc68k* instance = nullptr;
 };
 
-mc68k::Mc68k* g_instance = nullptr;
+std::atomic<mc68k::Mc68k*> g_instance = nullptr;
+
+mc68k::Mc68k* getInstance(m68ki_cpu_core* _core)
+{
+	return static_cast<CpuState*>(_core)->instance;
+}
 
 extern "C"
 {
 	unsigned int m68k_read_memory_8(m68ki_cpu_core* core, unsigned int address)
 	{
-		return g_instance->read8(address);
+		return getInstance(core)->read8(address);
 	}
 	unsigned int m68k_read_memory_16(m68ki_cpu_core* core, unsigned int address)
 	{
-		return g_instance->read16(address);
+		return getInstance(core)->read16(address);
 	}
 	unsigned int m68k_read_memory_32(m68ki_cpu_core* core, unsigned int address)
 	{
-		return g_instance->read32(address);
+		return getInstance(core)->read32(address);
 	}
 	void m68k_write_memory_8(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
-		g_instance->write8(address, static_cast<uint8_t>(value));
+		getInstance(core)->write8(address, static_cast<uint8_t>(value));
 	}
 	void m68k_write_memory_16(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
-		g_instance->write16(address, static_cast<uint16_t>(value));
+		getInstance(core)->write16(address, static_cast<uint16_t>(value));
 	}
 	void m68k_write_memory_32(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
-		g_instance->write32(address, value);
+		getInstance(core)->write32(address, value);
 	}
-	int m68k_int_ack(m68ki_cpu_core*, int int_level)
+	int m68k_int_ack(m68ki_cpu_core* core, int int_level)
 	{
-		return static_cast<int>(g_instance->readIrqUserVector(static_cast<uint8_t>(int_level)));
+		return static_cast<int>(getInstance(core)->readIrqUserVector(static_cast<uint8_t>(int_level)));
 	}
-	void m68k_reset()
-	{
-		g_instance->onReset();
-	}
-
 	int read_sp_on_reset(m68ki_cpu_core* core)
 	{
-		return static_cast<int>(g_instance->getResetSP());
+		return static_cast<int>(getInstance(core)->getResetSP());
 	}
 	int read_pc_on_reset(m68ki_cpu_core* core)
 	{
-		return static_cast<int>(g_instance->getResetPC());
+		return static_cast<int>(getInstance(core)->getResetPC());
 	}
+	int m68k_illegal_cbk(m68ki_cpu_core* core, int opcode)
+	{
+		return static_cast<int>(getInstance(core)->onIllegalInstruction(static_cast<uint32_t>(opcode)));
+	}
+	void m68k_reset_cbk(m68ki_cpu_core* core)
+	{
+		return getInstance(core)->onReset();
+	}
+
 	unsigned int m68k_read_disassembler_8  (unsigned int address)
 	{
-		CpuState* core;
-		return m68k_read_memory_8(core, address);
+		mc68k::Mc68k* instance = g_instance;
+		return m68k_read_memory_8(instance->getCpuState(), address);
 	}
 	unsigned int m68k_read_disassembler_16 (unsigned int address)
 	{
-		CpuState* core;
-		return m68k_read_memory_16(core, address);
+		mc68k::Mc68k* instance = g_instance;
+		return m68k_read_memory_16(instance->getCpuState(), address);
 	}
 	unsigned int m68k_read_disassembler_32 (unsigned int address)
 	{
-		CpuState* core;
-		return m68k_read_memory_32(core, address);
-	}
-	int m68k_illegal_cbk(m68ki_cpu_core*, int opcode)
-	{
-		return static_cast<int>(g_instance->onIllegalInstruction(static_cast<uint32_t>(opcode)));
+		mc68k::Mc68k* instance = g_instance;
+		return m68k_read_memory_32(instance->getCpuState(), address);
 	}
 }
 
@@ -87,16 +92,19 @@ namespace mc68k
 		g_instance = this;
 
 		m_cpuState.resize(sizeof(CpuState), 0);
+		getCpuState()->instance = this;
 
 		m68k_set_cpu_type(cpuState, M68K_CPU_TYPE_68020);
 		m68k_init(cpuState);
 		m68k_set_int_ack_callback(cpuState, m68k_int_ack);
 		m68k_set_illg_instr_callback(cpuState, m68k_illegal_cbk);
+		m68k_set_reset_instr_callback(cpuState, m68k_reset_cbk);
 		m68k_pulse_reset(cpuState);
 	}
 	Mc68k::~Mc68k()
 	{
-		g_instance = nullptr;
+		auto* inst = this;
+		g_instance.compare_exchange_strong(inst, nullptr);
 	};
 
 	uint32_t Mc68k::exec()
@@ -239,6 +247,11 @@ namespace mc68k
 	Hdi08& Mc68k::hdi08()
 	{
 		return m_hdi08;
+	}
+
+	CpuState* Mc68k::getCpuState()
+	{
+		return cpuState;
 	}
 
 	void Mc68k::raiseIPL()
