@@ -3,37 +3,44 @@
 #include <cassert>
 
 #include "dsp56kEmu/logging.h"
-#include "Moira/Musashi/m68k.h"
+//#include "Moira/Musashi/m68k.h"
+#include "Moira/Musashi/m68kcpu.h"
 
-static mc68k::Mc68k* g_instance = nullptr;
+struct CpuState : m68ki_cpu_core
+{
+	CpuState() = default;
+	mc68k::Mc68k* instance = nullptr;
+};
+
+mc68k::Mc68k* g_instance = nullptr;
 
 extern "C"
 {
-	unsigned int m68k_read_memory_8(unsigned int address)
+	unsigned int m68k_read_memory_8(m68ki_cpu_core* core, unsigned int address)
 	{
 		return g_instance->read8(address);
 	}
-	unsigned int m68k_read_memory_16(unsigned int address)
+	unsigned int m68k_read_memory_16(m68ki_cpu_core* core, unsigned int address)
 	{
 		return g_instance->read16(address);
 	}
-	unsigned int m68k_read_memory_32(unsigned int address)
+	unsigned int m68k_read_memory_32(m68ki_cpu_core* core, unsigned int address)
 	{
 		return g_instance->read32(address);
 	}
-	void m68k_write_memory_8(unsigned int address, unsigned int value)
+	void m68k_write_memory_8(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
 		g_instance->write8(address, static_cast<uint8_t>(value));
 	}
-	void m68k_write_memory_16(unsigned int address, unsigned int value)
+	void m68k_write_memory_16(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
 		g_instance->write16(address, static_cast<uint16_t>(value));
 	}
-	void m68k_write_memory_32(unsigned int address, unsigned int value)
+	void m68k_write_memory_32(m68ki_cpu_core* core, unsigned int address, unsigned int value)
 	{
 		g_instance->write32(address, value);
 	}
-	int m68k_int_ack(int int_level)
+	int m68k_int_ack(m68ki_cpu_core*, int int_level)
 	{
 		return static_cast<int>(g_instance->readIrqUserVector(static_cast<uint8_t>(int_level)));
 	}
@@ -42,27 +49,30 @@ extern "C"
 		g_instance->onReset();
 	}
 
-	int read_sp_on_reset(void)
+	int read_sp_on_reset(m68ki_cpu_core* core)
 	{
 		return static_cast<int>(g_instance->getResetSP());
 	}
-	int read_pc_on_reset(void)
+	int read_pc_on_reset(m68ki_cpu_core* core)
 	{
 		return static_cast<int>(g_instance->getResetPC());
 	}
 	unsigned int m68k_read_disassembler_8  (unsigned int address)
 	{
-		return m68k_read_memory_8(address);
+		CpuState* core;
+		return m68k_read_memory_8(core, address);
 	}
 	unsigned int m68k_read_disassembler_16 (unsigned int address)
 	{
-		return m68k_read_memory_16(address);
+		CpuState* core;
+		return m68k_read_memory_16(core, address);
 	}
 	unsigned int m68k_read_disassembler_32 (unsigned int address)
 	{
-		return m68k_read_memory_32(address);
+		CpuState* core;
+		return m68k_read_memory_32(core, address);
 	}
-	int m68k_illegal_cbk(int opcode)
+	int m68k_illegal_cbk(m68ki_cpu_core*, int opcode)
 	{
 		return static_cast<int>(g_instance->onIllegalInstruction(static_cast<uint32_t>(opcode)));
 	}
@@ -70,15 +80,19 @@ extern "C"
 
 namespace mc68k
 {
+#define cpuState ((CpuState*)&m_cpuState[0])
+
 	Mc68k::Mc68k() : m_gpt(*this), m_sim(*this), m_qsm(*this)
 	{
 		g_instance = this;
 
-		m68k_set_cpu_type(M68K_CPU_TYPE_68020);
-		m68k_init();
-		m68k_set_int_ack_callback(m68k_int_ack);
-		m68k_set_illg_instr_callback(m68k_illegal_cbk);
-		m68k_pulse_reset();
+		m_cpuState.resize(sizeof(CpuState), 0);
+
+		m68k_set_cpu_type(cpuState, M68K_CPU_TYPE_68020);
+		m68k_init(cpuState);
+		m68k_set_int_ack_callback(cpuState, m68k_int_ack);
+		m68k_set_illg_instr_callback(cpuState, m68k_illegal_cbk);
+		m68k_pulse_reset(cpuState);
 	}
 	Mc68k::~Mc68k()
 	{
@@ -87,7 +101,7 @@ namespace mc68k
 
 	uint32_t Mc68k::exec()
 	{
-		const auto deltaCycles = m68k_execute(1);
+		const auto deltaCycles = m68k_execute(cpuState, 1);
 		m_cycles += deltaCycles;
 
 		m_gpt.exec(deltaCycles);
@@ -196,7 +210,7 @@ namespace mc68k
 		const auto vec = vecs.front();
 		vecs.pop_front();
 
-		m68k_set_irq(0);
+		m68k_set_irq(cpuState, 0);
 		this->raiseIPL();
 
 		return vec;
@@ -204,17 +218,17 @@ namespace mc68k
 
 	void Mc68k::reset()
 	{
-		m68k_pulse_reset();
+		m68k_pulse_reset(cpuState);
 	}
 
 	void Mc68k::setPC(uint32_t _pc)
 	{
-		m68k_set_reg(M68K_REG_PC, _pc);
+		m68k_set_reg(cpuState, M68K_REG_PC, _pc);
 	}
 
 	uint32_t Mc68k::getPC()
 	{
-		return m68k_get_reg(nullptr, M68K_REG_PC);
+		return m68k_get_reg(cpuState, M68K_REG_PC);
 	}
 
 	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer) const
@@ -233,7 +247,7 @@ namespace mc68k
 		{
 			if(!m_pendingInterrupts[i].empty())
 			{
-				m68k_set_irq(static_cast<uint8_t>(i));
+				m68k_set_irq(cpuState, static_cast<uint8_t>(i));
 				break;
 			}
 		}
