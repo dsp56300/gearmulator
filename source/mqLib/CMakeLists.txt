@@ -3,7 +3,7 @@ project(mqLib)
 
 include(bin2h.cmake)
 
-bin2h(SOURCE_FILE "microQ223.swapped.BIN" HEADER_FILE "romData.h" VARIABLE_NAME "ROM_DATA")
+#bin2h(SOURCE_FILE "microQ223.swapped.BIN" HEADER_FILE "romData.h" VARIABLE_NAME "ROM_DATA")
 
 add_library(mqLib STATIC)
 
