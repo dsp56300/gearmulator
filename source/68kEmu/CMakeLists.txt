@@ -31,15 +31,16 @@ set(SOURCES_MOIRA
 set(SOURCES_MUSASHI
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68k.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kconf.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kcpu.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kcpu.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kcpu.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kdasm.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kfpu.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kops.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kdasm.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kfpu.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kmmu.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kops.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/m68kops.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/mamesf.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/milieu.h
-	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat.c
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat.h
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat-macros
 	${CMAKE_CURRENT_SOURCE_DIR}/Moira/Musashi/softfloat/softfloat-specialize
