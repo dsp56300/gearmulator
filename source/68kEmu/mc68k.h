@@ -94,6 +94,7 @@ namespace mc68k
 
 		std::array<std::deque<uint8_t>, 8> m_pendingInterrupts;
 		std::vector<uint8_t> m_cpuState;
+		CpuState* m_cpuStatePtr = nullptr;
 
 		uint64_t m_cycles = 0;
 	};

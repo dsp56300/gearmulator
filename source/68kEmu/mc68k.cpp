@@ -86,21 +86,21 @@ extern "C"
 
 namespace mc68k
 {
-#define cpuState ((CpuState*)&m_cpuState[0])
-
 	Mc68k::Mc68k() : m_gpt(*this), m_sim(*this), m_qsm(*this)
 	{
 		g_instance = this;
 
 		m_cpuState.resize(sizeof(CpuState), 0);
+		m_cpuStatePtr = reinterpret_cast<CpuState*>(&m_cpuState[0]);
+
 		getCpuState()->instance = this;
 
-		m68k_set_cpu_type(cpuState, M68K_CPU_TYPE_68020);
-		m68k_init(cpuState);
-		m68k_set_int_ack_callback(cpuState, m68k_int_ack);
-		m68k_set_illg_instr_callback(cpuState, m68k_illegal_cbk);
-		m68k_set_reset_instr_callback(cpuState, m68k_reset_cbk);
-		m68k_pulse_reset(cpuState);
+		m68k_set_cpu_type(m_cpuStatePtr, M68K_CPU_TYPE_68020);
+		m68k_init(m_cpuStatePtr);
+		m68k_set_int_ack_callback(m_cpuStatePtr, m68k_int_ack);
+		m68k_set_illg_instr_callback(m_cpuStatePtr, m68k_illegal_cbk);
+		m68k_set_reset_instr_callback(m_cpuStatePtr, m68k_reset_cbk);
+		m68k_pulse_reset(m_cpuStatePtr);
 	}
 	Mc68k::~Mc68k()
 	{
@@ -110,7 +110,7 @@ namespace mc68k
 
 	uint32_t Mc68k::exec()
 	{
-		const auto deltaCycles = m68k_execute(cpuState, 1);
+		const auto deltaCycles = m68k_execute(m_cpuStatePtr, 1);
 		m_cycles += deltaCycles;
 
 		m_gpt.exec(deltaCycles);
@@ -219,7 +219,7 @@ namespace mc68k
 		const auto vec = vecs.front();
 		vecs.pop_front();
 
-		m68k_set_irq(cpuState, 0);
+		m68k_set_irq(m_cpuStatePtr, 0);
 		this->raiseIPL();
 
 		return vec;
@@ -227,17 +227,17 @@ namespace mc68k
 
 	void Mc68k::reset()
 	{
-		m68k_pulse_reset(cpuState);
+		m68k_pulse_reset(m_cpuStatePtr);
 	}
 
 	void Mc68k::setPC(uint32_t _pc)
 	{
-		m68k_set_reg(cpuState, M68K_REG_PC, _pc);
+		m68k_set_reg(m_cpuStatePtr, M68K_REG_PC, _pc);
 	}
 
 	uint32_t Mc68k::getPC()
 	{
-		return m68k_get_reg(cpuState, M68K_REG_PC);
+		return m68k_get_reg(m_cpuStatePtr, M68K_REG_PC);
 	}
 
 	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer) const
@@ -252,7 +252,7 @@ namespace mc68k
 
 	CpuState* Mc68k::getCpuState()
 	{
-		return cpuState;
+		return m_cpuStatePtr;
 	}
 
 	void Mc68k::raiseIPL()
@@ -261,7 +261,7 @@ namespace mc68k
 		{
 			if(!m_pendingInterrupts[i].empty())
 			{
-				m68k_set_irq(cpuState, static_cast<uint8_t>(i));
+				m68k_set_irq(m_cpuStatePtr, static_cast<uint8_t>(i));
 				break;
 			}
 		}
