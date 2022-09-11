@@ -87,6 +87,8 @@ namespace mc68k
 {
 	Mc68k::Mc68k() : m_gpt(*this), m_sim(*this), m_qsm(*this)
 	{
+		m_cpuStateBuf.fill(0);
+
 		static_assert(sizeof(CpuState) <= CpuStateSize);
 		m_cpuState = reinterpret_cast<CpuState*>(&m_cpuStateBuf[0]);
 
