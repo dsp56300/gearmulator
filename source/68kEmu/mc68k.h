@@ -21,6 +21,8 @@ namespace mc68k
 			Little
 		};
 
+		static constexpr uint32_t CpuStateSize = 600;
+
 		Mc68k();
 		virtual ~Mc68k();
 
@@ -87,14 +89,15 @@ namespace mc68k
 	private:
 		void raiseIPL();
 
+		std::array<uint8_t, CpuStateSize> m_cpuStateBuf;
+		CpuState* m_cpuState;
+
 		Gpt m_gpt;
 		Sim m_sim;
 		Qsm m_qsm;
 		Hdi08 m_hdi08;
 
 		std::array<std::deque<uint8_t>, 8> m_pendingInterrupts;
-		std::vector<uint8_t> m_cpuState;
-		CpuState* m_cpuStatePtr = nullptr;
 
 		uint64_t m_cycles = 0;
 	};

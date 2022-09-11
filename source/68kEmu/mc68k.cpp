@@ -4,12 +4,11 @@
 #include <atomic>
 
 #include "dsp56kEmu/logging.h"
-//#include "Moira/Musashi/m68k.h"
+
 #include "Moira/Musashi/m68kcpu.h"
 
 struct CpuState : m68ki_cpu_core
 {
-	CpuState() = default;
 	mc68k::Mc68k* instance = nullptr;
 };
 
@@ -88,19 +87,19 @@ namespace mc68k
 {
 	Mc68k::Mc68k() : m_gpt(*this), m_sim(*this), m_qsm(*this)
 	{
-		g_instance = this;
+		static_assert(sizeof(CpuState) <= CpuStateSize);
+		m_cpuState = reinterpret_cast<CpuState*>(&m_cpuStateBuf[0]);
 
-		m_cpuState.resize(sizeof(CpuState), 0);
-		m_cpuStatePtr = reinterpret_cast<CpuState*>(&m_cpuState[0]);
+		g_instance = this;
 
 		getCpuState()->instance = this;
 
-		m68k_set_cpu_type(m_cpuStatePtr, M68K_CPU_TYPE_68020);
-		m68k_init(m_cpuStatePtr);
-		m68k_set_int_ack_callback(m_cpuStatePtr, m68k_int_ack);
-		m68k_set_illg_instr_callback(m_cpuStatePtr, m68k_illegal_cbk);
-		m68k_set_reset_instr_callback(m_cpuStatePtr, m68k_reset_cbk);
-		m68k_pulse_reset(m_cpuStatePtr);
+		m68k_set_cpu_type(getCpuState(), M68K_CPU_TYPE_68020);
+		m68k_init(getCpuState());
+		m68k_set_int_ack_callback(getCpuState(), m68k_int_ack);
+		m68k_set_illg_instr_callback(getCpuState(), m68k_illegal_cbk);
+		m68k_set_reset_instr_callback(getCpuState(), m68k_reset_cbk);
+		m68k_pulse_reset(getCpuState());
 	}
 	Mc68k::~Mc68k()
 	{
@@ -110,7 +109,7 @@ namespace mc68k
 
 	uint32_t Mc68k::exec()
 	{
-		const auto deltaCycles = m68k_execute(m_cpuStatePtr, 1);
+		const auto deltaCycles = m68k_execute(getCpuState(), 1);
 		m_cycles += deltaCycles;
 
 		m_gpt.exec(deltaCycles);
@@ -219,7 +218,7 @@ namespace mc68k
 		const auto vec = vecs.front();
 		vecs.pop_front();
 
-		m68k_set_irq(m_cpuStatePtr, 0);
+		m68k_set_irq(getCpuState(), 0);
 		this->raiseIPL();
 
 		return vec;
@@ -227,17 +226,17 @@ namespace mc68k
 
 	void Mc68k::reset()
 	{
-		m68k_pulse_reset(m_cpuStatePtr);
+		m68k_pulse_reset(getCpuState());
 	}
 
 	void Mc68k::setPC(uint32_t _pc)
 	{
-		m68k_set_reg(m_cpuStatePtr, M68K_REG_PC, _pc);
+		m68k_set_reg(getCpuState(), M68K_REG_PC, _pc);
 	}
 
 	uint32_t Mc68k::getPC()
 	{
-		return m68k_get_reg(m_cpuStatePtr, M68K_REG_PC);
+		return m68k_get_reg(getCpuState(), M68K_REG_PC);
 	}
 
 	uint32_t Mc68k::disassemble(uint32_t _pc, char* _buffer) const
@@ -252,7 +251,7 @@ namespace mc68k
 
 	CpuState* Mc68k::getCpuState()
 	{
-		return m_cpuStatePtr;
+		return m_cpuState;
 	}
 
 	void Mc68k::raiseIPL()
@@ -261,7 +260,7 @@ namespace mc68k
 		{
 			if(!m_pendingInterrupts[i].empty())
 			{
-				m68k_set_irq(m_cpuStatePtr, static_cast<uint8_t>(i));
+				m68k_set_irq(getCpuState(), static_cast<uint8_t>(i));
 				break;
 			}
 		}
