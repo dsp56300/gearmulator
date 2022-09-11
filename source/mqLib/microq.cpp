@@ -20,6 +20,7 @@ namespace mqLib
 			while(!m_destroy)
 				processUcThread();
 			m_destroy = false;
+			m_hw->ucThreadTerminated();
 		}));
 
 		m_hw->getUC().getLeds().setChangeCallback([this]()
@@ -35,13 +36,24 @@ namespace mqLib
 
 	MicroQ::~MicroQ()
 	{
+		// we need to have passed the boot stage
+		m_hw->processAudio(1);
+
 		m_destroy = true;
 
 		// DSP needs to run to let the uc thread wake up
+		const auto& esai = m_hw->getDSP().getPeriph().getEsai();
 		while(m_destroy)
-			m_hw->processAudio(1);
+		{
+			if(!esai.getAudioOutputs().empty())
+				m_hw->processAudio(1);
+			else
+				std::this_thread::yield();
+		}
 
 		m_ucThread->join();
+		m_ucThread.reset();
+		m_hw.reset();
 	}
 
 	void MicroQ::process(const float** _inputs, float** _outputs, uint32_t _frames)

@@ -64,6 +64,7 @@ namespace mqLib
 	{
 		m_dsp.getPeriph().getEsai().setCallback({}, 0);
 		m_hdiUC.setRxEmptyCallback({});
+		m_dspThread.join();
 	}
 
 	bool Hardware::process()

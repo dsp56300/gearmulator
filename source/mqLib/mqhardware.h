@@ -36,6 +36,11 @@ namespace mqLib
 
 		void ensureBufferSize(uint32_t _frames);
 
+		void ucThreadTerminated()
+		{
+			resumeDSP();
+		}
+
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
