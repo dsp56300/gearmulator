@@ -2,17 +2,16 @@
 
 #include "dspBootCode.h"
 
+#include <cstring>
+
 namespace mqLib
 {
 	static dsp56k::DefaultMemoryValidator g_memoryValidator;
 
-	static constexpr dsp56k::TWord g_bridgedAddr	= 0x080000;	// start of external SRAM, mapped to X and Y
-	static constexpr dsp56k::TWord g_xyMemSize		= 0x800000;	// due to weird AAR mapping we just allocate enough so that everything fits into it
-	static constexpr dsp56k::TWord g_pMemSize		= 0x2000;	// only $0000 < $1400 for DSP, rest for us
-	static constexpr dsp56k::TWord g_bootCodeBase	= 0x1500;
-
-	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr), m_dsp(m_memory, &m_periphX, &m_periphNop)
+	MqDsp::MqDsp() : m_periphX(nullptr), m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr, m_memoryBuffer), m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
+		memset(m_memoryBuffer, 0, sizeof(m_memoryBuffer));
+
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
 		m_periphX.getEsaiClock().setSamplerate(44100); // verified
 
