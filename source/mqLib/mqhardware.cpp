@@ -27,7 +27,9 @@ namespace mqLib
 		esai.setCallback([&](dsp56k::Audio*)
 		{
 			++m_esaiFrameIndex;
-			m_esaiFrameAddedCv.notify_one();
+
+			if((m_esaiFrameIndex & 15) == 0)
+				m_esaiFrameAddedCv.notify_one();
 
 			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
 				m_requestedFramesAvailableCv.notify_one();
@@ -285,7 +287,7 @@ namespace mqLib
 		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
-		if((esaiFrameIndex - m_lastEsaiFrameIndex) > 8)
+		if((esaiFrameIndex - m_lastEsaiFrameIndex) > 64)
 		{
 			haltDSP();
 		}
