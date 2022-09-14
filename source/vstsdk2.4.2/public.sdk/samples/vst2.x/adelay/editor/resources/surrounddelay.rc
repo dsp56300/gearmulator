@@ -1,0 +1,10 @@
+#define APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+128                     BITMAP  DISCARDABLE     "bmp00128.bmp"
+129                     BITMAP  DISCARDABLE     "bmp00129.bmp"
+130                     BITMAP  DISCARDABLE     "bmp00130.bmp"
