@@ -31,14 +31,20 @@ target_sources(mqVst2dll PRIVATE ../vstsdk2.4.2/public.sdk/source/vst2.x/vstplug
 if(MSVC)
 	target_sources(mqVst2dll PRIVATE ../vstsdk2.4.2/public.sdk/samples/vst2.x/win/vstplug.def version.rc)
 elseif(APPLE)
-	set_target_properties(mqVst2dll PROPERTIES BUNDLE TRUE)
-	set_target_properties(mqVst2dll PROPERTIES CXX_VISIBILITY_PRESET default)
-	set_target_properties(mqVst2dll PROPERTIES CMAKE_C_VISIBILITY_PRESET default)
-	set_target_properties(mqVst2dll PROPERTIES XCODE_ATTRIBUTE_INFOPLIST_FILE "Info.plist")
-	set_target_properties(mqVst2dll PROPERTIES XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES")
-	set_target_properties(mqVst2dll PROPERTIES XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst")
-	set_target_properties(mqVst2dll PROPERTIES XCODE_ATTRIBUTE_GENERATE_MASTER_OBJECT_FILE "YES")
-	set_target_properties(mqVst2dll PROPERTIES XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load")
+	set_target_properties(mqVst2dll PROPERTIES 
+		BUNDLE TRUE
+		BUNDLE_EXTENSION vst
+		XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY ""
+		XCODE_ATTRIBUTE_CODE_SIGNING_REQUIRED "NO"
+		CXX_VISIBILITY_PRESET default
+		CMAKE_C_VISIBILITY_PRESET default
+		XCODE_ATTRIBUTE_INFOPLIST_FILE ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		MACOSX_BUNDLE_INFO_PLIST ${CMAKE_CURRENT_SOURCE_DIR}/Info.plist
+		XCODE_ATTRIBUTE_GENERATE_PKGINFO_FILE "YES"
+		XCODE_ATTRIBUTE_WRAPPER_EXTENSION "vst"
+		XCODE_ATTRIBUTE_GENERATE_MASTER_OBJECT_FILE "YES"
+		XCODE_ATTRIBUTE_OTHER_LDFLAGS "-all_load"
+		)
 endif()
 
 target_include_directories(mqVst2dll PRIVATE ../vstsdk2.4.2/)
