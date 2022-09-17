@@ -199,13 +199,11 @@ namespace mqLib
 
 	bool MicroQ::getLedState(Leds::Led _led)
 	{
-		std::lock_guard lock(m_mutex);
 		return m_hw->getUC().getLeds().getLedState(_led) != 0;
 	}
 
 	void MicroQ::readLCD(std::array<char, 40>& _data)
 	{
-		std::lock_guard lock(m_mutex);
 		_data = m_hw->getUC().getLcd().getDdRam();
 	}
 
