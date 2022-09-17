@@ -51,6 +51,40 @@ int main(int _argc, char* _argv[])
 	mqLib::MicroQ mq;
 	auto* hw = mq.getHardware();
 
+#if 0
+	// Factory Test
+	mq.setButton(ButtonType::Inst1, true);
+	mq.setButton(ButtonType::Global, true);
+#endif
+
+#if 0
+	// Erase Flash
+	mq.setButton(ButtonType::Inst3, true);
+	mq.setButton(ButtonType::Global, true);
+#endif
+
+#if 0
+	// Wait for System Dump
+	mq.setButton(ButtonType::Shift, true);
+	mq.setButton(ButtonType::Global, true);
+#endif
+
+#if 0
+	// DSP clock reset + Service Mode
+	mq.setButton(ButtonType::Multi, true);
+#endif
+
+#if 0
+	// Service Mode
+	mq.setButton(ButtonType::Global, true);
+#endif
+
+#if 0
+	// Memory Game
+	mq.setButton(ButtonType::Global, true);
+	mq.setButton(ButtonType::Play, true);
+#endif
+
 	// create terminal-GUI
 	Terminal term(true, true, false, true);
 	Gui gui(mq);
