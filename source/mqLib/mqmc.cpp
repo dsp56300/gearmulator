@@ -50,6 +50,7 @@ namespace mqLib
 		if(getPC() == 0x80718)
 		{
 			// TODO: hack to prevent getting stuck here
+			// https://discord.com/channels/829099347975208970/883390038954627072/980646881296273488
 			m_memory[0x170] = 32;
 		}
 
