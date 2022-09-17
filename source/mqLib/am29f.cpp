@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "mqmc.h"
 #include "dsp56kEmu/logging.h"
 
 Am29f::Am29f(uint8_t* _buffer, const size_t _size, bool _useWriteEnable, bool _bitreversedCmdAddr): m_buffer(_buffer), m_size(_size), m_useWriteEnable(_useWriteEnable), m_bitreverseCmdAddr(_bitreversedCmdAddr)
@@ -119,9 +120,11 @@ void Am29f::execCommand(const CommandType _command, uint32_t _addr, const uint16
 			if(_addr >= m_size)
 				return;
 			LOG("Programming word at " << HEX(_addr) << ", value " << HEXN(_data, 4));
-			uint8_t* p = &m_buffer[_addr];
-			auto* p16 = reinterpret_cast<uint16_t*>(p);
-			*p16 = _data;
+			const auto old = mqLib::MqMc::readW(m_buffer, _addr);
+			// "A bit cannot be programmed from a 0 back to a 1"
+			const auto v = _data & old;
+			mqLib::MqMc::writeW(m_buffer, _addr, v);
+//			assert(v == _data);
 			break;
 		}
 	case CommandType::Invalid: 
