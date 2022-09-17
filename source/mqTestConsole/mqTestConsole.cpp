@@ -49,6 +49,7 @@ int main(int _argc, char* _argv[])
 
 	// create hardware
 	mqLib::MicroQ mq;
+	auto* hw = mq.getHardware();
 
 	// create terminal-GUI
 	Terminal term(true, true, false, true);
@@ -257,7 +258,7 @@ int main(int _argc, char* _argv[])
 				mq.sendMidi(synthLib::MC_MODULATION);
 				mq.sendMidi(0x0);
 				break;
-/* TODO 	case '!':
+			case '!':
 				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getUcCycles()));
 				break;
 			case '&':
@@ -269,7 +270,7 @@ int main(int _argc, char* _argv[])
 			case '$':
 				hw->getUC().dumpROM("rom_runtime");
 				break;
-*/			default:
+			default:
 				break;
 			}
 		}

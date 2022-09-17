@@ -221,6 +221,11 @@ namespace mqLib
 		return static_cast<DirtyFlags>(f);
 	}
 
+	Hardware* MicroQ::getHardware()
+	{
+		return m_hw.get();
+	}
+
 	void MicroQ::onLedsChanged()
 	{
 		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::Leds));

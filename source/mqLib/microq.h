@@ -102,6 +102,8 @@ namespace mqLib
 		// Dirty flags are sticky but are reset upon calling this function
 		DirtyFlags getDirtyFlags();
 
+		// Gain access to the hardware implementation, intended for advanced use. Usually not required
+		Hardware* getHardware();
 	private:
 		void internalProcess(uint32_t _frames);
 		void onLedsChanged();
