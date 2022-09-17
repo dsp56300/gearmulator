@@ -1,6 +1,7 @@
 #include "microq.h"
 
 #include "../synthLib/midiTypes.h"
+#include "../synthLib/os.h"
 
 #include "mqhardware.h"
 
@@ -9,7 +10,8 @@ namespace mqLib
 	MicroQ::MicroQ()
 	{
 		// create hardware, will use in-memory ROM if no ROM provided
-		m_hw.reset(new Hardware({}));
+		const auto romFile = synthLib::findROM(512 * 1024);
+		m_hw.reset(new Hardware(romFile));
 
 		m_midiInBuffer.reserve(1024);
 		m_midiOutBuffer.reserve(1024);
