@@ -6,10 +6,14 @@
 
 namespace mc68k
 {
-	constexpr uint16_t g_spcr1_speMask		= (1<<15);
 	constexpr uint16_t g_spcr0_mstrMask		= (1<<15);
+
+	constexpr uint16_t g_spcr1_speMask		= (1<<15);
+
 	constexpr uint16_t g_spcr2_inqpMask		= 0xf;
 	constexpr uint16_t g_spcr2_SpifieMask	= (1<<15);
+	constexpr uint16_t g_spcr2_wrenMask		= (1<<14);
+
 	constexpr uint16_t g_spsr_cptqpMask		= 0xf;
 	constexpr uint16_t g_spsr_spifMask		= (1<<7);
 
@@ -287,12 +291,16 @@ namespace mc68k
 		// set completion flag
 		spsr(spsr() | g_spsr_spifMask);
 
-		// clear enabled flag
-		auto cr1 = spcr1();
-		cr1 &= ~g_spcr1_speMask;
-		spcr1(cr1);
-
 		const auto cr2 = spcr2();
+//		const auto wrap = cr2 & g_spcr2_wrenMask;
+
+//		if(!wrap)
+		{
+			// clear enabled flag
+			auto cr1 = spcr1();
+			cr1 &= ~g_spcr1_speMask;
+			spcr1(cr1);
+		}
 
 		if(cr2 & g_spcr2_SpifieMask)
 		{
@@ -301,6 +309,9 @@ namespace mc68k
 			const auto levelQspi = static_cast<uint8_t>((read8(PeriphAddress::Qilr) >> 3) & 0x7);
 			m_mc68k.injectInterrupt(vector, levelQspi);
 		}
+
+//		if(wrap)
+//			startTransmit();
 	}
 
 	PeriphAddress Qsm::transmitRamAddr(uint8_t _offset)
