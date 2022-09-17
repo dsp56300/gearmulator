@@ -30,6 +30,8 @@ namespace mqLib
 		m_romRuntimeData.resize(m_rom.getSize());
 		memcpy(&m_romRuntimeData[0], m_rom.getData(), m_rom.getSize());
 
+		m_flash.reset(new Am29f(&m_romRuntimeData[0], m_romRuntimeData.size(), false, true));
+
 		m_memory.resize(g_memorySize, 0);
 
 		reset();
@@ -157,7 +159,7 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 		{
 			LOG("write16 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,4) << ", pc=" << HEXN(getPC(), 8));
-			writeW(m_romRuntimeData, addr - g_romAddress, val);
+			m_flash->write(addr - g_romAddress, val);
 			return;
 		}
 
@@ -182,7 +184,7 @@ namespace mqLib
 		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
 		{
 			LOG("write8 TO ROM addr=" << HEXN(addr, 8) << ", value=" << HEXN(val,2) << " char=" << logChar(val) << ", pc=" << HEXN(getPC(), 8));
-			m_romRuntimeData[addr - g_romAddress] = val;
+			m_flash->write(addr - g_romAddress, val);
 			return;
 		}
 

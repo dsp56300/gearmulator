@@ -5,6 +5,7 @@
 #include "buttons.h"
 #include "lcd.h"
 #include "leds.h"
+#include "am29f.h"
 
 #include "../68kEmu/mc68k.h"
 
@@ -44,6 +45,7 @@ namespace mqLib
 
 		const ROM& m_rom;
 		std::vector<uint8_t> m_romRuntimeData;
+		std::unique_ptr<Am29f> m_flash;
 		LCD m_lcd;
 		Buttons m_buttons;
 		Leds m_leds;
