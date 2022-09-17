@@ -8,6 +8,7 @@ include(bin2h.cmake)
 add_library(mqLib STATIC)
 
 set(SOURCES
+	am29f.cpp am29f.h
 	buttons.cpp buttons.h
 	dspBootCode.h
 	lcd.cpp lcd.h
