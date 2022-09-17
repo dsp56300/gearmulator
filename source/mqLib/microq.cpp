@@ -184,7 +184,6 @@ namespace mqLib
 
 	void MicroQ::setButton(Buttons::ButtonType _button, bool _pressed)
 	{
-		std::lock_guard lock(m_mutex);
 		m_hw->getUC().getButtons().setButton(_button, _pressed);
 	}
 
