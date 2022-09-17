@@ -41,6 +41,8 @@ namespace mqLib
 			resumeDSP();
 		}
 
+		void setBootMode(BootMode _mode);
+
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);

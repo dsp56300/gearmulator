@@ -100,6 +100,48 @@ namespace mqLib
 			_data.push_back(data & 0xff);
 	}
 
+	void Hardware::setBootMode(const BootMode _mode)
+	{
+		auto setButton = [&](const Buttons::ButtonType _type, const bool _pressed = true)
+		{
+			m_uc.getButtons().setButton(_type, _pressed);
+		};
+
+		switch (_mode)
+		{
+		case BootMode::Default: 
+			setButton(Buttons::ButtonType::Inst1, false);
+			setButton(Buttons::ButtonType::Inst3, false);
+			setButton(Buttons::ButtonType::Shift, false);
+			setButton(Buttons::ButtonType::Global, false);
+			setButton(Buttons::ButtonType::Multi, false);
+			setButton(Buttons::ButtonType::Play, false);
+			break;
+		case BootMode::FactoryTest:
+			setButton(Buttons::ButtonType::Inst1);
+			setButton(Buttons::ButtonType::Global);
+			break;
+		case BootMode::EraseFlash:
+			setButton(Buttons::ButtonType::Inst3);
+			setButton(Buttons::ButtonType::Global);
+			break;
+		case BootMode::WaitForSystemDump:
+			setButton(Buttons::ButtonType::Shift);
+			setButton(Buttons::ButtonType::Global);
+			break;
+		case BootMode::DspClockResetAndServiceMode:
+			setButton(Buttons::ButtonType::Multi);
+			break;
+		case BootMode::ServiceMode:
+			setButton(Buttons::ButtonType::Global);
+			break;
+		case BootMode::MemoryGame:
+			setButton(Buttons::ButtonType::Global);
+			setButton(Buttons::ButtonType::Play);
+			break;
+		}
+	}
+
 	void Hardware::hdiProcessUCtoDSPNMIIrq()
 	{
 		// QS6 is connected to DSP NMI pin but I've never seen this being triggered

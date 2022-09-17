@@ -23,7 +23,7 @@ namespace mqLib
 	class MicroQ
 	{
 	public:
-		MicroQ();
+		MicroQ(BootMode _bootMode = BootMode::Default);
 		~MicroQ();
 
 		// Process a block of audio data. Be sure to pass two channels for the inputs and six channels for the outputs

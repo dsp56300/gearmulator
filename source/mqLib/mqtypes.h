@@ -29,4 +29,15 @@ namespace mqLib
 
 	using TAudioOutputs = std::array<std::vector<dsp56k::TWord>, 6>;
 	using TAudioInputs = std::array<std::vector<dsp56k::TWord>, 2>;
+
+	enum class BootMode
+	{
+		Default,
+		FactoryTest,
+		EraseFlash,
+		WaitForSystemDump,
+		DspClockResetAndServiceMode,
+		ServiceMode,
+		MemoryGame
+	};
 }
