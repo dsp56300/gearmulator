@@ -29,6 +29,7 @@ namespace mc68k
 		virtual uint32_t exec();
 
 		void injectInterrupt(uint8_t _vector, uint8_t _level);
+		bool hasPendingInterrupt(uint8_t _vector, uint8_t _level) const;
 
 		virtual void onReset() {}
 		virtual uint32_t onIllegalInstruction(uint32_t opcode) { return 0; }

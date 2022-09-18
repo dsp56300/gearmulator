@@ -128,6 +128,17 @@ namespace mc68k
 		raiseIPL();
 	}
 
+	bool Mc68k::hasPendingInterrupt(uint8_t _vector, uint8_t _level) const
+	{
+		const auto& ints = m_pendingInterrupts[_level];
+		for (const uint8 i : ints)
+		{
+			if(i == _vector)
+				return true;
+		}
+		return false;
+	}
+
 	void Mc68k::writeW(uint8_t* _buf, size_t _offset, uint16_t _value)
 	{
 		_buf[_offset] = _value >> 8;
