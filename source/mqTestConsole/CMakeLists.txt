@@ -27,10 +27,10 @@ target_sources(mqTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(mqTestConsole PUBLIC mqLib cpp-terminal portaudio_static)
-target_compile_definitions(mqTestConsole PUBLIC "ANDROID")
-
-if(NOT ANDROID)
-	target_link_libraries(mqTestConsole PUBLIC portaudio_static)
+if(ANDROID)
+	target_compile_definitions(mqTestConsole PUBLIC "ANDROID")
+else()
+	target_link_libraries(mqTestConsole PUBLIC portmidi-static)
 endif()
 
 if(UNIX AND NOT APPLE)
