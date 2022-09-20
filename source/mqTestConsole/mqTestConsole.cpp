@@ -301,23 +301,11 @@ int main(int _argc, char* _argv[])
 	{
 		std::lock_guard lockDevices(mutexDevices);
 
-		if(midiIn)
-			midiIn->process(midiInBuffer);
-
-		for (const auto& e : midiInBuffer)
-			mq.sendMidiEvent(e);
-		midiInBuffer.clear();
-
 		mq.process(_blockSize);
 		_dst = &mq.getAudioOutputs();
 
 		if(mq.getDirtyFlags() != mqLib::MicroQ::DirtyFlags::None)
 			renderTrigger.push_back(1);
-
-		mq.receiveMidi(midiOutBuffer);
-		if(midiOut)
-			midiOut->write(midiOutBuffer);
-		midiOutBuffer.clear();
 	};
 	
 	auto createDevices = [&]()
@@ -366,13 +354,25 @@ int main(int _argc, char* _argv[])
 
 	while(true)
 	{
-		std::this_thread::sleep_for(std::chrono::milliseconds(250));
+		std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
 		if(settingsChanged)
 		{
 			createDevices();
 			settingsChanged = false;
 		}
+
+		if(midiIn)
+			midiIn->process(midiInBuffer);
+
+		for (const auto& e : midiInBuffer)
+			mq.sendMidiEvent(e);
+		midiInBuffer.clear();
+
+		mq.receiveMidi(midiOutBuffer);
+		if(midiOut)
+			midiOut->write(midiOutBuffer);
+		midiOutBuffer.clear();
 	}
 
 	return 0;
