@@ -1,0 +1,130 @@
+*------------------------------------------------------------------------
+	Created:	Maik Oppermann, 1.3.2000
+	Modified:	Matthias Juwan, 07/2002
+/*------------------------------------------------------------------------*/
+
+body
+{
+	background: white; color:black;
+	font-family:Tahoma; font-size:8pt; font-weight:normal;
+}
+
+p {	margin-left:8pt; }
+
+div, p /* netscape ignores body font settings */
+{
+	font-family:Tahoma; font-size:8pt; font-weight:normal;
+}
+
+td { font-size:8pt; font-family:Tahoma; font-weight:normal; }
+th { font-size:8pt; font-family:Tahoma; text-weight:bold; text-align:left; color:black; background:lightgrey; }
+
+a:link    { color:darkblue; font-weight:normal; }
+a:visited { color:darkblue; font-weight:normal; }
+a:active  { color:blue; font-weight:normal; }
+
+.subgroup
+{
+	margin-top:5pt; margin-bottom: 5pt;
+	margin-left:5pt;
+}
+
+/*------------------------------------------------------------------------*/
+/* "framework" header box                                                 */
+/*------------------------------------------------------------------------*/
+
+.framehead
+{
+	margin-left:0pt; /* for netscape */
+	padding:2px;
+	background: darkblue; color:white;
+	border-color: darkblue; border-style:solid; border-width:0.1px;
+	font-family:Arial,"sans-serif"; font-size:12pt; font-weight:bold; font-style:italic;
+}
+
+/* even links are white in the header */
+
+.framehead a:link    { color:white; text-decoration:none; }
+.framehead a:visited { color:white; text-decoration:none; }
+.framehead a:active  { color:white; text-decoration:none; }
+
+
+/*------------------------------------------------------------------------*/
+h1
+{
+	font-size:16.5pt; font-weight:bold;
+}
+
+h2
+{
+	margin-top:5pt; margin-bottom: 10pt;
+	margin-left:5pt;
+	font-size:12.5pt; font-weight:bold;
+}
+
+h3  /* class name heading */
+{
+	margin-top:5pt; margin-bottom: 10pt;
+	margin-left:5pt;
+	color: darkblue;
+	font-size:12.5pt; font-weight:bold;
+}
+
+h4  /* heading with colored background (Inheritance, Description, ...) */
+{
+	margin-top:5pt; margin-bottom: 10pt;
+	margin-left:5pt;
+	border-color:lightblue; border-style:solid; border-width:0px;
+	/*background: lightsteelblue; color:black;*/
+	font-size:10pt; font-weight:bold;
+}
+
+.include /* include file name */
+{
+	background:lightgrey;
+	color:black;
+	border-color:black; border-style:solid; border-width:1px;
+	padding:4pt;
+	margin-left:10pt;
+	margin-right:10pt;
+	white-space:pre;
+}
+
+/*------------------------------------------------------------------------*/
+/* a span tag inside a method can be used to format method names         */
+/*------------------------------------------------------------------------*/
+div.methods span  
+{
+	/*font-style:italic;*/
+	color: darkblue;
+}
+
+/*------------------------------------------------------------------------*/
+/* box for c++ (or other) source code                                     */
+/*------------------------------------------------------------------------*/
+.cpp
+{
+	background:lightyellow;
+	color:black;
+	border-color:black; border-style:solid; border-width:1px;
+	padding:4pt;
+	margin-left:10pt;
+	margin-right:10pt;
+	font-family:"Courier New",monospace; font-size:8pt;
+	white-space:pre;
+}
+
+
+/*------------------------------------------------------------------------*/
+/* menu frame */
+/*------------------------------------------------------------------------*/
+
+body.menu
+{
+	background: white; color:black;
+	font-family:Arial,"sans-serif"; font-size:11pt; font-weight:normal;
+}
+
+.menu a:link    { font-weight:normal; }
+.menu a:visited { font-weight:normal; }
+.menu a:active  { font-weight:normal; }
