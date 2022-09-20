@@ -209,7 +209,7 @@ namespace mqLib
 		fclose(hFile);
 	}
 
-	void MqMc::dumpAssembly(const uint32_t _first, const uint32_t _count) const
+	void MqMc::dumpAssembly(const uint32_t _first, const uint32_t _count)
 	{
 		std::stringstream ss;
 		ss << "mq_68k_" << _first << '-' << (_first + _count) << ".asm";

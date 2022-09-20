@@ -2,7 +2,7 @@
 
 #include "mqtypes.h"
 
-#include "../68kEmu/port.h"
+#include "../mc68k/port.h"
 
 namespace mqLib
 {

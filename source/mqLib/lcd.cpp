@@ -4,7 +4,8 @@
 
 #include <cassert>
 
-#include "../68kEmu/port.h"
+#include "../mc68k/port.h"
+
 #include "dsp56kEmu/logging.h"
 
 namespace mqLib

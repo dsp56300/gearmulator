@@ -33,7 +33,7 @@ namespace mqLib
 
 		void dumpMemory(const char* _filename) const;
 		void dumpROM(const char* _filename) const;
-		void dumpAssembly(uint32_t _first, uint32_t _count) const;
+		void dumpAssembly(uint32_t _first, uint32_t _count);
 
 	private:
 		uint16_t read16(uint32_t addr) override;
