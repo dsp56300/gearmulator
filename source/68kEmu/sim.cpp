@@ -1,7 +1,7 @@
 #include "sim.h"
 
+#include "logging.h"
 #include "mc68k.h"
-#include "../dsp56300/source/dsp56kEmu/logging.h"
 
 namespace mc68k
 {

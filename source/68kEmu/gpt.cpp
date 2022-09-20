@@ -1,7 +1,7 @@
 #include "gpt.h"
 
+#include "logging.h"
 #include "mc68k.h"
-#include "dsp56kEmu/logging.h"
 
 namespace mc68k
 {

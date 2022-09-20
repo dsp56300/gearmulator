@@ -49,6 +49,7 @@ set(SOURCES_MUSASHI
 set(SOURCES
 	gpt.cpp gpt.h
 	hdi08.cpp hdi08.h
+	logging.cpp logging.h
 	mc68k.cpp mc68k.h
 	peripheralBase.cpp peripheralBase.h
 	peripheralTypes.h
@@ -69,5 +70,3 @@ target_include_directories(68kEmu PUBLIC
 )
 
 set_property(TARGET 68kEmu PROPERTY CXX_STANDARD 17)
-
-target_link_libraries(68kEmu PUBLIC dsp56kEmu)

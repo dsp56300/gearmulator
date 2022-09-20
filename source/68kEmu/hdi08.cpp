@@ -2,7 +2,7 @@
 
 #include <cassert>
 
-#include "dsp56kEmu/logging.h"
+#include "logging.h"
 
 namespace mc68k
 {

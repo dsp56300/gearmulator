@@ -3,7 +3,7 @@
 #include <cassert>
 #include <atomic>
 
-#include "dsp56kEmu/logging.h"
+#include "logging.h"
 
 #include "Moira/Musashi/m68kcpu.h"
 
