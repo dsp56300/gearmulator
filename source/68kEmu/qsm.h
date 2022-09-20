@@ -56,14 +56,17 @@ namespace mc68k
 		void injectInterrupt(ScsrBits _scsrBits);
 		void exec(uint32_t _deltaCycles) override;
 
-		uint16_t spcr0()		{ return read16(PeriphAddress::Spcr0); }
-		uint16_t spcr1()		{ return read16(PeriphAddress::Spcr1); }
-		uint16_t spcr2()		{ return read16(PeriphAddress::Spcr2); }
-		uint16_t spcr3()		{ return read16(PeriphAddress::Spcr3); }
-		uint8_t spsr()			{ return read8(PeriphAddress::Spsr); }
+		uint16_t spcr0()			{ return PeripheralBase::read16(PeriphAddress::Spcr0); }
+		uint16_t spcr1()			{ return PeripheralBase::read16(PeriphAddress::Spcr1); }
+		uint16_t spcr2()			{ return PeripheralBase::read16(PeriphAddress::Spcr2); }
+		uint16_t spcr3()			{ return PeripheralBase::read16(PeriphAddress::Spcr3); }
+		uint8_t spsr()				{ return PeripheralBase::read8(PeriphAddress::Spsr); }
 
-		void spsr(uint8_t _value)	{ write8(PeriphAddress::Spsr, _value); }
-		void spcr1(uint16_t _value)	{ write16(PeriphAddress::Spcr1, _value); }
+		void spcr0(uint16_t _value)	{ PeripheralBase::write16(PeriphAddress::Spcr0, _value); }
+		void spcr1(uint16_t _value)	{ PeripheralBase::write16(PeriphAddress::Spcr1, _value); }
+		void spcr2(uint16_t _value)	{ PeripheralBase::write16(PeriphAddress::Spcr2, _value); }
+		void spcr3(uint16_t _value)	{ PeripheralBase::write16(PeriphAddress::Spcr3, _value); }
+		void spsr(uint8_t _value)	{ PeripheralBase::write8(PeriphAddress::Spsr, _value); }
 
 		void writeSciRX(uint16_t _data);
 		void readSciTX(std::deque<uint16_t>& _dst);
@@ -71,9 +74,10 @@ namespace mc68k
 		Port& getPortQS() { return m_portQS; }
 
 	private:
-		void startTransmit();
+		void startTransmit(bool _startAtZero = false);
 		void finishTransfer();
 		void execTransmit();
+		void cancelTransmit();
 		static uint16_t bitTest(uint16_t _value, Sccr1Bits _bit);
 		uint16_t bitTest(Sccr1Bits _bit);
 		uint16_t bitTest(ScsrBits _bit);
@@ -91,6 +95,7 @@ namespace mc68k
 		Port m_portQS;
 		Qspi m_qspi;
 		uint8_t m_nextQueue = 0xff;
+		uint32_t m_spiDelay = 0;
 		std::deque<uint16_t> m_spiTxData;
 		std::deque<uint16_t> m_sciTxData;
 		std::deque<uint16_t> m_sciRxData;
