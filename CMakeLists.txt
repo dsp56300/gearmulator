@@ -19,7 +19,7 @@ add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
 add_subdirectory(source/virusConsoleLib)
 add_subdirectory(source/libresample)
-add_subdirectory(source/68kEmu)
+add_subdirectory(source/mc68k)
 add_subdirectory(source/mqLib)
 
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)

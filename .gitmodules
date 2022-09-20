@@ -7,3 +7,6 @@
 [submodule "source/cpp-terminal"]
 	path = source/cpp-terminal
 	url = ../cpp-terminal.git
+[submodule "source/mc68k"]
+	path = source/mc68k
+	url = https://github.com/dsp56300/mc68k.git

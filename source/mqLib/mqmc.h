@@ -8,7 +8,7 @@
 #include "leds.h"
 #include "am29f.h"
 
-#include "../68kEmu/mc68k.h"
+#include "../mc68k/mc68k.h"
 
 namespace mqLib
 {
