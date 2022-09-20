@@ -343,9 +343,12 @@ namespace mqLib
 
 	void Hardware::processAudio(uint32_t _frames)
 	{
-		m_processAudio = true;
-
 		ensureBufferSize(_frames);
+
+		if(m_esaiFrameIndex == 0)
+			return;
+
+		m_processAudio = true;
 
 		auto& esai = m_dsp.getPeriph().getEsai();
 
