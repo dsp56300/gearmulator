@@ -197,6 +197,8 @@ namespace virusLib
 		auto conf = jit.getConfig();
 
 		conf.aguSupportBitreverse = false;
+		conf.aguSupportMultipleWrapModulo = false;
+		conf.dynamicPeripheralAddressing = false;
 
 		jit.setConfig(conf);
 	}
