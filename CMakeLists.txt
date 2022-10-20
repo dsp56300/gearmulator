@@ -10,6 +10,7 @@ project(gearmulator VERSION 1.2.20)
 include(base.cmake)
 
 set(ASMJIT_STATIC TRUE)
+set(ASMJIT_NO_INSTALL TRUE)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 

@@ -18,6 +18,7 @@ if(MSVC)
 	# /Oi Enable Intrinsic Functions
 	# /Ot Favor Fast Code
 
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
 
 	set(ARCHITECTURE ${CMAKE_VS_PLATFORM_NAME})
@@ -52,6 +53,7 @@ elseif(APPLE)
 	    "-framework OpenGL"
 	    "-framework QuartzCore"  	
 	)
+	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -funroll-loops -Ofast -flto")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -funroll-loops -Ofast -flto")
 else()
 	message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
@@ -59,6 +61,7 @@ else()
 	if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES arm AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES aarch64)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -msse")
 	endif()
+	set(CMAKE_C_FLAGS_RELEASE "-Ofast")
 	set(CMAKE_CXX_FLAGS_RELEASE "-Ofast")
 	set(CMAKE_CXX_FLAGS "-Ofast")
 	execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
