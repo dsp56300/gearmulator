@@ -303,14 +303,13 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		m_demo->process(1);
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, uint32_t _blockSize/* = 64*/)
 {
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
-	constexpr uint32_t blockSize = 64;
-
-	constexpr uint32_t notifyThreshold = ((blockSize<<1) - 4);
+	const auto bs2 = _blockSize<<1;
+	const auto notifyThreshold = bs2 > 4 ? bs2 - 4 : 0;
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
@@ -357,7 +356,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	while(!proc.finished())
 	{
 		sem.wait();
-		proc.processBlock(blockSize);
+		proc.processBlock(_blockSize);
 	}
 
 	esai.setCallback(nullptr,0);

@@ -30,7 +30,7 @@ public:
 
 	static void waitReturn();
 
-	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0);
+	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0, uint32_t _blockSize = 64);
 
 	const virusLib::ROMFile& getRom() const { return m_rom; }
 

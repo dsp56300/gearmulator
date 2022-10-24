@@ -299,7 +299,7 @@ int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, con
 
 	fclose(hFile);
 
-	m_app.run(filename, _sampleCount);
+	m_app.run(filename, _sampleCount, 1);
 
 	if(!loadAudioFile(_dst, filename))
 	{
