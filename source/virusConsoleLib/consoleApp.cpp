@@ -359,5 +359,5 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		proc.processBlock(_blockSize);
 	}
 
-	esai.setCallback(nullptr,0);
+	esai.setCallback([&](dsp56k::Audio*){},0);
 }
