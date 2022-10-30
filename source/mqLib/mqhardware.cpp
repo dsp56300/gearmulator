@@ -263,8 +263,7 @@ namespace mqLib
 
 		hdiProcessUCtoDSPNMIIrq();
 
-		// it works not to feed the rx port, but only rely on the uc callback if its empty. We seem to be lucky though, uc might rely on the status of the rxdf bit
-//		hdiTransferDSPtoUC();
+		hdiTransferDSPtoUC();
 
 		if(m_uc.requestDSPReset())
 		{
