@@ -181,7 +181,7 @@ namespace synthLib
         return {};
     }
 
-    std::string findROM(const size_t _minSize, const size_t _maxSize)
+    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
     {
         std::string path = getModulePath();
 
@@ -194,7 +194,7 @@ namespace synthLib
 
         for (const auto& file : files)
         {
-            if(!hasExtension(file, ".bin"))
+            if(!hasExtension(file, _extension))
                 continue;
 
             if (!_minSize && !_maxSize)
@@ -221,6 +221,11 @@ namespace synthLib
             return file;
         }
         return {};
+    }
+
+	std::string findROM(const size_t _minSize, const size_t _maxSize)
+    {
+	    return findFile(".bin", _minSize, _maxSize);
     }
 
     std::string findROM(const size_t _expectedSize)
