@@ -10,7 +10,10 @@ namespace mqLib
 	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/)
 	{
 		// create hardware, will use in-memory ROM if no ROM provided
-		const auto romFile = synthLib::findROM(512 * 1024);
+		auto romFile = synthLib::findROM(512 * 1024);
+		if(romFile.empty())
+			romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
+
 		m_hw.reset(new Hardware(romFile));
 
 		if(_bootMode != BootMode::Default)

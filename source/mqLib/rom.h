@@ -20,6 +20,7 @@ namespace mqLib
 		constexpr uint32_t getSize() const { return g_romSize; }
 
 	private:
+		bool loadFromMidi(std::vector<unsigned char>& _buffer, const std::string& _filename) const;
 		bool loadFromFile(const std::string& _filename);
 
 		const uint8_t* m_data;
