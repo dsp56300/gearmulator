@@ -8,6 +8,12 @@ namespace mqLib
 {
 	static_assert(ROM_DATA_SIZE == ROM::g_romSize);
 
+	constexpr uint32_t g_syncEsaiFrameRate = 16;
+	constexpr uint32_t g_syncHaltDspEsaiThreshold = 64;
+
+	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
+	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
+
 	Hardware::Hardware(std::string _romFilename)
 		: m_romFileName(std::move(_romFilename))
 		, m_rom(m_romFileName, ROM_DATA)
@@ -28,7 +34,7 @@ namespace mqLib
 		{
 			++m_esaiFrameIndex;
 
-			if((m_esaiFrameIndex & 15) == 0)
+			if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 				m_esaiFrameAddedCv.notify_one();
 
 			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
@@ -328,7 +334,7 @@ namespace mqLib
 		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
-		if((esaiFrameIndex - m_lastEsaiFrameIndex) > 64)
+		if((esaiFrameIndex - m_lastEsaiFrameIndex) > g_syncHaltDspEsaiThreshold)
 		{
 			haltDSP();
 		}
