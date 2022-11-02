@@ -2,11 +2,17 @@
 
 #include "dsp56kEmu/interrupts.h"
 
+#if EMBED_ROM
 #include "romData.h"
+#else
+constexpr uint8_t* ROM_DATA = nullptr;
+#endif
 
 namespace mqLib
 {
+#if EMBED_ROM
 	static_assert(ROM_DATA_SIZE == ROM::g_romSize);
+#endif
 
 	constexpr uint32_t g_syncEsaiFrameRate = 16;
 	constexpr uint32_t g_syncHaltDspEsaiThreshold = 64;
