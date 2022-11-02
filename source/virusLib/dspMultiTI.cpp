@@ -45,23 +45,54 @@ namespace virusLib
 	}
 
 	template<typename T>
+	void createEsai1Input(T* _dstL, T* _dstR, const T* _srcL, const T* _srcR, uint32_t _samples, uint32_t _dstOffsetL, uint32_t _dstOffsetR)
+	{
+		if(!_dstL || !_dstR)
+			return;
+
+		uint32_t iDstL = _dstOffsetL;
+		uint32_t iDstR = _dstOffsetR;
+
+		for(uint32_t i=0; i<_samples; ++i, iDstL += 3, iDstR += 3)
+		{
+			_dstL[iDstL  ]   = _srcL[i];
+			_dstR[iDstR  ]   = _srcR[i];
+		}
+	}
+
+	template<typename T>
 	void processAudioTI(DspMultiTI& _dsp, DspSingle& _dsp2, std::vector<std::vector<T>>& _buffer, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, const uint32_t _latency)
 	{
 		const auto s = static_cast<uint32_t>(_samples);
 
+		if(_buffer[0].size() < s*3)
+		{
+			for (auto& buffer : _buffer)
+				buffer.resize(s*3);
+		}
+
 		const T* inputs[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 		T* outputs[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
-		inputs[0] = _inputs[0];
-		inputs[1] = _inputs[1];
-
+		inputs[0] = nullptr;
+		inputs[1] = nullptr;
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
+
+		createEsai1Input(&_buffer[0][0], &_buffer[1][0], &_inputs[0][0], &_inputs[1][0], s, 1, 2);
+		inputs[0] = nullptr;
+		inputs[1] = nullptr;
+		inputs[2] = &_buffer[0][0];
+		inputs[3] = &_buffer[1][0];
+		inputs[4] = nullptr;
+		inputs[5] = nullptr;
+		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
 
 		inputs[0] = nullptr;
 		inputs[1] = nullptr;
-		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
-
 		_dsp2.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
+
+		inputs[0] = nullptr;
+		inputs[1] = nullptr;
 		_dsp2.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
 
 		// ESAI outputs
@@ -81,11 +112,6 @@ namespace virusLib
 		_dsp2.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s);
 
 		// ESAI_1 outputs
-		if(_buffer[0].size() < s*3)
-		{
-			for (auto& buffer : _buffer)
-				buffer.resize(s*3);
-		}
 
 		T* outputsMix[] = {&_buffer[0][0], &_buffer[1][0], &_buffer[2][0], &_buffer[3][0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
