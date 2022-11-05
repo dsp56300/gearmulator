@@ -42,10 +42,10 @@ namespace Virus
         registerParams(p);
 
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300 Emulator";
+		opts.applicationName = "DSP56300Emulator_OsTIrus";
 		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300 Emulator";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		opts.folderName = "DSP56300Emulator_OsTIrus";
+		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
 		m_config = new juce::PropertiesFile(opts);
 
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
