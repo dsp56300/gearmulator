@@ -299,8 +299,6 @@ int main(int _argc, char* _argv[])
 
 	std::function process = [&](uint32_t _blockSize, const mqLib::TAudioOutputs*& _dst)
 	{
-		std::lock_guard lockDevices(mutexDevices);
-
 		mq.process(_blockSize);
 		_dst = &mq.getAudioOutputs();
 
