@@ -5,15 +5,6 @@ project(mqTestConsole)
 add_executable(mqTestConsole)
 
 set(SOURCES
-	audioOutput.h
-	audioOutput.cpp
-	audioOutputPA.cpp audioOutputPA.h
-	audioOutputWAV.cpp audioOutputWAV.h
-	device.cpp device.h
-	midiDevice.cpp midiDevice.h
-	midiInput.cpp midiInput.h
-	midiOutput.cpp midiOutput.h
-	mqSettingsGui.cpp mqSettingsGui.h
 	mqTestConsole.cpp
 )
 

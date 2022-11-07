@@ -18,14 +18,13 @@
 
 #include <vector>
 
-#include "audioOutputPA.h"
-#include "midiInput.h"
-#include "midiOutput.h"
-
+#include "../mqConsoleLib/audioOutputPA.h"
+#include "../mqConsoleLib/midiInput.h"
+#include "../mqConsoleLib/midiOutput.h"
 #include "../mqConsoleLib/mqGui.h"
 #include "../mqConsoleLib/mqKeyInput.h"
 
-#include "mqSettingsGui.h"
+#include "../mqConsoleLib/mqSettingsGui.h"
 
 using Term::Terminal;
 using Term::Key;
