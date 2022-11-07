@@ -10,6 +10,8 @@ namespace synthLib
 	struct SMidiEvent;
 }
 
+namespace mqConsoleLib
+{
 class MidiOutput : public MidiDevice
 {
 public:
@@ -26,3 +28,4 @@ private:
 	void* m_stream = nullptr;
 	synthLib::MidiBufferParser m_parser;
 };
+}

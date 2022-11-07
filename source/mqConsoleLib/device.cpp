@@ -1,5 +1,7 @@
 #include "device.h"
 
+namespace mqConsoleLib
+{
 std::string Device::getDeviceName() const
 {
 	if(m_deviceName.empty())
@@ -34,4 +36,5 @@ bool Device::openDefaultDevice()
 		return false;
 	m_deviceId = getDefaultDeviceId();
 	return true;
+}
 }

@@ -2,6 +2,8 @@
 
 #include <string>
 
+namespace mqConsoleLib
+{
 class Device
 {
 public:
@@ -26,3 +28,4 @@ private:
 protected:
 	int m_deviceId = -1;
 };
+}

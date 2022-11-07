@@ -2,6 +2,8 @@
 
 #include "device.h"
 
+namespace mqConsoleLib
+{
 class MidiDevice : public Device
 {
 public:
@@ -16,3 +18,4 @@ public:
 private:
 	const bool m_output;
 };
+}

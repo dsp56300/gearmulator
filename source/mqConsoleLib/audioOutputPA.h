@@ -5,6 +5,8 @@
 #include "audioOutput.h"
 #include "device.h"
 
+namespace mqConsoleLib
+{
 class AudioOutputPA : public AudioOutput, public Device
 {
 public:
@@ -31,3 +33,4 @@ private:
 	bool m_callbackExited = false;
 	std::unique_ptr<std::thread> m_thread;
 };
+}

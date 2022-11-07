@@ -19,6 +19,8 @@ PmTimestamp returnTimeProc(void*)
 	return static_cast<PmTimestamp>(std::chrono::duration_cast<std::chrono::milliseconds>(now).count());
 }
 
+namespace mqConsoleLib
+{
 MidiInput::MidiInput(const std::string& _deviceName) : MidiDevice(_deviceName, false)
 {
 	Device::openDevice();
@@ -122,4 +124,5 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 
 	if(!m_readSysex)
 		_events.emplace_back(bytes[0], bytes[1], bytes[2]);
+}
 }

@@ -2,6 +2,9 @@
 
 #include "../portmidi/pm_common/portmidi.h"
 
+namespace mqConsoleLib
+{
+
 #ifdef ANDROID
 extern "C"
 {
@@ -100,4 +103,5 @@ int MidiDevice::deviceIdFromName(const std::string& _devName) const
 			return i;
 	}
 	return -1;
+}
 }

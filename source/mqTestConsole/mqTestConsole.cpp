@@ -56,7 +56,7 @@ int main(int _argc, char* _argv[])
 	Terminal term(true, true, false, true);
 	mqConsoleLib::Gui gui(mq);
 
-	SettingsGui settings;
+	mqConsoleLib::SettingsGui settings;
 
 	int devIdMidiOut = -1;
 	int devIdMidiIn = -1;
@@ -164,9 +164,9 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	std::unique_ptr<AudioOutputPA> audio;
-	std::unique_ptr<MidiInput> midiIn;
-	std::unique_ptr<MidiOutput> midiOut;
+	std::unique_ptr<mqConsoleLib::AudioOutputPA> audio;
+	std::unique_ptr<mqConsoleLib::MidiInput> midiIn;
+	std::unique_ptr<mqConsoleLib::MidiOutput> midiOut;
 
 	std::vector<synthLib::SMidiEvent> midiInBuffer;
 	std::vector<uint8_t> midiOutBuffer;
@@ -189,17 +189,17 @@ int main(int _argc, char* _argv[])
 		if(!audio || (!devNameAudioOut.empty() && audio->getDeviceName() != devNameAudioOut))
 		{
 			audio.reset();
-			audio.reset(new AudioOutputPA(process, devNameAudioOut));
+			audio.reset(new mqConsoleLib::AudioOutputPA(process, devNameAudioOut));
 		}
 		if(!midiIn || (!devNameMidiIn.empty() && midiIn->getDeviceName() != devNameMidiIn))
 		{
 			midiIn.reset();
-			midiIn.reset(new MidiInput(devNameMidiIn));
+			midiIn.reset(new mqConsoleLib::MidiInput(devNameMidiIn));
 		}
 		if(!midiOut || (!devNameMidiOut.empty() && midiOut->getDeviceName() != devNameMidiOut))
 		{
 			midiOut.reset();
-			midiOut.reset(new MidiOutput(devNameMidiOut));
+			midiOut.reset(new mqConsoleLib::MidiOutput(devNameMidiOut));
 		}
 
 		devNameMidiIn.clear();

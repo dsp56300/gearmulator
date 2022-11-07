@@ -2,6 +2,8 @@
 
 #include <array>
 
+namespace mqConsoleLib
+{
 constexpr uint32_t g_blockSize = 64;
 
 const std::string g_filename = "mq_output_" + std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count()) + ".wav";
@@ -57,4 +59,5 @@ void AudioOutputWAV::threadFunc()
 		}
 		);
 	}
+}
 }

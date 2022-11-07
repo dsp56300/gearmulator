@@ -19,6 +19,8 @@ constexpr auto g_itemNotHovered = Term::bg::black;
 
 constexpr int32_t g_maxEntries = 17;
 
+namespace mqConsoleLib
+{
 SettingsGui::SettingsGui()
 	: m_win(140, 21)
 {
@@ -292,4 +294,5 @@ void SettingsGui::moveCursor(int x, int y)
 		m_cursorY = m_settings[m_cursorX].empty() ? 0 : static_cast<int>(m_settings[m_cursorX].size()) - 1;
 	if(m_cursorY >= static_cast<int>(m_settings[m_cursorX].size()))
 		m_cursorY = 0;
+}
 }

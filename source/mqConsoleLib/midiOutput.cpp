@@ -7,6 +7,8 @@
 
 extern PmTimestamp returnTimeProc(void*);
 
+namespace mqConsoleLib
+{
 MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName, true)
 {
 	Device::openDevice();
@@ -67,4 +69,5 @@ void MidiOutput::write(const std::vector<synthLib::SMidiEvent>& _events) const
 			Pm_Write(m_stream, &ev, 1);
 		}
 	}
+}
 }

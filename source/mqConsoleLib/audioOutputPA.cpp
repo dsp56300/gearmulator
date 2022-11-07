@@ -9,6 +9,8 @@
 
 constexpr uint32_t g_blocksize = 256;
 
+namespace mqConsoleLib
+{
 static int ourPortAudioCallback(const void*/* inputBuffer*/, void *outputBuffer,
                                 unsigned long framesPerBuffer,
                                 const PaStreamCallbackTimeInfo*/* timeInfo*/,
@@ -169,4 +171,5 @@ std::string AudioOutputPA::getDeviceNameFromId(int _devId)
 	if(!api)
 		return di->name;
 	return std::string("[") + api->name + "] " + di->name;
+}
 }

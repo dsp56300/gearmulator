@@ -4,18 +4,21 @@
 
 #include "../mqLib/mqtypes.h"
 
-class AudioOutput
+namespace mqConsoleLib
 {
-public:
-	using ProcessCallback = std::function<void(uint32_t, const mqLib::TAudioOutputs*&)>;
-
-	AudioOutput(const ProcessCallback& _callback) : m_processCallback(_callback)
+	class AudioOutput
 	{
-	}
-	virtual ~AudioOutput() = default;
+	public:
+		using ProcessCallback = std::function<void(uint32_t, const mqLib::TAudioOutputs*&)>;
 
-	virtual void process() {}
+		AudioOutput(const ProcessCallback& _callback) : m_processCallback(_callback)
+		{
+		}
+		virtual ~AudioOutput() = default;
 
-protected:
-	const ProcessCallback& m_processCallback;
-};
+		virtual void process() {}
+
+	protected:
+		const ProcessCallback& m_processCallback;
+	};
+}

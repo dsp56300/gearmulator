@@ -6,7 +6,9 @@
 
 #include "../mqConsoleLib/mqGuiBase.h"
 
-class SettingsGui : public mqConsoleLib::GuiBase
+namespace mqConsoleLib
+{
+class SettingsGui : public GuiBase
 {
 public:
 	SettingsGui();
@@ -50,3 +52,4 @@ private:
 	std::string m_midiOutput;
 	std::string m_audioOutput;
 };
+}

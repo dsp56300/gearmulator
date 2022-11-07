@@ -7,6 +7,8 @@
 
 #include "../synthLib/midiTypes.h"
 
+namespace mqConsoleLib
+{
 class MidiInput : public MidiDevice
 {
 public:
@@ -25,3 +27,4 @@ private:
 	std::vector<uint8_t> m_sysexBuffer;
 	bool m_readSysex = false;
 };
+}

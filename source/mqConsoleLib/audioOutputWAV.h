@@ -4,19 +4,22 @@
 
 #include "../synthLib/wavWriter.h"
 
-class AudioOutputWAV : AudioOutput
+namespace mqConsoleLib
 {
-public:
-	explicit AudioOutputWAV(const ProcessCallback& _callback);
-	~AudioOutputWAV() override;
+	class AudioOutputWAV : AudioOutput
+	{
+	public:
+		explicit AudioOutputWAV(const ProcessCallback& _callback);
+		~AudioOutputWAV() override;
 
-	void threadFunc();
+		void threadFunc();
 
-private:
-	synthLib::AsyncWriter wavWriter;
+	private:
+		synthLib::AsyncWriter wavWriter;
 
-	std::vector<dsp56k::TWord> m_stereoOutput;
-	std::unique_ptr<std::thread> m_thread;
-	bool silence = true;
-	bool m_terminate = false;
-};
+		std::vector<dsp56k::TWord> m_stereoOutput;
+		std::unique_ptr<std::thread> m_thread;
+		bool silence = true;
+		bool m_terminate = false;
+	};
+}
