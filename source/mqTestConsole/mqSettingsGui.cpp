@@ -1,6 +1,7 @@
 #include "mqSettingsGui.h"
 
 #include <iostream>
+#include <cpp-terminal/input.hpp>
 
 #include "audioOutputPA.h"
 #include "midiDevice.h"
@@ -8,6 +9,8 @@
 #include "../portaudio/include/portaudio.h"
 
 #include "dsp56kEmu/logging.h"
+
+using Key = Term::Key;
 
 constexpr auto g_itemActive = Term::fg::bright_yellow;
 constexpr auto g_itemDefault = Term::fg::white;
@@ -75,6 +78,31 @@ void SettingsGui::onRight()
 void SettingsGui::onUp()
 {
 	moveCursor(0,-1);
+}
+
+bool SettingsGui::processKey(int _ch)
+{
+	switch (_ch)
+	{
+	case Key::ESC:
+	case Key::ENTER:
+		onEnter();
+		return true;
+	case Key::ARROW_DOWN:
+		onDown();
+		return true;
+	case Key::ARROW_LEFT:
+		onLeft();
+		return true;
+	case Key::ARROW_RIGHT:
+		onRight();
+		return true;
+	case Key::ARROW_UP:
+		onUp();
+		return true;
+	default:
+		return false;
+	}
 }
 
 void SettingsGui::findSettings()

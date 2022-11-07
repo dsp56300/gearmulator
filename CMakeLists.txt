@@ -57,6 +57,7 @@ endif()
 set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
 add_subdirectory(source/portaudio)
 
+add_subdirectory(source/mqConsoleLib)
 add_subdirectory(source/mqTestConsole)
 
 # ----------------- mQ VST2 Plugin

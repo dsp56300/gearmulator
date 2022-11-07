@@ -19,10 +19,12 @@
 #include <vector>
 
 #include "audioOutputPA.h"
-#include "audioOutputWAV.h"
 #include "midiInput.h"
 #include "midiOutput.h"
-#include "mqGui.h"
+
+#include "../mqConsoleLib/mqGui.h"
+#include "../mqConsoleLib/mqKeyInput.h"
+
 #include "mqSettingsGui.h"
 
 using Term::Terminal;
@@ -53,7 +55,7 @@ int main(int _argc, char* _argv[])
 
 	// create terminal-GUI
 	Terminal term(true, true, false, true);
-	Gui gui(mq);
+	mqConsoleLib::Gui gui(mq);
 
 	SettingsGui settings;
 
@@ -141,150 +143,25 @@ int main(int _argc, char* _argv[])
 		}
 	});
 
-	auto toggleButton = [&](const mqLib::Buttons::ButtonType _type)
-	{
-		mq.setButton(_type, mq.getButton(_type) ? false : true);
-		renderTrigger.push_back(1);
-	};
-
-	auto encRotate = [&](mqLib::Buttons::Encoders _encoder, const int _amount)
-	{
-		mq.rotateEncoder(_encoder, _amount);
-		renderTrigger.push_back(1);
-	};
-
-	// we need a bit of time to press boot buttons (service mode, factory tests, etc)
-	auto processKey = [&](int ch)
-	{
-		{
-			switch (ch)
-			{
-			case Key::ENTER:
-				if(showSettings)
-				{
-					settings.onEnter();
-					renderTrigger.push_back(1);
-				}
-				break;
-			case Key::ESC:
-				showSettings = !showSettings;
-				renderTrigger.push_back(1);
-				break;
-			case '1':					toggleButton(ButtonType::Inst1);			break;
-			case '2':					toggleButton(ButtonType::Inst2);			break;
-			case '3':					toggleButton(ButtonType::Inst3);			break;
-			case '4':					toggleButton(ButtonType::Inst4);			break;
-			case Key::ARROW_DOWN:
-				if(showSettings)
-				{
-					settings.onDown();
-					renderTrigger.push_back(1);
-				}
-				else
-					toggleButton(ButtonType::Down);
-				break;
-			case Key::ARROW_LEFT:
-				if(showSettings)
-				{
-					settings.onLeft();
-					renderTrigger.push_back(1);
-				}
-				else
-					toggleButton(ButtonType::Left);
-				break;
-			case Key::ARROW_RIGHT:
-				if(showSettings)
-				{
-					settings.onRight();
-					renderTrigger.push_back(1);
-				}
-				else
-					toggleButton(ButtonType::Right);
-				break;
-			case Key::ARROW_UP:
-				if(showSettings)
-				{
-					settings.onUp();
-					renderTrigger.push_back(1);
-				}
-				else
-					toggleButton(ButtonType::Up);
-				break;
-			case 'g':					toggleButton(ButtonType::Global);			break;
-			case 'm':					toggleButton(ButtonType::Multi);			break;
-			case 'e':					toggleButton(ButtonType::Edit);				break;
-			case 's':					toggleButton(ButtonType::Sound);			break;
-			case 'S':					toggleButton(ButtonType::Shift);			break;
-			case 'q':					toggleButton(ButtonType::Power);			break;
-			case 'M':					toggleButton(ButtonType::Multimode);		break;
-			case 'P':					toggleButton(ButtonType::Peek);				break;
-			case 'p':					toggleButton(ButtonType::Play);				break;
-
-			case Key::F1:				encRotate(EncoderType::LcdLeft, -1);		break;
-			case Key::F2:				encRotate(EncoderType::LcdLeft, 1);			break;
-			case Key::F3:				encRotate(EncoderType::LcdRight, -1);		break;
-			case Key::F4:				encRotate(EncoderType::LcdRight, 1);		break;
-			case '5':					encRotate(EncoderType::Master, -1);			break;
-			case '6':					encRotate(EncoderType::Master, 1);			break;
-			case Key::F5:				encRotate(EncoderType::Matrix1, -1);		break;
-			case Key::F6:				encRotate(EncoderType::Matrix1, 1);			break;
-			case Key::F7:				encRotate(EncoderType::Matrix2, -1);		break;
-			case Key::F8:				encRotate(EncoderType::Matrix2, 1);			break;
-			case Key::F9:				encRotate(EncoderType::Matrix3, -1);		break;
-			case Key::F10:				encRotate(EncoderType::Matrix3, 1);			break;
-			case Key::F11:				encRotate(EncoderType::Matrix4, -1);		break;
-			case Key::F12:				encRotate(EncoderType::Matrix4, 1);			break;
-			case '7':
-				// Midi Note On
-				mq.sendMidi(synthLib::M_NOTEON);
-				mq.sendMidi(synthLib::Note_C3);
-				mq.sendMidi(0x7f);
-				break;
-			case '8':	
-				// Midi Note Off
-				mq.sendMidi(synthLib::M_NOTEOFF);
-				mq.sendMidi(synthLib::Note_C3);
-				mq.sendMidi(0x7f);
-				break;
-			case '9':
-				// Modwheel Max
-				mq.sendMidi(synthLib::M_CONTROLCHANGE);
-				mq.sendMidi(synthLib::MC_MODULATION);
-				mq.sendMidi(0x7f);
-				break;
-			case '0':	
-				// Modwheel Min
-				mq.sendMidi(synthLib::M_CONTROLCHANGE);
-				mq.sendMidi(synthLib::MC_MODULATION);
-				mq.sendMidi(0x0);
-				break;
-			case '!':
-				hw->getDSP().dumpPMem("dsp_dump_P_" + std::to_string(hw->getUcCycles()));
-				break;
-			case '&':
-				hw->getDSP().dumpXYMem("dsp_dump_mem_" + std::to_string(hw->getUcCycles()) + "_");
-				break;
-			case '"':
-				hw->getUC().dumpMemory("mc_dump_mem");
-				break;
-			case '$':
-				hw->getUC().dumpROM("rom_runtime");
-				break;
-			default:
-				break;
-			}
-		}
-	};
+	mqConsoleLib::KeyInput mqKeyInput(mq);
 
 	// threaded key reader
-	std::thread inputReader([&exit, &processKey]
+	std::thread inputReader([&]
 	{
 		dsp56k::DSPThread::setCurrentThreadName("inputReader");
 		while(!exit)
 		{
 			const auto k = Term::read_key();
 			if(k)
-				processKey(k);
+			{
+				if(k == Key::ESC)
+					showSettings = !showSettings;
+				if(showSettings)
+					settings.processKey(k);
+				else
+					mqKeyInput.processKey(k);
+				renderTrigger.push_back(1);
+			}
 		}
 	});
 

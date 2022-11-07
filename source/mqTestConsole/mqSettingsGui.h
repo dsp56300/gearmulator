@@ -4,9 +4,9 @@
 
 #include <cpp-terminal/window.hpp>
 
-#include "mqGuiBase.h"
+#include "../mqConsoleLib/mqGuiBase.h"
 
-class SettingsGui : public GuiBase
+class SettingsGui : public mqConsoleLib::GuiBase
 {
 public:
 	SettingsGui();
@@ -19,6 +19,8 @@ public:
 	void onLeft();
 	void onRight();
 	void onUp();
+
+	bool processKey(int _ch);
 
 	const std::string& getMidiInput() const { return m_midiInput; }
 	const std::string& getMidiOutput() const { return m_midiOutput; }

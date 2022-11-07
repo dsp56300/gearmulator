@@ -13,8 +13,6 @@ set(SOURCES
 	midiDevice.cpp midiDevice.h
 	midiInput.cpp midiInput.h
 	midiOutput.cpp midiOutput.h
-	mqGui.cpp mqGui.h
-	mqGuiBase.cpp mqGuiBase.h
 	mqSettingsGui.cpp mqSettingsGui.h
 	mqTestConsole.cpp
 )
@@ -26,7 +24,7 @@ endif()
 target_sources(mqTestConsole PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(mqTestConsole PUBLIC mqLib cpp-terminal portaudio_static)
+target_link_libraries(mqTestConsole PUBLIC mqConsoleLib portaudio_static)
 if(ANDROID)
 	target_compile_definitions(mqTestConsole PUBLIC "ANDROID")
 else()
