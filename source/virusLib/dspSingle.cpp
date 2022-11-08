@@ -1,5 +1,7 @@
 #include "dspSingle.h"
 
+#include "dsp56kDebugger/debugger.h"
+
 namespace virusLib
 {
 	constexpr dsp56k::TWord g_externalMemStart	= 0x020000;
@@ -45,9 +47,11 @@ namespace virusLib
 		}
 	}
 
-	void DspSingle::startDSPThread()
+	void DspSingle::startDSPThread(const bool _createDebugger)
 	{
-		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str()));
+		const auto debugger = _createDebugger ? std::make_shared<dsp56kDebugger::Debugger>(*m_dsp) : std::shared_ptr<dsp56kDebugger::Debugger>();
+
+		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger));
 	}
 
 	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency)

@@ -36,7 +36,7 @@ public:
 
 private:
 
-	std::thread bootDSP() const;
+	std::thread bootDSP(bool _createDebugger) const;
 	dsp56k::IPeripherals& getYPeripherals() const;
 	void audioCallback(uint32_t audioCallbackCount);
 
