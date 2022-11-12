@@ -302,6 +302,7 @@ namespace mqLib
 
 		std::lock_guard uLockHalt(m_haltDSPmutex);
 		m_haltDSP = false;
+		uLockHalt.unlock();
 		m_haltDSPcv.notify_one();
 	}
 
