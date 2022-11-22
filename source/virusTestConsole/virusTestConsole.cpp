@@ -84,7 +84,7 @@ int main(int _argc, char* _argv[])
 
 	const std::string audioFilename = app->getSingleNameAsFilename();
 
-	app->run(audioFilename);
+	app->run(audioFilename, 0, 64, true);
 
 	std::cout << "Program ended. Press key to exit." << std::endl;
 	ConsoleApp::waitReturn();
