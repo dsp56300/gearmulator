@@ -29,3 +29,7 @@ target_sources(virusLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusLib PUBLIC synthLib)
+
+if(DSP56300_DEBUGGER)
+	target_link_libraries(virusLib PUBLIC dsp56kDebugger)
+endif()

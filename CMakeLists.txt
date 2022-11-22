@@ -11,8 +11,11 @@ include(base.cmake)
 
 set(ASMJIT_STATIC TRUE)
 set(ASMJIT_NO_INSTALL TRUE)
+set(BUILD_SHARED_LIBS OFF)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
+
+set(DSP56300_DEBUGGER TRUE)
 
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)

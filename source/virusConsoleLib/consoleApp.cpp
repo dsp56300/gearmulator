@@ -56,13 +56,13 @@ void ConsoleApp::waitReturn()
 	std::cin.ignore();
 }
 
-std::thread ConsoleApp::bootDSP() const
+std::thread ConsoleApp::bootDSP(const bool _createDebugger) const
 {
-	auto loader = virusLib::Device::bootDSP(*m_dsp1, m_rom);
+	auto loader = virusLib::Device::bootDSP(*m_dsp1, m_rom, _createDebugger);
 
 	if(m_dsp2)
 	{
-		auto loader2 = virusLib::Device::bootDSP(*m_dsp2, m_rom);
+		auto loader2 = virusLib::Device::bootDSP(*m_dsp2, m_rom, false);
 		loader2.join();
 	}
 
@@ -303,7 +303,7 @@ void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 		m_demo->process(1);
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, uint32_t _blockSize/* = 64*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, uint32_t _blockSize/* = 64*/, bool _createDebugger/* = false*/)
 {
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
@@ -339,7 +339,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			audioCallback(callbackCount>>3);
 	}, 0);
 
-	bootDSP().join();
+	bootDSP(_createDebugger).join();
 
 	/*
 	const std::string romFile = m_romName;
