@@ -76,7 +76,7 @@ void AudioPluginAudioProcessorEditor::loadSkin(const Skin& _skin)
 
 void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
 {
-	setScaleFactor(static_cast<float>(percent)/100.0f * m_rootScale);
+	setScaleFactor(static_cast<float>(percent)/100.0f * m_rootScale, -1.0);
 	auto* config = processorRef.getController().getConfig();
 	config->setValue("scale", percent);
 	config->saveIfNeeded();
@@ -259,4 +259,9 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 		return;
 
 	openMenu();
+}
+
+float AudioPluginAudioProcessorEditor::getRootScale() const
+{
+    return m_rootScale;
 }
