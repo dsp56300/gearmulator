@@ -1,6 +1,8 @@
 #include "dspSingle.h"
 
+#if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
+#endif
 
 namespace virusLib
 {
@@ -49,7 +51,11 @@ namespace virusLib
 
 	void DspSingle::startDSPThread(const bool _createDebugger)
 	{
+#if DSP56300_DEBUGGER
 		const auto debugger = _createDebugger ? std::make_shared<dsp56kDebugger::Debugger>(*m_dsp) : std::shared_ptr<dsp56kDebugger::Debugger>();
+#else
+		const auto debugger = std::shared_ptr<dsp56k::DebuggerInterface>();
+#endif
 
 		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger));
 	}

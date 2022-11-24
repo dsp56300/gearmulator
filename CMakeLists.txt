@@ -15,8 +15,6 @@ set(BUILD_SHARED_LIBS OFF)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 
-set(DSP56300_DEBUGGER TRUE)
-
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
 add_subdirectory(source/virusLib)
