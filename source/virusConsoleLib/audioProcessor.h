@@ -9,8 +9,6 @@
 #include "../synthLib/audioTypes.h"
 #include "../synthLib/wavWriter.h"
 
-#include "../virusLib/midiOutParser.h"
-
 namespace virusLib
 {
 	class DspSingle;
@@ -42,7 +40,6 @@ private:
 	std::vector<std::vector<dsp56k::TWord>> m_outputBuffers;
 	std::vector<std::vector<dsp56k::TWord>> m_inputBuffers;
 	std::vector<dsp56k::TWord> m_stereoOutput;
-	virusLib::MidiOutParser m_midiOut;
 
 	uint32_t m_processedSampleCount = 0;
 

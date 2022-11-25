@@ -17,7 +17,7 @@ set(SOURCES
 	dspSingle.cpp dspSingle.h
 	dspSingleSnow.cpp dspSingleSnow.h
 	dspMultiTI.cpp dspMultiTI.h
-	midiOutParser.cpp midiOutParser.h
+	hdi08TxParser.cpp hdi08TxParser.h
 	unpacker.cpp unpacker.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h

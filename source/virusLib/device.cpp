@@ -154,22 +154,7 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		while(m_dsp->getHDI08().hasTX())
-		{
-			if(m_midiOutParser.append(m_dsp->getHDI08().readTX()))
-			{
-				const auto midi = m_midiOutParser.getMidiData();
-				_midiOut.insert(_midiOut.end(), midi.begin(), midi.end());
-				m_midiOutParser.clearMidiData();
-			}
-		}
-
-		if(m_dsp2)
-		{
-			// just throw it away
-			while(m_dsp2->getHDI08().hasTX())
-				m_dsp2->getHDI08().readTX();
-		}
+		m_mc->processHdi08Tx(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)

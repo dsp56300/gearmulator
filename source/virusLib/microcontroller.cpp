@@ -36,17 +36,18 @@ constexpr uint8_t
 						92,  93,  94,  95,  96,  97,  98,  99,  105, 106, 110, 111, 112, 113,
 						114, 115, 116, 117, 118, 120, 121, 122, 123, 124, 125, 126, 127};
 
-constexpr int g_presetWriteDelaySamples = 256;
-
 namespace virusLib
 {
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
+Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
 
 	m_hdi08.addHDI08(_hdi08);
+
+	m_hdi08TxParsers.reserve(2);
+	m_hdi08TxParsers.emplace_back();
 
 	m_globalSettings.fill(0xffffffff);
 
@@ -249,7 +250,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 {
 	std::lock_guard lock(m_mutex);
 
-	if(m_loadingState || m_pendingPresetWriteDelay > 0)
+	if(m_loadingState || waitingForPresetReceiveConfirmation())
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
@@ -289,9 +290,10 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 	m_hdi08.writeRX(preset);
 
-//	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
+	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
 
-	m_pendingPresetWriteDelay = g_presetWriteDelaySamples;
+	for (auto& parser : m_hdi08TxParsers)
+		parser.waitForPreset(isMulti ? ROMFile::getMultiPresetSize() : ROMFile::getSinglePresetSize());
 
 	return true;
 }
@@ -957,13 +959,8 @@ void Microcontroller::process(size_t _size)
 
 	std::lock_guard lock(m_mutex);
 
-	if(m_pendingPresetWriteDelay > 0)
-	{
-		m_pendingPresetWriteDelay -= static_cast<int>(_size);
-
-		if(m_pendingPresetWriteDelay > 0)
-			return;
-	}
+	if(m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
+		return;
 
 	if(!m_pendingPresetWrites.empty())
 	{
@@ -1097,6 +1094,29 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
 {
 	m_hdi08.addHDI08(_hdi08);
+	m_hdi08TxParsers.emplace_back();
+}
+
+void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
+{
+	std::lock_guard lock(m_mutex);
+
+	for(size_t i=0; i<m_hdi08.size(); ++i)
+	{
+		auto* hdi08 = m_hdi08.get(i);
+		auto& parser = m_hdi08TxParsers[i];
+
+		while(hdi08->hasTX())
+		{
+			if(parser.append(hdi08->readTX()))
+			{
+				const auto midi = parser.getMidiData();
+				if(i == 0)
+					_midiEvents.insert(_midiEvents.end(), midi.begin(), midi.end());
+				parser.clearMidiData();
+			}
+		}
+	}
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
@@ -1185,5 +1205,15 @@ bool Microcontroller::isPageSupported(Page _page) const
 	default:
 		return false;
 	}
+}
+
+bool Microcontroller::waitingForPresetReceiveConfirmation() const
+{
+	for (const auto& parser : m_hdi08TxParsers)
+	{
+		if(parser.waitingForPreset())
+			return true;
+	}
+	return false;
 }
 }
