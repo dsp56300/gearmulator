@@ -825,7 +825,7 @@ void Microcontroller::process(size_t _size)
 	{
 		m_pendingPresetWriteDelay -= static_cast<int>(_size);
 
-		if(m_pendingPresetWriteDelay > 0)
+		if(m_pendingPresetWriteDelay > 0 || !m_hdi08.rxEmpty())
 			return;
 	}
 
