@@ -12,6 +12,7 @@
 #include <list>
 #include <mutex>
 
+#include "hdi08TxParser.h"
 #include "microcontrollerTypes.h"
 
 namespace virusLib
@@ -48,6 +49,8 @@ public:
 
 	void addHDI08(dsp56k::HDI08& _hdi08);
 
+	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
+
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
@@ -75,6 +78,8 @@ private:
 	bool isPageSupported(Page _page) const;
 
 	dsp56k::HDI08Queue m_hdi08;
+	std::vector<Hdi08TxParser> m_hdi08TxParsers;
+
 	const ROMFile& m_rom;
 
 	std::array<TPreset,128> m_multis;

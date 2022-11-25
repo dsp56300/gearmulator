@@ -86,15 +86,6 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 		});
 	}
 
-	while(m_dsp1->getPeriphX().getHDI08().hasTX())
-	{
-		const auto word = m_dsp1->getPeriphX().getHDI08().readTX();
-		m_midiOut.append(word);
-	}
-
-	while(m_dsp2 && m_dsp2->getPeriphX().getHDI08().hasTX())
-		m_dsp2->getPeriphX().getHDI08().readTX();
-
 	if(m_maxSampleCount && m_processedSampleCount >= m_maxSampleCount)
 		m_writer.setFinished();
 }

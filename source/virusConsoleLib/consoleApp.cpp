@@ -348,12 +348,16 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
 	*/
 
+	std::vector<synthLib::SMidiEvent> midiEvents;
+
 	AudioProcessor proc(m_rom.getSamplerate(), _audioOutputFilename, m_demo != nullptr, _maxSampleCount, m_dsp1.get(), m_dsp2);
 
 	while(!proc.finished())
 	{
 		sem.wait();
 		proc.processBlock(blockSize);
+		uc->processHdi08Tx(midiEvents);
+		midiEvents.clear();
 	}
 
 	esai.setCallback(nullptr,0);

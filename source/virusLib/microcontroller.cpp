@@ -48,6 +48,9 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 
 	m_hdi08.addHDI08(_hdi08);
 
+	m_hdi08TxParsers.reserve(2);
+	m_hdi08TxParsers.emplace_back();
+
 	m_globalSettings.fill(0xffffffff);
 
 	for(size_t i=0; i<m_multis.size(); ++i)
@@ -957,6 +960,29 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
 {
 	m_hdi08.addHDI08(_hdi08);
+	m_hdi08TxParsers.emplace_back();
+}
+
+void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
+{
+	std::lock_guard lock(m_mutex);
+
+	for(size_t i=0; i<m_hdi08.size(); ++i)
+	{
+		auto* hdi08 = m_hdi08.get(i);
+		auto& parser = m_hdi08TxParsers[i];
+
+		while(hdi08->hasTX())
+		{
+			if(parser.append(hdi08->readTX()))
+			{
+				const auto midi = parser.getMidiData();
+				if(i == 0)
+					_midiEvents.insert(_midiEvents.end(), midi.begin(), midi.end());
+				parser.clearMidiData();
+			}
+		}
+	}
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
