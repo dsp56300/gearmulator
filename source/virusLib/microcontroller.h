@@ -76,6 +76,7 @@ private:
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
+	bool waitingForPresetReceiveConfirmation() const;
 
 	dsp56k::HDI08Queue m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
@@ -105,7 +106,6 @@ private:
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
-	int m_pendingPresetWriteDelay;
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	mutable std::recursive_mutex m_mutex;

@@ -36,12 +36,10 @@ constexpr uint8_t
 						92,  93,  94,  95,  96,  97,  98,  99,  105, 106, 110, 111, 112, 113,
 						114, 115, 116, 117, 118, 120, 121, 122, 123, 124, 125, 126, 127};
 
-constexpr int g_presetWriteDelaySamples = 512;
-
 namespace virusLib
 {
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile), m_pendingPresetWriteDelay(g_presetWriteDelaySamples)
+Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
@@ -133,7 +131,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 {
 	std::lock_guard lock(m_mutex);
 
-	if(m_loadingState || m_pendingPresetWriteDelay > 0)
+	if(m_loadingState || waitingForPresetReceiveConfirmation())
 	{
 		// if we write a multi or a multi mode single, remove a pending single for single mode
 		// If we write a single-mode single, remove all multi-related pending writes
@@ -173,9 +171,10 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 	m_hdi08.writeRX(preset);
 
-//	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
+	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
 
-	m_pendingPresetWriteDelay = g_presetWriteDelaySamples;
+	for (auto& parser : m_hdi08TxParsers)
+		parser.waitForPreset(isMulti ? ROMFile::getMultiPresetSize() : ROMFile::getSinglePresetSize());
 
 	return true;
 }
@@ -824,13 +823,8 @@ void Microcontroller::process(size_t _size)
 
 	std::lock_guard lock(m_mutex);
 
-	if(m_pendingPresetWriteDelay > 0)
-	{
-		m_pendingPresetWriteDelay -= static_cast<int>(_size);
-
-		if(m_pendingPresetWriteDelay > 0 || !m_hdi08.rxEmpty())
-			return;
-	}
+	if(m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
+		return;
 
 	if(!m_pendingPresetWrites.empty())
 	{
@@ -1065,5 +1059,15 @@ bool Microcontroller::isPageSupported(Page _page) const
 	default:
 		return false;
 	}
+}
+
+bool Microcontroller::waitingForPresetReceiveConfirmation() const
+{
+	for (const auto& parser : m_hdi08TxParsers)
+	{
+		if(parser.waitingForPreset())
+			return true;
+	}
+	return false;
 }
 }
