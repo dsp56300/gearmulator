@@ -9,6 +9,13 @@
 
 namespace virusLib
 {
+	const std::vector<dsp56k::TWord> g_knownPatterns[] =
+	{
+		{0xf40000, 0x7f0000, 0x000000, 0xf70000},		// sent after DSP has booted
+		{0xf50000, 0x010000},							// sent all the time, beat indicator? (on)
+		{0xf50000, 0x000000},							// sent all the time, beat indicator? (off)
+	};
+
 	bool Hdi08TxParser::append(const dsp56k::TWord _data)
 	{
 //		LOG("HDI08 TX: " << HEX(_data));
@@ -43,7 +50,32 @@ namespace virusLib
 			}
 			else
 			{
-//				LOG("Unknown DSP word " << HEX(_data));
+				size_t i=0;
+				bool matched = false;
+				for (const auto& pattern : g_knownPatterns)
+				{
+					auto& pos = m_patternPositions[i++];
+
+					if(pattern[pos] == _data)
+					{
+						matched = true;
+
+						++pos;
+						if(pos == std::size(pattern))
+						{
+//							LOG("Matched pattern " << i);
+							m_matchedPatterns.push_back(static_cast<PatternType>(i));
+							pos = 0;
+						}
+					}
+					else
+					{
+						pos = 0;
+					}
+				}
+
+				if(!matched)
+					LOG("Unknown DSP word " << _data);
 			}
 			break;
 		case State::Sysex:
@@ -95,7 +127,7 @@ namespace virusLib
 						m_waitForPreset = ROMFile::getSinglePresetSize();
 						break;
 					}
-					LOG("Preset size for version code " << (int)version << " is " << m_waitForPreset);
+					LOG("Preset size for version code " << static_cast<int>(version) << " is " << m_waitForPreset);
 				}
 
 				uint32_t shift = 16;
