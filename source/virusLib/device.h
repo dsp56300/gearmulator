@@ -4,7 +4,7 @@
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/device.h"
 
-#include "midiOutParser.h"
+#include "hdi08TxParser.h"
 #include "romfile.h"
 #include "microcontroller.h"
 
@@ -46,7 +46,7 @@ namespace virusLib
 		DspSingle* m_dsp2 = nullptr;
 		std::unique_ptr<Microcontroller> m_mc;
 
-		MidiOutParser m_midiOutParser;
+		Hdi08TxParser m_midiOutParser;
 
 		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_numSamplesProcessed = 0;

@@ -9,7 +9,7 @@
 #include "../synthLib/audioTypes.h"
 #include "../synthLib/wavWriter.h"
 
-#include "../virusLib/midiOutParser.h"
+#include "../virusLib/hdi08TxParser.h"
 
 namespace virusLib
 {
@@ -42,7 +42,7 @@ private:
 	std::vector<std::vector<dsp56k::TWord>> m_outputBuffers;
 	std::vector<std::vector<dsp56k::TWord>> m_inputBuffers;
 	std::vector<dsp56k::TWord> m_stereoOutput;
-	virusLib::MidiOutParser m_midiOut;
+	virusLib::Hdi08TxParser m_midiOut;
 
 	uint32_t m_processedSampleCount = 0;
 

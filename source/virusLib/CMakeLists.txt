@@ -8,7 +8,7 @@ set(SOURCES
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
 	dspSingle.cpp dspSingle.h
-	midiOutParser.cpp midiOutParser.h
+	hdi08TxParser.cpp hdi08TxParser.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h

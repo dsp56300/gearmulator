@@ -5,14 +5,26 @@
 
 namespace virusLib
 {
-	class MidiOutParser
+	class Hdi08TxParser
 	{
 	public:
+		enum class State
+		{
+			Default,
+			Sysex,
+			Preset,
+		};
+
 		bool append(dsp56k::TWord _data);
 		const std::vector<synthLib::SMidiEvent>& getMidiData() const { return m_midiData; }
 		void clearMidiData() { m_midiData.clear(); }
+		void waitForPreset(uint32_t _byteCount);
+
 	private:
 		std::vector<synthLib::SMidiEvent> m_midiData;
-		std::vector<uint8_t> m_data;
+		std::vector<uint8_t> m_sysexData;
+		std::vector<uint8_t> m_presetData;
+		uint32_t m_waitForPreset = 0;
+		State m_state = State::Default;
 	};
 }
