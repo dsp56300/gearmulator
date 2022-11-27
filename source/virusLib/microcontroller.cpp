@@ -195,6 +195,8 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
 
+//	LOG("Send command, page " << (int)_page << ", part " << (int)_part << ", param " << (int)_param << ", value " << (int)_value);
+
 	if(_page == globalSettingsPage())
 	{
 		m_globalSettings[_param] = _value;
