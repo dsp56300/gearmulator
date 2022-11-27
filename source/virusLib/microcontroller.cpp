@@ -47,7 +47,7 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 	m_hdi08.addHDI08(_hdi08);
 
 	m_hdi08TxParsers.reserve(2);
-	m_hdi08TxParsers.emplace_back();
+	m_hdi08TxParsers.emplace_back(*this);
 
 	m_globalSettings.fill(0xffffffff);
 
@@ -293,7 +293,7 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
 
 	for (auto& parser : m_hdi08TxParsers)
-		parser.waitForPreset(isMulti ? ROMFile::getMultiPresetSize() : ROMFile::getSinglePresetSize());
+		parser.waitForPreset(isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize());
 
 	return true;
 }
@@ -313,6 +313,8 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	buf[0] = buf[0] | _page;
 	buf[1] = (_part << 16) | (_param << 8) | _value;
 	m_hdi08.writeRX(buf, 2);
+
+//	LOG("Send command, page " << (int)_page << ", part " << (int)_part << ", param " << (int)_param << ", value " << (int)_value);
 
 	if(_page == globalSettingsPage())
 	{
@@ -1094,7 +1096,7 @@ void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
 void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
 {
 	m_hdi08.addHDI08(_hdi08);
-	m_hdi08TxParsers.emplace_back();
+	m_hdi08TxParsers.emplace_back(*this);
 }
 
 void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
@@ -1141,6 +1143,16 @@ uint8_t Microcontroller::calcChecksum(const std::vector<uint8_t>& _data, const s
 		cs += _data[i];
 
 	return cs & 0x7f;
+}
+
+bool Microcontroller::dspHasBooted() const
+{
+	for (const auto &p : m_hdi08TxParsers)
+	{
+		if(!p.hasDspBooted())
+			return false;
+	}
+	return true;
 }
 
 void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
