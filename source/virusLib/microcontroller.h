@@ -56,6 +56,10 @@ public:
 
 	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset);
 
+	bool dspHasBooted() const;
+
+	const ROMFile& getROM() const { return m_rom; }
+
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);

@@ -36,7 +36,8 @@ namespace virusLib
 
 		loader.join();
 
-		dummyProcess(8);
+		while(!m_mc->dspHasBooted())
+			dummyProcess(8);
 
 		m_mc->sendInitControlCommands();
 
