@@ -174,3 +174,18 @@ void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
 		m_sliderMouseListeners.erase(it);
 	}
 }
+
+juce::Component* VirusParameterBinding::findComponentFromParameter(const pluginLib::Parameter& _parameter) const
+{
+	// Search the m_bindings vector for a BoundParameter that contains our provided _parameter
+    auto param_name = _parameter.getDescription().name;
+	auto it = std::find_if(m_bindings.begin(), m_bindings.end(), [param_name](BoundParameter i){return i.parameter->getDescription().name == param_name;});
+
+    // then return the corresponding component, or nullptr if the search fails.
+    if(it == m_bindings.end()){
+        return nullptr;
+    } else {
+        auto result =  *it;
+        return result.component;
+    }
+}

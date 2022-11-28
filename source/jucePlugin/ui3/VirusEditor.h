@@ -28,6 +28,7 @@ namespace genericVirusUI
 		Virus::Controller& getController() const;
 
 		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
+		void updateControlLabel(juce::Component* _component) const;
 
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
@@ -46,7 +47,6 @@ namespace genericVirusUI
 		void mouseExit(const juce::MouseEvent& event) override;
 		void mouseUp(const juce::MouseEvent& event) override;
 
-		void updateControlLabel(juce::Component* _component) const;
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 

@@ -260,3 +260,7 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 
 	openMenu();
 }
+
+const juce::Component * AudioPluginAudioProcessorEditor::getVirusEditor() const {
+	return m_virusEditor.get();
+}

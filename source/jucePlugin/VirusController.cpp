@@ -4,6 +4,7 @@
 
 #include "ParameterNames.h"
 #include "PluginProcessor.h"
+#include "PluginEditor.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 #include "../synthLib/os.h"
@@ -564,6 +565,22 @@ namespace Virus
     {
         const auto& desc = _parameter.getDescription();
 
+        {
+            // Parameter changes from midi controllers or from DAW hosts (via their
+            // native VST(3) wrapper interface) are not reported in the GUI control label
+            // through VirusEditor::updateControlLabel, unlike changes performed by the mouse in the GUI (using
+            // VirusEditor::{mouseDrag,mouseEnter,mouseExit,mouseUp}).
+            // Here we implement that functionality.
+
+            auto e = dynamic_cast<AudioPluginAudioProcessorEditor *>(m_processor.getActiveEditor());
+            auto v = dynamic_cast<const genericVirusUI::VirusEditor *>(e->getVirusEditor());
+
+            // With the parameter currently being changed, search for the relevant GUI component.
+            auto component = v->getParameterBinding().findComponentFromParameter(_parameter);
+
+            // pass it to updateControlLabel to update the control label.
+            v->updateControlLabel(component);
+        }
         sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
     }
 

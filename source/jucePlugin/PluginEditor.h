@@ -13,7 +13,8 @@ public:
 
     void paint (juce::Graphics&) override;
     void resized() override;
-	void mouseDown(const juce::MouseEvent& event) override;
+    void mouseDown(const juce::MouseEvent& event) override;
+    const juce::Component * getVirusEditor() const;
 
 private:
 	struct Skin

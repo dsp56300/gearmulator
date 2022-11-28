@@ -253,7 +253,10 @@ namespace genericVirusUI
 
 	void VirusEditor::mouseDrag(const juce::MouseEvent & event)
 	{
-	    updateControlLabel(event.eventComponent);
+        // Mouse drags only need to update the control label when there is a parameter change.
+        // Controller::sendParameterChange now calls updateControlLabel on all parameter changes, so the below call is
+        // no longer needed.
+//        updateControlLabel(event.eventComponent);
 	}
 
 	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
