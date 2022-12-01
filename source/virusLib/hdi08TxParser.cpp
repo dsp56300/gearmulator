@@ -113,29 +113,28 @@ namespace virusLib
 					LOG("Abort reading sysex, received invalid midi byte " << HEX(_data));
 					m_state = State::Default;
 					m_midiData.clear();
+					return append(_data);
 				}
-				else
+
+				m_sysexData.push_back(byte);
+
+				if(byte == 0xf7)
 				{
-					m_sysexData.push_back(byte);
+					LOG("End reading sysex");
 
-					if(byte == 0xf7)
-					{
-						LOG("End reading sysex");
+					m_state = State::Default;
 
-						m_state = State::Default;
+					std::stringstream s;
+					for (const auto b : m_sysexData)
+						s << HEXN(b, 2);
 
-						std::stringstream s;
-						for (const auto b : m_sysexData)
-							s << HEXN(b, 2);
+					LOG("Received sysex: " << s.str());
 
-						LOG("Received sysex: " << s.str());
+					synthLib::SMidiEvent ev;
+					std::swap(ev.sysex, m_sysexData);
+					m_midiData.emplace_back(ev);
 
-						synthLib::SMidiEvent ev;
-						std::swap(ev.sysex, m_sysexData);
-						m_midiData.emplace_back(ev);
-
-						return true;
-					}
+					return true;
 				}
 			}
 			break;
