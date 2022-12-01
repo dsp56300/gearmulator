@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../../juceUiLib/editor.h"
+#include "../../jucePluginLib/parameter.h"
 
 #include "Parts.h"
 #include "Tabs.h"
@@ -28,7 +29,7 @@ namespace genericVirusUI
 		Virus::Controller& getController() const;
 
 		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
-		void updateControlLabel(juce::Component* _component) const;
+		void updateControlLabel(const pluginLib::Parameter &_parameter) const;
 
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
@@ -47,6 +48,8 @@ namespace genericVirusUI
 		void mouseExit(const juce::MouseEvent& event) override;
 		void mouseUp(const juce::MouseEvent& event) override;
 
+		void updateControlLabelAndTooltip(juce::Component* _component) const;
+		void updateFocusedParameterTooltip(const Component *_component, const juce::String &value) const;
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 

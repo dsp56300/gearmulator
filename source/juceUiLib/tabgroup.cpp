@@ -8,6 +8,7 @@ namespace genericUI
 		: m_name(std::move(_name))
 		, m_pageNames(std::move(_pageNames))
 		, m_buttonNames(std::move(_buttonNames))
+		, m_currentPage(0)
 	{
 	}
 
@@ -23,14 +24,22 @@ namespace genericUI
 			m_tabButtons[i]->onClick = [this, i] { setPage(i); };
 
 		setPage(0);
+		m_currentPage = 0;
 	}
 
-	void TabGroup::setPage(const size_t _page) const
+	void TabGroup::setPage(const size_t _page)
 	{
 		for(size_t i=0; i<m_tabs.size(); ++i)
 		{
 			m_tabs[i]->setVisible(_page == i);
 			m_tabButtons[i]->setToggleState(_page == i, juce::dontSendNotification);
 		}
+		m_currentPage = _page;
+	}
+
+	bool TabGroup::searchPage(const juce::Component *_component) const
+	{
+		// If the component can be found in current page, return true;
+		return m_tabs[m_currentPage]->findChildWithID(_component->getComponentID()) != nullptr;
 	}
 }

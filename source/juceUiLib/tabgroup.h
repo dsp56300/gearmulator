@@ -27,10 +27,12 @@ namespace genericUI
 		void create(const Editor& _editor);
 
 		const std::string& getName() const { return m_name; }
+		bool searchPage(const juce::Component *_component) const;
 
 	private:
-		void setPage(const size_t _page) const;
+		void setPage(const size_t _page);
 
+		size_t m_currentPage;
 		std::string m_name;
 
 		std::vector<std::string> m_pageNames;

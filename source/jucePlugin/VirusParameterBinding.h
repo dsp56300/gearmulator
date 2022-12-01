@@ -35,7 +35,6 @@ public:
 	void bind(juce::ComboBox &_control, uint32_t _param);
 	void bind(juce::ComboBox &_control, uint32_t _param, uint8_t _part);
 	void bind(juce::Button &_control, uint32_t _param);
-	juce::Component* findComponentFromParameter(const pluginLib::Parameter &_parameter) const;
 
 private:
 	void removeMouseListener(juce::Slider& _slider);

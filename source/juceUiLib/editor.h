@@ -72,6 +72,8 @@ namespace genericUI
 			return m_tabGroupsByName.size();
 		}
 
+		const std::map<std::string, TabGroup *>& getTabGroupsByName() const { return m_tabGroupsByName; }
+
 		size_t getConditionCountRecursive() const;
 
 		static void setEnabled(juce::Component& _component, bool _enable);

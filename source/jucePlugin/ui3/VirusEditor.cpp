@@ -117,7 +117,7 @@ namespace genericVirusUI
 
 		updatePresetName();
 		updatePlayModeButtons();
-		updateControlLabel(nullptr);
+		updateControlLabelAndTooltip(nullptr);
 	}
 
 	VirusEditor::~VirusEditor()
@@ -253,112 +253,196 @@ namespace genericVirusUI
 
 	void VirusEditor::mouseDrag(const juce::MouseEvent & event)
 	{
-        // Mouse drags only need to update the control label when there is a parameter change.
-        // Controller::sendParameterChange now calls updateControlLabel on all parameter changes, so the below call is
-        // no longer needed.
-//        updateControlLabel(event.eventComponent);
+		// During mouse drags, updates to the control label are handled via
+		//  Controller::sendParameterChange -> VirusEditor::updateControlLabel(const pluginLib::Parameter),
+		// which is not well placed to handle FocusedParameterTooltip updates, as it lacks a reference to the
+		// GUI component being manipulated. So, we do that work here.
+
+		if(m_focusedParameterTooltip){
+			auto _component = event.eventComponent;
+			const auto& props = _component->getProperties();
+			const int v = props["parameter"];
+			const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
+			const auto* p = getController().getParameter(v, part);
+
+			if(!p) // Only occurs when we have a mouse drag across a non parameter UI feature (i.e. the skin background)...
+				m_focusedParameterTooltip->setVisible(false);
+
+			const auto value = p->getText(p->getValue(), 0);
+			updateFocusedParameterTooltip(_component, value);
+		}
 	}
 
 	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
 	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-		updateControlLabel(event.eventComponent);
+		if (event.mouseWasDraggedSinceMouseDown())
+			return;
+		updateControlLabelAndTooltip(event.eventComponent);
 	}
 	void VirusEditor::mouseExit(const juce::MouseEvent& event)
 	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-	    updateControlLabel(nullptr);
+		if (event.mouseWasDraggedSinceMouseDown())
+			return;
+		updateControlLabelAndTooltip(nullptr);
 	}
 
 	void VirusEditor::mouseUp(const juce::MouseEvent& event)
 	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-	    updateControlLabel(event.eventComponent);
+		if (event.mouseWasDraggedSinceMouseDown())
+			return;
+		updateControlLabelAndTooltip(event.eventComponent);
 	}
 
-	void VirusEditor::updateControlLabel(juce::Component* _component) const
+	void VirusEditor::updateControlLabelAndTooltip(juce::Component* _component) const
 	{
-		if(_component)
-		{
-			// combo boxes report the child label as event source, try the parent in this case
-			if(!_component->getProperties().contains("parameter"))
-				_component = _component->getParentComponent();
-		}
+		if(_component && !_component->getProperties().contains("parameter"))
+			_component = _component->getParentComponent(); // combo boxes report the child label as event source, try the parent in this case
 
+
+		// If there's no component, clear the control label and tooltip and return.
 		if(!_component || !_component->getProperties().contains("parameter"))
 		{
 			m_focusedParameterName->setVisible(false);
 			m_focusedParameterValue->setVisible(false);
 			if(m_focusedParameterTooltip)
 				m_focusedParameterTooltip->setVisible(false);
+
 			return;
 		}
 
 		const auto& props = _component->getProperties();
 		const int v = props["parameter"];
-
 		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
-
 		const auto* p = getController().getParameter(v, part);
 
+		// If the parameter lookup returns a nullptr, then clear the label and tooltip and return.
 		if(!p)
 		{
 			m_focusedParameterName->setVisible(false);
 			m_focusedParameterValue->setVisible(false);
 			if(m_focusedParameterTooltip)
 				m_focusedParameterTooltip->setVisible(false);
+
 			return;
 		}
 
+		// else, set the control label and tooltip
 		const auto value = p->getText(p->getValue(), 0);
-
 		const auto& desc = p->getDescription();
 
 		m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
 		m_focusedParameterValue->setText(value, juce::dontSendNotification);
-
 		m_focusedParameterName->setVisible(true);
 		m_focusedParameterValue->setVisible(true);
 
-		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component))
+		if(m_focusedParameterTooltip)
 		{
-			int x = _component->getX();
-			int y = _component->getY();
-
-			// local to global
-			auto parent = _component->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x += parent->getX();
-				y += parent->getY();
-				parent = parent->getParentComponent();
-			}
-
-			x += (_component->getWidth()>>1) - (m_focusedParameterTooltip->getWidth()>>1);
-			y += _component->getHeight() + (m_focusedParameterTooltip->getHeight()>>1);
-
-			// global to local of tooltip parent
-			parent = m_focusedParameterTooltip->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x -= parent->getX();
-				y -= parent->getY();
-				parent = parent->getParentComponent();
-			}
-
-			if(m_focusedParameterTooltip->getProperties().contains("offsetY"))
-				y += static_cast<int>(m_focusedParameterTooltip->getProperties()["offsetY"]);
-
-			m_focusedParameterTooltip->setTopLeftPosition(x,y);
-			m_focusedParameterTooltip->setText(value, juce::dontSendNotification);
-			m_focusedParameterTooltip->setVisible(true);
-			m_focusedParameterTooltip->toFront(false);
+			// For skins that implement FocusedParameterTooltip (e.g. Trancy)
+			updateFocusedParameterTooltip(_component, value);
 		}
+	}
+
+	void VirusEditor::updateFocusedParameterTooltip(const juce::Component *_component, const juce::String &value) const {
+
+		if(!dynamic_cast<const juce::Slider*>(_component))
+			return;
+
+		if(!_component || !_component->getProperties().contains("parameter"))
+		{
+			m_focusedParameterTooltip->setVisible(false);
+			return;
+		}
+
+
+		const auto& props = _component->getProperties();
+		const int v = props["parameter"];
+		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
+		const auto* p = getController().getParameter(v, part);
+
+
+		// We only render the tooltip if the parameter being changed is on the same 'part' as the currently visible/selected one.
+		if(p->getPart() != getController().getCurrentPart()) {
+			m_focusedParameterTooltip->setVisible(false);
+			return;
+		}
+
+		// and even furthermore, it's only rendered if the parameter is on the currently visible page of the editor.
+		jassert(getTabGroupCount() == 1);
+		auto tabGroup = getTabGroupsByName().begin()->second;
+		bool isOnPage = tabGroup->searchPage(_component);
+		if(!isOnPage) {
+			m_focusedParameterTooltip->setVisible(false);
+			return;
+		}
+
+		//
+		// Finally, we are ready to draw the tooltip.
+		//
+
+		int x = _component->getX();
+		int y = _component->getY();
+
+		// local to global
+		auto parent = _component->getParentComponent();
+
+		while(parent && parent != this)
+		{
+			x += parent->getX();
+			y += parent->getY();
+			parent = parent->getParentComponent();
+		}
+
+		x += (_component->getWidth()>>1) - (m_focusedParameterTooltip->getWidth() >> 1);
+		y += _component->getHeight() + (m_focusedParameterTooltip->getHeight() >> 1);
+
+		// global to local of tooltip parent
+		parent = m_focusedParameterTooltip->getParentComponent();
+
+		while(parent && parent != this)
+		{
+			x -= parent->getX();
+			y -= parent->getY();
+			parent = parent->getParentComponent();
+		}
+
+		if(m_focusedParameterTooltip->getProperties().contains("offsetY"))
+			y += static_cast<int>(m_focusedParameterTooltip->getProperties()["offsetY"]);
+
+		m_focusedParameterTooltip->setTopLeftPosition(x, y);
+		m_focusedParameterTooltip->setText(value, juce::dontSendNotification);
+		m_focusedParameterTooltip->setVisible(true);
+		m_focusedParameterTooltip->toFront(false);
+	}
+
+
+	void VirusEditor::updateControlLabel(const pluginLib::Parameter &_parameter) const
+	{
+		/*
+		 * To update the control label with the status of a parameter that doesn't have a GUI component
+		 * instantiated, updateControlLabelAndTooltip(juce::Component* _component) will not work for us, as it requires a
+		 * reference to the GUI component being manipulated.
+		 *
+		 * So we instead implement another version of it here, which updates the label using information provided by _parameter.
+		 *
+		 * Updating the tooltip for skins that implement FocusedParameterTooltip is left to VirusEditor::mouseDrag to trigger.
+		 * */
+
+		const auto value = _parameter.getText(_parameter.getValue(), 0);
+
+		juce::String name;
+		if(_parameter.getPart() == getController().getCurrentPart()){
+			name = _parameter.getDescription().name; // i.e. 'Portamento Time'
+			// It looks better if we don't show the 'part' number if we already have that part selected.
+		} else {
+			name = _parameter.name; // i.e. 'Ch 1 Portamento Time'
+			// and, this way we give the user a hint that they are manipulating an off-screen parameter.
+		}
+
+		m_focusedParameterName->setText(name, juce::dontSendNotification);
+		m_focusedParameterValue->setText(value, juce::dontSendNotification);
+
+		m_focusedParameterName->setVisible(true);
+		m_focusedParameterValue->setVisible(true);
 	}
 
 	void VirusEditor::updatePresetName() const

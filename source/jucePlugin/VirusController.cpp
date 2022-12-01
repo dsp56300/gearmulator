@@ -548,7 +548,7 @@ namespace Virus
 			}
             else
 			{
-				parseMessage(msg.sysex);               
+				parseMessage(msg.sysex);
 			}
         }
         m_virusOut.clear();
@@ -565,23 +565,15 @@ namespace Virus
     {
         const auto& desc = _parameter.getDescription();
 
-        {
-            // Parameter changes from midi controllers or from DAW hosts (via their
-            // native VST(3) wrapper interface) are not reported in the GUI control label
-            // through VirusEditor::updateControlLabel, unlike changes performed by the mouse in the GUI (using
-            // VirusEditor::{mouseDrag,mouseEnter,mouseExit,mouseUp}).
-            // Here we implement that functionality.
-
-            auto e = dynamic_cast<AudioPluginAudioProcessorEditor *>(m_processor.getActiveEditor());
-            auto v = dynamic_cast<const genericVirusUI::VirusEditor *>(e->getVirusEditor());
-
-            // With the parameter currently being changed, search for the relevant GUI component.
-            auto component = v->getParameterBinding().findComponentFromParameter(_parameter);
-
-            // pass it to updateControlLabel to update the control label.
-            v->updateControlLabel(component);
-        }
-        sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
+		{
+			// Changes performed by the mouse in the GUI (using VirusEditor::{mouseDrag,mouseEnter,mouseExit,mouseUp})
+			// update the GUI control label as expected, but changes from MIDI controllers or DAW plugin wrappers, do not.
+			// Here we implement that functionality.
+			auto e = dynamic_cast<AudioPluginAudioProcessorEditor *>(m_processor.getActiveEditor());
+			auto v = dynamic_cast<const genericVirusUI::VirusEditor *>(e->getVirusEditor());
+			v->updateControlLabel(_parameter);
+		}
+		sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
     }
 
     bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const

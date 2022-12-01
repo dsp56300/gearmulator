@@ -86,7 +86,7 @@ namespace genericUI
 
 	void UiObject::apply(Editor& _editor, juce::Slider& _target)
 	{
-	    _target.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+		_target.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
 		apply(_editor, static_cast<juce::Component&>(_target));
 
@@ -96,18 +96,18 @@ namespace genericUI
 
 		const auto sliderStyle = s->getStyle();
 
-	    switch (sliderStyle)
-	    {
-	    case RotaryStyle::Style::Rotary: 
+		switch (sliderStyle)
+		{
+		case RotaryStyle::Style::Rotary:
 			_target.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
 			break;
-	    case RotaryStyle::Style::LinearVertical:
+		case RotaryStyle::Style::LinearVertical:
 			_target.setSliderStyle(juce::Slider::LinearVertical);
 			break;
-	    case RotaryStyle::Style::LinearHorizontal:
+		case RotaryStyle::Style::LinearHorizontal:
 			_target.setSliderStyle(juce::Slider::LinearHorizontal);
 			break;
-	    }
+		}
 
 		bindParameter(_editor, _target);
 	}
@@ -420,6 +420,9 @@ namespace genericUI
 		}
 
 		readProperties(*_object);
+
+		// Assign each component a unique ID hash, enabling search routines such as TabGroup::searchPage
+		dynamic_cast<juce::Component*>(comp)->setComponentID(juce::Uuid().toString());
 
 		return comp;
 	}
