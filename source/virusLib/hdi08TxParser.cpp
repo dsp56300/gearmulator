@@ -78,6 +78,7 @@ namespace virusLib
 							{
 							case PatternType::DspBoot:
 								m_dspHasBooted = true;
+								LOG("DSP boot completed");
 								break;
 							default:
 								m_matchedPatterns.push_back(p);
