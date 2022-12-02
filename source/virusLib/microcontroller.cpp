@@ -44,10 +44,9 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 	if(!_romFile.isValid())
 		return;
 
-	m_hdi08.addHDI08(_hdi08);
-
 	m_hdi08TxParsers.reserve(2);
-	m_hdi08TxParsers.emplace_back(*this);
+
+	addHDI08(_hdi08);
 
 	m_globalSettings.fill(0xffffffff);
 
