@@ -41,6 +41,10 @@ namespace genericUI
 		juce::Justification m_align = 0;
 		bool m_bold = false;
 		bool m_italic = false;
+		int m_offsetL = 0;
+		int m_offsetT = 0;
+		int m_offsetR = 0;
+		int m_offsetB = 0;
 
 		std::string m_url;
 	};
