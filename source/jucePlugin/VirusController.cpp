@@ -52,7 +52,7 @@ namespace Virus
 		const auto& params = findSynthParam(0, 0x72, 0x7a);
 		for (const auto& parameter : params)
 		{
-			parameter->onValueChanged = [this] {
+			parameter->onValueChanged.emplace_back(std::make_pair(0, [this] {
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);
                 requestMulti(0, prg);
@@ -61,7 +61,7 @@ namespace Virus
 				{
 					onMsgDone();
 				}
-			};
+			}));
 		}
 		requestTotal();
 		requestArrangement();

@@ -57,13 +57,15 @@ namespace pluginLib
 
 		// allow 'injecting' additional code for specific parameter.
 		// eg. multi/single value change requires triggering more logic.
-		std::function<void()> onValueChanged = {};
+		std::list<std::pair<uint32_t, std::function<void()>>> onValueChanged;
 
 		void addLinkedParameter(Parameter* _param);
 
 		int getUniqueId() const { return m_uniqueId; }
 
 		const std::set<Parameter*>& getLinkedParameters() { return m_linkedParameters; }
+
+		bool removeListener(uint32_t _id);
 
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);

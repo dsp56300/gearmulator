@@ -25,8 +25,9 @@ namespace pluginLib
 				m_ctrl.sendParameterChange(*this, value);
 			m_lastValue = value;
 		}
-		if (onValueChanged)
-			onValueChanged();
+
+		for (const auto& func : onValueChanged)
+			func.second();
 	}
 
     void Parameter::setLinkedValue(const int _value)
@@ -75,20 +76,22 @@ namespace pluginLib
 
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
 	{
-		if (newValue == m_lastValue)
+		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
+
+		if (clampedValue == m_lastValue)
 			return;
 
-		m_lastValue = newValue;
+		m_lastValue = clampedValue;
 
 		if (notifyHost && getDescription().isPublic)
 		{
 			beginChangeGesture();
-			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			setValueNotifyingHost(convertTo0to1(static_cast<float>(clampedValue)));
 			endChangeGesture();
 		}
 		else
 		{
-			m_value.setValue(newValue);
+			m_value.setValue(clampedValue);
 		}
 
 		if (m_changingLinkedValues)
@@ -100,6 +103,24 @@ namespace pluginLib
 			p->setLinkedValue(newValue);
 
 		m_changingLinkedValues = false;
+	}
+
+	bool Parameter::removeListener(const uint32_t _id)
+	{
+		bool res = false;
+		for(auto it = onValueChanged.begin(); it !=onValueChanged.end();)
+		{
+			if(it->first == _id)
+			{
+				it = onValueChanged.erase(it);
+				res = true;
+			}
+			else
+			{
+				++it;
+			}
+		}
+		return res;
 	}
 
 	juce::String Parameter::genId(const pluginLib::Description &d, const int part, const int uniqueId)
