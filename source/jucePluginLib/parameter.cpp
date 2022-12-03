@@ -25,8 +25,9 @@ namespace pluginLib
 				m_ctrl.sendParameterChange(*this, value);
 			m_lastValue = value;
 		}
-		if (onValueChanged)
-			onValueChanged();
+
+		for (const auto& func : onValueChanged)
+			func.second();
 	}
 
     void Parameter::setLinkedValue(const int _value)
@@ -100,6 +101,24 @@ namespace pluginLib
 			p->setLinkedValue(newValue);
 
 		m_changingLinkedValues = false;
+	}
+
+	bool Parameter::removeListener(const uint32_t _id)
+	{
+		bool res = false;
+		for(auto it = onValueChanged.begin(); it !=onValueChanged.end();)
+		{
+			if(it->first == _id)
+			{
+				it = onValueChanged.erase(it);
+				res = true;
+			}
+			else
+			{
+				++it;
+			}
+		}
+		return res;
 	}
 
 	juce::String Parameter::genId(const pluginLib::Description &d, const int part, const int uniqueId)

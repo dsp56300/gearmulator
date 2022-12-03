@@ -49,8 +49,10 @@ private:
 		juce::Component* component = nullptr;
 		uint32_t type = 0xffffffff;
 		uint8_t part = CurrentPart;
+		uint32_t onChangeListenerId = 0;
 	};
 
 	std::vector<BoundParameter> m_bindings;
 	std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
+	uint32_t m_nextListenerId = 1;
 };

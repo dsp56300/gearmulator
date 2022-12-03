@@ -18,7 +18,8 @@ void VirusParameterBinding::clearBindings()
 		if(slider != nullptr)
 			removeMouseListener(*slider);
 
-		b.parameter->onValueChanged = nullptr;
+		if(b.onChangeListenerId)
+			b.parameter->removeListener(b.onChangeListenerId);
 	}
 
 	m_bindings.clear();
@@ -136,7 +137,8 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, 
 	}
 	//_combo.addItemList(v->getAllValueStrings(), 1);
 	_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
-	_combo.onChange = [this, &_combo, v]() {
+	_combo.onChange = [this, &_combo, v]()
+	{
 		if(v->getDescription().isPublic)
 		{
 			v->beginChangeGesture();
@@ -145,8 +147,16 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, 
 		}
 		v->getValueObject().getValueSource().setValue((int)_combo.getSelectedId() - 1);
 	};
-	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification); };
-	const BoundParameter p{v, &_combo, _param, _part};
+
+	const auto listenerId = m_nextListenerId++;
+
+	v->onValueChanged.emplace_back(std::make_pair(listenerId, [this, &_combo, v]()
+	{
+		const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
+		_combo.setSelectedId(value + 1, juce::dontSendNotification);
+	}));
+
+	const BoundParameter p{v, &_combo, _param, _part, listenerId};
 	m_bindings.emplace_back(p);
 }
 
