@@ -29,6 +29,8 @@ namespace genericVirusUI
 
 		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
 
+		PatchBrowser* getPatchBrowser();
+
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;
