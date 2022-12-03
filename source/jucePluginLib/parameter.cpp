@@ -76,20 +76,22 @@ namespace pluginLib
 
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
 	{
-		if (newValue == m_lastValue)
+		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
+
+		if (clampedValue == m_lastValue)
 			return;
 
-		m_lastValue = newValue;
+		m_lastValue = clampedValue;
 
 		if (notifyHost && getDescription().isPublic)
 		{
 			beginChangeGesture();
-			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			setValueNotifyingHost(convertTo0to1(static_cast<float>(clampedValue)));
 			endChangeGesture();
 		}
 		else
 		{
-			m_value.setValue(newValue);
+			m_value.setValue(clampedValue);
 		}
 
 		if (m_changingLinkedValues)
