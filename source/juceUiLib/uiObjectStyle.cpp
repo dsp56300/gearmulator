@@ -87,6 +87,11 @@ namespace genericUI
 		m_italic = _object.getPropertyInt("italic") != 0;
 
 		m_url = _object.getProperty("url");
+
+		m_offsetL = _object.getPropertyInt("offsetL", 1);
+		m_offsetT = _object.getPropertyInt("offsetT", 1);
+		m_offsetR = _object.getPropertyInt("offsetR", -30);
+		m_offsetB = _object.getPropertyInt("offsetB", -2);
 	}
 
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)
