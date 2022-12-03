@@ -147,6 +147,11 @@ namespace genericVirusUI
 		return nullptr;
 	}
 
+	PatchBrowser* VirusEditor::getPatchBrowser()
+	{
+		return m_patchBrowser.get();
+	}
+
 	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
 		if(!m_skinFolder.empty())

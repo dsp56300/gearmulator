@@ -11,8 +11,6 @@
 
 using namespace juce;
 
-const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
-
 namespace genericVirusUI
 {
 	virusLib::VirusModel guessVersion(const uint8_t v)
@@ -213,6 +211,16 @@ namespace genericVirusUI
 		return 0;
 	}
 
+	bool PatchBrowser::selectPrevPreset()
+	{
+		return selectPrevNextPreset(-1);
+	}
+
+	bool PatchBrowser::selectNextPreset()
+	{
+		return selectPrevNextPreset(1);
+	}
+
 	void PatchBrowser::fileClicked(const File& file, const MouseEvent& e)
 	{
 		const auto ext = file.getFileExtension().toLowerCase();
@@ -309,6 +317,8 @@ namespace genericVirusUI
 
 		m_controller.sendSysEx(msg);
 		m_controller.requestSingle(0x0, program);
+
+		m_controller.setCurrentPartPresetSource(m_controller.getCurrentPart(), Virus::Controller::PresetSource::Browser);
 
 		m_properties->setValue("virus_selected_patch", patch.name);
 	}
@@ -447,6 +457,34 @@ namespace genericVirusUI
 
 		if(selectIndex != -1)
 			m_patchList.selectRow(selectIndex);
+	}
+
+	bool PatchBrowser::selectPrevNextPreset(int _dir)
+	{
+		const auto part = m_controller.getCurrentPart();
+
+		if(m_controller.getCurrentPartPresetSource(part) == Virus::Controller::PresetSource::Rom)
+			return false;
+
+		if(m_filteredPatches.isEmpty())
+			return false;
+
+		const auto idx = m_patchList.getSelectedRow();
+		if(idx < 0)
+			return false;
+
+		const auto name = m_controller.getCurrentPartPresetName(part);
+
+		if(m_filteredPatches[idx].name != name)
+			return false;
+
+		const auto newIdx = idx + _dir;
+
+		if(newIdx < 0 || newIdx >= m_filteredPatches.size())
+			return false;
+
+		m_patchList.selectRow(newIdx);
+		return true;
 	}
 
 	bool PatchBrowser::initializePatch(const Virus::Controller& _controller, Patch& _patch)
