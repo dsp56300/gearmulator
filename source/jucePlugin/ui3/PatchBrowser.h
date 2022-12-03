@@ -41,6 +41,9 @@ namespace genericVirusUI
 		static bool load(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
 		static uint32_t loadBankFile(const Virus::Controller& _controller, std::vector<Patch>& _result, std::set<std::string>* _dedupeChecksums, const juce::File& file);
 
+		bool selectPrevPreset();
+		bool selectNextPreset();
+
 	private:
 		static bool initializePatch(const Virus::Controller& _controller, Patch& _patch);
 
@@ -69,6 +72,8 @@ namespace genericVirusUI
 		void onFileSelected(const juce::File& file);
 		void fillPatchList(const std::vector<Patch>& _patches);
 		void refreshPatchList();
+
+		bool selectPrevNextPreset(int _dir);
 
 		class PatchBrowserSorter;
 

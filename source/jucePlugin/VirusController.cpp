@@ -252,7 +252,7 @@ namespace Virus
 
 	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)
 	{
-    	if(_bank == virusLib::BankNumber::EditBuffer || _prg > 127)
+    	if(_bank == virusLib::BankNumber::EditBuffer || _prg > m_singles[0].size())
     	{
 			jassertfalse;
 			return;
@@ -271,20 +271,32 @@ namespace Virus
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank));
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg);
 
-		requestSingle(virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), pt);
+		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), pt);
 
 		m_currentBank[_part] = _bank;
 		m_currentProgram[_part] = _prg;
+        m_currentPresetSource[_part] = PresetSource::Rom;
+	}
+
+	void Controller::setCurrentPartPresetSource(uint8_t _part, PresetSource _source)
+	{
+        m_currentPresetSource[_part] = _source;
 	}
 
 	virusLib::BankNumber Controller::getCurrentPartBank(const uint8_t _part) const
     {
 	    return m_currentBank[_part];
     }
+
 	uint8_t Controller::getCurrentPartProgram(const uint8_t _part) const
     {
 	    return m_currentProgram[_part];
     }
+
+	Controller::PresetSource Controller::getCurrentPartPresetSource(uint8_t _part) const
+	{
+        return m_currentPresetSource[_part];
+	}
 
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const
 	{
@@ -386,26 +398,36 @@ namespace Virus
 		            linkedParam->setValueFromSynth(it->second, true);
             }
 
-            bool found = false;
-            for(size_t b=0; b<m_singles.size() && !found; ++b)
+            if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
-	            const auto& singlePatches = m_singles[b];
+	            bool found = false;
+	            for(size_t b=0; b<m_singles.size() && !found; ++b)
+	            {
+		            const auto& singlePatches = m_singles[b];
 
-                for(size_t s=0; s<singlePatches.size(); ++s)
-                {
-                    const auto& singlePatch = singlePatches[s];
+	                for(size_t s=0; s<singlePatches.size(); ++s)
+	                {
+	                    const auto& singlePatch = singlePatches[s];
 
-                    if(singlePatch.name == patch.name)
-                    {
-                        m_currentBank[ch] = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
-                        m_currentProgram[ch] = static_cast<uint8_t>(s);
-                        found = true;
-                        break;
-                    }
-                }
+	                    if(singlePatch.name == patch.name)
+	                    {
+	                        m_currentBank[ch] = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
+	                        m_currentProgram[ch] = static_cast<uint8_t>(s);
+	                        m_currentPresetSource[ch] = PresetSource::Rom;
+	                        found = true;
+	                        break;
+	                    }
+	                }
+	            }
+
+	            if(!found)
+	            {
+		            m_currentProgram[ch] = 0;
+	                m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
+	                m_currentPresetSource[ch] = PresetSource::Unknown;
+	            }
             }
-
-            if(!found)
+            else
             {
 	            m_currentProgram[ch] = 0;
                 m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
@@ -656,5 +678,21 @@ namespace Virus
 			return {};
 
 		return createSingleDump(usedPacketType, _modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
+    }
+
+    void Controller::selectPrevPreset(uint8_t _part)
+    {
+		if(getCurrentPartProgram(_part) > 0)
+		{
+            setCurrentPartPreset(_part, getCurrentPartBank(_part), getCurrentPartProgram(_part) - 1);
+		}
+    }
+
+    void Controller::selectNextPreset(uint8_t _part)
+    {
+		if(getCurrentPartProgram(_part) < m_singles[0].size())
+		{
+            setCurrentPartPreset(_part, getCurrentPartBank(_part), getCurrentPartProgram(_part) + 1);
+		}
     }
 }; // namespace Virus

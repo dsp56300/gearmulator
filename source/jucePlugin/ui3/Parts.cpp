@@ -75,14 +75,9 @@ namespace genericVirusUI
 		if(m_presetPrev.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		Virus::Controller& controller = m_editor.getController();
-
-		const auto pt = static_cast<uint8_t>(_part);
-
-		if(controller.getCurrentPartProgram(pt) > 0)
-		{
-            controller.setCurrentPartPreset(pt, controller.getCurrentPartBank(pt), controller.getCurrentPartProgram(pt) - 1);
-		}
+		auto* pb = m_editor.getPatchBrowser();
+		if(!pb || !pb->selectPrevPreset())
+			m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectNextPreset(size_t _part) const
@@ -90,13 +85,9 @@ namespace genericVirusUI
 		if(m_presetNext.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		Virus::Controller& controller = m_editor.getController();
-
-		const auto pt = static_cast<uint8_t>(_part);
-		if(controller.getCurrentPartProgram(pt) < 127)	// FIXME: magic value
-		{
-            controller.setCurrentPartPreset(pt, controller.getCurrentPartBank(pt), controller.getCurrentPartProgram(pt) + 1);
-		}
+		auto* pb = m_editor.getPatchBrowser();
+		if(!pb || !pb->selectNextPreset())
+			m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectPreset(size_t _part) const
