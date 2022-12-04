@@ -13,6 +13,7 @@ set(SOURCES
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
+	sysexToMidi.cpp sysexToMidi.h
 	wavWriter.cpp wavWriter.h
 )
 
