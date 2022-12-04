@@ -12,6 +12,8 @@
 
 using namespace juce;
 
+const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
+
 namespace genericVirusUI
 {
 	virusLib::PresetVersion guessVersion(const uint8_t v)

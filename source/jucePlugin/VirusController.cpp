@@ -94,7 +94,7 @@ namespace Virus
             if(name == midiPacketName(MidiPacketType::SingleDump) || name == midiPacketName(MidiPacketType::SingleDump_C))
                 parseSingle(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::MultiDump))
-                parseMulti(data, parameterValues);
+                parseMulti(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::ParameterChange))
                 parseParamChange(data);
             else
@@ -187,10 +187,20 @@ namespace Virus
 
     std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const
     {
+        return getPresetName("SingleName", _values);
+    }
+
+    std::string Controller::getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const
+    {
+        return getPresetName("MultiName", _values);
+    }
+
+    std::string Controller::getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const
+    {
         std::string name;
         for(uint32_t i=0; i<kNameLength; ++i)
         {
-	        const std::string paramName = "SingleName" + std::to_string(i);
+	        const std::string paramName = _paramNamePrefix + std::to_string(i);
             const auto idx = getParameterIndexByName(paramName);
             if(idx == InvalidParameterIndex)
                 break;
@@ -379,6 +389,11 @@ namespace Virus
 
 		if (patch.bankNumber == virusLib::BankNumber::EditBuffer)
 		{
+            if(patch.progNumber == virusLib::SINGLE)
+                m_singleEditBuffer = patch;
+            else
+                m_singleEditBuffers[patch.progNumber] = patch;
+
 			// virus sends also the single buffer not matter what's the mode. (?? no, both is requested, so both is sent)
 			// instead of keeping both, we 'encapsulate' this into first channel.
 			// the logic to maintain this is done by listening the global single/multi param.
@@ -437,16 +452,22 @@ namespace Virus
 				onProgramChange();
 		}
 		else
+		{
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
+		}
 	}
 
-	void Controller::parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
+	void Controller::parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
     {
         const auto bankNumber = _data.find(pluginLib::MidiDataType::Bank)->second;
 
 		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
 		if (bankNumber == 0)
         {
+	        m_multiEditBuffer.progNumber = _data.find(pluginLib::MidiDataType::Program)->second;
+	        m_multiEditBuffer.name = getMultiPresetName(_parameterValues);
+	        m_multiEditBuffer.data = _msg;
+
 			for (const auto & paramValue : _parameterValues)
 			{
                 const auto part = paramValue.first.first;
