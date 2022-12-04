@@ -95,8 +95,6 @@ public:
 
 private:
 	std::vector<Chunk> readChunks(std::istream& _file);
-	bool loadPresetFiles();
-	bool loadPresetFile(std::istream& _file);
 
 	BootRom bootRom;
 	std::vector<uint32_t> commandStream;
