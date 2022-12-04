@@ -15,13 +15,19 @@ namespace Virus
     class Controller : public pluginLib::Controller, juce::Timer
     {
     public:
-        struct SinglePatch
+        struct Patch
         {
-	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
-            uint8_t progNumber = 0;
             std::string name;
 			std::vector<uint8_t> data;
+            uint8_t progNumber = 0;
         };
+
+        struct SinglePatch : Patch
+        {
+	        virusLib::BankNumber bankNumber = static_cast<virusLib::BankNumber>(0);
+        };
+
+        struct MultiPatch : Patch {};
 
     	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
 
@@ -79,11 +85,28 @@ namespace Virus
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
 	        return m_singles;
         }
+
+        const SinglePatch& getSingleEditBuffer() const
+    	{
+    		return m_singleEditBuffer;
+    	}
+
+        const SinglePatch& getSingleEditBuffer(const uint8_t _part) const
+    	{
+    		return m_singleEditBuffers[_part];
+    	}
+
+        const MultiPatch& getMultiEditBuffer() const
+    	{
+    		return m_multiEditBuffer;
+    	}
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name);
 		bool isMultiMode() const;
@@ -132,11 +155,16 @@ namespace Virus
 		void timerCallback() override;
 
         Singles m_singles;
+        SinglePatch m_singleEditBuffer;                     // single mode
+        std::array<SinglePatch, 16> m_singleEditBuffers;    // multi mode
+
+        MultiPatch m_multiEditBuffer;
 
         void parseSingle(const SysEx& _msg);
         void parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
-        void parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+    	void parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
         void parseControllerDump(synthLib::SMidiEvent &);
 

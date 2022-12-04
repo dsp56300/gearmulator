@@ -16,6 +16,19 @@ namespace genericVirusUI
 	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor
 	{
 	public:
+		enum class FileType
+		{
+			Syx,
+			Mid
+		};
+
+		enum class SaveType
+		{
+			CurrentSingle,
+			Bank,
+			Arrangement
+		};
+
 		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
@@ -58,6 +71,9 @@ namespace genericVirusUI
 		void loadPreset();
 
 		void setPlayMode(uint8_t _playMode);
+
+		void savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0);
+		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
 		VirusParameterBinding& m_parameterBinding;
