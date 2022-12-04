@@ -32,7 +32,7 @@
 
 namespace synthLib
 {
-    std::string getModulePath()
+    std::string getModulePath(bool _stripPluginComponentFolders/* = true*/)
     {
         std::string path;
 #ifdef _WIN32
@@ -61,7 +61,6 @@ namespace synthLib
         }
         else
         {
-            const auto end = path.find_last_of("/\\");
             path = info.dli_fname;
         }
 #endif
@@ -70,6 +69,7 @@ namespace synthLib
     	{
 			const auto end = path.rfind(_key + _delim);
 
+            // strip folders such as "/foo.vst/" but do NOT strip "/.vst/"
 			if (end != std::string::npos && (path.find(_delim + _key) + 1) != end)
 				path = path.substr(0, end);
 		};
@@ -80,10 +80,13 @@ namespace synthLib
 			fixPathWithDelim(_key, '\\');
 		};
 
-		fixPath(".vst");
-		fixPath(".vst3");
-		fixPath(".component");
-		fixPath(".app");
+        if(_stripPluginComponentFolders)
+        {
+			fixPath(".vst");
+			fixPath(".vst3");
+			fixPath(".component");
+			fixPath(".app");
+        }
 
 		const auto end = path.find_last_of("/\\");
 
@@ -188,9 +191,14 @@ namespace synthLib
         if(path.empty())
             path = getCurrentDirectory();
 
+        return findFile(path, _extension, _minSize, _maxSize);
+    }
+
+    std::string findFile(const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
+    {
         std::vector<std::string> files;
 
-        getDirectoryEntries(files, path);
+        getDirectoryEntries(files, _rootPath);
 
         for (const auto& file : files)
         {
@@ -225,7 +233,18 @@ namespace synthLib
 
 	std::string findROM(const size_t _minSize, const size_t _maxSize)
     {
-	    return findFile(".bin", _minSize, _maxSize);
+        std::string path = getModulePath();
+
+        if(path.empty())
+            path = getCurrentDirectory();
+
+		auto f = findFile(".bin", _minSize, _maxSize);
+        if(!f.empty())
+            return f;
+
+    	path = getModulePath(false);
+
+		return findFile(".bin", _minSize, _maxSize);
     }
 
     std::string findROM(const size_t _expectedSize)
