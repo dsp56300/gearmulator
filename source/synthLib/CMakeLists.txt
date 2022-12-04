@@ -5,8 +5,11 @@ add_library(synthLib STATIC)
 
 set(SOURCES
 	audiobuffer.cpp audiobuffer.h
+	audioTypes.h
+	configFile.cpp configFile.h
 	device.cpp device.h
 	deviceTypes.h
+	midiBufferParser.cpp midiBufferParser.h
 	midiToSysex.cpp midiToSysex.h
 	midiTypes.h
 	os.cpp os.h
@@ -14,6 +17,8 @@ set(SOURCES
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
 	sysexToMidi.cpp sysexToMidi.h
+	wavReader.cpp wavReader.h
+	wavTypes.h
 	wavWriter.cpp wavWriter.h
 )
 

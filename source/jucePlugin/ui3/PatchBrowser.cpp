@@ -3,6 +3,7 @@
 #include "VirusEditor.h"
 
 #include "../../virusLib/microcontrollerTypes.h"
+#include "../../virusLib/microcontroller.h"
 
 #include "../VirusController.h"
 #include "juce_cryptography/hashing/juce_MD5.h"
@@ -15,15 +16,9 @@ const juce::Array<juce::String> ModelList = {"A","B","C","TI"};
 
 namespace genericVirusUI
 {
-	virusLib::VirusModel guessVersion(const uint8_t v)
+	virusLib::PresetVersion guessVersion(const uint8_t v)
 	{
-		if (v < 5)
-			return virusLib::A;
-		if (v == 6)
-			return virusLib::B;
-		if (v == 7)
-			return virusLib::C;
-		return virusLib::TI;
+		return virusLib::Microcontroller::getPresetVersion(v);
 	}
 
 	static PatchBrowser* s_lastPatchBrowser = nullptr;
@@ -288,9 +283,17 @@ namespace genericVirusUI
 			text = rowElement.unison == 0 ? " " : String(rowElement.unison + 1);
 		else if (columnId == Columns::ST)
 			text = rowElement.transpose != 64 ? String(rowElement.transpose - 64) : " ";
-		else if (columnId == Columns::VER) {
-			if (rowElement.model < ModelList.size())
-				text = ModelList[rowElement.model];
+		else if (columnId == Columns::VER)
+		{
+			switch (rowElement.model)
+			{
+			case virusLib::A:	text = "A";	break;
+			case virusLib::B:	text = "B";	break;
+			case virusLib::C:	text = "C";	break;
+			case virusLib::D:	text = "TI";	break;
+			case virusLib::D2:  text = "TI2";	break;
+			default:			text = "?";	break;
+			}
 		}
 		g.drawText(text, 2, 0, width - 4, height, Justification::centredLeft, true); // [6]
 		g.setColour(m_patchList.getLookAndFeel().findColour(ListBox::backgroundColourId));

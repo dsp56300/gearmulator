@@ -321,7 +321,13 @@ namespace pluginLib
 		parseMidiPackets(errors, midipackets);
 
 		auto res = errors.str();
-		assert(res.empty());
+
+		if(!res.empty())
+		{
+			LOG("ParameterDescription parsing issues:\n" << res);
+			assert(false);
+		}
+
 		return res;
 	}
 

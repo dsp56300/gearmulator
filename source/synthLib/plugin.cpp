@@ -17,7 +17,7 @@ namespace synthLib
 {
 	constexpr uint8_t g_stateVersion = 1;
 
-	Plugin::Plugin(Device* _device) : m_device(_device)
+	Plugin::Plugin(Device* _device) : m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut()), m_device(_device)
 	{
 		m_resampler.setDeviceSamplerate(_device->getSamplerate());
 	}
@@ -43,7 +43,7 @@ namespace synthLib
 		updateDeviceLatency();
 	}
 
-	void Plugin::process(const float** _inputs, float** _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
+	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
 		if(!m_device->isValid())
 			return;
@@ -51,13 +51,14 @@ namespace synthLib
 		setFlushDenormalsToZero();
 
 
-		const float* inputs[8] {};
-		float* outputs[8] {};
+		TAudioInputs inputs(_inputs);
+		TAudioOutputs outputs(_outputs);
 
-		inputs[0] = _inputs && _inputs[0] ? _inputs[0] : getDummyBuffer(_count);
-		inputs[1] = _inputs && _inputs[1] ? _inputs[1] : getDummyBuffer(_count);
-		outputs[0] = _outputs && _outputs[0] ? _outputs[0] : getDummyBuffer(_count);
-		outputs[1] = _outputs && _outputs[1] ? _outputs[1] : getDummyBuffer(_count);
+		for(size_t i=0; i<inputs.size(); ++i)
+			inputs[i] = _inputs[i] ? _inputs[i] : getDummyBuffer(_count);
+
+		for(size_t i=0; i<outputs.size(); ++i)
+			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
 
 		std::lock_guard lock(m_lock);
 
@@ -65,9 +66,9 @@ namespace synthLib
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
 
 		m_resampler.process(inputs, outputs, m_midiIn, m_midiOut, static_cast<uint32_t>(_count), 
-			[&](const float** _in, float** _out, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
+			[&](const TAudioInputs& _ins, const TAudioOutputs& _outs, size_t _c, const ResamplerInOut::TMidiVec& _midiIn, ResamplerInOut::TMidiVec& _midiOut)
 		{
-			m_device->process(_in, _out, _c, _midiIn, _midiOut);
+			m_device->process(_ins, _outs, _c, _midiIn, _midiOut);
 		});
 
 		m_midiIn.clear();

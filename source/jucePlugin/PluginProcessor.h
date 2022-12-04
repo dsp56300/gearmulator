@@ -63,6 +63,10 @@ public:
     std::string getRomName() {
         return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
     }
+    virusLib::ROMFile::Model getModel() const
+    {
+		return m_rom.getModel();
+    }
     synthLib::Plugin& getPlugin()
     {
 	    return m_plugin;
@@ -78,11 +82,12 @@ private:
     void setState(const void *_data, size_t _sizeInBytes);
 
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AudioPluginAudioProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 
+	std::string							m_romName;
+	virusLib::ROMFile					m_rom;
 	virusLib::Device					m_device;
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
-	std::string							m_romName;
     uint32_t							m_clockTempoParam = 0xffffffff;
 };

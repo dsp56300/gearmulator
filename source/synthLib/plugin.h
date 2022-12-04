@@ -26,7 +26,7 @@ namespace synthLib
 		uint32_t getLatencyMidiToOutput() const;
 		uint32_t getLatencyInputToOutput() const;
 
-		void process(const float** _inputs, float** _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
+		void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, float _bpm, float _ppqPos, bool _isPlaying);
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;

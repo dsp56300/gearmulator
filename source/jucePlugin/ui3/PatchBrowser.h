@@ -11,7 +11,7 @@ namespace Virus
 
 namespace virusLib
 {
-	enum VirusModel : uint8_t;
+	enum PresetVersion : uint8_t;
 }
 
 namespace genericVirusUI
@@ -25,7 +25,7 @@ namespace genericVirusUI
 	    std::string category1;
 	    std::string category2;
 	    std::vector<uint8_t> sysex;
-	    virusLib::VirusModel model;
+	    virusLib::PresetVersion model;
 	    uint8_t unison = 0;
 	    uint8_t transpose = 0;
 	    uint8_t arpMode = 0;
