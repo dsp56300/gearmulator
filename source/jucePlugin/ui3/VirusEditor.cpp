@@ -466,9 +466,9 @@ namespace genericVirusUI
 			else
 			{
 				// load to bank A
-				for (const auto& p : patches)
+				for(uint8_t i=0; i<static_cast<uint8_t>(patches.size()); ++i)
 				{
-					const auto data = getController().modifySingleDump(p.sysex, virusLib::BankNumber::A, 0, true, false);
+					const auto data = getController().modifySingleDump(patches[i].sysex, virusLib::BankNumber::A, i, true, false);
 					getController().sendSysEx(data);
 				}
 			}
