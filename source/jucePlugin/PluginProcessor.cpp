@@ -24,6 +24,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 {
 	getController(); // init controller
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
+
+	const auto latencyBlocks = getController().getConfig()->getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+	setLatencyBlocks(latencyBlocks);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() = default;
@@ -411,6 +414,20 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 		setLatencySamples(m_plugin.getLatencyMidiToOutput());
 	else
 		setLatencySamples(m_plugin.getLatencyInputToOutput());
+}
+
+void AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
+{
+	auto& p = getPlugin();
+
+	if(p.setLatencyBlocks(_blocks))
+	{
+		updateLatencySamples();
+
+		auto* config = getController().getConfig();
+		config->setValue("latencyBlocks", static_cast<int>(_blocks));
+		config->saveIfNeeded();
+	}
 }
 
 Virus::Controller &AudioPluginAudioProcessor::getController()

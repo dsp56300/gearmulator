@@ -73,6 +73,8 @@ public:
     }
     void updateLatencySamples();
 
+	void setLatencyBlocks(uint32_t _blocks);
+
 	// _____________
 	//
 private:
