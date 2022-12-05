@@ -64,7 +64,8 @@ public:
 	juce::MidiInput* getMidiInput() const;
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
-    std::string getRomName() {
+    std::string getRomName() const
+    {
         return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
     }
     virusLib::ROMFile::Model getModel() const
