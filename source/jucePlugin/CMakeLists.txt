@@ -125,8 +125,8 @@ endmacro()
 
 juce_add_binary_data(jucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy} ${ASSETS_VirusTI_Trancy})
 
-createJucePlugin(jucePlugin "DSP56300Emu" TRUE "TusV" jucePlugin_BinaryData${postfix} "")
+createJucePlugin(jucePlugin "DSP56300Emu" TRUE "Ttip" jucePlugin_BinaryData${postfix} "")
 	
 if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
-	createJucePlugin(jucePlugin_FX "DSP56300EmuFX" FALSE "TusF" jucePlugin_BinaryData${postfix} "_FX")
+	createJucePlugin(jucePlugin_FX "DSP56300EmuFX" FALSE "Ttif" jucePlugin_BinaryData${postfix} "_FX")
 endif()
