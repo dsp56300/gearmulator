@@ -1,5 +1,27 @@
 Release Notes 
 
+1.2.21 (2022.12.06):
+
+Osirus:
+- [Imp] ROM file will now also be found if put next to the binary in the Component folder for VST3 and AU builds
+- [Imp] Prev/Next buttons now select preset browser patches instead of ROM patches if a preset browser patch was selected last
+- [Imp] More save options have been added, either save one Single, or the current arrangement (if in Multi mode) or a whole bank
+- [Imp] All save options now support saving as either .syx or as .mid
+
+- [Fix] Plugin may not emit any sound after the plugin state was restored (if part of a previously saved project)
+- [Fix] Some UI elements didn't update their state correctly
+- [Fix] UI may send incorrect control changes back to DSP after changing patches
+- [Fix] Loading multiple Singles via bank load (file with more than one Single) didn't load all Singles but only the last one
+
+Test Console:
+- Fix demo song couldn't be loaded from ROM
+
+DSP:
+
+- Performance improvements (5-10%)
+- Stability improvemens
+- Large speedup of code (re)generation. Results in faster startup time, reduces hiccups in Multi mode and when changing patches
+
 1.2.20 (2022.07.29):
 
 - [Imp] Performance has improved by 10% - 20% depending on the use case
