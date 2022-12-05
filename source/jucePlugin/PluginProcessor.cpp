@@ -1,5 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "PluginEditorState.h"
 #include "ParameterNames.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>
@@ -27,6 +28,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 {
 	getController(); // init controller
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
+
+	const auto latencyBlocks = getController().getConfig()->getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+	setLatencyBlocks(latencyBlocks);
 }
 
 AudioPluginAudioProcessor::~AudioPluginAudioProcessor() = default;
@@ -269,7 +273,9 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-    return new AudioPluginAudioProcessorEditor (*this);
+	if(!m_editorState)
+		m_editorState.reset(new PluginEditorState(*this));
+    return new AudioPluginAudioProcessorEditor (*this, *m_editorState);
 }
 
 //==============================================================================
@@ -414,6 +420,20 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 		setLatencySamples(m_plugin.getLatencyMidiToOutput());
 	else
 		setLatencySamples(m_plugin.getLatencyInputToOutput());
+}
+
+void AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
+{
+	auto& p = getPlugin();
+
+	if(p.setLatencyBlocks(_blocks))
+	{
+		updateLatencySamples();
+
+		auto* config = getController().getConfig();
+		config->setValue("latencyBlocks", static_cast<int>(_blocks));
+		config->saveIfNeeded();
+	}
 }
 
 Virus::Controller &AudioPluginAudioProcessor::getController()
