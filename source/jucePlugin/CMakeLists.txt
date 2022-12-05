@@ -17,6 +17,8 @@ set(SOURCES
 	ParameterNames.h
     PluginEditor.cpp
     PluginEditor.h
+	PluginEditorState.cpp
+	PluginEditorState.h
     PluginProcessor.cpp
     PluginProcessor.h
 	VirusController.cpp

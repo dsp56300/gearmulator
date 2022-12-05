@@ -23,24 +23,6 @@ public:
 class VirusParameterBinding final : juce::MouseListener
 {
 public:
-	VirusParameterBinding(AudioPluginAudioProcessor &_processor) : m_processor(_processor)
-	{
-
-	}
-	~VirusParameterBinding() override;
-	void clearBindings();
-	void setPart(uint8_t _part);
-	void bind(juce::Slider& _control, uint32_t _param);
-	void bind(juce::Slider& _control, uint32_t _param, uint8_t _part);
-	void bind(juce::ComboBox &_control, uint32_t _param);
-	void bind(juce::ComboBox &_control, uint32_t _param, uint8_t _part);
-	void bind(juce::Button &_control, uint32_t _param);
-
-private:
-	void removeMouseListener(juce::Slider& _slider);
-
-	AudioPluginAudioProcessor& m_processor;
-
 	static constexpr uint8_t CurrentPart = 0xff;
 
 	struct BoundParameter
@@ -52,7 +34,34 @@ private:
 		uint32_t onChangeListenerId = 0;
 	};
 
+	VirusParameterBinding(AudioPluginAudioProcessor &_processor) : m_processor(_processor)
+	{
+	}
+	~VirusParameterBinding() override;
+
+	void bind(juce::Slider& _control, uint32_t _param);
+	void bind(juce::Slider& _control, uint32_t _param, uint8_t _part);
+	void bind(juce::ComboBox &_control, uint32_t _param);
+	void bind(juce::ComboBox &_control, uint32_t _param, uint8_t _part);
+	void bind(juce::Button &_control, uint32_t _param);
+
+	void clearBindings();
+	void setPart(uint8_t _part);
+
+	void disableBindings();
+	void enableBindings();
+
+private:
+	void removeMouseListener(juce::Slider& _slider);
+
+	void disableBinding(const BoundParameter& _value);
+
+	AudioPluginAudioProcessor& m_processor;
+
+	void bind(const std::vector<BoundParameter>& _bindings, bool _currentPartOnly);
+
 	std::vector<BoundParameter> m_bindings;
+	std::vector<BoundParameter> m_disabledBindings;
 	std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
 	uint32_t m_nextListenerId = 1;
 };

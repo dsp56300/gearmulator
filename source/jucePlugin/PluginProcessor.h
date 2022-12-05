@@ -2,9 +2,13 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
+
 #include "../synthLib/plugin.h"
 #include "../virusLib/device.h"
+
 #include "VirusController.h"
+
+class PluginEditorState;
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, juce::MidiInputCallback
@@ -92,4 +96,5 @@ private:
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
     uint32_t							m_clockTempoParam = 0xffffffff;
+    std::unique_ptr<PluginEditorState>  m_editorState;
 };

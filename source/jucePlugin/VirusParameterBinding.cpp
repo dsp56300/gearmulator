@@ -9,66 +9,6 @@ VirusParameterBinding::~VirusParameterBinding()
 	clearBindings();
 }
 
-void VirusParameterBinding::clearBindings()
-{
-	for (const auto b : m_bindings)
-	{
-		auto* slider = dynamic_cast<juce::Slider*>(b.component);
-
-		if(slider != nullptr)
-			removeMouseListener(*slider);
-
-		if(b.onChangeListenerId)
-			b.parameter->removeListener(b.onChangeListenerId);
-	}
-
-	m_bindings.clear();
-}
-
-void VirusParameterBinding::setPart(uint8_t _part)
-{
-	m_processor.getController().setCurrentPart(_part);
-
-	std::vector<BoundParameter> bindings;
-	bindings.swap(m_bindings);
-
-	for(size_t i=0; i<bindings.size(); ++i)
-	{
-		auto& b = bindings[i];
-
-		if(b.part != CurrentPart)
-		{
-			m_bindings.push_back(b);
-			continue;
-		}
-
-		const auto& desc = b.parameter->getDescription();
-		const bool isNonPartExclusive = desc.isNonPartSensitive();
-
-		if(isNonPartExclusive)
-			continue;
-
-		auto* slider = dynamic_cast<juce::Slider*>(b.component);
-		if(slider)
-		{
-			bind(*slider, b.type);
-			continue;
-		}
-		auto* button = dynamic_cast<juce::DrawableButton*>(b.component);
-		if(button)
-		{
-			bind(*button, b.type);
-			continue;
-		}
-		auto* comboBox = dynamic_cast<juce::ComboBox*>(b.component);
-		if(comboBox)
-		{
-			bind(*comboBox, b.type);
-			continue;
-		}
-		assert(false && "unknown component type");
-	}
-}
 void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
 {
 	bind(_slider, _param, CurrentPart);
@@ -183,4 +123,90 @@ void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
 		delete it->second;
 		m_sliderMouseListeners.erase(it);
 	}
+}
+
+void VirusParameterBinding::bind(const std::vector<BoundParameter>& _bindings, const bool _currentPartOnly)
+{
+	for (const auto& b : _bindings)
+	{
+		if(_currentPartOnly && b.part != CurrentPart)
+		{
+			m_bindings.emplace_back(b);
+			continue;
+		}
+
+		const auto& desc = b.parameter->getDescription();
+		const bool isNonPartExclusive = desc.isNonPartSensitive();
+
+		if(isNonPartExclusive)
+			continue;
+
+		auto* slider = dynamic_cast<juce::Slider*>(b.component);
+		if(slider)
+		{
+			bind(*slider, b.type);
+			continue;
+		}
+		auto* button = dynamic_cast<juce::DrawableButton*>(b.component);
+		if(button)
+		{
+			bind(*button, b.type);
+			continue;
+		}
+		auto* comboBox = dynamic_cast<juce::ComboBox*>(b.component);
+		if(comboBox)
+		{
+			bind(*comboBox, b.type);
+			continue;
+		}
+		assert(false && "unknown component type");
+	}
+}
+
+void VirusParameterBinding::disableBinding(const BoundParameter& _b)
+{
+	auto* slider = dynamic_cast<juce::Slider*>(_b.component);
+
+	if(slider != nullptr)
+		removeMouseListener(*slider);
+
+	auto* combo = dynamic_cast<juce::ComboBox*>(_b.component);
+	if(combo != nullptr)
+		combo->onChange = nullptr;
+
+	if(_b.onChangeListenerId)
+		_b.parameter->removeListener(_b.onChangeListenerId);
+}
+
+void VirusParameterBinding::clearBindings()
+{
+	for (const auto& b : m_bindings)
+		disableBinding(b);
+
+	m_bindings.clear();
+}
+
+void VirusParameterBinding::setPart(uint8_t _part)
+{
+	m_processor.getController().setCurrentPart(_part);
+
+	std::vector<BoundParameter> bindings;
+	bindings.swap(m_bindings);
+
+	bind(bindings, true);
+}
+
+void VirusParameterBinding::disableBindings()
+{
+	m_disabledBindings.clear();
+	std::swap(m_bindings, m_disabledBindings);
+
+	for (const auto& b : m_disabledBindings)
+		disableBinding(b);
+}
+
+void VirusParameterBinding::enableBindings()
+{
+	bind(m_disabledBindings, false);
+	m_disabledBindings.clear();
 }
