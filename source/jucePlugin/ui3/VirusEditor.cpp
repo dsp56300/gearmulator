@@ -433,14 +433,14 @@ namespace genericVirusUI
 		}
 
 		juce::PopupMenu banksMenu;
-		for(auto b=0; b<getController().getBankCount(); ++b)
+		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
             std::stringstream bankName;
             bankName << "Bank " << static_cast<char>('A' + b);
 
 			addEntry(banksMenu, bankName.str(), [this, b](const FileType _type)
 			{
-				savePresets(SaveType::Bank, _type, static_cast<uint8_t>(b));
+				savePresets(SaveType::Bank, _type, b);
 			});
 		}
 
