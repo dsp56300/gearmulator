@@ -6,6 +6,7 @@
 
 #include "midipacket.h"
 #include "parameterdescription.h"
+#include "parameterlink.h"
 
 namespace pluginLib
 {
@@ -32,9 +33,13 @@ namespace pluginLib
 		void parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets);
 		void parseMidiPacket(std::stringstream& _errors, const std::string& _key, const juce::var& _value);
 
+		void parseParameterLinks(std::stringstream& _errors, juce::Array<juce::var>* _links);
+		void parseParameterLink(std::stringstream& _errors, const juce::var& _value);
+
 		std::map<std::string, ValueList> m_valueLists;
 		std::vector<Description> m_descriptions;
 		std::map<std::string, uint32_t> m_nameToIndex;
 		std::map<std::string, MidiPacket> m_midiPackets;
+		std::vector<ParameterLink> m_parameterLinks;
 	};
 }

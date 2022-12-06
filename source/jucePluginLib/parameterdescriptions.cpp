@@ -317,8 +317,10 @@ namespace pluginLib
 		}
 
 		const auto midipackets = json["midipackets"].getDynamicObject();
-
 		parseMidiPackets(errors, midipackets);
+
+		const auto parameterLinks = json["parameterlinks"].getArray();
+		parseParameterLinks(errors, parameterLinks);
 
 		auto res = errors.str();
 
@@ -514,5 +516,92 @@ namespace pluginLib
 
 		if(!hasErrors)
 			m_midiPackets.insert(std::make_pair(_key, packet));
+	}
+
+	void ParameterDescriptions::parseParameterLinks(std::stringstream& _errors, juce::Array<juce::var>* _links)
+	{
+		if(!_links)
+			return;
+
+		for(int i=0; i<_links->size(); ++i)
+		{
+			const auto& value = (*_links)[i];
+			parseParameterLink(_errors, value);
+		}
+	}
+
+	void ParameterDescriptions::parseParameterLink(std::stringstream& _errors, const juce::var& _value)
+	{
+		const auto source = _value["source"].toString().toStdString();
+		const auto dest = _value["dest"].toString().toStdString();
+		const auto conditionParam = _value["conditionParameter"].toString().toStdString();
+		const auto conditionValues = _value["conditionValues"].getArray();
+		const auto linkType = _value["link"].toString().toStdString();
+
+		ParameterLink link;
+
+		if(!getIndexByName(link.source, source))
+		{
+			_errors << "Source parameter " << source << " not found for parameter link" << std::endl;
+			return;
+		}
+
+		if(!getIndexByName(link.dest, dest))
+		{
+			_errors << "Destination parameter " << dest << " not found for parameter link" << std::endl;
+			return;
+		}
+
+		if(link.source == link.dest)
+		{
+			_errors << "Cannot link source parameter " << source << " to itself" << std::endl;
+			return;
+		}
+
+		if(linkType == "relative")
+		{
+			link.mode = ParameterLink::LinkMode::Relative;
+		}
+		else if(linkType == "absolute")
+		{
+			link.mode = ParameterLink::LinkMode::Absolute;
+		}
+		else
+		{
+			_errors << "Parameter link mode " << linkType << " is not a value value, must be either relative or absolute" << std::endl;
+			return;
+		}
+
+		if(conditionParam.empty())
+		{
+			if(conditionValues && conditionValues->size() > 1)
+			{
+				_errors << "Condition parameter not specified for conditional parameter link of " << source << " to " << dest << ". Either specify no condition parameter and no values, or specify both" << std::endl;
+				return;
+			}
+		}
+
+		if(!conditionParam.empty())
+		{
+			if(conditionValues == nullptr || conditionValues->isEmpty())
+			{
+				_errors << "Condition parameter list is empty or invalid although the condition parameter " << conditionParam << " has been specified for parameter link of " << source << " to " << dest << ". Either specify no condition parameter and no values, or specify both" << std::endl;
+				return;
+			}
+
+			if(!getIndexByName(link.conditionParameter, conditionParam))
+			{
+				_errors << "Link condition parameter " << conditionParam << " not found for parameter link" << std::endl;
+				return;
+			}
+
+			for(auto i=0; i<conditionValues->size(); ++i)
+			{
+				const int v = (*conditionValues)[i];
+				link.conditionValues.insert(static_cast<uint8_t>(v));
+			}
+		}
+
+		m_parameterLinks.push_back(link);
 	}
 }
