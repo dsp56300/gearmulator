@@ -391,8 +391,8 @@ namespace Virus
 	            auto* p = getParameter(it->first.second, ch);
 				p->setValueFromSynth(it->second, true);
 
-	            for (const auto& linkedParam : p->getLinkedParameters())
-		            linkedParam->setValueFromSynth(it->second, true);
+	            for (const auto& derivedParam : p->getDerivedParameters())
+		            derivedParam->setValueFromSynth(it->second, true);
             }
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)

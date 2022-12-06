@@ -30,7 +30,7 @@ namespace pluginLib
 			func.second();
 	}
 
-    void Parameter::setLinkedValue(const int _value)
+    void Parameter::setDerivedValue(const int _value)
     {
 		const int newValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
 
@@ -53,25 +53,25 @@ namespace pluginLib
 
     bool Parameter::isMetaParameter() const
     {
-	    return !m_linkedParameters.empty();
+	    return !m_derivedParameters.empty();
     }
 
     void Parameter::setValue(float newValue)
 	{
-		if (m_changingLinkedValues)
+		if (m_changingDerivedValues)
 			return;
 
 		m_value.setValue(convertFrom0to1(newValue));
 
-		m_changingLinkedValues = true;
+		m_changingDerivedValues = true;
 
-		for (const auto& parameter : m_linkedParameters)
+		for (const auto& parameter : m_derivedParameters)
 		{
-			if(!parameter->m_changingLinkedValues)
-				parameter->setLinkedValue(m_value.getValue());
+			if(!parameter->m_changingDerivedValues)
+				parameter->setDerivedValue(m_value.getValue());
 		}
 
-		m_changingLinkedValues = false;
+		m_changingDerivedValues = false;
 	}
 
 	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
@@ -94,15 +94,15 @@ namespace pluginLib
 			m_value.setValue(clampedValue);
 		}
 
-		if (m_changingLinkedValues)
+		if (m_changingDerivedValues)
 			return;
 
-		m_changingLinkedValues = true;
+		m_changingDerivedValues = true;
 
-		for (const auto& p : m_linkedParameters)
-			p->setLinkedValue(newValue);
+		for (const auto& p : m_derivedParameters)
+			p->setDerivedValue(newValue);
 
-		m_changingLinkedValues = false;
+		m_changingDerivedValues = false;
 	}
 
 	bool Parameter::removeListener(const uint32_t _id)
@@ -137,18 +137,18 @@ namespace pluginLib
 		return 0;
 	}
 
-	void Parameter::addLinkedParameter(Parameter* _param)
+	void Parameter::addDerivedParameter(Parameter* _param)
 	{
 		if (_param == this)
 			return;
 
-		for (auto* p : m_linkedParameters)
+		for (auto* p : m_derivedParameters)
 		{
-			_param->m_linkedParameters.insert(p);
-			p->m_linkedParameters.insert(_param);
+			_param->m_derivedParameters.insert(p);
+			p->m_derivedParameters.insert(_param);
 		}
 
-		m_linkedParameters.insert(_param);
-		_param->m_linkedParameters.insert(this);
+		m_derivedParameters.insert(_param);
+		_param->m_derivedParameters.insert(this);
 	}	
 }

@@ -59,18 +59,18 @@ namespace pluginLib
 		// eg. multi/single value change requires triggering more logic.
 		std::list<std::pair<uint32_t, std::function<void()>>> onValueChanged;
 
-		void addLinkedParameter(Parameter* _param);
+		void addDerivedParameter(Parameter* _param);
 
 		int getUniqueId() const { return m_uniqueId; }
 
-		const std::set<Parameter*>& getLinkedParameters() { return m_linkedParameters; }
+		const std::set<Parameter*>& getDerivedParameters() { return m_derivedParameters; }
 
 		bool removeListener(uint32_t _id);
 
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
-		void setLinkedValue(int _value);
+		void setDerivedValue(int _value);
 
         Controller &m_ctrl;
 		const Description m_desc;
@@ -79,7 +79,7 @@ namespace pluginLib
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
 		int m_lastValue{-1};
 		juce::Value m_value;
-		std::set<Parameter*> m_linkedParameters;
-		bool m_changingLinkedValues = false;
+		std::set<Parameter*> m_derivedParameters;
+		bool m_changingDerivedValues = false;
     };
 }
