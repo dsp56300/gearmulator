@@ -28,6 +28,7 @@ namespace genericVirusUI
 		if(getTabGroupCount() == 0)
 			m_tabs.reset(new Tabs(*this));
 
+		// be backwards compatible with old skins
 		if(getControllerLinkCountRecursive() == 0)
 			m_controllerLinks.reset(new ControllerLinks(*this));
 
