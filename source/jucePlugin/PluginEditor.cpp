@@ -45,7 +45,7 @@ void AudioPluginAudioProcessorEditor::setGuiScale(juce::Component* _comp, int pe
 	const auto s = static_cast<float>(percent)/100.0f * m_state.getRootScale();
 	_comp->setTransform(juce::AffineTransform::scale(s,s));
 
-	setSize(m_state.getWidth() * s, m_state.getHeight() * s);
+	setSize(static_cast<int>(m_state.getWidth() * s), static_cast<int>(m_state.getHeight() * s));
 
 	auto* config = processorRef.getController().getConfig();
 	config->setValue("scale", percent);
