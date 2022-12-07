@@ -78,5 +78,8 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 	if(event.eventComponent && event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
 		return;
 
+	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
+		return;
+
 	m_state.openMenu();
 }
