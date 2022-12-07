@@ -7,6 +7,7 @@
 #include "FxPage.h"
 #include "MidiPorts.h"
 #include "PatchBrowser.h"
+#include "ControllerLinks.h"
 
 class VirusParameterBinding;
 class AudioPluginAudioProcessor;
@@ -85,6 +86,7 @@ namespace genericVirusUI
 		std::unique_ptr<MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
+		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
 		juce::Label* m_focusedParameterName = nullptr;

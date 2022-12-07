@@ -28,6 +28,9 @@ namespace genericVirusUI
 		if(getTabGroupCount() == 0)
 			m_tabs.reset(new Tabs(*this));
 
+		if(getControllerLinkCountRecursive() == 0)
+			m_controllerLinks.reset(new ControllerLinks(*this));
+
 		m_midiPorts.reset(new MidiPorts(*this));
 
 		// be backwards compatible with old skins
