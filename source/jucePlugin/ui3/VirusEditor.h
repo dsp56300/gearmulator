@@ -61,6 +61,9 @@ namespace genericVirusUI
 		void mouseEnter(const juce::MouseEvent& event) override;
 		void mouseExit(const juce::MouseEvent& event) override;
 		void mouseUp(const juce::MouseEvent& event) override;
+		void mouseDown(const juce::MouseEvent& event) override;
+		void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
+		void mouseDoubleClick(const juce::MouseEvent& event) override;
 
 		void updateControlLabel(juce::Component* _component) const;
 		void updatePresetName() const;

@@ -285,6 +285,21 @@ namespace genericVirusUI
 	    updateControlLabel(event.eventComponent);
 	}
 
+	void VirusEditor::mouseDown(const juce::MouseEvent& event)
+	{
+		updateControlLabel(event.eventComponent);
+	}
+
+	void VirusEditor::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+	{
+		updateControlLabel(event.eventComponent);
+	}
+
+	void VirusEditor::mouseDoubleClick(const juce::MouseEvent& event)
+	{
+		updateControlLabel(event.eventComponent);
+	}
+
 	void VirusEditor::updateControlLabel(juce::Component* _component) const
 	{
 		if(_component)
