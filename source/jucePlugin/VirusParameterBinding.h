@@ -51,6 +51,8 @@ public:
 	void disableBindings();
 	void enableBindings();
 
+	const auto& getBindings() const { return m_bindings; }
+
 private:
 	void removeMouseListener(juce::Slider& _slider);
 
@@ -63,5 +65,5 @@ private:
 	std::vector<BoundParameter> m_bindings;
 	std::vector<BoundParameter> m_disabledBindings;
 	std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
-	uint32_t m_nextListenerId = 1;
+	uint32_t m_nextListenerId = 100000;
 };
