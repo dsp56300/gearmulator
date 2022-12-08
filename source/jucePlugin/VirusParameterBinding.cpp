@@ -77,11 +77,17 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, 
 	}
 	//_combo.addItemList(v->getAllValueStrings(), 1);
 	_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
+
 	_combo.onChange = [this, &_combo, v]()
 	{
 		const auto id = _combo.getSelectedId();
 
 		if(id == 0)
+			return;
+
+		const int current = v->getValueObject().getValueSource().getValue();
+
+		if((id - 1) == current)
 			return;
 
 		if(v->getDescription().isPublic)
