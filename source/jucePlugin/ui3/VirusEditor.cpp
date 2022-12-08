@@ -124,23 +124,21 @@ namespace genericVirusUI
 		updatePlayModeButtons();
 		updateControlLabel(nullptr);
 
-		auto& bindings = m_parameterBinding.getBindings();
-
-		m_boundParameters.reserve(bindings.size());
-
-		for (const auto& binding : bindings)
+		for (auto& params : getController().getExposedParameters())
 		{
-			if(!binding.parameter || !binding.component)
-				continue;
-
-			const auto comp = binding.component;
-
-			m_boundParameters.push_back(binding.parameter);
-
-			binding.parameter->onValueChanged.emplace_back(1, [this, comp]()
+			for (const auto& param : params.second)
 			{
-				updateControlLabel(comp);
-			});
+				m_boundParameters.push_back(param);
+
+				param->onValueChanged.emplace_back(1, [this, param]()
+				{
+					if(param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange)
+						return;
+					auto* comp = m_parameterBinding.getBoundComponent(param);
+					if(comp)
+						updateControlLabel(comp);
+				});
+			}
 		}
 	}
 
