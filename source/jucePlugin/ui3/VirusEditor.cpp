@@ -132,7 +132,8 @@ namespace genericVirusUI
 
 				param->onValueChanged.emplace_back(1, [this, param]()
 				{
-					if(param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange)
+					if (param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
+						param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
 						return;
 					auto* comp = m_parameterBinding.getBoundComponent(param);
 					if(comp)
