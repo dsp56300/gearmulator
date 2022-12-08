@@ -13,7 +13,7 @@ const std::vector<PluginEditorState::Skin> m_includedSkins =
 	{"Galaxpel", "VirusC_Galaxpel.json", ""}
 };
 
-PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : m_processor(_processor), m_parameterBinding(_processor)
+PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : m_processor(_processor), m_parameterBinding(_processor.getController())
 {
 	Skin skin = readSkinFromConfig();
 

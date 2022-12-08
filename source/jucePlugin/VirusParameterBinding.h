@@ -2,7 +2,13 @@
 
 #include "../jucePluginLib/parameter.h"
 
-namespace juce {
+namespace Virus
+{
+	class Controller;
+}
+
+namespace juce
+{
 	class Value;
 }
 
@@ -34,7 +40,7 @@ public:
 		uint32_t onChangeListenerId = 0;
 	};
 
-	VirusParameterBinding(AudioPluginAudioProcessor &_processor) : m_processor(_processor)
+	VirusParameterBinding(Virus::Controller& _controller) : m_controller(_controller)
 	{
 	}
 	~VirusParameterBinding() override;
@@ -58,7 +64,7 @@ private:
 
 	void disableBinding(const BoundParameter& _value);
 
-	AudioPluginAudioProcessor& m_processor;
+	Virus::Controller& m_controller;
 
 	void bind(const std::vector<BoundParameter>& _bindings, bool _currentPartOnly);
 
