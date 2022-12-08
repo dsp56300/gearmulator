@@ -18,7 +18,8 @@ AudioPluginAudioProcessorEditor::AudioPluginAudioProcessorEditor(AudioPluginAudi
 
 	m_state.evSetGuiScale = [&](const int _scale)
 	{
-		setGuiScale(_scale);
+		if(getNumChildComponents() > 0)
+			setGuiScale(getChildComponent(0), _scale);
 	};
 
 	m_state.enableBindings();
@@ -36,9 +37,16 @@ AudioPluginAudioProcessorEditor::~AudioPluginAudioProcessorEditor()
 	setUiRoot(nullptr);
 }
 
-void AudioPluginAudioProcessorEditor::setGuiScale(int percent)
+void AudioPluginAudioProcessorEditor::setGuiScale(juce::Component* _comp, int percent)
 {
-	setScaleFactor(static_cast<float>(percent)/100.0f * m_state.getRootScale());
+	if(!_comp)
+		return;
+
+	const auto s = static_cast<float>(percent)/100.0f * m_state.getRootScale();
+	_comp->setTransform(juce::AffineTransform::scale(s,s));
+
+	setSize(static_cast<int>(m_state.getWidth() * s), static_cast<int>(m_state.getHeight() * s));
+
 	auto* config = processorRef.getController().getConfig();
 	config->setValue("scale", percent);
 	config->saveIfNeeded();
@@ -51,13 +59,11 @@ void AudioPluginAudioProcessorEditor::setUiRoot(juce::Component* _component)
 	if(!_component)
 		return;
 
-	setSize(_component->getWidth(), _component->getHeight());
-	addAndMakeVisible(_component);
-
 	const auto& config = processorRef.getController().getConfig();
     const auto scale = config->getIntValue("scale", 100);
 
-	setGuiScale(scale);
+	setGuiScale(_component, scale);
+	addAndMakeVisible(_component);
 }
 
 void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
@@ -70,6 +76,9 @@ void AudioPluginAudioProcessorEditor::mouseDown(const juce::MouseEvent& event)
 
 	// file browsers have their own menu, do not display two menus at once
 	if(event.eventComponent && event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
+		return;
+
+	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
 		return;
 
 	m_state.openMenu();

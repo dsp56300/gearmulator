@@ -375,6 +375,16 @@
  		{"page":114, "class":"Global", "index":126, "name":"LCD Contrast", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":127, "name":"Master Volume", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false}
  	],
+	"parameterlinks":
+	[
+		{
+			"source": "Cutoff", 
+			"dest": "Cutoff2", 
+			"conditionParameter": "Filter2 Cutoff Link",
+			"conditionValues": [1],
+			"link": "relative"
+		}
+	],
  	"valuelists":
  	{
  		"unsignedZero":

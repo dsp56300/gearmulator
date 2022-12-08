@@ -1,7 +1,5 @@
 #pragma once
 
-#include <vector>
-
 #include "../../juceUiLib/tabgroup.h"
 
 namespace juce

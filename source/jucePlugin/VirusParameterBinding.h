@@ -2,7 +2,13 @@
 
 #include "../jucePluginLib/parameter.h"
 
-namespace juce {
+namespace Virus
+{
+	class Controller;
+}
+
+namespace juce
+{
 	class Value;
 }
 
@@ -34,7 +40,7 @@ public:
 		uint32_t onChangeListenerId = 0;
 	};
 
-	VirusParameterBinding(AudioPluginAudioProcessor &_processor) : m_processor(_processor)
+	VirusParameterBinding(Virus::Controller& _controller) : m_controller(_controller)
 	{
 	}
 	~VirusParameterBinding() override;
@@ -51,17 +57,23 @@ public:
 	void disableBindings();
 	void enableBindings();
 
+	const auto& getBindings() const { return m_bindings; }
+	juce::Component* getBoundComponent(const pluginLib::Parameter* _parameter);
+
 private:
 	void removeMouseListener(juce::Slider& _slider);
 
-	void disableBinding(const BoundParameter& _value);
+	void addBinding(const BoundParameter& _boundParameter);
+	void disableBinding(const BoundParameter& _b);
 
-	AudioPluginAudioProcessor& m_processor;
+	Virus::Controller& m_controller;
 
 	void bind(const std::vector<BoundParameter>& _bindings, bool _currentPartOnly);
 
 	std::vector<BoundParameter> m_bindings;
 	std::vector<BoundParameter> m_disabledBindings;
+	std::map<const pluginLib::Parameter*, juce::Component*> m_boundParameters;
+	std::map<const juce::Component*, pluginLib::Parameter*> m_boundComponents;
 	std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
-	uint32_t m_nextListenerId = 1;
+	uint32_t m_nextListenerId = 100000;
 };

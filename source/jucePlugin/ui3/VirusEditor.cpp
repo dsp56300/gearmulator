@@ -28,6 +28,10 @@ namespace genericVirusUI
 		if(getTabGroupCount() == 0)
 			m_tabs.reset(new Tabs(*this));
 
+		// be backwards compatible with old skins
+		if(getControllerLinkCountRecursive() == 0)
+			m_controllerLinks.reset(new ControllerLinks(*this));
+
 		m_midiPorts.reset(new MidiPorts(*this));
 
 		// be backwards compatible with old skins
@@ -119,10 +123,30 @@ namespace genericVirusUI
 		updatePresetName();
 		updatePlayModeButtons();
 		updateControlLabel(nullptr);
+
+		for (auto& params : getController().getExposedParameters())
+		{
+			for (const auto& param : params.second)
+			{
+				m_boundParameters.push_back(param);
+
+				param->onValueChanged.emplace_back(1, [this, param]()
+				{
+					if(param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange)
+						return;
+					auto* comp = m_parameterBinding.getBoundComponent(param);
+					if(comp)
+						updateControlLabel(comp);
+				});
+			}
+		}
 	}
 
 	VirusEditor::~VirusEditor()
 	{
+		for (auto* p : m_boundParameters)
+			p->removeListener(1);
+
 		m_parameterBinding.clearBindings();
 
 		getController().onProgramChange = nullptr;
@@ -257,33 +281,21 @@ namespace genericVirusUI
 		updatePresetName();
 	}
 
-	void VirusEditor::mouseDrag(const juce::MouseEvent & event)
-	{
-	    updateControlLabel(event.eventComponent);
-	}
-
 	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
 	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-		updateControlLabel(event.eventComponent);
-	}
-	void VirusEditor::mouseExit(const juce::MouseEvent& event)
-	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-	    updateControlLabel(nullptr);
+		if(event.eventComponent && event.eventComponent->getProperties().contains("parameter"))
+			updateControlLabel(event.eventComponent);
 	}
 
-	void VirusEditor::mouseUp(const juce::MouseEvent& event)
+	void VirusEditor::timerCallback()
 	{
-	    if (event.mouseWasDraggedSinceMouseDown())
-	        return;
-	    updateControlLabel(event.eventComponent);
+		updateControlLabel(nullptr);
 	}
 
-	void VirusEditor::updateControlLabel(juce::Component* _component) const
+	void VirusEditor::updateControlLabel(juce::Component* _component)
 	{
+		stopTimer();
+
 		if(_component)
 		{
 			// combo boxes report the child label as event source, try the parent in this case
@@ -326,7 +338,7 @@ namespace genericVirusUI
 		m_focusedParameterName->setVisible(true);
 		m_focusedParameterValue->setVisible(true);
 
-		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component))
+		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component) && _component->isShowing())
 		{
 			int x = _component->getX();
 			int y = _component->getY();
@@ -362,6 +374,12 @@ namespace genericVirusUI
 			m_focusedParameterTooltip->setVisible(true);
 			m_focusedParameterTooltip->toFront(false);
 		}
+		else if(m_focusedParameterTooltip)
+		{
+			m_focusedParameterTooltip->setVisible(false);
+		}
+
+		startTimer(3000);
 	}
 
 	void VirusEditor::updatePresetName() const
@@ -501,7 +519,7 @@ namespace genericVirusUI
 	{
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
 
-		getController().getParameter(playMode)->setValue(_playMode);
+		getController().getParameter(playMode)->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			m_parameterBinding.setPart(0);

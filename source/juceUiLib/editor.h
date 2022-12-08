@@ -73,6 +73,7 @@ namespace genericUI
 		}
 
 		size_t getConditionCountRecursive() const;
+		size_t getControllerLinkCountRecursive() const;
 
 		static void setEnabled(juce::Component& _component, bool _enable);
 

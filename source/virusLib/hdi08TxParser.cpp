@@ -13,7 +13,7 @@ namespace virusLib
 {
 	const std::vector<dsp56k::TWord> g_knownPatterns[] =
 	{
-		{0xf40000, 0x7f0000, 0x000000, 0xf70000}		// sent after DSP has booted
+		{0xf40000, 0x7f0000}		// sent after DSP has booted
 	};
 
 	bool Hdi08TxParser::append(const dsp56k::TWord _data)

@@ -16,8 +16,7 @@ public:
 	void paint(juce::Graphics& g) override {}
 
 private:
-	void setGuiScale(int percent);
-	void openMenu();
+	void setGuiScale(juce::Component* _component, int percent);
 	void setUiRoot(juce::Component* _component);
 
 	// This reference is provided as a quick way for your editor to

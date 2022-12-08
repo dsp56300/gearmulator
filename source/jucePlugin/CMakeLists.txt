@@ -31,6 +31,8 @@ set(SOURCES
 )
 
 set(SOURCES_UI3
+	ui3/ControllerLinks.cpp
+	ui3/ControllerLinks.h
 	ui3/FxPage.cpp
 	ui3/FxPage.h
 	ui3/MidiPorts.cpp

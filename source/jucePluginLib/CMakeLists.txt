@@ -7,6 +7,7 @@ set(SOURCES
 	parameter.cpp parameter.h
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
+	parameterlink.cpp parameterlink.h
 )
 
 add_library(jucePluginLib STATIC)

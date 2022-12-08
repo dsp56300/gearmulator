@@ -122,15 +122,9 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getPopupMenuFont()
 	{
-		if(!m_fontFile.empty())
-		{
-			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
-			applyFontProperties(font);
-			return font;
-		}
-		auto font = LookAndFeel_V4::getPopupMenuFont();
-		applyFontProperties(font);
-		return font;
+		auto f = LookAndFeel_V4::getPopupMenuFont();
+		f.setHeight(f.getHeight() * 2.0f);
+		return f;
 	}
 
 	juce::Font UiObjectStyle::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)
@@ -144,6 +138,16 @@ namespace genericUI
 		auto font = LookAndFeel_V4::getTextButtonFont(_textButton, buttonHeight);
 		applyFontProperties(font);
 		return font;
+	}
+
+	bool UiObjectStyle::shouldPopupMenuScaleWithTargetComponent(const juce::PopupMenu::Options& _options)
+	{
+		return true;
+	}
+
+	juce::PopupMenu::Options UiObjectStyle::getOptionsForComboBoxPopupMenu(juce::ComboBox& _comboBox, juce::Label& _label)
+	{
+		return LookAndFeel_V4::getOptionsForComboBoxPopupMenu(_comboBox, _label).withStandardItemHeight(0);
 	}
 
 	void UiObjectStyle::applyFontProperties(juce::Font& _font) const
