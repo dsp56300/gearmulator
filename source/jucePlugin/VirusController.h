@@ -30,7 +30,7 @@ namespace Virus
 
         struct MultiPatch : Patch {};
 
-    	using Singles = std::array<std::array<SinglePatch, 128>, 8>;
+    	using Singles = std::vector<std::array<SinglePatch, 128>>;
 
     	static constexpr auto kNameLength = 10;
 

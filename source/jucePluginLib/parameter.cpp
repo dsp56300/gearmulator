@@ -37,6 +37,8 @@ namespace pluginLib
 		if (newValue == m_lastValue)
 			return;
 
+		_origin = ChangedBy::Derived;
+
 		m_lastValue = newValue;
 		m_lastValueOrigin = _origin;
 
