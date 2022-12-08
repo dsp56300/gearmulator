@@ -521,7 +521,7 @@ namespace genericVirusUI
 	{
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
 
-		getController().getParameter(playMode)->setValue(_playMode);
+		getController().getParameter(playMode)->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			m_parameterBinding.setPart(0);

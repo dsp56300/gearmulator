@@ -30,7 +30,7 @@ namespace pluginLib
 			func.second();
 	}
 
-    void Parameter::setDerivedValue(const int _value)
+    void Parameter::setDerivedValue(const int _value, ChangedBy _origin)
     {
 		const int newValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
 
@@ -38,11 +38,14 @@ namespace pluginLib
 			return;
 
 		m_lastValue = newValue;
+		m_lastValueOrigin = _origin;
 
 		if(getDescription().isPublic)
 		{
 			beginChangeGesture();
-			setValueNotifyingHost(convertTo0to1(static_cast<float>(newValue)));
+			const float v = convertTo0to1(static_cast<float>(newValue));
+			setValue(v, _origin);
+			sendValueChangedMessageToListeners(v);
 			endChangeGesture();
 		}
 		else
@@ -56,25 +59,31 @@ namespace pluginLib
 	    return !m_derivedParameters.empty();
     }
 
-    void Parameter::setValue(float newValue)
+    void Parameter::setValue(const float _newValue)
 	{
+		setValue(_newValue, ChangedBy::HostAutomation);
+	}
+
+    void Parameter::setValue(const float _newValue, const ChangedBy _origin)
+    {
 		if (m_changingDerivedValues)
 			return;
 
-		m_value.setValue(convertFrom0to1(newValue));
+		m_lastValueOrigin = _origin;
+		m_value.setValue(convertFrom0to1(_newValue));
 
 		m_changingDerivedValues = true;
 
 		for (const auto& parameter : m_derivedParameters)
 		{
 			if(!parameter->m_changingDerivedValues)
-				parameter->setDerivedValue(m_value.getValue());
+				parameter->setDerivedValue(m_value.getValue(), _origin);
 		}
 
 		m_changingDerivedValues = false;
-	}
+    }
 
-	void Parameter::setValueFromSynth(int newValue, const bool notifyHost)
+    void Parameter::setValueFromSynth(int newValue, const bool notifyHost, ChangedBy _origin)
 	{
 		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
 
@@ -82,11 +91,14 @@ namespace pluginLib
 			return;
 
 		m_lastValue = clampedValue;
+		m_lastValueOrigin = _origin;
 
 		if (notifyHost && getDescription().isPublic)
 		{
 			beginChangeGesture();
-			setValueNotifyingHost(convertTo0to1(static_cast<float>(clampedValue)));
+			const auto v = convertTo0to1(static_cast<float>(clampedValue));
+			setValue(v, _origin);
+			sendValueChangedMessageToListeners(v);
 			endChangeGesture();
 		}
 		else
@@ -100,7 +112,7 @@ namespace pluginLib
 		m_changingDerivedValues = true;
 
 		for (const auto& p : m_derivedParameters)
-			p->setDerivedValue(newValue);
+			p->setDerivedValue(newValue, _origin);
 
 		m_changingDerivedValues = false;
 	}
