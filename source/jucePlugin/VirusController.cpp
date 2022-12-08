@@ -38,7 +38,15 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
     {
-        registerParams(p);
+        switch(p.getModel())
+        {
+        default:
+        case virusLib::ROMFile::Model::ABC:  m_singles.resize(8);  break;
+        case virusLib::ROMFile::Model::Snow: m_singles.resize(10); break;
+        case virusLib::ROMFile::Model::TI:   m_singles.resize(26); break;
+        }
+
+    	registerParams(p);
 
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
@@ -65,7 +73,7 @@ namespace Virus
 		requestTotal();
 		requestArrangement();
 
-    	for(uint8_t i=3; i<=8; ++i)
+    	for(uint8_t i=3; i<=getBankCount(); ++i)
 			requestSingleBank(i);
 
     	startTimer(5);
