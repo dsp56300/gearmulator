@@ -39,7 +39,7 @@ void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const u
 		_slider.getProperties().set("bipolar", true);
 	}
 	const BoundParameter p{v, &_slider, _param, _part};
-	m_bindings.emplace_back(p);
+	addBinding(p);
 }
 
 void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
@@ -108,7 +108,7 @@ void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, 
 	}));
 
 	const BoundParameter p{v, &_combo, _param, _part, listenerId};
-	m_bindings.emplace_back(p);
+	addBinding(p);
 }
 
 void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
@@ -121,7 +121,15 @@ void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
 	}
 	_btn.getToggleStateValue().referTo(v->getValueObject());
 	const BoundParameter p{v, &_btn, _param, CurrentPart};
-	m_bindings.emplace_back(p);
+	addBinding(p);
+}
+
+juce::Component* VirusParameterBinding::getBoundComponent(const pluginLib::Parameter* _parameter)
+{
+	const auto it = m_boundParameters.find(_parameter);
+	if(it == m_boundParameters.end())
+		return nullptr;
+	return it->second;
 }
 
 void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
@@ -142,7 +150,7 @@ void VirusParameterBinding::bind(const std::vector<BoundParameter>& _bindings, c
 	{
 		if(_currentPartOnly && b.part != CurrentPart)
 		{
-			m_bindings.emplace_back(b);
+			addBinding(b);
 			continue;
 		}
 
@@ -174,8 +182,22 @@ void VirusParameterBinding::bind(const std::vector<BoundParameter>& _bindings, c
 	}
 }
 
+void VirusParameterBinding::addBinding(const BoundParameter& _boundParameter)
+{
+	m_bindings.emplace_back(_boundParameter);
+
+	m_boundComponents.erase(_boundParameter.component);
+	m_boundParameters.erase(_boundParameter.parameter);
+
+	m_boundParameters.insert(std::make_pair(_boundParameter.parameter, _boundParameter.component));
+	m_boundComponents.insert(std::make_pair(_boundParameter.component, _boundParameter.parameter));
+}
+
 void VirusParameterBinding::disableBinding(const BoundParameter& _b)
 {
+	m_boundParameters.erase(_b.parameter);
+	m_boundComponents.erase(_b.component);
+
 	auto* slider = dynamic_cast<juce::Slider*>(_b.component);
 
 	if(slider != nullptr)
@@ -195,14 +217,17 @@ void VirusParameterBinding::clearBindings()
 		disableBinding(b);
 
 	m_bindings.clear();
+	m_boundParameters.clear();
+	m_boundComponents.clear();
 }
 
 void VirusParameterBinding::setPart(uint8_t _part)
 {
-	m_processor.getController().setCurrentPart(_part);
+	const std::vector<BoundParameter> bindings = m_bindings;
 
-	std::vector<BoundParameter> bindings;
-	bindings.swap(m_bindings);
+	clearBindings();
+
+	m_controller.setCurrentPart(_part);
 
 	bind(bindings, true);
 }
