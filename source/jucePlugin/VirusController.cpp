@@ -478,7 +478,7 @@ namespace Virus
 		}
     }
 
-	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
+	void Controller::parseControllerDump(const synthLib::SMidiEvent& m)
 	{
 		const uint8_t status = m.a & 0xf0;
     	const uint8_t part = m.a & 0x0f;
@@ -585,8 +585,13 @@ namespace Virus
 
     void Controller::timerCallback()
     {
-        const juce::ScopedLock sl(m_eventQueueLock);
-        for (auto msg : m_virusOut)
+        std::vector<synthLib::SMidiEvent> virusOut;
+        {
+			const juce::ScopedLock sl(m_eventQueueLock);
+	        std::swap(m_virusOut, virusOut);
+        }
+
+    	for (const auto& msg : virusOut)
         {
             if (msg.sysex.empty())
             {
@@ -598,7 +603,6 @@ namespace Virus
 				parseMessage(msg.sysex);               
 			}
         }
-        m_virusOut.clear();
     }
 
     void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)

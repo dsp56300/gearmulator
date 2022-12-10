@@ -164,7 +164,7 @@ namespace Virus
     	void parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
-        void parseControllerDump(synthLib::SMidiEvent &);
+        void parseControllerDump(const synthLib::SMidiEvent&);
 
         AudioPluginAudioProcessor& m_processor;
         juce::CriticalSection m_eventQueueLock;
