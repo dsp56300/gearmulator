@@ -68,7 +68,8 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 		for(uint32_t p=0; p<m_rom.getPresetsPerBank(); ++p)
 		{
 			TPreset single;
-			m_rom.getSingle(bank, p, single);
+			if(!m_rom.getSingle(bank, p, single))
+				break;
 
 			if(ROMFile::getSingleName(single).size() != 10)
 			{
