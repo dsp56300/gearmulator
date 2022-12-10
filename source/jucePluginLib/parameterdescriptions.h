@@ -1,6 +1,6 @@
 #pragma once
 
-#include <map>
+#include <unordered_map>
 #include <string>
 #include <vector>
 
@@ -26,7 +26,7 @@ namespace pluginLib
 
 		bool getIndexByName(uint32_t& _index, const std::string& _name) const;
 
-		const std::map<std::string, MidiPacket>& getMidiPackets() const { return m_midiPackets; }
+		const std::unordered_map<std::string, MidiPacket>& getMidiPackets() const { return m_midiPackets; }
 
 	private:
 		std::string loadJson(const std::string& _jsonString);
@@ -36,10 +36,10 @@ namespace pluginLib
 		void parseParameterLinks(std::stringstream& _errors, juce::Array<juce::var>* _links);
 		void parseParameterLink(std::stringstream& _errors, const juce::var& _value);
 
-		std::map<std::string, ValueList> m_valueLists;
+		std::unordered_map<std::string, ValueList> m_valueLists;
 		std::vector<Description> m_descriptions;
-		std::map<std::string, uint32_t> m_nameToIndex;
-		std::map<std::string, MidiPacket> m_midiPackets;
+		std::unordered_map<std::string, uint32_t> m_nameToIndex;
+		std::unordered_map<std::string, MidiPacket> m_midiPackets;
 		std::vector<ParameterLink> m_parameterLinks;
 	};
 }
