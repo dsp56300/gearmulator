@@ -40,7 +40,7 @@ void ROMFile::dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::stri
 	fclose(hFile);
 }
 
-ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_path)
+ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_path), m_tiModel(_wantedTIModel)
 {
 	LOG("Init access virus");
 
@@ -79,7 +79,6 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 	}
 #endif
 	const auto chunks = readChunks(*dsp, _wantedTIModel);
-	file.close();
 
 	if (chunks.empty())
 		return;
@@ -171,6 +170,28 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 				}
 			}
 		}
+
+		// try to load the presets from the other roms, too
+		auto loadFirmwarePresets = [&file, _wantedTIModel, this](const TIModel _model)
+		{
+			if(_wantedTIModel == _model)
+				return;
+			file.clear();
+			file.seekg(0);
+			const auto firmware = ROMUnpacker::getFirmware(file, _model);
+			if(!firmware.Presets.empty())
+			{
+				for (auto& presetFile: firmware.Presets)
+				{
+					imemstream stream(presetFile);
+					loadPresetFile(stream);
+				}
+			}
+		};
+
+		loadFirmwarePresets(TIModel::TI);
+		loadFirmwarePresets(TIModel::TI2);
+		loadFirmwarePresets(TIModel::Snow);
 	}
 #endif
 }

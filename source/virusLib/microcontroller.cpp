@@ -58,7 +58,7 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 	bool failed = false;
 
 	// read all singles from ROM and copy first ROM banks to RAM banks
-	for(uint32_t b=0; b<26 && !failed; ++b)
+	for(uint32_t b=0; b<128 && !failed; ++b)
 	{
 		std::vector<TPreset> singles;
 

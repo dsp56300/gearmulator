@@ -72,6 +72,10 @@ public:
     {
 		return m_rom.getModel();
     }
+    virusLib::ROMFile::TIModel getTIModel() const
+    {
+		return m_rom.getTIModel();
+    }
     synthLib::Plugin& getPlugin()
     {
 	    return m_plugin;

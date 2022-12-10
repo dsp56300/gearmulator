@@ -65,6 +65,7 @@ public:
 	bool isValid() const { return bootRom.size > 0; }
 
 	Model getModel() const { return m_model; }
+	TIModel getTIModel() const { return m_tiModel; }
 
 	static bool isTIFamily(Model _model) { return _model == Model::Snow || _model == Model::TI; }
 	bool isTIFamily() const { return isTIFamily(m_model); }
@@ -132,6 +133,7 @@ private:
 
 	const std::string m_file;
 	Model m_model = Model::Invalid;
+	TIModel m_tiModel = TIModel::TI;
 
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;

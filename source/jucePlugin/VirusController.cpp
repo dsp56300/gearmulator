@@ -44,7 +44,7 @@ namespace Virus
         default:
         case virusLib::ROMFile::Model::ABC:  m_singles.resize(8);  break;
         case virusLib::ROMFile::Model::Snow: m_singles.resize(10); break;
-        case virusLib::ROMFile::Model::TI:   m_singles.resize(26); break;
+        case virusLib::ROMFile::Model::TI:   m_singles.resize(66); break;
         }
 
     	registerParams(p);
@@ -732,7 +732,33 @@ namespace Virus
     std::string Controller::getBankName(uint32_t _index) const
     {
         char temp[32]{0};
-        sprintf(temp, "Bank %c", 'A' + _index);
+
+        if(getBankCount() <= 26)
+        {
+	        sprintf(temp, "Bank %c", 'A' + _index);
+        }
+        else
+        {
+            switch(m_processor.getTIModel())
+            {
+            case virusLib::ROMFile::TIModel::Snow: 
+                if(_index < 10)	            sprintf(temp, "Snow Bank %c", 'A' + _index);
+                else if(_index < 26 + 10)	sprintf(temp, "TI Bank %c", 'A' + (_index - 10));
+                else			    		sprintf(temp, "TI2 Bank %c", 'A' + (_index - 26 - 10));
+                break;
+            case virusLib::ROMFile::TIModel::TI:
+                if(_index < 2)	            sprintf(temp, "RAM Bank %c", 'A' + _index);
+                else if(_index < 28)	    sprintf(temp, "TI Rom %c", 'A' + (_index - 2));
+                else if(_index < 28 + 26)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - 28));
+                else			    		sprintf(temp, "Snow Rom %c", 'A' + (_index - 28 - 26));
+                break;
+            case virusLib::ROMFile::TIModel::TI2: 
+                if(_index < 28)	            sprintf(temp, "TI2 Bank %c", 'A' + _index);
+                else if(_index < 28 + 26)	sprintf(temp, "TI Bank %c", 'A' + (_index - 28));
+                else			    		sprintf(temp, "Snow Bank %c", 'A' + (_index - 28 - 26));
+                break;
+            }
+        }
         return temp;
     }
 }; // namespace Virus
