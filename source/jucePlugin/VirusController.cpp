@@ -38,7 +38,15 @@ namespace Virus
 
     Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
     {
-        registerParams(p);
+        switch(p.getModel())
+        {
+        default:
+        case virusLib::ROMFile::Model::ABC:  m_singles.resize(8);  break;
+        case virusLib::ROMFile::Model::Snow: m_singles.resize(10); break;
+        case virusLib::ROMFile::Model::TI:   m_singles.resize(26); break;
+        }
+
+    	registerParams(p);
 
 		juce::PropertiesFile::Options opts;
 		opts.applicationName = "DSP56300 Emulator";
@@ -51,7 +59,7 @@ namespace Virus
 		const auto& params = findSynthParam(0, 0x72, 0x7a);
 		for (const auto& parameter : params)
 		{
-			parameter->onValueChanged = [this] {
+			parameter->onValueChanged.emplace_back(std::make_pair(0, [this] {
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);
                 requestMulti(0, prg);
@@ -60,12 +68,12 @@ namespace Virus
 				{
 					onMsgDone();
 				}
-			};
+			}));
 		}
 		requestTotal();
 		requestArrangement();
 
-    	for(uint8_t i=3; i<=8; ++i)
+    	for(uint8_t i=3; i<=getBankCount(); ++i)
 			requestSingleBank(i);
 
     	startTimer(5);
@@ -93,7 +101,7 @@ namespace Virus
             if(name == midiPacketName(MidiPacketType::SingleDump))
                 parseSingle(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::MultiDump))
-                parseMulti(data, parameterValues);
+                parseMulti(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::ParameterChange))
                 parseParamChange(data);
             else
@@ -148,10 +156,10 @@ namespace Virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, true);
+				param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, true);
+			param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
 		// TODO:
         /**
          If a
@@ -186,10 +194,20 @@ namespace Virus
 
     std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const
     {
+        return getPresetName("SingleName", _values);
+    }
+
+    std::string Controller::getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const
+    {
+        return getPresetName("MultiName", _values);
+    }
+
+    std::string Controller::getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const
+    {
         std::string name;
         for(uint32_t i=0; i<kNameLength; ++i)
         {
-	        const std::string paramName = "SingleName" + std::to_string(i);
+	        const std::string paramName = _paramNamePrefix + std::to_string(i);
             const auto idx = getParameterIndexByName(paramName);
             if(idx == InvalidParameterIndex)
                 break;
@@ -251,7 +269,7 @@ namespace Virus
 
 	void Controller::setCurrentPartPreset(uint8_t _part, const virusLib::BankNumber _bank, uint8_t _prg)
 	{
-    	if(_bank == virusLib::BankNumber::EditBuffer || _prg > 127)
+    	if(_bank == virusLib::BankNumber::EditBuffer || _prg > m_singles[0].size())
     	{
 			jassertfalse;
 			return;
@@ -270,20 +288,32 @@ namespace Virus
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_BANK_SELECT, virusLib::toMidiByte(_bank));
 		sendParameterChange(MessageType::PARAM_CHANGE_C, pt, virusLib::PART_PROGRAM_CHANGE, _prg);
 
-		requestSingle(virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), pt);
+		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), pt);
 
 		m_currentBank[_part] = _bank;
 		m_currentProgram[_part] = _prg;
+        m_currentPresetSource[_part] = PresetSource::Rom;
+	}
+
+	void Controller::setCurrentPartPresetSource(uint8_t _part, PresetSource _source)
+	{
+        m_currentPresetSource[_part] = _source;
 	}
 
 	virusLib::BankNumber Controller::getCurrentPartBank(const uint8_t _part) const
     {
 	    return m_currentBank[_part];
     }
+
 	uint8_t Controller::getCurrentPartProgram(const uint8_t _part) const
     {
 	    return m_currentProgram[_part];
     }
+
+	Controller::PresetSource Controller::getCurrentPartPresetSource(uint8_t _part) const
+	{
+        return m_currentPresetSource[_part];
+	}
 
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const
 	{
@@ -349,6 +379,11 @@ namespace Virus
 
 		if (patch.bankNumber == virusLib::BankNumber::EditBuffer)
 		{
+            if(patch.progNumber == virusLib::SINGLE)
+                m_singleEditBuffer = patch;
+            else
+                m_singleEditBuffers[patch.progNumber] = patch;
+
 			// virus sends also the single buffer not matter what's the mode. (?? no, both is requested, so both is sent)
 			// instead of keeping both, we 'encapsulate' this into first channel.
 			// the logic to maintain this is done by listening the global single/multi param.
@@ -362,32 +397,42 @@ namespace Virus
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
 	            auto* p = getParameter(it->first.second, ch);
-				p->setValueFromSynth(it->second, true);
+				p->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
 
-	            for (const auto& linkedParam : p->getLinkedParameters())
-		            linkedParam->setValueFromSynth(it->second, true);
+	            for (const auto& derivedParam : p->getDerivedParameters())
+		            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
             }
 
-            bool found = false;
-            for(size_t b=0; b<m_singles.size() && !found; ++b)
+            if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
-	            const auto& singlePatches = m_singles[b];
+	            bool found = false;
+	            for(size_t b=0; b<m_singles.size() && !found; ++b)
+	            {
+		            const auto& singlePatches = m_singles[b];
 
-                for(size_t s=0; s<singlePatches.size(); ++s)
-                {
-                    const auto& singlePatch = singlePatches[s];
+	                for(size_t s=0; s<singlePatches.size(); ++s)
+	                {
+	                    const auto& singlePatch = singlePatches[s];
 
-                    if(singlePatch.name == patch.name)
-                    {
-                        m_currentBank[ch] = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
-                        m_currentProgram[ch] = static_cast<uint8_t>(s);
-                        found = true;
-                        break;
-                    }
-                }
+	                    if(singlePatch.name == patch.name)
+	                    {
+	                        m_currentBank[ch] = virusLib::fromArrayIndex(static_cast<uint8_t>(b));
+	                        m_currentProgram[ch] = static_cast<uint8_t>(s);
+	                        m_currentPresetSource[ch] = PresetSource::Rom;
+	                        found = true;
+	                        break;
+	                    }
+	                }
+	            }
+
+	            if(!found)
+	            {
+		            m_currentProgram[ch] = 0;
+	                m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
+	                m_currentPresetSource[ch] = PresetSource::Unknown;
+	            }
             }
-
-            if(!found)
+            else
             {
 	            m_currentProgram[ch] = 0;
                 m_currentBank[ch] = virusLib::BankNumber::EditBuffer;
@@ -397,16 +442,22 @@ namespace Virus
 				onProgramChange();
 		}
 		else
+		{
 			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
+		}
 	}
 
-	void Controller::parseMulti(const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
+	void Controller::parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
     {
         const auto bankNumber = _data.find(pluginLib::MidiDataType::Bank)->second;
 
 		/* If it's a multi edit buffer, set the part page C parameters to their multi equivalents */
 		if (bankNumber == 0)
         {
+	        m_multiEditBuffer.progNumber = _data.find(pluginLib::MidiDataType::Program)->second;
+	        m_multiEditBuffer.name = getMultiPresetName(_parameterValues);
+	        m_multiEditBuffer.data = _msg;
+
 			for (const auto & paramValue : _parameterValues)
 			{
                 const auto part = paramValue.first.first;
@@ -422,12 +473,12 @@ namespace Virus
                 if(desc.page != virusLib::PAGE_C)
                     continue;
 
-                param->setValueFromSynth(value);
+                param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::PresetChange);
 			}
 		}
     }
 
-	void Controller::parseControllerDump(synthLib::SMidiEvent &m)
+	void Controller::parseControllerDump(const synthLib::SMidiEvent& m)
 	{
 		const uint8_t status = m.a & 0xf0;
     	const uint8_t part = m.a & 0x0f;
@@ -444,7 +495,7 @@ namespace Virus
 		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, page == 0 ? "A" : "B", m.b, m.c));
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
-			p->setValueFromSynth(m.c, true);
+			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
 	}
 
     void Controller::printMessage(const SysEx &msg)
@@ -534,8 +585,13 @@ namespace Virus
 
     void Controller::timerCallback()
     {
-        const juce::ScopedLock sl(m_eventQueueLock);
-        for (auto msg : m_virusOut)
+        std::vector<synthLib::SMidiEvent> virusOut;
+        {
+			const juce::ScopedLock sl(m_eventQueueLock);
+	        std::swap(m_virusOut, virusOut);
+        }
+
+    	for (const auto& msg : virusOut)
         {
             if (msg.sysex.empty())
             {
@@ -547,7 +603,6 @@ namespace Virus
 				parseMessage(msg.sysex);               
 			}
         }
-        m_virusOut.clear();
     }
 
     void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
@@ -632,5 +687,28 @@ namespace Virus
 			return {};
 
 		return createSingleDump(_modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
+    }
+
+    void Controller::selectPrevPreset(uint8_t _part)
+    {
+		if(getCurrentPartProgram(_part) > 0)
+		{
+            setCurrentPartPreset(_part, getCurrentPartBank(_part), getCurrentPartProgram(_part) - 1);
+		}
+    }
+
+    void Controller::selectNextPreset(uint8_t _part)
+    {
+		if(getCurrentPartProgram(_part) < m_singles[0].size())
+		{
+            setCurrentPartPreset(_part, getCurrentPartBank(_part), getCurrentPartProgram(_part) + 1);
+		}
+    }
+
+    std::string Controller::getBankName(uint32_t _index) const
+    {
+        char temp[32]{0};
+        sprintf(temp, "Bank %c", 'A' + _index);
+        return temp;
     }
 }; // namespace Virus

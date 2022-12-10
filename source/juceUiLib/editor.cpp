@@ -57,6 +57,7 @@ namespace genericUI
 
 		m_rootObject->createJuceTree(*this);
 		m_rootObject->createTabGroups(*this);
+		m_rootObject->createControllerLinks(*this);
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 	}
@@ -205,6 +206,11 @@ namespace genericUI
 	size_t Editor::getConditionCountRecursive() const
 	{
 		return m_rootObject ? m_rootObject->getConditionCountRecursive() : 0;
+	}
+
+	size_t Editor::getControllerLinkCountRecursive() const
+	{
+		return m_rootObject ? m_rootObject->getControllerLinkCountRecursive() : 0;
 	}
 
 	void Editor::setEnabled(juce::Component& _component, const bool _enable)

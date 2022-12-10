@@ -2,7 +2,8 @@
 
 #include "../virusConsoleLib/consoleApp.h"
 
-#include "../dsp56300/source/dsp56kEmu/jitunittests.h"
+#include "dsp56kEmu/jitunittests.h"
+#include "dsp56kEmu/interpreterunittests.h"
 
 #include "../synthLib/os.h"
 

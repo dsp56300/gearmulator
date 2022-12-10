@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "condition.h"
+#include "controllerlink.h"
 #include "tabgroup.h"
 
 namespace juce
@@ -38,6 +39,7 @@ namespace genericUI
 		void createJuceTree(Editor& _editor);
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
 		void createTabGroups(Editor& _editor);
+		void createControllerLinks(Editor& _editor);
 
 		void apply(Editor& _editor, juce::Component& _target);
 		void apply(Editor& _editor, juce::Slider& _target);
@@ -56,6 +58,7 @@ namespace genericUI
 		std::string getProperty(const std::string& _key, const std::string& _default = std::string()) const;
 
 		size_t getConditionCountRecursive() const;
+		size_t getControllerLinkCountRecursive() const;
 
 	private:
 		bool hasComponent(const std::string& _component) const;
@@ -82,6 +85,7 @@ namespace genericUI
 		std::unique_ptr<Condition> m_condition;
 
 		TabGroup m_tabGroup;
+		std::vector<std::unique_ptr<ControllerLink>> m_controllerLinks;
 	};
 
 	inline bool UiObject::hasComponent(const std::string& _component) const

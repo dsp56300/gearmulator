@@ -7,15 +7,34 @@
 #include "FxPage.h"
 #include "MidiPorts.h"
 #include "PatchBrowser.h"
+#include "ControllerLinks.h"
+
+namespace pluginLib
+{
+	class Parameter;
+}
 
 class VirusParameterBinding;
 class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
 {
-	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor
+	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor, juce::Timer
 	{
 	public:
+		enum class FileType
+		{
+			Syx,
+			Mid
+		};
+
+		enum class SaveType
+		{
+			CurrentSingle,
+			Bank,
+			Arrangement
+		};
+
 		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
@@ -29,6 +48,8 @@ namespace genericVirusUI
 
 		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
 
+		PatchBrowser* getPatchBrowser();
+
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;
@@ -41,12 +62,10 @@ namespace genericVirusUI
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
 
-		void mouseDrag(const juce::MouseEvent& event) override;
 		void mouseEnter(const juce::MouseEvent& event) override;
-		void mouseExit(const juce::MouseEvent& event) override;
-		void mouseUp(const juce::MouseEvent& event) override;
+		void timerCallback() override;
 
-		void updateControlLabel(juce::Component* _component) const;
+		void updateControlLabel(juce::Component* _component);
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 
@@ -56,6 +75,9 @@ namespace genericVirusUI
 		void loadPreset();
 
 		void setPlayMode(uint8_t _playMode);
+
+		void savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0);
+		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
 		VirusParameterBinding& m_parameterBinding;
@@ -67,6 +89,7 @@ namespace genericVirusUI
 		std::unique_ptr<MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
+		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
 		juce::Label* m_focusedParameterName = nullptr;
@@ -85,6 +108,7 @@ namespace genericVirusUI
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
+		std::vector<pluginLib::Parameter*> m_boundParameters;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 	};

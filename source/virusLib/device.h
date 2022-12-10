@@ -4,7 +4,6 @@
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/device.h"
 
-#include "midiOutParser.h"
 #include "romfile.h"
 #include "microcontroller.h"
 
@@ -13,7 +12,7 @@ namespace virusLib
 	class Device final : public synthLib::Device
 	{
 	public:
-		Device(const ROMFile& _rom);
+		Device(const ROMFile& _rom, bool _createDebugger = false);
 		~Device() override;
 
 		float getSamplerate() const override;
@@ -31,7 +30,7 @@ namespace virusLib
 		uint32_t getChannelCountOut() override;
 
 		static void createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom);
-		static std::thread bootDSP(DspSingle& _dsp, const ROMFile& _rom);
+		static std::thread bootDSP(DspSingle& _dsp, const ROMFile& _rom, bool _createDebugger);
 
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
@@ -45,8 +44,6 @@ namespace virusLib
 		std::unique_ptr<DspSingle> m_dsp;
 		DspSingle* m_dsp2 = nullptr;
 		std::unique_ptr<Microcontroller> m_mc;
-
-		MidiOutParser m_midiOutParser;
 
 		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_numSamplesProcessed = 0;

@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace pluginLib
@@ -49,8 +50,18 @@ namespace pluginLib
 
 		using Data = std::map<MidiDataType, uint8_t>;
 		using ParamIndex = std::pair<uint8_t,uint32_t>;
+
+		struct ParamIndexHash
+		{
+		    std::size_t operator () (const ParamIndex& p) const
+			{
+				static_assert(sizeof(std::size_t) > sizeof(uint32_t) + sizeof(uint8_t), "need a 64 bit compiler");
+				return (static_cast<std::size_t>(p.first) << 32) | p.second;
+		    }
+		};
+
 		using ParamIndices = std::set<ParamIndex>;
-		using ParamValues = std::map<ParamIndex, uint8_t>;	// part, index => value
+		using ParamValues = std::unordered_map<ParamIndex, uint8_t, ParamIndexHash>;	// part, index => value
 		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;	// part, name => value
 		using Sysex = std::vector<uint8_t>;
 
@@ -74,7 +85,7 @@ namespace pluginLib
 		const std::string m_name;
 		std::vector<MidiDataDefinition> m_definitions;
 		std::map<uint32_t, uint32_t> m_definitionToByteIndex;
-		std::multimap<uint32_t, uint32_t> m_byteToDefinitionIndex;
+		std::vector<std::vector<uint32_t>> m_byteToDefinitionIndex;
 		uint32_t m_byteSize = 0;
 		bool m_hasParameters = false;
 	};

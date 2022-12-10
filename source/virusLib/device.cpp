@@ -5,7 +5,7 @@
 
 namespace virusLib
 {
-	Device::Device(const ROMFile& _rom)
+	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
 		: synthLib::Device()
 		, m_rom(_rom)
 	{
@@ -26,17 +26,18 @@ namespace virusLib
 		if(m_dsp2)
 			m_mc->addHDI08(m_dsp2->getHDI08());
 
-		auto loader = bootDSP(*m_dsp, m_rom);
+		auto loader = bootDSP(*m_dsp, m_rom, _createDebugger);
 
 		if(m_dsp2)
 		{
-			auto loader2 = bootDSP(*m_dsp2, m_rom);
+			auto loader2 = bootDSP(*m_dsp2, m_rom, false);
 			loader2.join();
 		}
 
 		loader.join();
 
-		dummyProcess(8);
+		while(!m_mc->dspHasBooted())
+			dummyProcess(8);
 
 		m_mc->sendInitControlCommands();
 
@@ -135,22 +136,7 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		while(m_dsp->getHDI08().hasTX())
-		{
-			if(m_midiOutParser.append(m_dsp->getHDI08().readTX()))
-			{
-				const auto midi = m_midiOutParser.getMidiData();
-				_midiOut.insert(_midiOut.end(), midi.begin(), midi.end());
-				m_midiOutParser.clearMidiData();
-			}
-		}
-
-		if(m_dsp2)
-		{
-			// just throw it away
-			while(m_dsp2->getHDI08().hasTX())
-				m_dsp2->getHDI08().readTX();
-		}
+		m_mc->processHdi08Tx(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
@@ -203,10 +189,10 @@ namespace virusLib
 		jit.setConfig(conf);
 	}
 
-	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom)
+	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom, const bool _createDebugger)
 	{
 		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
-		_dsp.startDSPThread();
+		_dsp.startDSPThread(_createDebugger);
 		return res;
 	}
 }

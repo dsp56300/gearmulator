@@ -23,6 +23,8 @@ namespace genericUI
 		juce::Font getLabelFont(juce::Label&) override;
 		juce::Font getPopupMenuFont() override;
 		juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override;
+		bool shouldPopupMenuScaleWithTargetComponent (const juce::PopupMenu::Options&) override;
+		juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox&, juce::Label&) override;
 
 		void applyFontProperties(juce::Font& _font) const;
 
@@ -41,6 +43,10 @@ namespace genericUI
 		juce::Justification m_align = 0;
 		bool m_bold = false;
 		bool m_italic = false;
+		int m_offsetL = 0;
+		int m_offsetT = 0;
+		int m_offsetR = 0;
+		int m_offsetB = 0;
 
 		std::string m_url;
 	};

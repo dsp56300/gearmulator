@@ -9,35 +9,148 @@ VirusParameterBinding::~VirusParameterBinding()
 	clearBindings();
 }
 
-void VirusParameterBinding::clearBindings()
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
 {
-	for (const auto b : m_bindings)
+	bind(_slider, _param, CurrentPart);
+}
+void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
+{
+	const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+
+	if (!v)
 	{
-		auto* slider = dynamic_cast<juce::Slider*>(b.component);
-
-		if(slider != nullptr)
-			removeMouseListener(*slider);
-
-		b.parameter->onValueChanged = nullptr;
+		assert(false && "Failed to find parameter");
+		return;
 	}
 
-	m_bindings.clear();
+	removeMouseListener(_slider);
+
+	auto* listener = new VirusParameterBindingMouseListener(v, _slider);
+	m_sliderMouseListeners.insert(std::make_pair(&_slider, listener));
+
+	_slider.addMouseListener(listener, false);
+	const auto range = v->getNormalisableRange();
+	_slider.setRange(range.start, range.end, range.interval);
+	_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
+	_slider.getValueObject().referTo(v->getValueObject());
+	_slider.getProperties().set("type", "slider");
+	_slider.getProperties().set("name", juce::String(v->getDescription().name));
+	if (v->isBipolar()) {
+		_slider.getProperties().set("bipolar", true);
+	}
+	const BoundParameter p{v, &_slider, _param, _part};
+	addBinding(p);
 }
 
-void VirusParameterBinding::setPart(uint8_t _part)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
 {
-	m_processor.getController().setCurrentPart(_part);
+	bind(_combo, _param, CurrentPart);
+}
 
-	std::vector<BoundParameter> bindings;
-	bindings.swap(m_bindings);
-
-	for(size_t i=0; i<bindings.size(); ++i)
+void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, uint8_t _part)
+{
+	const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+	if (!v)
 	{
-		auto& b = bindings[i];
+		assert(false && "Failed to find parameter");
+		return;
+	}
+	_combo.setTextWhenNothingSelected("-");
+	_combo.setScrollWheelEnabled(true);
 
-		if(b.part != CurrentPart)
+	_combo.onChange = nullptr;
+	_combo.clear();
+
+	int idx = 1;
+	uint32_t count = 0;
+	for (const auto& vs : v->getAllValueStrings()) {
+		if(vs.isNotEmpty())
 		{
-			m_bindings.push_back(b);
+			_combo.addItem(vs, idx);
+			if(++count == 16)
+			{
+				_combo.getRootMenu()->addColumnBreak();
+				count = 0;
+			}
+		}
+		idx++;
+	}
+	//_combo.addItemList(v->getAllValueStrings(), 1);
+	_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
+
+	_combo.onChange = [this, &_combo, v]()
+	{
+		const auto id = _combo.getSelectedId();
+
+		if(id == 0)
+			return;
+
+		const int current = v->getValueObject().getValueSource().getValue();
+
+		if((id - 1) == current)
+			return;
+
+		if(v->getDescription().isPublic)
+		{
+			v->beginChangeGesture();
+			v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)));
+			v->endChangeGesture();
+		}
+		v->getValueObject().setValue(id - 1);
+	};
+
+	const auto listenerId = m_nextListenerId++;
+
+	v->onValueChanged.emplace_back(std::make_pair(listenerId, [this, &_combo, v]()
+	{
+		const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
+		_combo.setSelectedId(value + 1, juce::dontSendNotification);
+	}));
+
+	const BoundParameter p{v, &_combo, _param, _part, listenerId};
+	addBinding(p);
+}
+
+void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
+{
+	const auto v = m_controller.getParameter(_param, m_controller.getCurrentPart());
+	if (!v)
+	{
+		assert(false && "Failed to find parameter");
+		return;
+	}
+	_btn.getToggleStateValue().referTo(v->getValueObject());
+	const BoundParameter p{v, &_btn, _param, CurrentPart};
+	addBinding(p);
+}
+
+juce::Component* VirusParameterBinding::getBoundComponent(const pluginLib::Parameter* _parameter)
+{
+	const auto it = m_boundParameters.find(_parameter);
+	if(it == m_boundParameters.end())
+		return nullptr;
+	return it->second;
+}
+
+void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
+{
+	auto it = m_sliderMouseListeners.find(&_slider);
+
+	if(it != m_sliderMouseListeners.end())
+	{
+		_slider.removeMouseListener(it->second);
+		delete it->second;
+		m_sliderMouseListeners.erase(it);
+	}
+}
+
+void VirusParameterBinding::bind(const std::vector<BoundParameter>& _bindings, const bool _currentPartOnly)
+{
+	for (const auto& b : _bindings)
+	{
+		if(_currentPartOnly && b.part != CurrentPart)
+		{
+			addBinding(b);
 			continue;
 		}
 
@@ -68,109 +181,68 @@ void VirusParameterBinding::setPart(uint8_t _part)
 		assert(false && "unknown component type");
 	}
 }
-void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param)
+
+void VirusParameterBinding::addBinding(const BoundParameter& _boundParameter)
 {
-	bind(_slider, _param, CurrentPart);
-}
-void VirusParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
-{
-	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
+	m_bindings.emplace_back(_boundParameter);
 
-	if (!v)
-	{
-		assert(false && "Failed to find parameter");
-		return;
-	}
+	m_boundComponents.erase(_boundParameter.component);
+	m_boundParameters.erase(_boundParameter.parameter);
 
-	removeMouseListener(_slider);
-
-	auto* listener = new VirusParameterBindingMouseListener(v, _slider);
-	m_sliderMouseListeners.insert(std::make_pair(&_slider, listener));
-
-	_slider.addMouseListener(listener, false);
-	const auto range = v->getNormalisableRange();
-	_slider.setRange(range.start, range.end, range.interval);
-	_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
-	_slider.getValueObject().referTo(v->getValueObject());
-	_slider.getProperties().set("type", "slider");
-	_slider.getProperties().set("name", juce::String(v->getDescription().name));
-	if (v->isBipolar()) {
-		_slider.getProperties().set("bipolar", true);
-	}
-	const BoundParameter p{v, &_slider, _param, _part};
-	m_bindings.emplace_back(p);
+	m_boundParameters.insert(std::make_pair(_boundParameter.parameter, _boundParameter.component));
+	m_boundComponents.insert(std::make_pair(_boundParameter.component, _boundParameter.parameter));
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, uint32_t _param)
+void VirusParameterBinding::disableBinding(const BoundParameter& _b)
 {
-	bind(_combo, _param, CurrentPart);
+	m_boundParameters.erase(_b.parameter);
+	m_boundComponents.erase(_b.component);
+
+	auto* slider = dynamic_cast<juce::Slider*>(_b.component);
+
+	if(slider != nullptr)
+		removeMouseListener(*slider);
+
+	auto* combo = dynamic_cast<juce::ComboBox*>(_b.component);
+	if(combo != nullptr)
+		combo->onChange = nullptr;
+
+	if(_b.onChangeListenerId)
+		_b.parameter->removeListener(_b.onChangeListenerId);
 }
 
-void VirusParameterBinding::bind(juce::ComboBox& _combo, const uint32_t _param, uint8_t _part)
+void VirusParameterBinding::clearBindings()
 {
-	const auto v = m_processor.getController().getParameter(_param, _part == CurrentPart ? m_processor.getController().getCurrentPart() : _part);
-	if (!v)
-	{
-		assert(false && "Failed to find parameter");
-		return;
-	}
-	_combo.setTextWhenNothingSelected("-");
-	_combo.setScrollWheelEnabled(true);
+	for (const auto& b : m_bindings)
+		disableBinding(b);
 
-	_combo.onChange = nullptr;
-	_combo.clear();
-
-	int idx = 1;
-	uint32_t count = 0;
-	for (const auto& vs : v->getAllValueStrings()) {
-		if(vs.isNotEmpty())
-		{
-			_combo.addItem(vs, idx);
-			if(++count == 16)
-			{
-				_combo.getRootMenu()->addColumnBreak();
-				count = 0;
-			}
-		}
-		idx++;
-	}
-	//_combo.addItemList(v->getAllValueStrings(), 1);
-	_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
-	_combo.onChange = [this, &_combo, v]() {
-		if(v->getDescription().isPublic)
-		{
-			v->beginChangeGesture();
-			v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(_combo.getSelectedId() - 1)));
-			v->endChangeGesture();
-		}
-		v->getValueObject().getValueSource().setValue((int)_combo.getSelectedId() - 1);
-	};
-	v->onValueChanged = [this, &_combo, v]() { _combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification); };
-	const BoundParameter p{v, &_combo, _param, _part};
-	m_bindings.emplace_back(p);
+	m_bindings.clear();
+	m_boundParameters.clear();
+	m_boundComponents.clear();
 }
 
-void VirusParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
+void VirusParameterBinding::setPart(uint8_t _part)
 {
-	const auto v = m_processor.getController().getParameter(_param, m_processor.getController().getCurrentPart());
-	if (!v)
-	{
-		assert(false && "Failed to find parameter");
-		return;
-	}
-	_btn.getToggleStateValue().referTo(v->getValueObject());
-	const BoundParameter p{v, &_btn, _param, CurrentPart};
-	m_bindings.emplace_back(p);
+	const std::vector<BoundParameter> bindings = m_bindings;
+
+	clearBindings();
+
+	m_controller.setCurrentPart(_part);
+
+	bind(bindings, true);
 }
 
-void VirusParameterBinding::removeMouseListener(juce::Slider& _slider)
+void VirusParameterBinding::disableBindings()
 {
-	auto it = m_sliderMouseListeners.find(&_slider);
+	m_disabledBindings.clear();
+	std::swap(m_bindings, m_disabledBindings);
 
-	if(it != m_sliderMouseListeners.end())
-	{
-		_slider.removeMouseListener(it->second);
-		delete it->second;
-		m_sliderMouseListeners.erase(it);
-	}
+	for (const auto& b : m_disabledBindings)
+		disableBinding(b);
+}
+
+void VirusParameterBinding::enableBindings()
+{
+	bind(m_disabledBindings, false);
+	m_disabledBindings.clear();
 }

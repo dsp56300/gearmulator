@@ -12,6 +12,7 @@
 #include <list>
 #include <mutex>
 
+#include "hdi08TxParser.h"
 #include "microcontrollerTypes.h"
 
 namespace virusLib
@@ -48,10 +49,16 @@ public:
 
 	void addHDI08(dsp56k::HDI08& _hdi08);
 
+	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
+
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
 	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset);
+
+	bool dspHasBooted() const;
+
+	const ROMFile& getROM() const { return m_rom; }
 
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
@@ -73,8 +80,11 @@ private:
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
+	bool waitingForPresetReceiveConfirmation() const;
 
 	dsp56k::HDI08Queue m_hdi08;
+	std::vector<Hdi08TxParser> m_hdi08TxParsers;
+
 	const ROMFile& m_rom;
 
 	std::array<TPreset,128> m_multis;
@@ -100,7 +110,6 @@ private:
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
-	int m_pendingPresetWriteDelay;
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	mutable std::recursive_mutex m_mutex;
