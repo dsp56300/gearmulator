@@ -79,6 +79,7 @@ namespace Virus
 
     	void selectPrevPreset(uint8_t _part);
     	void selectNextPreset(uint8_t _part);
+        std::string getBankName(uint32_t _index) const;
 
         static void printMessage(const SysEx &);
 
@@ -168,7 +169,7 @@ namespace Virus
     	void parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
-        void parseControllerDump(synthLib::SMidiEvent &);
+        void parseControllerDump(const synthLib::SMidiEvent&);
 
         AudioPluginAudioProcessor& m_processor;
         juce::CriticalSection m_eventQueueLock;

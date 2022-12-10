@@ -13,6 +13,8 @@ namespace pluginLib
 		uint8_t usedMask = 0;
 		uint32_t byteIndex = 0;
 
+		m_byteToDefinitionIndex.reserve(m_definitions.size());
+
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
 			const auto& d = m_definitions[i];
@@ -30,7 +32,11 @@ namespace pluginLib
 			}
 
 			m_definitionToByteIndex.insert(std::make_pair(i, byteIndex));
-			m_byteToDefinitionIndex.insert(std::make_pair(byteIndex, i));
+
+			if(byteIndex >= m_byteToDefinitionIndex.size())
+				m_byteToDefinitionIndex.push_back({});
+
+			m_byteToDefinitionIndex[byteIndex].push_back(i);
 
 			usedMask |= masked;
 		}
@@ -46,11 +52,14 @@ namespace pluginLib
 
 		for(size_t i=0; i<size(); ++i)
 		{
-			const auto range = m_byteToDefinitionIndex.equal_range(static_cast<uint32_t>(i));
+			if(i >= m_byteToDefinitionIndex.size())
+				continue;
 
-			for(auto itRange = range.first; itRange != range.second; ++itRange)
+			const auto& range = m_byteToDefinitionIndex[i];
+
+			for(auto itRange = range.begin(); itRange != range.end(); ++itRange)
 			{
-				const auto& d = m_definitions[itRange->second];
+				const auto& d = m_definitions[*itRange];
 
 				switch (d.type)
 				{
@@ -72,7 +81,7 @@ namespace pluginLib
 					}
 					break;
 				case MidiDataType::Checksum:
-					pendingChecksums.insert(std::make_pair(static_cast<uint32_t>(i), itRange->second));
+					pendingChecksums.insert(std::make_pair(static_cast<uint32_t>(i), *itRange));
 					break;
 				default:
 					{
@@ -90,7 +99,7 @@ namespace pluginLib
 			}
 		}
 
-		for (auto& pendingChecksum : pendingChecksums)
+		for (const auto& pendingChecksum : pendingChecksums)
 		{
 			const auto byteIndex = pendingChecksum.first;
 			const auto descIndex = pendingChecksum.second;
@@ -111,15 +120,20 @@ namespace pluginLib
 		if(_src.size() != size())
 			return false;
 
+		_parameterValues.reserve(_src.size() << 1);
+
 		for(size_t i=0; i<_src.size(); ++i)
 		{
 			const auto s = _src[i];
 
-			const auto range = m_byteToDefinitionIndex.equal_range(static_cast<uint32_t>(i));
+			if(i >= m_byteToDefinitionIndex.size())
+				continue;
 
-			for(auto it = range.first; it != range.second; ++it)
+			const auto& range = m_byteToDefinitionIndex[i];
+
+			for(auto it = range.begin(); it != range.end(); ++it)
 			{
-				const auto& d = m_definitions[it->second];
+				const auto& d = m_definitions[*it];
 
 				switch (d.type)
 				{

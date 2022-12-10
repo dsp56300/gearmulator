@@ -90,9 +90,7 @@ namespace genericVirusUI
 
 			for(uint32_t i=0; i<m_controller.getBankCount(); ++i)
 			{
-				std::stringstream ss;
-				ss << "Bank " << static_cast<char>('A' + i);
-				m_romBankSelect->addItem(ss.str(), ++id);
+				m_romBankSelect->addItem(m_controller.getBankName(i), ++id);
 			}
 
 			m_romBankSelect->onChange = [this]

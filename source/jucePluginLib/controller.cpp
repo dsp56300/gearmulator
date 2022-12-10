@@ -215,7 +215,7 @@ namespace pluginLib
 
 	bool Controller::parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
 	{
-		const auto packets = m_descriptions.getMidiPackets();
+		const auto& packets = m_descriptions.getMidiPackets();
 
 		for (const auto& packet : packets)
 		{
