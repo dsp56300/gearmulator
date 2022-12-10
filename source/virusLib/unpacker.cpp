@@ -152,17 +152,41 @@ namespace virusLib
 				continue;
 			}
 
-			size_t ctr = 0;
-			assert (chunk.data.size() % 35 == 2);  // each chunk has 2 remaining bytes (checksum?)
-			for (size_t i = 0; i < chunk.size - 2; i += 35)
+			if(chunk.data.size() % 35 == 2)
 			{
-				const auto idx = swap16(*reinterpret_cast<uint16_t*>(&chunk.data[i + 1]));
-				assert (idx == ctr);
-				for (size_t j = 0; j < 32; ++j)
+				size_t ctr = 0;
+
+				// 4 chunk ID, 4 chunk length, 1 block id?, 2 segment offset in bytes (32)
+				// each chunk has 2 remaining bytes (checksum?)
+				for (size_t i = 0; i < chunk.size - 2; i += 35)
 				{
-					content.emplace_back(chunk.data[i + j + 3]);
+					const auto idx = swap16(*reinterpret_cast<uint16_t*>(&chunk.data[i + 1]));
+					assert (idx == ctr);
+					for (size_t j = 0; j < 32; ++j)
+					{
+						content.emplace_back(chunk.data[i + j + 3]);
+					}
+					ctr += 32;
 				}
-				ctr += 32;
+			}
+			else
+			{
+				// slightly different chunk format
+				// 4 chunk ID, 4 chunk length, 1 chunk id, 1 counter per segment, 1 block id?
+				assert(chunk.data.size() % 35 == 0);
+
+				uint8_t ctr = 0;
+				for (size_t i = 0; i < chunk.size - 2; i += 35)
+				{
+					const auto idx = static_cast<uint8_t>(chunk.data[i + 1]);
+
+					assert (idx == ctr);
+					for (size_t j = 0; j < 32; ++j)
+					{
+						content.emplace_back(chunk.data[i + j + 3]);
+					}
+					++ctr;
+				}
 			}
 		}
 
