@@ -23,6 +23,8 @@ namespace genericUI
 		juce::Font getLabelFont(juce::Label&) override;
 		juce::Font getPopupMenuFont() override;
 		juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override;
+		bool shouldPopupMenuScaleWithTargetComponent (const juce::PopupMenu::Options&) override;
+		juce::PopupMenu::Options getOptionsForComboBoxPopupMenu(juce::ComboBox&, juce::Label&) override;
 
 		void applyFontProperties(juce::Font& _font) const;
 

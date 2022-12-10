@@ -2483,7 +2483,7 @@
                     }
                 },
                 {
-                    "name" : "EnvVel",
+                    "name" : "EnvVel1",
                     "parameterAttachment" : {
                         "parameter" : "Flt1 EnvAmt Velocity"
                     },
@@ -2621,7 +2621,7 @@
                     }
                 },
                 {
-                    "name" : "EnvVel",
+                    "name" : "EnvVel2",
                     "parameterAttachment" : {
                         "parameter" : "Flt2 EnvAmt Velocity"
                     },
@@ -2773,7 +2773,13 @@
                         "texture" : "link_horizon_48x72_x2",
                         "tileSizeX" : "24",
                         "tileSizeY" : "72"
-                    }
+                    },
+					"controllerlinks": [
+						{ "source": "VelFlt1Freq", "dest": "VelFlt2Freq", "condition":"LinkEnv"},
+						{ "source": "VelFlt2Freq", "dest": "VelFlt1Freq", "condition":"LinkEnv"},
+						{ "source": "EnvVel1", "dest": "EnvVel2", "condition":"LinkEnv"},
+						{ "source": "EnvVel2", "dest": "EnvVel1", "condition":"LinkEnv"}
+					]
                 },
                 {
                     "name" : "Attack",
@@ -3230,7 +3236,11 @@
                         "texture" : "link_vert_72x48_x2",
                         "tileSizeX" : "72",
                         "tileSizeY" : "24"
-                    }
+                    },
+					"controllerlinks": [
+						{ "source": "LfoOsc1Pitch", "dest": "LfoOsc2Pitch", "condition":"Lfo1Link"},
+						{ "source": "LfoOsc2Pitch", "dest": "LfoOsc1Pitch", "condition":"Lfo1Link"}
+					]
                 },
                 {
                     "name" : "LfoShape",
@@ -3373,7 +3383,7 @@
                     }
                 },
                 {
-                    "name" : "LfoOsc1Pitch",
+                    "name" : "Cutoff1Lfo2Amount",
                     "parameterAttachment" : {
                         "parameter" : "Cutoff1 Lfo2 Amount"
                     },
@@ -3390,7 +3400,7 @@
                     }
                 },
                 {
-                    "name" : "LfoOsc2Pitch",
+                    "name" : "Cutoff2Lfo2Amount",
                     "parameterAttachment" : {
                         "parameter" : "Cutoff2 Lfo2 Amount"
                     },
@@ -3491,7 +3501,7 @@
                     }
                 },
                 {
-                    "name" : "Lfo1Link",
+                    "name" : "Lfo2Link",
                     "button" : {
                         "isToggle" : "1",
                         "normalImage" : "0",
@@ -3505,7 +3515,11 @@
                         "texture" : "link_vert_72x48_x2",
                         "tileSizeX" : "72",
                         "tileSizeY" : "24"
-                    }
+                    },
+					"controllerlinks": [
+						{ "source": "Cutoff1Lfo2Amount", "dest": "Cutoff2Lfo2Amount", "condition":"Lfo2Link"},
+						{ "source": "Cutoff2Lfo2Amount", "dest": "Cutoff1Lfo2Amount", "condition":"Lfo2Link"}
+					]
                 },
                 {
                     "name" : "LfoShape",

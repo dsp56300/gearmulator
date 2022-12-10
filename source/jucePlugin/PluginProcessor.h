@@ -2,9 +2,13 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
+
 #include "../synthLib/plugin.h"
 #include "../virusLib/device.h"
+
 #include "VirusController.h"
+
+class PluginEditorState;
 
 //==============================================================================
 class AudioPluginAudioProcessor  : public juce::AudioProcessor, juce::MidiInputCallback
@@ -60,7 +64,8 @@ public:
 	juce::MidiInput* getMidiInput() const;
 	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
 	
-    std::string getRomName() {
+    std::string getRomName() const
+    {
         return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
     }
     virusLib::ROMFile::Model getModel() const
@@ -72,6 +77,8 @@ public:
 	    return m_plugin;
     }
     void updateLatencySamples();
+
+	void setLatencyBlocks(uint32_t _blocks);
 
 	// _____________
 	//
@@ -90,4 +97,5 @@ private:
 	synthLib::Plugin					m_plugin;
 	std::vector<synthLib::SMidiEvent>	m_midiOut;
     uint32_t							m_clockTempoParam = 0xffffffff;
+    std::unique_ptr<PluginEditorState>  m_editorState;
 };

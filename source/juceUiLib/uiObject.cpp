@@ -64,6 +64,17 @@ namespace genericUI
 		}
 	}
 
+	void UiObject::createControllerLinks(Editor& _editor)
+	{
+		for (auto& link : m_controllerLinks)
+			link->create(_editor);
+
+		for (auto& ch : m_children)
+		{
+			ch->createControllerLinks(_editor);
+		}
+	}
+
 	void UiObject::apply(Editor& _editor, juce::Component& _target)
 	{
 		const auto x = getPropertyInt("x");
@@ -252,6 +263,16 @@ namespace genericUI
 		return count;
 	}
 
+	size_t UiObject::getControllerLinkCountRecursive() const
+	{
+		size_t count = m_controllerLinks.size();
+
+		for (const auto & c : m_children)
+			count += c->getControllerLinkCountRecursive();
+
+		return count;
+	}
+
 	void UiObject::createCondition(Editor& _editor, juce::Component& _target)
 	{
 		if(!hasComponent("condition"))
@@ -358,6 +379,30 @@ namespace genericUI
 					throw std::runtime_error("tab group page count must match tap group button count");
 
 				m_tabGroup = TabGroup(name, pagesVec, buttonVec);
+			}
+			else if(key == "controllerlinks")
+			{
+				auto* entries = value.getArray();
+
+				if(entries && !entries->isEmpty())
+				{
+					for(auto j=0; j<entries->size(); ++j)
+					{
+						const auto& e = (*entries)[j];
+						const auto source = e["source"].toString().toStdString();
+						const auto dest = e["dest"].toString().toStdString();
+						const auto condition = e["condition"].toString().toStdString();
+
+						if(source.empty())
+							throw std::runtime_error("source for controller link needs to have a name");
+						if(dest.empty())
+							throw std::runtime_error("destination for controller link needs to have a name");
+						if(condition.empty())
+							throw std::runtime_error("condition for controller link needs to have a name");
+
+						m_controllerLinks.emplace_back(new ControllerLink(source, dest, condition));
+					}
+				}
 			}
 			else
 			{

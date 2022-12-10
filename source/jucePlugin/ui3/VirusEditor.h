@@ -7,13 +7,19 @@
 #include "FxPage.h"
 #include "MidiPorts.h"
 #include "PatchBrowser.h"
+#include "ControllerLinks.h"
+
+namespace pluginLib
+{
+	class Parameter;
+}
 
 class VirusParameterBinding;
 class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
 {
-	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor
+	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor, juce::Timer
 	{
 	public:
 		enum class FileType
@@ -56,12 +62,10 @@ namespace genericVirusUI
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
 
-		void mouseDrag(const juce::MouseEvent& event) override;
 		void mouseEnter(const juce::MouseEvent& event) override;
-		void mouseExit(const juce::MouseEvent& event) override;
-		void mouseUp(const juce::MouseEvent& event) override;
+		void timerCallback() override;
 
-		void updateControlLabel(juce::Component* _component) const;
+		void updateControlLabel(juce::Component* _component);
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 
@@ -85,6 +89,7 @@ namespace genericVirusUI
 		std::unique_ptr<MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
+		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
 		juce::Label* m_focusedParameterName = nullptr;
@@ -103,6 +108,7 @@ namespace genericVirusUI
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
+		std::vector<pluginLib::Parameter*> m_boundParameters;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 	};

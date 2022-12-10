@@ -148,10 +148,10 @@ namespace Virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, true);
+				param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, true);
+			param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
 		// TODO:
         /**
          If a
@@ -389,10 +389,10 @@ namespace Virus
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
 	            auto* p = getParameter(it->first.second, ch);
-				p->setValueFromSynth(it->second, true);
+				p->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
 
-	            for (const auto& linkedParam : p->getLinkedParameters())
-		            linkedParam->setValueFromSynth(it->second, true);
+	            for (const auto& derivedParam : p->getDerivedParameters())
+		            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
             }
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)
@@ -465,7 +465,7 @@ namespace Virus
                 if(desc.page != virusLib::PAGE_C)
                     continue;
 
-                param->setValueFromSynth(value);
+                param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::PresetChange);
 			}
 		}
     }
@@ -487,7 +487,7 @@ namespace Virus
 		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, page == 0 ? "A" : "B", m.b, m.c));
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
-			p->setValueFromSynth(m.c, true);
+			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
 	}
 
     void Controller::printMessage(const SysEx &msg)
