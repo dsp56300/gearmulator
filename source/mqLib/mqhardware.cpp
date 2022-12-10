@@ -300,9 +300,10 @@ namespace mqLib
 		if(!m_haltDSP)
 			return;
 
-		std::lock_guard uLockHalt(m_haltDSPmutex);
-		m_haltDSP = false;
-		uLockHalt.unlock();
+		{
+			std::lock_guard uLockHalt(m_haltDSPmutex);
+			m_haltDSP = false;
+		}
 		m_haltDSPcv.notify_one();
 	}
 
