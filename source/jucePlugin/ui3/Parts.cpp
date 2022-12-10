@@ -109,9 +109,7 @@ namespace genericVirusUI
                     m_editor.getController().setCurrentPartPreset(pt, bank, j);
                 });
             }
-            std::stringstream bankName;
-            bankName << "Bank " << static_cast<char>('A' + b);
-            selector.addSubMenu(std::string(bankName.str()), p);
+            selector.addSubMenu(m_editor.getController().getBankName(b), p);
 		}
 		selector.showMenuAsync(juce::PopupMenu::Options());
 	}

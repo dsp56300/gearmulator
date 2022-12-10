@@ -704,4 +704,11 @@ namespace Virus
             setCurrentPartPreset(_part, getCurrentPartBank(_part), getCurrentPartProgram(_part) + 1);
 		}
     }
+
+    std::string Controller::getBankName(uint32_t _index) const
+    {
+        char temp[32]{0};
+        sprintf(temp, "Bank %c", 'A' + _index);
+        return temp;
+    }
 }; // namespace Virus

@@ -76,6 +76,7 @@ namespace Virus
 
     	void selectPrevPreset(uint8_t _part);
     	void selectNextPreset(uint8_t _part);
+        std::string getBankName(uint32_t _index) const;
 
         static void printMessage(const SysEx &);
 
