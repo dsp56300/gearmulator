@@ -221,8 +221,8 @@ namespace Virus
         return name;
     }
 
-    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name)
-	{
+    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name) const
+    {
 		for (int i=0; i<kNameLength; i++)
 		{
 	        const std::string paramName = "SingleName" + std::to_string(i);

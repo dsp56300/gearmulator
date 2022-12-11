@@ -1,8 +1,16 @@
 #pragma once
 
+#include <functional>
+#include <memory>
 #include <string>
+#include <vector>
 
-#include "VirusParameterBinding.h"
+#include "../../jucePluginLib/parameterbinding.h"
+
+namespace juce
+{
+	class Component;
+}
 
 class AudioPluginAudioProcessor;
 
@@ -51,7 +59,7 @@ private:
 
 	AudioPluginAudioProcessor& m_processor;
 
-	VirusParameterBinding m_parameterBinding;
+	pluginLib::ParameterBinding m_parameterBinding;
 
 	std::unique_ptr<juce::Component> m_virusEditor;
 	Skin m_currentSkin;

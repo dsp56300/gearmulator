@@ -5,6 +5,7 @@ set(SOURCES
 	controller.cpp controller.h
 	midipacket.cpp midipacket.h
 	parameter.cpp parameter.h
+	parameterbinding.cpp parameterbinding.h
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
