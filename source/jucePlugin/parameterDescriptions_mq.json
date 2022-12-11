@@ -949,273 +949,59 @@
 		],
 		"singledump": [
 			{"type": "byte", "value": "f0"},
-			{"type": "byte", "value": "00"},
-			{"type": "byte", "value": "20"},
-			{"type": "byte", "value": "33"},
-			{"type": "byte", "value": "01"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "10"},
 			{"type": "deviceid"},
 			{"type": "byte", "value": "10"},
 			{"type": "bank"},
 			{"type": "program"},
 
-			{"type": "param", "name":"Version"},							// 0
-			{"type": "param", "name":"Modulation Wheel"},                   // 1
-			{"type": "param", "name":"Breath Controller"},                  // 2
-			{"type": "param", "name":"Contr 3"},                            // 3
-			{"type": "param", "name":"Foot Controller"},                    // 4
-			{"type": "param", "name":"Portamento Time"},                    // 5
-			{"type": "param", "name":"Data Slider"},                        // 6
-			{"type": "param", "name":"Channel Volume"},                     // 7
-			{"type": "param", "name":"Balance"},                            // 8
-			{"type": "param", "name":"Contr 9"},                            // 9
-			{"type": "param", "name":"Panorama"},                           // 10
-			{"type": "param", "name":"Expression"},                         // 11
-			{"type": "param", "name":"Contr 12"},                           // 12
-			{"type": "param", "name":"Contr 13"},                           // 13
-			{"type": "param", "name":"Contr 14"},                           // 14
-			{"type": "param", "name":"Contr 15"},                           // 15
-			{"type": "param", "name":"Contr 16"},                           // 16
-			{"type": "param", "name":"Osc1 Shape"},                         // 17
-			{"type": "param", "name":"Osc1 Pulsewidth"},                    // 18
-			{"type": "param", "name":"Osc1 Wave Select"},                   // 19
-			{"type": "param", "name":"Osc1 Semitone"},                      // 20
-			{"type": "param", "name":"Osc1 Keyfollow"},                     // 21
-			{"type": "param", "name":"Osc2 Shape"},                         // 22
-			{"type": "param", "name":"Osc2 Pulsewidth"},                    // 23
-			{"type": "param", "name":"Osc2 Wave Select"},                   // 24
-			{"type": "param", "name":"Osc2 Semitone"},                      // 25
-			{"type": "param", "name":"Osc2 Detune"},                        // 26
-			{"type": "param", "name":"Osc2 FM Amount"},                     // 27
-			{"type": "param", "name":"Osc2 Sync"},                          // 28
-			{"type": "param", "name":"Osc2 Filt Env Amt"},                  // 29
-			{"type": "param", "name":"FM Filt Env Amt"},                    // 30
-			{"type": "param", "name":"Osc2 Keyfollow"},                     // 31
-			{"type": "param", "name":"Bank Select"},                        // 32
-			{"type": "param", "name":"Osc Balance"},                        // 33
-			{"type": "param", "name":"Suboscillator Volume"},               // 34
-			{"type": "param", "name":"Suboscillator Shape"},                // 35
-			{"type": "param", "name":"Osc Mainvolume"},                     // 36
-			{"type": "param", "name":"Noise Volume"},                       // 37
-			{"type": "param", "name":"Ringmodulator Volume"},               // 38
-			{"type": "param", "name":"Noise Color"},                        // 39
-			{"type": "param", "name":"Cutoff"},                             // 40
-			{"type": "param", "name":"Cutoff2"},                            // 41
-			{"type": "param", "name":"Filter1 Resonance"},                  // 42
-			{"type": "param", "name":"Filter2 Resonance"},                  // 43
-			{"type": "param", "name":"Filter1 Env Amt"},                    // 44
-			{"type": "param", "name":"Filter2 Env Amt"},                    // 45
-			{"type": "param", "name":"Filter1 Keyfollow"},                  // 46
-			{"type": "param", "name":"Filter2 Keyfollow"},                  // 47
-			{"type": "param", "name":"Filter Balance"},                     // 48
-			{"type": "param", "name":"Saturation Curve"},                   // 49
-			{"type": "null"},                                               // 50
-			{"type": "param", "name":"Filter1 Mode"},                       // 51
-			{"type": "param", "name":"Filter2 Mode"},                       // 52
-			{"type": "param", "name":"Filter Routing"},                     // 53
-			{"type": "param", "name":"Filter Env Attack"},                  // 54
-			{"type": "param", "name":"Filter Env Decay"},                   // 55
-			{"type": "param", "name":"Filter Env Sustain"},                 // 56
-			{"type": "param", "name":"Filter Env Sustain Time"},            // 57
-			{"type": "param", "name":"Filter Env Release"},                 // 58
-			{"type": "param", "name":"Amp Env Attack"},                     // 59
-			{"type": "param", "name":"Amp Env Decay"},                      // 60
-			{"type": "param", "name":"Amp Env Sustain"},                    // 61
-			{"type": "param", "name":"Amp Env Sustain Time"},               // 62
-			{"type": "param", "name":"Amp Env Release"},                    // 63
-			{"type": "param", "name":"Hold Pedal"},                         // 64
-			{"type": "param", "name":"Portamento Pedal"},                   // 65
-			{"type": "param", "name":"Sostenuto Pedal"},                    // 66
-			{"type": "param", "name":"Lfo1 Rate"},                          // 67
-			{"type": "param", "name":"Lfo1 Shape"},                         // 68
-			{"type": "param", "name":"Lfo1 Env Mode"},                      // 69
-			{"type": "param", "name":"Lfo1 Mode"},                          // 70
-			{"type": "param", "name":"Lfo1 Symmetry"},                      // 71
-			{"type": "param", "name":"Lfo1 Keyfollow"},                     // 72
-			{"type": "param", "name":"Lfo1 Keytrigger"},                    // 73
-			{"type": "param", "name":"Osc1 Lfo1 Amount"},                   // 74
-			{"type": "param", "name":"Osc2 Lfo1 Amount"},                   // 75
-			{"type": "param", "name":"PW Lfo1 Amount"},                     // 76
-			{"type": "param", "name":"Reso Lfo1 Amount"},                   // 77
-			{"type": "param", "name":"FiltGain Lfo1 Amount"},               // 78
-			{"type": "param", "name":"Lfo2 Rate"},                          // 79
-			{"type": "param", "name":"Lfo2 Shape"},                         // 80
-			{"type": "param", "name":"Lfo2 Env Mode"},                      // 81
-			{"type": "param", "name":"Lfo2 Mode"},                          // 82
-			{"type": "param", "name":"Lfo2 Symmetry"},                      // 83
-			{"type": "param", "name":"Lfo2 Keyfollow"},                     // 84
-			{"type": "param", "name":"Lfo2 Keytrigger"},                    // 85
-			{"type": "param", "name":"Shape Lfo2 Amount"},                  // 86
-			{"type": "param", "name":"FM Lfo2 Amount"},                     // 87
-			{"type": "param", "name":"Cutoff1 Lfo2 Amount"},                // 88
-			{"type": "param", "name":"Cutoff2 Lfo2 Amount"},                // 89
-			{"type": "param", "name":"Pan Lfo2 Amount"},                    // 90
-			{"type": "param", "name":"Patch Volume"},                       // 91
-			{"type": "param", "name":"A_Undefined92"},                      // 92
-			{"type": "param", "name":"Transpose"},                          // 93
-			{"type": "param", "name":"Key Mode"},                           // 94
-			{"type": "param", "name":"A_Undefined95"},                      // 95
-			{"type": "param", "name":"A_Undefined96"},                      // 96
-			{"type": "param", "name":"Unison Mode"},                        // 97
-			{"type": "param", "name":"Unison Detune"},                      // 98
-			{"type": "param", "name":"Unison Pan Spread"},                  // 99
-			{"type": "param", "name":"Unison Lfo Phase"},                   // 100
-			{"type": "param", "name":"Input Mode"},                         // 101
-			{"type": "param", "name":"Input Select"},                       // 102
-			{"type": "param", "name":"A_Undefined103"},                     // 103
-			{"type": "param", "name":"A_Undefined104"},                     // 104
-			{"type": "param", "name":"Chorus Mix"},                         // 105
-			{"type": "param", "name":"Chorus Rate"},                        // 106
-			{"type": "param", "name":"Chorus Depth"},                       // 107
-			{"type": "param", "name":"Chorus Delay"},                       // 108
-			{"type": "param", "name":"Chorus Feedback"},                    // 109
-			{"type": "param", "name":"Chorus Lfo Shape"},                   // 110
-			{"type": "param", "name":"A_Undefined111"},                     // 111
-			{"type": "param", "name":"Delay/Reverb Mode"},                  // 112
-			{"type": "param", "name":"Effect Send"},                        // 113
-			{"type": "param", "name":"Delay Time"},                         // 114
-			{"type": "param", "name":"Delay Feedback"},                     // 115
-			{"type": "param", "name":"Dly Rate / Rev Decay"},               // 116
-			{"type": "param", "name":"Dly Depth "},                         // 117
-			{"type": "param", "name":"Reverb Damping"},                     // 118
-			{"type": "param", "name":"Delay Color"},                        // 119
-			{"type": "param", "name":"A_Undefined120"},                     // 120
-			{"type": "param", "name":"A_Undefined121"},                     // 121
-			{"type": "param", "name":"Keyb Local"},                         // 122
-			{"type": "param", "name":"All Notes Off"},                      // 123
-			{"type": "param", "name":"A_Undefined124"},                     // 124
-			{"type": "param", "name":"A_Undefined125"},                     // 125
-			{"type": "param", "name":"A_Undefined126"},                     // 126
-			{"type": "param", "name":"A_Undefined127"},                     // 127
+			{"type": "param", "name":"Version"},						// 0
+			{"type": "param", "name":"O1Octave"},                       // 1
+			{"type": "param", "name":"O1Semi"},                         // 2
+			{"type": "param", "name":"O1Detune"},                       // 3
+			{"type": "param", "name":"O1BendRange"},                    // 4
+			{"type": "param", "name":"O1KeyTrack"},                     // 5
+			{"type": "param", "name":"O1FmSource"},                     // 6
+			{"type": "param", "name":"O1FmAmount"},                     // 7
+			{"type": "param", "name":"O1Shape"},                        // 8
+			{"type": "param", "name":"O1PulseWidth"},                   // 9
+			{"type": "param", "name":"O1PwmSource"},                    // 10
+			{"type": "param", "name":"O1Pwm"},                          // 11
+			{"type": "param", "name":"O1SubFreqDiv"},                   // 12
+			{"type": "param", "name":"O1SubVolume"},                    // 13
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"O2Octave"},						// 17
+			{"type": "param", "name":"O2Semi"},                         // 18
+			{"type": "param", "name":"O2Detune"},                       // 19
+			{"type": "param", "name":"O2BendRange"},                    // 20
+			{"type": "param", "name":"O2KeyTrack"},                     // 21
+			{"type": "param", "name":"O2FmSource"},                     // 22
+			{"type": "param", "name":"O2FmAmount"},                     // 23
+			{"type": "param", "name":"O2Shape"},                        // 24
+			{"type": "param", "name":"O2PulseWidth"},                   // 25
+			{"type": "param", "name":"O2PwmSource"},                    // 26
+			{"type": "param", "name":"O2Pwm"},                          // 27
+			{"type": "param", "name":"O2SubFreqDiv"},                   // 28
+			{"type": "param", "name":"O2SubVolume"},                    // 29
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"O3Octave"},						
+			{"type": "param", "name":"O3Semi"},
+			{"type": "param", "name":"O3Detune"},
+			{"type": "param", "name":"O3BendRange"},
+			{"type": "param", "name":"O3KeyTrack"},
+			{"type": "param", "name":"O3FmSource"},
+			{"type": "param", "name":"O3FmAmount"},
+			{"type": "param", "name":"O3Shape"},
+			{"type": "param", "name":"O3PulseWidth"},
+			{"type": "param", "name":"O3PwmSource"},
+			{"type": "param", "name":"O3Pwm"},
 
-			{"type": "param", "name":"B_Undefined0"},                       // 0
-			{"type": "param", "name":"Arp Mode"},                           // 1
-			{"type": "param", "name":"Arp Pattern Selct"},                  // 2
-			{"type": "param", "name":"Arp Octave Range"},                   // 3
-			{"type": "param", "name":"Arp Hold Enable"},                    // 4
-			{"type": "param", "name":"Arp Note Length"},                    // 5
-			{"type": "param", "name":"Arp Swing"},                          // 6
-			{"type": "param", "name":"Lfo3 Rate"},                          // 7
-			{"type": "param", "name":"Lfo3 Shape"},                         // 8
-			{"type": "param", "name":"Lfo3 Mode"},                          // 9
-			{"type": "param", "name":"Lfo3 Keyfollow"},                     // 10
-			{"type": "param", "name":"Lfo3 Destination"},                   // 11
-			{"type": "param", "name":"Osc Lfo3 Amount"},                    // 12
-			{"type": "param", "name":"Lfo3 Fade-In Time"},                  // 13
-			{"type": "param", "name":"B_Undefined14"},                      // 14
-			{"type": "param", "name":"B_Undefined15"},                      // 15
-			{"type": "param", "name":"Clock Tempo"},                        // 16
-			{"type": "param", "name":"Arp Clock"},                          // 17
-			{"type": "param", "name":"Lfo1 Clock"},                         // 18
-			{"type": "param", "name":"Lfo2 Clock"},                         // 19
-			{"type": "param", "name":"Delay Clock"},                        // 20
-			{"type": "param", "name":"Lfo3 Clock"},                         // 21
-			{"type": "param", "name":"B_Undefined22"},                      // 22
-			{"type": "param", "name":"B_Undefined23"},                      // 23
-			{"type": "param", "name":"B_Undefined24"},                      // 24
-			{"type": "param", "name":"Control Smooth Mode"},                // 25
-			{"type": "param", "name":"Bender Range Up"},                    // 26
-			{"type": "param", "name":"Bender Range Down"},                  // 27
-			{"type": "param", "name":"Bender Scale"},                       // 28
-			{"type": "param", "name":"B_Undefined29"},                      // 29
-			{"type": "param", "name":"Filter1 Env Polarity"},               // 30
-			{"type": "param", "name":"Filter2 Env Polarity"},               // 31
-			{"type": "param", "name":"Filter2 Cutoff Link"},                // 32
-			{"type": "param", "name":"Filter Keytrack Base"},               // 33
-			{"type": "param", "name":"Osc FM Mode"},                        // 34
-			{"type": "param", "name":"Osc Init Phase"},                     // 35
-			{"type": "param", "name":"Punch Intensity"},                    // 36
-			{"type": "param", "name":"B_Undefined37"},                      // 37
-			{"type": "param", "name":"Input Follower Mode"},                // 38
-			{"type": "param", "name":"Vocoder Mode"},                       // 39
-			{"type": "param", "name":"B_Undefined40"},                      // 40
-			{"type": "param", "name":"Osc3 Mode"},                          // 41
-			{"type": "param", "name":"Osc3 Volume"},                        // 42
-			{"type": "param", "name":"Osc3 Semitone"},                      // 43
-			{"type": "param", "name":"Osc3 Detune"},                        // 44
-			{"type": "param", "name":"LowEQ Frequency"},                    // 45
-			{"type": "param", "name":"HighEQ Frequency"},                   // 46
-			{"type": "param", "name":"Osc1 Shape Velocity"},                // 47
-			{"type": "param", "name":"Osc2 Shape Velocity"},                // 48
-			{"type": "param", "name":"PulseWidth Velocity"},                // 49
-			{"type": "param", "name":"Fm Amount Velocity"},                 // 50
-			{"type": "param", "name":"Soft Knob1 ShortName"},               // 51
-			{"type": "param", "name":"Soft Knob2 ShortName"},               // 52
-			{"type": "param", "name":"B_Undefined53"},                      // 53
-			{"type": "param", "name":"Flt1 EnvAmt Velocity"},               // 54
-			{"type": "param", "name":"Flt2 EnvAmt Velocity"},               // 55
-			{"type": "param", "name":"Resonance1 Velocity"},                // 56
-			{"type": "param", "name":"Resonance2 Velocity"},                // 57
-			{"type": "param", "name":"Second Output Balance"},              // 58
-			{"type": "param", "name":"B_Undefined59"},                      // 59
-			{"type": "param", "name":"Amp Velocity"},                       // 60
-			{"type": "param", "name":"Panorama Velocity"},                  // 61
-			{"type": "param", "name":"Soft Knob-1 Single"},                 // 62
-			{"type": "param", "name":"Soft Knob-2 Single"},                 // 63
-			{"type": "param", "name":"Assign1 Source"},                     // 64
-			{"type": "param", "name":"Assign1 Destination"},                // 65
-			{"type": "param", "name":"Assign1 Amount"},                     // 66
-			{"type": "param", "name":"Assign2 Source"},                     // 67
-			{"type": "param", "name":"Assign2 Destination1"},               // 68
-			{"type": "param", "name":"Assign2 Amount1"},                    // 69
-			{"type": "param", "name":"Assign2 Destination2"},               // 70
-			{"type": "param", "name":"Assign2 Amount2"},                    // 71
-			{"type": "param", "name":"Assign3 Source"},                     // 72
-			{"type": "param", "name":"Assign3 Destination1"},               // 73
-			{"type": "param", "name":"Assign3 Amount1"},                    // 74
-			{"type": "param", "name":"Assign3 Destination2"},               // 75
-			{"type": "param", "name":"Assign3 Amount2"},                    // 76
-			{"type": "param", "name":"Assign3 Destination3"},               // 77
-			{"type": "param", "name":"Assign3 Amount3"},                    // 78
-			{"type": "param", "name":"LFO1 Assign Dest"},                   // 79
-			{"type": "param", "name":"LFO1 Assign Amount"},                 // 80
-			{"type": "param", "name":"LFO2 Assign Dest"},                   // 81
-			{"type": "param", "name":"LFO2 Assign Amount"},                 // 82
-			{"type": "param", "name":"B_Undefined83"},                      // 83
-			{"type": "param", "name":"Phaser Mode"},                        // 84
-			{"type": "param", "name":"Phaser Mix"},                         // 85
-			{"type": "param", "name":"Phaser Rate"},                        // 86
-			{"type": "param", "name":"Phaser Depth"},                       // 87
-			{"type": "param", "name":"Phaser Frequency"},                   // 88
-			{"type": "param", "name":"Phaser Feedback"},                    // 89
-			{"type": "param", "name":"Phaser Spread"},                      // 90
-			{"type": "param", "name":"B_Undefined91"},                      // 91
-			{"type": "param", "name":"MidEQ Gain"},                         // 92
-			{"type": "param", "name":"MidEQ Frequency"},                    // 93
-			{"type": "param", "name":"MidEQ Q-Factor"},                     // 94
-			{"type": "param", "name":"LowEQ Gain"},                         // 95
-			{"type": "param", "name":"HighEQ Gain"},                        // 96
-			{"type": "param", "name":"Bass Intensity"},                     // 97
-			{"type": "param", "name":"Bass Tune"},                          // 98
-			{"type": "param", "name":"Input Ringmodulator"},                // 99
-			{"type": "param", "name":"Distortion Curve"},                   // 100
-			{"type": "param", "name":"Distortion Intensity"},               // 101
-			{"type": "param", "name":"B_Undefined102"},                     // 102
-			{"type": "param", "name":"Assign 4 Source"},                    // 103
-			{"type": "param", "name":"Assign 4 Destination"},               // 104
-			{"type": "param", "name":"Assign 4 Amount"},                    // 105
-			{"type": "param", "name":"Assign 5 Source"},                    // 106
-			{"type": "param", "name":"Assign 5 Destination"},               // 107
-			{"type": "param", "name":"Assign 5 Amount"},                    // 108
-			{"type": "param", "name":"Assign 6 Source"},                    // 109
-			{"type": "param", "name":"Assign 6 Destination"},               // 110
-			{"type": "param", "name":"Assign 6 Amount"},                    // 111
-			{"type": "param", "name":"SingleName0"},                        // 112
-			{"type": "param", "name":"SingleName1"},                        // 113
-			{"type": "param", "name":"SingleName2"},                        // 114
-			{"type": "param", "name":"SingleName3"},                        // 115
-			{"type": "param", "name":"SingleName4"},                        // 116
-			{"type": "param", "name":"SingleName5"},                        // 117
-			{"type": "param", "name":"SingleName6"},                        // 118
-			{"type": "param", "name":"SingleName7"},                        // 119
-			{"type": "param", "name":"SingleName8"},                        // 120
-			{"type": "param", "name":"SingleName9"},                        // 121
-			{"type": "param", "name":"Filter Select"},                      // 122
-			{"type": "param", "name":"Category1"},                          // 123
-			{"type": "param", "name":"Category2"},                          // 124
-			{"type": "param", "name":"B_Undefined125"},                     // 125
-			{"type": "param", "name":"B_Undefined126"},                     // 126
-			{"type": "param", "name":"B_Undefined127"},                     // 127
-			{"type": "checksum", "first": 5, "last": 264 },
+			{"type": "checksum", "first": 2, "last": 264},
 			{"type": "byte", "value": "f7"}
 		],
 		"multidump": [
