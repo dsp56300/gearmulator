@@ -260,6 +260,83 @@
  		{"index":157, "name":"Fx251DelayRearSLVolume"},
  		{"index":158, "name":"Fx251DelayDelayS1R"},
  		{"index":159, "name":"Fx251DelayRearSRVolume"},
+
+		// LFO 1
+ 		{"index":160, "name":"Lfo1Shape", "min":0, "max":5},
+ 		{"index":161, "name":"Lfo1Speed"},
+ 		{"index":161, "name":"Lfo1SpeedClocked"},
+ 		{"index":163, "name":"Lfo1Sync", "min":0 , "max":1, "isBool":true},
+ 		{"index":164, "name":"Lfo1Clocked", "min":0 , "max":1, "isBool":true},
+ 		{"index":165, "name":"Lfo1StartPhase"},
+ 		{"index":166, "name":"Lfo1Delay"},
+ 		{"index":167, "name":"Lfo1Fade"},
+ 		{"index":170, "name":"Lfo1KeyTrack"},
+
+		// LFO 2
+ 		{"index":172, "name":"Lfo2Shape", "min":0, "max":5},
+ 		{"index":173, "name":"Lfo2Speed"},
+ 		{"index":174, "name":"Lfo2SpeedClocked"},
+ 		{"index":175, "name":"Lfo2Sync", "min":0 , "max":1, "isBool":true},
+ 		{"index":176, "name":"Lfo2Clocked", "min":0 , "max":1, "isBool":true},
+ 		{"index":177, "name":"Lfo2StartPhase"},
+ 		{"index":178, "name":"Lfo2Delay"},
+ 		{"index":179, "name":"Lfo2Fade"},
+ 		{"index":182, "name":"Lfo2KeyTrack"},
+
+		// LFO 3
+ 		{"index":184, "name":"Lfo3Shape", "min":0, "max":5},
+ 		{"index":185, "name":"Lfo3Speed"},
+ 		{"index":186, "name":"Lfo3SpeedClocked"},
+ 		{"index":187, "name":"Lfo3Sync", "min":0 , "max":1, "isBool":true},
+ 		{"index":188, "name":"Lfo3Clocked", "min":0 , "max":1, "isBool":true},
+ 		{"index":189, "name":"Lfo3StartPhase"},
+ 		{"index":190, "name":"Lfo3Delay"},
+ 		{"index":191, "name":"Lfo3Fade"},
+ 		{"index":194, "name":"Lfo3KeyTrack"},
+		
+		// Filter Env
+ 		{"index":196, "name":"FilterEnvMode", "min":0, "max":4},
+ 		{"index":196, "name":"FilterEnvTriggerMode", "min":0, "max":2, "isBool":true},
+ 		{"index":197, "name":"FilterEnvAttack"},
+ 		{"index":198, "name":"FilterEnvAttackLevel"},
+ 		{"index":199, "name":"FilterEnvDecay"},
+ 		{"index":200, "name":"FilterEnvSustain"},
+ 		{"index":201, "name":"FilterEnvDecay2"},
+ 		{"index":202, "name":"FilterEnvSustain2"},
+ 		{"index":203, "name":"FilterEnvRelease"},
+		
+		// Amp Env
+ 		{"index":208, "name":"AmpEnvMode", "min":0, "max":4},
+ 		{"index":208, "name":"AmpEnvTriggerMode", "min":0, "max":2, "isBool":true},
+ 		{"index":211, "name":"AmpEnvAttack"},
+ 		{"index":212, "name":"AmpEnvAttackLevel"},
+ 		{"index":213, "name":"AmpEnvDecay"},
+ 		{"index":214, "name":"AmpEnvSustain"},
+ 		{"index":215, "name":"AmpEnvDecay2"},
+ 		{"index":216, "name":"AmpEnvSustain2"},
+ 		{"index":217, "name":"AmpEnvRelease"},
+		
+		// Env 3
+ 		{"index":220, "name":"Env3Mode", "min":0, "max":4},
+ 		{"index":220, "name":"Env3TriggerMode", "min":0, "max":2, "isBool":true},
+ 		{"index":223, "name":"Env3Attack"},
+ 		{"index":224, "name":"Env3AttackLevel"},
+ 		{"index":225, "name":"Env3Decay"},
+ 		{"index":226, "name":"Env3Sustain"},
+ 		{"index":227, "name":"Env3Decay2"},
+ 		{"index":228, "name":"Env3Sustain2"},
+ 		{"index":229, "name":"Env3Release"},
+		
+		// Env 4
+ 		{"index":232, "name":"Env3Mode", "min":0, "max":4},
+ 		{"index":232, "name":"Env3TriggerMode", "min":0, "max":2, "isBool":true},
+ 		{"index":235, "name":"Env3Attack"},
+ 		{"index":236, "name":"Env3AttackLevel"},
+ 		{"index":237, "name":"Env3Decay"},
+ 		{"index":238, "name":"Env3Sustain"},
+ 		{"index":239, "name":"Env3Decay2"},
+ 		{"index":240, "name":"Env3Sustain2"},
+ 		{"index":241, "name":"Env3Release"},
  	],
  	"valuelists":
  	{
