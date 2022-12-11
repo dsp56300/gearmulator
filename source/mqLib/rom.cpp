@@ -41,6 +41,7 @@ namespace mqLib
 	bool ROM::loadFromMidi(std::vector<unsigned char>& _buffer, const std::string& _filename) const
 	{
 		_buffer.clear();
+		_buffer.reserve(getSize());
 
 		std::vector<uint8_t> data;
 		if(!synthLib::MidiToSysex::readFile(data, _filename.c_str()) || data.empty())

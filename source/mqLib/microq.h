@@ -26,6 +26,9 @@ namespace mqLib
 		MicroQ(BootMode _bootMode = BootMode::Default);
 		~MicroQ();
 
+		// returns true if the instance is valid, false if the initialization failed
+		bool isValid() const;
+
 		// Process a block of audio data. Be sure to pass two channels for the inputs and six channels for the outputs
 		// _frames means the number of samples per channel
 		void process(const float** _inputs, float** _outputs, uint32_t _frames);

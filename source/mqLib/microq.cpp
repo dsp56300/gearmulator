@@ -64,6 +64,11 @@ namespace mqLib
 		m_hw.reset();
 	}
 
+	bool MicroQ::isValid() const
+	{
+		return m_hw && m_hw->isValid();
+	}
+
 	void MicroQ::process(const float** _inputs, float** _outputs, uint32_t _frames)
 	{
 		std::lock_guard lock(m_mutex);

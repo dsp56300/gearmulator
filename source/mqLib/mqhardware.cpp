@@ -28,6 +28,9 @@ namespace mqLib
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
 	{
+		if(!m_rom.isValid())
+			return;
+
 		m_dspThread.setLogToStdout(false);
 		m_dsp.getPeriph().disableTimers(true);	// only used to test DSP load, we report 0 all the time for now
 

@@ -43,6 +43,8 @@ namespace mqLib
 
 		void setBootMode(BootMode _mode);
 
+		bool isValid() const { return m_rom.isValid(); }
+
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
 		void hdiSendIrqToDSP(uint8_t _irq);
