@@ -107,7 +107,7 @@ namespace Virus
     		return m_multiEditBuffer;
     	}
 
-		void setSinglePresetName(uint8_t _part, const juce::String& _name);
+		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
 		bool isMultiMode() const;
 
     	// part 0 - 15 (ignored when single! 0x40...)
