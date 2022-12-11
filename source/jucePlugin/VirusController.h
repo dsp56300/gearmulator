@@ -120,8 +120,6 @@ namespace Virus
 
 		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
-		uint8_t getCurrentPart() const { return m_currentPart; }
-		void setCurrentPart(uint8_t _part) { m_currentPart = _part; }
 		void parseMessage(const SysEx &);
 		void sendSysEx(const SysEx &) const;
         void onStateLoaded() const;
@@ -174,7 +172,6 @@ namespace Virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
-		uint8_t m_currentPart = 0;
 		juce::PropertiesFile *m_config;
     };
 }; // namespace Virus

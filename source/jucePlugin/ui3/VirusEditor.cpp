@@ -5,15 +5,16 @@
 #include "../ParameterNames.h"
 #include "../PluginProcessor.h"
 #include "../VirusController.h"
-#include "../VirusParameterBinding.h"
 #include "../version.h"
+
+#include "../../jucePluginLib/parameterbinding.h"
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/sysexToMidi.h"
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),

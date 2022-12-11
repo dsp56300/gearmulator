@@ -3,10 +3,9 @@
 #include "VirusEditor.h"
 
 #include "../VirusController.h"
-#include "../VirusParameterBinding.h"
 #include "../ParameterNames.h"
 
-#include "dsp56kEmu/logging.h"
+#include "../../jucePluginLib/parameterbinding.h"
 
 namespace genericVirusUI
 {

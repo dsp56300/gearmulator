@@ -32,6 +32,9 @@ namespace pluginLib
 
 		const auto& getExposedParameters() { return m_synthParams; }
 
+		uint8_t getCurrentPart() const { return m_currentPart; }
+		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
@@ -59,8 +62,10 @@ namespace pluginLib
 
 		using ParameterList = std::vector<Parameter*>;
 
-		// tries to find synth param in both internal and host
+		uint8_t m_currentPart = 0;
+
 	protected:
+		// tries to find synth param in both internal and host
 		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
 		const ParameterList& findSynthParam(const ParamIndex& _paramIndex);
 
