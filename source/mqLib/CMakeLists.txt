@@ -21,6 +21,7 @@ endif()
 set(SOURCES
 	am29f.cpp am29f.h
 	buttons.cpp buttons.h
+	device.cpp device.h
 	dspBootCode.h
 	lcd.cpp lcd.h
 	leds.cpp leds.h
