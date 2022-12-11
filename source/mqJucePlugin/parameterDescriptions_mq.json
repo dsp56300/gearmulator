@@ -914,16 +914,220 @@
 			{"type": "param", "name":"AmpEnvRelease"},                             // 217
 			{"type": "null"},
 			{"type": "null"},
+			{"type": "param", "name":"Env3Mode", "mask":7},                        // 220
+			{"type": "param", "name":"Env3TriggerMode", "mask":3, "shift":3},      // 220
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env3Attack"},                                // 223
+			{"type": "param", "name":"Env3AttackLevel"},                           // 224
+			{"type": "param", "name":"Env3Decay"},                                 // 225
+			{"type": "param", "name":"Env3Sustain"},                               // 226
+			{"type": "param", "name":"Env3Decay2"},                                // 227
+			{"type": "param", "name":"Env3Sustain2"},                              // 228
+			{"type": "param", "name":"Env3Release"},                               // 229
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env4Mode", "mask":7},                        // 232
+			{"type": "param", "name":"Env4TriggerMode", "mask":3, "shift":3},      // 232
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env4Attack"},                                // 235
+			{"type": "param", "name":"Env4AttackLevel"},                           // 236
+			{"type": "param", "name":"Env4Decay"},                                 // 237
+			{"type": "param", "name":"Env4Sustain"},                               // 238
+			{"type": "param", "name":"Env4Decay2"},                                // 239
+			{"type": "param", "name":"Env4Sustain2"},                              // 240
+			{"type": "param", "name":"Env4Release"},                               // 241
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Mod1Source1"},                               // 245
+			{"type": "param", "name":"Mod1Source2"},                               // 246
+			{"type": "param", "name":"Mod1Operator"},                              // 247
+			{"type": "param", "name":"Mod1Constant"},                              // 248
+			{"type": "param", "name":"Mod2Source1"},                               // 249
+			{"type": "param", "name":"Mod2Source2"},                               // 250
+			{"type": "param", "name":"Mod2Operator"},                              // 251
+			{"type": "param", "name":"Mod2Constant"},                              // 252
+			{"type": "param", "name":"Mod3Source1"},                               // 253
+			{"type": "param", "name":"Mod3Source2"},                               // 254
+			{"type": "param", "name":"Mod3Operator"},                              // 255
+			{"type": "param", "name":"Mod3Constant"},                              // 256
+			{"type": "param", "name":"Mod4Source1"},                               // 257
+			{"type": "param", "name":"Mod4Source2"},                               // 258
+			{"type": "param", "name":"Mod4Operator"},                              // 259
+			{"type": "param", "name":"Mod4Constant"},                              // 260
+			{"type": "param", "name":"Slot1FSource"},                              // 261
+			{"type": "param", "name":"Slot1FDestination"},                         // 262
+			{"type": "param", "name":"Slot1FAmount"},                              // 263
+			{"type": "param", "name":"Slot2FSource"},                              // 264
+			{"type": "param", "name":"Slot2FDestination"},                         // 265
+			{"type": "param", "name":"Slot2FAmount"},                              // 266
+			{"type": "param", "name":"Slot3FSource"},                              // 267
+			{"type": "param", "name":"Slot3FDestination"},                         // 268
+			{"type": "param", "name":"Slot3FAmount"},                              // 269
+			{"type": "param", "name":"Slot4FSource"},                              // 270
+			{"type": "param", "name":"Slot4FDestination"},                         // 271
+			{"type": "param", "name":"Slot4FAmount"},                              // 272
+			{"type": "param", "name":"Slot5FSource"},                              // 273
+			{"type": "param", "name":"Slot5FDestination"},                         // 274
+			{"type": "param", "name":"Slot5FAmount"},                              // 275
+			{"type": "param", "name":"Slot6FSource"},                              // 276
+			{"type": "param", "name":"Slot6FDestination"},                         // 277
+			{"type": "param", "name":"Slot6FAmount"},                              // 278
+			{"type": "param", "name":"Slot7FSource"},                              // 279
+			{"type": "param", "name":"Slot7FDestination"},                         // 280
+			{"type": "param", "name":"Slot7FAmount"},                              // 281
+			{"type": "param", "name":"Slot8FSource"},                              // 282
+			{"type": "param", "name":"Slot8FDestination"},                         // 283
+			{"type": "param", "name":"Slot8FAmount"},                              // 284
+			{"type": "param", "name":"Slot1SSource"},                              // 285
+			{"type": "param", "name":"Slot1SDestination"},                         // 286
+			{"type": "param", "name":"Slot1SAmount"},                              // 287
+			{"type": "param", "name":"Slot2SSource"},                              // 288
+			{"type": "param", "name":"Slot2SDestination"},                         // 289
+			{"type": "param", "name":"Slot2SAmount"},                              // 290
+			{"type": "param", "name":"Slot3SSource"},                              // 291
+			{"type": "param", "name":"Slot3SDestination"},                         // 292
+			{"type": "param", "name":"Slot3SAmount"},                              // 293
+			{"type": "param", "name":"Slot4SSource"},                              // 294
+			{"type": "param", "name":"Slot4SDestination"},                         // 295
+			{"type": "param", "name":"Slot4SAmount"},                              // 296
+			{"type": "param", "name":"Slot5SSource"},                              // 297
+			{"type": "param", "name":"Slot5SDestination"},                         // 298
+			{"type": "param", "name":"Slot5SAmount"},                              // 299
+			{"type": "param", "name":"Slot6SSource"},                              // 300
+			{"type": "param", "name":"Slot6SDestination"},                         // 301
+			{"type": "param", "name":"Slot6SAmount"},                              // 302
+			{"type": "param", "name":"Slot7SSource"},                              // 303
+			{"type": "param", "name":"Slot7SDestination"},                         // 304
+			{"type": "param", "name":"Slot7SAmount"},                              // 305
+			{"type": "param", "name":"Slot8SSource"},                              // 306
+			{"type": "param", "name":"Slot8SDestination"},                         // 307
+			{"type": "param", "name":"Slot8SAmount"},                              // 308
+			{"type": "param", "name":"ControllerDelaySource"},                     // 309
+			{"type": "param", "name":"ControllerDelay"},                           // 310
+			{"type": "param", "name":"ArpMode"},                                   // 311
+			{"type": "param", "name":"ArpPattern"},                                // 312
+			{"type": "param", "name":"ArpMaxNotes"},                               // 313
+			{"type": "param", "name":"ArpClock"},                                  // 314
+			{"type": "param", "name":"ArpLength"},                                 // 315
+			{"type": "param", "name":"ArpOctaveRange"},                            // 316
+			{"type": "param", "name":"ArpDirection"},                              // 317
+			{"type": "param", "name":"ArpSortOrder"},                              // 318
+			{"type": "param", "name":"ArpVeloMode"},                               // 319
+			{"type": "param", "name":"ArpTFactor"},                                // 320
+			{"type": "param", "name":"ArpSameNoteOverlap"},                        // 321
+			{"type": "param", "name":"ArpPatternReset"},                           // 322
+			{"type": "param", "name":"ArpPatternLength"},                          // 323
+			{"type": "null"},
+			{"type": "param", "name":"Tempo"},                                     // 326
+			{"type": "param", "name":"Arp00Step", "mask":"7", "shift":4},          // 327
+			{"type": "param", "name":"Arp00Glide", "mask":"1", "shift":3},         // 327
+			{"type": "param", "name":"Arp00Accent", "mask":"7"},                   // 327
+			{"type": "param", "name":"Arp01Step", "mask":"7", "shift":4},          // 328
+			{"type": "param", "name":"Arp01Glide", "mask":"1", "shift":3},         // 328
+			{"type": "param", "name":"Arp01Accent", "mask":"7"},                   // 328
+			{"type": "param", "name":"Arp02Step", "mask":"7", "shift":4},          // 329
+			{"type": "param", "name":"Arp02Glide", "mask":"1", "shift":3},         // 329
+			{"type": "param", "name":"Arp02Accent", "mask":"7"},                   // 329
+			{"type": "param", "name":"Arp03Step", "mask":"7", "shift":4},          // 330
+			{"type": "param", "name":"Arp03Glide", "mask":"1", "shift":3},         // 330
+			{"type": "param", "name":"Arp03Accent", "mask":"7"},                   // 330
+			{"type": "param", "name":"Arp04Step", "mask":"7", "shift":4},          // 331
+			{"type": "param", "name":"Arp04Glide", "mask":"1", "shift":3},         // 331
+			{"type": "param", "name":"Arp04Accent", "mask":"7"},                   // 331
+			{"type": "param", "name":"Arp05Step", "mask":"7", "shift":4},          // 332
+			{"type": "param", "name":"Arp05Glide", "mask":"1", "shift":3},         // 332
+			{"type": "param", "name":"Arp05Accent", "mask":"7"},                   // 332
+			{"type": "param", "name":"Arp06Step", "mask":"7", "shift":4},          // 333
+			{"type": "param", "name":"Arp06Glide", "mask":"1", "shift":3},         // 333
+			{"type": "param", "name":"Arp06Accent", "mask":"7"},                   // 333
+			{"type": "param", "name":"Arp07Step", "mask":"7", "shift":4},          // 334
+			{"type": "param", "name":"Arp07Glide", "mask":"1", "shift":3},         // 334
+			{"type": "param", "name":"Arp07Accent", "mask":"7"},                   // 334
+			{"type": "param", "name":"Arp08Step", "mask":"7", "shift":4},          // 335
+			{"type": "param", "name":"Arp08Glide", "mask":"1", "shift":3},         // 335
+			{"type": "param", "name":"Arp08Accent", "mask":"7"},                   // 335
+			{"type": "param", "name":"Arp09Step", "mask":"7", "shift":4},          // 336
+			{"type": "param", "name":"Arp09Glide", "mask":"1", "shift":3},         // 336
+			{"type": "param", "name":"Arp09Accent", "mask":"7"},                   // 336
+			{"type": "param", "name":"Arp10Step", "mask":"7", "shift":4},          // 337
+			{"type": "param", "name":"Arp10Glide", "mask":"1", "shift":3},         // 337
+			{"type": "param", "name":"Arp10Accent", "mask":"7"},                   // 337
+			{"type": "param", "name":"Arp11Step", "mask":"7", "shift":4},          // 338
+			{"type": "param", "name":"Arp11Glide", "mask":"1", "shift":3},         // 338
+			{"type": "param", "name":"Arp11Accent", "mask":"7"},                   // 338
+			{"type": "param", "name":"Arp12Step", "mask":"7", "shift":4},          // 339
+			{"type": "param", "name":"Arp12Glide", "mask":"1", "shift":3},         // 339
+			{"type": "param", "name":"Arp12Accent", "mask":"7"},                   // 339
+			{"type": "param", "name":"Arp13Step", "mask":"7", "shift":4},          // 340
+			{"type": "param", "name":"Arp13Glide", "mask":"1", "shift":3},         // 340
+			{"type": "param", "name":"Arp13Accent", "mask":"7"},                   // 340
+			{"type": "param", "name":"Arp14Step", "mask":"7", "shift":4},          // 341
+			{"type": "param", "name":"Arp14Glide", "mask":"1", "shift":3},         // 341
+			{"type": "param", "name":"Arp14Accent", "mask":"7"},                   // 341
+			{"type": "param", "name":"Arp15Step", "mask":"7", "shift":4},          // 342
+			{"type": "param", "name":"Arp15Glide", "mask":"1", "shift":3},         // 342
+			{"type": "param", "name":"Arp15Accent", "mask":"7"},                   // 342
+			{"type": "param", "name":"Arp00Length", "mask":"7", "shift":4},        // 343
+			{"type": "param", "name":"Arp00Timing", "mask":"7"},                   // 343
+			{"type": "param", "name":"Arp01Length", "mask":"7", "shift":4},        // 344
+			{"type": "param", "name":"Arp01Timing", "mask":"7"},                   // 344
+			{"type": "param", "name":"Arp02Length", "mask":"7", "shift":4},        // 345
+			{"type": "param", "name":"Arp02Timing", "mask":"7"},                   // 345
+			{"type": "param", "name":"Arp03Length", "mask":"7", "shift":4},        // 346
+			{"type": "param", "name":"Arp03Timing", "mask":"7"},                   // 346
+			{"type": "param", "name":"Arp04Length", "mask":"7", "shift":4},        // 347
+			{"type": "param", "name":"Arp04Timing", "mask":"7"},                   // 347
+			{"type": "param", "name":"Arp05Length", "mask":"7", "shift":4},        // 348
+			{"type": "param", "name":"Arp05Timing", "mask":"7"},                   // 348
+			{"type": "param", "name":"Arp06Length", "mask":"7", "shift":4},        // 349
+			{"type": "param", "name":"Arp06Timing", "mask":"7"},                   // 349
+			{"type": "param", "name":"Arp07Length", "mask":"7", "shift":4},        // 350
+			{"type": "param", "name":"Arp07Timing", "mask":"7"},                   // 350
+			{"type": "param", "name":"Arp08Length", "mask":"7", "shift":4},        // 351
+			{"type": "param", "name":"Arp08Timing", "mask":"7"},                   // 351
+			{"type": "param", "name":"Arp09Length", "mask":"7", "shift":4},        // 352
+			{"type": "param", "name":"Arp09Timing", "mask":"7"},                   // 352
+			{"type": "param", "name":"Arp10Length", "mask":"7", "shift":4},        // 353
+			{"type": "param", "name":"Arp10Timing", "mask":"7"},                   // 353
+			{"type": "param", "name":"Arp11Length", "mask":"7", "shift":4},        // 354
+			{"type": "param", "name":"Arp11Timing", "mask":"7"},                   // 354
+			{"type": "param", "name":"Arp12Length", "mask":"7", "shift":4},        // 355
+			{"type": "param", "name":"Arp12Timing", "mask":"7"},                   // 355
+			{"type": "param", "name":"Arp13Length", "mask":"7", "shift":4},        // 356
+			{"type": "param", "name":"Arp13Timing", "mask":"7"},                   // 356
+			{"type": "param", "name":"Arp14Length", "mask":"7", "shift":4},        // 357
+			{"type": "param", "name":"Arp14Timing", "mask":"7"},                   // 357
+			{"type": "param", "name":"Arp15Length", "mask":"7", "shift":4},        // 358
+			{"type": "param", "name":"Arp15Timing", "mask":"7"},                   // 358
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Name00"},                                    // 363
+			{"type": "param", "name":"Name01"},                                    // 364
+			{"type": "param", "name":"Name02"},                                    // 365
+			{"type": "param", "name":"Name03"},                                    // 366
+			{"type": "param", "name":"Name04"},                                    // 367
+			{"type": "param", "name":"Name05"},                                    // 368
+			{"type": "param", "name":"Name06"},                                    // 369
+			{"type": "param", "name":"Name07"},                                    // 370
+			{"type": "param", "name":"Name08"},                                    // 371
+			{"type": "param", "name":"Name09"},                                    // 372
+			{"type": "param", "name":"Name10"},                                    // 373
+			{"type": "param", "name":"Name11"},                                    // 374
+			{"type": "param", "name":"Name12"},                                    // 375
+			{"type": "param", "name":"Name13"},                                    // 376
+			{"type": "param", "name":"Name14"},                                    // 377
+			{"type": "param", "name":"Name15"},                                    // 378
+			{"type": "param", "name":"Category00"},                                // 379
+			{"type": "param", "name":"Category01"},                                // 380
+			{"type": "param", "name":"Category02"},                                // 381
+			{"type": "param", "name":"Category03"},                                // 382
 
-
-
-
-
-
-
-
-
-			{"type": "checksum", "first": 2, "last": 264},
+            {"type": "checksum", "first": 2, "last": 389},
 			{"type": "byte", "value": "f7"}
 		],
 		"multidump": [
