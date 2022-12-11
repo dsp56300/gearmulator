@@ -81,8 +81,8 @@
  		{"index":62, "name":"O1Balance"},
  		{"index":63, "name":"O2Level"},
  		{"index":64, "name":"O2Balance"},
- 		{"index":65, "name":"O2Level"},
- 		{"index":66, "name":"O2Balance"},
+ 		{"index":65, "name":"O3Level"},
+ 		{"index":66, "name":"O3Balance"},
  		{"index":67, "name":"NoiseLevel"},
  		{"index":68, "name":"NoiseBalance"},
  		{"index":71, "name":"RingModLevel"},
@@ -275,7 +275,7 @@
 		// LFO 2
  		{"index":172, "name":"Lfo2Shape", "min":0, "max":5},
  		{"index":173, "name":"Lfo2Speed"},
- 		{"index":174, "name":"Lfo2SpeedClocked"},
+ 		{"index":173, "name":"Lfo2SpeedClocked"},
  		{"index":175, "name":"Lfo2Sync", "min":0 , "max":1, "isBool":true},
  		{"index":176, "name":"Lfo2Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":177, "name":"Lfo2StartPhase"},
@@ -286,7 +286,7 @@
 		// LFO 3
  		{"index":184, "name":"Lfo3Shape", "min":0, "max":5},
  		{"index":185, "name":"Lfo3Speed"},
- 		{"index":186, "name":"Lfo3SpeedClocked"},
+ 		{"index":185, "name":"Lfo3SpeedClocked"},
  		{"index":187, "name":"Lfo3Sync", "min":0 , "max":1, "isBool":true},
  		{"index":188, "name":"Lfo3Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":189, "name":"Lfo3StartPhase"},
@@ -535,7 +535,7 @@
  		{"index":379, "name":"Category00", "min":32, "max":127},
  		{"index":380, "name":"Category01", "min":32, "max":127},
  		{"index":381, "name":"Category02", "min":32, "max":127},
- 		{"index":382, "name":"Category03", "min":32, "max":127},
+ 		{"index":382, "name":"Category03", "min":32, "max":127}
  	],
  	"valuelists":
  	{
@@ -581,275 +581,9 @@
  			"+40",	"+41",	"+42",	"+43",	"+44",	"+45",	"+46",	"+47",	"+48",	"+49",	"+50",	"+51",	"+52",	"+53",	"+54",	"+55",	"+56",	"+57",	"+58",	"+59",			
  			"+60",	"+61",	"+62",	"Right"
  		],
- 		"version":
- 		[
- 			"A", "A", "A", "A", "A", "B", "C", "TI", "TI", "TI", "TI", "TI", "TI2"
- 		],
- 		"bank":
- 		[
- 			"Edit", "RAM A", "RAM B", "ROM C", "ROM D", "ROM E", "ROM F", "ROM G", "ROM H"
- 		],
- 		"oscShape":
- 		[
- 			"Wave",	"-63",	"-62",	"-61",	
- 			"-60",	"-59",	"-58",	"-57",	"-56",	"-55",	"-54",	"-53",	"-52",	"-51",	"-50",	"-49",	"-48",	"-47",	"-46",	"-45", "-44",	"-43",	"-42",	"-41",	
- 			"-40",	"-39",	"-38",	"-37",	"-36",	"-35",	"-34",	"-33",	"-32",	"-31",	"-30",	"-29",	"-28",	"-27",	"-26",	"-25",	"-24",	"-23",	"-22",	"-21",
- 			"-20",	"-19",	"-18",	"-17",	"-16",	"-15",	"-14",	"-13",	"-12",	"-11",	"-10",	"-9",	"-8",	"-7",	"-6",	"-5",	"-4",	"-3",	"-2",	"-1",
- 			"Saw",	"+1",	"+2",	"+3",	"+4",	"+5",	"+6",	"+7",	"+8",	"+9",	"+10",	"+11",	"+12",	"+13",	"+14",	"+15",	"+16",	"+17",	"+18",	"+19",
- 			"+20",	"+21",	"+22",	"+23",	"+24",	"+25",	"+26",	"+27",	"+28",	"+29",	"+30",	"+31",	"+32",	"+33",	"+34",	"+35",	"+36",	"+37",	"+38",	"+39",
- 			"+40",	"+41",	"+42",	"+43",	"+44",	"+45",	"+46",	"+47",	"+48",	"+49",	"+50",	"+51",	"+52",	"+53",	"+54",	"+55",	"+56",	"+57",	"+58",	"+59",			
- 			"+60",	"+61",	"+62",	"Pulse"
- 		],
- 		"suboscShape":
- 		[
- 			"Square",	"Triangle"
- 		],
- 		"oscWave":
- 		[
- 			"Sine",		"Triangle",	"Wave 2",	"Wave 3",	"Wave 4",	"Wave 5",	"Wave 6",	"Wave 7",	"Wave 8",	"Wave 9",	"Wave 10",	"Wave 11",	"Wave 12",	"Wave 13",	"Wave 14",	"Wave 15",	"Wave 16",	"Wave 17",	"Wave 18",	"Wave 19",
- 			"Wave 20",	"Wave 21",	"Wave 22",	"Wave 23",	"Wave 24",	"Wave 25",	"Wave 26",	"Wave 27",	"Wave 28",	"Wave 29",	"Wave 30",	"Wave 31",	"Wave 32",	"Wave 33",	"Wave 34",	"Wave 35",	"Wave 36",	"Wave 37",	"Wave 38",	"Wave 39",
- 			"Wave 40",	"Wave 41",	"Wave 42",	"Wave 43",	"Wave 44",	"Wave 45",	"Wave 46",	"Wave 47",	"Wave 48",	"Wave 49",	"Wave 50",	"Wave 51",	"Wave 52",	"Wave 53",	"Wave 54",	"Wave 55",	"Wave 56",	"Wave 57",	"Wave 58",	"Wave 59",			
- 			"Wave 60",	"Wave 61",	"Wave 62",	"Wave 63",	"Wave 64",	"Wave 65",	"Wave 66",	"Wave 67",	"Wave 68",	"Wave 69",	"Wave 70",	"Wave 71",	"Wave 72",	"Wave 73",	"Wave 74",	"Wave 75",	"Wave 76",	"Wave 77",	"Wave 78",	"Wave 79",			
- 			"Wave 80",	"Wave 81",	"Wave 82",	"Wave 83",	"Wave 84",	"Wave 85",	"Wave 86",	"Wave 87",	"Wave 88",	"Wave 89",	"Wave 90",	"Wave 91",	"Wave 92",	"Wave 93",	"Wave 94",	"Wave 95",	"Wave 96",	"Wave 97",	"Wave 98",	"Wave 99",			
- 			"Wave 100",	"Wave 101",	"Wave 102",	"Wave 103",	"Wave 104",	"Wave 105",	"Wave 106",	"Wave 107",	"Wave 108",	"Wave 109",	"Wave 110",	"Wave 111",	"Wave 112",	"Wave 113",	"Wave 114",	"Wave 115",	"Wave 116",	"Wave 117",	"Wave 118",	"Wave 119",			
- 			"Wave 120",	"Wave 121",	"Wave 122",	"Wave 123",	"Wave 124",	"Wave 125",	"Wave 126",	"Wave 127"
- 		],
- 		"satCurve":
- 		[
- 			"Off", "Light", "Soft", "Middle", "Hard", "Digital", "Shaper", "Rectifier", "BitReducer", "RateReducer", "Rate+Flw", "LowPass", "Low+Flw", "HighPass", "High+Flw"
- 		],
- 		"distCurve":
- 		[
- 			"Off", "Light", "Soft", "Middle", "Hard", "Digital", "Shaper", "Rectifier", "BitReducer", "RateReducer", "LowPass", "HighPass"
- 		],
- 		"filter1Mode":
- 		[
- 			"LowPass", "HighPass", "BandPass", "BandStop", "Analog 1P", "Analog 2P", "Analog 3P", "Analog 4P"
- 		],
- 		"filter2Mode":
- 		[
- 			"LowPass", "HighPass", "BandPass", "BandStop"
- 		],
- 		"filterRouting":
- 		[
- 			"Serial 4", "Serial 6", "Parallel 4", "Split"
- 		],
- 		"envSustainTime":
- 		[
- 			"Infinite",	"-63",	"-62",	"-61",	
- 			"-60",	"-59",	"-58",	"-57",	"-56",	"-55",	"-54",	"-53",	"-52",	"-51",	"-50",	"-49",	"-48",	"-47",	"-46",	"-45", "-44",	"-43",	"-42",	"-41",	
- 			"-40",	"-39",	"-38",	"-37",	"-36",	"-35",	"-34",	"-33",	"-32",	"-31",	"-30",	"-29",	"-28",	"-27",	"-26",	"-25",	"-24",	"-23",	"-22",	"-21",
- 			"-20",	"-19",	"-18",	"-17",	"-16",	"-15",	"-14",	"-13",	"-12",	"-11",	"-10",	"-9",	"-8",	"-7",	"-6",	"-5",	"-4",	"-3",	"-2",	"-1",
- 			"Fall",	"+1",	"+2",	"+3",	"+4",	"+5",	"+6",	"+7",	"+8",	"+9",	"+10",	"+11",	"+12",	"+13",	"+14",	"+15",	"+16",	"+17",	"+18",	"+19",
- 			"+20",	"+21",	"+22",	"+23",	"+24",	"+25",	"+26",	"+27",	"+28",	"+29",	"+30",	"+31",	"+32",	"+33",	"+34",	"+35",	"+36",	"+37",	"+38",	"+39",
- 			"+40",	"+41",	"+42",	"+43",	"+44",	"+45",	"+46",	"+47",	"+48",	"+49",	"+50",	"+51",	"+52",	"+53",	"+54",	"+55",	"+56",	"+57",	"+58",	"+59",			
- 			"+60",	"+61",	"+62",	"Rise"
- 		],
- 		"lfoShape":
- 		[
-			 "Sine", "Triangle", "Saw", "Square", "S&H", "S&G", "Wave 3", "Wave 4", "Wave 5", "Wave 6", "Wave 7", 
-			 "Wave 8", "Wave 9", "Wave 10", "Wave 11", "Wave 12", "Wave 13", "Wave 14", "Wave 15",
-			 "Wave 16", "Wave 17", "Wave 18", "Wave 19", "Wave 20", "Wave 21", "Wave 22", "Wave 23",
-			 "Wave 24", "Wave 25", "Wave 26", "Wave 27", "Wave 28", "Wave 29", "Wave 30", "Wave 31",
-			 "Wave 32", "Wave 33", "Wave 34", "Wave 35", "Wave 36", "Wave 37", "Wave 38", "Wave 39", 
-			 "Wave 40", "Wave 41", "Wave 42", "Wave 43", "Wave 44", "Wave 45", "Wave 46", "Wave 47",
-			 "Wave 48", "Wave 49", "Wave 50", "Wave 51", "Wave 52", "Wave 53", "Wave 54", "Wave 55",
-			 "Wave 56", "Wave 57", "Wave 58", "Wave 59", "Wave 60", "Wave 61", "Wave 62", "Wave 63",
-			 "Wave 64"
-		],
- 		"osc3Mode":
- 		[
-			 "Off", "Slave", "Saw", "Pulse", "Sine", "Triangle", "Wave 3", "Wave 4", "Wave 5", "Wave 6", "Wave 7", 
-			 "Wave 8", "Wave 9", "Wave 10", "Wave 11", "Wave 12", "Wave 13", "Wave 14", "Wave 15",
-			 "Wave 16", "Wave 17", "Wave 18", "Wave 19", "Wave 20", "Wave 21", "Wave 22", "Wave 23",
-			 "Wave 24", "Wave 25", "Wave 26", "Wave 27", "Wave 28", "Wave 29", "Wave 30", "Wave 31",
-			 "Wave 32", "Wave 33", "Wave 34", "Wave 35", "Wave 36", "Wave 37", "Wave 38", "Wave 39", 
-			 "Wave 40", "Wave 41", "Wave 42", "Wave 43", "Wave 44", "Wave 45", "Wave 46", "Wave 47",
-			 "Wave 48", "Wave 49", "Wave 50", "Wave 51", "Wave 52", "Wave 53", "Wave 54", "Wave 55",
-			 "Wave 56", "Wave 57", "Wave 58", "Wave 59", "Wave 60", "Wave 61", "Wave 62", "Wave 63",
-			 "Wave 64"
-		],
-		"lfoMode":
- 		[
- 			"Poly", "Mono"
- 		],
-		"keyMode":
- 		[
- 			"Poly", "Mono 1", "Mono 2", "Mono 3", "Mono 4", "Hold"
- 		],
-		"inputMode":
- 		[
- 			"Off", "Dynamic", "Static", "To Effects"
- 		],
-		"inputSelect":
- 		[
-			"IN L",	"IN L+R", "IN R", "AUX 1 L", "AUX 1 L+R", "AUX 1 R", "AUX 2 L", "AUX 2 L+R", "AUX 2 R"
- 		],
-		"outputSelect":
- 		[
-			"OUT 1 L", "OUT 1 L+R", "OUT 1 R", "OUT 2 L", "OUT 2 L+R", "OUT 2 R", "OUT 3 L", "OUT 3 L+R", "OUT 3 R", "AUX 1 L", "AUX 1 L+R", "AUX 1 R", "AUX 2 L", "AUX 2 L+R", "AUX 2 R"
- 		],
-		"delayReverbMode":
- 		[
-			"Off", "Delay", "Reverb", "Reverb + Feedback 1", "Reverb + Feedback 2", "Delay2:1", "Delay4:3", "Delay4:1", "Delay8:7", "Pattern1+1", "Pattern2+1", "Pattern3+1", "Pattern4+1",
-			"Pattern5+1", "Pattern2+3", "Pattern2+5", "Pattern3+2", "Pattern3+3", "Pattern3+4", "Pattern3+5", "Pattern4+3", "Pattern4+5", "Pattern5+2", "Pattern5+3", "Pattern5+4", "Pattern5+5", "Pattern X+Y"
- 		],
- 		"delayLfoShape":
- 		[
-			"Sine", "Triangle", "Saw", "Square", "S&H", "S&G"
-		],
-		"arpMode":
- 		[
-			"Off", "Up", "Down", "Up&Down", "As Played", "Random", "Chord"
-		],
-		"lfoDest":
- 		[
-			"Osc1", "Osc1+2", "Osc2", "PW1", "PW1+2", "PW2"
-		],
-		"bpm":
- 		[
-			"63 BPM",	"64 BPM",	"65 BPM",	"66 BPM",	"67 BPM",	"68 BPM",	"69 BPM",	"70 BPM",	"71 BPM",	"72 BPM",	"73 BPM",	"74 BPM",	"75 BPM",	"76 BPM",	"77 BPM",	"78 BPM",	
-			"79 BPM",	"80 BPM",	"81 BPM",	"82 BPM",	"83 BPM",	"84 BPM",	"85 BPM",	"86 BPM",	"87 BPM",	"88 BPM",	"89 BPM",	"90 BPM",	"91 BPM",	"92 BPM",	"93 BPM",	"94 BPM",	
-			"95 BPM",	"96 BPM",	"97 BPM",	"98 BPM",	"99 BPM",	"100 BPM",	"101 BPM",	"102 BPM",	"103 BPM",	"104 BPM",	"105 BPM",	"106 BPM",	"107 BPM",	"108 BPM",	"109 BPM",	"110 BPM",	
-			"111 BPM",	"112 BPM",	"113 BPM",	"114 BPM",	"115 BPM",	"116 BPM",	"117 BPM",	"118 BPM",	"119 BPM",	"120 BPM",	"121 BPM",	"122 BPM",	"123 BPM",	"124 BPM",	"125 BPM",	"126 BPM",	
-			"127 BPM",	"128 BPM",	"129 BPM",	"130 BPM",	"131 BPM",	"132 BPM",	"133 BPM",	"134 BPM",	"135 BPM",	"136 BPM",	"137 BPM",	"138 BPM",	"139 BPM",	"140 BPM",	"141 BPM",	"142 BPM",	
-			"143 BPM",	"144 BPM",	"145 BPM",	"146 BPM",	"147 BPM",	"148 BPM",	"149 BPM",	"150 BPM",	"151 BPM",	"152 BPM",	"153 BPM",	"154 BPM",	"155 BPM",	"156 BPM",	"157 BPM",	"158 BPM",	
-			"159 BPM",	"160 BPM",	"161 BPM",	"162 BPM",	"163 BPM",	"164 BPM",	"165 BPM",	"166 BPM",	"167 BPM",	"168 BPM",	"169 BPM",	"170 BPM",	"171 BPM",	"172 BPM",	"173 BPM",	"174 BPM",	
-			"175 BPM",	"176 BPM",	"177 BPM",	"178 BPM",	"179 BPM",	"180 BPM",	"181 BPM",	"182 BPM",	"183 BPM",	"184 BPM",	"185 BPM",	"186 BPM",	"187 BPM",	"188 BPM",	"189 BPM",	"190"
-		],
-		"arpSwing":
- 		[
-			"50%", "50%", "50%", "51%", "51%", "51%", "51%", "51%", "52%", "52%", "52%", "52%", "52%", "53%", "53%", "53%", 
-			"53%", "53%", "54%", "54%", "54%", "54%", "54%", "55%", "55%", "55%", "55%", "55%", "56%", "56%", "56%", "56%", 
-			"56%", "56%", "57%", "57%", "57%", "57%", "57%", "58%", "58%", "58%", "58%", "58%", "59%", "59%", "59%", "59%", 
-			"59%", "60%", "60%", "60%", "60%", "60%", "61%", "61%", "61%", "61%", "61%", "62%", "62%", "62%", "62%", "62%", 
-			"63%", "63%", "63%", "63%", "63%", "64%", "64%", "64%", "64%", "64%", "65%", "65%", "65%", "65%", "65%", "66%", 
-			"66%", "66%", "66%", "66%", "67%", "67%", "67%", "67%", "67%", "68%", "68%", "68%", "68%", "68%", "69%", "69%", 
-			"69%", "69%", "69%", "69%", "70%", "70%", "70%", "70%", "70%", "71%", "71%", "71%", "71%", "71%", "72%", "72%", 
-			"72%", "72%", "72%", "73%", "73%", "73%", "73%", "73%", "74%", "74%", "74%", "74%", "74%", "75%", "75%", "75%"
-		],
-		"controlSmoothMode":
- 		[
-			"Off", "On", "Auto", "Note"
-		],
 		"negPos":
  		[
 			"Negative", "Positive"
-		],
-		"linExp":
- 		[
-			"Linear", "Exponential"
-		],
-		"modmatrixSource":
- 		[
-			"Off", 			"PitchBnd", 	"ChanPres", 	"ModWheel", 	"Breath", 		"Contr3", 		"Foot", 		"Data", 
-			"Balance", 		"Contr 9", 		"Express", 		"Contr 12", 	"Contr 13", 	"Contr 14", 	"Contr 15", 	"Contr 16", 
-			"HoldPed", 		"PortaSw", 		"SostPed", 		"AmpEnv", 		"FiltEnv", 		"Lfo 1", 		"Lfo 2", 		"Lfo 3",
-			"VeloOn", 		"VeloOff", 		"KeyFlw", 		"Random"
-		],
- 		"modmatrixDest":
- 		[
-			"Off", 			"PatchVol", 	"ChannelVol", 	"Panorama", 	"Transpose", 	"Portamento", 	"Osc1Shape", 	"Osc1PlsWdh", 
-			"Osc1WavSel", 	"Osc1Pitch", 	"Osc1Keyflw", 	"Osc2Shape", 	"Osc2PlsWdh", 	"Osc2WavSel", 	"Osc2Pitch", 	"Osc2Detune", 
-			"Osc2FmAmt", 	"Osc2EnvAmt", 	"FmEnvAmt", 	"Osc2Keyflw", 	"OscBalance", 	"SubOscVol", 	"OscMainVol", 	"NoiseVol", 
-			"Cutoff", 		"Cutoff2", 		"Filt1Reso", 	"Filt2Reso", 	"Flt1EnvAmt", 	"Flt2EnvAmt", 	"Flt1Keyflw", 	"Flt2Keyflw", 
-			"FltBalance", 	"FltAttack", 	"FltDecay", 	"FltSustain", 	"FltSusTime", 	"FltRelease", 	"AmpAttack", 	"AmpDecay", 
-			"AmpSustain", 	"AmpSusTime", 	"AmpRelease", 	"Lfo1Rate", 	"Lfo1Cont", 	"Lfo1>Osc1", 	"Lfo1>Osc2", 	"Lfo1>PlsWd", 
-			"Lfo1>Reso", 	"Lfo1>FltGn", 	"Lfo2Rate", 	"Lfo2Cont", 	"Lfo2>Shape", 	"Lfo2>Fm", 		"Lfo2>Cut1", 	"Lfo2>Cut2", 
-			"Lfo2>Pan", 	"Lfo3Rate", 	"Lfo3OscAmt", 	"UniDetune", 	"UniSpread", 	"UniLfoPhs", 	"ChorusMix", 	"ChorusRate", 
-			"ChorusDpth", 	"ChorusDly", 	"ChorusFeed", 	"EffectSend", 	"DelayTime", 	"DelayFeed", 	"DelayRate", 	"DelayDepth", 
-			"Osc1ShpVel", 	"Osc2ShpVel", 	"PlsWhdVel", 	"FmAmtVel", 	"Flt1EnvVel", 	"Flt2EnvVel", 	"Reso1Vel", 	"Reso2Vel", 
-			"AmpVel", 		"PanVel", 		"Ass1Amt1", 	"Ass2Amt1", 	"Ass2Amt2", 	"Ass3Amt1", 	"Ass3Amt2", 	"Ass3Amt3", 
-			"OscInitPhs", 	"PunchInt", 	"RingMod", 		"NoiseColor", 	"DelayColor", 	"ABoostInt", 	"ABoostTune", 	"DistInt", 
-			"RingmodMix", 	"Osc3Volume", 	"Osc3Semi", 	"Osc3Detune", 	"Lfo1AssAmt", 	"Lfo2AssAmt", 	"PhaserMix", 	"PhaserRate", 
-			"PhaserDept", 	"PhaserFreq", 	"PhaserFdbk", 	"PhaserSprd", 	"RevbDecay", 	"RevDamping", 	"RevbColor", 	"RevPredely", 
-			"RevFeedbck", 	"SecBalance", 	"ArpNoteLen", 	"ArpSwing", 	"ArpPattern", 	"EqMidGain", 	"EqMidFreq", 	"EqMidQFactor", 
-			"Assign4Amt", 	"Assign5Amt", 	"Assign6Amt"
-		],
- 		"softknobDest":
- 		[
-			"Off",				"ModWheel",			"Breath",			"Contr3",			"Foot",				"Data",				"Balance",			"Contr9", 
-			"Expression",		"Contr12",			"Contr13",			"Contr14",			"Contr15",			"Contr16",			"PatchVolume",		"ChannelVolume", 
-			"Panorama",			"Transpose",		"Portamento",		"UnisonDetune",		"UnisonPanSprd",	"UnisoLfoPhase",	"ChorusMix",		"ChorusRate", 
-			"ChorusDepth",		"ChorusDelay",		"ChorusFeedback",	"EffectSend",		"DelayTime(ms)",	"DelayFeedback",	"DelayRate",		"DelayDepth", 
-			"Osc1WavSelect",	"Osc1PulseWidth",	"Osc1Semitone",		"Osc1Keyfollow",	"Osc2WavSelect",	"Os2PulseWidth",	"Osc2EnvAmount",	"FmEnvAmount", 
-			"Osc2Keyfollow",	"NoiseVolume",		"Filt1Resonance",	"Filt2Resonance",	"Filt1EnvAmount",	"Filt2EnvAmount",	"Filt1Keyfollow",	"Filt2Keyfollow", 
-			"Lfo1Symmetry",		"Lfo1>Osc1",		"Lfo1>Osc2",		"Lfo1>PulsWidth",	"Lfo1>Resonance",	"Lfo1>FiltGain",	"Lfo2Symmetry",		"Lfo2>Shape", 
-			"Lfo2>FmAmount",	"Lfo2>Cutoff1",		"Lfo2>Cutoff2",		"Lfo2>Panorama",	"Lfo3Rate",			"Lfo3OscAmount",	"Osc1ShapeVel",		"Osc2ShapeVel", 
-			"PulsWidthVel",		"FmAmountVel",		"Filt1EnvVel",		"Filt2EnvVel",		"Resonance1Vel",	"Resonance2Vel",	"AmplifierVel",		"PanoramaVel", 
-			"Assign1Amt1",		"Assign2Amt1",		"Assign2Amt2",		"Assign3Amt1",		"Assign3Amt2",		"Assign3Amt3",		"ClockTempo",		"InputThru", 
-			"OscInitPhase",		"PunchIntensity",	"Ringmodulator",	"NoiseColor",		"DelayColor",		"AnalogBoostInt",	"AnalogBstTune",	"DistortionInt", 
-			"RingModMix",		"Osc3Volume",		"Osc3Semitone",		"Osc3Detune",		"Lfo1AssignAmt",	"Lfo2AssignAmt",	"PhaserMix",		"PhaserRate", 
-			"PhaserDepth",		"PhaserFrequency",	"PhaserFeedback",	"PhaserSpread",		"RevDecayTime",		"ReverbDamping",	"ReverbColor",		"ReverbFeedback", 
-			"SecondBalance",	"ArpMode",			"ArpPattern",		"ArpClock",			"ArpNoteLength",	"ArpSwing",			"ArpOctaves",		"ArpHold", 
-			"EqMidGain",		"EqMidFreq",		"EqMidQFactor",		"Assign4Amt",		"Assign5Amt",		"Assign6Amt"
-		],
- 		"softknobName":
- 		[
-			"~Para","+3rds","+4ths","+5ths",
-			"+7ths","+Octave","Access","ArpMode","ArpOct","Attack",
-			"Balance","Chorus","Cutoff","Decay","Delay","Depth",
-			"Destroy","Detune","Disolve","Distort","Dive","Effects",
-			"Elevate","Energy","EqHigh","EqLow","EqMid","Fast","Fear",
-			"Filter","FM","Glide","Hold","Hype","Infect","Length","Mix",
-			"Morph","Mutate","Noise","Open","Orbit","Pan","Phaser","Phatter",
-			"Pitch","Pulsate","Push","PWM","Rate","Release","Reso","Reverb",
-			"Scream","Shape","Sharpen","Slow","Soften","Speed","SubOsc",
-			"Sustain","Sweep","Swing","Tempo","Thinner","Tone","Tremolo",
-			"Vibrato","WahWah","Warmth","Warp","Width"
-		],
- 		"unisonMode":
- 		[
-			"Off",	"Twin",	"3",	"4",	"5",	"6",	"7",	"8",
-			"9",	"10",	"11",	"12",	"13",	"14",	"15",	"16"
-		],
- 		"filterKeytrackBase":
- 		[
-			"C-2","C#-2","D-2","D#-2","E-2","F-2","F#-2","G-2","G#-2","A-2","A#-2","B-2",
-			"C-1","C#-1","D-1","D#-1","E-1","F-1","F#-1","G-1","G#-1","A-1","A#-1","B-1",
-			"C0", "C#0", "D0", "D#0", "E0", "F0", "F#0", "G0", "G#0", "A0", "A#0", "B0",
-			"C1", "C#1", "D1", "D#1", "E1", "F1", "F#1", "G1", "G#1", "A1", "A#1", "B1",
-			"C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2",
-			"C3", "C#3", "D3", "D#3", "E3", "F3", "F#3", "G3", "G#3", "A3", "A#3", "B3",
-			"C4", "C#4", "D4", "D#4", "E4", "F4", "F#4", "G4", "G#4", "A4", "A#4", "B4",
-			"C5", "C#5", "D5", "D#5", "E5", "F5", "F#5", "G5", "G#5", "A5", "A#5", "B5",
-			"C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
-			"C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
-			"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8"
-		],
- 		"oscFMMode":
- 		[
-		"Pos-Tri",	"Tri",	"Wave",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
-		],
-		"vocoderMode":
-		[
-			"Off",	"Oscillator",	"Osc Hold",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
-		],
-		"inputFollowerMode":
-		[
-			"Off",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
-		],
-		"musicDivision":
-		[
-			"Off",	"1/64",	"1/32",	"1/16",	"1/8",	"1/4",	"1/2",	"3/64",	"3/32",	"3/16",	"3/8",	"1/24",	"1/12",	"1/6",	"1/3",	"2/3",	"3/4",	"1/1",	"2/1",	"4/1",	"8/1",	"16/1"
-		],
-		"phaserMode":
-		[
-			"",	"1 Stage",	"2 Stages",	"3 Stages",	"4 Stages",	"5 Stages",	"6 Stages"
-		],
-		"filterSelect":
-		[
-			"Filter 1",	"Filter 2",	"Filter 1+2"
-		],
-		"category":
-		[
-			"--", "Lead",	"Bass",	"Pad",	"Decay",	"Pluck",
-			"Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
-			"Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3"
-		],
-		"reverbRoomSize":
-		[
-			"Ambience",	"Small Room",	"Large Room",	"Hall"
 		],
 		"ascii":
 		[
@@ -956,50 +690,238 @@
 			{"type": "bank"},
 			{"type": "program"},
 
-			{"type": "param", "name":"Version"},						// 0
-			{"type": "param", "name":"O1Octave"},                       // 1
-			{"type": "param", "name":"O1Semi"},                         // 2
-			{"type": "param", "name":"O1Detune"},                       // 3
-			{"type": "param", "name":"O1BendRange"},                    // 4
-			{"type": "param", "name":"O1KeyTrack"},                     // 5
-			{"type": "param", "name":"O1FmSource"},                     // 6
-			{"type": "param", "name":"O1FmAmount"},                     // 7
-			{"type": "param", "name":"O1Shape"},                        // 8
-			{"type": "param", "name":"O1PulseWidth"},                   // 9
-			{"type": "param", "name":"O1PwmSource"},                    // 10
-			{"type": "param", "name":"O1Pwm"},                          // 11
-			{"type": "param", "name":"O1SubFreqDiv"},                   // 12
-			{"type": "param", "name":"O1SubVolume"},                    // 13
+			{"type": "param", "name": "Version"},								// 0
+			{"type": "param", "name": "O1Octave"},                      		// 1
+			{"type": "param", "name": "O1Semi"},                        		// 2
+			{"type": "param", "name": "O1Detune"},                      		// 3
+			{"type": "param", "name": "O1BendRange"},                   		// 4
+			{"type": "param", "name": "O1KeyTrack"},                    		// 5
+			{"type": "param", "name": "O1FmSource"},                    		// 6
+			{"type": "param", "name": "O1FmAmount"},                    		// 7
+			{"type": "param", "name": "O1Shape"},                       		// 8
+			{"type": "param", "name": "O1PulseWidth"},                  		// 9
+			{"type": "param", "name": "O1PwmSource"},                   		// 10
+			{"type": "param", "name": "O1Pwm"},                         		// 11
+			{"type": "param", "name": "O1SubFreqDiv"},                  		// 12
+			{"type": "param", "name": "O1SubVolume"},                   		// 13
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "param", "name": "O2Octave"},								// 17
+			{"type": "param", "name": "O2Semi"},                        		// 18
+			{"type": "param", "name": "O2Detune"},                      		// 19
+			{"type": "param", "name": "O2BendRange"},                   		// 20
+			{"type": "param", "name": "O2KeyTrack"},                    		// 21
+			{"type": "param", "name": "O2FmSource"},                    		// 22
+			{"type": "param", "name": "O2FmAmount"},                    		// 23
+			{"type": "param", "name": "O2Shape"},                       		// 24
+			{"type": "param", "name": "O2PulseWidth"},                  		// 25
+			{"type": "param", "name": "O2PwmSource"},                   		// 26
+			{"type": "param", "name": "O2Pwm"},                         		// 27
+			{"type": "param", "name": "O2SubFreqDiv"},                  		// 28
+			{"type": "param", "name": "O2SubVolume"},                   		// 29
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "param", "name": "O3Octave"},								// 33
+			{"type": "param", "name": "O3Semi"},                        		// 34
+			{"type": "param", "name": "O3Detune"},                      		// 35
+			{"type": "param", "name": "O3BendRange"},                   		// 36
+			{"type": "param", "name": "O3KeyTrack"},                    		// 37
+			{"type": "param", "name": "O3FmSource"},                    		// 38
+			{"type": "param", "name": "O3FmAmount"},                    		// 39
+			{"type": "param", "name": "O3Shape"},                       		// 40
+			{"type": "param", "name": "O3PulseWidth"},                  		// 41
+			{"type": "param", "name": "O3PwmSource"},                   		// 42
+			{"type": "param", "name": "O3Pwm"},                         		// 43
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "param", "name":"Sync"},                           		// 49
+			{"type": "param", "name":"PitchModSrc"},                    		// 50
+			{"type": "param", "name":"PitchModAmount"},                 		// 51
+			{"type": "null"},		
+			{"type": "param", "name":"GlideEnable"},                    		// 53
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"GlideMode"},                              // 56
+			{"type": "param", "name":"GlideRate"},                              // 57
+			{"type": "param", "name":"VoiceMode", "mask":"1", "shift":"0"},     // 58
+			{"type": "param", "name":"UnisonoCount", "mask":"7", "shift":"1"},  // 58
+			{"type": "param", "name":"UnisonoDetune"},                          // 59
+			{"type": "null"},
+			{"type": "param", "name": "O1Level"},                               // 61
+			{"type": "param", "name": "O1Balance"},                             // 62
+			{"type": "param", "name": "O2Level"},                               // 63
+			{"type": "param", "name": "O2Balance"},                             // 64
+			{"type": "param", "name": "O3Level"},                               // 65
+			{"type": "param", "name": "O3Balance"},                             // 66
+			{"type": "param", "name": "NoiseLevel"},                            // 67
+			{"type": "param", "name": "NoiseBalance"},                          // 68
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "RingModLevel"},                          // 71
+			{"type": "param", "name": "RingModBalance"},                        // 72
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "NoiseModeF1"},                           // 75
+			{"type": "param", "name": "NoiseModeF2"},                           // 76
+
+			{"type": "param", "name": "F1Type"},                                // 77
+			{"type": "param", "name": "F1Cutoff"},                              // 78
+			{"type": "null"},
+			{"type": "param", "name": "F1Resonance"},                           // 80
+			{"type": "param", "name": "F1Drive"},                               // 81
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
-			{"type": "param", "name":"O2Octave"},						// 17
-			{"type": "param", "name":"O2Semi"},                         // 18
-			{"type": "param", "name":"O2Detune"},                       // 19
-			{"type": "param", "name":"O2BendRange"},                    // 20
-			{"type": "param", "name":"O2KeyTrack"},                     // 21
-			{"type": "param", "name":"O2FmSource"},                     // 22
-			{"type": "param", "name":"O2FmAmount"},                     // 23
-			{"type": "param", "name":"O2Shape"},                        // 24
-			{"type": "param", "name":"O2PulseWidth"},                   // 25
-			{"type": "param", "name":"O2PwmSource"},                    // 26
-			{"type": "param", "name":"O2Pwm"},                          // 27
-			{"type": "param", "name":"O2SubFreqDiv"},                   // 28
-			{"type": "param", "name":"O2SubVolume"},                    // 29
+			{"type": "null"},
+			{"type": "param", "name": "F1KeyTrack"},                            // 86
+			{"type": "param", "name": "F1EnvMod"},                              // 87
+			{"type": "param", "name": "F1VelMod"},                              // 88
+			{"type": "param", "name": "F1ModSource"},                           // 89
+			{"type": "param", "name": "F1CutoffMod"},                           // 90
+			{"type": "param", "name": "F1FmSource"},                            // 91
+			{"type": "param", "name": "F1FmAmount"},                            // 92
+			{"type": "param", "name": "F1Pan"},                                 // 93
+			{"type": "param", "name": "F1PanModSource"},                        // 94
+			{"type": "param", "name": "F1PanMod"},                              // 95
+
+			{"type": "param", "name": "F2Type"},                                // 97
+			{"type": "param", "name": "F2Cutoff"},                              // 98
+			{"type": "null"},
+			{"type": "param", "name": "F2Resonance"},                           // 100
+			{"type": "param", "name": "F2Drive"},                               // 101
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
-			{"type": "param", "name":"O3Octave"},						
-			{"type": "param", "name":"O3Semi"},
-			{"type": "param", "name":"O3Detune"},
-			{"type": "param", "name":"O3BendRange"},
-			{"type": "param", "name":"O3KeyTrack"},
-			{"type": "param", "name":"O3FmSource"},
-			{"type": "param", "name":"O3FmAmount"},
-			{"type": "param", "name":"O3Shape"},
-			{"type": "param", "name":"O3PulseWidth"},
-			{"type": "param", "name":"O3PwmSource"},
-			{"type": "param", "name":"O3Pwm"},
+			{"type": "null"},
+			{"type": "param", "name": "F2KeyTrack"},                            // 106
+			{"type": "param", "name": "F2EnvMod"},                              // 107
+			{"type": "param", "name": "F2VelMod"},                              // 108
+			{"type": "param", "name": "F2ModSource"},                           // 109
+			{"type": "param", "name": "F2CutoffMod"},                           // 110
+			{"type": "param", "name": "F2FmSource"},                            // 111
+			{"type": "param", "name": "F2FmAmount"},                            // 112
+			{"type": "param", "name": "F2Pan"},                                 // 113
+			{"type": "param", "name": "F2PanModSource"},                        // 114
+			{"type": "param", "name": "F2PanMod"},                              // 115
+			{"type": "null"},
+			{"type": "param", "name": "FilterRouting"},                         // 117
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "AmpVolume"},                             // 121
+			{"type": "param", "name": "AmpVelocity"},                           // 122
+			{"type": "param", "name": "AmpModSource"},                          // 123
+			{"type": "param", "name": "AmpModAmount"},                          // 124
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "EffectType"},                            // 128
+			{"type": "param", "name": "EffectMix"},                             // 129
+			{"type": "param", "name": "Fx1VocoderBands"},                       // 130
+			{"type": "param", "name": "Fx1VocoderAnalysisSignal"},              // 131
+			{"type": "param", "name": "Fx1VocoderAnalysisFreqLow"},             // 132
+			{"type": "param", "name": "Fx1VocoderAnalysisFreqHigh"},            // 133
+			{"type": "param", "name": "Fx1VocoderOffsetS"},                     // 134
+			{"type": "param", "name": "Fx1VocoderOffsetHi"},                    // 135
+			{"type": "param", "name": "Fx1VocoderBandwidth"},                   // 136
+			{"type": "param", "name": "Fx1VocoderResonance"},                   // 137
+			{"type": "param", "name": "Fx1VocoderAttack"},                      // 138
+			{"type": "param", "name": "Fx1VocoderDecay"},                       // 139
+			{"type": "param", "name": "Fx1VocoderEQLevelLow"},                  // 140
+			{"type": "param", "name": "Fx1VocoderEQBandMid"},                   // 141
+			{"type": "param", "name": "Fx1VocoderEQLevelMid"},                  // 142
+			{"type": "param", "name": "Fx1VocoderEQLevelHigh"},                 // 143
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Fx2VocoderBands"},						// 146
+			{"type": "param", "name":"Fx2VocoderAnalysisSignal"},               // 147
+			{"type": "param", "name":"Fx2VocoderAnalysisFreqLow"},              // 148
+			{"type": "param", "name":"Fx2VocoderAnalysisFreqHigh"},             // 149
+			{"type": "param", "name":"Fx2VocoderOffsetS"},                      // 150
+			{"type": "param", "name":"Fx2VocoderOffsetHi"},                     // 151
+			{"type": "param", "name":"Fx2VocoderBandwidth"},                    // 152
+			{"type": "param", "name":"Fx2VocoderResonance"},                    // 153
+			{"type": "param", "name":"Fx2VocoderAttack"},                       // 154
+			{"type": "param", "name":"Fx2VocoderDecay"},                        // 155
+			{"type": "param", "name":"Fx2VocoderEQLevelLow"},                   // 156
+			{"type": "param", "name":"Fx2VocoderEQBandMid"},                    // 157
+			{"type": "param", "name":"Fx2VocoderEQLevelMid"},                   // 158
+			{"type": "param", "name":"Fx2VocoderEQLevelHigh"},                  // 159
+			{"type": "param", "name":"Lfo1Shape"},								// 160
+			{"type": "param", "name":"Lfo1Speed"},                              // 161
+			{"type": "null"},
+			{"type": "param", "name":"Lfo1Sync"},                               // 163
+			{"type": "param", "name":"Lfo1Clocked"},                            // 164
+			{"type": "param", "name":"Lfo1StartPhase"},                         // 165
+			{"type": "param", "name":"Lfo1Delay"},                              // 166
+			{"type": "param", "name":"Lfo1Fade"},                               // 167
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo1KeyTrack"},                           // 170
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2Shape"},								// 172
+			{"type": "param", "name":"Lfo2Speed"},                              // 173
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2Sync"},                               // 175
+			{"type": "param", "name":"Lfo2Clocked"},                            // 176
+			{"type": "param", "name":"Lfo2StartPhase"},                         // 177
+			{"type": "param", "name":"Lfo2Delay"},                              // 178
+			{"type": "param", "name":"Lfo2Fade"},                               // 179
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2KeyTrack"},                           // 182
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3Shape"},								// 184
+			{"type": "param", "name":"Lfo3Speed"},                              // 185
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3Sync"},                               // 187
+			{"type": "param", "name":"Lfo3Clocked"},                            // 188
+			{"type": "param", "name":"Lfo3StartPhase"},                         // 189
+			{"type": "param", "name":"Lfo3Delay"},                              // 190
+			{"type": "param", "name":"Lfo3Fade"},                               // 191
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3KeyTrack"},                           // 194
+			{"type": "null"},
+			{"type": "param", "name":"FilterEnvMode", "mask":7},                   // 196
+			{"type": "param", "name":"FilterEnvTriggerMode", "mask":3, "shift":3}, // 196
+			{"type": "param", "name":"FilterEnvAttack"},                           // 197
+			{"type": "param", "name":"FilterEnvAttackLevel"},                      // 198
+			{"type": "param", "name":"FilterEnvDecay"},                            // 199
+			{"type": "param", "name":"FilterEnvSustain"},                          // 200
+			{"type": "param", "name":"FilterEnvDecay2"},                           // 201
+			{"type": "param", "name":"FilterEnvSustain2"},                         // 202
+			{"type": "param", "name":"FilterEnvRelease"},                          // 203
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"AmpEnvMode", "mask":7},                      // 208
+			{"type": "param", "name":"AmpEnvTriggerMode", "mask":3, "shift":3},    // 208
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"AmpEnvAttack"},                              // 211
+			{"type": "param", "name":"AmpEnvAttackLevel"},                         // 212
+			{"type": "param", "name":"AmpEnvDecay"},                               // 213
+			{"type": "param", "name":"AmpEnvSustain"},                             // 214
+			{"type": "param", "name":"AmpEnvDecay2"},                              // 215
+			{"type": "param", "name":"AmpEnvSustain2"},                            // 216
+			{"type": "param", "name":"AmpEnvRelease"},                             // 217
+			{"type": "null"},
+			{"type": "null"},
+
+
+
+
+
+
+
+
 
 			{"type": "checksum", "first": 2, "last": 264},
 			{"type": "byte", "value": "f7"}
