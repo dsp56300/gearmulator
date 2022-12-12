@@ -4,14 +4,14 @@
 #include <juce_audio_devices/juce_audio_devices.h>
 
 #include "../synthLib/plugin.h"
-#include "../mqLib/device.h"
+#include "../jucePluginEditorLib/pluginProcessor.h"
 
-#include "mqController.h"
+#include "../mqLib/device.h"
 
 class PluginEditorState;
 
 //==============================================================================
-class AudioPluginAudioProcessor  : public juce::AudioProcessor, juce::MidiInputCallback
+class AudioPluginAudioProcessor  : public jucePluginEditorLib::Processor
 {
 public:
     //==============================================================================
@@ -46,51 +46,25 @@ public:
     const juce::String getProgramName (int index) override;
     void changeProgramName (int index, const juce::String& newName) override;
 
-    //==============================================================================
-    void getStateInformation (juce::MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
-    void getCurrentProgramStateInformation (juce::MemoryBlock& destData) override;
-    void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override;
-
 	// _____________
 	//
-    Controller &getController();
 	bool isPluginValid() const { return m_plugin.isValid(); }
-	void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
-	void addMidiEvent(const synthLib::SMidiEvent& ev);
-	bool setMidiOutput(const juce::String& _out);
-	juce::MidiOutput* getMidiOutput() const;
-	bool setMidiInput(const juce::String& _in);
-	juce::MidiInput* getMidiInput() const;
-	void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
-	
-    std::string getRomName() const
-    {
-        return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
-    }
-    synthLib::Plugin& getPlugin()
+
+    synthLib::Plugin& getPlugin() override
     {
 	    return m_plugin;
     }
     void updateLatencySamples();
 
-	void setLatencyBlocks(uint32_t _blocks);
+	bool setLatencyBlocks(uint32_t _blocks) override;
 
-	// _____________
-	//
+    pluginLib::Controller* createController() override;
 private:
-    std::unique_ptr<Controller> m_controller;
-	std::unique_ptr<juce::MidiOutput> m_midiOutput;
-	std::unique_ptr<juce::MidiInput> m_midiInput;
-    void setState(const void *_data, size_t _sizeInBytes);
 
     //==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 
-	std::string							m_romName;
 	mqLib::Device		    			m_device;
 	synthLib::Plugin					m_plugin;
-	std::vector<synthLib::SMidiEvent>	m_midiOut;
-    uint32_t							m_clockTempoParam = 0xffffffff;
     std::unique_ptr<PluginEditorState>  m_editorState;
 };

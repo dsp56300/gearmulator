@@ -66,8 +66,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	target_link_libraries(${targetName}
 	PRIVATE
 		${binaryDataProject}
-		juceUiLib
-		jucePluginLib
+		jucePluginEditorLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC
