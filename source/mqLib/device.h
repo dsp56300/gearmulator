@@ -7,7 +7,7 @@
 
 namespace mqLib
 {
-	class Device : synthLib::Device
+	class Device : public synthLib::Device
 	{
 	public:
 		Device();
