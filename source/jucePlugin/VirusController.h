@@ -11,7 +11,6 @@ class AudioPluginAudioProcessor;
 
 namespace Virus
 {
-    using SysEx = std::vector<uint8_t>;
     class Controller : public pluginLib::Controller, juce::Timer
     {
     public:
@@ -78,7 +77,7 @@ namespace Virus
     	void selectNextPreset(uint8_t _part);
         std::string getBankName(uint32_t _index) const;
 
-        static void printMessage(const SysEx &);
+        static void printMessage(const pluginLib::SysEx &);
 
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
@@ -120,10 +119,9 @@ namespace Virus
 
 		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
-		void parseMessage(const SysEx &);
-		void sendSysEx(const SysEx &) const;
-        void onStateLoaded() const;
-		juce::PropertiesFile* getConfig() { return m_config; }
+		void parseSysexMessage(const pluginLib::SysEx &) override;
+		void sendSysEx(const pluginLib::SysEx &) const;
+        void onStateLoaded() override;
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
 
@@ -144,7 +142,7 @@ namespace Virus
 
 		uint8_t getDeviceId() const { return m_deviceId; }
 
-        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const;
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg) const;
 
     private:
         static std::string loadParameterDescriptions();
@@ -157,10 +155,10 @@ namespace Virus
 
         MultiPatch m_multiEditBuffer;
 
-        void parseSingle(const SysEx& _msg);
-        void parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+        void parseSingle(const pluginLib::SysEx& _msg);
+        void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
-    	void parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
+    	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
         void parseControllerDump(const synthLib::SMidiEvent&);
@@ -172,6 +170,5 @@ namespace Virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
-		juce::PropertiesFile *m_config;
     };
 }; // namespace Virus

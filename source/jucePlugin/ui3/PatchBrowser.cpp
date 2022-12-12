@@ -1,6 +1,7 @@
 #include "PatchBrowser.h"
 
 #include "VirusEditor.h"
+#include "../PluginProcessor.h"
 
 #include "../../virusLib/microcontrollerTypes.h"
 #include "../../virusLib/microcontroller.h"
@@ -28,7 +29,7 @@ namespace genericVirusUI
 		m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
 		m_search("Search Box"),
 		m_patchList("Patch Browser"),
-		m_properties(m_controller.getConfig())
+		m_properties(&_editor.getProcessor().getConfig())
 	{
 		const auto bankDir = m_properties->getValue("virus_bank_dir", "");
 

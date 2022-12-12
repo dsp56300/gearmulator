@@ -9,6 +9,7 @@ set(SOURCES
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
+	processor.cpp processor.h
 )
 
 add_library(jucePluginLib STATIC)
@@ -16,5 +17,6 @@ add_library(jucePluginLib STATIC)
 target_sources(jucePluginLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
+target_link_libraries(jucePluginLib PUBLIC juceUiLib synthLib)
 target_include_directories(jucePluginLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)

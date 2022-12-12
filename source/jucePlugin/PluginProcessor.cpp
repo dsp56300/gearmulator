@@ -1,32 +1,39 @@
 #include "PluginProcessor.h"
-#include "PluginEditor.h"
 #include "PluginEditorState.h"
 #include "ParameterNames.h"
+
+#include "../jucePluginEditorLib/pluginEditor.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 
-#include "../synthLib/os.h"
+static juce::PropertiesFile::Options getConfigOptions()
+{
+	juce::PropertiesFile::Options opts;
+	opts.applicationName = "DSP56300 Emulator";
+	opts.filenameSuffix = ".settings";
+	opts.folderName = "DSP56300 Emulator";
+	opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+	return opts;
+}
 
 //==============================================================================
 AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
-    AudioProcessor(BusesProperties()
+    jucePluginEditorLib::Processor(BusesProperties()
                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #if JucePlugin_IsSynth
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	),
-	MidiInputCallback(),
+	, getConfigOptions()),
 	m_romName(virusLib::ROMFile::findROM()),
 	m_rom(m_romName),
 	m_device(m_rom), m_plugin(&m_device)
 {
-	getController(); // init controller
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 
-	const auto latencyBlocks = getController().getConfig()->getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+	const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 	setLatencyBlocks(latencyBlocks);
 }
 
@@ -199,7 +206,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 			if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
 			{
 				// forward to UI to react to control input changes that should move knobs
-				getController().dispatchVirusOut(std::vector<synthLib::SMidiEvent>{ev});
+				static_cast<Virus::Controller&>(getController()).dispatchVirusOut(std::vector<synthLib::SMidiEvent>{ev});
 			}
 		}
 
@@ -233,7 +240,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if (!m_midiOut.empty())
 	{
-		getController().dispatchVirusOut(m_midiOut);
+		static_cast<Virus::Controller&>(getController()).dispatchVirusOut(m_midiOut);
 	}
 
     for (auto& e : m_midiOut)
@@ -271,190 +278,29 @@ bool AudioPluginAudioProcessor::hasEditor() const
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
 	if(!m_editorState)
-		m_editorState.reset(new PluginEditorState(*this));
-    return new AudioPluginAudioProcessorEditor (*this, *m_editorState);
-}
-
-//==============================================================================
-void AudioPluginAudioProcessor::getStateInformation (juce::MemoryBlock& destData)
-{
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
-
-	std::vector<uint8_t> state;
-	m_plugin.getState(state, synthLib::StateTypeGlobal);
-	destData.append(&state[0], state.size());
-}
-
-void AudioPluginAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
-{
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
-	setState(data, sizeInBytes);
-}
-
-void AudioPluginAudioProcessor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
-{
-	std::vector<uint8_t> state;
-	m_plugin.getState(state, synthLib::StateTypeCurrentProgram);
-	destData.append(&state[0], state.size());
-}
-
-void AudioPluginAudioProcessor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
-{
-	setState(data, sizeInBytes);
-}
-
-void AudioPluginAudioProcessor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
-{
-	juce::ScopedLock lock(getCallbackLock());
-	std::swap(dst, m_midiOut);
-	m_midiOut.clear();
-}
-
-void AudioPluginAudioProcessor::addMidiEvent(const synthLib::SMidiEvent& ev)
-{
-	m_plugin.addMidiEvent(ev);
-}
-
-juce::MidiOutput *AudioPluginAudioProcessor::getMidiOutput() const { return m_midiOutput.get(); }
-juce::MidiInput *AudioPluginAudioProcessor::getMidiInput() const { return m_midiInput.get(); }
-
-bool AudioPluginAudioProcessor::setMidiOutput(const juce::String& _out)
-{
-	if (m_midiOutput != nullptr && m_midiOutput->isBackgroundThreadRunning())
-	{
-		m_midiOutput->stopBackgroundThread();
-	}
-	m_midiOutput = juce::MidiOutput::openDevice(_out);
-	if (m_midiOutput != nullptr)
-	{
-		m_midiOutput->startBackgroundThread();
-		return true;
-	}
-	return false;
-}
-
-bool AudioPluginAudioProcessor::setMidiInput(const juce::String& _in)
-{
-	if (m_midiInput != nullptr)
-	{
-		m_midiInput->stop();
-	}
-	m_midiInput = juce::MidiInput::openDevice(_in, this);
-	if (m_midiInput != nullptr)
-	{
-		m_midiInput->start();
-		return true;
-	}
-	return false;
-}
-
-void AudioPluginAudioProcessor::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
-{
-	const auto* raw = message.getSysExData();
-	if (raw)
-	{
-		const auto count = message.getSysExDataSize();
-		auto syx = Virus::SysEx();
-		syx.push_back(0xf0);
-		for (int i = 0; i < count; i++)
-		{
-			syx.push_back(raw[i]);
-		}
-		syx.push_back(0xf7);
-		synthLib::SMidiEvent sm;
-		sm.source = synthLib::MidiEventSourcePlugin;
-		sm.sysex = syx;
-		getController().parseMessage(syx);
-
-		addMidiEvent(sm);
-
-		if (m_midiOutput)
-		{
-			std::vector<synthLib::SMidiEvent> data;
-			getLastMidiOut(data);
-			if (!data.empty())
-			{
-				const auto msg = juce::MidiMessage::createSysExMessage(data.data(), static_cast<int>(data.size()));
-
-				m_midiOutput->sendMessageNow(msg);
-			}
-		}
-	}
-	else
-	{
-		const auto count = message.getRawDataSize();
-		const auto* rawData = message.getRawData();
-		if (count >= 1 && count <= 3)
-		{
-			synthLib::SMidiEvent sm;
-			sm.source = synthLib::MidiEventSourcePlugin;
-			sm.a = rawData[0];
-			sm.b = count > 1 ? rawData[1] : 0;
-			sm.c = count > 2 ? rawData[2] : 0;
-			addMidiEvent(sm);
-		}
-		else
-		{
-			synthLib::SMidiEvent sm;
-			sm.source = synthLib::MidiEventSourcePlugin;
-			auto syx = Virus::SysEx();
-			for (int i = 0; i < count; i++)
-			{
-				syx.push_back(rawData[i]);
-			}
-			sm.sysex = syx;
-			addMidiEvent(sm);
-		}
-	}
+		m_editorState.reset(new PluginEditorState(*this, getController()));
+    return new jucePluginEditorLib::Editor(*this, *m_editorState, getConfig());
 }
 
 void AudioPluginAudioProcessor::updateLatencySamples()
 {
 	if constexpr(JucePlugin_IsSynth)
-		setLatencySamples(m_plugin.getLatencyMidiToOutput());
+		setLatencySamples(getPlugin().getLatencyMidiToOutput());
 	else
-		setLatencySamples(m_plugin.getLatencyInputToOutput());
+		setLatencySamples(getPlugin().getLatencyInputToOutput());
 }
 
-void AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
+bool AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
 {
-	auto& p = getPlugin();
-
-	if(p.setLatencyBlocks(_blocks))
-	{
-		updateLatencySamples();
-
-		auto* config = getController().getConfig();
-		config->setValue("latencyBlocks", static_cast<int>(_blocks));
-		config->saveIfNeeded();
-	}
+	if(!Processor::setLatencyBlocks(_blocks))
+		return false;
+	updateLatencySamples();
+	return true;
 }
 
-Virus::Controller &AudioPluginAudioProcessor::getController()
+pluginLib::Controller* AudioPluginAudioProcessor::createController()
 {
-    if (m_controller == nullptr)
-    {
-        // initialize controller if not exists.
-        // assures PluginProcessor is fully constructed!
-        m_controller = std::make_unique<Virus::Controller>(*this);
-    }
-    return *m_controller;
-}
-
-void AudioPluginAudioProcessor::setState(const void* _data, size_t _sizeInBytes)
-{
-	if(_sizeInBytes < 1)
-		return;
-
-	std::vector<uint8_t> state;
-	state.resize(_sizeInBytes);
-	memcpy(&state[0], _data, _sizeInBytes);
-	m_plugin.setState(state);
-	if (m_controller)
-		m_controller->onStateLoaded();
+	return new Virus::Controller(*this);
 }
 
 //==============================================================================

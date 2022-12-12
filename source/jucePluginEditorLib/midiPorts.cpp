@@ -1,28 +1,23 @@
-#include "MidiPorts.h"
+#include "midiPorts.h"
 
-#include "VirusEditor.h"
+#include "pluginProcessor.h"
 
-#include "../VirusController.h"
-#include "../PluginProcessor.h"
+#include "../../juceUiLib/editor.h"
 
-namespace genericVirusUI
+namespace jucePluginEditorLib
 {
-	MidiPorts::MidiPorts(VirusEditor& _editor) : m_editor(_editor)
+	MidiPorts::MidiPorts(const genericUI::Editor& _editor, Processor& _processor) : m_processor(_processor)
 	{
-		auto& processor = _editor.getProcessor();
+		const auto& properties = m_processor.getConfig();
 
-		{
-			const auto properties = _editor.getController().getConfig();
+		const auto midiIn = properties.getValue("midi_input", "");
+		const auto midiOut = properties.getValue("midi_output", "");
 
-			const auto midiIn = properties->getValue("midi_input", "");
-			const auto midiOut = properties->getValue("midi_output", "");
+		if (!midiIn.isEmpty())
+			m_processor.setMidiInput(midiIn);
 
-			if (!midiIn.isEmpty())
-				processor.setMidiInput(midiIn);
-
-			if (!midiOut.isEmpty())
-				processor.setMidiOutput(midiOut);
-		}
+		if (!midiOut.isEmpty())
+			m_processor.setMidiOutput(midiOut);
 
 		m_midiIn = _editor.findComponentT<juce::ComboBox>("MidiIn");
 		m_midiOut = _editor.findComponentT<juce::ComboBox>("MidiOut");
@@ -39,7 +34,7 @@ namespace genericVirusUI
 		{
 			const auto input = midiInputs[i];
 
-			if (processor.getMidiInput() != nullptr && input.identifier == processor.getMidiInput()->getIdentifier())
+			if (m_processor.getMidiInput() != nullptr && input.identifier == m_processor.getMidiInput()->getIdentifier())
 				inIndex = i + 1;
 
 			m_midiIn->addItem(input.name, i+2);
@@ -60,8 +55,8 @@ namespace genericVirusUI
 		for (int i = 0; i < midiOutputs.size(); i++)
 		{
 			const auto output = midiOutputs[i];
-			if (processor.getMidiOutput() != nullptr &&
-				output.identifier == processor.getMidiOutput()->getIdentifier())
+			if (m_processor.getMidiOutput() != nullptr &&
+				output.identifier == m_processor.getMidiOutput()->getIdentifier())
 			{
 				outIndex = i + 1;
 			}
@@ -84,12 +79,12 @@ namespace genericVirusUI
 	{
 	    const auto list = juce::MidiInput::getAvailableDevices();
 
-		const auto properties = m_editor.getController().getConfig();
+		auto& properties = m_processor.getConfig();
 
 	    if (index <= 0)
 	    {
-	        properties->setValue("midi_input", "");
-	        properties->save();
+	        properties.setValue("midi_input", "");
+	        properties.save();
 			m_lastInputIndex = 0;
 	        m_midiIn->setSelectedItemIndex(index, juce::dontSendNotification);
 	        return;
@@ -102,15 +97,15 @@ namespace genericVirusUI
 	    if (!deviceManager->isMidiInputDeviceEnabled(newInput.identifier))
 	        deviceManager->setMidiInputDeviceEnabled(newInput.identifier, true);
 
-	    if (!m_editor.getProcessor().setMidiInput(newInput.identifier))
+	    if (!m_processor.setMidiInput(newInput.identifier))
 	    {
 	        m_midiIn->setSelectedItemIndex(0, juce::dontSendNotification);
 	        m_lastInputIndex = 0;
 	        return;
 	    }
 
-	    properties->setValue("midi_input", newInput.identifier);
-	    properties->save();
+	    properties.setValue("midi_input", newInput.identifier);
+	    properties.save();
 
 	    m_midiIn->setSelectedItemIndex(index + 1, juce::dontSendNotification);
 	    m_lastInputIndex = index;
@@ -120,27 +115,27 @@ namespace genericVirusUI
 	{
 	    const auto list = juce::MidiOutput::getAvailableDevices();
 
-		const auto properties = m_editor.getController().getConfig();
+		auto& properties = m_processor.getConfig();
 
 	    if (index == 0)
 	    {
-	        properties->setValue("midi_output", "");
-	        properties->save();
+	        properties.setValue("midi_output", "");
+	        properties.save();
 	        m_midiOut->setSelectedItemIndex(index, juce::dontSendNotification);
 	        m_lastOutputIndex = index;
-	        m_editor.getProcessor().setMidiOutput("");
+	        m_processor.setMidiOutput("");
 	        return;
 	    }
 	    index--;
 	    const auto newOutput = list[index];
-	    if (!m_editor.getProcessor().setMidiOutput(newOutput.identifier))
+	    if (!m_processor.setMidiOutput(newOutput.identifier))
 	    {
 	        m_midiOut->setSelectedItemIndex(0, juce::dontSendNotification);
 	        m_lastOutputIndex = 0;
 	        return;
 	    }
-	    properties->setValue("midi_output", newOutput.identifier);
-	    properties->save();
+	    properties.setValue("midi_output", newOutput.identifier);
+	    properties.save();
 
 	    m_midiOut->setSelectedItemIndex(index + 1, juce::dontSendNotification);
 	    m_lastOutputIndex = index;
