@@ -7,6 +7,8 @@
 
 namespace pluginLib
 {
+    using SysEx = std::vector<uint8_t>;
+
 	class Controller
 	{
 	public:
@@ -34,6 +36,9 @@ namespace pluginLib
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
+
+		virtual void parseSysexMessage(const SysEx&) = 0;
+		virtual void onStateLoaded() = 0;
 
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);

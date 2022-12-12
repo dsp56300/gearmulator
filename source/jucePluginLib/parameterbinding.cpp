@@ -142,14 +142,19 @@ namespace pluginLib
 
 	void ParameterBinding::bind(juce::Button &_btn, const uint32_t _param)
 	{
-		const auto v = m_controller.getParameter(_param, m_controller.getCurrentPart());
+		bind(_btn, _param, CurrentPart);
+	}
+
+	void ParameterBinding::bind(juce::Button& _control, uint32_t _param, uint8_t _part)
+	{
+		const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
 		if (!v)
 		{
 			assert(false && "Failed to find parameter");
 			return;
 		}
-		_btn.getToggleStateValue().referTo(v->getValueObject());
-		const BoundParameter p{v, &_btn, _param, CurrentPart};
+		_control.getToggleStateValue().referTo(v->getValueObject());
+		const BoundParameter p{v, &_control, _param, CurrentPart};
 		addBinding(p);
 	}
 
@@ -186,25 +191,25 @@ namespace pluginLib
 			const auto& desc = b.parameter->getDescription();
 			const bool isNonPartExclusive = desc.isNonPartSensitive();
 
-			if(isNonPartExclusive)
+			if(_currentPartOnly && isNonPartExclusive)
 				continue;
 
 			auto* slider = dynamic_cast<juce::Slider*>(b.component);
 			if(slider)
 			{
-				bind(*slider, b.type);
+				bind(*slider, b.type, b.part);
 				continue;
 			}
 			auto* button = dynamic_cast<juce::DrawableButton*>(b.component);
 			if(button)
 			{
-				bind(*button, b.type);
+				bind(*button, b.type, b.part);
 				continue;
 			}
 			auto* comboBox = dynamic_cast<juce::ComboBox*>(b.component);
 			if(comboBox)
 			{
-				bind(*comboBox, b.type);
+				bind(*comboBox, b.type, b.part);
 				continue;
 			}
 			assert(false && "unknown component type");
@@ -230,11 +235,18 @@ namespace pluginLib
 		auto* slider = dynamic_cast<juce::Slider*>(_b.component);
 
 		if(slider != nullptr)
+		{
 			removeMouseListener(*slider);
+			slider->getValueObject().referTo(juce::Value());
+		}
 
 		auto* combo = dynamic_cast<juce::ComboBox*>(_b.component);
 		if(combo != nullptr)
 			combo->onChange = nullptr;
+
+		auto* button = dynamic_cast<juce::Button*>(_b.component);
+		if(button != nullptr)
+			button->getToggleStateValue().referTo(juce::Value());
 
 		if(_b.onChangeListenerId)
 			_b.parameter->removeListener(_b.onChangeListenerId);

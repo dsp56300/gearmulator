@@ -5,7 +5,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.22)
+project(gearmulator VERSION 1.2.23)
 
 include(base.cmake)
 
@@ -36,6 +36,7 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(source/JUCE)
 	add_subdirectory(source/jucePluginLib)
 	add_subdirectory(source/juceUiLib)
+	add_subdirectory(source/jucePluginEditorLib)
 	add_subdirectory(source/jucePlugin)
 	add_subdirectory(source/mqJucePlugin)
 endif()

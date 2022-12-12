@@ -14,7 +14,7 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
 		Editor(static_cast<EditorInterface&>(*this)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
@@ -33,7 +33,7 @@ namespace genericVirusUI
 		if(getControllerLinkCountRecursive() == 0)
 			m_controllerLinks.reset(new ControllerLinks(*this));
 
-		m_midiPorts.reset(new MidiPorts(*this));
+		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
 		// be backwards compatible with old skins
 		if(!getConditionCountRecursive())
@@ -156,7 +156,7 @@ namespace genericVirusUI
 
 	Virus::Controller& VirusEditor::getController() const
 	{
-		return m_processor.getController();
+		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
 	const char* VirusEditor::findNamedResourceByFilename(const std::string& _filename, uint32_t& _size)
@@ -528,7 +528,7 @@ namespace genericVirusUI
 
 	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		const auto path = getController().getConfig()->getValue("virus_bank_dir", "");
+		const auto path = m_processor.getConfig().getValue("virus_bank_dir", "");
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Save preset(s) as syx or mid",
 			m_previousPath.isEmpty()

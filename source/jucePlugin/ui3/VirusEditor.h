@@ -2,10 +2,11 @@
 
 #include "../../juceUiLib/editor.h"
 
+#include "../../jucePluginEditorLib/midiPorts.h"
+
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
-#include "MidiPorts.h"
 #include "PatchBrowser.h"
 #include "ControllerLinks.h"
 
@@ -35,7 +36,7 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
+		VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
@@ -86,7 +87,7 @@ namespace genericVirusUI
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Tabs> m_tabs;
-		std::unique_ptr<MidiPorts> m_midiPorts;
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
