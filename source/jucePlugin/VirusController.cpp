@@ -130,7 +130,7 @@ namespace Virus
 
         const auto& partParams = findSynthParam(part, page, index);
 
-    	if (partParams.empty() && part != 0)
+    	if (partParams.empty() && part != 0 && part != virusLib::SINGLE)
 		{
             // ensure it's not global
 			const auto& globalParams = findSynthParam(0, page, index);
