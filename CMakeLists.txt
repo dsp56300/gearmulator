@@ -37,6 +37,7 @@ if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(source/jucePluginLib)
 	add_subdirectory(source/juceUiLib)
 	add_subdirectory(source/jucePlugin)
+	add_subdirectory(source/mqJucePlugin)
 endif()
 
 # ----------------- Console Programs
