@@ -7,7 +7,28 @@
 
 #include "../synthLib/os.h"
 
-Controller::Controller(AudioPluginAudioProcessor& p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions())
+constexpr const char* g_midiPacketNames[] =
+{
+    "requestsingle",
+    "requestmulti",
+    "requestdrum",
+    "requestsinglebank",
+    "requestmultibank",
+    "requestdrumbank",
+    "requestglobal",
+    "requestallsingles",
+    "singleparameterchange",
+    "singledump"
+};
+
+static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
+
+static const char* midiPacketName(Controller::MidiPacketType _type)
+{
+	return g_midiPacketNames[static_cast<uint32_t>(_type)];
+}
+
+Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(_deviceId)
 {
     registerParams(p);
 }
