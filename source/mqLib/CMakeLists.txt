@@ -30,6 +30,7 @@ set(SOURCES
 	mqdsp.cpp mqdsp.h
 	mqhardware.cpp mqhardware.h
 	mqmc.cpp mqmc.h
+	mqmiditypes.h
 	mqtypes.h
 )
 
