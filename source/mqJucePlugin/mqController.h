@@ -14,4 +14,5 @@ private:
     void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     void parseSysexMessage(const pluginLib::SysEx&) override;
     void onStateLoaded() override;
+    static std::string Controller::loadParameterDescriptions();
 };

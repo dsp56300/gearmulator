@@ -20,6 +20,8 @@ set(SOURCES
     PluginEditorState.h
     PluginProcessor.cpp
     PluginProcessor.h
+	mqEditor.cpp
+	mqEditor.h
 	mqController.cpp
 	mqController.h
 	version.h

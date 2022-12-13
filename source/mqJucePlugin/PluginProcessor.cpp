@@ -32,6 +32,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 	, getConfigOptions()),
 	m_device(), m_plugin(&m_device)
 {
+	getController();
 	const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 	setLatencyBlocks(latencyBlocks);
 }
