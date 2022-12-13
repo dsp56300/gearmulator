@@ -498,7 +498,7 @@ namespace pluginLib
 			{
 				if(p.checksumFirstIndex >= (packet.size()-1) || p.checksumLastIndex >= (packet.size()-1))
 				{
-					_errors << "specified checksum range " << p.checksumFirstIndex << "-" << p.checksumLastIndex << " is out of range 0-" << packet.size() << i << std::endl;
+					_errors << "specified checksum range " << p.checksumFirstIndex << "-" << p.checksumLastIndex << " is out of range 0-" << packet.size() << std::endl;
 					return;
 				}
 			}
