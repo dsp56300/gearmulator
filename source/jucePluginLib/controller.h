@@ -15,6 +15,7 @@ namespace pluginLib
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
 		explicit Controller(const std::string& _parameterDescJson);
+		virtual ~Controller() = default;
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
