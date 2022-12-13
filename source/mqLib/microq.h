@@ -107,6 +107,10 @@ namespace mqLib
 
 		// Gain access to the hardware implementation, intended for advanced use. Usually not required
 		Hardware* getHardware();
+
+		// returns after the device has booted and is ready to receive midi commands
+		bool isBootCompleted() const;
+
 	private:
 		void internalProcess(uint32_t _frames);
 		void onLedsChanged();

@@ -236,6 +236,11 @@ namespace mqLib
 		return m_hw.get();
 	}
 
+	bool MicroQ::isBootCompleted() const
+	{
+		return m_hw && m_hw->isBootCompleted();
+	}
+
 	void MicroQ::onLedsChanged()
 	{
 		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::Leds));
