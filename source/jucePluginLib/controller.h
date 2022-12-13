@@ -7,14 +7,15 @@
 
 namespace pluginLib
 {
-    using SysEx = std::vector<uint8_t>;
+	class Processor;
+	using SysEx = std::vector<uint8_t>;
 
 	class Controller
 	{
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
-		explicit Controller(const std::string& _parameterDescJson);
+		explicit Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson);
 		virtual ~Controller() = default;
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
@@ -45,8 +46,12 @@ namespace pluginLib
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
 
-	private:
+		void sendSysEx(const pluginLib::SysEx &) const;
+		bool sendSysEx(const std::string& _packetName) const;
+		bool sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
+	private:
+		Processor& m_processor;
         ParameterDescriptions m_descriptions;
 
         struct ParamIndex

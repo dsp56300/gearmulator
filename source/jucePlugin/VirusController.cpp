@@ -36,7 +36,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -504,14 +504,6 @@ namespace Virus
 		LOG(s);
     }
 
-    void Controller::sendSysEx(const pluginLib::SysEx &msg) const
-    {
-        synthLib::SMidiEvent ev;
-        ev.sysex = msg;
-		ev.source = synthLib::MidiEventSourceEditor;
-        m_processor.addMidiEvent(ev);
-    }
-
     void Controller::onStateLoaded()
     {
 		requestTotal();
@@ -564,15 +556,8 @@ namespace Virus
 
     bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
     {
-	    std::vector<uint8_t> sysex;
-
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
-
-    	if(!createMidiDataFromPacket(sysex, midiPacketName(_type), _params, 0))
-            return false;
-
-        sendSysEx(sysex);
-        return true;
+        return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
     }
 
     void Controller::timerCallback()

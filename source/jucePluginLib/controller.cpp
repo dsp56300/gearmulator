@@ -3,10 +3,11 @@
 #include <cassert>
 
 #include "parameter.h"
+#include "processor.h"
 
 namespace pluginLib
 {
-	Controller::Controller(const std::string& _parameterDescJson) : m_descriptions(_parameterDescJson)
+	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
 	{
 	}
 	
@@ -104,6 +105,31 @@ namespace pluginLib
 		}
 		_processor.addParameterGroup(std::move(globalParams));
 	}
+
+	void Controller::sendSysEx(const pluginLib::SysEx& msg) const
+    {
+        synthLib::SMidiEvent ev;
+        ev.sysex = msg;
+		ev.source = synthLib::MidiEventSourceEditor;
+        m_processor.addMidiEvent(ev);
+    }
+
+	bool Controller::sendSysEx(const std::string& _packetName) const
+    {
+	    const std::map<pluginLib::MidiDataType, uint8_t> params;
+        return sendSysEx(_packetName, params);
+    }
+
+    bool Controller::sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+    {
+	    std::vector<uint8_t> sysex;
+
+    	if(!createMidiDataFromPacket(sysex, _packetName, _params, 0))
+            return false;
+
+        sendSysEx(sysex);
+        return true;
+    }
 
 	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
 	{
