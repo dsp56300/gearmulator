@@ -120,7 +120,6 @@ namespace Virus
 		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseSysexMessage(const pluginLib::SysEx &) override;
-		void sendSysEx(const pluginLib::SysEx &) const;
         void onStateLoaded() override;
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
