@@ -4,6 +4,8 @@ namespace mqLib
 {
 	Device::Device() : m_mq(BootMode::Default)
 	{
+		while(!m_mq.isBootCompleted())
+			m_mq.process(8);
 	}
 
 	Device::~Device() = default;
