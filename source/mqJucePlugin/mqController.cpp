@@ -32,7 +32,8 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 {
     registerParams(p);
 
-    sendSysEx(RequestAllSingles);
+//  sendSysEx(RequestAllSingles);
+    requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
 
     startTimer(50);
 }
@@ -55,9 +56,55 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uin
 {
 }
 
+std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values)
+{
+    std::string name;
+    for(uint32_t i=0; i<16; ++i)
+    {
+        char paramName[16];
+        sprintf(paramName, "Name%02u", i);
+        const auto idx = getParameterIndexByName(paramName);
+        if(idx == InvalidParameterIndex)
+            break;
+
+        const auto it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
+        if(it == _values.end())
+            break;
+
+        name += static_cast<char>(it->second);
+    }
+    return name;
+}
+
+void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
+{
+    Patch patch;
+    patch.data = _msg;
+    patch.name = getSingleName(_params);
+
+    const auto bank = _data.at(pluginLib::MidiDataType::Bank);
+    const auto prog = _data.at(pluginLib::MidiDataType::Program);
+
+    if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::EditBufferSingle) && prog == static_cast<uint8_t>(mqLib::MidiSoundLocation::EditBufferCurrentSingle))
+    {
+	    m_singleEditBuffer = patch;
+    }
+}
+
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
     LOG("Got sysex of size " << _msg.size())
+    std::string name;
+    pluginLib::MidiPacket::Data data;
+    pluginLib::MidiPacket::ParamValues parameterValues;
+
+    if(parseMidiPacket(name,  data, parameterValues, _msg))
+    {
+        if(name == midiPacketName(SingleDump))
+        {
+	        parseSingle(_msg, data, parameterValues);
+        }
+    }
 }
 
 void Controller::onStateLoaded()
@@ -94,4 +141,12 @@ bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataTyp
 {
     _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
     return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
+}
+
+void Controller::requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location) const
+{
+	std::map<pluginLib::MidiDataType, uint8_t> params;
+    params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
+    params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location);
+    sendSysEx(RequestSingle, params);
 }
