@@ -5,6 +5,11 @@
 
 #include <string>
 
+namespace synthLib
+{
+	struct SMidiEvent;
+}
+
 namespace pluginLib
 {
 	class Processor;
@@ -42,6 +47,10 @@ namespace pluginLib
 		virtual void parseSysexMessage(const SysEx&) = 0;
 		virtual void onStateLoaded() = 0;
 
+        // this is called by the plug-in on audio thread!
+        void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
+		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
@@ -74,6 +83,9 @@ namespace pluginLib
 		using ParameterList = std::vector<Parameter*>;
 
 		uint8_t m_currentPart = 0;
+
+		std::mutex m_pluginMidiOutLock;
+        std::vector<synthLib::SMidiEvent> m_pluginMidiOut;
 
 	protected:
 		// tries to find synth param in both internal and host
