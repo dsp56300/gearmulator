@@ -28,9 +28,11 @@ static const char* midiPacketName(Controller::MidiPacketType _type)
 	return g_midiPacketNames[static_cast<uint32_t>(_type)];
 }
 
-Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(loadParameterDescriptions()), m_processor(p), m_deviceId(_deviceId)
+Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_processor(p), m_deviceId(_deviceId)
 {
     registerParams(p);
+
+    sendSysEx(RequestAllSingles);
 }
 
 Controller::~Controller() = default;
@@ -69,4 +71,16 @@ std::string Controller::loadParameterDescriptions()
     if(res)
         return {res, size};
     return {};
+}
+
+bool Controller::sendSysEx(MidiPacketType _type) const
+{
+    std::map<pluginLib::MidiDataType, uint8_t> params;
+    return sendSysEx(_type, params);
+}
+
+bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+{
+    _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+    return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
 }
