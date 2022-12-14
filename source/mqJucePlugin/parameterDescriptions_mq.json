@@ -1137,7 +1137,7 @@
 			{"type": "param", "name":"Category02"},                                // 381
 			{"type": "param", "name":"Category03"},                                // 382
 
-            {"type": "checksum", "first": 2, "last": 388},
+            {"type": "checksum", "first": 4, "last": 389},
 			{"type": "byte", "value": "f7"}
 		]
 	}
