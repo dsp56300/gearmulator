@@ -778,7 +778,6 @@
 			{"type": "null"},
 			{"type": "param", "name": "NoiseModeF1"},                           // 75
 			{"type": "param", "name": "NoiseModeF2"},                           // 76
-
 			{"type": "param", "name": "F1Type"},                                // 77
 			{"type": "param", "name": "F1Cutoff"},                              // 78
 			{"type": "null"},
@@ -798,7 +797,7 @@
 			{"type": "param", "name": "F1Pan"},                                 // 93
 			{"type": "param", "name": "F1PanModSource"},                        // 94
 			{"type": "param", "name": "F1PanMod"},                              // 95
-
+			{"type": "null"},
 			{"type": "param", "name": "F2Type"},                                // 97
 			{"type": "param", "name": "F2Cutoff"},                              // 98
 			{"type": "null"},
@@ -1030,6 +1029,7 @@
 			{"type": "param", "name":"ArpSameNoteOverlap"},                        // 321
 			{"type": "param", "name":"ArpPatternReset"},                           // 322
 			{"type": "param", "name":"ArpPatternLength"},                          // 323
+			{"type": "null"},
 			{"type": "null"},
 			{"type": "param", "name":"Tempo"},                                     // 326
 			{"type": "param", "name":"Arp00Step", "mask":"7", "shift":4},          // 327
