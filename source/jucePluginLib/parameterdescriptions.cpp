@@ -244,7 +244,17 @@ namespace pluginLib
 			d.isBipolar = readPropertyBool("isBipolar");
 
 			d.toText = valueList;
-			d.index = static_cast<uint8_t>(readPropertyInt("index"));
+
+			d.page = static_cast<uint8_t>(readPropertyInt("page"));
+
+			auto index = readPropertyInt("index");
+
+			while(index >= 128)
+			{
+				index -= 128;
+				++d.page;
+			}
+			d.index = static_cast<uint8_t>(index);
 
 			d.range.setStart(minValue);
 			d.range.setEnd(maxValue);
@@ -298,8 +308,6 @@ namespace pluginLib
 					}
 				}
 			}
-
-			d.page = static_cast<uint8_t>(readPropertyInt("page"));
 
 			m_descriptions.push_back(d);
 		}
