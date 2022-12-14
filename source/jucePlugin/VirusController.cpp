@@ -563,10 +563,7 @@ namespace Virus
     void Controller::timerCallback()
     {
         std::vector<synthLib::SMidiEvent> virusOut;
-        {
-			const juce::ScopedLock sl(m_eventQueueLock);
-	        std::swap(m_virusOut, virusOut);
-        }
+        getPluginMidiOut(virusOut);
 
     	for (const auto& msg : virusOut)
         {
@@ -580,13 +577,6 @@ namespace Virus
 				parseSysexMessage(msg.sysex);               
 			}
         }
-    }
-
-    void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
-    {
-        const juce::ScopedLock sl(m_eventQueueLock);
-
-        m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
     }
 
     void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)

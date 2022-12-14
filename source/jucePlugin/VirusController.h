@@ -66,9 +66,6 @@ namespace Virus
     	Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 		~Controller() override;
 
-        // this is called by the plug-in on audio thread!
-        void dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &);
-
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
         std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
         std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);
@@ -165,8 +162,6 @@ namespace Virus
         void parseControllerDump(const synthLib::SMidiEvent&);
 
         AudioPluginAudioProcessor& m_processor;
-        juce::CriticalSection m_eventQueueLock;
-        std::vector<synthLib::SMidiEvent> m_virusOut;
         unsigned char m_deviceId;
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};

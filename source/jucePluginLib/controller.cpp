@@ -254,6 +254,19 @@ namespace pluginLib
 		return false;
 	}
 
+	void Controller::addPluginMidiOut(const std::vector<synthLib::SMidiEvent>& _events)
+	{
+        const std::lock_guard l(m_pluginMidiOutLock);
+        m_pluginMidiOut.insert(m_pluginMidiOut.end(), _events.begin(), _events.end());
+	}
+
+	void Controller::getPluginMidiOut(std::vector<synthLib::SMidiEvent>& _events)
+	{
+		const std::lock_guard l(m_pluginMidiOutLock);
+        std::swap(m_pluginMidiOut, _events);
+		m_pluginMidiOut.clear();
+	}
+
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
 	{
 		return new Parameter(_controller, _desc, _part, _uid);
