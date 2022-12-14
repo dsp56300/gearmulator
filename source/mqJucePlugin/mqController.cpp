@@ -33,20 +33,31 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
     registerParams(p);
 
     sendSysEx(RequestAllSingles);
+
+    startTimer(50);
 }
 
 Controller::~Controller() = default;
 
 void Controller::timerCallback()
 {
+    std::vector<synthLib::SMidiEvent> events;
+    getPluginMidiOut(events);
+
+    for (const auto& e : events)
+    {
+	    if(!e.sysex.empty())
+            parseSysexMessage(e.sysex);
+    }
 }
 
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
 {
 }
 
-void Controller::parseSysexMessage(const pluginLib::SysEx&)
+void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
+    LOG("Got sysex of size " << _msg.size())
 }
 
 void Controller::onStateLoaded()

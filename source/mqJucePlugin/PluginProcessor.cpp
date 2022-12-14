@@ -206,7 +206,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 			if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
 			{
 				// forward to UI to react to control input changes that should move knobs
-//				getController().dispatchVirusOut(std::vector<synthLib::SMidiEvent>{ev});
+				getController().addPluginMidiOut({ev});
 			}
 		}
 
@@ -240,7 +240,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if (!m_midiOut.empty())
 	{
-//		getController().dispatchVirusOut(m_midiOut);
+		getController().addPluginMidiOut(m_midiOut);
 	}
 
     for (auto& e : m_midiOut)
