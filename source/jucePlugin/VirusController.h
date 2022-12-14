@@ -136,6 +136,8 @@ namespace Virus
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
 		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
 
+        using pluginLib::Controller::sendSysEx;
+
         bool sendSysEx(MidiPacketType _type) const;
         bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
