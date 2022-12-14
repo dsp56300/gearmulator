@@ -2,7 +2,7 @@
 
 namespace mqLib
 {
-	enum class MidiDataType
+	enum class MidiDataType : uint8_t
 	{
 		SingleRequest = 0x00, SingleDump = 0x10, SingleParameterChange = 0x20, SingleParameterRequest = 0x30,
 		MultiRequest  = 0x01, MultiDump  = 0x11, MultiParameterChange  = 0x21, MultiParameterRequest  = 0x31,
@@ -10,7 +10,7 @@ namespace mqLib
 		GlobalRequest = 0x04, GlobalDump = 0x14, GlobalParameterChange = 0x24, GlobalParameterRequest = 0x34,
 	};
 
-	enum class MidiBufferNum
+	enum class MidiBufferNum : uint8_t
 	{
 		DeprecatedSingleBankA = 0x00,
 		DeprecatedSingleBankB,
@@ -27,7 +27,7 @@ namespace mqLib
 		SingleBankX = 0x48
 	};
 
-	enum class MidiSoundLocation
+	enum class MidiSoundLocation : uint8_t
 	{
 		AllSinglesBankA = 0x40,
 		AllSinglesBankB,
@@ -38,8 +38,8 @@ namespace mqLib
 		EditBufferFirstSingleLayer = 0x00,
 		EditBufferFirstDrumMapInstrument = 0x10,
 	};
-
-	enum class GlobalParameter
+	
+	enum class GlobalParameter : uint8_t
 	{
 		// Global data
 		Version,
