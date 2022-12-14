@@ -12,12 +12,90 @@ namespace mqLib
 
 	enum class MidiBufferNum
 	{
-		SingleEditBuffer = 0x20,
-		MultiEditBuffer = 0x30,
-		AllSingleBanks = 0x00,
+		DeprecatedSingleBankA = 0x00,
+		DeprecatedSingleBankB,
+		DeprecatedSingleBankC,
+		DeprecatedSingleBankX,
+		AllSounds = 0x10,
+		EditBufferSingle = 0x20,
+		EditBufferMulti = 0x30,
+		EditBufferSingleLayer = 0x30,
+		EditBufferDrumMap = 0x30,
 		SingleBankA = 0x40,
-		SingleBankB = 0x41,
-		SingleBankC = 0x42,
+		SingleBankB,
+		SingleBankC,
 		SingleBankX = 0x48
+	};
+
+	enum class MidiSoundLocation
+	{
+		AllSinglesBankA = 0x40,
+		AllSinglesBankB,
+		AllSinglesBankC,
+		AllSinglesBankX = 0x48,
+		EditBufferCurrentSingle = 0x00,
+		EditBufferFirstMulti = 0x00,
+		EditBufferFirstSingleLayer = 0x00,
+		EditBufferFirstDrumMapInstrument = 0x10,
+	};
+
+	enum class GlobalParameter
+	{
+		// Global data
+		Version,
+
+		// Initial instrument settings
+		InstrumentSelection = 20,
+		SingleMultiMode = 21,
+		MultiNumber = 22,
+
+		// Instr. 1-4
+		InstrumentASingleNumber = 1,	InstrumentBSingleNumber,	InstrumentCSingleNumber,	InstrumentDSingleNumber,
+		InstrumentABankNumber = 9,		InstrumentBBankNumber,		InstrumentCBankNumber,		InstrumentDBankNumber,
+
+		// Pedal/CV
+		PedalOffset = 70,
+		PedalGain,
+		PedalCurve,
+		PedalControl,
+
+		// MIDI Setup
+		Tuning = 5,
+		Transpose,
+		ControllerSend,
+		ControllerReceive,
+		ControllerW = 53,
+		ControllerX,
+		ControllerY,
+		ControllerZ,
+		ArpSend = 15,
+		Clock = 19,
+		MidiChannel = 24,
+		SysExDeviceId,
+		LocalControl,
+
+		// Program change
+		ProgramChangeRx = 57,
+		ProgramChangeTx = 74,
+
+		// Display Setup
+		PopupTime = 27,
+		LabelTime,
+		DisplayContrast,
+
+		// Keyboard setp
+		OnVelocityCurve = 30,
+		ReleaseVelocityCurve,
+		PressureCurve,
+
+		// External input
+		InputGain = 33,
+
+		// FX setup
+		GlobalLinkFX2 = 35,
+
+		// Mix in
+		Send = 58,
+		Level
 	};
 }
