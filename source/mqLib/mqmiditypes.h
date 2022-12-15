@@ -2,12 +2,17 @@
 
 namespace mqLib
 {
-	enum class MidiDataType : uint8_t
+	enum class SysexCommand : uint8_t
 	{
 		SingleRequest = 0x00, SingleDump = 0x10, SingleParameterChange = 0x20, SingleParameterRequest = 0x30,
 		MultiRequest  = 0x01, MultiDump  = 0x11, MultiParameterChange  = 0x21, MultiParameterRequest  = 0x31,
 		DrumRequest	  = 0x02, DrumDump   = 0x12, DrumParameterChange   = 0x22, DrumParameterRequest   = 0x32,
 		GlobalRequest = 0x04, GlobalDump = 0x14, GlobalParameterChange = 0x24, GlobalParameterRequest = 0x34,
+
+		EmuLCD = 0x50,
+		EmuLEDs = 0x51,
+		EmuButtons = 0x52,
+		EmuRotaries = 0x53,
 	};
 
 	enum class MidiBufferNum : uint8_t
