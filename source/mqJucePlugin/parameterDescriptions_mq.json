@@ -685,7 +685,7 @@
 			{"type": "byte", "value": "10"},
 			{"type": "deviceid"},
 			{"type": "byte", "value": "20"},
-			{"type": "bank"},
+			{"type": "part"},
 			{"type": "page"},
 			{"type": "paramindex"},
 			{"type": "paramvalue"},

@@ -52,8 +52,23 @@ void Controller::timerCallback()
     }
 }
 
-void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
+void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
 {
+    const auto& desc = _parameter.getDescription();
+
+    sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
+}
+
+bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
+{
+    std::map<pluginLib::MidiDataType, uint8_t> data;
+
+    data.insert(std::make_pair(pluginLib::MidiDataType::Part, _part));
+    data.insert(std::make_pair(pluginLib::MidiDataType::Page, _page));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+
+    return sendSysEx(SingleParameterChange, data);
 }
 
 std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values)

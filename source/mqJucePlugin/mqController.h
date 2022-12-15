@@ -37,6 +37,7 @@ public:
 private:
     void timerCallback() override;
     void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+    bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
     std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values);
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseSysexMessage(const pluginLib::SysEx&) override;
