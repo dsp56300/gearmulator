@@ -2,6 +2,13 @@
 
 namespace mqLib
 {
+	enum MidiHeaderByte : uint8_t
+	{
+		IdWaldorf = 0x3e,
+		IdMicroQ = 0x10,
+		DeviceIdOmni = 0x7f
+	};
+
 	enum class SysexCommand : uint8_t
 	{
 		SingleRequest = 0x00, SingleDump = 0x10, SingleParameterChange = 0x20, SingleParameterRequest = 0x30,
@@ -102,5 +109,41 @@ namespace mqLib
 		// Mix in
 		Send = 58,
 		Level
+	};
+
+	enum class MultiParameter
+	{
+		Volume = 0,
+
+		ControlW = 1,		ControlX,		ControlY,		ControlZ,
+
+		Name00 = 16, Name01, Name02, Name03, Name04, Name05, Name06, Name07, Name08, Name09, Name10, Name11, Name12, Name13, Name14, Name15,
+
+		Inst0SoundBank = 32,
+		Inst0SoundNumber,
+		Inst0MidiChannel,
+		Inst0Volume,
+		Inst0Transpose,
+		Inst0Detune,
+		Inst0Output,
+		Inst0Flags,
+		Inst0Pan,
+		Inst0ReservedA,
+		Inst0ReservedB,
+		Inst0Pattern,
+		Inst0VeloLow,
+		Inst0VeloHigh,
+		Inst0KeyLow,
+		Inst0KeyHigh,
+		Inst0MidiRxFlags,
+
+		Inst0 = Inst0SoundBank,		Inst1 = 54,		Inst2 = 76,		Inst3 = 98,
+		Inst4 = 120,				Inst5 = 142,	Inst6 = 164,	Inst7 = 186,
+		Inst8 = 208,				Inst9 = 230,	Inst10 = 252,	Inst11 = 274,
+		Inst12 = 296,				Inst13 = 318,	Inst14 = 340,	Inst15 = 362,
+
+		Last = 378,
+
+		Count
 	};
 }
