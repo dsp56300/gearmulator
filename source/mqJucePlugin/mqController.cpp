@@ -180,7 +180,7 @@ bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _inde
     return sendSysEx(SingleParameterChange, data);
 }
 
-bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value) const
+bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value)
 {
     std::map<pluginLib::MidiDataType, uint8_t> data;
 
@@ -189,6 +189,8 @@ bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_
     data.insert(std::make_pair(pluginLib::MidiDataType::Page, index >> 7 ));
     data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, index & 0x7f ));
     data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+
+    m_globalData[index] = _value;
 
     return sendSysEx(GlobalParameterChange, data);
 }

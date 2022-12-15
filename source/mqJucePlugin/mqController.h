@@ -50,7 +50,7 @@ private:
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
-    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value) const;
+    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
 	void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location) const;
 
     uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
