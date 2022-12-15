@@ -18,7 +18,9 @@ constexpr const char* g_midiPacketNames[] =
     "requestglobal",
     "requestallsingles",
     "singleparameterchange",
-    "singledump"
+    "globalparameterchange",
+    "singledump",
+    "globaldump"
 };
 
 static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -33,12 +35,34 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
     registerParams(p);
 
 //  sendSysEx(RequestAllSingles);
+	sendSysEx(RequestGlobal);
+    sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
     requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
 
     startTimer(50);
 }
 
 Controller::~Controller() = default;
+
+std::string Controller::loadParameterDescriptions()
+{
+    const auto name = "parameterDescriptions_mq.json";
+    const auto path = synthLib::getModulePath() +  name;
+
+    const std::ifstream f(path.c_str(), std::ios::in);
+    if(f.is_open())
+    {
+		std::stringstream buf;
+		buf << f.rdbuf();
+        return buf.str();
+    }
+
+    uint32_t size;
+    const auto res = mqJucePlugin::Editor::findNamedResourceByFilename(name, size);
+    if(res)
+        return {res, size};
+    return {};
+}
 
 void Controller::timerCallback()
 {
@@ -52,26 +76,11 @@ void Controller::timerCallback()
     }
 }
 
-void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
+void Controller::onStateLoaded()
 {
-    const auto& desc = _parameter.getDescription();
-
-    sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
 }
 
-bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
-{
-    std::map<pluginLib::MidiDataType, uint8_t> data;
-
-    data.insert(std::make_pair(pluginLib::MidiDataType::Part, _part));
-    data.insert(std::make_pair(pluginLib::MidiDataType::Page, _page));
-    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
-    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
-
-    return sendSysEx(SingleParameterChange, data);
-}
-
-std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values)
+std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 {
     std::string name;
     for(uint32_t i=0; i<16; ++i)
@@ -118,7 +127,8 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
     LOG("Got sysex of size " << _msg.size())
-    std::string name;
+
+	std::string name;
     pluginLib::MidiPacket::Data data;
     pluginLib::MidiPacket::ParamValues parameterValues;
 
@@ -128,31 +138,15 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         {
 	        parseSingle(_msg, data, parameterValues);
         }
+        if(name == midiPacketName(GlobalDump))
+        {
+            memcpy(&m_globalData[0], &_msg[5], sizeof(m_globalData));
+        }
+        else
+        {
+	        LOG("Received unknown sysex of size " << _msg.size());
+        }
     }
-}
-
-void Controller::onStateLoaded()
-{
-}
-
-std::string Controller::loadParameterDescriptions()
-{
-    const auto name = "parameterDescriptions_mq.json";
-    const auto path = synthLib::getModulePath() +  name;
-
-    const std::ifstream f(path.c_str(), std::ios::in);
-    if(f.is_open())
-    {
-		std::stringstream buf;
-		buf << f.rdbuf();
-        return buf.str();
-    }
-
-    uint32_t size;
-    const auto res = mqJucePlugin::Editor::findNamedResourceByFilename(name, size);
-    if(res)
-        return {res, size};
-    return {};
 }
 
 bool Controller::sendSysEx(MidiPacketType _type) const
@@ -167,10 +161,47 @@ bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataTyp
     return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
 }
 
+void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
+{
+    const auto& desc = _parameter.getDescription();
+
+    sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
+}
+
+bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
+{
+    std::map<pluginLib::MidiDataType, uint8_t> data;
+
+    data.insert(std::make_pair(pluginLib::MidiDataType::Part, _part));
+    data.insert(std::make_pair(pluginLib::MidiDataType::Page, _page));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+
+    return sendSysEx(SingleParameterChange, data);
+}
+
+bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value) const
+{
+    std::map<pluginLib::MidiDataType, uint8_t> data;
+
+    const auto index = static_cast<uint32_t>(_param);
+
+    data.insert(std::make_pair(pluginLib::MidiDataType::Page, index >> 7 ));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, index & 0x7f ));
+    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+
+    return sendSysEx(GlobalParameterChange, data);
+}
+
 void Controller::requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location) const
 {
 	std::map<pluginLib::MidiDataType, uint8_t> params;
     params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
     params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location);
     sendSysEx(RequestSingle, params);
+}
+
+uint8_t Controller::getGlobalParam(mqLib::GlobalParameter _type) const
+{
+    return m_globalData[static_cast<uint32_t>(_type)];
 }

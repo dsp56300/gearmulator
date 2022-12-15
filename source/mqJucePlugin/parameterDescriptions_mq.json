@@ -665,8 +665,6 @@
 			{"type": "byte", "value": "10"},
 			{"type": "deviceid"},
 			{"type": "byte", "value": "04"},
-			{"type": "byte", "value": "10"},
-			{"type": "bank"},
 			{"type": "byte", "value": "f7"}
 		],
 		"requestallsingles": [
@@ -686,6 +684,17 @@
 			{"type": "deviceid"},
 			{"type": "byte", "value": "20"},
 			{"type": "part"},
+			{"type": "page"},
+			{"type": "paramindex"},
+			{"type": "paramvalue"},
+			{"type": "byte", "value": "f7"}
+		],
+		"globalparameterchange": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "10"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "24"},
 			{"type": "page"},
 			{"type": "paramindex"},
 			{"type": "paramvalue"},
@@ -1138,6 +1147,37 @@
 			{"type": "param", "name":"Category03"},                                // 382
 
             {"type": "checksum", "first": 4, "last": 389},
+			{"type": "byte", "value": "f7"}
+		],
+		"globaldump": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "10"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "14"},
+
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+
+            {"type": "checksum", "first": 4, "last": 204},
 			{"type": "byte", "value": "f7"}
 		]
 	}
