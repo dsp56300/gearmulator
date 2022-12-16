@@ -2,19 +2,20 @@
 
 #include "../../juceUiLib/editor.h"
 
+#include "../../jucePluginEditorLib/midiPorts.h"
+
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
-#include "MidiPorts.h"
 #include "PatchBrowser.h"
 #include "ControllerLinks.h"
 
 namespace pluginLib
 {
 	class Parameter;
+	class ParameterBinding;
 }
 
-class VirusParameterBinding;
 class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
@@ -35,14 +36,14 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
+		VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
 
 		AudioPluginAudioProcessor& getProcessor() const { return m_processor; }
-		VirusParameterBinding& getParameterBinding() const { return m_parameterBinding; }
+		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 
 		Virus::Controller& getController() const;
 
@@ -80,13 +81,13 @@ namespace genericVirusUI
 		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
-		VirusParameterBinding& m_parameterBinding;
+		pluginLib::ParameterBinding& m_parameterBinding;
 
 		const std::string m_skinFolder;
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Tabs> m_tabs;
-		std::unique_ptr<MidiPorts> m_midiPorts;
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;

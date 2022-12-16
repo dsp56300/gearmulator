@@ -37,7 +37,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(loadParameterDescriptions(p.getModel())), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p.getModel())), m_processor(p), m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -48,13 +48,6 @@ namespace Virus
         }
 
     	registerParams(p);
-
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300Emulator_OsTIrus";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300Emulator_OsTIrus";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
-		m_config = new juce::PropertiesFile(opts);
 
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
 		const auto& params = findSynthParam(0, 0x72, 0x7a);
@@ -83,10 +76,9 @@ namespace Virus
     Controller::~Controller()
     {
 	    stopTimer();
-		delete m_config;
     }
 
-	void Controller::parseMessage(const SysEx& _msg)
+	void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 	{
         std::string name;
     	pluginLib::MidiPacket::Data data;
@@ -139,7 +131,7 @@ namespace Virus
 
         const auto& partParams = findSynthParam(part, page, index);
 
-    	if (partParams.empty() && part != 0)
+    	if (partParams.empty() && part != 0 && part != virusLib::SINGLE)
 		{
             // ensure it's not global
 			const auto& globalParams = findSynthParam(0, page, index);
@@ -222,8 +214,8 @@ namespace Virus
         return name;
     }
 
-    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name)
-	{
+    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name) const
+    {
 		for (int i=0; i<kNameLength; i++)
 		{
 	        const std::string paramName = "SingleName" + std::to_string(i);
@@ -316,13 +308,13 @@ namespace Virus
         return m_currentPresetSource[_part];
 	}
 
-	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg) const
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg) const
 	{
         MidiPacketType unused;
         return parseSingle(_data, _parameterValues, _msg, unused);
 	}
 
-	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const SysEx& _msg, MidiPacketType& usedPacketType) const
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const
 	{
         const auto packetName = midiPacketName(MidiPacketType::SingleDump);
 
@@ -335,7 +327,7 @@ namespace Virus
 
         if(_msg.size() > m->size())
         {
-            SysEx temp;
+	        pluginLib::SysEx temp;
             temp.insert(temp.begin(), _msg.begin(), _msg.begin() + (m->size()-1));
             temp.push_back(0xf7);
 	    	return parseMidiPacket(*m, _data, _parameterValues, temp);
@@ -373,7 +365,7 @@ namespace Virus
         return {};
 	}
 
-	void Controller::parseSingle(const SysEx& msg)
+	void Controller::parseSingle(const pluginLib::SysEx& msg)
 	{
 		pluginLib::MidiPacket::Data data;
         pluginLib::MidiPacket::ParamValues parameterValues;
@@ -384,7 +376,7 @@ namespace Virus
         parseSingle(msg, data, parameterValues);
     }
 
-	void Controller::parseSingle(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
+	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{
         SinglePatch patch;
 
@@ -465,7 +457,7 @@ namespace Virus
 		}
 	}
 
-	void Controller::parseMulti(const SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
+	void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
     {
         const auto bankNumber = _data.find(pluginLib::MidiDataType::Bank)->second;
 
@@ -516,7 +508,7 @@ namespace Virus
 			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
 	}
 
-    void Controller::printMessage(const SysEx &msg)
+    void Controller::printMessage(const pluginLib::SysEx &msg)
     {
 		std::stringstream ss;
         ss << "[size " << msg.size() << "] ";
@@ -530,15 +522,7 @@ namespace Virus
 		LOG(s);
     }
 
-    void Controller::sendSysEx(const SysEx &msg) const
-    {
-        synthLib::SMidiEvent ev;
-        ev.sysex = msg;
-		ev.source = synthLib::MidiEventSourceEditor;
-        m_processor.addMidiEvent(ev);
-    }
-
-    void Controller::onStateLoaded() const
+    void Controller::onStateLoaded()
     {
 		requestTotal();
 		requestArrangement();
@@ -590,24 +574,14 @@ namespace Virus
 
     bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
     {
-	    std::vector<uint8_t> sysex;
-
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
-
-    	if(!createMidiDataFromPacket(sysex, midiPacketName(_type), _params, 0))
-            return false;
-
-        sendSysEx(sysex);
-        return true;
+        return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
     }
 
     void Controller::timerCallback()
     {
         std::vector<synthLib::SMidiEvent> virusOut;
-        {
-			const juce::ScopedLock sl(m_eventQueueLock);
-	        std::swap(m_virusOut, virusOut);
-        }
+        getPluginMidiOut(virusOut);
 
     	for (const auto& msg : virusOut)
         {
@@ -618,16 +592,9 @@ namespace Virus
 			}
             else
 			{
-				parseMessage(msg.sysex);               
+				parseSysexMessage(msg.sysex);               
 			}
         }
-    }
-
-    void Controller::dispatchVirusOut(const std::vector<synthLib::SMidiEvent> &newData)
-    {
-        const juce::ScopedLock sl(m_eventQueueLock);
-
-        m_virusOut.insert(m_virusOut.end(), newData.begin(), newData.end());
     }
 
     void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)

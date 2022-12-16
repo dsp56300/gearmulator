@@ -17,16 +17,12 @@ set(SOURCES
 	parameterDescriptions_Snow.json
 	parameterDescriptions_TI.json
 	ParameterNames.h
-    PluginEditor.cpp
-    PluginEditor.h
 	PluginEditorState.cpp
 	PluginEditorState.h
     PluginProcessor.cpp
     PluginProcessor.h
 	VirusController.cpp
 	VirusController.h
-	VirusParameterBinding.cpp
-	VirusParameterBinding.h
 	version.h
 )
 
@@ -35,8 +31,6 @@ set(SOURCES_UI3
 	ui3/ControllerLinks.h
 	ui3/FxPage.cpp
 	ui3/FxPage.h
-	ui3/MidiPorts.cpp
-	ui3/MidiPorts.h
     ui3/Parts.cpp
     ui3/Parts.h
 	ui3/PatchBrowser.cpp
@@ -96,8 +90,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	target_link_libraries(${targetName}
 	PRIVATE
 		${binaryDataProject}
-		juceUiLib
-		jucePluginLib
+		jucePluginEditorLib
 		juce::juce_audio_utils
 		juce::juce_cryptography
 	PUBLIC

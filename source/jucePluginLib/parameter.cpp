@@ -164,5 +164,5 @@ namespace pluginLib
 
 		m_derivedParameters.insert(_param);
 		_param->m_derivedParameters.insert(this);
-	}	
+	}
 }
