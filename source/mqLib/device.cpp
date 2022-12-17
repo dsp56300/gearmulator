@@ -176,7 +176,7 @@ namespace mqLib
 					}
 					return true;
 				default:
-					return true;
+					break;
 				}
 			}
 		}
