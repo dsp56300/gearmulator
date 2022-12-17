@@ -3,7 +3,7 @@ Release Notes
 1.2.24 (2022.12.16)
 
 - [Fix] AU validation failed on MacOS (1.2.23 regression)
-- [Fix] Oscillator 1 & 2 waves were labeled incorrectly (Wave 2-63 instead of Wave 3-64)
+- [Fix] Incorrect waveform labels for Oscillator 1 & 2 (Wave 2-63 => Wave 3-64)
 
 1.2.23 (2022.12.12)
 
