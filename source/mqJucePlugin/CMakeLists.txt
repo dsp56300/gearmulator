@@ -14,8 +14,6 @@ endif()
 
 set(SOURCES
 	parameterDescriptions_mq.json
-    PluginEditor.cpp
-    PluginEditor.h
     PluginEditorState.cpp
     PluginEditorState.h
     PluginProcessor.cpp
