@@ -36,11 +36,14 @@ namespace genericUI
 			"disabledImageOn"
 		};
 
-		const bool isVerticalTiling = m_tileSizeY <= (m_drawable->getHeight()>>1);
-
 		static_assert(std::size(imageDrawables) == std::size(properties), "arrays must have same size");
 
+		const bool isVerticalTiling = m_tileSizeY <= (m_drawable->getHeight()>>1);
+
 		std::map<int, juce::Drawable*> drawables;
+
+		const auto targetW = _object.getPropertyInt("width", 0);
+		const auto targetH = _object.getPropertyInt("height", 0);
 
 		for(size_t i=0; i<std::size(imageDrawables); ++i)
 		{
@@ -57,8 +60,9 @@ namespace genericUI
 			}
 			else
 			{
+				const auto needsScale = targetW && targetH && (targetW != m_tileSizeX || targetH != m_tileSizeY);
 				juce::Drawable* d = m_drawable;
-				if(imageIndex > 0)
+				if(needsScale || imageIndex > 0)
 				{
 					m_createdDrawables.emplace_back(d->createCopy());
 					d = m_createdDrawables.back().get();
@@ -67,8 +71,18 @@ namespace genericUI
 					else
 						d->setOriginWithOriginalSize({static_cast<float>(-imageIndex * m_tileSizeX), 0.0f});
 				}
+
 				*imageDrawables[i] = d;
+
 				drawables.insert(std::make_pair(imageIndex, d));
+
+				if(needsScale)
+				{
+					auto* d = *imageDrawables[i];
+					const auto scaleX = static_cast<float>(targetW) / static_cast<float>(m_tileSizeX);
+					const auto scaleY = static_cast<float>(targetH) / static_cast<float>(m_tileSizeY);
+					d->setTransform(d->getTransform().scaled(scaleX, scaleY));
+				}
 			}
 		}
 	}
