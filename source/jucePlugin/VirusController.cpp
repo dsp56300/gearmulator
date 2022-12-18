@@ -341,7 +341,7 @@ namespace Virus
         }
 
         uint32_t size;
-        const auto res = genericVirusUI::VirusEditor::findNamedResourceByFilename(name, size);
+        const auto res = genericVirusUI::VirusEditor::findEmbeddedResource(name, size);
         if(res)
             return {res, size};
         return {};

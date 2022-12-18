@@ -1,8 +1,7 @@
 #pragma once
 
-#include "../../juceUiLib/editor.h"
-
 #include "../../jucePluginEditorLib/midiPorts.h"
+#include "../../jucePluginEditorLib/pluginEditor.h"
 
 #include "Parts.h"
 #include "Tabs.h"
@@ -20,7 +19,7 @@ class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
 {
-	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor, juce::Timer
+	class VirusEditor : public jucePluginEditorLib::Editor, juce::Timer
 	{
 	public:
 		enum class FileType
@@ -47,18 +46,12 @@ namespace genericVirusUI
 
 		Virus::Controller& getController() const;
 
-		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
+		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
+		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
 		PatchBrowser* getPatchBrowser();
 
 	private:
-		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
-		int getParameterIndexByName(const std::string& _name) override;
-		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
-		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
-		juce::Value* getParameterValue(int _parameterIndex) override;
-
 		void onProgramChange();
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
@@ -82,8 +75,6 @@ namespace genericVirusUI
 
 		AudioPluginAudioProcessor& m_processor;
 		pluginLib::ParameterBinding& m_parameterBinding;
-
-		const std::string m_skinFolder;
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Tabs> m_tabs;
@@ -110,7 +101,5 @@ namespace genericVirusUI
 		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
 		std::vector<pluginLib::Parameter*> m_boundParameters;
-
-		std::map<std::string, std::vector<char>> m_fileCache;
 	};
 }

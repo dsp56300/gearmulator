@@ -1,31 +1,35 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "../juceUiLib/editor.h"
 
-class AudioPluginAudioProcessor;
+namespace pluginLib
+{
+	class Processor;
+	class ParameterBinding;
+}
 
 namespace jucePluginEditorLib
 {
-	class PluginEditorState;
-
-	//==============================================================================
-	class Editor : public juce::AudioProcessorEditor
+	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
-	    explicit Editor (juce::AudioProcessor& _p, PluginEditorState& _s, juce::PropertiesFile& _config);
-	    ~Editor() override;
+		Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename);
 
-		void mouseDown(const juce::MouseEvent& event) override;
-
-		void paint(juce::Graphics& g) override {}
+		virtual const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) = 0;
 
 	private:
-		void setGuiScale(juce::Component* _component, int percent);
-		void setUiRoot(juce::Component* _component);
+		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
+		int getParameterIndexByName(const std::string& _name) override;
+		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
+		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
+		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
+		juce::Value* getParameterValue(int _parameterIndex) override;
 
-		PluginEditorState& m_state;
-		juce::PropertiesFile& m_config;
+		pluginLib::Processor& m_processor;
+		pluginLib::ParameterBinding& m_binding;
 
-		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Editor)
+		const std::string m_skinFolder;
+
+		std::map<std::string, std::vector<char>> m_fileCache;
 	};
 }
