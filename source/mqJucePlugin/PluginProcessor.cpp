@@ -277,8 +277,8 @@ bool AudioPluginAudioProcessor::hasEditor() const
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
-//	if(!m_editorState)
-//		m_editorState.reset(new PluginEditorState(*this));
+	if(!m_editorState)
+		m_editorState.reset(new PluginEditorState(*this));
     return new AudioPluginAudioProcessorEditor (*this, *m_editorState);
 }
 

@@ -1,5 +1,6 @@
 #include "PluginEditorState.h"
 
+#include "mqEditor.h"
 #include "PluginProcessor.h"
 
 #include "../synthLib/os.h"
@@ -16,5 +17,5 @@ PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : ju
 
 genericUI::Editor* PluginEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
 {
-	return nullptr;
+	return new mqJucePlugin::Editor(m_processor, m_parameterBinding);
 }
