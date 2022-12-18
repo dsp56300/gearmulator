@@ -15,7 +15,7 @@
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
-		Editor(_processorRef, _binding, std::move(_skinFolder), _jsonFilename),
+		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
 		m_openMenuCallback(std::move(_openMenuCallback))

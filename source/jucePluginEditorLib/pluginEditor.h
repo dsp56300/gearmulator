@@ -13,7 +13,7 @@ namespace jucePluginEditorLib
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
-		Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename);
+		Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
 
 		virtual const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) = 0;
 
