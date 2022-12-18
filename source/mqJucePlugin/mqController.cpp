@@ -58,7 +58,7 @@ std::string Controller::loadParameterDescriptions()
     }
 
     uint32_t size;
-    const auto res = mqJucePlugin::Editor::findNamedResourceByFilename(name, size);
+    const auto res = mqJucePlugin::Editor::findEmbeddedResource(name, size);
     if(res)
         return {res, size};
     return {};

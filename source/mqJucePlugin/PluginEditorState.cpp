@@ -17,5 +17,5 @@ PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : ju
 
 genericUI::Editor* PluginEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
 {
-	return new mqJucePlugin::Editor(m_processor, m_parameterBinding);
+	return new mqJucePlugin::Editor(m_processor, m_parameterBinding, _skin.folder, _skin.jsonFilename);
 }
