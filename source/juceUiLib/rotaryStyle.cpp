@@ -25,7 +25,7 @@ namespace genericUI
         if(!m_drawable || !m_tileSizeX || !m_tileSizeY)
             return;
 
-//		const auto w = m_drawable->getWidth();
+		const auto w = m_drawable->getWidth();
 		const auto h = m_drawable->getHeight();
 
 //		const auto stepsX = w / m_tileSizeX;
@@ -36,7 +36,14 @@ namespace genericUI
 
 		m_drawable->setOriginWithOriginalSize({0.0f, static_cast<float>(-m_tileSizeY * stepY)});
 
-		m_drawable->drawAt(_graphics, static_cast<float>(x), static_cast<float>(y), 1.0f);
+		auto t = juce::AffineTransform::translation (static_cast<float>(x), static_cast<float>(y));
+
+		if(width != m_tileSizeX || height != m_tileSizeY)
+		{
+			t = t.scaled(static_cast<float>(width) / static_cast<float>(m_tileSizeX), static_cast<float>(height) / static_cast<float>(m_tileSizeY));
+		}
+
+		m_drawable->draw(_graphics, 1.0f, t);
 	}
 
 	void RotaryStyle::drawLinearSlider(juce::Graphics& _graphics, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const juce::Slider::SliderStyle _sliderStyle, juce::Slider& _slider)
