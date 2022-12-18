@@ -33,6 +33,8 @@ SET(ASSETS
 	"parameterDescriptions_mq.json"
 )
 
+include(skins/mqFrontPanel/assets.cmake)
+
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject componentName)
 	juce_add_plugin(${targetName}
 		# VERSION ...                               # Set this if the plugin version is different to the project version
@@ -98,7 +100,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	endif()
 endmacro()
 
-juce_add_binary_data(mqJucePlugin_BinaryData${postfix} SOURCES ${ASSETS})
+juce_add_binary_data(mqJucePlugin_BinaryData${postfix} SOURCES ${ASSETS} ${ASSETS_mqFrontPanel})
 
 createJucePlugin(mqJucePlugin "DSP56300Emu" TRUE "Tmqs" mqJucePlugin_BinaryData${postfix} "")
 	
