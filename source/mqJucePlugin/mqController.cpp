@@ -138,7 +138,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         {
 	        parseSingle(_msg, data, parameterValues);
         }
-        if(name == midiPacketName(GlobalDump))
+        else if(name == midiPacketName(GlobalDump))
         {
             memcpy(&m_globalData[0], &_msg[5], sizeof(m_globalData));
         }
