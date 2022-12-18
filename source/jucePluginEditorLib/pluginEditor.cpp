@@ -7,13 +7,12 @@
 
 namespace jucePluginEditorLib
 {
-	Editor::Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
+	Editor::Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
 		: genericUI::Editor(static_cast<EditorInterface&>(*this))
 		, m_processor(_processor)
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
 	{
-		create(_jsonFilename);
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
