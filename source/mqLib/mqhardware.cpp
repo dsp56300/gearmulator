@@ -373,8 +373,16 @@ namespace mqLib
 
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
+
+		inputs[0] = &m_audioInputs[0].front();
+		inputs[1] = &m_audioInputs[1].front();
+
 		outputs[0] = &m_audioOutputs[0].front();
 		outputs[1] = &m_audioOutputs[1].front();
+		outputs[2] = &m_audioOutputs[2].front();
+		outputs[3] = &m_audioOutputs[3].front();
+		outputs[4] = &m_audioOutputs[4].front();
+		outputs[5] = &m_audioOutputs[5].front();
 
 		esai.processAudioInputInterleaved(inputs, count);
 
