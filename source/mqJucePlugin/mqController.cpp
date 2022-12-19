@@ -20,7 +20,11 @@ constexpr const char* g_midiPacketNames[] =
     "singleparameterchange",
     "globalparameterchange",
     "singledump",
-    "globaldump"
+    "globaldump",
+    "emuRequestLcd",
+    "emuRequestLeds",
+    "emuSendButton",
+    "emuSendRotary"
 };
 
 static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -30,19 +34,24 @@ static const char* midiPacketName(Controller::MidiPacketType _type)
 	return g_midiPacketNames[static_cast<uint32_t>(_type)];
 }
 
-Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_processor(p), m_deviceId(_deviceId)
+Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_deviceId(_deviceId)
 {
     registerParams(p);
 
 //  sendSysEx(RequestAllSingles);
 	sendSysEx(RequestGlobal);
-    sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
+//    sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
     requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
 
     startTimer(50);
 }
 
 Controller::~Controller() = default;
+
+void Controller::setFrontPanel(FrontPanel* _frontPanel)
+{
+    m_frontPanel = _frontPanel;
+}
 
 std::string Controller::loadParameterDescriptions()
 {
@@ -126,7 +135,26 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
 
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
-    LOG("Got sysex of size " << _msg.size())
+    if(m_frontPanel)
+    {
+	    if(_msg.size() >= 5)
+	    {
+            const auto cmd = static_cast<mqLib::SysexCommand>(_msg[4]);
+            switch (cmd)
+            {
+            case mqLib::SysexCommand::EmuRotaries:
+            case mqLib::SysexCommand::EmuButtons:
+            case mqLib::SysexCommand::EmuLCD:
+            case mqLib::SysexCommand::EmuLEDs:
+                m_frontPanel->processSysex(_msg);
+                return;
+            default:
+                break;
+            }
+	    }
+    }
+
+	LOG("Got sysex of size " << _msg.size())
 
 	std::string name;
     pluginLib::MidiPacket::Data data;

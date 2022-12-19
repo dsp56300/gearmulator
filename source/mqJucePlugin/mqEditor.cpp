@@ -2,6 +2,9 @@
 
 #include "BinaryData.h"
 #include "PluginProcessor.h"
+
+#include "mqController.h"
+
 #include "../jucePluginLib/parameterbinding.h"
 
 namespace mqJucePlugin
@@ -10,6 +13,13 @@ namespace mqJucePlugin
 	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
 	{
 		create(_jsonFilename);
+
+		m_frontPanel.reset(new FrontPanel(*this, static_cast<Controller&>(_processor.getController())));
+	}
+
+	Editor::~Editor()
+	{
+		m_frontPanel.reset();
 	}
 
 	const char* Editor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)

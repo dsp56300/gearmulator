@@ -4,6 +4,7 @@
 
 #include "../mqLib/mqmiditypes.h"
 
+class FrontPanel;
 class AudioPluginAudioProcessor;
 
 class Controller : public pluginLib::Controller, juce::Timer
@@ -23,6 +24,10 @@ public:
         GlobalParameterChange,
         SingleDump,
         GlobalDump,
+        EmuRequestLcd,
+        EmuRequestLeds,
+        EmuSendButton,
+        EmuSendRotary,
 
         Count
     };
@@ -36,6 +41,11 @@ public:
     Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 	~Controller() override;
 
+    void setFrontPanel(FrontPanel* _frontPanel);
+
+	bool sendSysEx(MidiPacketType _type) const;
+    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+
 private:
     static std::string loadParameterDescriptions();
 
@@ -46,8 +56,6 @@ private:
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseSysexMessage(const pluginLib::SysEx&) override;
 
-	bool sendSysEx(MidiPacketType _type) const;
-    bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
     bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
@@ -55,9 +63,9 @@ private:
 
     uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
-	AudioPluginAudioProcessor& m_processor;
     const uint8_t m_deviceId;
 
     Patch m_singleEditBuffer;
     std::array<uint8_t, 200> m_globalData{};
+    FrontPanel* m_frontPanel = nullptr;
 };

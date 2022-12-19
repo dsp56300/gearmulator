@@ -19,7 +19,7 @@
             }
         },
         {
-            "name" : "lineA",
+            "name" : "lcdLineA",
             "label" : {
                 "text" : "01234567890123456789",
                 "textHeight" : "46",
@@ -35,7 +35,7 @@
             }
         },
         {
-            "name" : "lineB",
+            "name" : "lcdLineB",
             "label" : {
                 "text" : "01234567890123456789",
                 "textHeight" : "46",
@@ -73,7 +73,7 @@
             "name" : "buttonInst1",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -110,7 +110,7 @@
             "name" : "buttonInst2",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -147,7 +147,7 @@
             "name" : "buttonInst3",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -184,7 +184,7 @@
             "name" : "buttonInst4",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -244,13 +244,13 @@
             "name" : "buttonPlay",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1321.2",
-                "y" : "395.479",
+                "x" : "1350.3",
+                "y" : "377.4",
                 "width" : "128",
                 "height" : "64",
                 "texture" : "button",
@@ -268,8 +268,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1369.2",
-                "y" : "357.479",
+                "x" : "1398.3",
+                "y" : "339.4",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -281,7 +281,7 @@
             "name" : "buttonMultimode",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -317,8 +317,9 @@
         {
             "name" : "buttonPeek",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -355,7 +356,7 @@
             "name" : "buttonGlobal",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -392,7 +393,7 @@
             "name" : "buttonMulti",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -429,7 +430,7 @@
             "name" : "buttonEdit",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -466,7 +467,7 @@
             "name" : "buttonSound",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -504,7 +505,7 @@
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -541,7 +542,7 @@
             "name" : "buttonU",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -559,7 +560,7 @@
             "name" : "buttonL",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -577,7 +578,7 @@
             "name" : "buttonR",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -595,7 +596,7 @@
             "name" : "buttonD",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
@@ -648,7 +649,7 @@
             }
         },
         {
-            "name" : "LedOsc3",
+            "name" : "ledOsc3",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -686,7 +687,7 @@
             }
         },
         {
-            "name" : "ledFilters",
+            "name" : "ledFilter1",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -857,12 +858,12 @@
             }
         },
         {
-            "name" : "encoderSmall",
+            "name" : "encoderMatrix1",
             "rotary" : {
             },
             "spritesheet" : {
                 "x" : "2592.22",
-                "y" : "524.82",
+                "y" : "534.82",
                 "width" : "140",
                 "height" : "140",
                 "texture" : "encoder",
@@ -871,12 +872,12 @@
             }
         },
         {
-            "name" : "encoderSmall",
+            "name" : "encoderMatrix2",
             "rotary" : {
             },
             "spritesheet" : {
                 "x" : "2822.22",
-                "y" : "524.82",
+                "y" : "534.82",
                 "width" : "140",
                 "height" : "140",
                 "texture" : "encoder",
@@ -885,12 +886,12 @@
             }
         },
         {
-            "name" : "encoderSmall",
+            "name" : "encoderMatrix3",
             "rotary" : {
             },
             "spritesheet" : {
                 "x" : "3052.22",
-                "y" : "524.82",
+                "y" : "534.82",
                 "width" : "140",
                 "height" : "140",
                 "texture" : "encoder",
@@ -899,12 +900,12 @@
             }
         },
         {
-            "name" : "encoderSmall",
+            "name" : "encoderMatrix4",
             "rotary" : {
             },
             "spritesheet" : {
                 "x" : "3282.22",
-                "y" : "524.82",
+                "y" : "534.82",
                 "width" : "140",
                 "height" : "140",
                 "texture" : "encoder",
@@ -916,13 +917,13 @@
             "name" : "buttonPower",
             "button" : {
                 "normalImage" : "0",
-                "overImage" : "1",
+                "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "3509.2",
-                "y" : "561.07",
+                "x" : "3499.2",
+                "y" : "578.7",
                 "width" : "128",
                 "height" : "64",
                 "texture" : "button",
@@ -940,8 +941,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "3557.2",
-                "y" : "523.07",
+                "x" : "3547.2",
+                "y" : "540.7",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
