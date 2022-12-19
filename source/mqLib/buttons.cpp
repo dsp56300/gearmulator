@@ -94,7 +94,7 @@ namespace mqLib
 
 		// The master encoder is a step encoder where 4 steps (one full cycle) is 1 tick
 		// The other encoders do not have any snapping, there are no ticks and there is some acceleration going on in the uc so use the smallest value that does something useful
-		current += _amount * (_encoder == Encoders::Master ? 4 : 3);
+		current += _amount;// * (_encoder == Encoders::Master ? 4 : 3);
 	}
 
 	uint8_t Buttons::processStepEncoder(Encoders _encoder, bool cycleEncoders)
