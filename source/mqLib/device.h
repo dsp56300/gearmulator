@@ -7,6 +7,8 @@
 
 namespace mqLib
 {
+	enum class SysexCommand : uint8_t;
+
 	class Device : public synthLib::Device
 	{
 	public:
@@ -28,9 +30,17 @@ namespace mqLib
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
+		static void createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd);
+
+		void sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst);
+		void sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst);
+		void sendSysexLEDs(std::vector<synthLib::SMidiEvent>& _dst);
+		void sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst);
+
 	private:
 		MicroQ						m_mq;
 		std::vector<uint8_t>		m_midiOutBuffer;
 		synthLib::MidiBufferParser	m_midiOutParser;
+		std::vector<synthLib::SMidiEvent> m_customSysexOut;
 	};
 }
