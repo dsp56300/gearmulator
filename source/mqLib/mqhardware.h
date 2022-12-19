@@ -32,7 +32,7 @@ namespace mqLib
 
 		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
 
-		void processAudio(uint32_t _frames);
+		void processAudio(uint32_t _frames, uint32_t _latency = 0);
 
 		void ensureBufferSize(uint32_t _frames);
 

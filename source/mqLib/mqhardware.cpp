@@ -358,7 +358,7 @@ namespace mqLib
 		m_lastEsaiFrameIndex = esaiFrameIndex;
 	}
 
-	void Hardware::processAudio(uint32_t _frames)
+	void Hardware::processAudio(uint32_t _frames, uint32_t _latency)
 	{
 		ensureBufferSize(_frames);
 
@@ -384,7 +384,7 @@ namespace mqLib
 		outputs[4] = &m_audioOutputs[4].front();
 		outputs[5] = &m_audioOutputs[5].front();
 
-		esai.processAudioInputInterleaved(inputs, count);
+		esai.processAudioInputInterleaved(inputs, count, _latency);
 
 		const auto requiredSize = _frames > 4 ? (_frames << 1) - 8 : 0;
 

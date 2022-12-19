@@ -69,7 +69,7 @@ namespace mqLib
 		return m_hw && m_hw->isValid();
 	}
 
-	void MicroQ::process(const float** _inputs, float** _outputs, uint32_t _frames)
+	void MicroQ::process(const float** _inputs, float** _outputs, uint32_t _frames, uint32_t _latency)
 	{
 		std::lock_guard lock(m_mutex);
 
@@ -84,7 +84,7 @@ namespace mqLib
 				dspIns[c][i] = dsp56k::sample2dsp(_inputs[c][i]);
 		}
 
-		internalProcess(_frames);
+		internalProcess(_frames, _latency);
 
 		// convert outputs from DSP words to float
 		const auto& dspOuts = m_hw->getAudioOutputs();
@@ -96,20 +96,20 @@ namespace mqLib
 		}
 	}
 
-	void MicroQ::process(uint32_t _frames)
+	void MicroQ::process(uint32_t _frames, uint32_t _latency)
 	{
 		std::lock_guard lock(m_mutex);
-		internalProcess(_frames);
+		internalProcess(_frames, _latency);
 	}
 
-	void MicroQ::internalProcess(uint32_t _frames)
+	void MicroQ::internalProcess(uint32_t _frames, uint32_t _latency)
 	{
 		// send midi in
 		m_hw->sendMidi(m_midiInBuffer);
 		m_midiInBuffer.clear();
 
 		// process audio
-		m_hw->processAudio(_frames);
+		m_hw->processAudio(_frames, _latency);
 
 		// receive midi output
 		m_hw->receiveMidi(m_midiOutBuffer);

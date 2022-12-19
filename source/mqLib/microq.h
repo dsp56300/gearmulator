@@ -31,11 +31,12 @@ namespace mqLib
 
 		// Process a block of audio data. Be sure to pass two channels for the inputs and six channels for the outputs
 		// _frames means the number of samples per channel
-		void process(const float** _inputs, float** _outputs, uint32_t _frames);
+		// _latency additional latency in samples that will be added to allow asynchronous processing
+		void process(const float** _inputs, float** _outputs, uint32_t _frames, uint32_t _latency = 0);
 
 		// Process a block of audio data. Data conversion is not performed, this allows to access raw DSP data
 		// The used input and output buffers can be queried below
-		void process(uint32_t _frames);
+		void process(uint32_t _frames, uint32_t _latency = 0);
 
 		// Retrieve the DSP audio input. Two channels, 24 bits. Only the 24 LSBs of each 32 bit word are used
 		TAudioInputs& getAudioInputs();
@@ -112,7 +113,7 @@ namespace mqLib
 		bool isBootCompleted() const;
 
 	private:
-		void internalProcess(uint32_t _frames);
+		void internalProcess(uint32_t _frames, uint32_t _latency);
 		void onLedsChanged();
 		void onLcdChanged();
 

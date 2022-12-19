@@ -69,7 +69,7 @@ namespace mqLib
 		const float* inputs[2] = {_inputs[0], _inputs[1]};
 		float* outputs[6] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5]};
 
-		m_mq.process(inputs, outputs, static_cast<uint32_t>(_samples));
+		m_mq.process(inputs, outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
