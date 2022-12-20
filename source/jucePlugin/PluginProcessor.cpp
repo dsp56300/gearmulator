@@ -2,7 +2,7 @@
 #include "PluginEditorState.h"
 #include "ParameterNames.h"
 
-#include "../jucePluginEditorLib/pluginEditor.h"
+#include "../jucePluginEditorLib/pluginEditorWindow.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
@@ -282,7 +282,7 @@ juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
 	if(!m_editorState)
 		m_editorState.reset(new PluginEditorState(*this, getController()));
-    return new jucePluginEditorLib::Editor(*this, *m_editorState, getConfig());
+    return new jucePluginEditorLib::EditorWindow(*this, *m_editorState, getConfig());
 }
 
 void AudioPluginAudioProcessor::updateLatencySamples()

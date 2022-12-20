@@ -15,10 +15,9 @@
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
-		Editor(static_cast<EditorInterface&>(*this)),
+		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_skinFolder(std::move(_skinFolder)),
 		m_openMenuCallback(std::move(_openMenuCallback))
 	{
 		create(_jsonFilename);
@@ -159,7 +158,7 @@ namespace genericVirusUI
 		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
-	const char* VirusEditor::findNamedResourceByFilename(const std::string& _filename, uint32_t& _size)
+	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
 	{
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
 		{
@@ -174,92 +173,14 @@ namespace genericVirusUI
 		return nullptr;
 	}
 
+	const char* VirusEditor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
+	{
+		return findEmbeddedResource(_filename, _size);
+	}
+
 	PatchBrowser* VirusEditor::getPatchBrowser()
 	{
 		return m_patchBrowser.get();
-	}
-
-	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
-	{
-		if(!m_skinFolder.empty())
-		{
-			auto readFromCache = [this, &_name, &_dataSize]()
-			{
-				const auto it = m_fileCache.find(_name);
-				if(it == m_fileCache.end())
-				{
-					_dataSize = 0;
-					return static_cast<char*>(nullptr);
-				}
-				_dataSize = static_cast<uint32_t>(it->second.size());
-				return &it->second.front();
-			};
-
-			auto* res = readFromCache();
-
-			if(res)
-				return res;
-
-			const auto modulePath = synthLib::getModulePath();
-			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
-
-			// try to load from disk first
-			FILE* hFile = fopen((folder + _name).c_str(), "rb");
-			if(hFile)
-			{
-				fseek(hFile, 0, SEEK_END);
-				_dataSize = ftell(hFile);
-				fseek(hFile, 0, SEEK_SET);
-
-				std::vector<char> data;
-				data.resize(_dataSize);
-				const auto readCount = fread(&data.front(), 1, _dataSize, hFile);
-				fclose(hFile);
-
-				if(readCount == _dataSize)
-					m_fileCache.insert(std::make_pair(_name, std::move(data)));
-
-				res = readFromCache();
-
-				if(res)
-					return res;
-			}
-		}
-
-		uint32_t size = 0;
-		const auto res = findNamedResourceByFilename(_name, size);
-		if(!res)
-			throw std::runtime_error("Failed to find file named " + _name);
-		_dataSize = size;
-		return res;
-	}
-
-	int VirusEditor::getParameterIndexByName(const std::string& _name)
-	{
-		return getController().getParameterIndexByName(_name);
-	}
-
-	bool VirusEditor::bindParameter(juce::Button& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool VirusEditor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool VirusEditor::bindParameter(juce::Slider& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	juce::Value* VirusEditor::getParameterValue(int _parameterIndex)
-	{
-		return getController().getParamValueObject(_parameterIndex);
 	}
 
 	void VirusEditor::onProgramChange()
