@@ -1078,7 +1078,7 @@
                 { "name" : "VocoderMode",       "parameterAttachment" : { "parameter" : "Vocoder Mode" },             "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "78", "y" : "789", "width" : "275", "height" : "52", "offsetR" : "-60" }},
                
                 {
-                    "name" : "ContainerFxDelayClassic",
+                    "name" : "ContainerFxDelayTapeDelay",
                     "image" : { "x" : "0", "y" : "0", "width" : "1966", "height" : "328", "texture" : "panel_9_fx2_delay_tape" }, 
                     "condition": { "enableOnParameter": "Delay Type", "enableOnValues": "1,2,3" },
                         "children" : [
@@ -1090,7 +1090,7 @@
                         ]
                 },      
                 {
-                    "name" : "ContainerFxDelayTapeDelay",
+                    "name" : "ContainerFxDelayClassic",
                     "image" : { "x" : "0", "y" : "0", "width" : "1966", "height" : "328", "texture" : "panel_9_fx2_delay_classic" }, 
                     "condition": { "enableOnParameter": "Delay Type", "enableOnValues": "0" },
                         "children" : [
