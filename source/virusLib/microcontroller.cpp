@@ -1038,9 +1038,10 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	uint32_t offset;
 	switch(_page)
 	{
-	default:
 	case PAGE_A:	offset = 0;	break;
 	case PAGE_B:	offset = 1;	break;
+	default:
+		return;
 	}
 
 	offset *= paramsPerPage;
