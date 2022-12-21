@@ -442,7 +442,7 @@ namespace genericVirusUI
 		getController().getParameter(playMode)->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
-			m_parameterBinding.setPart(0);
+			setPart(0);
 
 		onPlayModeChanged();
 	}
@@ -545,5 +545,6 @@ namespace genericVirusUI
 	{
 		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
 		onCurrentPartChanged();
+		setCurrentPart(static_cast<uint8_t>(_part));
 	}
 }

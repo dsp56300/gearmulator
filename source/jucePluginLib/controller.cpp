@@ -156,9 +156,9 @@ namespace pluginLib
 		return iti->second;
     }
 
-    juce::Value* Controller::getParamValueObject(const uint32_t _index)
+    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part)
     {
-	    const auto res = getParameter(_index);
+	    const auto res = getParameter(_index, _part);
 		return res ? &res->getValueObject() : nullptr;
     }
 

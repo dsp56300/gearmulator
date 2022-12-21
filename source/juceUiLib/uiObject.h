@@ -60,6 +60,8 @@ namespace genericUI
 		size_t getConditionCountRecursive() const;
 		size_t getControllerLinkCountRecursive() const;
 
+		void setCurrentPart(Editor& _editor, uint8_t _part);
+
 	private:
 		bool hasComponent(const std::string& _component) const;
 		template<typename T> T* createJuceObject(Editor& _editor);

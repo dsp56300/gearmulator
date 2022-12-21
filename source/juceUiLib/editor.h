@@ -77,6 +77,8 @@ namespace genericUI
 
 		static void setEnabled(juce::Component& _component, bool _enable);
 
+		void setCurrentPart(uint8_t _part);
+
 	private:
 		EditorInterface& m_interface;
 

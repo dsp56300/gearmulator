@@ -227,4 +227,9 @@ namespace genericUI
 			_component.setVisible(_enable);
 		}
 	}
+
+	void Editor::setCurrentPart(uint8_t _part)
+	{
+		m_rootObject->setCurrentPart(*this, _part);
+	}
 }
