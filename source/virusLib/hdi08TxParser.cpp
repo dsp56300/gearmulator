@@ -41,6 +41,8 @@ namespace virusLib
 				m_state = State::Preset;
 				LOG("Begin receiving upgraded preset");
 
+				m_presetData.clear();
+
 				if(m_remainingPresetBytes == 0)
 				{
 					m_remainingPresetBytes = std::numeric_limits<uint32_t>::max();
@@ -99,10 +101,11 @@ namespace virusLib
 
 				if(!matched)
 				{
-					std::stringstream s;
+/*					std::stringstream s;
 					for (const auto& w : m_nonPatternWords)
 						s << HEX(w) << ' ';
 					LOG("Unknown DSP words: " << s.str());
+*/
 					m_nonPatternWords.clear();
 				}
 			}
@@ -188,5 +191,11 @@ namespace virusLib
 	void Hdi08TxParser::waitForPreset(uint32_t _byteCount)
 	{
 		m_remainingPresetBytes = _byteCount;
+	}
+
+	void Hdi08TxParser::getPresetData(std::vector<uint8_t>& _data)
+	{
+		std::swap(m_presetData, _data);
+		m_presetData.clear();
 	}
 }

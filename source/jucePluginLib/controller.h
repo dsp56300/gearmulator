@@ -25,7 +25,7 @@ namespace pluginLib
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
-        juce::Value* getParamValueObject(uint32_t _index);
+        juce::Value* getParamValueObject(uint32_t _index, uint8_t _part);
         Parameter* getParameter(uint32_t _index) const;
         Parameter* getParameter(uint32_t _index, uint8_t _part) const;
 		

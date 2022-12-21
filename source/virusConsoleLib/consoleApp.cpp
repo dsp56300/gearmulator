@@ -359,7 +359,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	{
 		sem.wait();
 		proc.processBlock(_blockSize);
-		uc->processHdi08Tx(midiEvents);
+		uc->readMidiOut(midiEvents);
 		midiEvents.clear();
 	}
 

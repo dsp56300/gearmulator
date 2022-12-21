@@ -32,8 +32,8 @@ public:
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
-	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const;
-	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const;
+	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data);
+	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data);
 
 	void sendInitControlCommands();
 
@@ -49,7 +49,7 @@ public:
 
 	void addHDI08(dsp56k::HDI08& _hdi08);
 
-	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
+	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
@@ -80,7 +80,9 @@ private:
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
+	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
 	bool waitingForPresetReceiveConfirmation() const;
+	void receiveUpgradedPreset();
 
 	dsp56k::HDI08Queue m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
@@ -101,6 +103,9 @@ private:
 	uint8_t m_currentBank = 0;
 	uint8_t m_currentSingle = 0;
 
+	uint8_t m_sentPresetProgram = 0;
+	bool m_sentPresetIsMulti = false;
+
 	// Device does not like if we send everything at once, therefore we delay the send of Singles after sending a Multi
 	struct SPendingPresetWrite
 	{
@@ -112,6 +117,9 @@ private:
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
 	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
+	std::vector<std::pair<synthLib::MidiEventSource, std::vector<uint8_t>>> m_pendingSysexInput;
+	std::vector<synthLib::SMidiEvent> m_midiOutput;
+
 	mutable std::recursive_mutex m_mutex;
 	bool m_loadingState = false;
 };

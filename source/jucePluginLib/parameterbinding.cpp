@@ -182,18 +182,6 @@ namespace pluginLib
 	{
 		for (const auto& b : _bindings)
 		{
-			if(_currentPartOnly && b.part != CurrentPart)
-			{
-				addBinding(b);
-				continue;
-			}
-
-			const auto& desc = b.parameter->getDescription();
-			const bool isNonPartExclusive = desc.isNonPartSensitive();
-
-			if(_currentPartOnly && isNonPartExclusive)
-				continue;
-
 			auto* slider = dynamic_cast<juce::Slider*>(b.component);
 			if(slider)
 			{
