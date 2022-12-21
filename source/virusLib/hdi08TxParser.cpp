@@ -99,10 +99,11 @@ namespace virusLib
 
 				if(!matched)
 				{
-					std::stringstream s;
+/*					std::stringstream s;
 					for (const auto& w : m_nonPatternWords)
 						s << HEX(w) << ' ';
 					LOG("Unknown DSP words: " << s.str());
+*/
 					m_nonPatternWords.clear();
 				}
 			}
