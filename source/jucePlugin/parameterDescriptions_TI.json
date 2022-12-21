@@ -197,7 +197,7 @@
 		{"page":113, "index":17, "name":"Arp Clock", "displayName":"Arpeggiator Clock", "min":0, "max":17, "default":4, "toText":"numArpClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":113, "index":18, "name":"Lfo1 Clock", "displayName":"LFO 1/Clock", "min":0, "max":21, "default":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":113, "index":19, "name":"Lfo2 Clock", "displayName":"LFO 2/Clock", "min":0, "max":21, "default":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":113, "class":"MultiOrSingle|NonPartSensitive", "index":20, "name":"Delay Clock", "displayName":"Delay Clock", "min":0, "max":16, "default":0, "toText":"numDelayClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":113, "index":20, "name":"Delay Clock", "displayName":"Delay Clock", "min":0, "max":16, "default":0, "toText":"numDelayClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":113, "index":21, "name":"Lfo3 Clock", "displayName":"LFO 3/Clock", "min":0, "max":21, "default":0, "toText":"numLFOClockdividers", "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":113, "index":22, "name":"B_Undefined22", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":113, "index":23, "name":"B_Undefined23", "min":0, "max":127, "toText":"unsignedZero", "isPublic":false, "isDiscrete":false, "isBool":false},
