@@ -439,12 +439,18 @@ namespace genericVirusUI
 	{
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
 
-		getController().getParameter(playMode)->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
+		auto* param = getController().getParameter(playMode);
+		param->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
+
+		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
+		getController().sendParameterChange(*param, _playMode);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
 			setPart(0);
 
 		onPlayModeChanged();
+
+		getController().requestArrangement();
 	}
 
 	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)

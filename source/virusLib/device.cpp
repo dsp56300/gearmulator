@@ -136,7 +136,7 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_mc->processHdi08Tx(_midiOut);
+		m_mc->readMidiOut(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
