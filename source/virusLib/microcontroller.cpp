@@ -708,14 +708,21 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 	}
 
 	if(_program == SINGLE)
+	{
+		m_globalSettings[PLAY_MODE] = PlayModeSingle;
+
 		m_singleEditBuffer = _data;
+	}
+	else if(_program >= m_singleEditBuffers.size())
+	{
+		return false;
+	}
 	else
-		m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
+	{
+		m_singleEditBuffers[_program] = _data;
+	}
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << static_cast<int>(_program));
-
-	if(_program == SINGLE)
-		m_globalSettings[PLAY_MODE] = PlayModeSingle;
 
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data, false), false);
