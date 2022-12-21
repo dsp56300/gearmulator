@@ -663,7 +663,7 @@
 		{"page":115, "index":118, "name":"Memory Protect", "min":0, "max":1, "default":1, "isPublic":false, "isDiscrete":false, "isBool":true},
 		{"page":115, "index":120, "name":"Soft Thru", "min":0, "max":1, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":121, "name":"Panel Destination", "min":0, "max":2, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
-		{"page":115, "index":122, "name":"Play Mode", "min":0, "max":3, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
+		{"page":115, "index":122, "name":"Play Mode", "min":0, "max":2, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":123, "name":"Remote Channel", "min":0, "max":15, "default":0, "isPublic":false, "isDiscrete":true, "isBool":false}, 
 		{"page":115, "index":124, "name":"Midi Channel", "min":0, "max":15, "default":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":125, "name":"Led Mode", "min":0, "max":6, "default":2, "isPublic":false, "isDiscrete":true, "isBool":false},
