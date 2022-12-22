@@ -870,9 +870,6 @@ void Microcontroller::process(size_t _size)
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
-	while(waitingForPresetReceiveConfirmation())
-		process(1);
-
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
 
 	std::vector<SMidiEvent> responses;
