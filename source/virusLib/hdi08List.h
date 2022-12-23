@@ -9,6 +9,11 @@ namespace virusLib
 	class Hdi08List
 	{
 	public:
+		Hdi08List()
+		{
+			m_queues.reserve(2);
+		}
+
 		void addHDI08(dsp56k::HDI08& _hdi08);
 		bool rxEmpty() const;
 		void exec();
