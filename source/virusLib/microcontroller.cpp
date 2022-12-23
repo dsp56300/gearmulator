@@ -46,6 +46,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 		return;
 
 	m_hdi08TxParsers.reserve(2);
+	m_midiQueues.reserve(2);
 
 	addDSP(_dsp, _useEsaiBasedMidiTiming);
 
