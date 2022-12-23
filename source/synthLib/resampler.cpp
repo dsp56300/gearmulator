@@ -58,7 +58,10 @@ uint32_t synthLib::Resampler::process(TAudioOutputs& _output, const uint32_t _nu
 
 uint32_t synthLib::Resampler::processResample(const TAudioOutputs& _output, const uint32_t _numChannels, const uint32_t _numSamples, const TProcessFunc& _processFunc)
 {
-	const uint32_t inputLen = std::max(1, dsp56k::round_int(static_cast<float>(_numSamples) * m_factorInToOut));
+	// we need to preserve a constant, properly rounded, input length so accumulate the total number of samples we need and subtract the amount we use in this frame
+	m_inputLen += static_cast<double>(_numSamples) * m_factorInToOut;
+	const uint32_t inputLen = std::max(1, dsp56k::round_int(m_inputLen));
+	m_inputLen -= inputLen;
 
 	const auto availableInputLen = static_cast<uint32_t>(m_tempOutput[0].size());
 
