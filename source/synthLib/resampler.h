@@ -39,8 +39,10 @@ namespace synthLib
 
 		const float m_samplerateIn;
 		const float m_samplerateOut;
-		const float m_factorInToOut;
-		const float m_factorOutToIn;
+		const double m_factorInToOut;
+		const double m_factorOutToIn;
+
+		double m_inputLen = 0.0;
 
 		std::vector<void*> m_resamplerOut;
 

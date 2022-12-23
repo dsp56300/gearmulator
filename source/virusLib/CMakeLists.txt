@@ -17,11 +17,14 @@ set(SOURCES
 	dspSingle.cpp dspSingle.h
 	dspSingleSnow.cpp dspSingleSnow.h
 	dspMultiTI.cpp dspMultiTI.h
+	hdi08List.cpp hdi08List.h
+	hdi08MidiQueue.cpp hdi08MidiQueue.h
 	hdi08TxParser.cpp hdi08TxParser.h
-	unpacker.cpp unpacker.h
+	hdi08Queue.cpp hdi08Queue.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
+	unpacker.cpp unpacker.h
 	utils.h
 )
 
