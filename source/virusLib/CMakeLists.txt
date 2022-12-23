@@ -8,7 +8,10 @@ set(SOURCES
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
 	dspSingle.cpp dspSingle.h
+	hdi08List.cpp hdi08List.h
+	hdi08MidiQueue.cpp hdi08MidiQueue.h
 	hdi08TxParser.cpp hdi08TxParser.h
+	hdi08Queue.cpp hdi08Queue.h
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h

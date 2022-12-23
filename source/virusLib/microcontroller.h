@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../dsp56300/source/dsp56kEmu/dsp.h"
-#include "../dsp56300/source/dsp56kEmu/hdi08.h"
-#include "../dsp56300/source/dsp56kEmu/hdi08queue.h"
-
 #include "romfile.h"
 
 #include "../synthLib/deviceTypes.h"
@@ -12,12 +8,15 @@
 #include <list>
 #include <mutex>
 
+#include "hdi08List.h"
+#include "hdi08MidiQueue.h"
 #include "hdi08TxParser.h"
 #include "microcontrollerTypes.h"
 
 namespace virusLib
 {
-class DemoPlayback;
+	class DspSingle;
+	class DemoPlayback;
 
 class Microcontroller
 {
@@ -25,7 +24,7 @@ class Microcontroller
 public:
 	using TPreset = ROMFile::TPreset;
 
-	explicit Microcontroller(dsp56k::HDI08& hdi08, const ROMFile& romFile);
+	explicit Microcontroller(DspSingle& _dsp, const ROMFile& romFile, bool _useEsaiBasedMidiTiming);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev);
 	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
@@ -43,13 +42,11 @@ public:
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
-	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c);
-
-	void sendPendingMidiEvents(uint32_t _maxOffset);
-
-	void addHDI08(dsp56k::HDI08& _hdi08);
+	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 
 	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
+	void sendPendingMidiEvents(uint32_t _maxOffset);
+	Hdi08MidiQueue& getMidiQueue(size_t _index) { return m_midiQueues[_index]; }
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
@@ -84,8 +81,9 @@ private:
 	bool waitingForPresetReceiveConfirmation() const;
 	void receiveUpgradedPreset();
 
-	dsp56k::HDI08Queue m_hdi08;
+	Hdi08List m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
+	std::vector<Hdi08MidiQueue> m_midiQueues;
 
 	const ROMFile& m_rom;
 
@@ -116,7 +114,6 @@ private:
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
-	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 	std::vector<std::pair<synthLib::MidiEventSource, std::vector<uint8_t>>> m_pendingSysexInput;
 	std::vector<synthLib::SMidiEvent> m_midiOutput;
 

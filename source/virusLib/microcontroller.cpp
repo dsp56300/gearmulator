@@ -5,6 +5,7 @@
 
 #include "microcontroller.h"
 
+#include "dspSingle.h"
 #include "../synthLib/midiTypes.h"
 
 using namespace dsp56k;
@@ -39,15 +40,14 @@ constexpr uint8_t
 namespace virusLib
 {
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile)
+Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool _useEsaiBasedMidiTiming) : m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
 
-	m_hdi08.addHDI08(_hdi08);
-
 	m_hdi08TxParsers.reserve(2);
-	m_hdi08TxParsers.emplace_back(*this);
+
+	addDSP(_dsp, _useEsaiBasedMidiTiming);
 
 	m_globalSettings.fill(0xffffffff);
 
@@ -251,7 +251,9 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 		break;
 	}
 
-	m_pendingMidiEvents.push_back(_ev);
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.add(_ev);
+
 	return true;
 }
 
@@ -934,72 +936,23 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c)
+void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
-	std::lock_guard lock(m_mutex);
-
-	writeHostBitsWithWait(1, 1);
-
-	auto sendMIDItoDSP = [this](const uint8_t _midiByte)
-	{
-		const TWord word = static_cast<TWord>(_midiByte) << 16;
-		m_hdi08.writeRX(&word, 1);
-	};
-
-	const auto command = (_a & 0xf0);
-
-	if(command == 0xf0)
-	{
-		// single-byte status message
-		sendMIDItoDSP(_a);
-	}
-	else
-	{
-		sendMIDItoDSP(_a);
-		sendMIDItoDSP(_b);
-
-		if(command != M_AFTERTOUCH)
-			sendMIDItoDSP(_c);
-	}
-
-	return true;
-}
-
-void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
-{
-	auto size = m_pendingMidiEvents.size();
-
-	if(!size)
-		return;
-
-	while(!m_pendingMidiEvents.empty() && m_pendingMidiEvents.front().offset <= _maxOffset)
-	{
-		const auto& ev = m_pendingMidiEvents.front();
-
-		if(!sendMIDItoDSP(ev.a,ev.b,ev.c))
-			break;
-
-		m_pendingMidiEvents.pop_front();
-		--size;
-	}	
-}
-
-void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
-{
-	m_hdi08.addHDI08(_hdi08);
+	m_hdi08.addHDI08(_dsp.getHDI08());
 	m_hdi08TxParsers.emplace_back(*this);
+	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming);
 }
 
 void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
 {
 	for(size_t i=0; i<m_hdi08.size(); ++i)
 	{
-		auto* hdi08 = m_hdi08.get(i);
+		auto& hdi08 = m_hdi08.getHDI08(i);
 		auto& parser = m_hdi08TxParsers[i];
 
-		while(hdi08->hasTX())
+		while(hdi08.hasTX())
 		{
-			if(parser.append(hdi08->readTX()))
+			if(parser.append(hdi08.readTX()))
 			{
 				const auto midi = parser.getMidiData();
 				if(i == 0)
@@ -1022,6 +975,12 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 		sendSysex(input.second, _midiOut, input.first);
 
 	m_pendingSysexInput.clear();
+}
+
+void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
+{
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.sendPendingMidiEvents(_maxOffset);
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)

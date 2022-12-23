@@ -32,9 +32,9 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom);
 	m_dsp1.reset(dsp1);
 
-	uc.reset(new Microcontroller(m_dsp1->getHDI08(), m_rom));
+	uc.reset(new Microcontroller(*m_dsp1, m_rom, false));
 	if(m_dsp2)
-		uc->addHDI08(m_dsp2->getHDI08());
+		uc->addDSP(*m_dsp2, false);
 }
 
 ConsoleApp::~ConsoleApp()
