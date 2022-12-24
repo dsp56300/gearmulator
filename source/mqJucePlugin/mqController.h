@@ -46,6 +46,8 @@ public:
 	bool sendSysEx(MidiPacketType _type) const;
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
+    bool isMultiMode() const;
+
 private:
     static std::string loadParameterDescriptions();
 
@@ -59,13 +61,14 @@ private:
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
     bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
-	void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location) const;
+	void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
 
     uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
     const uint8_t m_deviceId;
 
     Patch m_singleEditBuffer;
+    std::array<Patch,16> m_singleEditBuffers;
     std::array<uint8_t, 200> m_globalData{};
     FrontPanel* m_frontPanel = nullptr;
 };

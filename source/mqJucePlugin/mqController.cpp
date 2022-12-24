@@ -41,7 +41,6 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 //  sendSysEx(RequestAllSingles);
 	sendSysEx(RequestGlobal);
 //    sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
-    requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
 
     startTimer(50);
 }
@@ -131,27 +130,29 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
 	            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
         }
     }
+    else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::EditBufferMulti))
+    {
+	    m_singleEditBuffers[prog] = patch;
+    }
 }
 
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
-    if(m_frontPanel)
+    if(_msg.size() >= 5)
     {
-	    if(_msg.size() >= 5)
-	    {
-            const auto cmd = static_cast<mqLib::SysexCommand>(_msg[4]);
-            switch (cmd)
-            {
-            case mqLib::SysexCommand::EmuRotaries:
-            case mqLib::SysexCommand::EmuButtons:
-            case mqLib::SysexCommand::EmuLCD:
-            case mqLib::SysexCommand::EmuLEDs:
+        const auto cmd = static_cast<mqLib::SysexCommand>(_msg[4]);
+        switch (cmd)
+        {
+        case mqLib::SysexCommand::EmuRotaries:
+        case mqLib::SysexCommand::EmuButtons:
+        case mqLib::SysexCommand::EmuLCD:
+        case mqLib::SysexCommand::EmuLEDs:
+            if(m_frontPanel)
                 m_frontPanel->processSysex(_msg);
-                return;
-            default:
-                break;
-            }
-	    }
+            return;
+        default:
+            break;
+        }
     }
 
 	LOG("Got sysex of size " << _msg.size())
@@ -169,6 +170,33 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         else if(name == midiPacketName(GlobalDump))
         {
             memcpy(&m_globalData[0], &_msg[5], sizeof(m_globalData));
+
+            if(isMultiMode())
+            {
+			    for(uint8_t i=0; i<16; ++i)
+				    requestSingle(mqLib::MidiBufferNum::EditBufferMulti, mqLib::MidiSoundLocation::EditBufferFirstMulti, i);
+            }
+            else
+            {
+				requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+            }
+
+        }
+        else if(name == midiPacketName(SingleParameterChange))
+        {
+            const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
+            const auto part = data[pluginLib::MidiDataType::Part];
+            const auto value = data[pluginLib::MidiDataType::ParameterValue];
+
+            LOG("Single parameter " << index << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
+        }
+        else if(name == midiPacketName(GlobalParameterChange))
+        {
+            const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
+            const auto value = data[pluginLib::MidiDataType::ParameterValue];
+
+            LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
+            m_globalData[index] = value;
         }
         else
         {
@@ -187,6 +215,11 @@ bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataTyp
 {
     _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
     return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
+}
+
+bool Controller::isMultiMode() const
+{
+    return m_globalData[static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode)] != 0;
 }
 
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
@@ -223,11 +256,11 @@ bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_
     return sendSysEx(GlobalParameterChange, data);
 }
 
-void Controller::requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location) const
+void Controller::requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset/* = 0*/) const
 {
 	std::map<pluginLib::MidiDataType, uint8_t> params;
     params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
-    params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location);
+    params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location) + _locationOffset;
     sendSysEx(RequestSingle, params);
 }
 
