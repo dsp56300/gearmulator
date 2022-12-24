@@ -121,7 +121,7 @@ void FrontPanel::processLCDUpdate(const std::vector<uint8_t>& _msg) const
 	const std::string lineA(&d[0], 20);
 	const std::string lineB(&d[20], 20);
 
-	LOG("LCD CONTENT:\n'" << lineA << "'\n'" << lineB << "'");
+//	LOG("LCD CONTENT:\n'" << lineA << "'\n'" << lineB << "'");
 
 	// nasty but works: prefix/postfix with byte 1 to prevent juce trimming the text
 	m_lcdLines[0]->setText("\1" + lineA + "\1", juce::dontSendNotification);
