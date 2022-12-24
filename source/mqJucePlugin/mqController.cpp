@@ -117,7 +117,7 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
     const auto bank = _data.at(pluginLib::MidiDataType::Bank);
     const auto prog = _data.at(pluginLib::MidiDataType::Program);
 
-    if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::EditBufferSingle) && prog == static_cast<uint8_t>(mqLib::MidiSoundLocation::EditBufferCurrentSingle))
+    if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferSingleMode) && prog == static_cast<uint8_t>(mqLib::MidiSoundLocation::EditBufferCurrentSingle))
     {
 	    m_singleEditBuffer = patch;
 
@@ -130,7 +130,7 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
 	            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
         }
     }
-    else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::EditBufferMulti))
+    else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferMultiMode))
     {
 	    m_singleEditBuffers[prog] = patch;
     }
@@ -174,11 +174,11 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
             if(isMultiMode())
             {
 			    for(uint8_t i=0; i<16; ++i)
-				    requestSingle(mqLib::MidiBufferNum::EditBufferMulti, mqLib::MidiSoundLocation::EditBufferFirstMulti, i);
+				    requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMulti, i);
             }
             else
             {
-				requestSingle(mqLib::MidiBufferNum::EditBufferSingle, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+				requestSingle(mqLib::MidiBufferNum::SingleEditBufferSingleMode, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
             }
 
         }

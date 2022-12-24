@@ -25,18 +25,30 @@ namespace mqLib
 	enum class MidiBufferNum : uint8_t
 	{
 		DeprecatedSingleBankA = 0x00,
-		DeprecatedSingleBankB,
-		DeprecatedSingleBankC,
-		DeprecatedSingleBankX,
+		DeprecatedSingleBankB = 0x01,
+		DeprecatedSingleBankC = 0x02,
+		DeprecatedSingleBankX = 0x03,
 		AllSounds = 0x10,
-		EditBufferSingle = 0x20,
-		EditBufferMulti = 0x30,
+		SingleEditBufferSingleMode = 0x20,
+		SingleEditBufferMultiMode = 0x30,
 		EditBufferSingleLayer = 0x30,
 		EditBufferDrumMap = 0x30,
 		SingleBankA = 0x40,
-		SingleBankB,
-		SingleBankC,
-		SingleBankX = 0x48
+		SingleBankB = 0x41,
+		SingleBankC = 0x42,
+		SingleBankX = 0x48,
+
+		DeprecatedMultiBankInternal = 0x00,
+		DeprecatedMultiBankCard = 0x03,
+		MultiEditBuffer = 0x20,
+		MultiBankInternal = 0x40,
+		MultiBankCard = 0x48,
+
+		DeprecatedDrumBankInternal = 0x00,
+		DeprecatedDrumBankCard = 0x01,
+		DrumEditBuffer = 0x20,
+		DrumBankInternal = 0x40,
+		DrumBankCard = 0x48,	// ?? midi doc says $40, but that is for the internal one, assuming 48 is meant, similar to all other card buffers
 	};
 
 	enum class MidiSoundLocation : uint8_t
@@ -145,5 +157,19 @@ namespace mqLib
 		Last = 378,
 
 		Count
+	};
+
+	enum SysexIndex
+	{
+		IdxSysexBegin = 0,
+		IdxIdWaldorf,
+		IdxIdMicroQ,
+		IdxDeviceId,
+		IdxCommand,
+		IdxBuffer,
+		IdxLocation,
+		IdxSingleParamFirst,
+		IdxMultiParamFirst = IdxSingleParamFirst,
+		IdxGlobalParamFirst = IdxBuffer,
 	};
 }
