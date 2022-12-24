@@ -219,11 +219,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	midiMessages.clear();
 
     juce::AudioPlayHead::CurrentPositionInfo pos{};
-	/*
+
 	auto* playHead = getPlayHead();
 	if(playHead) {
 		playHead->getCurrentPosition(pos);
-
+/*
 		if(pos.bpm > 0) { // sync virus interal clock to host
 			const uint8_t bpmValue = juce::jmin(127, juce::jmax(0, (int)pos.bpm-63)); // clamp to virus range, 63-190
 			const auto clockParam = getController().getParameter(m_clockTempoParam, 0);
@@ -231,8 +231,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 				clockParam->getValueObject().setValue(bpmValue);
 			}
 		}
-	}
-	*/
+*/	}
+
     m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
                      static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
