@@ -1,9 +1,5 @@
 #pragma once
 
-#include "../dsp56300/source/dsp56kEmu/dsp.h"
-#include "../dsp56300/source/dsp56kEmu/hdi08.h"
-#include "../dsp56300/source/dsp56kEmu/hdi08queue.h"
-
 #include "romfile.h"
 
 #include "../synthLib/deviceTypes.h"
@@ -12,12 +8,15 @@
 #include <list>
 #include <mutex>
 
+#include "hdi08List.h"
+#include "hdi08MidiQueue.h"
 #include "hdi08TxParser.h"
 #include "microcontrollerTypes.h"
 
 namespace virusLib
 {
-class DemoPlayback;
+	class DspSingle;
+	class DemoPlayback;
 
 class Microcontroller
 {
@@ -25,15 +24,15 @@ class Microcontroller
 public:
 	using TPreset = ROMFile::TPreset;
 
-	explicit Microcontroller(dsp56k::HDI08& hdi08, const ROMFile& romFile);
+	explicit Microcontroller(DspSingle& _dsp, const ROMFile& romFile, bool _useEsaiBasedMidiTiming);
 
 	bool sendMIDI(const synthLib::SMidiEvent& _ev);
 	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
 	bool writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data);
-	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const;
-	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const;
+	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data);
+	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data);
 
 	void sendInitControlCommands();
 
@@ -43,13 +42,11 @@ public:
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 
-	bool sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c);
+	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 
+	void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut);
 	void sendPendingMidiEvents(uint32_t _maxOffset);
-
-	void addHDI08(dsp56k::HDI08& _hdi08);
-
-	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
+	Hdi08MidiQueue& getMidiQueue(size_t _index) { return m_midiQueues[_index]; }
 
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
@@ -80,10 +77,13 @@ private:
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
+	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);
 	bool waitingForPresetReceiveConfirmation() const;
+	void receiveUpgradedPreset();
 
-	dsp56k::HDI08Queue m_hdi08;
+	Hdi08List m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
+	std::vector<Hdi08MidiQueue> m_midiQueues;
 
 	const ROMFile& m_rom;
 
@@ -101,6 +101,9 @@ private:
 	uint8_t m_currentBank = 0;
 	uint8_t m_currentSingle = 0;
 
+	uint8_t m_sentPresetProgram = 0;
+	bool m_sentPresetIsMulti = false;
+
 	// Device does not like if we send everything at once, therefore we delay the send of Singles after sending a Multi
 	struct SPendingPresetWrite
 	{
@@ -111,7 +114,9 @@ private:
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
 
-	dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
+	std::vector<std::pair<synthLib::MidiEventSource, std::vector<uint8_t>>> m_pendingSysexInput;
+	std::vector<synthLib::SMidiEvent> m_midiOutput;
+
 	mutable std::recursive_mutex m_mutex;
 	bool m_loadingState = false;
 };

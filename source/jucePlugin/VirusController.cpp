@@ -484,7 +484,6 @@ namespace Virus
 		else
 			return;
 
-		DBG(juce::String::formatted("Set part: %d bank: %s param: %d  value: %d", part, page == 0 ? "A" : "B", m.b, m.c));
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
 			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
@@ -631,7 +630,7 @@ namespace Virus
 
         for (const auto& it : _paramValues)
         {
-            const auto* p = getParameter(it.first.second);
+            const auto* p = getParameter(it.first.second, _program == virusLib::SINGLE ? 0 : _program);
             assert(p);
             if(!p)
                 return {};

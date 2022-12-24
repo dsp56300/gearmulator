@@ -93,8 +93,8 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
-	juce::Value* Editor::getParameterValue(int _parameterIndex)
+	juce::Value* Editor::getParameterValue(int _parameterIndex, uint8_t _part)
 	{
-		return m_processor.getController().getParamValueObject(_parameterIndex);
+		return m_processor.getController().getParamValueObject(_parameterIndex, _part);
 	}
 }

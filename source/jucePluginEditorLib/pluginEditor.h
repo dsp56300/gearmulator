@@ -23,7 +23,7 @@ namespace jucePluginEditorLib
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
 		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
 		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
-		juce::Value* getParameterValue(int _parameterIndex) override;
+		juce::Value* getParameterValue(int _parameterIndex, uint8_t _part) override;
 
 		pluginLib::Processor& m_processor;
 		pluginLib::ParameterBinding& m_binding;
