@@ -162,14 +162,35 @@ namespace mqLib
 	enum SysexIndex
 	{
 		IdxSysexBegin = 0,
-		IdxIdWaldorf,
-		IdxIdMicroQ,
-		IdxDeviceId,
-		IdxCommand,
-		IdxBuffer,
-		IdxLocation,
-		IdxSingleParamFirst,
-		IdxMultiParamFirst = IdxSingleParamFirst,
+		IdxIdWaldorf = 1,
+		IdxIdMicroQ = 2,
+		IdxDeviceId = 3,
+		IdxCommand = 4,
+
+		// dumps / dump requests
+		IdxBuffer = 5,
+		IdxLocation = 6,
+
+		// first parameter of a dump
+		IdxSingleParamFirst = 7,
+		IdxMultiParamFirst  = IdxSingleParamFirst,
+		IdxDrumParamFirst   = IdxSingleParamFirst,
 		IdxGlobalParamFirst = IdxBuffer,
+
+		IdxSingleParamIndexH = IdxBuffer + 1,
+		IdxSingleParamIndexL = IdxSingleParamIndexH + 1,
+		IdxSingleParamValue  = IdxSingleParamIndexL + 1,
+
+		IdxMultiParamIndexH = IdxBuffer,
+		IdxMultiParamIndexL = IdxMultiParamIndexH + 1,
+		IdxMultiParamValue  = IdxMultiParamIndexL + 1,
+
+		IdxDrumParamIndexH = IdxBuffer,
+		IdxDrumParamIndexL = IdxMultiParamIndexH + 1,
+		IdxDrumParamValue  = IdxMultiParamIndexL + 1,
+
+		IdxGlobalParamIndexH = IdxBuffer,
+		IdxGlobalParamIndexL = IdxGlobalParamIndexH + 1,
+		IdxGlobalParamValue  = IdxGlobalParamIndexL + 1
 	};
 }
