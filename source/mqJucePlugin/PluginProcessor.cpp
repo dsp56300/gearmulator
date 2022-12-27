@@ -249,24 +249,24 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	    if (e.source == synthLib::MidiEventSourceEditor)
 			continue;
 
-    	if (e.sysex.empty())
+		auto toJuceMidiMessage = [&e]()
 		{
-			const juce::MidiMessage message(e.a, e.b, e.c, 0.0);
-			midiMessages.addEvent(message, 0);
+			if(!e.sysex.empty())
+				return juce::MidiMessage(&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0);
+			const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
+			if(len == 1)
+				return juce::MidiMessage(e.a, 0.0);
+			if(len == 2)
+				return juce::MidiMessage(e.a, e.b, 0.0);
+			return juce::MidiMessage(e.a, e.b, e.c, 0.0);
+		};
 
-			// additionally send to the midi output we've selected in the editor
-			if (m_midiOutput)
-				m_midiOutput->sendMessageNow(message);
-		}
-		else
-		{
-			const juce::MidiMessage message(&e.sysex[0], static_cast<int>(e.sysex.size()), 0.0);
-			midiMessages.addEvent(message, 0);
+		const juce::MidiMessage message = toJuceMidiMessage();
+		midiMessages.addEvent(message, 0);
 
-			// additionally send to the midi output we've selected in the editor
-			if (m_midiOutput)
-				m_midiOutput->sendMessageNow(message);
-		}
+		// additionally send to the midi output we've selected in the editor
+		if (m_midiOutput)
+			m_midiOutput->sendMessageNow(message);
     }
 }
 
