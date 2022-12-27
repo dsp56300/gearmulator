@@ -221,7 +221,7 @@ namespace mqLib
 		static_assert(
 			(static_cast<uint32_t>(MultiParameter::Inst15) - static_cast<uint32_t>(MultiParameter::Inst0)) == 
 			(static_cast<uint32_t>(MultiParameter::Inst1 ) - static_cast<uint32_t>(MultiParameter::Inst0)) * 15, 
-			"we need a consequtive offset");
+			"we need a consecutive offset");
 
 		_data.assign(static_cast<uint32_t>(mqLib::MultiParameter::Count), 0);
 
