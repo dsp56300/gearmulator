@@ -50,20 +50,8 @@ namespace synthLib
 
 			++m_pendingEventLen;
 
-			if(m_pendingEventLen == 1)
-			{
-				if((m_pendingEvent.a & 0xf0) == 0xf0)
-					flushEvent();
-			}
-			else if(m_pendingEventLen == 2)
-			{
-				if(m_pendingEvent.a == synthLib::M_QUARTERFRAME || (m_pendingEvent.a & 0xf0) == synthLib::M_AFTERTOUCH)
-					flushEvent();
-			}
-			else if(m_pendingEventLen == 3)
-			{
+			if(lengthFromStatusByte(m_pendingEvent.a) == m_pendingEventLen)
 				flushEvent();
-			}
 		}
 	}
 
