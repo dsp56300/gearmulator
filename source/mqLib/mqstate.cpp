@@ -43,45 +43,42 @@ namespace mqLib
 			return receive(_responses, _data.sysex, _sender);
 		}
 
-		if(_sender == Origin::Device)
-		{
-			LOG("Received: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
+		LOG("Received: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
 
-			switch(_data.a & 0xf0)
+		switch(_data.a & 0xf0)
+		{
+		case synthLib::M_CONTROLCHANGE:
+			switch(_data.b)
 			{
-			case synthLib::M_CONTROLCHANGE:
-				switch(_data.b)
-				{
-				case synthLib::MC_BANKSELECTLSB:
-					m_lastBankSelectLSB = _data;
-					break;
-				default:
-					return false;
-				}
-				break;
-			case synthLib::M_PROGRAMCHANGE:
-				switch(static_cast<BankSelectLSB>(m_lastBankSelectLSB.c))
-				{
-				case BankSelectLSB::BsDeprecatedSingleBankA:
-				case BankSelectLSB::BsDeprecatedSingleBankB:
-				case BankSelectLSB::BsDeprecatedSingleBankC:
-				case BankSelectLSB::BsSingleBankA:
-				case BankSelectLSB::BsSingleBankB:
-				case BankSelectLSB::BsSingleBankC:
-					if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
-						requestSingle(MidiBufferNum::SingleEditBufferSingleMode, MidiSoundLocation::EditBufferCurrentSingle);
-					break;
-				case BankSelectLSB::BsMultiBank:
-					if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
-						requestMulti(MidiBufferNum::MultiEditBuffer, 0);
-					break;
-				default:
-					return false;
-				}
+			case synthLib::MC_BANKSELECTLSB:
+				m_lastBankSelectLSB = _data;
 				break;
 			default:
 				return false;
 			}
+			break;
+		case synthLib::M_PROGRAMCHANGE:
+			switch(static_cast<BankSelectLSB>(m_lastBankSelectLSB.c))
+			{
+			case BankSelectLSB::BsDeprecatedSingleBankA:
+			case BankSelectLSB::BsDeprecatedSingleBankB:
+			case BankSelectLSB::BsDeprecatedSingleBankC:
+			case BankSelectLSB::BsSingleBankA:
+			case BankSelectLSB::BsSingleBankB:
+			case BankSelectLSB::BsSingleBankC:
+				if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
+					requestSingle(MidiBufferNum::SingleEditBufferSingleMode, MidiSoundLocation::EditBufferCurrentSingle);
+				break;
+			case BankSelectLSB::BsMultiBank:
+				if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
+					requestMulti(MidiBufferNum::MultiEditBuffer, 0);
+				break;
+			default:
+				return false;
+			}
+			break;
+		default:
+			return false;
 		}
 		return false;
 	}
