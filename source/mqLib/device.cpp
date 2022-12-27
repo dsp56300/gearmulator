@@ -72,16 +72,12 @@ namespace mqLib
 
 		for (const auto& midiOut : _midiOut)
 		{
-			if(!midiOut.sysex.empty())
-			{
-				if(!m_state.receive(responses, midiOut.sysex, State::Origin::Device))
-					assert(false);
+			m_state.receive(responses, midiOut, State::Origin::Device);
 
-				for (auto& response : responses)
-				{
-					auto& r = _midiOut.emplace_back();
-					std::swap(response, r.sysex);
-				}
+			for (auto& response : responses)
+			{
+				auto& r = _midiOut.emplace_back();
+				std::swap(response, r.sysex);
 			}
 		}
 
@@ -114,10 +110,7 @@ namespace mqLib
 				return true;
 
 			Responses responses;
-			if(!m_state.receive(responses, sysex, State::Origin::External))
-			{
-				m_state.receive(responses, sysex, State::Origin::External);
-			}
+			auto res = m_state.receive(responses, sysex, State::Origin::External);
 
 			for (auto& response : responses)
 			{
@@ -125,8 +118,8 @@ namespace mqLib
 				std::swap(response, r.sysex);
 			}
 
-			// do not forward to device if our cache as able to reply
-			if(!responses.empty())
+			// do not forward to device if our cache as able to reply. It might have sent something to the device already on its own if a cache miss occured
+			if(res)
 				return true;
 		}
 

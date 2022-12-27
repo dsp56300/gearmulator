@@ -201,4 +201,17 @@ namespace mqLib
 		IdxModeParamIndexL = IdxModeParamIndexH + 1,
 		IdxModeParamValue  = IdxModeParamIndexL + 1
 	};
+
+	enum BankSelectLSB : uint8_t
+	{
+		BsDeprecatedSingleBankA = 0x0,
+		BsDeprecatedSingleBankB = 0x1,
+		BsDeprecatedSingleBankC = 0x2,
+		BsDeprecatedDrumBank = 0x4,
+		BsSingleBankA = 0x40,
+		BsSingleBankB = 0x41,
+		BsSingleBankC = 0x42,
+		BsDrumBank = 0x50,
+		BsMultiBank = 0x50,
+	};
 }

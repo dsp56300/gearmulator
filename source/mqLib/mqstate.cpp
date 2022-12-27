@@ -8,6 +8,7 @@
 #include "../synthLib/os.h"
 #include "../synthLib/midiToSysex.h"
 #include "../synthLib/midiBufferParser.h"
+#include "dsp56kEmu/logging.h"
 
 #pragma optimize("", off)
 
@@ -27,33 +28,58 @@ namespace mqLib
 		if(messages.empty())
 			return false;
 
+		Responses nop;
+
 		for (const auto& message : messages)
+			receive(nop, message, Origin::External);
+
+		return true;
+	}
+
+	bool State::receive(Responses& _responses, const synthLib::SMidiEvent& _data, Origin _sender)
+	{
+		if(!_data.sysex.empty())
 		{
-			Responses nop;
+			return receive(_responses, _data.sysex, _sender);
+		}
 
-			if(message.size() == 207)
-				continue;
+		if(_sender == Origin::Device)
+		{
+			LOG("Received: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
 
-			if(!receive(nop, message, Origin::External))
-				continue;
-
-			if(message[IdxBuffer] == static_cast<uint8_t>(MidiBufferNum::SingleEditBufferSingleMode))
+			switch(_data.a & 0xf0)
 			{
-				auto m = message;
-				m[IdxBuffer] = static_cast<uint8_t>(MidiBufferNum::DeprecatedSingleBankA);
-				for(uint8_t i=0; i<10; ++i)
+			case synthLib::M_CONTROLCHANGE:
+				switch(_data.b)
 				{
-					m[IdxLocation] = i;
-					updateChecksum(m);
-					forwardToDevice(m);
+				case synthLib::MC_BANKSELECTLSB:
+					m_lastBankSelectLSB = _data;
+					break;
+				default:
+					return false;
 				}
-			}
-			else
-			{
-				forwardToDevice(message);
+				break;
+			case synthLib::M_PROGRAMCHANGE:
+				switch(m_lastBankSelectLSB.c)
+				{
+				case BsDeprecatedSingleBankA:
+				case BsDeprecatedSingleBankB:
+				case BsDeprecatedSingleBankC:
+				case BsSingleBankA:
+				case BsSingleBankB:
+				case BsSingleBankC:
+					break;
+				case BsMultiBank:
+					break;
+				default:
+					return false;
+				}
+				break;
+			default:
+				return false;
 			}
 		}
-		return true;
+		return false;
 	}
 
 	bool State::receive(Responses& _responses, const SysEx& _data, Origin _sender)
@@ -179,7 +205,6 @@ namespace mqLib
 
 		receive(unused, convertTo(m_global), Origin::External);
 
-		/*
 		// accept files up to 300k as larger files might be the OS
 		const auto midifile = synthLib::findFile(".mid", 0, 300 * 1024);
 		if(!midifile.empty())
@@ -199,7 +224,6 @@ namespace mqLib
 
 			forwardToDevice(dump);
 		}
-		*/
 	}
 
 	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
@@ -560,7 +584,7 @@ namespace mqLib
 
 		if(!res)
 			forwardToDevice(_data);
-		return res;
+		return true;
 	}
 
 	bool State::parseDump(DumpType _type, const SysEx& _data)
@@ -577,7 +601,7 @@ namespace mqLib
 			return false;
 		}
 
-		if(res && m_isEditBuffer)
+		if(res)
 			forwardToDevice(_data);
 		return res;
 	}

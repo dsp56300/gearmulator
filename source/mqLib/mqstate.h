@@ -6,6 +6,12 @@
 #include "mqmiditypes.h"
 
 #include "../synthLib/deviceTypes.h"
+#include "../synthLib/midiTypes.h"
+
+namespace synthLib
+{
+	struct SMidiEvent;
+}
 
 namespace mqLib
 {
@@ -70,6 +76,7 @@ namespace mqLib
 
 		bool loadState(const SysEx& _sysex);
 
+		bool receive(Responses& _responses, const synthLib::SMidiEvent& _data, Origin _sender);
 		bool receive(Responses& _responses, const SysEx& _data, Origin _sender);
 		void createInitState();
 
@@ -212,5 +219,7 @@ namespace mqLib
 		// current state, valid while receiving data
 		Origin m_sender = Origin::External;
 		bool m_isEditBuffer = false;
+
+		synthLib::SMidiEvent m_lastBankSelectLSB;
 	};
 }
