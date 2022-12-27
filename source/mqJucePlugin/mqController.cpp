@@ -176,7 +176,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
             if(isMultiMode())
             {
 			    for(uint8_t i=0; i<16; ++i)
-				    requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMulti, i);
+				    requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, i);
             }
             else
             {

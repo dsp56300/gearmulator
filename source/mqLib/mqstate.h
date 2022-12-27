@@ -17,9 +17,6 @@ namespace mqLib
 {
 	class MicroQ;
 
-	enum class MidiBufferNum : uint8_t;
-	enum class GlobalParameter : uint8_t;
-
 	using SysEx = std::vector<uint8_t>;
 	using Responses = std::vector<SysEx>;
 
@@ -197,6 +194,10 @@ namespace mqLib
 		}
 
 		void forwardToDevice(const SysEx& _data) const;
+
+		void requestGlobal() const;
+		void requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const;
+		void requestMulti(MidiBufferNum _buf, uint8_t _location) const;
 
 		MicroQ& m_mq;
 

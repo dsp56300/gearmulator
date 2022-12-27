@@ -60,16 +60,20 @@ namespace mqLib
 				}
 				break;
 			case synthLib::M_PROGRAMCHANGE:
-				switch(m_lastBankSelectLSB.c)
+				switch(static_cast<BankSelectLSB>(m_lastBankSelectLSB.c))
 				{
-				case BsDeprecatedSingleBankA:
-				case BsDeprecatedSingleBankB:
-				case BsDeprecatedSingleBankC:
-				case BsSingleBankA:
-				case BsSingleBankB:
-				case BsSingleBankC:
+				case BankSelectLSB::BsDeprecatedSingleBankA:
+				case BankSelectLSB::BsDeprecatedSingleBankB:
+				case BankSelectLSB::BsDeprecatedSingleBankC:
+				case BankSelectLSB::BsSingleBankA:
+				case BankSelectLSB::BsSingleBankB:
+				case BankSelectLSB::BsSingleBankC:
+					if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
+						requestSingle(MidiBufferNum::SingleEditBufferSingleMode, MidiSoundLocation::EditBufferCurrentSingle);
 					break;
-				case BsMultiBank:
+				case BankSelectLSB::BsMultiBank:
+					if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
+						requestMulti(MidiBufferNum::MultiEditBuffer, 0);
 					break;
 				default:
 					return false;
@@ -137,7 +141,7 @@ namespace mqLib
 	void State::createInitState()
 	{
 		// request global settings and wait for them. Once they are valid, send init state
-		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
+		requestGlobal();
 //		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::ModeRequest), 0xf7});
 
 		synthLib::MidiBufferParser parser;
@@ -168,13 +172,6 @@ namespace mqLib
 		auto setParam = [&](GlobalParameter _param, uint8_t _value)
 		{
 			setGlobalParameter(_param, _value);
-			return;
-			const auto parameterIndex = static_cast<uint32_t>(_param);
-			const auto pah = static_cast<uint8_t>(parameterIndex >> 7);
-			const auto pal = static_cast<uint8_t>(parameterIndex & 0x7f);
-			const SysEx msg({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange), pah, pal, _value, 0xf7});
-			
-			receive(unused, msg, Origin::External);
 		};
 
 		setParam(GlobalParameter::InstrumentSelection, 0);		// Select first instrument
@@ -665,5 +662,20 @@ namespace mqLib
 	{
 		if(m_sender == Origin::External)
 			m_mq.sendMidi(_data);
+	}
+
+	void State::requestGlobal() const
+	{
+		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
+	}
+
+	void State::requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const
+	{
+		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::SingleRequest), static_cast<uint8_t>(_buf), static_cast<uint8_t>(_location), 0xf7});
+	}
+
+	void State::requestMulti(MidiBufferNum _buf, uint8_t _location) const
+	{
+		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
 	}
 }

@@ -61,7 +61,7 @@ namespace mqLib
 		AllSinglesBankC,
 		AllSinglesBankX = 0x48,
 		EditBufferCurrentSingle = 0x00,
-		EditBufferFirstMulti = 0x00,
+		EditBufferFirstMultiSingle = 0x00,
 		EditBufferFirstSingleLayer = 0x00,
 		EditBufferFirstDrumMapInstrument = 0x10,
 	};
@@ -202,7 +202,7 @@ namespace mqLib
 		IdxModeParamValue  = IdxModeParamIndexL + 1
 	};
 
-	enum BankSelectLSB : uint8_t
+	enum class BankSelectLSB : uint8_t
 	{
 		BsDeprecatedSingleBankA = 0x0,
 		BsDeprecatedSingleBankB = 0x1,
