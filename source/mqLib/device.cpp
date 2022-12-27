@@ -8,8 +8,11 @@ namespace mqLib
 {
 	Device::Device() : m_mq(BootMode::Default)
 	{
+		// we need to hit the play button to resume boot if the used rom is an OS update. mQ will complain about an uninitialized ROM area in this case
+		m_mq.setButton(Buttons::ButtonType::Play, true);
 		while(!m_mq.isBootCompleted())
 			m_mq.process(8);
+		m_mq.setButton(Buttons::ButtonType::Play, false);
 	}
 
 	Device::~Device() = default;
