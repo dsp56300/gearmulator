@@ -7,6 +7,8 @@
 
 #include "../synthLib/os.h"
 
+#pragma optimize("", off)
+
 constexpr const char* g_midiPacketNames[] =
 {
     "requestsingle",

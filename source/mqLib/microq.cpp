@@ -2,8 +2,11 @@
 
 #include "../synthLib/midiTypes.h"
 #include "../synthLib/os.h"
+#include "../synthLib/midiBufferParser.h"
 
 #include "mqhardware.h"
+
+#pragma optimize("", off)
 
 namespace mqLib
 {
@@ -154,31 +157,22 @@ namespace mqLib
 
 	void MicroQ::sendMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
-		std::lock_guard lock(m_mutex);
-
 		if(!_ev.sysex.empty())
 		{
-			m_midiInBuffer.insert(m_midiInBuffer.end(), _ev.sysex.begin(), _ev.sysex.end());
+			sendMidi(_ev.sysex);
+			return;
 		}
-		else
-		{
-			m_midiInBuffer.push_back(_ev.a);
 
-			const auto command = _ev.a & 0xf0;
+		std::lock_guard lock(m_mutex);
 
-			if(command != 0xf0)
-			{
-				if(command == synthLib::M_AFTERTOUCH)
-				{
-					m_midiInBuffer.push_back(_ev.b);
-				}
-				else
-				{
-					m_midiInBuffer.push_back(_ev.b);
-					m_midiInBuffer.push_back(_ev.c);
-				}
-			}
-		}
+		m_midiInBuffer.push_back(_ev.a);
+
+		const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_ev.a);
+
+		if(len > 1)
+			m_midiInBuffer.push_back(_ev.b);
+		if(len > 2)
+			m_midiInBuffer.push_back(_ev.c);
 	}
 
 	void MicroQ::receiveMidi(std::vector<uint8_t>& _buffer)

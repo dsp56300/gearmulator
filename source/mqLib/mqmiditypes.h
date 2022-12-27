@@ -1,12 +1,14 @@
 #pragma once
 
+#include <cstdint>
+
 namespace mqLib
 {
 	enum MidiHeaderByte : uint8_t
 	{
 		IdWaldorf = 0x3e,
 		IdMicroQ = 0x10,
-		DeviceIdOmni = 0x7f
+		IdDeviceOmni = 0x7f
 	};
 
 	enum class SysexCommand : uint8_t
@@ -15,6 +17,7 @@ namespace mqLib
 		MultiRequest  = 0x01, MultiDump  = 0x11, MultiParameterChange  = 0x21, MultiParameterRequest  = 0x31,
 		DrumRequest	  = 0x02, DrumDump   = 0x12, DrumParameterChange   = 0x22, DrumParameterRequest   = 0x32,
 		GlobalRequest = 0x04, GlobalDump = 0x14, GlobalParameterChange = 0x24, GlobalParameterRequest = 0x34,
+		ModeRequest   = 0x07, ModeDump   = 0x17, ModeParameterChange   = 0x27, ModeParameterRequest   = 0x37,
 
 		EmuLCD = 0x50,
 		EmuLEDs = 0x51,
@@ -176,6 +179,7 @@ namespace mqLib
 		IdxMultiParamFirst  = IdxSingleParamFirst,
 		IdxDrumParamFirst   = IdxSingleParamFirst,
 		IdxGlobalParamFirst = IdxBuffer,
+		IdxModeParamFirst = IdxBuffer,
 
 		IdxSingleParamIndexH = IdxBuffer + 1,
 		IdxSingleParamIndexL = IdxSingleParamIndexH + 1,
@@ -191,6 +195,10 @@ namespace mqLib
 
 		IdxGlobalParamIndexH = IdxBuffer,
 		IdxGlobalParamIndexL = IdxGlobalParamIndexH + 1,
-		IdxGlobalParamValue  = IdxGlobalParamIndexL + 1
+		IdxGlobalParamValue  = IdxGlobalParamIndexL + 1,
+
+		IdxModeParamIndexH = IdxBuffer,
+		IdxModeParamIndexL = IdxModeParamIndexH + 1,
+		IdxModeParamValue  = IdxModeParamIndexL + 1
 	};
 }

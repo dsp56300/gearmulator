@@ -4,15 +4,19 @@
 
 #include <cstring>
 
+#include "../synthLib/deviceTypes.h"
+
 namespace mqLib
 {
-	Device::Device() : m_mq(BootMode::Default)
+	Device::Device() : m_mq(BootMode::Default), m_state(m_mq), m_sysexRemote(m_mq)
 	{
 		// we need to hit the play button to resume boot if the used rom is an OS update. mQ will complain about an uninitialized ROM area in this case
 		m_mq.setButton(Buttons::ButtonType::Play, true);
 		while(!m_mq.isBootCompleted())
 			m_mq.process(8);
 		m_mq.setButton(Buttons::ButtonType::Play, false);
+
+		m_state.createInitState();
 	}
 
 	Device::~Device() = default;
@@ -39,14 +43,12 @@ namespace mqLib
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		// TODO
-		return false;
+		return m_state.getState(_state, _type);
 	}
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		// TODO
-		return false;
+		return m_state.setState(_state, _type);
 	}
 
 	uint32_t Device::getChannelCountIn()
@@ -66,6 +68,23 @@ namespace mqLib
 		m_midiOutParser.getEvents(_midiOut);
 		m_midiOutBuffer.clear();
 
+		Responses responses;
+
+		for (const auto& midiOut : _midiOut)
+		{
+			if(!midiOut.sysex.empty())
+			{
+				if(!m_state.receive(responses, midiOut.sysex, State::Origin::Device))
+					assert(false);
+
+				for (auto& response : responses)
+				{
+					auto& r = _midiOut.emplace_back();
+					std::swap(response, r.sysex);
+				}
+			}
+		}
+
 		if(!m_customSysexOut.empty())
 		{
 			_midiOut.insert(_midiOut.begin(), m_customSysexOut.begin(), m_customSysexOut.end());
@@ -82,138 +101,38 @@ namespace mqLib
 
 		const auto dirty = static_cast<uint32_t>(m_mq.getDirtyFlags());
 
-		if(dirty & static_cast<uint32_t>(MicroQ::DirtyFlags::Lcd))
-			sendSysexLCD(m_customSysexOut);
-		if(dirty & static_cast<uint32_t>(MicroQ::DirtyFlags::Leds))
-			sendSysexLEDs(m_customSysexOut);
+		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		const auto& sysex = _ev.sysex;
 
-		if(sysex.size() >= 5)
+		if(!sysex.empty())
 		{
-			if(sysex[1] == IdWaldorf && sysex[2] == IdMicroQ)
-			{
-				const auto cmd = sysex[4];
+			if(m_sysexRemote.receive(m_customSysexOut, sysex))
+				return true;
 
-				switch (static_cast<SysexCommand>(cmd))
-				{
-				case SysexCommand::EmuLCD:
-					sendSysexLCD(_response);
-					return true;
-				case SysexCommand::EmuButtons:
-					{
-						if(sysex.size() > 6)
-						{
-							const auto button = static_cast<Buttons::ButtonType>(sysex[5]);
-							const auto state = sysex[6];
-							m_mq.setButton(button, state != 0);
-						}
-						else
-						{
-							sendSysexButtons(_response);
-						}
-					}
-					return true;
-				case SysexCommand::EmuLEDs:
-					{
-						sendSysexLEDs(_response);
-					}
-					return true;
-				case SysexCommand::EmuRotaries:
-					{
-						if(sysex.size() > 6)
-						{
-							const auto encoder = static_cast<Buttons::Encoders>(sysex[5]);
-							const auto amount = static_cast<int>(sysex[6]) - 64;
-							if(amount)
-								m_mq.rotateEncoder(encoder, amount);
-						}
-						else
-						{
-							sendSysexRotaries(_response);
-						}
-					}
-					return true;
-				default:
-					break;
-				}
+			Responses responses;
+			if(!m_state.receive(responses, sysex, State::Origin::External))
+			{
+				m_state.receive(responses, sysex, State::Origin::External);
 			}
+
+			for (auto& response : responses)
+			{
+				auto& r = _response.emplace_back();
+				std::swap(response, r.sysex);
+			}
+
+			// do not forward to device if our cache as able to reply
+			if(!responses.empty())
+				return true;
 		}
 
 		m_mq.sendMidiEvent(_ev);
+
 		return true;
-	}
-
-	void Device::createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd)
-	{
-		constexpr uint8_t devId = 0;
-		_dst.assign({0xf0, IdWaldorf, IdMicroQ, devId, static_cast<uint8_t>(_cmd)});
-	}
-
-	void Device::sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst)
-	{
-		std::array<char, 40> lcdData{};
-		m_mq.readLCD(lcdData);
-
-		synthLib::SMidiEvent ev;
-		createSysexHeader(ev.sysex, SysexCommand::EmuLCD);
-		ev.sysex.insert(ev.sysex.end(), lcdData.begin(), lcdData.end());
-
-		_dst.emplace_back(ev);
-	}
-	
-	void Device::sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst)
-	{
-		static_assert(static_cast<uint32_t>(Buttons::ButtonType::Count) < 24, "too many buttons");
-		uint32_t buttons = 0;
-		for(uint32_t i=0; i<static_cast<uint32_t>(Buttons::ButtonType::Count); ++i)
-		{
-			if(m_mq.getButton(static_cast<Buttons::ButtonType>(i)))
-				buttons |= (1<<i);
-		}
-
-		auto& ev = _dst.emplace_back();
-
-		createSysexHeader(ev.sysex, SysexCommand::EmuButtons);
-
-		ev.sysex.push_back((buttons>>16) & 0xff);
-		ev.sysex.push_back((buttons>>8) & 0xff);
-		ev.sysex.push_back(buttons & 0xff);
-	}
-
-	void Device::sendSysexLEDs(std::vector<synthLib::SMidiEvent>& _dst)
-	{
-		static_assert(static_cast<uint32_t>(Leds::Led::Count) < 32, "too many LEDs");
-		uint32_t leds = 0;
-		for(uint32_t i=0; i<static_cast<uint32_t>(Leds::Led::Count); ++i)
-		{
-			if(m_mq.getLedState(static_cast<Leds::Led>(i)))
-				leds |= (1<<i);
-		}
-		auto& ev = _dst.emplace_back();
-		auto& response = ev.sysex;
-		createSysexHeader(response, SysexCommand::EmuLEDs);
-		response.push_back((leds>>24) & 0xff);
-		response.push_back((leds>>16) & 0xff);
-		response.push_back((leds>>8) & 0xff);
-		response.push_back(leds & 0xff);
-	}
-
-	void Device::sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst)
-	{
-		auto& ev= _dst.emplace_back();
-		auto& response = ev.sysex;
-
-		createSysexHeader(response, SysexCommand::EmuRotaries);
-
-		for(uint32_t i=0; i<static_cast<uint32_t>(Buttons::Encoders::Count); ++i)
-		{
-			const auto value = m_mq.getEncoder(static_cast<Buttons::Encoders>(i));
-			response.push_back(value);
-		}
 	}
 
 	void Device::createSequencerMultiData(std::vector<uint8_t>& _data)
