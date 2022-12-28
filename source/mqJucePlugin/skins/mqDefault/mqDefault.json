@@ -1,0 +1,1333 @@
+{
+    "name" : "Root",
+    "root" : {
+        "x" : "0",
+        "y" : "0",
+        "width" : "3000",
+        "height" : "2000",
+        "scale" : "0.5"
+    },
+    "tabgroup" : {
+        "buttons" : [
+            "btPageOsc",
+            "btPagePatchBrowser"
+        ],
+        "pages" : [
+            "pageOsc",
+            "pagePatchBrowser"
+        ]
+    },
+    "children" : [
+        {
+            "name" : "bakedBG",
+            "image" : {
+                "x" : "0",
+                "y" : "0",
+                "width" : "3000",
+                "height" : "2000",
+                "texture" : "bakedBG"
+            }
+        },
+        {
+            "name" : "DonateInfo",
+            "hyperlinkbutton" : {
+                "url" : "https://paypal.me/dsp56300",
+                "text" : "To donate: https://paypal.me/dsp56300",
+                "textHeight" : "38",
+                "color" : "FAB024FF",
+                "x" : "1162",
+                "y" : "1920.4",
+                "width" : "676",
+                "height" : "45"
+            }
+        },
+        {
+            "name" : "btPageOsc",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "134.0571",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageFilter",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "325.7545",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageLfo",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "517.4518",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageFx",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "709.1492",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPagePatchBrowser",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1064.544",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageMulti",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1256.241",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageDrum",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1447.939",
+                "y" : "119.1022",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "lcdLineA",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "1754.104",
+                "y" : "112.1022",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "lcdLineB",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "1754.104",
+                "y" : "176.1022",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "pageOsc",
+            "image" : {
+                "x" : "50",
+                "y" : "345",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pageOsc"
+            },
+            "children" : [
+                {
+                    "name" : "o1octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "123.7144",
+                        "y" : "77.42664",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_9",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Octave"
+                    }
+                },
+                {
+                    "name" : "o1octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "174.7144",
+                        "y" : "128.4266",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Octave"
+                    }
+                },
+                {
+                    "name" : "o1semi",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "55.35718",
+                        "y" : "303.78",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Semi"
+                    }
+                },
+                {
+                    "name" : "o1detune",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "294.0714",
+                        "y" : "303.78",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Detune"
+                    }
+                },
+                {
+                    "name" : "ledo1shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "551.7858",
+                        "y" : "143.8533",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_7",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Shape"
+                    }
+                },
+                {
+                    "name" : "o1shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "602.7858",
+                        "y" : "194.8533",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Osc1 Shape"
+                    }
+                },
+                {
+                    "name" : "o1pw",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "126.6766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1PulseWidth"
+                    }
+                },
+                {
+                    "name" : "o1pwm",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "126.6766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Pwm"
+                    }
+                },
+                {
+                    "name" : "o1pwmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O1PwmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1094.857",
+                        "y" : "71",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o1keytrack",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "301.03",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1KeyTrack"
+                    }
+                },
+                {
+                    "name" : "o1bendrange",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "301.03",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1BendRange"
+                    }
+                },
+                {
+                    "name" : "o1fmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O1FmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 2",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1572.286",
+                        "y" : "71",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o1fmamount",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1508.286",
+                        "y" : "126.6766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1FmAmount"
+                    }
+                },
+                {
+                    "name" : "o1subvolume",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1388.929",
+                        "y" : "301.03",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1SubVolume"
+                    }
+                },
+                {
+                    "name" : "o1subfreqdiv",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1627.643",
+                        "y" : "301.03",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1SubFreqDiv"
+                    }
+                },
+                {
+                    "name" : "o2octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "123.7144",
+                        "y" : "601.5734",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_9",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Octave"
+                    }
+                },
+                {
+                    "name" : "o2octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "174.7144",
+                        "y" : "652.5734",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Octave"
+                    }
+                },
+                {
+                    "name" : "o2semi",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "55.35718",
+                        "y" : "827.9266",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Semi"
+                    }
+                },
+                {
+                    "name" : "o2detune",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "294.0714",
+                        "y" : "827.9266",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Detune"
+                    }
+                },
+                {
+                    "name" : "ledo2shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "551.7858",
+                        "y" : "668",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_7",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Shape"
+                    }
+                },
+                {
+                    "name" : "o2shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "602.7858",
+                        "y" : "719",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Shape"
+                    }
+                },
+                {
+                    "name" : "o2pw",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "650.8234",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2PulseWidth"
+                    }
+                },
+                {
+                    "name" : "o2pwm",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "650.8234",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Pwm"
+                    }
+                },
+                {
+                    "name" : "o2pwmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O2PwmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1094.857",
+                        "y" : "595.1467",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o2keytrack",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "825.1766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2KeyTrack"
+                    }
+                },
+                {
+                    "name" : "o2bendrange",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "825.1766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2BendRange"
+                    }
+                },
+                {
+                    "name" : "o2fmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O2FmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 2",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1572.286",
+                        "y" : "595.1467",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o2fmamount",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1508.286",
+                        "y" : "650.8234",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2FmAmount"
+                    }
+                },
+                {
+                    "name" : "o2subvolume",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1388.929",
+                        "y" : "825.1766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2SubVolume"
+                    }
+                },
+                {
+                    "name" : "o2subfreqdivide",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1627.643",
+                        "y" : "825.1766",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2SubFreqDiv"
+                    }
+                },
+                {
+                    "name" : "ledo1octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "123.7144",
+                        "y" : "1125.72",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_9",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Octave"
+                    }
+                },
+                {
+                    "name" : "o2octave",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "174.7144",
+                        "y" : "1176.72",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Octave"
+                    }
+                },
+                {
+                    "name" : "o3semi",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "55.35718",
+                        "y" : "1352.073",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Semi"
+                    }
+                },
+                {
+                    "name" : "o3detune",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "294.0714",
+                        "y" : "1352.073",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Detune"
+                    }
+                },
+                {
+                    "name" : "ledo3shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "551.7858",
+                        "y" : "1192.147",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_7",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Shape"
+                    }
+                },
+                {
+                    "name" : "o3shape",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "602.7858",
+                        "y" : "1243.147",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Shape"
+                    }
+                },
+                {
+                    "name" : "o3pulsewidth",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "1174.97",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3PulseWidth"
+                    }
+                },
+                {
+                    "name" : "o3pwm",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "1174.97",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Pwm"
+                    }
+                },
+                {
+                    "name" : "o3pwmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O3PwmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1094.857",
+                        "y" : "1119.293",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o3keytrack",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "911.5",
+                        "y" : "1349.323",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3KeyTrack"
+                    }
+                },
+                {
+                    "name" : "o3bendrange",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1150.214",
+                        "y" : "1349.323",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3BendRange"
+                    }
+                },
+                {
+                    "name" : "o3fmsource",
+                    "parameterAttachment" : {
+                        "parameter" : "O3FmSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 2",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1572.286",
+                        "y" : "1119.293",
+                        "width" : "218.7143",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "o3fm",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1508.286",
+                        "y" : "1174.97",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3FmAmount"
+                    }
+                },
+                {
+                    "name" : "o1level",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1882",
+                        "y" : "103.5",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Level"
+                    }
+                },
+                {
+                    "name" : "o1balance",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2037",
+                        "y" : "191.8359",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Balance"
+                    }
+                },
+                {
+                    "name" : "o2level",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1882",
+                        "y" : "392.666",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Level"
+                    }
+                },
+                {
+                    "name" : "o2balance",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2037",
+                        "y" : "481.002",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Balance"
+                    }
+                },
+                {
+                    "name" : "o3volume",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1882",
+                        "y" : "681.832",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Level"
+                    }
+                },
+                {
+                    "name" : "o3balance",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2037",
+                        "y" : "770.168",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O3Balance"
+                    }
+                },
+                {
+                    "name" : "ringmodLevel",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1882",
+                        "y" : "970.998",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "RingModLevel"
+                    }
+                },
+                {
+                    "name" : "ringmodBalance",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2037",
+                        "y" : "1059.334",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "RingModBalance"
+                    }
+                },
+                {
+                    "name" : "noiseLevel",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1882",
+                        "y" : "1260.164",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "NoiseLevel"
+                    }
+                },
+                {
+                    "name" : "noiseBalance",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2037",
+                        "y" : "1348.5",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "NoiseBalance"
+                    }
+                },
+                {
+                    "name" : "glideRate",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2354.47",
+                        "y" : "85.42102",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "GlideRate"
+                    }
+                },
+                {
+                    "name" : "toggleWithLED",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2634.53",
+                        "y" : "69.06995",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "toggleWithLED",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    }
+                },
+                {
+                    "name" : "glidemode",
+                    "parameterAttachment" : {
+                        "parameter" : "GlideMode"
+                    },
+                    "combobox" : {
+                        "text" : "Porta",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2567.9",
+                        "y" : "278.0421",
+                        "width" : "260.5",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "unisonocount",
+                    "parameterAttachment" : {
+                        "parameter" : "UnisonoCount"
+                    },
+                    "combobox" : {
+                        "text" : "Dual",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2567.9",
+                        "y" : "488.4642",
+                        "width" : "260.7",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "unisonoDetune",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2371.14",
+                        "y" : "586.8142",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "UnisonoDetune"
+                    }
+                },
+                {
+                    "name" : "toggleWithLED",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2651.2",
+                        "y" : "570.4632",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "toggleWithLED",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    }
+                },
+                {
+                    "name" : "ampmodsource",
+                    "parameterAttachment" : {
+                        "parameter" : "AmpModSource"
+                    },
+                    "combobox" : {
+                        "text" : "LFO 3",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2567.9",
+                        "y" : "900.6842",
+                        "width" : "260.5",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "ampVolume",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2298.7",
+                        "y" : "984.1052",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpVolume"
+                    }
+                },
+                {
+                    "name" : "ampVelocity",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2503.9",
+                        "y" : "984.1052",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpVelocity"
+                    }
+                },
+                {
+                    "name" : "ampModAmount",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2709.1",
+                        "y" : "984.1052",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpModAmount"
+                    }
+                },
+                {
+                    "name" : "noisemodef1",
+                    "parameterAttachment" : {
+                        "parameter" : "NoiseModeF1"
+                    },
+                    "combobox" : {
+                        "text" : "Ext L+R",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2567.9",
+                        "y" : "1337.828",
+                        "width" : "266.9",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "noisemodef2",
+                    "parameterAttachment" : {
+                        "parameter" : "NoiseModeF2"
+                    },
+                    "combobox" : {
+                        "text" : "Ext L+R",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2567.9",
+                        "y" : "1428.698",
+                        "width" : "266.9",
+                        "height" : "49"
+                    }
+                }
+            ]
+        }
+    ]
+}
