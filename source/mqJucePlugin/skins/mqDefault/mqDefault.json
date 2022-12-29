@@ -8,6 +8,7 @@
         "scale" : "0.5"
     },
     "tabgroup" : {
+        "name" : "Root",
         "buttons" : [
             "btPageOsc",
             "btPagePatchBrowser"
@@ -25,7 +26,7 @@
                 "y" : "0",
                 "width" : "3000",
                 "height" : "2000",
-                "texture" : "bakedBG"
+                "texture" : "mqDefaultBG"
             }
         },
         {
@@ -200,6 +201,25 @@
             }
         },
         {
+            "name" : "ledPower",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2352.104",
+                "y" : "254.0745",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
             "name" : "pageOsc",
             "image" : {
                 "x" : "50",
@@ -210,7 +230,7 @@
             },
             "children" : [
                 {
-                    "name" : "o1octave",
+                    "name" : "ledo1octave",
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -308,7 +328,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Osc1 Shape"
+                        "parameter" : "O1Shape"
                     }
                 },
                 {
@@ -724,7 +744,7 @@
                     }
                 },
                 {
-                    "name" : "ledo1octave",
+                    "name" : "ledo3octave",
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -737,7 +757,7 @@
                         "tileSizeY" : "512"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "O1Octave"
+                        "parameter" : "O3Octave"
                     }
                 },
                 {
@@ -754,7 +774,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "O2Octave"
+                        "parameter" : "O3Octave"
                     }
                 },
                 {
@@ -1326,6 +1346,56 @@
                         "width" : "266.9",
                         "height" : "49"
                     }
+                }
+            ]
+        },
+        {
+            "name" : "pagePatchBrowser",
+            "image" : {
+                "x" : "50",
+                "y" : "345",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pagePatchBrowser"
+            },
+            "children" : [
+                {
+                    "name" : "patchbrowser",
+                    "component" : {
+                        "x" : "0",
+                        "y" : "55",
+                        "width" : "2900",
+                        "height" : "1470"
+                    },
+                    "children" : [
+                        {
+                            "name" : "ContainerFileSelector",
+                            "component" : {
+                                "x" : "0",
+                                "y" : "0",
+                                "width" : "1450",
+                                "height" : "1470"
+                            }
+                        },
+                        {
+                            "name" : "ContainerPatchList",
+                            "component" : {
+                                "x" : "1450",
+                                "y" : "0",
+                                "width" : "1450",
+                                "height" : "1418"
+                            }
+                        },
+                        {
+                            "name" : "ContainerPatchListSearchBox",
+                            "component" : {
+                                "x" : "1450",
+                                "y" : "1420",
+                                "width" : "1456",
+                                "height" : "50"
+                            }
+                        }
+                    ]
                 }
             ]
         }
