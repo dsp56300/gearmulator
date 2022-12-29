@@ -10,124 +10,125 @@
 		"max":127,
 		"isBool":false,
 		"isDiscrete":false,
-		"page":0
+		"page":0,
+		"step":0
 	},
  	"parameterdescriptions":
  	[
  		{"page":0, "index":0, "name":"Version", "min":1, "max":1, "isPublic":false, "isDiscrete":true},
 
 		// Osc 1
-		{"index":1 , "name":"O1Octave"     , "min":16, "max":112},
+		{"index":1 , "name":"O1Octave"     , "min":16, "max":112, "step":12},
  		{"index":2 , "name":"O1Semi"       , "min":52, "max":76},
  		{"index":3 , "name":"O1Detune"},
  		{"index":4 , "name":"O1BendRange"  , "min":40, "max":88},
  		{"index":5 , "name":"O1KeyTrack"},
- 		{"index":6 , "name":"O1FmSource"   , "min":0 , "max":14},
+ 		{"index":6 , "name":"O1FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":7 , "name":"O1FmAmount"},
  		{"index":8 , "name":"O1Shape"      , "min":0 , "max":6},
  		{"index":9 , "name":"O1PulseWidth"},
- 		{"index":10, "name":"O1PwmSource"  , "min":0 , "max":13},
+ 		{"index":10, "name":"O1PwmSource"  , "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":11, "name":"O1Pwm"},
  		{"index":12, "name":"O1SubFreqDiv" , "min":0 , "max":31},
  		{"index":13, "name":"O1SubVolume"  , "min":0 , "max":31},
 
 		// Osc 2
- 		{"index":17, "name":"O2Octave"     , "min":16, "max":112},
+ 		{"index":17, "name":"O2Octave"     , "min":16, "max":112, "step":12},
  		{"index":18, "name":"O2Semi"       , "min":52, "max":76},
  		{"index":19, "name":"O2Detune"},
  		{"index":20, "name":"O2BendRange"  , "min":40, "max":88},
  		{"index":21, "name":"O2KeyTrack"},
- 		{"index":22, "name":"O2FmSource"   , "min":0 , "max":14},
+ 		{"index":22, "name":"O2FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":23, "name":"O2FmAmount"},
  		{"index":24, "name":"O2Shape"      , "min":0 , "max":6},
  		{"index":25, "name":"O2PulseWidth"},
- 		{"index":26, "name":"O2PwmSource"  , "min":0 , "max":13},
+ 		{"index":26, "name":"O2PwmSource"  , "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":27, "name":"O2Pwm"},
  		{"index":28, "name":"O2SubFreqDiv" , "min":0 , "max":31},
  		{"index":29, "name":"O2SubVolume"  , "min":0 , "max":31},
 
 		// Osc 3
- 		{"index":33, "name":"O3Octave"     , "min":16, "max":112},
+ 		{"index":33, "name":"O3Octave"     , "min":16, "max":112, "step":12},
  		{"index":34, "name":"O3Semi"       , "min":52, "max":76},
  		{"index":35, "name":"O3Detune"},
  		{"index":36, "name":"O3BendRange"  , "min":40, "max":88},
  		{"index":37, "name":"O3KeyTrack"},
- 		{"index":38, "name":"O3FmSource"   , "min":0 , "max":14},
+ 		{"index":38, "name":"O3FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":39, "name":"O3FmAmount"},
  		{"index":40, "name":"O3Shape"      , "min":0 , "max":4},
  		{"index":41, "name":"O3PulseWidth"},
- 		{"index":42, "name":"O3PwmSource"  , "min":0 , "max":13},
+ 		{"index":42, "name":"O3PwmSource"  , "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":43, "name":"O3Pwm"},
 
 		// Sync
  		{"index":49, "name":"Sync", "min":0 , "max":1, "isBool":true},
 		
 		// Pitch Mod
- 		{"index":50, "name":"PitchModSrc", "min":0 , "max":13},
+ 		{"index":50, "name":"PitchModSrc", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":51, "name":"PitchModAmount"},
 
 		// Glide
  		{"index":53, "name":"GlideEnable", "min":0 , "max":1, "isBool":true},
- 		{"index":56, "name":"GlideMode", "min":0 , "max":4},
- 		{"index":57, "name":"GlideRate", "min":0 , "max":4},
+ 		{"index":56, "name":"GlideMode", "min":0 , "max":4, "isDiscrete":true, "toText":"glideMode"},
+ 		{"index":57, "name":"GlideRate", "min":0 , "max":127},
 		
 		// Sound
  		{"index":58, "name":"VoiceMode", "min":0 , "max":1, "isBool":true},
- 		{"index":58, "name":"UnisonoCount", "min":0 , "max":6},
+ 		{"index":58, "name":"UnisonoCount", "min":0 , "max":5, "isDiscrete":true, "toText":"unisonoMode"},
  		{"index":59, "name":"UnisonoDetune"},
 		
 		// Mixer
  		{"index":61, "name":"O1Level"},
- 		{"index":62, "name":"O1Balance"},
+ 		{"index":62, "name":"O1Balance", "toText":"filterBalance"},
  		{"index":63, "name":"O2Level"},
- 		{"index":64, "name":"O2Balance"},
+ 		{"index":64, "name":"O2Balance", "toText":"filterBalance"},
  		{"index":65, "name":"O3Level"},
- 		{"index":66, "name":"O3Balance"},
+ 		{"index":66, "name":"O3Balance", "toText":"filterBalance"},
  		{"index":67, "name":"NoiseLevel"},
- 		{"index":68, "name":"NoiseBalance"},
+ 		{"index":68, "name":"NoiseBalance", "toText":"filterBalance"},
  		{"index":71, "name":"RingModLevel"},
- 		{"index":72, "name":"RingModBalance"},
- 		{"index":75, "name":"NoiseModeF1", "min":0 , "max":3},
- 		{"index":76, "name":"NoiseModeF2", "min":0 , "max":3},
+ 		{"index":72, "name":"RingModBalance", "toText":"filterBalance"},
+ 		{"index":75, "name":"NoiseModeF1", "min":0 , "max":3, "isDiscrete":true, "toText":"noiseMode"},
+ 		{"index":76, "name":"NoiseModeF2", "min":0 , "max":3, "isDiscrete":true, "toText":"noiseMode"},
 		
 		// Filter 1
- 		{"index":77, "name":"F1Type", "min":0 , "max":10},
+ 		{"index":77, "name":"F1Type", "min":0 , "max":10, "isDiscrete":true, "toText":"filterType"},
  		{"index":78, "name":"F1Cutoff"},
  		{"index":80, "name":"F1Resonance"},
  		{"index":81, "name":"F1Drive"},
  		{"index":86, "name":"F1KeyTrack"},
  		{"index":87, "name":"F1EnvMod"},
  		{"index":88, "name":"F1VelMod"},
- 		{"index":89, "name":"F1ModSource", "min":0 , "max":13},
+ 		{"index":89, "name":"F1ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":90, "name":"F1CutoffMod"},
- 		{"index":91, "name":"F1FmSource", "min":0 , "max":14},
+ 		{"index":91, "name":"F1FmSource", "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":92, "name":"F1FmAmount"},
- 		{"index":93, "name":"F1Pan"},
- 		{"index":94, "name":"F1PanModSource", "min":0 , "max":13},
+ 		{"index":93, "name":"F1Pan", "toText":"pan"},
+ 		{"index":94, "name":"F1PanModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":95, "name":"F1PanMod"},
 		
 		// Filter 2
- 		{"index":97, "name":"F2Type", "min":0 , "max":10},
+ 		{"index":97, "name":"F2Type", "min":0 , "max":10, "isDiscrete":true, "toText":"filterType"},
  		{"index":98, "name":"F2Cutoff"},
  		{"index":100, "name":"F2Resonance"},
  		{"index":101, "name":"F2Drive"},
  		{"index":106, "name":"F2KeyTrack"},
  		{"index":107, "name":"F2EnvMod"},
  		{"index":108, "name":"F2VelMod"},
- 		{"index":109, "name":"F2ModSource", "min":0 , "max":13},
+ 		{"index":109, "name":"F2ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":110, "name":"F2CutoffMod"},
- 		{"index":111, "name":"F2FmSource", "min":0 , "max":14},
+ 		{"index":111, "name":"F2FmSource", "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":112, "name":"F2FmAmount"},
- 		{"index":113, "name":"F2Pan"},
- 		{"index":114, "name":"F2PanModSource", "min":0 , "max":13},
+ 		{"index":113, "name":"F2Pan", "toText":"pan"},
+ 		{"index":114, "name":"F2PanModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":115, "name":"F2PanMod"},
 
- 		{"index":117, "name":"FilterRouting", "min":0 , "max":1, "isBool":true},
-		
+ 		{"index":117, "name":"FilterRouting", "min":0 , "max":1, "isBool":true, "toText":"filterRouting"},
+
 		// Amp
  		{"index":121, "name":"AmpVolume"},
  		{"index":122, "name":"AmpVelocity"},
- 		{"index":123, "name":"AmpModSource", "min":0 , "max":13},
+ 		{"index":123, "name":"AmpModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":124, "name":"AmpModAmount"},
 		
 		// Effects
@@ -581,6 +582,17 @@
  			"+40",	"+41",	"+42",	"+43",	"+44",	"+45",	"+46",	"+47",	"+48",	"+49",	"+50",	"+51",	"+52",	"+53",	"+54",	"+55",	"+56",	"+57",	"+58",	"+59",			
  			"+60",	"+61",	"+62",	"Right"
  		],
+ 		"filterBalance":
+ 		[
+ 			"F1",	"-63",	"-62",	"-61",	
+ 			"-60",	"-59",	"-58",	"-57",	"-56",	"-55",	"-54",	"-53",	"-52",	"-51",	"-50",	"-49",	"-48",	"-47",	"-46",	"-45", "-44",	"-43",	"-42",	"-41",	
+ 			"-40",	"-39",	"-38",	"-37",	"-36",	"-35",	"-34",	"-33",	"-32",	"-31",	"-30",	"-29",	"-28",	"-27",	"-26",	"-25",	"-24",	"-23",	"-22",	"-21",
+ 			"-20",	"-19",	"-18",	"-17",	"-16",	"-15",	"-14",	"-13",	"-12",	"-11",	"-10",	"-9",	"-8",	"-7",	"-6",	"-5",	"-4",	"-3",	"-2",	"-1",
+ 			"Center","+1",	"+2",	"+3",	"+4",	"+5",	"+6",	"+7",	"+8",	"+9",	"+10",	"+11",	"+12",	"+13",	"+14",	"+15",	"+16",	"+17",	"+18",	"+19",
+ 			"+20",	"+21",	"+22",	"+23",	"+24",	"+25",	"+26",	"+27",	"+28",	"+29",	"+30",	"+31",	"+32",	"+33",	"+34",	"+35",	"+36",	"+37",	"+38",	"+39",
+ 			"+40",	"+41",	"+42",	"+43",	"+44",	"+45",	"+46",	"+47",	"+48",	"+49",	"+50",	"+51",	"+52",	"+53",	"+54",	"+55",	"+56",	"+57",	"+58",	"+59",			
+ 			"+60",	"+61",	"+62",	"F2"
+ 		],
 		"negPos":
  		[
 			"Negative", "Positive"
@@ -595,6 +607,34 @@
 			"[","\\","]","^","_","`",
 			"a","b","c","d","e","f","g","h","i","j","k","l","m","n","o","p","q","r","s","t","u","v","w","x","y","z",
 			"{","|","}","~","DEL"
+		],
+		"noiseMode":
+		[
+			"Noise", "Ext Left", "Ext Right", "Ext L+R"
+		],
+		"unisonoMode":
+		[
+			"Off", "Dual", "3", "4", "5", "6"
+		],
+		"glideMode":
+		[
+			"Portamento", "Fingered Porta", "Glissando", "?", "Fingered Gliss"
+		],
+		"fastModSource":
+		[
+			"Off", "LFO 1", "LFO 1 * ModW", "LFO 2", "LFO 2 * Prs", "LFO 3", "Filter Env", "Amp Env", "Env 3", "Env 4", "Velocity", "Mod Wheel", "Pitchbend", "Pressure"
+		],
+		"fmSource":
+		[
+			"Off", "Osc 1", "Osc 2", "Osc 3", "Noise", "Ext Left", "Ext Right", "Ext L+R", "LFO 1", "LFO 2", "LFO 3", "Filter Env", "Amp Env", "Env 3", "Env 4"
+		],
+		"filterType":
+		[
+			"Off", "24dB LP", "12dB LP", "24dB BP", "12dB BP", "24dB HP", "12dB HP", "24dB Notch", "12dB Notch", "Comb+", "Comb-"
+		],
+		"filterRouting":
+		[
+			"Parallel", "Serial"
 		]
 	},
  	"midipackets":
