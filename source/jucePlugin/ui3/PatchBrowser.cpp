@@ -29,9 +29,9 @@ namespace genericVirusUI
 		m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr),
 		m_search("Search Box"),
 		m_patchList("Patch Browser"),
-		m_properties(&_editor.getProcessor().getConfig())
+		m_properties(_editor.getProcessor().getConfig())
 	{
-		const auto bankDir = m_properties->getValue("virus_bank_dir", "");
+		const auto bankDir = m_properties.getValue("virus_bank_dir", "");
 
 		if (bankDir.isNotEmpty() && File(bankDir).isDirectory())
 		{
@@ -45,7 +45,7 @@ namespace genericVirusUI
 				if(s_lastPatchBrowser != callbackPathBrowser)
 					return;
 
-				const auto lastFile = m_properties->getValue("virus_selected_file", "");
+				const auto lastFile = m_properties.getValue("virus_selected_file", "");
 				const auto child = File(bankDir).getChildFile(lastFile);
 				if(child.existsAsFile())
 				{
@@ -241,7 +241,7 @@ namespace genericVirusUI
 
 			return;
 		}
-		m_properties->setValue("virus_bank_dir", path);
+		m_properties.setValue("virus_bank_dir", path);
 		onFileSelected(file);
 	}
 
@@ -324,7 +324,7 @@ namespace genericVirusUI
 
 		m_controller.setCurrentPartPresetSource(m_controller.getCurrentPart(), Virus::Controller::PresetSource::Browser);
 
-		m_properties->setValue("virus_selected_patch", patch.name);
+		m_properties.setValue("virus_selected_patch", patch.name);
 	}
 
 	void PatchBrowser::cellDoubleClicked(int rowNumber, int columnId, const MouseEvent&)
@@ -412,7 +412,7 @@ namespace genericVirusUI
 		const auto ext = file.getFileExtension().toLowerCase();
 		if (file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
 		{
-			m_properties->setValue("virus_selected_file", file.getFileName());
+			m_properties.setValue("virus_selected_file", file.getFileName());
 
 			std::vector<Patch> patches;
 			loadBankFile(m_controller, patches, nullptr, file);
@@ -437,7 +437,7 @@ namespace genericVirusUI
 	void PatchBrowser::refreshPatchList()
 	{
 		const auto searchValue = m_search.getText();
-		const auto selectedPatchName = m_properties->getValue("virus_selected_patch", "");
+		const auto selectedPatchName = m_properties.getValue("virus_selected_patch", "");
 
 		m_filteredPatches.clear();
 		int i=0;

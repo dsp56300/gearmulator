@@ -97,7 +97,7 @@ namespace genericVirusUI
 	    juce::TableListBox m_patchList;
 	    juce::Array<Patch> m_patches;
 	    juce::Array<Patch> m_filteredPatches;
-	    juce::PropertiesFile *m_properties;
+	    juce::PropertiesFile& m_properties;
 		juce::ComboBox* m_romBankSelect;
 	    juce::HashMap<juce::String, bool> m_checksums;
 		bool m_sendOnSelect = true;
