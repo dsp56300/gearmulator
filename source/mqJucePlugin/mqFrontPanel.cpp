@@ -43,12 +43,14 @@ FrontPanel::FrontPanel(mqJucePlugin::Editor& _editor, Controller& _controller) :
 	_controller.setFrontPanel(this);
 
 	for(size_t i=0; i<std::size(g_ledNames); ++i)
-		m_leds[i] = _editor.findComponentT<juce::Button>(g_ledNames[i]);
+		m_leds[i] = _editor.findComponentT<juce::Button>(g_ledNames[i], false);
 
 	for(size_t i=0; i<std::size(g_buttonNames); ++i)
 	{
-		auto* b = _editor.findComponentT<juce::Button>(g_buttonNames[i]);
+		auto* b = _editor.findComponentT<juce::Button>(g_buttonNames[i], false);
 		m_buttons[i] = b;
+		if(!b)
+			continue;
 
 		const auto index = static_cast<uint32_t>(i);
 		b->onStateChange = [this, index]
@@ -59,21 +61,27 @@ FrontPanel::FrontPanel(mqJucePlugin::Editor& _editor, Controller& _controller) :
 
 	for(size_t i=0; i<std::size(g_encoderNames); ++i)
 	{
-		m_encoders[i] = _editor.findComponentT<juce::Slider>(g_encoderNames[i]);
-		m_encoders[i]->setRotaryParameters(0.0f, juce::MathConstants<float>::twoPi, false);
+		auto* e = _editor.findComponentT<juce::Slider>(g_encoderNames[i], false);
+		if(!e)
+			continue;
+
+		m_encoders[i] = e;
+
+		e->setRotaryParameters(0.0f, juce::MathConstants<float>::twoPi, false);
 		const auto index = static_cast<uint32_t>(i);
-		m_encoders[i]->onValueChange = [this, index]
+		e->onValueChange = [this, index]
 		{
 			onEncoderValueChanged(index);
 		};
 	}
 
-	m_lcdLines[0] = _editor.findComponentT<juce::Label>("lcdLineA");
-	m_lcdLines[1] = _editor.findComponentT<juce::Label>("lcdLineB");
+	m_lcdLines[0] = _editor.findComponentT<juce::Label>("lcdLineA", false);
+	m_lcdLines[1] = _editor.findComponentT<juce::Label>("lcdLineB", m_lcdLines[0] != nullptr);
 
 	for (auto* line : m_lcdLines)
 	{
-		line->setJustificationType(juce::Justification::centredLeft);
+		if(line)
+			line->setJustificationType(juce::Justification::centredLeft);
 	}
 
 	_controller.sendSysEx(Controller::EmuRequestLcd);
@@ -109,6 +117,9 @@ void FrontPanel::processSysex(const std::vector<uint8_t>& _msg)
 
 void FrontPanel::processLCDUpdate(const std::vector<uint8_t>& _msg) const
 {
+	if(!m_lcdLines[0])
+		return;
+
 	const char* data = reinterpret_cast<const char*>(&_msg[5]);
 	std::array<char,40> d{};
 	for(size_t i=0; i<40; ++i)
@@ -138,14 +149,15 @@ void FrontPanel::processLedUpdate(const std::vector<uint8_t>& _msg) const
 
 	for(size_t i=0; i<static_cast<uint32_t>(mqLib::Leds::Led::Count); ++i)
 	{
-		m_leds[i]->setToggleState((leds & (1<<i)) != 0, juce::dontSendNotification);
+		if(m_leds[i])
+			m_leds[i]->setToggleState((leds & (1<<i)) != 0, juce::dontSendNotification);
 	}
 }
 
-void FrontPanel::onButtonStateChanged(uint32_t _index)
+void FrontPanel::onButtonStateChanged(uint32_t _index) const
 {
 	auto* b = m_buttons[_index];
-
+	
 	std::map<pluginLib::MidiDataType, uint8_t> params;
 
 	params[pluginLib::MidiDataType::ParameterIndex] = static_cast<uint8_t>(_index);

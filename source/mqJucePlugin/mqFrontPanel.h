@@ -24,7 +24,7 @@ private:
 	void processLCDUpdate(const std::vector<uint8_t>& _msg) const;
 	void processLedUpdate(const std::vector<uint8_t>& _msg) const;
 
-	void onButtonStateChanged(uint32_t _index);
+	void onButtonStateChanged(uint32_t _index) const;
 	void onEncoderValueChanged(uint32_t _index);
 
 	std::array<juce::Label*, 2> m_lcdLines{};
