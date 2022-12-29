@@ -242,6 +242,7 @@ namespace pluginLib
 			d.isDiscrete = readPropertyBool("isDiscrete");
 			d.isBool = readPropertyBool("isBool");
 			d.isBipolar = readPropertyBool("isBipolar");
+			d.step = readPropertyIntWithDefault("step", 0);
 
 			d.toText = valueList;
 
