@@ -5,6 +5,11 @@ set(ASSETS_mqDefault
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_7.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_9.png
 	${CMAKE_CURRENT_LIST_DIR}/mqDefaultBG.png
+	${CMAKE_CURRENT_LIST_DIR}/pageDrum.png
+	${CMAKE_CURRENT_LIST_DIR}/pageFilters.png
+	${CMAKE_CURRENT_LIST_DIR}/pageFx.png
+	${CMAKE_CURRENT_LIST_DIR}/pageLfo.png
+	${CMAKE_CURRENT_LIST_DIR}/pageMulti.png
 	${CMAKE_CURRENT_LIST_DIR}/pageOsc.png
 	${CMAKE_CURRENT_LIST_DIR}/pagePatchBrowser.png
 	${CMAKE_CURRENT_LIST_DIR}/toggleWithLED.png

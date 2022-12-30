@@ -11,11 +11,21 @@
         "name" : "Root",
         "buttons" : [
             "btPageOsc",
-            "btPagePatchBrowser"
+            "btPagePatchBrowser",
+            "btPageMulti",
+            "btPageFilter",
+            "btPageLfo",
+            "btPageFx",
+            "btPageDrum"
         ],
         "pages" : [
             "pageOsc",
-            "pagePatchBrowser"
+            "pagePatchBrowser",
+            "pageMulti",
+            "pageFilters",
+            "pageLfo",
+            "pageFx",
+            "pageDrum"
         ]
     },
     "children" : [
@@ -30,29 +40,17 @@
             }
         },
         {
-            "name" : "DonateInfo",
-            "hyperlinkbutton" : {
-                "url" : "https://paypal.me/dsp56300",
-                "text" : "To donate: https://paypal.me/dsp56300",
-                "textHeight" : "38",
-                "color" : "FAB024FF",
-                "x" : "1162",
-                "y" : "1920.4",
-                "width" : "676",
-                "height" : "45"
-            }
-        },
-        {
             "name" : "btPageOsc",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "134.0571",
-                "y" : "119.1022",
+                "x" : "109.1517",
+                "y" : "45.59735",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -63,14 +61,15 @@
         {
             "name" : "btPageFilter",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "325.7545",
-                "y" : "119.1022",
+                "x" : "355.4507",
+                "y" : "45.59735",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -81,14 +80,15 @@
         {
             "name" : "btPageLfo",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "517.4518",
-                "y" : "119.1022",
+                "x" : "601.7495",
+                "y" : "45.59735",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -99,32 +99,15 @@
         {
             "name" : "btPageFx",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "709.1492",
-                "y" : "119.1022",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "toggleWithLED",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "btPagePatchBrowser",
-            "button" : {
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "1064.544",
-                "y" : "119.1022",
+                "x" : "848.0485",
+                "y" : "45.59735",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -135,14 +118,15 @@
         {
             "name" : "btPageMulti",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1256.241",
-                "y" : "119.1022",
+                "x" : "109.1506",
+                "y" : "220.8996",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -153,14 +137,89 @@
         {
             "name" : "btPageDrum",
             "button" : {
+                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1447.939",
-                "y" : "119.1022",
+                "x" : "355.4498",
+                "y" : "220.8996",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPagePatchBrowser",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "848.0483",
+                "y" : "220.8996",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPlayModeMulti",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2080.482",
+                "y" : "50.45959",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPresetPrev",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1972.408",
+                "y" : "229.3636",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPresetNext",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2188.556",
+                "y" : "229.3636",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -178,8 +237,8 @@
                 "alignV" : "C",
                 "fontFile" : "Digital",
                 "fontName" : "Register",
-                "x" : "1754.104",
-                "y" : "112.1022",
+                "x" : "1190",
+                "y" : "151.8429",
                 "width" : "630",
                 "height" : "64"
             }
@@ -194,8 +253,8 @@
                 "alignV" : "C",
                 "fontFile" : "Digital",
                 "fontName" : "Register",
-                "x" : "1754.104",
-                "y" : "176.1022",
+                "x" : "1190",
+                "y" : "215.8429",
                 "width" : "630",
                 "height" : "64"
             }
@@ -210,8 +269,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2352.104",
-                "y" : "254.0745",
+                "x" : "1788.102",
+                "y" : "289.1428",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -223,7 +282,7 @@
             "name" : "pageOsc",
             "image" : {
                 "x" : "50",
-                "y" : "345",
+                "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
                 "texture" : "pageOsc"
@@ -234,7 +293,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "123.7144",
+                        "x" : "125.2327",
                         "y" : "77.42664",
                         "width" : "230",
                         "height" : "230",
@@ -251,7 +310,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "174.7144",
+                        "x" : "176.2327",
                         "y" : "128.4266",
                         "width" : "128",
                         "height" : "128",
@@ -268,7 +327,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "55.35718",
+                        "x" : "56.11633",
                         "y" : "303.78",
                         "width" : "128",
                         "height" : "128",
@@ -285,7 +344,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "294.0714",
+                        "x" : "296.349",
                         "y" : "303.78",
                         "width" : "128",
                         "height" : "128",
@@ -302,7 +361,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "551.7858",
+                        "x" : "555.5817",
                         "y" : "143.8533",
                         "width" : "230",
                         "height" : "230",
@@ -319,7 +378,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "602.7858",
+                        "x" : "606.5817",
                         "y" : "194.8533",
                         "width" : "128",
                         "height" : "128",
@@ -336,7 +395,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "126.6766",
                         "width" : "128",
                         "height" : "128",
@@ -353,7 +412,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "126.6766",
                         "width" : "128",
                         "height" : "128",
@@ -377,9 +436,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1094.857",
+                        "x" : "1100.931",
                         "y" : "71",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -388,7 +447,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "301.03",
                         "width" : "128",
                         "height" : "128",
@@ -405,7 +464,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "301.03",
                         "width" : "128",
                         "height" : "128",
@@ -429,9 +488,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1572.286",
+                        "x" : "1581.396",
                         "y" : "71",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -440,7 +499,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1508.286",
+                        "x" : "1517.396",
                         "y" : "126.6766",
                         "width" : "128",
                         "height" : "128",
@@ -457,7 +516,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1388.929",
+                        "x" : "1397.28",
                         "y" : "301.03",
                         "width" : "128",
                         "height" : "128",
@@ -474,7 +533,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1627.643",
+                        "x" : "1637.512",
                         "y" : "301.03",
                         "width" : "128",
                         "height" : "128",
@@ -491,7 +550,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "123.7144",
+                        "x" : "125.2327",
                         "y" : "601.5734",
                         "width" : "230",
                         "height" : "230",
@@ -508,7 +567,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "174.7144",
+                        "x" : "176.2327",
                         "y" : "652.5734",
                         "width" : "128",
                         "height" : "128",
@@ -525,7 +584,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "55.35718",
+                        "x" : "56.11633",
                         "y" : "827.9266",
                         "width" : "128",
                         "height" : "128",
@@ -542,7 +601,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "294.0714",
+                        "x" : "296.349",
                         "y" : "827.9266",
                         "width" : "128",
                         "height" : "128",
@@ -559,7 +618,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "551.7858",
+                        "x" : "555.5817",
                         "y" : "668",
                         "width" : "230",
                         "height" : "230",
@@ -576,7 +635,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "602.7858",
+                        "x" : "606.5817",
                         "y" : "719",
                         "width" : "128",
                         "height" : "128",
@@ -593,7 +652,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "650.8234",
                         "width" : "128",
                         "height" : "128",
@@ -610,7 +669,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "650.8234",
                         "width" : "128",
                         "height" : "128",
@@ -634,9 +693,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1094.857",
+                        "x" : "1100.931",
                         "y" : "595.1467",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -645,7 +704,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "825.1766",
                         "width" : "128",
                         "height" : "128",
@@ -662,7 +721,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "825.1766",
                         "width" : "128",
                         "height" : "128",
@@ -686,9 +745,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1572.286",
+                        "x" : "1581.396",
                         "y" : "595.1467",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -697,7 +756,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1508.286",
+                        "x" : "1517.396",
                         "y" : "650.8234",
                         "width" : "128",
                         "height" : "128",
@@ -714,7 +773,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1388.929",
+                        "x" : "1397.28",
                         "y" : "825.1766",
                         "width" : "128",
                         "height" : "128",
@@ -731,7 +790,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1627.643",
+                        "x" : "1637.512",
                         "y" : "825.1766",
                         "width" : "128",
                         "height" : "128",
@@ -748,7 +807,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "123.7144",
+                        "x" : "125.2327",
                         "y" : "1125.72",
                         "width" : "230",
                         "height" : "230",
@@ -765,7 +824,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "174.7144",
+                        "x" : "176.2327",
                         "y" : "1176.72",
                         "width" : "128",
                         "height" : "128",
@@ -782,7 +841,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "55.35718",
+                        "x" : "56.11633",
                         "y" : "1352.073",
                         "width" : "128",
                         "height" : "128",
@@ -799,7 +858,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "294.0714",
+                        "x" : "296.349",
                         "y" : "1352.073",
                         "width" : "128",
                         "height" : "128",
@@ -816,7 +875,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "551.7858",
+                        "x" : "555.5817",
                         "y" : "1192.147",
                         "width" : "230",
                         "height" : "230",
@@ -833,7 +892,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "602.7858",
+                        "x" : "606.5817",
                         "y" : "1243.147",
                         "width" : "128",
                         "height" : "128",
@@ -850,7 +909,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "1174.97",
                         "width" : "128",
                         "height" : "128",
@@ -867,7 +926,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "1174.97",
                         "width" : "128",
                         "height" : "128",
@@ -891,9 +950,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1094.857",
+                        "x" : "1100.931",
                         "y" : "1119.293",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -902,7 +961,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "911.5",
+                        "x" : "916.8143",
                         "y" : "1349.323",
                         "width" : "128",
                         "height" : "128",
@@ -919,7 +978,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1150.214",
+                        "x" : "1157.047",
                         "y" : "1349.323",
                         "width" : "128",
                         "height" : "128",
@@ -943,9 +1002,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1572.286",
+                        "x" : "1581.396",
                         "y" : "1119.293",
-                        "width" : "218.7143",
+                        "width" : "220.2327",
                         "height" : "49"
                     }
                 },
@@ -954,7 +1013,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1508.286",
+                        "x" : "1517.396",
                         "y" : "1174.97",
                         "width" : "128",
                         "height" : "128",
@@ -971,7 +1030,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1882",
+                        "x" : "1892.628",
                         "y" : "103.5",
                         "width" : "128",
                         "height" : "128",
@@ -988,7 +1047,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2037",
+                        "x" : "2031.461",
                         "y" : "191.8359",
                         "width" : "128",
                         "height" : "128",
@@ -1005,7 +1064,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1882",
+                        "x" : "1892.628",
                         "y" : "392.666",
                         "width" : "128",
                         "height" : "128",
@@ -1022,7 +1081,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2037",
+                        "x" : "2031.461",
                         "y" : "481.002",
                         "width" : "128",
                         "height" : "128",
@@ -1039,7 +1098,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1882",
+                        "x" : "1892.628",
                         "y" : "681.832",
                         "width" : "128",
                         "height" : "128",
@@ -1056,7 +1115,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2037",
+                        "x" : "2031.461",
                         "y" : "770.168",
                         "width" : "128",
                         "height" : "128",
@@ -1073,7 +1132,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1882",
+                        "x" : "1892.628",
                         "y" : "970.998",
                         "width" : "128",
                         "height" : "128",
@@ -1090,7 +1149,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2037",
+                        "x" : "2031.461",
                         "y" : "1059.334",
                         "width" : "128",
                         "height" : "128",
@@ -1107,7 +1166,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1882",
+                        "x" : "1892.628",
                         "y" : "1260.164",
                         "width" : "128",
                         "height" : "128",
@@ -1124,7 +1183,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2037",
+                        "x" : "2031.461",
                         "y" : "1348.5",
                         "width" : "128",
                         "height" : "128",
@@ -1141,7 +1200,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2354.47",
+                        "x" : "2348.931",
                         "y" : "85.42102",
                         "width" : "128",
                         "height" : "128",
@@ -1156,13 +1215,14 @@
                 {
                     "name" : "toggleWithLED",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "2634.53",
+                        "x" : "2634.73",
                         "y" : "69.06995",
                         "width" : "128",
                         "height" : "128",
@@ -1183,7 +1243,7 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2567.9",
+                        "x" : "2565.23",
                         "y" : "278.0421",
                         "width" : "260.5",
                         "height" : "49"
@@ -1201,7 +1261,7 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2567.9",
+                        "x" : "2565.23",
                         "y" : "488.4642",
                         "width" : "260.7",
                         "height" : "49"
@@ -1212,7 +1272,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2371.14",
+                        "x" : "2365.601",
                         "y" : "586.8142",
                         "width" : "128",
                         "height" : "128",
@@ -1227,13 +1287,14 @@
                 {
                     "name" : "toggleWithLED",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "2651.2",
+                        "x" : "2651.4",
                         "y" : "570.4632",
                         "width" : "128",
                         "height" : "128",
@@ -1254,7 +1315,7 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2567.9",
+                        "x" : "2565.23",
                         "y" : "900.6842",
                         "width" : "260.5",
                         "height" : "49"
@@ -1265,7 +1326,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2298.7",
+                        "x" : "2294.117",
                         "y" : "984.1052",
                         "width" : "128",
                         "height" : "128",
@@ -1282,7 +1343,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2503.9",
+                        "x" : "2501.23",
                         "y" : "984.1052",
                         "width" : "128",
                         "height" : "128",
@@ -1299,7 +1360,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2709.1",
+                        "x" : "2708.344",
                         "y" : "984.1052",
                         "width" : "128",
                         "height" : "128",
@@ -1323,9 +1384,9 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2567.9",
+                        "x" : "2565.23",
                         "y" : "1337.828",
-                        "width" : "266.9",
+                        "width" : "269.7695",
                         "height" : "49"
                     }
                 },
@@ -1341,26 +1402,56 @@
                         "alignH" : "C",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2567.9",
+                        "x" : "2565.23",
                         "y" : "1428.698",
-                        "width" : "266.9",
+                        "width" : "269.7695",
                         "height" : "49"
                     }
                 }
             ]
         },
         {
-            "name" : "pagePatchBrowser",
+            "name" : "pageFilters",
             "image" : {
                 "x" : "50",
-                "y" : "345",
+                "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
-                "texture" : "pagePatchBrowser"
+                "texture" : "pageFilters"
+            }
+        },
+        {
+            "name" : "pageLfo",
+            "image" : {
+                "x" : "50",
+                "y" : "428",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pageLfo"
+            }
+        },
+        {
+            "name" : "pageFx",
+            "image" : {
+                "x" : "50",
+                "y" : "428",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pageFx"
+            }
+        },
+        {
+            "name" : "pageMulti",
+            "image" : {
+                "x" : "50",
+                "y" : "428",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pageMulti"
             },
             "children" : [
                 {
-                    "name" : "patchbrowser",
+                    "name" : "controls",
                     "component" : {
                         "x" : "0",
                         "y" : "55",
@@ -1369,29 +1460,2590 @@
                     },
                     "children" : [
                         {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.375",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI0Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.375",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI0Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.375",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI0Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.375",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI0Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "224.125",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI1Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "224.125",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI1Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "224.125",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI1Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "224.125",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI1Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "1",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "402.875",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI2Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "402.875",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI2Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "402.875",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI2Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "402.875",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI2Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "581.625",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI3Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "581.625",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI3Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "581.625",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI3Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "581.625",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI3Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "3",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "760.375",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI4Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "760.375",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI4Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "760.375",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI4Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "760.375",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI4Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "4",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "939.125",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI5Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "939.125",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI5Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "939.125",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI5Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "939.125",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI5Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "5",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1117.875",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI6Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1117.875",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI6Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1117.875",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI6Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1117.875",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI6Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "6",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1296.625",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI7Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1296.625",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI7Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1296.625",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI7Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1296.625",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI7Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "7",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1475.375",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI8Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1475.375",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI8Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1475.375",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI8Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1475.375",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI8Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1654.125",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI9Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1654.125",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI9Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1654.125",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI9Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1654.125",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI9Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "9",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1832.875",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI10Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1832.875",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI10Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1832.875",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI10Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "1832.875",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI10Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "10",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2011.625",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI11Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2011.625",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI11Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2011.625",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI11Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2011.625",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI11Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "11",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2190.375",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI12Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2190.375",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI12Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2190.375",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI12Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2190.375",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI12Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "12",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2369.125",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI13Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2369.125",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI13Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2369.125",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI13Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2369.125",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI13Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "13",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2547.875",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI14Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2547.875",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI14Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2547.875",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI14Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2547.875",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI14Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "14",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "transpose",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2726.625",
+                                "y" : "22.90002",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI15Transpose"
+                            }
+                        },
+                        {
+                            "name" : "detune",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2726.625",
+                                "y" : "242.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI15Detune"
+                            }
+                        },
+                        {
+                            "name" : "keyhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15KeyHigh"
+                            },
+                            "combobox" : {
+                                "text" : "G+8",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "462.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "keylo",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15KeyLow"
+                            },
+                            "combobox" : {
+                                "text" : "C-2",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "556.9",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "velhi",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15VeloHigh"
+                            },
+                            "combobox" : {
+                                "text" : "127",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "697.5",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "vello",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15VeloLow"
+                            },
+                            "combobox" : {
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "792.3",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "pan",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2726.625",
+                                "y" : "932.8999",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI15Pan"
+                            }
+                        },
+                        {
+                            "name" : "volume",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "2726.625",
+                                "y" : "1152.5",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "MI15Volume"
+                            }
+                        },
+                        {
+                            "name" : "midichannel",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15MidiChannel"
+                            },
+                            "combobox" : {
+                                "text" : "15",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "C",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "1372.1",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name" : "pageDrum",
+            "image" : {
+                "x" : "50",
+                "y" : "428",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pageDrum"
+            }
+        },
+        {
+            "name" : "pagePatchBrowser",
+            "image" : {
+                "x" : "50",
+                "y" : "428",
+                "width" : "2900",
+                "height" : "1525",
+                "texture" : "pagePatchBrowser"
+            },
+            "children" : [
+                {
+                    "name" : "patchbrowser",
+                    "component" : {
+                        "x" : "-0.0004882813",
+                        "y" : "55",
+                        "width" : "2890",
+                        "height" : "1460"
+                    },
+                    "children" : [
+                        {
                             "name" : "ContainerFileSelector",
                             "component" : {
                                 "x" : "0",
                                 "y" : "0",
-                                "width" : "1450",
-                                "height" : "1470"
+                                "width" : "1445",
+                                "height" : "1460"
                             }
                         },
                         {
                             "name" : "ContainerPatchList",
                             "component" : {
-                                "x" : "1450",
+                                "x" : "1445",
                                 "y" : "0",
-                                "width" : "1450",
-                                "height" : "1418"
+                                "width" : "1445",
+                                "height" : "1408"
                             }
                         },
                         {
                             "name" : "ContainerPatchListSearchBox",
                             "component" : {
-                                "x" : "1450",
-                                "y" : "1420",
-                                "width" : "1456",
+                                "x" : "1445",
+                                "y" : "1410",
+                                "width" : "1451",
                                 "height" : "50"
                             }
                         }
