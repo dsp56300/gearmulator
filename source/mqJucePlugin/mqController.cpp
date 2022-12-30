@@ -185,11 +185,17 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         }
         else if(name == midiPacketName(SingleParameterChange))
         {
-            const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
+            const auto page = data[pluginLib::MidiDataType::Page];
+            const auto index = data[pluginLib::MidiDataType::ParameterIndex];
             const auto part = data[pluginLib::MidiDataType::Part];
             const auto value = data[pluginLib::MidiDataType::ParameterValue];
 
-            LOG("Single parameter " << index << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
+        	auto& params = findSynthParam(part, page, index);
+
+            for (auto& param : params)
+	            param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
+
+            LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
         }
         else if(name == midiPacketName(GlobalParameterChange))
         {
