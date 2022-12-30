@@ -244,6 +244,12 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 {
     const auto& desc = _parameter.getDescription();
 
+    if(desc.page >= 100)
+    {
+	    // TODO: multi
+        return;
+    }
+
     sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
 }
 
