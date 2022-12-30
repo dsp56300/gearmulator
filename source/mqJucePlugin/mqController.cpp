@@ -42,7 +42,7 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 
 //  sendSysEx(RequestAllSingles);
 	sendSysEx(RequestGlobal);
-//    sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
+//  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
 
     startTimer(50);
 }
@@ -52,6 +52,17 @@ Controller::~Controller() = default;
 void Controller::setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel)
 {
     m_frontPanel = _frontPanel;
+}
+
+void Controller::sendSingle(const std::vector<uint8_t>& _sysex)
+{
+	auto data = _sysex;
+
+	data[mqLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
+	data[mqLib::IdxLocation] = isMultiMode() ? getCurrentPart() : 0;
+
+	pluginLib::Controller::sendSysEx(data);
+    parseSysexMessage(data);
 }
 
 std::string Controller::loadParameterDescriptions()

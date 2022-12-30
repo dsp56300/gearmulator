@@ -46,6 +46,7 @@ public:
 	~Controller() override;
 
     void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
+    void sendSingle(const std::vector<uint8_t>& _sysex);
 
 	bool sendSysEx(MidiPacketType _type) const;
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;

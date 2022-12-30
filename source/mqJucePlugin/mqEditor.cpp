@@ -9,12 +9,15 @@
 
 namespace mqJucePlugin
 {
-	Editor::Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
 	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
 	{
 		create(_jsonFilename);
 
 		m_frontPanel.reset(new FrontPanel(*this, static_cast<Controller&>(_processor.getController())));
+
+		if(findComponent("ContainerPatchList", false))
+			m_patchBrowser.reset(new PatchBrowser(*this, _processor.getController(), _processor.getConfig()));
 	}
 
 	Editor::~Editor()

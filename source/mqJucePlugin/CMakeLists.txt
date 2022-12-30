@@ -24,6 +24,7 @@ set(SOURCES
 	mqController.h
 	mqFrontPanel.cpp
 	mqFrontPanel.h
+	mqPatchBrowser.cpp mqPatchBrowser.h
 	version.h
 )
 
