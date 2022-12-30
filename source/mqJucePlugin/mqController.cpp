@@ -123,13 +123,13 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
     {
 	    m_singleEditBuffer = patch;
 
-        for(auto it = _params.begin(); it != _params.end(); ++it)
+        for (const auto& it : _params)
         {
-            auto* p = getParameter(it->first.second, 0);
-			p->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+            auto* p = getParameter(it.first.second, 0);
+			p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
 
             for (const auto& derivedParam : p->getDerivedParameters())
-	            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+	            derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
         }
     }
     else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferMultiMode))
