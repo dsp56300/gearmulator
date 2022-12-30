@@ -62,7 +62,7 @@ namespace mqLib
 			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, SysexCommand::GlobalParameterRequest, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 207},
 			{DumpType::Mode, SysexCommand::ModeRequest, SysexCommand::ModeDump , SysexCommand::ModeParameterChange, SysexCommand::ModeParameterRequest, IdxModeParamFirst, IdxModeParamIndexH, IdxModeParamIndexL, IdxModeParamValue, 8},
 		};
-			
+
 		using Single = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
 		using Multi = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Multi)].dumpSize>;
 		using DrumMap = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Drum)].dumpSize>;

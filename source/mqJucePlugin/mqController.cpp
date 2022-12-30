@@ -49,7 +49,7 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 
 Controller::~Controller() = default;
 
-void Controller::setFrontPanel(FrontPanel* _frontPanel)
+void Controller::setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel)
 {
     m_frontPanel = _frontPanel;
 }
@@ -182,7 +182,6 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
             {
 				requestSingle(mqLib::MidiBufferNum::SingleEditBufferSingleMode, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
             }
-
         }
         else if(name == midiPacketName(SingleParameterChange))
         {

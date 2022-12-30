@@ -4,7 +4,11 @@
 
 #include "../mqLib/mqmiditypes.h"
 
-class FrontPanel;
+namespace mqJucePlugin
+{
+	class FrontPanel;
+}
+
 class AudioPluginAudioProcessor;
 
 class Controller : public pluginLib::Controller, juce::Timer
@@ -41,7 +45,7 @@ public:
     Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 	~Controller() override;
 
-    void setFrontPanel(FrontPanel* _frontPanel);
+    void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
 
 	bool sendSysEx(MidiPacketType _type) const;
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
@@ -70,5 +74,5 @@ private:
     Patch m_singleEditBuffer;
     std::array<Patch,16> m_singleEditBuffers;
     std::array<uint8_t, 200> m_globalData{};
-    FrontPanel* m_frontPanel = nullptr;
+    mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
 };
