@@ -240,6 +240,10 @@ bool Controller::isMultiMode() const
     return m_globalData[static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode)] != 0;
 }
 
+void Controller::setPlayMode(bool _multiMode)
+{
+}
+
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
 {
     const auto& desc = _parameter.getDescription();

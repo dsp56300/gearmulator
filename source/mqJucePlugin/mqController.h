@@ -52,6 +52,7 @@ public:
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
     bool isMultiMode() const;
+    void setPlayMode(bool _multiMode);
 
 private:
     static std::string loadParameterDescriptions();

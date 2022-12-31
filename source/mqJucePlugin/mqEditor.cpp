@@ -11,6 +11,7 @@ namespace mqJucePlugin
 {
 	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
 	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	, m_controller(static_cast<Controller&>(_processor.getController()))
 	{
 		create(_jsonFilename);
 
@@ -18,6 +19,15 @@ namespace mqJucePlugin
 
 		if(findComponent("ContainerPatchList", false))
 			m_patchBrowser.reset(new PatchBrowser(*this, _processor.getController(), _processor.getConfig()));
+
+		m_btPlayModeMulti = findComponentT<juce::Button>("btPlayModeMulti", false);
+		if(m_btPlayModeMulti)
+		{
+			m_btPlayModeMulti->onClick = [this]()
+			{
+				m_controller.setPlayMode(m_btPlayModeMulti->getToggleState());
+			};
+		}
 	}
 
 	Editor::~Editor()
