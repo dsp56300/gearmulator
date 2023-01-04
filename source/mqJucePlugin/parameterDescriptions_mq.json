@@ -296,7 +296,7 @@
  		{"index":194, "name":"Lfo3KeyTrack"},
 		
 		// Filter Env
- 		{"index":196, "name":"FilterEnvMode", "min":0, "max":4},
+ 		{"index":196, "name":"FilterEnvMode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
  		{"index":196, "name":"FilterEnvTriggerMode", "min":0, "max":2, "isBool":true},
  		{"index":197, "name":"FilterEnvAttack"},
  		{"index":198, "name":"FilterEnvAttackLevel"},
@@ -307,7 +307,7 @@
  		{"index":203, "name":"FilterEnvRelease"},
 		
 		// Amp Env
- 		{"index":208, "name":"AmpEnvMode", "min":0, "max":4},
+ 		{"index":208, "name":"AmpEnvMode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
  		{"index":208, "name":"AmpEnvTriggerMode", "min":0, "max":2, "isBool":true},
  		{"index":211, "name":"AmpEnvAttack"},
  		{"index":212, "name":"AmpEnvAttackLevel"},
@@ -318,7 +318,7 @@
  		{"index":217, "name":"AmpEnvRelease"},
 		
 		// Env 3
- 		{"index":220, "name":"Env3Mode", "min":0, "max":4},
+ 		{"index":220, "name":"Env3Mode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
  		{"index":220, "name":"Env3TriggerMode", "min":0, "max":2, "isBool":true},
  		{"index":223, "name":"Env3Attack"},
  		{"index":224, "name":"Env3AttackLevel"},
@@ -329,7 +329,7 @@
  		{"index":229, "name":"Env3Release"},
 		
 		// Env 4
- 		{"index":232, "name":"Env4Mode", "min":0, "max":4},
+ 		{"index":232, "name":"Env4Mode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
  		{"index":232, "name":"Env4TriggerMode", "min":0, "max":2, "isBool":true},
  		{"index":235, "name":"Env4Attack"},
  		{"index":236, "name":"Env4AttackLevel"},
@@ -1072,6 +1072,10 @@
 			"C6", "C#6", "D6", "D#6", "E6", "F6", "F#6", "G6", "G#6", "A6", "A#6", "B6",
 			"C7", "C#7", "D7", "D#7", "E7", "F7", "F#7", "G7", "G#7", "A7", "A#7", "B7",
 			"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8"
+		],
+		"envMode":
+		[
+			"ADSR", "ADS1DS2R", "One Shot", "Loop S1S2", "Loop All"
 		]
 	},
  	"midipackets":

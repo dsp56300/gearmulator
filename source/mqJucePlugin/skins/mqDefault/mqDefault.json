@@ -619,7 +619,7 @@
                     },
                     "spritesheet" : {
                         "x" : "555.5817",
-                        "y" : "668",
+                        "y" : "595.1467",
                         "width" : "230",
                         "height" : "230",
                         "texture" : "ledcircle_7",
@@ -636,7 +636,7 @@
                     },
                     "spritesheet" : {
                         "x" : "606.5817",
-                        "y" : "719",
+                        "y" : "646.1467",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -645,6 +645,28 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "O2Shape"
+                    }
+                },
+                {
+                    "name" : "toggleWithLED",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "606.5817",
+                        "y" : "828.1067",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "toggleWithLED",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Sync"
                     }
                 },
                 {
@@ -879,7 +901,7 @@
                         "y" : "1192.147",
                         "width" : "230",
                         "height" : "230",
-                        "texture" : "ledcircle_7",
+                        "texture" : "ledcircle_5",
                         "tileSizeX" : "512",
                         "tileSizeY" : "512"
                     },
@@ -1014,7 +1036,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1517.396",
-                        "y" : "1174.97",
+                        "y" : "1221.609",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1418,7 +1440,1243 @@
                 "width" : "2900",
                 "height" : "1525",
                 "texture" : "pageFilters"
-            }
+            },
+            "children" : [
+                {
+                    "name" : "ledknob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "124.04",
+                        "y" : "93.20001",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_11",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Type"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "175.04",
+                        "y" : "144.2",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Type"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "75.04004",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged_red",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Cutoff"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "275.04",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Resonance"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "628.4437",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1EnvMod"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "851.5564",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1VelMod"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F1ModSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "685.89",
+                        "y" : "77.00006",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "621.89",
+                        "y" : "144.8344",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1CutoffMod"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F1FmSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1092.99",
+                        "y" : "77.00006",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1028.99",
+                        "y" : "144.8344",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1FmAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F1PanModSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1500.09",
+                        "y" : "77.00006",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1331.49",
+                        "y" : "144.8344",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Pan"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1540.69",
+                        "y" : "144.8344",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1PanMod"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1211.844",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1KeyTrack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1434.956",
+                        "y" : "331.6794",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1Drive"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "1",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "0",
+                        "overImageOn" : "0",
+                        "downImageOn" : "0",
+                        "x" : "890.5901",
+                        "y" : "774",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterRouting"
+                    }
+                },
+                {
+                    "name" : "led (1)",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "669.3898",
+                        "y" : "774",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterRouting"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "732.6249",
+                        "y" : "758",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterRouting"
+                    }
+                },
+                {
+                    "name" : "ledknob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "124.04",
+                        "y" : "1098.625",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_11",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Type"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "175.04",
+                        "y" : "1149.625",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Type"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "75.04004",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged_red",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Cutoff"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "275.04",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Resonance"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "628.4437",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2EnvMod"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "851.5564",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2VelMod"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F2ModSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "685.89",
+                        "y" : "1082.426",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "621.89",
+                        "y" : "1150.26",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2CutoffMod"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F2FmSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1092.99",
+                        "y" : "1082.426",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1028.99",
+                        "y" : "1150.26",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2FmAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "F2PanModSource"
+                    },
+                    "combobox" : {
+                        "text" : "Osc 1",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1500.09",
+                        "y" : "1082.426",
+                        "width" : "176",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1331.49",
+                        "y" : "1150.26",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Pan"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1540.69",
+                        "y" : "1150.26",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2PanMod"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1211.844",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2KeyTrack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1434.956",
+                        "y" : "1337.105",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F2Drive"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvMode"
+                    },
+                    "combobox" : {
+                        "text" : "ADSR",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2052.4",
+                        "y" : "96.5",
+                        "width" : "250",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2619.961",
+                        "y" : "89",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvTriggerMode"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2782.29",
+                        "y" : "105",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvTriggerMode"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1806.7",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvAttack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1989.3",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvDecay"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2171.9",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvSustain"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2354.5",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvDecay2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2537.1",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvSustain2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2719.7",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvRelease"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvMode"
+                    },
+                    "combobox" : {
+                        "text" : "ADSR",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2052.4",
+                        "y" : "477.75",
+                        "width" : "250",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2619.961",
+                        "y" : "470.25",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvTriggerMode"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2782.29",
+                        "y" : "486.25",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvTriggerMode"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1806.7",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvAttack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1989.3",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvDecay"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2171.9",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvSustain"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2354.5",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvDecay2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2537.1",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvSustain2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2719.7",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvRelease"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Mode"
+                    },
+                    "combobox" : {
+                        "text" : "ADSR",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2052.4",
+                        "y" : "859",
+                        "width" : "250",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2619.961",
+                        "y" : "851.5",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3TriggerMode"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2782.29",
+                        "y" : "867.5",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3TriggerMode"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1806.7",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Attack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1989.3",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Decay"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2171.9",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Sustain"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2354.5",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Decay2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2537.1",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Sustain2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2719.7",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3Release"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Mode"
+                    },
+                    "combobox" : {
+                        "text" : "ADSR",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "C",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2052.4",
+                        "y" : "1240.25",
+                        "width" : "250",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2619.961",
+                        "y" : "1232.75",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4TriggerMode"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2782.29",
+                        "y" : "1248.75",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4TriggerMode"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1806.7",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Attack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1989.3",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Decay"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2171.9",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Sustain"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2354.5",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Decay2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2537.1",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Sustain2"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2719.7",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4Release"
+                    }
+                }
+            ]
         },
         {
             "name" : "pageLfo",
