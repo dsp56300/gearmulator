@@ -407,8 +407,9 @@ namespace genericVirusUI
 			m_previousPath = result.getParentDirectory().getFullPathName();
 			const auto ext = result.getFileExtension().toLowerCase();
 
-			std::vector<Patch> patches;
-			PatchBrowser::loadBankFile(getController(), patches, nullptr, result);
+			PatchBrowser::PatchList patches;
+
+			m_patchBrowser->loadBankFile(patches, nullptr, result);
 
 			if (patches.empty())
 				return;
@@ -416,7 +417,7 @@ namespace genericVirusUI
 			if (patches.size() == 1)
 			{
 				// load to edit buffer of current part
-				const auto data = getController().modifySingleDump(patches.front().sysex, virusLib::BankNumber::EditBuffer, 
+				const auto data = getController().modifySingleDump(patches.front()->sysex, virusLib::BankNumber::EditBuffer, 
 					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
 				getController().sendSysEx(data);
 			}
@@ -425,7 +426,7 @@ namespace genericVirusUI
 				// load to bank A
 				for(uint8_t i=0; i<static_cast<uint8_t>(patches.size()); ++i)
 				{
-					const auto data = getController().modifySingleDump(patches[i].sysex, virusLib::BankNumber::A, i, true, false);
+					const auto data = getController().modifySingleDump(patches[i]->sysex, virusLib::BankNumber::A, i, true, false);
 					getController().sendSysEx(data);
 				}
 			}
