@@ -1,0 +1,16 @@
+set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+set(TEST_DATA_DIR integrationTestsData)
+
+if(EXISTS ${RCLONE_CONF})
+	execute_process(COMMAND rclone --config ${RCLONE_CONF} sync dsp56300:integrationtests ${TEST_DATA_DIR} COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT)
+	if(RCLONE_RESULT)
+		message(FATAL_ERROR "Failed to execute rclone: " ${CMD_RESULT})
+	endif()
+
+	execute_process(COMMAND ${TEST_RUNNER} -folder ${TEST_DATA_DIR} COMMAND_ECHO STDOUT RESULT_VARIABLE TEST_RESULT)
+	if(TEST_RESULT)
+		message(FATAL_ERROR "Failed to execute ${TEST_RUNNER}: " ${CMD_RESULT})
+	endif()
+else()
+	message(WARNING "rclone.conf not found, skipping integration tests")
+endif()

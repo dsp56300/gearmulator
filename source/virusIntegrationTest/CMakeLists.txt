@@ -14,3 +14,8 @@ target_sources(virusIntegrationTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusIntegrationTest PUBLIC virusConsoleLib)
+
+add_test(NAME virusIntegrationTests COMMAND ${CMAKE_COMMAND} 
+	-DTEST_RUNNER=$<TARGET_FILE:virusIntegrationTest> 
+	-DROOT_DIR=${CMAKE_BINARY_DIR} 
+	-P ${CMAKE_CURRENT_SOURCE_DIR}/runTest.cmake)

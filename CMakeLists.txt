@@ -8,6 +8,7 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment ver
 project(gearmulator VERSION 1.2.25)
 
 include(base.cmake)
+include(CTest)
 
 set(ASMJIT_STATIC TRUE)
 set(ASMJIT_NO_INSTALL TRUE)
