@@ -1,11 +1,9 @@
-set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+include(${CMAKE_CURRENT_LIST_DIR}/../../scripts/rclone.cmake)
+
 set(TEST_DATA_DIR integrationTestsData)
 
 if(EXISTS ${RCLONE_CONF})
-	execute_process(COMMAND rclone --config ${RCLONE_CONF} sync dsp56300:integrationtests ${TEST_DATA_DIR} COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT)
-	if(RCLONE_RESULT)
-		message(FATAL_ERROR "Failed to execute rclone: " ${CMD_RESULT})
-	endif()
+	copyDataFrom("dsp56300:integrationtests" ${TEST_DATA_DIR})
 
 	execute_process(COMMAND ${TEST_RUNNER} -folder ${TEST_DATA_DIR} COMMAND_ECHO STDOUT RESULT_VARIABLE TEST_RESULT)
 	if(TEST_RESULT)
