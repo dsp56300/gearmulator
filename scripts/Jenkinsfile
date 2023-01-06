@@ -35,7 +35,7 @@ pipeline {
 		stage('Integration Tests') {
 			when {
 				expression {
-					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests && !"${env.NODE_LABELS}".contains('atom')
+					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests
 				}
 			}
 			steps {
