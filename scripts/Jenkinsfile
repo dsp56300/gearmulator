@@ -95,6 +95,14 @@ def formatArg(_arg)
 		return '%' + _arg + '%'
 }
 
+def deleteFile(name)
+{
+	if(isUnix())
+		sh "rm -f ${name}"
+	else
+		bat "del ${name}"
+}
+
 def supportTI()
 {
 	return params.Branch == 'snow' ? 'ON' : 'OFF'
@@ -152,39 +160,18 @@ def doIntegrationTests()
 	}
 }
 
+def doPack()
+{
+	dir(cmakeBuildDir()) {
+		genericSh 'cmake -P ../../scripts/pack.cmake'
+	}
+}
+
 def copyArtefacts(local, remote)
 {
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
 		dir(cmakeBuildDir()) {
 			genericSh 'cmake -DRCLONE_CONF=" + formatArg('rcloneConfig') + "-DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.UploadFolder} -P ../../scripts/deploy.cmake"
-		}
-	}
-}
-
-def deleteFile(name)
-{
-	if(isUnix())
-		sh "rm -f ${name}"
-	else
-		bat "del ${name}"
-}
-
-def doPack()
-{
-	dir(cmakeBuildDir()) {
-		deleteFile('*.zip')
-		deleteFile('*.rpm')
-		deleteFile('*.deb')
-		genericSh 'cpack -G ZIP'
-		
-		if(isUnix())
-		{
-			sh '''
-			if [ "$(uname)" != "Darwin" ]; then
-				cpack -G DEB
-				cpack -G RPM
-			fi
-			'''
 		}
 	}
 }

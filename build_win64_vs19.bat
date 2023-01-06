@@ -10,6 +10,6 @@ IF %ERRORLEVEL% NEQ 0 (
 	popd 
 	exit /B 2
 )
-cpack -G ZIP
+cmake -P ../../scripts/pack.cmake
 popd
 move /y %outdir%*.zip deploy\
