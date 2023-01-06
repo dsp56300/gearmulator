@@ -2,7 +2,9 @@ if(NOT ROOT_DIR)
 	set(ROOT_DIR ${CMAKE_BINARY_DIR})
 endif()
 
-set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+if(NOT RCLONE_CONF)
+	set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+endif()
 
 macro(copyArtefacts TARGET BRANCH FOLDER)
 	set(RCLONE_RESULT 0)
