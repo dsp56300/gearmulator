@@ -10,10 +10,10 @@ if(NOT RCLONE_CONF)
 	endif()
 endif()
 
-macro(copyArtefacts TARGET BRANCH FOLDER)
+macro(copyArtefacts TARGET FOLDER)
 	set(RCLONE_RESULT 0)
 	execute_process(COMMAND rclone --config ${RCLONE_CONF} copy 
-		--transfers=1 -v --include *.zip --include *.deb --include *.rpm --min-size 100 --max-depth 1 "${ROOT_DIR}" "${TARGET}/${BRANCH}/${FOLDER}"
+		--transfers=1 -v --include *.zip --include *.deb --include *.rpm --min-size 100 --max-depth 1 "${ROOT_DIR}" "${TARGET}/${FOLDER}"
 		COMMAND_ECHO STDOUT
 		RESULT_VARIABLE RCLONE_RESULT
 		WORKING_DIRECTORY ${ROOT_DIR})
