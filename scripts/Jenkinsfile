@@ -35,7 +35,7 @@ pipeline {
 		stage('Integration Tests') {
 			when {
 				expression {
-					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests
+					return params.IntegrationTests
 				}
 			}
 			steps {
@@ -155,8 +155,10 @@ def cmakeBuild()
 
 def doIntegrationTests()
 {
-	dir(cmakeBuildDir()) {
-		genericSh "ctest"
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+    	dir(cmakeBuildDir()) {
+    		genericSh "ctest -C Release -VV --output-on-failure"
+    	}
 	}
 }
 
@@ -171,7 +173,7 @@ def copyArtefacts(local, remote)
 {
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
 		dir(cmakeBuildDir()) {
-			genericSh 'cmake -DRCLONE_CONF=" + formatArg('rcloneConfig') + "-DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.UploadFolder} -P ../../scripts/deploy.cmake"
+			genericSh 'cmake -DRCLONE_CONF=' + formatArg('rcloneConfig') + " -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.UploadFolder} -P ../../scripts/deploy.cmake"
 		}
 	}
 }
