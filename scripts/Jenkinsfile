@@ -155,7 +155,7 @@ def cmakeBuild()
 
 def doIntegrationTests()
 {
-	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
     	dir(cmakeBuildDir()) {
     		genericSh "ctest -C Release -VV --output-on-failure"
     	}
@@ -171,9 +171,9 @@ def doPack()
 
 def copyArtefacts(local, remote)
 {
-	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
 		dir(cmakeBuildDir()) {
-			genericSh 'cmake -DRCLONE_CONF=' + formatArg('rcloneConfig') + " -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.UploadFolder} -P ../../scripts/deploy.cmake"
+			genericSh "cmake -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.Branch}/${params.UploadFolder} -P ../../scripts/deploy.cmake"
 		}
 	}
 }
