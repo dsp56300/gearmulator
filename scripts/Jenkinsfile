@@ -92,7 +92,7 @@ def supportTI()
 }
 def needsJuce()
 {
-	return params.Deploy ? 'ON' : 'OFF'
+	return params.Deploy || params.Upload ? 'ON' : 'OFF'
 }
 def buildFxPlugins()
 {
