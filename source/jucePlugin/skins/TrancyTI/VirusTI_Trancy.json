@@ -385,16 +385,37 @@
                 { "name" : "EnvVelo2",          "parameterAttachment" : { "parameter" : "Flt2 EnvAmt Velocity" },       "rotary" : { }, "spritesheet" : { "x" : "1503", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
 
                 { "name" : "FilterBalance",     "parameterAttachment" : { "parameter" : "Filter Balance" },             "rotary" : { }, "spritesheet" : { "x" : "915", "y" : "74", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
-                
+
+				{ "name" : "4_filter_env_filter",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_filter" },
+				  "children" : [
+					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Filter Env Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Filter Env Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+				]},
+
+				{ "name" : "4_filter_env_3",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_3" },
+				  "children" : [
+					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 3/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 3/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 3/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 3/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 3/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+				]},
+
+				{ "name" : "4_filter_env_4",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_4" },
+				  "children" : [
+					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 4/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 4/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 4/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 4/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 4/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+				]},
+
                 { "name" : "button_env_filter", "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"609","width":"245","height":"61","texture":"button_env_filter","tileSizeX":"245","tileSizeY":"61",}},
                 { "name" : "button_env_3",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"668","width":"245","height":"61","texture":"button_env_3","tileSizeX":"245","tileSizeY":"61",}},
                 { "name" : "button_env_4",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"728","width":"245","height":"61","texture":"button_env_4","tileSizeX":"245","tileSizeY":"61",}},                              
-               
-                { "name" : "Attack",            "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "644", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-                { "name" : "Decay",             "parameterAttachment" : { "parameter" : "Filter Env Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "644", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-                { "name" : "Sustain",           "parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "644", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-                { "name" : "Time",              "parameterAttachment" : { "parameter" : "Filter Env Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "644", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-                { "name" : "Release",           "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "644", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
 
                 { "name" : "Attack",            "parameterAttachment" : { "parameter" : "Amp Env Attack" },             "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Decay",             "parameterAttachment" : { "parameter" : "Amp Env Decay" },              "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
@@ -402,6 +423,11 @@
                 { "name" : "Time",              "parameterAttachment" : { "parameter" : "Amp Env Sustain Time" },       "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Release",           "parameterAttachment" : { "parameter" : "Amp Env Release" },            "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
             ],
+			"tabgroup": {
+				"name": "envelopeSelect",
+				"buttons": ["button_env_filter", "button_env_3", "button_env_4"],
+				"pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
+			},
 			"controllerlinks": [
 				{ "source": "Cutoff1", "dest": "Cutoff2", "condition":"LinkEnv" },					{ "source": "Cutoff2", "dest": "Cutoff1", "condition":"LinkEnv" },
 				{ "source": "Resonance1", "dest": "Resonance2", "condition":"LinkEnv" },			{ "source": "Resonance2", "dest": "Resonance1", "condition":"LinkEnv" },
