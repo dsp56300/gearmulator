@@ -35,7 +35,7 @@ pipeline {
 		stage('Integration Tests') {
 			when {
 				expression {
-					return fileExists(getIntegrationTestRunner()) && params.IntegrationTests && !"${env.NODE_LABELS}".contains('atom')
+					return params.IntegrationTests
 				}
 			}
 			steps {
@@ -86,13 +86,30 @@ def genericSh(cmd)
 		bat cmd
 	}
 }
+
+def formatArg(_arg)
+{
+	if(isUnix())
+		return '$' + _arg
+	else
+		return '%' + _arg + '%'
+}
+
+def deleteFile(name)
+{
+	if(isUnix())
+		sh "rm -f ${name}"
+	else
+		bat "del ${name}"
+}
+
 def supportTI()
 {
 	return params.Branch == 'snow' ? 'ON' : 'OFF'
 }
 def needsJuce()
 {
-	return params.Deploy ? 'ON' : 'OFF'
+	return params.Deploy || params.Upload ? 'ON' : 'OFF'
 }
 def buildFxPlugins()
 {
@@ -101,13 +118,6 @@ def buildFxPlugins()
 def cmakeBuildDir()
 {
 	return "${CMAKE_BUILD_DIR}_${params.Branch}"
-}
-
-def copyDataFrom(from, to)
-{
-	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
-		genericSh 'rclone --config ' + formatArg('rcloneConfig') + " sync dsp56300:${from} ${to}"
-	}
 }
 
 def doCheckout()
@@ -129,105 +139,51 @@ def doCheckout()
 
 def cmakeBuild()
 {
-	if(needsJuce()) {
-		copyVst2Sdk()
-	}
+	def buildDir = cmakeBuildDir();
+	def ti = supportTI();
+
 	dir(cmakeBuildDir()) {
 		deleteFile('CMakeCache.txt')	// we need to do this to be able to change option in the command line below. Otherwise, they won't change for an existing project
 	}
-	def buildDir = cmakeBuildDir();
-	def ti = supportTI();
+
 	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release -DVIRUS_SUPPORT_TI=${ti}"
-	dir("${buildDir}") {
+
+	dir(cmakeBuildDir()) {
 		genericSh 'cmake --build . --config Release'
-	}
-}
-
-def copyTestData()
-{
-	copyDataFrom('integrationtests', './testData')
-}
-
-def copyVst2Sdk()
-{
-	copyDataFrom('vstsdk2.4.2/', 'source/vstsdk2.4.2/')
-}
-
-def getIntegrationTestRunner()
-{
-	def buildDir = cmakeBuildDir()
-	if(isUnix()) {
-		return "${env.WORKSPACE}/${buildDir}/source/virusIntegrationTest/virusIntegrationTest"
-	} else {
-		return "${env.WORKSPACE}\\${buildDir}\\source\\virusIntegrationTest\\Release\\virusIntegrationTest.exe"
 	}
 }
 
 def doIntegrationTests()
 {
-	dir(cmakeBuildDir()) {
-		def runner = getIntegrationTestRunner()
-		
-		copyTestData()
-
-		genericSh "${runner} -folder testData"
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
+    	dir(cmakeBuildDir()) {
+    		genericSh "ctest -C Release -VV --output-on-failure"
+    	}
 	}
-}
-
-def formatArg(_arg)
-{
-	echo 'Formatting arg ' + _arg
-
-	if(isUnix())
-		return '$' + _arg
-	else
-		return '%' + _arg + '%'
-}
-def copyArtefacts(rcloneConfig, targetFolder)
-{
-	dir(cmakeBuildDir()) {
-		genericSh 'rclone copy --config ' + formatArg('rcloneConfig') + ' --transfers=1 -v --include "*.zip" --include "*.deb" --include "*.rpm" --min-size 100 --max-depth 1 . ' + "${targetFolder}/${params.Branch}${params.UploadFolder}"
-	}
-}
-
-def deleteFile(name)
-{
-	if(isUnix())
-		sh "rm -f ${name}"
-	else
-		bat "del ${name}"
 }
 
 def doPack()
 {
 	dir(cmakeBuildDir()) {
-		deleteFile('*.zip')
-		deleteFile('*.rpm')
-		deleteFile('*.deb')
-		genericSh 'cpack -G ZIP'
-		
-		if(isUnix())
-		{
-			sh '''
-			if [ "$(uname)" != "Darwin" ]; then
-				cpack -G DEB
-				cpack -G RPM
-			fi
-			'''
+		genericSh 'cmake -P ../../scripts/pack.cmake'
+	}
+}
+
+def copyArtefacts(local, remote)
+{
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
+		dir(cmakeBuildDir()) {
+			genericSh "cmake -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.Branch}/${params.UploadFolder} -P ../../scripts/deploy.cmake"
 		}
 	}
 }
 
 def doDeploy()
 {
-	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
-		copyArtefacts("${rcloneConfig}", "dsp56300:deploy");
-	}
+	copyArtefacts(1,0)
 }
 
 def doUpload()
 {
-	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'rcloneConfig')]) {
-		copyArtefacts("${rcloneConfig}", "dsp56300_ftp:builds")
-	}
+	copyArtefacts(0,1)
 }

@@ -8,6 +8,8 @@ set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment ver
 project(gearmulator VERSION 1.2.25)
 
 include(base.cmake)
+include(CTest)
+include(${CMAKE_CURRENT_LIST_DIR}/scripts/rclone.cmake)
 
 set(ASMJIT_STATIC TRUE)
 set(ASMJIT_NO_INSTALL TRUE)
@@ -21,8 +23,21 @@ add_subdirectory(source/virusLib)
 add_subdirectory(source/virusConsoleLib)
 add_subdirectory(source/libresample)
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
-	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
+# ----------------- Try to install VST2 SDK
+
+set(VST2SDK_TESTFILE ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
+set(VST2SDK_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
+
+if(NOT EXISTS ${VST2SDK_TESTFILE})
+	if(EXISTS ${RCLONE_CONF})
+		copyDataFrom("vstsdk2.4.2/" "${CMAKE_CURRENT_LIST_DIR}/source/vstsdk2.4.2/")
+	else()
+		message(WARNING "rclone.conf not found, unable to copy VST2 SDK")
+	endif()
+endif()
+
+if(EXISTS ${VST2SDK_TESTFILE})
+	set(JUCE_GLOBAL_VST2_SDK_PATH ${VST2SDK_FOLDER})
 endif()
 
 # ----------------- Juce based audio plugin
