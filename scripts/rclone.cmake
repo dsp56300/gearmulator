@@ -3,13 +3,10 @@ if(NOT ROOT_DIR)
 endif()
 
 if(NOT RCLONE_CONF)
-	message(STATUS "RCLONE_CONF not defined, detecting")
 	if(DEFINED ENV{RCLONE_CONF})
 		set(RCLONE_CONF $ENV{RCLONE_CONF})
-		message(STATUS "RCLONE_CONF defined via ENV as ${RCLONE_CONF}")
 	else()
 		set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
-		message(STATUS "RCLONE_CONF defined via ROOT_DIR as ${RCLONE_CONF}")
 	endif()
 endif()
 
