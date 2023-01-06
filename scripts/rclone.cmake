@@ -3,7 +3,11 @@ if(NOT ROOT_DIR)
 endif()
 
 if(NOT RCLONE_CONF)
-	set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+	if(DEFINED $ENV{RCLONE_CONF})
+		set(RCLONE_CONF $ENV{RCLONE_CONF})
+	else()
+		set(RCLONE_CONF ${ROOT_DIR}/rclone.conf)
+	endif()
 endif()
 
 macro(copyArtefacts TARGET BRANCH FOLDER)
