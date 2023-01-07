@@ -45,7 +45,6 @@ namespace virusLib
 		DspSingle* m_dsp2 = nullptr;
 		std::unique_ptr<Microcontroller> m_mc;
 
-		uint32_t m_numSamplesWritten = 0;
 		uint32_t m_numSamplesProcessed = 0;
 	};
 }

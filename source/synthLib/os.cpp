@@ -265,4 +265,44 @@ namespace synthLib
         _MM_SET_FLUSH_ZERO_MODE(_MM_FLUSH_ZERO_ON);
 #endif
     }
+
+    bool writeFile(const std::string& _filename, const std::vector<uint8_t>& _data)
+    {
+        return writeFile(_filename, &_data[0], _data.size());
+    }
+
+    bool writeFile(const std::string& _filename, const uint8_t* _data, size_t _size)
+    {
+        auto* hFile = fopen(_filename.c_str(), "wb");
+        if(!hFile)
+            return false;
+        const auto written = fwrite(&_data[0], 1, _size, hFile);
+        fclose(hFile);
+        return written == _size;
+    }
+
+    bool readFile(std::vector<uint8_t>& _data, const std::string& _filename)
+    {
+        auto* hFile = fopen(_filename.c_str(), "rb");
+        if(!hFile)
+            return false;
+
+    	fseek(hFile, 0, SEEK_END);
+        const auto size = ftell(hFile);
+        fseek(hFile, 0, SEEK_SET);
+
+    	if(!size)
+        {
+	        fclose(hFile);
+            _data.clear();
+            return true;
+        }
+
+    	if(_data.size() < static_cast<size_t>(size))
+            _data.resize(size);
+
+    	const auto read = fread(&_data[0], 1, _data.size(), hFile);
+        fclose(hFile);
+        return read == _data.size();
+    }
 } // namespace synthLib

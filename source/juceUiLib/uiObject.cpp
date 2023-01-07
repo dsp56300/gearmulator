@@ -273,6 +273,21 @@ namespace genericUI
 		return count;
 	}
 
+	void UiObject::setCurrentPart(Editor& _editor, uint8_t _part)
+	{
+		if(m_condition)
+		{
+			m_condition->unbind();
+			
+			const auto v = _editor.getInterface().getParameterValue(m_condition->getParameterIndex(), _part);
+			if(v)
+				m_condition->bind(v);
+		}
+
+		for (const auto& child : m_children)
+			child->setCurrentPart(_editor, _part);
+	}
+
 	void UiObject::createCondition(Editor& _editor, juce::Component& _target)
 	{
 		if(!hasComponent("condition"))
@@ -283,11 +298,6 @@ namespace genericUI
 		const auto index = _editor.getInterface().getParameterIndexByName(paramName);
 
 		if(index < 0)
-			throw std::runtime_error("Parameter named " + paramName + " not found");
-
-		const auto v = _editor.getInterface().getParameterValue(index);
-
-		if(!v)
 			throw std::runtime_error("Parameter named " + paramName + " not found");
 
 		const auto conditionValues = getProperty("enableOnValues");
@@ -310,7 +320,12 @@ namespace genericUI
 			start = i + 1;
 		}
 
-		m_condition.reset(new Condition(_target, *v, values));
+		const auto v = _editor.getInterface().getParameterValue(index, 0);
+
+		if(!v)
+			throw std::runtime_error("Parameter named " + paramName + " not found");
+
+		m_condition.reset(new Condition(_target, v, static_cast<uint32_t>(index), values));
 	}
 
 	bool UiObject::parse(juce::DynamicObject* _obj)

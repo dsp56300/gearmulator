@@ -454,13 +454,13 @@
  		],
  		"oscWave":
  		[
- 			"Sine",		"Triangle",	"Wave 2",	"Wave 3",	"Wave 4",	"Wave 5",	"Wave 6",	"Wave 7",	"Wave 8",	"Wave 9",	"Wave 10",	"Wave 11",	"Wave 12",	"Wave 13",	"Wave 14",	"Wave 15",	"Wave 16",	"Wave 17",	"Wave 18",	"Wave 19",
+ 			"Sine",		"Triangle",	"Wave 3",	"Wave 4",	"Wave 5",	"Wave 6",	"Wave 7",	"Wave 8",	"Wave 9",	"Wave 10",	"Wave 11",	"Wave 12",	"Wave 13",	"Wave 14",	"Wave 15",	"Wave 16",	"Wave 17",	"Wave 18",	"Wave 19",
  			"Wave 20",	"Wave 21",	"Wave 22",	"Wave 23",	"Wave 24",	"Wave 25",	"Wave 26",	"Wave 27",	"Wave 28",	"Wave 29",	"Wave 30",	"Wave 31",	"Wave 32",	"Wave 33",	"Wave 34",	"Wave 35",	"Wave 36",	"Wave 37",	"Wave 38",	"Wave 39",
  			"Wave 40",	"Wave 41",	"Wave 42",	"Wave 43",	"Wave 44",	"Wave 45",	"Wave 46",	"Wave 47",	"Wave 48",	"Wave 49",	"Wave 50",	"Wave 51",	"Wave 52",	"Wave 53",	"Wave 54",	"Wave 55",	"Wave 56",	"Wave 57",	"Wave 58",	"Wave 59",			
  			"Wave 60",	"Wave 61",	"Wave 62",	"Wave 63",	"Wave 64",	"Wave 65",	"Wave 66",	"Wave 67",	"Wave 68",	"Wave 69",	"Wave 70",	"Wave 71",	"Wave 72",	"Wave 73",	"Wave 74",	"Wave 75",	"Wave 76",	"Wave 77",	"Wave 78",	"Wave 79",			
  			"Wave 80",	"Wave 81",	"Wave 82",	"Wave 83",	"Wave 84",	"Wave 85",	"Wave 86",	"Wave 87",	"Wave 88",	"Wave 89",	"Wave 90",	"Wave 91",	"Wave 92",	"Wave 93",	"Wave 94",	"Wave 95",	"Wave 96",	"Wave 97",	"Wave 98",	"Wave 99",			
  			"Wave 100",	"Wave 101",	"Wave 102",	"Wave 103",	"Wave 104",	"Wave 105",	"Wave 106",	"Wave 107",	"Wave 108",	"Wave 109",	"Wave 110",	"Wave 111",	"Wave 112",	"Wave 113",	"Wave 114",	"Wave 115",	"Wave 116",	"Wave 117",	"Wave 118",	"Wave 119",			
- 			"Wave 120",	"Wave 121",	"Wave 122",	"Wave 123",	"Wave 124",	"Wave 125",	"Wave 126",	"Wave 127"
+ 			"Wave 120",	"Wave 121",	"Wave 122",	"Wave 123",	"Wave 124",	"Wave 125",	"Wave 126",	"Wave 127",	"Wave 128"
  		],
  		"satCurve":
  		[
@@ -702,7 +702,7 @@
 		"ascii":
 		[
 			"NUL","SOH","STX","ETX","EOT","ENQ","ACK","BEL","BS","HT","LF","VT","FF","CR","SO","SI","DLE","DC1","DC2","DC3","DC4","NAK","SYN","ETB","CAN","EM","SUB","ESC","FS","GS","RS","US",
-			", ","!",'"',"#","$","%","&","'","(",")","*","+",",","-",".","/",
+			", ","!","\"","#","$","%","&","'","(",")","*","+",",","-",".","/",
 			"0","1","2","3","4","5","6","7","8","9",
 			":",";","<","=",">","?","@",
 			"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z",

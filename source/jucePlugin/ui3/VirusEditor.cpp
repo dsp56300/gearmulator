@@ -5,19 +5,19 @@
 #include "../ParameterNames.h"
 #include "../PluginProcessor.h"
 #include "../VirusController.h"
-#include "../VirusParameterBinding.h"
 #include "../version.h"
+
+#include "../../jucePluginLib/parameterbinding.h"
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/sysexToMidi.h"
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
-		Editor(static_cast<EditorInterface&>(*this)),
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
+		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_skinFolder(std::move(_skinFolder)),
 		m_openMenuCallback(std::move(_openMenuCallback))
 	{
 		create(_jsonFilename);
@@ -32,7 +32,7 @@ namespace genericVirusUI
 		if(getControllerLinkCountRecursive() == 0)
 			m_controllerLinks.reset(new ControllerLinks(*this));
 
-		m_midiPorts.reset(new MidiPorts(*this));
+		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 
 		// be backwards compatible with old skins
 		if(!getConditionCountRecursive())
@@ -132,7 +132,8 @@ namespace genericVirusUI
 
 				param->onValueChanged.emplace_back(1, [this, param]()
 				{
-					if(param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange)
+					if (param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
+						param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
 						return;
 					auto* comp = m_parameterBinding.getBoundComponent(param);
 					if(comp)
@@ -154,10 +155,10 @@ namespace genericVirusUI
 
 	Virus::Controller& VirusEditor::getController() const
 	{
-		return m_processor.getController();
+		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
-	const char* VirusEditor::findNamedResourceByFilename(const std::string& _filename, uint32_t& _size)
+	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
 	{
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
 		{
@@ -172,92 +173,14 @@ namespace genericVirusUI
 		return nullptr;
 	}
 
+	const char* VirusEditor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
+	{
+		return findEmbeddedResource(_filename, _size);
+	}
+
 	PatchBrowser* VirusEditor::getPatchBrowser()
 	{
 		return m_patchBrowser.get();
-	}
-
-	const char* VirusEditor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
-	{
-		if(!m_skinFolder.empty())
-		{
-			auto readFromCache = [this, &_name, &_dataSize]()
-			{
-				const auto it = m_fileCache.find(_name);
-				if(it == m_fileCache.end())
-				{
-					_dataSize = 0;
-					return static_cast<char*>(nullptr);
-				}
-				_dataSize = static_cast<uint32_t>(it->second.size());
-				return &it->second.front();
-			};
-
-			auto* res = readFromCache();
-
-			if(res)
-				return res;
-
-			const auto modulePath = synthLib::getModulePath();
-			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
-
-			// try to load from disk first
-			FILE* hFile = fopen((folder + _name).c_str(), "rb");
-			if(hFile)
-			{
-				fseek(hFile, 0, SEEK_END);
-				_dataSize = ftell(hFile);
-				fseek(hFile, 0, SEEK_SET);
-
-				std::vector<char> data;
-				data.resize(_dataSize);
-				const auto readCount = fread(&data.front(), 1, _dataSize, hFile);
-				fclose(hFile);
-
-				if(readCount == _dataSize)
-					m_fileCache.insert(std::make_pair(_name, std::move(data)));
-
-				res = readFromCache();
-
-				if(res)
-					return res;
-			}
-		}
-
-		uint32_t size = 0;
-		const auto res = findNamedResourceByFilename(_name, size);
-		if(!res)
-			throw std::runtime_error("Failed to find file named " + _name);
-		_dataSize = size;
-		return res;
-	}
-
-	int VirusEditor::getParameterIndexByName(const std::string& _name)
-	{
-		return getController().getParameterIndexByName(_name);
-	}
-
-	bool VirusEditor::bindParameter(juce::Button& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool VirusEditor::bindParameter(juce::ComboBox& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	bool VirusEditor::bindParameter(juce::Slider& _target, int _parameterIndex)
-	{
-		m_parameterBinding.bind(_target, _parameterIndex);
-		return true;
-	}
-
-	juce::Value* VirusEditor::getParameterValue(int _parameterIndex)
-	{
-		return getController().getParamValueObject(_parameterIndex);
 	}
 
 	void VirusEditor::onProgramChange()
@@ -453,10 +376,7 @@ namespace genericVirusUI
 		juce::PopupMenu banksMenu;
 		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
-            std::stringstream bankName;
-            bankName << "Bank " << static_cast<char>('A' + b);
-
-			addEntry(banksMenu, bankName.str(), [this, b](const FileType _type)
+			addEntry(banksMenu, getController().getBankName(b), [this, b](const FileType _type)
 			{
 				savePresets(SaveType::Bank, _type, b);
 			});
@@ -487,8 +407,9 @@ namespace genericVirusUI
 			m_previousPath = result.getParentDirectory().getFullPathName();
 			const auto ext = result.getFileExtension().toLowerCase();
 
-			std::vector<Patch> patches;
-			PatchBrowser::loadBankFile(getController(), patches, nullptr, result);
+			PatchBrowser::PatchList patches;
+
+			m_patchBrowser->loadBankFile(patches, nullptr, result);
 
 			if (patches.empty())
 				return;
@@ -496,7 +417,7 @@ namespace genericVirusUI
 			if (patches.size() == 1)
 			{
 				// load to edit buffer of current part
-				const auto data = getController().modifySingleDump(patches.front().sysex, virusLib::BankNumber::EditBuffer, 
+				const auto data = getController().modifySingleDump(patches.front()->sysex, virusLib::BankNumber::EditBuffer, 
 					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
 				getController().sendSysEx(data);
 			}
@@ -505,7 +426,7 @@ namespace genericVirusUI
 				// load to bank A
 				for(uint8_t i=0; i<static_cast<uint8_t>(patches.size()); ++i)
 				{
-					const auto data = getController().modifySingleDump(patches[i].sysex, virusLib::BankNumber::A, i, true, false);
+					const auto data = getController().modifySingleDump(patches[i]->sysex, virusLib::BankNumber::A, i, true, false);
 					getController().sendSysEx(data);
 				}
 			}
@@ -519,17 +440,23 @@ namespace genericVirusUI
 	{
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
 
-		getController().getParameter(playMode)->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
+		auto* param = getController().getParameter(playMode);
+		param->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
+
+		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
+		getController().sendParameterChange(*param, _playMode);
 
 		if (_playMode == virusLib::PlayModeSingle && getController().getCurrentPart() != 0)
-			m_parameterBinding.setPart(0);
+			setPart(0);
 
 		onPlayModeChanged();
+
+		getController().requestArrangement();
 	}
 
 	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		const auto path = getController().getConfig()->getValue("virus_bank_dir", "");
+		const auto path = m_processor.getConfig().getValue("virus_bank_dir", "");
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Save preset(s) as syx or mid",
 			m_previousPath.isEmpty()
@@ -625,5 +552,6 @@ namespace genericVirusUI
 	{
 		m_parameterBinding.setPart(static_cast<uint8_t>(_part));
 		onCurrentPartChanged();
+		setCurrentPart(static_cast<uint8_t>(_part));
 	}
 }

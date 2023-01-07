@@ -10,7 +10,7 @@ namespace pluginLib
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
-		m_range.interval = m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f;
+		m_range.interval = m_desc.step ? m_desc.step : (m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f);
 		m_value.addListener(this);
     }
 
@@ -36,6 +36,8 @@ namespace pluginLib
 
 		if (newValue == m_lastValue)
 			return;
+
+		_origin = ChangedBy::Derived;
 
 		m_lastValue = newValue;
 		m_lastValueOrigin = _origin;
@@ -162,5 +164,5 @@ namespace pluginLib
 
 		m_derivedParameters.insert(_param);
 		_param->m_derivedParameters.insert(this);
-	}	
+	}
 }

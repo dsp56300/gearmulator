@@ -5,6 +5,7 @@
 
 #include "microcontroller.h"
 
+#include "dspSingle.h"
 #include "../synthLib/midiTypes.h"
 
 using namespace dsp56k;
@@ -39,15 +40,15 @@ constexpr uint8_t
 namespace virusLib
 {
 
-Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom(_romFile)
+Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool _useEsaiBasedMidiTiming) : m_rom(_romFile)
 {
 	if(!_romFile.isValid())
 		return;
 
-	m_hdi08.addHDI08(_hdi08);
-
 	m_hdi08TxParsers.reserve(2);
-	m_hdi08TxParsers.emplace_back(*this);
+	m_midiQueues.reserve(2);
+
+	addDSP(_dsp, _useEsaiBasedMidiTiming);
 
 	m_globalSettings.fill(0xffffffff);
 
@@ -68,7 +69,8 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 		for(uint32_t p=0; p<m_rom.getPresetsPerBank(); ++p)
 		{
 			TPreset single;
-			m_rom.getSingle(bank, p, single);
+			if(!m_rom.getSingle(bank, p, single))
+				break;
 
 			if(ROMFile::getSingleName(single).size() != 10)
 			{
@@ -95,6 +97,8 @@ Microcontroller::Microcontroller(HDI08& _hdi08, const ROMFile& _romFile) : m_rom
 				m_singleEditBuffers[i] = singles[i];
 		}
 	}
+
+	m_pendingSysexInput.reserve(64);
 }
 
 void Microcontroller::sendInitControlCommands()
@@ -163,6 +167,8 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 		return true;
 	}
 
+	receiveUpgradedPreset();
+
 	writeHostBitsWithWait(0,1);
 	// Send header
 	TWord buf[] = {0xf47555, static_cast<TWord>(isMulti ? 0x110000 : 0x100000)};
@@ -175,6 +181,9 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 	for (auto& parser : m_hdi08TxParsers)
 		parser.waitForPreset(isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize());
+
+	m_sentPresetProgram = program;
+	m_sentPresetIsMulti = isMulti;
 
 	return true;
 }
@@ -243,7 +252,9 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 		break;
 	}
 
-	m_pendingMidiEvents.push_back(_ev);
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.add(_ev);
+
 	return true;
 }
 
@@ -444,6 +455,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		
 	};
 
+	auto enqueue = [&]()
+	{
+		m_pendingSysexInput.emplace_back(std::make_pair(_source, _data));
+		return false;
+	};
+
 	switch (cmd)
 	{
 		case DUMP_SINGLE: 
@@ -468,6 +485,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		case REQUEST_SINGLE:
 			{
 				const auto bank = fromMidiByte(_data[7]);
+				if(!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation())
+					return enqueue();
 				const uint8_t program = _data[8];
 				LOG("Request Single, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				buildSingleResponse(bank, program);
@@ -476,6 +495,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		case REQUEST_MULTI:
 			{
 				const auto bank = fromMidiByte(_data[7]);
+				if(!m_pendingPresetWrites.empty() || bank == BankNumber::EditBuffer && waitingForPresetReceiveConfirmation())
+					return enqueue();
 				const uint8_t program = _data[8];
 				LOG("Request Multi, Bank " << (int)bank << ", program " << (int)program);
 				buildMultiResponse(bank, program);
@@ -507,6 +528,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			buildTotalResponse();
 			break;
 		case REQUEST_ARRANGEMENT:
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				return enqueue();
 			buildArrangementResponse();
 			break;
 		case PAGE_A:
@@ -655,10 +678,12 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 	return true;
 }
 
-bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data) const
+bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
 	if (_bank == BankNumber::EditBuffer)
 	{
+		receiveUpgradedPreset();
+
 		// Use multi-edit buffer
 		_data = m_multiEditBuffer;
 		return true;
@@ -672,10 +697,12 @@ bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& 
 	return true;
 }
 
-bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data) const
+bool Microcontroller::requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
 	if (_bank == BankNumber::EditBuffer)
 	{
+		receiveUpgradedPreset();
+
 		// Use single-edit buffer
 		if(_program == SINGLE)
 			_data = m_singleEditBuffer;
@@ -707,14 +734,21 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 	}
 
 	if(_program == SINGLE)
+	{
+		m_globalSettings[PLAY_MODE] = PlayModeSingle;
+
 		m_singleEditBuffer = _data;
+	}
+	else if(_program >= m_singleEditBuffers.size())
+	{
+		return false;
+	}
 	else
-		m_singleEditBuffers[_program % m_singleEditBuffers.size()] = _data;
+	{
+		m_singleEditBuffers[_program] = _data;
+	}
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << static_cast<int>(_program));
-
-	if(_program == SINGLE)
-		m_globalSettings[PLAY_MODE] = PlayModeSingle;
 
 	// Send to DSP
 	return sendPreset(_program, presetToDSPWords(_data, false), false);
@@ -839,7 +873,7 @@ void Microcontroller::process(size_t _size)
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
-	const uint8_t deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
+	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
 
 	std::vector<SMidiEvent> responses;
 
@@ -903,74 +937,23 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 	return true;
 }
 
-bool Microcontroller::sendMIDItoDSP(uint8_t _a, const uint8_t _b, const uint8_t _c)
+void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
-	std::lock_guard lock(m_mutex);
-
-	writeHostBitsWithWait(1, 1);
-
-	auto sendMIDItoDSP = [this](const uint8_t _midiByte)
-	{
-		const TWord word = static_cast<TWord>(_midiByte) << 16;
-		m_hdi08.writeRX(&word, 1);
-	};
-
-	const auto command = (_a & 0xf0);
-
-	if(command == 0xf0)
-	{
-		// single-byte status message
-		sendMIDItoDSP(_a);
-	}
-	else
-	{
-		sendMIDItoDSP(_a);
-		sendMIDItoDSP(_b);
-
-		if(command != M_AFTERTOUCH)
-			sendMIDItoDSP(_c);
-	}
-
-	return true;
-}
-
-void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
-{
-	auto size = m_pendingMidiEvents.size();
-
-	if(!size)
-		return;
-
-	while(!m_pendingMidiEvents.empty() && m_pendingMidiEvents.front().offset <= _maxOffset)
-	{
-		const auto& ev = m_pendingMidiEvents.front();
-
-		if(!sendMIDItoDSP(ev.a,ev.b,ev.c))
-			break;
-
-		m_pendingMidiEvents.pop_front();
-		--size;
-	}	
-}
-
-void Microcontroller::addHDI08(dsp56k::HDI08& _hdi08)
-{
-	m_hdi08.addHDI08(_hdi08);
+	m_hdi08.addHDI08(_dsp.getHDI08());
 	m_hdi08TxParsers.emplace_back(*this);
+	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming);
 }
 
 void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
 {
-	std::lock_guard lock(m_mutex);
-
 	for(size_t i=0; i<m_hdi08.size(); ++i)
 	{
-		auto* hdi08 = m_hdi08.get(i);
+		auto& hdi08 = m_hdi08.getHDI08(i);
 		auto& parser = m_hdi08TxParsers[i];
 
-		while(hdi08->hasTX())
+		while(hdi08.hasTX())
 		{
-			if(parser.append(hdi08->readTX()))
+			if(parser.append(hdi08.readTX()))
 			{
 				const auto midi = parser.getMidiData();
 				if(i == 0)
@@ -979,6 +962,26 @@ void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEve
 			}
 		}
 	}
+}
+
+void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
+{
+	std::lock_guard lock(m_mutex);
+	processHdi08Tx(_midiOut);
+
+	if (m_pendingSysexInput.empty() || !m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+		return;
+
+	for (const auto& input : m_pendingSysexInput)
+		sendSysex(input.second, _midiOut, input.first);
+
+	m_pendingSysexInput.clear();
+}
+
+void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
+{
+	for (auto& midiQueue : m_midiQueues)
+		midiQueue.sendPendingMidiEvents(_maxOffset);
 }
 
 PresetVersion Microcontroller::getPresetVersion(const TPreset& _preset)
@@ -1030,9 +1033,10 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	uint32_t offset;
 	switch(_page)
 	{
-	default:
 	case PAGE_A:	offset = 0;	break;
 	case PAGE_B:	offset = 1;	break;
+	default:
+		return;
 	}
 
 	offset *= paramsPerPage;
@@ -1082,4 +1086,39 @@ bool Microcontroller::waitingForPresetReceiveConfirmation() const
 	}
 	return false;
 }
+
+void Microcontroller::receiveUpgradedPreset()
+{
+	const auto waitingForPresetConfirmation = waitingForPresetReceiveConfirmation();
+
+	if(waitingForPresetConfirmation)
+		return;
+
+	std::vector<uint8_t> upgradedPreset;
+	m_hdi08TxParsers.front().getPresetData(upgradedPreset);
+
+	if(upgradedPreset.empty())
+		return;
+
+	LOG("Replacing edit buffer for " << (m_sentPresetIsMulti ? "multi" : "single") << " program " << static_cast<int>(m_sentPresetProgram) << " with upgraded preset");
+
+	auto copyTo = [&upgradedPreset, this](TPreset& _preset)
+	{
+		std::copy(upgradedPreset.begin(), upgradedPreset.end(), _preset.begin());
+	};
+
+	if(m_sentPresetIsMulti)
+	{
+		copyTo(m_multiEditBuffer);
+	}
+	else if(m_sentPresetProgram == SINGLE)
+	{
+		copyTo(m_singleEditBuffer);
+	}
+	else if(m_sentPresetProgram < m_singleEditBuffers.size())
+	{
+		copyTo(m_singleEditBuffers[m_sentPresetProgram]);
+	}
+}
+
 }

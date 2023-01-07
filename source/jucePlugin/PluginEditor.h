@@ -1,7 +1,8 @@
 #pragma once
 
-#include "VirusParameterBinding.h"
+#include <juce_audio_processors/juce_audio_processors.h>
 
+class AudioPluginAudioProcessor;
 class PluginEditorState;
 
 //==============================================================================

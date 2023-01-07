@@ -2,6 +2,7 @@
 
 #include <thread>
 #include <vector>
+#include <string>
 
 #include "dsp56kEmu/types.h"
 

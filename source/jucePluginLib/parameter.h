@@ -22,6 +22,7 @@ namespace pluginLib
 			ControlChange,
 			HostAutomation,
 			Ui,
+			Derived
 		};
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int uniqueId);

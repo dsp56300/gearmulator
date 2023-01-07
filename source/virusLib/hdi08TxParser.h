@@ -47,6 +47,8 @@ namespace virusLib
 			return m_dspHasBooted;
 		}
 
+		void getPresetData(std::vector<uint8_t>& _data);
+
 	private:
 		Microcontroller& m_mc;
 

@@ -1,23 +1,28 @@
 #pragma once
 
+namespace genericUI
+{
+	class Editor;
+}
+
 namespace juce
 {
 	class AudioDeviceManager;
 	class ComboBox;
 }
 
-namespace genericVirusUI
+namespace jucePluginEditorLib
 {
-	class VirusEditor;
+	class Processor;
 
 	class MidiPorts
 	{
 	public:
-		explicit MidiPorts(VirusEditor& _editor);
+		explicit MidiPorts(const genericUI::Editor& _editor, Processor& _processor);
 		~MidiPorts();
 
 	private:
-		VirusEditor& m_editor;
+		Processor& m_processor;
 
 		juce::ComboBox* m_midiIn = nullptr;
 		juce::ComboBox* m_midiOut = nullptr;
@@ -28,6 +33,5 @@ namespace genericVirusUI
 
 		void updateMidiInput(int _index);
 		void updateMidiOutput(int _index);
-
 	};
 }

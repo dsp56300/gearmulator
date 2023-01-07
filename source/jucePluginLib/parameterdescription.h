@@ -50,6 +50,7 @@ namespace pluginLib
 		bool isDiscrete;
 		bool isBool;
 		bool isBipolar;
+		int step = 0;
 		std::string toText;
 
 		bool isNonPartSensitive() const;

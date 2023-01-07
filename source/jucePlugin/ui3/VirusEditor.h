@@ -1,25 +1,25 @@
 #pragma once
 
-#include "../../juceUiLib/editor.h"
+#include "../../jucePluginEditorLib/midiPorts.h"
+#include "../../jucePluginEditorLib/pluginEditor.h"
 
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
-#include "MidiPorts.h"
 #include "PatchBrowser.h"
 #include "ControllerLinks.h"
 
 namespace pluginLib
 {
 	class Parameter;
+	class ParameterBinding;
 }
 
-class VirusParameterBinding;
 class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
 {
-	class VirusEditor : public genericUI::EditorInterface, public genericUI::Editor, juce::Timer
+	class VirusEditor : public jucePluginEditorLib::Editor, juce::Timer
 	{
 	public:
 		enum class FileType
@@ -35,29 +35,23 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(VirusParameterBinding& _binding, AudioPluginAudioProcessor &_processorRef, const std::string& _jsonFilename,
+		VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
 
 		AudioPluginAudioProcessor& getProcessor() const { return m_processor; }
-		VirusParameterBinding& getParameterBinding() const { return m_parameterBinding; }
+		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 
 		Virus::Controller& getController() const;
 
-		static const char* findNamedResourceByFilename(const std::string& _filename, uint32_t& _size);
+		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
+		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
 		PatchBrowser* getPatchBrowser();
 
 	private:
-		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
-		int getParameterIndexByName(const std::string& _name) override;
-		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
-		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;
-		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
-		juce::Value* getParameterValue(int _parameterIndex) override;
-
 		void onProgramChange();
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
@@ -80,13 +74,11 @@ namespace genericVirusUI
 		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
-		VirusParameterBinding& m_parameterBinding;
-
-		const std::string m_skinFolder;
+		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<Tabs> m_tabs;
-		std::unique_ptr<MidiPorts> m_midiPorts;
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
@@ -109,7 +101,5 @@ namespace genericVirusUI
 		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
 		std::vector<pluginLib::Parameter*> m_boundParameters;
-
-		std::map<std::string, std::vector<char>> m_fileCache;
 	};
 }

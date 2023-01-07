@@ -21,10 +21,10 @@ namespace virusLib
 			onAudioWritten();
 		}, 0);
 
-		m_mc.reset(new Microcontroller(m_dsp->getHDI08(), _rom));
+		m_mc.reset(new Microcontroller(*m_dsp, _rom, false));
 
 		if(m_dsp2)
-			m_mc->addHDI08(m_dsp2->getHDI08());
+			m_mc->addDSP(*m_dsp2, true);
 
 		auto loader = bootDSP(*m_dsp, m_rom, _createDebugger);
 
@@ -136,7 +136,7 @@ namespace virusLib
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_mc->processHdi08Tx(_midiOut);
+		m_mc->readMidiOut(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
@@ -170,11 +170,8 @@ namespace virusLib
 
 	void Device::onAudioWritten()
 	{
+		m_mc->getMidiQueue(0).onAudioWritten();
 		m_mc->process(1);
-
-		m_numSamplesWritten += 1;
-
-		m_mc->sendPendingMidiEvents(m_numSamplesWritten >> 1);
 	}
 
 	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
