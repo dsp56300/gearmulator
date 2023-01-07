@@ -12,8 +12,8 @@ namespace virusLib
 		getHDI08().writeHDR(0x0000);			// this = Master
 		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp = Slave
 
-		getPeriphX().getEsai().writeEmptyAudioIn(4);
-		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(4);
+		getPeriphX().getEsai().writeEmptyAudioIn(1);
+		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(3);
 	}
 
 	void audioAdd(float& _dst, float _src)
