@@ -89,6 +89,8 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_wavetable.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_filter.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_3.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_4.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_5_lfo.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_6_matrix.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_7_arp.png
