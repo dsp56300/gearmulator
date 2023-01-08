@@ -1,5 +1,16 @@
 Release Notes 
 
+1.2.25 (2023.01.08)
+
+- [Imp] DSP56300 plugins are now also available in CLAP plugin format
+
+- [Fix] Preset export created incorrect preset if exported from any part but the first
+- [Fix] Multi controls (part volume & pan) did not respond anymore after switching the active part and displayed incorrect values
+- [Fix] Performance issues when using automation
+- [Fix] Controls may have displayed incorrect values if a preset was loaded from an older Virus version
+- [Fix] Do not attempt to process invalid Single Dump SysEx message the part number is invalid
+- [Fix] Possible Audio Input crackling issues (Depending on the host sample rate)
+
 1.2.24 (2022.12.16)
 
 - [Fix] AU validation failed on MacOS (1.2.23 regression)
