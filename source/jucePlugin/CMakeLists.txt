@@ -97,10 +97,19 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		#juce::juce_recommended_warning_flags
 	)
 
+	set(clapFeatures "")
+	if(${isSynth})
+		message(STATUS "I AM A SYNTH")
+		list(APPEND clapFeatures instrument synthesizer)
+	else()
+		message(STATUS "I AM AN EFFECT")
+		list(APPEND clapFeatures audio-effect synthesizer multi-effects)
+	endif()
+
 	if(USE_CLAP)
 		clap_juce_extensions_plugin(TARGET ${targetName}
 			CLAP_ID "com.theusualsuspects.${plugin4CC}"
-			CLAP_FEATURES instrument synthesizer
+			CLAP_FEATURES ${clapFeatures}
 			CLAP_SUPPORT_URL "https://dsp56300.wordpress.com"
 			CLAP_MANUAL_URL "https://dsp56300.wordpress.com"
 			)
