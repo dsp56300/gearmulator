@@ -84,6 +84,7 @@ namespace synthLib
         {
 			fixPath(".vst");
 			fixPath(".vst3");
+			fixPath(".clap");
 			fixPath(".component");
 			fixPath(".app");
         }
