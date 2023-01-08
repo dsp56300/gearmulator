@@ -6,6 +6,8 @@ option(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
 
+set(USE_CLAP ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
+
 if(JUCE_GLOBAL_VST2_SDK_PATH)
     set(VST "VST")
 else()
@@ -95,6 +97,15 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		#juce::juce_recommended_warning_flags
 	)
 
+	if(USE_CLAP)
+		clap_juce_extensions_plugin(TARGET ${targetName}
+			CLAP_ID "com.theusualsuspects.${plugin4CC}"
+			CLAP_FEATURES instrument synthesizer
+			CLAP_SUPPORT_URL "https://dsp56300.wordpress.com"
+			CLAP_MANUAL_URL "https://dsp56300.wordpress.com"
+			)
+	endif()
+
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${targetName} PUBLIC -static-libgcc -static-libstdc++)
 	endif()
@@ -107,11 +118,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(APPLE)
 			install(TARGETS ${targetName}_AU DESTINATION . COMPONENT AU${componentName})
 		endif()
+		if(USE_CLAP)
+			install(TARGETS ${targetName}_CLAP DESTINATION . COMPONENT CLAP${componentName})
+		endif()
 	elseif(UNIX)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST LIBRARY DESTINATION /usr/local/lib/vst/ COMPONENT VST2${componentName})
 		endif()
 		install(TARGETS ${targetName}_VST3 LIBRARY DESTINATION /usr/local/lib/vst3/ COMPONENT VST3${componentName})
+		if(USE_CLAP)
+			install(TARGETS ${targetName}_CLAP LIBRARY DESTINATION /usr/local/lib/clap/ COMPONENT CLAP${componentName})
+		endif()
 	endif()
 endmacro()
 
