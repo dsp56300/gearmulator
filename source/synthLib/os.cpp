@@ -84,6 +84,7 @@ namespace synthLib
         {
 			fixPath(".vst");
 			fixPath(".vst3");
+			fixPath(".clap");
 			fixPath(".component");
 			fixPath(".app");
         }
@@ -238,13 +239,13 @@ namespace synthLib
         if(path.empty())
             path = getCurrentDirectory();
 
-		auto f = findFile(".bin", _minSize, _maxSize);
+		auto f = findFile(path, ".bin", _minSize, _maxSize);
         if(!f.empty())
             return f;
 
     	path = getModulePath(false);
 
-		return findFile(".bin", _minSize, _maxSize);
+		return findFile(path, ".bin", _minSize, _maxSize);
     }
 
     std::string findROM(const size_t _expectedSize)
