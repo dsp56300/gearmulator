@@ -99,10 +99,8 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	set(clapFeatures "")
 	if(${isSynth})
-		message(STATUS "I AM A SYNTH")
 		list(APPEND clapFeatures instrument synthesizer)
 	else()
-		message(STATUS "I AM AN EFFECT")
 		list(APPEND clapFeatures audio-effect synthesizer multi-effects)
 	endif()
 
