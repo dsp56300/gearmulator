@@ -1,7 +1,10 @@
+include(${CMAKE_CURRENT_LIST_DIR}/io.cmake)
+
 message(STATUS "Removing old packages")
-file(REMOVE *.zip)
-file(REMOVE *.deb)
-file(REMOVE *.rpm)
+
+removeGlob("*.zip")
+removeGlob("*.deb")
+removeGlob("*.rpm")
 
 macro(pack GENERATOR)
 	message(STATUS "Packaging ${GENERATOR}")
