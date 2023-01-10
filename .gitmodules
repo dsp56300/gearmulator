@@ -6,4 +6,4 @@
 	url = https://github.com/dsp56300/JUCE
 [submodule "source/clap-juce-extensions"]
 	path = source/clap-juce-extensions
-	url = ../../free-audio/clap-juce-extensions.git
+	url = https://github.com/free-audio/clap-juce-extensions
