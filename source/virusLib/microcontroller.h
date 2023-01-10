@@ -60,7 +60,7 @@ public:
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
-	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
+	bool sendPreset(uint8_t program, const TPreset& _data, bool isMulti = false);
 	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1);
 	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
@@ -109,7 +109,7 @@ private:
 	{
 		uint8_t program = 0;
 		bool isMulti = false;
-		std::vector<dsp56k::TWord> data;
+		TPreset data;
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;
