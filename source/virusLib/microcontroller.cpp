@@ -1040,7 +1040,7 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
 }
 
-void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value) const
+void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
 {
 	constexpr uint32_t paramsPerPage = 128;
 
