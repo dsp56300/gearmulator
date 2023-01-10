@@ -83,7 +83,7 @@
 		{"page":112, "index":48, "name":"Filter Balance", "displayName":"Filter Balance", "min":0, "max":127, "default":64, "toText":"pan", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":112, "index":48, "name":"Vocoder/Balance", "displayName":"Vocoder Balance (Dry-Wet)", "min":0, "max":127, "default":64, "toText":"pan", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true}, 
 		{"page":112, "index":49, "name":"Saturation Curve", "displayName":"Voice Saturation Type", "min":0, "max":14, "default":0, "toText":"satCurve", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":112, "index":50, "name":"Ringmodulator Volume", "displayName":"Ring Modulator Volume", "min":0, "max":127, "default":0, "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":112, "index":50, "name":"Ringmodulator Volume", "displayName":"Ring Modulator Volume", "min":0, "max":127, "default":0, "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":51, "name":"Filter1 Mode", "displayName":"Filter 1 Mode", "min":0, "max":7, "default":0, "toText":"filter1Mode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":52, "name":"Filter2 Mode", "displayName":"Filter 2 Mode", "min":0, "max":3, "default":0, "toText":"filter2Mode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":53, "name":"Filter Routing", "displayName":"Filter Routing", "min":0, "max":3, "default":0, "toText":"filterRouting", "isPublic":true, "isDiscrete":true, "isBool":false},
@@ -1250,7 +1250,7 @@
 			{"type": "param", "name":"Suboscillator Shape"},                // 35
 			{"type": "param", "name":"Osc Mainvolume"},                     // 36
 			{"type": "param", "name":"Noise Volume"},                       // 37
-			{"type": "param", "name":"Ringmodulator Volume"},               // 38
+			{"type": "null"},                                               // 38
 			{"type": "param", "name":"Noise Color"},                        // 39
 			{"type": "param", "name":"Cutoff"},                             // 40
 			{"type": "param", "name":"Cutoff2"},                            // 41
@@ -1262,7 +1262,7 @@
 			{"type": "param", "name":"Filter2 Keyfollow"},                  // 47
 			{"type": "param", "name":"Filter Balance"},                     // 48
 			{"type": "param", "name":"Saturation Curve"},                   // 49
-			{"type": "null"},                                               // 50
+			{"type": "param", "name":"Ringmodulator Volume"},               // 50
 			{"type": "param", "name":"Filter1 Mode"},                       // 51
 			{"type": "param", "name":"Filter2 Mode"},                       // 52
 			{"type": "param", "name":"Filter Routing"},                     // 53
