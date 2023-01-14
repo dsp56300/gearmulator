@@ -258,8 +258,8 @@ int IntegrationTest::runCompare()
 
 	for(uint32_t i=0; i<sampleCount; ++i)
 	{
-		const uint32_t a = (static_cast<uint32_t>(ptrA[0]) << 24) || (static_cast<uint32_t>(ptrA[1]) << 16) || ptrA[2];
-		const uint32_t b = (static_cast<uint32_t>(ptrB[0]) << 24) || (static_cast<uint32_t>(ptrB[1]) << 16) || ptrB[2];
+		const uint32_t a = (static_cast<uint32_t>(ptrA[0]) << 24) | (static_cast<uint32_t>(ptrA[1]) << 16) | ptrA[2];
+		const uint32_t b = (static_cast<uint32_t>(ptrB[0]) << 24) | (static_cast<uint32_t>(ptrB[1]) << 16) | ptrB[2];
 
 		if(b != a)
 		{
