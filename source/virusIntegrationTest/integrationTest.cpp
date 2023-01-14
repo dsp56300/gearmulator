@@ -246,12 +246,13 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 
 int IntegrationTest::runCompare()
 {
-	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample / 2;
+	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample;
+	const auto frameCount = sampleCount >> 1;
 
 	std::vector<uint8_t> temp;
 
 	File compareFile;
-	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(sampleCount));
+	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(frameCount));
 	if(res)
 		return res;
 
@@ -260,8 +261,8 @@ int IntegrationTest::runCompare()
 
 	for(uint32_t i=0; i<sampleCount; ++i)
 	{
-		const uint32_t a = (static_cast<uint32_t>(ptrA[0]) << 24) || (static_cast<uint32_t>(ptrA[1]) << 16) || ptrA[2];
-		const uint32_t b = (static_cast<uint32_t>(ptrB[0]) << 24) || (static_cast<uint32_t>(ptrB[1]) << 16) || ptrB[2];
+		const uint32_t a = (static_cast<uint32_t>(ptrA[0]) << 24) | (static_cast<uint32_t>(ptrA[1]) << 16) | ptrA[2];
+		const uint32_t b = (static_cast<uint32_t>(ptrB[0]) << 24) | (static_cast<uint32_t>(ptrB[1]) << 16) | ptrB[2];
 
 		if(b != a)
 		{
