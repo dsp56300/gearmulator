@@ -244,12 +244,13 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 
 int IntegrationTest::runCompare()
 {
-	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample / 2;
+	const auto sampleCount = m_referenceFile.data.dataByteSize * 8 / m_referenceFile.data.bitsPerSample;
+	const auto frameCount = sampleCount >> 1;
 
 	std::vector<uint8_t> temp;
 
 	File compareFile;
-	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(sampleCount));
+	const auto res = createAudioFile(compareFile, "compare_", static_cast<uint32_t>(frameCount));
 	if(res)
 		return res;
 
