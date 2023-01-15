@@ -36,6 +36,8 @@ namespace virusLib
 
 		loader.join();
 
+//		m_dsp->getMemory().saveAssembly("P.asm", 0, m_dsp->getMemory().sizeP(), true, false, m_dsp->getDSP().getPeriph(0), m_dsp->getDSP().getPeriph(1));
+
 		while(!m_mc->dspHasBooted())
 			dummyProcess(8);
 
