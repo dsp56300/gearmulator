@@ -597,7 +597,7 @@
 		{"page":114, "index":38, "name":"Part Detune", "min":0, "max":127, "default":64, "toText":"signedFirstOff", "isPublic":false, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":114, "index":39, "name":"Part Volume", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":114, "index":40, "name":"Part Midi Volume Init", "min":0, "max":127, "default":64, "toText":"unsignedOff", "isPublic":false, "isDiscrete":true, "isBool":false},
-		{"page":114, "index":41, "name":"Part Output Select", "min":0, "max":17, "default":10, "toText":"nameOutputSelect3rdgreyedWithoutOff", "isPublic":false, "isDiscrete":true, "isBool":false},
+		{"page":114, "index":41, "name":"Part Output Select", "min":0, "max":17, "default":10, "toText":"nameOutputSelectWithoutOff", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":41, "name":"Part Output Select Control 2", "min":0, "max":17, "default":10, "toText":"nameOutputSelectWithoutOff", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":43, "name":"Part Parameter/Panorama", "min":0, "max":127, "default":64, "toText":"panPercent", "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":114, "index":72, "name":"Part Enable", "min":0, "max":1, "default":1, "toText":"disabledEnabled", "isPublic":false, "isDiscrete":false, "isBool":true},
@@ -1036,13 +1036,15 @@
 		[
 			"RAM-A", "RAM-B", "RAM-C", "RAM-D", "ROM-A", "ROM-B", "ROM-C", "ROM-D", "ROM-E", "ROM-F", "ROM-G", "ROM-H", "ROM-I", "ROM-J", "ROM-K", "ROM-L", "ROM-M", "ROM-N", "ROM-O", "ROM-P", "ROM-Q", "ROM-R", "ROM-S", "ROM-T", "ROM-U", "ROM-V", "ROM-W", "ROM-X", "ROM-Y", "ROM-Z"
 		],
-		"nameOutputSelect3rdgreyedWithoutOff":
-		[
-			"Out1 L", "Out1 L+R", "Out1 R", "Out2 L", "Out2 L+R", "Out2 R", "Out3 L", "Out3 L+R", "Out3 R", "USB1 L", "USB1 L+R", "USB1 R", "USB2 L", "USB2 L+R", "USB2 R", "-GUSB3 L", "-GUSB3 L+R", "-GUSB3 R"
-		],
 		"nameOutputSelectWithoutOff":
 		[
-			"Out1 L", "Out1 L+R", "Out1 R", "Out2 L", "Out2 L+R", "Out2 R", "Out3 L", "Out3 L+R", "Out3 R", "USB1 L", "USB1 L+R", "USB1 R", "USB2 L", "USB2 L+R", "USB2 R", "USB3 L", "USB3 L+R", "USB3 R"
+			"Out1 L", "Out1 L+R", "Out1 R",
+			"Out2 L", "Out2 L+R", "Out2 R",
+			"Out3 L", "Out3 L+R", "Out3 R",
+
+			"USB1 L", "USB1 L+R", "USB1 R",
+			"USB2 L", "USB2 L+R", "USB2 R",
+			"USB3 L", "USB3 L+R", "USB3 R"
 		],
 		"disabledEnabled":
 		[
