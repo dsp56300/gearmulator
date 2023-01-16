@@ -62,8 +62,8 @@ namespace virusLib
 
 	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency)
 	{
-		const T* inputs[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		T* outputs[] = {_outputs[1], _outputs[0], _outputs[3], _outputs[2], _outputs[5], _outputs[4], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const T* inputs[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		T* outputs[] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3], _outputs[4], _outputs[5], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioInterleaved(inputs, outputs, static_cast<uint32_t>(_samples), _latency);
 	}
