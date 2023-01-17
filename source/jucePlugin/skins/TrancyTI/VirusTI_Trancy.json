@@ -826,8 +826,8 @@
         "image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_8_fx1"},
             "children" : [
                 { "name" : "CharacterType",     "parameterAttachment" : { "parameter" : "Character Type" },             "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "203", "y" : "110", "width" : "274", "height" : "45", "offsetR" : "-60" }},
-                { "name" : "AnalogBoostIntens", "parameterAttachment" : { "parameter" : "Bass Tune"},                   "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "87", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-                { "name" : "AnalogBoostTune",   "parameterAttachment" : { "parameter" : "Bass Intensity" },             "rotary" : { }, "spritesheet" : { "x" : "522", "y" : "87", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                { "name" : "AnalogBoostIntens", "parameterAttachment" : { "parameter" : "Bass Intensity"},              "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "87", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                { "name" : "AnalogBoostTune",   "parameterAttachment" : { "parameter" : "Bass Tune" },                  "rotary" : { }, "spritesheet" : { "x" : "522", "y" : "87", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                   
                 { "name" : "ContainerChorusOff", 
                   "condition": { "enableOnParameter": "Chorus/Type", "enableOnValues": "0" }, 
