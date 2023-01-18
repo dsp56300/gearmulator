@@ -9,86 +9,13 @@ project(gearmulator VERSION 1.2.26)
 
 include(base.cmake)
 include(CTest)
-include(${CMAKE_CURRENT_LIST_DIR}/scripts/rclone.cmake)
-
-set(ASMJIT_STATIC TRUE)
-set(ASMJIT_NO_INSTALL TRUE)
-set(BUILD_SHARED_LIBS OFF)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
 
-add_subdirectory(source/dsp56300/source)
-add_subdirectory(source/synthLib)
-add_subdirectory(source/virusLib)
-add_subdirectory(source/virusConsoleLib)
-add_subdirectory(source/libresample)
-add_subdirectory(source/mc68k)
-add_subdirectory(source/mqLib)
+# ----------------- source
 
-
-# ----------------- Try to install VST2 SDK
-
-set(VST2SDK_TESTFILE ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
-set(VST2SDK_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
-
-if(NOT EXISTS ${VST2SDK_TESTFILE})
-	if(EXISTS ${RCLONE_CONF})
-		copyDataFrom("vstsdk2.4.2/" "${CMAKE_CURRENT_LIST_DIR}/source/vstsdk2.4.2/")
-	else()
-		message(WARNING "rclone.conf not found, unable to copy VST2 SDK")
-	endif()
-endif()
-
-if(EXISTS ${VST2SDK_TESTFILE})
-	set(JUCE_GLOBAL_VST2_SDK_PATH ${VST2SDK_FOLDER})
-	set(MQ_VST2 TRUE)
-endif()
-
-# ----------------- Juce based audio plugin
-
-set_property(GLOBAL PROPERTY USE_FOLDERS YES)
-if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
-	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
-	add_subdirectory(source/JUCE)
-	if(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
-		add_subdirectory(source/clap-juce-extensions)
-	endif()
-	add_subdirectory(source/jucePluginLib)
-	add_subdirectory(source/juceUiLib)
-	add_subdirectory(source/jucePluginEditorLib)
-	add_subdirectory(source/jucePlugin)
-	add_subdirectory(source/mqJucePlugin)
-endif()
-
-# ----------------- Console Programs
-
-add_subdirectory(source/virusTestConsole)
-add_subdirectory(source/logicAnalysisParser)
-add_subdirectory(source/virusIntegrationTest)
-
-# needed for mQ test console
-set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
-set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
-set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
-add_subdirectory(source/cpp-terminal)
-
-if(NOT ANDROID)
-	add_subdirectory(source/portmidi)
-endif()
-
-set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
-add_subdirectory(source/portaudio)
-
-add_subdirectory(source/mqConsoleLib)
-add_subdirectory(source/mqTestConsole)
-
-# ----------------- mQ VST2 Plugin
-
-if(MQ_VST2)
-	add_subdirectory(source/vstsdk2.4.2)
-	add_subdirectory(source/mqVst2)
-endif()
+add_subdirectory(source)
 
 # ----------------- CPack
 
