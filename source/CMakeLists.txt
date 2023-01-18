@@ -79,10 +79,10 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 
 	# ----------------- mQ VST2 Plugin
 
-	if(JUCE_GLOBAL_VST2_SDK_PATH)
-		add_subdirectory(vstsdk2.4.2)
-		add_subdirectory(mqVst2)
-	endif()
+	#if(JUCE_GLOBAL_VST2_SDK_PATH)
+	#	add_subdirectory(vstsdk2.4.2)
+	#	add_subdirectory(mqVst2)
+	#endif()
 
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		add_subdirectory(mqJucePlugin)

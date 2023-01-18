@@ -26,4 +26,4 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(mqTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
-install(TARGETS mqTestConsole DESTINATION . COMPONENT STANDALONE)
+#install(TARGETS mqTestConsole DESTINATION . COMPONENT STANDALONE)
