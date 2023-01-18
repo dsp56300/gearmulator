@@ -38,4 +38,4 @@ include(skins/Trancy/assets.cmake)
 
 juce_add_binary_data(jucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
 
-createJucePluginWithFX(jucePlugin "DSP56300Emu" "TusV" "TusF" jucePlugin_BinaryData virusLib)
+createJucePluginWithFX(jucePlugin "Osirus" "TusV" "TusF" jucePlugin_BinaryData virusLib)
