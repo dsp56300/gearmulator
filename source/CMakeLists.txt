@@ -38,6 +38,8 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(jucePluginLib)
 	add_subdirectory(juceUiLib)
 	add_subdirectory(jucePluginEditorLib)
+	
+	include(juce.cmake)
 endif()
 
 # ----------------- Synth Osirus
