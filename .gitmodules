@@ -10,3 +10,6 @@
 [submodule "source/mc68k"]
 	path = source/mc68k
 	url = https://github.com/dsp56300/mc68k.git
+[submodule "source/clap-juce-extensions"]
+	path = source/clap-juce-extensions
+	url = https://github.com/free-audio/clap-juce-extensions

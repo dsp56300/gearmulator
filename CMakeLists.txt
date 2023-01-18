@@ -5,15 +5,18 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.24)
+project(gearmulator VERSION 1.2.26)
 
 include(base.cmake)
+include(CTest)
+include(${CMAKE_CURRENT_LIST_DIR}/scripts/rclone.cmake)
 
 set(ASMJIT_STATIC TRUE)
 set(ASMJIT_NO_INSTALL TRUE)
 set(BUILD_SHARED_LIBS OFF)
 
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
+option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
 
 add_subdirectory(source/dsp56300/source)
 add_subdirectory(source/synthLib)
@@ -23,8 +26,22 @@ add_subdirectory(source/libresample)
 add_subdirectory(source/mc68k)
 add_subdirectory(source/mqLib)
 
-if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
-	set(JUCE_GLOBAL_VST2_SDK_PATH ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
+
+# ----------------- Try to install VST2 SDK
+
+set(VST2SDK_TESTFILE ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/public.sdk/source/vst2.x/audioeffect.h)
+set(VST2SDK_FOLDER ${CMAKE_CURRENT_SOURCE_DIR}/source/vstsdk2.4.2/)
+
+if(NOT EXISTS ${VST2SDK_TESTFILE})
+	if(EXISTS ${RCLONE_CONF})
+		copyDataFrom("vstsdk2.4.2/" "${CMAKE_CURRENT_LIST_DIR}/source/vstsdk2.4.2/")
+	else()
+		message(WARNING "rclone.conf not found, unable to copy VST2 SDK")
+	endif()
+endif()
+
+if(EXISTS ${VST2SDK_TESTFILE})
+	set(JUCE_GLOBAL_VST2_SDK_PATH ${VST2SDK_FOLDER})
 	set(MQ_VST2 TRUE)
 endif()
 
@@ -34,6 +51,9 @@ set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 if(${PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON CACHE BOOL "" FORCE)
 	add_subdirectory(source/JUCE)
+	if(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
+		add_subdirectory(source/clap-juce-extensions)
+	endif()
 	add_subdirectory(source/jucePluginLib)
 	add_subdirectory(source/juceUiLib)
 	add_subdirectory(source/jucePluginEditorLib)
