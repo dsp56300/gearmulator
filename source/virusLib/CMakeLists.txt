@@ -3,7 +3,11 @@ project(virusLib)
 
 add_library(virusLib STATIC)
 
-option(VIRUS_SUPPORT_TI "Support Virus TI family" off)
+if(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
+	set(VIRUS_SUPPORT_TI on)
+else
+	set(VIRUS_SUPPORT_TI off)
+endif()
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h)
 
