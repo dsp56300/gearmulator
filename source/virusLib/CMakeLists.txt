@@ -5,7 +5,7 @@ add_library(virusLib STATIC)
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 	set(VIRUS_SUPPORT_TI on)
-else
+else()
 	set(VIRUS_SUPPORT_TI off)
 endif()
 
