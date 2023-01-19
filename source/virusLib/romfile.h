@@ -107,7 +107,7 @@ public:
 
 	static constexpr uint32_t getRomSizeModelDInstaller()
 	{
-		return 1024 * 1024 * 8;
+		return 1024 * 1024 * 7;
 	}
 
 	static constexpr uint32_t getRomSizeModelABC()
