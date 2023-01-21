@@ -13,7 +13,7 @@ namespace jucePluginEditorLib
 	PatchBrowser::PatchBrowser(const Editor& _editor, pluginLib::Controller& _controller, juce::PropertiesFile& _config, const std::initializer_list<ColumnDefinition>& _columns)
 		: m_editor(_editor), m_controller(_controller)
 		, m_properties(_config)
-		, m_fileFilter("*.syx;*.mid;*.midi", "*", "Patch Dumps")
+		, m_fileFilter("*.syx;*.mid;*.midi;*.vstpreset;*.fxb;*.fxp", "*", "Patch Dumps")
 		, m_bankList(FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles, File::getSpecialLocation(File::SpecialLocationType::currentApplicationFile), &m_fileFilter, nullptr)
 		, m_search("Search Box")
 		, m_patchList("Patch Browser")
@@ -156,7 +156,10 @@ namespace jucePluginEditorLib
 			return load(_result, _dedupeChecksums, packets);
 		}
 
-		return 0;
+		std::vector<std::vector<uint8_t>> packets;
+		synthLib::MidiToSysex::extractSysexFromFile(packets, file.getFullPathName().toStdString());
+
+		return load(_result, _dedupeChecksums, packets);
 	}
 
 	bool PatchBrowser::selectPrevNextPreset(int _dir)
@@ -221,7 +224,7 @@ namespace jucePluginEditorLib
 	{
 		const auto ext = file.getFileExtension().toLowerCase();
 
-		if (file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid")
+		if (file.existsAsFile() && ext == ".syx" || ext == ".midi" || ext == ".mid" || ext == ".fxb" || ext == ".fxp" || ext == ".vstpreset")
 		{
 			m_properties.setValue("virus_selected_file", file.getFileName());
 
