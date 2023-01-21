@@ -921,7 +921,12 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		}
 	}
 
-	if(events.empty())
+	return setState(events);
+}
+
+bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
+{
+	if(_events.empty())
 		return false;
 
 	// delay all preset loads until everything is loaded
@@ -929,10 +934,17 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 	std::vector<SMidiEvent> unusedResponses;
 
-	for (const auto& event : events)
+	for (const auto& event : _events)
 	{
-		sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
-		unusedResponses.clear();
+		if(!event.sysex.empty())
+		{
+			sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
+			unusedResponses.clear();
+		}
+		else
+		{
+			sendMIDI(event);
+		}
 	}
 
 	m_loadingState = false;
