@@ -544,6 +544,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			buildGlobalResponses();
 			break;
 		case REQUEST_TOTAL:
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				return enqueue();
 			buildTotalResponse();
 			break;
 		case REQUEST_ARRANGEMENT:
