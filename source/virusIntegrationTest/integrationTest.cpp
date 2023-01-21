@@ -266,7 +266,7 @@ int IntegrationTest::runCompare()
 
 		if(b != a)
 		{
-			std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << (i>>1) << std::endl;
+			std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << (i>>1) << ", ROM " << m_romFile << ", preset " << m_presetName << std::endl;
 			return -2;
 		}
 
@@ -274,7 +274,7 @@ int IntegrationTest::runCompare()
 		ptrB += 3;
 	}
 
-	std::cout << "Test succeeded, compared " << sampleCount << " samples" << std::endl;
+	std::cout << "Test succeeded, compared " << sampleCount << " samples, ROM " << m_romFile << ", preset " << m_presetName << std::endl;
 	return 0;
 }
 
