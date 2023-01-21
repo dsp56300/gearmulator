@@ -22,6 +22,9 @@ namespace virusLib
 
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
+		bool setStateFromUnknownCustomData(const std::vector<uint8_t>& _state) override;
+
+		static bool parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const std::vector<uint8_t>& _state);
 
 		uint32_t getInternalLatencyMidiToOutput() const override;
 		uint32_t getInternalLatencyInputToOutput() const override;

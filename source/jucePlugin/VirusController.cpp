@@ -50,8 +50,9 @@ namespace Virus
     	registerParams(p);
 
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
-		const auto& params = findSynthParam(0, 0x72, 0x7a);
-		for (const auto& parameter : params)
+        const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
+		auto* parameter = getParameter(paramIdx);
+        if(parameter)
 		{
 			parameter->onValueChanged.emplace_back(std::make_pair(0, [this] {
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;

@@ -674,6 +674,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			buildGlobalResponses();
 			break;
 		case REQUEST_TOTAL:
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				return enqueue();
 			buildTotalResponse();
 			break;
 		case REQUEST_ARRANGEMENT:
@@ -998,16 +1000,13 @@ void Microcontroller::process(size_t _size)
 
 	std::lock_guard lock(m_mutex);
 
-	if(m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
+	if(m_loadingState || m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
 		return;
 
-	if(!m_pendingPresetWrites.empty())
-	{
-		const auto preset = m_pendingPresetWrites.front();
-		m_pendingPresetWrites.pop_front();
+	const auto preset = m_pendingPresetWrites.front();
+	m_pendingPresetWrites.pop_front();
 
-		sendPreset(preset.program, preset.data, preset.isMulti);
-	}
+	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
@@ -1057,7 +1056,12 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		}
 	}
 
-	if(events.empty())
+	return setState(events);
+}
+
+bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
+{
+	if(_events.empty())
 		return false;
 
 	// delay all preset loads until everything is loaded
@@ -1065,10 +1069,17 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 	std::vector<SMidiEvent> unusedResponses;
 
-	for (const auto& event : events)
+	for (const auto& event : _events)
 	{
-		sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
-		unusedResponses.clear();
+		if(!event.sysex.empty())
+		{
+			sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
+			unusedResponses.clear();
+		}
+		else
+		{
+			sendMIDI(event);
+		}
 	}
 
 	m_loadingState = false;
