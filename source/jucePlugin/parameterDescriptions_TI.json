@@ -157,7 +157,7 @@
 		{"page":112, "index":109, "name":"Chorus/LowHigh Bal", "displayName":"Chorus/LowHigh Balance", "min":0, "max":127, "default":0, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":true, "isBool":false, "isBipolar":true},
 		{"page":112, "index":110, "name":"Chorus Lfo Shape", "displayName":"Chorus/LFO Shape", "min":0, "max":5, "default":1, "toText":"lfoShape", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":111, "name":"Chorus/X Over", "displayName":"Chorus/X Over", "min":0, "max":127, "default":64, "toText":"unsignedZero", "isPublic":true, "isDiscrete":true, "isBool":false},
-		{"page":112, "index":112, "name":"Delay Mode", "displayName":"Delay Mode", "min":1, "max":22, "default":1, "toText":"delayMode", "isPublic":true, "isDiscrete":true, "isBool":false},
+		{"page":112, "index":112, "name":"Delay Mode", "displayName":"Delay Mode", "min":0, "max":22, "default":1, "toText":"delayMode", "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":112, "index":113, "name":"Delay Send", "displayName":"Delay Send", "min":0, "max":127, "default":0, "toText":"send", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":114, "name":"Delay/Tape Delay Time", "displayName":"Delay Tape Delay Time (ms)", "min":0, "max":127, "default":64, "toText":"delayTime", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":114, "name":"Delay Time", "displayName":"Delay Time (ms)", "min":0, "max":127, "default":64, "toText":"delayTime", "isPublic":true, "isDiscrete":false, "isBool":false},
