@@ -864,16 +864,13 @@ void Microcontroller::process(size_t _size)
 
 	std::lock_guard lock(m_mutex);
 
-	if(m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
+	if(m_loadingState || m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
 		return;
 
-	if(!m_pendingPresetWrites.empty())
-	{
-		const auto preset = m_pendingPresetWrites.front();
-		m_pendingPresetWrites.pop_front();
+	const auto preset = m_pendingPresetWrites.front();
+	m_pendingPresetWrites.pop_front();
 
-		sendPreset(preset.program, preset.data, preset.isMulti);
-	}
+	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
