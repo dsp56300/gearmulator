@@ -101,13 +101,16 @@ namespace synthLib
 		if(!m_device)
 			return false;
 
-		if(_state.size() < 2)
+		if(_state.empty())
 			return false;
+
+		if(_state.size() < 2)
+			return m_device->setStateFromUnknownCustomData(_state);
 
 		const auto version = _state[0];
 
 		if(version != g_stateVersion)
-			return false;
+			return m_device->setStateFromUnknownCustomData(_state);
 
 		const auto stateType = static_cast<StateType>(_state[1]);
 

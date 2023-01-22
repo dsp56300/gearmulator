@@ -82,6 +82,93 @@ namespace virusLib
 		return m_mc->setState(_state, _type);
 	}
 
+	bool Device::setStateFromUnknownCustomData(const std::vector<uint8_t>& _state)
+	{
+		std::vector<synthLib::SMidiEvent> messages;
+		if(!parseTIcontrolPreset(messages, _state))
+			return false;
+		return m_mc->setState(messages);
+	}
+
+	bool Device::parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const std::vector<uint8_t>& _state)
+	{
+		if(_state.size() < 8)
+			return false;
+
+		auto readPos = static_cast<uint32_t>(_state.size());
+
+		for(uint32_t i=0; i<_state.size() - 8; ++i)
+		{
+			if(_state[i] == 'M' && _state[i+1] == 'I' && _state[i+2] == 'D' && _state[i+3] == 'I')
+			{
+				readPos = i + 4;
+				break;
+			}
+		}
+
+		if(readPos >= _state.size())
+			return false;
+
+		auto readLen = [&_state](const size_t _offset) -> uint32_t
+		{
+			if(_offset + 4 > _state.size())
+				return 0;
+			const uint32_t o =
+				(static_cast<uint32_t>(_state[_offset+0]) << 24) | 
+				(static_cast<uint32_t>(_state[_offset+1]) << 16) |
+				(static_cast<uint32_t>(_state[_offset+2]) << 8) |
+				(static_cast<uint32_t>(_state[_offset+3]));
+			return o;
+		};
+
+		auto nextLen = [&readPos, &readLen]() -> uint32_t
+		{
+			const auto len = readLen(readPos);
+			readPos += 4;
+			return len;
+		};
+
+		const auto dataLen = nextLen();
+
+		if(dataLen + readPos > _state.size())
+			return false;
+
+		const auto controllerAssignmentsLen = nextLen();
+
+		readPos += controllerAssignmentsLen;
+		
+		while(readPos < _state.size())
+		{
+			const auto midiDataLen = nextLen();
+
+			if(!midiDataLen)
+				break;
+
+			if((readPos + midiDataLen) > _state.size())
+				return false;
+
+			synthLib::SMidiEvent& e = _events.emplace_back();
+
+			e.sysex.assign(_state.begin() + readPos, _state.begin() + readPos + midiDataLen);
+
+			if(e.sysex.front() != 0xf0)
+			{
+				assert(e.sysex.size() <= 3);
+				e.a = e.sysex[0];
+				if(e.sysex.size() > 1)
+					e.b = e.sysex[1];
+				if(e.sysex.size() > 2)
+					e.c = e.sysex[2];
+
+				e.sysex.clear();
+			}
+
+			readPos += midiDataLen;
+		}
+
+		return true;
+	}
+
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples

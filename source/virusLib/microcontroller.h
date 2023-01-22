@@ -41,6 +41,7 @@ public:
 
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
+	bool setState(const std::vector<synthLib::SMidiEvent>& _events);
 
 	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 

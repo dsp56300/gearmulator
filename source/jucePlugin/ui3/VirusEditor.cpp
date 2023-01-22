@@ -55,8 +55,8 @@ namespace genericVirusUI
 
 		if(m_playModeSingle && m_playModeMulti)
 		{
-			m_playModeSingle->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeSingle); };
-			m_playModeMulti->onClick = [this]{ setPlayMode(virusLib::PlayMode::PlayModeMulti); };
+			m_playModeSingle->onClick = [this]{ if(m_playModeSingle->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeSingle); };
+			m_playModeMulti->onClick = [this]{ if(m_playModeMulti->getToggleState()) setPlayMode(virusLib::PlayMode::PlayModeMulti); };
 		}
 		else
 		{

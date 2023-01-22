@@ -4,6 +4,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include "os.h"
+
 namespace synthLib
 {
 #ifdef _MSC_VER
@@ -158,6 +160,22 @@ namespace synthLib
 				break;
 			}
 		}
+	}
+
+	bool MidiToSysex::extractSysexFromFile(std::vector<std::vector<uint8_t>>& _messages, const std::string& _filename)
+	{
+		std::vector<uint8_t> data;
+
+		if(!synthLib::readFile(data, _filename))
+			return false;
+
+		return extractSysexFromData(_messages, data);
+	}
+
+	bool MidiToSysex::extractSysexFromData(std::vector<std::vector<uint8_t>>& _messages, const std::vector<uint8_t>& _data)
+	{
+		splitMultipleSysex(_messages, _data);
+		return !_messages.empty();
 	}
 
 	bool MidiToSysex::checkChunk(FILE* hFile, const char* _pCompareChunk)
