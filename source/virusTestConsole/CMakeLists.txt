@@ -17,10 +17,10 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
-install(TARGETS virusTestConsole DESTINATION . COMPONENT OsirusTestConsole)
+install(TARGETS virusTestConsole DESTINATION . COMPONENT OsTIrusTestConsole)
 
 if(MSVC)
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsirusTestConsole)
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsTIrusTestConsole)
 else()
-	install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsirusTestConsole)
+	install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsTIrusTestConsole)
 endif()
