@@ -119,6 +119,12 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	bool PatchBrowser::loadUnkownData(std::vector<std::vector<unsigned char>>& _result, const std::string& _filename)
+	{
+		synthLib::MidiToSysex::extractSysexFromFile(_result, _filename);
+		return !_result.empty();
+	}
+
 	uint32_t PatchBrowser::loadBankFile(PatchList& _result, std::set<std::string>* _dedupeChecksums, const File& file)
 	{
 		const auto ext = file.getFileExtension().toLowerCase();
@@ -157,8 +163,8 @@ namespace jucePluginEditorLib
 		}
 
 		std::vector<std::vector<uint8_t>> packets;
-		synthLib::MidiToSysex::extractSysexFromFile(packets, file.getFullPathName().toStdString());
-
+		if(!loadUnkownData(packets, file.getFullPathName().toStdString()))
+			return false;
 		return load(_result, _dedupeChecksums, packets);
 	}
 
