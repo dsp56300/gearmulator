@@ -14,7 +14,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOUR
 set(SOURCES
 	buildconfig.h
 	buildconfig.h.in
-	demopacketvalidator.cpp demopacketvalidator.h
 	demoplayback.cpp demoplayback.h
 	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
@@ -28,6 +27,7 @@ set(SOURCES
 	romfile.cpp romfile.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
+	midiFileToRomData.cpp midiFileToRomData.h
 	unpacker.cpp unpacker.h
 	utils.h
 )

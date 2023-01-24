@@ -49,9 +49,8 @@ public:
 
 	using TPreset = std::array<uint8_t, 512>;
 
-	static void dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename);
-
-	explicit ROMFile(const std::string& _path, TIModel _wantedTIModel = TIModel::Snow);
+	explicit ROMFile(const std::string& _path, Model _model = Model::ABC, TIModel _wantedTIModel = TIModel::Snow);
+	explicit ROMFile(std::vector<uint8_t> _data, TIModel _wantedTIModel = TIModel::Snow);
 
 	bool getMulti(int _presetNumber, TPreset& _out) const;
 	bool getSingle(int _bank, int _presetNumber, TPreset& _out) const;
@@ -122,23 +121,31 @@ public:
 
 	static std::string findROM();
 
+	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, size_t _expectedSizeMin, size_t _expectedSizeMax);
+
 	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
+
+	std::string getFilename() const { return isValid() ? m_romFileName : std::string(); }
 
 private:
 	std::vector<Chunk> readChunks(std::istream& _file, TIModel _wantedTIModel);
 	bool loadPresetFiles();
 	bool loadPresetFile(std::istream& _file);
 
-	BootRom bootRom;
-	std::vector<uint32_t> commandStream;
+	bool initialize();
 
-	const std::string m_file;
+	BootRom bootRom;
+	std::vector<uint32_t> m_commandStream;
+
 	Model m_model = Model::Invalid;
 	TIModel m_tiModel = TIModel::TI;
 
 	std::vector<TPreset> m_singles;
 	std::vector<TPreset> m_multis;
 	std::vector<uint8_t> m_demoData;
+
+	std::string m_romFileName;
+	std::vector<uint8_t> m_romFileData;
 };
 
 }

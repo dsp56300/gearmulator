@@ -12,6 +12,8 @@
 
 #include "../synthLib/os.h"
 
+#include "midiFileToRomData.h"
+
 #include <cstring>	// memcpy
 
 #include "demoplaybackTI.h"
@@ -23,65 +25,124 @@
 
 namespace virusLib
 {
-void ROMFile::dumpToBin(const std::vector<dsp56k::TWord>& _data, const std::string& _filename)
+ROMFile::ROMFile(const std::string& _path, const Model _model/* = Model::ABC*/, TIModel _wantedTIModel) : m_tiModel(_wantedTIModel)
 {
-	FILE* hFile = fopen(_filename.c_str(), "wb");
-
-	for(size_t i=0; i<_data.size(); ++i)
+	if(!_path.empty())
 	{
-		const auto d = _data[i];
-		const auto hsb = (d >> 16) & 0xff;
-		const auto msb = (d >> 8) & 0xff;
-		const auto lsb = d & 0xff;
-		fwrite(&hsb, 1, 1, hFile);
-		fwrite(&msb, 1, 1, hFile);
-		fwrite(&lsb, 1, 1, hFile);
+		m_romFileName = _path;
+
+		// Open file
+		LOG("Loading ROM at " << _path);
+
+		if(!synthLib::readFile(m_romFileData, _path))
+		{
+			LOG("Failed to load ROM at '" << _path << "'");
+	#ifdef _WIN32
+			const auto errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
+			::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
+	#endif
+			return;
+		}
 	}
-	fclose(hFile);
+	else
+	{
+		const auto expectedSize = _model == Model::ABC ? 512 * 1024 : 0;
+
+		if(!loadROMData(m_romFileName, m_romFileData, expectedSize, expectedSize))
+			return;
+	}
+
+	if(initialize())
+		printf("ROM File: %s\n", m_romFileName.c_str());
 }
 
-ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_path), m_tiModel(_wantedTIModel)
+ROMFile::ROMFile(std::vector<uint8_t> _data, const TIModel _wantedTiModel) : m_tiModel(_wantedTiModel), m_romFileData(std::move(_data))
 {
-	LOG("Init access virus");
+	initialize();
+}
 
-	// Open file
-	LOG("Loading ROM at " << m_file);
-	std::ifstream file(this->m_file, std::ios::binary | std::ios::ate);
-	if (!file.is_open()) {
-		LOG("Failed to load ROM at '" << m_file << "'");
-#ifdef _WIN32
-		const auto errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
-		::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
-#endif
-		return;
+bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, const size_t _expectedSizeMin, const size_t _expectedSizeMax)
+{
+	// try binary roms first
+	const auto file = findROM();
+
+	if(!file.empty())
+	{
+		if(synthLib::readFile(_loadedData, file) && !_loadedData.empty())
+		{
+			_loadedFile = file;
+			return true;
+		}
 	}
 
-	std::istream *dsp = &file;
+	// if that didn't work, load an OS update as rom
+	auto loadMidiAsRom = [&](const std::string& _path)
+	{
+		_loadedFile.clear();
+		_loadedData.clear();
+
+		std::vector<std::string> files;
+
+		synthLib::findFiles(files, _path, ".mid", 512 * 1024, 600 * 1024);
+		
+		bool gotSector0 = false;
+		bool gotSector8 = false;
+
+		for (const auto& f : files)
+		{
+			MidiFileToRomData loader;
+			if(!loader.load(f) || loader.getData().size() != 256 * 1024)
+				continue;
+			if(loader.getFirstSector() == 0)
+			{
+				if(gotSector0)
+					continue;
+				gotSector0 = true;
+				_loadedFile = f;
+				_loadedData.insert(_loadedData.begin(), loader.getData().begin(), loader.getData().end());
+			}
+			else if(loader.getFirstSector() == 8)
+			{
+				if(gotSector8)
+					continue;
+				gotSector8 = true;
+				_loadedData.insert(_loadedData.end(), loader.getData().begin(), loader.getData().end());
+			}
+		}
+		return _loadedData.size() >= 256 * 1024;
+	};
+
+	if(loadMidiAsRom(synthLib::getModulePath()))
+		return true;
+
+	return loadMidiAsRom(synthLib::getModulePath(false));
+}
+
+bool ROMFile::initialize()
+{
+	std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
 
 #if VIRUS_SUPPORT_TI
 	ROMUnpacker::Firmware fw;
 
-	std::unique_ptr<imemstream> memStream;
-
 	// Check if we are dealing with a TI installer file, if so, unpack it first
-	if (ROMUnpacker::isValidInstaller(file))
+	if (ROMUnpacker::isValidInstaller(*dsp))
 	{
-		fw = ROMUnpacker::getFirmware(file, _wantedTIModel);
+		fw = ROMUnpacker::getFirmware(*dsp, m_tiModel);
 		if (!fw.isValid())
 		{
 			LOG("Could not unpack ROM file")
-			return;
+			return false;
 		}
 
 		// Wrap into a stream so we can pass it into readChunks
-		memStream.reset(new imemstream(fw.DSP));
-		dsp = memStream.get();
+		dsp.reset(new imemstream(fw.DSP));
 	}
 #endif
-	const auto chunks = readChunks(*dsp, _wantedTIModel);
+	const auto chunks = readChunks(*dsp, m_tiModel);
 
 	if (chunks.empty())
-		return;
+		return false;
 
 	bootRom.size = chunks[0].items[0];
 	bootRom.offset = chunks[0].items[1];
@@ -98,17 +159,13 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 	for (size_t j = 0; j < chunks.size(); j++)
 	{
 		for (; i < chunks[j].items.size(); i++)
-			commandStream.emplace_back(chunks[j].items[i]);
+			m_commandStream.emplace_back(chunks[j].items[i]);
 		i = 0;
 	}
 
-//	dumpToBin(bootRom.data, _path + "_bootloader.bin");
-//	dumpToBin(commandStream, _path + "_commandstream.bin");
-
-	printf("ROM File: %s\n", _path.c_str());
 	printf("Program BootROM size = 0x%x\n", bootRom.size);
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
-	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(commandStream.size()));
+	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(m_commandStream.size()));
 
 #if VIRUS_SUPPORT_TI
 	if(isTIFamily())
@@ -126,8 +183,8 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 				m_demoData.insert(m_demoData.begin(), preset.begin(), preset.end());
 				if(DemoPlaybackTI::findDemoData(m_demoData))
 					break;
-				else
-					m_demoData.clear();
+
+				m_demoData.clear();
 			}
 		}
 		else
@@ -172,13 +229,12 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 		}
 
 		// try to load the presets from the other roms, too
-		auto loadFirmwarePresets = [&file, _wantedTIModel, this](const TIModel _model)
+		auto loadFirmwarePresets = [this](const TIModel _model)
 		{
-			if(_wantedTIModel == _model)
+			if(m_tiModel == _model)
 				return;
-			file.clear();
-			file.seekg(0);
-			const auto firmware = ROMUnpacker::getFirmware(file, _model);
+			const std::unique_ptr<imemstream> file(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
+			const auto firmware = ROMUnpacker::getFirmware(*file, _model);
 			if(!firmware.Presets.empty())
 			{
 				for (auto& presetFile: firmware.Presets)
@@ -194,6 +250,7 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_file(_pat
 		loadFirmwarePresets(TIModel::Snow);
 	}
 #endif
+	return true;
 }
 
 std::string ROMFile::findROM()
@@ -217,8 +274,8 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 	_file.seekg(0, std::ios_base::end);
 	const auto fileSize = _file.tellg();
 
-	uint32_t offset = 0x70000;
-	int lastChunkId = 14;
+	uint32_t offset;
+	int lastChunkId;
 
 	if(fileSize == 1024 * 1024)
 	{
@@ -235,7 +292,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
-	else if (fileSize == 1024 * 512)
+	else if (fileSize == 1024 * 512 || fileSize == 1024 * 256)	// the latter is a ROM without presets
 	{
 		// ABC
 		m_model = Model::ABC;
@@ -375,7 +432,7 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	// Attach command stream
 	std::thread feedCommandStream([&]()
 	{
-		periph.getHDI08().writeRX(commandStream);
+		periph.getHDI08().writeRX(m_commandStream);
 	});
 
 	// Initialize the DSP
@@ -415,18 +472,10 @@ bool ROMFile::getMulti(const int _presetNumber, TPreset& _out) const
 
 bool ROMFile::getPreset(const uint32_t _offset, TPreset& _out) const
 {
-	// Open file
-	std::ifstream file(this->m_file, std::ios::binary | std::ios::ate);
-	if(!file.is_open())
-	{
-		LOG("Failed to open ROM file " << m_file)
+	if(_offset + getSinglePresetSize() > m_romFileData.size())
 		return false;
-	}
-	file.seekg(_offset);
-	if(file.tellg() != _offset)
-		return false;
-	file.read(reinterpret_cast<char *>(_out.data()), getSinglePresetSize());
-	file.close();
+
+	memcpy(_out.data(), &m_romFileData[_offset], getSinglePresetSize());
 	return true;
 }
 

@@ -198,6 +198,14 @@ namespace synthLib
     std::string findFile(const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
     {
         std::vector<std::string> files;
+        if(!findFiles(files, _rootPath, _extension, _minSize, _maxSize))
+            return {};
+        return files.front();
+    }
+
+    bool findFiles(std::vector<std::string>& _files, const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
+    {
+        std::vector<std::string> files;
 
         getDirectoryEntries(files, _rootPath);
 
@@ -208,8 +216,8 @@ namespace synthLib
 
             if (!_minSize && !_maxSize)
             {
-	            LOG("Found ROM at path " << file);
-                return file;
+                _files.push_back(file);
+                continue;
             }
 
             FILE *hFile = fopen(file.c_str(), "rb");
@@ -225,11 +233,9 @@ namespace synthLib
             if (_maxSize && size > _maxSize)
 	            continue;
 
-            LOG("Found ROM at path " << file);
-
-            return file;
+            _files.push_back(file);
         }
-        return {};
+        return !_files.empty();
     }
 
 	std::string findROM(const size_t _minSize, const size_t _maxSize)
