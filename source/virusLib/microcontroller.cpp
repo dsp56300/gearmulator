@@ -133,6 +133,9 @@ void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t f
 
 bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, const bool isMulti)
 {
+	if(!isValid(preset))
+		return false;
+
 	std::lock_guard lock(m_mutex);
 
 	if(m_loadingState || waitingForPresetReceiveConfirmation())
@@ -311,6 +314,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	auto buildPresetResponse = [&](const uint8_t _type, const BankNumber _bank, const uint8_t _program, const TPreset& _dump)
 	{
+		if(!isValid(_dump))
+			return;
+
 		SMidiEvent ev;
 		ev.source = _source;
 
@@ -682,6 +688,8 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, con
 
 bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const
 {
+	_result[0] = 0;
+
 	if (_bank == BankNumber::EditBuffer)
 		return false;
 
@@ -701,6 +709,8 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 
 bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	_data[0] = 0;
+
 	if (_bank == BankNumber::EditBuffer)
 	{
 		receiveUpgradedPreset();
@@ -1146,4 +1156,8 @@ void Microcontroller::receiveUpgradedPreset()
 	}
 }
 
+bool Microcontroller::isValid(const TPreset& _preset)
+{
+	return getPresetVersion(_preset) > 0;
+}
 }

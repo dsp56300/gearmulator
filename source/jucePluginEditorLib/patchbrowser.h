@@ -44,6 +44,7 @@ namespace jucePluginEditorLib
 
 		uint32_t load(PatchList& _result, std::set<std::string>* _dedupeChecksums, const std::vector<std::vector<uint8_t>>& _packets);
 		bool load(PatchList& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data);
+		virtual bool loadUnkownData(std::vector<std::vector<uint8_t>>& _result, const std::string& _filename);
 		uint32_t loadBankFile(PatchList& _result, std::set<std::string>* _dedupeChecksums, const juce::File& file);
 
 	protected:

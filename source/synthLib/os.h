@@ -15,6 +15,7 @@ namespace synthLib
 	bool getDirectoryEntries(std::vector<std::string>& _files, const std::string& _folder);
 
     std::string findFile(const std::string& _extension, size_t _minSize, size_t _maxSize);
+    bool findFiles(std::vector<std::string>& _files, const std::string& _rootPath, const std::string& _extension, size_t _minSize, size_t _maxSize);
     std::string findFile(const std::string& _rootPath, const std::string& _extension, size_t _minSize, size_t _maxSize);
     std::string findROM(size_t _minSize, size_t _maxSize);
 	std::string findROM(size_t _expectedSize = 524288);

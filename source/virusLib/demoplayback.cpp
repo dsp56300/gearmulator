@@ -13,7 +13,7 @@
 
 #include <cstring> // memcpy
 
-#include "demopacketvalidator.h"
+#include "midiFileToRomData.h"
 
 namespace virusLib
 {
@@ -25,7 +25,7 @@ namespace virusLib
 		if(synthLib::hasExtension(_filename, ".bin"))
 		{
 			std::vector<uint8_t> data;
-			auto hFile = fopen(_filename.c_str(), "rb");
+			auto* hFile = fopen(_filename.c_str(), "rb");
 			if(!hFile)
 			{
 				LOG("Failed to open demo file " << _filename);
@@ -39,33 +39,14 @@ namespace virusLib
 			return loadBinData(data);
 		}
 
-		std::vector<uint8_t> sysex;
-
-		synthLib::MidiToSysex::readFile(sysex, _filename.c_str());
-
-		if(sysex.empty())
+		MidiFileToRomData romReader;
+		if(!romReader.load(_filename) || romReader.getData().empty())
 		{
-			LOG("Failed to load demo midi file " << _filename << ", no sysex data found in file");
+			LOG("Failed to load demo midi file " << _filename << ", no valid data found in file");
 			return false;
 		}
 
-		std::vector<std::vector<uint8_t>> packets;
-		synthLib::MidiToSysex::splitMultipleSysex(packets, sysex);
-
-		DemoPacketValidator validator;
-
-		for (const auto& packet : packets)
-			validator.add(packet);
-
-		if(!validator.isValid())
-		{
-			LOG("Packet validation failed, packets missing or invalid");
-			return false;
-		}
-
-		const auto& data = validator.getData();
-
-		return loadBinData(data);
+		return loadBinData(romReader.getData());
 	}
 
 	bool DemoPlayback::loadBinData(const std::vector<uint8_t>& _data)

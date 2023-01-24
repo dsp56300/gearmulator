@@ -94,7 +94,7 @@ namespace jucePluginEditorLib
 
 	bool PatchBrowser::load(PatchList& _result, std::set<std::string>* _dedupeChecksums, const std::vector<uint8_t>& _data)
 	{
-		auto* patch = createPatch();
+		auto patch = std::shared_ptr<Patch>(createPatch());
 		patch->sysex = _data;
 		patch->progNumber = static_cast<int>(_result.size());
 
@@ -103,7 +103,7 @@ namespace jucePluginEditorLib
 
 		if (!_dedupeChecksums)
 		{
-			_result.push_back(std::shared_ptr<Patch>(patch));
+			_result.emplace_back(std::move(patch));
 		}
 		else
 		{
@@ -112,11 +112,17 @@ namespace jucePluginEditorLib
 			if (_dedupeChecksums->find(md5) == _dedupeChecksums->end())
 			{
 				_dedupeChecksums->insert(md5);
-				_result.push_back(std::shared_ptr<Patch>(patch));
+				_result.emplace_back(std::move(patch));
 			}
 		}
 
 		return true;
+	}
+
+	bool PatchBrowser::loadUnkownData(std::vector<std::vector<unsigned char>>& _result, const std::string& _filename)
+	{
+		synthLib::MidiToSysex::extractSysexFromFile(_result, _filename);
+		return !_result.empty();
 	}
 
 	uint32_t PatchBrowser::loadBankFile(PatchList& _result, std::set<std::string>* _dedupeChecksums, const File& file)
@@ -157,8 +163,8 @@ namespace jucePluginEditorLib
 		}
 
 		std::vector<std::vector<uint8_t>> packets;
-		synthLib::MidiToSysex::extractSysexFromFile(packets, file.getFullPathName().toStdString());
-
+		if(!loadUnkownData(packets, file.getFullPathName().toStdString()))
+			return false;
 		return load(_result, _dedupeChecksums, packets);
 	}
 
