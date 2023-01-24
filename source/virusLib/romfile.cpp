@@ -89,7 +89,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 		for (const auto& f : files)
 		{
 			MidiFileToRomData loader;
-			if(!loader.load(f) || loader.getData().size() != 256 * 1024)
+			if(!loader.load(f) || loader.getData().size() != getRomSizeModelABC() / 2)
 				continue;
 			if(loader.getFirstSector() == 0)
 			{
@@ -107,7 +107,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 				_loadedData.insert(_loadedData.end(), loader.getData().begin(), loader.getData().end());
 			}
 		}
-		return _loadedData.size() >= 256 * 1024;
+		return gotSector0 && _loadedData.size() >= getRomSizeModelABC() / 2;
 	};
 
 	if(loadMidiAsRom(synthLib::getModulePath()))
