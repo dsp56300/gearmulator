@@ -29,22 +29,13 @@ int main(int _argc, char* _argv[])
 			return -1;
 		}
 	}
-
-	const auto romFile = findROM(0);
-
-	if(romFile.empty())
-	{
-		std::cout << "Unable to find ROM. Place a ROM file with .bin extension next to this program." << std::endl;
-		ConsoleApp::waitReturn();
-		return -1;
-	}
-
+	
 	std::unique_ptr<ConsoleApp> app;
-	app.reset(new ConsoleApp(romFile));
+	app.reset(new ConsoleApp({}));
 
 	if(!app->isValid())
 	{
-		std::cout << "ROM file " << romFile << " couldn't be loaded. Make sure tha the ROM file is valid" << std::endl;
+		std::cout << "ROM file couldn't be loaded. Make sure that the ROM file is valid" << std::endl;
 		ConsoleApp::waitReturn();
 		return -1;
 	}
