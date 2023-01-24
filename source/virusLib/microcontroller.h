@@ -82,23 +82,25 @@ private:
 	bool waitingForPresetReceiveConfirmation() const;
 	void receiveUpgradedPreset();
 
+	static bool isValid(const TPreset& _preset);
+
 	Hdi08List m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
 	std::vector<Hdi08MidiQueue> m_midiQueues;
 
 	const ROMFile& m_rom;
 
-	std::array<TPreset,128> m_multis;
+	std::array<TPreset,128> m_multis{};
 	TPreset m_multiEditBuffer;
 
 	std::array<uint32_t, 256> m_globalSettings;
 	std::vector<std::vector<TPreset>> m_singles;
 
 	// Multi mode
-	std::array<TPreset,16> m_singleEditBuffers;
+	std::array<TPreset,16> m_singleEditBuffers{};
 
 	// Single mode
-	TPreset m_singleEditBuffer;
+	TPreset m_singleEditBuffer{};
 	uint8_t m_currentBank = 0;
 	uint8_t m_currentSingle = 0;
 
