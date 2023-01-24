@@ -42,7 +42,7 @@ ROMFile::ROMFile(const std::string& _path, const Model _model/* = Model::ABC*/)
 	}
 	else
 	{
-		const auto expectedSize = _model == Model::ABC ? 512 * 1024 : 0;
+		const auto expectedSize = _model == Model::ABC ? getRomSizeModelABC() : 0;
 
 		if(!loadROMData(m_romFileName, m_romFileData, expectedSize, expectedSize))
 			return;
@@ -92,7 +92,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 		for (const auto& f : files)
 		{
 			MidiFileToRomData loader;
-			if(!loader.load(f) || loader.getData().size() != 256 * 1024)
+			if(!loader.load(f) || loader.getData().size() != getRomSizeModelABC() / 2)
 				continue;
 			if(loader.getFirstSector() == 0)
 			{
@@ -110,7 +110,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 				_loadedData.insert(_loadedData.end(), loader.getData().begin(), loader.getData().end());
 			}
 		}
-		return _loadedData.size() >= 256 * 1024;
+		return gotSector0 && _loadedData.size() >= getRomSizeModelABC() / 2;
 	};
 
 	if(loadMidiAsRom(synthLib::getModulePath()))
@@ -162,7 +162,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	uint32_t offset = 0x18000;
 	int lastChunkId = 4;
 
-	if (fileSize == 1024 * 512 || fileSize == 1024 * 256)	// the latter is a ROM without presets
+	if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
 	{
 		// ABC
 		m_model = Model::ABC;
