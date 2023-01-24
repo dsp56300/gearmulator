@@ -121,7 +121,7 @@ public:
 
 	static std::string findROM();
 
-	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, size_t _expectedSizeMin, size_t _expectedSizeMax);
+	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData);
 
 	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
 

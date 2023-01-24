@@ -46,9 +46,7 @@ ROMFile::ROMFile(const std::string& _path, const Model _model/* = Model::ABC*/, 
 	}
 	else
 	{
-		const auto expectedSize = _model == Model::ABC ? 512 * 1024 : 0;
-
-		if(!loadROMData(m_romFileName, m_romFileData, expectedSize, expectedSize))
+		if(!loadROMData(m_romFileName, m_romFileData))
 			return;
 	}
 
@@ -61,7 +59,7 @@ ROMFile::ROMFile(std::vector<uint8_t> _data, const TIModel _wantedTiModel) : m_t
 	initialize();
 }
 
-bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, const size_t _expectedSizeMin, const size_t _expectedSizeMax)
+bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData)
 {
 	// try binary roms first
 	const auto file = findROM();
@@ -265,7 +263,7 @@ std::string ROMFile::findROM()
 	if (!res.empty())
 		return res;
 
-	// other roms (B,c)
+	// other roms (B,C)
 	return synthLib::findROM(getRomSizeModelABC());
 }
 
@@ -277,7 +275,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 	uint32_t offset;
 	int lastChunkId;
 
-	if(fileSize == 1024 * 1024)
+	if(fileSize == getRomSizeModelD())
 	{
 		// D
 		switch (_wantedTIModel)
@@ -292,7 +290,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
-	else if (fileSize == 1024 * 512 || fileSize == 1024 * 256)	// the latter is a ROM without presets
+	else if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
 	{
 		// ABC
 		m_model = Model::ABC;
