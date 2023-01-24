@@ -25,7 +25,7 @@
 
 namespace virusLib
 {
-ROMFile::ROMFile(const std::string& _path, const Model _model/* = Model::ABC*/, TIModel _wantedTIModel) : m_tiModel(_wantedTIModel)
+ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_tiModel(_wantedTIModel)
 {
 	if(!_path.empty())
 	{

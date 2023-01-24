@@ -49,7 +49,7 @@ public:
 
 	using TPreset = std::array<uint8_t, 512>;
 
-	explicit ROMFile(const std::string& _path, Model _model = Model::ABC, TIModel _wantedTIModel = TIModel::Snow);
+	explicit ROMFile(const std::string& _path, TIModel _wantedTIModel = TIModel::Snow);
 	explicit ROMFile(std::vector<uint8_t> _data, TIModel _wantedTIModel = TIModel::Snow);
 
 	bool getMulti(int _presetNumber, TPreset& _out) const;

@@ -30,7 +30,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	, getConfigOptions())
-	, m_rom(std::string(), virusLib::ROMFile::Model::TI, virusLib::ROMFile::TIModel::TI)
+	, m_rom(std::string(), virusLib::ROMFile::TIModel::TI)
 	, m_device(m_rom), m_plugin(&m_device)
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
