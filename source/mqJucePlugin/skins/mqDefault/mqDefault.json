@@ -430,10 +430,14 @@
                         "parameter" : "O1PwmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1100.931",
@@ -482,10 +486,14 @@
                         "parameter" : "O1FmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 2",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1581.396",
@@ -709,10 +717,14 @@
                         "parameter" : "O2PwmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1100.931",
@@ -761,10 +773,14 @@
                         "parameter" : "O2FmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 2",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1581.396",
@@ -966,10 +982,14 @@
                         "parameter" : "O3PwmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1100.931",
@@ -1018,10 +1038,14 @@
                         "parameter" : "O3FmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 2",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1581.396",
@@ -1259,10 +1283,14 @@
                         "parameter" : "GlideMode"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Porta",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
@@ -1277,10 +1305,14 @@
                         "parameter" : "UnisonoCount"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Dual",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
@@ -1331,10 +1363,14 @@
                         "parameter" : "AmpModSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "LFO 3",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
@@ -1400,10 +1436,14 @@
                         "parameter" : "NoiseModeF1"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Ext L+R",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
@@ -1418,10 +1458,14 @@
                         "parameter" : "NoiseModeF2"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Ext L+R",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
@@ -1550,10 +1594,14 @@
                         "parameter" : "F1ModSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "685.89",
@@ -1585,10 +1633,14 @@
                         "parameter" : "F1FmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1092.99",
@@ -1620,10 +1672,14 @@
                         "parameter" : "F1PanModSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1500.09",
@@ -1874,10 +1930,14 @@
                         "parameter" : "F2ModSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "685.89",
@@ -1909,10 +1969,14 @@
                         "parameter" : "F2FmSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1092.99",
@@ -1944,10 +2008,14 @@
                         "parameter" : "F2PanModSource"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "Osc 1",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "1500.09",
@@ -2030,10 +2098,14 @@
                         "parameter" : "FilterEnvMode"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "ADSR",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2052.4",
@@ -2045,6 +2117,7 @@
                 {
                     "name" : "buttonH",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
@@ -2193,10 +2266,14 @@
                         "parameter" : "AmpEnvMode"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "ADSR",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2052.4",
@@ -2208,6 +2285,7 @@
                 {
                     "name" : "buttonH",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
@@ -2223,7 +2301,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "AmpEnvTriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2245,7 +2323,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "AmpEnvTriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2356,10 +2434,14 @@
                         "parameter" : "Env3Mode"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "ADSR",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2052.4",
@@ -2371,6 +2453,7 @@
                 {
                     "name" : "buttonH",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
@@ -2386,7 +2469,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Env3TriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2408,7 +2491,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Env3TriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2519,10 +2602,14 @@
                         "parameter" : "Env4Mode"
                     },
                     "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
                         "text" : "ADSR",
                         "textHeight" : "30",
                         "color" : "D1D1D1FF",
-                        "alignH" : "C",
+                        "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2052.4",
@@ -2534,6 +2621,7 @@
                 {
                     "name" : "buttonH",
                     "button" : {
+                        "isToggle" : "1",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "1",
@@ -2549,7 +2637,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Env4TriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2571,7 +2659,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "Env4TriggerMode"
+                        "parameter" : "FilterEnvTriggerMode"
                     }
                 },
                 {
@@ -2686,7 +2774,1938 @@
                 "width" : "2900",
                 "height" : "1525",
                 "texture" : "pageLfo"
-            }
+            },
+            "children" : [
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "396.095",
+                        "y" : "86.09998",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Clocked"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "558.4236",
+                        "y" : "102.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Clocked"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "806.095",
+                        "y" : "86.09998",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Sync"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "968.4236",
+                        "y" : "102.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Sync"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "35.5",
+                        "y" : "98.29999",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Fade"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "26.8335",
+                        "y" : "294.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1StartPhase"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8335",
+                        "y" : "294.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Speed"
+                    }
+                },
+                {
+                    "name" : "ledknob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "423.8335",
+                        "y" : "210.98",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_6",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "474.8336",
+                        "y" : "261.98",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "733.8336",
+                        "y" : "294.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1KeyTrack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "922.8336",
+                        "y" : "294.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1Delay"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "396.095",
+                        "y" : "601.1",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Clocked"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "558.4236",
+                        "y" : "617.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Clocked"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "806.095",
+                        "y" : "601.1",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Sync"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "968.4236",
+                        "y" : "617.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Sync"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "35.5",
+                        "y" : "613.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Fade"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "26.8335",
+                        "y" : "809.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2StartPhase"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8335",
+                        "y" : "809.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Speed"
+                    }
+                },
+                {
+                    "name" : "ledknob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "423.8335",
+                        "y" : "725.98",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_6",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "474.8336",
+                        "y" : "776.98",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "733.8336",
+                        "y" : "809.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2KeyTrack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "922.8336",
+                        "y" : "809.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Delay"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "396.095",
+                        "y" : "1116.1",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Clocked"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "558.4236",
+                        "y" : "1132.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Clocked"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "806.095",
+                        "y" : "1116.1",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Sync"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "968.4236",
+                        "y" : "1132.1",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Sync"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "35.5",
+                        "y" : "1128.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Fade"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "26.8335",
+                        "y" : "1324.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3StartPhase"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8335",
+                        "y" : "1324.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Speed"
+                    }
+                },
+                {
+                    "name" : "ledknob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "423.8335",
+                        "y" : "1240.98",
+                        "width" : "230",
+                        "height" : "230",
+                        "texture" : "ledcircle_6",
+                        "tileSizeX" : "512",
+                        "tileSizeY" : "512"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "474.8336",
+                        "y" : "1291.98",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Shape"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "733.8336",
+                        "y" : "1324.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3KeyTrack"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "922.8336",
+                        "y" : "1324.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3Delay"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "101.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "61.79999",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "101.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "230.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "191.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "230.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "360.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "320.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "360.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "489.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "450.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "489.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "619.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "579.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "619.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "748.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "709.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "748.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "878.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "838.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "878.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8FSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1263.667",
+                        "y" : "1007.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1481.75",
+                        "y" : "968.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8FAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8FDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1759.834",
+                        "y" : "1007.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod1Source1"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1122.667",
+                        "y" : "1248.48",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod1Operator"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1317.959",
+                        "y" : "1452.38",
+                        "width" : "195.2916",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod1Source2"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1122.667",
+                        "y" : "1371.28",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1360.067",
+                        "y" : "1242.4",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Mod1Constant"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod2Source1"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1578.25",
+                        "y" : "1248.48",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod2Operator"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1773.542",
+                        "y" : "1452.38",
+                        "width" : "195.2916",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod2Source2"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1578.25",
+                        "y" : "1371.28",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1815.65",
+                        "y" : "1242.4",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Mod2Constant"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "101.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "61.79999",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot1SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "101.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "230.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "191.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot2SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "230.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "360.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "320.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot3SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "360.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "489.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "450.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot4SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "489.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "619.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "579.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot5SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "619.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "748.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "709.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot6SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "748.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "878.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "838.8",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot7SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "878.3",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8SSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2174.834",
+                        "y" : "1007.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2392.917",
+                        "y" : "968.3",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8SAmount"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Slot8SDestination"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2671",
+                        "y" : "1007.8",
+                        "width" : "204",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod3Source1"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2033.834",
+                        "y" : "1248.48",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod3Operator"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2229.125",
+                        "y" : "1452.38",
+                        "width" : "195.2916",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod3Source2"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2033.834",
+                        "y" : "1371.28",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2271.234",
+                        "y" : "1242.4",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Mod3Constant"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod4Source1"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2489.417",
+                        "y" : "1248.48",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod4Operator"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2684.708",
+                        "y" : "1452.38",
+                        "width" : "195.2916",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "Mod4Source2"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2489.417",
+                        "y" : "1371.28",
+                        "width" : "200",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2726.817",
+                        "y" : "1242.4",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Mod4Constant"
+                    }
+                }
+            ]
         },
         {
             "name" : "pageFx",
@@ -2757,10 +4776,14 @@
                                 "parameter" : "MI0KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
@@ -2775,10 +4798,14 @@
                                 "parameter" : "MI0KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
@@ -2793,10 +4820,14 @@
                                 "parameter" : "MI0VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
@@ -2811,10 +4842,14 @@
                                 "parameter" : "MI0VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
@@ -2863,10 +4898,14 @@
                                 "parameter" : "MI0MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
@@ -2915,10 +4954,14 @@
                                 "parameter" : "MI1KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
@@ -2933,10 +4976,14 @@
                                 "parameter" : "MI1KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
@@ -2951,10 +4998,14 @@
                                 "parameter" : "MI1VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
@@ -2969,10 +5020,14 @@
                                 "parameter" : "MI1VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
@@ -3021,10 +5076,14 @@
                                 "parameter" : "MI1MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "1",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
@@ -3073,10 +5132,14 @@
                                 "parameter" : "MI2KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
@@ -3091,10 +5154,14 @@
                                 "parameter" : "MI2KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
@@ -3109,10 +5176,14 @@
                                 "parameter" : "MI2VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
@@ -3127,10 +5198,14 @@
                                 "parameter" : "MI2VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
@@ -3179,10 +5254,14 @@
                                 "parameter" : "MI2MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
@@ -3231,10 +5310,14 @@
                                 "parameter" : "MI3KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
@@ -3249,10 +5332,14 @@
                                 "parameter" : "MI3KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
@@ -3267,10 +5354,14 @@
                                 "parameter" : "MI3VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
@@ -3285,10 +5376,14 @@
                                 "parameter" : "MI3VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
@@ -3337,10 +5432,14 @@
                                 "parameter" : "MI3MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "3",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
@@ -3389,10 +5488,14 @@
                                 "parameter" : "MI4KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
@@ -3407,10 +5510,14 @@
                                 "parameter" : "MI4KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
@@ -3425,10 +5532,14 @@
                                 "parameter" : "MI4VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
@@ -3443,10 +5554,14 @@
                                 "parameter" : "MI4VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
@@ -3495,10 +5610,14 @@
                                 "parameter" : "MI4MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "4",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
@@ -3547,10 +5666,14 @@
                                 "parameter" : "MI5KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
@@ -3565,10 +5688,14 @@
                                 "parameter" : "MI5KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
@@ -3583,10 +5710,14 @@
                                 "parameter" : "MI5VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
@@ -3601,10 +5732,14 @@
                                 "parameter" : "MI5VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
@@ -3653,10 +5788,14 @@
                                 "parameter" : "MI5MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "5",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
@@ -3705,10 +5844,14 @@
                                 "parameter" : "MI6KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
@@ -3723,10 +5866,14 @@
                                 "parameter" : "MI6KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
@@ -3741,10 +5888,14 @@
                                 "parameter" : "MI6VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
@@ -3759,10 +5910,14 @@
                                 "parameter" : "MI6VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
@@ -3811,10 +5966,14 @@
                                 "parameter" : "MI6MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "6",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
@@ -3863,10 +6022,14 @@
                                 "parameter" : "MI7KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
@@ -3881,10 +6044,14 @@
                                 "parameter" : "MI7KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
@@ -3899,10 +6066,14 @@
                                 "parameter" : "MI7VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
@@ -3917,10 +6088,14 @@
                                 "parameter" : "MI7VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
@@ -3969,10 +6144,14 @@
                                 "parameter" : "MI7MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "7",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
@@ -4021,10 +6200,14 @@
                                 "parameter" : "MI8KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
@@ -4039,10 +6222,14 @@
                                 "parameter" : "MI8KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
@@ -4057,10 +6244,14 @@
                                 "parameter" : "MI8VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
@@ -4075,10 +6266,14 @@
                                 "parameter" : "MI8VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
@@ -4127,10 +6322,14 @@
                                 "parameter" : "MI8MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
@@ -4179,10 +6378,14 @@
                                 "parameter" : "MI9KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
@@ -4197,10 +6400,14 @@
                                 "parameter" : "MI9KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
@@ -4215,10 +6422,14 @@
                                 "parameter" : "MI9VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
@@ -4233,10 +6444,14 @@
                                 "parameter" : "MI9VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
@@ -4285,10 +6500,14 @@
                                 "parameter" : "MI9MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "9",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
@@ -4337,10 +6556,14 @@
                                 "parameter" : "MI10KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
@@ -4355,10 +6578,14 @@
                                 "parameter" : "MI10KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
@@ -4373,10 +6600,14 @@
                                 "parameter" : "MI10VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
@@ -4391,10 +6622,14 @@
                                 "parameter" : "MI10VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
@@ -4443,10 +6678,14 @@
                                 "parameter" : "MI10MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "10",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
@@ -4495,10 +6734,14 @@
                                 "parameter" : "MI11KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
@@ -4513,10 +6756,14 @@
                                 "parameter" : "MI11KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
@@ -4531,10 +6778,14 @@
                                 "parameter" : "MI11VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
@@ -4549,10 +6800,14 @@
                                 "parameter" : "MI11VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
@@ -4601,10 +6856,14 @@
                                 "parameter" : "MI11MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "11",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
@@ -4653,10 +6912,14 @@
                                 "parameter" : "MI12KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
@@ -4671,10 +6934,14 @@
                                 "parameter" : "MI12KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
@@ -4689,10 +6956,14 @@
                                 "parameter" : "MI12VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
@@ -4707,10 +6978,14 @@
                                 "parameter" : "MI12VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
@@ -4759,10 +7034,14 @@
                                 "parameter" : "MI12MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "12",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
@@ -4811,10 +7090,14 @@
                                 "parameter" : "MI13KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
@@ -4829,10 +7112,14 @@
                                 "parameter" : "MI13KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
@@ -4847,10 +7134,14 @@
                                 "parameter" : "MI13VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
@@ -4865,10 +7156,14 @@
                                 "parameter" : "MI13VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
@@ -4917,10 +7212,14 @@
                                 "parameter" : "MI13MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "13",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
@@ -4969,10 +7268,14 @@
                                 "parameter" : "MI14KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
@@ -4987,10 +7290,14 @@
                                 "parameter" : "MI14KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
@@ -5005,10 +7312,14 @@
                                 "parameter" : "MI14VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
@@ -5023,10 +7334,14 @@
                                 "parameter" : "MI14VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
@@ -5075,10 +7390,14 @@
                                 "parameter" : "MI14MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "14",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
@@ -5127,10 +7446,14 @@
                                 "parameter" : "MI15KeyHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "G+8",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
@@ -5145,10 +7468,14 @@
                                 "parameter" : "MI15KeyLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "C-2",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
@@ -5163,10 +7490,14 @@
                                 "parameter" : "MI15VeloHigh"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "127",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
@@ -5181,10 +7512,14 @@
                                 "parameter" : "MI15VeloLow"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "0",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
@@ -5233,10 +7568,14 @@
                                 "parameter" : "MI15MidiChannel"
                             },
                             "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
                                 "text" : "15",
                                 "textHeight" : "30",
                                 "color" : "D1D1D1FF",
-                                "alignH" : "C",
+                                "alignH" : "L",
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",

@@ -6,6 +6,7 @@ set(ASSETS_mqDefault
 	${CMAKE_CURRENT_LIST_DIR}/led.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_11.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_5.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_6.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_7.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_9.png
 	${CMAKE_CURRENT_LIST_DIR}/mqDefaultBG.png
