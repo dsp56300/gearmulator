@@ -76,6 +76,7 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 
 	add_subdirectory(mqConsoleLib)
 	add_subdirectory(mqTestConsole)
+	add_subdirectory(mqPerformanceTest)
 
 	# ----------------- mQ VST2 Plugin
 

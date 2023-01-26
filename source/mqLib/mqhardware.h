@@ -30,7 +30,7 @@ namespace mqLib
 		void sendMidi(const std::vector<uint8_t>& _data);
 		void receiveMidi(std::vector<uint8_t>& _data);
 
-		const dsp56k::DSPThread& getDspThread() { return m_dspThread; }
+		dsp56k::DSPThread& getDspThread() { return m_dspThread; }
 
 		void processAudio(uint32_t _frames, uint32_t _latency = 0);
 
