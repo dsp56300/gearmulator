@@ -17,4 +17,4 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(mqPerformanceTest PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
-install(TARGETS mqPerformanceTest DESTINATION . COMPONENT STANDALONE)
+install(TARGETS mqPerformanceTest DESTINATION . COMPONENT VavraPerformanceTest)
