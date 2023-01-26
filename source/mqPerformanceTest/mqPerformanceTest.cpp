@@ -42,6 +42,7 @@ int main(int _argc, char* _argv[])
 	if(!mq.isValid())
 	{
 		std::cout << "Failed to find OS update midi file. Put mq_2_23.mid next to this program" << std::endl;
+		std::cin.ignore();
 		return -2;
 	}
 

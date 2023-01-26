@@ -16,8 +16,12 @@ namespace mqLib
 		auto romFile = synthLib::findROM(512 * 1024);
 		if(romFile.empty())
 			romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
-
+		if(romFile.empty())
+			return;
 		m_hw.reset(new Hardware(romFile));
+
+		if(!isValid())
+			return;
 
 		if(_bootMode != BootMode::Default)
 			m_hw->setBootMode(_bootMode);
@@ -47,6 +51,9 @@ namespace mqLib
 
 	MicroQ::~MicroQ()
 	{
+		if(!isValid())
+			return;
+
 		// we need to have passed the boot stage
 		m_hw->processAudio(1);
 

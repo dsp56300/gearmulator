@@ -27,6 +27,8 @@ namespace mqLib
 
 	MqMc::MqMc(const ROM& _rom) : m_rom(_rom)
 	{
+		if(!_rom.isValid())
+			return;
 		m_romRuntimeData.resize(m_rom.getSize());
 		memcpy(&m_romRuntimeData[0], m_rom.getData(), m_rom.getSize());
 
