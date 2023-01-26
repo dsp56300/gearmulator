@@ -1099,6 +1099,10 @@
 		"envMode":
 		[
 			"ADSR", "ADS1DS2R", "One Shot", "Loop S1S2", "Loop All"
+		],
+		"fxType":
+		[
+			"Bypass", "Chorus", "Flanger", "Phaser", "Overdrive", "Five FX", "Vocoder", "Delay", "Reverb", "5.1 Delay", "5.1 Delay Clocked"
 		]
 	},
  	"midipackets":
