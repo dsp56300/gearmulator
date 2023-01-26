@@ -25,7 +25,7 @@ int main(int _argc, char* _argv[])
 	try
 	{
 //		dsp56k::InterpreterUnitTests tests;		// only valid if Interpreter is active
-//		dsp56k::JitUnittests tests;				// only valid if JIT runtime is active
+		dsp56k::JitUnittests tests;				// only valid if JIT runtime is active
 //		return 0;
 	}
 	catch(std::string& _err)
