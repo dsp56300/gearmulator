@@ -217,7 +217,7 @@ namespace mqLib
 
 	bool Hardware::hdiTransferDSPtoUC() const
 	{
-		if(m_hdiDSP.hasTX() && m_hdiUC.canReceiveData())
+		if(m_hdiUC.canReceiveData() && m_hdiDSP.hasTX())
 		{
 			const auto v = m_hdiDSP.readTX();
 //			LOG("HDI uc2dsp=" << HEX(v));
