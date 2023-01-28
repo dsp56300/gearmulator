@@ -346,7 +346,7 @@ namespace mqLib
 		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
-		if((esaiFrameIndex - m_lastEsaiFrameIndex) > g_syncHaltDspEsaiThreshold)
+		if(esaiDelta > g_syncHaltDspEsaiThreshold)
 		{
 			haltDSP();
 		}
