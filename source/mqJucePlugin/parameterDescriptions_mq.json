@@ -132,8 +132,10 @@
  		{"index":124, "name":"AmpModAmount"},
 		
 		// Effects
- 		{"index":128, "name":"EffectType", "min":0 , "max":6},
- 		{"index":129, "name":"EffectMix"},
+ 		{"index":128, "name":"FX1Type", "min":0 , "max":6, "isDiscrete":true, "toText":"fx1Type"},
+ 		{"index":144, "name":"FX2Type", "min":0 , "max":10, "isDiscrete":true, "toText":"fx2Type"},
+ 		{"index":129, "name":"FX1Mix"},
+ 		{"index":145, "name":"FX2Mix"},
 
  		{"index":130, "name":"Fx1ChorusSpeed"},
  		{"index":131, "name":"Fx1ChorusDepth"},
@@ -1100,9 +1102,13 @@
 		[
 			"ADSR", "ADS1DS2R", "One Shot", "Loop S1S2", "Loop All"
 		],
-		"fxType":
+		"fx1Type":
 		[
-			"Bypass", "Chorus", "Flanger", "Phaser", "Overdrive", "Five FX", "Vocoder", "Delay", "Reverb", "5.1 Delay", "5.1 Delay Clocked"
+			"Bypass", "Chorus", "Flanger", "Phaser", "Overdrive", "Five FX", "Vocoder"
+		],
+		"fx2Type":
+		[
+			"Bypass", "Chorus", "Flanger", "Phaser", "Overdrive", "Five FX", "Vocoder", "Delay", "Reverb", "5.1 Delay", "5.1 Delay Clk"
 		]
 	},
  	"midipackets":
