@@ -5655,7 +5655,7 @@
                         "texture" : "fx1Chorus"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "1"
                     },
                     "children" : [
@@ -5673,7 +5673,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ChorusSpeed"
+                                "parameter" : "Fx2ChorusSpeed"
                             }
                         },
                         {
@@ -5690,7 +5690,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ChorusDepth"
+                                "parameter" : "Fx2ChorusDepth"
                             }
                         },
                         {
@@ -5707,7 +5707,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ChorusDelay"
+                                "parameter" : "Fx2ChorusDelay"
                             }
                         }
                     ]
@@ -5722,7 +5722,7 @@
                         "texture" : "fx1Flanger"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "2"
                     },
                     "children" : [
@@ -5740,7 +5740,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerSpeed"
+                                "parameter" : "Fx2FlangerSpeed"
                             }
                         },
                         {
@@ -5757,7 +5757,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerDepth"
+                                "parameter" : "Fx2FlangerDepth"
                             }
                         },
                         {
@@ -5774,7 +5774,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerFeedback"
+                                "parameter" : "Fx2FlangerFeedback"
                             }
                         },
                         {
@@ -5796,7 +5796,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerPolarity"
+                                "parameter" : "Fx2FlangerPolarity"
                             }
                         },
                         {
@@ -5818,7 +5818,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerPolarity"
+                                "parameter" : "Fx2FlangerPolarity"
                             }
                         },
                         {
@@ -5840,7 +5840,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1FlangerPolarity"
+                                "parameter" : "Fx2FlangerPolarity"
                             }
                         }
                     ]
@@ -5855,7 +5855,7 @@
                         "texture" : "fx1Phaser"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "3"
                     },
                     "children" : [
@@ -5873,7 +5873,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserSpeed"
+                                "parameter" : "Fx2PhaserSpeed"
                             }
                         },
                         {
@@ -5890,7 +5890,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserDepth"
+                                "parameter" : "Fx2PhaserDepth"
                             }
                         },
                         {
@@ -5907,7 +5907,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserFeedback"
+                                "parameter" : "Fx2PhaserFeedback"
                             }
                         },
                         {
@@ -5924,7 +5924,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserCenter"
+                                "parameter" : "Fx2PhaserCenter"
                             }
                         },
                         {
@@ -5941,7 +5941,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserSpacing"
+                                "parameter" : "Fx2PhaserSpacing"
                             }
                         },
                         {
@@ -5963,7 +5963,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserPolarity"
+                                "parameter" : "Fx2PhaserPolarity"
                             }
                         },
                         {
@@ -5985,7 +5985,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserPolarity"
+                                "parameter" : "Fx2PhaserPolarity"
                             }
                         },
                         {
@@ -6007,7 +6007,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1PhaserPolarity"
+                                "parameter" : "Fx2PhaserPolarity"
                             }
                         }
                     ]
@@ -6022,7 +6022,7 @@
                         "texture" : "fx1Overdrive"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "4"
                     },
                     "children" : [
@@ -6040,7 +6040,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1OverdriveDrive"
+                                "parameter" : "Fx2OverdriveDrive"
                             }
                         },
                         {
@@ -6057,7 +6057,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1OverdrivePostGain"
+                                "parameter" : "Fx2OverdrivePostGain"
                             }
                         },
                         {
@@ -6074,7 +6074,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1OverdriveCutoff"
+                                "parameter" : "Fx2OverdriveCutoff"
                             }
                         }
                     ]
@@ -6089,7 +6089,7 @@
                         "texture" : "fx1FiveFX"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "5"
                     },
                     "children" : [
@@ -6107,7 +6107,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1ChorusSpeed"
+                                "parameter" : "FiveFX2ChorusSpeed"
                             }
                         },
                         {
@@ -6124,7 +6124,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1ChorusDepth"
+                                "parameter" : "FiveFX2ChorusDepth"
                             }
                         },
                         {
@@ -6141,7 +6141,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1Delay"
+                                "parameter" : "FiveFX2Delay"
                             }
                         },
                         {
@@ -6158,7 +6158,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1ChorusDelayL"
+                                "parameter" : "FiveFX2ChorusDelayL"
                             }
                         },
                         {
@@ -6175,7 +6175,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1SampleAndHold"
+                                "parameter" : "FiveFX2SampleAndHold"
                             }
                         },
                         {
@@ -6192,13 +6192,13 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1Overdrive"
+                                "parameter" : "FiveFX2Overdrive"
                             }
                         },
                         {
                             "name" : "txtColLabel",
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1RingModSource"
+                                "parameter" : "FiveFX2RingModSource"
                             },
                             "combobox" : {
                                 "offsetL" : "15",
@@ -6231,7 +6231,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "FiveFX1RingModLevel"
+                                "parameter" : "FiveFX2RingModLevel"
                             }
                         }
                     ]
@@ -6246,7 +6246,7 @@
                         "texture" : "fx1Vocoder"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "6"
                     },
                     "children" : [
@@ -6264,7 +6264,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderBands"
+                                "parameter" : "Fx2VocoderBands"
                             }
                         },
                         {
@@ -6281,7 +6281,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderAnalysisFreqLow"
+                                "parameter" : "Fx2VocoderAnalysisFreqLow"
                             }
                         },
                         {
@@ -6298,7 +6298,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderAnalysisFreqHigh"
+                                "parameter" : "Fx2VocoderAnalysisFreqHigh"
                             }
                         },
                         {
@@ -6315,7 +6315,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderOffsetS"
+                                "parameter" : "Fx2VocoderOffsetS"
                             }
                         },
                         {
@@ -6332,7 +6332,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderOffsetHi"
+                                "parameter" : "Fx2VocoderOffsetHi"
                             }
                         },
                         {
@@ -6349,7 +6349,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderBandwidth"
+                                "parameter" : "Fx2VocoderBandwidth"
                             }
                         },
                         {
@@ -6366,7 +6366,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderResonance"
+                                "parameter" : "Fx2VocoderResonance"
                             }
                         },
                         {
@@ -6383,7 +6383,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderAttack"
+                                "parameter" : "Fx2VocoderAttack"
                             }
                         },
                         {
@@ -6400,7 +6400,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderDecay"
+                                "parameter" : "Fx2VocoderDecay"
                             }
                         },
                         {
@@ -6417,7 +6417,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderEQLevelLow"
+                                "parameter" : "Fx2VocoderEQLevelLow"
                             }
                         },
                         {
@@ -6434,7 +6434,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderEQBandMid"
+                                "parameter" : "Fx2VocoderEQBandMid"
                             }
                         },
                         {
@@ -6451,7 +6451,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderEQLevelMid"
+                                "parameter" : "Fx2VocoderEQLevelMid"
                             }
                         },
                         {
@@ -6468,13 +6468,13 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderEQLevelHigh"
+                                "parameter" : "Fx2VocoderEQLevelHigh"
                             }
                         },
                         {
                             "name" : "txtColLabel",
                             "parameterAttachment" : {
-                                "parameter" : "Fx1VocoderAnalysisSignal"
+                                "parameter" : "Fx2VocoderAnalysisSignal"
                             },
                             "combobox" : {
                                 "offsetL" : "15",
@@ -6505,7 +6505,7 @@
                         "texture" : "fx2Delay"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "7"
                     },
                     "children" : [
@@ -6656,7 +6656,7 @@
                     ]
                 },
                 {
-                    "name" : "fx2Reverb",
+                    "name" : "fxReverb",
                     "image" : {
                         "x" : "1800.5",
                         "y" : "55",
@@ -6665,7 +6665,7 @@
                         "texture" : "fx2Reverb"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "8"
                     },
                     "children" : [
@@ -6683,7 +6683,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbSize"
+                                "parameter" : "Fx2ReverbSize"
                             }
                         },
                         {
@@ -6700,7 +6700,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbShape"
+                                "parameter" : "Fx2ReverbShape"
                             }
                         },
                         {
@@ -6717,7 +6717,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbDecay"
+                                "parameter" : "Fx2ReverbDecay"
                             }
                         },
                         {
@@ -6734,7 +6734,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbPreDelay"
+                                "parameter" : "Fx2ReverbPreDelay"
                             }
                         },
                         {
@@ -6751,7 +6751,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbLowpass"
+                                "parameter" : "Fx2ReverbLowpass"
                             }
                         },
                         {
@@ -6768,7 +6768,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbHighpass"
+                                "parameter" : "Fx2ReverbHighpass"
                             }
                         },
                         {
@@ -6785,7 +6785,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbDiffusion"
+                                "parameter" : "Fx2ReverbDiffusion"
                             }
                         },
                         {
@@ -6802,7 +6802,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "Fx1ReverbDamping"
+                                "parameter" : "Fx2ReverbDamping"
                             }
                         }
                     ]
@@ -6817,7 +6817,7 @@
                         "texture" : "fx251Delay"
                     },
                     "condition" : {
-                        "enableOnParameter" : "FX1Type",
+                        "enableOnParameter" : "FX2Type",
                         "enableOnValues" : "9,10"
                     },
                     "children" : [
@@ -6849,7 +6849,7 @@
                                         "tileSizeY" : "128"
                                     },
                                     "parameterAttachment" : {
-                                        "parameter" : "O1Semi"
+                                        "parameter" : "Fx251DelayDelay"
                                     }
                                 }
                             ]
@@ -6882,7 +6882,7 @@
                                         "tileSizeY" : "128"
                                     },
                                     "parameterAttachment" : {
-                                        "parameter" : "O1Semi"
+                                        "parameter" : "Fx251ClockDelayDelay"
                                     }
                                 }
                             ]
@@ -6901,7 +6901,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayFeedback"
                             }
                         },
                         {
@@ -6918,7 +6918,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayDelayML"
                             }
                         },
                         {
@@ -6935,7 +6935,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayDelayMR"
                             }
                         },
                         {
@@ -6952,7 +6952,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayDelayS1L"
                             }
                         },
                         {
@@ -6969,7 +6969,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayDelayS2L"
                             }
                         },
                         {
@@ -6986,7 +6986,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayDelayS1R"
                             }
                         },
                         {
@@ -7003,7 +7003,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayInputHP"
                             }
                         },
                         {
@@ -7020,7 +7020,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayLfeLP"
                             }
                         },
                         {
@@ -7037,7 +7037,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayFSLVolume"
                             }
                         },
                         {
@@ -7054,7 +7054,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayFSRVolume"
                             }
                         },
                         {
@@ -7071,7 +7071,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayCenterSVolume"
                             }
                         },
                         {
@@ -7088,7 +7088,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayRearSLVolume"
                             }
                         },
                         {
@@ -7105,7 +7105,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "O1Semi"
+                                "parameter" : "Fx251DelayRearSRVolume"
                             }
                         }
                     ]
