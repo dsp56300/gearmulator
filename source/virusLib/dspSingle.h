@@ -1,8 +1,14 @@
 #pragma once
 
 #include "dsp56kEmu/dspthread.h"
+#include "dsp56kEmu/memory.h"
 
 #include "../synthLib/audioTypes.h"
+
+namespace dsp56k
+{
+	class Jit;
+}
 
 namespace virusLib
 {
