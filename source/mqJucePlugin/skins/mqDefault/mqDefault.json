@@ -2886,7 +2886,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "26.8335",
+                        "x" : "26.83362",
                         "y" : "294.48",
                         "width" : "128",
                         "height" : "128",
@@ -2903,7 +2903,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "215.8335",
+                        "x" : "215.8336",
                         "y" : "294.48",
                         "width" : "128",
                         "height" : "128",
@@ -3093,7 +3093,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "26.8335",
+                        "x" : "26.83362",
                         "y" : "809.48",
                         "width" : "128",
                         "height" : "128",
@@ -3110,7 +3110,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "215.8335",
+                        "x" : "215.8336",
                         "y" : "809.48",
                         "width" : "128",
                         "height" : "128",
@@ -3300,7 +3300,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "26.8335",
+                        "x" : "26.83362",
                         "y" : "1324.48",
                         "width" : "128",
                         "height" : "128",
@@ -3317,7 +3317,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "215.8335",
+                        "x" : "215.8336",
                         "y" : "1324.48",
                         "width" : "128",
                         "height" : "128",
@@ -4715,7 +4715,234 @@
                 "width" : "2900",
                 "height" : "1525",
                 "texture" : "pageFx"
-            }
+            },
+            "children" : [
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "O1FmSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "36",
+                        "y" : "137",
+                        "width" : "289.05",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "116.53",
+                        "y" : "240.1902",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Semi"
+                    }
+                },
+                {
+                    "name" : "fxReverb",
+                    "image" : {
+                        "x" : "373",
+                        "y" : "55",
+                        "width" : "1059.5",
+                        "height" : "498.3804"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "68.4375",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbSize"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "333.3125",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbShape"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "598.1875",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbDecay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "863.0625",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbPreDelay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "68.4375",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbLowpass"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "333.3125",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbHighpass"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "598.1875",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbDiffusion"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "863.0625",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ReverbDamping"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "O1FmSource"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1498.5",
+                        "y" : "137",
+                        "width" : "289.05",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1579.03",
+                        "y" : "240.1902",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O1Semi"
+                    }
+                }
+            ]
         },
         {
             "name" : "pageMulti",
