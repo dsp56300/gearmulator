@@ -1,5 +1,7 @@
 #include "dspSingle.h"
 
+#include "dsp56kEmu/dsp.h"
+
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif

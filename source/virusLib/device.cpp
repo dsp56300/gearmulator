@@ -3,6 +3,8 @@
 #include "dspSingle.h"
 #include "romfile.h"
 
+#include "dsp56kEmu/jit.h"
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
