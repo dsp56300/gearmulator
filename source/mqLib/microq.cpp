@@ -4,6 +4,8 @@
 #include "../synthLib/os.h"
 #include "../synthLib/midiBufferParser.h"
 
+#include "dsp56kEmu/threadtools.h"
+
 #include "mqhardware.h"
 
 #pragma optimize("", off)
@@ -31,7 +33,7 @@ namespace mqLib
 
 		m_ucThread.reset(new std::thread([&]()
 		{
-			dsp56k::DSPThread::setCurrentThreadName("MC68331");
+			dsp56k::ThreadTools::setCurrentThreadName("MC68331");
 			while(!m_destroy)
 				processUcThread();
 			m_destroy = false;

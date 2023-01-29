@@ -10,7 +10,7 @@
 #include "../mqLib/microq.h"
 #include "../mqLib/mqhardware.h"
 
-#include "dsp56kEmu/dspthread.h"
+#include "dsp56kEmu/threadtools.h"
 
 #include "dsp56kEmu/jitunittests.h"
 
@@ -92,7 +92,7 @@ int main(int _argc, char* _argv[])
 
 	std::thread renderer([&]
 	{
-		dsp56k::DSPThread::setCurrentThreadName("guiRender");
+		dsp56k::ThreadTools::setCurrentThreadName("guiRender");
 		bool prevShowSettings = true;
 
 		while(!exit)
@@ -134,7 +134,7 @@ int main(int _argc, char* _argv[])
 
 	std::thread oneSecondUpdater([&]
 	{
-		dsp56k::DSPThread::setCurrentThreadName("1secUpdater");
+		dsp56k::ThreadTools::setCurrentThreadName("1secUpdater");
 		while(!exit)
 		{
 			std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -147,7 +147,7 @@ int main(int _argc, char* _argv[])
 	// threaded key reader
 	std::thread inputReader([&]
 	{
-		dsp56k::DSPThread::setCurrentThreadName("inputReader");
+		dsp56k::ThreadTools::setCurrentThreadName("inputReader");
 		while(!exit)
 		{
 			const auto k = Term::read_key();
@@ -224,7 +224,7 @@ int main(int _argc, char* _argv[])
 
 	createDevices();
 
-	dsp56k::DSPThread::setCurrentThreadName("main");
+	dsp56k::ThreadTools::setCurrentThreadName("main");
 
 	while(true)
 	{
