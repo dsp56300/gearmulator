@@ -1,15 +1,12 @@
-#include <fstream>
 #include <iostream>
-#include <memory>
 
 #include "../synthLib/wavWriter.h"
 
 #include "../mqLib/microq.h"
 #include "../mqLib/mqhardware.h"
 
-#include "dsp56kEmu/dspthread.h"
-
 #include "dsp56kEmu/jitunittests.h"
+#include "dsp56kEmu/threadtools.h"
 
 #include <vector>
 
@@ -46,7 +43,7 @@ int main(int _argc, char* _argv[])
 		return -2;
 	}
 
-	dsp56k::DSPThread::setCurrentThreadName("main");
+	dsp56k::ThreadTools::setCurrentThreadName("main");
 
 	synthLib::AsyncWriter writer("mqOutput.wav", 44100, false);
 
