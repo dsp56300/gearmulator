@@ -50,7 +50,6 @@ int main(int _argc, char* _argv[])
 
 	// create hardware
 	mqLib::MicroQ mq(mqLib::BootMode::Default);
-	auto* hw = mq.getHardware();
 
 	// create terminal-GUI
 	Terminal term(true, true, false, true);
@@ -248,6 +247,4 @@ int main(int _argc, char* _argv[])
 			midiOut->write(midiOutBuffer);
 		midiOutBuffer.clear();
 	}
-
-	return 0;
 }
