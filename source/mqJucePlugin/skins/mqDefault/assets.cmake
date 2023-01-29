@@ -3,6 +3,17 @@ set(ASSETS_mqDefault
 	${CMAKE_CURRENT_LIST_DIR}/Digital.ttf
 	${CMAKE_CURRENT_LIST_DIR}/encoder_ranged.png
 	${CMAKE_CURRENT_LIST_DIR}/encoder_ranged_red.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Chorus.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1FiveFX.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Flanger.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Overdrive.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Phaser.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Vocoder.png
+	${CMAKE_CURRENT_LIST_DIR}/fx251Delay.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2Delay.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2DelayClocked.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2DelayNotClocked.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2Reverb.png
 	${CMAKE_CURRENT_LIST_DIR}/led.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_11.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_5.png

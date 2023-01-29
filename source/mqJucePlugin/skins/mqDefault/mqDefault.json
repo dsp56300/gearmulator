@@ -4720,7 +4720,7 @@
                 {
                     "name" : "txtColLabel",
                     "parameterAttachment" : {
-                        "parameter" : "O1FmSource"
+                        "parameter" : "FX1Type"
                     },
                     "combobox" : {
                         "offsetL" : "15",
@@ -4733,9 +4733,9 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "36",
+                        "x" : "31",
                         "y" : "137",
-                        "width" : "289.05",
+                        "width" : "268",
                         "height" : "41"
                     }
                 },
@@ -4744,7 +4744,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "116.53",
+                        "x" : "102.12",
                         "y" : "240.1902",
                         "width" : "128",
                         "height" : "128",
@@ -4753,16 +4753,21 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "O1Semi"
+                        "parameter" : "FX1Mix"
                     }
                 },
                 {
-                    "name" : "fxReverb",
+                    "name" : "fxChorus",
                     "image" : {
-                        "x" : "373",
+                        "x" : "338",
                         "y" : "55",
-                        "width" : "1059.5",
-                        "height" : "498.3804"
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Chorus"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "1"
                     },
                     "children" : [
                         {
@@ -4770,7 +4775,1906 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "68.4375",
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusDelay"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxFlanger",
+                    "image" : {
+                        "x" : "338",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Flanger"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "2"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerFeedback"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "669",
+                                "y" : "61.59998",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledNeg",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "808.6",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledPos",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "1",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "0",
+                                "overImageOn" : "0",
+                                "downImageOn" : "0",
+                                "x" : "622.8",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxPhaser",
+                    "image" : {
+                        "x" : "338",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Phaser"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "3"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.44995",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "264.35",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserFeedback"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "702.1499",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserCenter"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "921.05",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserSpacing"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "669",
+                                "y" : "61.59998",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledNeg",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "808.6",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledPos",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "1",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "0",
+                                "overImageOn" : "0",
+                                "downImageOn" : "0",
+                                "x" : "622.8",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxOverdrive",
+                    "image" : {
+                        "x" : "338",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Overdrive"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "4"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdriveDrive"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdrivePostGain"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged_red",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdriveCutoff"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxFiveFX",
+                    "image" : {
+                        "x" : "338",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1FiveFX"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "5"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "72.8125",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "346.4375",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "620.0625",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1Delay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "893.6875",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusDelayL"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "72.8125",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1SampleAndHold"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "346.4375",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1Overdrive"
+                            }
+                        },
+                        {
+                            "name" : "txtColLabel",
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1RingModSource"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "Osc 1 Pitch",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "549.0625",
+                                "y" : "353.7853",
+                                "width" : "270",
+                                "height" : "41"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "893.6875",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1RingModLevel"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxVocoder",
+                    "image" : {
+                        "x" : "338",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Vocoder"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "6"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "351.5",
+                                "y" : "185.19",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderBands"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "460.5",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisFreqLow"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "610.5",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisFreqHigh"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "808",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderOffsetS"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "950.7803",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderOffsetHi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "11",
+                                "y" : "321.7",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderBandwidth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "160.9997",
+                                "y" : "321.7026",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderResonance"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "11",
+                                "y" : "132",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAttack"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "161",
+                                "y" : "132",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderDecay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "462.187",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelLow"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "614.562",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQBandMid"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "766.937",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelMid"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "919.312",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelHigh"
+                            }
+                        },
+                        {
+                            "name" : "txtColLabel",
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisSignal"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "Osc 1 Pitch",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "17",
+                                "y" : "65",
+                                "width" : "298",
+                                "height" : "41"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "FX2Type"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1493.5",
+                        "y" : "137",
+                        "width" : "268",
+                        "height" : "41"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1564.62",
+                        "y" : "240.1902",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FX2Mix"
+                    }
+                },
+                {
+                    "name" : "fxChorus",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Chorus"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "1"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1ChorusDelay"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxFlanger",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Flanger"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "2"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerFeedback"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "669",
+                                "y" : "61.59998",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledNeg",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "808.6001",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledPos",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "1",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "0",
+                                "overImageOn" : "0",
+                                "downImageOn" : "0",
+                                "x" : "622.8",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1FlangerPolarity"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxPhaser",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Phaser"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "3"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "45.44995",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "264.3501",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserFeedback"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "702.1499",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserCenter"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "921.05",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserSpacing"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "669",
+                                "y" : "61.59998",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledNeg",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "808.6001",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledPos",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "1",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "0",
+                                "overImageOn" : "0",
+                                "downImageOn" : "0",
+                                "x" : "622.8",
+                                "y" : "77.59998",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1PhaserPolarity"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxOverdrive",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Overdrive"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "4"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "171.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdriveDrive"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdrivePostGain"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "794.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged_red",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1OverdriveCutoff"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxFiveFX",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1FiveFX"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "5"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "72.8125",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusSpeed"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "346.4375",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusDepth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "620.0625",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1Delay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "893.6875",
+                                "y" : "40.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1ChorusDelayL"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "72.8125",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1SampleAndHold"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "346.4375",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1Overdrive"
+                            }
+                        },
+                        {
+                            "name" : "txtColLabel",
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1RingModSource"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "Osc 1 Pitch",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "549.0625",
+                                "y" : "353.7853",
+                                "width" : "270",
+                                "height" : "41"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "893.6875",
+                                "y" : "289.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "FiveFX1RingModLevel"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fxVocoder",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx1Vocoder"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "6"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "351.5",
+                                "y" : "185.19",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderBands"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "460.5",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisFreqLow"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "610.5",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisFreqHigh"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "808",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderOffsetS"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "950.7803",
+                                "y" : "14",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderOffsetHi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "11",
+                                "y" : "321.7",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderBandwidth"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "160.9998",
+                                "y" : "321.7026",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderResonance"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "11",
+                                "y" : "132",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAttack"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "161",
+                                "y" : "132",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderDecay"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "462.187",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelLow"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "614.562",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQBandMid"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "766.937",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelMid"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "919.312",
+                                "y" : "322.6",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderEQLevelHigh"
+                            }
+                        },
+                        {
+                            "name" : "txtColLabel",
+                            "parameterAttachment" : {
+                                "parameter" : "Fx1VocoderAnalysisSignal"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "Osc 1 Pitch",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "17",
+                                "y" : "65",
+                                "width" : "298",
+                                "height" : "41"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fx2Delay",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx2Delay"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "7"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "61.75",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayFeedback"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "313.25",
+                                "y" : "185.1902",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayCutoff"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "817.8501",
+                                "y" : "162.171",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledNeg",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "957.45",
+                                "y" : "178.171",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayPolarity"
+                            }
+                        },
+                        {
+                            "name" : "ledPos",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "1",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "0",
+                                "overImageOn" : "0",
+                                "downImageOn" : "0",
+                                "x" : "771.6499",
+                                "y" : "178.171",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayPolarity"
+                            }
+                        },
+                        {
+                            "name" : "buttonH",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "811.7114",
+                                "y" : "272.2095",
+                                "width" : "128",
+                                "height" : "64",
+                                "texture" : "button",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayAutopan"
+                            }
+                        },
+                        {
+                            "name" : "led",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "1",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "956.25",
+                                "y" : "288.2095",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "Fx2DelayAutopan"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "fx2Reverb",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx2Reverb"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "8"
+                    },
+                    "children" : [
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "72.8125",
                                 "y" : "60.59509",
                                 "width" : "128",
                                 "height" : "128",
@@ -4787,7 +6691,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "333.3125",
+                                "x" : "346.4375",
                                 "y" : "60.59509",
                                 "width" : "128",
                                 "height" : "128",
@@ -4804,7 +6708,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "598.1875",
+                                "x" : "620.0625",
                                 "y" : "60.59509",
                                 "width" : "128",
                                 "height" : "128",
@@ -4821,7 +6725,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "863.0625",
+                                "x" : "893.6875",
                                 "y" : "60.59509",
                                 "width" : "128",
                                 "height" : "128",
@@ -4838,7 +6742,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "68.4375",
+                                "x" : "72.8125",
                                 "y" : "309.7853",
                                 "width" : "128",
                                 "height" : "128",
@@ -4855,7 +6759,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "333.3125",
+                                "x" : "346.4375",
                                 "y" : "309.7853",
                                 "width" : "128",
                                 "height" : "128",
@@ -4872,7 +6776,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "598.1875",
+                                "x" : "620.0625",
                                 "y" : "309.7853",
                                 "width" : "128",
                                 "height" : "128",
@@ -4889,7 +6793,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "863.0625",
+                                "x" : "893.6875",
                                 "y" : "309.7853",
                                 "width" : "128",
                                 "height" : "128",
@@ -4904,43 +6808,307 @@
                     ]
                 },
                 {
-                    "name" : "txtColLabel",
-                    "parameterAttachment" : {
-                        "parameter" : "O1FmSource"
+                    "name" : "fx251Delay",
+                    "image" : {
+                        "x" : "1800.5",
+                        "y" : "55",
+                        "width" : "1094.5",
+                        "height" : "498.3804",
+                        "texture" : "fx251Delay"
                     },
-                    "combobox" : {
-                        "offsetL" : "15",
-                        "offsetT" : "1",
-                        "offsetR" : "-15",
-                        "offsetB" : "-1",
-                        "text" : "Osc 1 Pitch",
-                        "textHeight" : "30",
-                        "color" : "D1D1D1FF",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "bold" : "1",
-                        "x" : "1498.5",
-                        "y" : "137",
-                        "width" : "289.05",
-                        "height" : "41"
-                    }
-                },
-                {
-                    "name" : "knob",
-                    "rotary" : {
+                    "condition" : {
+                        "enableOnParameter" : "FX1Type",
+                        "enableOnValues" : "9,10"
                     },
-                    "spritesheet" : {
-                        "x" : "1579.03",
-                        "y" : "240.1902",
-                        "width" : "128",
-                        "height" : "128",
-                        "texture" : "encoder_ranged",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "O1Semi"
-                    }
+                    "children" : [
+                        {
+                            "name" : "delay",
+                            "image" : {
+                                "x" : "3.178589",
+                                "y" : "12.09509",
+                                "width" : "150",
+                                "height" : "225",
+                                "texture" : "fx2DelayNotClocked"
+                            },
+                            "condition" : {
+                                "enableOnParameter" : "FX2Type",
+                                "enableOnValues" : "9"
+                            },
+                            "children" : [
+                                {
+                                    "name" : "knob",
+                                    "rotary" : {
+                                    },
+                                    "spritesheet" : {
+                                        "x" : "11",
+                                        "y" : "48.5",
+                                        "width" : "128",
+                                        "height" : "128",
+                                        "texture" : "encoder_ranged",
+                                        "tileSizeX" : "128",
+                                        "tileSizeY" : "128"
+                                    },
+                                    "parameterAttachment" : {
+                                        "parameter" : "O1Semi"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name" : "length",
+                            "image" : {
+                                "x" : "3.178589",
+                                "y" : "12.09509",
+                                "width" : "150",
+                                "height" : "225",
+                                "texture" : "fx2DelayClocked"
+                            },
+                            "condition" : {
+                                "enableOnParameter" : "FX2Type",
+                                "enableOnValues" : "10"
+                            },
+                            "children" : [
+                                {
+                                    "name" : "knob",
+                                    "rotary" : {
+                                    },
+                                    "spritesheet" : {
+                                        "x" : "11",
+                                        "y" : "48.5",
+                                        "width" : "128",
+                                        "height" : "128",
+                                        "texture" : "encoder_ranged",
+                                        "tileSizeX" : "128",
+                                        "tileSizeY" : "128"
+                                    },
+                                    "parameterAttachment" : {
+                                        "parameter" : "O1Semi"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "170.5356",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "326.8928",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "639.6072",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "795.9644",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "952.3215",
+                                "y" : "60.59509",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "14.17859",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "170.5356",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "326.8928",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "483.25",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "639.6072",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "795.9644",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        },
+                        {
+                            "name" : "knob",
+                            "rotary" : {
+                            },
+                            "spritesheet" : {
+                                "x" : "952.3215",
+                                "y" : "309.7853",
+                                "width" : "128",
+                                "height" : "128",
+                                "texture" : "encoder_ranged",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O1Semi"
+                            }
+                        }
+                    ]
                 }
             ]
         },
