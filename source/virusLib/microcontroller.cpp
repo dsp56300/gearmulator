@@ -1300,6 +1300,6 @@ void Microcontroller::receiveUpgradedPreset()
 
 bool Microcontroller::isValid(const TPreset& _preset)
 {
-	return getPresetVersion(_preset) > 0;
+	return _preset.front() > 0;
 }
 }
