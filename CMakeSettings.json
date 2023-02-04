@@ -1,0 +1,24 @@
+﻿{
+	"configurations": [
+		{
+			"name": "Linux-GCC-Debug",
+			"generator": "Unix Makefiles",
+			"configurationType": "Debug",
+			"cmakeExecutable": "cmake",
+			"remoteCopySourcesExclusionList": [ ".vs", ".git", "out" ],
+			"cmakeCommandArgs": "-Dgearmulator_BUILD_FX_PLUGIN=OFF -Dgearmulator_BUILD_JUCEPLUGIN=OFF ",
+			"buildCommandArgs": "",
+			"ctestCommandArgs": "",
+			"inheritEnvironments": [ "linux_arm" ],
+			"remoteMachineName": "${defaultRemoteMachineName}",
+			"remoteCMakeListsRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/src",
+			"remoteBuildRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/build/${name}",
+			"remoteInstallRoot": "$HOME/.vs/${projectDirName}/${workspaceHash}/out/install/${name}",
+			"remoteCopySources": true,
+			"rsyncCommandArgs": "-t --delete --delete-excluded --exclude \"temp/\" --exclude \"deploy/\" --exclude \"vtune/\"",
+			"remoteCopyBuildOutput": false,
+			"remoteCopySourcesMethod": "rsync",
+			"remoteCopyUseCompilerDefaults": true
+		}
+	]
+}
