@@ -14,7 +14,7 @@ namespace mqLib
 {
 	class ROM;
 
-	class MqMc : public mc68k::Mc68k
+	class MqMc final : public mc68k::Mc68k
 	{
 	public:
 		explicit MqMc(const ROM& _rom);
