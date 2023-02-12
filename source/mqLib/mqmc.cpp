@@ -49,14 +49,6 @@ namespace mqLib
 
 	uint32_t MqMc::exec()
 	{
-#if 0	// no longer needed since SPI implementation works, keep it for now though in case something is still wrong
-		if(getPC() == 0x80718)
-		{
-			// TODO: hack to prevent getting stuck here
-			// https://discord.com/channels/829099347975208970/883390038954627072/980646881296273488
-			m_memory[0x170] = 32;
-		}
-#endif
 		const uint32_t deltaCycles = Mc68k::exec();
 
 		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
