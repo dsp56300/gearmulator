@@ -154,7 +154,7 @@ namespace mqLib
 				dumpMemory((std::string("DSPTest_Error_") + std::to_string(val)).c_str());
 		}
 
-		if(addr < m_memory.size())
+		if(addr < g_memorySize)
 		{
 			writeW(m_memory, addr, val);
 			return;
@@ -179,7 +179,7 @@ namespace mqLib
 				dumpMemory((std::string("DSPTest_Error_") + std::to_string(val)).c_str());
 		}
 
-		if(addr < m_memory.size())
+		if(addr < g_memorySize)
 		{
 			m_memory[addr] = val;
 			return;
