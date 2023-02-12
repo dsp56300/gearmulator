@@ -105,6 +105,23 @@ namespace mqLib
 		m_dspResetCompleted = true;
 	}
 
+	uint16_t MqMc::readImm16(uint32_t addr)
+	{
+		if(addr < g_memorySize)
+		{
+			return readW(m_memory, addr);
+		}
+
+		if(addr >= g_romAddress && addr < g_romAddress + m_rom.getSize())
+		{
+			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
+//			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
+			return r;
+		}
+		__debugbreak();
+		return 0;
+	}
+
 	uint16_t MqMc::read16(uint32_t addr)
 	{
 		if(addr < g_memorySize)

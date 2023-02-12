@@ -36,6 +36,7 @@ namespace mqLib
 		void dumpAssembly(uint32_t _first, uint32_t _count);
 
 	private:
+		uint16_t readImm16(uint32_t _addr) override;
 		uint16_t read16(uint32_t addr) override;
 		uint8_t read8(uint32_t addr) override;
 		void write16(uint32_t addr, uint16_t val) override;
