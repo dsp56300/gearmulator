@@ -9,6 +9,7 @@
 #include "../VirusController.h"
 
 #include "../../synthLib/midiToSysex.h"
+#include "../../synthLib/os.h"
 
 using namespace juce;
 
@@ -196,6 +197,19 @@ namespace genericVirusUI
 		case ST:	return a.transpose - b.transpose;
 		default:	return a.progNumber - b.progNumber;
 		}
+	}
+
+	bool PatchBrowser::loadUnkownData(std::vector<std::vector<uint8_t>>& _result, const std::string& _filename)
+	{
+		std::vector<uint8_t> data;
+
+		if(!synthLib::readFile(data, _filename))
+			return jucePluginEditorLib::PatchBrowser::loadUnkownData(_result, _filename);
+
+		if(virusLib::Device::parsePowercorePreset(_result, data))
+			return true;
+
+		return jucePluginEditorLib::PatchBrowser::loadUnkownData(_result, _filename);
 	}
 
 	std::string PatchBrowser::getCellText(const jucePluginEditorLib::Patch& _patch, int columnId)

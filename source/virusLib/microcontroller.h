@@ -41,6 +41,7 @@ public:
 
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
+	bool setState(const std::vector<synthLib::SMidiEvent>& _events);
 
 	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 
@@ -60,7 +61,7 @@ public:
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
-	bool sendPreset(uint8_t program, const std::vector<dsp56k::TWord>& preset, bool isMulti = false);
+	bool sendPreset(uint8_t program, const TPreset& _data, bool isMulti = false);
 	void writeHostBitsWithWait(uint8_t flag0, uint8_t flag1);
 	std::vector<dsp56k::TWord> presetToDSPWords(const TPreset& _preset, bool _isMulti) const;
 	bool getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const;
@@ -73,7 +74,7 @@ private:
 	bool loadMultiSingle(uint8_t _part, const TPreset& _multi);
 
 	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
-	void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value) const;
+	static void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value);
 	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
@@ -81,23 +82,25 @@ private:
 	bool waitingForPresetReceiveConfirmation() const;
 	void receiveUpgradedPreset();
 
+	static bool isValid(const TPreset& _preset);
+
 	Hdi08List m_hdi08;
 	std::vector<Hdi08TxParser> m_hdi08TxParsers;
 	std::vector<Hdi08MidiQueue> m_midiQueues;
 
 	const ROMFile& m_rom;
 
-	std::array<TPreset,128> m_multis;
+	std::array<TPreset,128> m_multis{};
 	TPreset m_multiEditBuffer;
 
 	std::array<uint32_t, 256> m_globalSettings;
 	std::vector<std::vector<TPreset>> m_singles;
 
 	// Multi mode
-	std::array<TPreset,16> m_singleEditBuffers;
+	std::array<TPreset,16> m_singleEditBuffers{};
 
 	// Single mode
-	TPreset m_singleEditBuffer;
+	TPreset m_singleEditBuffer{};
 	uint8_t m_currentBank = 0;
 	uint8_t m_currentSingle = 0;
 
@@ -109,7 +112,7 @@ private:
 	{
 		uint8_t program = 0;
 		bool isMulti = false;
-		std::vector<dsp56k::TWord> data;
+		TPreset data;
 	};
 
 	std::list<SPendingPresetWrite> m_pendingPresetWrites;

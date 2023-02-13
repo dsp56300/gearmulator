@@ -8,6 +8,7 @@
 #include <mutex>
 #include <thread>
 
+#include "dsp56kEmu/threadtools.h"
 #include "dsp56kEmu/types.h"
 
 namespace synthLib
@@ -140,6 +141,8 @@ namespace synthLib
 
 	void AsyncWriter::threadWriteFunc()
 	{
+		dsp56k::ThreadTools::setCurrentThreadName("AsyncWavWriter");
+
 		synthLib::WavWriter writer;
 
 		std::vector<dsp56k::TWord> m_wordBuffer;

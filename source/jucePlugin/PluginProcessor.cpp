@@ -26,10 +26,9 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, getConfigOptions()),
-	m_romName(virusLib::ROMFile::findROM()),
-	m_rom(m_romName),
-	m_device(m_rom), m_plugin(&m_device)
+	, getConfigOptions())
+	, m_rom(std::string())
+	, m_device(m_rom), m_plugin(&m_device)
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 

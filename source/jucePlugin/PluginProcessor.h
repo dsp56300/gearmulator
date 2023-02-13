@@ -50,7 +50,7 @@ public:
 	//
     std::string getRomName() const
     {
-        return juce::File(juce::String(m_romName)).getFileNameWithoutExtension().toStdString();
+        return juce::File(juce::String(m_rom.getFilename())).getFileNameWithoutExtension().toStdString();
     }
     virusLib::ROMFile::Model getModel() const
     {
@@ -74,7 +74,6 @@ private:
     //==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 
-	std::string							m_romName;
 	virusLib::ROMFile					m_rom;
 	virusLib::Device					m_device;
 	synthLib::Plugin					m_plugin;

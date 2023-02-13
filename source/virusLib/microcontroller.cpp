@@ -131,8 +131,11 @@ void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t f
 	m_hdi08.writeHostFlags(flag0, flag1);
 }
 
-bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>& preset, const bool isMulti)
+bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, const bool isMulti)
 {
+	if(!isValid(preset))
+		return false;
+
 	std::lock_guard lock(m_mutex);
 
 	if(m_loadingState || waitingForPresetReceiveConfirmation())
@@ -169,13 +172,32 @@ bool Microcontroller::sendPreset(const uint8_t program, const std::vector<TWord>
 
 	receiveUpgradedPreset();
 
+	if(isMulti)
+	{
+		m_multiEditBuffer = preset;
+
+		m_globalSettings[PLAY_MODE] = PlayModeMulti;
+	}
+	else
+	{
+		if(program == SINGLE)
+		{
+			m_globalSettings[PLAY_MODE] = PlayModeSingle;
+			m_singleEditBuffer = preset;
+		}
+		else if(program < m_singleEditBuffers.size())
+		{
+			m_singleEditBuffers[program] = preset;
+		}
+	}
+
 	writeHostBitsWithWait(0,1);
 	// Send header
 	TWord buf[] = {0xf47555, static_cast<TWord>(isMulti ? 0x110000 : 0x100000)};
 	buf[1] = buf[1] | (program << 8);
 	m_hdi08.writeRX(buf, 2);
 
-	m_hdi08.writeRX(preset);
+	m_hdi08.writeRX(presetToDSPWords(preset, isMulti));
 
 	LOG("Send to DSP: " << (isMulti ? "Multi" : "Single") << " to program " << static_cast<int>(program));
 
@@ -292,6 +314,9 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	auto buildPresetResponse = [&](const uint8_t _type, const BankNumber _bank, const uint8_t _program, const TPreset& _dump)
 	{
+		if(!isValid(_dump))
+			return;
+
 		SMidiEvent ev;
 		ev.source = _source;
 
@@ -525,6 +550,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			buildGlobalResponses();
 			break;
 		case REQUEST_TOTAL:
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				return enqueue();
 			buildTotalResponse();
 			break;
 		case REQUEST_ARRANGEMENT:
@@ -661,6 +688,8 @@ std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, con
 
 bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _result) const
 {
+	_result[0] = 0;
+
 	if (_bank == BankNumber::EditBuffer)
 		return false;
 
@@ -680,6 +709,8 @@ bool Microcontroller::getSingle(BankNumber _bank, uint32_t _preset, TPreset& _re
 
 bool Microcontroller::requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data)
 {
+	_data[0] = 0;
+
 	if (_bank == BankNumber::EditBuffer)
 	{
 		receiveUpgradedPreset();
@@ -733,25 +764,13 @@ bool Microcontroller::writeSingle(BankNumber _bank, uint8_t _program, const TPre
 		return true;
 	}
 
-	if(_program == SINGLE)
-	{
-		m_globalSettings[PLAY_MODE] = PlayModeSingle;
-
-		m_singleEditBuffer = _data;
-	}
-	else if(_program >= m_singleEditBuffers.size())
-	{
+	if(_program >= m_singleEditBuffers.size() && _program != SINGLE)
 		return false;
-	}
-	else
-	{
-		m_singleEditBuffers[_program] = _data;
-	}
 
 	LOG("Loading Single " << ROMFile::getSingleName(_data) << " to part " << static_cast<int>(_program));
 
 	// Send to DSP
-	return sendPreset(_program, presetToDSPWords(_data, false), false);
+	return sendPreset(_program, _data, false);
 }
 
 bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPreset& _data)
@@ -768,14 +787,10 @@ bool Microcontroller::writeMulti(BankNumber _bank, uint8_t _program, const TPres
 		return true;
 	}
 
-	m_multiEditBuffer = _data;
-
 	LOG("Loading Multi " << ROMFile::getMultiName(_data));
 
-	m_globalSettings[PLAY_MODE] = PlayModeMulti;
-
 	// Convert array of uint8_t to vector of 24bit TWord
-	return sendPreset(_program, presetToDSPWords(_data, true), true);
+	return sendPreset(_program, _data, true);
 }
 
 bool Microcontroller::partBankSelect(const uint8_t _part, const uint8_t _value, const bool _immediatelySelectSingle)
@@ -859,16 +874,13 @@ void Microcontroller::process(size_t _size)
 
 	std::lock_guard lock(m_mutex);
 
-	if(m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
+	if(m_loadingState || m_pendingPresetWrites.empty() || !m_hdi08.rxEmpty() || waitingForPresetReceiveConfirmation())
 		return;
 
-	if(!m_pendingPresetWrites.empty())
-	{
-		const auto preset = m_pendingPresetWrites.front();
-		m_pendingPresetWrites.pop_front();
+	const auto preset = m_pendingPresetWrites.front();
+	m_pendingPresetWrites.pop_front();
 
-		sendPreset(preset.program, preset.data, preset.isMulti);
-	}
+	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
@@ -918,7 +930,12 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 		}
 	}
 
-	if(events.empty())
+	return setState(events);
+}
+
+bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
+{
+	if(_events.empty())
 		return false;
 
 	// delay all preset loads until everything is loaded
@@ -926,10 +943,17 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 
 	std::vector<SMidiEvent> unusedResponses;
 
-	for (const auto& event : events)
+	for (const auto& event : _events)
 	{
-		sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
-		unusedResponses.clear();
+		if(!event.sysex.empty())
+		{
+			sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
+			unusedResponses.clear();
+		}
+		else
+		{
+			sendMIDI(event);
+		}
 	}
 
 	m_loadingState = false;
@@ -969,13 +993,24 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	std::lock_guard lock(m_mutex);
 	processHdi08Tx(_midiOut);
 
-	if (m_pendingSysexInput.empty() || !m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+	if (m_pendingSysexInput.empty())
 		return;
 
-	for (const auto& input : m_pendingSysexInput)
-		sendSysex(input.second, _midiOut, input.first);
+	uint32_t eraseCount = 0;
 
-	m_pendingSysexInput.clear();
+	for (const auto& input : m_pendingSysexInput)
+	{
+		if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+			break;
+
+		sendSysex(input.second, _midiOut, input.first);
+		++eraseCount;
+	}
+
+	if(eraseCount == m_pendingSysexInput.size())
+		m_pendingSysexInput.clear();
+	else if(eraseCount > 0)
+		m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
 }
 
 void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
@@ -1026,7 +1061,7 @@ void Microcontroller::applyToSingleEditBuffer(const Page _page, const uint8_t _p
 		applyToSingleEditBuffer(m_singleEditBuffers[_part], _page, _param, _value);
 }
 
-void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value) const
+void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page, const uint8_t _param, const uint8_t _value)
 {
 	constexpr uint32_t paramsPerPage = 128;
 
@@ -1121,4 +1156,8 @@ void Microcontroller::receiveUpgradedPreset()
 	}
 }
 
+bool Microcontroller::isValid(const TPreset& _preset)
+{
+	return _preset.front() > 0;
+}
 }

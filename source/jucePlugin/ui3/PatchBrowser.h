@@ -40,6 +40,8 @@ namespace genericVirusUI
 		bool activatePatch(jucePluginEditorLib::Patch& _patch) override;
 		int comparePatches(int _columnId, const jucePluginEditorLib::Patch& a, const jucePluginEditorLib::Patch& b) const override;
 
+		bool loadUnkownData(std::vector<std::vector<uint8_t>>& _result, const std::string& _filename) override;
+
 		std::string getCellText(const jucePluginEditorLib::Patch& _patch, int _columnId) override;
 
 		void loadRomBank(uint32_t _bankIndex);

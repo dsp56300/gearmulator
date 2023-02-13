@@ -1,0 +1,87 @@
+pipeline {
+	agent any
+	parameters
+	{
+		booleanParam(name: 'LinuxARM', defaultValue: true, description: '') 
+		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
+		booleanParam(name: 'Win', defaultValue: true, description: '') 
+		booleanParam(name: 'Mac', defaultValue: true, description: '')
+		choice(name: 'Branch', choices: ['master', 'snow'], description: '')
+		booleanParam(name: 'FXPlugins', defaultValue: false, description: '')
+		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
+		booleanParam(name: 'Deploy', defaultValue: true, description: '')
+		booleanParam(name: 'Upload', defaultValue: false, description: '')
+		choice(name: 'UploadFolder', choices: ['', '/alpha', '/beta'], description: '')
+	}
+	stages {
+		stage('Prepare') {
+			steps {
+				script {
+					currentBuild.displayName += " - ${params.Branch} -"
+
+					if(params.LinuxARM)					currentBuild.displayName += " La"
+					if(params.LinuxX86)					currentBuild.displayName += " Lx"
+					if(params.Mac)						currentBuild.displayName += " M"
+					if(params.Win)						currentBuild.displayName += " W"
+					if(params.FXPlugins)				 currentBuild.displayName += " FX"
+					if(params.IntegrationTests)			currentBuild.displayName += " i"
+					if(params.Deploy)					currentBuild.displayName += " d"
+					if(params.Upload)					currentBuild.displayName += " u"
+
+					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
+				}
+			}
+		}
+		stage('Parallel Build') {
+			parallel {
+				stage('Windows') {
+					when { expression { return params.Win } }
+					steps {
+						startBuildJob('win')
+					}
+				}
+				stage('Mac') {
+					when { expression { return params.Mac } }
+					steps {
+						startBuildJob('mac')
+					}
+				}
+				stage('Linux aarch64') {
+					when { expression { return params.LinuxARM } }
+					steps {
+						startBuildJob('linux && arm')
+					}
+				}
+				stage('Linux x86') {
+					when { expression { return params.LinuxX86 } }
+					steps {
+						startBuildJob('linux && x86')
+					}
+				}
+			}
+		}
+	}
+	post {
+		always {
+			mqttNotification(
+				brokerUrl: "${env.MQTT_URL}",
+				credentialsId: 'mqtt',
+				message: currentBuild.displayName + ' - ' + currentBuild.currentResult)
+		}
+	}
+}
+
+def startBuildJob(label)
+{
+//	  build job: 'dsp56300', parameters: [[$class: 'LabelParameterValue', name: 'Agent', label: "win" ]]
+	build job: 'dsp56300', parameters:
+	[
+		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
+		[$class: 'StringParameterValue', name: 'Branch', value: params.Branch], 
+		[$class: 'BooleanParameterValue', name: 'Deploy', value: params.Deploy], 
+		[$class: 'BooleanParameterValue', name: 'Upload', value: params.Upload], 
+		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
+		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
+		[$class: 'StringParameterValue', name: 'UploadFolder', value: params.UploadFolder], 
+	]
+}
