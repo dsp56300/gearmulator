@@ -106,11 +106,11 @@ namespace virusLib
 		T* outputs[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
+		
+		createEsai1Input(&_buffers.input[0][0], &_buffers.input[1][0], &_inputs[0][0], &_inputs[1][0], s, 0, 1);
 
-		createEsai1Input(&_buffers.input[0][0], &_buffers.input[1][0], &_inputs[0][0], &_inputs[1][0], s, 1, 2);
-
-		inputs[2] = &_buffer[0][0];
-		inputs[3] = &_buffer[1][0];
+		inputs[2] = &_buffers.input[0][0];
+		inputs[3] = &_buffers.input[1][0];
 		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
 		inputs[2] = nullptr;
 		inputs[3] = nullptr;
