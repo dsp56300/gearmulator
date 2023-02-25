@@ -10,7 +10,7 @@ namespace virusLib
 		m_bufferI.resize(4);
 
 		getHDI08().writeHDR(0x0000);			// this = Master
-		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp = Slave
+		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp2 = Slave
 
 		getPeriphX().getEsai().writeEmptyAudioIn(1);
 		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(1);
