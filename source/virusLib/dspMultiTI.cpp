@@ -2,13 +2,12 @@
 
 #if VIRUS_SUPPORT_TI
 
+constexpr uint32_t g_esai1Padding = 3;
+
 namespace virusLib
 {
 	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "Master"), m_dsp2(0x100000, true, "Slave ")
 	{
-		m_bufferF.resize(4);
-		m_bufferI.resize(4);
-
 		getHDI08().writeHDR(0x0000);			// this = Master
 		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp2 = Slave
 
@@ -29,18 +28,18 @@ namespace virusLib
 	}
 
 	template<typename T>
-	void mixEsai1Output(T* _dstL, T* _dstR, const T* _srcL, const T* _srcR, uint32_t _samples, uint32_t _srcOffsetL, uint32_t _srcOffsetR)
+	void mixEsai1Output(T* _dstL, T* _dstR, const T* _srcL, const T* _srcR, uint32_t _samples, int32_t _srcOffsetL, int32_t _srcOffsetR)
 	{
 		if(!_dstL || !_dstR)
 			return;
 
-		uint32_t iSrcL = _srcOffsetL;
-		uint32_t iSrcR = _srcOffsetR;
+		_srcL += _srcOffsetL;
+		_srcR += _srcOffsetR;
 
-		for(uint32_t i=0; i<_samples; ++i, iSrcL += 3, iSrcR += 3)
+		for(uint32_t i=0; i<_samples; ++i, _srcL += 3, _srcR += 3)
 		{
-			audioAdd(_dstL[i], _srcL[iSrcL]);
-			audioAdd(_dstR[i], _srcR[iSrcR]);
+			audioAdd(_dstL[i], *_srcL);
+			audioAdd(_dstR[i], *_srcR);
 		}
 	}
 
@@ -60,23 +59,55 @@ namespace virusLib
 		}
 	}
 
-	template<typename T>
-	void processAudioTI(DspMultiTI& _dsp, DspSingle& _dsp2, std::vector<std::vector<T>>& _buffer, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, const uint32_t _latency)
+	template <typename T, size_t Size> void ensureSize(DspMultiTI::EsaiBuf<T, Size>& _buf, size_t _size)
+	{
+		if (_buf[0].size() < _size)
+		{
+			for (auto &buffer : _buf)
+				buffer.resize(_size, 0);
+		}
+	}
+
+	template <typename T> void ensureSize(DspMultiTI::EsaiBufs<T> &_bufs, size_t _size)
+	{
+		ensureSize(_bufs.input, _size);
+		ensureSize(_bufs.dspAout, _size);
+		ensureSize(_bufs.dspBout, _size);
+	}
+
+	template <typename T> void wrapPadding(std::vector<T>& _buf, const size_t _usedSize)
+	{
+		size_t iSrc = _usedSize;
+
+		for (size_t i=0; i<g_esai1Padding; ++i, ++iSrc)
+			_buf[i] = _buf[iSrc];
+	}
+
+	template <typename T, size_t Size> void wrapPadding(DspMultiTI::EsaiBuf<T, Size>& _buf, size_t _usedSize)
+	{
+		for (size_t i=0; i<_buf.size(); ++i)
+			wrapPadding(_buf[i], _usedSize);
+	}
+
+	template <typename T> void wrapPadding(DspMultiTI::EsaiBufs<T>& _bufs, size_t _usedSize)
+	{
+		wrapPadding(_bufs.dspAout, _usedSize);
+		wrapPadding(_bufs.dspBout, _usedSize);
+	}
+
+	template <typename T>
+	void processAudioTI(DspMultiTI &_dsp, DspSingle &_dsp2, DspMultiTI::EsaiBufs<T>& _buffers, const synthLib::TAudioInputsT<T> &_inputs, const synthLib::TAudioOutputsT<T> &_outputs, const size_t _samples, const uint32_t _latency)
 	{
 		const auto s = static_cast<uint32_t>(_samples);
 
-		if(_buffer[0].size() < s*3)
-		{
-			for (auto& buffer : _buffer)
-				buffer.resize(s*3);
-		}
+		ensureSize(_buffers, s * 3 + g_esai1Padding);
 
 		const T* inputs[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 		T* outputs[] = {nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
 
-		createEsai1Input(&_buffer[0][0], &_buffer[1][0], &_inputs[0][0], &_inputs[1][0], s, 1, 2);
+		createEsai1Input(&_buffers.input[0][0], &_buffers.input[1][0], &_inputs[0][0], &_inputs[1][0], s, 1, 2);
 
 		inputs[2] = &_buffer[0][0];
 		inputs[3] = &_buffer[1][0];
@@ -110,21 +141,24 @@ namespace virusLib
 
 		// ESAI_1 outputs
 
-		T* outputsMix[] = {&_buffer[0][0], &_buffer[1][0], &_buffer[2][0], &_buffer[3][0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		T* outputsMixA[] = {&_buffers.dspAout[0][g_esai1Padding], &_buffers.dspAout[1][g_esai1Padding], &_buffers.dspAout[2][g_esai1Padding], &_buffers.dspAout[3][g_esai1Padding], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		T* outputsMixB[] = {&_buffers.dspBout[0][g_esai1Padding], &_buffers.dspBout[1][g_esai1Padding], &_buffers.dspBout[2][g_esai1Padding], &_buffers.dspBout[3][g_esai1Padding], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		// USB outputs on the Master are sent to the Slave via ESAI_1 in 1/3 interleaved format => unpack it
-		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s * 3);
+		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixA, s * 3);
 
-		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMix[3], outputsMix[2], s, 1, 0);	// USB 1
-		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMix[0], outputsMix[1], s, 1, 2);	// USB 2
-		mixEsai1Output(_outputs[10], _outputs[11], outputsMix[2], outputsMix[3], s, 1, 2);	// USB 3
+		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMixA[2], outputsMixA[3], s, 0, 1);	// USB 1
+		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMixA[1], outputsMixA[0], s, 2, 1);	// USB 2
+		mixEsai1Output(_outputs[10], _outputs[11], outputsMixA[3], outputsMixA[2], s, 2, 1);	// USB 3
 
 		// DAC outputs on the Slave are send via ESAI_1 to the Master in 1/3 interleaved format => unpack it
-		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMix, s*3);
+		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixB, s * 3);
 
-		mixEsai1Output(_outputs[0], _outputs[1], outputsMix[0], outputsMix[1], s, 0, 1);	// Out 1
-		mixEsai1Output(_outputs[2], _outputs[3], outputsMix[2], outputsMix[3], s, 0, 1);	// Out 2
-		mixEsai1Output(_outputs[4], _outputs[5], outputsMix[1], outputsMix[0], s, 2, 1);	// Out 3
+		mixEsai1Output(_outputs[0], _outputs[1], outputsMixB[1], outputsMixB[0], s, -2, 0); // Out 1
+		mixEsai1Output(_outputs[2], _outputs[3], outputsMixB[3], outputsMixB[2], s, -2, 0); // Out 2
+		mixEsai1Output(_outputs[4], _outputs[5], outputsMixB[0], outputsMixB[1], s, 1, -1); // Out 3
+
+		wrapPadding(_buffers, s*3);
 	}
 
 	void DspMultiTI::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency)

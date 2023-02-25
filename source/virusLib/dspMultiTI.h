@@ -22,8 +22,18 @@ namespace virusLib
 
 	private:
 		DspSingle m_dsp2;
-		std::vector<std::vector<float>> m_bufferF;
-		std::vector<std::vector<dsp56k::TWord>> m_bufferI;
+
+		template<typename T, size_t Size> using EsaiBuf = std::array<std::vector<T>, Size>;
+
+		template<typename T> struct EsaiBufs
+		{
+			EsaiBuf<T, 2> input;
+			EsaiBuf<T, 4> dspAout;
+			EsaiBuf<T, 4> dspBout;
+		};
+
+		EsaiBufs<float> m_bufferF;
+		EsaiBufs<dsp56k::TWord> m_bufferI;
 	};
 }
 
