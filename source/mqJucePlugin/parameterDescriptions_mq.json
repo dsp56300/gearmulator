@@ -1352,8 +1352,8 @@
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "null"},
-			{"type": "param", "name": "EffectType"},                            // 128
-			{"type": "param", "name": "EffectMix"},                             // 129
+			{"type": "param", "name": "FX1Type"},                               // 128
+			{"type": "param", "name": "FX1Mix"},                                // 129
 			{"type": "param", "name": "Fx1VocoderBands"},                       // 130
 			{"type": "param", "name": "Fx1VocoderAnalysisSignal"},              // 131
 			{"type": "param", "name": "Fx1VocoderAnalysisFreqLow"},             // 132
@@ -1368,8 +1368,8 @@
 			{"type": "param", "name": "Fx1VocoderEQBandMid"},                   // 141
 			{"type": "param", "name": "Fx1VocoderEQLevelMid"},                  // 142
 			{"type": "param", "name": "Fx1VocoderEQLevelHigh"},                 // 143
-			{"type": "null"},
-			{"type": "null"},
+			{"type": "param", "name": "FX2Type"},                               // 144
+			{"type": "param", "name": "FX2Mix"},                                // 145
 			{"type": "param", "name":"Fx2VocoderBands"},						// 146
 			{"type": "param", "name":"Fx2VocoderAnalysisSignal"},               // 147
 			{"type": "param", "name":"Fx2VocoderAnalysisFreqLow"},              // 148
