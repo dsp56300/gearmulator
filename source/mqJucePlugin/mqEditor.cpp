@@ -7,6 +7,8 @@
 
 #include "../jucePluginLib/parameterbinding.h"
 
+#include "../mqLib/mqbuildconfig.h"
+
 namespace mqJucePlugin
 {
 	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
@@ -20,13 +22,38 @@ namespace mqJucePlugin
 		if(findComponent("ContainerPatchList", false))
 			m_patchBrowser.reset(new PatchBrowser(*this, _processor.getController(), _processor.getConfig()));
 
+		auto disableButton = [](juce::Component* _comp)
+		{
+			_comp->setAlpha(0.5f);
+			_comp->setEnabled(false);
+		};
+
+		auto disableByName = [this, &disableButton](const std::string& _button)
+		{
+			if (auto* bt = findComponentT<juce::Button>(_button, false))
+				disableButton(bt);
+		};
+
 		m_btPlayModeMulti = findComponentT<juce::Button>("btPlayModeMulti", false);
 		if(m_btPlayModeMulti)
 		{
-			m_btPlayModeMulti->onClick = [this]()
+			if constexpr(mqLib::g_pluginDemo)
 			{
-				m_controller.setPlayMode(m_btPlayModeMulti->getToggleState());
-			};
+				disableButton(m_btPlayModeMulti);
+			}
+			else
+			{
+				m_btPlayModeMulti->onClick = [this]()
+				{
+					m_controller.setPlayMode(m_btPlayModeMulti->getToggleState());
+				};
+			}
+		}
+
+		if constexpr(mqLib::g_pluginDemo)
+		{
+			disableByName("btPageMulti");
+			disableByName("btPageDrum");
 		}
 	}
 

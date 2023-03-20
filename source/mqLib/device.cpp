@@ -6,6 +6,8 @@
 
 #include "../synthLib/deviceTypes.h"
 
+#include "mqbuildconfig.h"
+
 namespace mqLib
 {
 	Device::Device() : m_mq(BootMode::Default), m_state(m_mq), m_sysexRemote(m_mq)
@@ -48,6 +50,9 @@ namespace mqLib
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
+		if constexpr (g_pluginDemo)
+			return false;
+
 		return m_state.setState(_state, _type);
 	}
 
