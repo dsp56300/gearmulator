@@ -182,7 +182,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         }
         else if(name == midiPacketName(GlobalDump))
         {
-            memcpy(&m_globalData[0], &_msg[5], sizeof(m_globalData));
+            memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
 
             if(isMultiMode())
             {
@@ -229,7 +229,7 @@ bool Controller::sendSysEx(MidiPacketType _type) const
     return sendSysEx(_type, params);
 }
 
-bool Controller::sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+bool Controller::sendSysEx(const MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const
 {
     _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
     return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
