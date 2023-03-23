@@ -55,6 +55,15 @@ namespace mqJucePlugin
 			disableByName("btPageMulti");
 			disableByName("btPageDrum");
 		}
+
+		m_btPresetPrev = findComponentT<juce::Button>("btPresetPrev", false);
+		m_btPresetNext = findComponentT<juce::Button>("btPresetNext", m_btPresetPrev != nullptr);
+
+		if (m_btPresetPrev)
+		{
+			m_btPresetPrev->onClick = [this]			{ onBtPresetPrev();	};
+			m_btPresetNext->onClick = [this]			{ onBtPresetNext();	};
+		}
 	}
 
 	Editor::~Editor()
@@ -80,5 +89,19 @@ namespace mqJucePlugin
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
 	{
 		return findEmbeddedResource(_filename, _size);
+	}
+
+	void Editor::onBtPresetPrev()
+	{
+		if (m_patchBrowser->selectPrevPreset())
+			return;
+//		m_controller.selectPrevPreset();
+	}
+
+	void Editor::onBtPresetNext()
+	{
+		if (m_patchBrowser->selectNextPreset())
+			return;
+//		m_controller.selectNextPreset();
 	}
 }

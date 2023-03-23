@@ -43,13 +43,17 @@ namespace mqLib
 			return receive(_responses, _data.sysex, _sender);
 		}
 
-		LOG("Received: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
+		if (_sender == Origin::Device)
+			LOG("Recv: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
 
 		switch(_data.a & 0xf0)
 		{
 		case synthLib::M_CONTROLCHANGE:
 			switch(_data.b)
 			{
+			case synthLib::MC_BANKSELECTMSB:
+				m_lastBankSelectMSB = _data;
+				break;
 			case synthLib::MC_BANKSELECTLSB:
 				m_lastBankSelectLSB = _data;
 				break;

@@ -9,7 +9,7 @@ namespace mqJucePlugin
 		std::string category;
 	};
 
-	class PatchBrowser : jucePluginEditorLib::PatchBrowser
+	class PatchBrowser : public jucePluginEditorLib::PatchBrowser
 	{
 	public:
 		PatchBrowser(const jucePluginEditorLib::Editor& _editor, pluginLib::Controller& _controller, juce::PropertiesFile& _config);

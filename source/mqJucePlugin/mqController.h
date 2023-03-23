@@ -54,7 +54,12 @@ public:
     bool isMultiMode() const;
     void setPlayMode(bool _multiMode);
 
+    void selectNextPreset();
+    void selectPrevPreset();
+
 private:
+	void selectPreset(int _offset);
+
     static std::string loadParameterDescriptions();
 
 	void timerCallback() override;
@@ -77,4 +82,6 @@ private:
     std::array<Patch,16> m_singleEditBuffers;
     std::array<uint8_t, 200> m_globalData{};
     mqJucePlugin::FrontPanel* m_frontPanel = nullptr;
+    std::array<uint32_t, 16> m_currentSingles{0};
+    uint32_t m_currentSingle = 0;
 };

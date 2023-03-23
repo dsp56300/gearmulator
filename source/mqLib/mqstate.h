@@ -221,6 +221,7 @@ namespace mqLib
 		Origin m_sender = Origin::External;
 		bool m_isEditBuffer = false;
 
+		synthLib::SMidiEvent m_lastBankSelectMSB;
 		synthLib::SMidiEvent m_lastBankSelectLSB;
 	};
 }

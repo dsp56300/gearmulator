@@ -244,6 +244,48 @@ void Controller::setPlayMode(bool _multiMode)
 {
 }
 
+void Controller::selectNextPreset()
+{
+	selectPreset(+1);
+}
+
+void Controller::selectPrevPreset()
+{
+	selectPreset(-1);
+}
+
+void Controller::selectPreset(int _offset)
+{
+    auto& current = isMultiMode() ? m_currentSingles[getCurrentPart()] : m_currentSingle;
+
+	int index = static_cast<int>(current) + _offset;
+
+	if (index < 0)
+        index += 300;
+
+	if (index >= 300)
+        index -= 300;
+
+    current = static_cast<uint32_t>(index);
+
+    const int single = index % 100;
+    const int bank = index / 100;
+
+    if (isMultiMode())
+    {
+	    // TODO: modify multi
+    }
+	else
+    {
+		sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTMSB, m_deviceId);
+        sendMidiEvent(synthLib::M_CONTROLCHANGE, synthLib::MC_BANKSELECTLSB, static_cast<uint8_t>(mqLib::MidiBufferNum::SingleBankA) + bank);
+        sendMidiEvent(synthLib::M_PROGRAMCHANGE, static_cast<uint8_t>(single), 0);
+/*
+		sendGlobalParameterChange(mqLib::GlobalParameter::InstrumentABankNumber, static_cast<uint8_t>(bank));
+	    sendGlobalParameterChange(mqLib::GlobalParameter::InstrumentASingleNumber, static_cast<uint8_t>(single));
+*/  }
+}
+
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
 {
     const auto& desc = _parameter.getDescription();
