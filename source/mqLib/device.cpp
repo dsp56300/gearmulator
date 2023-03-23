@@ -109,21 +109,22 @@ namespace mqLib
 	{
 		const auto& sysex = _ev.sysex;
 
-		Responses responses;
-
-		for (auto& response : responses)
-		{
-			auto& r = _response.emplace_back();
-			std::swap(response, r.sysex);
-		}
-
 		if (!sysex.empty())
 		{
 			if (m_sysexRemote.receive(m_customSysexOut, sysex))
 				return true;
 		}
 
+
+		Responses responses;
+
 		const auto res = m_state.receive(responses, _ev, State::Origin::External);
+
+		for (auto& response : responses)
+		{
+			auto& r = _response.emplace_back();
+			std::swap(response, r.sysex);
+		}
 
 		// do not forward to device if our cache was able to reply. It might have sent something to the device already on its own if a cache miss occured
 		if(res)
