@@ -2301,7 +2301,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "AmpEnvTriggerMode"
                     }
                 },
                 {
@@ -2323,7 +2323,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "AmpEnvTriggerMode"
                     }
                 },
                 {
@@ -2469,7 +2469,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "Env3TriggerMode"
                     }
                 },
                 {
@@ -2491,7 +2491,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "Env3TriggerMode"
                     }
                 },
                 {
@@ -2637,7 +2637,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "Env4TriggerMode"
                     }
                 },
                 {
@@ -2659,7 +2659,7 @@
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "FilterEnvTriggerMode"
+                        "parameter" : "Env4TriggerMode"
                     }
                 },
                 {
