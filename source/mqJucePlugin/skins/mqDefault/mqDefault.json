@@ -1275,6 +1275,9 @@
                         "texture" : "toggleWithLED",
                         "tileSizeX" : "128",
                         "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "GlideEnable"
                     }
                 },
                 {
@@ -1355,6 +1358,9 @@
                         "texture" : "toggleWithLED",
                         "tileSizeX" : "128",
                         "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "VoiceMode"
                     }
                 },
                 {
