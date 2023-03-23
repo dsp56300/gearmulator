@@ -111,8 +111,18 @@ namespace pluginLib
         synthLib::SMidiEvent ev;
         ev.sysex = msg;
 		ev.source = synthLib::MidiEventSourceEditor;
-        m_processor.addMidiEvent(ev);
+		sendMidiEvent(ev);
     }
+
+	void Controller::sendMidiEvent(const synthLib::SMidiEvent& _ev) const
+    {
+        m_processor.addMidiEvent(_ev);
+    }
+
+	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSourceEditor*/) const
+	{
+        m_processor.addMidiEvent(synthLib::SMidiEvent(_a, _b, _c, _offset, _source));
+	}
 
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
@@ -156,7 +166,7 @@ namespace pluginLib
 		return iti->second;
     }
 
-    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part)
+    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part) const
     {
 	    const auto res = getParameter(_index, _part);
 		return res ? &res->getValueObject() : nullptr;
