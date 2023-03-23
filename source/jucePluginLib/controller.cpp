@@ -4,9 +4,15 @@
 
 #include "parameter.h"
 #include "processor.h"
+#include "dsp56kEmu/logging.h"
 
 namespace pluginLib
 {
+	uint8_t getParameterValue(Parameter* _p)
+	{
+		return roundToInt(_p->getValueObject().getValue());
+	}
+
 	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
 	{
 	}
@@ -124,6 +130,54 @@ namespace pluginLib
         m_processor.addMidiEvent(synthLib::SMidiEvent(_a, _b, _c, _offset, _source));
 	}
 
+	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const
+	{
+		const auto &desc = _parameter.getDescription();
+
+		std::map<MidiDataType, uint8_t> data;
+
+		const auto *packet = getMidiPacket(_midiPacket);
+
+		if (!packet)
+		{
+			LOG("Failed to find midi packet " << _midiPacket);
+			return false;
+		}
+
+		const auto byte = packet->getByteIndexForParameterName(desc.name);
+
+		if (byte == MidiPacket::InvalidIndex)
+		{
+			LOG("Failed to find byte index for parameter " << desc.name);
+			return false;
+		}
+
+		std::vector<const MidiPacket::MidiDataDefinition*> definitions;
+
+		if(!packet->getDefinitionsForByteIndex(definitions, byte))
+			return false;
+
+		_result = 0;
+
+	    for (const auto& it : definitions)
+	    {
+			uint32_t idx = 0;
+
+	    	if(!m_descriptions.getIndexByName(idx, it->paramName))
+			{
+				LOG("Failed to find index for parameter " << it->paramName);
+				return false;
+			}
+
+			auto* p = getParameter(idx, _parameter.getPart());
+
+			const auto v = p == &_parameter ? _value : getParameterValue(p);
+			_result |= it->getMaskedValue(v);
+	    }
+
+		return true;
+	}
+	
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
 	    const std::map<pluginLib::MidiDataType, uint8_t> params;
@@ -219,7 +273,7 @@ namespace pluginLib
 				if(!p)
 					return false;
 
-				auto v = roundToInt(p->getValueObject().getValue());
+				const auto v = getParameterValue(p);
 				paramValues.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
 			}
 		}

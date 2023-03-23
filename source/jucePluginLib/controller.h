@@ -58,6 +58,8 @@ namespace pluginLib
 		void sendMidiEvent(const synthLib::SMidiEvent& _ev) const;
 		void sendMidiEvent(uint8_t _a, uint8_t _b, uint8_t _c, uint32_t _offset = 0, synthLib::MidiEventSource _source = synthLib::MidiEventSourceEditor) const;
 
+		bool combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const;
+
 	private:
 		Processor& m_processor;
         ParameterDescriptions m_descriptions;
