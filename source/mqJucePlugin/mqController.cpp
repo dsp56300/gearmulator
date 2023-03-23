@@ -288,27 +288,26 @@ void Controller::selectPreset(int _offset)
 
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
 {
-    const auto& desc = _parameter.getDescription();
+	const auto &desc = _parameter.getDescription();
 
-    if(desc.page >= 100)
-    {
-	    // TODO: multi
-        return;
-    }
+	if (desc.page >= 100)
+	{
+		// TODO: multi
+		return;
+	}
 
-    sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
-}
+	std::map<pluginLib::MidiDataType, uint8_t> data;
 
-bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const
-{
-    std::map<pluginLib::MidiDataType, uint8_t> data;
+	uint8_t v;
+	if (!combineParameterChange(v, g_midiPacketNames[SingleDump], _parameter, _value))
+		return;
 
-    data.insert(std::make_pair(pluginLib::MidiDataType::Part, _part));
-    data.insert(std::make_pair(pluginLib::MidiDataType::Page, _page));
-    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _index));
-    data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Page, desc.page));
+	data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, desc.index));
+	data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
 
-    return sendSysEx(SingleParameterChange, data);
+	sendSysEx(SingleParameterChange, data);
 }
 
 bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value)

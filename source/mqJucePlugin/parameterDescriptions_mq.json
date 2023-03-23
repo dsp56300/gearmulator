@@ -1281,8 +1281,8 @@
 			{"type": "null"},
 			{"type": "param", "name":"GlideMode"},                              // 56
 			{"type": "param", "name":"GlideRate"},                              // 57
-			{"type": "param", "name":"VoiceMode", "mask":"1", "shift":"0"},     // 58
-			{"type": "param", "name":"UnisonoCount", "mask":"7", "shift":"1"},  // 58
+			{"type": "param", "name":"VoiceMode", "mask":"7", "shift":"0"},     // 58
+			{"type": "param", "name":"UnisonoCount", "mask":"7", "shift":"4"},  // 58
 			{"type": "param", "name":"UnisonoDetune"},                          // 59
 			{"type": "null"},
 			{"type": "param", "name": "O1Level"},                               // 61
