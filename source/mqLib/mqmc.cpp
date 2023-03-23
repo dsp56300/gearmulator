@@ -118,7 +118,7 @@ namespace mqLib
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
-		__debugbreak();
+//		__debugbreak();
 		return 0;
 	}
 
