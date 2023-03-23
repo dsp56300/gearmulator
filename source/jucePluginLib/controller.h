@@ -3,12 +3,9 @@
 #include "parameterdescriptions.h"
 #include "parameter.h"
 
-#include <string>
+#include "../synthLib/midiTypes.h"
 
-namespace synthLib
-{
-	struct SMidiEvent;
-}
+#include <string>
 
 namespace pluginLib
 {
@@ -25,7 +22,7 @@ namespace pluginLib
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
-        juce::Value* getParamValueObject(uint32_t _index, uint8_t _part);
+        juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
         Parameter* getParameter(uint32_t _index) const;
         Parameter* getParameter(uint32_t _index, uint8_t _part) const;
 		
@@ -58,6 +55,8 @@ namespace pluginLib
 		void sendSysEx(const pluginLib::SysEx &) const;
 		bool sendSysEx(const std::string& _packetName) const;
 		bool sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+		void sendMidiEvent(const synthLib::SMidiEvent& _ev) const;
+		void sendMidiEvent(uint8_t _a, uint8_t _b, uint8_t _c, uint32_t _offset = 0, synthLib::MidiEventSource _source = synthLib::MidiEventSourceEditor) const;
 
 	private:
 		Processor& m_processor;
