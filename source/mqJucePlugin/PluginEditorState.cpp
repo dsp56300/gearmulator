@@ -7,8 +7,8 @@
 
 const std::vector<PluginEditorState::Skin> g_includedSkins =
 {
-	{"Device", "mqFrontPanel.json", ""},
-	{"Editor", "mqDefault.json", ""}
+	{"Editor", "mqDefault.json", ""},
+	{"Device", "mqFrontPanel.json", ""}
 };
 
 PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : jucePluginEditorLib::PluginEditorState(_processor, _processor.getController(), g_includedSkins)
