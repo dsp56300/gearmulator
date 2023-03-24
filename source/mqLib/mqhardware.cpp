@@ -46,8 +46,17 @@ namespace mqLib
 			if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 				m_esaiFrameAddedCv.notify_one();
 
+			m_requestedFramesAvailableMutex.lock();
+
 			if(m_requestedFrames && esai.getAudioOutputs().size() >= m_requestedFrames)
+			{
+				m_requestedFramesAvailableMutex.unlock();
 				m_requestedFramesAvailableCv.notify_one();
+			}
+			else
+			{
+				m_requestedFramesAvailableMutex.unlock();
+			}
 
 			std::unique_lock uLock(m_haltDSPmutex);
 			m_haltDSPcv.wait(uLock, [&]{ return m_haltDSP == false; });
@@ -392,14 +401,15 @@ namespace mqLib
 		{
 			// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 
-			m_requestedFrames = requiredSize;
 			std::unique_lock uLock(m_requestedFramesAvailableMutex);
+			m_requestedFrames = requiredSize;
 			m_requestedFramesAvailableCv.wait(uLock, [&]()
 			{
-				return esai.getAudioOutputs().size() >= requiredSize;
+				if(esai.getAudioOutputs().size() < requiredSize)
+					return false;
+				m_requestedFrames = 0;
+				return true;
 			});
-
-			m_requestedFrames = 0;
 		}
 
 		esai.processAudioOutputInterleaved(outputs, count);
