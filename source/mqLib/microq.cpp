@@ -20,6 +20,9 @@ namespace mqLib
 			romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
 		if(romFile.empty())
 			return;
+
+		LOG("Boot using ROM " << romFile);
+
 		m_hw.reset(new Hardware(romFile));
 
 		if(!isValid())
