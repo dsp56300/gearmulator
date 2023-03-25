@@ -90,8 +90,8 @@ namespace pluginLib
 
 	protected:
 		// tries to find synth param in both internal and host
-		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex);
-		const ParameterList& findSynthParam(const ParamIndex& _paramIndex);
+		const ParameterList& findSynthParam(uint8_t _part, uint8_t _page, uint8_t _paramIndex) const;
+		const ParameterList& findSynthParam(const ParamIndex& _paramIndex) const;
 
     	std::map<ParamIndex, ParameterList> m_synthInternalParams;
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
