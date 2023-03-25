@@ -182,7 +182,8 @@ namespace pluginLib
 
 			auto* p = getParameter(i, _parameter.getPart());
 
-			const auto v = p == &_parameter ? _value : getParameterValue(p);
+			const auto pIdx = ParamIndex{p->getDescription().page, p->getPart(), p->getDescription().index};
+			const auto v = idx == pIdx ? _value : getParameterValue(p);
 			_result |= it->getMaskedValue(v);
 	    }
 

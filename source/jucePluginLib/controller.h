@@ -69,16 +69,22 @@ namespace pluginLib
             uint8_t page;
             uint8_t partNum;
             uint8_t paramNum;
-            bool operator<(ParamIndex const &rhs) const
+
+        	bool operator<(const ParamIndex& _p) const
             {
-				if (page < rhs.page)         return false;
-				if (page > rhs.page)         return true;
-				if (partNum < rhs.partNum)   return false;
-				if (partNum > rhs.partNum)   return true;
-				if (paramNum < rhs.paramNum) return false;
-				if (paramNum > rhs.paramNum) return true;
+				if (page < _p.page)         return false;
+				if (page > _p.page)         return true;
+				if (partNum < _p.partNum)   return false;
+				if (partNum > _p.partNum)   return true;
+				if (paramNum < _p.paramNum) return false;
+				if (paramNum > _p.paramNum) return true;
 				return false;
 			}
+
+			bool operator==(const ParamIndex& _p) const
+            {
+	            return page == _p.page && partNum == _p.partNum && paramNum && _p.paramNum;
+            }
         };
 
 		using ParameterList = std::vector<Parameter*>;
