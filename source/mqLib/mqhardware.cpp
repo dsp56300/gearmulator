@@ -378,8 +378,6 @@ namespace mqLib
 
 		auto& esai = m_dsp.getPeriph().getEsai();
 
-		const auto count = _frames;
-
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
 
@@ -393,26 +391,42 @@ namespace mqLib
 		outputs[4] = &m_audioOutputs[4].front();
 		outputs[5] = &m_audioOutputs[5].front();
 
-		esai.processAudioInputInterleaved(inputs, count, _latency);
-
-		const auto requiredSize = _frames > 4 ? (_frames << 1) - 8 : 0;
-
-		if(esai.getAudioOutputs().size() < requiredSize)
+		while (_frames)
 		{
-			// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
+			const auto processCount = std::min(_frames, static_cast<uint32_t>(1024));
+			_frames -= processCount;
 
-			std::unique_lock uLock(m_requestedFramesAvailableMutex);
-			m_requestedFrames = requiredSize;
-			m_requestedFramesAvailableCv.wait(uLock, [&]()
+			esai.processAudioInputInterleaved(inputs, processCount, _latency);
+
+			const auto requiredSize = processCount > 4 ? (processCount << 1) - 8 : 0;
+
+			if(esai.getAudioOutputs().size() < requiredSize)
 			{
-				if(esai.getAudioOutputs().size() < requiredSize)
-					return false;
-				m_requestedFrames = 0;
-				return true;
-			});
-		}
+				// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
 
-		esai.processAudioOutputInterleaved(outputs, count);
+				std::unique_lock uLock(m_requestedFramesAvailableMutex);
+				m_requestedFrames = requiredSize;
+				m_requestedFramesAvailableCv.wait(uLock, [&]()
+				{
+					if(esai.getAudioOutputs().size() < requiredSize)
+						return false;
+					m_requestedFrames = 0;
+					return true;
+				});
+			}
+
+			esai.processAudioOutputInterleaved(outputs, processCount);
+
+			inputs[0] += processCount;
+			inputs[1] += processCount;
+
+			outputs[0] += processCount;
+			outputs[1] += processCount;
+			outputs[2] += processCount;
+			outputs[3] += processCount;
+			outputs[4] += processCount;
+			outputs[5] += processCount;
+		}
 
 		m_processAudio = false;
 	}
