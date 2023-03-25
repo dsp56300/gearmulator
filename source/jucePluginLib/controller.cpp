@@ -10,7 +10,7 @@ namespace pluginLib
 {
 	uint8_t getParameterValue(Parameter* _p)
 	{
-		return roundToInt(_p->getValueObject().getValue());
+		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
 	}
 
 	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
@@ -144,7 +144,18 @@ namespace pluginLib
 			return false;
 		}
 
-		const auto byte = packet->getByteIndexForParameterName(desc.name);
+		const ParamIndex idx = {static_cast<uint8_t>(desc.page), _parameter.getPart(), desc.index};
+
+		const auto params = findSynthParam(idx);
+
+		uint32_t byte = MidiPacket::InvalidIndex;
+
+		for (auto param : params)
+		{
+			byte = packet->getByteIndexForParameterName(param->getDescription().name);
+			if (byte != MidiPacket::InvalidIndex)
+				break;
+		}
 
 		if (byte == MidiPacket::InvalidIndex)
 		{
@@ -161,15 +172,15 @@ namespace pluginLib
 
 	    for (const auto& it : definitions)
 	    {
-			uint32_t idx = 0;
+			uint32_t i = 0;
 
-	    	if(!m_descriptions.getIndexByName(idx, it->paramName))
+	    	if(!m_descriptions.getIndexByName(i, it->paramName))
 			{
 				LOG("Failed to find index for parameter " << it->paramName);
 				return false;
 			}
 
-			auto* p = getParameter(idx, _parameter.getPart());
+			auto* p = getParameter(i, _parameter.getPart());
 
 			const auto v = p == &_parameter ? _value : getParameterValue(p);
 			_result |= it->getMaskedValue(v);
@@ -195,14 +206,14 @@ namespace pluginLib
         return true;
     }
 
-	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex) const
 	{
 		const ParamIndex paramIndex{ _page, _part, _paramIndex };
 
 		return findSynthParam(paramIndex);
 	}
 
-	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex) const
     {
 		const auto it = m_synthParams.find(_paramIndex);
 
