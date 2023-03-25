@@ -51,7 +51,10 @@ namespace pluginLib
 					const auto& existingParams = findSynthParam(idx);
 
 					for (auto& existingParam : existingParams)
-						existingParam->addDerivedParameter(p.get());
+					{
+						if(isDerivedParameter(*existingParam, *p))
+							existingParam->addDerivedParameter(p.get());
+					}
 				}
 
 				const bool isNonPartExclusive = desc.isNonPartSensitive();

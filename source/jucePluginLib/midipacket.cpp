@@ -276,6 +276,17 @@ namespace pluginLib
 		return InvalidIndex;
 	}
 
+	const MidiPacket::MidiDataDefinition* MidiPacket::getDefinitionByParameterName(const std::string& _name) const
+	{
+		for (const auto& definition : m_definitions)
+		{
+			if (definition.paramName == _name)
+				return &definition;
+		}
+
+		return nullptr;
+	}
+
 	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, const Sysex& _src)
 	{
 		auto checksum = _d.checksumInitValue;

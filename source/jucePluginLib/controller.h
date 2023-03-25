@@ -60,9 +60,7 @@ namespace pluginLib
 
 		bool combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const;
 
-	private:
-		Processor& m_processor;
-        ParameterDescriptions m_descriptions;
+		virtual bool isDerivedParameter(Parameter& _derived, Parameter& _base) const { return true; }
 
         struct ParamIndex
         {
@@ -88,6 +86,10 @@ namespace pluginLib
         };
 
 		using ParameterList = std::vector<Parameter*>;
+
+	private:
+		Processor& m_processor;
+        ParameterDescriptions m_descriptions;
 
 		uint8_t m_currentPart = 0;
 
