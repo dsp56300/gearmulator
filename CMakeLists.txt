@@ -5,7 +5,7 @@ set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
 set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 
-project(gearmulator VERSION 1.2.30)
+project(gearmulator VERSION 1.2.31)
 
 include(base.cmake)
 include(CTest)
