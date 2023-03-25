@@ -185,14 +185,22 @@ namespace synthLib
         return {};
     }
 
-    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
+    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize, const bool _stripPluginComponentFolders)
     {
-        std::string path = getModulePath();
+        std::string path = getModulePath(_stripPluginComponentFolders);
 
         if(path.empty())
             path = getCurrentDirectory();
 
         return findFile(path, _extension, _minSize, _maxSize);
+    }
+
+    std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
+    {
+        auto res = findFile(_extension, _minSize, _maxSize, true);
+		if (!res.empty())
+			return res;
+		return findFile(_extension, _minSize, _maxSize, false);
     }
 
     std::string findFile(const std::string& _rootPath, const std::string& _extension, const size_t _minSize, const size_t _maxSize)
