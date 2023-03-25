@@ -171,6 +171,12 @@ namespace pluginLib
 		if(!packet->getDefinitionsForByteIndex(definitions, byte))
 			return false;
 
+		if (definitions.size() == 1)
+		{
+			_result = _value;
+			return true;
+		}
+
 		_result = 0;
 
 	    for (const auto& it : definitions)
@@ -184,9 +190,7 @@ namespace pluginLib
 			}
 
 			auto* p = getParameter(i, _parameter.getPart());
-
-			const auto pIdx = ParamIndex{p->getDescription().page, p->getPart(), p->getDescription().index};
-			const auto v = idx == pIdx ? _value : getParameterValue(p);
+			const auto v = p == &_parameter ? _value : getParameterValue(p);
 			_result |= it->getMaskedValue(v);
 	    }
 
