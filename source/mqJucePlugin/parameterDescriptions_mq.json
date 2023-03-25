@@ -300,13 +300,13 @@
 		// Filter Env
  		{"index":196, "name":"FilterEnvMode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
  		{"index":196, "name":"FilterEnvTriggerMode", "min":0, "max":2, "isBool":true},
- 		{"index":197, "name":"FilterEnvAttack"},
- 		{"index":198, "name":"FilterEnvAttackLevel"},
- 		{"index":199, "name":"FilterEnvDecay"},
- 		{"index":200, "name":"FilterEnvSustain"},
- 		{"index":201, "name":"FilterEnvDecay2"},
- 		{"index":202, "name":"FilterEnvSustain2"},
- 		{"index":203, "name":"FilterEnvRelease"},
+ 		{"index":199, "name":"FilterEnvAttack"},
+ 		{"index":200, "name":"FilterEnvAttackLevel"},
+ 		{"index":201, "name":"FilterEnvDecay"},
+ 		{"index":202, "name":"FilterEnvSustain"},
+ 		{"index":203, "name":"FilterEnvDecay2"},
+ 		{"index":204, "name":"FilterEnvSustain2"},
+ 		{"index":205, "name":"FilterEnvRelease"},
 		
 		// Amp Env
  		{"index":208, "name":"AmpEnvMode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
@@ -1422,15 +1422,15 @@
 			{"type": "null"},
 			{"type": "param", "name":"FilterEnvMode", "mask":7},                   // 196
 			{"type": "param", "name":"FilterEnvTriggerMode", "mask":3, "shift":3}, // 196
-			{"type": "param", "name":"FilterEnvAttack"},                           // 197
-			{"type": "param", "name":"FilterEnvAttackLevel"},                      // 198
-			{"type": "param", "name":"FilterEnvDecay"},                            // 199
-			{"type": "param", "name":"FilterEnvSustain"},                          // 200
-			{"type": "param", "name":"FilterEnvDecay2"},                           // 201
-			{"type": "param", "name":"FilterEnvSustain2"},                         // 202
-			{"type": "param", "name":"FilterEnvRelease"},                          // 203
 			{"type": "null"},
 			{"type": "null"},
+			{"type": "param", "name":"FilterEnvAttack"},                           // 199
+			{"type": "param", "name":"FilterEnvAttackLevel"},                      // 200
+			{"type": "param", "name":"FilterEnvDecay"},                            // 201
+			{"type": "param", "name":"FilterEnvSustain"},                          // 202
+			{"type": "param", "name":"FilterEnvDecay2"},                           // 203
+			{"type": "param", "name":"FilterEnvSustain2"},                         // 204
+			{"type": "param", "name":"FilterEnvRelease"},                          // 205
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "param", "name":"AmpEnvMode", "mask":7},                      // 208
