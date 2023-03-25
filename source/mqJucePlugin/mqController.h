@@ -76,6 +76,8 @@ private:
 
     uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
+	bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
+
     const uint8_t m_deviceId;
 
     Patch m_singleEditBuffer;

@@ -337,3 +337,23 @@ uint8_t Controller::getGlobalParam(mqLib::GlobalParameter _type) const
 {
     return m_globalData[static_cast<uint32_t>(_type)];
 }
+
+bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const
+{
+	const auto& packetName = g_midiPacketNames[SingleDump];
+	const auto* packet = getMidiPacket(packetName);
+
+	if (!packet)
+	{
+		LOG("Failed to find midi packet " << packetName);
+		return true;
+	}
+	
+	const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
+	const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
+
+	if (!defA || !defB)
+		return true;
+
+	return defA->doMasksOverlap(*defB);
+}
