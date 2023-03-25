@@ -15,9 +15,9 @@ namespace mqLib
 	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/)
 	{
 		// create hardware, will use in-memory ROM if no ROM provided
-		auto romFile = synthLib::findROM(512 * 1024);
-		if(romFile.empty())
-			romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
+//		auto romFile = synthLib::findROM(512 * 1024);	// TODO: validate the found ROMs before use, check if it starts with "2.23". Otherwise, a Virus ROM might be found and booted
+//		if(romFile.empty())
+		const auto romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
 		if(romFile.empty())
 			return;
 
