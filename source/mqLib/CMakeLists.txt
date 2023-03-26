@@ -24,6 +24,7 @@ set(SOURCES
 	device.cpp device.h
 	dspBootCode.h
 	lcd.cpp lcd.h
+	lcdfonts.cpp lcdfonts.h
 	leds.cpp leds.h
 	rom.cpp rom.h
 	microq.cpp microq.h
