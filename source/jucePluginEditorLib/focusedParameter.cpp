@@ -13,11 +13,13 @@ namespace jucePluginEditorLib
 		: m_parameterBinding(_parameterBinding)
 		, m_controller(_controller)
 	{
-		m_focusedParameterName = _editor.findComponentT<juce::Label>("FocusedParameterName");
-		m_focusedParameterValue = _editor.findComponentT<juce::Label>("FocusedParameterValue");
+		m_focusedParameterName = _editor.findComponentT<juce::Label>("FocusedParameterName", false);
+		m_focusedParameterValue = _editor.findComponentT<juce::Label>("FocusedParameterValue", false);
 
-		m_focusedParameterName->setVisible(false);
-		m_focusedParameterValue->setVisible(false);
+		if (m_focusedParameterName)
+			m_focusedParameterName->setVisible(false);
+		if (m_focusedParameterValue)
+			m_focusedParameterValue->setVisible(false);
 
 		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false)));
 
@@ -76,8 +78,10 @@ namespace jucePluginEditorLib
 
 		if(!_component || !_component->getProperties().contains("parameter"))
 		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
+			if (m_focusedParameterName)
+				m_focusedParameterName->setVisible(false);
+			if (m_focusedParameterValue)
+				m_focusedParameterValue->setVisible(false);
 			m_tooltip->setVisible(false);
 			return;
 		}
@@ -91,8 +95,10 @@ namespace jucePluginEditorLib
 
 		if(!p)
 		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
+			if (m_focusedParameterName)
+				m_focusedParameterName->setVisible(false);
+			if (m_focusedParameterValue)
+				m_focusedParameterValue->setVisible(false);
 			m_tooltip->setVisible(false);
 			return;
 		}
@@ -101,11 +107,17 @@ namespace jucePluginEditorLib
 
 		const auto& desc = p->getDescription();
 
-		m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
-		m_focusedParameterValue->setText(value, juce::dontSendNotification);
+		if (m_focusedParameterName)
+		{
+			m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
+			m_focusedParameterName->setVisible(true);
+		}
 
-		m_focusedParameterName->setVisible(true);
-		m_focusedParameterValue->setVisible(true);
+		if (m_focusedParameterValue)
+		{
+			m_focusedParameterValue->setText(value, juce::dontSendNotification);
+			m_focusedParameterValue->setVisible(true);
+		}
 
 		m_tooltip->initialize(_component, value);
 
