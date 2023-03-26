@@ -36,7 +36,7 @@ namespace pluginLib
 		bool parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 
-		const auto& getExposedParameters() { return m_synthParams; }
+		const auto& getExposedParameters() const { return m_synthParams; }
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }

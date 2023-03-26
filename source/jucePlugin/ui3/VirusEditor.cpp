@@ -41,11 +41,9 @@ namespace genericVirusUI
 		m_patchBrowser.reset(new PatchBrowser(*this));
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
-		m_focusedParameterName = findComponentT<juce::Label>("FocusedParameterName");
-		m_focusedParameterValue = findComponentT<juce::Label>("FocusedParameterValue");
 
-		m_tooltip.reset(new jucePluginEditorLib::FocusedParameterTooltip(findComponentT<juce::Label>("FocusedParameterTooltip", false)));
-		
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
+
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
 		m_playModeSingle = findComponentT<juce::Button>("PlayModeSingle", false);
@@ -75,9 +73,6 @@ namespace genericVirusUI
 		getController().onProgramChange = [this] { onProgramChange(); };
 
 		addMouseListener(this, true);
-
-		m_focusedParameterName->setVisible(false);
-		m_focusedParameterValue->setVisible(false);
 
 		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
 		{
@@ -120,31 +115,11 @@ namespace genericVirusUI
 
 		updatePresetName();
 		updatePlayModeButtons();
-		updateControlLabel(nullptr);
-
-		for (auto& params : getController().getExposedParameters())
-		{
-			for (const auto& param : params.second)
-			{
-				m_boundParameters.push_back(param);
-
-				param->onValueChanged.emplace_back(1, [this, param]()
-				{
-					if (param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
-						param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
-						return;
-					auto* comp = m_parameterBinding.getBoundComponent(param);
-					if(comp)
-						updateControlLabel(comp);
-				});
-			}
-		}
 	}
 
 	VirusEditor::~VirusEditor()
 	{
-		for (auto* p : m_boundParameters)
-			p->removeListener(1);
+		m_focusedParameter.reset();
 
 		m_parameterBinding.clearBindings();
 
@@ -204,62 +179,7 @@ namespace genericVirusUI
 
 	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
 	{
-		if(event.eventComponent && event.eventComponent->getProperties().contains("parameter"))
-			updateControlLabel(event.eventComponent);
-	}
-
-	void VirusEditor::timerCallback()
-	{
-		updateControlLabel(nullptr);
-	}
-
-	void VirusEditor::updateControlLabel(juce::Component* _component)
-	{
-		stopTimer();
-
-		if(_component)
-		{
-			// combo boxes report the child label as event source, try the parent in this case
-			if(!_component->getProperties().contains("parameter"))
-				_component = _component->getParentComponent();
-		}
-
-		if(!_component || !_component->getProperties().contains("parameter"))
-		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
-			m_tooltip->setVisible(false);
-			return;
-		}
-
-		const auto& props = _component->getProperties();
-		const int v = props["parameter"];
-
-		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
-
-		const auto* p = getController().getParameter(v, part);
-
-		if(!p)
-		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
-			m_tooltip->setVisible(false);
-			return;
-		}
-
-		const auto value = p->getText(p->getValue(), 0);
-
-		const auto& desc = p->getDescription();
-
-		m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
-		m_focusedParameterValue->setText(value, juce::dontSendNotification);
-
-		m_focusedParameterName->setVisible(true);
-		m_focusedParameterValue->setVisible(true);
-
-		m_tooltip->initialize(_component, value);
-
-		startTimer(3000);
+		m_focusedParameter->onMouseEnter(event);
 	}
 
 	void VirusEditor::updatePresetName() const
