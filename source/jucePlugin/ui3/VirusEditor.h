@@ -2,6 +2,7 @@
 
 #include "../../jucePluginEditorLib/midiPorts.h"
 #include "../../jucePluginEditorLib/pluginEditor.h"
+#include "../../jucePluginEditorLib/focusedParameterTooltip.h"
 
 #include "Parts.h"
 #include "Tabs.h"
@@ -86,7 +87,9 @@ namespace genericVirusUI
 		juce::Label* m_presetName = nullptr;
 		juce::Label* m_focusedParameterName = nullptr;
 		juce::Label* m_focusedParameterValue = nullptr;
-		juce::Label* m_focusedParameterTooltip = nullptr;
+
+		std::unique_ptr<jucePluginEditorLib::FocusedParameterTooltip> m_tooltip;
+
 		juce::ComboBox* m_romSelector = nullptr;
 
 		juce::Button* m_playModeSingle = nullptr;
