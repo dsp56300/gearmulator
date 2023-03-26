@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.15)
 project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	focusedParameter.cpp focusedParameter.h
+	focusedParameterTooltip.cpp focusedParameterTooltip.h
 	midiPorts.cpp midiPorts.h
 	patchbrowser.cpp patchbrowser.h
 	pluginEditor.cpp pluginEditor.h

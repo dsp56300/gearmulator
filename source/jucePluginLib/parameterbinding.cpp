@@ -158,7 +158,7 @@ namespace pluginLib
 		addBinding(p);
 	}
 
-	juce::Component* ParameterBinding::getBoundComponent(const pluginLib::Parameter* _parameter)
+	juce::Component* ParameterBinding::getBoundComponent(const Parameter* _parameter) const
 	{
 		const auto it = m_boundParameters.find(_parameter);
 		if(it == m_boundParameters.end())
