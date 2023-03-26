@@ -260,6 +260,50 @@
             }
         },
         {
+            "name" : "FocusedParameterName",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "backgroundColor" : "269029FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "1190",
+                "y" : "151.8429",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "FocusedParameterValue",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "backgroundColor" : "269029FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "1190",
+                "y" : "215.8429",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "lcdshadow",
+            "image" : {
+                "x" : "1179",
+                "y" : "150.8429",
+                "width" : "642",
+                "height" : "130",
+                "texture" : "lcdshadow"
+            }
+        },
+        {
             "name" : "ledPower",
             "button" : {
                 "isToggle" : "1",
@@ -10048,6 +10092,24 @@
                     ]
                 }
             ]
+        },
+        {
+            "name" : "FocusedParameterTooltip",
+            "label" : {
+                "text" : "42",
+                "textHeight" : "40",
+                "color" : "CF972EFF",
+                "backgroundColor" : "000000FF",
+                "alignH" : "C",
+                "alignV" : "C",
+                "x" : "1185",
+                "y" : "1225.5",
+                "width" : "96",
+                "height" : "55"
+            },
+            "componentProperties" : {
+                "offsetY" : "25"
+            }
         }
     ]
 }

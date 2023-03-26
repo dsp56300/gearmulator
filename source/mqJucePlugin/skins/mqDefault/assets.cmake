@@ -14,6 +14,7 @@ set(ASSETS_mqDefault
 	${CMAKE_CURRENT_LIST_DIR}/fx2DelayClocked.png
 	${CMAKE_CURRENT_LIST_DIR}/fx2DelayNotClocked.png
 	${CMAKE_CURRENT_LIST_DIR}/fx2Reverb.png
+	${CMAKE_CURRENT_LIST_DIR}/lcdshadow.png
 	${CMAKE_CURRENT_LIST_DIR}/led.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_11.png
 	${CMAKE_CURRENT_LIST_DIR}/ledcircle_5.png

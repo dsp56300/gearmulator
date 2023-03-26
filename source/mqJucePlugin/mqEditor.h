@@ -1,12 +1,14 @@
 #pragma once
 
 #include "../jucePluginEditorLib/pluginEditor.h"
+#include "../jucePluginEditorLib/focusedParameter.h"
 
 #include "mqFrontPanel.h"
 #include "mqPatchBrowser.h"
 
 namespace jucePluginEditorLib
 {
+	class FocusedParameter;
 	class Processor;
 }
 
@@ -26,6 +28,8 @@ namespace mqJucePlugin
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
 	private:
+		void mouseEnter(const juce::MouseEvent& _event) override;
+
 		void onBtPresetPrev();
 		void onBtPresetNext();
 
@@ -36,5 +40,7 @@ namespace mqJucePlugin
 		juce::Button* m_btPlayModeMulti = nullptr;
 		juce::Button* m_btPresetPrev = nullptr;
 		juce::Button* m_btPresetNext = nullptr;
+
+		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 	};
 }

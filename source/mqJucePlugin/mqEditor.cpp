@@ -64,10 +64,15 @@ namespace mqJucePlugin
 			m_btPresetPrev->onClick = [this]			{ onBtPresetPrev();	};
 			m_btPresetNext->onClick = [this]			{ onBtPresetNext();	};
 		}
+
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, _binding, *this));
+
+		addMouseListener(this, true);
 	}
 
 	Editor::~Editor()
 	{
+		m_focusedParameter.reset();
 		m_frontPanel.reset();
 	}
 
@@ -89,6 +94,11 @@ namespace mqJucePlugin
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
 	{
 		return findEmbeddedResource(_filename, _size);
+	}
+
+	void Editor::mouseEnter(const juce::MouseEvent& _event)
+	{
+		m_focusedParameter->onMouseEnter(_event);
 	}
 
 	void Editor::onBtPresetPrev()
