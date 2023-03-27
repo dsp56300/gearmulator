@@ -1,4 +1,5 @@
 #include <cstdint>
+#include <array>
 
 namespace mqLib
 {
@@ -2662,4 +2663,11 @@ namespace mqLib
 		0b11111,
 		0b11111,
 	};
+
+	static_assert(std::size(g_fontTable0) == 256 * 10);
+
+	const uint8_t* getCharacterData(const uint8_t _character)
+	{
+		return &g_fontTable0[_character * 10];
+	}
 }
