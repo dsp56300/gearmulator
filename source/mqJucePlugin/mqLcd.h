@@ -20,8 +20,8 @@ private:
 private:
 	std::array<juce::Path, 256> m_characterPaths;
 
-	const float m_pixelW;
-	const float m_pixelH;
+	const float m_scaleW;
+	const float m_scaleH;
 
 	std::array<uint8_t, 40> m_text{' '};
 	std::array<std::array<uint8_t, 8>, 8> m_cgData{0};

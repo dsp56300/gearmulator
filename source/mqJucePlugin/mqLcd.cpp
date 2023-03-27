@@ -2,16 +2,40 @@
 
 #include "../mqLib/lcdfonts.h"
 
+// EW20290GLW display simulation
+
 constexpr int g_pixelsPerCharW = 5;
 constexpr int g_pixelsPerCharH = 8;
+
 constexpr int g_numCharsW = 20;
 constexpr int g_numCharsH = 2;
+
+constexpr float g_pixelSpacingAdjust = 3.0f;	// 1.0f = 100% as on the hardware, but it looks better on screen if its a bit more
+
+constexpr float g_pixelSpacingW = 0.05f * g_pixelSpacingAdjust;
+constexpr float g_pixelSizeW = 0.6f;
+constexpr float g_charSpacingW = 0.4f;
+
+constexpr float g_charSizeW = g_pixelsPerCharW * g_pixelSizeW + g_pixelSpacingW * (g_pixelsPerCharW - 1);
+constexpr float g_sizeW = g_numCharsW * g_charSizeW + g_charSpacingW * (g_numCharsW - 1);
+constexpr float g_pixelStrideW = g_pixelSizeW + g_pixelSpacingW;
+constexpr float g_charStrideW = g_charSizeW + g_charSpacingW;
+
+constexpr float g_pixelSpacingH = 0.05f * g_pixelSpacingAdjust;
+constexpr float g_pixelSizeH = 0.65f;
+constexpr float g_charSpacingH = 0.4f;
+
+constexpr float g_charSizeH = g_pixelsPerCharH * g_pixelSizeH + g_pixelSpacingH * (g_pixelsPerCharH - 1);
+constexpr float g_sizeH = g_numCharsH * g_charSizeH + g_charSpacingH * (g_numCharsH - 1);
+constexpr float g_pixelStrideH = g_pixelSizeH + g_pixelSpacingH;
+constexpr float g_charStrideH = g_charSizeH + g_charSpacingH;
+
 constexpr int g_numPixelsW = g_numCharsW * g_pixelsPerCharW + g_numCharsW - 1;
 constexpr int g_numPixelsH = g_numCharsH * g_pixelsPerCharH + g_numCharsH - 1;
 
 constexpr float g_pixelBorder = 0.1f;
 
-MqLcd::MqLcd(Component& _parent) : m_pixelW(static_cast<float>(_parent.getWidth()) / static_cast<float>(g_numPixelsW)), m_pixelH(static_cast<float>(_parent.getHeight()) / static_cast<float>(g_numPixelsH))
+MqLcd::MqLcd(Component& _parent) : m_scaleW(static_cast<float>(_parent.getWidth()) / g_sizeW), m_scaleH(static_cast<float>(_parent.getHeight()) / g_sizeH)
 {
 	setSize(_parent.getWidth(), _parent.getHeight());
 
@@ -68,11 +92,11 @@ void MqLcd::paint(juce::Graphics& _g)
 
 	for (auto y=0; y<2; ++y)
 	{
-		const auto ty = m_pixelH * (g_pixelsPerCharH + 1) * static_cast<float>(y);
+		const auto ty = static_cast<float>(y) * g_charStrideH * m_scaleH;
 
 		for (auto x = 0; x < 20; ++x, ++charIdx)
 		{
-			const auto tx = m_pixelW * (g_pixelsPerCharW + 1) * static_cast<float>(x);
+			const auto tx = static_cast<float>(x) * g_charStrideW * m_scaleW;
 
 			const auto t = juce::AffineTransform::translation(tx, ty);
 
@@ -96,19 +120,12 @@ juce::Path MqLcd::createPath(const uint8_t _character) const
 
 	juce::Path path;
 
-	const auto h = m_pixelH;
-	const auto w = m_pixelW;
-
-	const auto borderX = g_pixelBorder * w;
-	const auto borderY = g_pixelBorder * h;
-	const auto borderW = borderX * 2.0f;
-	const auto borderH = borderY * 2.0f;
-	const auto wWithBorder = w - borderW;
-	const auto hWithBorder = h - borderH;
+	const auto h = g_pixelSizeH * m_scaleH;
+	const auto w = g_pixelSizeW * m_scaleW;
 
 	for (auto y=0; y<8; ++y)
 	{
-		const auto y0 = static_cast<float>(y) * m_pixelH;
+		const auto y0 = static_cast<float>(y) * g_pixelStrideH * m_scaleH;
 
 		for (auto x=0; x<=4; ++x)
 		{
@@ -119,9 +136,9 @@ juce::Path MqLcd::createPath(const uint8_t _character) const
 			if(!set)
 				continue;
 
-			const auto x0 = static_cast<float>(x) * m_pixelW;
+			const auto x0 = static_cast<float>(x) * g_pixelStrideW * m_scaleW;
 
-			path.addRectangle(x0 + borderX, y0 + borderY, wWithBorder, hWithBorder);
+			path.addRectangle(x0, y0, w, h);
 		}
 	}
 
