@@ -23,6 +23,7 @@ namespace mqLib
 		EmuLEDs = 0x51,
 		EmuButtons = 0x52,
 		EmuRotaries = 0x53,
+		EmuLCDCGRata = 0x54
 	};
 
 	enum class MidiBufferNum : uint8_t

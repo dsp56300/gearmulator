@@ -27,6 +27,11 @@ namespace mqLib
 		{
 			m_changeCallback = _callback;
 		}
+
+		void setCgRamChangeCallback(const ChangeCallback& _callback)
+		{
+			m_cgRamChangeCallback = _callback;
+		}
 	private:
 		enum class CursorShiftMode
 		{
@@ -82,5 +87,6 @@ namespace mqLib
 		uint32_t m_lastOpState = 0;
 
 		ChangeCallback m_changeCallback;
+		ChangeCallback m_cgRamChangeCallback;
 	};
 }

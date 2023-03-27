@@ -52,6 +52,11 @@ namespace mqLib
 		{
 			onLcdChanged();
 		});
+
+		m_hw->getUC().getLcd().setCgRamChangeCallback([this]()
+		{
+			onLcdCgRamChanged();
+		});
 	}
 
 	MicroQ::~MicroQ()
@@ -255,6 +260,11 @@ namespace mqLib
 	void MicroQ::onLcdChanged()
 	{
 		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::Lcd));
+	}
+
+	void MicroQ::onLcdCgRamChanged()
+	{
+		m_dirtyFlags.fetch_or(static_cast<uint32_t>(DirtyFlags::LcdCgRam));
 	}
 
 	void MicroQ::processUcThread() const

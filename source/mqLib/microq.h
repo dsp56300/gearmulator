@@ -97,9 +97,10 @@ namespace mqLib
 		// Dirty flags indicate that the front panel of the device has changed. To be retrieved via getDirtyFlags()
 		enum class DirtyFlags : uint32_t
 		{
-			None	= 0,
-			Leds	= 0x01,	// one or more LEDs changed its state
-			Lcd		= 0x02,	// the LCD has been refreshed and should be repainted
+			None		= 0,
+			Leds		= 0x01,	// one or more LEDs changed its state
+			Lcd			= 0x02,	// the LCD has been refreshed and should be repainted
+			LcdCgRam	= 0x04,	// the LCD CG RAM has been modified, custom characters need to be repainted
 		};
 
 		// Retrieve dirty flags for the front panel. See enum DirtyFlags for a description
@@ -116,6 +117,7 @@ namespace mqLib
 		void internalProcess(uint32_t _frames, uint32_t _latency);
 		void onLedsChanged();
 		void onLcdChanged();
+		void onLcdCgRamChanged();
 
 		void processUcThread() const;
 

@@ -26,6 +26,26 @@ namespace mqLib
 		_dst.emplace_back(ev);
 	}
 	
+	void SysexRemoteControl::sendSysexLCDCGRam(std::vector<synthLib::SMidiEvent>& _dst) const
+	{
+		std::array<char, 64> lcdData{};
+
+		std::array<uint8_t, 8> data{};
+
+		for (auto i=0, k=0; i<8; ++i)
+		{
+			m_mq.readCustomLCDCharacter(data, i);
+			for (auto j=0; j<8; ++j)
+				lcdData[k++] = static_cast<char>(data[j]);
+		}
+
+		synthLib::SMidiEvent ev;
+		createSysexHeader(ev.sysex, SysexCommand::EmuLCDCGRata);
+		ev.sysex.insert(ev.sysex.end(), lcdData.begin(), lcdData.end());
+
+		_dst.emplace_back(ev);
+	}
+	
 	void SysexRemoteControl::sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst) const
 	{
 		static_assert(static_cast<uint32_t>(Buttons::ButtonType::Count) < 24, "too many buttons");
@@ -92,6 +112,9 @@ namespace mqLib
 		case SysexCommand::EmuLCD:
 			sendSysexLCD(_output);
 			return true;
+		case SysexCommand::EmuLCDCGRata:
+			sendSysexLCDCGRam(_output);
+			return true;
 		case SysexCommand::EmuButtons:
 			{
 				if(_input.size() > 6)
@@ -135,6 +158,8 @@ namespace mqLib
 	{
 		if(_dirtyFlags & static_cast<uint32_t>(MicroQ::DirtyFlags::Lcd))
 			sendSysexLCD(_output);
+		if(_dirtyFlags & static_cast<uint32_t>(MicroQ::DirtyFlags::LcdCgRam))
+			sendSysexLCDCGRam(_output);
 		if(_dirtyFlags & static_cast<uint32_t>(MicroQ::DirtyFlags::Leds))
 			sendSysexLEDs(_output);
 	}

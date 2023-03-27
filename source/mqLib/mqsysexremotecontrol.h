@@ -21,6 +21,7 @@ namespace mqLib
 		static void createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd);
 
 		void sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst) const;
+		void sendSysexLCDCGRam(std::vector<synthLib::SMidiEvent>& _dst) const;
 		void sendSysexButtons(std::vector<synthLib::SMidiEvent>& _dst) const;
 		void sendSysexLEDs(std::vector<synthLib::SMidiEvent>& _dst) const;
 		void sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst) const;

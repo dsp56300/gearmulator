@@ -37,6 +37,7 @@ namespace mqLib
 			return false;
 
 		bool changed = false;
+		bool cgRamChanged = false;
 
 		if(!read)
 		{
@@ -118,7 +119,12 @@ namespace mqLib
 //					changed = true;
 //					LOG("LCD write data to CGRAM addr " << m_cgramAddr << ", data=" << static_cast<int>(g));
 
-					m_cgramData[m_cgramAddr] = g;
+					if (m_cgramData[m_cgramAddr] != g)
+					{
+						m_cgramData[m_cgramAddr] = g;
+						cgRamChanged = true;
+					}
+
 					m_cgramAddr += m_addrIncrement;
 
 					if((false && (m_cgramAddr & 0x7) == 0))
@@ -209,6 +215,9 @@ namespace mqLib
 
 		if(changed && m_changeCallback)
 			m_changeCallback();
+
+		if(cgRamChanged && m_cgRamChangeCallback)
+			m_cgRamChangeCallback();
 
 		return true;
 	}
