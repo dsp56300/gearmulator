@@ -2,6 +2,8 @@
 
 #include "mqController.h"
 #include "mqEditor.h"
+#include "mqLcd.h"
+#include "mqLcdText.h"
 
 #include "../mqLib/device.h"
 #include "../mqLib/mqmiditypes.h"
@@ -40,7 +42,7 @@ namespace mqJucePlugin
 		"encoderAlphaDial"
 	};
 
-	FrontPanel::FrontPanel(mqJucePlugin::Editor& _editor, Controller& _controller) : m_controller(_controller)
+	FrontPanel::FrontPanel(const mqJucePlugin::Editor& _editor, Controller& _controller) : m_controller(_controller)
 	{
 		_controller.setFrontPanel(this);
 
@@ -77,13 +79,27 @@ namespace mqJucePlugin
 			};
 		}
 
-		m_lcdLines[0] = _editor.findComponentT<juce::Label>("lcdLineA", false);
-		m_lcdLines[1] = _editor.findComponentT<juce::Label>("lcdLineB", m_lcdLines[0] != nullptr);
+		auto *lcdArea = _editor.findComponentT<juce::Component>("lcdArea", false);
 
-		for (auto* line : m_lcdLines)
+		if (lcdArea)
+			m_lcd.reset(new MqLcd(*lcdArea));
+
+		std::array<juce::Label*, 2> lcdLines{};
+
+		lcdLines[0] = _editor.findComponentT<juce::Label>("lcdLineA", false);
+		lcdLines[1] = _editor.findComponentT<juce::Label>("lcdLineB", lcdLines[0] != nullptr);
+
+		if (lcdLines[0])
 		{
-			if(line)
-				line->setJustificationType(juce::Justification::centredLeft);
+			if (m_lcd)
+			{
+				lcdLines[0]->setVisible(false);
+				lcdLines[1]->setVisible(false);
+			}
+			else
+			{
+				m_lcd.reset(new MqLcdText(*lcdLines[0], *lcdLines[1]));
+			}
 		}
 
 		_controller.sendSysEx(Controller::EmuRequestLcd);
@@ -93,9 +109,10 @@ namespace mqJucePlugin
 	FrontPanel::~FrontPanel()
 	{
 		m_controller.setFrontPanel(nullptr);
+		m_lcd.reset();
 	}
 
-	void FrontPanel::processSysex(const std::vector<uint8_t>& _msg)
+	void FrontPanel::processSysex(const std::vector<uint8_t>& _msg) const
 	{
 		if(_msg.size() < 5)
 			return;
@@ -106,6 +123,9 @@ namespace mqJucePlugin
 		{
 		case mqLib::SysexCommand::EmuLCD:
 			processLCDUpdate(_msg);
+			break;
+		case mqLib::SysexCommand::EmuLCDCGRata:
+			processLCDCGRamUpdate(_msg);
 			break;
 		case mqLib::SysexCommand::EmuLEDs:
 			processLedUpdate(_msg);
@@ -119,26 +139,25 @@ namespace mqJucePlugin
 
 	void FrontPanel::processLCDUpdate(const std::vector<uint8_t>& _msg) const
 	{
-		if(!m_lcdLines[0])
-			return;
+		const auto* data = &_msg[5];
 
-		const char* data = reinterpret_cast<const char*>(&_msg[5]);
-		std::array<char,40> d{};
-		for(size_t i=0; i<40; ++i)
-		{
-			if(data[i] < 32)
-				d[i] = '?';
-			else
-				d[i] = data[i];
-		}
-		const std::string lineA(&d[0], 20);
-		const std::string lineB(&d[20], 20);
+		std::array<uint8_t, 40> d{};
 
-	//	LOG("LCD CONTENT:\n'" << lineA << "'\n'" << lineB << "'");
+		for(size_t i=0; i<d.size(); ++i)
+			d[i] = data[i];
 
-		// nasty but works: prefix/postfix with byte 1 to prevent juce trimming the text
-		m_lcdLines[0]->setText("\1" + lineA + "\1", juce::dontSendNotification);
-		m_lcdLines[1]->setText("\1" + lineB + "\1", juce::dontSendNotification);
+		m_lcd->setText(d);
+	}
+
+	void FrontPanel::processLCDCGRamUpdate(const std::vector<uint8_t>& _msg) const
+	{
+		const auto *data = &_msg[5];
+
+		std::array<uint8_t, 64> d{};
+		for (size_t i = 0; i < d.size(); ++i)
+			d[i] = data[i];
+
+		m_lcd->setCgRam(d);
 	}
 
 	void FrontPanel::processLedUpdate(const std::vector<uint8_t>& _msg) const
@@ -158,7 +177,7 @@ namespace mqJucePlugin
 
 	void FrontPanel::onButtonStateChanged(uint32_t _index) const
 	{
-		auto* b = m_buttons[_index];
+		const auto* b = m_buttons[_index];
 		
 		std::map<pluginLib::MidiDataType, uint8_t> params;
 
@@ -177,7 +196,7 @@ namespace mqJucePlugin
 		const auto* e = m_encoders[_index];
 
 		float& vOld = m_encoderValues[_index];
-		const float v = static_cast<float>(e->getValue());
+		const auto v = static_cast<float>(e->getValue());
 
 		auto delta = v - vOld;
 

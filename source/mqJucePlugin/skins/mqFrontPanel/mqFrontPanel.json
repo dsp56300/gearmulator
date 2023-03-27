@@ -51,6 +51,18 @@
             }
         },
         {
+            "name" : "lcdArea",
+            "component" : {
+                "x" : "358.6",
+                "y" : "298",
+                "width" : "620",
+                "height" : "108"
+            },
+            "componentProperties" : {
+                "lcdBackgroundColor" : "248727"
+            }
+        },
+        {
             "name" : "ledInst1",
             "button" : {
                 "isToggle" : "1",

@@ -228,6 +228,18 @@
             }
         },
         {
+            "name" : "lcdArea",
+            "component" : {
+                "x" : "1190",
+                "y" : "161.8429",
+                "width" : "620",
+                "height" : "108"
+            },
+            "componentProperties" : {
+                "lcdBackgroundColor" : "248727"
+            }
+        },
+        {
             "name" : "lcdLineA",
             "label" : {
                 "text" : "01234567890123456789",
@@ -260,46 +272,12 @@
             }
         },
         {
-            "name" : "FocusedParameterName",
-            "label" : {
-                "text" : "01234567890123456789",
-                "textHeight" : "46",
-                "color" : "000000FF",
-                "backgroundColor" : "269029FF",
-                "alignH" : "L",
-                "alignV" : "C",
-                "fontFile" : "Digital",
-                "fontName" : "Register",
-                "x" : "1190",
-                "y" : "151.8429",
-                "width" : "630",
-                "height" : "64"
-            }
-        },
-        {
-            "name" : "FocusedParameterValue",
-            "label" : {
-                "text" : "01234567890123456789",
-                "textHeight" : "46",
-                "color" : "000000FF",
-                "backgroundColor" : "269029FF",
-                "alignH" : "L",
-                "alignV" : "C",
-                "fontFile" : "Digital",
-                "fontName" : "Register",
-                "x" : "1190",
-                "y" : "215.8429",
-                "width" : "630",
-                "height" : "64"
-            }
-        },
-        {
             "name" : "lcdshadow",
             "image" : {
-                "x" : "1179",
-                "y" : "150.8429",
-                "width" : "642",
-                "height" : "130",
+                "x" : "1180",
+                "y" : "151.8429",
+                "width" : "640",
+                "height" : "128",
                 "texture" : "lcdshadow"
             }
         },

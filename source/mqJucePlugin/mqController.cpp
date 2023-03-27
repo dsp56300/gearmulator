@@ -159,6 +159,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         case mqLib::SysexCommand::EmuRotaries:
         case mqLib::SysexCommand::EmuButtons:
         case mqLib::SysexCommand::EmuLCD:
+        case mqLib::SysexCommand::EmuLCDCGRata:
         case mqLib::SysexCommand::EmuLEDs:
             if(m_frontPanel)
                 m_frontPanel->processSysex(_msg);

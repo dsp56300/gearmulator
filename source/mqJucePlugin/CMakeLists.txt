@@ -5,16 +5,14 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_D
 
 set(SOURCES
 	parameterDescriptions_mq.json
-    PluginEditorState.cpp
-    PluginEditorState.h
-    PluginProcessor.cpp
-    PluginProcessor.h
-	mqEditor.cpp
-	mqEditor.h
-	mqController.cpp
-	mqController.h
-	mqFrontPanel.cpp
-	mqFrontPanel.h
+    PluginEditorState.cpp PluginEditorState.h
+    PluginProcessor.cpp PluginProcessor.h
+	mqController.cpp mqController.h
+	mqEditor.cpp mqEditor.h
+	mqFrontPanel.cpp mqFrontPanel.h
+	mqLcd.cpp mqLcd.h
+	mqLcdBase.cpp mqLcdBase.h
+	mqLcdText.cpp mqLcdText.h
 	mqPatchBrowser.cpp mqPatchBrowser.h
 	version.h
 )
