@@ -2,6 +2,7 @@
 
 #include <array>
 #include <functional>
+#include <cstdint>
 
 namespace mc68k
 {
