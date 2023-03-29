@@ -2,6 +2,8 @@
 
 #include <array>
 #include <vector>
+#include <cstddef>
+#include <cstdint>
 
 #include "mqmiditypes.h"
 
