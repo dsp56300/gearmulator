@@ -287,6 +287,30 @@ namespace pluginLib
 		return nullptr;
 	}
 
+	bool MidiPacket::updateChecksums(Sysex& _data) const
+	{
+		if (_data.size() != m_byteSize)
+			return false;
+
+		bool res = false;
+
+		for (uint32_t i=0; i<m_definitions.size(); ++i)
+		{
+			const auto& def = m_definitions[i];
+
+			if (def.type != MidiDataType::Checksum)
+				continue;
+
+			const auto byteIndex = m_definitionToByteIndex.find(i)->second;
+
+			const auto c = calcChecksum(def, _data);
+			_data[byteIndex] = c;
+			res = true;
+		}
+
+		return res;
+	}
+
 	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, const Sysex& _src)
 	{
 		auto checksum = _d.checksumInitValue;
