@@ -7,6 +7,7 @@ namespace mqLib
 	enum MidiHeaderByte : uint8_t
 	{
 		IdWaldorf = 0x3e,
+		IdQ = 0x0f,
 		IdMicroQ = 0x10,
 		IdDeviceOmni = 0x7f
 	};

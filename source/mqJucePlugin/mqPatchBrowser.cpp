@@ -33,22 +33,33 @@ namespace mqJucePlugin
 	{
 		auto& patch = static_cast<Patch&>(_patch);
 
-		const auto& dump = mqLib::State::g_dumps[static_cast<uint32_t>(mqLib::State::DumpType::Single)];
+		const auto& dumpMq = mqLib::State::g_dumps[static_cast<uint32_t>(mqLib::State::DumpType::Single)];
 
-		if(patch.sysex.size() != dump.dumpSize)
-			return false;
+		if (patch.sysex.size() == dumpMq.dumpSize)
+		{
+			patch.name = std::string(reinterpret_cast<const char *>(&patch.sysex[dumpMq.firstParamIndex + 363]), 16);
+			patch.category = std::string(reinterpret_cast<const char *>(&patch.sysex[dumpMq.firstParamIndex + 379]), 4);
 
-		patch.name = std::string(reinterpret_cast<const char*>(&patch.sysex[dump.firstParamIndex + 363]), 16);
-		patch.category = std::string(reinterpret_cast<const char*>(&patch.sysex[dump.firstParamIndex + 379]), 4);
+			return true;
+		}
 
-		return true;
+		const auto &dumpQ = mqLib::State::g_dumps[static_cast<uint32_t>(mqLib::State::DumpType::SingleQ)];
+
+		if (patch.sysex.size() == dumpQ.dumpSize)
+		{
+			patch.name = std::string(reinterpret_cast<const char *>(&patch.sysex[dumpQ.firstParamIndex + 364]), 16);
+			patch.category = std::string(reinterpret_cast<const char *>(&patch.sysex[dumpQ.firstParamIndex + 380]), 4);
+
+			return true;
+		}
+		return false;
 	}
 
 	juce::MD5 PatchBrowser::getChecksum(jucePluginEditorLib::Patch& _patch)
 	{
 		const auto& dump = mqLib::State::g_dumps[static_cast<uint32_t>(mqLib::State::DumpType::Single)];
 
-		return juce::MD5(&_patch.sysex[dump.firstParamIndex], dump.dumpSize - 2 - dump.firstParamIndex);
+		return {&_patch.sysex[dump.firstParamIndex], dump.dumpSize - 2 - dump.firstParamIndex};
 	}
 
 	bool PatchBrowser::activatePatch(jucePluginEditorLib::Patch& _patch)

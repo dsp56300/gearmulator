@@ -38,6 +38,7 @@ namespace mqLib
 			Drum,
 			Global,
 			Mode,
+			SingleQ,
 
 			Count
 		};
@@ -63,6 +64,8 @@ namespace mqLib
 			{DumpType::Drum, SysexCommand::DrumRequest, SysexCommand::DrumDump, SysexCommand::DrumParameterChange, SysexCommand::DrumParameterRequest, IdxDrumParamFirst, IdxDrumParamIndexH, IdxDrumParamIndexL, IdxDrumParamValue, 393},
 			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, SysexCommand::GlobalParameterRequest, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 207},
 			{DumpType::Mode, SysexCommand::ModeRequest, SysexCommand::ModeDump , SysexCommand::ModeParameterChange, SysexCommand::ModeParameterRequest, IdxModeParamFirst, IdxModeParamIndexH, IdxModeParamIndexL, IdxModeParamValue, 8},
+
+			{DumpType::SingleQ, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, SysexCommand::SingleParameterRequest, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 393},
 		};
 
 		using Single = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
@@ -70,6 +73,8 @@ namespace mqLib
 		using DrumMap = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Drum)].dumpSize>;
 		using Global = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Global)].dumpSize>;
 		using Mode = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Mode)].dumpSize>;
+
+		using SingleQ = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::SingleQ)].dumpSize>;
 
 		State(MicroQ& _mq);
 

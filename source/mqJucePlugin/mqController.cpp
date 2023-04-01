@@ -22,6 +22,7 @@ constexpr const char* g_midiPacketNames[] =
     "singleparameterchange",
     "globalparameterchange",
     "singledump",
+    "singledump_Q",
     "globaldump",
     "emuRequestLcd",
     "emuRequestLeds",
@@ -60,6 +61,16 @@ void Controller::sendSingle(const std::vector<uint8_t>& _sysex)
 
 	data[mqLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
 	data[mqLib::IdxLocation] = isMultiMode() ? getCurrentPart() : 0;
+
+	const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
+
+	if (!p->updateChecksums(data))
+	{
+		p = getMidiPacket(g_midiPacketNames[SingleDumpQ]);
+
+		if(!p->updateChecksums(data))
+			return;
+	}
 
 	pluginLib::Controller::sendSysEx(data);
     parseSysexMessage(data);

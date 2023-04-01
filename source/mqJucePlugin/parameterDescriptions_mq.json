@@ -1663,6 +1663,456 @@
             {"type": "checksum", "first": 4, "last": 389},
 			{"type": "byte", "value": "f7"}
 		],
+		"singledump_Q": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "0f"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "10"},
+			{"type": "bank"},
+			{"type": "program"},
+
+			{"type": "param", "name": "Version"},								// 0
+			{"type": "param", "name": "O1Octave"},                      		// 1
+			{"type": "param", "name": "O1Semi"},                        		// 2
+			{"type": "param", "name": "O1Detune"},                      		// 3
+			{"type": "param", "name": "O1BendRange"},                   		// 4
+			{"type": "param", "name": "O1KeyTrack"},                    		// 5
+			{"type": "param", "name": "O1FmSource"},                    		// 6
+			{"type": "param", "name": "O1FmAmount"},                    		// 7
+			{"type": "param", "name": "O1Shape"},                       		// 8
+			{"type": "param", "name": "O1PulseWidth"},                  		// 9
+			{"type": "param", "name": "O1PwmSource"},                   		// 10
+			{"type": "param", "name": "O1Pwm"},                         		// 11
+			{"type": "param", "name": "O1SubFreqDiv"},                  		// 12
+			{"type": "param", "name": "O1SubVolume"},                   		// 13
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "param", "name": "O2Octave"},								// 17
+			{"type": "param", "name": "O2Semi"},                        		// 18
+			{"type": "param", "name": "O2Detune"},                      		// 19
+			{"type": "param", "name": "O2BendRange"},                   		// 20
+			{"type": "param", "name": "O2KeyTrack"},                    		// 21
+			{"type": "param", "name": "O2FmSource"},                    		// 22
+			{"type": "param", "name": "O2FmAmount"},                    		// 23
+			{"type": "param", "name": "O2Shape"},                       		// 24
+			{"type": "param", "name": "O2PulseWidth"},                  		// 25
+			{"type": "param", "name": "O2PwmSource"},                   		// 26
+			{"type": "param", "name": "O2Pwm"},                         		// 27
+			{"type": "param", "name": "O2SubFreqDiv"},                  		// 28
+			{"type": "param", "name": "O2SubVolume"},                   		// 29
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "null"},         		
+			{"type": "param", "name": "O3Octave"},								// 33
+			{"type": "param", "name": "O3Semi"},                        		// 34
+			{"type": "param", "name": "O3Detune"},                      		// 35
+			{"type": "param", "name": "O3BendRange"},                   		// 36
+			{"type": "param", "name": "O3KeyTrack"},                    		// 37
+			{"type": "param", "name": "O3FmSource"},                    		// 38
+			{"type": "param", "name": "O3FmAmount"},                    		// 39
+			{"type": "param", "name": "O3Shape"},                       		// 40
+			{"type": "param", "name": "O3PulseWidth"},                  		// 41
+			{"type": "param", "name": "O3PwmSource"},                   		// 42
+			{"type": "param", "name": "O3Pwm"},                         		// 43
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "null"},		
+			{"type": "param", "name":"Sync"},                           		// 49
+			{"type": "param", "name":"PitchModSrc"},                    		// 50
+			{"type": "param", "name":"PitchModAmount"},                 		// 51
+			{"type": "null"},		
+			{"type": "param", "name":"GlideEnable"},                    		// 53
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"GlideMode"},                              // 56
+			{"type": "param", "name":"GlideRate"},                              // 57
+			{"type": "param", "name":"VoiceMode", "mask":"7", "shift":"0"},     // 58
+			{"type": "param", "name":"UnisonoCount", "mask":"7", "shift":"4"},  // 58
+			{"type": "param", "name":"UnisonoDetune"},                          // 59
+			{"type": "null"},
+			{"type": "param", "name": "O1Level"},                               // 61
+			{"type": "param", "name": "O1Balance"},                             // 62
+			{"type": "param", "name": "O2Level"},                               // 63
+			{"type": "param", "name": "O2Balance"},                             // 64
+			{"type": "param", "name": "O3Level"},                               // 65
+			{"type": "param", "name": "O3Balance"},                             // 66
+			{"type": "param", "name": "NoiseLevel"},                            // 67
+			{"type": "param", "name": "NoiseBalance"},                          // 68
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "RingModLevel"},                          // 71
+			{"type": "param", "name": "RingModBalance"},                        // 72
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "NoiseModeF1"},                           // 75
+			{"type": "param", "name": "NoiseModeF2"},                           // 76
+			{"type": "param", "name": "F1Type"},                                // 77
+			{"type": "param", "name": "F1Cutoff"},                              // 78
+			{"type": "null"},
+			{"type": "param", "name": "F1Resonance"},                           // 80
+			{"type": "param", "name": "F1Drive"},                               // 81
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "F1KeyTrack"},                            // 86
+			{"type": "param", "name": "F1EnvMod"},                              // 87
+			{"type": "param", "name": "F1VelMod"},                              // 88
+			{"type": "param", "name": "F1ModSource"},                           // 89
+			{"type": "param", "name": "F1CutoffMod"},                           // 90
+			{"type": "param", "name": "F1FmSource"},                            // 91
+			{"type": "param", "name": "F1FmAmount"},                            // 92
+			{"type": "param", "name": "F1Pan"},                                 // 93
+			{"type": "param", "name": "F1PanModSource"},                        // 94
+			{"type": "param", "name": "F1PanMod"},                              // 95
+			{"type": "null"},
+			{"type": "param", "name": "F2Type"},                                // 97
+			{"type": "param", "name": "F2Cutoff"},                              // 98
+			{"type": "null"},
+			{"type": "param", "name": "F2Resonance"},                           // 100
+			{"type": "param", "name": "F2Drive"},                               // 101
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "F2KeyTrack"},                            // 106
+			{"type": "param", "name": "F2EnvMod"},                              // 107
+			{"type": "param", "name": "F2VelMod"},                              // 108
+			{"type": "param", "name": "F2ModSource"},                           // 109
+			{"type": "param", "name": "F2CutoffMod"},                           // 110
+			{"type": "param", "name": "F2FmSource"},                            // 111
+			{"type": "param", "name": "F2FmAmount"},                            // 112
+			{"type": "param", "name": "F2Pan"},                                 // 113
+			{"type": "param", "name": "F2PanModSource"},                        // 114
+			{"type": "param", "name": "F2PanMod"},                              // 115
+			{"type": "null"},
+			{"type": "param", "name": "FilterRouting"},                         // 117
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "AmpVolume"},                             // 121
+			{"type": "param", "name": "AmpVelocity"},                           // 122
+			{"type": "param", "name": "AmpModSource"},                          // 123
+			{"type": "param", "name": "AmpModAmount"},                          // 124
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name": "FX1Type"},                               // 128
+			{"type": "param", "name": "FX1Mix"},                                // 129
+			{"type": "param", "name": "Fx1VocoderBands"},                       // 130
+			{"type": "param", "name": "Fx1VocoderAnalysisSignal"},              // 131
+			{"type": "param", "name": "Fx1VocoderAnalysisFreqLow"},             // 132
+			{"type": "param", "name": "Fx1VocoderAnalysisFreqHigh"},            // 133
+			{"type": "param", "name": "Fx1VocoderOffsetS"},                     // 134
+			{"type": "param", "name": "Fx1VocoderOffsetHi"},                    // 135
+			{"type": "param", "name": "Fx1VocoderBandwidth"},                   // 136
+			{"type": "param", "name": "Fx1VocoderResonance"},                   // 137
+			{"type": "param", "name": "Fx1VocoderAttack"},                      // 138
+			{"type": "param", "name": "Fx1VocoderDecay"},                       // 139
+			{"type": "param", "name": "Fx1VocoderEQLevelLow"},                  // 140
+			{"type": "param", "name": "Fx1VocoderEQBandMid"},                   // 141
+			{"type": "param", "name": "Fx1VocoderEQLevelMid"},                  // 142
+			{"type": "param", "name": "Fx1VocoderEQLevelHigh"},                 // 143
+			{"type": "param", "name": "FX2Type"},                               // 144
+			{"type": "param", "name": "FX2Mix"},                                // 145
+			{"type": "param", "name":"Fx2VocoderBands"},						// 146
+			{"type": "param", "name":"Fx2VocoderAnalysisSignal"},               // 147
+			{"type": "param", "name":"Fx2VocoderAnalysisFreqLow"},              // 148
+			{"type": "param", "name":"Fx2VocoderAnalysisFreqHigh"},             // 149
+			{"type": "param", "name":"Fx2VocoderOffsetS"},                      // 150
+			{"type": "param", "name":"Fx2VocoderOffsetHi"},                     // 151
+			{"type": "param", "name":"Fx2VocoderBandwidth"},                    // 152
+			{"type": "param", "name":"Fx2VocoderResonance"},                    // 153
+			{"type": "param", "name":"Fx2VocoderAttack"},                       // 154
+			{"type": "param", "name":"Fx2VocoderDecay"},                        // 155
+			{"type": "param", "name":"Fx2VocoderEQLevelLow"},                   // 156
+			{"type": "param", "name":"Fx2VocoderEQBandMid"},                    // 157
+			{"type": "param", "name":"Fx2VocoderEQLevelMid"},                   // 158
+			{"type": "param", "name":"Fx2VocoderEQLevelHigh"},                  // 159
+			{"type": "param", "name":"Lfo1Shape"},								// 160
+			{"type": "param", "name":"Lfo1Speed"},                              // 161
+			{"type": "null"},
+			{"type": "param", "name":"Lfo1Sync"},                               // 163
+			{"type": "param", "name":"Lfo1Clocked"},                            // 164
+			{"type": "param", "name":"Lfo1StartPhase"},                         // 165
+			{"type": "param", "name":"Lfo1Delay"},                              // 166
+			{"type": "param", "name":"Lfo1Fade"},                               // 167
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo1KeyTrack"},                           // 170
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2Shape"},								// 172
+			{"type": "param", "name":"Lfo2Speed"},                              // 173
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2Sync"},                               // 175
+			{"type": "param", "name":"Lfo2Clocked"},                            // 176
+			{"type": "param", "name":"Lfo2StartPhase"},                         // 177
+			{"type": "param", "name":"Lfo2Delay"},                              // 178
+			{"type": "param", "name":"Lfo2Fade"},                               // 179
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo2KeyTrack"},                           // 182
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3Shape"},								// 184
+			{"type": "param", "name":"Lfo3Speed"},                              // 185
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3Sync"},                               // 187
+			{"type": "param", "name":"Lfo3Clocked"},                            // 188
+			{"type": "param", "name":"Lfo3StartPhase"},                         // 189
+			{"type": "param", "name":"Lfo3Delay"},                              // 190
+			{"type": "param", "name":"Lfo3Fade"},                               // 191
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Lfo3KeyTrack"},                           // 194
+			{"type": "null"},
+			{"type": "param", "name":"FilterEnvMode", "mask":7},                   // 196
+			{"type": "param", "name":"FilterEnvTriggerMode", "mask":3, "shift":3}, // 196
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"FilterEnvAttack"},                           // 199
+			{"type": "param", "name":"FilterEnvAttackLevel"},                      // 200
+			{"type": "param", "name":"FilterEnvDecay"},                            // 201
+			{"type": "param", "name":"FilterEnvSustain"},                          // 202
+			{"type": "param", "name":"FilterEnvDecay2"},                           // 203
+			{"type": "param", "name":"FilterEnvSustain2"},                         // 204
+			{"type": "param", "name":"FilterEnvRelease"},                          // 205
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"AmpEnvMode", "mask":7},                      // 208
+			{"type": "param", "name":"AmpEnvTriggerMode", "mask":3, "shift":3},    // 208
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"AmpEnvAttack"},                              // 211
+			{"type": "param", "name":"AmpEnvAttackLevel"},                         // 212
+			{"type": "param", "name":"AmpEnvDecay"},                               // 213
+			{"type": "param", "name":"AmpEnvSustain"},                             // 214
+			{"type": "param", "name":"AmpEnvDecay2"},                              // 215
+			{"type": "param", "name":"AmpEnvSustain2"},                            // 216
+			{"type": "param", "name":"AmpEnvRelease"},                             // 217
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env3Mode", "mask":7},                        // 220
+			{"type": "param", "name":"Env3TriggerMode", "mask":3, "shift":3},      // 220
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env3Attack"},                                // 223
+			{"type": "param", "name":"Env3AttackLevel"},                           // 224
+			{"type": "param", "name":"Env3Decay"},                                 // 225
+			{"type": "param", "name":"Env3Sustain"},                               // 226
+			{"type": "param", "name":"Env3Decay2"},                                // 227
+			{"type": "param", "name":"Env3Sustain2"},                              // 228
+			{"type": "param", "name":"Env3Release"},                               // 229
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env4Mode", "mask":7},                        // 232
+			{"type": "param", "name":"Env4TriggerMode", "mask":3, "shift":3},      // 232
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Env4Attack"},                                // 235
+			{"type": "param", "name":"Env4AttackLevel"},                           // 236
+			{"type": "param", "name":"Env4Decay"},                                 // 237
+			{"type": "param", "name":"Env4Sustain"},                               // 238
+			{"type": "param", "name":"Env4Decay2"},                                // 239
+			{"type": "param", "name":"Env4Sustain2"},                              // 240
+			{"type": "param", "name":"Env4Release"},                               // 241
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},                                                      // 244, Q "Env Mode" Filter/Amp=0, Env3/4=2. All parameters below moved down one position, dump is one byte longer
+			{"type": "null"},
+			{"type": "param", "name":"Mod1Source1"},                               // 245
+			{"type": "param", "name":"Mod1Source2"},                               // 246
+			{"type": "param", "name":"Mod1Operator"},                              // 247
+			{"type": "param", "name":"Mod1Constant"},                              // 248
+			{"type": "param", "name":"Mod2Source1"},                               // 249
+			{"type": "param", "name":"Mod2Source2"},                               // 250
+			{"type": "param", "name":"Mod2Operator"},                              // 251
+			{"type": "param", "name":"Mod2Constant"},                              // 252
+			{"type": "param", "name":"Mod3Source1"},                               // 253
+			{"type": "param", "name":"Mod3Source2"},                               // 254
+			{"type": "param", "name":"Mod3Operator"},                              // 255
+			{"type": "param", "name":"Mod3Constant"},                              // 256
+			{"type": "param", "name":"Mod4Source1"},                               // 257
+			{"type": "param", "name":"Mod4Source2"},                               // 258
+			{"type": "param", "name":"Mod4Operator"},                              // 259
+			{"type": "param", "name":"Mod4Constant"},                              // 260
+			{"type": "param", "name":"Slot1FSource"},                              // 261
+			{"type": "param", "name":"Slot1FDestination"},                         // 262
+			{"type": "param", "name":"Slot1FAmount"},                              // 263
+			{"type": "param", "name":"Slot2FSource"},                              // 264
+			{"type": "param", "name":"Slot2FDestination"},                         // 265
+			{"type": "param", "name":"Slot2FAmount"},                              // 266
+			{"type": "param", "name":"Slot3FSource"},                              // 267
+			{"type": "param", "name":"Slot3FDestination"},                         // 268
+			{"type": "param", "name":"Slot3FAmount"},                              // 269
+			{"type": "param", "name":"Slot4FSource"},                              // 270
+			{"type": "param", "name":"Slot4FDestination"},                         // 271
+			{"type": "param", "name":"Slot4FAmount"},                              // 272
+			{"type": "param", "name":"Slot5FSource"},                              // 273
+			{"type": "param", "name":"Slot5FDestination"},                         // 274
+			{"type": "param", "name":"Slot5FAmount"},                              // 275
+			{"type": "param", "name":"Slot6FSource"},                              // 276
+			{"type": "param", "name":"Slot6FDestination"},                         // 277
+			{"type": "param", "name":"Slot6FAmount"},                              // 278
+			{"type": "param", "name":"Slot7FSource"},                              // 279
+			{"type": "param", "name":"Slot7FDestination"},                         // 280
+			{"type": "param", "name":"Slot7FAmount"},                              // 281
+			{"type": "param", "name":"Slot8FSource"},                              // 282
+			{"type": "param", "name":"Slot8FDestination"},                         // 283
+			{"type": "param", "name":"Slot8FAmount"},                              // 284
+			{"type": "param", "name":"Slot1SSource"},                              // 285
+			{"type": "param", "name":"Slot1SDestination"},                         // 286
+			{"type": "param", "name":"Slot1SAmount"},                              // 287
+			{"type": "param", "name":"Slot2SSource"},                              // 288
+			{"type": "param", "name":"Slot2SDestination"},                         // 289
+			{"type": "param", "name":"Slot2SAmount"},                              // 290
+			{"type": "param", "name":"Slot3SSource"},                              // 291
+			{"type": "param", "name":"Slot3SDestination"},                         // 292
+			{"type": "param", "name":"Slot3SAmount"},                              // 293
+			{"type": "param", "name":"Slot4SSource"},                              // 294
+			{"type": "param", "name":"Slot4SDestination"},                         // 295
+			{"type": "param", "name":"Slot4SAmount"},                              // 296
+			{"type": "param", "name":"Slot5SSource"},                              // 297
+			{"type": "param", "name":"Slot5SDestination"},                         // 298
+			{"type": "param", "name":"Slot5SAmount"},                              // 299
+			{"type": "param", "name":"Slot6SSource"},                              // 300
+			{"type": "param", "name":"Slot6SDestination"},                         // 301
+			{"type": "param", "name":"Slot6SAmount"},                              // 302
+			{"type": "param", "name":"Slot7SSource"},                              // 303
+			{"type": "param", "name":"Slot7SDestination"},                         // 304
+			{"type": "param", "name":"Slot7SAmount"},                              // 305
+			{"type": "param", "name":"Slot8SSource"},                              // 306
+			{"type": "param", "name":"Slot8SDestination"},                         // 307
+			{"type": "param", "name":"Slot8SAmount"},                              // 308
+			{"type": "param", "name":"ControllerDelaySource"},                     // 309
+			{"type": "param", "name":"ControllerDelay"},                           // 310
+			{"type": "param", "name":"ArpMode"},                                   // 311
+			{"type": "param", "name":"ArpPattern"},                                // 312
+			{"type": "param", "name":"ArpMaxNotes"},                               // 313
+			{"type": "param", "name":"ArpClock"},                                  // 314
+			{"type": "param", "name":"ArpLength"},                                 // 315
+			{"type": "param", "name":"ArpOctaveRange"},                            // 316
+			{"type": "param", "name":"ArpDirection"},                              // 317
+			{"type": "param", "name":"ArpSortOrder"},                              // 318
+			{"type": "param", "name":"ArpVeloMode"},                               // 319
+			{"type": "param", "name":"ArpTFactor"},                                // 320
+			{"type": "param", "name":"ArpSameNoteOverlap"},                        // 321
+			{"type": "param", "name":"ArpPatternReset"},                           // 322
+			{"type": "param", "name":"ArpPatternLength"},                          // 323
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Tempo"},                                     // 326
+			{"type": "param", "name":"Arp00Step", "mask":"7", "shift":4},          // 327
+			{"type": "param", "name":"Arp00Glide", "mask":"1", "shift":3},         // 327
+			{"type": "param", "name":"Arp00Accent", "mask":"7"},                   // 327
+			{"type": "param", "name":"Arp01Step", "mask":"7", "shift":4},          // 328
+			{"type": "param", "name":"Arp01Glide", "mask":"1", "shift":3},         // 328
+			{"type": "param", "name":"Arp01Accent", "mask":"7"},                   // 328
+			{"type": "param", "name":"Arp02Step", "mask":"7", "shift":4},          // 329
+			{"type": "param", "name":"Arp02Glide", "mask":"1", "shift":3},         // 329
+			{"type": "param", "name":"Arp02Accent", "mask":"7"},                   // 329
+			{"type": "param", "name":"Arp03Step", "mask":"7", "shift":4},          // 330
+			{"type": "param", "name":"Arp03Glide", "mask":"1", "shift":3},         // 330
+			{"type": "param", "name":"Arp03Accent", "mask":"7"},                   // 330
+			{"type": "param", "name":"Arp04Step", "mask":"7", "shift":4},          // 331
+			{"type": "param", "name":"Arp04Glide", "mask":"1", "shift":3},         // 331
+			{"type": "param", "name":"Arp04Accent", "mask":"7"},                   // 331
+			{"type": "param", "name":"Arp05Step", "mask":"7", "shift":4},          // 332
+			{"type": "param", "name":"Arp05Glide", "mask":"1", "shift":3},         // 332
+			{"type": "param", "name":"Arp05Accent", "mask":"7"},                   // 332
+			{"type": "param", "name":"Arp06Step", "mask":"7", "shift":4},          // 333
+			{"type": "param", "name":"Arp06Glide", "mask":"1", "shift":3},         // 333
+			{"type": "param", "name":"Arp06Accent", "mask":"7"},                   // 333
+			{"type": "param", "name":"Arp07Step", "mask":"7", "shift":4},          // 334
+			{"type": "param", "name":"Arp07Glide", "mask":"1", "shift":3},         // 334
+			{"type": "param", "name":"Arp07Accent", "mask":"7"},                   // 334
+			{"type": "param", "name":"Arp08Step", "mask":"7", "shift":4},          // 335
+			{"type": "param", "name":"Arp08Glide", "mask":"1", "shift":3},         // 335
+			{"type": "param", "name":"Arp08Accent", "mask":"7"},                   // 335
+			{"type": "param", "name":"Arp09Step", "mask":"7", "shift":4},          // 336
+			{"type": "param", "name":"Arp09Glide", "mask":"1", "shift":3},         // 336
+			{"type": "param", "name":"Arp09Accent", "mask":"7"},                   // 336
+			{"type": "param", "name":"Arp10Step", "mask":"7", "shift":4},          // 337
+			{"type": "param", "name":"Arp10Glide", "mask":"1", "shift":3},         // 337
+			{"type": "param", "name":"Arp10Accent", "mask":"7"},                   // 337
+			{"type": "param", "name":"Arp11Step", "mask":"7", "shift":4},          // 338
+			{"type": "param", "name":"Arp11Glide", "mask":"1", "shift":3},         // 338
+			{"type": "param", "name":"Arp11Accent", "mask":"7"},                   // 338
+			{"type": "param", "name":"Arp12Step", "mask":"7", "shift":4},          // 339
+			{"type": "param", "name":"Arp12Glide", "mask":"1", "shift":3},         // 339
+			{"type": "param", "name":"Arp12Accent", "mask":"7"},                   // 339
+			{"type": "param", "name":"Arp13Step", "mask":"7", "shift":4},          // 340
+			{"type": "param", "name":"Arp13Glide", "mask":"1", "shift":3},         // 340
+			{"type": "param", "name":"Arp13Accent", "mask":"7"},                   // 340
+			{"type": "param", "name":"Arp14Step", "mask":"7", "shift":4},          // 341
+			{"type": "param", "name":"Arp14Glide", "mask":"1", "shift":3},         // 341
+			{"type": "param", "name":"Arp14Accent", "mask":"7"},                   // 341
+			{"type": "param", "name":"Arp15Step", "mask":"7", "shift":4},          // 342
+			{"type": "param", "name":"Arp15Glide", "mask":"1", "shift":3},         // 342
+			{"type": "param", "name":"Arp15Accent", "mask":"7"},                   // 342
+			{"type": "param", "name":"Arp00Length", "mask":"7", "shift":4},        // 343
+			{"type": "param", "name":"Arp00Timing", "mask":"7"},                   // 343
+			{"type": "param", "name":"Arp01Length", "mask":"7", "shift":4},        // 344
+			{"type": "param", "name":"Arp01Timing", "mask":"7"},                   // 344
+			{"type": "param", "name":"Arp02Length", "mask":"7", "shift":4},        // 345
+			{"type": "param", "name":"Arp02Timing", "mask":"7"},                   // 345
+			{"type": "param", "name":"Arp03Length", "mask":"7", "shift":4},        // 346
+			{"type": "param", "name":"Arp03Timing", "mask":"7"},                   // 346
+			{"type": "param", "name":"Arp04Length", "mask":"7", "shift":4},        // 347
+			{"type": "param", "name":"Arp04Timing", "mask":"7"},                   // 347
+			{"type": "param", "name":"Arp05Length", "mask":"7", "shift":4},        // 348
+			{"type": "param", "name":"Arp05Timing", "mask":"7"},                   // 348
+			{"type": "param", "name":"Arp06Length", "mask":"7", "shift":4},        // 349
+			{"type": "param", "name":"Arp06Timing", "mask":"7"},                   // 349
+			{"type": "param", "name":"Arp07Length", "mask":"7", "shift":4},        // 350
+			{"type": "param", "name":"Arp07Timing", "mask":"7"},                   // 350
+			{"type": "param", "name":"Arp08Length", "mask":"7", "shift":4},        // 351
+			{"type": "param", "name":"Arp08Timing", "mask":"7"},                   // 351
+			{"type": "param", "name":"Arp09Length", "mask":"7", "shift":4},        // 352
+			{"type": "param", "name":"Arp09Timing", "mask":"7"},                   // 352
+			{"type": "param", "name":"Arp10Length", "mask":"7", "shift":4},        // 353
+			{"type": "param", "name":"Arp10Timing", "mask":"7"},                   // 353
+			{"type": "param", "name":"Arp11Length", "mask":"7", "shift":4},        // 354
+			{"type": "param", "name":"Arp11Timing", "mask":"7"},                   // 354
+			{"type": "param", "name":"Arp12Length", "mask":"7", "shift":4},        // 355
+			{"type": "param", "name":"Arp12Timing", "mask":"7"},                   // 355
+			{"type": "param", "name":"Arp13Length", "mask":"7", "shift":4},        // 356
+			{"type": "param", "name":"Arp13Timing", "mask":"7"},                   // 356
+			{"type": "param", "name":"Arp14Length", "mask":"7", "shift":4},        // 357
+			{"type": "param", "name":"Arp14Timing", "mask":"7"},                   // 357
+			{"type": "param", "name":"Arp15Length", "mask":"7", "shift":4},        // 358
+			{"type": "param", "name":"Arp15Timing", "mask":"7"},                   // 358
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "null"},
+			{"type": "param", "name":"Name00"},                                    // 363
+			{"type": "param", "name":"Name01"},                                    // 364
+			{"type": "param", "name":"Name02"},                                    // 365
+			{"type": "param", "name":"Name03"},                                    // 366
+			{"type": "param", "name":"Name04"},                                    // 367
+			{"type": "param", "name":"Name05"},                                    // 368
+			{"type": "param", "name":"Name06"},                                    // 369
+			{"type": "param", "name":"Name07"},                                    // 370
+			{"type": "param", "name":"Name08"},                                    // 371
+			{"type": "param", "name":"Name09"},                                    // 372
+			{"type": "param", "name":"Name10"},                                    // 373
+			{"type": "param", "name":"Name11"},                                    // 374
+			{"type": "param", "name":"Name12"},                                    // 375
+			{"type": "param", "name":"Name13"},                                    // 376
+			{"type": "param", "name":"Name14"},                                    // 377
+			{"type": "param", "name":"Name15"},                                    // 378
+			{"type": "param", "name":"Category00"},                                // 379
+			{"type": "param", "name":"Category01"},                                // 380
+			{"type": "param", "name":"Category02"},                                // 381
+			{"type": "param", "name":"Category03"},                                // 382
+
+            {"type": "checksum", "first": 4, "last": 390},
+			{"type": "byte", "value": "f7"}
+		],
 		"globaldump": [
 			{"type": "byte", "value": "f0"},
 			{"type": "byte", "value": "3e"},

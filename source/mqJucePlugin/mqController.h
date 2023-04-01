@@ -27,6 +27,7 @@ public:
         SingleParameterChange,
         GlobalParameterChange,
         SingleDump,
+        SingleDumpQ,
         GlobalDump,
         EmuRequestLcd,
         EmuRequestLeds,
