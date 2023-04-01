@@ -92,6 +92,8 @@ namespace pluginLib
 		uint32_t getByteIndexForParameterName(const std::string& _name) const;
 		const MidiDataDefinition *getDefinitionByParameterName(const std::string& _name) const;
 
+		bool updateChecksums(Sysex& _data) const;
+
 	private:
 		static uint8_t calcChecksum(const MidiDataDefinition& _d, const Sysex& _src);
 
