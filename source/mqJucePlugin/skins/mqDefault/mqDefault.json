@@ -7137,6 +7137,1831 @@
                             }
                         }
                     ]
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1136.972",
+                        "y" : "677.6904",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpSameNoteOverlap"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1299.301",
+                        "y" : "693.6904",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpSameNoteOverlap"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2616.972",
+                        "y" : "677.6904",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpPatternReset"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2779.301",
+                        "y" : "693.6904",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpPatternReset"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpMode"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "42.89917",
+                        "y" : "724.4902",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpDirection"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "392.8992",
+                        "y" : "724.4902",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpVeloMode"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "42.89917",
+                        "y" : "874.4902",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpClock"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "392.8992",
+                        "y" : "874.4902",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpPattern"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "42.89917",
+                        "y" : "1024.49",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "txtColLabel",
+                    "parameterAttachment" : {
+                        "parameter" : "ArpSortOrder"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Osc 1 Pitch",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "392.8992",
+                        "y" : "1024.49",
+                        "width" : "300",
+                        "height" : "50"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63.57947",
+                        "y" : "1088.29",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Tempo"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "303.8995",
+                        "y" : "1088.29",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpMaxNotes"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "544.2195",
+                        "y" : "1088.29",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpTFactor"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "63.57947",
+                        "y" : "1323.09",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpOctaveRange"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "303.8995",
+                        "y" : "1323.09",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpLength"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "808.7919",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp00Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "760.7919",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp00Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "808.7919",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp00Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "760.7919",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp00Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "760.7919",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp00Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "942.3537",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp01Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "894.3537",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp01Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "942.3537",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp01Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "894.3537",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp01Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "894.3537",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp01Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1075.916",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp02Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1027.916",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp02Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1075.916",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp02Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1027.916",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp02Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1027.916",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp02Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1209.477",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp03Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1161.477",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp03Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1209.477",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp03Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1161.477",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp03Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1161.477",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp03Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1343.039",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp04Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1295.039",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp04Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1343.039",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp04Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1295.039",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp04Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1295.039",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp04Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1476.601",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp05Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1428.601",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp05Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1476.601",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp05Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1428.601",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp05Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1428.601",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp05Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1610.163",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp06Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1562.163",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp06Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1610.163",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp06Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1562.163",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp06Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1562.163",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp06Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1743.725",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp07Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1695.725",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp07Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1743.725",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp07Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1695.725",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp07Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1695.725",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp07Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1877.286",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp08Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1829.286",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp08Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1877.286",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp08Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1829.286",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp08Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1829.286",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp08Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2010.848",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp09Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1962.848",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp09Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2010.848",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp09Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1962.848",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp09Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1962.848",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp09Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2144.41",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp10Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2096.41",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp10Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2144.41",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp10Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2096.41",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp10Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2096.41",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp10Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2277.972",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp11Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2229.972",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp11Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2277.972",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp11Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2229.972",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp11Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2229.972",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp11Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2411.533",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp12Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2363.533",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp12Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2411.533",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp12Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2363.533",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp12Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2363.533",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp12Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2545.095",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp13Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2497.095",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp13Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2545.095",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp13Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2497.095",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp13Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2497.095",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp13Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2678.657",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp14Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2630.657",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp14Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2678.657",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp14Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2630.657",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp14Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2630.657",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp14Length"
+                    }
+                },
+                {
+                    "name" : "glide",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2812.219",
+                        "y" : "847.3804",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp15Glide"
+                    }
+                },
+                {
+                    "name" : "accent",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2764.219",
+                        "y" : "922.5643",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp15Accent"
+                    }
+                },
+                {
+                    "name" : "step",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2812.219",
+                        "y" : "1093.748",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp15Step"
+                    }
+                },
+                {
+                    "name" : "timing",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2764.219",
+                        "y" : "1168.932",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp15Timing"
+                    }
+                },
+                {
+                    "name" : "length",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2764.219",
+                        "y" : "1340.116",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Arp15Length"
+                    }
                 }
             ]
         },
