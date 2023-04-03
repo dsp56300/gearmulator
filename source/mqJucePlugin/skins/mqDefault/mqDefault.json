@@ -7139,94 +7139,6 @@
                     ]
                 },
                 {
-                    "name" : "buttonH",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "0",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1136.972",
-                        "y" : "677.6904",
-                        "width" : "128",
-                        "height" : "64",
-                        "texture" : "button",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "ArpSameNoteOverlap"
-                    }
-                },
-                {
-                    "name" : "led",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1299.301",
-                        "y" : "693.6904",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "ArpSameNoteOverlap"
-                    }
-                },
-                {
-                    "name" : "buttonH",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "0",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2616.972",
-                        "y" : "677.6904",
-                        "width" : "128",
-                        "height" : "64",
-                        "texture" : "button",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "ArpPatternReset"
-                    }
-                },
-                {
-                    "name" : "led",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2779.301",
-                        "y" : "693.6904",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "ArpPatternReset"
-                    }
-                },
-                {
                     "name" : "txtColLabel",
                     "parameterAttachment" : {
                         "parameter" : "ArpMode"
@@ -7444,6 +7356,94 @@
                     }
                 },
                 {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1120.972",
+                        "y" : "662.2904",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpSameNoteOverlap"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1283.301",
+                        "y" : "678.2904",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpSameNoteOverlap"
+                    }
+                },
+                {
+                    "name" : "buttonH",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2635.972",
+                        "y" : "662.2904",
+                        "width" : "128",
+                        "height" : "64",
+                        "texture" : "button",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpPatternReset"
+                    }
+                },
+                {
+                    "name" : "led",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "1",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2798.301",
+                        "y" : "678.2904",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "ArpPatternReset"
+                    }
+                },
+                {
                     "name" : "glide",
                     "button" : {
                         "isToggle" : "1",
@@ -7454,7 +7454,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "808.7919",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7471,7 +7471,7 @@
                     },
                     "spritesheet" : {
                         "x" : "760.7919",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7483,25 +7483,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "808.7919",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp00Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "778.8918",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7510,7 +7510,7 @@
                     },
                     "spritesheet" : {
                         "x" : "760.7919",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7527,7 +7527,7 @@
                     },
                     "spritesheet" : {
                         "x" : "760.7919",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7549,7 +7549,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "942.3537",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7566,7 +7566,7 @@
                     },
                     "spritesheet" : {
                         "x" : "894.3537",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7578,25 +7578,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "942.3537",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp01Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "912.4537",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7605,7 +7605,7 @@
                     },
                     "spritesheet" : {
                         "x" : "894.3537",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7622,7 +7622,7 @@
                     },
                     "spritesheet" : {
                         "x" : "894.3537",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7644,7 +7644,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1075.916",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7661,7 +7661,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1027.916",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7673,25 +7673,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1075.916",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp02Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1046.016",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7700,7 +7700,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1027.916",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7717,7 +7717,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1027.916",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7739,7 +7739,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1209.477",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7756,7 +7756,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1161.477",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7768,25 +7768,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1209.477",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp03Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1179.577",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7795,7 +7795,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1161.477",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7812,7 +7812,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1161.477",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7834,7 +7834,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1343.039",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7851,7 +7851,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1295.039",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7863,25 +7863,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1343.039",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp04Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1313.139",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7890,7 +7890,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1295.039",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7907,7 +7907,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1295.039",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7929,7 +7929,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1476.601",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -7946,7 +7946,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1428.601",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -7958,25 +7958,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1476.601",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp05Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1446.701",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -7985,7 +7985,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1428.601",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8002,7 +8002,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1428.601",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8024,7 +8024,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1610.163",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8041,7 +8041,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1562.163",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8053,25 +8053,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1610.163",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp06Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1580.263",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8080,7 +8080,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1562.163",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8097,7 +8097,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1562.163",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8119,7 +8119,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1743.725",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8136,7 +8136,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1695.725",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8148,25 +8148,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1743.725",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp07Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1713.825",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8175,7 +8175,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1695.725",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8192,7 +8192,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1695.725",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8214,7 +8214,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1877.286",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8231,7 +8231,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1829.286",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8243,25 +8243,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "1877.286",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp08Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1847.386",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8270,7 +8270,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1829.286",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8287,7 +8287,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1829.286",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8309,7 +8309,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2010.848",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8326,7 +8326,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1962.848",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8338,25 +8338,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2010.848",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp09Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1980.948",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8365,7 +8365,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1962.848",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8382,7 +8382,7 @@
                     },
                     "spritesheet" : {
                         "x" : "1962.848",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8404,7 +8404,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2144.41",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8421,7 +8421,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2096.41",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8433,25 +8433,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2144.41",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp10Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2114.51",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8460,7 +8460,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2096.41",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8477,7 +8477,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2096.41",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8499,7 +8499,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2277.972",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8516,7 +8516,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2229.972",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8528,25 +8528,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2277.972",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp11Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2248.072",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8555,7 +8555,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2229.972",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8572,7 +8572,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2229.972",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8594,7 +8594,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2411.533",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8611,7 +8611,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2363.533",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8623,25 +8623,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2411.533",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp12Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2381.633",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8650,7 +8650,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2363.533",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8667,7 +8667,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2363.533",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8689,7 +8689,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2545.095",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8706,7 +8706,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2497.095",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8718,25 +8718,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2545.095",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp13Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2515.195",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8745,7 +8745,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2497.095",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8762,7 +8762,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2497.095",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8784,7 +8784,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2678.657",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8801,7 +8801,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2630.657",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8813,25 +8813,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2678.657",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp14Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2648.757",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8840,7 +8840,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2630.657",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8857,7 +8857,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2630.657",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8879,7 +8879,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2812.219",
-                        "y" : "847.3804",
+                        "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -8896,7 +8896,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2764.219",
-                        "y" : "922.5643",
+                        "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8908,25 +8908,25 @@
                     }
                 },
                 {
-                    "name" : "step",
-                    "button" : {
-                        "isToggle" : "1",
-                        "normalImage" : "0",
-                        "overImage" : "1",
-                        "downImage" : "1",
-                        "normalImageOn" : "1",
-                        "overImageOn" : "1",
-                        "downImageOn" : "1",
-                        "x" : "2812.219",
-                        "y" : "1093.748",
-                        "width" : "32",
-                        "height" : "32",
-                        "texture" : "led",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
-                    },
+                    "name" : "dropdownArpStep",
                     "parameterAttachment" : {
                         "parameter" : "Arp15Step"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : ">>",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2782.319",
+                        "y" : "1077.64",
+                        "width" : "91.8",
+                        "height" : "40"
                     }
                 },
                 {
@@ -8935,7 +8935,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2764.219",
-                        "y" : "1168.932",
+                        "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -8952,7 +8952,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2764.219",
-                        "y" : "1340.116",
+                        "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
