@@ -22,7 +22,7 @@
  		{"index":2 , "name":"O1Semi"       , "min":52, "max":76, "isDiscrete":true, "isBipolar":true, "toText":"signed"},
  		{"index":3 , "name":"O1Detune"},
  		{"index":4 , "name":"O1BendRange"  , "min":40, "max":88},
- 		{"index":5 , "name":"O1KeyTrack", "default":96},
+ 		{"index":5 , "name":"O1KeyTrack", "default":96, "toText":"keytrack"},
  		{"index":6 , "name":"O1FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":7 , "name":"O1FmAmount"},
  		{"index":8 , "name":"O1Shape"      , "min":0 , "max":6, "isDiscrete":true},
@@ -37,7 +37,7 @@
  		{"index":18, "name":"O2Semi"       , "min":52, "max":76, "isDiscrete":true, "isBipolar":true, "toText":"signed"},
  		{"index":19, "name":"O2Detune"},
  		{"index":20, "name":"O2BendRange"  , "min":40, "max":88},
- 		{"index":21, "name":"O2KeyTrack", "default":96},
+ 		{"index":21, "name":"O2KeyTrack", "default":96, "toText":"keytrack"},
  		{"index":22, "name":"O2FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":23, "name":"O2FmAmount"},
  		{"index":24, "name":"O2Shape"      , "min":0 , "max":6, "isDiscrete":true},
@@ -52,7 +52,7 @@
  		{"index":34, "name":"O3Semi"       , "min":52, "max":76, "isDiscrete":true, "isBipolar":true, "toText":"signed"},
  		{"index":35, "name":"O3Detune"},
  		{"index":36, "name":"O3BendRange"  , "min":40, "max":88},
- 		{"index":37, "name":"O3KeyTrack", "default":96},
+ 		{"index":37, "name":"O3KeyTrack", "default":96, "toText":"keytrack"},
  		{"index":38, "name":"O3FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
  		{"index":39, "name":"O3FmAmount"},
  		{"index":40, "name":"O3Shape"      , "min":0 , "max":4, "isDiscrete":true},
@@ -96,7 +96,7 @@
  		{"index":78, "name":"F1Cutoff"},
  		{"index":80, "name":"F1Resonance"},
  		{"index":81, "name":"F1Drive"},
- 		{"index":86, "name":"F1KeyTrack"},
+ 		{"index":86, "name":"F1KeyTrack", "toText":"keytrack"},
  		{"index":87, "name":"F1EnvMod", "isBipolar":true, "toText":"signed"},
  		{"index":88, "name":"F1VelMod", "isBipolar":true, "toText":"signed"},
  		{"index":89, "name":"F1ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
@@ -112,7 +112,7 @@
  		{"index":98, "name":"F2Cutoff"},
  		{"index":100, "name":"F2Resonance"},
  		{"index":101, "name":"F2Drive"},
- 		{"index":106, "name":"F2KeyTrack"},
+ 		{"index":106, "name":"F2KeyTrack", "toText":"keytrack"},
  		{"index":107, "name":"F2EnvMod", "isBipolar":true, "toText":"signed"},
  		{"index":108, "name":"F2VelMod", "isBipolar":true, "toText":"signed"},
  		{"index":109, "name":"F2ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
@@ -273,7 +273,7 @@
  		{"index":165, "name":"Lfo1StartPhase"},
  		{"index":166, "name":"Lfo1Delay"},
  		{"index":167, "name":"Lfo1Fade"},
- 		{"index":170, "name":"Lfo1KeyTrack"},
+ 		{"index":170, "name":"Lfo1KeyTrack", "toText":"keytrack"},
 
 		// LFO 2
  		{"index":172, "name":"Lfo2Shape", "min":0, "max":5},
@@ -284,7 +284,7 @@
  		{"index":177, "name":"Lfo2StartPhase"},
  		{"index":178, "name":"Lfo2Delay"},
  		{"index":179, "name":"Lfo2Fade"},
- 		{"index":182, "name":"Lfo2KeyTrack"},
+ 		{"index":182, "name":"Lfo2KeyTrack", "toText":"keytrack"},
 
 		// LFO 3
  		{"index":184, "name":"Lfo3Shape", "min":0, "max":5},
@@ -295,7 +295,7 @@
  		{"index":189, "name":"Lfo3StartPhase"},
  		{"index":190, "name":"Lfo3Delay"},
  		{"index":191, "name":"Lfo3Fade"},
- 		{"index":194, "name":"Lfo3KeyTrack"},
+ 		{"index":194, "name":"Lfo3KeyTrack", "toText":"keytrack"},
 		
 		// Filter Env
  		{"index":196, "name":"FilterEnvMode", "min":0, "max":4, "isDiscrete":true, "toText":"envMode"},
@@ -1185,6 +1185,25 @@
 			"200",	"205",	"210",	"215",	"220",	"225",	"230",	"235",	"240",	"245",
 			"250",	"255",	"260",	"265",	"270",	"275",	"280",	"285",	"290",	"295",
 			"300"
+		],
+		"keytrack":
+		[
+			"-200%", "-197%", "-194%", "-191%", "-188%", "-185%", "-182%", "-179%",
+			"-175%", "-172%", "-169%", "-166%", "-163%", "-160%", "-157%", "-154%",
+			"-150%", "-147%", "-144%", "-141%", "-138%", "-135%", "-132%", "-129%",
+			"-125%", "-122%", "-119%", "-116%", "-113%", "-110%", "-107%", "-104%",
+			"-100%", "-97%", "-94%", "-91%", "-88%", "-85%", "-82%", "-79%",
+			"-75%", "-72%", "-69%", "-66%", "-63%", "-60%", "-57%", "-54%",
+			"-50%", "-47%", "-44%", "-41%", "-38%", "-35%", "-32%", "-29%",
+			"-25%", "-22%", "-19%", "-16%", "-13%", "-10%", "-7%", "-4%",
+			"0%", "+3%", "+6%", "+9%", "+12%", "+15%", "+18%", "+21%",
+			"+25%", "+28%", "+31%", "+34%", "+37%", "+40%", "+43%", "+46%",
+			"+50%", "+53%", "+56%", "+59%", "+62%", "+65%", "+68%", "+71%",
+			"+75%", "+78%", "+81%", "+84%", "+87%", "+90%", "+93%", "+96%",
+			"+100%", "+103%", "+106%", "+109%", "+112%", "+115%", "+118%", "+121%",
+			"+125%", "+128%", "+131%", "+134%", "+137%", "+140%", "+143%", "+146%",
+			"+150%", "+153%", "+156%", "+159%", "+162%", "+165%", "+168%", "+171%",
+			"+175%", "+178%", "+181%", "+184%", "+187%", "+190%", "+193%", "+196%",
 		]
 	},
  	"midipackets":
