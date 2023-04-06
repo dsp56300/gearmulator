@@ -265,7 +265,7 @@
  		{"index":159, "name":"Fx251DelayRearSRVolume"},
 
 		// LFO 1
- 		{"index":160, "name":"Lfo1Shape", "min":0, "max":5},
+ 		{"index":160, "name":"Lfo1Shape", "min":0, "max":5, "isDiscrete":true},
  		{"index":161, "name":"Lfo1Speed"},
  		{"index":161, "name":"Lfo1SpeedClocked"},
  		{"index":163, "name":"Lfo1Sync", "min":0 , "max":1, "isBool":true},
@@ -276,7 +276,7 @@
  		{"index":170, "name":"Lfo1KeyTrack", "toText":"keytrack"},
 
 		// LFO 2
- 		{"index":172, "name":"Lfo2Shape", "min":0, "max":5},
+ 		{"index":172, "name":"Lfo2Shape", "min":0, "max":5, "isDiscrete":true},
  		{"index":173, "name":"Lfo2Speed"},
  		{"index":173, "name":"Lfo2SpeedClocked"},
  		{"index":175, "name":"Lfo2Sync", "min":0 , "max":1, "isBool":true},
@@ -287,7 +287,7 @@
  		{"index":182, "name":"Lfo2KeyTrack", "toText":"keytrack"},
 
 		// LFO 3
- 		{"index":184, "name":"Lfo3Shape", "min":0, "max":5},
+ 		{"index":184, "name":"Lfo3Shape", "min":0, "max":5, "isDiscrete":true},
  		{"index":185, "name":"Lfo3Speed"},
  		{"index":185, "name":"Lfo3SpeedClocked"},
  		{"index":187, "name":"Lfo3Sync", "min":0 , "max":1, "isBool":true},
