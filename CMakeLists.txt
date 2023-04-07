@@ -13,10 +13,6 @@ include(CTest)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 option(${PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
 
-# ----------------- source
-
-add_subdirectory(source)
-
 # ----------------- CPack
 
 get_cmake_property(CPACK_COMPONENTS_ALL COMPONENTS)
@@ -50,3 +46,7 @@ set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 
 include(CPack)
+
+# ----------------- source
+
+add_subdirectory(source)
