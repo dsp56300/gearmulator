@@ -3,7 +3,12 @@ cmake_minimum_required(VERSION 3.15)
 # build a fat binary that runs on both intel and the new Apple M1 chip
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "OS X Architectures")
 
-set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+# Xcode 14+ can not build for anything < High Sierra anymore
+if(CMAKE_GENERATOR STREQUAL Xcode AND XCODE_VERSION VERSION_GREATER_EQUAL 14.0.0)
+	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.13" CACHE STRING "Minimum OS X deployment version")
+else()
+	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
+endif()
 
 project(gearmulator VERSION 1.2.30)
 
