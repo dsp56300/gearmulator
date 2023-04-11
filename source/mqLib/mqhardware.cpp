@@ -120,7 +120,7 @@ namespace mqLib
 		_data.clear();
 		_data.reserve(midiData.size());
 
-		for (auto data : midiData)
+		for (const auto data : midiData)
 			_data.push_back(data & 0xff);
 	}
 
