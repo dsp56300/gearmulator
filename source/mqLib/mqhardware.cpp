@@ -184,6 +184,17 @@ namespace mqLib
 	{
 		waitDspRxEmpty();
 
+		if(_irq == 0x92)
+		{
+//			LOG("DSP timeout, waiting...");
+			// this one is sent by the uc if the DSP taking too long to reset HF2 back to one. Instead of aborting here, we wait a bit longer for the DSP to finish on its own
+			ucYieldLoop([&]
+			{
+				return !bittest(m_hdiDSP.readControlRegister(), dsp56k::HDI08::HCR_HF2);
+			});
+//			LOG("DSP timeout wait done");
+		}
+
 		m_dsp.dsp().injectInterrupt(_irq);
 
 		ucYieldLoop([&]()
