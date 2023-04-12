@@ -248,7 +248,7 @@ namespace mqLib
 		if(m_hdiUC.canReceiveData() && m_hdiDSP.hasTX())
 		{
 			const auto v = m_hdiDSP.readTX();
-//			LOG("HDI uc2dsp=" << HEX(v));
+//			LOG("HDI dsp2uc=" << HEX(v));
 			m_hdiUC.writeRx(v);
 			return true;
 		}
