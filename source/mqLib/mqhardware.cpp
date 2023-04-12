@@ -209,6 +209,8 @@ namespace mqLib
 		{
 			return m_dsp.dsp().hasPendingInterrupts();
 		});
+
+		hdiTransferDSPtoUC();
 	}
 
 	uint8_t Hardware::hdiUcReadIsr(uint8_t _isr) const
