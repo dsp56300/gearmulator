@@ -50,8 +50,10 @@ set(CPACK_RPM_PACKAGE_AUTOREQ "yes")
 set(CPACK_RPM_PACKAGE_URL ${CPACK_DEBIAN_PACKAGE_HOMEPAGE})
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 
-include(CPack)
-
 # ----------------- source
 
 add_subdirectory(source)
+
+# -----------------
+
+include(CPack)
