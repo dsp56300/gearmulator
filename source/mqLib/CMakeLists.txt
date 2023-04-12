@@ -45,4 +45,8 @@ endif()
 target_sources(mqLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(mqLib PUBLIC synthLib 68kEmu)
+target_link_libraries(mqLib PUBLIC synthLib 68kEmu dsp56kDebugger)
+
+if(DSP56300_DEBUGGER)
+	target_link_libraries(mqLib PUBLIC dsp56kDebugger)
+endif()
