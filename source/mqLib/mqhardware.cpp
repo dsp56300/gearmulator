@@ -281,7 +281,7 @@ namespace mqLib
 		{
 			ucYieldLoop([&]()
 			{
-				return m_hdiDSP.txInterruptEnabled() && !m_hdiDSP.hasTX();
+				return m_dsp.dsp().hasPendingInterrupts() || (m_hdiDSP.txInterruptEnabled() && !m_hdiDSP.hasTX());
 			});
 		}
 
