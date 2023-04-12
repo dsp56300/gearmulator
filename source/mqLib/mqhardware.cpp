@@ -1,5 +1,9 @@
 #include "mqhardware.h"
 
+#if DSP56300_DEBUGGER
+#include "dsp56kDebugger/debugger.h"
+#endif
+
 #include "dsp56kEmu/interrupts.h"
 
 #if EMBED_ROM
@@ -24,7 +28,11 @@ namespace mqLib
 		: m_romFileName(std::move(_romFilename))
 		, m_rom(m_romFileName, ROM_DATA)
 		, m_uc(m_rom)
-		, m_dspThread(m_dsp.dsp())
+#if DSP56300_DEBUGGER
+		, m_dspThread(m_dsp.dsp(), "DSP", std::make_shared<dsp56kDebugger::Debugger>(m_dsp.dsp()))
+#else
+		, m_dspThread(m_dsp.dsp(), "DSP")
+#endif
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
 	{
@@ -201,6 +209,8 @@ namespace mqLib
 		{
 			return m_dsp.dsp().hasPendingInterrupts();
 		});
+
+		hdiTransferDSPtoUC();
 	}
 
 	uint8_t Hardware::hdiUcReadIsr(uint8_t _isr) const
@@ -240,7 +250,7 @@ namespace mqLib
 		if(m_hdiUC.canReceiveData() && m_hdiDSP.hasTX())
 		{
 			const auto v = m_hdiDSP.readTX();
-//			LOG("HDI uc2dsp=" << HEX(v));
+//			LOG("HDI dsp2uc=" << HEX(v));
 			m_hdiUC.writeRx(v);
 			return true;
 		}
@@ -271,7 +281,7 @@ namespace mqLib
 		{
 			ucYieldLoop([&]()
 			{
-				return m_hdiDSP.txInterruptEnabled() && !m_hdiDSP.hasTX();
+				return m_dsp.dsp().hasPendingInterrupts() || (m_hdiDSP.txInterruptEnabled() && !m_hdiDSP.hasTX());
 			});
 		}
 
