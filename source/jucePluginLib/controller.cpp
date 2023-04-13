@@ -4,9 +4,15 @@
 
 #include "parameter.h"
 #include "processor.h"
+#include "dsp56kEmu/logging.h"
 
 namespace pluginLib
 {
+	uint8_t getParameterValue(Parameter* _p)
+	{
+		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
+	}
+
 	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
 	{
 	}
@@ -45,7 +51,10 @@ namespace pluginLib
 					const auto& existingParams = findSynthParam(idx);
 
 					for (auto& existingParam : existingParams)
-						existingParam->addDerivedParameter(p.get());
+					{
+						if(isDerivedParameter(*existingParam, *p))
+							existingParam->addDerivedParameter(p.get());
+					}
 				}
 
 				const bool isNonPartExclusive = desc.isNonPartSensitive();
@@ -111,9 +120,83 @@ namespace pluginLib
         synthLib::SMidiEvent ev;
         ev.sysex = msg;
 		ev.source = synthLib::MidiEventSourceEditor;
-        m_processor.addMidiEvent(ev);
+		sendMidiEvent(ev);
     }
 
+	void Controller::sendMidiEvent(const synthLib::SMidiEvent& _ev) const
+    {
+        m_processor.addMidiEvent(_ev);
+    }
+
+	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSourceEditor*/) const
+	{
+        m_processor.addMidiEvent(synthLib::SMidiEvent(_a, _b, _c, _offset, _source));
+	}
+
+	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const
+	{
+		const auto &desc = _parameter.getDescription();
+
+		std::map<MidiDataType, uint8_t> data;
+
+		const auto *packet = getMidiPacket(_midiPacket);
+
+		if (!packet)
+		{
+			LOG("Failed to find midi packet " << _midiPacket);
+			return false;
+		}
+
+		const ParamIndex idx = {static_cast<uint8_t>(desc.page), _parameter.getPart(), desc.index};
+
+		const auto params = findSynthParam(idx);
+
+		uint32_t byte = MidiPacket::InvalidIndex;
+
+		for (auto param : params)
+		{
+			byte = packet->getByteIndexForParameterName(param->getDescription().name);
+			if (byte != MidiPacket::InvalidIndex)
+				break;
+		}
+
+		if (byte == MidiPacket::InvalidIndex)
+		{
+			LOG("Failed to find byte index for parameter " << desc.name);
+			return false;
+		}
+
+		std::vector<const MidiPacket::MidiDataDefinition*> definitions;
+
+		if(!packet->getDefinitionsForByteIndex(definitions, byte))
+			return false;
+
+		if (definitions.size() == 1)
+		{
+			_result = _value;
+			return true;
+		}
+
+		_result = 0;
+
+	    for (const auto& it : definitions)
+	    {
+			uint32_t i = 0;
+
+	    	if(!m_descriptions.getIndexByName(i, it->paramName))
+			{
+				LOG("Failed to find index for parameter " << it->paramName);
+				return false;
+			}
+
+			auto* p = getParameter(i, _parameter.getPart());
+			const auto v = p == &_parameter ? _value : getParameterValue(p);
+			_result |= it->getMaskedValue(v);
+	    }
+
+		return true;
+	}
+	
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
 	    const std::map<pluginLib::MidiDataType, uint8_t> params;
@@ -131,14 +214,14 @@ namespace pluginLib
         return true;
     }
 
-	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const uint8_t _part, const uint8_t _page, const uint8_t _paramIndex) const
 	{
 		const ParamIndex paramIndex{ _page, _part, _paramIndex };
 
 		return findSynthParam(paramIndex);
 	}
 
-	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex)
+	const Controller::ParameterList& Controller::findSynthParam(const ParamIndex& _paramIndex) const
     {
 		const auto it = m_synthParams.find(_paramIndex);
 
@@ -156,7 +239,7 @@ namespace pluginLib
 		return iti->second;
     }
 
-    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part)
+    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part) const
     {
 	    const auto res = getParameter(_index, _part);
 		return res ? &res->getValueObject() : nullptr;
@@ -209,7 +292,7 @@ namespace pluginLib
 				if(!p)
 					return false;
 
-				auto v = roundToInt(p->getValueObject().getValue());
+				const auto v = getParameterValue(p);
 				paramValues.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
 			}
 		}

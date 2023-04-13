@@ -58,7 +58,7 @@ namespace pluginLib
 		void enableBindings();
 
 		const auto& getBindings() const { return m_bindings; }
-		juce::Component* getBoundComponent(const pluginLib::Parameter* _parameter);
+		juce::Component* getBoundComponent(const pluginLib::Parameter* _parameter) const;
 
 	private:
 		void removeMouseListener(juce::Slider& _slider);

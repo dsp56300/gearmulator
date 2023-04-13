@@ -1,6 +1,7 @@
 option(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
 
 set(USE_CLAP ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
+set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
 if(JUCE_GLOBAL_VST2_SDK_PATH)
     set(VST "VST")
@@ -92,6 +93,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(USE_CLAP)
 			install(TARGETS ${targetName}_CLAP LIBRARY DESTINATION /usr/local/lib/clap/ COMPONENT ${productName}-CLAP)
 		endif()
+	endif()
+	
+	if(APPLE AND ${isSynth})
+		add_test(NAME ${targetName}_AU_Validate COMMAND ${CMAKE_COMMAND} 
+			-DIDCOMPANY=TusP
+			-DIDPLUGIN=${plugin4CC}
+			-DBINDIR=${CMAKE_BINARY_DIR}
+			-DCOMPONENT_NAME=${productName}
+			-DCPACK_FILE=${CPACK_PACKAGE_NAME}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}-${productName}-AU.zip
+			-P ${JUCE_CMAKE_DIR}/runAuValidation.cmake)
+		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
 	endif()
 endmacro()
 

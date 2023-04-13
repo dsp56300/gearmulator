@@ -46,6 +46,16 @@ namespace pluginLib
 			uint32_t checksumFirstIndex = 0;
 			uint32_t checksumLastIndex = 0;
 			uint8_t checksumInitValue = 0;
+
+			uint8_t getMaskedValue(const uint8_t _unmasked) const
+			{
+				 return static_cast<uint8_t>((_unmasked & paramMask) << paramShift);
+			}
+
+			bool doMasksOverlap(const MidiDataDefinition& _d) const
+			{
+				return (getMaskedValue(0xff) & _d.getMaskedValue(0xff)) != 0;
+			}
 		};
 
 		using Data = std::map<MidiDataType, uint8_t>;
@@ -75,9 +85,14 @@ namespace pluginLib
 		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
+		bool getDefinitionsForByteIndex(std::vector<const MidiDataDefinition*>& _result, uint32_t _byteIndex) const;
+		bool getParameterIndicesForByteIndex(std::vector<ParamIndex>& _result, const ParameterDescriptions& _parameters, uint32_t _byteIndex) const;
 
 		uint32_t getByteIndexForType(MidiDataType _type) const;
 		uint32_t getByteIndexForParameterName(const std::string& _name) const;
+		const MidiDataDefinition *getDefinitionByParameterName(const std::string& _name) const;
+
+		bool updateChecksums(Sysex& _data) const;
 
 	private:
 		static uint8_t calcChecksum(const MidiDataDefinition& _d, const Sysex& _src);
