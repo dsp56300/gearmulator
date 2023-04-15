@@ -351,7 +351,21 @@ namespace mqLib
 		if(!p)
 			return false;
 
+		if(*p == _data[IdxGlobalParamValue])
+			return true;
+
 		*p = _data[IdxGlobalParamValue];
+
+		// if the play mode is changed, request the edit buffer for the first single again, because on the mQ, that edit buffer is shared between multi & single
+		const auto param = (_data[IdxGlobalParamIndexH] << 7) | _data[IdxGlobalParamIndexL];
+
+		if(param == static_cast<uint32_t>(GlobalParameter::SingleMultiMode))
+		{
+			const auto v = _data[IdxGlobalParamValue];
+
+			requestSingle(v ? MidiBufferNum::SingleEditBufferMultiMode : MidiBufferNum::SingleEditBufferSingleMode, MidiSoundLocation::EditBufferFirstMultiSingle);
+		}
+
 		return true;
 	}
 
