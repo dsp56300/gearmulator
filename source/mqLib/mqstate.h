@@ -60,7 +60,7 @@ namespace mqLib
 		static constexpr Dump g_dumps[] = 
 		{
 			{DumpType::Single, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, SysexCommand::SingleParameterRequest, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 392},
-			{DumpType::Multi, SysexCommand::MultiRequest, SysexCommand::MultiDump, SysexCommand::MultiParameterChange, SysexCommand::MultiParameterRequest, IdxMultiParamFirst, IdxMultiParamIndexH, IdxMultiParamIndexL, IdxMultiParamValue, 394},
+			{DumpType::Multi, SysexCommand::MultiRequest, SysexCommand::MultiDump, SysexCommand::MultiParameterChange, SysexCommand::MultiParameterRequest, IdxMultiParamFirst, IdxMultiParamIndexH, IdxMultiParamIndexL, IdxMultiParamValue, 393},
 			{DumpType::Drum, SysexCommand::DrumRequest, SysexCommand::DrumDump, SysexCommand::DrumParameterChange, SysexCommand::DrumParameterRequest, IdxDrumParamFirst, IdxDrumParamIndexH, IdxDrumParamIndexL, IdxDrumParamValue, 393},
 			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, SysexCommand::GlobalParameterRequest, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 207},
 			{DumpType::Mode, SysexCommand::ModeRequest, SysexCommand::ModeDump , SysexCommand::ModeParameterChange, SysexCommand::ModeParameterRequest, IdxModeParamFirst, IdxModeParamIndexH, IdxModeParamIndexL, IdxModeParamValue, 8},
@@ -184,12 +184,12 @@ namespace mqLib
 		{
 			return _multi[IdxMultiParamFirst] > 0;			// Note: no version number in a multi, assume that Multi volume has to be > 0 to be valid
 		}
-
+		/*
 		static bool isValid(const DrumMap& _drum)
 		{
 			return _drum[IdxDrumParamFirst + 5] >= 4;		// Note: no version number in a drum map, check for transpose value for instrument 0
 		}
-
+		*/
 		static bool isValid(const Global& _global)
 		{
 			return _global[IdxGlobalParamFirst] == '1';		// yes, this is not an int but an ascii '1' = 49
