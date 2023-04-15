@@ -67,11 +67,15 @@ namespace mqJucePlugin
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, _binding, *this));
 
+		if(!findComponents("partSelectButton", false).empty())
+			m_partSelect.reset(new mqPartSelect(*this, m_controller, _binding));
+
 		addMouseListener(this, true);
 	}
 
 	Editor::~Editor()
 	{
+		m_partSelect.reset();
 		m_focusedParameter.reset();
 		m_frontPanel.reset();
 	}

@@ -5,6 +5,7 @@
 
 #include "mqFrontPanel.h"
 #include "mqPatchBrowser.h"
+#include "mqPartSelect.h"
 
 namespace jucePluginEditorLib
 {
@@ -37,6 +38,7 @@ namespace mqJucePlugin
 
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
+		std::unique_ptr<mqPartSelect> m_partSelect;
 		juce::Button* m_btPlayModeMulti = nullptr;
 		juce::Button* m_btPresetPrev = nullptr;
 		juce::Button* m_btPresetNext = nullptr;

@@ -3,7 +3,7 @@
     "root" : {
         "x" : "0",
         "y" : "0",
-        "width" : "3000",
+        "width" : "3400",
         "height" : "2000",
         "scale" : "0.5"
     },
@@ -34,7 +34,7 @@
             "image" : {
                 "x" : "0",
                 "y" : "0",
-                "width" : "3000",
+                "width" : "3400",
                 "height" : "2000",
                 "texture" : "mqDefaultBG"
             }
@@ -49,8 +49,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "109.1517",
-                "y" : "45.59735",
+                "x" : "224.6718",
+                "y" : "45.59766",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -68,8 +68,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "355.4507",
-                "y" : "45.59735",
+                "x" : "470.9707",
+                "y" : "45.59766",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -87,8 +87,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "601.7495",
-                "y" : "45.59735",
+                "x" : "717.2695",
+                "y" : "45.59766",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -106,65 +106,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "848.0485",
-                "y" : "45.59735",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "toggleWithLED",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "btPageMulti",
-            "button" : {
-                "isToggle" : "1",
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "109.1506",
-                "y" : "220.8996",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "toggleWithLED",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "btPageDrum",
-            "button" : {
-                "isToggle" : "1",
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "355.4498",
-                "y" : "220.8996",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "toggleWithLED",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "btPagePatchBrowser",
-            "button" : {
-                "isToggle" : "1",
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "848.0483",
-                "y" : "220.8996",
+                "x" : "963.5685",
+                "y" : "45.59766",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -182,8 +125,46 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2080.482",
-                "y" : "50.45959",
+                "x" : "224.6707",
+                "y" : "220.8999",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageMulti",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "717.269",
+                "y" : "220.8999",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPageDrum",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "963.5683",
+                "y" : "220.8999",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -200,8 +181,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1972.408",
-                "y" : "229.3636",
+                "x" : "2301.228",
+                "y" : "223.3",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -218,8 +199,27 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2188.556",
-                "y" : "229.3636",
+                "x" : "2517.376",
+                "y" : "223.3",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btPagePatchBrowser",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2409.32",
+                "y" : "56",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
@@ -230,7 +230,7 @@
         {
             "name" : "lcdArea",
             "component" : {
-                "x" : "1190",
+                "x" : "1390",
                 "y" : "161.8429",
                 "width" : "620",
                 "height" : "108"
@@ -249,7 +249,7 @@
                 "alignV" : "C",
                 "fontFile" : "Digital",
                 "fontName" : "Register",
-                "x" : "1190",
+                "x" : "1390",
                 "y" : "151.8429",
                 "width" : "630",
                 "height" : "64"
@@ -265,7 +265,7 @@
                 "alignV" : "C",
                 "fontFile" : "Digital",
                 "fontName" : "Register",
-                "x" : "1190",
+                "x" : "1390",
                 "y" : "215.8429",
                 "width" : "630",
                 "height" : "64"
@@ -274,7 +274,7 @@
         {
             "name" : "lcdshadow",
             "image" : {
-                "x" : "1180",
+                "x" : "1380",
                 "y" : "151.8429",
                 "width" : "640",
                 "height" : "128",
@@ -291,7 +291,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "1788.102",
+                "x" : "1988.102",
                 "y" : "289.1428",
                 "width" : "32",
                 "height" : "32",
@@ -303,7 +303,7 @@
         {
             "name" : "pageOsc",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -1507,7 +1507,7 @@
         {
             "name" : "pageFilters",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -1587,7 +1587,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "628.4437",
+                        "x" : "628.4436",
                         "y" : "331.6794",
                         "width" : "128",
                         "height" : "128",
@@ -1632,7 +1632,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "685.89",
+                        "x" : "685.8899",
                         "y" : "77.00006",
                         "width" : "176",
                         "height" : "49"
@@ -1643,7 +1643,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "621.89",
+                        "x" : "621.8899",
                         "y" : "144.8344",
                         "width" : "128",
                         "height" : "128",
@@ -1816,7 +1816,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "669.3898",
+                        "x" : "669.3899",
                         "y" : "774",
                         "width" : "32",
                         "height" : "32",
@@ -1838,7 +1838,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "732.6249",
+                        "x" : "732.625",
                         "y" : "758",
                         "width" : "128",
                         "height" : "64",
@@ -1923,7 +1923,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "628.4437",
+                        "x" : "628.4436",
                         "y" : "1337.105",
                         "width" : "128",
                         "height" : "128",
@@ -1968,7 +1968,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "685.89",
+                        "x" : "685.8899",
                         "y" : "1082.426",
                         "width" : "176",
                         "height" : "49"
@@ -1979,7 +1979,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "621.89",
+                        "x" : "621.8899",
                         "y" : "1150.26",
                         "width" : "128",
                         "height" : "128",
@@ -2797,7 +2797,7 @@
         {
             "name" : "pageLfo",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -2948,7 +2948,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "423.8335",
+                        "x" : "423.8336",
                         "y" : "210.98",
                         "width" : "230",
                         "height" : "230",
@@ -2982,7 +2982,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "733.8336",
+                        "x" : "733.8335",
                         "y" : "294.48",
                         "width" : "128",
                         "height" : "128",
@@ -2999,7 +2999,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "922.8336",
+                        "x" : "922.8335",
                         "y" : "294.48",
                         "width" : "128",
                         "height" : "128",
@@ -3155,7 +3155,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "423.8335",
+                        "x" : "423.8336",
                         "y" : "725.98",
                         "width" : "230",
                         "height" : "230",
@@ -3189,7 +3189,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "733.8336",
+                        "x" : "733.8335",
                         "y" : "809.48",
                         "width" : "128",
                         "height" : "128",
@@ -3206,7 +3206,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "922.8336",
+                        "x" : "922.8335",
                         "y" : "809.48",
                         "width" : "128",
                         "height" : "128",
@@ -3362,7 +3362,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "423.8335",
+                        "x" : "423.8336",
                         "y" : "1240.98",
                         "width" : "230",
                         "height" : "230",
@@ -3396,7 +3396,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "733.8336",
+                        "x" : "733.8335",
                         "y" : "1324.48",
                         "width" : "128",
                         "height" : "128",
@@ -3413,7 +3413,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "922.8336",
+                        "x" : "922.8335",
                         "y" : "1324.48",
                         "width" : "128",
                         "height" : "128",
@@ -3480,7 +3480,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "101.3",
                         "width" : "204",
                         "height" : "49"
@@ -3541,7 +3541,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "230.8",
                         "width" : "204",
                         "height" : "49"
@@ -3602,7 +3602,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "360.3",
                         "width" : "204",
                         "height" : "49"
@@ -3663,7 +3663,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "489.8",
                         "width" : "204",
                         "height" : "49"
@@ -3724,7 +3724,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "619.3",
                         "width" : "204",
                         "height" : "49"
@@ -3785,7 +3785,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "748.8",
                         "width" : "204",
                         "height" : "49"
@@ -3846,7 +3846,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "878.3",
                         "width" : "204",
                         "height" : "49"
@@ -3907,7 +3907,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1759.834",
+                        "x" : "1759.833",
                         "y" : "1007.8",
                         "width" : "204",
                         "height" : "49"
@@ -4738,7 +4738,7 @@
         {
             "name" : "pageFx",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -5003,7 +5003,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "45.44995",
+                                "x" : "45.45001",
                                 "y" : "185.1902",
                                 "width" : "128",
                                 "height" : "128",
@@ -6852,7 +6852,7 @@
                         {
                             "name" : "delay",
                             "image" : {
-                                "x" : "3.178589",
+                                "x" : "3.178711",
                                 "y" : "12.09509",
                                 "width" : "150",
                                 "height" : "225",
@@ -6885,7 +6885,7 @@
                         {
                             "name" : "length",
                             "image" : {
-                                "x" : "3.178589",
+                                "x" : "3.178711",
                                 "y" : "12.09509",
                                 "width" : "150",
                                 "height" : "225",
@@ -7022,7 +7022,7 @@
                             "rotary" : {
                             },
                             "spritesheet" : {
-                                "x" : "14.17859",
+                                "x" : "14.17871",
                                 "y" : "309.7853",
                                 "width" : "128",
                                 "height" : "128",
@@ -7548,7 +7548,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "942.3537",
+                        "x" : "942.3538",
                         "y" : "813.3804",
                         "width" : "32",
                         "height" : "32",
@@ -7565,7 +7565,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "894.3537",
+                        "x" : "894.3538",
                         "y" : "894.4803",
                         "width" : "128",
                         "height" : "128",
@@ -7604,7 +7604,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "894.3537",
+                        "x" : "894.3538",
                         "y" : "1172.8",
                         "width" : "128",
                         "height" : "128",
@@ -7621,7 +7621,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "894.3537",
+                        "x" : "894.3538",
                         "y" : "1349.9",
                         "width" : "128",
                         "height" : "128",
@@ -8968,7 +8968,7 @@
         {
             "name" : "pageMulti",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -11839,7 +11839,7 @@
         {
             "name" : "pageDrum",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -11849,7 +11849,7 @@
         {
             "name" : "pagePatchBrowser",
             "image" : {
-                "x" : "50",
+                "x" : "450",
                 "y" : "428",
                 "width" : "2900",
                 "height" : "1525",
@@ -11905,13 +11905,621 @@
                 "backgroundColor" : "000000FF",
                 "alignH" : "C",
                 "alignV" : "C",
-                "x" : "1185",
+                "x" : "1385",
                 "y" : "1225.5",
                 "width" : "96",
                 "height" : "55"
             },
             "componentProperties" : {
                 "offsetY" : "25"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "514.5938",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "530.5938",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "603.7813",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "619.7813",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "692.9688",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "708.9688",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "782.1563",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "798.1563",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "871.3438",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "887.3438",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "960.5313",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "976.5313",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1049.719",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1065.719",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1138.906",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1154.906",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1228.094",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1244.094",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1317.281",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1333.281",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1406.469",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1422.469",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1495.656",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1511.656",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1584.844",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1600.844",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1674.031",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1690.031",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1763.219",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1779.219",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectButton",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "164.9614",
+                "y" : "1852.406",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "partSelectLED",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "327.29",
+                "y" : "1868.406",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
             }
         }
     ]
