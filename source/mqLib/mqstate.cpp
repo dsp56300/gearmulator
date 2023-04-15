@@ -384,7 +384,7 @@ namespace mqLib
 	{
 		const auto loc = _data[IdxBuffer];
 
-		Single* s = getSingle(getGlobalParameter(GlobalParameter::SingleMultiMode) ? MidiBufferNum::SingleEditBufferSingleMode : MidiBufferNum::SingleEditBufferMultiMode, loc);
+		Single* s = getSingle(getGlobalParameter(GlobalParameter::SingleMultiMode) ? MidiBufferNum::SingleEditBufferMultiMode : MidiBufferNum::SingleEditBufferSingleMode, loc);
 		if(!s)
 			return nullptr;
 		return getParameter(*s, _data, DumpType::Single);
