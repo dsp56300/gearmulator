@@ -67,17 +67,20 @@ private:
     void onStateLoaded() override;
 
     std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
+    void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part);
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseSysexMessage(const pluginLib::SysEx&) override;
 
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
-    bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
     bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
 	void requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
+	void requestMulti(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset = 0) const;
 
     uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
 	bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
+
+	void requestAllPatches() const;
 
     const uint8_t m_deviceId;
 

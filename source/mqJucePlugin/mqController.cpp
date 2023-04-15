@@ -132,6 +132,18 @@ std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& 
     return name;
 }
 
+void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part)
+{
+	for (const auto& it : _params)
+	{
+		auto* p = getParameter(it.first.second, _part);
+		p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+
+		for (const auto& derivedParam : p->getDerivedParameters())
+			derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+	}
+}
+
 void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
 {
     Patch patch;
@@ -145,18 +157,20 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
     {
 	    m_singleEditBuffer = patch;
 
-        for (const auto& it : _params)
-        {
-            auto* p = getParameter(it.first.second, 0);
-			p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
-
-            for (const auto& derivedParam : p->getDerivedParameters())
-	            derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
-        }
+		if(!isMultiMode())
+			applyPatchParameters(_params, 0);
     }
     else if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::SingleEditBufferMultiMode))
     {
 	    m_singleEditBuffers[prog] = patch;
+
+    	if (isMultiMode())
+			applyPatchParameters(_params, prog);
+
+		// if we switched to multi, all singles have to be requested. However, we cannot send all requests at once (device will miss some)
+		// so we chain them one after the other
+		if(prog + 1 < m_singleEditBuffers.size())
+			requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, prog + 1);
     }
 }
 
@@ -196,15 +210,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         {
             memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
 
-            if(isMultiMode())
-            {
-			    for(uint8_t i=0; i<16; ++i)
-				    requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, i);
-            }
-            else
-            {
-				requestSingle(mqLib::MidiBufferNum::SingleEditBufferSingleMode, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
-            }
+			requestAllPatches();
         }
         else if(name == midiPacketName(SingleParameterChange))
         {
@@ -225,8 +231,14 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
             const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
             const auto value = data[pluginLib::MidiDataType::ParameterValue];
 
-            LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
-            m_globalData[index] = value;
+			if(m_globalData[index] != value)
+			{
+				LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
+				m_globalData[index] = value;
+
+				if (index == static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode))
+					requestAllPatches();
+			}
         }
         else
         {
@@ -252,8 +264,14 @@ bool Controller::isMultiMode() const
     return m_globalData[static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode)] != 0;
 }
 
-void Controller::setPlayMode(bool _multiMode)
+void Controller::setPlayMode(const bool _multiMode)
 {
+	const uint8_t playMode = _multiMode ? 1 : 0;
+
+	if(m_globalData[static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode)] == playMode)
+		return;
+	sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, playMode);
+	requestAllPatches();
 }
 
 void Controller::selectNextPreset()
@@ -324,9 +342,12 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 
 bool Controller::sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value)
 {
-    std::map<pluginLib::MidiDataType, uint8_t> data;
+	const auto index = static_cast<uint32_t>(_param);
 
-    const auto index = static_cast<uint32_t>(_param);
+	if(m_globalData[index] == _value)
+		return true;
+
+    std::map<pluginLib::MidiDataType, uint8_t> data;
 
     data.insert(std::make_pair(pluginLib::MidiDataType::Page, index >> 7 ));
     data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, index & 0x7f ));
@@ -343,6 +364,14 @@ void Controller::requestSingle(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocati
     params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
     params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location) + _locationOffset;
     sendSysEx(RequestSingle, params);
+}
+
+void Controller::requestMulti(mqLib::MidiBufferNum _buf, mqLib::MidiSoundLocation _location, uint8_t _locationOffset) const
+{
+	std::map<pluginLib::MidiDataType, uint8_t> params;
+	params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
+	params[pluginLib::MidiDataType::Program] = static_cast<uint8_t>(_location) + _locationOffset;
+	sendSysEx(RequestMulti, params);
 }
 
 uint8_t Controller::getGlobalParam(mqLib::GlobalParameter _type) const
@@ -368,4 +397,19 @@ bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::P
 		return true;
 
 	return defA->doMasksOverlap(*defB);
+}
+
+void Controller::requestAllPatches() const
+{
+	if (isMultiMode())
+	{
+		requestMulti(mqLib::MidiBufferNum::MultiEditBuffer, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle);
+
+		// the other singles 1-15 are requested one after the other after a single has been received
+		requestSingle(mqLib::MidiBufferNum::SingleEditBufferMultiMode, mqLib::MidiSoundLocation::EditBufferFirstMultiSingle, 0);
+	}
+	else
+	{
+		requestSingle(mqLib::MidiBufferNum::SingleEditBufferSingleMode, mqLib::MidiSoundLocation::EditBufferCurrentSingle);
+	}
 }
