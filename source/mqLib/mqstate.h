@@ -87,6 +87,8 @@ namespace mqLib
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
+		static void createSequencerMultiData(std::vector<uint8_t>& _data);
+
 	private:
 		template<size_t Size> static bool convertTo(std::array<uint8_t, Size>& _dst, const SysEx& _data)
 		{
@@ -205,6 +207,8 @@ namespace mqLib
 		void requestGlobal() const;
 		void requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const;
 		void requestMulti(MidiBufferNum _buf, uint8_t _location) const;
+		void sendMulti(const std::vector<uint8_t>& _multiData) const;
+		void sendGlobalParameter(GlobalParameter _param, uint8_t _value);
 
 		MicroQ& m_mq;
 

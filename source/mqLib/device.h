@@ -23,8 +23,6 @@ namespace mqLib
 		uint32_t getChannelCountIn() override;
 		uint32_t getChannelCountOut() override;
 
-		static void createSequencerMultiData(std::vector<uint8_t>& _data);
-
 	protected:
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;

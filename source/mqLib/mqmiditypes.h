@@ -161,6 +161,12 @@ namespace mqLib
 
 		Last = 378,
 
+		Padding0,
+		Padding1,
+		Padding2,
+		Padding3,
+		Padding4,
+
 		Count
 	};
 

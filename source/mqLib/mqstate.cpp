@@ -198,10 +198,14 @@ namespace mqLib
 		setParam(GlobalParameter::LocalControl, 1);				// On
 		setParam(GlobalParameter::ProgramChangeRx, 2);			// Number + Bank
 		setParam(GlobalParameter::ProgramChangeTx, 2);			// Number + Bank
-
 		setParam(GlobalParameter::SingleMultiMode, 0);			// Single mode
 
 		receive(unused, convertTo(m_global), Origin::External);
+
+		// send default multi
+		std::vector<uint8_t> defaultMultiData;
+		createSequencerMultiData(defaultMultiData);
+		sendMulti(defaultMultiData);
 
 		// accept files up to 300k as larger files might be the OS
 		const auto midifile = synthLib::findFile(".mid", 0, 300 * 1024);
@@ -212,6 +216,9 @@ namespace mqLib
 			if(!sysex.empty())
 				loadState(sysex);
 		}
+
+		// switch to Single mode as the multi dump causes it to go to Multi mode
+		sendGlobalParameter(GlobalParameter::SingleMultiMode, 0);
 
 		if(isValid(m_romSingles[0]))
 		{
@@ -678,5 +685,80 @@ namespace mqLib
 	void State::requestMulti(MidiBufferNum _buf, uint8_t _location) const
 	{
 		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
+	}
+
+	inline void State::sendMulti(const std::vector<uint8_t>& _multiData) const
+	{
+		std::vector<uint8_t> data = { 0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(MidiBufferNum::DeprecatedMultiBankInternal), 0};
+		data.insert(data.end(), _multiData.begin(), _multiData.end());
+
+		uint8_t checksum = 0;
+		for(size_t i=4; i<data.size(); ++i)
+			checksum += data[i];
+		data.push_back(checksum & 0x7f);
+		data.push_back(0xf7);
+		m_mq.sendMidi(data);
+	}
+
+	void State::sendGlobalParameter(GlobalParameter _param, uint8_t _value)
+	{
+		setGlobalParameter(_param, _value);
+
+		const auto p = static_cast<uint8_t>(_param);
+
+		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange), 
+			static_cast<uint8_t>(p >> 7), static_cast<uint8_t>(p & 0x7f), _value, 0xf7});
+	}
+
+	void State::createSequencerMultiData(std::vector<uint8_t>& _data)
+	{
+		static_assert(
+			(static_cast<uint32_t>(MultiParameter::Inst15) - static_cast<uint32_t>(MultiParameter::Inst0)) ==
+			(static_cast<uint32_t>(MultiParameter::Inst1) - static_cast<uint32_t>(MultiParameter::Inst0)) * 15,
+			"we need a consecutive offset");
+
+		_data.assign(static_cast<uint32_t>(mqLib::MultiParameter::Count), 0);
+
+		constexpr char name[] = "DSP56300EmuMulti";
+		static_assert(std::size(name) == 17, "wrong name length");
+		memcpy(&_data[static_cast<uint32_t>(MultiParameter::Name00)], name, sizeof(name) - 1);
+
+		auto setParam = [&](MultiParameter _param, const uint8_t _value)
+		{
+			_data[static_cast<uint32_t>(_param)] = _value;
+		};
+
+		auto setInstParam = [&](const uint8_t _instIndex, const MultiParameter _param, const uint8_t _value)
+		{
+			auto index = static_cast<uint32_t>(MultiParameter::Inst0) + (static_cast<uint32_t>(MultiParameter::Inst1) - static_cast<uint32_t>(MultiParameter::Inst0)) * _instIndex;
+			index += static_cast<uint32_t>(_param) - static_cast<uint32_t>(MultiParameter::Inst0);
+			_data[index] = _value;
+		};
+
+		setParam(MultiParameter::Volume, 127);						// max volume
+
+		setParam(MultiParameter::ControlW, 121);					// global
+		setParam(MultiParameter::ControlX, 121);					// global
+		setParam(MultiParameter::ControlY, 121);					// global
+		setParam(MultiParameter::ControlZ, 121);					// global
+
+		for (uint8_t i = 0; i < 16; ++i)
+		{
+			setInstParam(i, MultiParameter::Inst0SoundBank, 0);	    // bank A
+			setInstParam(i, MultiParameter::Inst0SoundNumber, i);	// sound number i
+			setInstParam(i, MultiParameter::Inst0MidiChannel, 2+i);	// midi channel i
+			setInstParam(i, MultiParameter::Inst0Volume, 127);		// max volume
+			setInstParam(i, MultiParameter::Inst0Transpose, 64);	// no transpose
+			setInstParam(i, MultiParameter::Inst0Detune, 64);		// no detune
+			setInstParam(i, MultiParameter::Inst0Output, 0);		// main out
+			setInstParam(i, MultiParameter::Inst0Flags, 3);			// RX = Local+MIDI / TX = off / Engine = Play
+			setInstParam(i, MultiParameter::Inst0Pan, 64);			// center
+			setInstParam(i, MultiParameter::Inst0Pattern, 0);		// no pattern
+			setInstParam(i, MultiParameter::Inst0VeloLow, 0);		// full velocity range
+			setInstParam(i, MultiParameter::Inst0VeloHigh, 127);
+			setInstParam(i, MultiParameter::Inst0KeyLow, 0);		// full key range
+			setInstParam(i, MultiParameter::Inst0KeyHigh, 127);
+			setInstParam(i, MultiParameter::Inst0MidiRxFlags, 63);	// enable Pitchbend, Modwheel, Aftertouch, Sustain, Button 1/2, Program Change
+		}
 	}
 }
