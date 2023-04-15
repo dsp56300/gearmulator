@@ -184,7 +184,9 @@ namespace mqLib
 
 		static bool isValid(const Multi& _multi)
 		{
-			return _multi[IdxMultiParamFirst] > 0;			// Note: no version number in a multi, assume that Multi volume has to be > 0 to be valid
+			return _multi.front() == 0xf0;
+			// we cannot do this anymore as drum map & multi have the same length
+//			return _multi[IdxMultiParamFirst] > 0;			// Note: no version number in a multi, assume that Multi volume has to be > 0 to be valid
 		}
 		/*
 		static bool isValid(const DrumMap& _drum)
