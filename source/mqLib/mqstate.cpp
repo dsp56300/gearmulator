@@ -779,7 +779,7 @@ namespace mqLib
 			setInstParam(i, MultiParameter::Inst0Flags, 3);			// RX = Local+MIDI / TX = off / Engine = Play
 			setInstParam(i, MultiParameter::Inst0Pan, 64);			// center
 			setInstParam(i, MultiParameter::Inst0Pattern, 0);		// no pattern
-			setInstParam(i, MultiParameter::Inst0VeloLow, 0);		// full velocity range
+			setInstParam(i, MultiParameter::Inst0VeloLow, 1);		// full velocity range
 			setInstParam(i, MultiParameter::Inst0VeloHigh, 127);
 			setInstParam(i, MultiParameter::Inst0KeyLow, 0);		// full key range
 			setInstParam(i, MultiParameter::Inst0KeyHigh, 127);
