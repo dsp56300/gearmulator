@@ -234,17 +234,21 @@ namespace mqLib
 	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
 	{
 		append(_state, m_global);
-		append(_state, m_currentDrumMap);
+
+		const auto isMultiMode = getGlobalParameter(GlobalParameter::SingleMultiMode) != 0;
+
+//		append(_state, m_currentDrumMap);
+
 		append(_state, m_currentMulti);
 
-		for (const auto& s : m_currentMultiSingles)
+		for(size_t i=0; i<m_currentMultiSingles.size(); ++i)
+		{
+			const auto& s = (isMultiMode || i >= m_currentInstrumentSingles.size()) ? m_currentMultiSingles[i] : m_currentInstrumentSingles[i];
 			append(_state, s);
+		}
 
-		for (const auto& s : m_currentDrumMapSingles)
-			append(_state, s);
-
-		for (const auto& s : m_currentInstrumentSingles)
-			append(_state, s);
+//		for (const auto& s : m_currentDrumMapSingles)
+//			append(_state, s);
 
 		return !_state.empty();
 	}
