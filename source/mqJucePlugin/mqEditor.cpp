@@ -52,6 +52,22 @@ namespace mqJucePlugin
 			}
 		}
 
+		m_btSave = findComponentT<juce::Button>("btSave", false);
+		if (m_btSave)
+		{
+			if constexpr (mqLib::g_pluginDemo)
+			{
+				disableButton(m_btSave);
+			}
+			else
+			{
+				m_btSave->onClick = [this]()
+				{
+					onBtSave();
+				};
+			}
+		}
+
 		if constexpr(mqLib::g_pluginDemo)
 		{
 			disableByName("btPageMulti");
@@ -115,6 +131,10 @@ namespace mqJucePlugin
 	void Editor::mouseEnter(const juce::MouseEvent& _event)
 	{
 		m_focusedParameter->onMouseEnter(_event);
+	}
+
+	void Editor::onBtSave()
+	{
 	}
 
 	void Editor::onBtPresetPrev()

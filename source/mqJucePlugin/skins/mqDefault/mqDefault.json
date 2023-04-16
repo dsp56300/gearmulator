@@ -197,8 +197,26 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2409.32",
-                "y" : "56",
+                "x" : "2301.228",
+                "y" : "50.46399",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "toggleWithLED",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "btSave",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2517.376",
+                "y" : "50.46399",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "toggleWithLED",
