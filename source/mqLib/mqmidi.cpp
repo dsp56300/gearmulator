@@ -20,13 +20,17 @@ namespace mqLib
 		if(m_remainingSysexDelay)
 			m_remainingSysexDelay -= std::min(m_remainingSysexDelay, _numSamples);
 
-		if(m_remainingSysexDelay == 0 && !m_transmittingSysex && !m_pendingSysexBuffers.empty())
+		while(m_remainingSysexDelay == 0 && !m_transmittingSysex && !m_pendingSysexBuffers.empty())
 		{
 			const auto& msg = m_pendingSysexBuffers.front();
+
 			for (const auto b : msg)
 				m_qsm.writeSciRX(b);
+
+			if(msg.size() > 0xf)
+				m_remainingSysexDelay = g_sysexSendDelaySamples;
+
 			m_pendingSysexBuffers.pop_front();
-			m_remainingSysexDelay = g_sysexSendDelaySamples;
 		}
 	}
 
