@@ -20,6 +20,7 @@ constexpr const char* g_midiPacketNames[] =
     "requestglobal",
     "requestallsingles",
     "singleparameterchange",
+    "multiparameterchange",
     "globalparameterchange",
     "singledump",
     "singledump_Q",
@@ -352,13 +353,30 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 {
 	const auto &desc = _parameter.getDescription();
 
+	std::map<pluginLib::MidiDataType, uint8_t> data;
+
 	if (desc.page >= 100)
 	{
-		// TODO: multi
+		uint8_t v;
+
+		if (!combineParameterChange(v, g_midiPacketNames[MultiDump], _parameter, _value))
+			return;
+
+		const auto& dump = mqLib::State::g_dumps[static_cast<int>(mqLib::State::DumpType::Multi)];
+
+		uint32_t idx = desc.index;
+
+		if(desc.page > 100)
+			idx += (static_cast<uint32_t>(mqLib::MultiParameter::Inst1) - static_cast<uint32_t>(mqLib::MultiParameter::Inst0)) * (desc.page - 101);
+
+		data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
+		data.insert(std::make_pair(pluginLib::MidiDataType::Page, idx >> 7));
+		data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, idx & 0x7f));
+		data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
+
+		sendSysEx(MultiParameterChange, data);
 		return;
 	}
-
-	std::map<pluginLib::MidiDataType, uint8_t> data;
 
 	uint8_t v;
 	if (!combineParameterChange(v, g_midiPacketNames[SingleDump], _parameter, _value))
@@ -413,6 +431,9 @@ uint8_t Controller::getGlobalParam(mqLib::GlobalParameter _type) const
 
 bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const
 {
+	if(_derived.getDescription().page >= 100)
+		return false;
+
 	const auto& packetName = g_midiPacketNames[SingleDump];
 	const auto* packet = getMidiPacket(packetName);
 

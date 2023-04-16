@@ -1302,6 +1302,17 @@
 			{"type": "paramvalue"},
 			{"type": "byte", "value": "f7"}
 		],
+		"multiparameterchange": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "10"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "21"},
+			{"type": "page"},
+			{"type": "paramindex"},
+			{"type": "paramvalue"},
+			{"type": "byte", "value": "f7"}
+		],
 		"globalparameterchange": [
 			{"type": "byte", "value": "f0"},
 			{"type": "byte", "value": "3e"},

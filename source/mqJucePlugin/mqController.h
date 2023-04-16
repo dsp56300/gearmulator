@@ -26,6 +26,7 @@ public:
         RequestGlobal,
         RequestAllSingles,
         SingleParameterChange,
+        MultiParameterChange,
         GlobalParameterChange,
         SingleDump,
         SingleDumpQ,
