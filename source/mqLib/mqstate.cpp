@@ -1,6 +1,7 @@
 #include "mqstate.h"
 
 #include <cassert>
+#include <cstring>
 
 #include "mqmiditypes.h"
 #include "microq.h"
