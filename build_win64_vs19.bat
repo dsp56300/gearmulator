@@ -1,5 +1,5 @@
 set outdir=temp\cmake_win64\
-cmake . -B %outdir% -G "Visual Studio 16 2019" -A x64 -Dgearmulator_BUILD_FX_PLUGIN=ON
+cmake . -B %outdir% -G "Visual Studio 16 2019" -A x64 -Dgearmulator_BUILD_FX_PLUGIN=ON -DDSP56300_DEBUGGER=0
 IF %ERRORLEVEL% NEQ 0 (
 	popd 
 	exit /B 2
