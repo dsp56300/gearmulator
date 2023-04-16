@@ -5,6 +5,7 @@
 #include "mqdsp.h"
 #include "mqmc.h"
 #include "mqtypes.h"
+#include "mqmidi.h"
 #include "rom.h"
 
 #include "dsp56kEmu/dspthread.h"
@@ -79,6 +80,8 @@ namespace mqLib
 		MqMc m_uc;
 		MqDsp m_dsp;
 		dsp56k::DSPThread m_dspThread;
+
+		Midi m_midi;
 
 		mc68k::Hdi08& m_hdiUC;
 		dsp56k::HDI08& m_hdiDSP;

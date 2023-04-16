@@ -32,6 +32,7 @@ set(SOURCES
 	mqdsp.cpp mqdsp.h
 	mqhardware.cpp mqhardware.h
 	mqmc.cpp mqmc.h
+	mqmidi.cpp mqmidi.h
 	mqstate.cpp mqstate.h
 	mqmiditypes.h
 	mqsysexremotecontrol.cpp mqsysexremotecontrol.h

@@ -33,6 +33,7 @@ namespace mqLib
 #else
 		, m_dspThread(m_dsp.dsp(), "DSP")
 #endif
+		, m_midi(m_uc.getQSM())
 		, m_hdiUC(m_uc.hdi08())
 		, m_hdiDSP(m_dsp.hdi08())
 	{
@@ -109,7 +110,7 @@ namespace mqLib
 
 	void Hardware::sendMidi(const uint8_t _byte)
 	{
-		m_uc.getQSM().writeSciRX(_byte);
+		m_midi.writeMidi(_byte);
 	}
 
 	void Hardware::sendMidi(const std::vector<uint8_t>& _data)
@@ -120,16 +121,7 @@ namespace mqLib
 
 	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
 	{
-		std::deque<uint16_t> midiData;
-		m_uc.getQSM().readSciTX(midiData);
-		if(midiData.empty())
-			return;
-
-		_data.clear();
-		_data.reserve(midiData.size());
-
-		for (const auto data : midiData)
-			_data.push_back(data & 0xff);
+		m_midi.readTransmitBuffer(_data);
 	}
 
 	void Hardware::setBootMode(const BootMode _mode)
@@ -394,6 +386,8 @@ namespace mqLib
 
 		if(m_esaiFrameIndex == 0)
 			return;
+
+		m_midi.process(_frames);
 
 		m_processAudio = true;
 
