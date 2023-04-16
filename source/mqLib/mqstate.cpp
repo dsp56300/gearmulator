@@ -737,7 +737,7 @@ namespace mqLib
 
 		_data.assign(static_cast<uint32_t>(mqLib::MultiParameter::Count), 0);
 
-		constexpr char name[] = "DSP56300EmuMulti";
+		constexpr char name[] = "From TUS with <3";
 		static_assert(std::size(name) == 17, "wrong name length");
 		memcpy(&_data[static_cast<uint32_t>(MultiParameter::Name00)], name, sizeof(name) - 1);
 
