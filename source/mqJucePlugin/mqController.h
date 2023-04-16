@@ -29,6 +29,7 @@ public:
         GlobalParameterChange,
         SingleDump,
         SingleDumpQ,
+		MultiDump,
         GlobalDump,
         EmuRequestLcd,
         EmuRequestLeds,
@@ -72,6 +73,7 @@ private:
     std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
     void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part);
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
+    void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseSysexMessage(const pluginLib::SysEx&) override;
 
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;

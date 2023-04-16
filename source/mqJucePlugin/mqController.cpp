@@ -23,6 +23,7 @@ constexpr const char* g_midiPacketNames[] =
     "globalparameterchange",
     "singledump",
     "singledump_Q",
+    "multidump",
     "globaldump",
     "emuRequestLcd",
     "emuRequestLeds",
@@ -179,6 +180,21 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
     }
 }
 
+void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params)
+{
+	Patch patch;
+	patch.data = _msg;
+	patch.name = getSingleName(_params);
+
+	const auto bank = _data.at(pluginLib::MidiDataType::Bank);
+//	const auto prog = _data.at(pluginLib::MidiDataType::Program);
+
+	if(bank == static_cast<uint8_t>(mqLib::MidiBufferNum::MultiEditBuffer))
+	{
+		applyPatchParameters(_params, 0);
+	}
+}
+
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
     if(_msg.size() >= 5)
@@ -211,7 +227,11 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         {
 	        parseSingle(_msg, data, parameterValues);
         }
-        else if(name == midiPacketName(GlobalDump))
+		else if (name == midiPacketName(MultiDump))
+		{
+			parseMulti(_msg, data, parameterValues);
+		}
+		else if(name == midiPacketName(GlobalDump))
         {
 			const auto lastPlayMode = isMultiMode();
             memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
