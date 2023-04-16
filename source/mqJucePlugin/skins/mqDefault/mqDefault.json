@@ -15,8 +15,7 @@
             "btPageMulti",
             "btPageFilter",
             "btPageLfo",
-            "btPageFx",
-            "btPageDrum"
+            "btPageFx"
         ],
         "pages" : [
             "pageOsc",
@@ -24,8 +23,7 @@
             "pageMulti",
             "pageFilters",
             "pageLfo",
-            "pageFx",
-            "pageDrum"
+            "pageFx"
         ]
     },
     "children" : [
@@ -145,25 +143,6 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "717.269",
-                "y" : "220.8999",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "toggleWithLED",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "btPageDrum",
-            "button" : {
-                "isToggle" : "1",
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "963.5683",
                 "y" : "220.8999",
                 "width" : "128",
                 "height" : "128",
@@ -8990,7 +8969,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "45.375",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9007,7 +8986,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "45.375",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9035,7 +9014,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9057,7 +9036,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9079,7 +9058,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9101,7 +9080,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9112,7 +9091,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "45.375",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9129,7 +9108,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "45.375",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9157,7 +9136,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "109.375",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI0Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "109.375",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9168,7 +9169,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "224.125",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9185,7 +9186,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "224.125",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9213,7 +9214,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9235,7 +9236,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9257,7 +9258,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9279,7 +9280,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9290,7 +9291,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "224.125",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9307,7 +9308,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "224.125",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9335,7 +9336,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "288.125",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI1Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "288.125",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9346,7 +9369,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "402.875",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9363,7 +9386,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "402.875",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9391,7 +9414,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9413,7 +9436,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9435,7 +9458,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9457,7 +9480,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9468,7 +9491,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "402.875",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9485,7 +9508,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "402.875",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9513,7 +9536,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "466.875",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI2Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "466.875",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9524,7 +9569,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "581.625",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9541,7 +9586,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "581.625",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9569,7 +9614,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9591,7 +9636,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9613,7 +9658,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9635,7 +9680,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9646,7 +9691,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "581.625",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9663,7 +9708,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "581.625",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9691,7 +9736,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "645.625",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI3Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "645.625",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9702,7 +9769,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "760.375",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9719,7 +9786,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "760.375",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9747,7 +9814,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9769,7 +9836,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9791,7 +9858,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9813,7 +9880,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9824,7 +9891,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "760.375",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9841,7 +9908,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "760.375",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9869,7 +9936,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "824.375",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI4Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "824.375",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9880,7 +9969,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "939.125",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9897,7 +9986,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "939.125",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -9925,7 +10014,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9947,7 +10036,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9969,7 +10058,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -9991,7 +10080,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10002,7 +10091,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "939.125",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10019,7 +10108,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "939.125",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10047,7 +10136,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1003.125",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI5Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1003.125",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10058,7 +10169,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1117.875",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10075,7 +10186,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1117.875",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10103,7 +10214,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10125,7 +10236,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10147,7 +10258,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10169,7 +10280,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10180,7 +10291,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1117.875",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10197,7 +10308,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1117.875",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10225,7 +10336,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1181.875",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI6Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1181.875",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10236,7 +10369,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1296.625",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10253,7 +10386,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1296.625",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10281,7 +10414,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10303,7 +10436,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10325,7 +10458,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10347,7 +10480,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10358,7 +10491,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1296.625",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10375,7 +10508,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1296.625",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10403,7 +10536,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1360.625",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI7Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1360.625",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10414,7 +10569,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1475.375",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10431,7 +10586,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1475.375",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10459,7 +10614,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10481,7 +10636,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10503,7 +10658,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10525,7 +10680,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10536,7 +10691,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1475.375",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10553,7 +10708,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1475.375",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10581,7 +10736,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1539.375",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI8Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1539.375",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10592,7 +10769,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1654.125",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10609,7 +10786,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1654.125",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10637,7 +10814,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10659,7 +10836,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10681,7 +10858,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10703,7 +10880,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10714,7 +10891,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1654.125",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10731,7 +10908,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1654.125",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10759,7 +10936,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1718.125",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI9Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1718.125",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10770,7 +10969,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1832.875",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10787,7 +10986,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1832.875",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10815,7 +11014,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10837,7 +11036,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10859,7 +11058,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10881,7 +11080,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10892,7 +11091,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1832.875",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10909,7 +11108,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "1832.875",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10937,7 +11136,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "1896.875",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI10Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "1896.875",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -10948,7 +11169,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2011.625",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10965,7 +11186,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2011.625",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -10993,7 +11214,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11015,7 +11236,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11037,7 +11258,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11059,7 +11280,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11070,7 +11291,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2011.625",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11087,7 +11308,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2011.625",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11115,7 +11336,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2075.625",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI11Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2075.625",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11126,7 +11369,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2190.375",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11143,7 +11386,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2190.375",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11171,7 +11414,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11193,7 +11436,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11215,7 +11458,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11237,7 +11480,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11248,7 +11491,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2190.375",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11265,7 +11508,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2190.375",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11293,7 +11536,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2254.375",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI12Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2254.375",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11304,7 +11569,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2369.125",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11321,7 +11586,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2369.125",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11349,7 +11614,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11371,7 +11636,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11393,7 +11658,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11415,7 +11680,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11426,7 +11691,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2369.125",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11443,7 +11708,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2369.125",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11471,7 +11736,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2433.125",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI13Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2433.125",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11482,7 +11769,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2547.875",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11499,7 +11786,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2547.875",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11527,7 +11814,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11549,7 +11836,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11571,7 +11858,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11593,7 +11880,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11604,7 +11891,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2547.875",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11621,7 +11908,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2547.875",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11649,7 +11936,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2611.875",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI14Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2611.875",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11660,7 +11969,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2726.625",
-                                "y" : "22.90002",
+                                "y" : "17.72223",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11677,7 +11986,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2726.625",
-                                "y" : "242.5",
+                                "y" : "216.6111",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11705,7 +12014,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
-                                "y" : "462.1",
+                                "y" : "415.5",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11727,7 +12036,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
-                                "y" : "556.9",
+                                "y" : "499.9445",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11749,7 +12058,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
-                                "y" : "697.5",
+                                "y" : "619.8334",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11771,7 +12080,7 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
-                                "y" : "792.3",
+                                "y" : "704.2778",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11782,7 +12091,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2726.625",
-                                "y" : "932.8999",
+                                "y" : "824.1667",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11799,7 +12108,7 @@
                             },
                             "spritesheet" : {
                                 "x" : "2726.625",
-                                "y" : "1152.5",
+                                "y" : "1023.056",
                                 "width" : "128",
                                 "height" : "128",
                                 "texture" : "encoder_ranged",
@@ -11827,7 +12136,29 @@
                                 "alignV" : "C",
                                 "bold" : "1",
                                 "x" : "2790.625",
-                                "y" : "1372.1",
+                                "y" : "1221.944",
+                                "width" : "80",
+                                "height" : "49"
+                            }
+                        },
+                        {
+                            "name" : "output",
+                            "parameterAttachment" : {
+                                "parameter" : "MI15Output"
+                            },
+                            "combobox" : {
+                                "offsetL" : "15",
+                                "offsetT" : "1",
+                                "offsetR" : "-15",
+                                "offsetB" : "-1",
+                                "text" : "0",
+                                "textHeight" : "30",
+                                "color" : "D1D1D1FF",
+                                "alignH" : "L",
+                                "alignV" : "C",
+                                "bold" : "1",
+                                "x" : "2790.625",
+                                "y" : "1341.833",
                                 "width" : "80",
                                 "height" : "49"
                             }
@@ -11835,16 +12166,6 @@
                     ]
                 }
             ]
-        },
-        {
-            "name" : "pageDrum",
-            "image" : {
-                "x" : "450",
-                "y" : "428",
-                "width" : "2900",
-                "height" : "1525",
-                "texture" : "pageDrum"
-            }
         },
         {
             "name" : "pagePatchBrowser",
