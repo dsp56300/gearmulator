@@ -221,7 +221,7 @@ namespace mqLib
 
 		// Edit Buffers
 		std::array<Single, 16> m_currentMultiSingles{Single{}};
-		std::array<Single, 4> m_currentInstrumentSingles{Single{}};
+		std::array<Single, 1> m_currentInstrumentSingles{Single{}};
 		std::array<Single, 32> m_currentDrumMapSingles{Single{}};
 		Multi m_currentMulti{};
 		DrumMap m_currentDrumMap{};

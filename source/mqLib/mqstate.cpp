@@ -34,6 +34,10 @@ namespace mqLib
 		for (const auto& message : messages)
 			receive(nop, message, Origin::External);
 
+		// if device receives a multi, it switches to multi mode. Switch back to single mode if single mode was requested
+		if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
+			sendGlobalParameter(GlobalParameter::SingleMultiMode, 0);
+
 		return true;
 	}
 
@@ -466,7 +470,7 @@ namespace mqLib
 			return nullptr;
 		case MidiBufferNum::SingleEditBufferSingleMode:
 			m_isEditBuffer = true;
-			return &m_currentInstrumentSingles[getGlobalParameter(GlobalParameter::InstrumentSelection)];
+			return m_currentInstrumentSingles.data();//getGlobalParameter(GlobalParameter::InstrumentSelection)];
 		case MidiBufferNum::SingleEditBufferMultiMode:
 //		case MidiBufferNum::EditBufferSingleLayer: (same value as above)
 			{
@@ -479,10 +483,12 @@ namespace mqLib
 						return nullptr;
 					return &m_currentMultiSingles[_loc];
 				}
-				if(_loc >= m_currentInstrumentSingles.size())
-					return nullptr;
-				return &m_currentInstrumentSingles[_loc];
-			}
+				if(_loc < m_currentInstrumentSingles.size())
+					return &m_currentInstrumentSingles[_loc];
+				if (_loc < m_currentMultiSingles.size())
+					return &m_currentMultiSingles[_loc];
+				return nullptr;
+		}
 		default:
 			return nullptr;
 		}
