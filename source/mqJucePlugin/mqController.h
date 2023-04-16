@@ -3,6 +3,7 @@
 #include "../jucePluginLib/controller.h"
 
 #include "../mqLib/mqmiditypes.h"
+#include "../jucePluginLib/event.h"
 
 namespace mqJucePlugin
 {
@@ -42,6 +43,8 @@ public:
         std::string name;
 		std::vector<uint8_t> data;
     };
+
+	pluginLib::Event onPlayModeChanged;
 
     Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
 	~Controller() override;

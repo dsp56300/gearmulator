@@ -46,6 +46,11 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 //  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
 
     startTimer(50);
+
+	onPlayModeChanged.addListener(0, [this]()
+	{
+		requestAllPatches();
+	});
 }
 
 Controller::~Controller() = default;
@@ -208,10 +213,15 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         }
         else if(name == midiPacketName(GlobalDump))
         {
+			const auto lastPlayMode = isMultiMode();
             memcpy(m_globalData.data(), &_msg[5], sizeof(m_globalData));
+			const auto newPlayMode = isMultiMode();
 
-			requestAllPatches();
-        }
+			if(lastPlayMode != newPlayMode)
+				onPlayModeChanged();
+			else
+				requestAllPatches();
+		}
         else if(name == midiPacketName(SingleParameterChange))
         {
             const auto page = data[pluginLib::MidiDataType::Page];
@@ -270,8 +280,10 @@ void Controller::setPlayMode(const bool _multiMode)
 
 	if(m_globalData[static_cast<uint32_t>(mqLib::GlobalParameter::SingleMultiMode)] == playMode)
 		return;
+
 	sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, playMode);
-	requestAllPatches();
+
+	onPlayModeChanged();
 }
 
 void Controller::selectNextPreset()

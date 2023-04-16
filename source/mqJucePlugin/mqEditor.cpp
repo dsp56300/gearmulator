@@ -11,13 +11,15 @@
 
 namespace mqJucePlugin
 {
+	static constexpr uint32_t PlayModeListenerId = 1;
+
 	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
 	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
-	, m_controller(static_cast<Controller&>(_processor.getController()))
+	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
 		create(_jsonFilename);
 
-		m_frontPanel.reset(new FrontPanel(*this, static_cast<Controller&>(_processor.getController())));
+		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
 		if(findComponent("ContainerPatchList", false))
 			m_patchBrowser.reset(new PatchBrowser(*this, _processor.getController(), _processor.getConfig()));
@@ -71,10 +73,20 @@ namespace mqJucePlugin
 			m_partSelect.reset(new mqPartSelect(*this, m_controller, _binding));
 
 		addMouseListener(this, true);
+
+		m_controller.onPlayModeChanged.addListener(PlayModeListenerId, [this]()
+		{
+			if(m_btPlayModeMulti)
+				m_btPlayModeMulti->setToggleState(m_controller.isMultiMode(), juce::dontSendNotification);
+			if(m_partSelect)
+				m_partSelect->onPlayModeChanged();
+		});
 	}
 
 	Editor::~Editor()
 	{
+		m_controller.onPlayModeChanged.removeListener(PlayModeListenerId);
+
 		m_partSelect.reset();
 		m_focusedParameter.reset();
 		m_frontPanel.reset();

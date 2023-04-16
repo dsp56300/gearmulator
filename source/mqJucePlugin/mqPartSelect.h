@@ -14,6 +14,8 @@ class mqPartSelect
 public:
 	explicit mqPartSelect(const mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding);
 
+	void onPlayModeChanged() const;
+
 private:
 	void updateUiState() const;
 	void selectPart(uint8_t _index) const;
