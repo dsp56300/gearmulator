@@ -5,6 +5,7 @@
 #include "../jucePluginLib/parameterbinding.h"
 
 #include "../synthLib/os.h"
+#include "../synthLib/sysexToMidi.h"
 
 namespace jucePluginEditorLib
 {
@@ -66,6 +67,47 @@ namespace jucePluginEditorLib
 			}
 		};
 		m_fileChooser->launchAsync(flags, onFileChosen);
+	}
+
+	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const
+	{
+		if (_presets.empty())
+			return false;
+
+		if (_type == FileType::Mid)
+			return synthLib::SysexToMidi::write(_pathName.c_str(), _presets);
+
+		FILE* hFile = fopen(_pathName.c_str(), "wb");
+
+		if (!hFile)
+			return false;
+
+		for (const auto& message : _presets)
+		{
+			const auto written = fwrite(&message.front(), 1, message.size(), hFile);
+
+			if (written != message.size())
+			{
+				fclose(hFile);
+				return false;
+			}
+		}
+		fclose(hFile);
+		return true;
+	}
+
+	std::string Editor::createValidFilename(FileType& _type, const juce::File& _file)
+	{
+		const auto ext = _file.getFileExtension();
+		auto file = _file.getFullPathName().toStdString();
+		
+		if (ext.endsWithIgnoreCase("mid"))
+			_type = FileType::Mid;
+		else if (ext.endsWithIgnoreCase("syx"))
+			_type = FileType::Syx;
+		else
+			file += _type == FileType::Mid ? ".mid" : ".syx";
+		return file;
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

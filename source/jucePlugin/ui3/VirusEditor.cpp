@@ -10,7 +10,6 @@
 #include "../../jucePluginLib/parameterbinding.h"
 
 #include "../../synthLib/os.h"
-#include "../../synthLib/sysexToMidi.h"
 
 namespace genericVirusUI
 {
@@ -320,18 +319,8 @@ namespace genericVirusUI
 	{
 		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
-			const auto ext = _result.getFileExtension().toLowerCase();
-
-			auto file = _result.getFullPathName().toStdString();
-			auto fileType = _fileType;
-
-			if(ext.endsWithIgnoreCase("mid"))
-				fileType = FileType::Mid;
-			else if (ext.endsWithIgnoreCase("syx"))
-				fileType = FileType::Syx;
-			else
-				file += _fileType == FileType::Mid ? ".mid" : ".syx";
-
+			FileType fileType = _fileType;
+			const auto file = createValidFilename(fileType, _result);
 			savePresets(file, _saveType, fileType, _bankNumber);
 		});
 	}
@@ -374,31 +363,7 @@ namespace genericVirusUI
 			return false;
 		}
 
-		if(messages.empty())
-			return false;
-
-		if(_fileType == FileType::Mid)
-		{
-			return synthLib::SysexToMidi::write(_pathName.c_str(), messages);
-		}
-
-		FILE* hFile = fopen(_pathName.c_str(), "wb");
-
-		if(!hFile)
-			return false;
-
-		for (const auto& message : messages)
-		{
-			const auto written = fwrite(&message[0], 1, message.size(), hFile);
-
-			if(written != message.size())
-			{
-				fclose(hFile);
-				return false;
-			}
-		}
-		fclose(hFile);
-		return true;
+		return Editor::savePresets(_fileType, _pathName, messages);
 	}
 
 	void VirusEditor::setPart(size_t _part)
