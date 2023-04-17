@@ -175,4 +175,5 @@ void MqLcd::timerCallback()
 {
 	stopTimer();
 	m_overrideText[0] = 0;
+	repaint();
 }
