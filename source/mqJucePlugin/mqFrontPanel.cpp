@@ -102,6 +102,11 @@ namespace mqJucePlugin
 			}
 		}
 
+		auto* shadow = _editor.findComponent("lcdshadow", false);
+
+		if(shadow)
+			shadow->setInterceptsMouseClicks(false, false);
+
 		_controller.sendSysEx(Controller::EmuRequestLcd);
 		_controller.sendSysEx(Controller::EmuRequestLeds);
 	}

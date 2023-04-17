@@ -1,5 +1,6 @@
 #include "mqLcd.h"
 
+#include "version.h"
 #include "../mqLib/lcdfonts.h"
 
 // EW20290GLW display simulation
@@ -35,7 +36,7 @@ constexpr int g_numPixelsH = g_numCharsH * g_pixelsPerCharH + g_numCharsH - 1;
 
 constexpr float g_pixelBorder = 0.1f;
 
-MqLcd::MqLcd(Component& _parent) : m_scaleW(static_cast<float>(_parent.getWidth()) / g_sizeW), m_scaleH(static_cast<float>(_parent.getHeight()) / g_sizeH)
+MqLcd::MqLcd(Component& _parent) : juce::Button("mqLCDButton"), m_scaleW(static_cast<float>(_parent.getWidth()) / g_sizeW), m_scaleH(static_cast<float>(_parent.getHeight()) / g_sizeH)
 {
 	setSize(_parent.getWidth(), _parent.getHeight());
 
@@ -55,6 +56,13 @@ MqLcd::MqLcd(Component& _parent) : m_scaleW(static_cast<float>(_parent.getWidth(
 
 	m_text.fill(255);	// block character
 	m_cgData.fill({0});
+
+	onClick = [&]()
+	{
+		onClicked();
+	};
+
+	setEnabled(true);
 }
 
 MqLcd::~MqLcd() = default;
@@ -88,6 +96,8 @@ void MqLcd::setCgRam(std::array<uint8_t, 64>& _data)
 
 void MqLcd::paint(juce::Graphics& _g)
 {
+	const auto& text = m_overrideText[0] ? m_overrideText : m_text;
+
 	uint32_t charIdx = 0;
 
 	for (auto y=0; y<2; ++y)
@@ -100,7 +110,7 @@ void MqLcd::paint(juce::Graphics& _g)
 
 			const auto t = juce::AffineTransform::translation(tx, ty);
 
-			const auto c = m_text[charIdx];
+			const auto c = text[charIdx];
 			const auto& p = m_characterPaths[c];
 
 			if (m_charBgColor)
@@ -143,4 +153,26 @@ juce::Path MqLcd::createPath(const uint8_t _character) const
 	}
 
 	return path;
+}
+
+void MqLcd::onClicked()
+{
+	if(isTimerRunning())
+		return;
+
+	const std::string lineA(std::string("Vavra v") + g_pluginVersionString);
+	const std::string lineB = __DATE__ " " __TIME__;
+
+	m_overrideText.fill(' ');
+
+	memcpy(m_overrideText.data(), lineA.c_str(), std::min(std::size(lineA), static_cast<size_t>(20)));
+	memcpy(&m_overrideText[20], lineB.c_str(), std::min(std::size(lineB), static_cast<size_t>(20)));
+
+	startTimer(3000);
+}
+
+void MqLcd::timerCallback()
+{
+	stopTimer();
+	m_overrideText[0] = 0;
 }
