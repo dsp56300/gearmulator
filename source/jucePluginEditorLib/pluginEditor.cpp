@@ -1,18 +1,71 @@
 #include "pluginEditor.h"
 
 #include "pluginProcessor.h"
+
 #include "../jucePluginLib/parameterbinding.h"
 
 #include "../synthLib/os.h"
 
 namespace jucePluginEditorLib
 {
-	Editor::Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
+	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
 		: genericUI::Editor(static_cast<EditorInterface&>(*this))
 		, m_processor(_processor)
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
 	{
+	}
+
+	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
+	{
+		const auto path = m_processor.getConfig().getValue("load_path", "");
+
+		m_fileChooser = std::make_unique<juce::FileChooser>(
+			"Choose syx/midi banks to import",
+			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
+			"*.syx,*.mid,*.midi", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		{
+			if (_chooser.getResults().isEmpty())
+				return;
+
+			const auto result = _chooser.getResult();
+
+			m_processor.getConfig().setValue("load_path", result.getParentDirectory().getFullPathName());
+
+			_callback(result);
+		};
+		m_fileChooser->launchAsync(flags, onFileChosen);
+	}
+
+	void Editor::savePreset(const std::function<void(const juce::File&)>& _callback)
+	{
+		const auto path = m_processor.getConfig().getValue("save_path", "");
+
+		m_fileChooser = std::make_unique<juce::FileChooser>(
+			"Save preset(s) as syx or mid",
+			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
+			"*.syx,*.mid,*.midi", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		{
+			if (_chooser.getResults().isEmpty())
+				return;
+
+			const auto result = _chooser.getResult();
+			m_processor.getConfig().setValue("save_path", result.getParentDirectory().getFullPathName());
+
+			if (!result.existsAsFile() || juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "File exists", "Do you want to overwrite the existing file?") == 1)
+			{
+				_callback(result);
+			}
+		};
+		m_fileChooser->launchAsync(flags, onFileChosen);
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
@@ -31,7 +84,7 @@ namespace jucePluginEditorLib
 				return &it->second.front();
 			};
 
-			auto* res = readFromCache();
+			const auto* res = readFromCache();
 
 			if(res)
 				return res;
