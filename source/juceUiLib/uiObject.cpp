@@ -46,6 +46,9 @@ namespace genericUI
 
 			_parent.addAndMakeVisible(obj);
 
+			if(ch->m_condition)
+				ch->m_condition->refresh();
+
 			ch->createChildObjects(_editor, *obj);
 		}
 	}
