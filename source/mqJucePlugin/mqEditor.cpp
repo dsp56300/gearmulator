@@ -133,8 +133,43 @@ namespace mqJucePlugin
 		m_focusedParameter->onMouseEnter(_event);
 	}
 
+	void Editor::savePreset(const FileType _type)
+	{
+		jucePluginEditorLib::Editor::savePreset([&](const juce::File& _file)
+		{
+			FileType type = _type;
+			const auto file = createValidFilename(type, _file);
+
+			const auto part = m_controller.getCurrentPart();
+			const auto p = m_controller.createSingleDump(mqLib::MidiBufferNum::SingleBankA, static_cast<mqLib::MidiSoundLocation>(0), part, part);
+			if(!p.empty())
+			{
+				const std::vector<std::vector<uint8_t>> presets{p};
+				jucePluginEditorLib::Editor::savePresets(_type, file, presets);
+			}
+		});
+	}
+
 	void Editor::onBtSave()
 	{
+		juce::PopupMenu menu;
+
+		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(FileType)>& _callback)
+		{
+			juce::PopupMenu subMenu;
+
+			subMenu.addItem(".syx", [_callback]() {_callback(FileType::Syx); });
+			subMenu.addItem(".mid", [_callback]() {_callback(FileType::Mid); });
+
+			_menu.addSubMenu(_name, subMenu);
+		};
+
+		addEntry(menu, "Current Single (Edit Buffer)", [this](FileType _type)
+		{
+			savePreset(_type);
+		});
+
+		menu.showMenuAsync(juce::PopupMenu::Options());
 	}
 
 	void Editor::onBtPresetPrev()

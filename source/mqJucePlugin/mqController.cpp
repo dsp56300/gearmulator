@@ -317,6 +317,22 @@ void Controller::selectPrevPreset()
 	selectPreset(-1);
 }
 
+std::vector<uint8_t> Controller::createSingleDump(const mqLib::MidiBufferNum _buffer, const mqLib::MidiSoundLocation _location, const uint8_t _locationOffset, const uint8_t _part) const
+{
+	pluginLib::MidiPacket::Data data;
+
+	data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Bank, static_cast<uint8_t>(_buffer)));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Program, static_cast<uint8_t>(_location) + _locationOffset));
+
+	std::vector<uint8_t> dst;
+
+	if (!createMidiDataFromPacket(dst, midiPacketName(SingleDump), data, _part))
+		return {};
+
+	return dst;
+}
+
 void Controller::selectPreset(int _offset)
 {
     auto& current = isMultiMode() ? m_currentSingles[getCurrentPart()] : m_currentSingle;

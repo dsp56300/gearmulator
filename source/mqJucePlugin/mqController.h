@@ -48,7 +48,7 @@ public:
 
 	pluginLib::Event onPlayModeChanged;
 
-    Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
+    Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 	~Controller() override;
 
     void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
@@ -62,6 +62,8 @@ public:
 
     void selectNextPreset();
     void selectPrevPreset();
+
+	std::vector<uint8_t> createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, uint8_t _part) const;
 
 private:
 	void selectPreset(int _offset);

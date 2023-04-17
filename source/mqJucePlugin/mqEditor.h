@@ -31,6 +31,8 @@ namespace mqJucePlugin
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
 
+		void savePreset(FileType _type);
+
 		void onBtSave();
 		void onBtPresetPrev();
 		void onBtPresetNext();
