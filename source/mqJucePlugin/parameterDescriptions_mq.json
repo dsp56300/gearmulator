@@ -23,7 +23,7 @@
  		{"index":3 , "name":"O1Detune"},
  		{"index":4 , "name":"O1BendRange"  , "min":40, "max":88},
  		{"index":5 , "name":"O1KeyTrack", "default":96, "toText":"keytrack"},
- 		{"index":6 , "name":"O1FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
+ 		{"index":6 , "name":"O1FmSource"   , "min":0 , "max":11, "isDiscrete":true, "toText":"fmSource"},
  		{"index":7 , "name":"O1FmAmount"},
  		{"index":8 , "name":"O1Shape"      , "min":0 , "max":6, "isDiscrete":true},
  		{"index":9 , "name":"O1PulseWidth"},
@@ -38,7 +38,7 @@
  		{"index":19, "name":"O2Detune"},
  		{"index":20, "name":"O2BendRange"  , "min":40, "max":88},
  		{"index":21, "name":"O2KeyTrack", "default":96, "toText":"keytrack"},
- 		{"index":22, "name":"O2FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
+ 		{"index":22, "name":"O2FmSource"   , "min":0 , "max":11, "isDiscrete":true, "toText":"fmSource"},
  		{"index":23, "name":"O2FmAmount"},
  		{"index":24, "name":"O2Shape"      , "min":0 , "max":6, "isDiscrete":true},
  		{"index":25, "name":"O2PulseWidth"},
@@ -53,7 +53,7 @@
  		{"index":35, "name":"O3Detune"},
  		{"index":36, "name":"O3BendRange"  , "min":40, "max":88},
  		{"index":37, "name":"O3KeyTrack", "default":96, "toText":"keytrack"},
- 		{"index":38, "name":"O3FmSource"   , "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
+ 		{"index":38, "name":"O3FmSource"   , "min":0 , "max":11, "isDiscrete":true, "toText":"fmSource"},
  		{"index":39, "name":"O3FmAmount"},
  		{"index":40, "name":"O3Shape"      , "min":0 , "max":4, "isDiscrete":true},
  		{"index":41, "name":"O3PulseWidth"},
@@ -101,7 +101,7 @@
  		{"index":88, "name":"F1VelMod", "isBipolar":true, "toText":"signed"},
  		{"index":89, "name":"F1ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":90, "name":"F1CutoffMod"},
- 		{"index":91, "name":"F1FmSource", "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
+ 		{"index":91, "name":"F1FmSource", "min":0 , "max":11, "isDiscrete":true, "toText":"fmSource"},
  		{"index":92, "name":"F1FmAmount"},
  		{"index":93, "name":"F1Pan", "toText":"pan", "isBipolar":true},
  		{"index":94, "name":"F1PanModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
@@ -117,7 +117,7 @@
  		{"index":108, "name":"F2VelMod", "isBipolar":true, "toText":"signed"},
  		{"index":109, "name":"F2ModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
  		{"index":110, "name":"F2CutoffMod"},
- 		{"index":111, "name":"F2FmSource", "min":0 , "max":14, "isDiscrete":true, "toText":"fmSource"},
+ 		{"index":111, "name":"F2FmSource", "min":0 , "max":11, "isDiscrete":true, "toText":"fmSource"},
  		{"index":112, "name":"F2FmAmount"},
  		{"index":113, "name":"F2Pan", "toText":"pan", "isBipolar":true},
  		{"index":114, "name":"F2PanModSource", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
@@ -1044,7 +1044,7 @@
 		],
 		"fmSource":
 		[
-			"Off", "Osc 1", "Osc 2", "Osc 3", "Noise", "Ext Left", "Ext Right", "Ext L+R", "LFO 1", "LFO 2", "LFO 3", "Filter Env", "Amp Env", "Env 3", "Env 4"
+			"Off", "Osc 1", "Osc 2", "Osc 3", "Noise", "LFO 1", "LFO 2", "LFO 3", "Filter Env", "Amp Env", "Env 3", "Env 4"
 		],
 		"filterType":
 		[
