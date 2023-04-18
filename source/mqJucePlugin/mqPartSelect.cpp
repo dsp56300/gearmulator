@@ -3,8 +3,9 @@
 #include "mqController.h"
 #include "mqEditor.h"
 
-mqPartSelect::mqPartSelect(const mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
-	: m_controller(_controller)
+mqPartSelect::mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
+	: m_editor(_editor)
+	, m_controller(_controller)
 	, m_parameterBinding(_parameterBinding)
 {
 	std::vector<juce::Button*> buttons;
@@ -66,5 +67,6 @@ void mqPartSelect::updateUiState() const
 void mqPartSelect::selectPart(const uint8_t _index) const
 {
 	m_parameterBinding.setPart(_index);
+	m_editor.setCurrentPart(_index);
 	updateUiState();
 }

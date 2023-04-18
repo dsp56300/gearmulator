@@ -12,7 +12,7 @@ namespace mqJucePlugin
 class mqPartSelect
 {
 public:
-	explicit mqPartSelect(const mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding);
+	explicit mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding);
 
 	void onPlayModeChanged() const;
 
@@ -26,6 +26,7 @@ private:
 		juce::Button* led = nullptr;
 	};
 
+	mqJucePlugin::Editor& m_editor;
 	Controller& m_controller;
 	pluginLib::ParameterBinding& m_parameterBinding;
 	std::array<Part, 16> m_parts{};
