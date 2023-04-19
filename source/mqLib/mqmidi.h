@@ -19,6 +19,16 @@ namespace mqLib
 		void process(uint32_t _numSamples);
 
 		void writeMidi(uint8_t _byte);
+		void writeMidi(const std::initializer_list<uint8_t>& _bytes)
+		{
+			for (const uint8_t byte : _bytes)
+				writeMidi(byte);
+		}
+		void writeMidi(const std::vector<uint8_t>& _bytes)
+		{
+			for (const uint8_t byte : _bytes)
+				writeMidi(byte);
+		}
 		void readTransmitBuffer(std::vector<uint8_t>& _result);
 
 	private:

@@ -10,6 +10,8 @@
 
 #include "dsp56kEmu/dspthread.h"
 
+#include "../synthLib/midiTypes.h"
+
 namespace mqLib
 {
 	class Hardware
@@ -27,8 +29,7 @@ namespace mqLib
 		auto& getAudioInputs() { return m_audioInputs; }
 		auto& getAudioOutputs() { return m_audioOutputs; }
 
-		void sendMidi(uint8_t _byte);
-		void sendMidi(const std::vector<uint8_t>& _data);
+		void sendMidi(const synthLib::SMidiEvent& _ev);
 		void receiveMidi(std::vector<uint8_t>& _data);
 
 		dsp56k::DSPThread& getDspThread() { return m_dspThread; }
@@ -47,6 +48,7 @@ namespace mqLib
 		bool isValid() const { return m_rom.isValid(); }
 
 		bool isBootCompleted() const { return m_bootCompleted; }
+		void resetMidiCounter();
 
 	private:
 		void hdiProcessUCtoDSPNMIIrq();
@@ -62,6 +64,7 @@ namespace mqLib
 		void resumeDSP();
 		void setGlobalDefaultParameters();
 		void syncUcToDSP();
+		void processMidiInput();
 
 		const std::string m_romFileName;
 
@@ -82,6 +85,8 @@ namespace mqLib
 		dsp56k::DSPThread m_dspThread;
 
 		Midi m_midi;
+		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, true> m_midiIn;
+		uint32_t m_midiOffsetCounter = 0;
 
 		mc68k::Hdi08& m_hdiUC;
 		dsp56k::HDI08& m_hdiDSP;

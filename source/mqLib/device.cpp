@@ -7,6 +7,7 @@
 #include "../synthLib/deviceTypes.h"
 
 #include "mqbuildconfig.h"
+#include "mqhardware.h"
 
 namespace mqLib
 {
@@ -19,6 +20,9 @@ namespace mqLib
 		m_mq.setButton(Buttons::ButtonType::Play, false);
 
 		m_state.createInitState();
+
+		auto* hw = m_mq.getHardware();
+		hw->resetMidiCounter();
 	}
 
 	Device::~Device() = default;
@@ -105,6 +109,13 @@ namespace mqLib
 		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
 	}
 
+	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
+	{
+		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
+
+		m_numSamplesProcessed += static_cast<uint32_t>(_size);
+	}
+
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		const auto& sysex = _ev.sysex;
@@ -114,7 +125,6 @@ namespace mqLib
 			if (m_sysexRemote.receive(m_customSysexOut, sysex))
 				return true;
 		}
-
 
 		Responses responses;
 
@@ -130,7 +140,17 @@ namespace mqLib
 		if(res)
 			return true;
 
-		m_mq.sendMidiEvent(_ev);
+		if(_ev.sysex.empty())
+		{
+			auto e = _ev;
+			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			m_mq.sendMidiEvent(e);
+		}
+		else
+		{
+			m_mq.sendMidiEvent(_ev);
+		}
+
 
 		return true;
 	}

@@ -693,23 +693,25 @@ namespace mqLib
 
 	void State::forwardToDevice(const SysEx& _data) const
 	{
-		if(m_sender == Origin::External)
-			m_mq.sendMidi(_data);
+		if(m_sender != Origin::External)
+			return;
+
+		sendSysex(_data);
 	}
 
 	void State::requestGlobal() const
 	{
-		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
+		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
 	}
 
 	void State::requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const
 	{
-		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::SingleRequest), static_cast<uint8_t>(_buf), static_cast<uint8_t>(_location), 0xf7});
+		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::SingleRequest), static_cast<uint8_t>(_buf), static_cast<uint8_t>(_location), 0xf7});
 	}
 
 	void State::requestMulti(MidiBufferNum _buf, uint8_t _location) const
 	{
-		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
+		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
 	}
 
 	inline void State::sendMulti(const std::vector<uint8_t>& _multiData) const
@@ -722,7 +724,7 @@ namespace mqLib
 			checksum += data[i];
 		data.push_back(checksum & 0x7f);
 		data.push_back(0xf7);
-		m_mq.sendMidi(data);
+		sendSysex(data);
 	}
 
 	void State::sendGlobalParameter(GlobalParameter _param, uint8_t _value)
@@ -731,8 +733,22 @@ namespace mqLib
 
 		const auto p = static_cast<uint8_t>(_param);
 
-		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange), 
+		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange),
 			static_cast<uint8_t>(p >> 7), static_cast<uint8_t>(p & 0x7f), _value, 0xf7});
+	}
+
+	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
+	{
+		synthLib::SMidiEvent e;
+		e.sysex = _data;
+		m_mq.sendMidiEvent(e);
+	}
+
+	void State::sendSysex(const SysEx& _data) const
+	{
+		synthLib::SMidiEvent e;
+		e.sysex = _data;
+		m_mq.sendMidiEvent(e);
 	}
 
 	void State::createSequencerMultiData(std::vector<uint8_t>& _data)

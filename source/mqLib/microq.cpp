@@ -31,7 +31,6 @@ namespace mqLib
 		if(_bootMode != BootMode::Default)
 			m_hw->setBootMode(_bootMode);
 
-		m_midiInBuffer.reserve(1024);
 		m_midiOutBuffer.reserve(1024);
 
 		m_ucThread.reset(new std::thread([&]()
@@ -124,10 +123,6 @@ namespace mqLib
 
 	void MicroQ::internalProcess(uint32_t _frames, uint32_t _latency)
 	{
-		// send midi in
-		m_hw->sendMidi(m_midiInBuffer);
-		m_midiInBuffer.clear();
-
 		// process audio
 		m_hw->processAudio(_frames, _latency);
 
@@ -145,51 +140,9 @@ namespace mqLib
 		return m_hw->getAudioOutputs();
 	}
 
-	void MicroQ::sendMidi(const uint8_t _byte)
-	{
-		std::lock_guard lock(m_mutex);
-		m_midiInBuffer.push_back(_byte);
-	}
-
-	void MicroQ::sendMidi(const uint8_t _a, const uint8_t _b)
-	{
-		std::lock_guard lock(m_mutex);
-		m_midiInBuffer.push_back(_a);
-		m_midiInBuffer.push_back(_b);
-	}
-
-	void MicroQ::sendMidi(const uint8_t _a, const uint8_t _b, const uint8_t _c)
-	{
-		std::lock_guard lock(m_mutex);
-		m_midiInBuffer.push_back(_a);
-		m_midiInBuffer.push_back(_b);
-		m_midiInBuffer.push_back(_c);
-	}
-
-	void MicroQ::sendMidi(const std::vector<uint8_t>& _buffer)
-	{
-		std::lock_guard lock(m_mutex);
-		m_midiInBuffer.insert(m_midiInBuffer.end(), _buffer.begin(), _buffer.end());
-	}
-
 	void MicroQ::sendMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
-		if(!_ev.sysex.empty())
-		{
-			sendMidi(_ev.sysex);
-			return;
-		}
-
-		std::lock_guard lock(m_mutex);
-
-		m_midiInBuffer.push_back(_ev.a);
-
-		const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_ev.a);
-
-		if(len > 1)
-			m_midiInBuffer.push_back(_ev.b);
-		if(len > 2)
-			m_midiInBuffer.push_back(_ev.c);
+		m_hw->sendMidi(_ev);
 	}
 
 	void MicroQ::receiveMidi(std::vector<uint8_t>& _buffer)

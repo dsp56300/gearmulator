@@ -4,6 +4,8 @@
 #include "dsp56kDebugger/debugger.h"
 #endif
 
+#include "../synthLib/midiTypes.h"
+#include "../synthLib/midiBufferParser.h"
 #include "dsp56kEmu/interrupts.h"
 
 #if EMBED_ROM
@@ -51,6 +53,9 @@ namespace mqLib
 		esai.setCallback([&](dsp56k::Audio*)
 		{
 			++m_esaiFrameIndex;
+
+			if (m_esaiFrameIndex & 1)
+				processMidiInput();
 
 			if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 				m_esaiFrameAddedCv.notify_one();
@@ -107,16 +112,10 @@ namespace mqLib
 		processUcCycle();
 		return true;
 	}
-
-	void Hardware::sendMidi(const uint8_t _byte)
+	
+	void Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
 	{
-		m_midi.writeMidi(_byte);
-	}
-
-	void Hardware::sendMidi(const std::vector<uint8_t>& _data)
-	{
-		for (const auto mb : _data)
-			sendMidi(mb);
+		m_midiIn.push_back(_ev);
 	}
 
 	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
@@ -164,6 +163,18 @@ namespace mqLib
 			setButton(Buttons::ButtonType::Play);
 			break;
 		}
+	}
+
+	void Hardware::resetMidiCounter()
+	{
+		// wait for DSP to enter blocking state
+		auto& inputs = m_dsp.getPeriph().getEsai().getAudioInputs();
+		auto& outputs = m_dsp.getPeriph().getEsai().getAudioOutputs();
+
+		while(inputs.size() > 2 && !outputs.full())
+			std::this_thread::yield();
+
+		m_midiOffsetCounter = 0;
 	}
 
 	void Hardware::hdiProcessUCtoDSPNMIIrq()
@@ -334,8 +345,8 @@ namespace mqLib
 
 	void Hardware::setGlobalDefaultParameters()
 	{
-		sendMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
-		sendMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
+		m_midi.writeMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
+		m_midi.writeMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
 		m_bootCompleted = true;
 	}
 
@@ -378,6 +389,35 @@ namespace mqLib
 		}
 
 		m_lastEsaiFrameIndex = esaiFrameIndex;
+	}
+
+	void Hardware::processMidiInput()
+	{
+		++m_midiOffsetCounter;
+
+		while(!m_midiIn.empty())
+		{
+			const auto& e = m_midiIn.front();
+
+			if(e.offset > m_midiOffsetCounter)
+				break;
+
+			if(!e.sysex.empty())
+			{
+				m_midi.writeMidi(e.sysex);
+			}
+			else
+			{
+				m_midi.writeMidi(e.a);
+				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
+				if (len > 1)
+					m_midi.writeMidi(e.b);
+				if (len > 2)
+					m_midi.writeMidi(e.c);
+			}
+
+			m_midiIn.pop_front();
+		}
 	}
 
 	void Hardware::processAudio(uint32_t _frames, uint32_t _latency)

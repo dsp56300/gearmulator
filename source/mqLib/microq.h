@@ -45,10 +45,6 @@ namespace mqLib
 		TAudioOutputs& getAudioOutputs();
 
 		// send midi to the midi input of the device
-		void sendMidi(uint8_t _byte);
-		void sendMidi(uint8_t _a, uint8_t _b);
-		void sendMidi(uint8_t _a, uint8_t _b, uint8_t _c);
-		void sendMidi(const std::vector<uint8_t>& _buffer);
 		void sendMidiEvent(const synthLib::SMidiEvent& _ev);
 
 		// Receive midi data that the device generated during the last call of process().
@@ -125,7 +121,6 @@ namespace mqLib
 
 		std::mutex m_mutex;
 
-		std::vector<uint8_t> m_midiInBuffer;
 		std::vector<uint8_t> m_midiOutBuffer;
 
 		std::unique_ptr<std::thread> m_ucThread;
