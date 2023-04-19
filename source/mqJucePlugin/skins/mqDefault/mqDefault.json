@@ -1266,7 +1266,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2348.931",
-                        "y" : "85.42102",
+                        "y" : "67.04742",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1288,7 +1288,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2634.73",
-                        "y" : "69.06995",
+                        "y" : "50.69635",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "toggleWithLED",
@@ -1316,8 +1316,47 @@
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
-                        "y" : "278.0421",
+                        "y" : "239.4627",
                         "width" : "260.5",
+                        "height" : "49"
+                    }
+                },
+                {
+                    "name" : "glideRate",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2268.061",
+                        "y" : "422.1098",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "PitchModAmount"
+                    }
+                },
+                {
+                    "name" : "glidemode",
+                    "parameterAttachment" : {
+                        "parameter" : "PitchModSrc"
+                    },
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Porta",
+                        "textHeight" : "30",
+                        "color" : "D1D1D1FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2661.738",
+                        "y" : "481.1098",
+                        "width" : "218.7824",
                         "height" : "49"
                     }
                 },
@@ -1337,9 +1376,9 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2565.23",
-                        "y" : "488.4642",
-                        "width" : "260.7",
+                        "x" : "2475.862",
+                        "y" : "724.0195",
+                        "width" : "223.0056",
                         "height" : "49"
                     }
                 },
@@ -1349,7 +1388,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2365.601",
-                        "y" : "586.8142",
+                        "y" : "783.7233",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1370,8 +1409,8 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "2651.4",
-                        "y" : "570.4632",
+                        "x" : "2729.5",
+                        "y" : "740.2233",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "toggleWithLED",
@@ -1399,7 +1438,7 @@
                         "alignV" : "C",
                         "bold" : "1",
                         "x" : "2565.23",
-                        "y" : "900.6842",
+                        "y" : "1078.12",
                         "width" : "260.5",
                         "height" : "49"
                     }
@@ -1410,7 +1449,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2294.117",
-                        "y" : "984.1052",
+                        "y" : "1138.616",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1427,7 +1466,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2501.23",
-                        "y" : "984.1052",
+                        "y" : "1138.616",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1444,7 +1483,7 @@
                     },
                     "spritesheet" : {
                         "x" : "2708.344",
-                        "y" : "984.1052",
+                        "y" : "1138.616",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "encoder_ranged",
@@ -1471,9 +1510,9 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2565.23",
-                        "y" : "1337.828",
-                        "width" : "269.7695",
+                        "x" : "2402.846",
+                        "y" : "1446.506",
+                        "width" : "142.3848",
                         "height" : "49"
                     }
                 },
@@ -1493,9 +1532,9 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2565.23",
-                        "y" : "1428.698",
-                        "width" : "269.7695",
+                        "x" : "2727.615",
+                        "y" : "1446.506",
+                        "width" : "142.3848",
                         "height" : "49"
                     }
                 }

@@ -65,7 +65,7 @@
 		
 		// Pitch Mod
  		{"index":50, "name":"PitchModSrc", "min":0 , "max":13, "isDiscrete":true, "toText":"fastModSource"},
- 		{"index":51, "name":"PitchModAmount"},
+ 		{"index":51, "name":"PitchModAmount", "isBipolar":true, "toText":"signed"},
 
 		// Glide
  		{"index":53, "name":"GlideEnable", "min":0 , "max":1, "isBool":true},
