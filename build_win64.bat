@@ -12,4 +12,3 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 cpack -G ZIP
 popd
-move /y %outdir%*.zip deploy\

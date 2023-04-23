@@ -2,12 +2,18 @@
 
 #include "../../jucePluginEditorLib/midiPorts.h"
 #include "../../jucePluginEditorLib/pluginEditor.h"
+#include "../../jucePluginEditorLib/focusedParameter.h"
 
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
 #include "PatchBrowser.h"
 #include "ControllerLinks.h"
+
+namespace jucePluginEditorLib
+{
+	class FocusedParameter;
+}
 
 namespace pluginLib
 {
@@ -19,15 +25,9 @@ class AudioPluginAudioProcessor;
 
 namespace genericVirusUI
 {
-	class VirusEditor : public jucePluginEditorLib::Editor, juce::Timer
+	class VirusEditor : public jucePluginEditorLib::Editor
 	{
 	public:
-		enum class FileType
-		{
-			Syx,
-			Mid
-		};
-
 		enum class SaveType
 		{
 			CurrentSingle,
@@ -57,9 +57,7 @@ namespace genericVirusUI
 		void onCurrentPartChanged();
 
 		void mouseEnter(const juce::MouseEvent& event) override;
-		void timerCallback() override;
 
-		void updateControlLabel(juce::Component* _component);
 		void updatePresetName() const;
 		void updatePlayModeButtons() const;
 
@@ -84,9 +82,9 @@ namespace genericVirusUI
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
-		juce::Label* m_focusedParameterName = nullptr;
-		juce::Label* m_focusedParameterValue = nullptr;
-		juce::Label* m_focusedParameterTooltip = nullptr;
+
+		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
+
 		juce::ComboBox* m_romSelector = nullptr;
 
 		juce::Button* m_playModeSingle = nullptr;
@@ -97,9 +95,6 @@ namespace genericVirusUI
 
 		juce::TooltipWindow m_tooltipWindow;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
-		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
-		std::vector<pluginLib::Parameter*> m_boundParameters;
 	};
 }

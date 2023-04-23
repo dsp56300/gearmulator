@@ -10,7 +10,6 @@
 #include "../../jucePluginLib/parameterbinding.h"
 
 #include "../../synthLib/os.h"
-#include "../../synthLib/sysexToMidi.h"
 
 namespace genericVirusUI
 {
@@ -41,12 +40,8 @@ namespace genericVirusUI
 		m_patchBrowser.reset(new PatchBrowser(*this));
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
-		m_focusedParameterName = findComponentT<juce::Label>("FocusedParameterName");
-		m_focusedParameterValue = findComponentT<juce::Label>("FocusedParameterValue");
-		m_focusedParameterTooltip = findComponentT<juce::Label>("FocusedParameterTooltip", false);
 
-		if(m_focusedParameterTooltip)
-			m_focusedParameterTooltip->setVisible(false);
+		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
 
 		m_romSelector = findComponentT<juce::ComboBox>("RomSelector");
 
@@ -77,9 +72,6 @@ namespace genericVirusUI
 		getController().onProgramChange = [this] { onProgramChange(); };
 
 		addMouseListener(this, true);
-
-		m_focusedParameterName->setVisible(false);
-		m_focusedParameterValue->setVisible(false);
 
 		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
 		{
@@ -122,31 +114,11 @@ namespace genericVirusUI
 
 		updatePresetName();
 		updatePlayModeButtons();
-		updateControlLabel(nullptr);
-
-		for (auto& params : getController().getExposedParameters())
-		{
-			for (const auto& param : params.second)
-			{
-				m_boundParameters.push_back(param);
-
-				param->onValueChanged.emplace_back(1, [this, param]()
-				{
-					if (param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
-						param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
-						return;
-					auto* comp = m_parameterBinding.getBoundComponent(param);
-					if(comp)
-						updateControlLabel(comp);
-				});
-			}
-		}
 	}
 
 	VirusEditor::~VirusEditor()
 	{
-		for (auto* p : m_boundParameters)
-			p->removeListener(1);
+		m_focusedParameter.reset();
 
 		m_parameterBinding.clearBindings();
 
@@ -206,103 +178,7 @@ namespace genericVirusUI
 
 	void VirusEditor::mouseEnter(const juce::MouseEvent& event)
 	{
-		if(event.eventComponent && event.eventComponent->getProperties().contains("parameter"))
-			updateControlLabel(event.eventComponent);
-	}
-
-	void VirusEditor::timerCallback()
-	{
-		updateControlLabel(nullptr);
-	}
-
-	void VirusEditor::updateControlLabel(juce::Component* _component)
-	{
-		stopTimer();
-
-		if(_component)
-		{
-			// combo boxes report the child label as event source, try the parent in this case
-			if(!_component->getProperties().contains("parameter"))
-				_component = _component->getParentComponent();
-		}
-
-		if(!_component || !_component->getProperties().contains("parameter"))
-		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
-			if(m_focusedParameterTooltip)
-				m_focusedParameterTooltip->setVisible(false);
-			return;
-		}
-
-		const auto& props = _component->getProperties();
-		const int v = props["parameter"];
-
-		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(getController().getCurrentPart());
-
-		const auto* p = getController().getParameter(v, part);
-
-		if(!p)
-		{
-			m_focusedParameterName->setVisible(false);
-			m_focusedParameterValue->setVisible(false);
-			if(m_focusedParameterTooltip)
-				m_focusedParameterTooltip->setVisible(false);
-			return;
-		}
-
-		const auto value = p->getText(p->getValue(), 0);
-
-		const auto& desc = p->getDescription();
-
-		m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
-		m_focusedParameterValue->setText(value, juce::dontSendNotification);
-
-		m_focusedParameterName->setVisible(true);
-		m_focusedParameterValue->setVisible(true);
-
-		if(m_focusedParameterTooltip && dynamic_cast<juce::Slider*>(_component) && _component->isShowing())
-		{
-			int x = _component->getX();
-			int y = _component->getY();
-
-			// local to global
-			auto parent = _component->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x += parent->getX();
-				y += parent->getY();
-				parent = parent->getParentComponent();
-			}
-
-			x += (_component->getWidth()>>1) - (m_focusedParameterTooltip->getWidth()>>1);
-			y += _component->getHeight() + (m_focusedParameterTooltip->getHeight()>>1);
-
-			// global to local of tooltip parent
-			parent = m_focusedParameterTooltip->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x -= parent->getX();
-				y -= parent->getY();
-				parent = parent->getParentComponent();
-			}
-
-			if(m_focusedParameterTooltip->getProperties().contains("offsetY"))
-				y += static_cast<int>(m_focusedParameterTooltip->getProperties()["offsetY"]);
-
-			m_focusedParameterTooltip->setTopLeftPosition(x,y);
-			m_focusedParameterTooltip->setText(value, juce::dontSendNotification);
-			m_focusedParameterTooltip->setVisible(true);
-			m_focusedParameterTooltip->toFront(false);
-		}
-		else if(m_focusedParameterTooltip)
-		{
-			m_focusedParameterTooltip->setVisible(false);
-		}
-
-		startTimer(3000);
+		m_focusedParameter->onMouseEnter(event);
 	}
 
 	void VirusEditor::updatePresetName() const
@@ -389,27 +265,13 @@ namespace genericVirusUI
 
 	void VirusEditor::loadPreset()
 	{
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Choose syx/midi banks to import",
-			m_previousPath.isEmpty()
-			? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
-			: m_previousPath,
-			"*.syx,*.mid,*.midi", true);
-
-		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		const std::function onFileChooser = [this](const juce::FileChooser& chooser)
+		Editor::loadPreset([this](const juce::File& _result)
 		{
-			if (chooser.getResults().isEmpty())
-				return;
-
-			const auto result = chooser.getResult();
-			m_previousPath = result.getParentDirectory().getFullPathName();
-			const auto ext = result.getFileExtension().toLowerCase();
+			const auto ext = _result.getFileExtension().toLowerCase();
 
 			PatchBrowser::PatchList patches;
 
-			m_patchBrowser->loadBankFile(patches, nullptr, result);
+			m_patchBrowser->loadBankFile(patches, nullptr, _result);
 
 			if (patches.empty())
 				return;
@@ -432,8 +294,7 @@ namespace genericVirusUI
 			}
 
 			getController().onStateLoaded();
-		};
-		m_fileChooser->launchAsync(flags, onFileChooser);
+		});
 	}
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
@@ -456,31 +317,12 @@ namespace genericVirusUI
 
 	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		const auto path = m_processor.getConfig().getValue("virus_bank_dir", "");
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as syx or mid",
-			m_previousPath.isEmpty()
-			? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
-			: m_previousPath,
-			"*.syx,*.mid", true);
-
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChooser = [this, _saveType, _bankNumber](const juce::FileChooser& chooser)
+		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
-			if (chooser.getResults().isEmpty())
-				return;
-
-			const auto result = chooser.getResult();
-			m_previousPath = result.getParentDirectory().getFullPathName();
-			const auto ext = result.getFileExtension().toLowerCase();
-
-			if (!result.existsAsFile() || juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "File exists", "Do you want to overwrite the existing file?") == 1)
-			{
-				savePresets(result.getFullPathName().toStdString(), _saveType, ext.endsWith("mid") ? FileType::Mid : FileType::Syx, _bankNumber);
-			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChooser);
+			FileType fileType = _fileType;
+			const auto file = createValidFilename(fileType, _result);
+			savePresets(file, _saveType, fileType, _bankNumber);
+		});
 	}
 
 	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/) const
@@ -521,31 +363,7 @@ namespace genericVirusUI
 			return false;
 		}
 
-		if(messages.empty())
-			return false;
-
-		if(_fileType == FileType::Mid)
-		{
-			return synthLib::SysexToMidi::write(_pathName.c_str(), messages);
-		}
-
-		FILE* hFile = fopen(_pathName.c_str(), "wb");
-
-		if(!hFile)
-			return false;
-
-		for (const auto& message : messages)
-		{
-			const auto written = fwrite(&message[0], 1, message.size(), hFile);
-
-			if(written != message.size())
-			{
-				fclose(hFile);
-				return false;
-			}
-		}
-		fclose(hFile);
-		return true;
+		return Editor::savePresets(_fileType, _pathName, messages);
 	}
 
 	void VirusEditor::setPart(size_t _part)

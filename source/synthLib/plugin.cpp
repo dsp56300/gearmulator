@@ -28,7 +28,7 @@ namespace synthLib
 
 		if(m_midiInRingBuffer.full())
 		{
-			std::lock_guard lock(m_lock);
+			std::lock_guard l(m_lock);
 			processMidiInEvent(m_midiInRingBuffer.pop_front());
 		}
 		m_midiInRingBuffer.push_back(_ev);

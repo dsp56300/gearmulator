@@ -4,18 +4,30 @@
 
 namespace pluginLib
 {
-	class Processor;
 	class ParameterBinding;
 }
 
 namespace jucePluginEditorLib
 {
+	class Processor;
+
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
-		Editor(pluginLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
+		enum class FileType
+		{
+			Syx,
+			Mid
+		};
+
+		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
 
 		virtual const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) = 0;
+
+		void loadPreset(const std::function<void(const juce::File&)>& _callback);
+		void savePreset(const std::function<void(const juce::File&)>& _callback);
+		bool savePresets(FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const;
+		static std::string createValidFilename(FileType& _type, const juce::File& _file);
 
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
@@ -25,11 +37,13 @@ namespace jucePluginEditorLib
 		bool bindParameter(juce::Slider& _target, int _parameterIndex) override;
 		juce::Value* getParameterValue(int _parameterIndex, uint8_t _part) override;
 
-		pluginLib::Processor& m_processor;
+		Processor& m_processor;
 		pluginLib::ParameterBinding& m_binding;
 
 		const std::string m_skinFolder;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
+
+		std::unique_ptr<juce::FileChooser> m_fileChooser;
 	};
 }

@@ -12,4 +12,3 @@ IF %ERRORLEVEL% NEQ 0 (
 )
 cmake -P ../../scripts/pack.cmake
 popd
-move /y %outdir%*.zip deploy\

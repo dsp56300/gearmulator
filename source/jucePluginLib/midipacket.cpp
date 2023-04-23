@@ -34,7 +34,7 @@ namespace pluginLib
 			m_definitionToByteIndex.insert(std::make_pair(i, byteIndex));
 
 			if(byteIndex >= m_byteToDefinitionIndex.size())
-				m_byteToDefinitionIndex.push_back({});
+				m_byteToDefinitionIndex.emplace_back();
 
 			m_byteToDefinitionIndex[byteIndex].push_back(i);
 
@@ -77,7 +77,7 @@ namespace pluginLib
 							LOG("Failed to find value for parameter " << d.paramName << ", part " << d.paramPart);
 							return false;
 						}
-						_dst[i] |= (it->second & d.paramMask) << d.paramShift;
+						_dst[i] |= d.getMaskedValue(it->second);
 					}
 					break;
 				case MidiDataType::Checksum:
@@ -207,6 +207,45 @@ namespace pluginLib
 		return true;
 	}
 
+	bool MidiPacket::getDefinitionsForByteIndex(std::vector<const MidiDataDefinition*>& _result, uint32_t _byteIndex) const
+	{
+		if (_byteIndex >= m_byteToDefinitionIndex.size())
+			return false;
+
+		const auto& defs = m_byteToDefinitionIndex[_byteIndex];
+
+		for (const auto idx : defs)
+		{
+			const auto &d = m_definitions[idx];
+			_result.emplace_back(&d);
+		}
+		return true;
+	}
+
+	bool MidiPacket::getParameterIndicesForByteIndex(std::vector<ParamIndex>& _result, const ParameterDescriptions& _parameters, const uint32_t _byteIndex) const
+	{
+		if (_byteIndex >= m_byteToDefinitionIndex.size())
+			return false;
+
+		const auto& defs = m_byteToDefinitionIndex[_byteIndex];
+
+		for (const auto idx : defs)
+		{
+			const auto &d = m_definitions[idx];
+
+			uint32_t paramIdx;
+
+			if(!_parameters.getIndexByName(paramIdx, d.paramName))
+			{
+				LOG("Failed to retrieve index for parameter " << d.paramName);
+				return false;
+			}
+
+			_result.emplace_back(d.paramPart, paramIdx);
+		}
+		return true;
+	}
+
 	uint32_t MidiPacket::getByteIndexForType(MidiDataType _type) const
 	{
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
@@ -235,6 +274,41 @@ namespace pluginLib
 			return m_definitionToByteIndex.find(i)->second;
 		}
 		return InvalidIndex;
+	}
+
+	const MidiPacket::MidiDataDefinition* MidiPacket::getDefinitionByParameterName(const std::string& _name) const
+	{
+		for (const auto& definition : m_definitions)
+		{
+			if (definition.paramName == _name)
+				return &definition;
+		}
+
+		return nullptr;
+	}
+
+	bool MidiPacket::updateChecksums(Sysex& _data) const
+	{
+		if (_data.size() != m_byteSize)
+			return false;
+
+		bool res = false;
+
+		for (uint32_t i=0; i<m_definitions.size(); ++i)
+		{
+			const auto& def = m_definitions[i];
+
+			if (def.type != MidiDataType::Checksum)
+				continue;
+
+			const auto byteIndex = m_definitionToByteIndex.find(i)->second;
+
+			const auto c = calcChecksum(def, _data);
+			_data[byteIndex] = c;
+			res = true;
+		}
+
+		return res;
 	}
 
 	uint8_t MidiPacket::calcChecksum(const MidiDataDefinition& _d, const Sysex& _src)

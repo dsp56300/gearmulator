@@ -55,7 +55,7 @@ namespace synthLib
 			const auto key = trim(line.substr(0, posEq));
 			const auto val = trim(line.substr(posEq + 1));
 
-			m_values.emplace_back(std::make_pair(key, val));
+			m_values.emplace_back(key, val);
 		}
 	}
 }

@@ -45,7 +45,8 @@ namespace virusLib
 		switch (cmd)
 		{
 		case 0x50:	// Virus A
-		case 0x55:	// Virus B
+		case 0x53:	// Virus B OS
+		case 0x55:	// Virus B Demo
 		case 0x57:	// Virus C
 			{
 				const auto msb = _packet[6];	// packet number MSB
@@ -132,7 +133,7 @@ namespace virusLib
 
 			if(lsb != m_expectedSector)
 			{
-				if(lsb == 127)
+				if(lsb == 127 || lsb == 126)
 					return setCompleted();
 				return packetInvalid();
 			}
