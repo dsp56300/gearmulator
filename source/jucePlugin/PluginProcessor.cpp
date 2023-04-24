@@ -71,55 +71,6 @@ bool AudioPluginAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double AudioPluginAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int AudioPluginAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int AudioPluginAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void AudioPluginAudioProcessor::setCurrentProgram (int index)
-{
-    juce::ignoreUnused (index);
-}
-
-const juce::String AudioPluginAudioProcessor::getProgramName (int index)
-{
-    juce::ignoreUnused (index);
-    return "default";
-}
-
-void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String& newName)
-{
-    juce::ignoreUnused (index, newName);
-}
-
-//==============================================================================
-void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-	m_plugin.setSamplerate(static_cast<float>(sampleRate));
-	m_plugin.setBlockSize(samplesPerBlock);
-
-	updateLatencySamples();
-}
-
-void AudioPluginAudioProcessor::releaseResources()
-{
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
-}
-
 bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
     // This is the place where you check if the layout is supported.
@@ -239,7 +190,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
     if (!m_midiOut.empty())
 	{
-		static_cast<Virus::Controller&>(getController()).addPluginMidiOut(m_midiOut);
+		getController().addPluginMidiOut(m_midiOut);
 	}
 
     for (auto& e : m_midiOut)
@@ -269,10 +220,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool AudioPluginAudioProcessor::hasEditor() const
-{
-    return true; // (change this to false if you choose to not supply an editor)
-}
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
@@ -287,14 +234,6 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 		setLatencySamples(getPlugin().getLatencyMidiToOutput());
 	else
 		setLatencySamples(getPlugin().getLatencyInputToOutput());
-}
-
-bool AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
-{
-	if(!Processor::setLatencyBlocks(_blocks))
-		return false;
-	updateLatencySamples();
-	return true;
 }
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()

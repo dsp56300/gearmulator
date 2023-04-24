@@ -41,9 +41,13 @@ namespace pluginLib
 		}
 
 		virtual bool setLatencyBlocks(uint32_t _blocks);
+		virtual void updateLatencySamples() = 0;
 
 	private:
-	    //==============================================================================
+		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
+		void releaseResources() override;
+
+		//==============================================================================
 	    void getStateInformation (juce::MemoryBlock& destData) override;
 	    void setStateInformation (const void* data, int sizeInBytes) override;
 	    void getCurrentProgramStateInformation (juce::MemoryBlock& destData) override;
@@ -51,9 +55,19 @@ namespace pluginLib
 
 		void setState(const void *_data, size_t _sizeInBytes);
 
-		virtual Controller* createController() = 0;
+	    //==============================================================================
+		int getNumPrograms() override;
+		int getCurrentProgram() override;
+		void setCurrentProgram(int _index) override;
+		const juce::String getProgramName(int _index) override;
+		void changeProgramName(int _index, const juce::String &_newName) override;
 
-	    std::unique_ptr<pluginLib::Controller> m_controller{};
+	    //==============================================================================
+		double getTailLengthSeconds() const override;
+		//==============================================================================
+		virtual Controller *createController() = 0;
+
+	    std::unique_ptr<Controller> m_controller{};
 
 	protected:
 		std::unique_ptr<juce::MidiOutput> m_midiOutput{};

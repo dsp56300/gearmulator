@@ -126,7 +126,27 @@ namespace pluginLib
 
 	bool Processor::setLatencyBlocks(uint32_t _blocks)
 	{
-		return getPlugin().setLatencyBlocks(_blocks);
+		if (!getPlugin().setLatencyBlocks(_blocks))
+			return false;
+		updateLatencySamples();
+		return true;
+	}
+
+	//==============================================================================
+	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
+	{
+		// Use this method as the place to do any pre-playback
+		// initialisation that you need..
+		getPlugin().setSamplerate(static_cast<float>(sampleRate));
+		getPlugin().setBlockSize(samplesPerBlock);
+
+		updateLatencySamples();
+	}
+
+	void Processor::releaseResources()
+	{
+		// When playback stops, you can use this as an opportunity to free up any
+		// spare memory, etc.
 	}
 
 	//==============================================================================
@@ -138,7 +158,7 @@ namespace pluginLib
 
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeGlobal);
-		destData.append(&state[0], state.size());
+		destData.append(state.data(), state.size());
 	}
 
 	void Processor::setStateInformation (const void* data, int sizeInBytes)
@@ -152,7 +172,7 @@ namespace pluginLib
 	{
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
-		destData.append(&state[0], state.size());
+		destData.append(state.data(), state.size());
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
@@ -167,9 +187,43 @@ namespace pluginLib
 
 		std::vector<uint8_t> state;
 		state.resize(_sizeInBytes);
-		memcpy(&state[0], _data, _sizeInBytes);
+		memcpy(state.data(), _data, _sizeInBytes);
 		getPlugin().setState(state);
 		if (hasController())
 			getController().onStateLoaded();
+	}
+
+	//==============================================================================
+
+	int Processor::getNumPrograms()
+	{
+		return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+				  // so this should be at least 1, even if you're not really implementing programs.
+	}
+
+	int Processor::getCurrentProgram()
+	{
+		return 0;
+	}
+
+	void Processor::setCurrentProgram(int _index)
+	{
+		juce::ignoreUnused(_index);
+	}
+
+	const juce::String Processor::getProgramName(int _index)
+	{
+		juce::ignoreUnused(_index);
+		return "default";
+	}
+
+	void Processor::changeProgramName(int _index, const juce::String& _newName)
+	{
+		juce::ignoreUnused(_index, _newName);
+	}
+
+	double Processor::getTailLengthSeconds() const
+	{
+		return 0.0f;
 	}
 }
