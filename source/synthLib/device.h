@@ -4,10 +4,8 @@
 
 #include "audioTypes.h"
 #include "deviceTypes.h"
-#include "../synthLib/midiTypes.h"
 
-#include "../dsp56300/source/dsp56kEmu/dspthread.h"
-#include "../dsp56300/source/dsp56kEmu/memory.h"
+#include "../synthLib/midiTypes.h"
 
 namespace synthLib
 {
