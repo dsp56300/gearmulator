@@ -34,7 +34,10 @@ namespace pluginLib
 	    Controller& getController();
 		bool isPluginValid() { return getPlugin().isValid(); }
 
-		virtual synthLib::Plugin& getPlugin() = 0;
+		synthLib::Plugin& getPlugin();
+
+		virtual synthLib::Device* createDevice() = 0;
+
 		bool hasController() const
 		{
 			return m_controller.get();
@@ -69,7 +72,12 @@ namespace pluginLib
 
 	    std::unique_ptr<Controller> m_controller{};
 
+		synthLib::DeviceError getDeviceError() const { return m_deviceError; }
+
 	protected:
+		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
+		std::unique_ptr<synthLib::Device> m_device;
+		std::unique_ptr<synthLib::Plugin> m_plugin;
 		std::unique_ptr<juce::MidiOutput> m_midiOutput{};
 		std::unique_ptr<juce::MidiInput> m_midiInput{};
 		std::vector<synthLib::SMidiEvent> m_midiOut{};

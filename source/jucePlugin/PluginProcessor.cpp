@@ -27,8 +27,6 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	, getConfigOptions())
-	, m_rom(std::string())
-	, m_device(m_rom), m_plugin(&m_device)
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 
@@ -162,7 +160,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 		ev.offset = metadata.samplePosition;
 
-		m_plugin.addMidiEvent(ev);
+		getPlugin().addMidiEvent(ev);
 	}
 
 	midiMessages.clear();
@@ -182,11 +180,11 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		}
 	}
 
-    m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
+	getPlugin().process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
                      static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
     m_midiOut.clear();
-    m_plugin.getMidiOut(m_midiOut);
+    getPlugin().getMidiOut(m_midiOut);
 
     if (!m_midiOut.empty())
 	{
@@ -234,6 +232,12 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 		setLatencySamples(getPlugin().getLatencyMidiToOutput());
 	else
 		setLatencySamples(getPlugin().getLatencyInputToOutput());
+}
+
+synthLib::Device* AudioPluginAudioProcessor::createDevice()
+{
+	m_rom.reset(new virusLib::ROMFile(std::string()));
+	return new virusLib::Device(*m_rom);
 }
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()

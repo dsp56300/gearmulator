@@ -1,4 +1,15 @@
 #include "processor.h"
+#include "dummydevice.h"
+
+#include "../synthLib/deviceException.h"
+#include "../synthLib/os.h"
+
+#include "dsp56kEmu/logging.h"
+
+namespace synthLib
+{
+	class DeviceException;
+}
 
 namespace pluginLib
 {
@@ -9,6 +20,8 @@ namespace pluginLib
 	Processor::~Processor()
 	{
 		m_controller.reset();
+		m_plugin.reset();
+		m_device.reset();
 	}
 
 	void Processor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
@@ -122,6 +135,43 @@ namespace pluginLib
 	        m_controller.reset(createController());
 
 	    return *m_controller;
+	}
+
+	synthLib::Plugin& Processor::getPlugin()
+	{
+		if(m_plugin)
+			return *m_plugin;
+
+		try
+		{
+			m_device.reset(createDevice());
+		}
+		catch(const synthLib::DeviceException& e)
+		{
+			LOG("Failed to create device: " << e.what());
+
+			std::string msg = e.what();
+
+			m_deviceError = e.errorCode();
+
+			if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+			{
+				msg += "\n\n";
+				msg += "The firmware file needs to be located next to the plugin.";
+				msg += "\n\n";
+				msg += "The plugin was loaded from path:\n\n" + synthLib::getModulePath() + "\n\nCopy the requested file to this path and reload the plugin.";
+			}
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Device Initialization failed", msg);
+		}
+
+		if(!m_device)
+		{
+			m_device.reset(new DummyDevice());
+		}
+
+		m_plugin.reset(new synthLib::Plugin(m_device.get()));
+
+		return *m_plugin;
 	}
 
 	bool Processor::setLatencyBlocks(uint32_t _blocks)

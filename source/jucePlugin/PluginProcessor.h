@@ -31,11 +31,13 @@ public:
 
 	std::string getRomName() const
     {
-        return juce::File(juce::String(m_rom.getFilename())).getFileNameWithoutExtension().toStdString();
+		if(!m_rom)
+			return "<invalid>";
+        return juce::File(juce::String(m_rom->getFilename())).getFileNameWithoutExtension().toStdString();
     }
     virusLib::ROMFile::Model getModel() const
     {
-		return m_rom.getModel();
+		return m_rom ? m_rom->getModel() : virusLib::ROMFile::Model::Invalid;
     }
 
 	// _____________
@@ -43,19 +45,15 @@ public:
 private:
 	void updateLatencySamples() override;
 
-    synthLib::Plugin& getPlugin() override
-    {
-	    return m_plugin;
-    }
+    synthLib::Device* createDevice() override;
 
     pluginLib::Controller* createController() override;
 
     //==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
 
-	virusLib::ROMFile					m_rom;
-	virusLib::Device					m_device;
-	synthLib::Plugin					m_plugin;
-    uint32_t							m_clockTempoParam = 0xffffffff;
+	std::unique_ptr<virusLib::ROMFile>	m_rom;
+
+	uint32_t							m_clockTempoParam = 0xffffffff;
     std::unique_ptr<PluginEditorState>  m_editorState;
 };
