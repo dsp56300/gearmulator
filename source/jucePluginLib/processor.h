@@ -46,13 +46,16 @@ namespace pluginLib
 		virtual bool setLatencyBlocks(uint32_t _blocks);
 		virtual void updateLatencySamples() = 0;
 
+		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer) {}
+		virtual void loadCustomData(const std::vector<uint8_t>& _sourceBuffer) {}
+
 	private:
 		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 		void releaseResources() override;
 
 		//==============================================================================
 	    void getStateInformation (juce::MemoryBlock& destData) override;
-	    void setStateInformation (const void* data, int sizeInBytes) override;
+	    void setStateInformation (const void* _data, int _sizeInBytes) override;
 	    void getCurrentProgramStateInformation (juce::MemoryBlock& destData) override;
 	    void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override;
 

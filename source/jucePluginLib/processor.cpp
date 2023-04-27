@@ -3,6 +3,7 @@
 
 #include "../synthLib/deviceException.h"
 #include "../synthLib/os.h"
+#include "../synthLib/binarystream.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -13,6 +14,11 @@ namespace synthLib
 
 namespace pluginLib
 {
+	constexpr char g_saveMagic[] = "DSP56300";
+	constexpr uint32_t g_saveVersion = 1;
+
+	using PluginStream = synthLib::BinaryStream<uint32_t>;
+
 	Processor::Processor(const BusesProperties& _busesProperties) : juce::AudioProcessor(_busesProperties)
 	{
 	}
@@ -206,16 +212,28 @@ namespace pluginLib
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
 
-		std::vector<uint8_t> state;
-		getPlugin().getState(state, synthLib::StateTypeGlobal);
-		destData.append(state.data(), state.size());
+		std::vector<uint8_t> buffer;
+		getPlugin().getState(buffer, synthLib::StateTypeGlobal);
+
+		PluginStream ss;
+		ss.write(g_saveMagic);
+		ss.write(g_saveVersion);
+		ss.write(buffer);
+		buffer.clear();
+		saveCustomData(buffer);
+		ss.write(buffer);
+
+		std::vector<uint8_t> buf;
+		ss.toVector(buf);
+
+		destData.append(buf.data(), buf.size());
 	}
 
-	void Processor::setStateInformation (const void* data, int sizeInBytes)
+	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
 	    // You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
-		setState(data, sizeInBytes);
+		setState(_data, _sizeInBytes);
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
@@ -230,7 +248,7 @@ namespace pluginLib
 		setState(data, sizeInBytes);
 	}
 
-	void Processor::setState(const void* _data, size_t _sizeInBytes)
+	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
 			return;
@@ -238,7 +256,47 @@ namespace pluginLib
 		std::vector<uint8_t> state;
 		state.resize(_sizeInBytes);
 		memcpy(state.data(), _data, _sizeInBytes);
-		getPlugin().setState(state);
+
+		PluginStream ss(state);
+
+		if (ss.checkString(g_saveMagic))
+		{
+			try
+			{
+				const std::string magic = ss.readString();
+
+				if (magic != g_saveMagic)
+					return;
+
+				const auto version = ss.read<uint32_t>();
+
+				if (version != g_saveVersion)
+					return;
+
+				std::vector<uint8_t> buffer;
+				ss.read(buffer);
+				getPlugin().setState(buffer);
+				ss.read(buffer);
+
+				try
+				{
+					loadCustomData(buffer);
+				}
+				catch (std::range_error&)
+				{
+				}
+			}
+			catch (std::range_error& e)
+			{
+				LOG("Failed to read state: " << e.what());
+				return;
+			}
+		}
+		else
+		{
+			getPlugin().setState(state);
+		}
+
 		if (hasController())
 			getController().onStateLoaded();
 	}
