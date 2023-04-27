@@ -186,6 +186,8 @@ void PluginEditorState::openMenu()
 	menu.addSubMenu("GUI Scale", scaleMenu);
 	menu.addSubMenu("Latency (blocks)", latencyMenu);
 
+	initContextMenu(menu);
+
 	menu.showMenuAsync(juce::PopupMenu::Options());
 }
 
