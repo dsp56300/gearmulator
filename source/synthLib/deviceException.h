@@ -3,6 +3,7 @@
 #include "deviceTypes.h"
 
 #include <stdexcept>
+#include <string>
 
 namespace synthLib
 {
