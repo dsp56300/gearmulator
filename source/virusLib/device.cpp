@@ -6,6 +6,8 @@
 
 #include "dsp56kEmu/jit.h"
 
+#include "../synthLib/deviceException.h"
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
@@ -13,7 +15,7 @@ namespace virusLib
 		, m_rom(_rom)
 	{
 		if(!m_rom.isValid())
-			return;
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
 
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom);

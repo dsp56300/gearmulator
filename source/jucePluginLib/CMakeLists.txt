@@ -2,7 +2,9 @@ cmake_minimum_required(VERSION 3.15)
 project(jucePluginLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	event.cpp event.h
 	controller.cpp controller.h
+	dummydevice.cpp dummydevice.h
 	midipacket.cpp midipacket.h
 	parameter.cpp parameter.h
 	parameterbinding.cpp parameterbinding.h

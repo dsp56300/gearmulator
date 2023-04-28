@@ -21,6 +21,7 @@ namespace genericUI
 		void bind(juce::Value* _value);
 		void unbind();
 		int32_t getParameterIndex() const { return m_parameterIndex; }
+		void refresh();
 	private:
 		juce::Component& m_target;
 		const int32_t m_parameterIndex;

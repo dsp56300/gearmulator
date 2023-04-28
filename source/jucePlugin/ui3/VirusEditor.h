@@ -28,12 +28,6 @@ namespace genericVirusUI
 	class VirusEditor : public jucePluginEditorLib::Editor
 	{
 	public:
-		enum class FileType
-		{
-			Syx,
-			Mid
-		};
-
 		enum class SaveType
 		{
 			CurrentSingle,
@@ -101,8 +95,6 @@ namespace genericVirusUI
 
 		juce::TooltipWindow m_tooltipWindow;
 
-		std::unique_ptr<juce::FileChooser> m_fileChooser;
-		juce::String m_previousPath;
 		std::function<void()> m_openMenuCallback;
 	};
 }

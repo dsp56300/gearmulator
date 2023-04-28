@@ -1,7 +1,24 @@
 #include "processor.h"
+#include "dummydevice.h"
+
+#include "../synthLib/deviceException.h"
+#include "../synthLib/os.h"
+#include "../synthLib/binarystream.h"
+
+#include "dsp56kEmu/logging.h"
+
+namespace synthLib
+{
+	class DeviceException;
+}
 
 namespace pluginLib
 {
+	constexpr char g_saveMagic[] = "DSP56300";
+	constexpr uint32_t g_saveVersion = 1;
+
+	using PluginStream = synthLib::BinaryStream<uint32_t>;
+
 	Processor::Processor(const BusesProperties& _busesProperties) : juce::AudioProcessor(_busesProperties)
 	{
 	}
@@ -9,6 +26,8 @@ namespace pluginLib
 	Processor::~Processor()
 	{
 		m_controller.reset();
+		m_plugin.reset();
+		m_device.reset();
 	}
 
 	void Processor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
@@ -124,9 +143,66 @@ namespace pluginLib
 	    return *m_controller;
 	}
 
+	synthLib::Plugin& Processor::getPlugin()
+	{
+		if(m_plugin)
+			return *m_plugin;
+
+		try
+		{
+			m_device.reset(createDevice());
+		}
+		catch(const synthLib::DeviceException& e)
+		{
+			LOG("Failed to create device: " << e.what());
+
+			std::string msg = e.what();
+
+			m_deviceError = e.errorCode();
+
+			if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+			{
+				msg += "\n\n";
+				msg += "The firmware file needs to be located next to the plugin.";
+				msg += "\n\n";
+				msg += "The plugin was loaded from path:\n\n" + synthLib::getModulePath() + "\n\nCopy the requested file to this path and reload the plugin.";
+			}
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Device Initialization failed", msg);
+		}
+
+		if(!m_device)
+		{
+			m_device.reset(new DummyDevice());
+		}
+
+		m_plugin.reset(new synthLib::Plugin(m_device.get()));
+
+		return *m_plugin;
+	}
+
 	bool Processor::setLatencyBlocks(uint32_t _blocks)
 	{
-		return getPlugin().setLatencyBlocks(_blocks);
+		if (!getPlugin().setLatencyBlocks(_blocks))
+			return false;
+		updateLatencySamples();
+		return true;
+	}
+
+	//==============================================================================
+	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
+	{
+		// Use this method as the place to do any pre-playback
+		// initialisation that you need..
+		getPlugin().setSamplerate(static_cast<float>(sampleRate));
+		getPlugin().setBlockSize(samplesPerBlock);
+
+		updateLatencySamples();
+	}
+
+	void Processor::releaseResources()
+	{
+		// When playback stops, you can use this as an opportunity to free up any
+		// spare memory, etc.
 	}
 
 	//==============================================================================
@@ -136,23 +212,35 @@ namespace pluginLib
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
 
-		std::vector<uint8_t> state;
-		getPlugin().getState(state, synthLib::StateTypeGlobal);
-		destData.append(&state[0], state.size());
+		std::vector<uint8_t> buffer;
+		getPlugin().getState(buffer, synthLib::StateTypeGlobal);
+
+		PluginStream ss;
+		ss.write(g_saveMagic);
+		ss.write(g_saveVersion);
+		ss.write(buffer);
+		buffer.clear();
+		saveCustomData(buffer);
+		ss.write(buffer);
+
+		std::vector<uint8_t> buf;
+		ss.toVector(buf);
+
+		destData.append(buf.data(), buf.size());
 	}
 
-	void Processor::setStateInformation (const void* data, int sizeInBytes)
+	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
 	    // You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
-		setState(data, sizeInBytes);
+		setState(_data, _sizeInBytes);
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
-		destData.append(&state[0], state.size());
+		destData.append(state.data(), state.size());
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
@@ -160,16 +248,90 @@ namespace pluginLib
 		setState(data, sizeInBytes);
 	}
 
-	void Processor::setState(const void* _data, size_t _sizeInBytes)
+	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
 			return;
 
 		std::vector<uint8_t> state;
 		state.resize(_sizeInBytes);
-		memcpy(&state[0], _data, _sizeInBytes);
-		getPlugin().setState(state);
+		memcpy(state.data(), _data, _sizeInBytes);
+
+		PluginStream ss(state);
+
+		if (ss.checkString(g_saveMagic))
+		{
+			try
+			{
+				const std::string magic = ss.readString();
+
+				if (magic != g_saveMagic)
+					return;
+
+				const auto version = ss.read<uint32_t>();
+
+				if (version != g_saveVersion)
+					return;
+
+				std::vector<uint8_t> buffer;
+				ss.read(buffer);
+				getPlugin().setState(buffer);
+				ss.read(buffer);
+
+				try
+				{
+					loadCustomData(buffer);
+				}
+				catch (std::range_error&)
+				{
+				}
+			}
+			catch (std::range_error& e)
+			{
+				LOG("Failed to read state: " << e.what());
+				return;
+			}
+		}
+		else
+		{
+			getPlugin().setState(state);
+		}
+
 		if (hasController())
 			getController().onStateLoaded();
+	}
+
+	//==============================================================================
+
+	int Processor::getNumPrograms()
+	{
+		return 1; // NB: some hosts don't cope very well if you tell them there are 0 programs,
+				  // so this should be at least 1, even if you're not really implementing programs.
+	}
+
+	int Processor::getCurrentProgram()
+	{
+		return 0;
+	}
+
+	void Processor::setCurrentProgram(int _index)
+	{
+		juce::ignoreUnused(_index);
+	}
+
+	const juce::String Processor::getProgramName(int _index)
+	{
+		juce::ignoreUnused(_index);
+		return "default";
+	}
+
+	void Processor::changeProgramName(int _index, const juce::String& _newName)
+	{
+		juce::ignoreUnused(_index, _newName);
+	}
+
+	double Processor::getTailLengthSeconds() const
+	{
+		return 0.0f;
 	}
 }

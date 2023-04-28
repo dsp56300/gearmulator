@@ -66,6 +66,8 @@ namespace jucePluginEditorLib
 
 		void loadDefaultSkin();
 
+		virtual void initContextMenu(juce::PopupMenu& _menu) {};
+
 	protected:
 		virtual genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) = 0;
 

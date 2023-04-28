@@ -10,7 +10,6 @@
 #include "../../jucePluginLib/parameterbinding.h"
 
 #include "../../synthLib/os.h"
-#include "../../synthLib/sysexToMidi.h"
 
 namespace genericVirusUI
 {
@@ -266,27 +265,13 @@ namespace genericVirusUI
 
 	void VirusEditor::loadPreset()
 	{
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Choose syx/midi banks to import",
-			m_previousPath.isEmpty()
-			? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory()
-			: m_previousPath,
-			"*.syx,*.mid,*.midi", true);
-
-		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		const std::function onFileChooser = [this](const juce::FileChooser& chooser)
+		Editor::loadPreset([this](const juce::File& _result)
 		{
-			if (chooser.getResults().isEmpty())
-				return;
-
-			const auto result = chooser.getResult();
-			m_previousPath = result.getParentDirectory().getFullPathName();
-			const auto ext = result.getFileExtension().toLowerCase();
+			const auto ext = _result.getFileExtension().toLowerCase();
 
 			PatchBrowser::PatchList patches;
 
-			m_patchBrowser->loadBankFile(patches, nullptr, result);
+			m_patchBrowser->loadBankFile(patches, nullptr, _result);
 
 			if (patches.empty())
 				return;
@@ -309,8 +294,7 @@ namespace genericVirusUI
 			}
 
 			getController().onStateLoaded();
-		};
-		m_fileChooser->launchAsync(flags, onFileChooser);
+		});
 	}
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
@@ -333,31 +317,12 @@ namespace genericVirusUI
 
 	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		const auto path = m_processor.getConfig().getValue("virus_bank_dir", "");
-		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as syx or mid",
-			m_previousPath.isEmpty()
-			? (path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : juce::File(path))
-			: m_previousPath,
-			"*.syx,*.mid", true);
-
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChooser = [this, _saveType, _bankNumber](const juce::FileChooser& chooser)
+		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
-			if (chooser.getResults().isEmpty())
-				return;
-
-			const auto result = chooser.getResult();
-			m_previousPath = result.getParentDirectory().getFullPathName();
-			const auto ext = result.getFileExtension().toLowerCase();
-
-			if (!result.existsAsFile() || juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "File exists", "Do you want to overwrite the existing file?") == 1)
-			{
-				savePresets(result.getFullPathName().toStdString(), _saveType, ext.endsWith("mid") ? FileType::Mid : FileType::Syx, _bankNumber);
-			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChooser);
+			FileType fileType = _fileType;
+			const auto file = createValidFilename(fileType, _result);
+			savePresets(file, _saveType, fileType, _bankNumber);
+		});
 	}
 
 	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/) const
@@ -398,31 +363,7 @@ namespace genericVirusUI
 			return false;
 		}
 
-		if(messages.empty())
-			return false;
-
-		if(_fileType == FileType::Mid)
-		{
-			return synthLib::SysexToMidi::write(_pathName.c_str(), messages);
-		}
-
-		FILE* hFile = fopen(_pathName.c_str(), "wb");
-
-		if(!hFile)
-			return false;
-
-		for (const auto& message : messages)
-		{
-			const auto written = fwrite(&message[0], 1, message.size(), hFile);
-
-			if(written != message.size())
-			{
-				fclose(hFile);
-				return false;
-			}
-		}
-		fclose(hFile);
-		return true;
+		return Editor::savePresets(_fileType, _pathName, messages);
 	}
 
 	void VirusEditor::setPart(size_t _part)

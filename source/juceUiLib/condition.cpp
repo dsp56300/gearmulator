@@ -44,4 +44,10 @@ namespace genericUI
 		m_value->removeListener(this);
 		m_value = nullptr;
 	}
+
+	void Condition::refresh()
+	{
+		if(m_value)
+			valueChanged(*m_value);
+	}
 }

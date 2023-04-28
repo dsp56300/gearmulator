@@ -354,7 +354,7 @@ namespace jucePluginEditorLib
 
 		bool operator()(const std::shared_ptr<Patch>& _a, const std::shared_ptr<Patch>& _b) const
 		{
-			return (compareElements(*_a, *_b) < 0) == m_forward;
+			return m_forward ? compareElements(*_a, *_b) < 0 : compareElements(*_a, *_b) > 0;
 		}
 
 	private:
