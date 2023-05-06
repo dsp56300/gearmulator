@@ -239,7 +239,7 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 
 synthLib::Device* AudioPluginAudioProcessor::createDevice()
 {
-	m_rom.reset(new virusLib::ROMFile(std::string()));
+	m_rom.reset(new virusLib::ROMFile(std::string(), virusLib::ROMFile::TIModel::TI));
 	return new virusLib::Device(*m_rom);
 }
 
