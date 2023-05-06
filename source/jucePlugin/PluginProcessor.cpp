@@ -242,6 +242,9 @@ synthLib::Device* AudioPluginAudioProcessor::createDevice()
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()
 {
+	// force creation of device as the controller decides how to initialize based on the used ROM
+	getPlugin();
+
 	return new Virus::Controller(*this);
 }
 
