@@ -2,6 +2,8 @@
 
 #if VIRUS_SUPPORT_TI
 
+DSP56K_DEOPTIMIZE
+
 constexpr uint32_t g_esai1Padding = 3;
 
 namespace virusLib
@@ -119,8 +121,9 @@ namespace virusLib
 		inputs[3] = nullptr;
 
 		// Slave ESAI input gets the analog input in regular fashion
-		inputs[0] = &_inputs[1][0];
-		inputs[1] = &_inputs[0][0];
+		// TODO: phase issue, one channel is offset by 1 sample
+		inputs[0] = &_inputs[0][0];
+		inputs[1] = &_inputs[1][0];
 		_dsp2.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
 		inputs[0] = nullptr;
 		inputs[1] = nullptr;
@@ -152,18 +155,18 @@ namespace virusLib
 
 		// USB outputs on the Master are sent to the Slave via ESAI_1 in 1/3 interleaved format => unpack it
 		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixA, s * 3);
-
-		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMixA[2], outputsMixA[3], s, 0, 1);	// USB 1
-		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMixA[1], outputsMixA[0], s, 2, 1);	// USB 2
-		mixEsai1Output(_outputs[10], _outputs[11], outputsMixA[3], outputsMixA[2], s, 2, 1);	// USB 3
-
+#if 1
+		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMixA[3], outputsMixA[2], s, -2, 0);	// USB 1
+		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMixA[0], outputsMixA[1], s, 1, -1);	// USB 2
+		mixEsai1Output(_outputs[10], _outputs[11], outputsMixA[2], outputsMixA[3], s, 1, -1);	// USB 3
+#endif
 		// DAC outputs on the Slave are send via ESAI_1 to the Master in 1/3 interleaved format => unpack it
 		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixB, s * 3);
-
-		mixEsai1Output(_outputs[0], _outputs[1], outputsMixB[0], outputsMixB[1], s, 0, 1); // Out 1
-		mixEsai1Output(_outputs[2], _outputs[3], outputsMixB[2], outputsMixB[3], s, 0, 1); // Out 2
-		mixEsai1Output(_outputs[4], _outputs[5], outputsMixB[1], outputsMixB[0], s, 2, 1); // Out 3
-
+#if 1
+		mixEsai1Output(_outputs[0], _outputs[1], outputsMixB[1], outputsMixB[0], s, -2, 0); // Out 1
+		mixEsai1Output(_outputs[2], _outputs[3], outputsMixB[3], outputsMixB[2], s, -2, 0); // Out 2
+		mixEsai1Output(_outputs[4], _outputs[5], outputsMixB[0], outputsMixB[1], s, 1, -1); // Out 3
+#endif
 		wrapPadding(_buffers, s*3);
 	}
 
