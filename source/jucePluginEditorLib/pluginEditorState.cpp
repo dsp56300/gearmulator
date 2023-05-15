@@ -167,11 +167,15 @@ void PluginEditorState::openMenu()
 
 	juce::PopupMenu scaleMenu;
 	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addItem("65%", true, scale == 65, [this] { setGuiScale(65); });
 	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addItem("85%", true, scale == 85, [this] { setGuiScale(85); });
 	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
 	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
 	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addItem("175%", true, scale == 175, [this] { setGuiScale(175); });
 	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addItem("250%", true, scale == 250, [this] { setGuiScale(250); });
 	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
 
 	const auto latency = m_processor.getPlugin().getLatencyBlocks();
