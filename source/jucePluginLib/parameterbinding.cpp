@@ -24,7 +24,7 @@ namespace pluginLib
 
 	void ParameterBinding::MouseListener::mouseDrag(const juce::MouseEvent& event)
 	{
-		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())));
+		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
 	}
 
 	ParameterBinding::~ParameterBinding()
@@ -122,7 +122,7 @@ namespace pluginLib
 			if(v->getDescription().isPublic)
 			{
 				v->beginChangeGesture();
-				v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)));
+				v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)), Parameter::ChangedBy::ControlChange);
 				v->endChangeGesture();
 			}
 			v->getValueObject().setValue(id - 1);

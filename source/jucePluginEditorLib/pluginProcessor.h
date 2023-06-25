@@ -12,6 +12,9 @@ namespace jucePluginEditorLib
 		juce::PropertiesFile& getConfig() { return m_config; }
 
 		bool setLatencyBlocks(uint32_t _blocks) override;
+
+		bool hasEditor() const override;
+
 	private:
 		juce::PropertiesFile m_config;
 	};

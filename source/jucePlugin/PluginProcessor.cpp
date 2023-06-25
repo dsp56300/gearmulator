@@ -27,8 +27,6 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	, getConfigOptions())
-	, m_rom(std::string())
-	, m_device(m_rom), m_plugin(&m_device)
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 
@@ -69,55 +67,6 @@ bool AudioPluginAudioProcessor::isMidiEffect() const
    #else
     return false;
    #endif
-}
-
-double AudioPluginAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int AudioPluginAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int AudioPluginAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void AudioPluginAudioProcessor::setCurrentProgram (int index)
-{
-    juce::ignoreUnused (index);
-}
-
-const juce::String AudioPluginAudioProcessor::getProgramName (int index)
-{
-    juce::ignoreUnused (index);
-    return "default";
-}
-
-void AudioPluginAudioProcessor::changeProgramName (int index, const juce::String& newName)
-{
-    juce::ignoreUnused (index, newName);
-}
-
-//==============================================================================
-void AudioPluginAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
-	m_plugin.setSamplerate(static_cast<float>(sampleRate));
-	m_plugin.setBlockSize(samplesPerBlock);
-
-	updateLatencySamples();
-}
-
-void AudioPluginAudioProcessor::releaseResources()
-{
-    // When playback stops, you can use this as an opportunity to free up any
-    // spare memory, etc.
 }
 
 bool AudioPluginAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
@@ -211,7 +160,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 		ev.offset = metadata.samplePosition;
 
-		m_plugin.addMidiEvent(ev);
+		getPlugin().addMidiEvent(ev);
 	}
 
 	midiMessages.clear();
@@ -231,15 +180,15 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		}
 	}
 
-    m_plugin.process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
+	getPlugin().process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
                      static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
     m_midiOut.clear();
-    m_plugin.getMidiOut(m_midiOut);
+    getPlugin().getMidiOut(m_midiOut);
 
     if (!m_midiOut.empty())
 	{
-		static_cast<Virus::Controller&>(getController()).addPluginMidiOut(m_midiOut);
+		getController().addPluginMidiOut(m_midiOut);
 	}
 
     for (auto& e : m_midiOut)
@@ -269,10 +218,6 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 }
 
 //==============================================================================
-bool AudioPluginAudioProcessor::hasEditor() const
-{
-    return true; // (change this to false if you choose to not supply an editor)
-}
 
 juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
 {
@@ -289,16 +234,17 @@ void AudioPluginAudioProcessor::updateLatencySamples()
 		setLatencySamples(getPlugin().getLatencyInputToOutput());
 }
 
-bool AudioPluginAudioProcessor::setLatencyBlocks(uint32_t _blocks)
+synthLib::Device* AudioPluginAudioProcessor::createDevice()
 {
-	if(!Processor::setLatencyBlocks(_blocks))
-		return false;
-	updateLatencySamples();
-	return true;
+	m_rom.reset(new virusLib::ROMFile(std::string()));
+	return new virusLib::Device(*m_rom);
 }
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()
 {
+	// force creation of device as the controller decides how to initialize based on the used ROM
+	getPlugin();
+
 	return new Virus::Controller(*this);
 }
 
