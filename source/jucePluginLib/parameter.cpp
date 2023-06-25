@@ -16,15 +16,7 @@ namespace pluginLib
 
     void Parameter::valueChanged(juce::Value &)
     {
-		const uint8_t value = roundToInt(m_value.getValue());
-		jassert (m_range.getRange().contains(value) || m_range.end == value);
-		if (value != m_lastValue)
-		{
-			// ignore initial update
-			if(m_lastValue != -1)
-				m_ctrl.sendParameterChange(*this, value);
-			m_lastValue = value;
-		}
+		sendToSynth();
 
 		for (const auto& func : onValueChanged)
 			func.second();
@@ -46,14 +38,37 @@ namespace pluginLib
 		{
 			beginChangeGesture();
 			const float v = convertTo0to1(static_cast<float>(newValue));
-			setValue(v, _origin);
-			sendValueChangedMessageToListeners(v);
+			setValueNotifyingHost(v, _origin);
 			endChangeGesture();
 		}
 		else
 		{
 			m_value.setValue(newValue);
 		}
+	}
+
+    void Parameter::sendToSynth()
+    {
+		const float floatValue = m_value.getValue();
+		const auto value = juce::roundToInt(floatValue);
+
+		jassert(m_range.getRange().contains(floatValue) || m_range.end == floatValue);
+		jassert(value >= 0 && value <= 127);
+
+		if (value == m_lastValue)
+			return;
+
+		// ignore initial update
+		if (m_lastValue != -1)
+			m_ctrl.sendParameterChange(*this, static_cast<uint8_t>(value));
+
+		m_lastValue = value;
+    }
+
+    void Parameter::setValueNotifyingHost(const float _value, const ChangedBy _origin)
+    {
+		setValue(_value, _origin);
+		sendValueChangedMessageToListeners(_value);
 	}
 
     bool Parameter::isMetaParameter() const
@@ -71,8 +86,11 @@ namespace pluginLib
 		if (m_changingDerivedValues)
 			return;
 
+		const auto floatValue = convertFrom0to1(_newValue);
 		m_lastValueOrigin = _origin;
-		m_value.setValue(convertFrom0to1(_newValue));
+		m_value.setValue(floatValue);
+
+		sendToSynth();
 
 		m_changingDerivedValues = true;
 
@@ -99,8 +117,7 @@ namespace pluginLib
 		{
 			beginChangeGesture();
 			const auto v = convertTo0to1(static_cast<float>(clampedValue));
-			setValue(v, _origin);
-			sendValueChangedMessageToListeners(v);
+			setValueNotifyingHost(v, _origin);
 			endChangeGesture();
 		}
 		else

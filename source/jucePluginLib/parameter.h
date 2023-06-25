@@ -27,10 +27,10 @@ namespace pluginLib
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int uniqueId);
 
-        juce::Value &getValueObject() { return m_value; };
-        const juce::Value &getValueObject() const { return m_value; };
+        juce::Value &getValueObject() { return m_value; }
+        const juce::Value &getValueObject() const { return m_value; }
 
-        const Description& getDescription() const { return m_desc; };
+        const Description& getDescription() const { return m_desc; }
 
 		uint8_t getPart() const { return m_partNum; }
 
@@ -80,10 +80,13 @@ namespace pluginLib
 
 		ChangedBy getChangeOrigin() const { return m_lastValueOrigin; }
 
+		void setValueNotifyingHost(float _value, ChangedBy _origin);
+
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
 		void setDerivedValue(int _value, ChangedBy _origin);
+		void sendToSynth();
 
         Controller &m_ctrl;
 		const Description m_desc;
