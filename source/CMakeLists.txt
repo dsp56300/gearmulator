@@ -3,7 +3,8 @@ cmake_minimum_required(VERSION 3.15)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugin" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugin" on)
 
-option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" off)
+option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 
 # ----------------- DSP56300 emulator
 
@@ -47,5 +48,33 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS)
 	add_subdirectory(virusIntegrationTest)
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		add_subdirectory(jucePlugin)
+	endif()
+endif()
+
+# ----------------- Synth Vavra
+
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
+	add_subdirectory(mc68k)
+	add_subdirectory(mqLib)
+
+	# needed for test console
+	set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(cpp-terminal)
+
+	if(NOT ANDROID)
+		add_subdirectory(portmidi)
+	endif()
+
+	set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
+	add_subdirectory(portaudio)
+
+	add_subdirectory(mqConsoleLib)
+	add_subdirectory(mqTestConsole)
+	add_subdirectory(mqPerformanceTest)
+
+	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+		add_subdirectory(mqJucePlugin)
 	endif()
 endif()

@@ -1,0 +1,966 @@
+{
+    "name" : "Root",
+    "root" : {
+        "x" : "0",
+        "y" : "0",
+        "width" : "3800",
+        "height" : "704",
+        "scale" : "0.5"
+    },
+    "children" : [
+        {
+            "name" : "bakedBG",
+            "image" : {
+                "x" : "0",
+                "y" : "0",
+                "width" : "3800",
+                "height" : "704",
+                "texture" : "bakedBG"
+            }
+        },
+        {
+            "name" : "lcdLineA",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "358.6",
+                "y" : "288",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "lcdLineB",
+            "label" : {
+                "text" : "01234567890123456789",
+                "textHeight" : "46",
+                "color" : "000000FF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "fontFile" : "Digital",
+                "fontName" : "Register",
+                "x" : "358.6",
+                "y" : "352",
+                "width" : "630",
+                "height" : "64"
+            }
+        },
+        {
+            "name" : "lcdArea",
+            "component" : {
+                "x" : "358.6",
+                "y" : "298",
+                "width" : "620",
+                "height" : "108"
+            },
+            "componentProperties" : {
+                "lcdBackgroundColor" : "248727"
+            }
+        },
+        {
+            "name" : "ledInst1",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "400.0637",
+                "y" : "65.10001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonInst1",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "352.0637",
+                "y" : "115.1",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledInst2",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "568.4213",
+                "y" : "65.10001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonInst2",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "520.4213",
+                "y" : "115.1",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledInst3",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "736.7787",
+                "y" : "65.10001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonInst3",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "688.7787",
+                "y" : "115.1",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledInst4",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "905.1362",
+                "y" : "65.10001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonInst4",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "857.1362",
+                "y" : "115.1",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderAlphaDial",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "1081.2",
+                "y" : "224",
+                "width" : "256",
+                "height" : "256",
+                "texture" : "alphadial",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderLCDLeft",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "448.6",
+                "y" : "523.9",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderLCDRight",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "748.6",
+                "y" : "523.9",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonPlay",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1350.3",
+                "y" : "377.4",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledPlay",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1398.3",
+                "y" : "339.4",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonMultimode",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1023.25",
+                "y" : "581.59",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledMultimode",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "988.25",
+                "y" : "597.59",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonPeek",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1268.75",
+                "y" : "581.59",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledPeek",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1233.75",
+                "y" : "597.59",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonGlobal",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1597",
+                "y" : "99.32001",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledGlobal",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1556",
+                "y" : "115.6",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonMulti",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1597",
+                "y" : "209.32",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledMulti",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1556",
+                "y" : "225.6",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonEdit",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1597",
+                "y" : "319.32",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledEdit",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1556",
+                "y" : "335.6",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonSound",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1597",
+                "y" : "429.32",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledSound",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1556",
+                "y" : "445.6",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonShift",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1597",
+                "y" : "539.32",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledShift",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1556",
+                "y" : "555.6",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonU",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2020.93",
+                "y" : "186.2607",
+                "width" : "64",
+                "height" : "128",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonL",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1888.93",
+                "y" : "318.2607",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonR",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2088.93",
+                "y" : "318.2607",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonD",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2020.93",
+                "y" : "386.2607",
+                "width" : "64",
+                "height" : "128",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledOsc1",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "89.82001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledOsc2",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2463.14",
+                "y" : "89.82001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledOsc3",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2495.14",
+                "y" : "89.82001",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledMixerRouting",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "154.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledFilter1",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "219.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledFilter2",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2463.14",
+                "y" : "219.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledAmpFxArp",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "284.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledEnv1",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "349.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledEnv2",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2463.14",
+                "y" : "349.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledEnv3",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2495.14",
+                "y" : "349.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledEnv4",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2527.14",
+                "y" : "349.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledLFOs",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "414.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledModMatrix",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2431.14",
+                "y" : "479.82",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderMatrix1",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "2592.22",
+                "y" : "534.82",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderMatrix2",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "2822.22",
+                "y" : "534.82",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderMatrix3",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "3052.22",
+                "y" : "534.82",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "encoderMatrix4",
+            "rotary" : {
+            },
+            "spritesheet" : {
+                "x" : "3282.22",
+                "y" : "534.82",
+                "width" : "140",
+                "height" : "140",
+                "texture" : "encoder",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "buttonPower",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "3499.2",
+                "y" : "578.7",
+                "width" : "128",
+                "height" : "64",
+                "texture" : "button",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "ledPower",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "1",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "3547.2",
+                "y" : "540.7",
+                "width" : "32",
+                "height" : "32",
+                "texture" : "led",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        }
+    ]
+}
