@@ -17,9 +17,11 @@ if(MSVC)
 	# /Zi Generate Debug Info PDB
 	# /Oi Enable Intrinsic Functions
 	# /Ot Favor Fast Code
+	# /permissive- Standards Conformance
 
 	set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} /O2 /GS- /fp:fast /Oy /GT /GL /Zi /Oi /Ot")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /permissive-")
 
 	set(ARCHITECTURE ${CMAKE_VS_PLATFORM_NAME})
 
