@@ -1,9 +1,10 @@
 #pragma once
 
-#include <array>
-
 #include "../synthLib/midiTypes.h"
 #include "../dsp56300/source/dsp56kEmu/types.h"
+
+#include <array>
+#include <cstddef>
 
 namespace virusLib
 {

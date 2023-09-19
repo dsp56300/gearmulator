@@ -7,6 +7,8 @@
 
 #include "../synthLib/deviceException.h"
 
+#include <cstring>
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)

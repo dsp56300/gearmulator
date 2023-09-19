@@ -14,6 +14,8 @@
 
 #include <cstring>	// memcpy
 
+#include "dsp56kEmu/memory.h"
+
 #ifdef _WIN32
 #define NOMINMAX
 #include <Windows.h>

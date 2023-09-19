@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <cstddef>
 
 #include "audioTypes.h"
 #include "deviceTypes.h"
