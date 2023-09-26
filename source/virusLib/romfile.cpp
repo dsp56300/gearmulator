@@ -171,7 +171,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	}
 	else 
 	{
-		LOG("Invalid ROM, unexpected filesize")
+		LOG("Invalid ROM, unexpected filesize");
 		return {};
 	}
 
