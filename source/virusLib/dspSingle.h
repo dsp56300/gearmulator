@@ -2,6 +2,7 @@
 
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/memory.h"
+#include "dsp56kEmu/peripherals.h"
 
 #include "../synthLib/audioTypes.h"
 

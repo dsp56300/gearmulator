@@ -16,6 +16,8 @@
 
 #include <cstring>	// memcpy
 
+#include "dsp56kEmu/memory.h"
+
 #include "demoplaybackTI.h"
 
 #ifdef _WIN32
@@ -299,7 +301,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wa
 	}
 	else 
 	{
-		LOG("Invalid ROM, unexpected filesize")
+		LOG("Invalid ROM, unexpected filesize");
 		return {};
 	}
 
