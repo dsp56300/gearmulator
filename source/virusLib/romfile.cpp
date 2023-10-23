@@ -131,7 +131,7 @@ bool ROMFile::initialize()
 		fw = ROMUnpacker::getFirmware(*dsp, m_tiModel);
 		if (!fw.isValid())
 		{
-			LOG("Could not unpack ROM file")
+			LOG("Could not unpack ROM file");
 			return false;
 		}
 

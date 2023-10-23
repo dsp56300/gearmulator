@@ -29,7 +29,7 @@ namespace virusLib
 		Chunk table = chunks[0];
 		if (std::string(table.name) != "TABL")
 		{
-			LOG("Installer file table not found")
+			LOG("Installer file table not found");
 			return Firmware{};
 		}
 
