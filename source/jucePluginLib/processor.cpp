@@ -211,7 +211,7 @@ namespace pluginLib
 	    // You should use this method to store your parameters in the memory block.
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
-
+#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> buffer;
 		getPlugin().getState(buffer, synthLib::StateTypeGlobal);
 
@@ -227,27 +227,35 @@ namespace pluginLib
 		ss.toVector(buf);
 
 		destData.append(buf.data(), buf.size());
+#endif
 	}
 
 	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
-	    // You should use this method to restore your parameters from this memory block,
+#if !SYNTHLIB_DEMO_MODE
+		// You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
 		setState(_data, _sizeInBytes);
+#endif
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
 		destData.append(state.data(), state.size());
+#endif
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		setState(data, sizeInBytes);
+#endif
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
@@ -300,6 +308,7 @@ namespace pluginLib
 		if (hasController())
 			getController().onStateLoaded();
 	}
+#endif
 
 	//==============================================================================
 

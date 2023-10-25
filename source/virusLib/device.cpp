@@ -78,6 +78,7 @@ namespace virusLib
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
@@ -95,6 +96,7 @@ namespace virusLib
 			return false;
 		return m_mc->setState(messages);
 	}
+#endif
 
 	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string& _4cc)
 	{

@@ -59,7 +59,9 @@ namespace pluginLib
 	    void getCurrentProgramStateInformation (juce::MemoryBlock& destData) override;
 	    void setCurrentProgramStateInformation (const void* data, int sizeInBytes) override;
 
+#if !SYNTHLIB_DEMO_MODE
 		void setState(const void *_data, size_t _sizeInBytes);
+#endif
 
 	    //==============================================================================
 		int getNumPrograms() override;

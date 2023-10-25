@@ -883,6 +883,7 @@ void Microcontroller::process(size_t _size)
 	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
+#if !SYNTHLIB_DEMO_MODE
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
@@ -960,6 +961,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 
 	return true;
 }
+#endif
 
 void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {

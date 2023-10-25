@@ -44,6 +44,7 @@ namespace jucePluginEditorLib
 
 	void Editor::savePreset(const std::function<void(const juce::File&)>& _callback)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
 		m_fileChooser = std::make_unique<juce::FileChooser>(
@@ -67,8 +68,12 @@ namespace jucePluginEditorLib
 			}
 		};
 		m_fileChooser->launchAsync(flags, onFileChosen);
+#else
+		showDemoRestrictionMessageBox();
+#endif
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const
 	{
 		if (_presets.empty())
@@ -95,6 +100,7 @@ namespace jucePluginEditorLib
 		fclose(hFile);
 		return true;
 	}
+#endif
 
 	std::string Editor::createValidFilename(FileType& _type, const juce::File& _file)
 	{
@@ -108,6 +114,12 @@ namespace jucePluginEditorLib
 		else
 			file += _type == FileType::Mid ? ".mid" : ".syx";
 		return file;
+	}
+
+	void Editor::showDemoRestrictionMessageBox() const
+	{
+		const auto &[title, msg] = getDemoRestrictionText();
+		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

@@ -2,6 +2,8 @@
 
 #include "../juceUiLib/editor.h"
 
+#include "../synthLib/buildconfig.h"
+
 namespace pluginLib
 {
 	class ParameterBinding;
@@ -26,8 +28,14 @@ namespace jucePluginEditorLib
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const std::function<void(const juce::File&)>& _callback);
+#if !SYNTHLIB_DEMO_MODE
 		bool savePresets(FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const;
+#endif
 		static std::string createValidFilename(FileType& _type, const juce::File& _file);
+
+		virtual std::pair<std::string, std::string> getDemoRestrictionText() const = 0;
+
+		void showDemoRestrictionMessageBox() const;
 
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
