@@ -1,5 +1,4 @@
 set(ASSETS_VirusTI_Trancy
-	${CMAKE_CURRENT_LIST_DIR}/background.png
 	${CMAKE_CURRENT_LIST_DIR}/button_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_10.png
@@ -122,3 +121,9 @@ set(ASSETS_VirusTI_Trancy
 
 	${CMAKE_CURRENT_LIST_DIR}/VirusTI_Trancy.json
 )
+
+if(SYNTHLIB_DEMO_MODE)
+	list(APPEND ASSETS_VirusTI_Trancy ${CMAKE_CURRENT_LIST_DIR}/demo/background.png)
+else()
+	list(APPEND ASSETS_VirusTI_Trancy ${CMAKE_CURRENT_LIST_DIR}/background.png)
+endif()	
