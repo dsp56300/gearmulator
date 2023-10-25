@@ -2,8 +2,9 @@
 
 #include <mutex>
 
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/resamplerInOut.h"
+#include "midiTypes.h"
+#include "resamplerInOut.h"
+#include "buildconfig.h"
 
 #include "../dsp56300/source/dsp56kEmu/ringbuffer.h"
 
@@ -31,9 +32,10 @@ namespace synthLib
 
 		bool isValid() const;
 
+#if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state);
-
+#endif
 		void insertMidiEvent(const SMidiEvent& _ev);
 
 		bool setLatencyBlocks(uint32_t _latencyBlocks);

@@ -1,0 +1,3 @@
+#pragma once
+
+#cmakedefine01 SYNTHLIB_DEMO_MODE

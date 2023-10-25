@@ -6,7 +6,8 @@
 #include "audioTypes.h"
 #include "deviceTypes.h"
 
-#include "../synthLib/midiTypes.h"
+#include "midiTypes.h"
+#include "buildconfig.h"
 
 namespace synthLib
 {
@@ -25,9 +26,12 @@ namespace synthLib
 
 		virtual float getSamplerate() const = 0;
 		virtual bool isValid() const = 0;
+
+#if SYNTHLIB_DEMO_MODE == 0
 		virtual bool getState(std::vector<uint8_t>& _state, StateType _type) = 0;
 		virtual bool setState(const std::vector<uint8_t>& _state, StateType _type) = 0;
-		virtual bool setStateFromUnknownCustomData(const std::vector<uint8_t>& _state) { return false; }
+		virtual bool setStateFromUnknownCustomData(const std::vector<uint8_t> &_state) { return false; }
+#endif
 
 		virtual uint32_t getChannelCountIn() = 0;
 		virtual uint32_t getChannelCountOut() = 0;

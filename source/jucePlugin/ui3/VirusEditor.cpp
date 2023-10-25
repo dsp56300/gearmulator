@@ -155,6 +155,16 @@ namespace genericVirusUI
 		return m_patchBrowser.get();
 	}
 
+	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
+	{
+		return {
+				JucePlugin_Name " - Demo Mode",
+				JucePlugin_Name " runs in demo mode, the following restrictions apply:\n"
+				"\n"
+				"* The plugin state is not preserved\n"
+				"* Preset saving is disabled"};
+	}
+
 	void VirusEditor::onProgramChange()
 	{
 		m_parts->onProgramChange();
@@ -327,6 +337,9 @@ namespace genericVirusUI
 
 	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/) const
 	{
+#if SYNTHLIB_DEMO_MODE
+		return false;
+#else
 		std::vector< std::vector<uint8_t> > messages;
 		
 		switch (_saveType)
@@ -364,6 +377,7 @@ namespace genericVirusUI
 		}
 
 		return Editor::savePresets(_fileType, _pathName, messages);
+#endif
 	}
 
 	void VirusEditor::setPart(size_t _part)

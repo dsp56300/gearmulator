@@ -51,6 +51,8 @@ namespace genericVirusUI
 
 		PatchBrowser* getPatchBrowser();
 
+		std::pair<std::string, std::string> getDemoRestrictionText() const override;
+
 	private:
 		void onProgramChange();
 		void onPlayModeChanged();
