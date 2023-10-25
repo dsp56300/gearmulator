@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(synthLib)
 
-set(SYNTHLIB_DEMO_MODE OFF CACHE BOOL "Demo Mode" FORCE)
+set(SYNTHLIB_DEMO_MODE ON CACHE BOOL "Demo Mode" FORCE)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h)
 
