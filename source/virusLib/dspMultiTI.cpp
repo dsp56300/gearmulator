@@ -2,8 +2,6 @@
 
 #if VIRUS_SUPPORT_TI
 
-DSP56K_DEOPTIMIZE
-
 constexpr uint32_t g_esai1Padding = 3;
 
 namespace virusLib
