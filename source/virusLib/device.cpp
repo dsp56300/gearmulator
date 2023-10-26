@@ -17,7 +17,7 @@ namespace virusLib
 		, m_rom(_rom)
 	{
 		if(!m_rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware ROM file (firmware.bin) is required, but was not found.");
 
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom);
