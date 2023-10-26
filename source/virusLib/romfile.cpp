@@ -266,7 +266,7 @@ std::string ROMFile::findROM()
 		return res;
 
 	// other roms (B,C)
-	return synthLib::findROM(getRomSizeModelABC());
+	return {};	//synthLib::findROM(getRomSizeModelABC());
 }
 
 std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, TIModel _wantedTIModel)

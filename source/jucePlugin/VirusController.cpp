@@ -348,7 +348,7 @@ namespace Virus
 
 	std::string Controller::loadParameterDescriptions(const virusLib::ROMFile::Model _model)
 	{
-        const auto name = virusLib::ROMFile::isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
+		const auto name = _model == virusLib::ROMFile::Model::Invalid || virusLib::ROMFile::isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
         const auto path = synthLib::getModulePath() +  name;
 
         const std::ifstream f(path.c_str(), std::ios::in);
