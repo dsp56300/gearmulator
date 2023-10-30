@@ -693,7 +693,8 @@
 		[
 			"--", "Lead",	"Bass",	"Pad",	"Decay",	"Pluck",
 			"Acid", "Classic", "Arpeggiator", "Effects",	"Drums",	"Percussion",
-			"Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3"
+			"Input", "Vocoder", "Favourite 1", "Favourite 2", "Favourite 3",
+			"Organ", "Piano", "String", "FM", "Digital", "Atomizer"
 		],
 		"reverbRoomSize":
 		[
