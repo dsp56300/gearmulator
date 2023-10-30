@@ -14,10 +14,21 @@ set(SOURCES
 	processor.cpp processor.h
 )
 
+set(SOURCES_PATCHDB
+	patchdb/datasource.cpp patchdb/datasource.h
+	patchdb/db.cpp	patchdb/db.h
+	patchdb/patch.cpp patchdb/patch.h
+	patchdb/patchdbtypes.cpp patchdb/patchdbtypes.h
+	patchdb/patchhistory.cpp patchdb/patchhistory.h
+	patchdb/patchmodifications.cpp patchdb/patchmodifications.h
+	patchdb/tags.cpp patchdb/tags.h
+)
+
 add_library(jucePluginLib STATIC)
 
-target_sources(jucePluginLib PRIVATE ${SOURCES})
+target_sources(jucePluginLib PRIVATE ${SOURCES} ${SOURCES_PATCHDB})
 source_group("source" FILES ${SOURCES})
+source_group("source\\patchdb" FILES ${SOURCES_PATCHDB})
 
 target_link_libraries(jucePluginLib PUBLIC juceUiLib synthLib)
 target_include_directories(jucePluginLib PUBLIC ../JUCE/modules)

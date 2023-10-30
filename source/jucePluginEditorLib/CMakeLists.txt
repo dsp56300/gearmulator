@@ -6,6 +6,11 @@ set(SOURCES
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
 	midiPorts.cpp midiPorts.h
 	patchbrowser.cpp patchbrowser.h
+	patchmanager.cpp patchmanager.h
+	patchmanagertreeitem.cpp patchmanagertreeitem.h
+	patchmanagertree.cpp patchmanagertree.h
+	patchmanagerlist.cpp patchmanagerlist.h
+	patchmanagertypes.h
 	pluginEditor.cpp pluginEditor.h
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
