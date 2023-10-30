@@ -436,7 +436,12 @@ namespace Virus
 		}
 		else
 		{
-			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
+            const auto bank = toArrayIndex(patch.bankNumber);
+            const auto program = patch.progNumber;
+
+			m_singles[bank][program] = patch;
+
+			onRomPatchReceived(patch.bankNumber, program);
 		}
 	}
 

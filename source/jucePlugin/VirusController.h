@@ -120,6 +120,7 @@ namespace Virus
         void onStateLoaded() override;
 		std::function<void()> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
+		std::function<void(virusLib::BankNumber _bank, uint32_t _program)> onRomPatchReceived = {};
 
 		bool requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const;
 		bool requestSingle(uint8_t _bank, uint8_t _program) const;
