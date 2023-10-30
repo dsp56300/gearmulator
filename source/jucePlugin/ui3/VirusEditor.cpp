@@ -37,8 +37,11 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
+#if defined(_MSC_VER) && defined(_DEBUG)
+		m_patchManager.reset(new PatchManager(getController(), findComponent("page_presets")));
+#else
 		m_patchBrowser.reset(new PatchBrowser(*this));
-
+#endif
 		m_presetName = findComponentT<juce::Label>("PatchName");
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));

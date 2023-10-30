@@ -8,6 +8,7 @@
 #include "Tabs.h"
 #include "FxPage.h"
 #include "PatchBrowser.h"
+#include "PatchManager.h"
 #include "ControllerLinks.h"
 
 namespace jucePluginEditorLib
@@ -81,6 +82,7 @@ namespace genericVirusUI
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
+		std::unique_ptr<PatchManager> m_patchManager;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
