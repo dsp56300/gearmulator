@@ -20,6 +20,7 @@ namespace synthLib
     std::string findROM(size_t _minSize, size_t _maxSize);
 	std::string findROM(size_t _expectedSize = 524288);
 
+	std::string getExtension(const std::string& _name);
 	bool hasExtension(const std::string& _filename, const std::string& _extension);
 
 	void setFlushDenormalsToZero();

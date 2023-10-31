@@ -177,7 +177,7 @@ namespace synthLib
         return str;
     }
 
-    static std::string getExtension(const std::string &_name)
+    std::string getExtension(const std::string &_name)
     {
         const auto pos = _name.find_last_of('.');
         if (pos != std::string::npos)
@@ -269,6 +269,9 @@ namespace synthLib
 
     bool hasExtension(const std::string& _filename, const std::string& _extension)
     {
+        if (_extension.empty())
+            return true;
+
         return lowercase(getExtension(_filename)) == lowercase(_extension);
     }
 
@@ -313,7 +316,7 @@ namespace synthLib
             return true;
         }
 
-    	if(_data.size() < static_cast<size_t>(size))
+    	if(_data.size() != static_cast<size_t>(size))
             _data.resize(size);
 
     	const auto read = fread(&_data[0], 1, _data.size(), hFile);
