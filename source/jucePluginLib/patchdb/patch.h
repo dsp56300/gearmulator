@@ -13,8 +13,9 @@ namespace pluginLib::patchDB
 		virtual ~Patch() = default;
 
 		std::string name;
-		uint8_t bank = 0;
-		uint8_t program = 0;
+
+		uint32_t bank = g_invalidBank;
+		uint32_t program = g_invalidProgram;
 
 		DataSource source;
 

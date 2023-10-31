@@ -18,14 +18,22 @@ namespace jucePluginEditorLib
 		m_tree->setTransform(scale);
 
 		_root->addAndMakeVisible(m_tree);
+
+		startTimer(500);
 	}
 
 	PatchManager::~PatchManager()
 	{
+		stopTimer();
 		delete m_tree;
 	}
 
 	void PatchManager::addCategory(const std::string& _category)
 	{
+	}
+
+	void PatchManager::timerCallback()
+	{
+		uiProcess();
 	}
 }

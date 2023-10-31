@@ -5,6 +5,8 @@
 #include "../../jucePluginLib/patchdb/datasource.h"
 
 #include "../../virusLib/microcontroller.h"
+#include "../../virusLib/device.h"
+
 #include "juce_cryptography/hashing/juce_MD5.h"
 
 namespace Virus
@@ -58,7 +60,7 @@ namespace genericVirusUI
 		m_controller.onRomPatchReceived = {};
 	}
 
-	bool PatchManager::loadRomData(std::vector<uint8_t>& _result, const uint32_t _bank, const uint32_t _program)
+	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
 		const auto bankIndex = _bank + g_firstRomBankIndex;
 		const auto& singles = m_controller.getSinglePresets();
@@ -70,7 +72,7 @@ namespace genericVirusUI
 		const auto& s = bank[_program];
 		if (s.data.empty())
 			return false;
-		_result = s.data;
+		_results.push_back(s.data);
 		return true;
 	}
 
@@ -95,6 +97,17 @@ namespace genericVirusUI
 		const auto idxArpMode = c.getParameterIndexByName("Arp Mode");
 
 		auto patch = std::make_shared<Patch>();
+
+		{
+			const auto it = data.find(pluginLib::MidiDataType::Bank);
+			if (it != data.end())
+				patch->bank = it->second;
+		}
+		{
+			const auto it = data.find(pluginLib::MidiDataType::Program);
+			if (it != data.end())
+				patch->program = it->second;
+		}
 
 		patch->sysex = _sysex;
 		patch->source = _ds;
@@ -124,6 +137,28 @@ namespace genericVirusUI
 			patch->categories.push_back(paramCategory2->getDescription().valueList.valueToText(category2));
 
 		return patch;
+	}
+
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	{
+		{
+			std::vector<synthLib::SMidiEvent> events;
+			virusLib::Device::parseTIcontrolPreset(events, _data);
+
+			for (const auto& e : events)
+			{
+				if (!e.sysex.empty())
+					_results.push_back(e.sysex);
+			}
+
+			if (!_results.empty())
+				return true;
+		}
+
+		if (virusLib::Device::parsePowercorePreset(_results, _data))
+			return true;
+
+		return jucePluginEditorLib::PatchManager::parseFileData(_results, _data);
 	}
 
 	void PatchManager::addRomPatches()
