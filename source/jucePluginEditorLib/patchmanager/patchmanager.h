@@ -14,15 +14,8 @@ namespace jucePluginEditorLib::patchManager
 		explicit PatchManager(juce::Component *_root);
 		~PatchManager() override;
 
-		void addCategories(const std::vector<std::string>& _categories)
-		{
-			for (const auto& category : _categories)
-				addCategory(category);
-		}
-
-		void addCategory(const std::string& _category);
-
 		void timerCallback() override;
+
 	private:
 		Tree* m_tree = nullptr;
 	};

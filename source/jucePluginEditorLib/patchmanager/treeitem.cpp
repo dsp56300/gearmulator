@@ -1,15 +1,44 @@
 #include "treeitem.h"
 
+#include "patchmanager.h"
+
 namespace jucePluginEditorLib::patchManager
 {
-	TreeItem::TreeItem()
+	TreeItem::TreeItem(PatchManager& _patchManager, std::string _title) : m_patchManager(_patchManager), m_title(std::move(_title))
 	{
 	}
 
-	void TreeItem::paintItem(juce::Graphics& _g, int _width, int _height)
+	void TreeItem::setTitle(const std::string& _title)
+	{
+		if (m_title == _title)
+			return;
+		m_title = _title;
+		repaintItem();
+	}
+
+	void TreeItem::processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches)
+	{
+		if (_dirtySearches.find(m_searchHandle) == _dirtySearches.end())
+			return;
+
+		const auto& search = getPatchManager().getSearch(m_searchHandle);
+		if (!search)
+			return;
+
+		processSearchUpdated(*search);
+	}
+
+	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
+	{
+		m_searchHandle = getPatchManager().search(std::move(_request), [](const pluginLib::patchDB::SearchResult&)
+		{
+		});
+	}
+
+	void TreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
 		_g.setColour(juce::Colour(0xffffffff));
-		_g.drawText("Root", 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
+		_g.drawText(m_title.c_str(), 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
 }

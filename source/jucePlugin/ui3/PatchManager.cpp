@@ -52,16 +52,29 @@ namespace genericVirusUI
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
 		const auto bankIndex = _bank + g_firstRomBankIndex;
+
 		const auto& singles = m_controller.getSinglePresets();
+
 		if (bankIndex >= singles.size())
 			return false;
+
 		const auto& bank = singles[bankIndex];
-		if (_program >= bank.size())
-			return false;
-		const auto& s = bank[_program];
-		if (s.data.empty())
-			return false;
-		_results.push_back(s.data);
+
+		if(_program != pluginLib::patchDB::g_invalidProgram)
+		{
+			if (_program >= bank.size())
+				return false;
+			const auto& s = bank[_program];
+			if (s.data.empty())
+				return false;
+			_results.push_back(s.data);
+		}
+		else
+		{
+			_results.reserve(bank.size());
+			for (const auto& patch : bank)
+				_results.push_back(patch.data);
+		}
 		return true;
 	}
 

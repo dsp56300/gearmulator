@@ -3,6 +3,7 @@
 #include <deque>
 #include <functional>
 #include <map>
+#include <list>
 #include <thread>
 #include <shared_mutex>
 
@@ -20,14 +21,6 @@ namespace pluginLib::patchDB
 	class DB
 	{
 	public:
-		struct Dirty
-		{
-			bool categories = false;
-			bool tags = false;
-			std::set<SearchHandle> searches;
-			bool patches;
-		};
-
 		DB();
 		virtual ~DB();
 
@@ -37,6 +30,12 @@ namespace pluginLib::patchDB
 
 		uint32_t search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback);
 		void cancelSearch(uint32_t _handle);
+
+		std::shared_ptr<Search> getSearch(SearchHandle _handle);
+
+		void getCategories(std::set<Tag>& _categories);
+		void getTags(std::set<Tag>& _tags);
+		const auto& getDataSources() const { return m_dataSources; }
 
 	protected:
 		virtual bool loadData(DataList& _results, const DataSource& _ds);
@@ -73,10 +72,11 @@ namespace pluginLib::patchDB
 		std::map<PatchKey, PatchPtr> m_patches;
 		std::set<Tag> m_tags;
 		std::set<Tag> m_categories;
+		std::vector<DataSource> m_dataSources;
 
 		// search
 		std::mutex m_searchesMutex;
-		std::map<uint32_t, Search> m_searches;
+		std::map<uint32_t, std::shared_ptr<Search>> m_searches;
 		std::set<SearchHandle> m_cancelledSearches;
 		uint32_t m_nextSearchHandle = 0;
 	};

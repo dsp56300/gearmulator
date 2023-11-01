@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <shared_mutex>
 
 #include "datasource.h"
 #include "patch.h"
@@ -22,9 +23,6 @@ namespace pluginLib::patchDB
 
 	using SearchResult = std::map<PatchKey, PatchPtr>;
 	using SearchCallback = std::function<void(const SearchResult&)>;
-	using SearchHandle = uint32_t;
-
-	static constexpr SearchHandle g_invalidSearchHandle = ~0;
 
 	enum class SearchState
 	{
@@ -36,9 +34,21 @@ namespace pluginLib::patchDB
 	struct Search
 	{
 		SearchHandle handle = g_invalidSearchHandle;
+
 		SearchRequest request;
+
 		SearchCallback callback;
-		SearchResult result;
+
+		SearchResult results;
+
+		mutable std::shared_mutex resultsMutex;
+
 		SearchState state = SearchState::NotStarted;
+
+		size_t getResultSize() const
+		{
+			std::shared_lock searchLock(resultsMutex);
+			return results.size();
+		}
 	};
 }

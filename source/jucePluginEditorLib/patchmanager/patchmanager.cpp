@@ -10,10 +10,10 @@ namespace jucePluginEditorLib::patchManager
 	PatchManager::PatchManager(juce::Component* _root)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
-		const auto rootH = _root->getHeight() / g_scale;
+//		const auto rootH = _root->getHeight() / g_scale;
 		const auto scale = juce::AffineTransform::scale(g_scale);
 
-		m_tree = new Tree();
+		m_tree = new Tree(*this);
 		m_tree->setSize(rootW / 3, _root->getHeight() * g_scale);
 		m_tree->setTransform(scale);
 
@@ -30,7 +30,9 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::timerCallback()
 	{
-		Dirty dirty;
+		pluginLib::patchDB::Dirty dirty;
 		uiProcess(dirty);
+
+		m_tree->processDirty(dirty);
 	}
 }
