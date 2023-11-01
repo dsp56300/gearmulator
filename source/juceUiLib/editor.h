@@ -79,6 +79,8 @@ namespace genericUI
 
 		void setCurrentPart(uint8_t _part);
 
+		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
+
 	private:
 		EditorInterface& m_interface;
 
