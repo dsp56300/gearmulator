@@ -1,6 +1,7 @@
 #include "midiToSysex.h"
 
 #include <cstdio>
+#include <cstring>	// memcmp
 
 #include "dsp56kEmu/logging.h"
 
