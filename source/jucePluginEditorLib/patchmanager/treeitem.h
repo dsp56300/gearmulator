@@ -2,12 +2,12 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-namespace jucePluginEditorLib
+namespace jucePluginEditorLib::patchManager
 {
-	class PatchManagerTreeItem : public juce::TreeViewItem
+	class TreeItem : public juce::TreeViewItem
 	{
 	public:
-		PatchManagerTreeItem();
+		TreeItem();
 
 	private:
 		bool mightContainSubItems() override
@@ -15,6 +15,6 @@ namespace jucePluginEditorLib
 			return true;
 		}
 
-		void paintItem(juce::Graphics& g, int width, int height) override;
+		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 	};
 }

@@ -4,9 +4,9 @@
 
 #include "../../jucePluginLib/patchdb/db.h"
 
-namespace jucePluginEditorLib
+namespace jucePluginEditorLib::patchManager
 {
-	class PatchManagerTree;
+	class Tree;
 
 	class PatchManager : public pluginLib::patchDB::DB, juce::Timer
 	{
@@ -24,6 +24,6 @@ namespace jucePluginEditorLib
 
 		void timerCallback() override;
 	private:
-		PatchManagerTree* m_tree = nullptr;
+		Tree* m_tree = nullptr;
 	};
 }

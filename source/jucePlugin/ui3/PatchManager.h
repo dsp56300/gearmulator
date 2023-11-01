@@ -12,7 +12,7 @@ namespace Virus
 
 namespace genericVirusUI
 {
-	class PatchManager : public jucePluginEditorLib::PatchManager
+	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
 		struct Patch final : pluginLib::patchDB::Patch

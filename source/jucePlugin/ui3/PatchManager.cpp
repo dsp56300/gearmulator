@@ -30,7 +30,7 @@ namespace genericVirusUI
 		return ds;
 	}
 
-	PatchManager::PatchManager(Virus::Controller& _controller, juce::Component* _root) : jucePluginEditorLib::PatchManager(_root), m_controller(_controller)
+	PatchManager::PatchManager(Virus::Controller& _controller, juce::Component* _root) : jucePluginEditorLib::patchManager::PatchManager(_root), m_controller(_controller)
 	{
 		addRomPatches();
 
@@ -147,7 +147,7 @@ namespace genericVirusUI
 		if (virusLib::Device::parsePowercorePreset(_results, _data))
 			return true;
 
-		return jucePluginEditorLib::PatchManager::parseFileData(_results, _data);
+		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
 	}
 
 	void PatchManager::addRomPatches()

@@ -3,7 +3,7 @@
 #include "tree.h"
 #include "treeitem.h"
 
-namespace jucePluginEditorLib
+namespace jucePluginEditorLib::patchManager
 {
 	constexpr int g_scale = 2;
 
@@ -13,7 +13,7 @@ namespace jucePluginEditorLib
 		const auto rootH = _root->getHeight() / g_scale;
 		const auto scale = juce::AffineTransform::scale(g_scale);
 
-		m_tree = new PatchManagerTree();
+		m_tree = new Tree();
 		m_tree->setSize(rootW / 3, _root->getHeight() * g_scale);
 		m_tree->setTransform(scale);
 

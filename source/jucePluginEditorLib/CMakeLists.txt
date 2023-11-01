@@ -13,10 +13,14 @@ set(SOURCES
 )
 
 set(SOURCES_PM
-	patchmanager/patchmanager.cpp patchmanager/patchmanager.h
-	patchmanager/treeitem.cpp patchmanager/treeitem.h
-	patchmanager/tree.cpp patchmanager/tree.h
+	patchmanager/categorytreeitem.cpp patchmanager/categorytreeitem.h
+	patchmanager/datasourcetreeitem.cpp patchmanager/datasourcetreeitem.h
 	patchmanager/list.cpp patchmanager/list.h
+	patchmanager/patchmanager.cpp patchmanager/patchmanager.h
+	patchmanager/roottreeitem.cpp patchmanager/roottreeitem.h
+	patchmanager/tagtreeitem.cpp patchmanager/tagtreeitem.h
+	patchmanager/tree.cpp patchmanager/tree.h
+	patchmanager/treeitem.cpp patchmanager/treeitem.h
 	patchmanager/types.h
 )
 

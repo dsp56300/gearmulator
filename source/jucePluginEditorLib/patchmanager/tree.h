@@ -2,13 +2,13 @@
 
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
-namespace jucePluginEditorLib
+namespace jucePluginEditorLib::patchManager
 {
-	class PatchManagerTree : public juce::TreeView
+	class Tree : public juce::TreeView
 	{
 	public:
-		PatchManagerTree();
-		~PatchManagerTree() override;
+		Tree();
+		~Tree() override;
 
 	private:
 	};
