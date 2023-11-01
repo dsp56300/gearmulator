@@ -92,6 +92,8 @@ namespace genericUI
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
 		std::map<std::string, TabGroup*> m_tabGroupsByName;
 
+		juce::TooltipWindow m_tooltipWindow;
+
 		float m_scale = 1.0f;
 	};
 }

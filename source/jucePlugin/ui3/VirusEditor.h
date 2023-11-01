@@ -97,8 +97,6 @@ namespace genericVirusUI
 
 		juce::Label* m_deviceModel = nullptr;
 
-		juce::TooltipWindow m_tooltipWindow;
-
 		std::function<void()> m_openMenuCallback;
 	};
 }
