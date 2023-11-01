@@ -1,6 +1,6 @@
-#include "patchmanagertree.h"
+#include "tree.h"
 
-#include "patchmanagertreeitem.h"
+#include "treeitem.h"
 
 namespace jucePluginEditorLib
 {

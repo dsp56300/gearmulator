@@ -1,4 +1,4 @@
-#include "patchmanagertreeitem.h"
+#include "treeitem.h"
 
 namespace jucePluginEditorLib
 {

@@ -2,7 +2,7 @@
 
 #include <juce_audio_plugin_client/juce_audio_plugin_client.h>
 
-#include "../jucePluginLib/patchdb/db.h"
+#include "../../jucePluginLib/patchdb/db.h"
 
 namespace jucePluginEditorLib
 {

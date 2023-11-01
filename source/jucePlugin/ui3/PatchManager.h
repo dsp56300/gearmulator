@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../jucePluginEditorLib/patchmanager.h"
+#include "../../jucePluginEditorLib/patchmanager/patchmanager.h"
 #include "../../jucePluginLib/patchdb/patch.h"
 
 #include "../../virusLib/microcontrollerTypes.h"
