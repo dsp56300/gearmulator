@@ -26,11 +26,24 @@ namespace jucePluginEditorLib::patchManager
 		addGroup(GroupType::Categories);
 		addGroup(GroupType::Tags);
 		addGroup(GroupType::Favourites);
+
+		getViewport()->setScrollBarsShown(true, true);
 	}
 
 	Tree::~Tree()
 	{
 		deleteRootItem();
+	}
+
+	void Tree::updateDataSources()
+	{
+		auto* item = getItem(GroupType::DataSources);
+		if (!item)
+			return;
+
+		const auto& sources = m_patchManager.getDataSources();
+
+		item->updateFromDataSources(sources);
 	}
 
 	void Tree::updateCategories()
@@ -58,6 +71,9 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
+		if (_dirty.dataSources)
+			updateDataSources();
+
 		if (_dirty.categories)
 			updateCategories();
 
@@ -67,9 +83,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!_dirty.searches.empty())
 		{
 			for (const auto& it : m_groupItems)
-			{
 				it.second->processDirty(_dirty.searches);
-			}
 		}
 	}
 

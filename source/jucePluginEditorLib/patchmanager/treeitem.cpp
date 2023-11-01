@@ -1,6 +1,9 @@
 #include "treeitem.h"
 
+#include "list.h"
 #include "patchmanager.h"
+
+#include "../../jucePluginLib/patchdb/patchdbtypes.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -26,6 +29,32 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		processSearchUpdated(*search);
+	}
+
+	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
+	{
+		TreeViewItem::itemSelectionChanged(_isNowSelected);
+
+		if (_isNowSelected)
+			getPatchManager().setSelectedSearch(getSearchHandle());
+	}
+
+	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+	{
+		TreeViewItem::itemDropped(dragSourceDetails, insertIndex);
+	}
+
+	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+	{
+		const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get());
+
+		if (!list)
+			return false;
+
+		if (m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+			return false;
+
+		return true;
 	}
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)

@@ -41,16 +41,19 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	void GroupTreeItem::updateFromDataSources(const std::set<std::string>& _tags)
+	void GroupTreeItem::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSource>& _dataSources)
 	{
-		const auto& ds = getPatchManager().getDataSources();
-
-		for (const auto& d : ds)
+		for (const auto& d : _dataSources)
 		{
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 				continue;
 			auto* item = new DatasourceTreeItem(getPatchManager(), d);
+
+			addSubItem(item);
 			m_itemsByDataSource.insert({ d, item });
+
+			if (m_itemsByDataSource.size() == 1)
+				setOpen(true);
 		}
 	}
 

@@ -16,16 +16,13 @@ namespace Virus
 
 namespace genericVirusUI
 {
-	const auto g_firstRomBankIndex = toArrayIndex(virusLib::BankNumber::C);
-
-	pluginLib::patchDB::DataSource createRomDataSource(const uint32_t _bank, const uint32_t _program)
+	pluginLib::patchDB::DataSource createRomDataSource(const uint32_t _bank)
 	{
 		pluginLib::patchDB::DataSource ds;
 		ds.type = pluginLib::patchDB::SourceType::Rom;
 		ds.bank = _bank;
-		ds.program = _program;
 		char temp[32];
-		snprintf(temp, sizeof(temp), "ROM %c", 'C' + _bank);
+		snprintf(temp, sizeof(temp), "ROM %c", 'A' + _bank);
 		ds.name = temp;
 		return ds;
 	}
@@ -39,8 +36,18 @@ namespace genericVirusUI
 		{
 			if (_bank == virusLib::BankNumber::EditBuffer || _bank < virusLib::BankNumber::C)
 				return;
-			const auto index = virusLib::toArrayIndex(_bank) - g_firstRomBankIndex;
-			addDataSource(createRomDataSource(index, _program));
+
+			const auto index = virusLib::toArrayIndex(_bank);
+
+			const auto& banks = m_controller.getSinglePresets();
+
+			if(index < banks.size())
+			{
+				const auto& bank = banks[index];
+
+				if(_program == bank.size() - 1)
+					addDataSource(createRomDataSource(index));
+			}
 		};
 	}
 
@@ -51,7 +58,7 @@ namespace genericVirusUI
 
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
-		const auto bankIndex = _bank + g_firstRomBankIndex;
+		const auto bankIndex = _bank;
 
 		const auto& singles = m_controller.getSinglePresets();
 
@@ -171,15 +178,12 @@ namespace genericVirusUI
 		{
 			const auto& bank = singles[b];
 
-			for (uint32_t p = 0; p < bank.size(); ++p)
-			{
-				const auto& single = bank[p];
+			const auto& single = bank[bank.size()-1];
 
-				if (single.data.empty())
-					continue;
+			if (single.data.empty())
+				continue;
 
-				addDataSource(createRomDataSource(b, p));
-			}
+			addDataSource(createRomDataSource(b));
 		}
 	}
 }

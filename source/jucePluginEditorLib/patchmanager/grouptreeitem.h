@@ -27,8 +27,8 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void updateFromTags(const std::set<std::string>& _tags);
-		void updateFromDataSources(const std::set<std::string>& _tags);
-		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
+		void updateFromDataSources(const std::vector<pluginLib::patchDB::DataSource>& _dataSources);
+		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches) override;
 
 	private:
 		const GroupType m_type;

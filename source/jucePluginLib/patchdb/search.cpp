@@ -23,6 +23,14 @@ namespace pluginLib::patchDB
 			return t.find(_search) != std::string::npos;
 		}
 
+		bool matchStrings(const std::string& _test, const std::string& _search)
+		{
+			if (_search.empty())
+				return true;
+
+			return _test.find(_search) != std::string::npos;
+		}
+
 		bool testTags(const Tags& _tags, const Tags& _search)
 		{
 			for (const auto& t : _search.getAdded())
@@ -46,13 +54,13 @@ namespace pluginLib::patchDB
 		if(source.type != SourceType::Invalid && _patch.source.type != source.type)
 			return false;
 
-		if(source.bank != g_invalidBank && source.bank != _patch.source.bank != source.bank)
+		if(source.bank != g_invalidBank && _patch.source.bank != source.bank)
 			return false;
 
-		if (source.program != g_invalidProgram && source.program != _patch.source.program != source.program)
+		if (source.program != g_invalidProgram && _patch.source.program != source.program)
 			return false;
 
-		if (!matchStringsIgnoreCase(_patch.source.name, source.name))
+		if (!matchStrings(_patch.source.name, source.name))
 			return false;
 
 		// name

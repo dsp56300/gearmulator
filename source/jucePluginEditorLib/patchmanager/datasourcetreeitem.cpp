@@ -1,6 +1,7 @@
 #include "datasourcetreeitem.h"
 
 #include "../../jucePluginLib/patchdb/datasource.h"
+#include "../../jucePluginLib/patchdb/search.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -25,5 +26,13 @@ namespace jucePluginEditorLib::patchManager
 
 	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSource& _ds) : TreeItem(_pm, getTitle(_ds))
 	{
+		pluginLib::patchDB::SearchRequest sr;
+		sr.source = _ds;
+		search(std::move(sr));
+	}
+
+	void DatasourceTreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
+	{
+		setTitle(getTitle(_search.request.source) + " (" + std::to_string(_search.getResultSize()) + ")");
 	}
 }

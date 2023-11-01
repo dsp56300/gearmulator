@@ -12,5 +12,10 @@ namespace jucePluginEditorLib::patchManager
 		{
 			return true;
 		}
+
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override
+		{
+			return false;
+		}
 	};
 }

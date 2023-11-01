@@ -17,5 +17,12 @@ namespace jucePluginEditorLib::patchManager
 		{
 			return false;
 		}
+
+		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
+
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override
+		{
+				return false;
+		}
 	};
 }

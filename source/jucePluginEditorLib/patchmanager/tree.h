@@ -20,6 +20,7 @@ namespace jucePluginEditorLib::patchManager
 		Tree(PatchManager& _patchManager);
 		~Tree() override;
 
+		void updateDataSources();
 		void updateCategories();
 		void updateTags();
 

@@ -25,7 +25,12 @@ namespace jucePluginEditorLib::patchManager
 
 		auto getSearchHandle() const { return m_searchHandle; }
 
-		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
+		virtual void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
+
+		void itemSelectionChanged(bool _isNowSelected) override;
+
+		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
 
 	protected:
 		void search(pluginLib::patchDB::SearchRequest&& _request);
