@@ -22,7 +22,18 @@ namespace pluginLib::patchDB
 			m_removed.insert(_tag);
 		}
 
-		const auto& get() const { return m_added; }
+		const auto& getAdded() const { return m_added; }
+		const auto& getRemoved() const { return m_removed; }
+
+		bool containsAdded(const Tag& _tag) const
+		{
+			return m_added.find(_tag) != m_added.end();
+		}
+
+		bool containsRemoved(const Tag& _tag) const
+		{
+			return m_removed.find(_tag) != m_added.end();
+		}
 
 	private:
 		std::set<Tag> m_added;

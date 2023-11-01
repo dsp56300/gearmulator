@@ -18,14 +18,6 @@ namespace genericVirusUI
 {
 	const auto g_firstRomBankIndex = toArrayIndex(virusLib::BankNumber::C);
 
-	constexpr const char* const g_categories[] = 
-	{
-		"Off", "Lead", "Bass", "Pad", "Decay", "Pluck", "Acid", "Classic",
-		"Arpeggiator", "Effects", "Drums", "Percussion", "Input", "Vocoder",
-		"Favourite 1", "Favourite 2", "Favourite 3",
-		"Organ", "Piano", "String", "FM", "Digital", "Atomizer"
-	};
-
 	pluginLib::patchDB::DataSource createRomDataSource(const uint32_t _bank, const uint32_t _program)
 	{
 		pluginLib::patchDB::DataSource ds;
@@ -40,9 +32,6 @@ namespace genericVirusUI
 
 	PatchManager::PatchManager(Virus::Controller& _controller, juce::Component* _root) : jucePluginEditorLib::PatchManager(_root), m_controller(_controller)
 	{
-		for (const auto& category : g_categories)
-			addCategory(category);
-
 		addRomPatches();
 
 		// rom patches are received via midi, make sure we add all remaining ones, too
@@ -132,9 +121,9 @@ namespace genericVirusUI
 		const auto* paramCategory2 = c.getParameter(idxCategory2, 0);
 
 		if (category1)
-			patch->categories.push_back(paramCategory1->getDescription().valueList.valueToText(category1));
+			patch->categories.add(paramCategory1->getDescription().valueList.valueToText(category1));
 		if (category2)
-			patch->categories.push_back(paramCategory2->getDescription().valueList.valueToText(category2));
+			patch->categories.add(paramCategory2->getDescription().valueList.valueToText(category2));
 
 		return patch;
 	}

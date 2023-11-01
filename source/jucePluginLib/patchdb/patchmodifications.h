@@ -1,8 +1,13 @@
 #pragma once
 
+#include "tags.h"
+
 namespace pluginLib::patchDB
 {
-	class PatchModifications
+	struct PatchModifications
 	{
+		Tags tags;
+		Tags categories;
+		std::string name;
 	};
 }

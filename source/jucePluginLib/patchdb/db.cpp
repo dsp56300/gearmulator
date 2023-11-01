@@ -8,22 +8,24 @@
 
 namespace pluginLib::patchDB
 {
-	static void findFiles(std::vector<std::string>& _files, const std::string& _dir)
+	namespace
 	{
-		std::vector<std::string> files;
-		synthLib::findFiles(files, _dir, {}, 0, 0);
-
-		for (const auto& file : files)
+		void findFiles(std::vector<std::string>& _files, const std::string& _dir)
 		{
-			FILE* hFile = fopen(file.c_str(), "rb");
-			if (hFile)
+			std::vector<std::string> files;
+			synthLib::findFiles(files, _dir, {}, 0, 0);
+
+			for (const auto& file : files)
 			{
-				fclose(hFile);
-				_files.push_back(file);
-			}
-			else
-			{
-				findFiles(_files, file);
+				if (FILE* hFile = fopen(file.c_str(), "rb"))
+				{
+					fclose(hFile);  // NOLINT(cert-err33-c) - why? What am I supposed to do if I cannot close a file, eh?
+					_files.push_back(file);
+				}
+				else
+				{
+					findFiles(_files, file);
+				}
 			}
 		}
 	}
@@ -34,6 +36,11 @@ namespace pluginLib::patchDB
 		{
 			loaderThreadFunc();
 		}));
+
+		DataSource ds;
+		ds.type = SourceType::Folder;
+		ds.name = "f:\\AccessVirusEmulator\\Presets";
+		addDataSource(ds);
 	}
 
 	DB::~DB()
@@ -63,16 +70,46 @@ namespace pluginLib::patchDB
 		});
 	}
 
-	void DB::uiProcess()
+	void DB::uiProcess(Dirty& _dirty)
 	{
 		std::list<std::function<void()>> uiFuncs;
 		{
 			std::scoped_lock lock(m_uiMutex);
 			std::swap(uiFuncs, m_uiFuncs);
+			_dirty = m_dirty;
+			m_dirty = {};
 		}
 
 		for (const auto& func : uiFuncs)
 			func();
+	}
+
+	uint32_t DB::search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback)
+	{
+		const auto handle = m_nextSearchHandle++;
+
+		Search s;
+
+		s.handle = handle;
+		s.request = std::move(_request);
+		s.callback = std::move(_callback);
+
+		runOnLoaderThread([this, s]
+		{
+			Search search = s;
+			if(executeSearch(search))
+			{
+				std::scoped_lock lock(m_searchesMutex);
+				m_searches.insert({ search.handle, search });
+			}
+		});
+
+		return s.handle;
+	}
+
+	void DB::cancelSearch(const uint32_t _handle)
+	{
+		m_cancelledSearches.insert(_handle);
 	}
 
 	bool DB::loadData(DataList& _results, const DataSource& _ds)
@@ -105,8 +142,8 @@ namespace pluginLib::patchDB
 
 				return !_results.empty();
 			}
-		default:
-			assert(false && "unknown data source type");
+//		default:
+//			assert(false && "unknown data source type");
 		}
 		return false;
 	}
@@ -160,15 +197,101 @@ namespace pluginLib::patchDB
 
 		m_patches.insert({key, _patch});
 
+		// add to ongoing searches
+		std::scoped_lock lockSearches(m_searchesMutex);
+
+		for (auto& it : m_searches)
+		{
+			auto& search = it.second;
+
+			if (search.request.match(*_patch))
+			{
+				const auto oldCount = search.result.size();
+				search.result.insert({ key, _patch });
+				const auto newCount = search.result.size();
+				if(newCount > oldCount)
+				{
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.searches.insert(it.first);
+				}
+			}
+		}
+
+		// add to all known categories
+		{
+			const auto oldCount = m_categories.size();
+			for (const auto& c : _patch->categories.getAdded())
+				m_categories.insert(c);
+			const auto newCount = m_categories.size();
+			if(newCount != oldCount)
+			{
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.categories = true;
+			}
+		}
+
+		// add to all known tags
+		{
+			const auto oldCount = m_tags.size();
+			for (const auto& c : _patch->tags.getAdded())
+				m_tags.insert(c);
+			const auto newCount = m_tags.size();
+			if (newCount != oldCount)
+			{
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.tags = true;
+			}
+		}
+
 		return true;
 	}
 
-	void DB::addCategory(const std::string& _category, const PatchKey& _key)
+	bool DB::removePatch(const PatchKey& _key)
 	{
-		const auto it = m_categories.find(_category);
-		if (it != m_categories.end())
-			it->second.insert(_key);
-		else
-			m_categories.insert({ _category, {_key} });
+		std::unique_lock lock(m_patchesMutex);
+
+		const auto it = m_patches.find(_key);
+		if (it == m_patches.end())
+			return false;
+
+		m_patches.erase(it);
+
+		// remove from searches
+		std::scoped_lock lockSearches(m_searchesMutex);
+
+		for (auto& itSearches : m_searches)
+		{
+			auto& search = itSearches.second;
+			search.result.erase(_key);
+		}
+
+		std::unique_lock lockUi(m_uiMutex);
+		m_dirty.patches = true;
+
+		return true;
+	}
+
+	bool DB::executeSearch(Search& _search)
+	{
+		const auto oldCount = _search.result.size();
+
+		for (const auto& [key, patchPtr] : m_patches)
+		{
+			if (m_cancelledSearches.find(_search.handle) != m_cancelledSearches.end())
+				return false;
+
+			const auto* patch = patchPtr.get();
+			assert(patch);
+
+			if(_search.request.match(*patch))
+				_search.result.insert({ key, patchPtr });
+		}
+
+		if(_search.result.size() != oldCount)
+		{
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.searches.insert(_search.handle);
+		}
+		return true;
 	}
 }

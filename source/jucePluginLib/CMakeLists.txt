@@ -21,6 +21,7 @@ set(SOURCES_PATCHDB
 	patchdb/patchdbtypes.cpp patchdb/patchdbtypes.h
 	patchdb/patchhistory.cpp patchdb/patchhistory.h
 	patchdb/patchmodifications.cpp patchdb/patchmodifications.h
+	patchdb/search.cpp patchdb/search.h
 	patchdb/tags.cpp patchdb/tags.h
 )
 

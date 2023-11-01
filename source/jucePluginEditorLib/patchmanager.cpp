@@ -28,12 +28,9 @@ namespace jucePluginEditorLib
 		delete m_tree;
 	}
 
-	void PatchManager::addCategory(const std::string& _category)
-	{
-	}
-
 	void PatchManager::timerCallback()
 	{
-		uiProcess();
+		Dirty dirty;
+		uiProcess(dirty);
 	}
 }
