@@ -62,4 +62,16 @@ namespace jucePluginEditorLib::patchManager
 			return {};
 		return row;
 	}
+
+	void List::selectedRowsChanged(int lastRowSelected)
+	{
+		ListBoxModel::selectedRowsChanged(lastRowSelected);
+
+		const auto idx = getSelectedRow();
+
+		if (idx < 0 || idx >= m_patches.size())
+			return;
+
+		m_patchManager.setSelectedPatch(m_patches[idx]);
+	}
 }

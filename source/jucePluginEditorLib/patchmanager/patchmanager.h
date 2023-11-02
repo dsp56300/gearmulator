@@ -6,6 +6,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
+	class Info;
 	class List;
 	class Tree;
 
@@ -18,9 +19,11 @@ namespace jucePluginEditorLib::patchManager
 		void timerCallback() override;
 
 		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle);
+		void setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch);
 
 	private:
 		Tree* m_tree = nullptr;
 		List* m_list = nullptr;
+		Info* m_info = nullptr;
 	};
 }

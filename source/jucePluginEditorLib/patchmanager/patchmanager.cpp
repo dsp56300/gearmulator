@@ -1,5 +1,6 @@
 #include "patchmanager.h"
 
+#include "info.h"
 #include "list.h"
 #include "tree.h"
 #include "treeitem.h"
@@ -30,7 +31,13 @@ namespace jucePluginEditorLib::patchManager
 
 		addAndMakeVisible(m_list);
 
-		startTimer(500);
+		m_info = new Info(*this);
+		m_info->setSize(rootW / 3, rootH);
+		m_info->setTopLeftPosition(m_tree->getWidth() + m_list->getWidth(), 0);
+
+		addAndMakeVisible(m_info);
+
+		startTimer(200);
 	}
 
 	PatchManager::~PatchManager()
@@ -38,6 +45,7 @@ namespace jucePluginEditorLib::patchManager
 		stopTimer();
 		delete m_tree;
 		delete m_list;
+		delete m_info;
 	}
 
 	void PatchManager::timerCallback()
@@ -51,5 +59,10 @@ namespace jucePluginEditorLib::patchManager
 	void PatchManager::setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle)
 	{
 		m_list->setContent(_handle);
+	}
+
+	void PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		m_info->setPatch(_patch);
 	}
 }
