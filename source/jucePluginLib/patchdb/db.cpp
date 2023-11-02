@@ -23,10 +23,8 @@ namespace pluginLib::patchDB
 
 	DB::~DB()
 	{
-		m_destroy = true;
-		runOnLoaderThread([] {});
-		m_loader->join();
-		m_loader.reset();
+		assert(m_destroy && "stopLoaderThread() needs to be called by derived class in destructor");
+		stopLoaderThread();
 	}
 
 	void DB::addDataSource(const DataSource& _ds)
@@ -164,6 +162,17 @@ namespace pluginLib::patchDB
 	{
 		synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 		return !_results.empty();
+	}
+
+	void DB::stopLoaderThread()
+	{
+		if (m_destroy)
+			return;
+
+		m_destroy = true;
+		runOnLoaderThread([] {});
+		m_loader->join();
+		m_loader.reset();
 	}
 
 	void DB::loaderThreadFunc()

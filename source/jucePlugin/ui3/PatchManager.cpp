@@ -53,6 +53,7 @@ namespace genericVirusUI
 
 	PatchManager::~PatchManager()
 	{
+		stopLoaderThread();
 		m_controller.onRomPatchReceived = {};
 	}
 
