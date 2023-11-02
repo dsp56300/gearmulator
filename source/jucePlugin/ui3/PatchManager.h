@@ -28,7 +28,7 @@ namespace genericVirusUI
 
 		// PatchDB impl
 		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
-		std::shared_ptr<pluginLib::patchDB::Patch> initializePatch(const std::vector<uint8_t>& _sysex, const pluginLib::patchDB::DataSource& _ds) override;
+		std::shared_ptr<pluginLib::patchDB::Patch> initializePatch(const std::vector<uint8_t>& _sysex, const pluginLib::patchDB::DataSourcePtr& _ds) override;
 		bool parseFileData(std::vector<std::vector<uint8_t>>& _results, const std::vector<uint8_t>& _data) override;
 
 	private:

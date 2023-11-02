@@ -21,7 +21,7 @@ namespace jucePluginEditorLib::patchManager
 
 		PatchManager& getPatchManager() const { return m_patchManager; }
 
-		void setTitle(const std::string& _title);
+		virtual void setTitle(const std::string& _title);
 
 		auto getSearchHandle() const { return m_searchHandle; }
 

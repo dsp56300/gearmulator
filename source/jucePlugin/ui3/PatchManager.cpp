@@ -85,7 +85,7 @@ namespace genericVirusUI
 		return true;
 	}
 
-	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(const std::vector<uint8_t>& _sysex, const pluginLib::patchDB::DataSource& _ds)
+	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(const std::vector<uint8_t>& _sysex, const pluginLib::patchDB::DataSourcePtr& _ds)
 	{
 		if (_sysex.size() < 267)
 			return nullptr;

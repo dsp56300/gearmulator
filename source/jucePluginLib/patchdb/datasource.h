@@ -8,6 +8,8 @@ namespace pluginLib::patchDB
 {
 	struct DataSource
 	{
+		DataSourcePtr parent;
+
 		SourceType type = SourceType::Invalid;
 		std::string name;
 		uint32_t bank = g_invalidBank;
@@ -15,7 +17,7 @@ namespace pluginLib::patchDB
 
 		bool operator == (const DataSource& _ds) const
 		{
-			return type == _ds.type && name == _ds.name && bank == _ds.bank && program == _ds.program;
+			return parent == _ds.parent && type == _ds.type && name == _ds.name && bank == _ds.bank && program == _ds.program;
 		}
 
 		bool operator != (const DataSource& _ds) const
@@ -25,6 +27,9 @@ namespace pluginLib::patchDB
 
 		bool operator < (const DataSource& _ds) const
 		{
+			if (parent < _ds.parent)	return true;
+			if (parent > _ds.parent)	return false;
+
 			if (type < _ds.type)		return true;
 			if (type > _ds.type)		return false;
 

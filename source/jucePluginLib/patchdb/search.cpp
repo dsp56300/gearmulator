@@ -46,21 +46,32 @@ namespace pluginLib::patchDB
 			}
 			return true;
 		}
+
+		bool matchDataSource(const DataSource& _source, const DataSource& _search)
+		{
+			if (_source.parent && matchDataSource(*_source.parent, _search))
+				return true;
+
+			if (_search.type != SourceType::Invalid && _source.type != _search.type)
+				return false;
+
+			if (_search.bank != g_invalidBank && _source.bank != _search.bank)
+				return false;
+
+			if (_search.program != g_invalidProgram && _source.program != _search.program)
+				return false;
+
+			if (!matchStrings(_source.name, _search.name))
+				return false;
+
+			return true;
+		}
 	}
 
 	bool SearchRequest::match(const Patch& _patch) const
 	{
 		// datasource
-		if(source.type != SourceType::Invalid && _patch.source.type != source.type)
-			return false;
-
-		if(source.bank != g_invalidBank && _patch.source.bank != source.bank)
-			return false;
-
-		if (source.program != g_invalidProgram && _patch.source.program != source.program)
-			return false;
-
-		if (!matchStrings(_patch.source.name, source.name))
+		if (!matchDataSource(*_patch.source, source))
 			return false;
 
 		// name

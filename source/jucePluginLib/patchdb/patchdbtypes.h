@@ -34,4 +34,7 @@ namespace pluginLib::patchDB
 		std::set<SearchHandle> searches;
 		bool patches;
 	};
+
+	struct DataSource;
+	using DataSourcePtr = std::shared_ptr<DataSource>;
 }

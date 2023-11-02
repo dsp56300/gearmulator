@@ -8,28 +8,6 @@
 
 namespace pluginLib::patchDB
 {
-	namespace
-	{
-		void findFiles(std::vector<std::string>& _files, const std::string& _dir)
-		{
-			std::vector<std::string> files;
-			synthLib::findFiles(files, _dir, {}, 0, 0);
-
-			for (const auto& file : files)
-			{
-				if (FILE* hFile = fopen(file.c_str(), "rb"))
-				{
-					fclose(hFile);  // NOLINT(cert-err33-c) - why? What am I supposed to do if I cannot close a file, eh?
-					_files.push_back(file);
-				}
-				else
-				{
-					findFiles(_files, file);
-				}
-			}
-		}
-	}
-
 	DB::DB()
 	{
 		m_loader.reset(new std::thread([&]
@@ -53,23 +31,11 @@ namespace pluginLib::patchDB
 
 	void DB::addDataSource(const DataSource& _ds)
 	{
-		m_dataSources.push_back(_ds);
-		m_dirty.dataSources = true;
-
 		runOnLoaderThread([this, _ds]()
 		{
-			std::vector<std::vector<uint8_t>> data;
-			if(loadData(data, _ds))
-			{
-				for(uint32_t p=0; p<data.size(); ++p)
-				{
-					if (const auto patch = initializePatch(data[p], _ds))
-					{
-						patch->program = p;
-						addPatch(patch);
-					}
-				}
-			}
+			const auto ds = std::make_shared<DataSource>(_ds);
+
+			addDataSource(ds);
 		});
 	}
 
@@ -134,40 +100,64 @@ namespace pluginLib::patchDB
 		_tags = m_tags;
 	}
 
-	bool DB::loadData(DataList& _results, const DataSource& _ds)
+	bool DB::loadData(DataList& _results, const DataSourcePtr& _ds)
 	{
-		switch (_ds.type)
+		switch (_ds->type)
 		{
 		case SourceType::Invalid:
 			return false;
 		case SourceType::Rom:
-			return loadRomData(_results, _ds.bank, _ds.program);
+			return loadRomData(_results, _ds->bank, _ds->program);
 		case SourceType::File:
-			break;
+			return loadFile(_results, _ds->name);
 		case SourceType::Folder:
-			{
-				std::vector<std::string> files;
-				findFiles(files, _ds.name);
-
-				Data data;
-				data.reserve(16384);
-
-				for (const auto& file : files)
-				{
-					if(!synthLib::readFile(data, file))
-						continue;
-
-					DataList results;
-					if (parseFileData(results, data))
-						_results.insert(_results.end(), results.begin(), results.end());
-				}
-
-				return !_results.empty();
-			}
+			return loadFolder(_results, _ds);
 //		default:
 //			assert(false && "unknown data source type");
 		}
 		return false;
+	}
+
+	bool DB::loadFile(DataList& _results, const std::string& _file)
+	{
+		Data data;
+		data.reserve(16384);
+
+		const auto& file = _file;
+
+		if (!synthLib::readFile(data, file))
+			return false;
+
+		return parseFileData(_results, data);
+	}
+
+	bool DB::loadFolder(DataList& _results, const DataSourcePtr& _folder)
+	{
+		assert(_folder->type == SourceType::Folder);
+
+		std::vector<std::string> files;
+		synthLib::findFiles(files, _folder->name, {}, 0, 0);
+
+		for (const auto& file : files)
+		{
+			const auto child = std::make_shared<DataSource>();
+			child->parent = _folder;
+			child->name = file;
+
+			if (FILE* hFile = fopen(file.c_str(), "rb"))
+			{
+				fclose(hFile);  // NOLINT(cert-err33-c) - why? What am I supposed to do if I cannot close a file, eh?
+
+				child->type = SourceType::File;
+			}
+			else
+			{
+				child->type = SourceType::Folder;
+			}
+			addDataSource(child);
+		}
+
+		return !_results.empty();
 	}
 
 	bool DB::parseFileData(DataList& _results, const Data& _data)
@@ -202,12 +192,40 @@ namespace pluginLib::patchDB
 		m_uiFuncs.push_back(_func);
 	}
 
+	bool DB::addDataSource(const DataSourcePtr& _ds)
+	{
+		std::vector<std::vector<uint8_t>> data;
+
+		{
+			std::unique_lock lockDs(m_dataSourcesMutex);
+			m_dataSources.push_back(_ds);
+
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
+
+		if (!loadData(data, _ds))
+			return false;
+
+		bool result = false;
+
+		for (uint32_t p = 0; p < data.size(); ++p)
+		{
+			if (const auto patch = initializePatch(data[p], _ds))
+			{
+				patch->program = p;
+				result |= addPatch(patch);
+			}
+		}
+		return result;
+	}
+
 	bool DB::addPatch(const PatchPtr& _patch)
 	{
 		if (!_patch)
 			return false;
 
-		if (_patch->source.type == SourceType::Invalid)
+		if (_patch->source->type == SourceType::Invalid)
 			return false;
 
 		std::unique_lock lock(m_patchesMutex);
@@ -224,7 +242,7 @@ namespace pluginLib::patchDB
 
 		for (auto& it : m_searches)
 		{
-			auto& search = it.second;
+			const auto& search = it.second;
 
 			if (search->request.match(*_patch))
 			{

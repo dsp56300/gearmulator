@@ -26,6 +26,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
+		void paint(juce::Graphics& g) override;
 	private:
 		void addGroup(GroupType _type);
 		GroupTreeItem* getItem(GroupType _type);

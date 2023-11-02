@@ -35,19 +35,28 @@ namespace pluginLib::patchDB
 
 		void getCategories(std::set<Tag>& _categories);
 		void getTags(std::set<Tag>& _tags);
-		const auto& getDataSources() const { return m_dataSources; }
+
+		void getDataSources(std::vector<DataSourcePtr>& _dataSources)
+		{
+			std::shared_lock lock(m_dataSourcesMutex);
+			_dataSources = m_dataSources;
+		}
 
 	protected:
-		virtual bool loadData(DataList& _results, const DataSource& _ds);
+		virtual bool loadData(DataList& _results, const DataSourcePtr& _ds);
 
 		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
-		virtual std::shared_ptr<Patch> initializePatch(const Data& _sysex, const DataSource& _ds) = 0;
+		virtual bool loadFile(DataList& _results, const std::string& _file);
+		virtual bool loadFolder(DataList& _results, const DataSourcePtr& _folder);
+		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourcePtr& _ds) = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 
 	private:
 		void loaderThreadFunc();
 		void runOnLoaderThread(const std::function<void()>& _func);
 		void runOnUiThread(const std::function<void()>& _func);
+
+		bool addDataSource(const DataSourcePtr& _ds);
 
 		bool addPatch(const PatchPtr& _patch);
 		bool removePatch(const PatchKey& _key);
@@ -72,7 +81,9 @@ namespace pluginLib::patchDB
 		std::map<PatchKey, PatchPtr> m_patches;
 		std::set<Tag> m_tags;
 		std::set<Tag> m_categories;
-		std::vector<DataSource> m_dataSources;
+
+		std::shared_mutex m_dataSourcesMutex;
+		std::vector<DataSourcePtr> m_dataSources;
 
 		// search
 		std::mutex m_searchesMutex;

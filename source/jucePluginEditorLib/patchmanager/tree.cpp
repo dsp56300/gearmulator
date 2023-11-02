@@ -11,12 +11,13 @@ namespace jucePluginEditorLib::patchManager
 {
 	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
 	{
-		setColour(backgroundColourId, juce::Colour(0xff999999));
+//		setColour(backgroundColourId, juce::Colour(0xff999999));
+		setColour(backgroundColourId, juce::Colour());
 		setColour(linesColourId, juce::Colour(0xffffffff));
 		setColour(dragAndDropIndicatorColourId, juce::Colour(0xff00ff00));
 		setColour(selectedItemBackgroundColourId, juce::Colour(0xffaaaaaa));
-		setColour(oddItemsColourId, juce::Colour(0xff333333));
-		setColour(evenItemsColourId, juce::Colour(0xff555555));
+//		setColour(oddItemsColourId, juce::Colour(0xff333333));
+//		setColour(evenItemsColourId, juce::Colour(0xff555555));
 
 		auto *rootItem = new RootTreeItem(m_patchManager);
 		setRootItem(rootItem);
@@ -41,9 +42,10 @@ namespace jucePluginEditorLib::patchManager
 		if (!item)
 			return;
 
-		const auto& sources = m_patchManager.getDataSources();
+		std::vector<std::shared_ptr<pluginLib::patchDB::DataSource>> dataSources;
+		m_patchManager.getDataSources(dataSources);
 
-		item->updateFromDataSources(sources);
+		item->updateFromDataSources(dataSources);
 	}
 
 	void Tree::updateCategories()
@@ -85,6 +87,12 @@ namespace jucePluginEditorLib::patchManager
 			for (const auto& it : m_groupItems)
 				it.second->processDirty(_dirty.searches);
 		}
+	}
+
+	void Tree::paint(juce::Graphics& g)
+	{
+		// we don't want a background
+		//TreeView::paint(g);
 	}
 
 	void Tree::addGroup(const GroupType _type)

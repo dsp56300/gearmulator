@@ -14,6 +14,7 @@ namespace pluginLib::patchDB
 
 namespace jucePluginEditorLib::patchManager
 {
+	class DatasourceTreeItem;
 	class TagTreeItem;
 
 	class GroupTreeItem : public TreeItem
@@ -27,12 +28,14 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void updateFromTags(const std::set<std::string>& _tags);
-		void updateFromDataSources(const std::vector<pluginLib::patchDB::DataSource>& _dataSources);
+		void updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourcePtr>& _dataSources);
 		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches) override;
 
 	private:
+		DatasourceTreeItem* createItemForDataSource(const std::shared_ptr<pluginLib::patchDB::DataSource>& _dataSource);
+
 		const GroupType m_type;
 		std::map<std::string, TagTreeItem*> m_itemsByTag;
-		std::map<pluginLib::patchDB::DataSource, TreeItem*> m_itemsByDataSource;
+		std::map<pluginLib::patchDB::DataSourcePtr, DatasourceTreeItem*> m_itemsByDataSource;
 	};
 }

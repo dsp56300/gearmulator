@@ -67,7 +67,8 @@ namespace jucePluginEditorLib::patchManager
 	void TreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
 		_g.setColour(juce::Colour(0xffffffff));
-		_g.drawText(m_title.c_str(), 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
+		const juce::String t(m_title);
+		_g.drawText(t, 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
 }

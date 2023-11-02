@@ -1,5 +1,6 @@
 #pragma once
 #include "treeitem.h"
+#include "../../jucePluginLib/patchdb/datasource.h"
 
 namespace pluginLib::patchDB
 {
@@ -11,12 +12,14 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTreeItem : public TreeItem
 	{
 	public:
-		DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSource& _ds);
+		DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourcePtr& _ds);
 
 		bool mightContainSubItems() override
 		{
-			return false;
+			return m_dataSource->type == pluginLib::patchDB::SourceType::Folder;
 		}
+
+		void setTitle(const std::string& _title) override;
 
 		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
 
@@ -24,5 +27,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 				return false;
 		}
+
+		const pluginLib::patchDB::DataSourcePtr m_dataSource;
 	};
 }

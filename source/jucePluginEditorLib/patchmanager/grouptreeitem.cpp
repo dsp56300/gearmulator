@@ -41,12 +41,15 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	void GroupTreeItem::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSource>& _dataSources)
+	void GroupTreeItem::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourcePtr>& _dataSources)
 	{
 		for (const auto& d : _dataSources)
 		{
+			createItemForDataSource(d);
+
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 				continue;
+
 			auto* item = new DatasourceTreeItem(getPatchManager(), d);
 
 			addSubItem(item);
@@ -64,5 +67,32 @@ namespace jucePluginEditorLib::patchManager
 
 		for (const auto& it : m_itemsByDataSource)
 			it.second->processDirty(_dirtySearches);
+	}
+
+	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const std::shared_ptr<pluginLib::patchDB::DataSource>& _dataSource)
+	{
+		const auto it = m_itemsByDataSource.find(_dataSource);
+
+		if (it != m_itemsByDataSource.end())
+			return it->second;
+
+		auto* item = new DatasourceTreeItem(getPatchManager(), _dataSource);
+
+		m_itemsByDataSource.insert({ _dataSource, item });
+
+		if(_dataSource->parent)
+		{
+			auto* parent = createItemForDataSource(_dataSource->parent);
+			parent->addSubItem(item);
+		}
+		else
+		{
+			addSubItem(item);
+
+			if (getNumSubItems() == 1)
+				setOpen(true);
+		}
+
+		return item;
 	}
 }
