@@ -1,6 +1,8 @@
 #include "pluginEditorWindow.h"
 #include "pluginEditorState.h"
 
+#include "patchmanager/patchmanager.h"
+
 namespace jucePluginEditorLib
 {
 
@@ -71,9 +73,16 @@ void EditorWindow::mouseDown(const juce::MouseEvent& event)
 		return;
 	}
 
-	// file browsers have their own menu, do not display two menus at once
-	if(event.eventComponent && event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
-		return;
+	if(event.eventComponent)
+	{
+		// file browsers have their own menu, do not display two menus at once
+		if(event.eventComponent->findParentComponentOfClass<juce::FileBrowserComponent>())
+			return;
+
+		// patch manager has its own context menu, too
+		if (event.eventComponent->findParentComponentOfClass<patchManager::PatchManager>())
+			return;
+	}
 
 	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
 		return;
