@@ -37,8 +37,14 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
+		auto configOptions = getProcessor().getConfigOptions();
+		configOptions.filenameSuffix = ".json";
+		configOptions.applicationName += " Patch DB";
+
+		const auto file = configOptions.getDefaultFile();
+
 #if defined(_MSC_VER) && defined(_DEBUG)
-		m_patchManager.reset(new PatchManager(getController(), findComponent("page_presets")));
+		m_patchManager.reset(new PatchManager(getController(), findComponent("page_presets"), file));
 #else
 		m_patchBrowser.reset(new PatchBrowser(*this));
 #endif

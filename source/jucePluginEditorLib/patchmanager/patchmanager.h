@@ -1,7 +1,5 @@
 #pragma once
 
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-
 #include "../../jucePluginLib/patchdb/db.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -13,7 +11,7 @@ namespace jucePluginEditorLib::patchManager
 	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer
 	{
 	public:
-		explicit PatchManager(juce::Component* _root);
+		explicit PatchManager(juce::Component* _root, const juce::File& _json);
 		~PatchManager() override;
 
 		void timerCallback() override;

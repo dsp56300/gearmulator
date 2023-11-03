@@ -5,20 +5,18 @@
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/midiToSysex.h"
+#include "dsp56kEmu/logging.h"
 
 namespace pluginLib::patchDB
 {
-	DB::DB()
+	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json))
 	{
 		m_loader.reset(new std::thread([&]
 		{
 			loaderThreadFunc();
 		}));
 
-		DataSource ds;
-		ds.type = SourceType::Folder;
-		ds.name = "f:\\AccessVirusEmulator\\Presets";
-		addDataSource(ds);
+		loadJson();
 	}
 
 	DB::~DB()
@@ -34,6 +32,8 @@ namespace pluginLib::patchDB
 			const auto ds = std::make_shared<DataSource>(_ds);
 
 			addDataSource(ds);
+
+			saveJson();
 		});
 	}
 
@@ -110,6 +110,8 @@ namespace pluginLib::patchDB
 			return loadFile(_results, _ds->name);
 		case SourceType::Folder:
 			return loadFolder(_results, _ds);
+		case SourceType::Count:
+			return false;
 //		default:
 //			assert(false && "unknown data source type");
 		}
@@ -368,6 +370,78 @@ namespace pluginLib::patchDB
 			m_dirty.searches.insert(_search.handle);
 		}
 
+		return true;
+	}
+
+	bool DB::loadJson()
+	{
+		bool success = true;
+
+		const auto json = juce::JSON::parse(m_jsonFileName);
+		const auto* datasources = json["datasources"].getArray();
+
+		if(datasources)
+		{
+			for(int i=0; i<datasources->size(); ++i)
+			{
+				const auto var = datasources->getUnchecked(i);
+
+				DataSource ds;
+
+				ds.type = toSourceType(var["type"].toString().toStdString());
+				ds.name = var["name"].toString().toStdString();
+
+				if (ds.type != SourceType::Invalid && !ds.name.empty())
+				{
+					addDataSource(ds);
+				}
+				else
+				{
+					LOG("Unexpected data source type " << toString(ds.type) << " with name '" << ds.name << "'");
+					success = false;
+				}
+			}
+		}
+		return success;
+	}
+
+	bool DB::saveJson()
+	{
+		if (!m_jsonFileName.hasWriteAccess())
+			return false;
+		const auto tempFile = juce::File(m_jsonFileName.getFullPathName() + "_tmp.json");
+		if (!tempFile.hasWriteAccess())
+			return false;
+
+		auto* json = new juce::DynamicObject();
+
+		std::shared_lock lockDs(m_dataSourcesMutex);
+		{
+			juce::Array<juce::var> dss;
+
+			for (const auto& dataSource : m_dataSources)
+			{
+				if (dataSource->parent)
+					continue;
+				if (dataSource->type == SourceType::Rom)
+					continue;
+
+				auto* o = new juce::DynamicObject();
+
+				o->setProperty("type", juce::String(toString(dataSource->type)));
+				o->setProperty("name", juce::String(dataSource->name));
+
+				dss.add(o);
+			}
+			json->setProperty("datasources", dss);
+		}
+
+		const auto jsonText = juce::JSON::toString(juce::var(json), false);
+		if (!tempFile.replaceWithText(jsonText))
+			return false;
+		if (!tempFile.copyFileTo(m_jsonFileName))
+			return false;
+		tempFile.deleteFile();
 		return true;
 	}
 }

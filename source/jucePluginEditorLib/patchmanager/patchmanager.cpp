@@ -3,13 +3,12 @@
 #include "info.h"
 #include "list.h"
 #include "tree.h"
-#include "treeitem.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	constexpr int g_scale = 2;
 
-	PatchManager::PatchManager(juce::Component* _root)
+	PatchManager::PatchManager(Component* _root, const juce::File& _json) : DB(_json)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;

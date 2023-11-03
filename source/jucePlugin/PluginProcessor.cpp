@@ -26,7 +26,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, getConfigOptions())
+	, ::getConfigOptions())
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 

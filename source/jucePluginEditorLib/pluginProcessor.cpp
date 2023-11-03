@@ -4,6 +4,7 @@ namespace jucePluginEditorLib
 {
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions)
 	: pluginLib::Processor(_busesProperties)
+	, m_configOptions(_configOptions)
 	, m_config(_configOptions)
 	{
 	}

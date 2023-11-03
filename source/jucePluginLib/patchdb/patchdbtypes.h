@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <set>
+#include <string>
 #include <vector>
 
 namespace pluginLib::patchDB
@@ -11,7 +12,8 @@ namespace pluginLib::patchDB
 		Invalid,
 		Rom,
 		File,
-		Folder
+		Folder,
+		Count
 	};
 
 	struct Patch;
@@ -37,4 +39,7 @@ namespace pluginLib::patchDB
 
 	struct DataSource;
 	using DataSourcePtr = std::shared_ptr<DataSource>;
+
+	std::string toString(SourceType _type);
+	SourceType toSourceType(const std::string& _string);
 }

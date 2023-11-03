@@ -23,7 +23,7 @@ namespace genericVirusUI
 			uint8_t arpMode = 0;
 		};
 
-		PatchManager(Virus::Controller& _controller, juce::Component* _root);
+		PatchManager(Virus::Controller& _controller, juce::Component* _root, const juce::File& _json);
 		~PatchManager() override;
 
 		// PatchDB impl

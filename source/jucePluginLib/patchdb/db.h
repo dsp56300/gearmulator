@@ -12,6 +12,8 @@
 #include "search.h"
 #include "dsp56kEmu/ringbuffer.h"
 
+#include <juce_audio_processors/juce_audio_processors.h>
+
 namespace pluginLib::patchDB
 {
 	struct SearchRequest;
@@ -21,7 +23,7 @@ namespace pluginLib::patchDB
 	class DB
 	{
 	public:
-		DB();
+		DB(juce::File _json);
 		virtual ~DB();
 
 		void addDataSource(const DataSource& _ds);
@@ -65,10 +67,16 @@ namespace pluginLib::patchDB
 
 		bool executeSearch(Search& _search);
 
+		bool loadJson();
+		bool saveJson();
+
+		// IO
+		juce::File m_jsonFileName;
+
+		// loader
 		std::unique_ptr<std::thread> m_loader;
 		bool m_destroy = false;
 
-		// loader
 		std::mutex m_loaderMutex;
 		std::deque<std::function<void()>> m_loaderFuncs;
 		std::condition_variable m_loaderCv;
