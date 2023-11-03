@@ -11,8 +11,8 @@ namespace jucePluginEditorLib::patchManager
 {
 	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
 	{
-//		setColour(backgroundColourId, juce::Colour(0xff999999));
-		setColour(backgroundColourId, juce::Colour());
+		setColour(backgroundColourId, juce::Colour(0xff444444));
+//		setColour(backgroundColourId, juce::Colour(0));
 		setColour(linesColourId, juce::Colour(0xffffffff));
 		setColour(dragAndDropIndicatorColourId, juce::Colour(0xff00ff00));
 		setColour(selectedItemBackgroundColourId, juce::Colour(0xffaaaaaa));
@@ -91,8 +91,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::paint(juce::Graphics& g)
 	{
-		// we don't want a background
-		//TreeView::paint(g);
+		// if we don't want a background, skip this call
+		TreeView::paint(g);
 	}
 
 	void Tree::addGroup(const GroupType _type)
