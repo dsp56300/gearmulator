@@ -42,8 +42,13 @@ namespace pluginLib::patchDB
 
 	bool DB::addTag(TagType _type, const std::string& _tag)
 	{
-		std::unique_lock lock(m_patchesMutex);
-		return internalAddTag(_type, _tag);
+		{
+			std::unique_lock lock(m_patchesMutex);
+			if (!internalAddTag(_type, _tag))
+				return false;
+		}
+		saveJson();
+		return true;
 	}
 
 	void DB::uiProcess(Dirty& _dirty)
