@@ -1,11 +1,13 @@
 #pragma once
 
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
 #include "datasource.h"
 #include "tags.h"
+#include "patchdbtypes.h"
 
 namespace pluginLib::patchDB
 {
@@ -20,8 +22,8 @@ namespace pluginLib::patchDB
 
 		std::shared_ptr<DataSource> source;
 
-		Tags categories;
-		Tags tags;
+		TypedTags tags;
+
 		std::string hash;
 		std::vector<uint8_t> sysex;
 	};

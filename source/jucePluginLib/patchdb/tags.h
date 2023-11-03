@@ -1,12 +1,13 @@
 #pragma once
 
+#include <map>
 #include <set>
 #include <string>
 
+#include "patchdbtypes.h"
+
 namespace pluginLib::patchDB
 {
-	using Tag = std::string;
-
 	class Tags
 	{
 	public:
@@ -38,5 +39,16 @@ namespace pluginLib::patchDB
 	private:
 		std::set<Tag> m_added;
 		std::set<Tag> m_removed;
+	};
+
+	class TypedTags
+	{
+	public:
+		const Tags& get(TagType _type) const;
+		const auto& get() const { return m_tags; }
+		void add(TagType _type, const Tag& _tag);
+
+	private:
+		std::map<TagType, Tags> m_tags;
 	};
 }

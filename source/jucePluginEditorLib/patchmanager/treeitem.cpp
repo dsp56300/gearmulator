@@ -11,6 +11,11 @@ namespace jucePluginEditorLib::patchManager
 	{
 	}
 
+	TreeItem::~TreeItem()
+	{
+		destroyEditorLabel();
+	}
+
 	void TreeItem::setTitle(const std::string& _title)
 	{
 		if (m_title == _title)
@@ -70,5 +75,57 @@ namespace jucePluginEditorLib::patchManager
 		const juce::String t(m_title);
 		_g.drawText(t, 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
+	}
+
+	void TreeItem::editorHidden(juce::Label* _label, juce::TextEditor& _textEditor)
+	{
+		if (m_editorLabel)
+		{
+			const auto text = m_editorLabel->getText();
+			m_finishedEditingCallback(true, text.toStdString());
+			destroyEditorLabel();
+		}
+		Listener::editorHidden(_label, _textEditor);
+	}
+
+	void TreeItem::labelTextChanged(juce::Label* _label)
+	{
+	}
+
+	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)
+	{
+		if (m_editorLabel)
+			return false;
+
+		m_editorLabel = new juce::Label({}, _initialText);
+
+		const auto pos = getItemPosition(true);
+
+		m_editorLabel->setTopLeftPosition(pos.getTopLeft());
+		m_editorLabel->setSize(pos.getWidth(), pos.getHeight());
+
+		m_editorLabel->setEditable(true, true, true);
+		m_editorLabel->setColour(juce::Label::backgroundColourId, juce::Colour(0xff333333));
+
+		m_editorLabel->addListener(this);
+
+		getOwnerView()->addAndMakeVisible(m_editorLabel);
+
+		m_editorLabel->showEditor();
+
+		m_finishedEditingCallback = std::move(_callback);
+
+		return true;
+	}
+
+	void TreeItem::destroyEditorLabel()
+	{
+		if (!m_editorLabel)
+			return;
+
+		m_editorLabel->getParentComponent()->removeChildComponent(m_editorLabel);
+		m_editorLabel = nullptr;
+
+		m_finishedEditingCallback = {};
 	}
 }

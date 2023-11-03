@@ -78,12 +78,17 @@ namespace pluginLib::patchDB
 		if (!matchStringsIgnoreCase(_patch.name, name))
 			return false;
 
-		// tags & categories
-		if (!testTags(_patch.categories, categories))
-			return false;
+		// tags, categories, ...
+		for (const auto& it : tags.get())
+		{
+			const auto type = it.first;
+			const auto& t = it.second;
 
-		if (!testTags(_patch.tags, tags))
-			return false;
+			const auto& patchTags = _patch.tags.get(type);
+
+			if (!testTags(patchTags, t))
+				return false;
+		}
 
 		return true;
 	}

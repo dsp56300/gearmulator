@@ -1,10 +1,13 @@
 #include "db.h"
 
+#include <cassert>
+
 #include "datasource.h"
 #include "patch.h"
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/midiToSysex.h"
+
 #include "dsp56kEmu/logging.h"
 
 namespace pluginLib::patchDB
@@ -35,6 +38,12 @@ namespace pluginLib::patchDB
 
 			saveJson();
 		});
+	}
+
+	bool DB::addTag(TagType _type, const std::string& _tag)
+	{
+		std::unique_lock lock(m_patchesMutex);
+		return internalAddTag(_type, _tag);
 	}
 
 	void DB::uiProcess(Dirty& _dirty)
@@ -86,16 +95,16 @@ namespace pluginLib::patchDB
 		return it->second;
 	}
 
-	void DB::getCategories(std::set<Tag>& _categories)
+	void DB::getTags(const TagType _type, std::set<Tag>& _tags)
 	{
-		std::shared_lock lock(m_patchesMutex);
-		_categories = m_categories;
-	}
+		_tags.clear();
 
-	void DB::getTags(std::set<Tag>& _tags)
-	{
 		std::shared_lock lock(m_patchesMutex);
-		_tags = m_tags;
+		const auto it = m_tags.find(_type);
+		if (it == m_tags.end())
+			return;
+
+		_tags = it->second;
 	}
 
 	bool DB::loadData(DataList& _results, const DataSourcePtr& _ds)
@@ -275,29 +284,15 @@ namespace pluginLib::patchDB
 			}
 		}
 
-		// add to all known categories
+		// add to all known categories, tags, etc
 		{
-			const auto oldCount = m_categories.size();
-			for (const auto& c : _patch->categories.getAdded())
-				m_categories.insert(c);
-			const auto newCount = m_categories.size();
-			if(newCount != oldCount)
+			for (const auto& it : _patch->tags.get())
 			{
-				std::unique_lock lockUi(m_uiMutex);
-				m_dirty.categories = true;
-			}
-		}
+				const auto type = it.first;
+				const auto& tags = it.second;
 
-		// add to all known tags
-		{
-			const auto oldCount = m_tags.size();
-			for (const auto& c : _patch->tags.getAdded())
-				m_tags.insert(c);
-			const auto newCount = m_tags.size();
-			if (newCount != oldCount)
-			{
-				std::unique_lock lockUi(m_uiMutex);
-				m_dirty.tags = true;
+				for (const auto& tag : tags.getAdded())
+					internalAddTag(type, tag);
 			}
 		}
 
@@ -339,6 +334,31 @@ namespace pluginLib::patchDB
 
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.patches = true;
+
+		return true;
+	}
+
+	bool DB::internalAddTag(TagType _type, const Tag& _tag)
+	{
+		const auto itType = m_tags.find(_type);
+
+		if (itType == m_tags.end())
+		{
+			m_tags.insert({ _type, {_tag} });
+
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.tags.insert(_type);
+			return true;
+		}
+
+		auto& tags = itType->second;
+
+		if (tags.find(_tag) != tags.end())
+			return false;
+
+		tags.insert(_tag);
+		std::unique_lock lockUi(m_uiMutex);
+		m_dirty.tags.insert(_type);
 
 		return true;
 	}

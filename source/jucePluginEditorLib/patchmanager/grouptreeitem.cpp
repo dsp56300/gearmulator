@@ -4,6 +4,7 @@
 #include "datasourcetreeitem.h"
 #include "patchmanager.h"
 #include "tagtreeitem.h"
+#include "dsp56kEmu/logging.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -28,13 +29,10 @@ namespace jucePluginEditorLib::patchManager
 		{
 			auto itExisting = m_itemsByTag.find(tag);
 
-			if(itExisting != m_itemsByTag.end())
+			if (itExisting != m_itemsByTag.end())
 				continue;
 
-			TagTreeItem* item = m_type == GroupType::Categories ? new CategoryTreeItem(getPatchManager(), tag) : new TagTreeItem(getPatchManager(), GroupType::Tags, tag);
-
-			addSubItem(item);
-			m_itemsByTag.insert({ tag, item });
+			createSubItem(tag);
 
 			if (m_itemsByTag.size() == 1)
 				setOpen(true);
@@ -69,6 +67,27 @@ namespace jucePluginEditorLib::patchManager
 			it.second->processDirty(_dirtySearches);
 	}
 
+	void GroupTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+
+			juce::PopupMenu menu;
+
+			menu.addItem("Add...", [this]
+			{
+				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+				{
+					LOG("New Text: " << _newText << ", success " << _success);
+					getPatchManager().addTag(pluginLib::patchDB::TagType::Tag, _newText);
+				});
+			});
+
+			menu.showMenuAsync(juce::PopupMenu::Options());
+		}
+	}
+
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const std::shared_ptr<pluginLib::patchDB::DataSource>& _dataSource)
 	{
 		const auto it = m_itemsByDataSource.find(_dataSource);
@@ -92,6 +111,16 @@ namespace jucePluginEditorLib::patchManager
 			if (getNumSubItems() == 1)
 				setOpen(true);
 		}
+
+		return item;
+	}
+
+	TagTreeItem* GroupTreeItem::createSubItem(const std::string& _tag)
+	{
+		TagTreeItem* item = m_type == GroupType::Categories ? new CategoryTreeItem(getPatchManager(), _tag) : new TagTreeItem(getPatchManager(), GroupType::Tags, _tag);
+
+		addSubItem(item);
+		m_itemsByTag.insert({ _tag, item });
 
 		return item;
 	}

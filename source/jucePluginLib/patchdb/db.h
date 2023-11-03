@@ -10,7 +10,6 @@
 #include "patch.h"
 #include "patchdbtypes.h"
 #include "search.h"
-#include "dsp56kEmu/ringbuffer.h"
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
@@ -27,6 +26,7 @@ namespace pluginLib::patchDB
 		virtual ~DB();
 
 		void addDataSource(const DataSource& _ds);
+		bool addTag(TagType _type, const std::string& _tag);
 
 		void uiProcess(Dirty& _dirty);
 
@@ -35,8 +35,7 @@ namespace pluginLib::patchDB
 
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 
-		void getCategories(std::set<Tag>& _categories);
-		void getTags(std::set<Tag>& _tags);
+		void getTags(TagType _type, std::set<Tag>& _tags);
 
 		void getDataSources(std::vector<DataSourcePtr>& _dataSources)
 		{
@@ -65,6 +64,8 @@ namespace pluginLib::patchDB
 		bool addPatch(const PatchPtr& _patch);
 		bool removePatch(const PatchKey& _key);
 
+		bool internalAddTag(TagType _type, const Tag& _tag);
+
 		bool executeSearch(Search& _search);
 
 		bool loadJson();
@@ -89,8 +90,7 @@ namespace pluginLib::patchDB
 		// data
 		std::shared_mutex m_patchesMutex;
 		std::map<PatchKey, PatchPtr> m_patches;
-		std::set<Tag> m_tags;
-		std::set<Tag> m_categories;
+		std::map<TagType, std::set<Tag>> m_tags;
 
 		std::shared_mutex m_dataSourcesMutex;
 		std::vector<DataSourcePtr> m_dataSources;

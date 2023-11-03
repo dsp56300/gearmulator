@@ -1,5 +1,7 @@
 #include "tagtreeitem.h"
 
+#include <cassert>
+
 #include "patchmanager.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -11,10 +13,13 @@ namespace jucePluginEditorLib::patchManager
 		switch (_type)
 		{
 		case GroupType::Categories:
-			sr.categories.add(_tag);
+			sr.tags.add(pluginLib::patchDB::TagType::Category, _tag);
 			break;
 		case GroupType::Tags:
-			sr.tags.add(_tag);
+			sr.tags.add(pluginLib::patchDB::TagType::Tag, _tag);
+			break;
+		case GroupType::Favourites:
+			sr.tags.add(pluginLib::patchDB::TagType::Favourites, _tag);
 			break;
 		default:
 			assert(false);

@@ -16,6 +16,18 @@ namespace pluginLib::patchDB
 		Count
 	};
 
+	using Tag = std::string;
+
+	enum class TagType
+	{
+		Category,
+		Tag,
+		Favourites,
+		CustomA,
+		CustomB,
+		CustomC
+	};
+
 	struct Patch;
 	using PatchPtr = std::shared_ptr<Patch>;
 
@@ -31,10 +43,10 @@ namespace pluginLib::patchDB
 	struct Dirty
 	{
 		bool dataSources = false;
-		bool categories = false;
-		bool tags = false;
+		bool patches = false;
+
+		std::set<TagType> tags;
 		std::set<SearchHandle> searches;
-		bool patches;
 	};
 
 	struct DataSource;

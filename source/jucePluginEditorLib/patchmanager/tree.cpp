@@ -55,7 +55,7 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		std::set<pluginLib::patchDB::Tag> categories;
-		m_patchManager.getCategories(categories);
+		m_patchManager.getTags(pluginLib::patchDB::TagType::Category, categories);
 
 		item->updateFromTags(categories);
 	}
@@ -66,7 +66,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!item)
 			return;
 		std::set<pluginLib::patchDB::Tag> tags;
-		m_patchManager.getTags(tags);
+		m_patchManager.getTags(pluginLib::patchDB::TagType::Tag, tags);
 
 		item->updateFromTags(tags);
 	}
@@ -76,10 +76,10 @@ namespace jucePluginEditorLib::patchManager
 		if (_dirty.dataSources)
 			updateDataSources();
 
-		if (_dirty.categories)
+		if (_dirty.tags.find(pluginLib::patchDB::TagType::Category) != _dirty.tags.end())
 			updateCategories();
 
-		if (_dirty.tags)
+		if (_dirty.tags.find(pluginLib::patchDB::TagType::Tag) != _dirty.tags.end())
 			updateTags();
 
 		if (!_dirty.searches.empty())
@@ -93,6 +93,22 @@ namespace jucePluginEditorLib::patchManager
 	{
 		// if we don't want a background, skip this call
 		TreeView::paint(g);
+	}
+
+	bool Tree::keyPressed(const juce::KeyPress& _key)
+	{
+		if(_key.getKeyCode() == juce::KeyPress::F2Key)
+		{
+			if(getNumSelectedItems() == 1)
+			{
+				juce::TreeViewItem* item = getSelectedItem(0);
+				auto* myItem = dynamic_cast<TreeItem*>(item);
+
+				if(myItem)
+					return myItem->beginEdit();
+			}
+		}
+		return TreeView::keyPressed(_key);
 	}
 
 	void Tree::addGroup(const GroupType _type)

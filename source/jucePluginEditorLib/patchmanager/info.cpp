@@ -32,8 +32,8 @@ namespace jucePluginEditorLib::patchManager
 
 		m_name->setText(_patch->name, juce::sendNotification);
 		m_source->setText(toText(_patch->source), juce::sendNotification);
-		m_categories->setText(toText(_patch->categories), juce::sendNotification);
-		m_tags->setText(toText(_patch->tags), juce::sendNotification);
+		m_categories->setText(toText(_patch->tags.get(pluginLib::patchDB::TagType::Category)), juce::sendNotification);
+		m_tags->setText(toText(_patch->tags.get(pluginLib::patchDB::TagType::Tag)), juce::sendNotification);
 
 		doLayout();
 	}

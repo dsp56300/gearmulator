@@ -14,8 +14,7 @@ namespace pluginLib::patchDB
 	struct SearchRequest
 	{
 		std::string name;
-		Tags tags;
-		Tags categories;
+		TypedTags tags;
 		DataSource source;
 
 		bool match(const Patch& _patch) const;

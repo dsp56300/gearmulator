@@ -27,6 +27,9 @@ namespace jucePluginEditorLib::patchManager
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
 		void paint(juce::Graphics& g) override;
+
+		bool keyPressed(const juce::KeyPress& _key) override;
+
 	private:
 		void addGroup(GroupType _type);
 		GroupTreeItem* getItem(GroupType _type);

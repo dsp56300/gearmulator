@@ -7,7 +7,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	namespace
 	{
-		std::string getTitle(const pluginLib::patchDB::DataSource& _ds)
+		std::string getDataSourceTitle(const pluginLib::patchDB::DataSource& _ds)
 		{
 			switch (_ds.type)
 			{
@@ -26,7 +26,7 @@ namespace jucePluginEditorLib::patchManager
 
 	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourcePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
 	{
-		DatasourceTreeItem::setTitle(getTitle(*_ds));
+		DatasourceTreeItem::setTitle(getDataSourceTitle(*_ds));
 
 		pluginLib::patchDB::SearchRequest sr;
 		sr.source = *_ds;
@@ -50,6 +50,6 @@ namespace jucePluginEditorLib::patchManager
 
 	void DatasourceTreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
 	{
-		setTitle(getTitle(_search.request.source) + " (" + std::to_string(_search.getResultSize()) + ")");
+		setTitle(getDataSourceTitle(_search.request.source) + " (" + std::to_string(_search.getResultSize()) + ")");
 	}
 }

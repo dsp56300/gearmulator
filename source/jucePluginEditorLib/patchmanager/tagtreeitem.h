@@ -18,7 +18,7 @@ namespace jucePluginEditorLib::patchManager
 		auto getGroupType() const { return m_group; }
 
 		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
-		
+
 	private:
 		const GroupType m_group;
 		const std::string m_tag;
