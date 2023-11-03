@@ -422,6 +422,36 @@ namespace pluginLib::patchDB
 				}
 			}
 		}
+
+		auto* tags = json["tags"].getDynamicObject();
+
+		if(tags)
+		{
+			const auto& props = tags->getProperties();
+			for (const auto& it : props)
+			{
+				const auto strType = it.name.toString().toStdString();
+				const auto type = toTagType(strType);
+
+				const auto* tagsArray = it.value.getArray();
+				if(tagsArray)
+				{
+					std::set<Tag> newTags;
+					for(int i=0; i<tagsArray->size(); ++i)
+					{
+						const auto tag = tagsArray->getUnchecked(i).toString().toStdString();
+						newTags.insert(tag);
+					}
+					m_tags.insert({ type, newTags });
+					m_dirty.tags.insert(type);
+				}
+				else
+				{
+					LOG("Unexpected empty tags for tag type " << strType);
+					success = false;
+				}
+			}
+		}
 		return success;
 	}
 
@@ -435,14 +465,16 @@ namespace pluginLib::patchDB
 
 		auto* json = new juce::DynamicObject();
 
-		std::shared_lock lockDs(m_dataSourcesMutex);
 		{
+			std::shared_lock lockDs(m_dataSourcesMutex);
+
 			juce::Array<juce::var> dss;
 
 			for (const auto& dataSource : m_dataSources)
 			{
 				if (dataSource->parent)
 					continue;
+
 				if (dataSource->type == SourceType::Rom)
 					continue;
 
@@ -454,6 +486,29 @@ namespace pluginLib::patchDB
 				dss.add(o);
 			}
 			json->setProperty("datasources", dss);
+		}
+
+		{
+			std::shared_lock lockP(m_patchesMutex);
+
+			auto* tagTypes = new juce::DynamicObject();
+
+			for (const auto& it : m_tags)
+			{
+				const auto type = it.first;
+				const auto& tags = it.second;
+
+				if(tags.empty())
+					continue;
+
+				juce::Array<juce::var> tagsArray;
+				for (const auto& tag : tags)
+					tagsArray.add(juce::String(tag));
+
+				tagTypes->setProperty(juce::String(toString(type)), tagsArray);
+			}
+
+			json->setProperty("tags", tagTypes);
 		}
 
 		const auto jsonText = juce::JSON::toString(juce::var(json), false);

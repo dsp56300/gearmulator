@@ -20,12 +20,15 @@ namespace pluginLib::patchDB
 
 	enum class TagType
 	{
+		Invalid,
 		Category,
 		Tag,
 		Favourites,
 		CustomA,
 		CustomB,
-		CustomC
+		CustomC,
+
+		Count
 	};
 
 	struct Patch;
@@ -53,5 +56,8 @@ namespace pluginLib::patchDB
 	using DataSourcePtr = std::shared_ptr<DataSource>;
 
 	std::string toString(SourceType _type);
+	std::string toString(TagType _type);
+
 	SourceType toSourceType(const std::string& _string);
+	TagType toTagType(const std::string& _string);
 }
