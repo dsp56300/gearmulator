@@ -124,6 +124,7 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		m_editorLabel->getParentComponent()->removeChildComponent(m_editorLabel);
+		delete m_editorLabel;
 		m_editorLabel = nullptr;
 
 		m_finishedEditingCallback = {};
