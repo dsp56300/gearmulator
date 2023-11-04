@@ -42,7 +42,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!item)
 			return;
 
-		std::vector<std::shared_ptr<pluginLib::patchDB::DataSource>> dataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> dataSources;
 		m_patchManager.getDataSources(dataSources);
 
 		item->updateFromDataSources(dataSources);

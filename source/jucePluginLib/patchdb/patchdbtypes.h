@@ -56,7 +56,8 @@ namespace pluginLib::patchDB
 	};
 
 	struct DataSource;
-	using DataSourcePtr = std::shared_ptr<DataSource>;
+	struct DataSourceNode;
+	using DataSourceNodePtr = std::shared_ptr<DataSourceNode>;
 
 	std::string toString(SourceType _type);
 	std::string toString(TagType _type);

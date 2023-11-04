@@ -24,7 +24,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourcePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
+	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
 	{
 		DatasourceTreeItem::setTitle(getDataSourceTitle(*_ds));
 

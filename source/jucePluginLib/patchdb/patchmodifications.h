@@ -2,12 +2,21 @@
 
 #include "tags.h"
 
+namespace juce
+{
+	class var;
+	class DynamicObject;
+}
+
 namespace pluginLib::patchDB
 {
 	struct PatchModifications
 	{
-		void modifyTags(const TypedTags& _tags);
+		bool modifyTags(const TypedTags& _tags);
 		void updateCache();
+
+		juce::DynamicObject* serialize() const;
+		bool deserialize(const juce::var& _var);
 
 		PatchPtr patch;
 		TypedTags tags;

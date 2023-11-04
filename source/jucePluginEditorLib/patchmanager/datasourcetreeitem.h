@@ -12,7 +12,7 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTreeItem : public TreeItem
 	{
 	public:
-		DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourcePtr& _ds);
+		DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds);
 
 		bool mightContainSubItems() override
 		{
@@ -28,6 +28,6 @@ namespace jucePluginEditorLib::patchManager
 				return false;
 		}
 
-		const pluginLib::patchDB::DataSourcePtr m_dataSource;
+		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
 }

@@ -4,6 +4,7 @@
 
 #include "datasource.h"
 #include "patch.h"
+#include "patchmodifications.h"
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/midiToSysex.h"
@@ -32,7 +33,8 @@ namespace pluginLib::patchDB
 	{
 		runOnLoaderThread([this, _ds]()
 		{
-			const auto ds = std::make_shared<DataSource>(_ds);
+			const auto ds = std::make_shared<DataSourceNode>();
+			*ds = _ds;
 
 			addDataSource(ds);
 
@@ -40,7 +42,7 @@ namespace pluginLib::patchDB
 		});
 	}
 
-	bool DB::addTag(TagType _type, const std::string& _tag)
+	bool DB::addTag(const TagType _type, const std::string& _tag)
 	{
 		{
 			std::unique_lock lock(m_patchesMutex);
@@ -116,43 +118,51 @@ namespace pluginLib::patchDB
 	{
 		const auto key = PatchKey(*_patch);
 
+		std::unique_lock lock(m_patchesMutex);
+		const auto& itPatch = m_patches.find(key);
+		if (itPatch == m_patches.end())
+			return false;
+
+		const auto& it = m_patchModifications.find(key);
+
+		if (it != m_patchModifications.end())
 		{
-			std::unique_lock lock(m_patchesMutex);
-			const auto& itPatch = m_patches.find(key);
-			if (itPatch == m_patches.end())
+			if (!it->second->modifyTags(_tags))
 				return false;
 
-			const auto& it = m_patchModifications.find(key);
-
-			if (it != m_patchModifications.end())
-			{
-				it->second->modifyTags(_tags);
-				updateSearches(_patch);
-				return true;
-			}
-
-			const auto mods = std::make_shared<PatchModifications>();
-			mods->patch = itPatch->second;
-			mods->modifyTags(_tags);
-
-			itPatch->second->modifications = mods;
-
-			m_patchModifications.insert({ key, mods });
-
 			updateSearches(_patch);
+			lock.unlock();
+			saveJson();
+			return true;
 		}
+
+		const auto mods = std::make_shared<PatchModifications>();
+		mods->patch = itPatch->second;
+
+		const auto res = mods->modifyTags(_tags);
+		
+		if (!res)
+			return false;
+
+		itPatch->second->modifications = mods;
+
+		m_patchModifications.insert({ key, mods });
+
+		updateSearches(_patch);
+		lock.unlock();
+		saveJson();
 
 		return true;
 	}
 
-	bool DB::loadData(DataList& _results, const DataSourcePtr& _ds)
+	bool DB::loadData(DataList& _results, const DataSourceNodePtr& _ds)
 	{
 		switch (_ds->type)
 		{
 		case SourceType::Invalid:
 			return false;
 		case SourceType::Rom:
-			return loadRomData(_results, _ds->bank, _ds->program);
+			return loadRomData(_results, _ds->bank, g_invalidProgram);
 		case SourceType::File:
 			return loadFile(_results, _ds->name);
 		case SourceType::Folder:
@@ -178,7 +188,7 @@ namespace pluginLib::patchDB
 		return parseFileData(_results, data);
 	}
 
-	bool DB::loadFolder(DataList& _results, const DataSourcePtr& _folder)
+	bool DB::loadFolder(DataList& _results, const DataSourceNodePtr& _folder)
 	{
 		assert(_folder->type == SourceType::Folder);
 
@@ -187,7 +197,7 @@ namespace pluginLib::patchDB
 
 		for (const auto& file : files)
 		{
-			const auto child = std::make_shared<DataSource>();
+			const auto child = std::make_shared<DataSourceNode>();
 			child->parent = _folder;
 			child->name = file;
 
@@ -250,13 +260,25 @@ namespace pluginLib::patchDB
 		m_uiFuncs.push_back(_func);
 	}
 
-	bool DB::addDataSource(const DataSourcePtr& _ds)
+	bool DB::addDataSource(DataSourceNodePtr _ds)
 	{
 		std::vector<std::vector<uint8_t>> data;
 
 		{
 			std::unique_lock lockDs(m_dataSourcesMutex);
-			m_dataSources.push_back(_ds);
+
+			const auto itExisting = m_dataSources.find(*_ds);
+
+			if (itExisting != m_dataSources.end())
+			{
+				const auto parent = _ds->parent;
+				_ds = itExisting->second;
+				_ds->parent = parent;
+			}
+			else
+			{
+				m_dataSources.insert({ *_ds, _ds });
+			}
 
 			std::unique_lock lockUi(m_uiMutex);
 			m_dirty.dataSources = true;
@@ -506,6 +528,37 @@ namespace pluginLib::patchDB
 				}
 			}
 		}
+
+		auto* patches = json["patches"].getDynamicObject();
+
+		if (patches)
+		{
+			const auto& props = patches->getProperties();
+			for (const auto& it : props)
+			{
+				const auto strKey = it.name.toString().toStdString();
+				const auto var = it.value;
+
+				auto key = PatchKey::fromString(strKey);
+
+				PatchModificationsPtr mods = std::make_shared<PatchModifications>();
+
+				if (!mods->deserialize(var))
+				{
+					LOG("Failed to parse patch modifications for key " << strKey);
+					success = false;
+					continue;
+				}
+					
+				if(!key.isValid())
+				{
+					LOG("Failed to parse patch key from string " << strKey);
+					success = false;
+				}
+
+				m_patchModifications.insert({ key, mods });
+			}
+		}
 		return success;
 	}
 
@@ -524,8 +577,10 @@ namespace pluginLib::patchDB
 
 			juce::Array<juce::var> dss;
 
-			for (const auto& dataSource : m_dataSources)
+			for (const auto& it : m_dataSources)
 			{
+				const auto& dataSource = it.second;
+
 				if (dataSource->parent)
 					continue;
 
@@ -563,6 +618,20 @@ namespace pluginLib::patchDB
 			}
 
 			json->setProperty("tags", tagTypes);
+
+			auto* patchMods = new juce::DynamicObject();
+
+			for (const auto& it : m_patchModifications)
+			{
+				const auto& key = it.first;
+				const auto& mods = it.second;
+
+				auto* obj = mods->serialize();
+
+				patchMods->setProperty(juce::String(key.toString()), obj);
+			}
+
+			json->setProperty("patches", patchMods);
 		}
 
 		const auto jsonText = juce::JSON::toString(juce::var(json), false);

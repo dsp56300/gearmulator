@@ -64,7 +64,7 @@ namespace jucePluginEditorLib::patchManager
 		return ss.str();
 	}
 
-	std::string Info::toText(const pluginLib::patchDB::DataSourcePtr& _source)
+	std::string Info::toText(const pluginLib::patchDB::DataSourceNodePtr& _source)
 	{
 		if (!_source)
 			return {};

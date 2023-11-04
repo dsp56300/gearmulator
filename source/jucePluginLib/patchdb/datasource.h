@@ -8,16 +8,14 @@ namespace pluginLib::patchDB
 {
 	struct DataSource
 	{
-		DataSourcePtr parent;
-
 		SourceType type = SourceType::Invalid;
 		std::string name;
 		uint32_t bank = g_invalidBank;
-		uint32_t program = g_invalidProgram;
+//		uint32_t program = g_invalidProgram;
 
 		bool operator == (const DataSource& _ds) const
 		{
-			return parent == _ds.parent && type == _ds.type && name == _ds.name && bank == _ds.bank && program == _ds.program;
+			return type == _ds.type && name == _ds.name && bank == _ds.bank;//&& program == _ds.program;
 		}
 
 		bool operator != (const DataSource& _ds) const
@@ -27,8 +25,8 @@ namespace pluginLib::patchDB
 
 		bool operator < (const DataSource& _ds) const
 		{
-			if (parent < _ds.parent)	return true;
-			if (parent > _ds.parent)	return false;
+//			if (parent < _ds.parent)	return true;
+//			if (parent > _ds.parent)	return false;
 
 			if (type < _ds.type)		return true;
 			if (type > _ds.type)		return false;
@@ -38,16 +36,29 @@ namespace pluginLib::patchDB
 
 			if (bank < _ds.bank)		return true;
 			if (bank > _ds.bank)		return false;
-
+			/*
 			if (program < _ds.program)	return true;
 			if (program > _ds.program)	return false;
-
+			*/
 			return false;
 		}
 
 		bool operator > (const DataSource& _ds) const
 		{
 			return _ds < *this;
+		}
+
+		std::string toString() const;
+	};
+
+	struct DataSourceNode : DataSource
+	{
+		DataSourceNodePtr parent;
+
+		DataSourceNode& operator = (const DataSource& _source)
+		{
+			static_cast<DataSource&>(*this) = _source;
+			return *this;
 		}
 	};
 }

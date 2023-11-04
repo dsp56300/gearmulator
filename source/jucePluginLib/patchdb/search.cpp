@@ -47,7 +47,7 @@ namespace pluginLib::patchDB
 			return true;
 		}
 
-		bool matchDataSource(const DataSource& _source, const DataSource& _search)
+		bool matchDataSource(const DataSourceNode& _source, const DataSource& _search)
 		{
 			if (_source.parent && matchDataSource(*_source.parent, _search))
 				return true;
@@ -56,9 +56,6 @@ namespace pluginLib::patchDB
 				return false;
 
 			if (_search.bank != g_invalidBank && _source.bank != _search.bank)
-				return false;
-
-			if (_search.program != g_invalidProgram && _source.program != _search.program)
 				return false;
 
 			if (!matchStrings(_source.name, _search.name))
@@ -77,6 +74,9 @@ namespace pluginLib::patchDB
 		// name
 		if (!matchStringsIgnoreCase(_patch.getName(), name))
 			return false;
+
+//		if (program != g_invalidProgram && _patch.program != program)
+//			return false;
 
 		// tags, categories, ...
 		for (const auto& it : tags.get())

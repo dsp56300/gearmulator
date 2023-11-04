@@ -19,7 +19,7 @@ namespace pluginLib::patchDB
 		uint32_t bank = g_invalidBank;
 		uint32_t program = g_invalidProgram;
 
-		std::shared_ptr<DataSource> source;
+		DataSourceNodePtr source;
 
 		TypedTags tags;
 
@@ -34,14 +34,17 @@ namespace pluginLib::patchDB
 
 	struct PatchKey
 	{
-		std::shared_ptr<DataSource> source;
+		DataSource source;
 		std::string hash;
+		uint32_t program = g_invalidProgram;
 
-		explicit PatchKey(const Patch& _patch) : source(_patch.source), hash(_patch.hash) {}
+		PatchKey() = default;
+
+		explicit PatchKey(const Patch& _patch) : source(static_cast<const DataSource&>(*_patch.source)), hash(_patch.hash), program(_patch.program) {}
 
 		bool operator == (const PatchKey& _other) const
 		{
-			return *source == *_other.source && hash == _other.hash;
+			return source == _other.source && hash == _other.hash && program == _other.program;
 		}
 
 		bool operator != (const PatchKey& _other) const
@@ -51,13 +54,22 @@ namespace pluginLib::patchDB
 
 		bool operator < (const PatchKey& _other) const
 		{
-			if (*source < *_other.source)
+			if (program < _other.program)
 				return true;
-			if (*source > *_other.source)
+			if (program > _other.program)
+				return false;
+			if (source < _other.source)
+				return true;
+			if (source > _other.source)
 				return false;
 			if (hash < _other.hash)
 				return true;
 			return false;
 		}
+
+		bool isValid() const { return !hash.empty() && source.type != SourceType::Invalid; }
+
+		std::string toString() const;
+		static PatchKey fromString(const std::string& _string);
 	};
 }

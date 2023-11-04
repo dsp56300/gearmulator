@@ -13,8 +13,6 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-#include "patchmodifications.h"
-
 namespace pluginLib::patchDB
 {
 	struct SearchRequest;
@@ -30,10 +28,13 @@ namespace pluginLib::patchDB
 		void uiProcess(Dirty& _dirty);
 
 		void addDataSource(const DataSource& _ds);
-		void getDataSources(std::vector<DataSourcePtr>& _dataSources)
+
+		void getDataSources(std::vector<DataSourceNodePtr>& _dataSources)
 		{
 			std::shared_lock lock(m_dataSourcesMutex);
-			_dataSources = m_dataSources;
+			_dataSources.reserve(m_dataSources.size());
+			for (const auto& it : m_dataSources)
+				_dataSources.push_back(it.second);
 		}
 
 		bool addTag(TagType _type, const std::string& _tag);
@@ -45,12 +46,12 @@ namespace pluginLib::patchDB
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 
 	protected:
-		virtual bool loadData(DataList& _results, const DataSourcePtr& _ds);
+		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 
 		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
 		virtual bool loadFile(DataList& _results, const std::string& _file);
-		virtual bool loadFolder(DataList& _results, const DataSourcePtr& _folder);
-		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourcePtr& _ds) = 0;
+		virtual bool loadFolder(DataList& _results, const DataSourceNodePtr& _folder);
+		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourceNodePtr& _ds) = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 
 		void stopLoaderThread();
@@ -60,7 +61,7 @@ namespace pluginLib::patchDB
 		void runOnLoaderThread(const std::function<void()>& _func);
 		void runOnUiThread(const std::function<void()>& _func);
 
-		bool addDataSource(const DataSourcePtr& _ds);
+		bool addDataSource(DataSourceNodePtr _ds);
 
 		bool addPatch(const PatchPtr& _patch);
 		bool removePatch(const PatchKey& _key);
@@ -91,7 +92,7 @@ namespace pluginLib::patchDB
 
 		// data
 		std::shared_mutex m_dataSourcesMutex;
-		std::vector<DataSourcePtr> m_dataSources;
+		std::map<DataSource, DataSourceNodePtr> m_dataSources;	// we need a key to find duplicates, but at the same time we need pointers to do the parent relation
 
 		std::shared_mutex m_patchesMutex;
 		std::map<PatchKey, PatchPtr> m_patches;
