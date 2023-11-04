@@ -11,22 +11,37 @@ namespace pluginLib::patchDB
 	class Tags
 	{
 	public:
-		void add(const Tag& _tag)
+		bool add(const Tag& _tag)
 		{
+			const auto cA = m_added.size();
+			const auto cR = m_removed.size();
+
 			m_added.insert(_tag);
 			m_removed.erase(_tag);
+
+			return cA != m_added.size() || cR != m_removed.size();
 		}
 
-		void erase(const Tag& _tag)
+		bool erase(const Tag& _tag)
 		{
+			const auto cA = m_added.size();
+			const auto cR = m_removed.size();
+
 			m_added.erase(_tag);
 			m_removed.erase(_tag);
+
+			return cA != m_added.size() || cR != m_removed.size();
 		}
 
-		void addRemoved(const Tag& _tag)
+		bool addRemoved(const Tag& _tag)
 		{
+			const auto cA = m_added.size();
+			const auto cR = m_removed.size();
+
 			m_added.erase(_tag);
 			m_removed.insert(_tag);
+
+			return cA != m_added.size() || cR != m_removed.size();
 		}
 
 		const auto& getAdded() const { return m_added; }
@@ -57,9 +72,9 @@ namespace pluginLib::patchDB
 	public:
 		const Tags& get(TagType _type) const;
 		const auto& get() const { return m_tags; }
-		void add(TagType _type, const Tag& _tag);
-		void erase(TagType _type, const Tag& _tag);
-		void addRemoved(TagType _type, const Tag& _tag);
+		bool add(TagType _type, const Tag& _tag);
+		bool erase(TagType _type, const Tag& _tag);
+		bool addRemoved(TagType _type, const Tag& _tag);
 		bool containsAdded(TagType _type, const Tag& _tag) const;
 		bool containsRemoved(TagType _type, const Tag& _tag) const;
 		void clear();

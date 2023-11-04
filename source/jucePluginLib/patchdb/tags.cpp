@@ -11,7 +11,7 @@ namespace pluginLib::patchDB
 		return empty;
 	}
 
-	void TypedTags::add(const TagType _type, const Tag& _tag)
+	bool TypedTags::add(const TagType _type, const Tag& _tag)
 	{
 		const auto it = m_tags.find(_type);
 
@@ -20,14 +20,13 @@ namespace pluginLib::patchDB
 			Tags t;
 			t.add(_tag);
 			m_tags.insert({ _type, t});
+			return true;
 		}
-		else
-		{
-			it->second.add(_tag);
-		}
+
+		return it->second.add(_tag);
 	}
 
-	void TypedTags::addRemoved(const TagType _type, const Tag& _tag)
+	bool TypedTags::addRemoved(const TagType _type, const Tag& _tag)
 	{
 		const auto it = m_tags.find(_type);
 
@@ -36,24 +35,26 @@ namespace pluginLib::patchDB
 			Tags t;
 			t.addRemoved(_tag);
 			m_tags.insert({ _type, t });
+			return true;
 		}
-		else
-		{
-			it->second.addRemoved(_tag);
-		}
+
+		return it->second.addRemoved(_tag);
 	}
 
-	void TypedTags::erase(const TagType _type, const Tag& _tag)
+	bool TypedTags::erase(const TagType _type, const Tag& _tag)
 	{
 		const auto it = m_tags.find(_type);
 
 		if (it == m_tags.end())
-			return;
+			return false;
 
-		it->second.erase(_tag);
+		if (!it->second.erase(_tag))
+			return false;
 
 		if (it->second.empty())
 			m_tags.erase(_type);
+
+		return true;
 	}
 
 	bool TypedTags::containsAdded(const TagType _type, const Tag& _tag) const
