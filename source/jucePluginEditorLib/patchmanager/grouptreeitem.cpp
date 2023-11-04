@@ -1,6 +1,5 @@
 #include "grouptreeitem.h"
 
-#include "categorytreeitem.h"
 #include "datasourcetreeitem.h"
 #include "patchmanager.h"
 #include "tagtreeitem.h"
@@ -11,6 +10,7 @@ namespace jucePluginEditorLib::patchManager
 	class DatasourceTreeItem;
 	constexpr const char* const g_groupNames[] =
 	{
+		"Invalid",
 		"Data Sources",
 		"Categories",
 		"Tags",
@@ -79,8 +79,8 @@ namespace jucePluginEditorLib::patchManager
 			{
 				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
 				{
-					LOG("New Text: " << _newText << ", success " << _success);
-					getPatchManager().addTag(pluginLib::patchDB::TagType::Tag, _newText);
+					if(!_newText.empty())
+						getPatchManager().addTag(toTagType(m_type), _newText);
 				});
 			});
 
@@ -117,7 +117,7 @@ namespace jucePluginEditorLib::patchManager
 
 	TagTreeItem* GroupTreeItem::createSubItem(const std::string& _tag)
 	{
-		TagTreeItem* item = m_type == GroupType::Categories ? new CategoryTreeItem(getPatchManager(), _tag) : new TagTreeItem(getPatchManager(), GroupType::Tags, _tag);
+		TagTreeItem* item = new TagTreeItem(getPatchManager(), m_type, _tag);
 
 		addSubItem(item);
 		m_itemsByTag.insert({ _tag, item });

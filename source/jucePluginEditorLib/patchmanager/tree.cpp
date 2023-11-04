@@ -48,27 +48,25 @@ namespace jucePluginEditorLib::patchManager
 		item->updateFromDataSources(dataSources);
 	}
 
-	void Tree::updateCategories()
+	void Tree::updateTags(const GroupType _type)
 	{
-		auto* item = getItem(GroupType::Categories);
-		if (!item)
+		const auto tagType = toTagType(_type);
+		if (tagType == pluginLib::patchDB::TagType::Invalid)
 			return;
-
-		std::set<pluginLib::patchDB::Tag> categories;
-		m_patchManager.getTags(pluginLib::patchDB::TagType::Category, categories);
-
-		item->updateFromTags(categories);
-	}
-
-	void Tree::updateTags()
-	{
-		auto* item = getItem(GroupType::Tags);
+		auto* item = getItem(_type);
 		if (!item)
 			return;
 		std::set<pluginLib::patchDB::Tag> tags;
-		m_patchManager.getTags(pluginLib::patchDB::TagType::Tag, tags);
-
+		m_patchManager.getTags(tagType, tags);
 		item->updateFromTags(tags);
+	}
+
+	void Tree::updateTags(const pluginLib::patchDB::TagType _type)
+	{
+		const auto groupType = toGroupType(_type);
+		if (groupType == GroupType::Invalid)
+			return;
+		updateTags(groupType);
 	}
 
 	void Tree::processDirty(const pluginLib::patchDB::Dirty& _dirty)
@@ -76,11 +74,8 @@ namespace jucePluginEditorLib::patchManager
 		if (_dirty.dataSources)
 			updateDataSources();
 
-		if (_dirty.tags.find(pluginLib::patchDB::TagType::Category) != _dirty.tags.end())
-			updateCategories();
-
-		if (_dirty.tags.find(pluginLib::patchDB::TagType::Tag) != _dirty.tags.end())
-			updateTags();
+		for (const auto& tagType : _dirty.tags)
+			updateTags(tagType);
 
 		if (!_dirty.searches.empty())
 		{

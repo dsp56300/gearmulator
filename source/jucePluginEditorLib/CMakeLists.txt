@@ -13,7 +13,6 @@ set(SOURCES
 )
 
 set(SOURCES_PM
-	patchmanager/categorytreeitem.cpp patchmanager/categorytreeitem.h
 	patchmanager/datasourcetreeitem.cpp patchmanager/datasourcetreeitem.h
 	patchmanager/grouptreeitem.cpp patchmanager/grouptreeitem.h
 	patchmanager/info.cpp patchmanager/info.h

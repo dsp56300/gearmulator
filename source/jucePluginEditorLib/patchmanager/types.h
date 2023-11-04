@@ -9,6 +9,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	enum class GroupType
 	{
+		Invalid,
 		DataSources,
 		Categories,
 		Tags,
@@ -17,4 +18,5 @@ namespace jucePluginEditorLib::patchManager
 	};
 
 	pluginLib::patchDB::TagType toTagType(GroupType _groupType);
+	GroupType toGroupType(pluginLib::patchDB::TagType _tagType);
 }

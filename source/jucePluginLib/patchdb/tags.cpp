@@ -1,5 +1,7 @@
 #include "tags.h"
 
+#include <juce_audio_processors/juce_audio_processors.h>
+
 namespace pluginLib::patchDB
 {
 	const Tags& TypedTags::get(const TagType _type) const
@@ -76,5 +78,75 @@ namespace pluginLib::patchDB
 	void TypedTags::clear()
 	{
 		m_tags.clear();
+	}
+
+	juce::DynamicObject* TypedTags::serialize() const
+	{
+		auto* doTags = new juce::DynamicObject();
+
+		for (const auto& it : get())
+		{
+			const auto& key = it.first;
+			const auto& tags = it.second;
+
+			auto* doType = new juce::DynamicObject();
+
+			const auto& added = tags.getAdded();
+			const auto& removed = tags.getRemoved();
+
+			if (!added.empty())
+			{
+				juce::Array<juce::var> doAdded;
+				for (const auto& tag : added)
+					doAdded.add(juce::String(tag));
+				doType->setProperty("added", doAdded);
+			}
+
+			if (!removed.empty())
+			{
+				juce::Array<juce::var> doRemoved;
+				for (const auto& tag : removed)
+					doRemoved.add(juce::String(tag));
+				doType->setProperty("removed", doRemoved);
+			}
+
+			doTags->setProperty(juce::String(toString(key)), doType);
+		}
+
+		return doTags;
+	}
+
+	void TypedTags::deserialize(juce::DynamicObject* _obj)
+	{
+		for (const auto& prop : _obj->getProperties())
+		{
+			const auto type = toTagType(prop.name.toString().toStdString());
+
+			if (type == TagType::Invalid)
+				continue;
+
+			const auto* added = prop.value["added"].getArray();
+			const auto* removed = prop.value["removed"].getArray();
+
+			if (added)
+			{
+				for (const auto& var : *added)
+				{
+					const auto& tag = var.toString().toStdString();
+					if (!tag.empty())
+						add(type, tag);
+				}
+			}
+
+			if (removed)
+			{
+				for (const auto& var : *removed)
+				{
+					const auto& tag = var.toString().toStdString();
+					if (!tag.empty())
+						addRemoved(type, tag);
+				}
+			}
+		}
 	}
 }

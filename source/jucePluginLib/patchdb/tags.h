@@ -6,6 +6,11 @@
 
 #include "patchdbtypes.h"
 
+namespace juce
+{
+	class DynamicObject;
+}
+
 namespace pluginLib::patchDB
 {
 	class Tags
@@ -78,7 +83,8 @@ namespace pluginLib::patchDB
 		bool containsAdded(TagType _type, const Tag& _tag) const;
 		bool containsRemoved(TagType _type, const Tag& _tag) const;
 		void clear();
-
+		juce::DynamicObject* serialize() const;
+		void deserialize(juce::DynamicObject* _obj);
 	private:
 		std::map<TagType, Tags> m_tags;
 	};

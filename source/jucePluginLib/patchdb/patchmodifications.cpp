@@ -63,36 +63,7 @@ namespace pluginLib::patchDB
 	{
 		auto* o = new juce::DynamicObject();
 
-		auto* doTags = new juce::DynamicObject();
-
-		for (const auto& it : tags.get())
-		{
-			const auto& key = it.first;
-			const auto& tags = it.second;
-
-			auto* doType = new juce::DynamicObject();
-
-			const auto& added = tags.getAdded();
-			const auto& removed = tags.getRemoved();
-
-			if(!added.empty())
-			{
-				juce::Array<juce::var> doAdded;
-				for (const auto& tag : added)
-					doAdded.add(juce::String(tag));
-				doType->setProperty("added", doAdded);
-			}
-
-			if (!removed.empty())
-			{
-				juce::Array<juce::var> doRemoved;
-				for (const auto& tag : removed)
-					doRemoved.add(juce::String(tag));
-				doType->setProperty("removed", doRemoved);
-			}
-
-			doTags->setProperty(juce::String(toString(key)), doType);
-		}
+		auto* doTags = tags.serialize();
 
 		o->setProperty("tags", doTags);
 
@@ -118,36 +89,7 @@ namespace pluginLib::patchDB
 
 		if(t)
 		{
-			for(const auto& prop : t->getProperties())
-			{
-				const auto type = toTagType(prop.name.toString().toStdString());
-
-				if(type == TagType::Invalid)
-					continue;
-
-				const auto* added = prop.value["added"].getArray();
-				const auto* removed = prop.value["removed"].getArray();
-
-				if(added)
-				{
-					for (const auto& var : *added)
-					{
-						const auto& tag = var.toString().toStdString();
-						if(!tag.empty())
-							tags.add(type, tag);
-					}
-				}
-
-				if (removed)
-				{
-					for (const auto& var : *removed)
-					{
-						const auto& tag = var.toString().toStdString();
-						if (!tag.empty())
-							tags.addRemoved(type, tag);
-					}
-				}
-			}
+			tags.deserialize(t);
 		}
 
 		return true;

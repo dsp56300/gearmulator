@@ -20,4 +20,19 @@ namespace jucePluginEditorLib::patchManager
 			return pluginLib::patchDB::TagType::Invalid;
 		}
 	}
+
+	GroupType toGroupType(const pluginLib::patchDB::TagType _tagType)
+	{
+		switch (_tagType)
+		{
+		case pluginLib::patchDB::TagType::Category:
+			return GroupType::Categories;
+		case pluginLib::patchDB::TagType::Tag:
+			return GroupType::Tags;
+		case pluginLib::patchDB::TagType::Favourites:
+			return GroupType::Favourites;
+		default: 
+			return GroupType::Invalid;
+		}
+	}
 }

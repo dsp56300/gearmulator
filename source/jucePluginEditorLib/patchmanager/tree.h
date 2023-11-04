@@ -21,8 +21,8 @@ namespace jucePluginEditorLib::patchManager
 		~Tree() override;
 
 		void updateDataSources();
-		void updateCategories();
-		void updateTags();
+		void updateTags(GroupType _type);
+		void updateTags(pluginLib::patchDB::TagType _type);
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
