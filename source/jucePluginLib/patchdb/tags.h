@@ -17,7 +17,13 @@ namespace pluginLib::patchDB
 			m_removed.erase(_tag);
 		}
 
-		void remove(const Tag& _tag)
+		void erase(const Tag& _tag)
+		{
+			m_added.erase(_tag);
+			m_removed.erase(_tag);
+		}
+
+		void addRemoved(const Tag& _tag)
 		{
 			m_added.erase(_tag);
 			m_removed.insert(_tag);
@@ -36,6 +42,11 @@ namespace pluginLib::patchDB
 			return m_removed.find(_tag) != m_added.end();
 		}
 
+		bool empty() const
+		{
+			return m_added.empty() && m_removed.empty();
+		}
+
 	private:
 		std::set<Tag> m_added;
 		std::set<Tag> m_removed;
@@ -47,6 +58,11 @@ namespace pluginLib::patchDB
 		const Tags& get(TagType _type) const;
 		const auto& get() const { return m_tags; }
 		void add(TagType _type, const Tag& _tag);
+		void erase(TagType _type, const Tag& _tag);
+		void addRemoved(TagType _type, const Tag& _tag);
+		bool containsAdded(TagType _type, const Tag& _tag) const;
+		bool containsRemoved(TagType _type, const Tag& _tag) const;
+		void clear();
 
 	private:
 		std::map<TagType, Tags> m_tags;

@@ -34,6 +34,9 @@ namespace pluginLib::patchDB
 	struct Patch;
 	using PatchPtr = std::shared_ptr<Patch>;
 
+	struct PatchModifications;
+	using PatchModificationsPtr = std::shared_ptr<PatchModifications>;
+
 	using Data = std::vector<uint8_t>;
 	using DataList = std::vector<Data>;
 

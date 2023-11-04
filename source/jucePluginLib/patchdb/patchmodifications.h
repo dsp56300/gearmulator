@@ -6,8 +6,14 @@ namespace pluginLib::patchDB
 {
 	struct PatchModifications
 	{
-		Tags tags;
-		Tags categories;
+		void modifyTags(const TypedTags& _tags);
+		void updateCache();
+
+		PatchPtr patch;
+		TypedTags tags;
 		std::string name;
+
+		// cache
+		TypedTags mergedTags;
 	};
 }

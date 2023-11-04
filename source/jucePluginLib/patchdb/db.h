@@ -13,6 +13,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "patchmodifications.h"
+
 namespace pluginLib::patchDB
 {
 	struct SearchRequest;
@@ -25,23 +27,22 @@ namespace pluginLib::patchDB
 		DB(juce::File _json);
 		virtual ~DB();
 
-		void addDataSource(const DataSource& _ds);
-		bool addTag(TagType _type, const std::string& _tag);
-
 		void uiProcess(Dirty& _dirty);
 
-		uint32_t search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback);
-		void cancelSearch(uint32_t _handle);
-
-		std::shared_ptr<Search> getSearch(SearchHandle _handle);
-
-		void getTags(TagType _type, std::set<Tag>& _tags);
-
+		void addDataSource(const DataSource& _ds);
 		void getDataSources(std::vector<DataSourcePtr>& _dataSources)
 		{
 			std::shared_lock lock(m_dataSourcesMutex);
 			_dataSources = m_dataSources;
 		}
+
+		bool addTag(TagType _type, const std::string& _tag);
+		void getTags(TagType _type, std::set<Tag>& _tags);
+		bool modifyTags(const PatchPtr& _patch, const TypedTags& _tags);
+
+		uint32_t search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback);
+		void cancelSearch(uint32_t _handle);
+		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 
 	protected:
 		virtual bool loadData(DataList& _results, const DataSourcePtr& _ds);
@@ -88,12 +89,13 @@ namespace pluginLib::patchDB
 		Dirty m_dirty;
 
 		// data
+		std::shared_mutex m_dataSourcesMutex;
+		std::vector<DataSourcePtr> m_dataSources;
+
 		std::shared_mutex m_patchesMutex;
 		std::map<PatchKey, PatchPtr> m_patches;
 		std::map<TagType, std::set<Tag>> m_tags;
-
-		std::shared_mutex m_dataSourcesMutex;
-		std::vector<DataSourcePtr> m_dataSources;
+		std::map<PatchKey, PatchModificationsPtr> m_patchModifications;
 
 		// search
 		std::mutex m_searchesMutex;

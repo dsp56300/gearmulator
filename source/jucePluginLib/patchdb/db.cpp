@@ -112,6 +112,33 @@ namespace pluginLib::patchDB
 		_tags = it->second;
 	}
 
+	bool DB::modifyTags(const PatchPtr& _patch, const TypedTags& _tags)
+	{
+		const auto key = PatchKey(*_patch);
+		std::unique_lock lock(m_patchesMutex);
+		const auto& itPatch = m_patches.find(key);
+		if (itPatch == m_patches.end())
+			return false;
+
+		const auto& it = m_patchModifications.find(key);
+
+		if(it != m_patchModifications.end())
+		{
+			it->second->modifyTags(_tags);
+			return true;
+		}
+
+		const auto mods = std::make_shared<PatchModifications>();
+		mods->patch = itPatch->second;
+		mods->modifyTags(_tags);
+
+		itPatch->second->modifications = mods;
+
+		m_patchModifications.insert({ key, mods });
+
+		return true;
+	}
+
 	bool DB::loadData(DataList& _results, const DataSourcePtr& _ds)
 	{
 		switch (_ds->type)

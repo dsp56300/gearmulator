@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstdint>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -26,6 +25,8 @@ namespace pluginLib::patchDB
 
 		std::string hash;
 		std::vector<uint8_t> sysex;
+
+		PatchModificationsPtr modifications;
 	};
 
 	struct PatchKey
