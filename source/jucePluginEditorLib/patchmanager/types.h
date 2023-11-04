@@ -1,5 +1,10 @@
 #pragma once
 
+namespace pluginLib::patchDB
+{
+	enum class TagType;
+}
+
 namespace jucePluginEditorLib::patchManager
 {
 	enum class GroupType
@@ -10,4 +15,6 @@ namespace jucePluginEditorLib::patchManager
 		Favourites,
 		Count
 	};
+
+	pluginLib::patchDB::TagType toTagType(GroupType _groupType);
 }

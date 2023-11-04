@@ -36,6 +36,11 @@ namespace jucePluginEditorLib::patchManager
 		processSearchUpdated(*search);
 	}
 
+	bool TreeItem::hasSearch() const
+	{
+		return m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle;
+	}
+
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
 		TreeViewItem::itemSelectionChanged(_isNowSelected);
@@ -46,7 +51,29 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		TreeViewItem::itemDropped(dragSourceDetails, insertIndex);
+		const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get());
+
+		if (!list)
+			return;
+
+		const auto* arr = dragSourceDetails.description.getArray();
+		if (!arr)
+			return;
+
+		std::vector<pluginLib::patchDB::PatchPtr> patches;
+
+		for (const auto& var : *arr)
+		{
+			if (!var.isInt())
+				continue;
+			const int idx = var;
+			const auto patch = list->getPatch(idx);
+			if (patch)
+				patches.push_back(patch);
+		}
+
+		if(!patches.empty())
+			patchesDropped(patches);
 	}
 
 	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
@@ -56,8 +83,15 @@ namespace jucePluginEditorLib::patchManager
 		if (!list)
 			return false;
 
-		if (m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+		const auto* arr = dragSourceDetails.description.getArray();
+		if (!arr)
 			return false;
+
+		for (auto var : *arr)
+		{
+			if (!var.isInt())
+				return false;
+		}
 
 		return true;
 	}
@@ -116,6 +150,14 @@ namespace jucePluginEditorLib::patchManager
 		m_finishedEditingCallback = std::move(_callback);
 
 		return true;
+	}
+
+	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		for (const auto& patch : _patches)
+		{
+			patchDropped(patch);
+		}
 	}
 
 	void TreeItem::destroyEditorLabel()

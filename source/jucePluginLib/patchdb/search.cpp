@@ -75,7 +75,7 @@ namespace pluginLib::patchDB
 			return false;
 
 		// name
-		if (!matchStringsIgnoreCase(_patch.name, name))
+		if (!matchStringsIgnoreCase(_patch.getName(), name))
 			return false;
 
 		// tags, categories, ...
@@ -84,7 +84,7 @@ namespace pluginLib::patchDB
 			const auto type = it.first;
 			const auto& t = it.second;
 
-			const auto& patchTags = _patch.tags.get(type);
+			const auto& patchTags = _patch.getTags().get(type);
 
 			if (!testTags(patchTags, t))
 				return false;

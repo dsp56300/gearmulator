@@ -27,6 +27,13 @@ namespace jucePluginEditorLib::patchManager
 		juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
 
 		void selectedRowsChanged(int lastRowSelected) override;
+
+		pluginLib::patchDB::PatchPtr getPatch(const size_t _index) const
+		{
+			if (_index >= m_patches.size())
+				return {};
+			return m_patches[_index];
+		}
 	private:
 		PatchManager& m_patchManager;
 

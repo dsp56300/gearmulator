@@ -45,7 +45,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto& patch = m_patches[_rowNumber];
 
-		const auto text = patch->name;
+		const auto text = patch->getName();
 
 		_g.drawText(text, 2, 0, _width - 4, _height, juce::Justification::centredLeft, true);
 //		_g.setColour(m_patchList.getLookAndFeel().findColour(ListBox::backgroundColourId));
@@ -57,10 +57,20 @@ namespace jucePluginEditorLib::patchManager
 		if(rowsToDescribe.size() > 1)
 			return {};
 
-		const auto row = rowsToDescribe.getRange(0).getStart();
-		if (row < 0 || row >= m_patches.size())
-			return {};
-		return row;
+		const auto& ranges = rowsToDescribe.getRanges();
+
+		juce::Array<juce::var> indices;
+
+		for (const auto& range : ranges)
+		{
+			for (int i = range.getStart(); i < range.getEnd(); ++i)
+			{
+				if(i >= 0 && i<m_patches.size())
+					indices.add(i);
+			}
+		}
+
+		return indices;
 	}
 
 	void List::selectedRowsChanged(int lastRowSelected)

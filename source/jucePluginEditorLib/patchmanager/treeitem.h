@@ -35,9 +35,13 @@ namespace jucePluginEditorLib::patchManager
 
 		bool beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback);
 
+		virtual void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) {};
+		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches);
+
+		bool hasSearch() const;
+
 		// TreeViewItem
 		void itemSelectionChanged(bool _isNowSelected) override;
-
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
 

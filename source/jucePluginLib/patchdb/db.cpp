@@ -115,26 +115,32 @@ namespace pluginLib::patchDB
 	bool DB::modifyTags(const PatchPtr& _patch, const TypedTags& _tags)
 	{
 		const auto key = PatchKey(*_patch);
-		std::unique_lock lock(m_patchesMutex);
-		const auto& itPatch = m_patches.find(key);
-		if (itPatch == m_patches.end())
-			return false;
 
-		const auto& it = m_patchModifications.find(key);
-
-		if(it != m_patchModifications.end())
 		{
-			it->second->modifyTags(_tags);
-			return true;
+			std::unique_lock lock(m_patchesMutex);
+			const auto& itPatch = m_patches.find(key);
+			if (itPatch == m_patches.end())
+				return false;
+
+			const auto& it = m_patchModifications.find(key);
+
+			if (it != m_patchModifications.end())
+			{
+				it->second->modifyTags(_tags);
+				updateSearches(_patch);
+				return true;
+			}
+
+			const auto mods = std::make_shared<PatchModifications>();
+			mods->patch = itPatch->second;
+			mods->modifyTags(_tags);
+
+			itPatch->second->modifications = mods;
+
+			m_patchModifications.insert({ key, mods });
+
+			updateSearches(_patch);
 		}
-
-		const auto mods = std::make_shared<PatchModifications>();
-		mods->patch = itPatch->second;
-		mods->modifyTags(_tags);
-
-		itPatch->second->modifications = mods;
-
-		m_patchModifications.insert({ key, mods });
 
 		return true;
 	}
@@ -287,45 +293,28 @@ namespace pluginLib::patchDB
 		if (m_patches.find(key) != m_patches.end())
 			return false;
 
+		// find modification and apply it to the patch
+		const auto itMod = m_patchModifications.find(key);
+		if(itMod != m_patchModifications.end())
+		{
+			_patch->modifications = itMod->second;
+			itMod->second->patch = _patch;
+			itMod->second->updateCache();
+		}
+
 		m_patches.insert({key, _patch});
 
 		// add to ongoing searches
-		std::scoped_lock lockSearches(m_searchesMutex);
-
-		for (auto& it : m_searches)
-		{
-			const auto& search = it.second;
-
-			if (search->request.match(*_patch))
-			{
-				bool countChanged;
-
-				{
-					std::unique_lock lockResults(search->resultsMutex);
-					const auto oldCount = search->results.size();
-					search->results.insert({ key, _patch });
-					const auto newCount = search->results.size();
-					countChanged = newCount != oldCount;
-				}
-
-				if(countChanged)
-				{
-					std::unique_lock lockUi(m_uiMutex);
-					m_dirty.searches.insert(it.first);
-				}
-			}
-		}
+		updateSearches(_patch);
 
 		// add to all known categories, tags, etc
+		for (const auto& it : _patch->getTags().get())
 		{
-			for (const auto& it : _patch->tags.get())
-			{
-				const auto type = it.first;
-				const auto& tags = it.second;
+			const auto type = it.first;
+			const auto& tags = it.second;
 
-				for (const auto& tag : tags.getAdded())
-					internalAddTag(type, tag);
-			}
+			for (const auto& tag : tags.getAdded())
+				internalAddTag(type, tag);
 		}
 
 		return true;
@@ -423,6 +412,39 @@ namespace pluginLib::patchDB
 		}
 
 		return true;
+	}
+
+	void DB::updateSearches(const PatchPtr& _patch)
+	{
+		const PatchKey key(*_patch);
+
+		std::unique_lock lockSearches(m_searchesMutex);
+
+		for (const auto& it : m_searches)
+		{
+			const auto handle = it.first;
+			auto& search = it.second;
+			const auto match = search->request.match(*_patch);
+
+			if (match)
+			{
+				if (search->results.find(key) == search->results.end())
+				{
+					search->results.insert({ key, _patch });
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.searches.insert(handle);
+				}
+			}
+			else
+			{
+				if (search->results.find(key) != search->results.end())
+				{
+					search->results.erase(key);
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.searches.insert(handle);
+				}
+			}
+		}
 	}
 
 	bool DB::loadJson()

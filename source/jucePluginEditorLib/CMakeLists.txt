@@ -23,7 +23,7 @@ set(SOURCES_PM
 	patchmanager/tagtreeitem.cpp patchmanager/tagtreeitem.h
 	patchmanager/tree.cpp patchmanager/tree.h
 	patchmanager/treeitem.cpp patchmanager/treeitem.h
-	patchmanager/types.h
+	patchmanager/types.cpp patchmanager/types.h
 )
 
 add_library(jucePluginEditorLib STATIC)

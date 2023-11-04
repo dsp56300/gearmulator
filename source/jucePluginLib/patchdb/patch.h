@@ -27,6 +27,9 @@ namespace pluginLib::patchDB
 		std::vector<uint8_t> sysex;
 
 		PatchModificationsPtr modifications;
+
+		const TypedTags& getTags() const;
+		const std::string& getName() const;
 	};
 
 	struct PatchKey

@@ -68,6 +68,7 @@ namespace pluginLib::patchDB
 		bool internalAddTag(TagType _type, const Tag& _tag);
 
 		bool executeSearch(Search& _search);
+		void updateSearches(const PatchPtr& _patch);
 
 		bool loadJson();
 		bool saveJson();

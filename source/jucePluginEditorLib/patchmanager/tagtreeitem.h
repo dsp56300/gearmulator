@@ -19,6 +19,11 @@ namespace jucePluginEditorLib::patchManager
 
 		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
 
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+		void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) override;
+
+		const auto& getTag() const { return m_tag; }
+
 	private:
 		const GroupType m_group;
 		const std::string m_tag;
