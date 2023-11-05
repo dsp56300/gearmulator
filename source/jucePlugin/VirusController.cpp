@@ -441,7 +441,8 @@ namespace Virus
 
 			m_singles[bank][program] = patch;
 
-			onRomPatchReceived(patch.bankNumber, program);
+            if(onRomPatchReceived)
+				onRomPatchReceived(patch.bankNumber, program);
 		}
 	}
 
