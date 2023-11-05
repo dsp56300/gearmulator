@@ -96,13 +96,13 @@ namespace pluginLib::patchDB
 
 		std::shared_mutex m_patchesMutex;
 		std::map<PatchKey, PatchPtr> m_patches;
-		std::map<TagType, std::set<Tag>> m_tags;
+		std::unordered_map<TagType, std::set<Tag>> m_tags;
 		std::map<PatchKey, PatchModificationsPtr> m_patchModifications;
 
 		// search
 		std::mutex m_searchesMutex;
-		std::map<uint32_t, std::shared_ptr<Search>> m_searches;
-		std::set<SearchHandle> m_cancelledSearches;
+		std::unordered_map<uint32_t, std::shared_ptr<Search>> m_searches;
+		std::unordered_set<SearchHandle> m_cancelledSearches;
 		uint32_t m_nextSearchHandle = 0;
 	};
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <map>
-#include <set>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 #include "patchdbtypes.h"
 
@@ -68,8 +68,8 @@ namespace pluginLib::patchDB
 		}
 
 	private:
-		std::set<Tag> m_added;
-		std::set<Tag> m_removed;
+		std::unordered_set<Tag> m_added;
+		std::unordered_set<Tag> m_removed;
 	};
 
 	class TypedTags
@@ -86,6 +86,6 @@ namespace pluginLib::patchDB
 		juce::DynamicObject* serialize() const;
 		void deserialize(juce::DynamicObject* _obj);
 	private:
-		std::map<TagType, Tags> m_tags;
+		std::unordered_map<TagType, Tags> m_tags;
 	};
 }
