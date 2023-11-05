@@ -31,13 +31,13 @@ namespace pluginLib::patchDB
 
 	void DB::addDataSource(const DataSource& _ds)
 	{
-		runOnLoaderThread([this, _ds]()
+		const auto ds = std::make_shared<DataSourceNode>();
+		*ds = _ds;
+
+		addDataSource(ds);
+
+		runOnLoaderThread([this]
 		{
-			const auto ds = std::make_shared<DataSourceNode>();
-			*ds = _ds;
-
-			addDataSource(ds);
-
 			saveJson();
 		});
 	}
@@ -166,7 +166,7 @@ namespace pluginLib::patchDB
 		case SourceType::File:
 			return loadFile(_results, _ds->name);
 		case SourceType::Folder:
-			return loadFolder(_results, _ds);
+			return loadFolder(_ds);
 		case SourceType::Count:
 			return false;
 //		default:
@@ -188,7 +188,7 @@ namespace pluginLib::patchDB
 		return parseFileData(_results, data);
 	}
 
-	bool DB::loadFolder(DataList& _results, const DataSourceNodePtr& _folder)
+	bool DB::loadFolder(const DataSourceNodePtr& _folder)
 	{
 		assert(_folder->type == SourceType::Folder);
 
@@ -214,7 +214,7 @@ namespace pluginLib::patchDB
 			addDataSource(child);
 		}
 
-		return !_results.empty();
+		return !files.empty();
 	}
 
 	bool DB::parseFileData(DataList& _results, const Data& _data)
@@ -260,44 +260,76 @@ namespace pluginLib::patchDB
 		m_uiFuncs.push_back(_func);
 	}
 
-	bool DB::addDataSource(DataSourceNodePtr _ds)
+	void DB::addDataSource(const DataSourceNodePtr& _ds)
 	{
-		std::vector<std::vector<uint8_t>> data;
-
+		runOnLoaderThread([this, _ds]
 		{
-			std::unique_lock lockDs(m_dataSourcesMutex);
+			auto ds = _ds;
 
-			const auto itExisting = m_dataSources.find(*_ds);
+			bool dsExists;
 
-			if (itExisting != m_dataSources.end())
 			{
-				const auto parent = _ds->parent;
-				_ds = itExisting->second;
-				_ds->parent = parent;
+				std::unique_lock lockDs(m_dataSourcesMutex);
+
+				const auto itExisting = m_dataSources.find(*ds);
+
+				dsExists = itExisting != m_dataSources.end();
+
+				if (dsExists)
+				{
+					const auto parent = ds->parent;
+					ds = itExisting->second;
+					ds->parent = parent;
+
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.dataSources = true;
+				}
 			}
-			else
+
+			if (ds->name.find("DemoPresets.zip") != std::string::npos)
+				int foo = 0;
+
+			std::vector<std::vector<uint8_t>> data;
+			auto result = loadData(data, ds);
+
+			if(result)
 			{
-				m_dataSources.insert({ *_ds, _ds });
+				result = false;
+
+				for (uint32_t p = 0; p < data.size(); ++p)
+				{
+					if (const auto patch = initializePatch(data[p], ds))
+					{
+						patch->program = p;
+						result |= addPatch(patch);
+					}
+				}
 			}
 
-			std::unique_lock lockUi(m_uiMutex);
-			m_dirty.dataSources = true;
-		}
-
-		if (!loadData(data, _ds))
-			return false;
-
-		bool result = false;
-
-		for (uint32_t p = 0; p < data.size(); ++p)
-		{
-			if (const auto patch = initializePatch(data[p], _ds))
+			if(!dsExists)
 			{
-				patch->program = p;
-				result |= addPatch(patch);
+				bool addDs = result;
+
+				if (!addDs)
+				{
+					// if the data source is a root data source, still add it because its a user request
+					if (!ds->parent)
+						addDs = true;
+				}
+
+				if (addDs)
+				{
+					std::unique_lock lockDs(m_dataSourcesMutex);
+
+					m_dataSources.insert({ *ds, ds });
+
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.dataSources = true;
+				}
 			}
-		}
-		return result;
+
+			return result;
+		});
 	}
 
 	bool DB::addPatch(const PatchPtr& _patch)

@@ -50,7 +50,7 @@ namespace pluginLib::patchDB
 
 		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
 		virtual bool loadFile(DataList& _results, const std::string& _file);
-		virtual bool loadFolder(DataList& _results, const DataSourceNodePtr& _folder);
+		virtual bool loadFolder(const DataSourceNodePtr& _folder);
 		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourceNodePtr& _ds) = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 
@@ -61,7 +61,7 @@ namespace pluginLib::patchDB
 		void runOnLoaderThread(const std::function<void()>& _func);
 		void runOnUiThread(const std::function<void()>& _func);
 
-		bool addDataSource(DataSourceNodePtr _ds);
+		void addDataSource(const DataSourceNodePtr& _ds);
 
 		bool addPatch(const PatchPtr& _patch);
 		bool removePatch(const PatchKey& _key);
