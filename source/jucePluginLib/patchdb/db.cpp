@@ -286,9 +286,6 @@ namespace pluginLib::patchDB
 				}
 			}
 
-			if (ds->name.find("DemoPresets.zip") != std::string::npos)
-				int foo = 0;
-
 			std::vector<std::vector<uint8_t>> data;
 			auto result = loadData(data, ds);
 
