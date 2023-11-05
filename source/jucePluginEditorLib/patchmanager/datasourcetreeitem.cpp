@@ -22,34 +22,26 @@ namespace jucePluginEditorLib::patchManager
 			}
 			return {};
 		}
+
+		std::string getDataSourceNodeTitle(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+		{
+			if (!_ds->parent)
+				return getDataSourceTitle(*_ds);
+
+			const auto t = getDataSourceTitle(*_ds);
+			const auto pos = t.find_last_of("\\/");
+			if (pos != std::string::npos)
+				return t.substr(pos + 1);
+			return t;
+		}
 	}
 
 	DatasourceTreeItem::DatasourceTreeItem(PatchManager& _pm, const pluginLib::patchDB::DataSourceNodePtr& _ds) : TreeItem(_pm,{}), m_dataSource(_ds)
 	{
-		DatasourceTreeItem::setTitle(getDataSourceTitle(*_ds));
+		setTitle(getDataSourceNodeTitle(_ds));
 
 		pluginLib::patchDB::SearchRequest sr;
-		sr.source = *_ds;
+		sr.source = static_cast<pluginLib::patchDB::DataSource>(*_ds);
 		search(std::move(sr));
-	}
-
-	void DatasourceTreeItem::setTitle(const std::string& _title)
-	{
-		if(!m_dataSource->parent)
-		{
-			TreeItem::setTitle(_title);
-			return;
-		}
-
-		const auto pos = _title.find_last_of("\\/");
-		if (pos != std::string::npos)
-			TreeItem::setTitle(_title.substr(pos + 1));
-		else
-			TreeItem::setTitle(_title);
-	}
-
-	void DatasourceTreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
-	{
-		setTitle(getDataSourceTitle(_search.request.source) + " (" + std::to_string(_search.getResultSize()) + ")");
 	}
 }

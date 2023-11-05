@@ -12,6 +12,9 @@ namespace pluginLib::patchDB
 
 namespace jucePluginEditorLib::patchManager
 {
+	static constexpr uint32_t g_invalidCount = ~0;
+	static constexpr uint32_t g_unknownCount = g_invalidCount - 1;
+
 	class PatchManager;
 
 	class TreeItem : public juce::TreeViewItem, juce::Label::Listener
@@ -19,13 +22,13 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		using FinishedEditingCallback = std::function<void(bool, const std::string&)>;
 
-		TreeItem(PatchManager& _patchManager, std::string _title);
+		TreeItem(PatchManager& _patchManager, const std::string& _title, uint32_t _count = g_invalidCount);
 		~TreeItem() override;
 
 		PatchManager& getPatchManager() const { return m_patchManager; }
 
-		virtual void setTitle(const std::string& _title);
-		const std::string& getTitle() const { return m_title; }
+		void setTitle(const std::string& _title);
+		virtual void setCount(uint32_t _count);
 
 		auto getSearchHandle() const { return m_searchHandle; }
 
@@ -51,20 +54,24 @@ namespace jucePluginEditorLib::patchManager
 
 	protected:
 		void search(pluginLib::patchDB::SearchRequest&& _request);
-		virtual void processSearchUpdated(const pluginLib::patchDB::Search& _search) {};
+		virtual void processSearchUpdated(const pluginLib::patchDB::Search& _search);
 
 	private:
-		bool mightContainSubItems() override
-		{
-			return true;
-		}
+		bool mightContainSubItems() override { return true; }
 
+		void setText(const std::string& _text);
+		void updateText();
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
 		void destroyEditorLabel();
 
 		PatchManager& m_patchManager;
+
 		std::string m_title;
+		uint32_t m_count = g_invalidCount;
+
+		std::string m_text;
+
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 
 		FinishedEditingCallback m_finishedEditingCallback;

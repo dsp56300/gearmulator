@@ -16,14 +16,6 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	void TagTreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
-	{
-		const auto patchCount = _search.getResultSize();
-
-		const auto title = m_tag + " (" + std::to_string(patchCount) + ")";
-		setTitle(title);
-	}
-
 	bool TagTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 	{
 		return TreeItem::isInterestedInDragSource(dragSourceDetails) && hasSearch();

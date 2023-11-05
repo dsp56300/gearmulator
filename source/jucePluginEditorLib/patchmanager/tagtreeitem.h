@@ -17,8 +17,6 @@ namespace jucePluginEditorLib::patchManager
 
 		auto getGroupType() const { return m_group; }
 
-		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
-
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
 		void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) override;
 

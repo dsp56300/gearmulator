@@ -7,8 +7,9 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	TreeItem::TreeItem(PatchManager& _patchManager, std::string _title) : m_patchManager(_patchManager), m_title(std::move(_title))
+	TreeItem::TreeItem(PatchManager& _patchManager, const std::string& _title, const uint32_t _count/* = g_invalidCount*/) : m_patchManager(_patchManager), m_count(_count)
 	{
+		setTitle(_title);
 	}
 
 	TreeItem::~TreeItem()
@@ -21,7 +22,15 @@ namespace jucePluginEditorLib::patchManager
 		if (m_title == _title)
 			return;
 		m_title = _title;
-		repaintItem();
+		updateText();
+	}
+
+	void TreeItem::setCount(const uint32_t _count)
+	{
+		if (m_count == _count)
+			return;
+		m_count = _count;
+		updateText();
 	}
 
 	void TreeItem::processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches)
@@ -98,15 +107,40 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
 	{
+		setCount(g_unknownCount);
+
 		m_searchHandle = getPatchManager().search(std::move(_request), [](const pluginLib::patchDB::SearchResult&)
 		{
 		});
 	}
 
+	void TreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
+	{
+		setCount(static_cast<uint32_t>(_search.results.size()));
+	}
+
+	void TreeItem::setText(const std::string& _text)
+	{
+		if (m_text == _text)
+			return;
+		m_text = _text;
+		repaintItem();
+	}
+
+	void TreeItem::updateText()
+	{
+		if (m_count == g_invalidCount)
+			setText(m_title);
+		else if (m_count == g_unknownCount)
+			setText(m_title + " (?)");
+		else
+			setText(m_title + " (" + std::to_string(m_count) + ')');
+	}
+
 	void TreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
 		_g.setColour(juce::Colour(0xffffffff));
-		const juce::String t(m_title);
+		const juce::String t(m_text);
 		_g.drawText(t, 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}

@@ -19,15 +19,9 @@ namespace jucePluginEditorLib::patchManager
 			return m_dataSource->type == pluginLib::patchDB::SourceType::Folder;
 		}
 
-		void setTitle(const std::string& _title) override;
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override { return false; }
 
-		void processSearchUpdated(const pluginLib::patchDB::Search& _search) override;
-
-		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override
-		{
-				return false;
-		}
-
+	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
 }
