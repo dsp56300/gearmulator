@@ -15,12 +15,12 @@ namespace pluginLib::patchDB
 {
 	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json))
 	{
+		loadJson();
+
 		m_loader.reset(new std::thread([&]
 		{
 			loaderThreadFunc();
 		}));
-
-		loadJson();
 	}
 
 	DB::~DB()
