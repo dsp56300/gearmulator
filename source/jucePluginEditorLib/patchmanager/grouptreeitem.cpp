@@ -39,18 +39,56 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
+	void GroupTreeItem::removeItem(const DatasourceTreeItem* _item)
+	{
+		if (!_item)
+			return;
+
+		for(auto it = m_itemsByDataSource.begin(); it != m_itemsByDataSource.end(); ++it)
+		{
+			if (it->second == _item)
+			{
+				m_itemsByDataSource.erase(it);
+				break;
+			}
+		}
+
+		while (_item->getNumSubItems())
+			removeItem(dynamic_cast<DatasourceTreeItem*>(_item->getSubItem(0)));
+
+		const auto indexInParent = _item->getIndexInParent();
+
+		if (auto* parent = _item->getParentItem())
+			parent->removeSubItem(indexInParent, true);
+	}
+
+	void GroupTreeItem::removeDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	{
+		const auto it = m_itemsByDataSource.find(_ds);
+		if (it == m_itemsByDataSource.end())
+			return;
+		removeItem(it->second);
+	}
+
 	void GroupTreeItem::updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourceNodePtr>& _dataSources)
 	{
+		const auto previousItems = m_itemsByDataSource;
+
+		for (const auto& previousItem : previousItems)
+		{
+			const auto& ds = previousItem.first;
+
+			if (std::find(_dataSources.begin(), _dataSources.end(), ds) == _dataSources.end())
+				removeDataSource(ds);
+		}
+
 		for (const auto& d : _dataSources)
 		{
-			createItemForDataSource(d);
-
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 				continue;
 
-			auto* item = new DatasourceTreeItem(getPatchManager(), d);
+			auto* item = createItemForDataSource(d);
 
-			addSubItem(item);
 			m_itemsByDataSource.insert({ d, item });
 
 			if (m_itemsByDataSource.size() == 1)
@@ -75,14 +113,50 @@ namespace jucePluginEditorLib::patchManager
 
 			juce::PopupMenu menu;
 
-			menu.addItem("Add...", [this]
+			const auto tagType = toTagType(m_type);
+
+			if(m_type == GroupType::DataSources)
 			{
-				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+				menu.addItem("Add Folder...", [this]
 				{
-					if(!_newText.empty())
-						getPatchManager().addTag(toTagType(m_type), _newText);
+					juce::FileChooser fc("Select Folder");
+
+					if(fc.browseForDirectory())
+					{
+						const auto result = fc.getResult().getFullPathName().toStdString();
+						pluginLib::patchDB::DataSource ds;
+						ds.type = pluginLib::patchDB::SourceType::Folder;
+						ds.name = result;
+						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+						getPatchManager().addDataSource(ds);
+					}
 				});
-			});
+
+				menu.addItem("Add File...", [this]
+				{
+					juce::FileChooser fc("Select File");
+					if(fc.browseForFileToOpen())
+					{
+						const auto result = fc.getResult().getFullPathName().toStdString();
+						pluginLib::patchDB::DataSource ds;
+						ds.type = pluginLib::patchDB::SourceType::File;
+						ds.name = result;
+						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+						getPatchManager().addDataSource(ds);
+					}
+				});
+			}
+			if(tagType != pluginLib::patchDB::TagType::Invalid)
+			{
+				menu.addItem("Add...", [this]
+				{
+					beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+					{
+						if (!_newText.empty())
+							getPatchManager().addTag(toTagType(m_type), _newText);
+					});
+				});
+			}
 
 			menu.showMenuAsync(juce::PopupMenu::Options());
 		}

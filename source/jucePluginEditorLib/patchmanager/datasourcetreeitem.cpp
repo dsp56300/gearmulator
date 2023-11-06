@@ -1,5 +1,6 @@
 #include "datasourcetreeitem.h"
 
+#include "patchmanager.h"
 #include "../../jucePluginLib/patchdb/datasource.h"
 #include "../../jucePluginLib/patchdb/search.h"
 
@@ -43,5 +44,19 @@ namespace jucePluginEditorLib::patchManager
 		pluginLib::patchDB::SearchRequest sr;
 		sr.source = static_cast<pluginLib::patchDB::DataSource>(*_ds);
 		search(std::move(sr));
+	}
+
+	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(_mouseEvent.mods.isPopupMenu())
+		{
+			juce::PopupMenu menu;
+			menu.addItem("Remove", [this]
+			{
+				getPatchManager().removeDataSource(*m_dataSource);
+			});
+
+			menu.showMenuAsync({});
+		}
 	}
 }

@@ -60,5 +60,18 @@ namespace pluginLib::patchDB
 			static_cast<DataSource&>(*this) = _source;
 			return *this;
 		}
+
+		bool isChildOf(const DataSourceNode* _ds) const
+		{
+			auto node = this;
+
+			while(node)
+			{
+				if (_ds == node)
+					return true;
+				node = node->parent.get();
+			}
+			return false;
+		}
 	};
 }

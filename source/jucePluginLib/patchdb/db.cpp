@@ -42,6 +42,60 @@ namespace pluginLib::patchDB
 		});
 	}
 
+	void DB::removeDataSource(const DataSource& _ds)
+	{
+		runOnLoaderThread([this, _ds]
+		{
+			std::unique_lock lockDs(m_dataSourcesMutex);
+
+			const auto it = m_dataSources.find(_ds);
+			if (it == m_dataSources.end())
+				return;
+
+			const auto ds = it->second;
+
+			m_dataSources.erase(it);
+
+			// remove all datasources that are a child of the one being removed
+			for (auto itChildDs = m_dataSources.begin(); itChildDs != m_dataSources.end();)
+			{
+				if(itChildDs->second->isChildOf(ds.get()))
+					m_dataSources.erase(itChildDs++);
+				else
+					++itChildDs;
+			}
+
+			lockDs.unlock();
+
+			// remove all patches that were added due to this datasource
+			bool patchesChanged = false;
+
+			std::unique_lock lockPatches(m_patchesMutex);
+
+			for (auto itPatch = m_patches.begin(); itPatch != m_patches.end();)
+			{
+				const auto& patch = itPatch->second;
+
+				if (patch->source->isChildOf(ds.get()))
+				{
+					removePatchFromSearches(itPatch->first);
+					m_patches.erase(itPatch++);
+					patchesChanged = true;
+				}
+				else
+				{
+					++itPatch;
+				}
+			}
+
+			std::unique_lock lockUi(m_uiMutex);
+
+			m_dirty.dataSources = true;
+			if(patchesChanged)
+				m_dirty.patches = true;
+		});
+	}
+
 	bool DB::addTag(const TagType _type, const std::string& _tag)
 	{
 		{
@@ -289,7 +343,7 @@ namespace pluginLib::patchDB
 			std::vector<std::vector<uint8_t>> data;
 			auto result = loadData(data, ds);
 
-			if(result)
+			if(result && !data.empty())
 			{
 				result = false;
 
@@ -319,7 +373,6 @@ namespace pluginLib::patchDB
 					std::unique_lock lockDs(m_dataSourcesMutex);
 
 					m_dataSources.insert({ *ds, ds });
-
 					std::unique_lock lockUi(m_uiMutex);
 					m_dirty.dataSources = true;
 				}
@@ -381,28 +434,7 @@ namespace pluginLib::patchDB
 
 		m_patches.erase(it);
 
-		// remove from searches
-		std::scoped_lock lockSearches(m_searchesMutex);
-
-		for (auto& itSearches : m_searches)
-		{
-			const auto& search = itSearches.second;
-
-			bool countChanged;
-			{
-				std::unique_lock lockResults(search->resultsMutex);
-				const auto oldCount = search->results.size();
-				search->results.erase(_key);
-				const auto newCount = search->results.size();
-				countChanged = newCount != oldCount;
-			}
-
-			if(countChanged)
-			{
-				std::unique_lock lockUi(m_uiMutex);
-				m_dirty.searches.insert(itSearches.first);
-			}
-		}
+		removePatchFromSearches(_key);
 
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.patches = true;
@@ -496,6 +528,35 @@ namespace pluginLib::patchDB
 				}
 			}
 		}
+	}
+
+	bool DB::removePatchFromSearches(const PatchKey& _key)
+	{
+		bool res = false;
+
+		std::scoped_lock lockSearches(m_searchesMutex);
+
+		for (auto& itSearches : m_searches)
+		{
+			const auto& search = itSearches.second;
+
+			bool countChanged;
+			{
+				std::unique_lock lockResults(search->resultsMutex);
+				const auto oldCount = search->results.size();
+				search->results.erase(_key);
+				const auto newCount = search->results.size();
+				countChanged = newCount != oldCount;
+			}
+
+			if (countChanged)
+			{
+				res = true;
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.searches.insert(itSearches.first);
+			}
+		}
+		return res;
 	}
 
 	bool DB::loadJson()

@@ -28,6 +28,7 @@ namespace pluginLib::patchDB
 		void uiProcess(Dirty& _dirty);
 
 		void addDataSource(const DataSource& _ds);
+		void removeDataSource(const DataSource& _ds);
 
 		void getDataSources(std::vector<DataSourceNodePtr>& _dataSources)
 		{
@@ -70,6 +71,7 @@ namespace pluginLib::patchDB
 
 		bool executeSearch(Search& _search);
 		void updateSearches(const PatchPtr& _patch);
+		bool removePatchFromSearches(const PatchKey& _key);
 
 		bool loadJson();
 		bool saveJson();

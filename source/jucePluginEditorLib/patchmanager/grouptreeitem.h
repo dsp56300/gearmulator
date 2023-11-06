@@ -28,9 +28,12 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void updateFromTags(const std::set<std::string>& _tags);
+		void removeItem(const DatasourceTreeItem* _item);
+		void removeDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds);
 		void updateFromDataSources(const std::vector<pluginLib::patchDB::DataSourceNodePtr>& _dataSources);
 		void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches) override;
 		void itemClicked(const juce::MouseEvent&) override;
+
 	private:
 		DatasourceTreeItem* createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource);
 		TagTreeItem* createSubItem(const std::string& _tag);
