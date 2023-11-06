@@ -37,6 +37,8 @@ namespace jucePluginEditorLib::patchManager
 	private:
 		DatasourceTreeItem* createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource);
 		TagTreeItem* createSubItem(const std::string& _tag);
+		static bool needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds);
+		void validateParent(const pluginLib::patchDB::DataSourceNodePtr& _ds, DatasourceTreeItem* _item);
 
 		const GroupType m_type;
 		std::map<std::string, TagTreeItem*> m_itemsByTag;

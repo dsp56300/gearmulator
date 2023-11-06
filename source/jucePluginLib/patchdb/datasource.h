@@ -9,6 +9,7 @@ namespace pluginLib::patchDB
 	struct DataSource
 	{
 		SourceType type = SourceType::Invalid;
+		DataSourceOrigin origin = DataSourceOrigin::Invalid;
 		std::string name;
 		uint32_t bank = g_invalidBank;
 //		uint32_t program = g_invalidProgram;

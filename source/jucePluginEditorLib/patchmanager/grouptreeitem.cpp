@@ -84,8 +84,12 @@ namespace jucePluginEditorLib::patchManager
 
 		for (const auto& d : _dataSources)
 		{
+			const auto itExisting = m_itemsByDataSource.find(d);
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
+			{
+				validateParent(itExisting->first, itExisting->second);
 				continue;
+			}
 
 			auto* item = createItemForDataSource(d);
 
@@ -173,7 +177,7 @@ namespace jucePluginEditorLib::patchManager
 
 		m_itemsByDataSource.insert({ _dataSource, item });
 
-		if(_dataSource->parent)
+		if(needsParentItem(_dataSource))
 		{
 			auto* parent = createItemForDataSource(_dataSource->parent);
 			parent->addSubItem(item);
@@ -191,11 +195,34 @@ namespace jucePluginEditorLib::patchManager
 
 	TagTreeItem* GroupTreeItem::createSubItem(const std::string& _tag)
 	{
-		TagTreeItem* item = new TagTreeItem(getPatchManager(), m_type, _tag);
+		auto item = new TagTreeItem(getPatchManager(), m_type, _tag);
 
 		addSubItem(item);
 		m_itemsByTag.insert({ _tag, item });
 
 		return item;
+	}
+
+	bool GroupTreeItem::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	{
+		return _ds->parent && _ds->origin != pluginLib::patchDB::DataSourceOrigin::Manual;
+	}
+
+	void GroupTreeItem::validateParent(const pluginLib::patchDB::DataSourceNodePtr& _ds, DatasourceTreeItem* _item)
+	{
+		TreeViewItem* parentNeeded = this;
+
+		if(needsParentItem(_ds))
+		{
+			parentNeeded = createItemForDataSource(_ds->parent);
+		}
+
+		auto* parentExisting = _item->getParentItem();
+
+		if(parentNeeded != parentExisting)
+		{
+			parentExisting->removeSubItem(_item->getIndexInParent(), false);
+			parentNeeded->addSubItem(_item);
+		}
 	}
 }
