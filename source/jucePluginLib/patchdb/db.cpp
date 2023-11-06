@@ -13,19 +13,14 @@
 
 namespace pluginLib::patchDB
 {
-	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json))
+	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json)), m_loader("PatchLoader")
 	{
 		loadJson();
-
-		m_loader.reset(new std::thread([&]
-		{
-			loaderThreadFunc();
-		}));
 	}
 
 	DB::~DB()
 	{
-		assert(m_destroy && "stopLoaderThread() needs to be called by derived class in destructor");
+		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor");
 		stopLoaderThread();
 	}
 
@@ -290,34 +285,12 @@ namespace pluginLib::patchDB
 
 	void DB::stopLoaderThread()
 	{
-		if (m_destroy)
-			return;
-
-		m_destroy = true;
-		runOnLoaderThread([] {});
-		m_loader->join();
-		m_loader.reset();
-	}
-
-	void DB::loaderThreadFunc()
-	{
-		while(!m_destroy)
-		{
-			std::unique_lock lock(m_loaderMutex);
-			m_loaderCv.wait(lock, [this] {return !m_loaderFuncs.empty(); });
-			const auto func = m_loaderFuncs.front();
-			m_loaderFuncs.pop_front();
-			lock.unlock();
-
-			func();
-		}
+		m_loader.destroy();
 	}
 
 	void DB::runOnLoaderThread(const std::function<void()>& _func)
 	{
-		std::unique_lock lock(m_loaderMutex);
-		m_loaderFuncs.push_back(_func);
-		m_loaderCv.notify_one();
+		m_loader.add(_func);
 	}
 
 	void DB::runOnUiThread(const std::function<void()>& _func)

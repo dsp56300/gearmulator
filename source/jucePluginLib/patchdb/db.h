@@ -13,6 +13,8 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
+#include "jobqueue.h"
+
 namespace pluginLib::patchDB
 {
 	struct SearchRequest;
@@ -58,7 +60,6 @@ namespace pluginLib::patchDB
 		void stopLoaderThread();
 
 	private:
-		void loaderThreadFunc();
 		void runOnLoaderThread(const std::function<void()>& _func);
 		void runOnUiThread(const std::function<void()>& _func);
 
@@ -80,12 +81,7 @@ namespace pluginLib::patchDB
 		juce::File m_jsonFileName;
 
 		// loader
-		std::unique_ptr<std::thread> m_loader;
-		bool m_destroy = false;
-
-		std::mutex m_loaderMutex;
-		std::deque<std::function<void()>> m_loaderFuncs;
-		std::condition_variable m_loaderCv;
+		JobQueue m_loader;
 
 		// ui
 		std::mutex m_uiMutex;
