@@ -64,7 +64,7 @@ namespace pluginLib::patchDB
 			// remove all datasources that are a child of the one being removed
 			for (auto itChildDs = m_dataSources.begin(); itChildDs != m_dataSources.end();)
 			{
-				if(itChildDs->second->isChildOf(ds.get()))
+				if (itChildDs->second->isChildOf(ds.get()))
 					m_dataSources.erase(itChildDs++);
 				else
 					++itChildDs;
@@ -110,6 +110,10 @@ namespace pluginLib::patchDB
 
 			saveJson();
 		});
+	}
+
+	void DB::refreshDataSource(const DataSourceNodePtr& _ds)
+	{
 	}
 
 	bool DB::addTag(const TagType _type, const std::string& _tag)

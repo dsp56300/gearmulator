@@ -1,6 +1,7 @@
 #include "datasourcetreeitem.h"
 
 #include "patchmanager.h"
+
 #include "../../jucePluginLib/patchdb/datasource.h"
 #include "../../jucePluginLib/patchdb/search.h"
 
@@ -51,11 +52,19 @@ namespace jucePluginEditorLib::patchManager
 		if(_mouseEvent.mods.isPopupMenu())
 		{
 			juce::PopupMenu menu;
-			menu.addItem("Remove", [this]
+
+			menu.addItem("Refresh", [this]
 			{
-				getPatchManager().removeDataSource(*m_dataSource);
+				getPatchManager().refreshDataSource(*m_dataSource);
 			});
 
+			if(m_dataSource->type == pluginLib::patchDB::SourceType::File || m_dataSource->type == pluginLib::patchDB::SourceType::Folder)
+			{
+				menu.addItem("Remove", [this]
+				{
+					getPatchManager().removeDataSource(*m_dataSource);
+				});
+			}
 			menu.showMenuAsync({});
 		}
 	}
