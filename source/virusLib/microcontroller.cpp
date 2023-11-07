@@ -75,7 +75,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 			if(ROMFile::getSingleName(single).size() != 10)
 			{
 				failed = true;
-				break;				
+				break;
 			}
 
 			singles.emplace_back(single);
@@ -1160,6 +1160,6 @@ void Microcontroller::receiveUpgradedPreset()
 
 bool Microcontroller::isValid(const TPreset& _preset)
 {
-	return _preset.front() > 0;
+	return _preset[240] >= 32 && _preset[240] <= 127;
 }
 }
