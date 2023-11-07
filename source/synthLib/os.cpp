@@ -185,6 +185,18 @@ namespace synthLib
         return {};
     }
 
+    size_t getFileSize(const std::string& _file)
+    {
+        FILE* hFile = fopen(_file.c_str(), "rb");
+        if (!hFile)
+            return 0;
+
+        fseek(hFile, 0, SEEK_END);
+        const auto size = static_cast<size_t>(ftell(hFile));
+        fclose(hFile);
+        return size;
+    }
+
     std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize, const bool _stripPluginComponentFolders)
     {
         std::string path = getModulePath(_stripPluginComponentFolders);
@@ -228,13 +240,7 @@ namespace synthLib
                 continue;
             }
 
-            FILE *hFile = fopen(file.c_str(), "rb");
-            if (!hFile)
-	            continue;
-
-            fseek(hFile, 0, SEEK_END);
-            const auto size = static_cast<size_t>(ftell(hFile));
-            fclose(hFile);
+            const auto size = getFileSize(file);
 
             if (_minSize && size < _minSize)
 	            continue;
