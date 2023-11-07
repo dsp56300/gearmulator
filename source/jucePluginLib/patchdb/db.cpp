@@ -266,7 +266,13 @@ namespace pluginLib::patchDB
 
 		const auto& file = _file;
 
-		if (!synthLib::readFile(data, file))
+		const auto size = synthLib::getFileSize(file);
+
+		// unlikely that a 4mb file has useful data for us, skip
+		if (!size || size >= 1024 * 1024 * 4)
+			return false;
+
+		if (!synthLib::readFile(data, file) || data.empty())
 			return false;
 
 		return parseFileData(_results, data);
