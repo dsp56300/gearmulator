@@ -68,15 +68,15 @@ namespace pluginLib::patchDB
 
 		void addDataSource(const DataSourceNodePtr& _ds);
 
-		bool addPatch(const PatchPtr& _patch);
+		bool addPatches(const std::vector<PatchPtr>& _patches);
 		bool removePatch(const PatchKey& _key);
 
 		bool internalAddTag(TagType _type, const Tag& _tag);
 		bool internalRemoveTag(TagType _type, const Tag& _tag);
 
 		bool executeSearch(Search& _search);
-		void updateSearches(const PatchPtr& _patch);
-		bool removePatchFromSearches(const PatchKey& _key);
+		void updateSearches(const std::vector<PatchPtr>& _patches);
+		bool removePatchesFromSearches(const std::vector<PatchKey>& _keys);
 
 		bool loadJson();
 		bool saveJson();

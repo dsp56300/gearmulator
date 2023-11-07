@@ -34,15 +34,17 @@ namespace pluginLib::patchDB
 			if (type < _ds.type)		return true;
 			if (type > _ds.type)		return false;
 
-			if (name < _ds.name)		return true;
-			if (name > _ds.name)		return false;
-
 			if (bank < _ds.bank)		return true;
 			if (bank > _ds.bank)		return false;
+
 			/*
 			if (program < _ds.program)	return true;
 			if (program > _ds.program)	return false;
 			*/
+
+			if (name < _ds.name)		return true;
+			if (name > _ds.name)		return false;
+
 			return false;
 		}
 
