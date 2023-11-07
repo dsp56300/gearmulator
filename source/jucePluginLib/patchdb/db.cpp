@@ -73,31 +73,42 @@ namespace pluginLib::patchDB
 			lockDs.unlock();
 
 			// remove all patches that were added due to this datasource
-			bool patchesChanged = false;
+			std::vector<PatchKey> removedPatches;
 
-			std::unique_lock lockPatches(m_patchesMutex);
-
-			for (auto itPatch = m_patches.begin(); itPatch != m_patches.end();)
 			{
-				const auto& patch = itPatch->second;
+				std::unique_lock lockPatches(m_patchesMutex);
 
-				if (patch->source->isChildOf(ds.get()))
+				for (auto itPatch = m_patches.begin(); itPatch != m_patches.end();)
 				{
-					removePatchFromSearches(itPatch->first);
-					m_patches.erase(itPatch++);
-					patchesChanged = true;
-				}
-				else
-				{
-					++itPatch;
+					const auto& patch = itPatch->second;
+
+					if (patch->source->isChildOf(ds.get()))
+					{
+						removedPatches.push_back(itPatch->first);
+						m_patches.erase(itPatch++);
+					}
+					else
+					{
+						++itPatch;
+					}
 				}
 			}
 
-			std::unique_lock lockUi(m_uiMutex);
+			const auto patchesChanged = !removedPatches.empty();
 
-			m_dirty.dataSources = true;
-			if(patchesChanged)
-				m_dirty.patches = true;
+			for (const auto& key : removedPatches)
+				removePatchFromSearches(key);
+
+			{
+				
+				std::unique_lock lockUi(m_uiMutex);
+
+				m_dirty.dataSources = true;
+				if (patchesChanged)
+					m_dirty.patches = true;
+			}
+
+			saveJson();
 		});
 	}
 
