@@ -27,7 +27,8 @@ namespace pluginLib::patchDB
 	{
 		NotStarted,
 		Running,
-		Cancelled
+		Cancelled,
+		Completed
 	};
 
 	struct Search

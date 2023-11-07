@@ -469,14 +469,19 @@ namespace pluginLib::patchDB
 
 	bool DB::executeSearch(Search& _search)
 	{
-		const auto oldCount = _search.getResultSize();
+		_search.state = SearchState::Running;
 
 		std::shared_lock patchesLock(m_patchesMutex);
 
 		for (const auto& [key, patchPtr] : m_patches)
 		{
 			if (m_cancelledSearches.find(_search.handle) != m_cancelledSearches.end())
+			{
+				_search.state = SearchState::Cancelled;
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.searches.insert(_search.handle);
 				return false;
+			}
 
 			const auto* patch = patchPtr.get();
 			assert(patch);
@@ -488,8 +493,8 @@ namespace pluginLib::patchDB
 			}
 		}
 
-		if(_search.getResultSize() != oldCount)
 		{
+			_search.state = SearchState::Completed;
 			std::unique_lock lockUi(m_uiMutex);
 			m_dirty.searches.insert(_search.handle);
 		}
