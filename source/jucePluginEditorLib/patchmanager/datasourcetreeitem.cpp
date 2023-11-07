@@ -14,6 +14,7 @@ namespace jucePluginEditorLib::patchManager
 			switch (_ds.type)
 			{
 			case pluginLib::patchDB::SourceType::Invalid:
+			case pluginLib::patchDB::SourceType::Count:
 				return {};
 			case pluginLib::patchDB::SourceType::Rom:
 			case pluginLib::patchDB::SourceType::File:
@@ -30,7 +31,7 @@ namespace jucePluginEditorLib::patchManager
 			if (!_ds->hasParent())
 				return getDataSourceTitle(*_ds);
 
-			const auto t = getDataSourceTitle(*_ds);
+			auto t = getDataSourceTitle(*_ds);
 			const auto pos = t.find_last_of("\\/");
 			if (pos != std::string::npos)
 				return t.substr(pos + 1);
