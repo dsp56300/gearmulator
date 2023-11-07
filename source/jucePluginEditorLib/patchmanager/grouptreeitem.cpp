@@ -195,7 +195,7 @@ namespace jucePluginEditorLib::patchManager
 
 		if(needsParentItem(_dataSource))
 		{
-			auto* parent = createItemForDataSource(_dataSource->parent);
+			auto* parent = createItemForDataSource(_dataSource->getParent());
 			parent->addSubItem(item);
 		}
 		else
@@ -221,7 +221,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool GroupTreeItem::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds)
 	{
-		return _ds->parent && _ds->origin != pluginLib::patchDB::DataSourceOrigin::Manual;
+		return _ds->hasParent() && _ds->origin != pluginLib::patchDB::DataSourceOrigin::Manual;
 	}
 
 	void GroupTreeItem::validateParent(const pluginLib::patchDB::DataSourceNodePtr& _ds, DatasourceTreeItem* _item)
@@ -230,7 +230,7 @@ namespace jucePluginEditorLib::patchManager
 
 		if(needsParentItem(_ds))
 		{
-			parentNeeded = createItemForDataSource(_ds->parent);
+			parentNeeded = createItemForDataSource(_ds->getParent());
 		}
 
 		auto* parentExisting = _item->getParentItem();

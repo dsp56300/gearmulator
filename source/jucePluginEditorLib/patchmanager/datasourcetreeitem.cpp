@@ -27,7 +27,7 @@ namespace jucePluginEditorLib::patchManager
 
 		std::string getDataSourceNodeTitle(const pluginLib::patchDB::DataSourceNodePtr& _ds)
 		{
-			if (!_ds->parent)
+			if (!_ds->hasParent())
 				return getDataSourceTitle(*_ds);
 
 			const auto t = getDataSourceTitle(*_ds);
@@ -55,7 +55,7 @@ namespace jucePluginEditorLib::patchManager
 
 			menu.addItem("Refresh", [this]
 			{
-				getPatchManager().refreshDataSource(*m_dataSource);
+				getPatchManager().refreshDataSource(m_dataSource);
 			});
 
 			if(m_dataSource->type == pluginLib::patchDB::SourceType::File || m_dataSource->type == pluginLib::patchDB::SourceType::Folder)

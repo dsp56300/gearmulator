@@ -49,7 +49,7 @@ namespace pluginLib::patchDB
 
 		bool matchDataSource(const DataSourceNode& _source, const DataSource& _search)
 		{
-			if (_source.parent && matchDataSource(*_source.parent, _search))
+			if (_source.hasParent() && matchDataSource(*_source.getParent(), _search))
 				return true;
 
 			if (_search.type != SourceType::Invalid && _source.type != _search.type)
