@@ -123,6 +123,17 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
+	bool DB::removeTag(TagType _type, const Tag& _tag)
+	{
+		{
+			std::unique_lock lock(m_patchesMutex);
+			if (!internalRemoveTag(_type, _tag))
+				return false;
+		}
+		saveJson();
+		return true;
+	}
+
 	void DB::uiProcess(Dirty& _dirty)
 	{
 		std::list<std::function<void()>> uiFuncs;
@@ -472,6 +483,27 @@ namespace pluginLib::patchDB
 			return false;
 
 		tags.insert(_tag);
+		std::unique_lock lockUi(m_uiMutex);
+		m_dirty.tags.insert(_type);
+
+		return true;
+	}
+
+	bool DB::internalRemoveTag(const TagType _type, const Tag& _tag)
+	{
+		const auto& itType = m_tags.find(_type);
+
+		if (itType == m_tags.end())
+			return false;
+
+		auto& tags = itType->second;
+		const auto itTag = tags.find(_tag);
+
+		if (itTag == tags.end())
+			return false;
+
+		tags.erase(itTag);
+
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.tags.insert(_type);
 

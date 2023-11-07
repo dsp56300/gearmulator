@@ -40,7 +40,9 @@ namespace pluginLib::patchDB
 				_dataSources.push_back(it.second);
 		}
 
-		bool addTag(TagType _type, const std::string& _tag);
+		bool addTag(TagType _type, const Tag& _tag);
+		bool removeTag(TagType _type, const Tag& _tag);
+
 		void getTags(TagType _type, std::set<Tag>& _tags);
 		bool modifyTags(const PatchPtr& _patch, const TypedTags& _tags);
 
@@ -69,6 +71,7 @@ namespace pluginLib::patchDB
 		bool removePatch(const PatchKey& _key);
 
 		bool internalAddTag(TagType _type, const Tag& _tag);
+		bool internalRemoveTag(TagType _type, const Tag& _tag);
 
 		bool executeSearch(Search& _search);
 		void updateSearches(const PatchPtr& _patch);

@@ -25,6 +25,22 @@ namespace jucePluginEditorLib::patchManager
 
 	void GroupTreeItem::updateFromTags(const std::set<std::string>& _tags)
 	{
+		for(auto it = m_itemsByTag.begin(); it != m_itemsByTag.end();)
+		{
+			const auto tag = it->first;
+			const auto* item = it->second;
+
+			if(_tags.find(tag) == _tags.end())
+			{
+				item->getParentItem()->removeSubItem(item->getIndexInParent(), true);
+				m_itemsByTag.erase(it++);
+			}
+			else
+			{
+				++it;
+			}
+		}
+
 		for (const auto& tag : _tags)
 		{
 			auto itExisting = m_itemsByTag.find(tag);

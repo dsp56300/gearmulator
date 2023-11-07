@@ -37,4 +37,23 @@ namespace jucePluginEditorLib::patchManager
 		}
 		TreeItem::patchDropped(_patch);
 	}
+
+	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(_mouseEvent.mods.isPopupMenu())
+		{
+			const auto tagType = toTagType(getGroupType());
+
+			if(tagType != pluginLib::patchDB::TagType::Invalid)
+			{
+				juce::PopupMenu menu;
+				menu.addItem("Remove", [this, tagType]
+				{
+					getPatchManager().removeTag(tagType, m_tag);
+				});
+
+				menu.showMenuAsync({});
+			}
+		}
+	}
 }

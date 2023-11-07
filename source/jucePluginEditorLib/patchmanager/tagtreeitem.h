@@ -22,6 +22,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto& getTag() const { return m_tag; }
 
+		void itemClicked(const juce::MouseEvent&) override;
 	private:
 		const GroupType m_group;
 		const std::string m_tag;
