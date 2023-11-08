@@ -15,6 +15,11 @@ namespace jucePluginEditorLib::patchManager
 	TreeItem::~TreeItem()
 	{
 		destroyEditorLabel();
+		if(m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle)
+		{
+			getPatchManager().cancelSearch(m_searchHandle);
+			m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+		}
 	}
 
 	void TreeItem::setTitle(const std::string& _title)

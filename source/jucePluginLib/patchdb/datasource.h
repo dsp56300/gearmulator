@@ -56,7 +56,7 @@ namespace pluginLib::patchDB
 		std::string toString() const;
 	};
 
-	struct DataSourceNode final : DataSource
+	struct DataSourceNode final : DataSource, std::enable_shared_from_this<DataSourceNode>
 	{
 		DataSourceNode() = default;
 		DataSourceNode(const DataSourceNode&) = delete;
@@ -80,9 +80,11 @@ namespace pluginLib::patchDB
 		DataSourceNode& operator = (const DataSource& _source);
 
 		bool isChildOf(const DataSourceNode* _ds) const;
+		void removeAllChildren();
 
 	private:
 		DataSourceNodePtr m_parent;
-		std::set<DataSourceNode*> m_children;
+
+		std::vector<std::weak_ptr<DataSourceNode>> m_children;
 	};
 }

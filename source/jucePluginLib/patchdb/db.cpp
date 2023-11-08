@@ -28,10 +28,9 @@ namespace pluginLib::patchDB
 	{
 		const auto ds = std::make_shared<DataSourceNode>(_ds);
 
-		addDataSource(ds);
-
-		runOnLoaderThread([this]
+		runOnLoaderThread([this, ds]
 		{
+			addDataSource(ds);
 			saveJson();
 		});
 	}
@@ -58,16 +57,27 @@ namespace pluginLib::patchDB
 				return;
 			}
 
-			m_dataSources.erase(it);
+			std::set<DataSourceNodePtr> removedDataSources{it->second};
 
 			// remove all datasources that are a child of the one being removed
-			for (auto itChildDs = m_dataSources.begin(); itChildDs != m_dataSources.end();)
+			std::function<void(const DataSourceNodePtr&)> removeChildren = [&](const DataSourceNodePtr& _parent)
 			{
-				if (itChildDs->second->isChildOf(ds.get()))
-					m_dataSources.erase(itChildDs++);
-				else
-					++itChildDs;
-			}
+				for (auto& child : _parent->getChildren())
+				{
+					const auto c = child.lock();
+
+					if (!c || c->origin == DataSourceOrigin::Manual)
+						continue;
+
+					removedDataSources.insert(c);
+					removeChildren(c);
+				}
+			};
+
+			removeChildren(ds);
+
+			for (const auto& removed : removedDataSources)
+				m_dataSources.erase(*removed);
 
 			lockDs.unlock();
 
@@ -81,7 +91,7 @@ namespace pluginLib::patchDB
 				{
 					const auto& patch = itPatch->second;
 
-					if (patch->source->isChildOf(ds.get()))
+					if (removedDataSources.find(patch->source) != removedDataSources.end())
 					{
 						removedPatches.push_back(itPatch->first);
 						m_patches.erase(itPatch++);
@@ -98,13 +108,21 @@ namespace pluginLib::patchDB
 			removePatchesFromSearches(removedPatches);
 
 			{
-				
 				std::unique_lock lockUi(m_uiMutex);
 
 				m_dirty.dataSources = true;
 				if (patchesChanged)
 					m_dirty.patches = true;
 			}
+
+			for (auto& removedDataSource : removedDataSources)
+			{
+				if (removedDataSource->name == "F:\\AccessVirusEmulator\\Presets")
+					int foo = 0;
+				removedDataSource->setParent(nullptr);
+				removedDataSource->removeAllChildren();
+			}
+			removedDataSources.clear();
 
 			saveJson();
 		});
@@ -173,7 +191,9 @@ namespace pluginLib::patchDB
 
 	void DB::cancelSearch(const uint32_t _handle)
 	{
+		std::unique_lock lock(m_searchesMutex);
 		m_cancelledSearches.insert(_handle);
+		m_searches.erase(_handle);
 	}
 
 	std::shared_ptr<Search> DB::getSearch(const SearchHandle _handle)
@@ -242,18 +262,14 @@ namespace pluginLib::patchDB
 	{
 		switch (_ds->type)
 		{
-		case SourceType::Invalid:
-			return false;
 		case SourceType::Rom:
 			return loadRomData(_results, _ds->bank, g_invalidProgram);
 		case SourceType::File:
 			return loadFile(_results, _ds->name);
+		case SourceType::Invalid:
 		case SourceType::Folder:
-			return loadFolder(_ds);
 		case SourceType::Count:
 			return false;
-//		default:
-//			assert(false && "unknown data source type");
 		}
 		return false;
 	}
@@ -330,91 +346,97 @@ namespace pluginLib::patchDB
 
 	void DB::addDataSource(const DataSourceNodePtr& _ds)
 	{
-		runOnLoaderThread([this, _ds]
+		if (m_loader.destroyed())
+			return;
+
+		auto ds = _ds;
+
+		bool dsExists;
+
 		{
-			auto ds = _ds;
+			std::unique_lock lockDs(m_dataSourcesMutex);
 
-			bool dsExists;
+			const auto itExisting = m_dataSources.find(*ds);
 
+			dsExists = itExisting != m_dataSources.end();
+
+			if (dsExists)
 			{
-				std::unique_lock lockDs(m_dataSourcesMutex);
+				// two things can happen here:
+				// * a child DS already exists and the one being added has a parent that was previously unknown to the existing DS
+				// * a DS is added again (for example manually requested by a user) even though it already exists because of a parent DS added earlier
 
-				const auto itExisting = m_dataSources.find(*ds);
+				ds = itExisting->second;
 
-				dsExists = itExisting != m_dataSources.end();
-
-				if (dsExists)
+				if(_ds->origin == DataSourceOrigin::Manual)
 				{
-					// two things can happen here:
-					// * a child DS already exists and the one being added has a parent that was previously unknown to the existing DS
-					// * a DS is added again (for example manually requested by a user) even though it already exists because of a parent DS added earlier
+					// user manually added a DS that already exists as a child
+					assert(!_ds->hasParent());
+					ds->origin = _ds->origin;
+				}
+				else if(_ds->hasParent() && !ds->hasParent())
+				{
+					// a parent datasource is added and this DS previously didn't have a parent
+					ds->setParent(_ds->getParent());
+				}
+				else
+				{
+					// nothing to be done
+					assert(_ds->getParent().get() == ds->getParent().get());
+					return;
+				}
 
-					ds = itExisting->second;
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.dataSources = true;
+			}
+		}
 
-					if(_ds->origin == DataSourceOrigin::Manual)
-					{
-						assert(!_ds->hasParent());
-						ds->origin = _ds->origin;
-					}
-					else if(_ds->hasParent() && !ds->hasParent())
-					{
-						ds->setParent(_ds->getParent());
-					}
-					else
-					{
-						// nothing to be done
-						assert(_ds->getParent().get() == ds->getParent().get());
-						return;
-					}
+		auto addDsToList = [&]
+		{
+			if (dsExists)
+				return;
 
-					std::unique_lock lockUi(m_uiMutex);
-					m_dirty.dataSources = true;
+			std::unique_lock lockDs(m_dataSourcesMutex);
+
+			m_dataSources.insert({ *ds, ds });
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.dataSources = true;
+
+			dsExists = true;
+		};
+
+		if (ds->type == SourceType::Folder)
+		{
+			addDsToList();
+			loadFolder(ds);
+			return;
+		}
+
+		// always add DS if manually requested by user
+		if (ds->origin == DataSourceOrigin::Manual)
+			addDsToList();
+
+		std::vector<std::vector<uint8_t>> data;
+
+		if(loadData(data, ds) && !data.empty())
+		{
+			std::vector<PatchPtr> patches;
+			patches.reserve(data.size());
+
+			for (uint32_t p = 0; p < data.size(); ++p)
+			{
+				if (const auto patch = initializePatch(data[p], ds))
+				{
+					patch->program = p;
+					patches.push_back(patch);
 				}
 			}
 
-			std::vector<std::vector<uint8_t>> data;
-			auto result = loadData(data, ds);
+			if (!patches.empty())
+				addDsToList();
 
-			if(result && !data.empty())
-			{
-				std::vector<PatchPtr> patches;
-				patches.reserve(data.size());
-
-				for (uint32_t p = 0; p < data.size(); ++p)
-				{
-					if (const auto patch = initializePatch(data[p], ds))
-					{
-						patch->program = p;
-						patches.push_back(patch);
-					}
-				}
-
-				addPatches(patches);
-
-				result = !patches.empty();
-			}
-
-			if(!dsExists)
-			{
-				bool addDs = result;
-
-				if (!addDs)
-				{
-					// if the data source is a root data source, still add it because its a user request
-					if (!ds->hasParent())
-						addDs = true;
-				}
-
-				if (addDs)
-				{
-					std::unique_lock lockDs(m_dataSourcesMutex);
-
-					m_dataSources.insert({ *ds, ds });
-					std::unique_lock lockUi(m_uiMutex);
-					m_dirty.dataSources = true;
-				}
-			}
-		});
+			addPatches(patches);
+		}
 	}
 
 	bool DB::addPatches(const std::vector<PatchPtr>& _patches)

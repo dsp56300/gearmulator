@@ -8,6 +8,10 @@
 
 namespace pluginLib::patchDB
 {
+	Patch::~Patch()
+	{
+	}
+
 	const TypedTags& Patch::getTags() const
 	{
 		if (!modifications)

@@ -1,6 +1,7 @@
 #include "datasource.h"
 
 #include <sstream>
+#include <memory>
 
 namespace pluginLib::patchDB
 {
@@ -17,7 +18,7 @@ namespace pluginLib::patchDB
 		return ss.str();
 	}
 
-	DataSourceNode::DataSourceNode(const DataSource& _ds): DataSource(_ds)
+	DataSourceNode::DataSourceNode(const DataSource& _ds) : DataSource(_ds)
 	{
 	}
 
@@ -28,12 +29,7 @@ namespace pluginLib::patchDB
 	DataSourceNode::~DataSourceNode()
 	{
 		setParent(nullptr);
-
-		while (!m_children.empty())
-		{
-			const auto child = *m_children.begin();
-			child->setParent(nullptr);
-		}
+		removeAllChildren();
 	}
 
 	DataSourceNode& DataSourceNode::operator=(DataSourceNode&& _other) noexcept
@@ -53,15 +49,23 @@ namespace pluginLib::patchDB
 
 		if(m_parent)
 		{
-			m_parent->m_children.erase(this);
+			// we MUST NOT create a new ptr to this here as we may be called from our destructor, in which case there shouldn't be a pointer in there anyway
+			for(size_t i=0; i<m_parent->m_children.size(); ++i)
+			{
+				auto& child = m_parent->m_children[i];
+				auto ptr = child.lock();
+				if (ptr && ptr.get() == this)
+				{
+					m_parent->m_children.erase(m_parent->m_children.begin() + i);
+					break;
+				}
+			}
 		}
 
 		m_parent = _parent;
 
 		if(_parent)
-		{
-			_parent->m_children.insert(this);
-		}
+			_parent->m_children.emplace_back(shared_from_this());
 	}
 
 	DataSourceNode& DataSourceNode::operator=(const DataSource& _source)
@@ -81,5 +85,17 @@ namespace pluginLib::patchDB
 			node = node->m_parent.get();
 		}
 		return false;
+	}
+
+	void DataSourceNode::removeAllChildren()
+	{
+		while(!m_children.empty())
+		{
+			const auto& c = m_children.back().lock();
+			if (c)
+				c->setParent(nullptr);
+			else
+				m_children.pop_back();
+		}
 	}
 }

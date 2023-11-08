@@ -12,7 +12,7 @@ namespace pluginLib::patchDB
 {
 	struct Patch
 	{
-		virtual ~Patch() = default;
+		virtual ~Patch();
 
 		std::string name;
 
