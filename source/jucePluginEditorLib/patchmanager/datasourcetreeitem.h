@@ -22,6 +22,8 @@ namespace jucePluginEditorLib::patchManager
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override { return false; }
 
 		void itemClicked(const juce::MouseEvent&) override;
+		void refresh();
+
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};

@@ -28,7 +28,7 @@ namespace jucePluginEditorLib::patchManager
 
 		std::string getDataSourceNodeTitle(const pluginLib::patchDB::DataSourceNodePtr& _ds)
 		{
-			if (!_ds->hasParent())
+			if (_ds->origin == pluginLib::patchDB::DataSourceOrigin::Manual)
 				return getDataSourceTitle(*_ds);
 
 			auto t = getDataSourceTitle(*_ds);
@@ -68,5 +68,10 @@ namespace jucePluginEditorLib::patchManager
 			}
 			menu.showMenuAsync({});
 		}
+	}
+
+	void DatasourceTreeItem::refresh()
+	{
+		setTitle(getDataSourceNodeTitle(m_dataSource));
 	}
 }

@@ -104,6 +104,7 @@ namespace jucePluginEditorLib::patchManager
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 			{
 				validateParent(itExisting->first, itExisting->second);
+				itExisting->second->refresh();
 				continue;
 			}
 
