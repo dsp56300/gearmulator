@@ -36,7 +36,7 @@ namespace jucePluginEditorLib::patchManager
 		m_list->setSize(rootW / 3, rootH - g_searchBarHeight);
 		m_list->setTopLeftPosition(m_tree->getWidth(), 0);
 
-		m_searchList = new SearchList();
+		m_searchList = new SearchList(*m_list);
 		m_searchList->setSize(rootW / 3, g_searchBarHeight);
 		m_searchList->setTopLeftPosition(m_tree->getWidth(), m_list->getHeight());
 
