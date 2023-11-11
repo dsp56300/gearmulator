@@ -12,6 +12,7 @@ namespace pluginLib::patchDB
 
 namespace jucePluginEditorLib::patchManager
 {
+	class Tree;
 	static constexpr uint32_t g_invalidCount = ~0;
 	static constexpr uint32_t g_unknownCount = g_invalidCount - 1;
 
@@ -42,6 +43,8 @@ namespace jucePluginEditorLib::patchManager
 		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches);
 
 		bool hasSearch() const;
+
+		Tree* getTree() const;
 
 		// TreeViewItem
 		void itemSelectionChanged(bool _isNowSelected) override;

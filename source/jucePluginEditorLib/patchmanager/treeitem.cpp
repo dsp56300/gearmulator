@@ -2,6 +2,7 @@
 
 #include "list.h"
 #include "patchmanager.h"
+#include "tree.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
 
@@ -53,6 +54,11 @@ namespace jucePluginEditorLib::patchManager
 	bool TreeItem::hasSearch() const
 	{
 		return m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle;
+	}
+
+	Tree* TreeItem::getTree() const
+	{
+		return dynamic_cast<Tree*>(getOwnerView());
 	}
 
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
