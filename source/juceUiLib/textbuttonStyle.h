@@ -11,6 +11,7 @@ namespace genericUI
 
 	private:
 		void drawButtonBackground(juce::Graphics&, juce::Button&, const juce::Colour& backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
+		juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override;
 	public:
 		void apply(juce::Button& _target) const;
 	};
