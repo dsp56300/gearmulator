@@ -44,7 +44,7 @@ namespace genericVirusUI
 		const auto file = configOptions.getDefaultFile();
 
 #if defined(_MSC_VER) && defined(_DEBUG)
-		m_patchManager.reset(new PatchManager(getController(), findComponent("page_presets"), file));
+		m_patchManager.reset(new PatchManager(*this, findComponent("page_presets"), file));
 #else
 		m_patchBrowser.reset(new PatchBrowser(*this));
 #endif
