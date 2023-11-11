@@ -9,6 +9,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		getViewport()->setScrollBarsShown(true, false);
 		setModel(this);
+		setMultipleSelectionEnabled(true);
 	}
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
@@ -23,6 +24,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search)
 	{
+		const std::set<Patch> selectedPatches = getSelectedPatches();
+
 		m_search = _search;
 
 		m_patches.clear();
@@ -34,6 +37,9 @@ namespace jucePluginEditorLib::patchManager
 		filterPatches();
 
 		updateContent();
+
+		setSelectedPatches(selectedPatches);
+
 		repaint();
 	}
 
@@ -60,9 +66,6 @@ namespace jucePluginEditorLib::patchManager
 
 	juce::var List::getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe)
 	{
-		if(rowsToDescribe.size() > 1)
-			return {};
-
 		const auto& ranges = rowsToDescribe.getRanges();
 
 		juce::Array<juce::var> indices;
@@ -91,6 +94,37 @@ namespace jucePluginEditorLib::patchManager
 		m_patchManager.setSelectedPatch(getPatch(idx));
 	}
 
+	std::set<List::Patch> List::getSelectedPatches() const
+	{
+		std::set<List::Patch> result;
+
+		const auto selectedRows = getSelectedRows();
+		const auto& ranges = selectedRows.getRanges();
+
+		for (const auto& range : ranges)
+		{
+			for (int i = range.getStart(); i < range.getEnd(); ++i)
+			{
+				if (i >= 0 && static_cast<size_t>(i) < getPatches().size())
+					result.insert(getPatch(i));
+			}
+		}
+		return result;
+	}
+
+	void List::setSelectedPatches(const std::set<Patch>& _patches)
+	{
+		juce::SparseSet<int> selection;
+
+		for(int i=0; i<static_cast<int>(getPatches().size()); ++i)
+		{
+			if (_patches.find(getPatch(i)) != _patches.end())
+				selection.addRange({ i,i + 1 });
+		}
+
+		setSelectedRows(selection);
+	}
+
 	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
 		if (!m_search)
@@ -109,8 +143,14 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		m_filter = _filter;
+
+		const auto selected = getSelectedPatches();
+
 		filterPatches();
 		updateContent();
+
+		setSelectedPatches(selected);
+
 		repaint();
 	}
 

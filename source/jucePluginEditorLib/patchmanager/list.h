@@ -42,6 +42,9 @@ namespace jucePluginEditorLib::patchManager
 			return getPatch(getPatches(), _index);
 		}
 
+		std::set<Patch> getSelectedPatches() const;
+		void setSelectedPatches(const std::set<Patch>& _patches);
+
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
 		static Patch getPatch(const Patches& _patches, const size_t _index)
