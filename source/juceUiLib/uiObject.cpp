@@ -18,7 +18,7 @@
 
 namespace genericUI
 {
-	UiObject::UiObject(const juce::var& _json)
+	UiObject::UiObject(const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate)
 	{
 		auto* obj = _json.getDynamicObject();
 
@@ -81,6 +81,15 @@ namespace genericUI
 		}
 	}
 
+	void UiObject::registerTemplates(Editor& _editor) const
+	{
+		for(auto& s : m_templates)
+			_editor.registerTemplate(s);
+
+		for (auto& ch : m_children)
+			ch->registerTemplates(_editor);
+	}
+
 	void UiObject::apply(Editor& _editor, juce::Component& _target)
 	{
 		const auto x = getPropertyInt("x");
@@ -88,15 +97,17 @@ namespace genericUI
 		const auto w = getPropertyInt("width");
 		const auto h = getPropertyInt("height");
 
-		if(w < 1 || h < 1)
+		if(w > 0 && h > 0)
+		{
+			_target.setTopLeftPosition(x, y);
+			_target.setSize(w, h);
+		}
+		else if (!m_isTemplate)
 		{
 			std::stringstream ss;
 			ss << "Size " << w << "x" << h << " for object named " << m_name << " is invalid, each side must be > 0";
 			throw std::runtime_error(ss.str());
 		}
-
-		_target.setTopLeftPosition(x, y);
-		_target.setSize(w, h);
 
 		createCondition(_editor, _target);
 	}
@@ -388,6 +399,14 @@ namespace genericUI
 						child.reset(new UiObject((*children)[c]));
 						m_children.emplace_back(std::move(child));
 					}
+				}
+			}
+			else if (key == "templates")
+			{
+				if (const auto children = value.getArray())
+				{
+					for (const auto& c : *children)
+						m_templates.emplace_back(std::make_shared<UiObject>(c, true));
 				}
 			}
 			else if(key == "tabgroup")

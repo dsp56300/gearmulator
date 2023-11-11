@@ -33,13 +33,14 @@ namespace genericUI
 	class UiObject
 	{
 	public:
-		explicit UiObject(const juce::var& _json);
+		explicit UiObject(const juce::var& _json, bool _isTemplate = false);
 		~UiObject();
 
 		void createJuceTree(Editor& _editor);
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
 		void createTabGroups(Editor& _editor);
 		void createControllerLinks(Editor& _editor);
+		void registerTemplates(Editor& _editor) const;
 
 		void apply(Editor& _editor, juce::Component& _target);
 		void apply(Editor& _editor, juce::Slider& _target);
@@ -65,6 +66,8 @@ namespace genericUI
 
 		void setCurrentPart(Editor& _editor, uint8_t _part);
 
+		const auto& getName() const { return m_name; }
+
 	private:
 		bool hasComponent(const std::string& _component) const;
 		template<typename T> T* createJuceObject(Editor& _editor);
@@ -80,9 +83,12 @@ namespace genericUI
 		template<typename Target, typename Style>
 		void createStyle(Editor& _editor, Target& _target, Style* _style);
 
+		bool m_isTemplate;
 		std::string m_name;
 		std::map<std::string, std::map<std::string, std::string>> m_components;
 		std::vector<std::unique_ptr<UiObject>> m_children;
+
+		std::vector<std::shared_ptr<UiObject>> m_templates;
 
 		std::vector<std::unique_ptr<juce::Component>> m_juceObjects;
 		std::unique_ptr<UiObjectStyle> m_style;
