@@ -46,12 +46,16 @@ namespace genericUI
 		void apply(Editor& _editor, juce::Slider& _target);
 		void apply(Editor& _editor, juce::ComboBox& _target);
 		void apply(Editor& _editor, juce::DrawableButton& _target);
+
 		void apply(Editor& _editor, juce::Label& _target);
 		void apply(Editor& _editor, juce::TextButton& _target);
 		void apply(Editor& _editor, juce::HyperlinkButton& _target);
 		void apply(Editor& _editor, juce::TreeView& _target);
 		void apply(Editor& _editor, juce::ListBox& _target);
 		void apply(Editor& _editor, juce::TextEditor& _target);
+
+		template<typename TComponent, typename TStyle>
+		void applyT(Editor& _editor, TComponent& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 

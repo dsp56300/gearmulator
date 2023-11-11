@@ -16,6 +16,8 @@
 #include "textEditorStyle.h"
 #include "treeViewStyle.h"
 
+#include <cassert>
+
 namespace genericUI
 {
 	UiObject::UiObject(const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate)
@@ -160,52 +162,48 @@ namespace genericUI
 
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new LabelStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::Label, LabelStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::TextButton& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new TextButtonStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::TextButton, TextButtonStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::HyperlinkButton& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new HyperlinkButtonStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::HyperlinkButton, HyperlinkButtonStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::TreeView& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new TreeViewStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::TreeView, TreeViewStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::ListBox& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new ListBoxStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::ListBox, ListBoxStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::TextEditor& _target)
 	{
+		applyT<juce::TextEditor, TextEditorStyle>(_editor, _target);
+	}
+
+	template <typename TComponent, typename TStyle> void UiObject::applyT(Editor& _editor, TComponent& _target)
+	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		TextEditorStyle* s = nullptr;
-		if(!m_style)
-			s = new TextEditorStyle(_editor);
+
+		TStyle* s = nullptr;
+
+		if (!m_style)
+			s = new TStyle(_editor);
+
 		createStyle(_editor, _target, s);
-		static_cast<TextEditorStyle*>(m_style.get())->apply(_target);
+
+		s = dynamic_cast<TStyle*>(m_style.get());
+		assert(s);
+		s->apply(_target);
 	}
 
 	void UiObject::collectVariants(std::set<std::string>& _dst, const std::string& _property) const
