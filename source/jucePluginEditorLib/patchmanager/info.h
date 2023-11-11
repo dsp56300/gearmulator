@@ -31,7 +31,7 @@ namespace jucePluginEditorLib::patchManager
 
 		PatchManager& m_patchManager;
 
-		juce::Component m_content;
+		Component m_content;
 
 		juce::Label* m_name = nullptr;
 		juce::Label* m_lbSource = nullptr;

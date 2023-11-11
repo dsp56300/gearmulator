@@ -6,11 +6,13 @@
 #include "patchmanager.h"
 #include "roottreeitem.h"
 #include "treeitem.h"
+#include "../../juceUiLib/uiObject.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
 	{
+		// some very basic defaults if no style is available
 		setColour(backgroundColourId, juce::Colour(0xff444444));
 //		setColour(backgroundColourId, juce::Colour(0));
 		setColour(linesColourId, juce::Colour(0xffffffff));
@@ -18,6 +20,11 @@ namespace jucePluginEditorLib::patchManager
 		setColour(selectedItemBackgroundColourId, juce::Colour(0xffaaaaaa));
 //		setColour(oddItemsColourId, juce::Colour(0xff333333));
 //		setColour(evenItemsColourId, juce::Colour(0xff555555));
+
+		if(const auto t = _patchManager.getTemplate("pm_treeview"))
+		{
+			t->apply(_patchManager.getEditor(), *this);
+		}
 
 		auto *rootItem = new RootTreeItem(m_patchManager);
 		setRootItem(rootItem);
@@ -86,8 +93,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::paint(juce::Graphics& g)
 	{
-		// if we don't want a background, skip this call
-		TreeView::paint(g);
+		if (findColour(backgroundColourId).getAlpha() > 0)
+			TreeView::paint(g);
 	}
 
 	bool Tree::keyPressed(const juce::KeyPress& _key)

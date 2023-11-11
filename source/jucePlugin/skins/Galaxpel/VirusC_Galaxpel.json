@@ -12,6 +12,39 @@
         "buttons": ["TabOsc", "TabLfo", "TabEffects", "TabArp", "Presets"],
         "pages": ["page_osc", "page_lfo", "page_fx", "page_arp", "page_presets"]
     },
+    "templates" : [
+        {
+            "name" : "pm_treeview",
+            "treeview" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "75A7FEFF",
+                "backgroundColor" : "252933ff",
+                "selectedItemBackgroundColor" : "3b4150ff"
+            }
+        },
+        {
+            "name" : "pm_search",
+            "texteditor" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "75A7FEFF",
+                "outlineColor" : "75A7FEFF",
+                "backgroundColor" : "252933ff",
+				"text": "Filter..."
+            }
+        },
+        {
+            "name" : "pm_listbox",
+            "listbox" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "75A7FEFF",
+                "outlineColor" : "75A7FEFF",
+                "backgroundColor" : "252933ff"
+            }
+        }
+	],
     "children" : [
         {
             "name" : "bg",

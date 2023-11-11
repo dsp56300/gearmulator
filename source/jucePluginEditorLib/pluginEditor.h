@@ -37,6 +37,8 @@ namespace jucePluginEditorLib
 
 		void showDemoRestrictionMessageBox() const;
 
+		Processor& getProcessor() const { return m_processor; }
+
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;

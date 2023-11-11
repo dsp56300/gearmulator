@@ -2,6 +2,9 @@
 
 #include "patchmanager.h"
 #include "search.h"
+#include "../../juceUiLib/uiObject.h"
+
+#include "../../juceUiLib/uiObjectStyle.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -10,6 +13,9 @@ namespace jucePluginEditorLib::patchManager
 		getViewport()->setScrollBarsShown(true, false);
 		setModel(this);
 		setMultipleSelectionEnabled(true);
+
+		if (const auto& t = _pm.getTemplate("pm_listbox"))
+			t->apply(_pm.getEditor(), *this);
 	}
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
@@ -48,20 +54,24 @@ namespace jucePluginEditorLib::patchManager
 		return static_cast<int>(getPatches().size());
 	}
 
-	void List::paintListBoxItem(int _rowNumber, juce::Graphics& _g, int _width, int _height, bool _rowIsSelected)
+	void List::paintListBoxItem(const int _rowNumber, juce::Graphics& _g, const int _width, const int _height, const bool _rowIsSelected)
 	{
+		const auto* style = dynamic_cast<genericUI::UiObjectStyle*>(&getLookAndFeel());
+
 		if (_rowNumber >= getNumRows())
 			return;	// Juce what are you up to?
 
-		_g.setColour(_rowIsSelected ? juce::Colours::darkblue : getLookAndFeel().findColour(textColourId));
+		const auto textColor = findColour(textColourId);
+		_g.setColour(_rowIsSelected ? textColor.interpolatedWith(juce::Colours::white, 0.5f) : textColor);
 
 		const auto& patch = getPatch(_rowNumber);
 
 		const auto text = patch->getName();
 
-		_g.drawText(text, 2, 0, _width - 4, _height, juce::Justification::centredLeft, true);
-//		_g.setColour(m_patchList.getLookAndFeel().findColour(ListBox::backgroundColourId));
-//		_g.fillRect(_width - 1, 0, 1, _height);
+		_g.drawText(text, 2, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
+
+		_g.setColour(findColour(backgroundColourId));
+		_g.fillRect(_width - 1, 0, 1, _height);
 	}
 
 	juce::var List::getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe)

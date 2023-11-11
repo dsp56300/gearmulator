@@ -6,12 +6,15 @@
 #include "searchtree.h"
 #include "tree.h"
 
+#include "../pluginEditor.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	constexpr int g_scale = 2;
 	constexpr auto g_searchBarHeight = 32;
+	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(Component* _root, const juce::File& _json) : DB(_json)
+	PatchManager::PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _json) : DB(_json), m_editor(_editor)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;
@@ -23,31 +26,37 @@ namespace jucePluginEditorLib::patchManager
 		_root->addAndMakeVisible(this);
 
 		m_tree = new Tree(*this);
-		m_tree->setSize(rootW / 3, rootH - g_searchBarHeight);
+		m_tree->setSize(rootW / 3 - g_padding, rootH - g_searchBarHeight - g_padding);
 
 		m_searchTree = new SearchTree(*m_tree);
-		m_searchTree->setSize(rootW / 3, g_searchBarHeight);
-		m_searchTree->setTopLeftPosition(0, m_tree->getHeight());
+		m_searchTree->setSize(m_tree->getWidth(), g_searchBarHeight);
+		m_searchTree->setTopLeftPosition(m_tree->getX(), m_tree->getHeight() + g_padding);
 
 		addAndMakeVisible(m_tree);
 		addAndMakeVisible(m_searchTree);
 
 		m_list = new List(*this);
-		m_list->setSize(rootW / 3, rootH - g_searchBarHeight);
-		m_list->setTopLeftPosition(m_tree->getWidth(), 0);
+		m_list->setSize(rootW / 3 - g_padding, rootH - g_searchBarHeight - g_padding);
+		m_list->setTopLeftPosition(m_tree->getWidth() + g_padding, 0);
 
 		m_searchList = new SearchList(*m_list);
-		m_searchList->setSize(rootW / 3, g_searchBarHeight);
-		m_searchList->setTopLeftPosition(m_tree->getWidth(), m_list->getHeight());
+		m_searchList->setSize(m_list->getWidth(), g_searchBarHeight);
+		m_searchList->setTopLeftPosition(m_list->getX(), m_list->getHeight() + g_padding);
 
 		addAndMakeVisible(m_list);
 		addAndMakeVisible(m_searchList);
 
 		m_info = new Info(*this);
 		m_info->setSize(rootW / 3, rootH);
-		m_info->setTopLeftPosition(m_tree->getWidth() + m_list->getWidth(), 0);
+		m_info->setTopLeftPosition(m_tree->getWidth() + m_list->getWidth() + g_padding * 2, 0);
 
 		addAndMakeVisible(m_info);
+
+		if(const auto t = getTemplate("pm_search"))
+		{
+			t->apply(getEditor(), *m_searchList);
+			t->apply(getEditor(), *m_searchTree);
+		}
 
 		startTimer(200);
 	}
@@ -79,5 +88,10 @@ namespace jucePluginEditorLib::patchManager
 	void PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		m_info->setPatch(_patch);
+	}
+
+	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
+	{
+		return m_editor.getTemplate(_name);
 	}
 }

@@ -1,13 +1,13 @@
 #include "PatchManager.h"
 
+#include "VirusEditor.h"
 #include "../VirusController.h"
 
 #include "../../jucePluginLib/patchdb/datasource.h"
+#include "../../jucePluginEditorLib/pluginEditor.h"
 
 #include "../../virusLib/microcontroller.h"
 #include "../../virusLib/device.h"
-
-#include "juce_cryptography/hashing/juce_MD5.h"
 
 namespace Virus
 {
@@ -27,12 +27,12 @@ namespace genericVirusUI
 		return ds;
 	}
 
-	PatchManager::PatchManager(Virus::Controller& _controller, juce::Component* _root, const juce::File& _json) : jucePluginEditorLib::patchManager::PatchManager(_root, _json), m_controller(_controller)
+	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _json) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _json), m_controller(_editor.getController())
 	{
 		addRomPatches();
 
 		// rom patches are received via midi, make sure we add all remaining ones, too
-		_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
+		m_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
 		{
 			if (_bank == virusLib::BankNumber::EditBuffer || _bank < virusLib::BankNumber::C)
 				return;

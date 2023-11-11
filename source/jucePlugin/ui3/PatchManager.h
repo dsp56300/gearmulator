@@ -12,6 +12,8 @@ namespace Virus
 
 namespace genericVirusUI
 {
+	class VirusEditor;
+
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
@@ -23,7 +25,7 @@ namespace genericVirusUI
 			uint8_t arpMode = 0;
 		};
 
-		PatchManager(Virus::Controller& _controller, juce::Component* _root, const juce::File& _json);
+		PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _json);
 		~PatchManager() override;
 
 		// PatchDB impl

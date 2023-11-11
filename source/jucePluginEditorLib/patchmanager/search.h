@@ -4,22 +4,18 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	class Search : public juce::Label, juce::Label::Listener
+	class Search : public juce::TextEditor, juce::TextEditor::Listener
 	{
 	public:
 		Search();
 
-		void textWasChanged() override;
-		void textWasEdited() override;
-		void labelTextChanged(Label* _label) override;
-		void editorShown(Label* _label, juce::TextEditor& _editor) override;
-		void editorHidden(Label* _label, juce::TextEditor& _editor) override;
 		void textEditorTextChanged(juce::TextEditor&) override;
 
 		static std::string lowercase(const std::string& _s);
 
 		virtual void onTextChanged(const std::string& _text);
 
+		void paint(juce::Graphics& g) override;
 	private:
 		void setText(const std::string& _text);
 

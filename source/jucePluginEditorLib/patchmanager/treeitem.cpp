@@ -5,6 +5,7 @@
 #include "tree.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
+#include "../../juceUiLib/treeViewStyle.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -16,6 +17,7 @@ namespace jucePluginEditorLib::patchManager
 	TreeItem::~TreeItem()
 	{
 		destroyEditorLabel();
+
 		if(m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle)
 		{
 			getPatchManager().cancelSearch(m_searchHandle);
@@ -138,7 +140,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!arr)
 			return false;
 
-		for (auto var : *arr)
+		for (const auto& var : *arr)
 		{
 			if (!var.isInt())
 				return false;
@@ -181,9 +183,18 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
-		_g.setColour(juce::Colour(0xffffffff));
+		const auto* style = dynamic_cast<const genericUI::TreeViewStyle*>(&getOwnerView()->getLookAndFeel());
+
+		_g.setColour(style ? style->getColor() : juce::Colour(0xffffffff));
+
+		if(style)
+		{
+			if (const auto f = style->getFont())
+				_g.setFont(*f);
+		}
+
 		const juce::String t(m_text);
-		_g.drawText(t, 0, 0, _width, _height, juce::Justification(juce::Justification::centredLeft));
+		_g.drawText(t, 0, 0, _width, _height, style ? style->getAlign() : juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
 
