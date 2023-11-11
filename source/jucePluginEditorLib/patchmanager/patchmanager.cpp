@@ -68,6 +68,7 @@ namespace jucePluginEditorLib::patchManager
 		uiProcess(dirty);
 
 		m_tree->processDirty(dirty);
+		m_list->processDirty(dirty);
 	}
 
 	void PatchManager::setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle)

@@ -91,6 +91,18 @@ namespace jucePluginEditorLib::patchManager
 		m_patchManager.setSelectedPatch(getPatch(idx));
 	}
 
+	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
+	{
+		if (!m_search)
+			return;
+
+		if (_dirty.searches.empty())
+			return;
+
+		if(_dirty.searches.find(m_search->handle) != _dirty.searches.end())
+			setContent(m_search);
+	}
+
 	void List::setFilter(const std::string& _filter)
 	{
 		if (m_filter == _filter)
