@@ -1,6 +1,8 @@
 #include "info.h"
 
+#include "patchmanager.h"
 #include "../../jucePluginLib/patchdb/patch.h"
+#include "../../juceUiLib/uiObject.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -15,6 +17,25 @@ namespace jucePluginEditorLib::patchManager
 		m_categories = addChild(new juce::Label());
 		m_lbTags = addChild(new juce::Label("", "Tags"));
 		m_tags = addChild(new juce::Label());
+
+		if(const auto& t = _pm.getTemplate("pm_info_label"))
+		{
+			t->apply(_pm.getEditor(), *m_lbSource);
+			t->apply(_pm.getEditor(), *m_lbCategories);
+			t->apply(_pm.getEditor(), *m_lbTags);
+		}
+
+		if (const auto& t = _pm.getTemplate("pm_info_text"))
+		{
+			t->apply(_pm.getEditor(), *m_source);
+			t->apply(_pm.getEditor(), *m_categories);
+			t->apply(_pm.getEditor(), *m_tags);
+		}
+
+		if (const auto& t = _pm.getTemplate("pm_info_name"))
+		{
+			t->apply(_pm.getEditor(), *m_name);
+		}
 	}
 
 	Info::~Info()
@@ -72,13 +93,26 @@ namespace jucePluginEditorLib::patchManager
 		switch (_source->type)
 		{
 		case pluginLib::patchDB::SourceType::Invalid:
+		case pluginLib::patchDB::SourceType::Count:
 			return {};
 		case pluginLib::patchDB::SourceType::Rom:
-		case pluginLib::patchDB::SourceType::File:
 		case pluginLib::patchDB::SourceType::Folder:
 			return _source->name;
+		case pluginLib::patchDB::SourceType::File:
+			{
+				auto t = _source->name;
+				const auto pos = t.find_last_of("\\/");
+				if (pos != std::string::npos)
+					return t.substr(pos + 1);
+				return t;
+			}
 		}
 		return {};
+	}
+
+	void Info::paint(juce::Graphics& g)
+	{
+		g.fillAll(m_name->findColour(juce::Label::backgroundColourId));
 	}
 
 	juce::Label* Info::addChild(juce::Label* _label)
@@ -96,7 +130,24 @@ namespace jucePluginEditorLib::patchManager
 		fb.flexDirection = juce::FlexBox::Direction::column;
 
 		for (const auto& cChild : m_content.getChildren())
-			fb.items.add(juce::FlexItem(*cChild).withWidth(static_cast<float>(getWidth())).withHeight(40));
+		{
+			juce::FlexItem item(*cChild);
+			item = item.withWidth(static_cast<float>(getWidth()));
+
+			const auto* label = dynamic_cast<const juce::Label*>(cChild);
+			if (label)
+			{
+				const auto t = label->getText();
+				int lineCount = 1;
+				for (const auto ch : t)
+				{
+					if (ch == '\n')
+						++lineCount;
+				}
+				item = item.withHeight(label->getFont().getHeight() * (static_cast<float>(lineCount) + 1.5f));
+			}
+			fb.items.add(item);
+		}
 
 		fb.performLayout(m_content.getLocalBounds());
 	}

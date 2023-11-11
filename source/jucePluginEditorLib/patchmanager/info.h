@@ -24,6 +24,8 @@ namespace jucePluginEditorLib::patchManager
 
 		static std::string toText(const pluginLib::patchDB::Tags& _tags);
 		static std::string toText(const pluginLib::patchDB::DataSourceNodePtr& _source);
+
+		void paint(juce::Graphics& g) override;
 	private:
 		juce::Label* addChild(juce::Label* _label);
 		void doLayout() const;

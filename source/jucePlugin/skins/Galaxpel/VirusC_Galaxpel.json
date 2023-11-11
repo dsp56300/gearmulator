@@ -19,7 +19,7 @@
                 "alignH" : "L",
                 "alignV" : "C",
                 "color" : "75A7FEFF",
-                "backgroundColor" : "252933ff",
+                "backgroundColor" : "1c1f22ff",
                 "selectedItemBackgroundColor" : "3b4150ff"
             }
         },
@@ -29,8 +29,8 @@
                 "alignH" : "L",
                 "alignV" : "C",
                 "color" : "75A7FEFF",
-                "outlineColor" : "75A7FEFF",
-                "backgroundColor" : "252933ff",
+                "outlineColor" : "476495ff",
+                "backgroundColor" : "0e1216ff",
 				"text": "Filter..."
             }
         },
@@ -40,8 +40,38 @@
                 "alignH" : "L",
                 "alignV" : "C",
                 "color" : "75A7FEFF",
-                "outlineColor" : "75A7FEFF",
-                "backgroundColor" : "252933ff"
+                "backgroundColor" : "1c1f22ff",
+                "selectedItemBackgroundColor" : "3b4150ff",
+				"bold": "1"
+             }
+        },
+        {
+            "name" : "pm_info_name",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "T",
+                "color" : "79AAFFFF",
+                "backgroundColor" : "1c1f22ff",
+                "textHeight" : "32",
+				"bold": "1"
+            }
+        },
+        {
+            "name" : "pm_info_label",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "B",
+                "color" : "888888ff",
+                "textHeight" : "16"
+            }
+        },
+        {
+            "name" : "pm_info_text",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "T",
+                "color" : "75A7FEFF",
+                "textHeight" : "18"
             }
         }
 	],

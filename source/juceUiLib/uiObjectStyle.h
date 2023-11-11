@@ -21,6 +21,7 @@ namespace genericUI
 		virtual void apply(Editor& _editor, const UiObject& _object);
 
 		const auto& getColor() const { return m_color; }
+		const auto& getSelectedItemBackgroundColor() const { return m_selectedItemBgColor; }
 		const auto& getAlign() const { return m_align; }
 
 		std::optional<juce::Font> getFont() const;

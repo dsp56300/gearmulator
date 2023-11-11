@@ -61,17 +61,24 @@ namespace jucePluginEditorLib::patchManager
 		if (_rowNumber >= getNumRows())
 			return;	// Juce what are you up to?
 
-		const auto textColor = findColour(textColourId);
-		_g.setColour(_rowIsSelected ? textColor.interpolatedWith(juce::Colours::white, 0.5f) : textColor);
-
 		const auto& patch = getPatch(_rowNumber);
 
 		const auto text = patch->getName();
 
-		_g.drawText(text, 2, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
+		if(style && _rowIsSelected)
+		{
+			_g.setColour(style->getSelectedItemBackgroundColor());
+			_g.fillRect(0, 0, _width, _height);
+		}
 
-		_g.setColour(findColour(backgroundColourId));
-		_g.fillRect(_width - 1, 0, 1, _height);
+		if (style)
+		{
+			if (const auto f = style->getFont())
+				_g.setFont(*f);
+		}
+
+		_g.setColour(findColour(textColourId));
+		_g.drawText(text, 2, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
 	}
 
 	juce::var List::getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe)

@@ -47,8 +47,8 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_searchList);
 
 		m_info = new Info(*this);
-		m_info->setSize(rootW / 3, rootH);
 		m_info->setTopLeftPosition(m_tree->getWidth() + m_list->getWidth() + g_padding * 2, 0);
+		m_info->setSize(getWidth() - m_info->getX(), rootH);
 
 		addAndMakeVisible(m_info);
 
