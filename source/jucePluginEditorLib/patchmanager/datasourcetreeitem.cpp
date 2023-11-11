@@ -74,4 +74,24 @@ namespace jucePluginEditorLib::patchManager
 	{
 		setTitle(getDataSourceNodeTitle(m_dataSource));
 	}
+
+	int DatasourceTreeItem::compareElements(const TreeViewItem* _a, const TreeViewItem* _b)
+	{
+		const auto* a = dynamic_cast<const DatasourceTreeItem*>(_a);
+		const auto* b = dynamic_cast<const DatasourceTreeItem*>(_b);
+
+		if (!a || !b)
+			return TreeItem::compareElements(_a, _b);
+
+		const auto& dsA = a->m_dataSource;
+		const auto& dsB = b->m_dataSource;
+
+		if (dsA->type == pluginLib::patchDB::SourceType::Rom || dsB->type == pluginLib::patchDB::SourceType::Rom)
+			int foo = 0;
+
+		if (dsA->type != dsB->type)
+			return static_cast<int>(dsA->type) - static_cast<int>(dsB->type);
+
+		return TreeItem::compareElements(_a, _b);
+	}
 }

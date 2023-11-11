@@ -24,6 +24,8 @@ namespace jucePluginEditorLib::patchManager
 		void itemClicked(const juce::MouseEvent&) override;
 		void refresh();
 
+		int compareElements(const TreeViewItem* _a, const TreeViewItem* _b) override;
+
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};

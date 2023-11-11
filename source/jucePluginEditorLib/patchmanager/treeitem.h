@@ -47,9 +47,9 @@ namespace jucePluginEditorLib::patchManager
 		Tree* getTree() const;
 
 		void removeFromParent(bool _destroy) const;
-		void setParent(TreeViewItem* _parent);
+		void setParent(TreeViewItem* _parent, bool _sorted = false);
 
-		const std::string& getText() { return m_text; }
+		const std::string& getText() const { return m_text; }
 
 		// TreeViewItem
 		void itemSelectionChanged(bool _isNowSelected) override;
@@ -59,6 +59,8 @@ namespace jucePluginEditorLib::patchManager
 		// juce::Label::Listener
 		void editorHidden(juce::Label*, juce::TextEditor&) override;
 		void labelTextChanged(juce::Label* _label) override;
+
+		virtual int compareElements(const TreeViewItem* _a, const TreeViewItem* _b);
 
 	protected:
 		void search(pluginLib::patchDB::SearchRequest&& _request);

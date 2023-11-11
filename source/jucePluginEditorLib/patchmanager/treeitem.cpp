@@ -74,7 +74,7 @@ namespace jucePluginEditorLib::patchManager
 		parent->removeSubItem(idx, _destroy);
 	}
 
-	void TreeItem::setParent(TreeViewItem* _parent)
+	void TreeItem::setParent(TreeViewItem* _parent, const bool _sorted/* = false*/)
 	{
 		const auto* parentExisting = getParentItem();
 
@@ -82,8 +82,14 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		removeFromParent(false);
+
 		if (_parent)
-			_parent->addSubItem(this);
+		{
+			if(_sorted)
+				_parent->addSubItemSorted(*this, this);
+			else
+				_parent->addSubItem(this);
+		}
 	}
 
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
@@ -194,6 +200,21 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::labelTextChanged(juce::Label* _label)
 	{
+	}
+
+	int TreeItem::compareElements(const TreeViewItem* _a, const TreeViewItem* _b)
+	{
+		const auto* a = dynamic_cast<const TreeItem*>(_a);
+		const auto* b = dynamic_cast<const TreeItem*>(_b);
+
+		if(a && b)
+			return a->getText().compare(b->getText());
+
+		if (_a < _b)
+			return -1;
+		if (_a > _b)
+			return 1;
+		return 0;
 	}
 
 	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)

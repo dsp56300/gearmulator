@@ -11,8 +11,8 @@ namespace pluginLib::patchDB
 	{
 		Invalid,
 		Rom,
-		File,
 		Folder,
+		File,
 		Count
 	};
 

@@ -263,15 +263,15 @@ namespace jucePluginEditorLib::patchManager
 			parentNeeded = this;
 		}
 
-		_item->setParent(parentNeeded);
+		_item->setParent(parentNeeded, true);
 	}
 
 	void GroupTreeItem::validateParent(TagTreeItem* _item)
 	{
 		if (match(*_item))
-			_item->setParent(this);
+			_item->setParent(this, true);
 		else
-			_item->setParent(nullptr);
+			_item->setParent(nullptr, true);
 	}
 
 	bool GroupTreeItem::match(TreeItem& _item) const
