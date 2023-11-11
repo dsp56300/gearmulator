@@ -31,6 +31,8 @@ namespace genericVirusUI
 	{
 		addRomPatches();
 
+		startLoaderThread();
+
 		// rom patches are received via midi, make sure we add all remaining ones, too
 		m_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
 		{

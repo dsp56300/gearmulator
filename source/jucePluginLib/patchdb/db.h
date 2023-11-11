@@ -60,6 +60,7 @@ namespace pluginLib::patchDB
 		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourceNodePtr& _ds) = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 
+		void startLoaderThread();
 		void stopLoaderThread();
 
 	private:

@@ -4,19 +4,28 @@
 
 namespace pluginLib::patchDB
 {
-	JobQueue::JobQueue(const std::string& _name)
+	JobQueue::JobQueue(std::string _name, bool _start/* = true*/) : m_name(std::move(_name))
 	{
-		m_thread.reset(new std::thread([this, _name]
-		{
-			if(!_name.empty())
-				dsp56k::ThreadTools::setCurrentThreadName(_name);
-			threadFunc();
-		}));
+		if (_start)
+			start();
 	}
 
 	JobQueue::~JobQueue()
 	{
 		destroy();
+	}
+
+	void JobQueue::start()
+	{
+		if (m_thread)
+			return;
+
+		m_thread.reset(new std::thread([this]
+		{
+			if(!m_name.empty())
+				dsp56k::ThreadTools::setCurrentThreadName(m_name);
+			threadFunc();
+		}));
 	}
 
 	void JobQueue::destroy()

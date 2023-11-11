@@ -9,9 +9,10 @@ namespace pluginLib::patchDB
 	class JobQueue
 	{
 	public:
-		JobQueue(const std::string& _name = {});
+		JobQueue(std::string _name = {}, bool _start = true);
 		~JobQueue();
 
+		void start();
 		void destroy();
 
 		void add(const std::function<void()>& _func);
@@ -20,6 +21,7 @@ namespace pluginLib::patchDB
 	private:
 		void threadFunc();
 
+		std::string m_name;
 		std::deque<std::function<void()>> m_funcs;
 		std::mutex m_mutex;
 		std::condition_variable m_cv;

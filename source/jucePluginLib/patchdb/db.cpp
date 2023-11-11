@@ -13,7 +13,7 @@
 
 namespace pluginLib::patchDB
 {
-	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json)), m_loader("PatchLoader")
+	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json)), m_loader("PatchLoader", false)
 	{
 		loadJson();
 	}
@@ -327,6 +327,11 @@ namespace pluginLib::patchDB
 	{
 		synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 		return !_results.empty();
+	}
+
+	void DB::startLoaderThread()
+	{
+		m_loader.start();
 	}
 
 	void DB::stopLoaderThread()
