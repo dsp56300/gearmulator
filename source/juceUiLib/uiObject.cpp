@@ -215,6 +215,9 @@ namespace genericUI
 
 		for (const auto& child : m_children)
 			child->collectVariants(_dst, _property);
+
+		for (const auto& child : m_templates)
+			child->collectVariants(_dst, _property);
 	}
 
 	juce::Component* UiObject::createJuceObject(Editor& _editor)
