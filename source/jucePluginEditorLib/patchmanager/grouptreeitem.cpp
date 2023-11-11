@@ -2,6 +2,7 @@
 
 #include "datasourcetreeitem.h"
 #include "patchmanager.h"
+#include "search.h"
 #include "tagtreeitem.h"
 #include "dsp56kEmu/logging.h"
 
@@ -18,16 +19,6 @@ namespace jucePluginEditorLib::patchManager
 	};
 
 	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
-
-	namespace 
-	{
-		std::string lowercase(std::string _s)
-		{
-			auto t = _s;
-			std::transform(t.begin(), t.end(), t.begin(), tolower);
-			return t;
-		}
-	}
 
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type) : TreeItem(_pm, g_groupNames[static_cast<uint32_t>(_type)]), m_type(_type)
 	{
@@ -112,6 +103,7 @@ namespace jucePluginEditorLib::patchManager
 		for (const auto& d : _dataSources)
 		{
 			const auto itExisting = m_itemsByDataSource.find(d);
+
 			if (m_itemsByDataSource.find(d) != m_itemsByDataSource.end())
 			{
 				validateParent(itExisting->first, itExisting->second);
@@ -193,12 +185,10 @@ namespace jucePluginEditorLib::patchManager
 
 	void GroupTreeItem::setFilter(const std::string& _filter)
 	{
-		const auto f = lowercase(_filter);
-
-		if (m_filter == f)
+		if (m_filter == _filter)
 			return;
 
-		m_filter = f;
+		m_filter = _filter;
 
 		for (const auto& it : m_itemsByDataSource)
 			validateParent(it.first, it.second);
@@ -274,11 +264,11 @@ namespace jucePluginEditorLib::patchManager
 			_item->setParent(nullptr, true);
 	}
 
-	bool GroupTreeItem::match(TreeItem& _item) const
+	bool GroupTreeItem::match(const TreeItem& _item) const
 	{
 		if (m_filter.empty())
 			return true;
-		const auto t = lowercase(_item.getText());
+		const auto t = Search::lowercase(_item.getText());
 		return t.find(m_filter) != std::string::npos;
 	}
 }

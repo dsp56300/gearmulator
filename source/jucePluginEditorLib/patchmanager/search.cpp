@@ -40,16 +40,25 @@ namespace jucePluginEditorLib::patchManager
 		setText(_textEditor.getText().toStdString());
 	}
 
+	std::string Search::lowercase(const std::string& _s)
+	{
+		auto t = _s;
+		std::transform(t.begin(), t.end(), t.begin(), tolower);
+		return t;
+	}
+
 	void Search::onTextChanged(const std::string& _text)
 	{
 	}
 
 	void Search::setText(const std::string& _text)
 	{
-		if (m_text == _text)
+		const auto t = lowercase(_text);
+
+		if (m_text == t)
 			return;
 
-		m_text = _text;
-		onTextChanged(_text);
+		m_text = t;
+		onTextChanged(t);
 	}
 }

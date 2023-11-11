@@ -16,6 +16,8 @@ namespace jucePluginEditorLib::patchManager
 		void editorHidden(Label* _label, juce::TextEditor& _editor) override;
 		void textEditorTextChanged(juce::TextEditor&) override;
 
+		static std::string lowercase(const std::string& _s);
+
 		virtual void onTextChanged(const std::string& _text);
 
 	private:

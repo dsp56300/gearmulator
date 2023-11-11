@@ -44,7 +44,7 @@ namespace jucePluginEditorLib::patchManager
 		bool needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds) const;
 		void validateParent(const pluginLib::patchDB::DataSourceNodePtr& _ds, DatasourceTreeItem* _item);
 		void validateParent(TagTreeItem* _item);
-		bool match(TreeItem& _item) const;
+		bool match(const TreeItem& _item) const;
 
 		const GroupType m_type;
 		std::map<std::string, TagTreeItem*> m_itemsByTag;
