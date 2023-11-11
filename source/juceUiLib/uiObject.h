@@ -48,6 +48,9 @@ namespace genericUI
 		void apply(Editor& _editor, juce::Label& _target);
 		void apply(Editor& _editor, juce::TextButton& _target);
 		void apply(Editor& _editor, juce::HyperlinkButton& _target);
+		void apply(Editor& _editor, juce::TreeView& _target);
+		void apply(Editor& _editor, juce::ListBox& _target);
+		void apply(Editor& _editor, juce::TextEditor& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 

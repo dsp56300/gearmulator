@@ -2,16 +2,19 @@ cmake_minimum_required(VERSION 3.15)
 project(juceUiLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
-	editor.cpp editor.h
-	editorInterface.h
 	condition.cpp condition.h
 	controllerlink.cpp controllerlink.h
+	editor.cpp editor.h
+	editorInterface.h
 	image.cpp image.h
+	listBoxStyle.cpp listBoxStyle.h
 	rotaryStyle.cpp rotaryStyle.h
 	comboboxStyle.cpp comboboxStyle.h
 	buttonStyle.cpp buttonStyle.h
 	labelStyle.cpp labelStyle.h
 	textbuttonStyle.cpp textbuttonStyle.h
+	textEditorStyle.cpp textEditorStyle.h
+	treeViewStyle.cpp treeViewStyle.h
 	hyperlinkbuttonStyle.cpp hyperlinkbuttonStyle.h
 	tabgroup.cpp tabgroup.h
 	uiObject.cpp uiObject.h

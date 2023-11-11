@@ -12,6 +12,9 @@
 #include "textbuttonStyle.h"
 #include "hyperlinkbuttonStyle.h"
 #include "labelStyle.h"
+#include "listBoxStyle.h"
+#include "textEditorStyle.h"
+#include "treeViewStyle.h"
 
 namespace genericUI
 {
@@ -166,6 +169,32 @@ namespace genericUI
 		auto* s = new HyperlinkButtonStyle(_editor);
 		createStyle(_editor, _target, s);
 		s->apply(_target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::TreeView& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		auto* s = new TreeViewStyle(_editor);
+		createStyle(_editor, _target, s);
+		s->apply(_target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::ListBox& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		auto* s = new ListBoxStyle(_editor);
+		createStyle(_editor, _target, s);
+		s->apply(_target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::TextEditor& _target)
+	{
+		apply(_editor, static_cast<juce::Component&>(_target));
+		TextEditorStyle* s = nullptr;
+		if(!m_style)
+			s = new TextEditorStyle(_editor);
+		createStyle(_editor, _target, s);
+		static_cast<TextEditorStyle*>(m_style.get())->apply(_target);
 	}
 
 	void UiObject::collectVariants(std::set<std::string>& _dst, const std::string& _property) const
@@ -507,7 +536,8 @@ namespace genericUI
 
 	template <typename Target, typename Style> void UiObject::createStyle(Editor& _editor, Target& _target, Style* _style)
 	{
-		m_style.reset(_style);
+		if(_style)
+			m_style.reset(_style);
 		m_style->apply(_editor, *this);
 		_target.setLookAndFeel(m_style.get());
 	}
