@@ -12,21 +12,44 @@ namespace jucePluginEditorLib::patchManager
 
 	void Search::textWasChanged()
 	{
-		LOG("textWasChanged");
+		setText(getText().toStdString());
 	}
 
 	void Search::textWasEdited()
 	{
-		LOG("textWasEdited");
+		setText(getText().toStdString());
 	}
 
 	void Search::labelTextChanged(Label* _label)
 	{
-		LOG("labeltextChanged");
+		setText(getText().toStdString());
+	}
+
+	void Search::editorShown(Label* _label, juce::TextEditor& _editor)
+	{
+		Listener::editorShown(_label, _editor);
+	}
+
+	void Search::editorHidden(Label* _label, juce::TextEditor& _editor)
+	{
+		Listener::editorHidden(_label, _editor);
 	}
 
 	void Search::textEditorTextChanged(juce::TextEditor& _textEditor)
 	{
-		LOG("textEditTextChanged: " << _textEditor.getText().toStdString());
+		setText(_textEditor.getText().toStdString());
+	}
+
+	void Search::onTextChanged(const std::string& _text)
+	{
+	}
+
+	void Search::setText(const std::string& _text)
+	{
+		if (m_text == _text)
+			return;
+
+		m_text = _text;
+		onTextChanged(_text);
 	}
 }

@@ -106,11 +106,23 @@ namespace jucePluginEditorLib::patchManager
 		return TreeView::keyPressed(_key);
 	}
 
+	void Tree::setFilter(const std::string& _filter)
+	{
+		if (m_filter == _filter)
+			return;
+
+		m_filter = _filter;
+
+		for (const auto& it : m_groupItems)
+			it.second->setFilter(_filter);
+	}
+
 	void Tree::addGroup(const GroupType _type)
 	{
 		auto* groupItem = new GroupTreeItem(m_patchManager, _type);
 		getRootItem()->addSubItem(groupItem);
 		m_groupItems.insert({ _type, groupItem });
+		groupItem->setFilter(m_filter);
 	}
 
 	GroupTreeItem* Tree::getItem(const GroupType _type)

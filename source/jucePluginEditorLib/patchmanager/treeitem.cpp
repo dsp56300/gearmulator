@@ -61,6 +61,31 @@ namespace jucePluginEditorLib::patchManager
 		return dynamic_cast<Tree*>(getOwnerView());
 	}
 
+	void TreeItem::removeFromParent(const bool _destroy) const
+	{
+		auto* parent = getParentItem();
+		if (!parent)
+		{
+			if (_destroy)
+				delete this;
+			return;
+		}
+		const auto idx = getIndexInParent();
+		parent->removeSubItem(idx, _destroy);
+	}
+
+	void TreeItem::setParent(TreeViewItem* _parent)
+	{
+		const auto* parentExisting = getParentItem();
+
+		if (_parent == parentExisting)
+			return;
+
+		removeFromParent(false);
+		if (_parent)
+			_parent->addSubItem(this);
+	}
+
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
 		TreeViewItem::itemSelectionChanged(_isNowSelected);

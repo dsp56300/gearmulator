@@ -25,7 +25,7 @@ namespace jucePluginEditorLib::patchManager
 		m_tree = new Tree(*this);
 		m_tree->setSize(rootW / 3, rootH - g_searchBarHeight);
 
-		m_searchTree = new SearchTree();
+		m_searchTree = new SearchTree(*m_tree);
 		m_searchTree->setSize(rootW / 3, g_searchBarHeight);
 		m_searchTree->setTopLeftPosition(0, m_tree->getHeight());
 
@@ -55,6 +55,8 @@ namespace jucePluginEditorLib::patchManager
 	PatchManager::~PatchManager()
 	{
 		stopTimer();
+		delete m_searchTree;
+		delete m_searchList;
 		delete m_tree;
 		delete m_list;
 		delete m_info;

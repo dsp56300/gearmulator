@@ -19,6 +19,16 @@ namespace jucePluginEditorLib::patchManager
 
 	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
 
+	namespace 
+	{
+		std::string lowercase(std::string _s)
+		{
+			auto t = _s;
+			std::transform(t.begin(), t.end(), t.begin(), tolower);
+			return t;
+		}
+	}
+
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type) : TreeItem(_pm, g_groupNames[static_cast<uint32_t>(_type)]), m_type(_type)
 	{
 	}
@@ -32,7 +42,7 @@ namespace jucePluginEditorLib::patchManager
 
 			if(_tags.find(tag) == _tags.end())
 			{
-				item->getParentItem()->removeSubItem(item->getIndexInParent(), true);
+				item->removeFromParent(true);
 				m_itemsByTag.erase(it++);
 			}
 			else
@@ -46,11 +56,15 @@ namespace jucePluginEditorLib::patchManager
 			auto itExisting = m_itemsByTag.find(tag);
 
 			if (itExisting != m_itemsByTag.end())
+			{
+				validateParent(itExisting->second);
 				continue;
+			}
 
+			const auto oldNumSubItems = getNumSubItems();
 			createSubItem(tag);
 
-			if (m_itemsByTag.size() == 1)
+			if (getNumSubItems() == 1 && oldNumSubItems == 0)
 				setOpen(true);
 		}
 	}
@@ -72,10 +86,7 @@ namespace jucePluginEditorLib::patchManager
 		while (_item->getNumSubItems())
 			removeItem(dynamic_cast<DatasourceTreeItem*>(_item->getSubItem(0)));
 
-		const auto indexInParent = _item->getIndexInParent();
-
-		if (auto* parent = _item->getParentItem())
-			parent->removeSubItem(indexInParent, true);
+		_item->removeFromParent(true);
 	}
 
 	void GroupTreeItem::removeDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds)
@@ -111,9 +122,6 @@ namespace jucePluginEditorLib::patchManager
 			auto* item = createItemForDataSource(d);
 
 			m_itemsByDataSource.insert({ d, item });
-
-			if (m_itemsByDataSource.size() == 1)
-				setOpen(true);
 		}
 	}
 
@@ -183,6 +191,22 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
+	void GroupTreeItem::setFilter(const std::string& _filter)
+	{
+		const auto f = lowercase(_filter);
+
+		if (m_filter == f)
+			return;
+
+		m_filter = f;
+
+		for (const auto& it : m_itemsByDataSource)
+			validateParent(it.first, it.second);
+
+		for (const auto& it : m_itemsByTag)
+			validateParent(it.second);
+	}
+
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)
 	{
 		const auto it = m_itemsByDataSource.find(_dataSource);
@@ -194,18 +218,12 @@ namespace jucePluginEditorLib::patchManager
 
 		m_itemsByDataSource.insert({ _dataSource, item });
 
-		if(needsParentItem(_dataSource))
-		{
-			auto* parent = createItemForDataSource(_dataSource->getParent());
-			parent->addSubItem(item);
-		}
-		else
-		{
-			addSubItem(item);
+		const auto oldNumSubItems = getNumSubItems();
 
-			if (getNumSubItems() == 1)
-				setOpen(true);
-		}
+		validateParent(_dataSource, item);
+
+		if(getNumSubItems() == 1 && oldNumSubItems == 0)
+			setOpen(true);
 
 		return item;
 	}
@@ -214,32 +232,53 @@ namespace jucePluginEditorLib::patchManager
 	{
 		auto item = new TagTreeItem(getPatchManager(), m_type, _tag);
 
-		addSubItem(item);
+		validateParent(item);
+
 		m_itemsByTag.insert({ _tag, item });
 
 		return item;
 	}
 
-	bool GroupTreeItem::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	bool GroupTreeItem::needsParentItem(const pluginLib::patchDB::DataSourceNodePtr& _ds) const
 	{
+		if (!m_filter.empty())
+			return false;
 		return _ds->hasParent() && _ds->origin != pluginLib::patchDB::DataSourceOrigin::Manual;
 	}
 
 	void GroupTreeItem::validateParent(const pluginLib::patchDB::DataSourceNodePtr& _ds, DatasourceTreeItem* _item)
 	{
-		TreeViewItem* parentNeeded = this;
+		TreeViewItem* parentNeeded = nullptr;
 
-		if(needsParentItem(_ds))
+		if (needsParentItem(_ds))
 		{
 			parentNeeded = createItemForDataSource(_ds->getParent());
 		}
-
-		auto* parentExisting = _item->getParentItem();
-
-		if(parentNeeded != parentExisting)
+		else if (_ds->type == pluginLib::patchDB::SourceType::Folder && !m_filter.empty())
 		{
-			parentExisting->removeSubItem(_item->getIndexInParent(), false);
-			parentNeeded->addSubItem(_item);
+			parentNeeded = nullptr;
 		}
+		else if (match(*_item))
+		{
+			parentNeeded = this;
+		}
+
+		_item->setParent(parentNeeded);
+	}
+
+	void GroupTreeItem::validateParent(TagTreeItem* _item)
+	{
+		if (match(*_item))
+			_item->setParent(this);
+		else
+			_item->setParent(nullptr);
+	}
+
+	bool GroupTreeItem::match(TreeItem& _item) const
+	{
+		if (m_filter.empty())
+			return true;
+		const auto t = lowercase(_item.getText());
+		return t.find(m_filter) != std::string::npos;
 	}
 }

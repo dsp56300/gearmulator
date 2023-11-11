@@ -30,11 +30,14 @@ namespace jucePluginEditorLib::patchManager
 
 		bool keyPressed(const juce::KeyPress& _key) override;
 
+		void setFilter(const std::string& _filter);
+
 	private:
 		void addGroup(GroupType _type);
 		GroupTreeItem* getItem(GroupType _type);
 
 		PatchManager& m_patchManager;
 		std::map<GroupType, GroupTreeItem*> m_groupItems;
+		std::string m_filter;
 	};
 }
