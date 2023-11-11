@@ -4,6 +4,8 @@
 
 namespace jucePluginEditorLib::patchManager
 {
+	class SearchTree;
+	class SearchList;
 	class Info;
 	class List;
 	class Tree;
@@ -23,5 +25,8 @@ namespace jucePluginEditorLib::patchManager
 		Tree* m_tree = nullptr;
 		List* m_list = nullptr;
 		Info* m_info = nullptr;
+
+		SearchList* m_searchList = nullptr;
+		SearchTree* m_searchTree = nullptr;
 	};
 }

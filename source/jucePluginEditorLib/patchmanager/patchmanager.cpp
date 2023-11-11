@@ -2,11 +2,14 @@
 
 #include "info.h"
 #include "list.h"
+#include "searchlist.h"
+#include "searchtree.h"
 #include "tree.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	constexpr int g_scale = 2;
+	constexpr auto g_searchBarHeight = 32;
 
 	PatchManager::PatchManager(Component* _root, const juce::File& _json) : DB(_json)
 	{
@@ -20,15 +23,25 @@ namespace jucePluginEditorLib::patchManager
 		_root->addAndMakeVisible(this);
 
 		m_tree = new Tree(*this);
-		m_tree->setSize(rootW / 3, rootH);
+		m_tree->setSize(rootW / 3, rootH - g_searchBarHeight);
+
+		m_searchTree = new SearchTree();
+		m_searchTree->setSize(rootW / 3, g_searchBarHeight);
+		m_searchTree->setTopLeftPosition(0, m_tree->getHeight());
 
 		addAndMakeVisible(m_tree);
+		addAndMakeVisible(m_searchTree);
 
 		m_list = new List(*this);
-		m_list->setSize(rootW / 3, rootH);
+		m_list->setSize(rootW / 3, rootH - g_searchBarHeight);
 		m_list->setTopLeftPosition(m_tree->getWidth(), 0);
 
+		m_searchList = new SearchList();
+		m_searchList->setSize(rootW / 3, g_searchBarHeight);
+		m_searchList->setTopLeftPosition(m_tree->getWidth(), m_list->getHeight());
+
 		addAndMakeVisible(m_list);
+		addAndMakeVisible(m_searchList);
 
 		m_info = new Info(*this);
 		m_info->setSize(rootW / 3, rootH);

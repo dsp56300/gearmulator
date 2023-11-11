@@ -23,6 +23,9 @@ set(SOURCES_PM
 	patchmanager/tree.cpp patchmanager/tree.h
 	patchmanager/treeitem.cpp patchmanager/treeitem.h
 	patchmanager/types.cpp patchmanager/types.h
+	patchmanager/search.cpp patchmanager/search.h
+	patchmanager/searchlist.cpp patchmanager/searchlist.h
+	patchmanager/searchtree.cpp patchmanager/searchtree.h
 )
 
 add_library(jucePluginEditorLib STATIC)
