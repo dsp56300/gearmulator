@@ -171,9 +171,9 @@ namespace jucePluginEditorLib::patchManager
 		if (m_filter == _filter)
 			return;
 
-		m_filter = _filter;
-
 		const auto selected = getSelectedPatches();
+
+		m_filter = _filter;
 
 		filterPatches();
 		updateContent();
