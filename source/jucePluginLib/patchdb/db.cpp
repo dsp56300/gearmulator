@@ -217,43 +217,51 @@ namespace pluginLib::patchDB
 		_tags = it->second;
 	}
 
-	bool DB::modifyTags(const PatchPtr& _patch, const TypedTags& _tags)
+	bool DB::modifyTags(const std::vector<PatchPtr>& _patches, const TypedTags& _tags)
 	{
-		const auto key = PatchKey(*_patch);
+		std::vector<PatchPtr> changed;
+		changed.reserve(_patches.size());
 
 		std::unique_lock lock(m_patchesMutex);
-		const auto& itPatch = m_patches.find(key);
-		if (itPatch == m_patches.end())
-			return false;
 
-		const auto& it = m_patchModifications.find(key);
-
-		if (it != m_patchModifications.end())
+		for (const auto& patch : _patches)
 		{
-			if (!it->second->modifyTags(_tags))
+			const auto key = PatchKey(*patch);
+
+			const auto& itPatch = m_patches.find(key);
+			if (itPatch == m_patches.end())
 				return false;
 
-			updateSearches({ _patch });
-			lock.unlock();
-			saveJson();
-			return true;
+			const auto& it = m_patchModifications.find(key);
+
+			if (it != m_patchModifications.end())
+			{
+				if (it->second->modifyTags(_tags))
+					changed.push_back(patch);
+
+				continue;
+			}
+
+			const auto mods = std::make_shared<PatchModifications>();
+			mods->patch = itPatch->second;
+
+			if (!mods->modifyTags(_tags))
+				continue;
+
+			itPatch->second->modifications = mods;
+
+			m_patchModifications.insert({ key, mods });
+
+			changed.push_back(patch);
 		}
 
-		const auto mods = std::make_shared<PatchModifications>();
-		mods->patch = itPatch->second;
+		if(!changed.empty())
+			updateSearches(changed);
 
-		const auto res = mods->modifyTags(_tags);
-		
-		if (!res)
-			return false;
-
-		itPatch->second->modifications = mods;
-
-		m_patchModifications.insert({ key, mods });
-
-		updateSearches({ _patch });
 		lock.unlock();
-		saveJson();
+
+		if(!changed.empty())
+			saveJson();
 
 		return true;
 	}

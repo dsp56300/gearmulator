@@ -21,21 +21,20 @@ namespace jucePluginEditorLib::patchManager
 		return TreeItem::isInterestedInDragSource(dragSourceDetails) && hasSearch();
 	}
 
-	void TagTreeItem::patchDropped(const pluginLib::patchDB::PatchPtr& _patch)
+	void TagTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		const auto tagType = toTagType(getGroupType());
 
-		if(tagType != pluginLib::patchDB::TagType::Invalid)
-		{
-			pluginLib::patchDB::TypedTags tags;
-			if (juce::ModifierKeys::currentModifiers.isShiftDown())
-				tags.addRemoved(tagType, getTag());
-			else
-				tags.add(tagType, getTag());
+		if (tagType == pluginLib::patchDB::TagType::Invalid)
+			return;
 
-			getPatchManager().modifyTags(_patch, tags);
-		}
-		TreeItem::patchDropped(_patch);
+		pluginLib::patchDB::TypedTags tags;
+		if (juce::ModifierKeys::currentModifiers.isShiftDown())
+			tags.addRemoved(tagType, getTag());
+		else
+			tags.add(tagType, getTag());
+
+		getPatchManager().modifyTags(_patches, tags);
 	}
 
 	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
