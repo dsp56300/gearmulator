@@ -26,7 +26,7 @@ namespace pluginLib::patchDB
 		std::string hash;
 		std::vector<uint8_t> sysex;
 
-		PatchModificationsPtr modifications;
+		std::weak_ptr<PatchModifications> modifications;
 
 		const TypedTags& getTags() const;
 		const std::string& getName() const;

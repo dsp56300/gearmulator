@@ -8,24 +8,23 @@
 
 namespace pluginLib::patchDB
 {
-	Patch::~Patch()
-	{
-	}
+	Patch::~Patch() = default;
 
 	const TypedTags& Patch::getTags() const
 	{
-		if (!modifications)
-			return tags;
-		return modifications->mergedTags;
+		if (const auto m = modifications.lock())
+			return m->mergedTags;
+		return tags;
 	}
 
 	const std::string& Patch::getName() const
 	{
-		if (!modifications)
+		const auto m = modifications.lock();
+		if (!m)
 			return name;
-		if (modifications->name.empty())
+		if (m->name.empty())
 			return name;
-		return modifications->name;
+		return m->name;
 	}
 
 	std::string PatchKey::toString() const
