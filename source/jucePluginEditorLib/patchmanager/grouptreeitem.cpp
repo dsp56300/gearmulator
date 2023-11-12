@@ -197,6 +197,17 @@ namespace jucePluginEditorLib::patchManager
 			validateParent(it.second);
 	}
 
+	bool GroupTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
+	{
+		if (isOpen())
+			return false;
+
+		if (TreeItem::isInterestedInDragSource(_dragSourceDetails))
+			setOpen(true);
+
+		return false;
+	}
+
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)
 	{
 		const auto it = m_itemsByDataSource.find(_dataSource);
