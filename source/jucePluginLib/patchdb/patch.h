@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <array>
 
 #include "datasource.h"
 #include "tags.h"
@@ -10,9 +11,22 @@
 
 namespace pluginLib::patchDB
 {
+	using PatchHash = std::array<uint8_t, 16>;
+
 	struct Patch
 	{
-		virtual ~Patch();
+		Patch()
+		{
+			hash.fill(0);
+		}
+
+		Patch(const Patch&) = delete;
+		Patch(Patch&&) = delete;
+
+		virtual ~Patch() = default;
+
+		Patch& operator = (const Patch&) = delete;
+		Patch& operator = (Patch&&) = delete;
 
 		std::string name;
 
@@ -23,7 +37,7 @@ namespace pluginLib::patchDB
 
 		TypedTags tags;
 
-		std::string hash;
+		PatchHash hash;
 		std::vector<uint8_t> sysex;
 
 		std::weak_ptr<PatchModifications> modifications;
@@ -35,7 +49,7 @@ namespace pluginLib::patchDB
 	struct PatchKey
 	{
 		DataSource source;
-		std::string hash;
+		PatchHash hash;
 		uint32_t program = g_invalidProgram;
 
 		PatchKey() = default;
@@ -67,7 +81,7 @@ namespace pluginLib::patchDB
 			return false;
 		}
 
-		bool isValid() const { return !hash.empty() && source.type != SourceType::Invalid; }
+		bool isValid() const { return source.type != SourceType::Invalid; }
 
 		std::string toString() const;
 		static PatchKey fromString(const std::string& _string);

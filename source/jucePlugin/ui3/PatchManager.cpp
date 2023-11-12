@@ -128,7 +128,9 @@ namespace genericVirusUI
 			const auto frontOffset = idxVersion;	// remove bank number, program number and other stuff that we don't need
 			constexpr auto backOffset = 2;			// remove f7 and checksum
 			const juce::MD5 md5(_sysex.data() + frontOffset, _sysex.size() - frontOffset - backOffset);
-			patch->hash = md5.toHexString().toStdString();
+
+			static_assert(sizeof(juce::MD5) >= sizeof(pluginLib::patchDB::PatchHash));
+			memcpy(patch->hash.data(), md5.getChecksumDataArray(), std::size(patch->hash));
 		}
 
 		patch->name = c.getSinglePresetName(parameterValues);

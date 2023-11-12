@@ -6,10 +6,10 @@
 #include "patchmodifications.h"
 #include "serialization.h"
 
+#include <juce_audio_processors/juce_audio_processors.h>
+
 namespace pluginLib::patchDB
 {
-	Patch::~Patch() = default;
-
 	const TypedTags& Patch::getTags() const
 	{
 		if (const auto m = modifications.lock())
@@ -37,7 +37,7 @@ namespace pluginLib::patchDB
 		if (program != g_invalidProgram)
 			ss << "prog|" << program << '|';
 
-		ss << "hash|" << hash;
+		ss << "hash|" << juce::String::toHexString(hash.data(), (int)hash.size());
 
 		return ss.str();
 	}
@@ -65,7 +65,19 @@ namespace pluginLib::patchDB
 			else if (key == "prog")
 				patchKey.program = ::strtol(val.c_str(), nullptr, 10);
 			else if (key == "hash")
-				patchKey.hash = val;
+			{
+				juce::MemoryBlock mb;
+				mb.loadFromHexString(juce::String(val));
+				if(mb.getSize() == std::size(patchKey.hash))
+				{
+					memcpy(patchKey.hash.data(), mb.getData(), std::size(patchKey.hash));
+				}
+				else
+				{
+					assert(false && "hash value has invalid length");
+					patchKey.hash.fill(0);
+				}
+			}
 			else
 			{
 				assert(false && "unknown property key while parsing patch key");
