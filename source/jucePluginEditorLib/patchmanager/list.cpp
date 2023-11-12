@@ -223,6 +223,12 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::filterPatches()
 	{
+		if (m_filter.empty())
+		{
+			m_filteredPatches.clear();
+			return;
+		}
+
 		m_filteredPatches.reserve(m_patches.size());
 
 		m_filteredPatches.clear();
