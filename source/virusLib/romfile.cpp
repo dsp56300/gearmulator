@@ -123,7 +123,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 
 bool ROMFile::initialize()
 {
-	std::istream *dsp = new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData));
+	const std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
 	
 	const auto chunks = readChunks(*dsp);
 
