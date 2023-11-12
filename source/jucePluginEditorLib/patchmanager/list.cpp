@@ -1,5 +1,6 @@
 #include "list.h"
 
+#include "listitem.h"
 #include "patchmanager.h"
 #include "search.h"
 #include "../../juceUiLib/uiObject.h"
@@ -85,6 +86,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto& ranges = rowsToDescribe.getRanges();
 
+		if (ranges.isEmpty())
+			return {};
+
 		juce::Array<juce::var> indices;
 
 		for (const auto& range : ranges)
@@ -97,6 +101,19 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		return indices;
+	}
+
+	juce::Component* List::refreshComponentForRow(int rowNumber, bool isRowSelected,
+		Component* existingComponentToUpdate)
+	{
+		auto* existing = dynamic_cast<ListItem*>(existingComponentToUpdate);
+
+		if (existing)
+			return existing;
+
+		delete existingComponentToUpdate;
+
+		return new ListItem(*this);
 	}
 
 	void List::selectedRowsChanged(const int lastRowSelected)

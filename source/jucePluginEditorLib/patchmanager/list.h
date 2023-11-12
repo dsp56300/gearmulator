@@ -27,6 +27,7 @@ namespace jucePluginEditorLib::patchManager
 		int getNumRows() override;
 		void paintListBoxItem(int _rowNumber, juce::Graphics& _g, int _width, int _height, bool _rowIsSelected) override;
 		juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
+		Component* refreshComponentForRow(int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
 
 		void selectedRowsChanged(int lastRowSelected) override;
 
