@@ -131,15 +131,27 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::setSelectedPatches(const std::set<Patch>& _patches)
 	{
+		if (_patches.empty())
+			return;
+
 		juce::SparseSet<int> selection;
+
+		int maxRow = std::numeric_limits<int>::min();
+		int minRow = std::numeric_limits<int>::max();
 
 		for(int i=0; i<static_cast<int>(getPatches().size()); ++i)
 		{
 			if (_patches.find(getPatch(i)) != _patches.end())
-				selection.addRange({ i,i + 1 });
+			{
+				selection.addRange({ i, i + 1 });
+
+				maxRow = std::max(maxRow, i);
+				minRow = std::min(minRow, i);
+			}
 		}
 
 		setSelectedRows(selection);
+		scrollToEnsureRowIsOnscreen((minRow + maxRow) >> 1);
 	}
 
 	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
