@@ -839,6 +839,9 @@ namespace pluginLib::patchDB
 				const auto& key = it.first;
 				const auto& mods = it.second;
 
+				if (mods->empty())
+					continue;
+
 				auto* obj = mods->serialize();
 
 				patchMods->setProperty(juce::String(key.toString()), obj);

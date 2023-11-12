@@ -18,6 +18,8 @@ namespace pluginLib::patchDB
 		juce::DynamicObject* serialize() const;
 		bool deserialize(const juce::var& _var);
 
+		bool empty() const;
+
 		PatchPtr patch;
 		TypedTags tags;
 		std::string name;

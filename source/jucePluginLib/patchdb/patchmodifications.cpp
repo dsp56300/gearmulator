@@ -94,4 +94,9 @@ namespace pluginLib::patchDB
 
 		return true;
 	}
+
+	bool PatchModifications::empty() const
+	{
+		return name.empty() && tags.empty();
+	}
 }

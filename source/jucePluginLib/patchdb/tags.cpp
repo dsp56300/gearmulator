@@ -80,6 +80,16 @@ namespace pluginLib::patchDB
 		m_tags.clear();
 	}
 
+	bool TypedTags::empty() const
+	{
+		for (const auto& tag : m_tags)
+		{
+			if (!tag.second.empty())
+				return false;
+		}
+		return true;
+	}
+
 	juce::DynamicObject* TypedTags::serialize() const
 	{
 		auto* doTags = new juce::DynamicObject();

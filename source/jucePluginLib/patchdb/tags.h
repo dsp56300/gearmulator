@@ -83,6 +83,7 @@ namespace pluginLib::patchDB
 		bool containsAdded(TagType _type, const Tag& _tag) const;
 		bool containsRemoved(TagType _type, const Tag& _tag) const;
 		void clear();
+		bool empty() const;
 		juce::DynamicObject* serialize() const;
 		void deserialize(juce::DynamicObject* _obj);
 	private:
