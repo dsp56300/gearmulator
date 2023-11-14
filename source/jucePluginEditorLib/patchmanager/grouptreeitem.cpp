@@ -13,6 +13,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		"Invalid",
 		"Data Sources",
+		"User",
 		"Categories",
 		"Tags",
 		"Favourites"

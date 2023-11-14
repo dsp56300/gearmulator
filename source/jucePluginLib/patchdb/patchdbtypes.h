@@ -13,6 +13,7 @@ namespace pluginLib::patchDB
 		Rom,
 		Folder,
 		File,
+		LocalStorage,
 		Count
 	};
 

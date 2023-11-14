@@ -9,6 +9,7 @@ namespace jucePluginEditorLib::patchManager
 		switch (_groupType)
 		{
 		case GroupType::DataSources:
+		case GroupType::LocalStorage:
 			return pluginLib::patchDB::TagType::Invalid;
 		case GroupType::Categories:
 			return pluginLib::patchDB::TagType::Category;

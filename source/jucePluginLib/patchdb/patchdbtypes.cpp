@@ -7,7 +7,8 @@ namespace pluginLib::patchDB
 		"invalid",
 		"rom",
 		"folder",
-		"file"
+		"file",
+		"localstorage"
 	};
 
 	static_assert(std::size(g_sourceTypes) == static_cast<uint32_t>(SourceType::Count));

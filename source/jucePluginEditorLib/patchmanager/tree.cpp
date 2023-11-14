@@ -31,6 +31,7 @@ namespace jucePluginEditorLib::patchManager
 		setRootItemVisible(false);
 
 		addGroup(GroupType::DataSources);
+		addGroup(GroupType::LocalStorage);
 		addGroup(GroupType::Categories);
 		addGroup(GroupType::Tags);
 		addGroup(GroupType::Favourites);
@@ -45,14 +46,32 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::updateDataSources()
 	{
-		auto* item = getItem(GroupType::DataSources);
-		if (!item)
+		auto* itemDs = getItem(GroupType::DataSources);
+		auto* itemLocalStorage = getItem(GroupType::LocalStorage);
+
+		if (!itemDs || !itemLocalStorage)
 			return;
 
-		std::vector<pluginLib::patchDB::DataSourceNodePtr> dataSources;
-		m_patchManager.getDataSources(dataSources);
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> allDataSources;
 
-		item->updateFromDataSources(dataSources);
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> readOnlyDataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
+
+		m_patchManager.getDataSources(allDataSources);
+
+		readOnlyDataSources.reserve(allDataSources.size());
+		storageDataSources.reserve(allDataSources.size());
+
+		for (const auto& ds : allDataSources)
+		{
+			if (ds->type == pluginLib::patchDB::SourceType::LocalStorage)
+				storageDataSources.push_back(ds);
+			else
+				readOnlyDataSources.push_back(ds);
+		}
+
+		itemDs->updateFromDataSources(readOnlyDataSources);
+		itemLocalStorage->updateFromDataSources(storageDataSources);
 	}
 
 	void Tree::updateTags(const GroupType _type)

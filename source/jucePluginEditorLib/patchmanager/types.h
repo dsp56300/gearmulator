@@ -11,6 +11,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		Invalid,
 		DataSources,
+		LocalStorage,
 		Categories,
 		Tags,
 		Favourites,
