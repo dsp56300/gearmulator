@@ -7,6 +7,12 @@
 
 #include <string>
 
+namespace juce
+{
+	class AudioProcessor;
+	class Value;
+}
+
 namespace pluginLib
 {
 	class Processor;

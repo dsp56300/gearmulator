@@ -1,9 +1,10 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-
 #include <set>
+#include <string>
+#include <vector>
 
+#include "juce_gui_basics/juce_gui_basics.h"
 #include "juce_cryptography/hashing/juce_MD5.h"
 
 namespace pluginLib

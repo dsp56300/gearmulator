@@ -1,5 +1,7 @@
 #include "focusedParameterTooltip.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace jucePluginEditorLib
 {
 	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label)

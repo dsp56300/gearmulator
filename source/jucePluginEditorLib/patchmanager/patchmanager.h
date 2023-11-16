@@ -2,6 +2,8 @@
 
 #include "../../jucePluginLib/patchdb/db.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace genericUI
 {
 	class UiObject;

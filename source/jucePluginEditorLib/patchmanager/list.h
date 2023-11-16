@@ -1,8 +1,8 @@
 #pragma once
 
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
-
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
+
+#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace pluginLib::patchDB
 {

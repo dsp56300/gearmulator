@@ -1,6 +1,6 @@
 #pragma once
 
-#include <juce_audio_plugin_client/juce_audio_plugin_client.h>
+#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace jucePluginEditorLib::patchManager
 {
