@@ -202,8 +202,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		if (m_editorLabel)
 		{
-			const auto text = m_editorLabel->getText();
-			m_finishedEditingCallback(true, text.toStdString());
+			const auto text = m_editorLabel->getText().toStdString();
+			if(text != m_editorInitialText)
+				m_finishedEditingCallback(true, text);
 			destroyEditorLabel();
 		}
 		Listener::editorHidden(_label, _textEditor);
@@ -233,6 +234,7 @@ namespace jucePluginEditorLib::patchManager
 		if (m_editorLabel)
 			return false;
 
+		m_editorInitialText = _initialText;
 		m_editorLabel = new juce::Label({}, _initialText);
 
 		const auto pos = getItemPosition(true);

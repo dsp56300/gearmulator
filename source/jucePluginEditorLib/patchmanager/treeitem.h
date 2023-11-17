@@ -86,5 +86,6 @@ namespace jucePluginEditorLib::patchManager
 
 		FinishedEditingCallback m_finishedEditingCallback;
 		juce::Label* m_editorLabel = nullptr;
+		std::string m_editorInitialText;
 	};
 }
