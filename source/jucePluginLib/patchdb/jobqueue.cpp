@@ -25,6 +25,8 @@ namespace pluginLib::patchDB
 		if (!m_threads.empty())
 			return;
 
+		m_destroy = false;
+
 		m_threads.reserve(m_threadCount);
 
 		for(size_t i=0; i<m_threadCount; ++i)
@@ -55,8 +57,6 @@ namespace pluginLib::patchDB
 		for (const auto& thread : m_threads)
 			thread->join();
 		m_threads.clear();
-
-		m_destroy = false;
 
 		m_funcs.clear();
 		m_emptyCv.notify_all();
