@@ -147,19 +147,16 @@ namespace synthLib
 			if (_src[i] != 0xf0)
 				continue;
 
+			if (_isMidiFileData)
 			{
 				uint32_t numBytesRead = 0;
+				uint32_t length = 0;
 
-				if (_isMidiFileData)
-				{
-					uint32_t length = 0;
+				readVarLen(numBytesRead, length, &_src[i + 1], _src.size() - i - 1);
 
-					readVarLen(numBytesRead, length, &_src[i + 1], _src.size() - i - 1);
-
-					// do some simple validation here, I've seen midi files where sysex is stored without varlength encoding
-					if (length == 0 || (numBytesRead > 1 && length < 128))
-						numBytesRead = 0;
-				}
+				// do some simple validation here, I've seen midi files where sysex is stored without varlength encoding
+				if (length == 0 || (numBytesRead > 1 && length < 128))
+					numBytesRead = 0;
 
 				std::vector<uint8_t> entry;
 
@@ -178,8 +175,7 @@ namespace synthLib
 					entry.push_back(_src[j]);
 				}
 			}
-
-			if(!_isMidiFileData)
+			else
 			{
 				for (size_t j = i + 1; j < _src.size(); ++j)
 				{
