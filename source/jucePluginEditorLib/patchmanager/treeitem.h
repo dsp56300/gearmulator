@@ -54,7 +54,7 @@ namespace jucePluginEditorLib::patchManager
 		// TreeViewItem
 		void itemSelectionChanged(bool _isNowSelected) override;
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
-		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
 
 		// juce::Label::Listener
 		void editorHidden(juce::Label*, juce::TextEditor&) override;

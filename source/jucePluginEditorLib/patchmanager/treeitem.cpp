@@ -129,14 +129,14 @@ namespace jucePluginEditorLib::patchManager
 			patchesDropped(patches);
 	}
 
-	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
-		const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get());
+		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
 
 		if (!list)
 			return false;
 
-		const auto* arr = dragSourceDetails.description.getArray();
+		const auto* arr = _dragSourceDetails.description.getArray();
 		if (!arr)
 			return false;
 
@@ -259,9 +259,7 @@ namespace jucePluginEditorLib::patchManager
 	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		for (const auto& patch : _patches)
-		{
 			patchDropped(patch);
-		}
 	}
 
 	void TreeItem::destroyEditorLabel()
