@@ -62,15 +62,6 @@ namespace pluginLib::patchDB
 		m_emptyCv.notify_all();
 	}
 
-	void JobQueue::add(const std::function<void()>& _func)
-	{
-		{
-			std::unique_lock lock(m_mutexFuncs);
-			m_funcs.push_back(_func);
-		}
-		m_cv.notify_one();
-	}
-
 	void JobQueue::add(std::function<void()>&& _func)
 	{
 		{
@@ -117,6 +108,53 @@ namespace pluginLib::patchDB
 
 			if (m_funcs.empty() && !m_numRunning)
 				m_emptyCv.notify_all();
+		}
+	}
+
+	JobGroup::JobGroup(JobQueue& _queue): m_queue(_queue)
+	{
+	}
+
+	JobGroup::~JobGroup()
+	{
+		wait();
+	}
+
+	void JobGroup::add(std::function<void()>&& _func)
+	{
+		{
+			std::unique_lock lockCounts(m_mutexCounts);
+			++m_countEnqueued;
+		}
+
+		auto func = [this, f = std::move(_func)]
+		{
+			f();
+			onFuncCompleted();
+		};
+
+		m_queue.add(func);
+	}
+
+	void JobGroup::wait()
+	{
+		std::unique_lock l(m_mutexCounts);
+		m_completedCv.wait(l, [this]
+			{
+				return m_countCompleted == m_countEnqueued;
+			}
+		);
+	}
+
+	void JobGroup::onFuncCompleted()
+	{
+		std::unique_lock lockCounts(m_mutexCounts);
+		++m_countCompleted;
+
+		if (m_countCompleted == m_countEnqueued)
+		{
+			lockCounts.unlock();
+			m_completedCv.notify_one();
 		}
 	}
 }

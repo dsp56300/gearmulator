@@ -347,9 +347,9 @@ namespace pluginLib::patchDB
 		m_loader.destroy();
 	}
 
-	void DB::runOnLoaderThread(const std::function<void()>& _func)
+	void DB::runOnLoaderThread(std::function<void()>&& _func)
 	{
-		m_loader.add(_func);
+		m_loader.add(std::move(_func));
 	}
 
 	void DB::runOnUiThread(const std::function<void()>& _func)
