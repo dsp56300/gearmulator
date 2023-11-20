@@ -214,6 +214,18 @@ namespace Virus
         return name;
     }
 
+    void Controller::setSinglePresetName(std::vector<uint8_t>& _sysex, const std::string& _name) const
+    {
+        for (int i = 0; i < kNameLength; i++)
+        {
+            const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if (idx == InvalidParameterIndex || idx >= _sysex.size())
+                break;
+            _sysex[idx] = (i < _name.size()) ? _name[i] : ' ';
+        }
+    }
+
     void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name) const
     {
 		for (int i=0; i<kNameLength; i++)
