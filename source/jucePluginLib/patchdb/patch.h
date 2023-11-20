@@ -43,6 +43,7 @@ namespace pluginLib::patchDB
 		std::weak_ptr<PatchModifications> modifications;
 
 		const TypedTags& getTags() const;
+		const Tags& getTags(TagType _type) const;
 		const std::string& getName() const;
 	};
 

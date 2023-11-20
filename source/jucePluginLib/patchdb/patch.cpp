@@ -17,6 +17,11 @@ namespace pluginLib::patchDB
 		return tags;
 	}
 
+	const Tags& Patch::getTags(const TagType _type) const
+	{
+		return getTags().get(_type);
+	}
+
 	const std::string& Patch::getName() const
 	{
 		const auto m = modifications.lock();
