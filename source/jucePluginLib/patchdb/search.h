@@ -16,6 +16,7 @@ namespace pluginLib::patchDB
 		std::string name;
 		TypedTags tags;
 		DataSource source;
+		DataSourceNodePtr sourceNode;
 
 		bool match(const Patch& _patch) const;
 	};

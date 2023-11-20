@@ -48,7 +48,7 @@ namespace jucePluginEditorLib::patchManager
 		setTitle(getDataSourceNodeTitle(_ds));
 
 		pluginLib::patchDB::SearchRequest sr;
-		sr.source = static_cast<pluginLib::patchDB::DataSource>(*_ds);
+		sr.sourceNode = _ds;
 		search(std::move(sr));
 	}
 

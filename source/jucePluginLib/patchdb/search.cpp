@@ -63,13 +63,31 @@ namespace pluginLib::patchDB
 
 			return true;
 		}
+
+		bool matchDataSource(const DataSourceNodePtr& _source, const DataSourceNodePtr& _search)
+		{
+			if (_source == _search)
+				return true;
+
+			if (const auto parent = _source->getParent())
+				return matchDataSource(parent, _search);
+
+			return false;
+		}
 	}
 
 	bool SearchRequest::match(const Patch& _patch) const
 	{
 		// datasource
-		if (!matchDataSource(*_patch.source, source))
+		if(sourceNode)
+		{
+			if (!matchDataSource(_patch.source, sourceNode))
+				return false;
+		}
+		else if (!matchDataSource(*_patch.source, source))
+		{
 			return false;
+		}
 
 		// name
 		if (!matchStringsIgnoreCase(_patch.getName(), name))
