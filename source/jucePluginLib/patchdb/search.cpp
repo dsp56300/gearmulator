@@ -69,7 +69,7 @@ namespace pluginLib::patchDB
 			if (_source == _search)
 				return true;
 
-			if (const auto parent = _source->getParent())
+			if (const auto& parent = _source->getParent())
 				return matchDataSource(parent, _search);
 
 			return false;
