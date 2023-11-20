@@ -649,7 +649,7 @@ namespace Virus
 
         for (const auto& it : _paramValues)
         {
-            const auto* p = getParameter(it.first.second, _program == virusLib::SINGLE ? 0 : _program);
+            const auto* p = getParameter(it.first.second);
             assert(p);
             if(!p)
                 return {};
