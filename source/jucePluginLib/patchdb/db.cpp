@@ -18,7 +18,6 @@ namespace pluginLib::patchDB
 	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
 	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
 	{
-		loadJson();
 	}
 
 	DB::~DB()
@@ -343,6 +342,11 @@ namespace pluginLib::patchDB
 	void DB::startLoaderThread()
 	{
 		m_loader.start();
+
+		runOnLoaderThread([this]
+		{
+			loadJson();
+		});
 	}
 
 	void DB::stopLoaderThread()
@@ -715,66 +719,71 @@ namespace pluginLib::patchDB
 			}
 		}
 
-		auto* tags = json["tags"].getDynamicObject();
-
-		if(tags)
 		{
-			const auto& props = tags->getProperties();
-			for (const auto& it : props)
-			{
-				const auto strType = it.name.toString().toStdString();
-				const auto type = toTagType(strType);
+			std::unique_lock lockPatches(m_patchesMutex);
 
-				const auto* tagsArray = it.value.getArray();
-				if(tagsArray)
+			auto* tags = json["tags"].getDynamicObject();
+
+			if(tags)
+			{
+				const auto& props = tags->getProperties();
+				for (const auto& it : props)
 				{
-					std::set<Tag> newTags;
-					for(int i=0; i<tagsArray->size(); ++i)
+					const auto strType = it.name.toString().toStdString();
+					const auto type = toTagType(strType);
+
+					const auto* tagsArray = it.value.getArray();
+					if(tagsArray)
 					{
-						const auto tag = tagsArray->getUnchecked(i).toString().toStdString();
-						newTags.insert(tag);
+						std::set<Tag> newTags;
+						for(int i=0; i<tagsArray->size(); ++i)
+						{
+							const auto tag = tagsArray->getUnchecked(i).toString().toStdString();
+							newTags.insert(tag);
+						}
+						m_tags.insert({ type, newTags });
+						m_dirty.tags.insert(type);
 					}
-					m_tags.insert({ type, newTags });
-					m_dirty.tags.insert(type);
-				}
-				else
-				{
-					LOG("Unexpected empty tags for tag type " << strType);
-					success = false;
+					else
+					{
+						LOG("Unexpected empty tags for tag type " << strType);
+						success = false;
+					}
 				}
 			}
-		}
 
-		auto* patches = json["patches"].getDynamicObject();
+			auto* patches = json["patches"].getDynamicObject();
 
-		if (patches)
-		{
-			const auto& props = patches->getProperties();
-			for (const auto& it : props)
+			if (patches)
 			{
-				const auto strKey = it.name.toString().toStdString();
-				const auto var = it.value;
-
-				auto key = PatchKey::fromString(strKey);
-
-				PatchModificationsPtr mods = std::make_shared<PatchModifications>();
-
-				if (!mods->deserialize(var))
+				const auto& props = patches->getProperties();
+				for (const auto& it : props)
 				{
-					LOG("Failed to parse patch modifications for key " << strKey);
-					success = false;
-					continue;
-				}
-					
-				if(!key.isValid())
-				{
-					LOG("Failed to parse patch key from string " << strKey);
-					success = false;
-				}
+					const auto strKey = it.name.toString().toStdString();
+					const auto var = it.value;
 
-				m_patchModifications.insert({ key, mods });
+					auto key = PatchKey::fromString(strKey);
+
+					PatchModificationsPtr mods = std::make_shared<PatchModifications>();
+
+					if (!mods->deserialize(var))
+					{
+						LOG("Failed to parse patch modifications for key " << strKey);
+						success = false;
+						continue;
+					}
+
+					if(!key.isValid())
+					{
+						LOG("Failed to parse patch key from string " << strKey);
+						success = false;
+					}
+
+					m_patchModifications.insert({ key, mods });
+				}
 			}
 		}
+
 		return success;
 	}
 
