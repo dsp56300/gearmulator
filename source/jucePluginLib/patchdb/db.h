@@ -55,6 +55,8 @@ namespace pluginLib::patchDB
 		static bool isValid(const PatchPtr& _patch);
 
 	protected:
+		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
+
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 
 		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;

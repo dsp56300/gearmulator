@@ -44,13 +44,21 @@ namespace pluginLib::patchDB
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds)
 	{
-		const auto ds = std::make_shared<DataSourceNode>(_ds);
+		return addDataSource(_ds, true);
+	}
 
-		runOnLoaderThread([this, ds]
-		{
-			addDataSource(ds);
-			saveJson();
-		});
+	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
+	{
+		const auto needsSave = _save && _ds.origin == DataSourceOrigin::Manual && _ds.type != SourceType::Rom;
+
+		auto ds = std::make_shared<DataSourceNode>(_ds);
+
+		runOnLoaderThread([this, ds, needsSave]
+			{
+				addDataSource(ds);
+				if(needsSave)
+					saveJson();
+			});
 
 		return ds;
 	}
@@ -780,7 +788,7 @@ namespace pluginLib::patchDB
 
 				if (ds.type != SourceType::Invalid && !ds.name.empty())
 				{
-					const auto dsPtr = addDataSource(ds);
+					const auto dsPtr = addDataSource(ds, false);
 
 					if (ds.type == SourceType::LocalStorage)
 						localStorageDs.push_back(dsPtr);
