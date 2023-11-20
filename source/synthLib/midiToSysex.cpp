@@ -142,54 +142,63 @@ namespace synthLib
 
 	void MidiToSysex::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src, const bool _isMidiFileData/* = false*/)
 	{
+		if(!_isMidiFileData)
+		{
+			std::vector<size_t> indices;
+
+			for (size_t i = 0; i < _src.size(); ++i)
+			{
+				if (indices.size() & 1)
+				{
+					if (_src[i] == 0xf7)
+						indices.push_back(i);
+				}
+				else if (_src[i] == 0xf0)
+				{
+					indices.push_back(i);
+				}
+			}
+
+			if (indices.size() & 1)
+				indices.pop_back();
+
+			for(size_t i=0; i<indices.size(); i += 2)
+			{
+				auto& e =_dst.emplace_back();
+				e.assign(_src.begin() + indices[i], _src.begin() + indices[i + 1] + 1);
+			}
+			return;
+		}
+
 		for (size_t i = 0; i < _src.size(); ++i)
 		{
 			if (_src[i] != 0xf0)
 				continue;
 
-			if (_isMidiFileData)
+			uint32_t numBytesRead = 0;
+			uint32_t length = 0;
+
+			readVarLen(numBytesRead, length, &_src[i + 1], _src.size() - i - 1);
+
+			// do some simple validation here, I've seen midi files where sysex is stored without varlength encoding
+			if (length == 0 || (numBytesRead > 1 && length < 128))
+				numBytesRead = 0;
+
+			std::vector<uint8_t> entry;
+
+			entry.push_back(_src[i]);
+
+			for(size_t j = i + numBytesRead + 1; j < _src.size(); ++j)
 			{
-				uint32_t numBytesRead = 0;
-				uint32_t length = 0;
-
-				readVarLen(numBytesRead, length, &_src[i + 1], _src.size() - i - 1);
-
-				// do some simple validation here, I've seen midi files where sysex is stored without varlength encoding
-				if (length == 0 || (numBytesRead > 1 && length < 128))
-					numBytesRead = 0;
-
-				std::vector<uint8_t> entry;
-
-				entry.push_back(_src[i]);
-
-				for(size_t j = i + numBytesRead + 1; j < _src.size(); ++j)
+				if(_src[j] > 0xf0)
 				{
-					if(_src[j] > 0xf0)
-					{
-						entry.push_back(0xf7);
-						_dst.emplace_back(std::move(entry));
-						i = j;
-						break;
-					}
-
-					entry.push_back(_src[j]);
-				}
-			}
-			else
-			{
-				for (size_t j = i + 1; j < _src.size(); ++j)
-				{
-					if (_src[j] != 0xf7)
-						continue;
-
-					std::vector<uint8_t> entry;
-					entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
-
-					_dst.emplace_back(entry);
-
+					entry.push_back(0xf7);
+					_dst.emplace_back(std::move(entry));
 					i = j;
 					break;
 				}
+
+				entry.push_back(_src[j]);
 			}
 		}
 	}
