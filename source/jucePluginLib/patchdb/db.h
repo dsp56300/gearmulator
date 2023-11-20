@@ -23,7 +23,7 @@ namespace pluginLib::patchDB
 	class DB
 	{
 	public:
-		DB(juce::File _json);
+		DB(juce::File _dir);
 		virtual ~DB();
 
 		void uiProcess(Dirty& _dirty);
@@ -82,6 +82,7 @@ namespace pluginLib::patchDB
 		bool saveJson();
 
 		// IO
+		juce::File m_settingsDir;
 		juce::File m_jsonFileName;
 
 		// loader

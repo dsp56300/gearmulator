@@ -21,7 +21,7 @@ namespace jucePluginEditorLib::patchManager
 	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer
 	{
 	public:
-		explicit PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _json);
+		explicit PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _dir);
 		~PatchManager() override;
 
 		void timerCallback() override;

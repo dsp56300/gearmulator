@@ -14,7 +14,7 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _json) : DB(_json), m_editor(_editor)
+	PatchManager::PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _dir) : DB(_dir), m_editor(_editor)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;

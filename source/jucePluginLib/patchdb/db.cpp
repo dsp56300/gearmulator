@@ -13,7 +13,10 @@
 
 namespace pluginLib::patchDB
 {
-	DB::DB(juce::File _json) : m_jsonFileName(std::move(_json)), m_loader("PatchLoader", false)
+	DB::DB(juce::File _dir)
+	: m_settingsDir(std::move(_dir))
+	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
+	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
 	{
 		loadJson();
 	}

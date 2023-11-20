@@ -27,7 +27,7 @@ namespace genericVirusUI
 		return ds;
 	}
 
-	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _json) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _json), m_controller(_editor.getController())
+	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _dir), m_controller(_editor.getController())
 	{
 		addRomPatches();
 
