@@ -161,6 +161,59 @@ namespace genericVirusUI
 		return patch;
 	}
 
+	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
+	{
+		// apply name
+		if (!_patch->name.empty())
+			m_controller.setSinglePresetName(_patch->sysex, _patch->name);
+
+		pluginLib::MidiPacket::Data data;
+		pluginLib::MidiPacket::ParamValues parameterValues;
+
+		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
+			return _patch->sysex;
+
+		// apply program
+		auto program = data[pluginLib::MidiDataType::Program];
+
+		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
+			program = static_cast<uint8_t>(_patch->program);
+
+		// apply categories
+		const uint32_t indicesCategory[] = {
+			m_controller.getParameterIndexByName("Category1"),
+			m_controller.getParameterIndexByName("Category2")
+		};
+
+		const pluginLib::Parameter* paramsCategory[] = {
+			m_controller.getParameter(indicesCategory[0], 0),
+			m_controller.getParameter(indicesCategory[1], 0)
+		};
+
+		auto& val0 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, indicesCategory[0]))->second;
+		auto& val1 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, indicesCategory[1]))->second;
+
+		val0 = val1 = 0;
+
+		const auto& tags = _patch->getTags(pluginLib::patchDB::TagType::Category);
+
+		size_t i = 0;
+		for (const auto& tag : tags.getAdded())
+		{
+			const auto categoryValue = paramsCategory[i]->getDescription().valueList.textToValue(tag);
+			if(categoryValue != 0)
+			{
+				auto& v = i ? val1 : val0;
+				v = static_cast<uint8_t>(categoryValue);
+				++i;
+				if (i == 2)
+					break;
+			}
+		}
+
+		return m_controller.createSingleDump(toMidiByte(virusLib::BankNumber::A), program, parameterValues);
+	}
+
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
 	{
 		{
