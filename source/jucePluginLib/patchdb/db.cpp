@@ -464,7 +464,7 @@ namespace pluginLib::patchDB
 			const auto key = PatchKey(*patch);
 
 			if (m_patches.find(key) != m_patches.end())
-				return false;
+				continue;
 
 			// find modification and apply it to the patch
 			const auto itMod = m_patchModifications.find(key);
