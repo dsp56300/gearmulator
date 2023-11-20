@@ -98,7 +98,7 @@ namespace virusLib
 	}
 #endif
 
-	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string& _4cc)
+	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc)
 	{
 		for(uint32_t i=0; i<_data.size() - _4cc.size(); ++i)
 		{
