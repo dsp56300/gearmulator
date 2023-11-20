@@ -168,6 +168,23 @@ namespace jucePluginEditorLib::patchManager
 					}
 				});
 			}
+			else if(m_type ==GroupType::LocalStorage)
+			{
+				menu.addItem("Create...", [this]
+				{
+					beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+					{
+						pluginLib::patchDB::DataSource ds;
+
+						ds.name = _newText;
+						ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+						ds.timestamp = std::chrono::system_clock::now();
+
+						getPatchManager().addDataSource(ds);
+					});
+				});
+			}
 			if(tagType != pluginLib::patchDB::TagType::Invalid)
 			{
 				menu.addItem("Add...", [this]

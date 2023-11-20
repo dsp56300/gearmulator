@@ -13,6 +13,7 @@ namespace pluginLib::patchDB
 		std::string name;
 		uint32_t bank = g_invalidBank;
 //		uint32_t program = g_invalidProgram;
+		Timestamp timestamp;
 
 		virtual ~DataSource() = default;
 

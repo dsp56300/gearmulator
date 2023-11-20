@@ -28,7 +28,7 @@ namespace pluginLib::patchDB
 
 		void uiProcess(Dirty& _dirty);
 
-		void addDataSource(const DataSource& _ds);
+		DataSourceNodePtr addDataSource(const DataSource& _ds);
 		void removeDataSource(const DataSource& _ds);
 		void refreshDataSource(const DataSourceNodePtr& _ds);
 
@@ -49,6 +49,8 @@ namespace pluginLib::patchDB
 		uint32_t search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback);
 		void cancelSearch(uint32_t _handle);
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
+
+		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 
 		static bool isValid(const PatchPtr& _patch);
 
@@ -83,6 +85,8 @@ namespace pluginLib::patchDB
 
 		bool loadJson();
 		bool saveJson();
+		juce::File getLocalStorageFile(const DataSource& _ds) const;
+		bool saveLocalStorage() const;
 
 		// IO
 		juce::File m_settingsDir;

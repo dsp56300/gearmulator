@@ -8,11 +8,27 @@
 
 #include "../../synthLib/os.h"
 #include "../../synthLib/midiToSysex.h"
+#include "../../synthLib/hybridcontainer.h"
 
 #include "dsp56kEmu/logging.h"
 
 namespace pluginLib::patchDB
 {
+	static std::string createValidFilename(const std::string& _name)
+	{
+		std::string result;
+		result.reserve(_name.size());
+
+		for (const char c : _name)
+		{
+			if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+				result += c;
+			else
+				result += '_';
+		}
+		return result;
+	}
+
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
 	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
@@ -26,7 +42,7 @@ namespace pluginLib::patchDB
 		stopLoaderThread();
 	}
 
-	void DB::addDataSource(const DataSource& _ds)
+	DataSourceNodePtr DB::addDataSource(const DataSource& _ds)
 	{
 		const auto ds = std::make_shared<DataSourceNode>(_ds);
 
@@ -35,6 +51,8 @@ namespace pluginLib::patchDB
 			addDataSource(ds);
 			saveJson();
 		});
+
+		return ds;
 	}
 
 	void DB::removeDataSource(const DataSource& _ds)
@@ -205,6 +223,39 @@ namespace pluginLib::patchDB
 		if (it == m_searches.end())
 			return {};
 		return it->second;
+	}
+
+	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches)
+	{
+		if (_ds->type != SourceType::LocalStorage)
+			return;
+
+		runOnLoaderThread([this, _ds, _patches]
+		{
+			{
+				std::shared_lock lockDs(m_dataSourcesMutex);
+				const auto itDs = m_dataSources.find(*_ds);
+				if (itDs == m_dataSources.end())
+					return;
+			}
+
+			// filter out all patches that are already part of _ds
+			std::vector<PatchPtr> newPatches;
+			newPatches.reserve(_patches.size());
+
+			for (const auto& patch : _patches)
+			{
+				if (*patch->source == *_ds)
+					continue;
+
+				newPatches.push_back(patch->createCopy(_ds));
+			}
+
+			if (newPatches.empty())
+				return;
+
+			addPatches(newPatches);
+		});
 	}
 
 	bool DB::isValid(const PatchPtr& _patch)
@@ -713,6 +764,8 @@ namespace pluginLib::patchDB
 		const auto json = juce::JSON::parse(m_jsonFileName);
 		const auto* datasources = json["datasources"].getArray();
 
+		synthLib::HybridVector<DataSourceNodePtr, 32> localStorageDs;
+
 		if(datasources)
 		{
 			for(int i=0; i<datasources->size(); ++i)
@@ -727,7 +780,10 @@ namespace pluginLib::patchDB
 
 				if (ds.type != SourceType::Invalid && !ds.name.empty())
 				{
-					addDataSource(ds);
+					const auto dsPtr = addDataSource(ds);
+
+					if (ds.type == SourceType::LocalStorage)
+						localStorageDs.push_back(dsPtr);
 				}
 				else
 				{
@@ -802,6 +858,32 @@ namespace pluginLib::patchDB
 			}
 		}
 
+		for (const auto& ds : localStorageDs)
+		{
+			const auto file = getLocalStorageFile(*ds);
+
+			std::vector<uint8_t> data;
+			if (!synthLib::readFile(data, file.getFullPathName().toStdString()))
+			{
+				success = false;
+				continue;
+			}
+
+			std::vector<std::vector<uint8_t>> packets;
+			synthLib::MidiToSysex::splitMultipleSysex(packets, data);
+
+			std::vector<PatchPtr> patchPtrs;
+
+			for (const auto& packet : packets)
+			{
+				const auto patch = initializePatch(packet, ds);
+				if(isValid(patch))
+					patchPtrs.push_back(patch);
+			}
+
+			if (!patchPtrs.empty())
+				addPatches(patchPtrs);
+		}
 		return success;
 	}
 
@@ -842,6 +924,8 @@ namespace pluginLib::patchDB
 
 		{
 			std::shared_lock lockP(m_patchesMutex);
+
+			saveLocalStorage();
 
 			auto* tagTypes = new juce::DynamicObject();
 
@@ -887,5 +971,62 @@ namespace pluginLib::patchDB
 			return false;
 		tempFile.deleteFile();
 		return true;
+	}
+
+	juce::File DB::getLocalStorageFile(const DataSource& _ds) const
+	{
+		const auto filename = createValidFilename(_ds.name);
+
+		return m_settingsDir.getChildFile(filename + ".syx");
+	}
+
+	bool DB::saveLocalStorage() const
+	{
+		std::map<DataSourceNodePtr, std::set<PatchPtr>> localStoragePatches;
+
+		for (const auto& it : m_patches)
+		{
+			const auto& patch = it.second;
+
+			if (patch->source->type == SourceType::LocalStorage)
+				localStoragePatches[patch->source].insert(it.second);
+		}
+
+		if (localStoragePatches.empty())
+			return false;
+
+		synthLib::HybridVector<PatchPtr, 128> patchesVec;
+
+		bool res = true;
+
+		for (const auto& it : localStoragePatches)
+		{
+			const auto& ds = it.first;
+			const auto& patches = it.second;
+
+			patchesVec.assign(patches.begin(), patches.end());
+
+			std::sort(patchesVec.begin(), patchesVec.end(), [](const PatchPtr& a, const PatchPtr& b)
+			{
+				return a < b;
+			});
+
+			const auto file = getLocalStorageFile(*ds);
+
+			std::vector<uint8_t> sysexBuffer;
+			sysexBuffer.reserve(patchesVec.front()->sysex.size() * patchesVec.size());
+
+			for (const auto& patch : patchesVec)
+			{
+				const auto patchSysex = prepareSave(patch);
+
+				if(!patchSysex.empty())
+					sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
+			}
+
+			if (!file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+				res = false;
+		}
+		return res;
 	}
 }

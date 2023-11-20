@@ -1,5 +1,7 @@
 #include "datasourcetreeitem.h"
 
+#include <cassert>
+
 #include "patchmanager.h"
 
 #include "../../jucePluginLib/patchdb/datasource.h"
@@ -19,9 +21,11 @@ namespace jucePluginEditorLib::patchManager
 			case pluginLib::patchDB::SourceType::Rom:
 			case pluginLib::patchDB::SourceType::File:
 			case pluginLib::patchDB::SourceType::Folder:
+			case pluginLib::patchDB::SourceType::LocalStorage:
 				return _ds.name;
-//			default:
-//				return {};
+			default:
+				assert(false);
+				return"invalid";
 			}
 			return {};
 		}
@@ -46,6 +50,23 @@ namespace jucePluginEditorLib::patchManager
 		pluginLib::patchDB::SearchRequest sr;
 		sr.source = static_cast<pluginLib::patchDB::DataSource>(*_ds);
 		search(std::move(sr));
+	}
+
+	bool DatasourceTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
+	{
+		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
+			return false;
+		return TreeItem::isInterestedInDragSource(_dragSourceDetails);
+	}
+
+	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		TreeItem::patchesDropped(_patches);
+
+		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
+			return;
+
+		getPatchManager().copyPatchesTo(m_dataSource, _patches);
 	}
 
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

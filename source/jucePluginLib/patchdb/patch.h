@@ -20,14 +20,18 @@ namespace pluginLib::patchDB
 			hash.fill(0);
 		}
 
-		Patch(const Patch&) = delete;
-		Patch(Patch&&) = delete;
-
 		virtual ~Patch() = default;
 
 		Patch& operator = (const Patch&) = delete;
 		Patch& operator = (Patch&&) = delete;
 
+		PatchPtr createCopy(const DataSourceNodePtr& _ds) const;
+
+	private:
+		Patch(const Patch&) = default;
+		Patch(Patch&&) = default;
+
+	public:
 		std::string name;
 
 		uint32_t bank = g_invalidBank;
