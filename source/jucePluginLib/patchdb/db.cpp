@@ -207,6 +207,21 @@ namespace pluginLib::patchDB
 		return it->second;
 	}
 
+	bool DB::isValid(const PatchPtr& _patch)
+	{
+		if (!_patch)
+			return false;
+		if (_patch->name.empty())
+			return false;
+		if (_patch->sysex.empty())
+			return false;
+		if (_patch->sysex.front() != 0xf0)
+			return false;
+		if (_patch->sysex.back() != 0xf7)
+			return false;
+		return true;
+	}
+
 	void DB::getTags(const TagType _type, std::set<Tag>& _tags)
 	{
 		_tags.clear();
@@ -447,8 +462,11 @@ namespace pluginLib::patchDB
 			{
 				if (const auto patch = initializePatch(data[p], ds))
 				{
-					patch->program = p;
-					patches.push_back(patch);
+					if(isValid(patch))
+					{
+						patch->program = p;
+						patches.push_back(patch);
+					}
 				}
 			}
 

@@ -50,6 +50,8 @@ namespace pluginLib::patchDB
 		void cancelSearch(uint32_t _handle);
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 
+		static bool isValid(const PatchPtr& _patch);
+
 	protected:
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 
