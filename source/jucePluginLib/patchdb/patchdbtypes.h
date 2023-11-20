@@ -4,6 +4,7 @@
 #include <set>
 #include <string>
 #include <vector>
+#include <chrono>
 
 namespace pluginLib::patchDB
 {
@@ -72,4 +73,6 @@ namespace pluginLib::patchDB
 
 	SourceType toSourceType(const std::string& _string);
 	TagType toTagType(const std::string& _string);
+
+	using Timestamp = std::chrono::time_point<std::chrono::system_clock>;
 }
