@@ -40,11 +40,11 @@ namespace genericVirusUI
 		const auto configOptions = getProcessor().getConfigOptions();
 		const auto dir = configOptions.getDefaultFile().getParentDirectory();
 
-#if defined(_MSC_VER) && defined(_DEBUG)
+//#if defined(_MSC_VER) && defined(_DEBUG)
 		m_patchManager.reset(new PatchManager(*this, findComponent("page_presets"), dir));
-#else
-		m_patchBrowser.reset(new PatchBrowser(*this));
-#endif
+//#else
+//		m_patchBrowser.reset(new PatchBrowser(*this));
+//#endif
 		m_presetName = findComponentT<juce::Label>("PatchName");
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
