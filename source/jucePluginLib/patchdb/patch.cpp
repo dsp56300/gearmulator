@@ -10,23 +10,27 @@
 
 namespace pluginLib::patchDB
 {
-	PatchPtr Patch::createCopy(const DataSourceNodePtr& _ds) const
+	std::pair<PatchPtr, PatchModificationsPtr> Patch::createCopy(const DataSourceNodePtr& _ds) const
 	{
 		if (*_ds == *source)
-			return nullptr;
+			return {};
 
 		auto p = std::shared_ptr<Patch>(new Patch(*this));
 
 		p->source = _ds;
 
-		if(const auto oldMods = modifications.lock())
+		PatchModificationsPtr newMods;
+
+		if(const auto mods = modifications.lock())
+			newMods = std::make_shared<PatchModifications>(*mods);
+
+		if(newMods)
 		{
-			p->tags = oldMods->mergedTags;
-			if (!oldMods->name.empty())
-				p->name = oldMods->name;
+			p->modifications = newMods;
+			newMods->patch = p;
 		}
 
-		return p;
+		return { p, newMods };
 	}
 
 	const TypedTags& Patch::getTags() const

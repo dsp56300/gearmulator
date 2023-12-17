@@ -25,7 +25,7 @@ namespace pluginLib::patchDB
 		Patch& operator = (const Patch&) = delete;
 		Patch& operator = (Patch&&) = delete;
 
-		PatchPtr createCopy(const DataSourceNodePtr& _ds) const;
+		std::pair<PatchPtr, PatchModificationsPtr> createCopy(const DataSourceNodePtr& _ds) const;
 
 	private:
 		Patch(const Patch&) = default;

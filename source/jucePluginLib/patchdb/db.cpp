@@ -249,18 +249,44 @@ namespace pluginLib::patchDB
 
 			// filter out all patches that are already part of _ds
 			std::vector<PatchPtr> newPatches;
+			std::vector<std::shared_ptr<PatchModifications>> newPatchModifications;
 			newPatches.reserve(_patches.size());
+			newPatchModifications.reserve(_patches.size());
 
 			for (const auto& patch : _patches)
 			{
 				if (*patch->source == *_ds)
 					continue;
 
-				newPatches.push_back(patch->createCopy(_ds));
+				auto [newPatch, newMods] = patch->createCopy(_ds);
+
+				newPatches.push_back(newPatch);
+				newPatchModifications.push_back(newMods);
 			}
 
 			if (newPatches.empty())
 				return;
+
+			{
+				std::unique_lock lock(m_patchesMutex);
+				for(size_t i=0; i<newPatches.size(); ++i)
+				{
+					const auto& patch = newPatches[i];
+					const auto& mods = newPatchModifications[i];
+
+					if(!mods)
+						continue;
+
+					const auto key = PatchKey(*patch);
+
+					auto it = m_patchModifications.find(key);
+					assert(it == m_patchModifications.end());
+					if (it != m_patchModifications.end())
+						it->second = mods;
+					else
+						m_patchModifications.insert({ key, mods });
+				}
+			}
 
 			addPatches(newPatches);
 
