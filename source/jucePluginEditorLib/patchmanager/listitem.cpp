@@ -18,20 +18,30 @@ namespace jucePluginEditorLib::patchManager
 	{
 		Component::paint(g);
 
-//		if(m_drag)
-//			g.drawRect(0, getHeight()>>1, getWidth(), 3, 3);
+		g.setColour(juce::Colour(0xff00ff00));
+
+		if(m_drag == DragType::Above)
+			g.drawRect(0, 0, getWidth(), 3, 3);
+		else if(m_drag == DragType::Below)
+			g.drawRect(0, getHeight()-3, getWidth(), 3, 3);
 	}
 
 	void ListItem::itemDragEnter(const SourceDetails& dragSourceDetails)
 	{
 		DragAndDropTarget::itemDragEnter(dragSourceDetails);
-		m_drag = true;
+		updateDragTypeFromPosition(dragSourceDetails);
 	}
 
 	void ListItem::itemDragExit(const SourceDetails& dragSourceDetails)
 	{
 		DragAndDropTarget::itemDragExit(dragSourceDetails);
-		m_drag = false;
+		m_drag = DragType::Off;
+		repaint();
+	}
+
+	void ListItem::itemDragMove(const SourceDetails& dragSourceDetails)
+	{
+		updateDragTypeFromPosition(dragSourceDetails);
 	}
 
 	bool ListItem::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
@@ -41,7 +51,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListItem::itemDropped(const SourceDetails& dragSourceDetails)
 	{
-		m_drag = false;
+		m_drag = DragType::Off;
+		repaint();
 	}
 
 	void ListItem::mouseDown(const juce::MouseEvent& event)
@@ -58,5 +69,18 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		return false;
+	}
+
+	void ListItem::updateDragTypeFromPosition(const SourceDetails& dragSourceDetails)
+	{
+		const auto prev = m_drag;
+
+		if (dragSourceDetails.localPosition.y < (getHeight() >> 1))
+			m_drag = DragType::Above;
+		else
+			m_drag = DragType::Below;
+
+		if (prev != m_drag)
+			repaint();
 	}
 }
