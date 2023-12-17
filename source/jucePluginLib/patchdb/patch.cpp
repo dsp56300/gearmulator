@@ -61,7 +61,7 @@ namespace pluginLib::patchDB
 		if (program != g_invalidProgram)
 			ss << "prog|" << program << '|';
 
-		ss << "hash|" << juce::String::toHexString(hash.data(), (int)hash.size());
+		ss << "hash|" << juce::String::toHexString(hash.data(), (int)hash.size(), 0);
 
 		return ss.str();
 	}
