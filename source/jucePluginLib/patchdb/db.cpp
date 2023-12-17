@@ -290,6 +290,7 @@ namespace pluginLib::patchDB
 
 			addPatches(newPatches);
 
+			saveJson();
 		});
 	}
 
