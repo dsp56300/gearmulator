@@ -183,6 +183,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
+		getTree()->setColour(juce::TreeView::dragAndDropIndicatorColourId, juce::Colour(juce::ModifierKeys::currentModifiers.isShiftDown() ? 0xffff0000 : 0xff00ff00));
+
 		const auto* style = dynamic_cast<const genericUI::TreeViewStyle*>(&getOwnerView()->getLookAndFeel());
 
 		_g.setColour(style ? style->getColor() : juce::Colour(0xffffffff));
