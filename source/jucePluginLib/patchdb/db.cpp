@@ -263,6 +263,58 @@ namespace pluginLib::patchDB
 				return;
 
 			addPatches(newPatches);
+
+		});
+	}
+
+	void DB::removePatches(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches)
+	{
+		if (_ds->type != SourceType::LocalStorage)
+			return;
+
+		runOnLoaderThread([this, _ds, _patches]
+		{
+			{
+				std::shared_lock lockDs(m_dataSourcesMutex);
+				const auto itDs = m_dataSources.find(*_ds);
+				if (itDs == m_dataSources.end())
+					return;
+			}
+
+			{
+				std::vector<PatchKey> removedPatches;
+				removedPatches.reserve(_patches.size());
+
+				std::unique_lock lock(m_patchesMutex);
+
+				for (const auto& patch : _patches)
+				{
+					if(patch->source != _ds)
+						continue;
+
+					PatchKey key(*patch);
+
+					const auto it = m_patches.find(key);
+
+					if(it == m_patches.end())
+						continue;
+
+					m_patches.erase(it);
+					removedPatches.emplace_back(std::move(key));
+				}
+
+				if (removedPatches.empty())
+					return;
+
+				removePatchesFromSearches(removedPatches);
+
+				{
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.patches = true;
+				}
+			}
+
+			saveJson();
 		});
 	}
 

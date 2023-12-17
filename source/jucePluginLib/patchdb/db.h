@@ -51,6 +51,7 @@ namespace pluginLib::patchDB
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 
 		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
+		void removePatches(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 
 		static bool isValid(const PatchPtr& _patch);
 

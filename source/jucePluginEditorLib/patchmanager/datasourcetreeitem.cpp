@@ -66,7 +66,10 @@ namespace jucePluginEditorLib::patchManager
 		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
 			return;
 
-		getPatchManager().copyPatchesTo(m_dataSource, _patches);
+		if (juce::ModifierKeys::currentModifiers.isShiftDown())
+			getPatchManager().removePatches(m_dataSource, _patches);
+		else
+			getPatchManager().copyPatchesTo(m_dataSource, _patches);
 	}
 
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
