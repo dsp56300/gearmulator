@@ -15,9 +15,10 @@ set(SOURCES
 )
 
 set(SOURCES_PATCHDB
-	patchdb/jobqueue.cpp patchdb/jobqueue.h
+	patchdb/bank.cpp patchdb/bank.h
 	patchdb/datasource.cpp patchdb/datasource.h
-	patchdb/db.cpp	patchdb/db.h
+	patchdb/db.cpp patchdb/db.h
+	patchdb/jobqueue.cpp patchdb/jobqueue.h
 	patchdb/patch.cpp patchdb/patch.h
 	patchdb/patchdbtypes.cpp patchdb/patchdbtypes.h
 	patchdb/patchhistory.cpp patchdb/patchhistory.h
