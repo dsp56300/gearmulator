@@ -86,6 +86,9 @@ namespace pluginLib::patchDB
 		void updateSearches(const std::vector<PatchPtr>& _patches);
 		bool removePatchesFromSearches(const std::vector<PatchKey>& _keys);
 
+		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds);
+		bool createConsecutiveProgramNumbers(std::vector<PatchPtr>& _patches);
+
 		bool loadJson();
 		bool saveJson();
 		juce::File getLocalStorageFile(const DataSource& _ds) const;

@@ -250,6 +250,10 @@ namespace pluginLib::patchDB
 			// filter out all patches that are already part of _ds
 			std::vector<PatchPtr> newPatches;
 			std::vector<std::shared_ptr<PatchModifications>> newPatchModifications;
+
+			// use a very high value to ensure that the patches are inserted last, program numbers are cleaned up later
+			uint32_t newPatchIndex = 100000;
+
 			newPatches.reserve(_patches.size());
 			newPatchModifications.reserve(_patches.size());
 
@@ -259,6 +263,8 @@ namespace pluginLib::patchDB
 					continue;
 
 				auto [newPatch, newMods] = patch->createCopy(_ds);
+
+				newPatch->program = newPatchIndex++;
 
 				newPatches.push_back(newPatch);
 				newPatchModifications.push_back(newMods);
@@ -289,6 +295,8 @@ namespace pluginLib::patchDB
 			}
 
 			addPatches(newPatches);
+
+			createConsecutiveProgramNumbers(_ds);
 
 			saveJson();
 		});
@@ -842,6 +850,60 @@ namespace pluginLib::patchDB
 			}
 		}
 		return res;
+	}
+
+	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds)
+	{
+		Search s;
+		s.request.sourceNode = _ds;
+		if(!executeSearch(s))
+			return false;
+
+		if(s.results.empty())
+			return false;
+
+		std::vector<PatchPtr> patches;
+		patches.reserve(s.results.size());
+
+		for (const auto& [key, patch] : s.results)
+			patches.push_back(patch);
+
+		return createConsecutiveProgramNumbers(patches);
+	}
+
+	bool DB::createConsecutiveProgramNumbers(std::vector<PatchPtr>& _patches)
+	{
+		if(_patches.empty())
+			return false;
+
+		std::sort(_patches.begin(), _patches.end(), [&](const PatchPtr& a, const PatchPtr& b)
+		{
+			return a->program < b->program;
+		});
+
+		std::unique_lock lockPatches(m_patchesMutex);
+
+		bool dirty = false;
+		uint32_t program = 0;
+
+		for (const auto& patch : _patches)
+		{
+			const auto p = program++;
+
+			if(patch->program == p)
+				continue;
+
+			patch->program = p;
+			dirty = true;
+		}
+
+		if(dirty)
+		{
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.patches = true;
+		}
+
+		return true;
 	}
 
 	bool DB::loadJson()
