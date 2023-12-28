@@ -946,9 +946,7 @@ namespace pluginLib::patchDB
 		{
 			std::unique_lock lockPatches(m_patchesMutex);
 
-			auto* tags = json["tags"].getDynamicObject();
-
-			if(tags)
+			if(auto* tags = json["tags"].getDynamicObject())
 			{
 				const auto& props = tags->getProperties();
 				for (const auto& it : props)
@@ -976,9 +974,7 @@ namespace pluginLib::patchDB
 				}
 			}
 
-			auto* patches = json["patches"].getDynamicObject();
-
-			if (patches)
+			if (auto* patches = json["patches"].getDynamicObject())
 			{
 				const auto& props = patches->getProperties();
 				for (const auto& it : props)
@@ -988,7 +984,7 @@ namespace pluginLib::patchDB
 
 					auto key = PatchKey::fromString(strKey);
 
-					PatchModificationsPtr mods = std::make_shared<PatchModifications>();
+					auto mods = std::make_shared<PatchModifications>();
 
 					if (!mods->deserialize(var))
 					{
