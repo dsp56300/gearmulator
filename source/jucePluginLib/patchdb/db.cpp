@@ -206,8 +206,10 @@ namespace pluginLib::patchDB
 		s->request = std::move(_request);
 		s->callback = std::move(_callback);
 
-		std::scoped_lock lock(m_searchesMutex);
-		m_searches.insert({ s->handle, s });
+		{
+			std::unique_lock lock(m_searchesMutex);
+			m_searches.insert({ s->handle, s });
+		}
 
 		runOnLoaderThread([this, s]
 		{
@@ -226,7 +228,7 @@ namespace pluginLib::patchDB
 
 	std::shared_ptr<Search> DB::getSearch(const SearchHandle _handle)
 	{
-		std::unique_lock lock(m_searchesMutex);
+		std::shared_lock lock(m_searchesMutex);
 		const auto it = m_searches.find(_handle);
 		if (it == m_searches.end())
 			return {};
@@ -766,7 +768,7 @@ namespace pluginLib::patchDB
 
 	void DB::updateSearches(const std::vector<PatchPtr>& _patches)
 	{
-		std::unique_lock lockSearches(m_searchesMutex);
+		std::shared_lock lockSearches(m_searchesMutex);
 
 		std::set<SearchHandle> dirtySearches;
 
@@ -824,7 +826,7 @@ namespace pluginLib::patchDB
 	{
 		bool res = false;
 
-		std::scoped_lock lockSearches(m_searchesMutex);
+		std::shared_lock lockSearches(m_searchesMutex);
 
 		for (auto& itSearches : m_searches)
 		{

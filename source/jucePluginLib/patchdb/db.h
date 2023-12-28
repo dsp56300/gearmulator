@@ -116,7 +116,7 @@ namespace pluginLib::patchDB
 		std::map<PatchKey, PatchModificationsPtr> m_patchModifications;
 
 		// search
-		std::mutex m_searchesMutex;
+		std::shared_mutex m_searchesMutex;
 		std::unordered_map<uint32_t, std::shared_ptr<Search>> m_searches;
 		std::unordered_set<SearchHandle> m_cancelledSearches;
 		uint32_t m_nextSearchHandle = 0;
