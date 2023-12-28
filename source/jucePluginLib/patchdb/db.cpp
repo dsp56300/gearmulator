@@ -127,8 +127,6 @@ namespace pluginLib::patchDB
 
 			for (auto& removedDataSource : removedDataSources)
 			{
-				if (removedDataSource->name == "F:\\AccessVirusEmulator\\Presets")
-					int foo = 0;
 				removedDataSource->setParent(nullptr);
 				removedDataSource->removeAllChildren();
 			}
