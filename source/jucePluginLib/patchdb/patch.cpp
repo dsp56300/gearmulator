@@ -12,12 +12,12 @@ namespace pluginLib::patchDB
 {
 	std::pair<PatchPtr, PatchModificationsPtr> Patch::createCopy(const DataSourceNodePtr& _ds) const
 	{
-		if (*_ds == *source)
+		if (*_ds == *source.lock())
 			return {};
 
 		auto p = std::shared_ptr<Patch>(new Patch(*this));
 
-		p->source = _ds;
+		p->source = _ds->weak_from_this();
 
 		PatchModificationsPtr newMods;
 
@@ -59,8 +59,8 @@ namespace pluginLib::patchDB
 	{
 		std::stringstream ss;
 
-		if (source.type != SourceType::Invalid)
-			ss << source.toString() << '|';
+		if (source->type != SourceType::Invalid)
+			ss << source->toString() << '|';
 
 		if (program != g_invalidProgram)
 			ss << "prog|" << program << '|';
@@ -78,6 +78,7 @@ namespace pluginLib::patchDB
 			return {};
 
 		PatchKey patchKey;
+		patchKey.source = std::make_shared<DataSourceNode>();
 
 		for(size_t i=0; i<elems.size(); i+=2)
 		{
@@ -85,11 +86,11 @@ namespace pluginLib::patchDB
 			const auto& val = elems[i + 1];
 
 			if (key == "type")
-				patchKey.source.type = toSourceType(val);
+				patchKey.source->type = toSourceType(val);
 			else if (key == "name")
-				patchKey.source.name = val;
+				patchKey.source->name = val;
 			else if (key == "bank")
-				patchKey.source.bank = ::strtol(val.c_str(), nullptr, 10);
+				patchKey.source->bank = ::strtol(val.c_str(), nullptr, 10);
 			else if (key == "prog")
 				patchKey.program = ::strtol(val.c_str(), nullptr, 10);
 			else if (key == "hash")

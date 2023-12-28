@@ -122,7 +122,7 @@ namespace genericVirusUI
 		}
 
 		patch->sysex = _sysex;
-		patch->source = _ds;
+		patch->source = _ds->weak_from_this();
 
 		{
 			const auto frontOffset = idxVersion;	// remove bank number, program number and other stuff that we don't need

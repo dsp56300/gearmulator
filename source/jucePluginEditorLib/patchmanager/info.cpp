@@ -52,7 +52,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		m_name->setText(_patch->getName(), juce::sendNotification);
-		m_source->setText(toText(_patch->source), juce::sendNotification);
+		m_source->setText(toText(_patch->source.lock()), juce::sendNotification);
 		m_categories->setText(toText(_patch->getTags().get(pluginLib::patchDB::TagType::Category)), juce::sendNotification);
 		m_tags->setText(toText(_patch->getTags().get(pluginLib::patchDB::TagType::Tag)), juce::sendNotification);
 

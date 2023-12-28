@@ -21,7 +21,7 @@ namespace pluginLib::patchDB
 		bool match(const Patch& _patch) const;
 	};
 
-	using SearchResult = std::map<PatchKey, PatchPtr>;
+	using SearchResult = std::set<PatchPtr>;
 	using SearchCallback = std::function<void(const SearchResult&)>;
 
 	enum class SearchState

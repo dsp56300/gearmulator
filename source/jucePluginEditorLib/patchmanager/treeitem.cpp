@@ -160,7 +160,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
 	{
-		setCount(static_cast<uint32_t>(_search.results.size()));
+		setCount(static_cast<uint32_t>(_search.getResultSize()));
 	}
 
 	void TreeItem::setText(const std::string& _text)

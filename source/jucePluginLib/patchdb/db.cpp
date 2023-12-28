@@ -86,6 +86,7 @@ namespace pluginLib::patchDB
 			}
 
 			std::set<DataSourceNodePtr> removedDataSources{it->second};
+			std::vector<PatchPtr> removedPatches;
 
 			// remove all datasources that are a child of the one being removed
 			std::function<void(const DataSourceNodePtr&)> removeChildren = [&](const DataSourceNodePtr& _parent)
@@ -97,6 +98,7 @@ namespace pluginLib::patchDB
 					if (!c || c->origin == DataSourceOrigin::Manual)
 						continue;
 
+					removedPatches.insert(removedPatches.end(), c->patches.begin(), c->patches.end());
 					removedDataSources.insert(c);
 					removeChildren(c);
 				}
@@ -108,28 +110,6 @@ namespace pluginLib::patchDB
 				m_dataSources.erase(*removed);
 
 			lockDs.unlock();
-
-			// remove all patches that were added due to this datasource
-			std::vector<PatchKey> removedPatches;
-
-			{
-				std::unique_lock lockPatches(m_patchesMutex);
-
-				for (auto itPatch = m_patches.begin(); itPatch != m_patches.end();)
-				{
-					const auto& patch = itPatch->second;
-
-					if (removedDataSources.find(patch->source) != removedDataSources.end())
-					{
-						removedPatches.push_back(itPatch->first);
-						m_patches.erase(itPatch++);
-					}
-					else
-					{
-						++itPatch;
-					}
-				}
-			}
 
 			const auto patchesChanged = !removedPatches.empty();
 
@@ -261,7 +241,7 @@ namespace pluginLib::patchDB
 
 			for (const auto& patch : _patches)
 			{
-				if (*patch->source == *_ds)
+				if (patch->source.lock() == _ds)
 					continue;
 
 				auto [newPatch, newMods] = patch->createCopy(_ds);
@@ -319,25 +299,23 @@ namespace pluginLib::patchDB
 			}
 
 			{
-				std::vector<PatchKey> removedPatches;
+				std::vector<PatchPtr> removedPatches;
 				removedPatches.reserve(_patches.size());
 
 				std::unique_lock lock(m_patchesMutex);
 
 				for (const auto& patch : _patches)
 				{
-					if(patch->source != _ds)
+					if(patch->source.lock() == _ds)
 						continue;
 
-					PatchKey key(*patch);
+					const auto it = _ds->patches.find(patch);
 
-					const auto it = m_patches.find(key);
-
-					if(it == m_patches.end())
+					if(it == _ds->patches.end())
 						continue;
 
-					m_patches.erase(it);
-					removedPatches.emplace_back(std::move(key));
+					_ds->patches.erase(it);
+					removedPatches.emplace_back(patch);
 				}
 
 				if (removedPatches.empty())
@@ -393,10 +371,6 @@ namespace pluginLib::patchDB
 		{
 			const auto key = PatchKey(*patch);
 
-			const auto& itPatch = m_patches.find(key);
-			if (itPatch == m_patches.end())
-				return false;
-
 			const auto& it = m_patchModifications.find(key);
 
 			if (it != m_patchModifications.end())
@@ -408,12 +382,12 @@ namespace pluginLib::patchDB
 			}
 
 			const auto mods = std::make_shared<PatchModifications>();
-			mods->patch = itPatch->second;
+			mods->patch = patch;
 
 			if (!mods->modifyTags(_tags))
 				continue;
 
-			itPatch->second->modifications = mods;
+			patch->modifications = mods;
 
 			m_patchModifications.insert({ key, mods });
 
@@ -498,8 +472,7 @@ namespace pluginLib::patchDB
 
 	bool DB::parseFileData(DataList& _results, const Data& _data)
 	{
-		synthLib::MidiToSysex::extractSysexFromData(_results, _data);
-		return !_results.empty();
+		return synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 	}
 
 	void DB::startLoaderThread()
@@ -614,6 +587,7 @@ namespace pluginLib::patchDB
 					{
 						patch->program = p;
 						patches.push_back(patch);
+						ds->patches.insert(patch);
 					}
 				}
 			}
@@ -636,9 +610,6 @@ namespace pluginLib::patchDB
 		{
 			const auto key = PatchKey(*patch);
 
-			if (m_patches.find(key) != m_patches.end())
-				continue;
-
 			// find modification and apply it to the patch
 			const auto itMod = m_patchModifications.find(key);
 			if (itMod != m_patchModifications.end())
@@ -647,8 +618,6 @@ namespace pluginLib::patchDB
 				itMod->second->patch = patch;
 				itMod->second->updateCache();
 			}
-
-			m_patches.insert({ key, patch });
 
 			// add to all known categories, tags, etc
 			for (const auto& it : patch->getTags().get())
@@ -667,15 +636,23 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	bool DB::removePatch(const PatchKey& _key)
+	bool DB::removePatch(const PatchPtr& _key)
 	{
 		std::unique_lock lock(m_patchesMutex);
 
-		const auto it = m_patches.find(_key);
-		if (it == m_patches.end())
+		const auto itDs = m_dataSources.find(*_key->source.lock());
+
+		if(itDs == m_dataSources.end())
 			return false;
 
-		m_patches.erase(it);
+		const auto& ds = itDs->second;
+		auto& patches = ds->patches;
+
+		const auto it = patches.find(_key);
+		if (it == patches.end())
+			return false;
+
+		patches.erase(it);
 
 		removePatchesFromSearches({ _key });
 
@@ -735,30 +712,55 @@ namespace pluginLib::patchDB
 	{
 		_search.state = SearchState::Running;
 
-		std::shared_lock patchesLock(m_patchesMutex);
-
-		for (const auto& [key, patchPtr] : m_patches)
+		auto searchInDs = [&](const DataSourceNodePtr& _ds)
 		{
-			if (m_cancelledSearches.find(_search.handle) != m_cancelledSearches.end())
+			for (const auto& patchPtr : _ds->patches)
 			{
-				_search.state = SearchState::Cancelled;
-				std::unique_lock lockUi(m_uiMutex);
-				m_dirty.searches.insert(_search.handle);
+				if (m_cancelledSearches.find(_search.handle) != m_cancelledSearches.end())
+				{
+					_search.state = SearchState::Cancelled;
+					std::unique_lock lockUi(m_uiMutex);
+					m_dirty.searches.insert(_search.handle);
+					return false;
+				}
+
+				const auto* patch = patchPtr.get();
+				assert(patch);
+
+				if(_search.request.match(*patch))
+				{
+					std::unique_lock searchLock(_search.resultsMutex);
+					_search.results.insert(patchPtr);
+				}
+			}
+			return true;
+		};
+
+		if(_search.request.source.type != SourceType::Invalid)
+		{
+			const auto& it = m_dataSources.find(_search.request.source);
+
+			if(it == m_dataSources.end())
+			{
+				_search.state = SearchState::Completed;
 				return false;
 			}
 
-			const auto* patch = patchPtr.get();
-			assert(patch);
-
-			if(_search.request.match(*patch))
+			if(!searchInDs(it->second))
+				return false;
+		}
+		else
+		{
+			for (const auto& it : m_dataSources)
 			{
-				std::unique_lock searchLock(_search.resultsMutex);
-				_search.results.insert({ key, patchPtr });
+				if(!searchInDs(it.second))
+					return false;
 			}
 		}
 
+		_search.state = SearchState::Completed;
+
 		{
-			_search.state = SearchState::Completed;
 			std::unique_lock lockUi(m_uiMutex);
 			m_dirty.searches.insert(_search.handle);
 		}
@@ -772,11 +774,6 @@ namespace pluginLib::patchDB
 
 		std::set<SearchHandle> dirtySearches;
 
-		std::vector<PatchKey> keys;
-		keys.reserve(_patches.size());
-		for (const auto& patch : _patches)
-			keys.emplace_back(*patch);
-
 		for (const auto& it : m_searches)
 		{
 			const auto handle = it.first;
@@ -784,11 +781,8 @@ namespace pluginLib::patchDB
 
 			bool searchDirty = false;
 
-			for(size_t i=0; i<keys.size(); ++i)
+			for (const auto& patch : _patches)
 			{
-				const auto& key = keys[i];
-				const auto& patch = _patches[i];
-
 				const auto match = search->request.match(*patch);
 
 				bool countChanged;
@@ -798,9 +792,9 @@ namespace pluginLib::patchDB
 					const auto oldCount = search->results.size();
 
 					if (match)
-						search->results.insert({ key, patch });
+						search->results.insert(patch);
 					else
-						search->results.erase(key);
+						search->results.erase(patch);
 
 					const auto newCount = search->results.size();
 					countChanged = newCount != oldCount;
@@ -822,7 +816,7 @@ namespace pluginLib::patchDB
 			m_dirty.searches.insert(dirtySearch);
 	}
 
-	bool DB::removePatchesFromSearches(const std::vector<PatchKey>& _keys)
+	bool DB::removePatchesFromSearches(const std::vector<PatchPtr>& _keys)
 	{
 		bool res = false;
 
@@ -864,11 +858,7 @@ namespace pluginLib::patchDB
 		if(s.results.empty())
 			return false;
 
-		std::vector<PatchPtr> patches;
-		patches.reserve(s.results.size());
-
-		for (const auto& [key, patch] : s.results)
-			patches.push_back(patch);
+		std::vector<PatchPtr> patches{s.results.begin(), s.results.end()};
 
 		return createConsecutiveProgramNumbers(patches);
 	}
@@ -1135,12 +1125,12 @@ namespace pluginLib::patchDB
 	{
 		std::map<DataSourceNodePtr, std::set<PatchPtr>> localStoragePatches;
 
-		for (const auto& it : m_patches)
+		for (const auto& it : m_dataSources)
 		{
-			const auto& patch = it.second;
+			const auto& ds = it.second;
 
-			if (patch->source->type == SourceType::LocalStorage)
-				localStoragePatches[patch->source].insert(it.second);
+			if (ds->type == SourceType::LocalStorage)
+				localStoragePatches.insert({ds, ds->patches});
 		}
 
 		if (localStoragePatches.empty())

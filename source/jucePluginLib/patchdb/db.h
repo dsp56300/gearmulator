@@ -77,14 +77,14 @@ namespace pluginLib::patchDB
 		void addDataSource(const DataSourceNodePtr& _ds);
 
 		bool addPatches(const std::vector<PatchPtr>& _patches);
-		bool removePatch(const PatchKey& _key);
+		bool removePatch(const PatchPtr& _key);
 
 		bool internalAddTag(TagType _type, const Tag& _tag);
 		bool internalRemoveTag(TagType _type, const Tag& _tag);
 
 		bool executeSearch(Search& _search);
 		void updateSearches(const std::vector<PatchPtr>& _patches);
-		bool removePatchesFromSearches(const std::vector<PatchKey>& _keys);
+		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
 
 		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds);
 		bool createConsecutiveProgramNumbers(std::vector<PatchPtr>& _patches);
@@ -111,7 +111,6 @@ namespace pluginLib::patchDB
 		std::map<DataSource, DataSourceNodePtr> m_dataSources;	// we need a key to find duplicates, but at the same time we need pointers to do the parent relation
 
 		std::shared_mutex m_patchesMutex;
-		std::map<PatchKey, PatchPtr> m_patches;
 		std::unordered_map<TagType, std::set<Tag>> m_tags;
 		std::map<PatchKey, PatchModificationsPtr> m_patchModifications;
 

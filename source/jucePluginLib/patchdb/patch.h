@@ -29,7 +29,7 @@ namespace pluginLib::patchDB
 
 	private:
 		Patch(const Patch&) = default;
-		Patch(Patch&&) = default;
+		Patch(Patch&&) noexcept = default;
 
 	public:
 		std::string name;
@@ -37,7 +37,7 @@ namespace pluginLib::patchDB
 		uint32_t bank = g_invalidBank;
 		uint32_t program = g_invalidProgram;
 
-		DataSourceNodePtr source;
+		std::weak_ptr<DataSourceNode> source;
 
 		TypedTags tags;
 
@@ -53,17 +53,17 @@ namespace pluginLib::patchDB
 
 	struct PatchKey
 	{
-		DataSource source;
+		DataSourceNodePtr source;
 		PatchHash hash;
 		uint32_t program = g_invalidProgram;
 
 		PatchKey() = default;
 
-		explicit PatchKey(const Patch& _patch) : source(static_cast<const DataSource&>(*_patch.source)), hash(_patch.hash), program(_patch.program) {}
+		explicit PatchKey(const Patch& _patch) : source(_patch.source), hash(_patch.hash), program(_patch.program) {}
 
 		bool operator == (const PatchKey& _other) const
 		{
-			return source == _other.source && hash == _other.hash && program == _other.program;
+			return equals(source, _other.source) && hash == _other.hash && program == _other.program;
 		}
 
 		bool operator != (const PatchKey& _other) const
@@ -86,7 +86,14 @@ namespace pluginLib::patchDB
 			return false;
 		}
 
-		bool isValid() const { return source.type != SourceType::Invalid; }
+		bool isValid() const { return source->type != SourceType::Invalid; }
+
+		static bool equals(const DataSourceNodePtr& _a, const DataSourceNodePtr& _b)
+		{
+			if(!_a)
+				return !_b;
+			return *_a == *_b;
+		}
 
 		std::string toString() const;
 		static PatchKey fromString(const std::string& _string);

@@ -22,24 +22,10 @@ namespace pluginLib::patchDB
 	{
 	}
 
-	DataSourceNode::DataSourceNode(DataSourceNode&& _other) noexcept: DataSource(_other), m_parent(std::move(_other.m_parent)), m_children(std::move(_other.m_children))
-	{
-	}
-
 	DataSourceNode::~DataSourceNode()
 	{
 		setParent(nullptr);
 		removeAllChildren();
-	}
-
-	DataSourceNode& DataSourceNode::operator=(DataSourceNode&& _other) noexcept
-	{
-		static_cast<DataSource&>(*this) = static_cast<DataSource&>(_other);
-
-		m_parent = std::move(_other.m_parent);
-		m_children = std::move(_other.m_children);
-
-		return *this;
 	}
 
 	void DataSourceNode::setParent(const DataSourceNodePtr& _parent)
@@ -66,12 +52,6 @@ namespace pluginLib::patchDB
 
 		if(_parent)
 			_parent->m_children.emplace_back(shared_from_this());
-	}
-
-	DataSourceNode& DataSourceNode::operator=(const DataSource& _source)
-	{
-		static_cast<DataSource&>(*this) = _source;
-		return *this;
 	}
 
 	bool DataSourceNode::isChildOf(const DataSourceNode* _ds) const

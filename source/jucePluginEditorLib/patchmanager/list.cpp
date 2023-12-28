@@ -36,9 +36,10 @@ namespace jucePluginEditorLib::patchManager
 		m_search = _search;
 
 		m_patches.clear();
-
-		for (const auto& result : _search->results)
-			m_patches.push_back(result.second);
+		{
+			std::shared_lock lock(_search->resultsMutex);
+			m_patches.insert(m_patches.end(), _search->results.begin(), _search->results.end());
+		}
 
 		sortPatches();
 		filterPatches();
@@ -208,8 +209,10 @@ namespace jucePluginEditorLib::patchManager
 
 			if(sourceType == pluginLib::patchDB::SourceType::Folder)
 			{
-				if (*_a->source != *_b->source)
-					return *_a->source < *_b->source;
+				const auto aSource = _a->source.lock();
+				const auto bSource = _b->source.lock();
+				if (*aSource != *bSource)
+					return *aSource < *bSource;
 			}
 			else if (sourceType == pluginLib::patchDB::SourceType::File || sourceType == pluginLib::patchDB::SourceType::Rom)
 			{

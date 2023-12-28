@@ -14,6 +14,7 @@ namespace pluginLib::patchDB
 		uint32_t bank = g_invalidBank;
 //		uint32_t program = g_invalidProgram;
 		Timestamp timestamp;
+		std::set<PatchPtr> patches;
 
 		virtual ~DataSource() = default;
 
@@ -62,23 +63,19 @@ namespace pluginLib::patchDB
 		DataSourceNode() = default;
 		DataSourceNode(const DataSourceNode&) = delete;
 
-		DataSourceNode(const DataSource& _ds);
-
-		DataSourceNode(DataSourceNode&& _other) noexcept;
+		explicit DataSourceNode(const DataSource& _ds);
+		explicit DataSourceNode(DataSourceNode&&) = delete;
 
 		~DataSourceNode() override;
 
 		DataSourceNode& operator = (const DataSourceNode&) = delete;
-
-		DataSourceNode& operator = (DataSourceNode&& _other) noexcept;
+		DataSourceNode& operator = (DataSourceNode&& _other) noexcept = delete;
 
 		auto& getParent() const { return m_parent; }
 		auto hasParent() const { return getParent() != nullptr; }
 		const auto& getChildren() const { return m_children; }
 
 		void setParent(const DataSourceNodePtr& _parent);
-
-		DataSourceNode& operator = (const DataSource& _source);
 
 		bool isChildOf(const DataSourceNode* _ds) const;
 		void removeAllChildren();
