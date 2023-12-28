@@ -417,6 +417,8 @@ namespace pluginLib::patchDB
 		case SourceType::Folder:
 		case SourceType::Count:
 			return false;
+		case SourceType::LocalStorage:
+			return loadLocalStorage(_results, _ds);
 		}
 		return false;
 	}
@@ -438,6 +440,18 @@ namespace pluginLib::patchDB
 			return false;
 
 		return parseFileData(_results, data);
+	}
+
+	bool DB::loadLocalStorage(DataList& _results, const DataSourceNodePtr& _ds)
+	{
+		const auto file = getLocalStorageFile(*_ds);
+
+		std::vector<uint8_t> data;
+		if (!synthLib::readFile(data, file.getFullPathName().toStdString()))
+			return false;
+
+		synthLib::MidiToSysex::splitMultipleSysex(_results, data);
+		return !_results.empty();
 	}
 
 	bool DB::loadFolder(const DataSourceNodePtr& _folder)
@@ -905,8 +919,6 @@ namespace pluginLib::patchDB
 		const auto json = juce::JSON::parse(m_jsonFileName);
 		const auto* datasources = json["datasources"].getArray();
 
-		synthLib::HybridVector<DataSourceNodePtr, 32> localStorageDs;
-
 		if(datasources)
 		{
 			for(int i=0; i<datasources->size(); ++i)
@@ -921,10 +933,7 @@ namespace pluginLib::patchDB
 
 				if (ds.type != SourceType::Invalid && !ds.name.empty())
 				{
-					const auto dsPtr = addDataSource(ds, false);
-
-					if (ds.type == SourceType::LocalStorage)
-						localStorageDs.push_back(dsPtr);
+					addDataSource(ds, false);
 				}
 				else
 				{
@@ -999,32 +1008,6 @@ namespace pluginLib::patchDB
 			}
 		}
 
-		for (const auto& ds : localStorageDs)
-		{
-			const auto file = getLocalStorageFile(*ds);
-
-			std::vector<uint8_t> data;
-			if (!synthLib::readFile(data, file.getFullPathName().toStdString()))
-			{
-				success = false;
-				continue;
-			}
-
-			std::vector<std::vector<uint8_t>> packets;
-			synthLib::MidiToSysex::splitMultipleSysex(packets, data);
-
-			std::vector<PatchPtr> patchPtrs;
-
-			for (const auto& packet : packets)
-			{
-				const auto patch = initializePatch(packet, ds);
-				if(isValid(patch))
-					patchPtrs.push_back(patch);
-			}
-
-			if (!patchPtrs.empty())
-				addPatches(patchPtrs);
-		}
 		return success;
 	}
 
