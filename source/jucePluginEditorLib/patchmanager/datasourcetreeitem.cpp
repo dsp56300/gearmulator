@@ -83,7 +83,9 @@ namespace jucePluginEditorLib::patchManager
 				getPatchManager().refreshDataSource(m_dataSource);
 			});
 
-			if(m_dataSource->type == pluginLib::patchDB::SourceType::File || m_dataSource->type == pluginLib::patchDB::SourceType::Folder)
+			if(m_dataSource->type == pluginLib::patchDB::SourceType::File || 
+				m_dataSource->type == pluginLib::patchDB::SourceType::Folder ||
+				m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
 			{
 				menu.addItem("Remove", [this]
 				{
