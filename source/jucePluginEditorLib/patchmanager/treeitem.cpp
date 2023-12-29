@@ -228,7 +228,7 @@ namespace jucePluginEditorLib::patchManager
 		const auto pos = getItemPosition(true);
 
 		m_editorLabel->setTopLeftPosition(pos.getTopLeft());
-		m_editorLabel->setSize(pos.getWidth(), pos.getHeight());
+		m_editorLabel->setSize(pos.getWidth(), getItemHeight());
 
 		m_editorLabel->setEditable(true, true, true);
 		m_editorLabel->setColour(juce::Label::backgroundColourId, juce::Colour(0xff333333));
