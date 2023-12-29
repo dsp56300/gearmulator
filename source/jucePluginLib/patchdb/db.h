@@ -52,6 +52,7 @@ namespace pluginLib::patchDB
 
 		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 		void removePatches(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
+		bool movePatchesTo(uint32_t _position, const std::vector<PatchPtr>& _patches);
 
 		static bool isValid(const PatchPtr& _patch);
 
@@ -88,7 +89,6 @@ namespace pluginLib::patchDB
 		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
 
 		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds);
-		bool createConsecutiveProgramNumbers(std::vector<PatchPtr>& _patches);
 
 		bool loadJson();
 		bool saveJson();

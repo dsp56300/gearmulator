@@ -109,21 +109,7 @@ namespace jucePluginEditorLib::patchManager
 		if (!list)
 			return;
 
-		const auto* arr = dragSourceDetails.description.getArray();
-		if (!arr)
-			return;
-
-		std::vector<pluginLib::patchDB::PatchPtr> patches;
-
-		for (const auto& var : *arr)
-		{
-			if (!var.isInt())
-				continue;
-			const int idx = var;
-			const auto patch = list->getPatch(idx);
-			if (patch)
-				patches.push_back(patch);
-		}
+		const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
 
 		if(!patches.empty())
 			patchesDropped(patches);

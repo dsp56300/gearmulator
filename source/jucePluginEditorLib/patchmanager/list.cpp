@@ -29,6 +29,11 @@ namespace jucePluginEditorLib::patchManager
 		setContent(search);
 	}
 
+	void List::refreshContent()
+	{
+		setContent(m_search);
+	}
+
 	void List::setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search)
 	{
 		const std::set<Patch> selectedPatches = getSelectedPatches();
@@ -110,11 +115,14 @@ namespace jucePluginEditorLib::patchManager
 		auto* existing = dynamic_cast<ListItem*>(existingComponentToUpdate);
 
 		if (existing)
+		{
+			existing->setRow(rowNumber);
 			return existing;
+		}
 
 		delete existingComponentToUpdate;
 
-		return new ListItem(*this);
+		return new ListItem(*this, rowNumber);
 	}
 
 	void List::selectedRowsChanged(const int lastRowSelected)
@@ -182,6 +190,26 @@ namespace jucePluginEditorLib::patchManager
 
 		if(_dirty.searches.find(m_search->handle) != _dirty.searches.end())
 			setContent(m_search);
+	}
+
+	std::vector<pluginLib::patchDB::PatchPtr> List::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const
+	{
+		const auto* arr = _dragSourceDetails.description.getArray();
+		if (!arr)
+			return {};
+
+		std::vector<pluginLib::patchDB::PatchPtr> patches;
+
+		for (const auto& var : *arr)
+		{
+			if (!var.isInt())
+				continue;
+			const int idx = var;
+			if (const auto patch = getPatch(idx))
+				patches.push_back(patch);
+		}
+
+		return patches;
 	}
 
 	void List::setFilter(const std::string& _filter)

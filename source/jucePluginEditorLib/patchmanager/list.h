@@ -22,6 +22,7 @@ namespace jucePluginEditorLib::patchManager
 		explicit List(PatchManager& _pm);
 
 		void setContent(const pluginLib::patchDB::SearchHandle& _handle);
+		void refreshContent();
 
 		// ListBoxModel
 		int getNumRows() override;
@@ -47,6 +48,7 @@ namespace jucePluginEditorLib::patchManager
 		void setSelectedPatches(const std::set<Patch>& _patches);
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
+		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;
 
 		static Patch getPatch(const Patches& _patches, const size_t _index)
 		{
@@ -56,6 +58,11 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void setFilter(const std::string& _filter);
+
+		PatchManager& getPatchManager() const
+		{
+			return m_patchManager;
+		}
 
 	private:
 		void sortPatches();

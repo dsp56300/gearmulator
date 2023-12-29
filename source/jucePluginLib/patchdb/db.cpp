@@ -333,6 +333,36 @@ namespace pluginLib::patchDB
 		});
 	}
 
+	bool DB::movePatchesTo(const uint32_t _position, const std::vector<PatchPtr>& _patches)
+	{
+		if(_patches.empty())
+			return false;
+
+		{
+			std::unique_lock lock(m_patchesMutex);
+
+			const auto ds = _patches.front()->source.lock();
+
+			if(!ds || ds->type != SourceType::LocalStorage)
+				return false;
+
+			if(!ds->movePatchesTo(_position, _patches))
+				return false;
+		}
+
+		{
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.dataSources = true;
+		}
+
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
+
+		return true;
+	}
+
 	bool DB::isValid(const PatchPtr& _patch)
 	{
 		if (!_patch)
@@ -864,52 +894,8 @@ namespace pluginLib::patchDB
 
 	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds)
 	{
-		Search s;
-		s.request.sourceNode = _ds;
-		if(!executeSearch(s))
-			return false;
-
-		if(s.results.empty())
-			return false;
-
-		std::vector<PatchPtr> patches{s.results.begin(), s.results.end()};
-
-		return createConsecutiveProgramNumbers(patches);
-	}
-
-	bool DB::createConsecutiveProgramNumbers(std::vector<PatchPtr>& _patches)
-	{
-		if(_patches.empty())
-			return false;
-
-		std::sort(_patches.begin(), _patches.end(), [&](const PatchPtr& a, const PatchPtr& b)
-		{
-			return a->program < b->program;
-		});
-
 		std::unique_lock lockPatches(m_patchesMutex);
-
-		bool dirty = false;
-		uint32_t program = 0;
-
-		for (const auto& patch : _patches)
-		{
-			const auto p = program++;
-
-			if(patch->program == p)
-				continue;
-
-			patch->program = p;
-			dirty = true;
-		}
-
-		if(dirty)
-		{
-			std::unique_lock lockUi(m_uiMutex);
-			m_dirty.patches = true;
-		}
-
-		return true;
+		return _ds->createConsecutiveProgramNumbers();
 	}
 
 	bool DB::loadJson()

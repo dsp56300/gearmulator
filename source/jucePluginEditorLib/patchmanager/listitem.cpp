@@ -1,6 +1,7 @@
 #include "listitem.h"
 
 #include "list.h"
+#include "patchmanager.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -9,7 +10,7 @@ namespace jucePluginEditorLib::patchManager
 	// However, by disabling mouse clicks, we also disable the ability to D&D onto these entries, even though D&D are not clicks...
 	// We solve both by overwriting hitTest() and return true as long as a D&D is in progress, false otherwise
 
-	ListItem::ListItem(List& _list) : m_list(_list)
+	ListItem::ListItem(List& _list, const int _row) : m_list(_list), m_row(_row)
 	{
 //		setInterceptsMouseClicks(false, false);
 	}
@@ -51,8 +52,18 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListItem::itemDropped(const SourceDetails& dragSourceDetails)
 	{
+		if(m_drag == DragType::Off)
+			return;
+
+		const auto drag = m_drag;
 		m_drag = DragType::Off;
-		repaint();
+
+		const auto patches = m_list.getPatchesFromDragSource(dragSourceDetails);
+
+		if(!patches.empty() && m_list.getPatchManager().movePatchesTo(drag == DragType::Above ? m_row : m_row + 1, patches))
+			m_list.refreshContent();
+		else
+			repaint();
 	}
 
 	void ListItem::mouseDown(const juce::MouseEvent& event)
