@@ -177,7 +177,9 @@ namespace genericVirusUI
 		auto program = data[pluginLib::MidiDataType::Program];
 
 		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
-			program = static_cast<uint8_t>(_patch->program);
+		{
+			program = _patch->program <= 127 ? static_cast<uint8_t>(_patch->program) : 127;
+		}
 
 		// apply categories
 		const uint32_t indicesCategory[] = {
