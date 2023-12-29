@@ -27,7 +27,6 @@ namespace jucePluginEditorLib::patchManager
 				assert(false);
 				return"invalid";
 			}
-			return {};
 		}
 
 		std::string getDataSourceNodeTitle(const pluginLib::patchDB::DataSourceNodePtr& _ds)
@@ -118,9 +117,6 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto& dsA = a->m_dataSource;
 		const auto& dsB = b->m_dataSource;
-
-		if (dsA->type == pluginLib::patchDB::SourceType::Rom || dsB->type == pluginLib::patchDB::SourceType::Rom)
-			int foo = 0;
 
 		if (dsA->type != dsB->type)
 			return static_cast<int>(dsA->type) - static_cast<int>(dsB->type);
