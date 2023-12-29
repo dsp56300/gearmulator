@@ -18,6 +18,7 @@ namespace pluginLib::patchDB
 		auto p = std::shared_ptr<Patch>(new Patch(*this));
 
 		p->source = _ds->weak_from_this();
+		_ds->patches.insert(p);
 
 		PatchModificationsPtr newMods;
 

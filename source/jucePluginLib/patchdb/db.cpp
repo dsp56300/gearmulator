@@ -233,20 +233,19 @@ namespace pluginLib::patchDB
 			std::vector<PatchPtr> newPatches;
 			std::vector<std::shared_ptr<PatchModifications>> newPatchModifications;
 
-			// use a very high value to ensure that the patches are inserted last, program numbers are cleaned up later
-			uint32_t newPatchIndex = 100000;
+			uint32_t newPatchProgramNumber = _ds->getMaxProgramNumber() + 1;
 
 			newPatches.reserve(_patches.size());
 			newPatchModifications.reserve(_patches.size());
 
 			for (const auto& patch : _patches)
 			{
-				if (patch->source.lock() == _ds)
+				if (_ds->contains(patch))
 					continue;
 
 				auto [newPatch, newMods] = patch->createCopy(_ds);
 
-				newPatch->program = newPatchIndex++;
+				newPatch->program = newPatchProgramNumber++;
 
 				newPatches.push_back(newPatch);
 				newPatchModifications.push_back(newMods);
