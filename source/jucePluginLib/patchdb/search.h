@@ -15,7 +15,6 @@ namespace pluginLib::patchDB
 	{
 		std::string name;
 		TypedTags tags;
-		DataSource source;
 		DataSourceNodePtr sourceNode;
 
 		bool match(const Patch& _patch) const;
@@ -50,6 +49,13 @@ namespace pluginLib::patchDB
 		{
 			std::shared_lock searchLock(resultsMutex);
 			return results.size();
+		}
+
+		SourceType getSourceType() const
+		{
+			if(request.sourceNode)
+				return request.sourceNode->type;
+			return SourceType::Invalid;
 		}
 	};
 }

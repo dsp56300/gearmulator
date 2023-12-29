@@ -205,7 +205,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		std::sort(m_patches.begin(), m_patches.end(), [this](const Patch& _a, const Patch& _b)
 		{
-			const auto sourceType = m_search->request.source.type;
+			const auto sourceType = m_search->getSourceType();
 
 			if(sourceType == pluginLib::patchDB::SourceType::Folder)
 			{
@@ -214,7 +214,7 @@ namespace jucePluginEditorLib::patchManager
 				if (*aSource != *bSource)
 					return *aSource < *bSource;
 			}
-			else if (sourceType == pluginLib::patchDB::SourceType::File || sourceType == pluginLib::patchDB::SourceType::Rom)
+			else if (sourceType == pluginLib::patchDB::SourceType::File || sourceType == pluginLib::patchDB::SourceType::Rom || sourceType == pluginLib::patchDB::SourceType::LocalStorage)
 			{
 				if (_a->program != _b->program)
 					return _a->program < _b->program;

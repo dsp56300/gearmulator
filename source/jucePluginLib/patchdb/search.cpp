@@ -87,10 +87,6 @@ namespace pluginLib::patchDB
 			if (!matchDataSource(patchSource.get(), sourceNode))
 				return false;
 		}
-		else if (!matchDataSource(*patchSource, source))
-		{
-			return false;
-		}
 
 		// name
 		if (!matchStringsIgnoreCase(_patch.getName(), name))

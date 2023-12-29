@@ -750,9 +750,9 @@ namespace pluginLib::patchDB
 			return true;
 		};
 
-		if(_search.request.source.type != SourceType::Invalid)
+		if(_search.getSourceType() == SourceType::File || _search.getSourceType() == SourceType::LocalStorage)
 		{
-			const auto& it = m_dataSources.find(_search.request.source);
+			const auto& it = m_dataSources.find(*_search.request.sourceNode);
 
 			if(it == m_dataSources.end())
 			{
