@@ -1103,24 +1103,31 @@ namespace pluginLib::patchDB
 			const auto& ds = it.first;
 			const auto& patches = it.second;
 
-			patchesVec.assign(patches.begin(), patches.end());
-			DataSource::sortByProgram(patchesVec);
-
 			const auto file = getLocalStorageFile(*ds);
 
-			std::vector<uint8_t> sysexBuffer;
-			sysexBuffer.reserve(patchesVec.front()->sysex.size() * patchesVec.size());
-
-			for (const auto& patch : patchesVec)
+			if(patches.empty())
 			{
-				const auto patchSysex = prepareSave(patch);
-
-				if(!patchSysex.empty())
-					sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
+				file.deleteFile();
 			}
+			else
+			{
+				patchesVec.assign(patches.begin(), patches.end());
+				DataSource::sortByProgram(patchesVec);
 
-			if (!file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
-				res = false;
+				std::vector<uint8_t> sysexBuffer;
+				sysexBuffer.reserve(patchesVec.front()->sysex.size() * patchesVec.size());
+
+				for (const auto& patch : patchesVec)
+				{
+					const auto patchSysex = prepareSave(patch);
+
+					if(!patchSysex.empty())
+						sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
+				}
+
+				if (!file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+					res = false;
+			}
 		}
 		return res;
 	}
