@@ -147,7 +147,7 @@ namespace pluginLib::patchDB
 		if(m_parent)
 		{
 			// we MUST NOT create a new ptr to this here as we may be called from our destructor, in which case there shouldn't be a pointer in there anyway
-			for(size_t i=0; i<m_parent->m_children.size(); ++i)
+			for(uint32_t i=0; i<static_cast<uint32_t>(m_parent->m_children.size()); ++i)
 			{
 				auto& child = m_parent->m_children[i];
 				auto ptr = child.lock();
