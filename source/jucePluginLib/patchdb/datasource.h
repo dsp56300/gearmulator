@@ -18,6 +18,53 @@ namespace pluginLib::patchDB
 
 		virtual ~DataSource() = default;
 
+		bool createConsecutiveProgramNumbers();	// returns true if any patch was modified
+		static bool createConsecutiveProgramNumbers(const std::vector<PatchPtr>& _patches);	// returns true if any patch was modified
+
+		std::pair<uint32_t, uint32_t> getProgramNumberRange() const;
+		uint32_t getMaxProgramNumber() const;
+		static void sortByProgram(std::vector<PatchPtr>& _patches);
+
+		bool contains(const PatchPtr& _patch) const;
+
+		template<typename T>
+		bool containsAll(const T& _patches) const
+		{
+			for (auto p : _patches)
+			{
+				if(!contains(p))
+					return false;
+			}
+			return true;
+		}
+
+		template<typename T>
+		bool containsAny(const T& _patches) const
+		{
+			for (auto p : _patches)
+			{
+				if(contains(p))
+					return true;
+			}
+			return false;
+		}
+
+		bool movePatchesTo(uint32_t _position, const std::vector<PatchPtr>& _patches);
+
+		template<typename T>
+		bool remove(const T& _patches)
+		{
+			if(!containsAll(_patches))
+				return false;
+
+			for (const auto& patch : _patches)
+				patches.erase(patch);
+
+			return true;
+		}
+
+		bool remove(const PatchPtr& _patch);
+
 		bool operator == (const DataSource& _ds) const
 		{
 			return type == _ds.type && name == _ds.name && bank == _ds.bank;//&& program == _ds.program;
