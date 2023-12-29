@@ -214,19 +214,7 @@ namespace Virus
         return name;
     }
 
-    void Controller::setSinglePresetName(std::vector<uint8_t>& _sysex, const std::string& _name) const
-    {
-        for (int i = 0; i < kNameLength; i++)
-        {
-            const std::string paramName = "SingleName" + std::to_string(i);
-            const auto idx = getParameterIndexByName(paramName);
-            if (idx == InvalidParameterIndex || idx >= _sysex.size())
-                break;
-            _sysex[idx] = (i < _name.size()) ? _name[i] : ' ';
-        }
-    }
-
-    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name) const
+    void Controller::setSinglePresetName(const uint8_t _part, const juce::String& _name) const
     {
 		for (int i=0; i<kNameLength; i++)
 		{
@@ -246,7 +234,27 @@ namespace Virus
 		}
 	}
 
-	bool Controller::isMultiMode() const
+    void Controller::setSinglePresetName(pluginLib::MidiPacket::ParamValues& _values, const std::string& _name) const
+    {
+        for(uint32_t i=0; i<kNameLength; ++i)
+        {
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            const auto& it = _values.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idx));
+            if(it == _values.end())
+                break;
+
+            if(i < _name.size())
+	            it->second = _name[i];
+            else
+                it->second = ' ';
+        }
+    }
+
+    bool Controller::isMultiMode() const
 	{
         const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
 		const auto& value = getParameter(paramIdx)->getValueObject();

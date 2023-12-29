@@ -103,9 +103,10 @@ namespace Virus
     		return m_multiEditBuffer;
     	}
 
-		void setSinglePresetName(std::vector<uint8_t>& _sysex, const std::string& _name) const;
 		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
-		bool isMultiMode() const;
+        void setSinglePresetName(pluginLib::MidiPacket::ParamValues& _values, const std::string& _name) const;
+
+    	bool isMultiMode() const;
 
     	// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);

@@ -163,15 +163,15 @@ namespace genericVirusUI
 
 	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
-		// apply name
-		if (!_patch->name.empty())
-			m_controller.setSinglePresetName(_patch->sysex, _patch->name);
-
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::ParamValues parameterValues;
 
 		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
 			return _patch->sysex;
+
+		// apply name
+		if (!_patch->name.empty())
+			m_controller.setSinglePresetName(parameterValues, _patch->name);
 
 		// apply program
 		auto program = data[pluginLib::MidiDataType::Program];
