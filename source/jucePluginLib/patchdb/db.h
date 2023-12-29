@@ -31,6 +31,7 @@ namespace pluginLib::patchDB
 		DataSourceNodePtr addDataSource(const DataSource& _ds);
 		void removeDataSource(const DataSource& _ds);
 		void refreshDataSource(const DataSourceNodePtr& _ds);
+		void renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName);
 
 		void getDataSources(std::vector<DataSourceNodePtr>& _dataSources)
 		{

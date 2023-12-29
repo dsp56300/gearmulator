@@ -141,6 +141,47 @@ namespace pluginLib::patchDB
 	{
 	}
 
+	void DB::renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName)
+	{
+		if(_ds->type != SourceType::LocalStorage)
+			return;
+
+		if(_newName.empty())
+			return;
+
+		runOnLoaderThread([this, _ds, _newName]
+		{
+			{
+				std::unique_lock lockDs(m_dataSourcesMutex);
+				const auto it = m_dataSources.find(*_ds);
+
+				if(it == m_dataSources.end())
+					return;
+
+				const auto ds = it->second;
+
+				if(ds->name == _newName)
+					return;
+
+				for (const auto& [_, d] : m_dataSources)
+				{
+					if(d->type == SourceType::LocalStorage && d->name == _newName)
+						return;
+				}
+
+				ds->name = _newName;
+
+				m_dataSources.erase(it);
+				m_dataSources.insert({*ds, ds});
+			}
+
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.dataSources = true;
+
+			saveJson();
+		});
+	}
+
 	bool DB::addTag(const TagType _type, const std::string& _tag)
 	{
 		{

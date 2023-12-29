@@ -92,6 +92,13 @@ namespace jucePluginEditorLib::patchManager
 					getPatchManager().removeDataSource(*m_dataSource);
 				});
 			}
+			if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+			{
+				menu.addItem("Rename...", [this]
+				{
+					beginEdit();
+				});
+			}
 			menu.showMenuAsync({});
 		}
 	}
@@ -119,5 +126,20 @@ namespace jucePluginEditorLib::patchManager
 			return static_cast<int>(dsA->type) - static_cast<int>(dsB->type);
 
 		return TreeItem::compareElements(_a, _b);
+	}
+
+	bool DatasourceTreeItem::beginEdit()
+	{
+		if(m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
+			return TreeItem::beginEdit();
+
+		static_cast<TreeItem&>(*this).beginEdit(m_dataSource->name, [this](bool _success, const std::string& _newName)
+		{
+			if(_newName != m_dataSource->name)
+			{
+				getPatchManager().renameDataSource(m_dataSource, _newName);
+			}
+		});
+		return true;
 	}
 }

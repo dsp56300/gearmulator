@@ -27,6 +27,8 @@ namespace jucePluginEditorLib::patchManager
 
 		int compareElements(const TreeViewItem* _a, const TreeViewItem* _b) override;
 
+		bool beginEdit() override;
+
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
