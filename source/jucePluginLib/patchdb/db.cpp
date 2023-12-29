@@ -129,6 +129,7 @@ namespace pluginLib::patchDB
 			{
 				removedDataSource->setParent(nullptr);
 				removedDataSource->removeAllChildren();
+				removedDataSource->patches.clear();
 			}
 			removedDataSources.clear();
 
