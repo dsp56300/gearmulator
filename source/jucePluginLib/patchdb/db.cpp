@@ -305,16 +305,8 @@ namespace pluginLib::patchDB
 
 				for (const auto& patch : _patches)
 				{
-					if(patch->source.lock() == _ds)
-						continue;
-
-					const auto it = _ds->patches.find(patch);
-
-					if(it == _ds->patches.end())
-						continue;
-
-					_ds->patches.erase(it);
-					removedPatches.emplace_back(patch);
+					if(_ds->patches.erase(patch))
+						removedPatches.emplace_back(patch);
 				}
 
 				if (removedPatches.empty())
