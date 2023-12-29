@@ -1100,7 +1100,8 @@ namespace pluginLib::patchDB
 		if (localStoragePatches.empty())
 			return false;
 
-		synthLib::HybridVector<PatchPtr, 128> patchesVec;
+		std::vector<PatchPtr> patchesVec;
+		patchesVec.reserve(128);
 
 		bool res = true;
 
@@ -1110,11 +1111,7 @@ namespace pluginLib::patchDB
 			const auto& patches = it.second;
 
 			patchesVec.assign(patches.begin(), patches.end());
-
-			std::sort(patchesVec.begin(), patchesVec.end(), [](const PatchPtr& a, const PatchPtr& b)
-			{
-				return a < b;
-			});
+			DataSource::sortByProgram(patchesVec);
 
 			const auto file = getLocalStorageFile(*ds);
 
