@@ -11,6 +11,7 @@
 #include "search.h"
 
 #include "jobqueue.h"
+#include "state.h"
 
 #include "juce_core/juce_core.h"
 
@@ -124,5 +125,8 @@ namespace pluginLib::patchDB
 		std::unordered_map<uint32_t, std::shared_ptr<Search>> m_searches;
 		std::unordered_set<SearchHandle> m_cancelledSearches;
 		uint32_t m_nextSearchHandle = 0;
+
+		// current plugin state
+		State m_state;
 	};
 }
