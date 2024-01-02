@@ -100,7 +100,6 @@ namespace pluginLib::patchDB
 					if (!c || c->origin == DataSourceOrigin::Manual)
 						continue;
 
-					removedPatches.insert(removedPatches.end(), c->patches.begin(), c->patches.end());
 					removedDataSources.insert(c);
 					removeChildren(c);
 				}
@@ -109,7 +108,10 @@ namespace pluginLib::patchDB
 			removeChildren(ds);
 
 			for (const auto& removed : removedDataSources)
+			{
+				removedPatches.insert(removedPatches.end(), removed->patches.begin(), removed->patches.end());
 				m_dataSources.erase(*removed);
+			}
 
 			lockDs.unlock();
 
