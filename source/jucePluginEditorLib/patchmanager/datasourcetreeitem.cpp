@@ -51,11 +51,14 @@ namespace jucePluginEditorLib::patchManager
 		search(std::move(sr));
 	}
 
-	bool DatasourceTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
+	bool DatasourceTreeItem::isInterestedInSavePatchDesc(const SavePatchDesc& _desc)
 	{
-		if (m_dataSource->type != pluginLib::patchDB::SourceType::LocalStorage)
-			return false;
-		return TreeItem::isInterestedInDragSource(_dragSourceDetails);
+		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
+	}
+
+	bool DatasourceTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	{
+		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
 	}
 
 	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)

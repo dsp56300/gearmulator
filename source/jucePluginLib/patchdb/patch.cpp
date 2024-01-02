@@ -12,7 +12,8 @@ namespace pluginLib::patchDB
 {
 	std::pair<PatchPtr, PatchModificationsPtr> Patch::createCopy(const DataSourceNodePtr& _ds) const
 	{
-		if (*_ds == *source.lock())
+		const auto patchDs = source.lock();
+		if (patchDs && *_ds == *patchDs)
 			return {};
 
 		auto p = std::shared_ptr<Patch>(new Patch(*this));

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "list.h"
+#include "savepatchdesc.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
@@ -54,7 +56,11 @@ namespace jucePluginEditorLib::patchManager
 		// TreeViewItem
 		void itemSelectionChanged(bool _isNowSelected) override;
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
+
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
+
+		virtual bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) { return false; }
+		virtual bool isInterestedInSavePatchDesc(const SavePatchDesc& _desc) { return false; }
 
 		// juce::Label::Listener
 		void editorHidden(juce::Label*, juce::TextEditor&) override;

@@ -2,6 +2,7 @@
 
 #include "list.h"
 #include "patchmanager.h"
+#include "savepatchdesc.h"
 #include "tree.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
@@ -106,33 +107,48 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get());
 
-		if (!list)
-			return;
+		if (list)
+		{
+			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
 
-		const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
+			if(!patches.empty())
+				patchesDropped(patches);
+		}
+		else
+		{
+			const auto* desc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
 
-		if(!patches.empty())
-			patchesDropped(patches);
+			if(!desc)
+				return;
+
+			if(auto patch = getPatchManager().requestPatchForSave(desc->getPart()))
+				patchesDropped({patch});
+		}
 	}
 
 	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
 
-		if (!list)
-			return false;
-
-		const auto* arr = _dragSourceDetails.description.getArray();
-		if (!arr)
-			return false;
-
-		for (const auto& var : *arr)
+		if (list)
 		{
-			if (!var.isInt())
+			const auto* arr = _dragSourceDetails.description.getArray();
+			if (!arr)
 				return false;
+
+			for (const auto& var : *arr)
+			{
+				if (!var.isInt())
+					return false;
+			}
+
+			return isInterestedInPatchList(list, *arr);
 		}
 
-		return true;
+		if(const auto* desc = dynamic_cast<const SavePatchDesc*>(_dragSourceDetails.description.getObject()))
+			return isInterestedInSavePatchDesc(*desc);
+
+		return false;
 	}
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)

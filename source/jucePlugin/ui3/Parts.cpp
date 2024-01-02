@@ -7,6 +7,8 @@
 
 #include "../../jucePluginLib/parameterbinding.h"
 
+#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+
 namespace genericVirusUI
 {
 	Parts::Parts(VirusEditor& _editor) : m_editor(_editor)
@@ -30,6 +32,13 @@ namespace genericVirusUI
 				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
 
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
+
+			m_mouseListeners.push_back(new PartMouseListener(static_cast<int>(i), [this, &_editor](const juce::MouseEvent&, const int _part)
+			{
+				_editor.startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(_part), m_presetName[_part]);
+			}));
+
+			m_presetName[i]->addMouseListener(m_mouseListeners.back(), false);
 
 			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
 			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);

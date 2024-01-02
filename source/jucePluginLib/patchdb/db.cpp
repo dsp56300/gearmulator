@@ -411,6 +411,13 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
+	PatchPtr DB::requestPatchForSave(int _part)
+	{
+		Data data;
+		requestPatchForSave(data, _part);
+		return initializePatch(data);
+	}
+
 	void DB::getTags(const TagType _type, std::set<Tag>& _tags)
 	{
 		_tags.clear();
@@ -432,6 +439,9 @@ namespace pluginLib::patchDB
 
 		for (const auto& patch : _patches)
 		{
+			if(patch->source.expired())
+				continue;
+
 			const auto key = PatchKey(*patch);
 
 			const auto& it = m_patchModifications.find(key);
@@ -658,8 +668,10 @@ namespace pluginLib::patchDB
 
 			for (uint32_t p = 0; p < data.size(); ++p)
 			{
-				if (const auto patch = initializePatch(data[p], ds))
+				if (const auto patch = initializePatch(data[p]))
 				{
+					patch->source = ds->weak_from_this();
+
 					if(isValid(patch))
 					{
 						patch->program = p;

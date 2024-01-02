@@ -57,6 +57,9 @@ namespace pluginLib::patchDB
 
 		static bool isValid(const PatchPtr& _patch);
 
+		PatchPtr requestPatchForSave(int _part);
+		virtual bool requestPatchForSave(Data& _data, int _part) = 0;
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
@@ -66,7 +69,7 @@ namespace pluginLib::patchDB
 		virtual bool loadFile(DataList& _results, const std::string& _file);
 		virtual bool loadLocalStorage(DataList& _results, const DataSourceNodePtr& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
-		virtual PatchPtr initializePatch(const Data& _sysex, const DataSourceNodePtr& _ds) = 0;
+		virtual PatchPtr initializePatch(const Data& _sysex) = 0;
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 

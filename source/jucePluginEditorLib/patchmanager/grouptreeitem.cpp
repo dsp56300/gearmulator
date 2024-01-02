@@ -220,7 +220,8 @@ namespace jucePluginEditorLib::patchManager
 		if (isOpen())
 			return false;
 
-		if (TreeItem::isInterestedInDragSource(_dragSourceDetails))
+		if( (!m_itemsByDataSource.empty() && m_itemsByDataSource.begin()->second->isInterestedInDragSource(_dragSourceDetails)) || 
+			(!m_itemsByTag.empty() && m_itemsByTag.begin()->second->isInterestedInDragSource(_dragSourceDetails)))
 			setOpen(true);
 
 		return false;

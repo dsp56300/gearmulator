@@ -10,7 +10,7 @@
 
 namespace genericUI
 {
-	class Editor : public juce::Component
+	class Editor : public juce::Component, public juce::DragAndDropContainer
 	{
 	public:
 		explicit Editor(EditorInterface& _interface);

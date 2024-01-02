@@ -18,6 +18,7 @@ namespace jucePluginEditorLib::patchManager
 		auto getGroupType() const { return m_group; }
 
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+		bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) override;
 		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
 
 		const auto& getTag() const { return m_tag; }

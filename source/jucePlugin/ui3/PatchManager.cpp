@@ -88,7 +88,7 @@ namespace genericVirusUI
 		return true;
 	}
 
-	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(const std::vector<uint8_t>& _sysex, const pluginLib::patchDB::DataSourceNodePtr& _ds)
+	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(const std::vector<uint8_t>& _sysex)
 	{
 		if (_sysex.size() < 267)
 			return nullptr;
@@ -122,7 +122,6 @@ namespace genericVirusUI
 		}
 
 		patch->sysex = _sysex;
-		patch->source = _ds->weak_from_this();
 
 		{
 			const auto frontOffset = idxVersion;	// remove bank number, program number and other stuff that we don't need
@@ -236,6 +235,12 @@ namespace genericVirusUI
 			return true;
 
 		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
+	}
+
+	bool PatchManager::requestPatchForSave(pluginLib::patchDB::Data& _data, const int _part)
+	{
+		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), toMidiByte(virusLib::BankNumber::A), 0);
+		return !_data.empty();
 	}
 
 	void PatchManager::addRomPatches()

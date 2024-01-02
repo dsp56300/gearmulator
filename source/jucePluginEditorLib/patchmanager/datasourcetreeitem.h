@@ -19,7 +19,9 @@ namespace jucePluginEditorLib::patchManager
 			return m_dataSource->type == pluginLib::patchDB::SourceType::Folder;
 		}
 
-		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
+		bool isInterestedInSavePatchDesc(const SavePatchDesc& _desc) override;
+		bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) override;
+
 		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
 
 		void itemClicked(const juce::MouseEvent&) override;
