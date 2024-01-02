@@ -50,7 +50,8 @@ namespace genericVirusUI
 		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
-		PatchBrowser* getPatchBrowser();
+		PatchBrowser* getPatchBrowser() const;
+		PatchManager* getPatchManager() const;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 

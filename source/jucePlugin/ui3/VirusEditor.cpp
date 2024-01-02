@@ -156,9 +156,14 @@ namespace genericVirusUI
 		return findEmbeddedResource(_filename, _size);
 	}
 
-	PatchBrowser* VirusEditor::getPatchBrowser()
+	PatchBrowser* VirusEditor::getPatchBrowser() const
 	{
 		return m_patchBrowser.get();
+	}
+
+	PatchManager* VirusEditor::getPatchManager() const
+	{
+		return m_patchManager.get();
 	}
 
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
