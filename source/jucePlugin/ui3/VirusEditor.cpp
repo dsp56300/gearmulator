@@ -75,7 +75,7 @@ namespace genericVirusUI
 			m_romSelector->setSelectedId(1, juce::dontSendNotification);
 		}
 
-		getController().onProgramChange = [this] { onProgramChange(); };
+		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
 
 		addMouseListener(this, true);
 
@@ -171,7 +171,7 @@ namespace genericVirusUI
 				"* Preset saving is disabled"};
 	}
 
-	void VirusEditor::onProgramChange()
+	void VirusEditor::onProgramChange(int /*_part*/)
 	{
 		m_parts->onProgramChange();
 		updatePresetName();

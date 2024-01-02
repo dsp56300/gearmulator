@@ -120,7 +120,7 @@ namespace Virus
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseSysexMessage(const pluginLib::SysEx &) override;
         void onStateLoaded() override;
-		std::function<void()> onProgramChange = {};
+		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
 		std::function<void(virusLib::BankNumber _bank, uint32_t _program)> onRomPatchReceived = {};
 

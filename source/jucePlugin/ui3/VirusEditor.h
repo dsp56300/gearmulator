@@ -55,7 +55,7 @@ namespace genericVirusUI
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 	private:
-		void onProgramChange();
+		void onProgramChange(int _part);
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
 

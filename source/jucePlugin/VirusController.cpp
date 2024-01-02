@@ -452,7 +452,7 @@ namespace Virus
             }
 
 			if (onProgramChange)
-				onProgramChange();
+				onProgramChange(patch.progNumber);
 		}
 		else
 		{
