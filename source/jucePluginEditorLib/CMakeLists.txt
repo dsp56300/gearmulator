@@ -21,6 +21,7 @@ set(SOURCES_PM
 	patchmanager/patchmanager.cpp patchmanager/patchmanager.h
 	patchmanager/roottreeitem.cpp patchmanager/roottreeitem.h
 	patchmanager/savepatchdesc.cpp patchmanager/savepatchdesc.h
+	patchmanager/state.cpp patchmanager/state.h
 	patchmanager/tagtreeitem.cpp patchmanager/tagtreeitem.h
 	patchmanager/tree.cpp patchmanager/tree.h
 	patchmanager/treeitem.cpp patchmanager/treeitem.h

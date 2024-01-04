@@ -14,7 +14,7 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _dir) : DB(_dir), m_editor(_editor)
+	PatchManager::PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _dir) : DB(_dir), m_editor(_editor), m_state(*this)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;
@@ -80,14 +80,16 @@ namespace jucePluginEditorLib::patchManager
 		m_list->processDirty(dirty);
 	}
 
-	void PatchManager::setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle)
+	void PatchManager::setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const
 	{
 		m_list->setContent(_handle);
 	}
 
-	void PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch)
+	void PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch, uint32_t _indexInSearch)
 	{
 		m_info->setPatch(_patch);
+
+		m_state.setSelectedPatch(getCurrentPart(), _patch, _fromSearch, _indexInSearch);
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const

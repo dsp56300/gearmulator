@@ -109,7 +109,7 @@ namespace genericVirusUI
 			if (text.trim().length() > 0)
 			{
 				getController().setSinglePresetName(getController().getCurrentPart(), text);
-				onProgramChange();
+				onProgramChange(getController().getCurrentPart());
 			}
 		};
 

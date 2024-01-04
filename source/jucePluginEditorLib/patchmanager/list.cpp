@@ -129,12 +129,10 @@ namespace jucePluginEditorLib::patchManager
 	{
 		ListBoxModel::selectedRowsChanged(lastRowSelected);
 
-		const auto idx = getSelectedRow();
+		const auto patches = getSelectedPatches();
 
-		if (idx < 0 || static_cast<size_t>(idx) >= getPatches().size())
-			return;
-
-		m_patchManager.setSelectedPatch(getPatch(idx));
+		if(patches.size() == 1)
+			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle, lastRowSelected);
 	}
 
 	std::set<List::Patch> List::getSelectedPatches() const
@@ -229,11 +227,11 @@ namespace jucePluginEditorLib::patchManager
 		repaint();
 	}
 
-	void List::sortPatches()
+	void List::sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType)
 	{
-		std::sort(m_patches.begin(), m_patches.end(), [this](const Patch& _a, const Patch& _b)
+		std::sort(_patches.begin(), _patches.end(), [_sourceType](const Patch& _a, const Patch& _b)
 		{
-			const auto sourceType = m_search->getSourceType();
+			const auto sourceType = _sourceType;
 
 			if(sourceType == pluginLib::patchDB::SourceType::Folder)
 			{
@@ -250,6 +248,12 @@ namespace jucePluginEditorLib::patchManager
 
 			return _a->getName().compare(_b->name) < 0;
 		});
+	}
+
+	void List::sortPatches()
+	{
+		// Note: If this list is no longer sorted by calling this function, be sure to modify the second caller in state.cpp, too, as it is used to track the selected entry across multiple parts
+		sortPatches(m_patches, m_search->getSourceType());
 	}
 
 	void List::filterPatches()

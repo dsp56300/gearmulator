@@ -243,6 +243,11 @@ namespace genericVirusUI
 		return !_data.empty();
 	}
 
+	int PatchManager::getCurrentPart() const
+	{
+		return m_controller.getCurrentPart();
+	}
+
 	void PatchManager::addRomPatches()
 	{
 		const auto& singles = m_controller.getSinglePresets();

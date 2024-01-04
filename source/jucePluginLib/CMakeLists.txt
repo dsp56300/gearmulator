@@ -23,7 +23,6 @@ set(SOURCES_PATCHDB
 	patchdb/patchhistory.cpp patchdb/patchhistory.h
 	patchdb/patchmodifications.cpp patchdb/patchmodifications.h
 	patchdb/search.cpp patchdb/search.h
-	patchdb/state.cpp patchdb/state.h
 	patchdb/serialization.cpp patchdb/serialization.h
 	patchdb/tags.cpp patchdb/tags.h
 )

@@ -4,6 +4,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "state.h"
+
 namespace genericUI
 {
 	class UiObject;
@@ -26,11 +28,13 @@ namespace jucePluginEditorLib::patchManager
 
 		void timerCallback() override;
 
-		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle);
-		void setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch);
+		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const;
+		void setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch, uint32_t _indexInSearch);
 
 		auto& getEditor() const { return m_editor; }
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
+
+		virtual int getCurrentPart() const = 0;
 
 	private:
 		genericUI::Editor& m_editor;
@@ -41,5 +45,7 @@ namespace jucePluginEditorLib::patchManager
 
 		SearchList* m_searchList = nullptr;
 		SearchTree* m_searchTree = nullptr;
+
+		State m_state;
 	};
 }

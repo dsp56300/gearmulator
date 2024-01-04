@@ -64,6 +64,8 @@ namespace jucePluginEditorLib::patchManager
 			return m_patchManager;
 		}
 
+		static void sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType);
+
 	private:
 		void sortPatches();
 		void filterPatches();
