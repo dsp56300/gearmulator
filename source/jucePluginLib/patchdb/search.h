@@ -57,5 +57,12 @@ namespace pluginLib::patchDB
 				return request.sourceNode->type;
 			return SourceType::Invalid;
 		}
+
+		void setCompleted()
+		{
+			state = SearchState::Completed;
+			if(callback)
+				callback(results);
+		}
 	};
 }

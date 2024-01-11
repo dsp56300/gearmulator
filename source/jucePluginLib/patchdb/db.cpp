@@ -833,7 +833,7 @@ namespace pluginLib::patchDB
 
 			if(it == m_dataSources.end())
 			{
-				_search.state = SearchState::Completed;
+				_search.setCompleted();
 				return false;
 			}
 
@@ -849,7 +849,7 @@ namespace pluginLib::patchDB
 			}
 		}
 
-		_search.state = SearchState::Completed;
+		_search.setCompleted();
 
 		{
 			std::unique_lock lockUi(m_uiMutex);
