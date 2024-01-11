@@ -35,6 +35,8 @@ namespace jucePluginEditorLib::patchManager
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
 
 		virtual int getCurrentPart() const = 0;
+		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) = 0;
+		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
 	private:
 		genericUI::Editor& m_editor;

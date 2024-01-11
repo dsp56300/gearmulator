@@ -90,6 +90,8 @@ namespace jucePluginEditorLib::patchManager
 		m_info->setPatch(_patch);
 
 		m_state.setSelectedPatch(getCurrentPart(), _patch, _fromSearch, _indexInSearch);
+
+		activatePatch(_patch);
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const

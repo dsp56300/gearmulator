@@ -164,20 +164,7 @@ namespace genericVirusUI
 	{
 		auto& c = static_cast<Virus::Controller&>(m_controller);
 
-		// re-pack single, force to edit buffer
-		const auto program = c.isMultiMode() ? c.getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE);
-
-		const auto msg = c.modifySingleDump(_patch.sysex, virusLib::BankNumber::EditBuffer, program, true, true);
-
-		if(msg.empty())
-			return false;
-
-		c.sendSysEx(msg);
-		c.requestSingle(0x0, program);
-
-		c.setCurrentPartPresetSource(m_controller.getCurrentPart(), Virus::Controller::PresetSource::Browser);
-
-		return true;
+		return c.activatePatch(_patch.sysex);
 	}
 
 	int PatchBrowser::comparePatches(const int _columnId, const jucePluginEditorLib::Patch& _a, const jucePluginEditorLib::Patch& _b) const

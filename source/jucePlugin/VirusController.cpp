@@ -704,4 +704,41 @@ namespace Virus
         sprintf(temp, "Bank %c", 'A' + _index);
         return temp;
     }
+
+    bool Controller::activatePatch(const std::vector<unsigned char>& _sysex)
+    {
+		// re-pack, force to edit buffer
+		return activatePatch(_sysex, isMultiMode() ? getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE));
+    }
+
+    bool Controller::activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part)
+    {
+        if(_part == virusLib::ProgramType::SINGLE)
+        {
+            if(isMultiMode())
+	            _part = 0;
+        }
+        else if(_part >= 16)
+        {
+            return false;
+        }
+        else if(!isMultiMode() && _part == 0)
+        {
+            _part = virusLib::ProgramType::SINGLE;
+        }
+
+        const auto program = static_cast<uint8_t>(_part);
+
+    	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program, true, true);
+
+		if(msg.empty())
+			return false;
+
+		sendSysEx(msg);
+		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
+
+		setCurrentPartPresetSource(program == virusLib::ProgramType::SINGLE ? 0 : program, PresetSource::Browser);
+
+		return true;
+    }
 }; // namespace Virus

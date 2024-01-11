@@ -35,6 +35,11 @@ namespace genericVirusUI
 		bool parseFileData(std::vector<std::vector<uint8_t>>& _results, const std::vector<uint8_t>& _data) override;
 		virtual bool requestPatchForSave(pluginLib::patchDB::Data& _data, int _part);
 		int getCurrentPart() const override;
+
+		// PatchManager impl
+		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) override;
+		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
+
 	private:
 		void addRomPatches();
 

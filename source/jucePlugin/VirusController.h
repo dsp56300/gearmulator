@@ -74,6 +74,9 @@ namespace Virus
     	void selectNextPreset(uint8_t _part);
         std::string getBankName(uint32_t _index) const;
 
+    	bool activatePatch(const std::vector<unsigned char>& _sysex);
+    	bool activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part);
+
         static void printMessage(const pluginLib::SysEx &);
 
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
