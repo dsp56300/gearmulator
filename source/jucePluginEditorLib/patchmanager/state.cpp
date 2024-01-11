@@ -12,9 +12,9 @@ namespace jucePluginEditorLib::patchManager
 		m_index = _index;
 	}
 
-	void State::setSelectedPatch(const int _part, const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _searchHandle, uint32_t _indexInSearch)
+	void State::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _searchHandle, uint32_t _indexInSearch)
 	{
-		if(_part < 0 || _part >= static_cast<int>(m_parts.size()))
+		if(_part >= static_cast<int>(m_parts.size()))
 			return;
 
 		const auto& search = m_patchManager.getSearch(_searchHandle);

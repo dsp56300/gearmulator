@@ -121,7 +121,7 @@ namespace jucePluginEditorLib::patchManager
 			if(!desc)
 				return;
 
-			if(auto patch = getPatchManager().requestPatchForSave(desc->getPart()))
+			if(auto patch = getPatchManager().requestPatchForPart(desc->getPart()))
 				patchesDropped({patch});
 		}
 	}

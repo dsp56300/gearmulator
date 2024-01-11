@@ -413,10 +413,10 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	PatchPtr DB::requestPatchForSave(int _part)
+	PatchPtr DB::requestPatchForPart(const uint32_t _part)
 	{
 		Data data;
-		requestPatchForSave(data, _part);
+		requestPatchForPart(data, _part);
 		return initializePatch(data);
 	}
 

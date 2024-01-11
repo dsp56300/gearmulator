@@ -57,8 +57,8 @@ namespace pluginLib::patchDB
 
 		static bool isValid(const PatchPtr& _patch);
 
-		PatchPtr requestPatchForSave(int _part);
-		virtual bool requestPatchForSave(Data& _data, int _part) = 0;
+		PatchPtr requestPatchForPart(uint32_t _part);
+		virtual bool requestPatchForPart(Data& _data, uint32_t _part) = 0;
 
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);

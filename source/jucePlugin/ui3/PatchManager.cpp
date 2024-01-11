@@ -237,13 +237,13 @@ namespace genericVirusUI
 		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
 	}
 
-	bool PatchManager::requestPatchForSave(pluginLib::patchDB::Data& _data, const int _part)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part)
 	{
 		_data = m_controller.createSingleDump(static_cast<uint8_t>(_part), toMidiByte(virusLib::BankNumber::A), 0);
 		return !_data.empty();
 	}
 
-	int PatchManager::getCurrentPart() const
+	uint32_t PatchManager::getCurrentPart() const
 	{
 		return m_controller.getCurrentPart();
 	}

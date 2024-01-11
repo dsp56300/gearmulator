@@ -27,7 +27,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 		}
 
-		void setSelectedPatch(int _part, const pluginLib::patchDB::PatchPtr& _patch, uint32_t _searchHandle, uint32_t _index = pluginLib::patchDB::g_invalidProgram);
+		void setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, uint32_t _searchHandle, uint32_t _index = pluginLib::patchDB::g_invalidProgram);
 
 	private:
 		PatchManager& m_patchManager;
