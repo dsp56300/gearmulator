@@ -1,16 +1,16 @@
 #pragma once
 
 #include <functional>
-#include <map>
 #include <string>
 #include <shared_mutex>
 
 #include "datasource.h"
-#include "patch.h"
 #include "tags.h"
 
 namespace pluginLib::patchDB
 {
+	struct Search;
+
 	struct SearchRequest
 	{
 		std::string name;
@@ -21,7 +21,7 @@ namespace pluginLib::patchDB
 	};
 
 	using SearchResult = std::set<PatchPtr>;
-	using SearchCallback = std::function<void(const SearchResult&)>;
+	using SearchCallback = std::function<void(const Search&)>;
 
 	enum class SearchState
 	{
@@ -61,8 +61,12 @@ namespace pluginLib::patchDB
 		void setCompleted()
 		{
 			state = SearchState::Completed;
-			if(callback)
-				callback(results);
+
+			if(!callback)
+				return;
+
+			std::shared_lock searchLock(resultsMutex);
+			callback(*this);
 		}
 	};
 }

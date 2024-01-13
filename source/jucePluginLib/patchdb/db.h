@@ -84,10 +84,10 @@ namespace pluginLib::patchDB
 		void startLoaderThread();
 		void stopLoaderThread();
 
-	private:
 		void runOnLoaderThread(std::function<void()>&& _func);
 		void runOnUiThread(const std::function<void()>& _func);
 
+	private:
 		void addDataSource(const DataSourceNodePtr& _ds);
 
 		bool addPatches(const std::vector<PatchPtr>& _patches);

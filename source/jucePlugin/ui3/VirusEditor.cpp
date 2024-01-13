@@ -176,12 +176,14 @@ namespace genericVirusUI
 				"* Preset saving is disabled"};
 	}
 
-	void VirusEditor::onProgramChange(int /*_part*/)
+	void VirusEditor::onProgramChange(int _part)
 	{
 		m_parts->onProgramChange();
 		updatePresetName();
 		updatePlayModeButtons();
 		updateDeviceModel();
+		if(m_patchManager)
+			m_patchManager->onProgramChanged(_part);
 	}
 
 	void VirusEditor::onPlayModeChanged()

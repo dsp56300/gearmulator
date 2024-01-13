@@ -43,6 +43,12 @@ namespace jucePluginEditorLib::patchManager
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) = 0;
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
+		void onLoadFinished() override;
+
+	protected:
+		void updateStateAsync(uint32_t _part);
+		pluginLib::patchDB::SearchHandle updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
+
 	private:
 		bool selectPreset(uint32_t _part, int _offset);
 

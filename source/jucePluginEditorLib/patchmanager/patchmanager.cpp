@@ -166,6 +166,97 @@ namespace jucePluginEditorLib::patchManager
 		return m_editor.getTemplate(_name);
 	}
 
+	void PatchManager::onLoadFinished()
+	{
+		DB::onLoadFinished();
+
+		for(uint32_t i=0; i<16; ++i)
+			updateStateAsync(i);
+	}
+
+	void PatchManager::updateStateAsync(uint32_t _part)
+	{
+		pluginLib::patchDB::Data data;
+		if(!requestPatchForPart(data, _part))
+			return;
+		const auto patch = initializePatch(data);
+		if(!patch)
+			return;
+		updateStateAsync(_part, patch);
+	}
+
+	pluginLib::patchDB::SearchHandle PatchManager::updateStateAsync(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		if(!isValid(_patch))
+			return pluginLib::patchDB::g_invalidSearchHandle;
+
+		// assume that we already know the patch if the state is valid and the name is a match
+		if(m_state.isValid(_part))
+		{
+			const auto knownPatch = m_state.getPatch(_part);
+
+			if(knownPatch && knownPatch->name == _patch->name)
+				return pluginLib::patchDB::g_invalidSearchHandle;
+		}
+
+		const auto patchDs = _patch->source.lock();
+
+		if(patchDs)
+		{
+			setSelectedPatch(_part, _patch);
+			return pluginLib::patchDB::g_invalidSearchHandle;
+		}
+
+		// we've got a patch, but we do not know its datasource and search handle, find the data source by executing a search
+
+		const auto searchHandle = findDatasourceForPatch(_patch, [this, _part](const pluginLib::patchDB::Search& _search)
+		{
+			const auto handle = _search.handle;
+
+			std::vector<pluginLib::patchDB::PatchPtr> results;
+			results.assign(_search.results.begin(), _search.results.end());
+
+			if(results.empty())
+				return;
+
+			if(results.size() > 1)
+			{
+				// if there are multiple results, sort them, we prefer ROM results over other results
+
+				std::sort(results.begin(), results.end(), [](const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b)
+				{
+					const auto dsA = _a->source.lock();
+					const auto dsB = _b->source.lock();
+
+					if(!dsA || !dsB)
+						return true;
+
+					if(dsA->type < dsB->type)
+						return true;
+					if(dsA->type > dsB->type)
+						return false;
+					if(dsA->name < dsB->name)
+						return true;
+					if(dsA->name > dsB->name)
+						return false;
+					if(_a->program < _b->program)
+						return true;
+					return false;
+				});
+			}
+
+			const auto currentPatch = results.front();
+
+			runOnUiThread([this, _part, currentPatch, handle]
+			{
+				cancelSearch(handle);
+				updateStateAsync(_part, currentPatch);
+			});
+		});
+
+		return searchHandle;
+	}
+
 	bool PatchManager::selectPreset(const uint32_t _part, const int _offset)
 	{
 		auto [patch, index] = m_state.getNeighbourPreset(_part, _offset);

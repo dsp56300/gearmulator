@@ -59,6 +59,11 @@ namespace genericVirusUI
 		m_controller.onRomPatchReceived = {};
 	}
 
+	void PatchManager::onProgramChanged(int _part)
+	{
+		updateStateAsync(_part);
+	}
+
 	bool PatchManager::loadRomData(pluginLib::patchDB::DataList& _results, const uint32_t _bank, const uint32_t _program)
 	{
 		const auto bankIndex = _bank;
