@@ -84,6 +84,12 @@ namespace pluginLib::patchDB
 		m_emptyCv.wait(lock, [this] {return m_funcs.empty() && !m_numRunning; });
 	}
 
+	size_t JobQueue::pending() const
+	{
+		std::unique_lock lock(m_mutexFuncs);
+		return m_funcs.size();
+	}
+
 	void JobQueue::threadFunc()
 	{
 		while (!m_destroy)

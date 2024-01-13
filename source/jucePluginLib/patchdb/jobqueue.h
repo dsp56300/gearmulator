@@ -33,6 +33,7 @@ namespace pluginLib::patchDB
 		size_t size() const;
 		bool empty() const { return size() == 0; }
 		void waitEmpty();
+		size_t pending() const;
 
 	private:
 		void threadFunc();
