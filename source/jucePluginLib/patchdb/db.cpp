@@ -220,7 +220,7 @@ namespace pluginLib::patchDB
 			func();
 	}
 
-	uint32_t DB::search(SearchRequest&& _request, std::function<void(const SearchResult&)>&& _callback)
+	uint32_t DB::search(SearchRequest&& _request, SearchCallback&& _callback)
 	{
 		const auto handle = m_nextSearchHandle++;
 
@@ -500,6 +500,11 @@ namespace pluginLib::patchDB
 			saveJson();
 
 		return true;
+	}
+
+	SearchHandle DB::search(SearchRequest&& _request)
+	{
+		return search(std::move(_request), [](const Search&) {});
 	}
 
 	bool DB::loadData(DataList& _results, const DataSourceNodePtr& _ds)

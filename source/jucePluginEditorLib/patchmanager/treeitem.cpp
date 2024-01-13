@@ -154,10 +154,7 @@ namespace jucePluginEditorLib::patchManager
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
 	{
 		setCount(g_unknownCount);
-
-		m_searchHandle = getPatchManager().search(std::move(_request), [](const pluginLib::patchDB::SearchResult&)
-		{
-		});
+		m_searchHandle = getPatchManager().search(std::move(_request));
 	}
 
 	void TreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)

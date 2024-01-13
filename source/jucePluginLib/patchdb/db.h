@@ -47,8 +47,10 @@ namespace pluginLib::patchDB
 		void getTags(TagType _type, std::set<Tag>& _tags);
 		bool modifyTags(const std::vector<PatchPtr>& _patches, const TypedTags& _tags);
 
-		uint32_t search(SearchRequest&& _request, SearchCallback&& _callback);
+		SearchHandle search(SearchRequest&& _request);
+		SearchHandle search(SearchRequest&& _request, SearchCallback&& _callback);
 		SearchHandle findDatasourceForPatch(const PatchPtr& _patch, SearchCallback&& _callback);
+
 		void cancelSearch(uint32_t _handle);
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 		std::shared_ptr<Search> getSearch(const DataSource& _dataSource);
