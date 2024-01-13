@@ -60,6 +60,8 @@ namespace pluginLib::patchDB
 		PatchPtr requestPatchForPart(uint32_t _part);
 		virtual bool requestPatchForPart(Data& _data, uint32_t _part) = 0;
 
+		bool isLoading() const { return m_loading; }
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
@@ -72,6 +74,7 @@ namespace pluginLib::patchDB
 		virtual PatchPtr initializePatch(const Data& _sysex) = 0;
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
+		virtual void onLoadFinished() {}
 
 		void startLoaderThread();
 		void stopLoaderThread();
@@ -124,5 +127,8 @@ namespace pluginLib::patchDB
 		std::unordered_map<uint32_t, std::shared_ptr<Search>> m_searches;
 		std::unordered_set<SearchHandle> m_cancelledSearches;
 		uint32_t m_nextSearchHandle = 0;
+
+		// state
+		bool m_loading = true;
 	};
 }

@@ -581,7 +581,19 @@ namespace pluginLib::patchDB
 
 	void DB::runOnLoaderThread(std::function<void()>&& _func)
 	{
-		m_loader.add(std::move(_func));
+		m_loader.add([this, f = std::move(_func)]
+		{
+			f();
+
+			if(isLoading() && !m_loader.pending())
+			{
+				runOnUiThread([this]
+				{
+					m_loading = false;
+					onLoadFinished();
+				});
+			}
+		});
 	}
 
 	void DB::runOnUiThread(const std::function<void()>& _func)
