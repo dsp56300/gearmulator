@@ -291,6 +291,16 @@ namespace genericVirusUI
 		return true;
 	}
 
+	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		return m_controller.activatePatch(_patch->sysex);
+	}
+
+	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
+	{
+		return m_controller.activatePatch(_patch->sysex, _part);
+	}
+
 	void PatchManager::addRomPatches()
 	{
 		const auto& singles = m_controller.getSinglePresets();

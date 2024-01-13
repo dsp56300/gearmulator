@@ -31,6 +31,11 @@ namespace jucePluginEditorLib::patchManager
 		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const;
 		void setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch, uint32_t _indexInSearch);
 
+		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
+
+		bool selectPrevPreset(uint32_t _part);
+		bool selectNextPreset(uint32_t _part);
+
 		auto& getEditor() const { return m_editor; }
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
 
@@ -39,6 +44,8 @@ namespace jucePluginEditorLib::patchManager
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
 	private:
+		bool selectPreset(uint32_t _part, int _offset);
+
 		genericUI::Editor& m_editor;
 
 		Tree* m_tree = nullptr;

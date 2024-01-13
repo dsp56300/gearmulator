@@ -1,5 +1,6 @@
 #include "patchmanager.h"
 
+#include "datasourcetreeitem.h"
 #include "info.h"
 #include "list.h"
 #include "searchlist.h"
@@ -94,8 +95,110 @@ namespace jucePluginEditorLib::patchManager
 		activatePatch(_patch);
 	}
 
+	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
+	{
+		if(!isValid(_patch))
+			return false;
+
+		// assume that we already know the patch if the state is valid and the name is a match
+		if(m_state.isValid(_part))
+		{
+			const auto knownPatch = m_state.getPatch(_part);
+
+			if(knownPatch && knownPatch->name == _patch->name)
+				return true;
+		}
+
+		const auto& currentPatch = _patch;
+
+		// we've got a patch, but we do not know its search handle, i.e. which list it is part of, find the missing information
+
+		const auto patchDs = _patch->source.lock();
+
+		if(!patchDs)
+			return false;
+
+		pluginLib::patchDB::SearchHandle searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+
+		if(getCurrentPart() == _part)
+		{
+			if(const auto* item = m_tree->selectItem(*patchDs))
+				searchHandle = item->getSearchHandle();
+		}
+
+		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+		{
+			const auto search = getSearch(*patchDs);
+
+			if(!search)
+				return false;
+			searchHandle = search->handle;
+		}
+
+		const auto [patches, index] = m_state.getPatchesAndIndex(currentPatch, searchHandle);
+
+		if(index == pluginLib::patchDB::g_invalidProgram)
+			return false;
+
+		m_state.setSelectedPatch(_part, currentPatch, searchHandle, index);
+
+		if(getCurrentPart() == _part)
+		{
+			if(!m_list->setSelectedPatches({currentPatch}))
+				int foo=0;
+		}
+
+		return true;
+	}
+
+	bool PatchManager::selectPrevPreset(const uint32_t _part)
+	{
+		return selectPreset(_part, -1);
+	}
+
+	bool PatchManager::selectNextPreset(const uint32_t _part)
+	{
+		return selectPreset(_part, 1);
+	}
+
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
 	{
 		return m_editor.getTemplate(_name);
+	}
+
+	bool PatchManager::selectPreset(const uint32_t _part, const int _offset)
+	{
+		auto [patch, index] = m_state.getNeighbourPreset(_part, _offset);
+
+		if(!patch)
+		{
+			// if the current patch is unknown, request the current patch and find the source of it
+			const auto currentPatch = requestPatchForPart(_part);
+			if(!currentPatch)
+				return false;
+
+			if(!setSelectedPatch(_part, currentPatch))
+				return false;
+
+			const auto searchHandle = m_state.getSearchHandle(_part);
+
+			const auto& [p, i] = m_state.getNeighbourPreset(currentPatch, searchHandle, _offset);
+
+			if(!p)
+				return false;
+
+			patch = p;
+			index = i;
+		}
+
+		if(!activatePatch(patch, _part))
+			return false;
+
+		m_state.setSelectedPatch(_part, patch, m_state.getSearchHandle(_part), index);
+
+		if(getCurrentPart() == _part)
+			m_list->setSelectedPatches({patch});
+
+		return true;
 	}
 }

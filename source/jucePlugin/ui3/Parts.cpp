@@ -83,6 +83,10 @@ namespace genericVirusUI
 		if(m_presetPrev.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectPrevPreset(static_cast<uint32_t>(_part)))
+			return;
+
 		auto* pb = m_editor.getPatchBrowser();
 		if(!pb || !pb->selectPrevPreset())
 			m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
@@ -92,6 +96,10 @@ namespace genericVirusUI
 	{
 		if(m_presetNext.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
+
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectNextPreset(static_cast<uint32_t>(_part)))
+			return;
 
 		auto* pb = m_editor.getPatchBrowser();
 		if(!pb || !pb->selectNextPreset())
