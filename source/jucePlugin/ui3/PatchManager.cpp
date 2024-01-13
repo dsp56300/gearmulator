@@ -129,7 +129,7 @@ namespace genericVirusUI
 		patch->sysex = _sysex;
 
 		{
-			const auto frontOffset = idxVersion;	// remove bank number, program number and other stuff that we don't need
+			constexpr auto frontOffset = 9;			// remove bank number, program number and other stuff that we don't need, first index is the patch version
 			constexpr auto backOffset = 2;			// remove f7 and checksum
 			const juce::MD5 md5(_sysex.data() + frontOffset, _sysex.size() - frontOffset - backOffset);
 
