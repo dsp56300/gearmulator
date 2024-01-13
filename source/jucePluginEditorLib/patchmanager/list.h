@@ -45,7 +45,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		std::set<Patch> getSelectedPatches() const;
-		void setSelectedPatches(const std::set<Patch>& _patches);
+		bool setSelectedPatches(const std::set<Patch>& _patches);
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;

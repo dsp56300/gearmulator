@@ -153,10 +153,10 @@ namespace jucePluginEditorLib::patchManager
 		return result;
 	}
 
-	void List::setSelectedPatches(const std::set<Patch>& _patches)
+	bool List::setSelectedPatches(const std::set<Patch>& _patches)
 	{
 		if (_patches.empty())
-			return;
+			return false;
 
 		juce::SparseSet<int> selection;
 
@@ -174,8 +174,12 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 
+		if(selection.isEmpty())
+			return false;
+
 		setSelectedRows(selection);
 		scrollToEnsureRowIsOnscreen((minRow + maxRow) >> 1);
+		return true;
 	}
 
 	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
