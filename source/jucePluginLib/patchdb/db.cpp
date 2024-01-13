@@ -266,6 +266,21 @@ namespace pluginLib::patchDB
 		return it->second;
 	}
 
+	std::shared_ptr<Search> DB::getSearch(const DataSource& _dataSource)
+	{
+		std::shared_lock lock(m_searchesMutex);
+
+		for (const auto& it : m_searches)
+		{
+			const auto& search = it.second;
+			if(!search->request.sourceNode)
+				continue;
+			if(*search->request.sourceNode == _dataSource)
+				return search;
+		}
+		return nullptr;
+	}
+
 	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches)
 	{
 		if (_ds->type != SourceType::LocalStorage)

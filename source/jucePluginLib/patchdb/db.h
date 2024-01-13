@@ -51,6 +51,7 @@ namespace pluginLib::patchDB
 		SearchHandle findDatasourceForPatch(const PatchPtr& _patch, SearchCallback&& _callback);
 		void cancelSearch(uint32_t _handle);
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
+		std::shared_ptr<Search> getSearch(const DataSource& _dataSource);
 
 		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 		void removePatches(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
