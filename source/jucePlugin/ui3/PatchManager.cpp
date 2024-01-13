@@ -248,6 +248,49 @@ namespace genericVirusUI
 		return m_controller.getCurrentPart();
 	}
 
+	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const
+	{
+		pluginLib::MidiPacket::Data dataA, dataB;
+		pluginLib::MidiPacket::ParamValues parameterValuesA, parameterValuesB;
+
+		if (!m_controller.parseSingle(dataA, parameterValuesA, _a->sysex) || !m_controller.parseSingle(dataB, parameterValuesB, _b->sysex))
+			return false;
+
+		if(parameterValuesA.size() != parameterValuesB.size())
+			return false;
+
+		for (const auto& itA : parameterValuesA)
+		{
+			const auto& k = itA.first;
+			auto vA = itA.second;
+
+			const auto& itB = parameterValuesB.find(k);
+
+			if(itB == parameterValuesB.end())
+				return false;
+
+			auto vB = itB->second;
+
+			if(vA != vB)
+			{
+				// parameters might be out of range because some dumps have values that are out of range indeed, clamp to valid range and compare again
+				const auto* param = m_controller.getParameter(itB->first.second);
+				if(!param)
+					return false;
+
+				if(param->getDescription().isNonPartSensitive())
+					continue;
+
+				vA = static_cast<uint8_t>(param->getDescription().range.clipValue(vA));
+				vB = static_cast<uint8_t>(param->getDescription().range.clipValue(vB));
+
+				if(vA != vB)
+					return false;
+			}
+		}
+		return true;
+	}
+
 	void PatchManager::addRomPatches()
 	{
 		const auto& singles = m_controller.getSinglePresets();

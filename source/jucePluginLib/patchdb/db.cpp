@@ -243,6 +243,13 @@ namespace pluginLib::patchDB
 		return handle;
 	}
 
+	SearchHandle DB::findDatasourceForPatch(const PatchPtr& _patch, SearchCallback&& _callback)
+	{
+		SearchRequest req;
+		req.patch = _patch;
+		return search(std::move(req), std::move(_callback));
+	}
+
 	void DB::cancelSearch(const uint32_t _handle)
 	{
 		std::unique_lock lock(m_searchesMutex);
@@ -814,6 +821,42 @@ namespace pluginLib::patchDB
 	bool DB::executeSearch(Search& _search)
 	{
 		_search.state = SearchState::Running;
+
+		const auto reqPatch = _search.request.patch;
+		if(reqPatch)
+		{
+			// we're searching by patch content to find patches within datasources
+			SearchResult results;
+
+			std::shared_lock lockDs(m_dataSourcesMutex);
+
+			for (const auto& [_, ds] : m_dataSources)
+			{
+				for (const auto& patch : ds->patches)
+				{
+					if(patch->hash == reqPatch->hash)
+						results.insert(patch);
+					else if(patch->sysex.size() == reqPatch->sysex.size() && patch->name == reqPatch->name)
+					{
+						// if patches are not 100% identical, they might still be the same patch as unknown/unused data in dumps might have different values
+						if(equals(patch, reqPatch))
+							results.insert(patch);
+					}
+				}
+			}
+
+			if(!results.empty())
+			{
+				std::unique_lock searchLock(_search.resultsMutex);
+				std::swap(_search.results, results);
+			}
+
+			_search.setCompleted();
+
+			std::unique_lock lockUi(m_uiMutex);
+			m_dirty.searches.insert(_search.handle);
+			return true;
+		}
 
 		auto searchInDs = [&](const DataSourceNodePtr& _ds)
 		{
