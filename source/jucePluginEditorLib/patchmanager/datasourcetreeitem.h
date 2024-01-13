@@ -31,6 +31,8 @@ namespace jucePluginEditorLib::patchManager
 
 		bool beginEdit() override;
 
+		const auto& getDataSource() const { return m_dataSource; }
+
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};

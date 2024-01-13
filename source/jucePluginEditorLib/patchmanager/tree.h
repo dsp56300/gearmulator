@@ -6,11 +6,13 @@
 
 namespace pluginLib::patchDB
 {
+	struct DataSource;
 	struct Dirty;
 }
 
 namespace jucePluginEditorLib::patchManager
 {
+	class DatasourceTreeItem;
 	class PatchManager;
 	class GroupTreeItem;
 
@@ -31,6 +33,8 @@ namespace jucePluginEditorLib::patchManager
 		bool keyPressed(const juce::KeyPress& _key) override;
 
 		void setFilter(const std::string& _filter);
+
+		DatasourceTreeItem* selectItem(const pluginLib::patchDB::DataSource& _ds);
 
 	private:
 		void addGroup(GroupType _type);
