@@ -41,7 +41,7 @@ namespace genericVirusUI
 		const auto dir = configOptions.getDefaultFile().getParentDirectory();
 
 //#if defined(_MSC_VER) && defined(_DEBUG)
-		m_patchManager.reset(new PatchManager(*this, findComponent("page_presets"), dir));
+		setPatchManager(new PatchManager(*this, findComponent("page_presets"), dir));
 //#else
 //		m_patchBrowser.reset(new PatchBrowser(*this));
 //#endif
@@ -159,11 +159,6 @@ namespace genericVirusUI
 	PatchBrowser* VirusEditor::getPatchBrowser() const
 	{
 		return m_patchBrowser.get();
-	}
-
-	PatchManager* VirusEditor::getPatchManager() const
-	{
-		return m_patchManager.get();
 	}
 
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const

@@ -7,6 +7,8 @@
 #include "../synthLib/os.h"
 #include "../synthLib/sysexToMidi.h"
 
+#include "patchmanager/patchmanager.h"
+
 namespace jucePluginEditorLib
 {
 	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
@@ -16,6 +18,8 @@ namespace jucePluginEditorLib
 		, m_skinFolder(std::move(_skinFolder))
 	{
 	}
+
+	Editor::~Editor() = default;
 
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
@@ -120,6 +124,11 @@ namespace jucePluginEditorLib
 	{
 		const auto &[title, msg] = getDemoRestrictionText();
 		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
+	}
+
+	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
+	{
+		m_patchManager.reset(_patchManager);
 	}
 
 	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)

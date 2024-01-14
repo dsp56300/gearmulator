@@ -50,7 +50,6 @@ namespace genericVirusUI
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
 		PatchBrowser* getPatchBrowser() const;
-		PatchManager* getPatchManager() const;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
@@ -82,7 +81,6 @@ namespace genericVirusUI
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
 		std::unique_ptr<PatchBrowser> m_patchBrowser;
-		std::unique_ptr<PatchManager> m_patchManager;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;

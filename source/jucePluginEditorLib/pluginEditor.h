@@ -11,6 +11,11 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	namespace patchManager
+	{
+		class PatchManager;
+	}
+
 	class Processor;
 
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
@@ -23,6 +28,12 @@ namespace jucePluginEditorLib
 		};
 
 		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
+		~Editor() override;
+
+		Editor(const Editor&) = delete;
+		Editor(Editor&&) = delete;
+		Editor& operator = (const Editor&) = delete;
+		Editor& operator = (Editor&&) = delete;
 
 		virtual const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) = 0;
 
@@ -38,6 +49,13 @@ namespace jucePluginEditorLib
 		void showDemoRestrictionMessageBox() const;
 
 		Processor& getProcessor() const { return m_processor; }
+
+		void setPatchManager(patchManager::PatchManager* _patchManager);
+
+		patchManager::PatchManager* getPatchManager() const
+		{
+			return m_patchManager.get();
+		}
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
@@ -58,5 +76,6 @@ namespace jucePluginEditorLib
 		std::map<std::string, std::vector<char>> m_fileCache;
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
+		std::unique_ptr<patchManager::PatchManager> m_patchManager;
 	};
 }
