@@ -34,7 +34,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void setFilter(const std::string& _filter);
 
-		DatasourceTreeItem* selectItem(const pluginLib::patchDB::DataSource& _ds);
+		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds);
 
 	private:
 		void addGroup(GroupType _type);

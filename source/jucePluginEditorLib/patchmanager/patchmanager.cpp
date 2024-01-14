@@ -120,10 +120,12 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::SearchHandle searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 
-		if(getCurrentPart() == _part)
+		if(auto* item = m_tree->getItem(*patchDs))
 		{
-			if(const auto* item = m_tree->selectItem(*patchDs))
-				searchHandle = item->getSearchHandle();
+			searchHandle = item->getSearchHandle();
+
+			if(getCurrentPart() == _part)
+				item->setSelected(true, true);
 		}
 
 		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)

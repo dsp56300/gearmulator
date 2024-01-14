@@ -143,13 +143,13 @@ namespace jucePluginEditorLib::patchManager
 			it.second->setFilter(_filter);
 	}
 
-	DatasourceTreeItem* Tree::selectItem(const pluginLib::patchDB::DataSource& _ds)
+	DatasourceTreeItem* Tree::getItem(const pluginLib::patchDB::DataSource& _ds)
 	{
 		const auto it = m_groupItems.find(GroupType::DataSources);
 		if(it == m_groupItems.end())
 			return nullptr;
 		const auto* item = it->second;
-		return item->selectItem(_ds);
+		return item->getItem(_ds);
 	}
 
 	void Tree::addGroup(const GroupType _type)

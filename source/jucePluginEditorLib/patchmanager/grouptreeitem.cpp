@@ -227,15 +227,12 @@ namespace jucePluginEditorLib::patchManager
 		return false;
 	}
 
-	DatasourceTreeItem* GroupTreeItem::selectItem(const pluginLib::patchDB::DataSource& _ds) const
+	DatasourceTreeItem* GroupTreeItem::getItem(const pluginLib::patchDB::DataSource& _ds) const
 	{
 		for (const auto& [_, item] : m_itemsByDataSource)
 		{
 			if(*item->getDataSource() == _ds)
-			{
-				item->setSelected(true, true);
 				return item;
-			}
 		}
 		return nullptr;
 	}
