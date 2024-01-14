@@ -129,14 +129,29 @@ namespace jucePluginEditorLib
 	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
 	{
 		m_patchManager.reset(_patchManager);
+
+		if(_patchManager && !m_instanceConfig.empty())
+			m_patchManager->setPerInstanceConfig(m_instanceConfig);
 	}
 
 	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 	{
+		m_instanceConfig = _data;
+
+		if(m_patchManager)
+			m_patchManager->setPerInstanceConfig(_data);
 	}
 
 	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
 	{
+		if(m_patchManager)
+		{
+			m_instanceConfig.clear();
+			m_patchManager->getPerInstanceConfig(m_instanceConfig);
+		}
+
+		if(!m_instanceConfig.empty())
+			_data.insert(_data.end, m_instanceConfig.begin(), m_instanceConfig.end());
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

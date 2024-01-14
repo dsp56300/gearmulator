@@ -9,6 +9,8 @@
 
 #include "../pluginEditor.h"
 
+#include "../../jucePluginLib/types.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	constexpr int g_scale = 2;
@@ -174,6 +176,25 @@ namespace jucePluginEditorLib::patchManager
 
 		for(uint32_t i=0; i<16; ++i)
 			updateStateAsync(i);
+	}
+
+	void PatchManager::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+	{
+		if(_data.empty())
+			return;
+		pluginLib::PluginStream s(_data);
+		const auto version = s.read<uint32_t>();
+		if(version != 1)
+			return;
+		m_state.setConfig(s);
+	}
+
+	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	{
+		pluginLib::PluginStream s;
+		s.write<uint32_t>(1);	// version
+		m_state.getConfig(s);
+		s.toVector(_data);
 	}
 
 	void PatchManager::updateStateAsync(uint32_t _part)

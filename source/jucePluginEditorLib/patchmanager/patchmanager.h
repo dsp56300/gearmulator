@@ -45,6 +45,9 @@ namespace jucePluginEditorLib::patchManager
 
 		void onLoadFinished() override;
 
+		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
+		void getPerInstanceConfig(std::vector<uint8_t>& _data);
+
 	protected:
 		void updateStateAsync(uint32_t _part);
 		pluginLib::patchDB::SearchHandle updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);

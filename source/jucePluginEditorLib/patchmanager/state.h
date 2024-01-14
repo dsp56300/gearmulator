@@ -3,6 +3,7 @@
 #include <array>
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
+#include "../../jucePluginLib/types.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -19,6 +20,9 @@ namespace jucePluginEditorLib::patchManager
 		const auto& getIndex() const { return m_searchHandle; }
 
 		bool isValid() const { return m_patch && m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle && m_index != pluginLib::patchDB::g_invalidProgram;}
+
+		void setConfig(pluginLib::PluginStream& _s);
+		void getConfig(pluginLib::PluginStream& _s);
 
 	private:
 		pluginLib::patchDB::PatchPtr m_patch;
@@ -44,6 +48,9 @@ namespace jucePluginEditorLib::patchManager
 		bool isValid(uint32_t _part) const;
 
 		std::pair<std::vector<pluginLib::patchDB::PatchPtr>, uint32_t> getPatchesAndIndex(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _searchHandle) const;
+
+		void setConfig(pluginLib::PluginStream& _s);
+		void getConfig(pluginLib::PluginStream& _s);
 
 	private:
 		PatchManager& m_patchManager;

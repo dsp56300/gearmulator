@@ -77,5 +77,6 @@ namespace jucePluginEditorLib
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
+		std::vector<uint8_t> m_instanceConfig;
 	};
 }

@@ -12,6 +12,14 @@ namespace jucePluginEditorLib::patchManager
 		m_index = _index;
 	}
 
+	void PartState::setConfig(pluginLib::PluginStream& _s)
+	{
+	}
+
+	void PartState::getConfig(pluginLib::PluginStream& _s)
+	{
+	}
+
 	void State::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _searchHandle, uint32_t _indexInSearch)
 	{
 		if(_part >= static_cast<int>(m_parts.size()))
@@ -116,5 +124,31 @@ namespace jucePluginEditorLib::patchManager
 			index = static_cast<uint32_t>(it - patches.begin());
 
 		return {patches, index};
+	}
+
+	void State::setConfig(pluginLib::PluginStream& _s)
+	{
+		const auto version = _s.read<uint32_t>();
+		if(version != 1)
+			return;
+
+		const auto numParts = _s.read<uint32_t>();
+
+		for(size_t i=0; i<numParts; ++i)
+		{
+			if(i < m_parts.size())
+			{
+				m_parts[i].setConfig(_s);
+			}
+			else
+			{
+				PartState unused;
+				unused.setConfig(_s);
+			}
+		}
+	}
+
+	void State::getConfig(pluginLib::PluginStream& _s)
+	{
 	}
 }
