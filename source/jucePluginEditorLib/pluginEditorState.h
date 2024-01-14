@@ -78,7 +78,7 @@ namespace jucePluginEditorLib
 		void loadSkin(const Skin& _skin);
 		void setGuiScale(int _scale) const;
 
-		std::unique_ptr<juce::Component> m_virusEditor;
+		std::unique_ptr<juce::Component> m_editor;
 		Skin m_currentSkin;
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
