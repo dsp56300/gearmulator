@@ -147,10 +147,7 @@ namespace jucePluginEditorLib::patchManager
 		m_state.setSelectedPatch(_part, currentPatch, searchHandle, index);
 
 		if(getCurrentPart() == _part)
-		{
-			if(!m_list->setSelectedPatches({currentPatch}))
-				int foo=0;
-		}
+			m_list->setSelectedPatches({currentPatch});
 
 		return true;
 	}
