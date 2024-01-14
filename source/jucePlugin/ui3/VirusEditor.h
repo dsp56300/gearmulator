@@ -42,7 +42,6 @@ namespace genericVirusUI
 
 		void setPart(size_t _part);
 
-		AudioPluginAudioProcessor& getProcessor() const { return m_processor; }
 		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 
 		Virus::Controller& getController() const;

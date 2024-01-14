@@ -219,11 +219,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 //==============================================================================
 
-juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
+jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 {
-	if(!m_editorState)
-		m_editorState.reset(new PluginEditorState(*this, getController()));
-    return new jucePluginEditorLib::EditorWindow(*this, *m_editorState, getConfig());
+	return new PluginEditorState(*this, getController());
 }
 
 void AudioPluginAudioProcessor::updateLatencySamples()

@@ -55,6 +55,17 @@ void PluginEditorState::loadDefaultSkin()
 	loadSkin(skin);
 }
 
+void PluginEditorState::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+{
+	m_instanceConfig = _data;
+}
+
+void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
+{
+	if(!m_instanceConfig.empty())
+		_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+}
+
 void PluginEditorState::loadSkin(const Skin& _skin)
 {
 	if(m_currentSkin == _skin)
