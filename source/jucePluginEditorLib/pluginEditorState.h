@@ -41,6 +41,12 @@ namespace jucePluginEditorLib
 		explicit PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins);
 		virtual ~PluginEditorState() = default;
 
+		PluginEditorState(PluginEditorState&&) = delete;
+		PluginEditorState(const PluginEditorState&) = delete;
+
+		PluginEditorState& operator = (PluginEditorState&&) = delete;
+		PluginEditorState& operator = (const PluginEditorState&) = delete;
+
 		void exportCurrentSkin() const;
 		Skin readSkinFromConfig() const;
 		void writeSkinToConfig(const Skin& _skin) const;

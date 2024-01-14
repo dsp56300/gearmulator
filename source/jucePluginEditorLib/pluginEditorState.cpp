@@ -231,7 +231,7 @@ void PluginEditorState::exportCurrentSkin() const
 	if(!m_editor)
 		return;
 
-	auto* editor = dynamic_cast<genericUI::Editor*>(m_editor.get());
+	const auto* editor = dynamic_cast<const genericUI::Editor*>(m_editor.get());
 
 	if(!editor)
 		return;
