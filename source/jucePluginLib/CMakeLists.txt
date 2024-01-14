@@ -12,6 +12,7 @@ set(SOURCES
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
 	processor.cpp processor.h
+	types.h
 )
 
 set(SOURCES_PATCHDB
