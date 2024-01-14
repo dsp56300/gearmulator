@@ -122,6 +122,14 @@ namespace jucePluginEditorLib
 		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
 	}
 
+	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+	{
+	}
+
+	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	{
+	}
+
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
 		if(!m_skinFolder.empty())

@@ -58,10 +58,19 @@ void PluginEditorState::loadDefaultSkin()
 void PluginEditorState::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 {
 	m_instanceConfig = _data;
+
+	if(m_editor && !m_instanceConfig.empty())
+		getEditor()->setPerInstanceConfig(m_instanceConfig);
 }
 
 void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 {
+	if(m_editor)
+	{
+		m_instanceConfig.clear();
+		getEditor()->getPerInstanceConfig(m_instanceConfig);
+	}
+
 	if(!m_instanceConfig.empty())
 		_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
 }
@@ -76,6 +85,9 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 	if (m_editor)
 	{
+		m_instanceConfig.clear();
+		getEditor()->getPerInstanceConfig(m_instanceConfig);
+
 		m_parameterBinding.clearBindings();
 
 		auto* parent = m_editor->getParentComponent();
@@ -97,6 +109,9 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor.get());
+
+		if(!m_instanceConfig.empty())
+			getEditor()->setPerInstanceConfig(m_instanceConfig);
 	}
 	catch(const std::runtime_error& _err)
 	{
@@ -113,6 +128,11 @@ void PluginEditorState::setGuiScale(int _scale) const
 {
 	if(evSetGuiScale)
 		evSetGuiScale(_scale);
+}
+
+genericUI::Editor* PluginEditorState::getEditor() const
+{
+	return static_cast<genericUI::Editor*>(m_editor.get());
 }
 
 void PluginEditorState::openMenu()

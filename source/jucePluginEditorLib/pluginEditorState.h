@@ -80,6 +80,8 @@ namespace jucePluginEditorLib
 		void loadSkin(const Skin& _skin);
 		void setGuiScale(int _scale) const;
 
+		genericUI::Editor* getEditor() const;
+
 		std::unique_ptr<juce::Component> m_editor;
 		Skin m_currentSkin;
 		float m_rootScale = 1.0f;

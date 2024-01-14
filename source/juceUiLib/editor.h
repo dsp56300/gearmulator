@@ -84,6 +84,9 @@ namespace genericUI
 
 		std::shared_ptr<UiObject> getTemplate(const std::string& _name) const;
 
+		virtual void setPerInstanceConfig(const std::vector<uint8_t>& _data) {}
+		virtual void getPerInstanceConfig(std::vector<uint8_t>& _data) {}
+
 	private:
 		EditorInterface& m_interface;
 

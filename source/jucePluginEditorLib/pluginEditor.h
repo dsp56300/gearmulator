@@ -39,6 +39,9 @@ namespace jucePluginEditorLib
 
 		Processor& getProcessor() const { return m_processor; }
 
+		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
+		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
+
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;
