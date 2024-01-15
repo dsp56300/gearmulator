@@ -151,7 +151,7 @@ namespace jucePluginEditorLib
 		}
 
 		if(!m_instanceConfig.empty())
-			_data.insert(_data.end, m_instanceConfig.begin(), m_instanceConfig.end());
+			_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

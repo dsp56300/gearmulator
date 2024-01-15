@@ -177,8 +177,8 @@ namespace genericVirusUI
 		updatePresetName();
 		updatePlayModeButtons();
 		updateDeviceModel();
-		if(m_patchManager)
-			m_patchManager->onProgramChanged(_part);
+		if(getPatchManager())
+			static_cast<PatchManager*>(getPatchManager())->onProgramChanged(_part);
 	}
 
 	void VirusEditor::onPlayModeChanged()
