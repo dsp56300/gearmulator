@@ -59,6 +59,9 @@ namespace pluginLib::patchDB
 
 	std::string PatchKey::toString() const
 	{
+		if(!isValid())
+			return {};
+
 		std::stringstream ss;
 
 		if (source->type != SourceType::Invalid)
