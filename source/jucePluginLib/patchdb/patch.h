@@ -54,7 +54,7 @@ namespace pluginLib::patchDB
 	struct PatchKey
 	{
 		DataSourceNodePtr source;
-		PatchHash hash;
+		PatchHash hash{0};
 		uint32_t program = g_invalidProgram;
 
 		PatchKey() = default;
