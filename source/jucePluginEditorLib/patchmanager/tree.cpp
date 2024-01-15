@@ -145,7 +145,7 @@ namespace jucePluginEditorLib::patchManager
 
 	DatasourceTreeItem* Tree::getItem(const pluginLib::patchDB::DataSource& _ds)
 	{
-		const auto it = m_groupItems.find(GroupType::DataSources);
+		const auto it = m_groupItems.find(_ds.type == pluginLib::patchDB::SourceType::LocalStorage ?  GroupType::LocalStorage : GroupType::DataSources);
 		if(it == m_groupItems.end())
 			return nullptr;
 		const auto* item = it->second;
