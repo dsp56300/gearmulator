@@ -154,6 +154,14 @@ namespace jucePluginEditorLib
 			_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
 	}
 
+	void Editor::setCurrentPart(uint8_t _part)
+	{
+		genericUI::Editor::setCurrentPart(_part);
+
+		if(m_patchManager)
+			m_patchManager->setCurrentPart(_part);
+	}
+
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
 		if(!m_skinFolder.empty())

@@ -78,7 +78,7 @@ namespace genericUI
 
 		static void setEnabled(juce::Component& _component, bool _enable);
 
-		void setCurrentPart(uint8_t _part);
+		virtual void setCurrentPart(uint8_t _part);
 
 		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
 

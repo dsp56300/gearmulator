@@ -243,6 +243,14 @@ namespace jucePluginEditorLib::patchManager
 		updateStateAsync(_part, patch);
 	}
 
+	void PatchManager::setCurrentPart(uint32_t _part)
+	{
+		if(!m_state.isValid(_part))
+			return;
+
+		setSelectedPatch(_part, m_state.getPatch(_part));
+	}
+
 	void PatchManager::updateStateAsync(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		if(!isValid(_patch))

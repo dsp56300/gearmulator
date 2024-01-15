@@ -52,6 +52,8 @@ namespace jucePluginEditorLib::patchManager
 
 		void onProgramChanged(uint32_t _part);
 
+		void setCurrentPart(uint32_t _part);
+
 	protected:
 		void updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 
