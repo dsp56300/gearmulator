@@ -77,10 +77,17 @@ namespace pluginLib::patchDB
 				return true;
 			if (program > _other.program)
 				return false;
-			if (source < _other.source)
+			if(!source && _other.source)
 				return true;
-			if (source > _other.source)
+			if(source && !_other.source)
 				return false;
+			if(source)
+			{
+				if (*source < *_other.source)
+					return true;
+				if (*source > *_other.source)
+					return false;
+			}
 			if (hash < _other.hash)
 				return true;
 			return false;
