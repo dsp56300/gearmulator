@@ -132,7 +132,7 @@ namespace jucePluginEditorLib::patchManager
 		const auto patches = getSelectedPatches();
 
 		if(patches.size() == 1)
-			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle, lastRowSelected);
+			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
 	}
 
 	std::set<List::Patch> List::getSelectedPatches() const
@@ -158,6 +158,18 @@ namespace jucePluginEditorLib::patchManager
 		if (_patches.empty())
 			return false;
 
+		std::set<pluginLib::patchDB::PatchKey> patches;
+
+		for (const auto& patch : _patches)
+			patches.insert(pluginLib::patchDB::PatchKey(*patch));
+		return setSelectedPatches(patches);
+	}
+
+	bool List::setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _patches)
+	{
+		if (_patches.empty())
+			return false;
+
 		juce::SparseSet<int> selection;
 
 		int maxRow = std::numeric_limits<int>::min();
@@ -165,7 +177,9 @@ namespace jucePluginEditorLib::patchManager
 
 		for(int i=0; i<static_cast<int>(getPatches().size()); ++i)
 		{
-			if (_patches.find(getPatch(i)) != _patches.end())
+			const auto key = pluginLib::patchDB::PatchKey(*getPatch(i));
+
+			if (_patches.find(key) != _patches.end())
 			{
 				selection.addRange({ i, i + 1 });
 

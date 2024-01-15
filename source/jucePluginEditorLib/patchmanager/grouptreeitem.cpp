@@ -168,7 +168,7 @@ namespace jucePluginEditorLib::patchManager
 					}
 				});
 			}
-			else if(m_type ==GroupType::LocalStorage)
+			else if(m_type == GroupType::LocalStorage)
 			{
 				menu.addItem("Create...", [this]
 				{

@@ -88,13 +88,22 @@ namespace jucePluginEditorLib::patchManager
 		m_list->setContent(_handle);
 	}
 
-	void PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch, uint32_t _indexInSearch)
+	bool PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::SearchHandle _fromSearch)
 	{
-		m_info->setPatch(_patch);
+		return setSelectedPatch(getCurrentPart(), _patch, _fromSearch);
+	}
 
-		m_state.setSelectedPatch(getCurrentPart(), _patch, _fromSearch, _indexInSearch);
+	bool PatchManager::setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch)
+	{
+		if(!activatePatch(_patch, _part))
+			return false;
 
-		activatePatch(_patch);
+		m_state.setSelectedPatch(getCurrentPart(), pluginLib::patchDB::PatchKey(*_patch), _fromSearch);
+
+		if(_part == getCurrentPart())
+			m_info->setPatch(_patch);
+
+		return true;
 	}
 
 	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
@@ -102,64 +111,70 @@ namespace jucePluginEditorLib::patchManager
 		if(!isValid(_patch))
 			return false;
 
-		// assume that we already know the patch if the state is valid and the name is a match
-		if(m_state.isValid(_part))
-		{
-			const auto knownPatch = m_state.getPatch(_part);
-
-			if(knownPatch && knownPatch->name == _patch->name)
-				return true;
-		}
-
-		const auto& currentPatch = _patch;
-
-		// we've got a patch, but we do not know its search handle, i.e. which list it is part of, find the missing information
-
 		const auto patchDs = _patch->source.lock();
 
 		if(!patchDs)
 			return false;
 
+		if(!setSelectedPatch(_part, pluginLib::patchDB::PatchKey(*_patch)))
+			return false;
+
+		return true;
+	}
+
+	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchKey& _patch)
+	{
+		// we've got a patch, but we do not know its search handle, i.e. which list it is part of, find the missing information
+
+		if(!_patch.isValid())
+			return false;
+
 		pluginLib::patchDB::SearchHandle searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 
-		if(auto* item = m_tree->getItem(*patchDs))
+		if(auto* item = m_tree->getItem(*_patch.source))
 		{
 			searchHandle = item->getSearchHandle();
 
+			// select the tree item that contains the data source and expand all parents to make it visible
 			if(getCurrentPart() == _part)
+			{
 				item->setSelected(true, true);
+
+				auto* parent = item->getParentItem();
+				while(parent)
+				{
+					parent->setOpen(true);
+					parent = parent->getParentItem();
+				}
+			}
 		}
 
 		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
 		{
-			const auto search = getSearch(*patchDs);
+			const auto search = getSearch(*_patch.source);
 
 			if(!search)
 				return false;
+
 			searchHandle = search->handle;
 		}
 
-		const auto [patches, index] = m_state.getPatchesAndIndex(currentPatch, searchHandle);
-
-		if(index == pluginLib::patchDB::g_invalidProgram)
-			return false;
-
-		m_state.setSelectedPatch(_part, currentPatch, searchHandle, index);
+		m_state.setSelectedPatch(_part, _patch, searchHandle);
 
 		if(getCurrentPart() == _part)
-			m_list->setSelectedPatches({currentPatch});
+			m_list->setSelectedPatches({_patch});
 
 		return true;
 	}
 
 	bool PatchManager::selectPrevPreset(const uint32_t _part)
 	{
-		return selectPreset(_part, -1);
+		return selectPatch(_part, -1);
 	}
 
 	bool PatchManager::selectNextPreset(const uint32_t _part)
 	{
-		return selectPreset(_part, 1);
+		return selectPatch(_part, 1);
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
@@ -171,19 +186,39 @@ namespace jucePluginEditorLib::patchManager
 	{
 		DB::onLoadFinished();
 
-		for(uint32_t i=0; i<16; ++i)
-			updateStateAsync(i);
+		for(uint32_t i=0; i<m_state.getPartCount(); ++i)
+		{
+			const auto p = m_state.getPatch(i);
+
+			// If the state has been deserialized, the patch key is valid but the search handle is not. Only restore if that is the case
+			if(p.isValid() && m_state.getSearchHandle(i) == pluginLib::patchDB::g_invalidSearchHandle)
+			{
+				if(!setSelectedPatch(i, p))
+					m_state.clear(i);
+			}
+			else if(!m_state.isValid(i))
+			{
+				// otherwise, try to restore from the currently loaded patch
+				updateStateAsync(i, requestPatchForPart(i));
+			}
+		}
 	}
 
 	void PatchManager::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 	{
 		if(_data.empty())
 			return;
-		pluginLib::PluginStream s(_data);
-		const auto version = s.read<uint32_t>();
-		if(version != 1)
-			return;
-		m_state.setConfig(s);
+		try
+		{
+			pluginLib::PluginStream s(_data);
+			const auto version = s.read<uint32_t>();
+			if(version != 1)
+				return;
+			m_state.setConfig(s);
+		}
+		catch(std::range_error&)
+		{
+		}
 	}
 
 	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data)
@@ -194,8 +229,11 @@ namespace jucePluginEditorLib::patchManager
 		s.toVector(_data);
 	}
 
-	void PatchManager::updateStateAsync(uint32_t _part)
+	void PatchManager::onProgramChanged(const uint32_t _part)
 	{
+		if(isLoading())
+			return;
+		return;
 		pluginLib::patchDB::Data data;
 		if(!requestPatchForPart(data, _part))
 			return;
@@ -205,31 +243,22 @@ namespace jucePluginEditorLib::patchManager
 		updateStateAsync(_part, patch);
 	}
 
-	pluginLib::patchDB::SearchHandle PatchManager::updateStateAsync(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
+	void PatchManager::updateStateAsync(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		if(!isValid(_patch))
-			return pluginLib::patchDB::g_invalidSearchHandle;
-
-		// assume that we already know the patch if the state is valid and the name is a match
-		if(m_state.isValid(_part))
-		{
-			const auto knownPatch = m_state.getPatch(_part);
-
-			if(knownPatch && knownPatch->name == _patch->name)
-				return pluginLib::patchDB::g_invalidSearchHandle;
-		}
+			return;
 
 		const auto patchDs = _patch->source.lock();
 
 		if(patchDs)
 		{
 			setSelectedPatch(_part, _patch);
-			return pluginLib::patchDB::g_invalidSearchHandle;
+			return;
 		}
 
 		// we've got a patch, but we do not know its datasource and search handle, find the data source by executing a search
 
-		const auto searchHandle = findDatasourceForPatch(_patch, [this, _part](const pluginLib::patchDB::Search& _search)
+		findDatasourceForPatch(_patch, [this, _part](const pluginLib::patchDB::Search& _search)
 		{
 			const auto handle = _search.handle;
 
@@ -267,49 +296,23 @@ namespace jucePluginEditorLib::patchManager
 
 			const auto currentPatch = results.front();
 
-			runOnUiThread([this, _part, currentPatch, handle]
+			const auto key = pluginLib::patchDB::PatchKey(*currentPatch);
+
+			runOnUiThread([this, _part, key, handle]
 			{
 				cancelSearch(handle);
-				updateStateAsync(_part, currentPatch);
+				setSelectedPatch(_part, key);
 			});
 		});
-
-		return searchHandle;
 	}
 
-	bool PatchManager::selectPreset(const uint32_t _part, const int _offset)
+	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
 	{
-		auto [patch, index] = m_state.getNeighbourPreset(_part, _offset);
+		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
 
 		if(!patch)
-		{
-			// if the current patch is unknown, request the current patch and find the source of it
-			const auto currentPatch = requestPatchForPart(_part);
-			if(!currentPatch)
-				return false;
-
-			if(!setSelectedPatch(_part, currentPatch))
-				return false;
-
-			const auto searchHandle = m_state.getSearchHandle(_part);
-
-			const auto& [p, i] = m_state.getNeighbourPreset(currentPatch, searchHandle, _offset);
-
-			if(!p)
-				return false;
-
-			patch = p;
-			index = i;
-		}
-
-		if(!activatePatch(patch, _part))
 			return false;
 
-		m_state.setSelectedPatch(_part, patch, m_state.getSearchHandle(_part), index);
-
-		if(getCurrentPart() == _part)
-			m_list->setSelectedPatches({patch});
-
-		return true;
+		return setSelectedPatch(_part, patch, m_state.getSearchHandle(_part));
 	}
 }

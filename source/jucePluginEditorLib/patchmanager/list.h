@@ -6,6 +6,7 @@
 
 namespace pluginLib::patchDB
 {
+	struct PatchKey;
 	struct Search;
 }
 
@@ -46,6 +47,7 @@ namespace jucePluginEditorLib::patchManager
 
 		std::set<Patch> getSelectedPatches() const;
 		bool setSelectedPatches(const std::set<Patch>& _patches);
+		bool setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _patches);
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;

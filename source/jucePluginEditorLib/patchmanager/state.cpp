@@ -5,37 +5,35 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	void PartState::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _searchHandle, uint32_t _index)
+	void PartState::setSelectedPatch(const pluginLib::patchDB::PatchKey& _patch, uint32_t _searchHandle)
 	{
 		m_patch = _patch;
 		m_searchHandle = _searchHandle;
-		m_index = _index;
 	}
 
 	void PartState::setConfig(pluginLib::PluginStream& _s)
 	{
+		const auto patchKey = _s.readString();
+		m_patch = pluginLib::patchDB::PatchKey::fromString(patchKey);
 	}
 
-	void PartState::getConfig(pluginLib::PluginStream& _s)
+	void PartState::getConfig(pluginLib::PluginStream& _s) const
 	{
+		_s.write(m_patch.toString());
 	}
 
-	void State::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _searchHandle, uint32_t _indexInSearch)
+	void PartState::clear()
 	{
-		if(_part >= static_cast<int>(m_parts.size()))
+		m_patch = {};
+		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+	}
+
+	void State::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchKey& _patch, const uint32_t _searchHandle)
+	{
+		if(_part >= m_parts.size())
 			return;
 
-		if (_indexInSearch == pluginLib::patchDB::g_invalidProgram)
-		{
-			const auto result = getPatchesAndIndex(_patch, _searchHandle);
-
-			const auto index = result.second;
-
-			if(index != pluginLib::patchDB::g_invalidProgram)
-				_indexInSearch = index;
-		}
-
-		m_parts[_part].setSelectedPatch(_patch, _searchHandle, _indexInSearch);
+		m_parts[_part].setSelectedPatch(_patch, _searchHandle);
 	}
 
 	std::pair<pluginLib::patchDB::PatchPtr, uint32_t> State::getNeighbourPreset(const uint32_t _part, const int _offset) const
@@ -48,7 +46,7 @@ namespace jucePluginEditorLib::patchManager
 		return getNeighbourPreset(part.getPatch(), part.getSearchHandle(), _offset);
 	}
 
-	std::pair<pluginLib::patchDB::PatchPtr, uint32_t> State::getNeighbourPreset(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::SearchHandle _searchHandle, const int _offset) const
+	std::pair<pluginLib::patchDB::PatchPtr, uint32_t> State::getNeighbourPreset(const pluginLib::patchDB::PatchKey& _patch, const pluginLib::patchDB::SearchHandle _searchHandle, const int _offset) const
 	{
 		const auto result = getPatchesAndIndex(_patch, _searchHandle);
 
@@ -72,10 +70,10 @@ namespace jucePluginEditorLib::patchManager
 		return {patches[i], i};
 	}
 
-	pluginLib::patchDB::PatchPtr State::getPatch(const uint32_t _part) const
+	pluginLib::patchDB::PatchKey State::getPatch(const uint32_t _part) const
 	{
 		if(_part >= m_parts.size())
-			return nullptr;
+			return {};
 		return m_parts[_part].getPatch();
 	}
 
@@ -86,13 +84,6 @@ namespace jucePluginEditorLib::patchManager
 		return m_parts[_part].getSearchHandle();
 	}
 
-	uint32_t State::getIndex(const uint32_t _part) const
-	{
-		if(_part >= m_parts.size())
-			return pluginLib::patchDB::g_invalidProgram;
-		return m_parts[_part].getIndex();
-	}
-
 	bool State::isValid(const uint32_t _part) const
 	{
 		if(_part >= m_parts.size())
@@ -100,7 +91,7 @@ namespace jucePluginEditorLib::patchManager
 		return m_parts[_part].isValid();
 	}
 
-	std::pair<std::vector<pluginLib::patchDB::PatchPtr>, uint32_t> State::getPatchesAndIndex(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::SearchHandle _searchHandle) const
+	std::pair<std::vector<pluginLib::patchDB::PatchPtr>, uint32_t> State::getPatchesAndIndex(const pluginLib::patchDB::PatchKey& _patch, const pluginLib::patchDB::SearchHandle _searchHandle) const
 	{
 		const auto& search = m_patchManager.getSearch(_searchHandle);
 
@@ -116,12 +107,16 @@ namespace jucePluginEditorLib::patchManager
 
 		List::sortPatches(patches, search->getSourceType());
 
-		const auto it = std::find(patches.begin(), patches.end(), _patch);
+		uint32_t index = pluginLib::patchDB::g_invalidProgram;
 
-		auto index = pluginLib::patchDB::g_invalidProgram;
-
-		if(it != patches.end())
-			index = static_cast<uint32_t>(it - patches.begin());
+		for(uint32_t i=0; i<patches.size(); ++i)
+		{
+			if(pluginLib::patchDB::PatchKey(*patches[i]) == _patch)
+			{
+				index = i;
+				break;
+			}
+		}
 
 		return {patches, index};
 	}
@@ -148,7 +143,19 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	void State::getConfig(pluginLib::PluginStream& _s)
+	void State::getConfig(pluginLib::PluginStream& _s) const
 	{
+		_s.write<uint32_t>(1);							// version
+		_s.write<uint32_t>((uint32_t)m_parts.size());
+
+		for (const auto& part : m_parts)
+			part.getConfig(_s);
+	}
+
+	void State::clear(const uint32_t _part)
+	{
+		if(_part >= m_parts.size())
+			return;
+		m_parts[_part].clear();
 	}
 }
