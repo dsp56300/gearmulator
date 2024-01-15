@@ -93,7 +93,7 @@ namespace pluginLib::patchDB
 			return false;
 		}
 
-		bool isValid() const { return source->type != SourceType::Invalid; }
+		bool isValid() const { return source && source->type != SourceType::Invalid; }
 
 		static bool equals(const DataSourceNodePtr& _a, const DataSourceNodePtr& _b)
 		{
