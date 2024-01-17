@@ -509,12 +509,17 @@ namespace pluginLib::patchDB
 
 	bool DB::loadData(DataList& _results, const DataSourceNodePtr& _ds)
 	{
-		switch (_ds->type)
+		return loadData(_results, *_ds);
+	}
+
+	bool DB::loadData(DataList& _results, const DataSource& _ds)
+	{
+		switch (_ds.type)
 		{
 		case SourceType::Rom:
-			return loadRomData(_results, _ds->bank, g_invalidProgram);
+			return loadRomData(_results, _ds.bank, g_invalidProgram);
 		case SourceType::File:
-			return loadFile(_results, _ds->name);
+			return loadFile(_results, _ds.name);
 		case SourceType::Invalid:
 		case SourceType::Folder:
 		case SourceType::Count:
@@ -544,9 +549,9 @@ namespace pluginLib::patchDB
 		return parseFileData(_results, data);
 	}
 
-	bool DB::loadLocalStorage(DataList& _results, const DataSourceNodePtr& _ds)
+	bool DB::loadLocalStorage(DataList& _results, const DataSource& _ds)
 	{
-		const auto file = getLocalStorageFile(*_ds);
+		const auto file = getLocalStorageFile(_ds);
 
 		std::vector<uint8_t> data;
 		if (!synthLib::readFile(data, file.getFullPathName().toStdString()))

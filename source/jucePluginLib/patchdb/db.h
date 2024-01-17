@@ -70,10 +70,11 @@ namespace pluginLib::patchDB
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
+		virtual bool loadData(DataList& _results, const DataSource& _ds);
 
 		virtual bool loadRomData(DataList& _results, uint32_t _bank, uint32_t _program) = 0;
 		virtual bool loadFile(DataList& _results, const std::string& _file);
-		virtual bool loadLocalStorage(DataList& _results, const DataSourceNodePtr& _ds);
+		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
 		virtual PatchPtr initializePatch(const Data& _sysex) = 0;
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
