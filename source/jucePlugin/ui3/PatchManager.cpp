@@ -27,6 +27,13 @@ namespace genericVirusUI
 		return ds;
 	}
 
+	void PatchManager::selectRomPreset(uint32_t _part, virusLib::BankNumber _bank, uint8_t _program)
+	{
+		const pluginLib::patchDB::DataSource ds = createRomDataSource(toArrayIndex(_bank));
+
+		selectPatch(_part, ds, _program);
+	}
+
 	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _dir), m_controller(_editor.getController())
 	{
 		addRomPatches();

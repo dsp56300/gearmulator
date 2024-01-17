@@ -136,6 +136,18 @@ namespace genericVirusUI
 		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
+	void VirusEditor::selectRomPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _program)
+	{
+		if(getPatchManager())
+		{
+			static_cast<PatchManager*>(getPatchManager())->selectRomPreset(_part, _bank, _program);
+		}
+		else
+		{
+			getController().setCurrentPartPreset(_part, _bank, _program);
+		}
+	}
+
 	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
 	{
 		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)

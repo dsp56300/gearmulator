@@ -28,6 +28,8 @@ namespace genericVirusUI
 		PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir);
 		~PatchManager() override;
 
+		void selectRomPreset(uint32_t _part, virusLib::BankNumber _bank, uint8_t _program);
+
 		// PatchDB impl
 		bool loadRomData(pluginLib::patchDB::DataList& _results, uint32_t _bank, uint32_t _program) override;
 		std::shared_ptr<pluginLib::patchDB::Patch> initializePatch(const std::vector<uint8_t>& _sysex) override;

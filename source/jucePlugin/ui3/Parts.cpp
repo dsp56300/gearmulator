@@ -122,7 +122,7 @@ namespace genericVirusUI
                 const auto presetName = presetNames[j];
                 p.addItem(presetName, [this, bank, j, pt] 
                 {
-                    m_editor.getController().setCurrentPartPreset(pt, bank, j);
+					m_editor.selectRomPreset(pt, bank, j);
                 });
             }
             selector.addSubMenu(m_editor.getController().getBankName(b), p);

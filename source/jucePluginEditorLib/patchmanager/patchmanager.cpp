@@ -92,6 +92,22 @@ namespace jucePluginEditorLib::patchManager
 	{
 		return setSelectedPatch(getCurrentPart(), _patch, _fromSearch);
 	}
+	
+	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
+	{
+		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
+
+		if(!patch)
+			return false;
+
+		if(!setSelectedPatch(_part, patch, m_state.getSearchHandle(_part)))
+			return false;
+
+		if(_part == getCurrentPart())
+			m_list->setSelectedPatches({patch});
+
+		return true;
+	}
 
 	bool PatchManager::setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch)
 	{
@@ -129,35 +145,10 @@ namespace jucePluginEditorLib::patchManager
 		if(!_patch.isValid())
 			return false;
 
-		pluginLib::patchDB::SearchHandle searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
-
-		if(auto* item = m_tree->getItem(*_patch.source))
-		{
-			searchHandle = item->getSearchHandle();
-
-			// select the tree item that contains the data source and expand all parents to make it visible
-			if(getCurrentPart() == _part)
-			{
-				item->setSelected(true, true);
-
-				auto* parent = item->getParentItem();
-				while(parent)
-				{
-					parent->setOpen(true);
-					parent = parent->getParentItem();
-				}
-			}
-		}
+		const auto searchHandle = getSearchHandle(*_patch.source, _part == getCurrentPart());
 
 		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
-		{
-			const auto search = getSearch(*_patch.source);
-
-			if(!search)
-				return false;
-
-			searchHandle = search->handle;
-		}
+			return false;
 
 		m_state.setSelectedPatch(_part, _patch, searchHandle);
 
@@ -175,6 +166,43 @@ namespace jucePluginEditorLib::patchManager
 	bool PatchManager::selectNextPreset(const uint32_t _part)
 	{
 		return selectPatch(_part, 1);
+	}
+
+	bool PatchManager::selectPatch(const uint32_t _part, const pluginLib::patchDB::DataSource& _ds, const uint32_t _program)
+	{
+		const auto searchHandle = getSearchHandle(_ds, _part == getCurrentPart());
+
+		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+			return false;
+
+		auto s = getSearch(searchHandle);
+		if(!s)
+			return false;
+
+		pluginLib::patchDB::PatchPtr p;
+
+		std::shared_lock lockResults(s->resultsMutex);
+		for (const auto& patch : s->results)
+		{
+			if(patch->program == _program)
+			{
+				p = patch;
+				break;
+			}
+		}
+
+		if(!p)
+			return false;
+
+		if(!activatePatch(p, _part))
+			return false;
+
+		setSelectedPatch(_part, p, s->handle);
+
+		if(_part == getCurrentPart())
+			m_list->setSelectedPatches({p});
+
+		return true;
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
@@ -314,13 +342,33 @@ namespace jucePluginEditorLib::patchManager
 		});
 	}
 
-	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
+	pluginLib::patchDB::SearchHandle PatchManager::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)
 	{
-		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
+		if(auto* item = m_tree->getItem(_ds))
+		{
+			const auto searchHandle = item->getSearchHandle();
 
-		if(!patch)
-			return false;
+			// select the tree item that contains the data source and expand all parents to make it visible
+			if(_selectTreeItem)
+			{
+				item->setSelected(true, true);
 
-		return setSelectedPatch(_part, patch, m_state.getSearchHandle(_part));
+				auto* parent = item->getParentItem();
+				while(parent)
+				{
+					parent->setOpen(true);
+					parent = parent->getParentItem();
+				}
+			}
+
+			return searchHandle;
+		}
+
+		const auto search = getSearch(_ds);
+
+		if(!search)
+			return pluginLib::patchDB::g_invalidSearchHandle;
+
+		return search->handle;
 	}
 }

@@ -29,15 +29,23 @@ namespace jucePluginEditorLib::patchManager
 		void timerCallback() override;
 
 		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const;
+
 		bool setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
+
+		bool selectPrevPreset(uint32_t _part);
+		bool selectNextPreset(uint32_t _part);
+
+		bool selectPatch(uint32_t _part, const pluginLib::patchDB::DataSource& _ds, uint32_t _program);
+
+	private:
+		bool selectPatch(uint32_t _part, int _offset);
+
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchKey& _patch);
 
-		bool selectPrevPreset(uint32_t _part);
-		bool selectNextPreset(uint32_t _part);
-
+	public:
 		auto& getEditor() const { return m_editor; }
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
 
@@ -58,7 +66,7 @@ namespace jucePluginEditorLib::patchManager
 		void updateStateAsync(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 
 	private:
-		bool selectPatch(uint32_t _part, int _offset);
+		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 
 		genericUI::Editor& m_editor;
 
