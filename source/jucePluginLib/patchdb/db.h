@@ -69,6 +69,7 @@ namespace pluginLib::patchDB
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
+	public:
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);
 		virtual bool loadData(DataList& _results, const DataSource& _ds);
 
@@ -80,6 +81,8 @@ namespace pluginLib::patchDB
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const = 0;
+
+	protected:
 		virtual void onLoadFinished() {}
 
 		void startLoaderThread();
