@@ -72,8 +72,8 @@ namespace genericVirusUI
 
 		void setPlayMode(uint8_t _playMode);
 
-		void savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0);
-		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
+		void savePresets(SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0);
+		bool savePresets(const std::string& _pathName, SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
 		pluginLib::ParameterBinding& m_parameterBinding;

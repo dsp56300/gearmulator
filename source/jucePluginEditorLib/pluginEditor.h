@@ -4,6 +4,8 @@
 
 #include "../synthLib/buildconfig.h"
 
+#include "types.h"
+
 namespace pluginLib
 {
 	class ParameterBinding;
@@ -21,12 +23,6 @@ namespace jucePluginEditorLib
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
-		enum class FileType
-		{
-			Syx,
-			Mid
-		};
-
 		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
 		~Editor() override;
 
