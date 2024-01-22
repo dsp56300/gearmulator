@@ -15,11 +15,12 @@ namespace pluginLib::patchDB
 
 	struct Patch
 	{
+	protected:
 		Patch()
 		{
 			hash.fill(0);
 		}
-
+	public:
 		virtual ~Patch() = default;
 
 		Patch& operator = (const Patch&) = delete;
