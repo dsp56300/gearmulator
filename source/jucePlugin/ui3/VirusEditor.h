@@ -46,7 +46,7 @@ namespace genericVirusUI
 
 		Virus::Controller& getController() const;
 
-		void selectRomPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _program);
+		void selectRomPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _program) const;
 
 		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;

@@ -136,7 +136,7 @@ namespace genericVirusUI
 		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
-	void VirusEditor::selectRomPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _program)
+	void VirusEditor::selectRomPreset(const uint8_t _part, const virusLib::BankNumber _bank, const uint8_t _program) const
 	{
 		if(getPatchManager())
 		{
