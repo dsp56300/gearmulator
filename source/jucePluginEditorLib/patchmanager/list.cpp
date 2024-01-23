@@ -3,6 +3,7 @@
 #include "listitem.h"
 #include "patchmanager.h"
 #include "search.h"
+#include "../pluginEditor.h"
 #include "../../juceUiLib/uiObject.h"
 
 #include "../../juceUiLib/uiObjectStyle.h"
@@ -54,6 +55,57 @@ namespace jucePluginEditorLib::patchManager
 		setSelectedPatches(selectedPatches);
 
 		repaint();
+	}
+
+	bool List::exportPresets(const bool _selectedOnly, FileType _fileType) const
+	{
+		Patches patches;
+
+		if(_selectedOnly)
+		{
+			const auto selected = getSelectedPatches();
+			if(selected.empty())
+				return false;
+			patches.assign(selected.begin(), selected.end());
+		}
+		else
+		{
+			patches = getPatches();
+		}
+
+		if(patches.empty())
+			return false;
+
+		sortPatches(patches, m_search->getSourceType());
+
+		auto& editor = m_patchManager.getEditor();
+
+		editor.savePreset([this, p = std::move(patches), _fileType](const juce::File& _file)
+		{
+			exportPresets(_file, p, _fileType);
+		});
+
+		return true;
+	}
+
+	bool List::onClicked(const juce::MouseEvent& _mouseEvent) const
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+			return false;
+
+		auto fileTypeMenu = [this](const std::function<void(FileType)>& _func)
+		{
+			juce::PopupMenu menu;
+			menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
+			menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
+			return menu;
+		};
+
+		juce::PopupMenu menu;
+		menu.addSubMenu("Export selected...", fileTypeMenu([this](const FileType _fileType) { exportPresets(true, _fileType); }));
+		menu.addSubMenu("Export all...", fileTypeMenu([this](const FileType _fileType) { exportPresets(false, _fileType); }));
+		menu.showMenuAsync({});
+		return true;
 	}
 
 	int List::getNumRows()
@@ -109,8 +161,7 @@ namespace jucePluginEditorLib::patchManager
 		return indices;
 	}
 
-	juce::Component* List::refreshComponentForRow(int rowNumber, bool isRowSelected,
-		Component* existingComponentToUpdate)
+	juce::Component* List::refreshComponentForRow(int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
 	{
 		auto* existing = dynamic_cast<ListItem*>(existingComponentToUpdate);
 
@@ -234,6 +285,24 @@ namespace jucePluginEditorLib::patchManager
 		return patches;
 	}
 
+	void List::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType _fileType) const
+	{
+		FileType type = _fileType;
+		const auto name = Editor::createValidFilename(type, _file);
+
+		std::vector<pluginLib::patchDB::Data> patchData;
+		for (const auto& patch : _patches)
+		{
+			const auto patchSysex = m_patchManager.prepareSave(patch);
+
+			if(!patchSysex.empty())
+				patchData.push_back(patchSysex);
+		}
+
+		if(!m_patchManager.getEditor().savePresets(type, name, patchData))
+			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
+	}
+
 	void List::setFilter(const std::string& _filter)
 	{
 		if (m_filter == _filter)
@@ -274,10 +343,27 @@ namespace jucePluginEditorLib::patchManager
 		});
 	}
 
+	void List::listBoxItemClicked(const int _row, const juce::MouseEvent& _mouseEvent)
+	{
+		if(!onClicked(_mouseEvent))
+			ListBoxModel::listBoxItemClicked(_row, _mouseEvent);
+	}
+
+	void List::backgroundClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!onClicked(_mouseEvent))
+			ListBoxModel::backgroundClicked(_mouseEvent);
+	}
+
 	void List::sortPatches()
 	{
 		// Note: If this list is no longer sorted by calling this function, be sure to modify the second caller in state.cpp, too, as it is used to track the selected entry across multiple parts
-		sortPatches(m_patches, m_search->getSourceType());
+		sortPatches(m_patches);
+	}
+
+	void List::sortPatches(Patches& _patches) const
+	{
+		sortPatches(_patches, m_search->getSourceType());
 	}
 
 	void List::filterPatches()

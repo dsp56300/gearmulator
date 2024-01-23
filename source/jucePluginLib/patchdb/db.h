@@ -66,6 +66,8 @@ namespace pluginLib::patchDB
 
 		bool isLoading() const { return m_loading; }
 
+		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches) const;
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 

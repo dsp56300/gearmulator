@@ -49,6 +49,22 @@ namespace pluginLib::patchDB
 		return addDataSource(_ds, true);
 	}
 
+	bool DB::writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches) const
+	{
+		std::vector<uint8_t> sysexBuffer;
+		sysexBuffer.reserve(_patches.front()->sysex.size() * _patches.size());
+
+		for (const auto& patch : _patches)
+		{
+			const auto patchSysex = prepareSave(patch);
+
+			if(!patchSysex.empty())
+				sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
+		}
+
+		return _file.replaceWithData(sysexBuffer.data(), sysexBuffer.size());
+	}
+
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
 	{
 		const auto needsSave = _save && _ds.origin == DataSourceOrigin::Manual && _ds.type != SourceType::Rom;
@@ -1244,19 +1260,7 @@ namespace pluginLib::patchDB
 			{
 				patchesVec.assign(patches.begin(), patches.end());
 				DataSource::sortByProgram(patchesVec);
-
-				std::vector<uint8_t> sysexBuffer;
-				sysexBuffer.reserve(patchesVec.front()->sysex.size() * patchesVec.size());
-
-				for (const auto& patch : patchesVec)
-				{
-					const auto patchSysex = prepareSave(patch);
-
-					if(!patchSysex.empty())
-						sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
-				}
-
-				if (!file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+				if(!writePatchesToFile(file, patchesVec))
 					res = false;
 			}
 		}

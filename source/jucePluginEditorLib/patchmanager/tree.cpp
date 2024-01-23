@@ -6,7 +6,9 @@
 #include "patchmanager.h"
 #include "roottreeitem.h"
 #include "treeitem.h"
+
 #include "../../juceUiLib/uiObject.h"
+#include "../pluginEditor.h"
 
 namespace jucePluginEditorLib::patchManager
 {

@@ -4,6 +4,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "../types.h"
+
 namespace pluginLib::patchDB
 {
 	struct PatchKey;
@@ -51,6 +53,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;
+		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const;
 
 		static Patch getPatch(const Patches& _patches, const size_t _index)
 		{
@@ -67,12 +70,18 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		static void sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType);
+		void listBoxItemClicked(int _row, const juce::MouseEvent&) override;
+		void backgroundClicked(const juce::MouseEvent&) override;
 
 	private:
 		void sortPatches();
+		void sortPatches(Patches& _patches) const;
 		void filterPatches();
 		bool match(const Patch& _patch) const;
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);
+		bool exportPresets(bool _selectedOnly, FileType _fileType) const;
+
+		bool onClicked(const juce::MouseEvent&) const;
 
 		PatchManager& m_patchManager;
 

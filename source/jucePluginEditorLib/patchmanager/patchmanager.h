@@ -6,10 +6,14 @@
 
 #include "state.h"
 
+namespace jucePluginEditorLib
+{
+	class Editor;
+}
+
 namespace genericUI
 {
 	class UiObject;
-	class Editor;
 }
 
 namespace jucePluginEditorLib::patchManager
@@ -23,7 +27,7 @@ namespace jucePluginEditorLib::patchManager
 	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer
 	{
 	public:
-		explicit PatchManager(genericUI::Editor& _editor, Component* _root, const juce::File& _dir);
+		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir);
 		~PatchManager() override;
 
 		void timerCallback() override;
@@ -68,7 +72,7 @@ namespace jucePluginEditorLib::patchManager
 	private:
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 
-		genericUI::Editor& m_editor;
+		Editor& m_editor;
 
 		Tree* m_tree = nullptr;
 		List* m_list = nullptr;
