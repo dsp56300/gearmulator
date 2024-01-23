@@ -101,9 +101,50 @@ namespace jucePluginEditorLib::patchManager
 			return menu;
 		};
 
+		const auto hasSelectedPatches = !getSelectedPatches().empty();
+
 		juce::PopupMenu menu;
-		menu.addSubMenu("Export selected...", fileTypeMenu([this](const FileType _fileType) { exportPresets(true, _fileType); }));
+		if(hasSelectedPatches)
+			menu.addSubMenu("Export selected...", fileTypeMenu([this](const FileType _fileType) { exportPresets(true, _fileType); }));
 		menu.addSubMenu("Export all...", fileTypeMenu([this](const FileType _fileType) { exportPresets(false, _fileType); }));
+		menu.addSeparator();
+
+		if(hasSelectedPatches)
+		{
+			auto selectedPatches = getSelectedPatches();
+
+			if(!m_search->request.tags.empty())
+			{
+				menu.addItem("Remove selected", [this, s = std::move(selectedPatches)]
+				{
+					const std::vector patches(s.begin(), s.end());
+					pluginLib::patchDB::TypedTags removeTags;
+
+					// converted "added" tags to "removed" tags
+					for (const auto& tags : m_search->request.tags.get())
+					{
+						const pluginLib::patchDB::TagType type = tags.first;
+						const auto& t = tags.second;
+							
+						for (const auto& tag : t.getAdded())
+							removeTags.addRemoved(type, tag);
+					}
+
+					m_patchManager.modifyTags(patches, removeTags);
+				});
+			}
+			else if(m_search->getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
+			{
+				menu.addItem("Deleted selected", [this, s = std::move(selectedPatches)]
+				{
+					if(juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "Confirmation needed", "Delete selected patches from bank?") == 1)
+					{
+						const std::vector patches(s.begin(), s.end());
+						m_patchManager.removePatches(m_search->request.sourceNode, patches);
+					}
+				});
+			}
+		}
 		menu.showMenuAsync({});
 		return true;
 	}
@@ -188,7 +229,7 @@ namespace jucePluginEditorLib::patchManager
 
 	std::set<List::Patch> List::getSelectedPatches() const
 	{
-		std::set<List::Patch> result;
+		std::set<Patch> result;
 
 		const auto selectedRows = getSelectedRows();
 		const auto& ranges = selectedRows.getRanges();
