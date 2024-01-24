@@ -137,7 +137,7 @@ namespace jucePluginEditorLib::patchManager
 			{
 				menu.addItem("Deleted selected", [this, s = std::move(selectedPatches)]
 				{
-					if(juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "Confirmation needed", "Delete selected patches from bank?") == 1)
+					if(showDeleteConfirmationMessageBox())
 					{
 						const std::vector patches(s.begin(), s.end());
 						m_patchManager.removePatches(m_search->request.sourceNode, patches);
@@ -394,6 +394,11 @@ namespace jucePluginEditorLib::patchManager
 	{
 		if(!onClicked(_mouseEvent))
 			ListBoxModel::backgroundClicked(_mouseEvent);
+	}
+
+	bool List::showDeleteConfirmationMessageBox()
+	{
+		return 1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "Confirmation needed", "Delete selected patches from bank?");
 	}
 
 	void List::sortPatches()

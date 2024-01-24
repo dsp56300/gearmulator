@@ -73,6 +73,7 @@ namespace jucePluginEditorLib::patchManager
 		void listBoxItemClicked(int _row, const juce::MouseEvent&) override;
 		void backgroundClicked(const juce::MouseEvent&) override;
 
+		static bool showDeleteConfirmationMessageBox();
 	private:
 		void sortPatches();
 		void sortPatches(Patches& _patches) const;

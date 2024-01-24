@@ -69,9 +69,14 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		if (juce::ModifierKeys::currentModifiers.isShiftDown())
-			getPatchManager().removePatches(m_dataSource, _patches);
+		{
+			if(List::showDeleteConfirmationMessageBox())
+				getPatchManager().removePatches(m_dataSource, _patches);
+		}
 		else
+		{
 			getPatchManager().copyPatchesTo(m_dataSource, _patches);
+		}
 	}
 
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
