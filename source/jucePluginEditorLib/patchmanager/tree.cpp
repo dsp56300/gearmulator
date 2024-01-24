@@ -32,11 +32,11 @@ namespace jucePluginEditorLib::patchManager
 		setRootItem(rootItem);
 		setRootItemVisible(false);
 
-		addGroup(GroupType::DataSources);
+		addGroup(GroupType::Favourites);
 		addGroup(GroupType::LocalStorage);
+		addGroup(GroupType::DataSources);
 		addGroup(GroupType::Categories);
 		addGroup(GroupType::Tags);
-		addGroup(GroupType::Favourites);
 
 		getViewport()->setScrollBarsShown(true, true);
 	}
