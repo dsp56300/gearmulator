@@ -29,7 +29,7 @@ namespace pluginLib::patchDB
 		void uiProcess(Dirty& _dirty);
 
 		DataSourceNodePtr addDataSource(const DataSource& _ds);
-		void removeDataSource(const DataSource& _ds);
+		void removeDataSource(const DataSource& _ds, bool _save = true);
 		void refreshDataSource(const DataSourceNodePtr& _ds);
 		void renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName);
 

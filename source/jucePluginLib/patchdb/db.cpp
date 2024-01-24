@@ -81,9 +81,9 @@ namespace pluginLib::patchDB
 		return ds;
 	}
 
-	void DB::removeDataSource(const DataSource& _ds)
+	void DB::removeDataSource(const DataSource& _ds, bool _save/* = true*/)
 	{
-		runOnLoaderThread([this, _ds]
+		runOnLoaderThread([this, _ds, _save]
 		{
 			std::unique_lock lockDs(m_dataSourcesMutex);
 
@@ -151,12 +151,22 @@ namespace pluginLib::patchDB
 			}
 			removedDataSources.clear();
 
-			saveJson();
+			if(_save)
+				saveJson();
 		});
 	}
 
 	void DB::refreshDataSource(const DataSourceNodePtr& _ds)
 	{
+		auto parent = _ds->getParent();
+
+		removeDataSource(*_ds, false);
+
+		runOnLoaderThread([this, parent, _ds]
+		{
+			_ds->setParent(parent);
+			addDataSource(_ds);
+		});
 	}
 
 	void DB::renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName)
