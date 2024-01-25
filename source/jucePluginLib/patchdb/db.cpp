@@ -907,16 +907,25 @@ namespace pluginLib::patchDB
 
 		auto searchInDs = [&](const DataSourceNodePtr& _ds)
 		{
+			bool isCancelled;
+			{
+				std::shared_lock lockSearches(m_searchesMutex);
+				const auto it = m_cancelledSearches.find(_search.handle);
+				isCancelled = it != m_cancelledSearches.end();
+				if(isCancelled)
+					m_cancelledSearches.erase(it);
+			}
+
+			if(isCancelled)
+			{
+				_search.state = SearchState::Cancelled;
+				std::unique_lock lockUi(m_uiMutex);
+				m_dirty.searches.insert(_search.handle);
+				return false;
+			}
+
 			for (const auto& patchPtr : _ds->patches)
 			{
-				if (m_cancelledSearches.find(_search.handle) != m_cancelledSearches.end())
-				{
-					_search.state = SearchState::Cancelled;
-					std::unique_lock lockUi(m_uiMutex);
-					m_dirty.searches.insert(_search.handle);
-					return false;
-				}
-
 				const auto* patch = patchPtr.get();
 				assert(patch);
 
