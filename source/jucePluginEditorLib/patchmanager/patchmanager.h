@@ -74,12 +74,14 @@ namespace jucePluginEditorLib::patchManager
 
 		Editor& m_editor;
 
-		Tree* m_tree = nullptr;
+		Tree* m_treeDS = nullptr;
+		Tree* m_treeTags = nullptr;
 		List* m_list = nullptr;
 		Info* m_info = nullptr;
 
+		SearchTree* m_searchTreeDS = nullptr;
+		SearchTree* m_searchTreeTags = nullptr;
 		SearchList* m_searchList = nullptr;
-		SearchTree* m_searchTree = nullptr;
 
 		State m_state;
 	};

@@ -36,10 +36,11 @@ namespace jucePluginEditorLib::patchManager
 
 		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds);
 
-	private:
+	protected:
 		void addGroup(GroupType _type);
 		GroupTreeItem* getItem(GroupType _type);
 
+	private:
 		PatchManager& m_patchManager;
 		std::map<GroupType, GroupTreeItem*> m_groupItems;
 		std::string m_filter;
