@@ -46,7 +46,7 @@ namespace pluginLib::patchDB
 			}
 			return true;
 		}
-
+		/*
 		bool matchDataSource(const DataSourceNode& _source, const DataSource& _search)
 		{
 			if (_source.hasParent() && matchDataSource(*_source.getParent(), _search))
@@ -63,7 +63,7 @@ namespace pluginLib::patchDB
 
 			return true;
 		}
-
+		*/
 		bool matchDataSource(const DataSourceNode* _source, const DataSourceNodePtr& _search)
 		{
 			if (_source == _search.get())
