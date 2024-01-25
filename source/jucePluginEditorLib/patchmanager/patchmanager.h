@@ -74,6 +74,7 @@ namespace jucePluginEditorLib::patchManager
 
 	private:
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
+		void onSelectedItemsChanged();
 
 		Editor& m_editor;
 

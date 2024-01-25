@@ -115,17 +115,20 @@ namespace jucePluginEditorLib::patchManager
 		{
 			m_treeTags->onParentSearchChanged(_item->getSearchRequest());
 		}
+
+		onSelectedItemsChanged();
 	}
 
 	void PatchManager::addSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
 		m_selectedItems[_tree].insert(_item);
+		onSelectedItemsChanged();
 	}
 
 	void PatchManager::removeSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
 		m_selectedItems[_tree].erase(_item);
-//		m_list->setContent(_handle);
+		onSelectedItemsChanged();
 	}
 
 	bool PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::SearchHandle _fromSearch)
@@ -410,5 +413,34 @@ namespace jucePluginEditorLib::patchManager
 			return pluginLib::patchDB::g_invalidSearchHandle;
 
 		return search->handle;
+	}
+
+	void PatchManager::onSelectedItemsChanged()
+	{
+		const auto selectedTags = m_selectedItems[m_treeTags];
+
+		auto selectItem = [&](const TreeItem* _item)
+		{
+			if(_item->getSearchHandle() != pluginLib::patchDB::g_invalidSearchHandle)
+			{
+				m_list->setContent(_item->getSearchHandle());
+				return true;
+			}
+			return false;
+		};
+
+		if(!selectedTags.empty())
+		{
+			if(selectItem(*selectedTags.begin()))
+				return;
+		}
+
+		const auto selectedDataSources = m_selectedItems[m_treeDS];
+
+		if(!selectedDataSources.empty())
+		{
+			const auto* item = *selectedDataSources.begin();
+			selectItem(item);
+		}
 	}
 }
