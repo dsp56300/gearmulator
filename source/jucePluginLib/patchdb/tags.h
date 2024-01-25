@@ -67,6 +67,8 @@ namespace pluginLib::patchDB
 			return m_added.empty() && m_removed.empty();
 		}
 
+		bool operator == (const Tags& _t) const;
+
 	private:
 		std::unordered_set<Tag> m_added;
 		std::unordered_set<Tag> m_removed;
@@ -86,6 +88,7 @@ namespace pluginLib::patchDB
 		bool empty() const;
 		juce::DynamicObject* serialize() const;
 		void deserialize(juce::DynamicObject* _obj);
+		bool operator == (const TypedTags& _tags) const;
 	private:
 		std::unordered_map<TagType, Tags> m_tags;
 	};

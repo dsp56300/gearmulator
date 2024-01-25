@@ -41,6 +41,8 @@ namespace jucePluginEditorLib::patchManager
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
 		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds) const;
 
+		void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch) override;
+
 	private:
 		DatasourceTreeItem* createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource);
 		TagTreeItem* createSubItem(const std::string& _tag);

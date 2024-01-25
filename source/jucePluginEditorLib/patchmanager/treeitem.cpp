@@ -17,6 +17,8 @@ namespace jucePluginEditorLib::patchManager
 
 	TreeItem::~TreeItem()
 	{
+		getPatchManager().removeSelectedItem(getTree(), this);
+
 		destroyEditorLabel();
 
 		if(m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle)
@@ -47,7 +49,7 @@ namespace jucePluginEditorLib::patchManager
 		if (_dirtySearches.find(m_searchHandle) == _dirtySearches.end())
 			return;
 
-		const auto& search = getPatchManager().getSearch(m_searchHandle);
+		const auto search = getPatchManager().getSearch(m_searchHandle);
 		if (!search)
 			return;
 
@@ -99,15 +101,23 @@ namespace jucePluginEditorLib::patchManager
 	{
 		TreeViewItem::itemSelectionChanged(_isNowSelected);
 
-		if (_isNowSelected)
-			getPatchManager().setSelectedSearch(getSearchHandle());
+		if(getTree()->isMultiSelectEnabled())
+		{
+			if (_isNowSelected)
+				getPatchManager().addSelectedItem(getTree(), this);
+			else
+				getPatchManager().removeSelectedItem(getTree(), this);
+		}
+		else
+		{
+			if (_isNowSelected)
+				getPatchManager().setSelectedItem(getTree(), this);
+		}
 	}
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get());
-
-		if (list)
+		if (const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
 		{
 			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
 
@@ -153,7 +163,9 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
 	{
+		cancelSearch();
 		setCount(g_unknownCount);
+		m_searchRequest = _request;
 		m_searchHandle = getPatchManager().search(std::move(_request));
 	}
 
@@ -228,6 +240,23 @@ namespace jucePluginEditorLib::patchManager
 		if (_a > _b)
 			return 1;
 		return 0;
+	}
+
+	void TreeItem::setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch)
+	{
+		if(_parentSearch == m_parentSearchRequest)
+			return;
+		m_parentSearchRequest = _parentSearch;
+		onParentSearchChanged(m_parentSearchRequest);
+	}
+
+	void TreeItem::cancelSearch()
+	{
+		if(m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+			return;
+
+		getPatchManager().cancelSearch(m_searchHandle);
+		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
 	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)

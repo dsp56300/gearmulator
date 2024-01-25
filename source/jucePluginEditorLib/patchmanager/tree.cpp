@@ -148,6 +148,14 @@ namespace jucePluginEditorLib::patchManager
 		return item->getItem(_ds);
 	}
 
+	void Tree::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest)
+	{
+		for (auto& groupItem : m_groupItems)
+		{
+			groupItem.second->setParentSearchRequest(_searchRequest);
+		}
+	}
+
 	void Tree::addGroup(const GroupType _type)
 	{
 		auto* groupItem = new GroupTreeItem(m_patchManager, _type);

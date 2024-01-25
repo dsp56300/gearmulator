@@ -4,6 +4,27 @@
 
 namespace pluginLib::patchDB
 {
+	bool Tags::operator==(const Tags& _t) const
+	{
+		if(m_added.size() != _t.m_added.size())
+			return false;
+		if(m_removed.size() != _t.m_removed.size())
+			return false;
+
+		for (auto e : m_added)
+		{
+			if(_t.m_added.find(e) == _t.m_added.end())
+				return false;
+		}
+
+		for (auto e : m_removed)
+		{
+			if(_t.m_removed.find(e) == _t.m_removed.end())
+				return false;
+		}
+		return true;
+	}
+
 	const Tags& TypedTags::get(const TagType _type) const
 	{
 		const auto& it = m_tags.find(_type);
@@ -158,5 +179,22 @@ namespace pluginLib::patchDB
 				}
 			}
 		}
+	}
+
+	bool TypedTags::operator==(const TypedTags& _tags) const
+	{
+		if(m_tags.size() != _tags.m_tags.size())
+			return false;
+
+		for (const auto& tags : m_tags)
+		{
+			const auto it = _tags.m_tags.find(tags.first);
+			if(it == _tags.m_tags.end())
+				return false;
+
+			if(!(it->second == tags.second))
+				return false;
+		}
+		return true;
 	}
 }

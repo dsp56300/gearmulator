@@ -20,6 +20,7 @@ namespace jucePluginEditorLib::patchManager
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
 		bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) override;
 		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
 		const auto& getTag() const { return m_tag; }
 

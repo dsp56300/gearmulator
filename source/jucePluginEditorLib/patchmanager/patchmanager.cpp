@@ -107,9 +107,25 @@ namespace jucePluginEditorLib::patchManager
 		m_list->processDirty(dirty);
 	}
 
-	void PatchManager::setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const
+	void PatchManager::setSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
-		m_list->setContent(_handle);
+		m_selectedItems[_tree] = std::set{_item};
+
+		if(_tree == m_treeDS)
+		{
+			m_treeTags->onParentSearchChanged(_item->getSearchRequest());
+		}
+	}
+
+	void PatchManager::addSelectedItem(Tree* _tree, const TreeItem* _item)
+	{
+		m_selectedItems[_tree].insert(_item);
+	}
+
+	void PatchManager::removeSelectedItem(Tree* _tree, const TreeItem* _item)
+	{
+		m_selectedItems[_tree].erase(_item);
+//		m_list->setContent(_handle);
 	}
 
 	bool PatchManager::setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::patchDB::SearchHandle _fromSearch)

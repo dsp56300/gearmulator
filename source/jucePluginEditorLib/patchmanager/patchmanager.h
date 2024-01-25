@@ -18,6 +18,7 @@ namespace genericUI
 
 namespace jucePluginEditorLib::patchManager
 {
+	class TreeItem;
 	class SearchTree;
 	class SearchList;
 	class Info;
@@ -32,7 +33,9 @@ namespace jucePluginEditorLib::patchManager
 
 		void timerCallback() override;
 
-		void setSelectedSearch(const pluginLib::patchDB::SearchHandle& _handle) const;
+		void setSelectedItem(Tree* _tree, const TreeItem* _item);
+		void addSelectedItem(Tree* _tree, const TreeItem* _item);
+		void removeSelectedItem(Tree* _tree, const TreeItem* _item);
 
 		bool setSelectedPatch(const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
@@ -84,5 +87,7 @@ namespace jucePluginEditorLib::patchManager
 		SearchList* m_searchList = nullptr;
 
 		State m_state;
+
+		std::map<Tree*, std::set<const TreeItem*>> m_selectedItems;
 	};
 }

@@ -17,7 +17,10 @@ namespace pluginLib::patchDB
 		TypedTags tags;
 		DataSourceNodePtr sourceNode;
 		PatchPtr patch;	// used by the UI to restore selection of a patch, the data source of this request patch will be null, the result will tell the UI which datasource it is in
+
 		bool match(const Patch& _patch) const;
+		bool isValid() const;
+		bool operator == (const SearchRequest& _r) const;
 	};
 
 	using SearchResult = std::set<PatchPtr>;

@@ -237,6 +237,17 @@ namespace jucePluginEditorLib::patchManager
 		return nullptr;
 	}
 
+	void GroupTreeItem::setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch)
+	{
+		TreeItem::setParentSearchRequest(_parentSearch);
+
+		for (const auto& it : m_itemsByDataSource)
+			it.second->setParentSearchRequest(_parentSearch);
+
+		for (const auto& it : m_itemsByTag)
+			it.second->setParentSearchRequest(_parentSearch);
+	}
+
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)
 	{
 		const auto it = m_itemsByDataSource.find(_dataSource);

@@ -6,6 +6,7 @@
 
 namespace pluginLib::patchDB
 {
+	struct SearchRequest;
 	struct DataSource;
 	struct Dirty;
 }
@@ -35,6 +36,8 @@ namespace jucePluginEditorLib::patchManager
 		void setFilter(const std::string& _filter);
 
 		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds);
+
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
 
 	protected:
 		void addGroup(GroupType _type);

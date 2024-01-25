@@ -6,12 +6,13 @@ namespace jucePluginEditorLib::patchManager
 {
 	TagTreeItem::TagTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _tag) : TreeItem(_pm, _tag), m_group(_type), m_tag(_tag)
 	{
-		const auto tagType = toTagType(_type);
+		const auto tagType = toTagType(getGroupType());
 
-		if(tagType != pluginLib::patchDB::TagType::Invalid)
+		if(tagType == pluginLib::patchDB::TagType::Favourites)
 		{
 			pluginLib::patchDB::SearchRequest sr;
-			sr.tags.add(tagType, _tag);
+			sr.tags.add(tagType, getTag());
+
 			search(std::move(sr));
 		}
 	}
@@ -40,6 +41,19 @@ namespace jucePluginEditorLib::patchManager
 			tags.add(tagType, getTag());
 
 		getPatchManager().modifyTags(_patches, tags);
+	}
+
+	void TagTreeItem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
+	{
+		const auto tagType = toTagType(getGroupType());
+
+		if(tagType == pluginLib::patchDB::TagType::Invalid)
+			return;
+
+		pluginLib::patchDB::SearchRequest sr = _parentSearchRequest;
+		sr.tags.add(tagType, getTag());
+
+		search(std::move(sr));
 	}
 
 	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

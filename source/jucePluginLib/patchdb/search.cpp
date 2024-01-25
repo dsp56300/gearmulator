@@ -109,4 +109,14 @@ namespace pluginLib::patchDB
 
 		return true;
 	}
+
+	bool SearchRequest::isValid() const
+	{
+		return !name.empty() || !tags.empty() || sourceNode || patch;
+	}
+
+	bool SearchRequest::operator==(const SearchRequest& _r) const
+	{
+		return name == _r.name && tags == _r.tags && sourceNode == _r.sourceNode && patch == _r.patch;
+	}
 }

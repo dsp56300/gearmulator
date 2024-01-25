@@ -5,6 +5,7 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
+#include "../../jucePluginLib/patchdb/search.h"
 
 namespace pluginLib::patchDB
 {
@@ -34,6 +35,7 @@ namespace jucePluginEditorLib::patchManager
 		virtual void setCount(uint32_t _count);
 
 		auto getSearchHandle() const { return m_searchHandle; }
+		const auto& getSearchRequest() const { return m_searchRequest; }
 
 		virtual void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
 
@@ -68,9 +70,13 @@ namespace jucePluginEditorLib::patchManager
 
 		virtual int compareElements(const TreeViewItem* _a, const TreeViewItem* _b);
 
+		virtual void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch);
+
 	protected:
+		void cancelSearch();
 		void search(pluginLib::patchDB::SearchRequest&& _request);
 		virtual void processSearchUpdated(const pluginLib::patchDB::Search& _search);
+		virtual void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) {}
 
 	private:
 		bool mightContainSubItems() override { return true; }
@@ -88,6 +94,9 @@ namespace jucePluginEditorLib::patchManager
 
 		std::string m_text;
 
+		pluginLib::patchDB::SearchRequest m_parentSearchRequest;
+
+		pluginLib::patchDB::SearchRequest m_searchRequest;
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 
 		FinishedEditingCallback m_finishedEditingCallback;
