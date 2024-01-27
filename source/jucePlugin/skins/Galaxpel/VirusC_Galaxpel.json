@@ -73,6 +73,17 @@
                 "color" : "75A7FEFF",
                 "textHeight" : "18"
             }
+        },
+        {
+            "name" : "pm_status_label",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "79AAFFFF",
+                "backgroundColor" : "1c1f22ff",
+                "textHeight" : "18",
+				"bold": "0"
+            }
         }
 	],
     "children" : [

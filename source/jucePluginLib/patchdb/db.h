@@ -65,6 +65,7 @@ namespace pluginLib::patchDB
 		virtual bool requestPatchForPart(Data& _data, uint32_t _part) = 0;
 
 		bool isLoading() const { return m_loading; }
+		bool isScanning() const { return !m_loader.empty(); }
 
 		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches) const;
 

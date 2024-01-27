@@ -18,6 +18,7 @@ namespace genericUI
 
 namespace jucePluginEditorLib::patchManager
 {
+	class Status;
 	class TreeItem;
 	class SearchTree;
 	class SearchList;
@@ -43,6 +44,8 @@ namespace jucePluginEditorLib::patchManager
 		bool selectNextPreset(uint32_t _part);
 
 		bool selectPatch(uint32_t _part, const pluginLib::patchDB::DataSource& _ds, uint32_t _program);
+
+		void setListStatus(uint32_t _selected, uint32_t _total);
 
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
@@ -86,6 +89,7 @@ namespace jucePluginEditorLib::patchManager
 		SearchTree* m_searchTreeDS = nullptr;
 		SearchTree* m_searchTreeTags = nullptr;
 		SearchList* m_searchList = nullptr;
+		Status* m_status = nullptr;
 
 		State m_state;
 

@@ -55,6 +55,8 @@ namespace jucePluginEditorLib::patchManager
 		setSelectedPatches(selectedPatches);
 
 		repaint();
+
+		getPatchManager().setListStatus(static_cast<uint32_t>(selectedPatches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
 	bool List::exportPresets(const bool _selectedOnly, FileType _fileType) const
@@ -231,6 +233,8 @@ namespace jucePluginEditorLib::patchManager
 
 		if(patches.size() == 1)
 			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
+
+		getPatchManager().setListStatus(static_cast<uint32_t>(patches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
 	std::set<List::Patch> List::getSelectedPatches() const

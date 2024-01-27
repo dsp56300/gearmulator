@@ -6,6 +6,7 @@
 #include "list.h"
 #include "searchlist.h"
 #include "searchtree.h"
+#include "status.h"
 #include "tagstree.h"
 #include "tree.h"
 
@@ -70,15 +71,25 @@ namespace jucePluginEditorLib::patchManager
 		// 4th column
 		m_info = new Info(*this);
 		m_info->setTopLeftPosition(m_list->getRight() + g_padding, 0);
-		m_info->setSize(getWidth() - m_info->getX(), rootH);
+		m_info->setSize(getWidth() - m_info->getX(), rootH - g_searchBarHeight - g_padding);
+
+		m_status = new Status();
+		m_status->setTopLeftPosition(m_info->getX(), m_info->getHeight() + g_padding);
+		m_status->setSize(m_info->getWidth(), g_searchBarHeight);
 
 		addAndMakeVisible(m_info);
+		addAndMakeVisible(m_status);
 
 		if(const auto t = getTemplate("pm_search"))
 		{
 			t->apply(getEditor(), *m_searchList);
 			t->apply(getEditor(), *m_searchTreeDS);
 			t->apply(getEditor(), *m_searchTreeTags);
+		}
+
+		if(const auto t = getTemplate("pm_status_label"))
+		{
+			t->apply(getEditor(), *m_status);
 		}
 
 		startTimer(200);
@@ -88,6 +99,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		stopTimer();
 
+		delete m_status;
 		delete m_info;
 		delete m_searchList;
 		delete m_list;
@@ -105,6 +117,8 @@ namespace jucePluginEditorLib::patchManager
 		m_treeDS->processDirty(dirty);
 		m_treeTags->processDirty(dirty);
 		m_list->processDirty(dirty);
+
+		m_status->setScanning(isScanning());
 	}
 
 	void PatchManager::setSelectedItem(Tree* _tree, const TreeItem* _item)
@@ -112,9 +126,7 @@ namespace jucePluginEditorLib::patchManager
 		m_selectedItems[_tree] = std::set{_item};
 
 		if(_tree == m_treeDS)
-		{
 			m_treeTags->onParentSearchChanged(_item->getSearchRequest());
-		}
 
 		onSelectedItemsChanged();
 	}
@@ -246,6 +258,11 @@ namespace jucePluginEditorLib::patchManager
 			m_list->setSelectedPatches({p});
 
 		return true;
+	}
+
+	void PatchManager::setListStatus(uint32_t _selected, uint32_t _total)
+	{
+		m_status->setListStatus(_selected, _total);
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
