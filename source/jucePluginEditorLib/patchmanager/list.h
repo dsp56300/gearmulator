@@ -63,6 +63,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void setFilter(const std::string& _filter);
+		void setFilter(const std::string& _filter, bool _hideDuplicates);
 
 		PatchManager& getPatchManager() const
 		{
@@ -82,7 +83,7 @@ namespace jucePluginEditorLib::patchManager
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);
 		bool exportPresets(bool _selectedOnly, FileType _fileType) const;
 
-		bool onClicked(const juce::MouseEvent&) const;
+		bool onClicked(const juce::MouseEvent&);
 
 		PatchManager& m_patchManager;
 
@@ -90,5 +91,6 @@ namespace jucePluginEditorLib::patchManager
 		Patches m_patches;
 		Patches m_filteredPatches;
 		std::string m_filter;
+		bool m_hideDuplicates = false;
 	};
 }

@@ -88,7 +88,7 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
-	bool List::onClicked(const juce::MouseEvent& _mouseEvent) const
+	bool List::onClicked(const juce::MouseEvent& _mouseEvent)
 	{
 		if(!_mouseEvent.mods.isPopupMenu())
 			return false;
@@ -107,10 +107,11 @@ namespace jucePluginEditorLib::patchManager
 		if(hasSelectedPatches)
 			menu.addSubMenu("Export selected...", fileTypeMenu([this](const FileType _fileType) { exportPresets(true, _fileType); }));
 		menu.addSubMenu("Export all...", fileTypeMenu([this](const FileType _fileType) { exportPresets(false, _fileType); }));
-		menu.addSeparator();
 
 		if(hasSelectedPatches)
 		{
+			menu.addSeparator();
+
 			auto selectedPatches = getSelectedPatches();
 
 			if(!m_search->request.tags.empty())
@@ -145,6 +146,11 @@ namespace jucePluginEditorLib::patchManager
 				});
 			}
 		}
+		menu.addSeparator();
+		menu.addItem("Hide Duplicates", true, m_hideDuplicates, [this]
+		{
+			setFilter(m_filter, !m_hideDuplicates);
+		});
 		menu.showMenuAsync({});
 		return true;
 	}
@@ -346,12 +352,18 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::setFilter(const std::string& _filter)
 	{
-		if (m_filter == _filter)
+		setFilter(_filter, m_hideDuplicates);
+	}
+
+	void List::setFilter(const std::string& _filter, const bool _hideDuplicates)
+	{
+		if (m_filter == _filter && _hideDuplicates == m_hideDuplicates)
 			return;
 
 		const auto selected = getSelectedPatches();
 
 		m_filter = _filter;
+		m_hideDuplicates = _hideDuplicates;
 
 		filterPatches();
 		updateContent();
@@ -414,19 +426,27 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::filterPatches()
 	{
-		if (m_filter.empty())
+		if (m_filter.empty() && !m_hideDuplicates)
 		{
 			m_filteredPatches.clear();
 			return;
 		}
 
 		m_filteredPatches.reserve(m_patches.size());
-
 		m_filteredPatches.clear();
+
+		std::set<pluginLib::patchDB::PatchHash> knownPatches;
 
 		for (const auto& patch : m_patches)
 		{
-			if (match(patch))
+			if(m_hideDuplicates)
+			{
+				if(knownPatches.find(patch->hash) != knownPatches.end())
+					continue;
+				knownPatches.insert(patch->hash);
+			}
+
+			if (m_filter.empty() || match(patch))
 				m_filteredPatches.emplace_back(patch);
 		}
 	}
