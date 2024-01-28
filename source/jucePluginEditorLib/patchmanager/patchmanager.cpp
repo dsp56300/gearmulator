@@ -104,6 +104,10 @@ namespace jucePluginEditorLib::patchManager
 		delete m_info;
 		delete m_searchList;
 		delete m_list;
+
+		// trees emit onSelectionChanged, be sure to guard it 
+		m_list = nullptr;
+
 		delete m_searchTreeTags;
 		delete m_treeTags;
 		delete m_searchTreeDS;
@@ -451,6 +455,10 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::onSelectedItemsChanged()
 	{
+		// trees emit onSelectionChanged in destructor, be sure to guard it 
+		if(!m_list)
+			return;
+
 		const auto selectedTags = m_selectedItems[m_treeTags];
 
 		auto selectItem = [&](const TreeItem* _item)
