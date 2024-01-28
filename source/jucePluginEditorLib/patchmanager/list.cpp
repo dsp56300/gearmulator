@@ -185,8 +185,27 @@ namespace jucePluginEditorLib::patchManager
 				_g.setFont(*f);
 		}
 
+		const auto c = getPatchManager().getPatchColor(patch);
+
+		constexpr int offsetX = 20;
+
+		if(c != pluginLib::patchDB::g_invalidColor)
+		{
+			_g.setColour(juce::Colour(c));
+			constexpr auto s = 8.f;
+			constexpr auto sd2 = 0.5f * s;
+			_g.fillEllipse(10 - sd2, static_cast<float>(_height) * 0.5f - sd2, s, s);
+//			_g.setColour(juce::Colour(0xffffffff));
+//			_g.drawEllipse(10 - sd2, static_cast<float>(_height) * 0.5f - sd2, s, s, 1.0f);
+//			offsetX += 14;
+		}
+
+//		if(c != pluginLib::patchDB::g_invalidColor)
+//			_g.setColour(juce::Colour(c));
+//		else
 		_g.setColour(findColour(textColourId));
-		_g.drawText(text, 2, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
+
+		_g.drawText(text, offsetX, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
 	}
 
 	juce::var List::getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe)

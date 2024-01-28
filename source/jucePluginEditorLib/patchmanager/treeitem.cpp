@@ -198,7 +198,9 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto* style = dynamic_cast<const genericUI::TreeViewStyle*>(&getOwnerView()->getLookAndFeel());
 
-		_g.setColour(style ? style->getColor() : juce::Colour(0xffffffff));
+		const auto color = getColor();
+
+		_g.setColour(color != pluginLib::patchDB::g_invalidColor ? juce::Colour(color) : style ? style->getColor() : juce::Colour(0xffffffff));
 
 		if(style)
 		{

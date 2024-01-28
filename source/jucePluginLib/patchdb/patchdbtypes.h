@@ -75,4 +75,7 @@ namespace pluginLib::patchDB
 	TagType toTagType(const std::string& _string);
 
 	using Timestamp = std::chrono::time_point<std::chrono::system_clock>;
+
+	using Color = uint32_t;
+	static constexpr uint32_t g_invalidColor = 0;
 }

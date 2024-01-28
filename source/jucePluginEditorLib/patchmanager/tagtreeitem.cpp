@@ -1,6 +1,8 @@
 #include "tagtreeitem.h"
 
 #include "patchmanager.h"
+#include "tree.h"
+#include "juce_gui_extra/misc/juce_ColourSelector.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -69,9 +71,42 @@ namespace jucePluginEditorLib::patchManager
 				{
 					getPatchManager().removeTag(tagType, m_tag);
 				});
+				menu.addItem("Set Color...", [this, tagType]
+				{
+					juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
+
+					cs->getProperties().set("tagType", static_cast<int>(tagType));
+					cs->getProperties().set("tag", juce::String(getTag()));
+
+					cs->setSize(400,300);
+					cs->setCurrentColour(juce::Colour(getColor()));
+					cs->addChangeListener(&getPatchManager());
+
+					const auto treeRect = getTree()->getScreenBounds();
+					const auto itemRect = getItemPosition(true);
+					auto rect = itemRect;
+					rect.translate(treeRect.getX(), treeRect.getY());
+
+					juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
+				});
+				if(getColor() != pluginLib::patchDB::g_invalidColor)
+				{
+					menu.addItem("Clear Color", [this, tagType]
+					{
+						getPatchManager().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
+					});
+				}
 
 				menu.showMenuAsync({});
 			}
 		}
+	}
+
+	pluginLib::patchDB::Color TagTreeItem::getColor() const
+	{
+		const auto tagType = toTagType(getGroupType());
+		if(tagType != pluginLib::patchDB::TagType::Invalid)
+			return getPatchManager().getTagColor(tagType, getTag());
+		return TreeItem::getColor();
 	}
 }

@@ -72,6 +72,8 @@ namespace jucePluginEditorLib::patchManager
 
 		virtual void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch);
 
+		virtual pluginLib::patchDB::Color getColor() const { return pluginLib::patchDB::g_invalidColor; }
+
 	protected:
 		void cancelSearch();
 		void search(pluginLib::patchDB::SearchRequest&& _request);

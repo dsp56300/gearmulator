@@ -13,6 +13,7 @@
 #include "../pluginEditor.h"
 
 #include "../../jucePluginLib/types.h"
+#include "juce_gui_extra/misc/juce_ColourSelector.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -265,6 +266,22 @@ namespace jucePluginEditorLib::patchManager
 		m_status->setListStatus(_selected, _total);
 	}
 
+	pluginLib::patchDB::Color PatchManager::getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const
+	{
+		// we want to prevent that a whole list is colored with one color just because that list is based on a tag, prefer other tags instead
+		pluginLib::patchDB::TypedTags ignoreTags;
+
+		for (const auto& selectedItem : m_selectedItems)
+		{
+			for (const auto& item : selectedItem.second)
+			{
+				const auto& s = item->getSearchRequest();
+				ignoreTags.add(s.tags);
+			}
+		}
+		return DB::getPatchColor(_patch, ignoreTags);
+	}
+
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
 	{
 		return m_editor.getTemplate(_name);
@@ -458,6 +475,23 @@ namespace jucePluginEditorLib::patchManager
 		{
 			const auto* item = *selectedDataSources.begin();
 			selectItem(item);
+		}
+	}
+
+	void PatchManager::changeListenerCallback(juce::ChangeBroadcaster* _source)
+	{
+		auto* cs = dynamic_cast<juce::ColourSelector*>(_source);
+
+		if(cs)
+		{
+			const auto tagType = static_cast<pluginLib::patchDB::TagType>(static_cast<int>(cs->getProperties()["tagType"]));
+			const auto tag = cs->getProperties()["tag"].toString().toStdString();
+
+			if(tagType != pluginLib::patchDB::TagType::Invalid && !tag.empty())
+			{
+				const auto color = cs->getCurrentColour();
+				setTagColor(tagType, tag, color.getARGB());
+			}
 		}
 	}
 }

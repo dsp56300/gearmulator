@@ -41,6 +41,10 @@ namespace pluginLib::patchDB
 				_dataSources.push_back(it.second);
 		}
 
+		bool setTagColor(TagType _type, const Tag& _tag, Color _color);
+		Color getTagColor(TagType _type, const Tag& _tag) const;
+		Color getPatchColor(const PatchPtr& _patch, const TypedTags& _tagsToIgnore) const;
+
 		bool addTag(TagType _type, const Tag& _tag);
 		bool removeTag(TagType _type, const Tag& _tag);
 
@@ -109,6 +113,8 @@ namespace pluginLib::patchDB
 
 		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds);
 
+		Color getTagColorInternal(TagType _type, const Tag& _tag) const;
+
 		bool loadJson();
 		bool saveJson();
 		juce::File getLocalStorageFile(const DataSource& _ds) const;
@@ -130,8 +136,9 @@ namespace pluginLib::patchDB
 		std::shared_mutex m_dataSourcesMutex;
 		std::map<DataSource, DataSourceNodePtr> m_dataSources;	// we need a key to find duplicates, but at the same time we need pointers to do the parent relation
 
-		std::shared_mutex m_patchesMutex;
+		mutable std::shared_mutex m_patchesMutex;
 		std::unordered_map<TagType, std::set<Tag>> m_tags;
+		std::unordered_map<TagType, std::unordered_map<Tag, uint32_t>> m_tagColors;
 		std::map<PatchKey, PatchModificationsPtr> m_patchModifications;
 
 		// search

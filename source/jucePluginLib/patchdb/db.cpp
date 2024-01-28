@@ -210,6 +210,63 @@ namespace pluginLib::patchDB
 		});
 	}
 
+	bool DB::setTagColor(const TagType _type, const Tag& _tag, const Color _color)
+	{
+		std::shared_lock lock(m_patchesMutex);
+		if(_color == g_invalidColor)
+		{
+			const auto itType = m_tagColors.find(_type);
+
+			if(itType == m_tagColors.end())
+				return false;
+
+			if(!itType->second.erase(_tag))
+				return false;
+		}
+		else
+		{
+			if(m_tagColors[_type][_tag] == _color)
+				return false;
+			m_tagColors[_type][_tag] = _color;
+		}
+
+		std::unique_lock lockUi(m_uiMutex);
+		m_dirty.tags.insert(_type);
+
+		// TODO: this might spam saving if this function is called too often
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
+		return true;
+	}
+
+	Color DB::getTagColor(const TagType _type, const Tag& _tag) const
+	{
+		std::shared_lock lock(m_patchesMutex);
+		return getTagColorInternal(_type, _tag);
+	}
+
+	Color DB::getPatchColor(const PatchPtr& _patch, const TypedTags& _tagsToIgnore) const
+	{
+		const auto& tags = _patch->getTags();
+
+		for (const auto& itType : tags.get())
+		{
+			for (const auto& tag : itType.second.getAdded())
+			{
+				if(_tagsToIgnore.containsAdded(itType.first, tag))
+					continue;
+
+				const auto c = getTagColor(itType.first, tag);
+				if(c != g_invalidColor)
+					return c;
+			}
+		}
+
+		return g_invalidColor;
+	}
+
 	bool DB::addTag(const TagType _type, const std::string& _tag)
 	{
 		{
@@ -1056,6 +1113,17 @@ namespace pluginLib::patchDB
 		return _ds->createConsecutiveProgramNumbers();
 	}
 
+	Color DB::getTagColorInternal(const TagType _type, const Tag& _tag) const
+	{
+		const auto itType = m_tagColors.find(_type);
+		if(itType == m_tagColors.end())
+			return 0;
+		const auto itTag = itType->second.find(_tag);
+		if(itTag == itType->second.end())
+			return 0;
+		return itTag->second;
+	}
+
 	bool DB::loadJson()
 	{
 		bool success = true;
@@ -1118,6 +1186,36 @@ namespace pluginLib::patchDB
 				}
 			}
 
+			if(auto* tagColors = json["tagColors"].getDynamicObject())
+			{
+				const auto& props = tagColors->getProperties();
+
+				for (const auto& it : props)
+				{
+					const auto strType = it.name.toString().toStdString();
+					const auto type = toTagType(strType);
+
+					auto* colors = it.value.getDynamicObject();
+					if(colors)
+					{
+						std::unordered_map<Tag, Color> newTags;
+						for (auto itCol : colors->getProperties())
+						{
+							const auto tag = itCol.name.toString().toStdString();
+							const auto col = static_cast<juce::int64>(itCol.value);
+							if(!tag.empty() && col != g_invalidColor && col >= std::numeric_limits<Color>::min() && col <= std::numeric_limits<Color>::max())
+								newTags[tag] = static_cast<Color>(col);
+						}
+						m_tagColors[type] = newTags;
+						m_dirty.tags.insert(type);
+					}
+					else
+					{
+						LOG("Unexpected empty tags for tag type " << strType);
+						success = false;
+					}
+				}
+			}
 			if (auto* patches = json["patches"].getDynamicObject())
 			{
 				const auto& props = patches->getProperties();
@@ -1209,6 +1307,25 @@ namespace pluginLib::patchDB
 			}
 
 			json->setProperty("tags", tagTypes);
+			
+			auto* tagColors = new juce::DynamicObject();
+
+			for (const auto& it : m_tagColors)
+			{
+				const auto type = it.first;
+				const auto& tags = it.second;
+
+				if(tags.empty())
+					continue;
+
+				auto* colors = new juce::DynamicObject();
+				for (const auto& [tag, col] : tags)
+					colors->setProperty(juce::String(tag), static_cast<juce::int64>(col));
+
+				tagColors->setProperty(juce::String(toString(type)), colors);
+			}
+
+			json->setProperty("tagColors", tagColors);
 
 			auto* patchMods = new juce::DynamicObject();
 

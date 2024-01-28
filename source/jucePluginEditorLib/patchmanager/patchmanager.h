@@ -26,7 +26,7 @@ namespace jucePluginEditorLib::patchManager
 	class List;
 	class Tree;
 
-	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer
+	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer, public juce::ChangeListener
 	{
 	public:
 		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir);
@@ -47,6 +47,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void setListStatus(uint32_t _selected, uint32_t _total);
 
+		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 
@@ -78,6 +79,8 @@ namespace jucePluginEditorLib::patchManager
 	private:
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 		void onSelectedItemsChanged();
+
+		void changeListenerCallback (juce::ChangeBroadcaster* _source) override;
 
 		Editor& m_editor;
 

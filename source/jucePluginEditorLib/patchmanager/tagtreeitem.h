@@ -25,6 +25,8 @@ namespace jucePluginEditorLib::patchManager
 		const auto& getTag() const { return m_tag; }
 
 		void itemClicked(const juce::MouseEvent&) override;
+
+		pluginLib::patchDB::Color getColor() const override;
 	private:
 		const GroupType m_group;
 		const std::string m_tag;
