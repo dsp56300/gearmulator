@@ -22,12 +22,22 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
 	{
+		cancelSearch();
+
 		const auto& search = m_patchManager.getSearch(_handle);
 
 		if (!search)
 			return;
 
 		setContent(search);
+	}
+
+	void List::setContent(pluginLib::patchDB::SearchRequest&& _request)
+	{
+		cancelSearch();
+		const auto sh = getPatchManager().search(std::move(_request));
+		setContent(sh);
+		m_searchHandle = sh;
 	}
 
 	void List::refreshContent()
@@ -155,6 +165,14 @@ namespace jucePluginEditorLib::patchManager
 		});
 		menu.showMenuAsync({});
 		return true;
+	}
+
+	void List::cancelSearch()
+	{
+		if(m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
+			return;
+		getPatchManager().cancelSearch(m_searchHandle);
+		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
 	int List::getNumRows()

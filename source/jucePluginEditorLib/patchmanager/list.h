@@ -8,6 +8,7 @@
 
 namespace pluginLib::patchDB
 {
+	struct SearchRequest;
 	struct PatchKey;
 	struct Search;
 }
@@ -25,6 +26,8 @@ namespace jucePluginEditorLib::patchManager
 		explicit List(PatchManager& _pm);
 
 		void setContent(const pluginLib::patchDB::SearchHandle& _handle);
+		void setContent(pluginLib::patchDB::SearchRequest&& _request);
+
 		void refreshContent();
 
 		// ListBoxModel
@@ -82,8 +85,8 @@ namespace jucePluginEditorLib::patchManager
 		bool match(const Patch& _patch) const;
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);
 		bool exportPresets(bool _selectedOnly, FileType _fileType) const;
-
 		bool onClicked(const juce::MouseEvent&);
+		void cancelSearch();
 
 		PatchManager& m_patchManager;
 
@@ -92,5 +95,6 @@ namespace jucePluginEditorLib::patchManager
 		Patches m_filteredPatches;
 		std::string m_filter;
 		bool m_hideDuplicates = false;
+		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	};
 }

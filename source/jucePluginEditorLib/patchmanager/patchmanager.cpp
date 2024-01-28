@@ -486,8 +486,19 @@ namespace jucePluginEditorLib::patchManager
 
 		if(!selectedTags.empty())
 		{
-			if(selectItem(*selectedTags.begin()))
+			if(selectedTags.size() == 1)
+			{
+				if(selectItem(*selectedTags.begin()))
+					return;
+			}
+			else
+			{
+				pluginLib::patchDB::SearchRequest search = (*selectedTags.begin())->getSearchRequest();
+				for (const auto& selectedTag : selectedTags)
+					search.tags.add(selectedTag->getSearchRequest().tags);
+				m_list->setContent(std::move(search));
 				return;
+			}
 		}
 
 		const auto selectedDataSources = m_selectedItems[m_treeDS];
