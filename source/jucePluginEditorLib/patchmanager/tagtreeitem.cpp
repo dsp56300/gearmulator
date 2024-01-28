@@ -67,10 +67,14 @@ namespace jucePluginEditorLib::patchManager
 			if(tagType != pluginLib::patchDB::TagType::Invalid)
 			{
 				juce::PopupMenu menu;
-				menu.addItem("Remove", [this, tagType]
+				const auto& s = getPatchManager().getSearch(getSearchHandle());
+				if(s && !s->getResultSize())
 				{
-					getPatchManager().removeTag(tagType, m_tag);
-				});
+					menu.addItem("Remove", [this, tagType]
+					{
+						getPatchManager().removeTag(tagType, m_tag);
+					});
+				}
 				menu.addItem("Set Color...", [this, tagType]
 				{
 					juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
