@@ -116,6 +116,8 @@ namespace genericVirusUI
 		const auto idxUnison = c.getParameterIndexByName("Unison Mode");
 		const auto idxTranspose = c.getParameterIndexByName("Transpose");
 		const auto idxArpMode = c.getParameterIndexByName("Arp Mode");
+		const auto idxPhaserMix = c.getParameterIndexByName("Phaser Mix");
+		const auto idxChorusMix = c.getParameterIndexByName("Chorus Mix");
 
 		auto patch = std::make_shared<Patch>();
 
@@ -171,6 +173,10 @@ namespace genericVirusUI
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Arp");
 		if(patch->unison)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Unison");
+		if(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxPhaserMix))->second > 0)
+			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Phaser");
+		if(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxChorusMix))->second > 0)
+			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Chorus");
 		return patch;
 	}
 
