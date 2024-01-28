@@ -15,6 +15,9 @@ namespace jucePluginEditorLib::patchManager
 		Categories,
 		Tags,
 		Favourites,
+		CustomA,
+		CustomB,
+		CustomC,
 		Count
 	};
 

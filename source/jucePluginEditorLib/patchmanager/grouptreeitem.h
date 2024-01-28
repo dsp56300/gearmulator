@@ -20,7 +20,7 @@ namespace jucePluginEditorLib::patchManager
 	class GroupTreeItem : public TreeItem
 	{
 	public:
-		GroupTreeItem(PatchManager& _pm, GroupType _type);
+		GroupTreeItem(PatchManager& _pm, GroupType _type, const std::string& _groupName);
 
 		bool mightContainSubItems() override
 		{

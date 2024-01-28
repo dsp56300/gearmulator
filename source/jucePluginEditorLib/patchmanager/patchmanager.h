@@ -48,6 +48,9 @@ namespace jucePluginEditorLib::patchManager
 		void setListStatus(uint32_t _selected, uint32_t _total);
 
 		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
+
+		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name);
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 

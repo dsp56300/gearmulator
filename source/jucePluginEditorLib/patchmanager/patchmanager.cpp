@@ -286,6 +286,19 @@ namespace jucePluginEditorLib::patchManager
 		return DB::getPatchColor(_patch, ignoreTags);
 	}
 
+	bool PatchManager::addGroupTreeItemForTag(const pluginLib::patchDB::TagType _type, const std::string& _name)
+	{
+		const auto groupType = toGroupType(_type);
+		if(groupType == GroupType::Invalid)
+			return false;
+		if(_name.empty())
+			return false;
+		if(m_treeTags->getItem(groupType))
+			return false;
+		m_treeTags->addGroup(groupType, _name);
+		return true;
+	}
+
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
 	{
 		return m_editor.getTemplate(_name);

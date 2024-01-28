@@ -58,6 +58,8 @@ namespace genericVirusUI
 					addDataSource(createRomDataSource(index));
 			}
 		};
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA, "Virus Model");
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB, "Virus Features");
 	}
 
 	PatchManager::~PatchManager()
@@ -164,6 +166,11 @@ namespace genericVirusUI
 		case virusLib::D:	patch->tags.add(pluginLib::patchDB::TagType::CustomA, "TI");		break;
 		case virusLib::D2:	patch->tags.add(pluginLib::patchDB::TagType::CustomA, "TI2");		break;
 		}
+
+		if(patch->arpMode)
+			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Arp");
+		if(patch->unison)
+			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Unison");
 		return patch;
 	}
 

@@ -12,6 +12,21 @@
 
 namespace jucePluginEditorLib::patchManager
 {
+	constexpr const char* const g_groupNames[] =
+	{
+		"Invalid",
+		"Data Sources",
+		"User",
+		"Categories",
+		"Tags",
+		"Favourites",
+		"CustomA",
+		"CustomB",
+		"CustomC"
+	};
+
+	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
+
 	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
 	{
 		// some very basic defaults if no style is available
@@ -150,18 +165,23 @@ namespace jucePluginEditorLib::patchManager
 
 	void Tree::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest)
 	{
-		for (auto& groupItem : m_groupItems)
+		for (const auto& groupItem : m_groupItems)
 		{
 			groupItem.second->setParentSearchRequest(_searchRequest);
 		}
 	}
 
-	void Tree::addGroup(const GroupType _type)
+	void Tree::addGroup(GroupType _type, const std::string& _name)
 	{
-		auto* groupItem = new GroupTreeItem(m_patchManager, _type);
+		auto* groupItem = new GroupTreeItem(m_patchManager, _type, _name);
 		getRootItem()->addSubItem(groupItem);
 		m_groupItems.insert({ _type, groupItem });
 		groupItem->setFilter(m_filter);
+	}
+
+	void Tree::addGroup(const GroupType _type)
+	{
+		addGroup(_type, g_groupNames[static_cast<uint32_t>(_type)]);
 	}
 
 	GroupTreeItem* Tree::getItem(const GroupType _type)

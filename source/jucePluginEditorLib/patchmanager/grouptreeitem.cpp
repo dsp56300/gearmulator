@@ -4,24 +4,12 @@
 #include "patchmanager.h"
 #include "search.h"
 #include "tagtreeitem.h"
-#include "dsp56kEmu/logging.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	class DatasourceTreeItem;
-	constexpr const char* const g_groupNames[] =
-	{
-		"Invalid",
-		"Data Sources",
-		"User",
-		"Categories",
-		"Tags",
-		"Favourites"
-	};
 
-	static_assert(std::size(g_groupNames) == static_cast<uint32_t>(GroupType::Count));
-
-	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type) : TreeItem(_pm, g_groupNames[static_cast<uint32_t>(_type)]), m_type(_type)
+	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
 	}
 

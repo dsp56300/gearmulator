@@ -39,9 +39,11 @@ namespace jucePluginEditorLib::patchManager
 
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
 
+		void addGroup(GroupType _type, const std::string& _name);
+
+		GroupTreeItem* getItem(GroupType _type);
 	protected:
 		void addGroup(GroupType _type);
-		GroupTreeItem* getItem(GroupType _type);
 
 	private:
 		PatchManager& m_patchManager;
