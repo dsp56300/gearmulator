@@ -80,6 +80,7 @@ namespace pluginLib::patchDB
 		const Tags& get(TagType _type) const;
 		const auto& get() const { return m_tags; }
 		bool add(TagType _type, const Tag& _tag);
+		bool add(const TypedTags& _tags);
 		bool erase(TagType _type, const Tag& _tag);
 		bool addRemoved(TagType _type, const Tag& _tag);
 		bool containsAdded(TagType _type, const Tag& _tag) const;

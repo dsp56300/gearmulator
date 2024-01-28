@@ -49,6 +49,19 @@ namespace pluginLib::patchDB
 		return it->second.add(_tag);
 	}
 
+	bool TypedTags::add(const TypedTags& _tags)
+	{
+		bool result = false;
+
+		for (const auto& tags : _tags.get())
+		{
+			for (const auto& tag : tags.second.getAdded())
+				result |= add(tags.first, tag);
+		}
+
+		return result;
+	}
+
 	bool TypedTags::addRemoved(const TagType _type, const Tag& _tag)
 	{
 		const auto it = m_tags.find(_type);
