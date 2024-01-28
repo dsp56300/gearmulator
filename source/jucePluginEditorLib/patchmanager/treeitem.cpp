@@ -204,8 +204,17 @@ namespace jucePluginEditorLib::patchManager
 
 		if(style)
 		{
-			if (const auto f = style->getFont())
+			if (auto f = style->getFont())
+			{
+				f->setBold(getParentItem() == getTree()->getRootItem());
 				_g.setFont(*f);
+			}
+			else
+			{
+				auto fnt = _g.getCurrentFont();
+				fnt.setBold(getParentItem() == getTree()->getRootItem());
+				_g.setFont(fnt);
+			}
 		}
 
 		const juce::String t(m_text);
