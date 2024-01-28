@@ -22,7 +22,7 @@ namespace pluginLib::patchDB
 			const auto t = lowercase(_test);
 			return t.find(_search) != std::string::npos;
 		}
-
+		/*
 		bool matchStrings(const std::string& _test, const std::string& _search)
 		{
 			if (_search.empty())
@@ -30,7 +30,7 @@ namespace pluginLib::patchDB
 
 			return _test.find(_search) != std::string::npos;
 		}
-
+		*/
 		bool testTags(const Tags& _tags, const Tags& _search)
 		{
 			for (const auto& t : _search.getAdded())
