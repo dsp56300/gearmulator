@@ -155,10 +155,24 @@ namespace genericVirusUI
 		const auto* paramCategory1 = c.getParameter(idxCategory1, 0);
 		const auto* paramCategory2 = c.getParameter(idxCategory2, 0);
 
-		if (category1)
-			patch->tags.add(pluginLib::patchDB::TagType::Category, paramCategory1->getDescription().valueList.valueToText(category1));
-		if (category2)
-			patch->tags.add(pluginLib::patchDB::TagType::Category, paramCategory2->getDescription().valueList.valueToText(category2));
+		auto addCategory = [&patch](const uint8_t _value, const pluginLib::Parameter* _param)
+		{
+			if(!_value)
+				return;
+			const auto& values = _param->getDescription().valueList;
+			if(_value >= values.texts.size())
+				return;
+
+			// Virus < TI had less categories
+			if(patch->version < virusLib::D && _value > 16)
+				return;
+
+			const auto t = _param->getDescription().valueList.valueToText(_value);
+			patch->tags.add(pluginLib::patchDB::TagType::Category, t);
+		};
+
+		addCategory(category1, paramCategory1);
+		addCategory(category2, paramCategory2);
 
 		switch (patch->version)
 		{
