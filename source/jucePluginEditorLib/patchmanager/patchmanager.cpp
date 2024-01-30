@@ -138,13 +138,20 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::addSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
+		const auto oldCount = m_selectedItems[_tree].size();
 		m_selectedItems[_tree].insert(_item);
-		onSelectedItemsChanged();
+		const auto newCount = m_selectedItems[_tree].size();
+		if(newCount > oldCount)
+			onSelectedItemsChanged();
 	}
 
 	void PatchManager::removeSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
-		m_selectedItems[_tree].erase(_item);
+		const auto it = m_selectedItems.find(_tree);
+		if(it == m_selectedItems.end())
+			return;
+		if(!it->second.erase(_item))
+			return;
 		onSelectedItemsChanged();
 	}
 
