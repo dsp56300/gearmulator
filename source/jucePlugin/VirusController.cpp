@@ -368,17 +368,6 @@ namespace Virus
         return {};
 	}
 
-	void Controller::parseSingle(const pluginLib::SysEx& msg)
-	{
-		pluginLib::MidiPacket::Data data;
-        pluginLib::MidiPacket::ParamValues parameterValues;
-
-    	if(!parseSingle(data, parameterValues, msg))
-            return;
-
-        parseSingle(msg, data, parameterValues);
-    }
-
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{
         SinglePatch patch;

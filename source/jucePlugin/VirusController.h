@@ -159,7 +159,6 @@ namespace Virus
 
         MultiPatch m_multiEditBuffer;
 
-        void parseSingle(const pluginLib::SysEx& _msg);
         void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
     	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
