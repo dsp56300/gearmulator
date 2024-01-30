@@ -359,7 +359,7 @@ namespace jucePluginEditorLib::patchManager
 		pluginLib::patchDB::Data data;
 		if(!requestPatchForPart(data, _part))
 			return;
-		const auto patch = initializePatch(data);
+		const auto patch = initializePatch(std::move(data));
 		if(!patch)
 			return;
 		updateStateAsync(_part, patch);

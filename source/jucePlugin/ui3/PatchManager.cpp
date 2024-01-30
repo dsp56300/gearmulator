@@ -97,7 +97,7 @@ namespace genericVirusUI
 		return true;
 	}
 
-	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(const std::vector<uint8_t>& _sysex)
+	std::shared_ptr<pluginLib::patchDB::Patch> PatchManager::initializePatch(std::vector<uint8_t>&& _sysex)
 	{
 		if (_sysex.size() < 267)
 			return nullptr;
@@ -132,8 +132,6 @@ namespace genericVirusUI
 				patch->program = it->second;
 		}
 
-		patch->sysex = _sysex;
-
 		{
 			constexpr auto frontOffset = 9;			// remove bank number, program number and other stuff that we don't need, first index is the patch version
 			constexpr auto backOffset = 2;			// remove f7 and checksum
@@ -142,6 +140,8 @@ namespace genericVirusUI
 			static_assert(sizeof(juce::MD5) >= sizeof(pluginLib::patchDB::PatchHash));
 			memcpy(patch->hash.data(), md5.getChecksumDataArray(), std::size(patch->hash));
 		}
+
+		patch->sysex = std::move(_sysex);
 
 		patch->name = c.getSinglePresetName(parameterValues);
 		patch->version = virusLib::Microcontroller::getPresetVersion(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxVersion))->second);

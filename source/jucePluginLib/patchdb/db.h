@@ -84,7 +84,7 @@ namespace pluginLib::patchDB
 		virtual bool loadFile(DataList& _results, const std::string& _file);
 		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
-		virtual PatchPtr initializePatch(const Data& _sysex) = 0;
+		virtual PatchPtr initializePatch(Data&& _sysex) = 0;
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const = 0;

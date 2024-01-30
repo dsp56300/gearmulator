@@ -522,7 +522,7 @@ namespace pluginLib::patchDB
 	{
 		Data data;
 		requestPatchForPart(data, _part);
-		return initializePatch(data);
+		return initializePatch(std::move(data));
 	}
 
 	void DB::getTags(const TagType _type, std::set<Tag>& _tags)
@@ -793,7 +793,7 @@ namespace pluginLib::patchDB
 
 			for (uint32_t p = 0; p < data.size(); ++p)
 			{
-				if (const auto patch = initializePatch(data[p]))
+				if (const auto patch = initializePatch(std::move(data[p])))
 				{
 					patch->source = ds->weak_from_this();
 
