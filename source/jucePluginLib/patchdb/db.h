@@ -50,6 +50,7 @@ namespace pluginLib::patchDB
 
 		void getTags(TagType _type, std::set<Tag>& _tags);
 		bool modifyTags(const std::vector<PatchPtr>& _patches, const TypedTags& _tags);
+		bool renamePatch(const PatchPtr& _patch, const std::string& _name);
 
 		SearchHandle search(SearchRequest&& _request);
 		SearchHandle search(SearchRequest&& _request, SearchCallback&& _callback);

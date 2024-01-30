@@ -1,5 +1,7 @@
 #pragma once
 
+#include "editable.h"
+
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -17,7 +19,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
 
-	class List : public juce::ListBox, juce::ListBoxModel
+	class List : public juce::ListBox, juce::ListBoxModel, Editable
 	{
 	public:
 		using Patch = pluginLib::patchDB::PatchPtr;

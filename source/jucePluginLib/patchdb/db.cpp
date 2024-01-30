@@ -585,6 +585,43 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
+	bool DB::renamePatch(const PatchPtr& _patch, const std::string& _name)
+	{
+		if(_patch->getName() == _name)
+			return false;
+
+		{
+			std::unique_lock lock(m_patchesMutex);
+
+			const auto key = PatchKey(*_patch);
+
+			const auto& it = m_patchModifications.find(key);
+
+			if (it != m_patchModifications.end())
+			{
+				it->second->name = _name;
+			}
+			else
+			{
+				const auto mods = std::make_shared<PatchModifications>();
+				mods->patch = _patch;
+				_patch->modifications = mods;
+
+				mods->name = _name;
+
+				mods->updateCache();
+
+				m_patchModifications.insert({ key, mods });
+			}
+
+			updateSearches({_patch});
+		}
+
+		saveJson();
+
+		return true;
+	}
+
 	SearchHandle DB::search(SearchRequest&& _request)
 	{
 		return search(std::move(_request), [](const Search&) {});

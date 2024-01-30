@@ -113,7 +113,9 @@ namespace jucePluginEditorLib::patchManager
 			return menu;
 		};
 
-		const auto hasSelectedPatches = !getSelectedPatches().empty();
+		auto selectedPatches = getSelectedPatches();
+
+		const auto hasSelectedPatches = !selectedPatches.empty();
 
 		juce::PopupMenu menu;
 		if(hasSelectedPatches)
@@ -124,7 +126,21 @@ namespace jucePluginEditorLib::patchManager
 		{
 			menu.addSeparator();
 
-			auto selectedPatches = getSelectedPatches();
+			if(selectedPatches.size() == 1)
+			{
+				const auto& patch = *selectedPatches.begin();
+				const auto row = getSelectedRow();
+				const auto pos = getRowPosition(row, true);
+
+				menu.addItem("Rename...", [this, patch, row, pos]
+				{
+					beginEdit(this, pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
+					{
+						if(_name != patch->getName())
+							getPatchManager().renamePatch(patch, _name);
+					});
+				});
+			}
 
 			if(!m_search->request.tags.empty())
 			{
