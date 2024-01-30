@@ -105,7 +105,7 @@ namespace genericVirusUI
 		const auto& c = static_cast<const Virus::Controller&>(m_controller);
 
 		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::ParamValues parameterValues;
+		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
 		if (!c.parseSingle(data, parameterValues, _sysex))
 			return nullptr;
@@ -114,7 +114,7 @@ namespace genericVirusUI
 		const auto idxCategory1 = c.getParameterIndexByName("Category1");
 		const auto idxCategory2 = c.getParameterIndexByName("Category2");
 		const auto idxUnison = c.getParameterIndexByName("Unison Mode");
-		const auto idxTranspose = c.getParameterIndexByName("Transpose");
+//		const auto idxTranspose = c.getParameterIndexByName("Transpose");
 		const auto idxArpMode = c.getParameterIndexByName("Arp Mode");
 		const auto idxPhaserMix = c.getParameterIndexByName("Phaser Mix");
 		const auto idxChorusMix = c.getParameterIndexByName("Chorus Mix");
@@ -143,19 +143,20 @@ namespace genericVirusUI
 
 		patch->sysex = std::move(_sysex);
 
-		patch->name = c.getSinglePresetName(parameterValues);
-		patch->version = virusLib::Microcontroller::getPresetVersion(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxVersion))->second);
-		patch->unison = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxUnison))->second;
-		patch->transpose = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxTranspose))->second;
-		patch->arpMode = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxArpMode))->second;
+		patch->name = m_controller.getSinglePresetName(parameterValues);
 
-		const auto category1 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory1))->second;
-		const auto category2 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory2))->second;
+		const auto version = virusLib::Microcontroller::getPresetVersion(*parameterValues[idxVersion]);
+		const auto unison = *parameterValues[idxUnison];
+//		const auto transpose = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxTranspose))->second;
+		const auto arpMode = *parameterValues[idxArpMode];
+
+		const auto category1 = *parameterValues[idxCategory1];
+		const auto category2 = *parameterValues[idxCategory2];
 
 		const auto* paramCategory1 = c.getParameter(idxCategory1, 0);
 		const auto* paramCategory2 = c.getParameter(idxCategory2, 0);
 
-		auto addCategory = [&patch](const uint8_t _value, const pluginLib::Parameter* _param)
+		auto addCategory = [&patch, version](const uint8_t _value, const pluginLib::Parameter* _param)
 		{
 			if(!_value)
 				return;
@@ -164,7 +165,7 @@ namespace genericVirusUI
 				return;
 
 			// Virus < TI had less categories
-			if(patch->version < virusLib::D && _value > 16)
+			if(version < virusLib::D && _value > 16)
 				return;
 
 			const auto t = _param->getDescription().valueList.valueToText(_value);
@@ -174,7 +175,7 @@ namespace genericVirusUI
 		addCategory(category1, paramCategory1);
 		addCategory(category2, paramCategory2);
 
-		switch (patch->version)
+		switch (version)
 		{
 		case virusLib::A:	patch->tags.add(pluginLib::patchDB::TagType::CustomA, "A");		break;
 		case virusLib::B:	patch->tags.add(pluginLib::patchDB::TagType::CustomA, "B");		break;
@@ -183,13 +184,13 @@ namespace genericVirusUI
 		case virusLib::D2:	patch->tags.add(pluginLib::patchDB::TagType::CustomA, "TI2");		break;
 		}
 
-		if(patch->arpMode)
+		if(arpMode)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Arp");
-		if(patch->unison)
+		if(unison)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Unison");
-		if(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxPhaserMix))->second > 0)
+		if(*parameterValues[idxPhaserMix] > 0)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Phaser");
-		if(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxChorusMix))->second > 0)
+		if(*parameterValues[idxChorusMix] > 0)
 			patch->tags.add(pluginLib::patchDB::TagType::CustomB, "Chorus");
 		return patch;
 	}
@@ -197,7 +198,7 @@ namespace genericVirusUI
 	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
 		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::ParamValues parameterValues;
+		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
 		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
 			return _patch->sysex;
@@ -225,10 +226,8 @@ namespace genericVirusUI
 			m_controller.getParameter(indicesCategory[1], 0)
 		};
 
-		auto& val0 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, indicesCategory[0]))->second;
-		auto& val1 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, indicesCategory[1]))->second;
-
-		val0 = val1 = 0;
+		uint8_t val0 = 0;
+		uint8_t val1 = 0;
 
 		const auto& tags = _patch->getTags(pluginLib::patchDB::TagType::Category);
 
@@ -245,6 +244,9 @@ namespace genericVirusUI
 					break;
 			}
 		}
+
+		parameterValues[indicesCategory[0]] = val0;
+		parameterValues[indicesCategory[1]] = val1;
 
 		return m_controller.createSingleDump(toMidiByte(virusLib::BankNumber::A), program, parameterValues);
 	}
@@ -285,7 +287,7 @@ namespace genericVirusUI
 	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const
 	{
 		pluginLib::MidiPacket::Data dataA, dataB;
-		pluginLib::MidiPacket::ParamValues parameterValuesA, parameterValuesB;
+		pluginLib::MidiPacket::AnyPartParamValues parameterValuesA, parameterValuesB;
 
 		if (!m_controller.parseSingle(dataA, parameterValuesA, _a->sysex) || !m_controller.parseSingle(dataB, parameterValuesB, _b->sysex))
 			return false;
@@ -293,22 +295,29 @@ namespace genericVirusUI
 		if(parameterValuesA.size() != parameterValuesB.size())
 			return false;
 
-		for (const auto& itA : parameterValuesA)
+		for(uint32_t i=0; i<parameterValuesA.size(); ++i)
 		{
-			const auto& k = itA.first;
-			auto vA = itA.second;
+			const auto& k = i;
+			const auto& itA = parameterValuesA[i];
+			const auto& itB = parameterValuesB[i];
 
-			const auto& itB = parameterValuesB.find(k);
+			if(!itA)
+			{
+				if(itB)
+					return false;
+				continue;
+			}
 
-			if(itB == parameterValuesB.end())
+			if(!itB)
 				return false;
 
-			auto vB = itB->second;
+			auto vA = *itA;
+			auto vB = *itB;
 
 			if(vA != vB)
 			{
 				// parameters might be out of range because some dumps have values that are out of range indeed, clamp to valid range and compare again
-				const auto* param = m_controller.getParameter(itB->first.second);
+				const auto* param = m_controller.getParameter(i);
 				if(!param)
 					return false;
 

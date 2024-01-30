@@ -125,7 +125,7 @@ namespace genericVirusUI
 		auto& patch = static_cast<Patch&>(_patch);
 
 		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::ParamValues parameterValues;
+		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
 		if(!c.parseSingle(data, parameterValues, patch.sysex))
 			return false;
@@ -138,13 +138,13 @@ namespace genericVirusUI
 		const auto idxArpMode = c.getParameterIndexByName("Arp Mode");
 
 		patch.name = c.getSinglePresetName(parameterValues);
-		patch.model = virusLib::Microcontroller::getPresetVersion(parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxVersion))->second);
-		patch.unison = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxUnison))->second;
-		patch.transpose = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxTranspose))->second;
-		patch.arpMode = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxArpMode))->second;
+		patch.model = virusLib::Microcontroller::getPresetVersion(*parameterValues[idxVersion]);
+		patch.unison = *parameterValues[idxUnison];
+		patch.transpose = *parameterValues[idxTranspose];
+		patch.arpMode = *parameterValues[idxArpMode];
 
-		const auto category1 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory1))->second;
-		const auto category2 = parameterValues.find(std::make_pair(pluginLib::MidiPacket::AnyPart, idxCategory2))->second;
+		const auto category1 = *parameterValues[idxCategory1];
+		const auto category2 = *parameterValues[idxCategory2];
 
 		const auto* paramCategory1 = c.getParameter(idxCategory1, 0);
 		const auto* paramCategory2 = c.getParameter(idxCategory2, 0);

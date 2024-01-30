@@ -15,9 +15,14 @@ namespace pluginLib
 
 		m_byteToDefinitionIndex.reserve(m_definitions.size());
 
+		std::set<uint32_t> usedParts;
+
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
 			const auto& d = m_definitions[i];
+
+			if(d.paramPart != AnyPart)
+				usedParts.insert(d.paramPart);
 
 			if(d.type == MidiDataType::Parameter)
 				m_hasParameters = true;
@@ -42,6 +47,8 @@ namespace pluginLib
 		}
 
 		m_byteSize = byteIndex + 1;
+
+		m_numDifferentPartsUsedInParameters = static_cast<uint32_t>(usedParts.size());
 	}
 
 	bool MidiPacket::create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const
@@ -115,12 +122,39 @@ namespace pluginLib
 		return create(_dst, _data, {});
 	}
 
+	bool MidiPacket::parse(Data& _data, AnyPartParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
+	{
+		if(m_numDifferentPartsUsedInParameters > 0)
+		{
+			LOG("Failed to parse midi packet " << m_name << " with parameters for " << m_numDifferentPartsUsedInParameters << " different parts into parameter values that are not part-aware");
+			return false;
+		}
+
+		_parameterValues.reserve(_src.size());
+
+		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
+		{
+			const auto idx = _paramIndex.second;
+			if(_parameterValues.size() <= idx)
+				_parameterValues.resize(idx + 1);
+			_parameterValues[idx] = _value;
+		}, _parameters, _src, _ignoreChecksumErrors);
+	}
+
 	bool MidiPacket::parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors/* = true*/) const
+	{
+		_parameterValues.reserve(_src.size() << 1);
+
+		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
+		{
+			_parameterValues.insert(std::make_pair(_paramIndex, _value));
+		}, _parameters, _src, _ignoreChecksumErrors);
+	}
+	
+	bool MidiPacket::parse(Data& _data, const std::function<void(ParamIndex, uint8_t)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
 	{
 		if(_src.size() != size())
 			return false;
-
-		_parameterValues.reserve(_src.size() << 1);
 
 		for(size_t i=0; i<_src.size(); ++i)
 		{
@@ -173,7 +207,7 @@ namespace pluginLib
 							return false;
 						}
 						const auto sMasked = (s >> d.paramShift) & d.paramMask;
-						_parameterValues.insert(std::make_pair(std::make_pair(d.paramPart, idx), sMasked));
+						_addParamValueCallback(std::make_pair(d.paramPart, idx), static_cast<uint8_t>(sMasked));
 					}
 					break;
 				default:

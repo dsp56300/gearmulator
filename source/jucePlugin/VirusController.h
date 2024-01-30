@@ -67,7 +67,7 @@ namespace Virus
 		~Controller() override;
 
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
-        std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues);
+        std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
         std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram, bool _modifyBank, bool _modifyProgram);
 
     	void selectPrevPreset(uint8_t _part);
@@ -83,8 +83,10 @@ namespace Virus
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
         std::string getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
         std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
@@ -107,7 +109,7 @@ namespace Virus
     	}
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
-        void setSinglePresetName(pluginLib::MidiPacket::ParamValues& _values, const std::string& _name) const;
+        void setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const;
 
     	bool isMultiMode() const;
 
@@ -146,7 +148,7 @@ namespace Virus
 
 		uint8_t getDeviceId() const { return m_deviceId; }
 
-        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg) const;
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg) const;
 
     private:
         static std::string loadParameterDescriptions();
