@@ -590,6 +590,9 @@ namespace pluginLib::patchDB
 		if(_patch->getName() == _name)
 			return false;
 
+		if(_name.empty())
+			return false;
+
 		{
 			std::unique_lock lock(m_patchesMutex);
 
