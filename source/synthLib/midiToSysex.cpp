@@ -184,21 +184,21 @@ namespace synthLib
 			if (length == 0 || (numBytesRead > 1 && length < 128))
 				numBytesRead = 0;
 
-			std::vector<uint8_t> entry;
+			const auto jStart = i + numBytesRead + 1;
 
-			entry.push_back(_src[i]);
-
-			for(size_t j = i + numBytesRead + 1; j < _src.size(); ++j)
+			for(size_t j = jStart; j < _src.size(); ++j)
 			{
-				if(_src[j] > 0xf0)
-				{
-					entry.push_back(0xf7);
-					_dst.emplace_back(std::move(entry));
-					i = j;
-					break;
-				}
+				if(_src[j] <= 0xf0)
+					continue;
 
-				entry.push_back(_src[j]);
+				std::vector<uint8_t> entry;
+				entry.reserve(j - jStart + 2);
+				entry.push_back(0xf0);
+				entry.insert(entry.end(), _src.begin() + jStart, _src.begin() + j);
+				entry.push_back(0xf7);
+				_dst.emplace_back(std::move(entry));
+				i = j;
+				break;
 			}
 		}
 	}
