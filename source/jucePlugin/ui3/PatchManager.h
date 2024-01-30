@@ -19,10 +19,6 @@ namespace genericVirusUI
 	public:
 		struct Patch final : pluginLib::patchDB::Patch
 		{
-			virusLib::PresetVersion version = virusLib::PresetVersion::A;
-			uint8_t unison = 0;
-			uint8_t transpose = 0;
-			uint8_t arpMode = 0;
 		};
 
 		PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir);
