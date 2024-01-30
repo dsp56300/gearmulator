@@ -96,5 +96,6 @@ namespace jucePluginEditorLib::patchManager
 		std::string m_filter;
 		bool m_hideDuplicates = false;
 		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+		bool m_ignoreSelectedRowsChanged = false;
 	};
 }

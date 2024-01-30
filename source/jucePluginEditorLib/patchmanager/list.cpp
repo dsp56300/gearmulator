@@ -266,6 +266,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		ListBoxModel::selectedRowsChanged(lastRowSelected);
 
+		if(m_ignoreSelectedRowsChanged)
+			return;
+
 		const auto patches = getSelectedPatches();
 
 		if(patches.size() == 1)
@@ -336,7 +339,9 @@ namespace jucePluginEditorLib::patchManager
 			return false;
 		}
 
+		m_ignoreSelectedRowsChanged = true;
 		setSelectedRows(selection);
+		m_ignoreSelectedRowsChanged = false;
 		scrollToEnsureRowIsOnscreen((minRow + maxRow) >> 1);
 		return true;
 	}
