@@ -438,7 +438,7 @@ namespace jucePluginEditorLib::patchManager
 					return _a->program < _b->program;
 			}
 
-			return _a->getName().compare(_b->name) < 0;
+			return _a->getName().compare(_b->getName()) < 0;
 		});
 	}
 
@@ -499,7 +499,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool List::match(const Patch& _patch) const
 	{
-		const auto name = _patch->name;
+		const auto name = _patch->getName();
 		const auto t = Search::lowercase(name);
 		return t.find(m_filter) != std::string::npos;
 	}

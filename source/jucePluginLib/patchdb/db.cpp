@@ -507,7 +507,7 @@ namespace pluginLib::patchDB
 	{
 		if (!_patch)
 			return false;
-		if (_patch->name.empty())
+		if (_patch->getName().empty())
 			return false;
 		if (_patch->sysex.empty())
 			return false;
@@ -940,7 +940,7 @@ namespace pluginLib::patchDB
 				{
 					if(patch->hash == reqPatch->hash)
 						results.insert(patch);
-					else if(patch->sysex.size() == reqPatch->sysex.size() && patch->name == reqPatch->name)
+					else if(patch->sysex.size() == reqPatch->sysex.size() && patch->getName() == reqPatch->getName())
 					{
 						// if patches are not 100% identical, they might still be the same patch as unknown/unused data in dumps might have different values
 						if(equals(patch, reqPatch))

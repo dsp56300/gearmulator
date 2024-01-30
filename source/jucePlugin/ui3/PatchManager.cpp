@@ -204,8 +204,8 @@ namespace genericVirusUI
 			return _patch->sysex;
 
 		// apply name
-		if (!_patch->name.empty())
-			m_controller.setSinglePresetName(parameterValues, _patch->name);
+		if (!_patch->getName().empty())
+			m_controller.setSinglePresetName(parameterValues, _patch->getName());
 
 		// apply program
 		auto program = data[pluginLib::MidiDataType::Program];

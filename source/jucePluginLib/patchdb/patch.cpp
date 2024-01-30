@@ -50,9 +50,7 @@ namespace pluginLib::patchDB
 	const std::string& Patch::getName() const
 	{
 		const auto m = modifications.lock();
-		if (!m)
-			return name;
-		if (m->name.empty())
+		if (!m || m->name.empty())
 			return name;
 		return m->name;
 	}
