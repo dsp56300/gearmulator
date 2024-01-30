@@ -1,5 +1,6 @@
 #pragma once
 
+#include "editable.h"
 #include "list.h"
 #include "savepatchdesc.h"
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -21,11 +22,9 @@ namespace jucePluginEditorLib::patchManager
 
 	class PatchManager;
 
-	class TreeItem : public juce::TreeViewItem, juce::Label::Listener
+	class TreeItem : public juce::TreeViewItem, protected Editable
 	{
 	public:
-		using FinishedEditingCallback = std::function<void(bool, const std::string&)>;
-
 		TreeItem(PatchManager& _patchManager, const std::string& _title, uint32_t _count = g_invalidCount);
 		~TreeItem() override;
 
@@ -40,7 +39,6 @@ namespace jucePluginEditorLib::patchManager
 		virtual void processDirty(const std::set<pluginLib::patchDB::SearchHandle>& _dirtySearches);
 
 		virtual bool beginEdit() { return false; }
-
 		bool beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback);
 
 		virtual void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) {}
@@ -64,10 +62,6 @@ namespace jucePluginEditorLib::patchManager
 		virtual bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) { return false; }
 		virtual bool isInterestedInSavePatchDesc(const SavePatchDesc& _desc) { return false; }
 
-		// juce::Label::Listener
-		void editorHidden(juce::Label*, juce::TextEditor&) override;
-		void labelTextChanged(juce::Label* _label) override;
-
 		virtual int compareElements(const TreeViewItem* _a, const TreeViewItem* _b);
 
 		virtual void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch);
@@ -87,8 +81,6 @@ namespace jucePluginEditorLib::patchManager
 		void updateText();
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
-		void destroyEditorLabel();
-
 		PatchManager& m_patchManager;
 
 		std::string m_title;
@@ -100,9 +92,5 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::SearchRequest m_searchRequest;
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
-
-		FinishedEditingCallback m_finishedEditingCallback;
-		juce::Label* m_editorLabel = nullptr;
-		std::string m_editorInitialText;
 	};
 }

@@ -19,8 +19,6 @@ namespace jucePluginEditorLib::patchManager
 	{
 		getPatchManager().removeSelectedItem(getTree(), this);
 
-		destroyEditorLabel();
-
 		if(m_searchHandle != pluginLib::patchDB::g_invalidSearchHandle)
 		{
 			getPatchManager().cancelSearch(m_searchHandle);
@@ -54,6 +52,14 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		processSearchUpdated(*search);
+	}
+
+	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)
+	{
+		auto pos = getItemPosition(true);
+		pos.setHeight(getItemHeight());
+
+		return Editable::beginEdit(getOwnerView(), pos, _initialText, std::move(_callback));
 	}
 
 	bool TreeItem::hasSearch() const
@@ -222,22 +228,6 @@ namespace jucePluginEditorLib::patchManager
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
 
-	void TreeItem::editorHidden(juce::Label* _label, juce::TextEditor& _textEditor)
-	{
-		if (m_editorLabel)
-		{
-			const auto text = m_editorLabel->getText().toStdString();
-			if(text != m_editorInitialText)
-				m_finishedEditingCallback(true, text);
-			destroyEditorLabel();
-		}
-		Listener::editorHidden(_label, _textEditor);
-	}
-
-	void TreeItem::labelTextChanged(juce::Label* _label)
-	{
-	}
-
 	int TreeItem::compareElements(const TreeViewItem* _a, const TreeViewItem* _b)
 	{
 		const auto* a = dynamic_cast<const TreeItem*>(_a);
@@ -270,48 +260,9 @@ namespace jucePluginEditorLib::patchManager
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
-	bool TreeItem::beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback)
-	{
-		if (m_editorLabel)
-			return false;
-
-		m_editorInitialText = _initialText;
-		m_editorLabel = new juce::Label({}, _initialText);
-
-		const auto pos = getItemPosition(true);
-
-		m_editorLabel->setTopLeftPosition(pos.getTopLeft());
-		m_editorLabel->setSize(pos.getWidth(), getItemHeight());
-
-		m_editorLabel->setEditable(true, true, true);
-		m_editorLabel->setColour(juce::Label::backgroundColourId, juce::Colour(0xff333333));
-
-		m_editorLabel->addListener(this);
-
-		getOwnerView()->addAndMakeVisible(m_editorLabel);
-
-		m_editorLabel->showEditor();
-
-		m_finishedEditingCallback = std::move(_callback);
-
-		return true;
-	}
-
 	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		for (const auto& patch : _patches)
 			patchDropped(patch);
-	}
-
-	void TreeItem::destroyEditorLabel()
-	{
-		if (!m_editorLabel)
-			return;
-
-		m_editorLabel->getParentComponent()->removeChildComponent(m_editorLabel);
-		delete m_editorLabel;
-		m_editorLabel = nullptr;
-
-		m_finishedEditingCallback = {};
 	}
 }

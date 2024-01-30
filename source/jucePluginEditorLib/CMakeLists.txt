@@ -16,6 +16,7 @@ set(SOURCES
 set(SOURCES_PM
 	patchmanager/datasourcetree.cpp patchmanager/datasourcetree.h
 	patchmanager/datasourcetreeitem.cpp patchmanager/datasourcetreeitem.h
+	patchmanager/editable.cpp patchmanager/editable.h
 	patchmanager/grouptreeitem.cpp patchmanager/grouptreeitem.h
 	patchmanager/info.cpp patchmanager/info.h
 	patchmanager/list.cpp patchmanager/list.h
