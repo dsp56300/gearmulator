@@ -26,7 +26,7 @@ namespace jucePluginEditorLib::patchManager
 	class List;
 	class Tree;
 
-	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::DragAndDropContainer, public juce::ChangeListener
+	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::ChangeListener
 	{
 	public:
 		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir);
