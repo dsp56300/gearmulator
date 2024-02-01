@@ -28,6 +28,8 @@ namespace pluginLib::patchDB
 
 		std::pair<PatchPtr, PatchModificationsPtr> createCopy(const DataSourceNodePtr& _ds) const;
 
+		void replaceData(const Patch& _patch);
+
 	private:
 		Patch(const Patch&) = default;
 		Patch(Patch&&) noexcept = default;

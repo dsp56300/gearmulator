@@ -35,6 +35,16 @@ namespace pluginLib::patchDB
 		return { p, newMods };
 	}
 
+	void Patch::replaceData(const Patch& _patch)
+	{
+		name = _patch.name;
+		tags = _patch.tags;
+		bank = _patch.bank;
+		program = _patch.program;
+		hash = _patch.hash;
+		sysex = _patch.sysex;
+	}
+
 	const TypedTags& Patch::getTags() const
 	{
 		if (const auto m = modifications.lock())
