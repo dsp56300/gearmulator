@@ -890,11 +890,11 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	bool DB::removePatch(const PatchPtr& _key)
+	bool DB::removePatch(const PatchPtr& _patch)
 	{
 		std::unique_lock lock(m_patchesMutex);
 
-		const auto itDs = m_dataSources.find(*_key->source.lock());
+		const auto itDs = m_dataSources.find(*_patch->source.lock());
 
 		if(itDs == m_dataSources.end())
 			return false;
@@ -902,13 +902,13 @@ namespace pluginLib::patchDB
 		const auto& ds = itDs->second;
 		auto& patches = ds->patches;
 
-		const auto it = patches.find(_key);
+		const auto it = patches.find(_patch);
 		if (it == patches.end())
 			return false;
 
 		patches.erase(it);
 
-		removePatchesFromSearches({ _key });
+		removePatchesFromSearches({ _patch });
 
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.patches = true;

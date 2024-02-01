@@ -103,7 +103,7 @@ namespace pluginLib::patchDB
 		void addDataSource(const DataSourceNodePtr& _ds);
 
 		bool addPatches(const std::vector<PatchPtr>& _patches);
-		bool removePatch(const PatchPtr& _key);
+		bool removePatch(const PatchPtr& _patch);
 
 		bool internalAddTag(TagType _type, const Tag& _tag);
 		bool internalRemoveTag(TagType _type, const Tag& _tag);
