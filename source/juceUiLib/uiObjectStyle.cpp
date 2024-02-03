@@ -43,11 +43,20 @@ namespace genericUI
 		{
 			const auto color = _object.getProperty(_prop);
 
-			if(color.size() != 8)
+			uint32_t r,g,b,a;
+
+			if(color.size() == 8)
+			{
+				sscanf(color.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
+			}
+			else if(color.size() == 6)
+			{
+				sscanf(color.c_str(), "%02x%02x%02x", &r, &g, &b);
+				a = 255;
+			}
+			else
 				return;
 
-			uint32_t r,g,b,a;
-			sscanf(color.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
 			_target = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
 		};
 
