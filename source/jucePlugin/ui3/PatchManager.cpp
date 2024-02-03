@@ -43,7 +43,7 @@ namespace genericVirusUI
 		// rom patches are received via midi, make sure we add all remaining ones, too
 		m_controller.onRomPatchReceived = [this](const virusLib::BankNumber _bank, const uint32_t _program)
 		{
-			if (_bank == virusLib::BankNumber::EditBuffer || _bank < virusLib::BankNumber::C)
+			if (_bank == virusLib::BankNumber::EditBuffer)
 				return;
 
 			const auto index = virusLib::toArrayIndex(_bank);
