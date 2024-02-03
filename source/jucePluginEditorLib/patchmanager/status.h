@@ -7,6 +7,8 @@ namespace jucePluginEditorLib::patchManager
 	class Status : public juce::Label
 	{
 	public:
+		Status();
+
 		void setScanning(bool _scanning);
 		void setListStatus(uint32_t _selected, uint32_t _total);
 

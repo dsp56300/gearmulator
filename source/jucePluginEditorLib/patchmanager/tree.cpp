@@ -6,6 +6,7 @@
 #include "patchmanager.h"
 #include "roottreeitem.h"
 #include "treeitem.h"
+#include "defaultskin.h"
 
 #include "../../juceUiLib/uiObject.h"
 #include "../pluginEditor.h"
@@ -30,11 +31,11 @@ namespace jucePluginEditorLib::patchManager
 	Tree::Tree(PatchManager& _patchManager) : m_patchManager(_patchManager)
 	{
 		// some very basic defaults if no style is available
-		setColour(backgroundColourId, juce::Colour(0xff444444));
+		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
 //		setColour(backgroundColourId, juce::Colour(0));
 		setColour(linesColourId, juce::Colour(0xffffffff));
 		setColour(dragAndDropIndicatorColourId, juce::Colour(0xff00ff00));
-		setColour(selectedItemBackgroundColourId, juce::Colour(0xffaaaaaa));
+		setColour(selectedItemBackgroundColourId, juce::Colour(defaultSkin::colors::selectedItem));
 //		setColour(oddItemsColourId, juce::Colour(0xff333333));
 //		setColour(evenItemsColourId, juce::Colour(0xff555555));
 
@@ -42,12 +43,25 @@ namespace jucePluginEditorLib::patchManager
 		{
 			t->apply(_patchManager.getEditor(), *this);
 		}
-
+		
 		auto *rootItem = new RootTreeItem(m_patchManager);
 		setRootItem(rootItem);
 		setRootItemVisible(false);
 
 		getViewport()->setScrollBarsShown(true, true);
+
+		if(const auto t = _patchManager.getTemplate("pm_scrollbar"))
+		{
+			t->apply(_patchManager.getEditor(), getViewport()->getVerticalScrollBar());
+			t->apply(_patchManager.getEditor(), getViewport()->getHorizontalScrollBar());
+		}
+		else
+		{
+			getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getViewport()->getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getViewport()->getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		}
 	}
 
 	Tree::~Tree()

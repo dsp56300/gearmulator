@@ -1,7 +1,14 @@
 #include "status.h"
+#include "defaultskin.h"
 
 namespace jucePluginEditorLib::patchManager
 {
+	Status::Status()
+	{
+		setColour(textColourId, juce::Colour(defaultSkin::colors::statusText));
+		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
+	}
+
 	void Status::setScanning(bool _scanning)
 	{
 		if(m_isScanning == _scanning)

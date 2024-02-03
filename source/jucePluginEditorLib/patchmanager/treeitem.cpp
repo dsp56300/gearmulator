@@ -208,19 +208,21 @@ namespace jucePluginEditorLib::patchManager
 
 		_g.setColour(color != pluginLib::patchDB::g_invalidColor ? juce::Colour(color) : style ? style->getColor() : juce::Colour(0xffffffff));
 
+		bool haveFont = false;
 		if(style)
 		{
 			if (auto f = style->getFont())
 			{
 				f->setBold(getParentItem() == getTree()->getRootItem());
 				_g.setFont(*f);
+				haveFont = true;
 			}
-			else
-			{
-				auto fnt = _g.getCurrentFont();
-				fnt.setBold(getParentItem() == getTree()->getRootItem());
-				_g.setFont(fnt);
-			}
+		}
+		if(!haveFont)
+		{
+			auto fnt = _g.getCurrentFont();
+			fnt.setBold(getParentItem() == getTree()->getRootItem());
+			_g.setFont(fnt);
 		}
 
 		const juce::String t(m_text);

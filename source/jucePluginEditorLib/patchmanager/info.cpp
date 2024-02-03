@@ -1,6 +1,8 @@
 #include "info.h"
 
 #include "patchmanager.h"
+#include "defaultskin.h"
+
 #include "../../jucePluginLib/patchdb/patch.h"
 #include "../../juceUiLib/uiObject.h"
 #include "../pluginEditor.h"
@@ -25,6 +27,16 @@ namespace jucePluginEditorLib::patchManager
 			t->apply(_pm.getEditor(), *m_lbCategories);
 			t->apply(_pm.getEditor(), *m_lbTags);
 		}
+		else
+		{
+			m_lbSource->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoLabel));
+			m_lbCategories->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoLabel));
+			m_lbTags->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoLabel));
+
+			m_lbSource->setJustificationType(juce::Justification::bottomLeft);
+			m_lbCategories->setJustificationType(juce::Justification::bottomLeft);
+			m_lbTags->setJustificationType(juce::Justification::bottomLeft);
+		}
 
 		if (const auto& t = _pm.getTemplate("pm_info_text"))
 		{
@@ -32,10 +44,30 @@ namespace jucePluginEditorLib::patchManager
 			t->apply(_pm.getEditor(), *m_categories);
 			t->apply(_pm.getEditor(), *m_tags);
 		}
+		else
+		{
+			m_source->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoText));
+			m_categories->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoText));
+			m_tags->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoText));
+
+			m_source->setJustificationType(juce::Justification::topLeft);
+			m_categories->setJustificationType(juce::Justification::topLeft);
+			m_tags->setJustificationType(juce::Justification::topLeft);
+		}
 
 		if (const auto& t = _pm.getTemplate("pm_info_name"))
 		{
 			t->apply(_pm.getEditor(), *m_name);
+		}
+		else
+		{
+			auto f = m_name->getFont();
+			f.setHeight(f.getHeight() * 2);
+			f.setBold(true);
+			m_name->setFont(f);
+			m_name->setJustificationType(juce::Justification::topLeft);
+			m_name->setColour(juce::Label::textColourId, juce::Colour(defaultSkin::colors::infoHeadline));
+			m_name->setColour(juce::Label::backgroundColourId, juce::Colour(defaultSkin::colors::background));
 		}
 	}
 

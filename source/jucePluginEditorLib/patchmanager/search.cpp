@@ -1,11 +1,16 @@
 #include "search.h"
 
+#include "defaultskin.h"
 #include "dsp56kEmu/logging.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	Search::Search()
 	{
+		setColour(textColourId, juce::Colour(defaultSkin::colors::itemText));
+		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
+		setColour(outlineColourId, juce::Colour(defaultSkin::colors::textEditOutline));
+
 		addListener(this);
 	}
 

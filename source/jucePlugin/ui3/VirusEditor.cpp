@@ -41,7 +41,12 @@ namespace genericVirusUI
 		const auto dir = configOptions.getDefaultFile().getParentDirectory();
 
 //#if defined(_MSC_VER) && defined(_DEBUG)
-		setPatchManager(new PatchManager(*this, findComponent("page_presets"), dir));
+		{
+			juce::Component* pmParent = findComponent("ContainerPatchManager", false);
+			if(!pmParent)
+				pmParent = findComponent("page_presets");
+			setPatchManager(new PatchManager(*this, pmParent, dir));
+		}
 //#else
 //		m_patchBrowser.reset(new PatchBrowser(*this));
 //#endif

@@ -1,5 +1,6 @@
 #include "list.h"
 
+#include "defaultskin.h"
 #include "listitem.h"
 #include "patchmanager.h"
 #include "search.h"
@@ -12,12 +13,28 @@ namespace jucePluginEditorLib::patchManager
 {
 	List::List(PatchManager& _pm): m_patchManager(_pm)
 	{
+		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
+		setColour(textColourId, juce::Colour(defaultSkin::colors::itemText));
+
 		getViewport()->setScrollBarsShown(true, false);
 		setModel(this);
 		setMultipleSelectionEnabled(true);
 
 		if (const auto& t = _pm.getTemplate("pm_listbox"))
 			t->apply(_pm.getEditor(), *this);
+
+		if(const auto t = _pm.getTemplate("pm_scrollbar"))
+		{
+			t->apply(_pm.getEditor(), getVerticalScrollBar());
+			t->apply(_pm.getEditor(), getHorizontalScrollBar());
+		}
+		else
+		{
+			getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
+			getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
+		}
 	}
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
@@ -208,9 +225,12 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto text = patch->getName();
 
-		if(style && _rowIsSelected)
+		if(_rowIsSelected)
 		{
-			_g.setColour(style->getSelectedItemBackgroundColor());
+			if(style)
+				_g.setColour(style->getSelectedItemBackgroundColor());
+			else
+				_g.setColour(juce::Colour(0x33ffffff));
 			_g.fillRect(0, 0, _width, _height);
 		}
 

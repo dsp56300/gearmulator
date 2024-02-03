@@ -319,6 +319,11 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	void PatchManager::paint(juce::Graphics& g)
+	{
+		g.fillAll(juce::Colour(0,0,0));
+	}
+
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
 	{
 		return m_editor.getTemplate(_name);

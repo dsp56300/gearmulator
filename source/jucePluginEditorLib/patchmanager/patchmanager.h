@@ -51,6 +51,8 @@ namespace jucePluginEditorLib::patchManager
 
 		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name);
 
+		void paint(juce::Graphics& g) override;
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 
