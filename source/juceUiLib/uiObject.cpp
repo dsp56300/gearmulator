@@ -6,13 +6,14 @@
 
 #include "editor.h"
 
-#include "rotaryStyle.h"
-#include "comboboxStyle.h"
 #include "buttonStyle.h"
-#include "textbuttonStyle.h"
+#include "comboboxStyle.h"
 #include "hyperlinkbuttonStyle.h"
 #include "labelStyle.h"
 #include "listBoxStyle.h"
+#include "rotaryStyle.h"
+#include "scrollbarStyle.h"
+#include "textbuttonStyle.h"
 #include "textEditorStyle.h"
 #include "treeViewStyle.h"
 
@@ -163,6 +164,11 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
 		applyT<juce::Label, LabelStyle>(_editor, _target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::ScrollBar& _target)
+	{
+		applyT<juce::ScrollBar, ScrollBarStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::TextButton& _target)

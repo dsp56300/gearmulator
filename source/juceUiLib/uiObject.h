@@ -48,6 +48,7 @@ namespace genericUI
 		void apply(Editor& _editor, juce::DrawableButton& _target);
 
 		void apply(Editor& _editor, juce::Label& _target);
+		void apply(Editor& _editor, juce::ScrollBar& _target);
 		void apply(Editor& _editor, juce::TextButton& _target);
 		void apply(Editor& _editor, juce::HyperlinkButton& _target);
 		void apply(Editor& _editor, juce::TreeView& _target);
