@@ -49,14 +49,14 @@ namespace pluginLib::patchDB
 		return addDataSource(_ds, true);
 	}
 
-	bool DB::writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches) const
+	bool DB::writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches)
 	{
 		std::vector<uint8_t> sysexBuffer;
 		sysexBuffer.reserve(_patches.front()->sysex.size() * _patches.size());
 
 		for (const auto& patch : _patches)
 		{
-			const auto patchSysex = prepareSave(patch);
+			const auto patchSysex = patch->sysex;
 
 			if(!patchSysex.empty())
 				sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
@@ -576,9 +576,6 @@ namespace pluginLib::patchDB
 
 		if(!changed.empty())
 		{
-			for (const auto& patch : changed)
-				bakePatchChanges(patch);
-
 			updateSearches(changed);
 		}
 
@@ -626,7 +623,6 @@ namespace pluginLib::patchDB
 				m_patchModifications.insert({ key, mods });
 			}
 
-			bakePatchChanges(_patch);
 			updateSearches({_patch});
 		}
 
@@ -924,37 +920,6 @@ namespace pluginLib::patchDB
 		m_dirty.patches = true;
 
 		return true;
-	}
-
-	void DB::bakePatchChanges(const PatchPtr& _patch)
-	{
-		if(!_patch)
-			return;
-
-		const auto ds = _patch->source.lock();
-
-		if(!ds || ds->type != SourceType::LocalStorage)
-			return;
-
-		const auto oldKey = PatchKey(*_patch);
-
-		const auto it = m_patchModifications.find(oldKey);
-
-		if(it == m_patchModifications.end())
-			return;	// nothing to be done
-
-		const auto mods = it->second;
-
-		auto data = prepareSave(_patch);
-		assert(!data.empty());
-		const auto newPatch = initializePatch(std::move(data));
-		assert(newPatch);
-		_patch->replaceData(*newPatch);
-
-		const auto newKey = PatchKey(*_patch);
-
-		m_patchModifications.erase(oldKey);
-		m_patchModifications.insert({newKey, mods});
 	}
 
 	bool DB::internalAddTag(TagType _type, const Tag& _tag)

@@ -72,7 +72,7 @@ namespace pluginLib::patchDB
 		bool isLoading() const { return m_loading; }
 		bool isScanning() const { return !m_loader.empty(); }
 
-		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches) const;
+		static bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
 
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
@@ -104,8 +104,6 @@ namespace pluginLib::patchDB
 
 		bool addPatches(const std::vector<PatchPtr>& _patches);
 		bool removePatch(const PatchPtr& _patch);
-
-		void bakePatchChanges(const PatchPtr& _patch);
 
 		bool internalAddTag(TagType _type, const Tag& _tag);
 		bool internalRemoveTag(TagType _type, const Tag& _tag);
