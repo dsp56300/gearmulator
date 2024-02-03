@@ -1337,7 +1337,10 @@ namespace pluginLib::patchDB
 	bool DB::saveJson()
 	{
 		if (!m_jsonFileName.hasWriteAccess())
+		{
+			pushError("No write access to file:\n" + m_jsonFileName.getFullPathName().toStdString());
 			return false;
+		}
 
 		auto* json = new juce::DynamicObject();
 
@@ -1449,7 +1452,7 @@ namespace pluginLib::patchDB
 		return {};
 	}
 
-	bool DB::saveJson(const DataSourceNodePtr& _ds) const
+	bool DB::saveJson(const DataSourceNodePtr& _ds)
 	{
 		if(!_ds)
 			return false;
@@ -1463,7 +1466,10 @@ namespace pluginLib::patchDB
 			filename = m_settingsDir.getChildFile(filename.getFullPathName());
 
 		if(!filename.hasWriteAccess())
+		{
+			pushError("No write access to file:\n" + filename.getFullPathName().toStdString());
 			return false;
+		}
 
 		if(_ds->patches.empty())
 		{
@@ -1505,14 +1511,28 @@ namespace pluginLib::patchDB
 
 	bool DB::saveJson(const juce::File& _target, juce::DynamicObject* _src)
 	{
+		if (!_target.hasWriteAccess())
+		{
+			pushError("No write access to file:\n" + _target.getFullPathName().toStdString());
+			return false;
+		}
 		const auto tempFile = juce::File(_target.getFullPathName() + "_tmp.json");
 		if (!tempFile.hasWriteAccess())
+		{
+			pushError("No write access to file:\n" + tempFile.getFullPathName().toStdString());
 			return false;
+		}
 		const auto jsonText = juce::JSON::toString(juce::var(_src), false);
 		if (!tempFile.replaceWithText(jsonText))
+		{
+			pushError("Failed to write data to file:\n" + tempFile.getFullPathName().toStdString());
 			return false;
+		}
 		if (!tempFile.copyFileTo(_target))
+		{
+			pushError("Failed to copy\n" + tempFile.getFullPathName().toStdString() + "\nto\n" + _target.getFullPathName().toStdString());
 			return false;
+		}
 		tempFile.deleteFile();
 		return true;
 	}
@@ -1564,5 +1584,11 @@ namespace pluginLib::patchDB
 			}
 		}
 		return res;
+	}
+
+	void DB::pushError(std::string _string)
+	{
+		std::unique_lock lockUi(m_uiMutex);
+		m_dirty.errors.emplace_back(std::move(_string));
 	}
 }

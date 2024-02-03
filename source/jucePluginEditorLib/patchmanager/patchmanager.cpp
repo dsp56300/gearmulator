@@ -124,6 +124,19 @@ namespace jucePluginEditorLib::patchManager
 		m_list->processDirty(dirty);
 
 		m_status->setScanning(isScanning());
+
+		if(!dirty.errors.empty())
+		{
+			std::string msg = "Patch Manager encountered errors:\n\n";
+			for(size_t i=0; i<dirty.errors.size(); ++i)
+			{
+				msg += dirty.errors[i];
+				if(i < dirty.errors.size() - 1)
+					msg += "\n";
+			}
+
+			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Patch Manager Error", msg);
+		}
 	}
 
 	void PatchManager::setSelectedItem(Tree* _tree, const TreeItem* _item)

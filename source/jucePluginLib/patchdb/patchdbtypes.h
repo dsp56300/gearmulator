@@ -62,6 +62,7 @@ namespace pluginLib::patchDB
 
 		std::set<TagType> tags;
 		std::set<SearchHandle> searches;
+		std::vector<std::string> errors;
 	};
 
 	struct DataSource;

@@ -121,13 +121,15 @@ namespace pluginLib::patchDB
 		static bool loadPatchModifications(std::map<PatchKey, PatchModificationsPtr>& _patchModifications, const juce::var& _parentNode, const DataSourceNodePtr& _dataSource = nullptr);
 
 		bool saveJson();
-		bool saveJson(const DataSourceNodePtr& _ds) const;
-		static bool saveJson(const juce::File& _target, juce::DynamicObject* _src);
+		bool saveJson(const DataSourceNodePtr& _ds);
+		bool saveJson(const juce::File& _target, juce::DynamicObject* _src);
 
 		juce::File getJsonFile(const DataSource& _ds) const;
 		juce::File getLocalStorageFile(const DataSource& _ds) const;
 
 		bool saveLocalStorage() const;
+
+		void pushError(std::string _string);
 
 		// IO
 		juce::File m_settingsDir;
