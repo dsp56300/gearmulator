@@ -59,7 +59,7 @@ namespace pluginLib::patchDB
 
 		bool containsRemoved(const Tag& _tag) const
 		{
-			return m_removed.find(_tag) != m_added.end();
+			return m_removed.find(_tag) != m_removed.end();
 		}
 
 		bool empty() const

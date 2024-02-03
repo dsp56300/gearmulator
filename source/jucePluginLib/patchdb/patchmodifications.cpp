@@ -21,6 +21,8 @@ namespace pluginLib::patchDB
 			{
 				if (!p->tags.containsAdded(type, tag))
 					res |= tags.add(type, tag);
+				else if(tags.containsRemoved(type, tag))
+					res |= tags.erase(type, tag);
 			}
 
 			for (const auto& tag : t.getRemoved())
