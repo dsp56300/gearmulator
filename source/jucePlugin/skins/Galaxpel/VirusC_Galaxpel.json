@@ -35,6 +35,12 @@
             }
         },
         {
+            "name" : "pm_scrollbar",
+            "scrollbar" : {
+                "color" : "75A7FEFF",
+            }
+        },
+        {
             "name" : "pm_listbox",
             "listbox" : {
                 "alignH" : "L",
