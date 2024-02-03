@@ -20,7 +20,7 @@ namespace pluginLib::patchDB
 
 		bool empty() const;
 
-		PatchPtr patch;
+		std::weak_ptr<Patch> patch;
 		TypedTags tags;
 		std::string name;
 

@@ -15,15 +15,17 @@ namespace pluginLib::patchDB
 			const auto type = it.first;
 			const auto& t = it.second;
 
+			const auto p = patch.lock();
+
 			for (const auto& tag : t.getAdded())
 			{
-				if (!patch->tags.containsAdded(type, tag))
+				if (!p->tags.containsAdded(type, tag))
 					res |= tags.add(type, tag);
 			}
 
 			for (const auto& tag : t.getRemoved())
 			{
-				if (patch->tags.containsAdded(type, tag))
+				if (p->tags.containsAdded(type, tag))
 					res |= tags.addRemoved(type, tag);
 				else if (tags.containsAdded(type, tag))
 					res |= tags.erase(type, tag);
@@ -39,12 +41,14 @@ namespace pluginLib::patchDB
 
 	void PatchModifications::updateCache()
 	{
-		mergedTags.clear();
-
-		if (!patch)
+		const auto p = patch.lock();
+		if (!p)
+		{
+			mergedTags = tags;
 			return;
+		}
 
-		mergedTags = patch->tags;
+		mergedTags = p->tags;
 
 		for (const auto& it : tags.get())
 		{
@@ -69,7 +73,8 @@ namespace pluginLib::patchDB
 
 		if(!name.empty())
 		{
-			if (!patch || name != patch->name)
+			const auto p = patch.lock();
+			if (!p || name != p->name)
 				o->setProperty("name", juce::String(name));
 		}
 

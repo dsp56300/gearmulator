@@ -403,27 +403,6 @@ namespace pluginLib::patchDB
 			if (newPatches.empty())
 				return;
 
-			{
-				std::unique_lock lock(m_patchesMutex);
-				for(size_t i=0; i<newPatches.size(); ++i)
-				{
-					const auto& patch = newPatches[i];
-					const auto& mods = newPatchModifications[i];
-
-					if(!mods)
-						continue;
-
-					const auto key = PatchKey(*patch);
-
-					auto it = m_patchModifications.find(key);
-					assert(it == m_patchModifications.end());
-					if (it != m_patchModifications.end())
-						it->second = mods;
-					else
-						m_patchModifications.insert({ key, mods });
-				}
-			}
-
 			addPatches(newPatches);
 
 			createConsecutiveProgramNumbers(_ds);
@@ -539,6 +518,9 @@ namespace pluginLib::patchDB
 
 	bool DB::modifyTags(const std::vector<PatchPtr>& _patches, const TypedTags& _tags)
 	{
+		if(_tags.empty())
+			return false;
+
 		std::vector<PatchPtr> changed;
 		changed.reserve(_patches.size());
 
@@ -551,25 +533,17 @@ namespace pluginLib::patchDB
 
 			const auto key = PatchKey(*patch);
 
-			const auto& it = m_patchModifications.find(key);
+			auto mods = patch->modifications;
 
-			if (it != m_patchModifications.end())
+			if(!mods)
 			{
-				if (it->second->modifyTags(_tags))
-					changed.push_back(patch);
-
-				continue;
+				mods = std::make_shared<PatchModifications>();
+				mods->patch = patch;
+				patch->modifications = mods;
 			}
-
-			const auto mods = std::make_shared<PatchModifications>();
-			mods->patch = patch;
 
 			if (!mods->modifyTags(_tags))
 				continue;
-
-			patch->modifications = mods;
-
-			m_patchModifications.insert({ key, mods });
 
 			changed.push_back(patch);
 		}
@@ -604,24 +578,17 @@ namespace pluginLib::patchDB
 
 			const auto key = PatchKey(*_patch);
 
-			const auto& it = m_patchModifications.find(key);
-
-			if (it != m_patchModifications.end())
+			auto mods = _patch->modifications;
+			if(!mods)
 			{
-				it->second->name = _name;
-			}
-			else
-			{
-				const auto mods = std::make_shared<PatchModifications>();
+				mods = std::make_shared<PatchModifications>();
 				mods->patch = _patch;
 				_patch->modifications = mods;
-
-				mods->name = _name;
-
-				mods->updateCache();
-
-				m_patchModifications.insert({ key, mods });
 			}
+
+			mods->name = _name;
+
+			mods->updateCache();
 
 			updateSearches({_patch});
 		}
@@ -853,9 +820,11 @@ namespace pluginLib::patchDB
 			}
 
 			if (!patches.empty())
+			{
 				addDsToList();
-
-			addPatches(patches);
+				loadPatchModifications(ds, patches);
+				addPatches(patches);
+			}
 		}
 	}
 
@@ -875,8 +844,11 @@ namespace pluginLib::patchDB
 			if (itMod != m_patchModifications.end())
 			{
 				patch->modifications = itMod->second;
-				itMod->second->patch = patch;
-				itMod->second->updateCache();
+
+				m_patchModifications.erase(itMod);
+
+				patch->modifications->patch = patch;
+				patch->modifications->updateCache();
 			}
 
 			// add to all known categories, tags, etc
@@ -911,6 +883,14 @@ namespace pluginLib::patchDB
 		const auto it = patches.find(_patch);
 		if (it == patches.end())
 			return false;
+
+		auto mods = _patch->modifications;
+
+		if(mods && !mods->empty())
+		{
+			mods->patch.reset();
+			m_patchModifications.insert({PatchKey(*_patch), mods});
+		}
 
 		patches.erase(it);
 
@@ -1262,34 +1242,93 @@ namespace pluginLib::patchDB
 					}
 				}
 			}
-			if (auto* patches = json["patches"].getDynamicObject())
+
+			if(!loadPatchModifications(m_patchModifications, json))
+				success = false;
+		}
+
+		return success;
+	}
+
+	bool DB::loadPatchModifications(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches)
+	{
+		if(_patches.empty())
+			return true;
+
+		const auto file = getJsonFile(*_ds);
+		if(file.getFileName().isEmpty())
+			return false;
+
+		if(!file.exists())
+			return true;
+
+		const auto json = juce::JSON::parse(file);
+
+		std::map<PatchKey, PatchModificationsPtr> patchModifications;
+
+		if(!loadPatchModifications(patchModifications, json, _ds))
+			return false;
+
+		// apply modifications to patches
+		for (const auto& patch : _patches)
+		{
+			const auto key = PatchKey(*patch);
+			const auto it = patchModifications.find(key);
+			if(it != patchModifications.end())
 			{
-				const auto& props = patches->getProperties();
-				for (const auto& it : props)
-				{
-					const auto strKey = it.name.toString().toStdString();
-					const auto var = it.value;
+				patch->modifications = it->second;
+				patch->modifications->patch = patch;
+				patch->modifications->updateCache();
 
-					auto key = PatchKey::fromString(strKey);
+				patchModifications.erase(it);
 
-					auto mods = std::make_shared<PatchModifications>();
-
-					if (!mods->deserialize(var))
-					{
-						LOG("Failed to parse patch modifications for key " << strKey);
-						success = false;
-						continue;
-					}
-
-					if(!key.isValid())
-					{
-						LOG("Failed to parse patch key from string " << strKey);
-						success = false;
-					}
-
-					m_patchModifications.insert({ key, mods });
-				}
+				if(patchModifications.empty())
+					break;
 			}
+		}
+
+		if(!patchModifications.empty())
+		{
+			// any patch modification that we couldn't apply to a patch is added to the global modifications
+			for (const auto& patchModification : patchModifications)
+				m_patchModifications.insert(patchModification);
+		}
+
+		return true;
+	}
+
+	bool DB::loadPatchModifications(std::map<PatchKey, PatchModificationsPtr>& _patchModifications, const juce::var& _parentNode, const DataSourceNodePtr& _dataSource/* = nullptr*/)
+	{
+		auto* patches = _parentNode["patches"].getDynamicObject();
+		if(!patches)
+			return true;
+
+		bool success = true;
+
+		const auto& props = patches->getProperties();
+		for (const auto& it : props)
+		{
+			const auto strKey = it.name.toString().toStdString();
+			const auto var = it.value;
+
+			auto key = PatchKey::fromString(strKey, _dataSource);
+
+			auto mods = std::make_shared<PatchModifications>();
+
+			if (!mods->deserialize(var))
+			{
+				LOG("Failed to parse patch modifications for key " << strKey);
+				success = false;
+				continue;
+			}
+
+			if(!key.isValid())
+			{
+				LOG("Failed to parse patch key from string " << strKey);
+				success = false;
+			}
+
+			_patchModifications.insert({ key, mods });
 		}
 
 		return success;
@@ -1299,14 +1338,14 @@ namespace pluginLib::patchDB
 	{
 		if (!m_jsonFileName.hasWriteAccess())
 			return false;
-		const auto tempFile = juce::File(m_jsonFileName.getFullPathName() + "_tmp.json");
-		if (!tempFile.hasWriteAccess())
-			return false;
 
 		auto* json = new juce::DynamicObject();
 
 		{
 			std::shared_lock lockDs(m_dataSourcesMutex);
+			std::shared_lock lockP(m_patchesMutex);
+
+			auto patchModifications = m_patchModifications;
 
 			juce::Array<juce::var> dss;
 
@@ -1314,6 +1353,17 @@ namespace pluginLib::patchDB
 			{
 				const auto& dataSource = it.second;
 
+				// if we cannot save patch modifications to a separate file, add them to the global file
+				if(!saveJson(dataSource))
+				{
+					for (const auto& patch : dataSource->patches)
+					{
+						if(!patch->modifications || patch->modifications->empty())
+							continue;
+
+						patchModifications.insert({PatchKey(*patch), patch->modifications});
+					}
+				}
 				if (dataSource->origin != DataSourceOrigin::Manual)
 					continue;
 
@@ -1328,10 +1378,6 @@ namespace pluginLib::patchDB
 				dss.add(o);
 			}
 			json->setProperty("datasources", dss);
-		}
-
-		{
-			std::shared_lock lockP(m_patchesMutex);
 
 			saveLocalStorage();
 
@@ -1375,7 +1421,7 @@ namespace pluginLib::patchDB
 
 			auto* patchMods = new juce::DynamicObject();
 
-			for (const auto& it : m_patchModifications)
+			for (const auto& it : patchModifications)
 			{
 				const auto& key = it.first;
 				const auto& mods = it.second;
@@ -1391,10 +1437,81 @@ namespace pluginLib::patchDB
 			json->setProperty("patches", patchMods);
 		}
 
-		const auto jsonText = juce::JSON::toString(juce::var(json), false);
+		return saveJson(m_jsonFileName, json);
+	}
+
+	juce::File DB::getJsonFile(const DataSource& _ds) const
+	{
+		if(_ds.type == SourceType::LocalStorage)
+			return {getLocalStorageFile(_ds).getFullPathName() + ".json"};
+		if(_ds.type == SourceType::File)
+			return {_ds.name + ".json"};
+		return {};
+	}
+
+	bool DB::saveJson(const DataSourceNodePtr& _ds) const
+	{
+		if(!_ds)
+			return false;
+
+		auto filename = getJsonFile(*_ds);
+
+		if(filename.getFileName().isEmpty())
+			return _ds->patches.empty();
+
+		if(!juce::File::isAbsolutePath(filename.getFullPathName()))
+			filename = m_settingsDir.getChildFile(filename.getFullPathName());
+
+		if(!filename.hasWriteAccess())
+			return false;
+
+		if(_ds->patches.empty())
+		{
+			filename.deleteFile();
+			return true;
+		}
+
+		juce::DynamicObject* patchMods = nullptr;
+
+		for (const auto& patch : _ds->patches)
+		{
+			const auto mods = patch->modifications;
+
+			if(!mods || mods->empty())
+				continue;
+
+			auto* obj = mods->serialize();
+
+			if(!patchMods)
+				patchMods = new juce::DynamicObject();
+
+			const auto key = PatchKey(*patch);
+
+			patchMods->setProperty(juce::String(key.toString(false)), obj);
+		}
+
+		if(!patchMods)
+		{
+			filename.deleteFile();
+			return true;
+		}
+
+		auto* json = new juce::DynamicObject();
+
+		json->setProperty("patches", patchMods);
+
+		return saveJson(filename, json);
+	}
+
+	bool DB::saveJson(const juce::File& _target, juce::DynamicObject* _src)
+	{
+		const auto tempFile = juce::File(_target.getFullPathName() + "_tmp.json");
+		if (!tempFile.hasWriteAccess())
+			return false;
+		const auto jsonText = juce::JSON::toString(juce::var(_src), false);
 		if (!tempFile.replaceWithText(jsonText))
 			return false;
-		if (!tempFile.copyFileTo(m_jsonFileName))
+		if (!tempFile.copyFileTo(_target))
 			return false;
 		tempFile.deleteFile();
 		return true;

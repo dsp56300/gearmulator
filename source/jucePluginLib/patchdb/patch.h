@@ -47,7 +47,7 @@ namespace pluginLib::patchDB
 		PatchHash hash;
 		std::vector<uint8_t> sysex;
 
-		std::weak_ptr<PatchModifications> modifications;
+		std::shared_ptr<PatchModifications> modifications;
 
 		const TypedTags& getTags() const;
 		const Tags& getTags(TagType _type) const;
@@ -105,7 +105,7 @@ namespace pluginLib::patchDB
 			return *_a == *_b;
 		}
 
-		std::string toString() const;
-		static PatchKey fromString(const std::string& _string);
+		std::string toString(bool _includeDatasource = true) const;
+		static PatchKey fromString(const std::string& _string, const DataSourceNodePtr& _dataSource = nullptr);
 	};
 }

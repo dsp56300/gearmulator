@@ -23,7 +23,7 @@ namespace pluginLib::patchDB
 
 		PatchModificationsPtr newMods;
 
-		if(const auto mods = modifications.lock())
+		if(const auto mods = modifications)
 			newMods = std::make_shared<PatchModifications>(*mods);
 
 		if(newMods)
@@ -47,7 +47,7 @@ namespace pluginLib::patchDB
 
 	const TypedTags& Patch::getTags() const
 	{
-		if (const auto m = modifications.lock())
+		if (const auto m = modifications)
 			return m->mergedTags;
 		return tags;
 	}
@@ -59,20 +59,20 @@ namespace pluginLib::patchDB
 
 	const std::string& Patch::getName() const
 	{
-		const auto m = modifications.lock();
+		const auto m = modifications;
 		if (!m || m->name.empty())
 			return name;
 		return m->name;
 	}
 
-	std::string PatchKey::toString() const
+	std::string PatchKey::toString(const bool _includeDatasource) const
 	{
 		if(!isValid())
 			return {};
 
 		std::stringstream ss;
 
-		if (source->type != SourceType::Invalid)
+		if (_includeDatasource && source->type != SourceType::Invalid)
 			ss << source->toString() << '|';
 
 		if (program != g_invalidProgram)
@@ -83,7 +83,7 @@ namespace pluginLib::patchDB
 		return ss.str();
 	}
 
-	PatchKey PatchKey::fromString(const std::string& _string)
+	PatchKey PatchKey::fromString(const std::string& _string, const DataSourceNodePtr& _dataSource/* = nullptr*/)
 	{
 		const std::vector<std::string> elems = Serialization::split(_string, '|');
 
@@ -91,7 +91,11 @@ namespace pluginLib::patchDB
 			return {};
 
 		PatchKey patchKey;
-		patchKey.source = std::make_shared<DataSourceNode>();
+
+		if(_dataSource)
+			patchKey.source = _dataSource;
+		else
+			patchKey.source = std::make_shared<DataSourceNode>();
 
 		for(size_t i=0; i<elems.size(); i+=2)
 		{
