@@ -364,12 +364,12 @@ namespace pluginLib::patchDB
 		return nullptr;
 	}
 
-	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches)
+	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches, int _insertRow/* = -1*/)
 	{
 		if (_ds->type != SourceType::LocalStorage)
 			return;
 
-		runOnLoaderThread([this, _ds, _patches]
+		runOnLoaderThread([this, _ds, _patches, _insertRow]
 		{
 			{
 				std::shared_lock lockDs(m_dataSourcesMutex);
@@ -379,29 +379,38 @@ namespace pluginLib::patchDB
 			}
 
 			// filter out all patches that are already part of _ds
-			std::vector<PatchPtr> newPatches;
-			std::vector<std::shared_ptr<PatchModifications>> newPatchModifications;
-
-			uint32_t newPatchProgramNumber = _ds->getMaxProgramNumber() + 1;
-
-			newPatches.reserve(_patches.size());
-			newPatchModifications.reserve(_patches.size());
+			std::vector<PatchPtr> patchesToAdd;
+			patchesToAdd.reserve(_patches.size());
 
 			for (const auto& patch : _patches)
 			{
 				if (_ds->contains(patch))
 					continue;
 
+				patchesToAdd.push_back(patch);
+			}
+
+			if(patchesToAdd.empty())
+				return;
+
+			std::vector<PatchPtr> newPatches;
+			newPatches.reserve(patchesToAdd.size());
+
+			uint32_t newPatchProgramNumber = _insertRow >= 0 ? static_cast<uint32_t>(_insertRow) : _ds->getMaxProgramNumber() + 1;
+
+			if(newPatchProgramNumber > _ds->getMaxProgramNumber() + 1)
+				newPatchProgramNumber = _ds->getMaxProgramNumber() + 1;
+
+			_ds->makeSpaceForNewPatches(newPatchProgramNumber, static_cast<uint32_t>(patchesToAdd.size()));
+
+			for (const auto& patch : patchesToAdd)
+			{
 				auto [newPatch, newMods] = patch->createCopy(_ds);
 
 				newPatch->program = newPatchProgramNumber++;
 
 				newPatches.push_back(newPatch);
-				newPatchModifications.push_back(newMods);
 			}
-
-			if (newPatches.empty())
-				return;
 
 			addPatches(newPatches);
 
@@ -576,8 +585,6 @@ namespace pluginLib::patchDB
 			if(!ds)
 				return false;
 
-			const auto key = PatchKey(*_patch);
-
 			auto mods = _patch->modifications;
 			if(!mods)
 			{
@@ -593,7 +600,40 @@ namespace pluginLib::patchDB
 			updateSearches({_patch});
 		}
 
-		saveJson();
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
+
+		return true;
+	}
+
+	bool DB::replacePatch(const PatchPtr& _existing, const PatchPtr& _new)
+	{
+		if(!_existing || !_new)
+			return false;
+
+		if(_existing == _new)
+			return false;
+
+		const auto ds = _existing->source.lock();
+
+		if(!ds || ds->type != SourceType::LocalStorage)
+			return false;
+
+		std::unique_lock lock(m_patchesMutex);
+
+		_existing->replaceData(*_new);
+
+		if(_existing->modifications)
+			_existing->modifications->name.clear();
+
+		updateSearches({_existing});
+
+		runOnLoaderThread([this]
+		{
+			saveJson();
+		});
 
 		return true;
 	}

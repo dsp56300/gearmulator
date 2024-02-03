@@ -60,6 +60,8 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const;
 		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const;
 
+		pluginLib::patchDB::DataSourceNodePtr getDataSource() const;
+
 		static Patch getPatch(const Patches& _patches, const size_t _index)
 		{
 			if (_index >= _patches.size())
@@ -80,6 +82,11 @@ namespace jucePluginEditorLib::patchManager
 		void backgroundClicked(const juce::MouseEvent&) override;
 
 		static bool showDeleteConfirmationMessageBox();
+		pluginLib::patchDB::SourceType getSourceType() const;
+		bool canReorderPatches() const;
+		bool hasTagFilters() const;
+		bool hasFilters() const;
+
 	private:
 		void sortPatches();
 		void sortPatches(Patches& _patches) const;

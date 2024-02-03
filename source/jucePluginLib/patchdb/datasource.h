@@ -21,6 +21,8 @@ namespace pluginLib::patchDB
 		bool createConsecutiveProgramNumbers();	// returns true if any patch was modified
 		static bool createConsecutiveProgramNumbers(const std::vector<PatchPtr>& _patches);	// returns true if any patch was modified
 
+		bool makeSpaceForNewPatches(uint32_t _insertPosition, uint32_t _count) const;
+
 		std::pair<uint32_t, uint32_t> getProgramNumberRange() const;
 		uint32_t getMaxProgramNumber() const;
 		static void sortByProgram(std::vector<PatchPtr>& _patches);

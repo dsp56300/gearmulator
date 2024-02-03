@@ -39,8 +39,6 @@ namespace pluginLib::patchDB
 	{
 		name = _patch.name;
 		tags = _patch.tags;
-		bank = _patch.bank;
-		program = _patch.program;
 		hash = _patch.hash;
 		sysex = _patch.sysex;
 	}

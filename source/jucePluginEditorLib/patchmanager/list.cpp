@@ -88,7 +88,7 @@ namespace jucePluginEditorLib::patchManager
 		if(patches.empty())
 			return false;
 
-		sortPatches(patches, m_search->getSourceType());
+		sortPatches(patches, getSourceType());
 
 		auto& editor = m_patchManager.getEditor();
 
@@ -162,7 +162,7 @@ namespace jucePluginEditorLib::patchManager
 					m_patchManager.modifyTags(patches, removeTags);
 				});
 			}
-			else if(m_search->getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
+			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
 			{
 				menu.addItem("Deleted selected", [this, s = std::move(selectedPatches)]
 				{
@@ -412,6 +412,14 @@ namespace jucePluginEditorLib::patchManager
 			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
 	}
 
+	pluginLib::patchDB::DataSourceNodePtr List::getDataSource() const
+	{
+		if(!m_search)
+			return nullptr;
+
+		return m_search->request.sourceNode;
+	}
+
 	void List::setFilter(const std::string& _filter)
 	{
 		setFilter(_filter, m_hideDuplicates);
@@ -475,6 +483,36 @@ namespace jucePluginEditorLib::patchManager
 		return 1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "Confirmation needed", "Delete selected patches from bank?");
 	}
 
+	pluginLib::patchDB::SourceType List::getSourceType() const
+	{
+		if(!m_search)
+			return pluginLib::patchDB::SourceType::Invalid;
+		return m_search->getSourceType();
+	}
+
+	bool List::canReorderPatches() const
+	{
+		if(!m_search)
+			return false;
+		if(getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
+			return false;
+		if(!m_search->request.tags.empty())
+			return false;
+		return true;
+	}
+
+	bool List::hasTagFilters() const
+	{
+		if(!m_search)
+			return false;
+		return !m_search->request.tags.empty();
+	}
+
+	bool List::hasFilters() const
+	{
+		return hasTagFilters() || !m_filter.empty();
+	}
+
 	void List::sortPatches()
 	{
 		// Note: If this list is no longer sorted by calling this function, be sure to modify the second caller in state.cpp, too, as it is used to track the selected entry across multiple parts
@@ -483,7 +521,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::sortPatches(Patches& _patches) const
 	{
-		sortPatches(_patches, m_search->getSourceType());
+		sortPatches(_patches, getSourceType());
 	}
 
 	void List::filterPatches()

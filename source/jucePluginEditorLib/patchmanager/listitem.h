@@ -33,7 +33,8 @@ namespace jucePluginEditorLib::patchManager
 		{
 			Off,
 			Above,
-			Below
+			Below,
+			Over
 		};
 
 		List& m_list;

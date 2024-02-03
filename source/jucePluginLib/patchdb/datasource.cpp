@@ -41,6 +41,21 @@ namespace pluginLib::patchDB
 		return dirty;
 	}
 
+	bool DataSource::makeSpaceForNewPatches(const uint32_t _insertPosition, const uint32_t _count) const
+	{
+		bool dirty = true;
+
+		for (const auto& patch : patches)
+		{
+			if(patch->program >= _insertPosition)
+			{
+				patch->program += _count;
+				dirty = true;
+			}
+		}
+		return dirty;
+	}
+
 	std::pair<uint32_t, uint32_t> DataSource::getProgramNumberRange() const
 	{
 		if(patches.empty())
