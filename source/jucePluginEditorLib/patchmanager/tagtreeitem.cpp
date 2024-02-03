@@ -43,6 +43,7 @@ namespace jucePluginEditorLib::patchManager
 			tags.add(tagType, getTag());
 
 		getPatchManager().modifyTags(_patches, tags);
+		getPatchManager().repaint();
 	}
 
 	void TagTreeItem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)

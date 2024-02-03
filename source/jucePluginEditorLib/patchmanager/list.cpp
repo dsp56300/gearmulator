@@ -160,6 +160,7 @@ namespace jucePluginEditorLib::patchManager
 					}
 
 					m_patchManager.modifyTags(patches, removeTags);
+					m_patchManager.repaint();
 				});
 			}
 			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)

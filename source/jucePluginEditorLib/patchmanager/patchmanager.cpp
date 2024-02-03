@@ -543,6 +543,8 @@ namespace jucePluginEditorLib::patchManager
 			{
 				const auto color = cs->getCurrentColour();
 				setTagColor(tagType, tag, color.getARGB());
+
+				repaint();
 			}
 		}
 	}
