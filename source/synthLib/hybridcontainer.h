@@ -1,5 +1,5 @@
 #pragma once
-
+/*
 #include <vector>
 #include <memory_resource>
 #include <array>
@@ -26,3 +26,4 @@ namespace synthLib
 		}
 	};
 }
+*/
