@@ -10,7 +10,7 @@ else()
 	set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9" CACHE STRING "Minimum OS X deployment version")
 endif()
 
-project(gearmulator VERSION 1.2.36)
+project(gearmulator VERSION 1.3.0)
 
 include(base.cmake)
 include(CTest)
