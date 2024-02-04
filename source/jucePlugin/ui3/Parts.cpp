@@ -56,7 +56,14 @@ namespace genericVirusUI
 		updateAll();
 	}
 
-	Parts::~Parts() = default;
+	Parts::~Parts()
+	{
+		for(size_t i=0; i<m_presetName.size(); ++i)
+		{
+			m_presetName[i]->removeMouseListener(m_mouseListeners[i]);
+			delete m_mouseListeners[i];
+		}
+	}
 
 	void Parts::onProgramChange() const
 	{
@@ -119,7 +126,7 @@ namespace genericVirusUI
             juce::PopupMenu p;
             for (uint8_t j = 0; j < presetNames.size(); j++)
             {
-                const auto presetName = presetNames[j];
+                const auto& presetName = presetNames[j];
                 p.addItem(presetName, [this, bank, j, pt] 
                 {
 					m_editor.selectRomPreset(pt, bank, j);
