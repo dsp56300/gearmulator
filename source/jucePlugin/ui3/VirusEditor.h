@@ -86,6 +86,7 @@ namespace genericVirusUI
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
+		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 
