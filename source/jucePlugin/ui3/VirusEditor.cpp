@@ -312,33 +312,37 @@ namespace genericVirusUI
 	{
 		Editor::loadPreset([this](const juce::File& _result)
 		{
-			const auto ext = _result.getFileExtension().toLowerCase();
+			pluginLib::patchDB::DataList results;
 
-			PatchBrowser::PatchList patches;
-
-			m_patchBrowser->loadBankFile(patches, nullptr, _result);
-
-			if (patches.empty())
+			if(!getPatchManager()->loadFile(results, _result.getFullPathName().toStdString()))
 				return;
 
-			if (patches.size() == 1)
+			auto& c = getController();
+
+			// we attempt to convert all results as some of them might not be valid preset data
+			for(size_t i=0; i<results.size();)
 			{
-				// load to edit buffer of current part
-				const auto data = getController().modifySingleDump(patches.front()->sysex, virusLib::BankNumber::EditBuffer, 
-					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
-				getController().sendSysEx(data);
-			}
-			else
-			{
-				// load to bank A
-				for(uint8_t i=0; i<static_cast<uint8_t>(patches.size()); ++i)
-				{
-					const auto data = getController().modifySingleDump(patches[i]->sysex, virusLib::BankNumber::A, i, true, false);
-					getController().sendSysEx(data);
-				}
+				// convert to load to edit buffer of current part
+				const auto data = c.modifySingleDump(results[i], virusLib::BankNumber::EditBuffer, c.isMultiMode() ? c.getCurrentPart() : virusLib::SINGLE, true, true);
+				if(data.empty())
+					results.erase(results.begin() + i);
+				else
+					results[i++] = data;
 			}
 
-			getController().onStateLoaded();
+			if (results.size() == 1)
+			{
+				c.sendSysEx(results.front());
+			}
+			else if(results.size() > 1)
+			{
+				juce::NativeMessageBox::showMessageBox(juce::AlertWindow::InfoIcon, "Information", 
+					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
+					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
+				);
+			}
+
+			c.onStateLoaded();
 		});
 	}
 
