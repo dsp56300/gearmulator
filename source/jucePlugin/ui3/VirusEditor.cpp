@@ -41,16 +41,13 @@ namespace genericVirusUI
 		const auto configOptions = getProcessor().getConfigOptions();
 		const auto dir = configOptions.getDefaultFile().getParentDirectory();
 
-//#if defined(_MSC_VER) && defined(_DEBUG)
 		{
-			juce::Component* pmParent = findComponent("ContainerPatchManager", false);
+			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
 				pmParent = findComponent("page_presets");
 			setPatchManager(new PatchManager(*this, pmParent, dir));
 		}
-//#else
-//		m_patchBrowser.reset(new PatchBrowser(*this));
-//#endif
+
 		m_presetName = findComponentT<juce::Label>("PatchName");
 
 		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(getController(), m_parameterBinding, *this));
@@ -181,11 +178,6 @@ namespace genericVirusUI
 	const char* VirusEditor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
 	{
 		return findEmbeddedResource(_filename, _size);
-	}
-
-	PatchBrowser* VirusEditor::getPatchBrowser() const
-	{
-		return m_patchBrowser.get();
 	}
 
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const

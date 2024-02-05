@@ -9,6 +9,8 @@
 #include "../../virusLib/microcontroller.h"
 #include "../../virusLib/device.h"
 
+#include "juce_cryptography/hashing/juce_MD5.h"
+
 namespace Virus
 {
 	class Controller;

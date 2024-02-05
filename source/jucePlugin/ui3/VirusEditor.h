@@ -7,7 +7,6 @@
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
-#include "PatchBrowser.h"
 #include "PatchManager.h"
 #include "ControllerLinks.h"
 
@@ -51,8 +50,6 @@ namespace genericVirusUI
 		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
-		PatchBrowser* getPatchBrowser() const;
-
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 	private:
@@ -82,7 +79,6 @@ namespace genericVirusUI
 		std::unique_ptr<Tabs> m_tabs;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
-		std::unique_ptr<PatchBrowser> m_patchBrowser;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
