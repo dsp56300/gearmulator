@@ -81,33 +81,61 @@ namespace jucePluginEditorLib::patchManager
 
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
-		if(_mouseEvent.mods.isPopupMenu())
-		{
-			juce::PopupMenu menu;
+		if(!_mouseEvent.mods.isPopupMenu())
+			return;
 
-			menu.addItem("Refresh", [this]
+		juce::PopupMenu menu;
+
+		menu.addItem("Refresh", [this]
+		{
+			getPatchManager().refreshDataSource(m_dataSource);
+		});
+
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::File || 
+			m_dataSource->type == pluginLib::patchDB::SourceType::Folder ||
+			m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			menu.addItem("Remove", [this]
 			{
-				getPatchManager().refreshDataSource(m_dataSource);
+				getPatchManager().removeDataSource(*m_dataSource);
+			});
+		}
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			menu.addItem("Delete", [this]
+			{
+				if(1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, 
+					"Patch Manager", 
+					"Are you sure that you want to delete your user bank named '" + getDataSource()->name + "'?"))
+					getPatchManager().removeDataSource(*m_dataSource);
+			});
+		}
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			menu.addItem("Rename...", [this]
+			{
+				beginEdit();
 			});
 
-			if(m_dataSource->type == pluginLib::patchDB::SourceType::File || 
-				m_dataSource->type == pluginLib::patchDB::SourceType::Folder ||
-				m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+			auto fileTypeMenu = [this](const std::function<void(FileType)>& _func)
 			{
-				menu.addItem("Remove", [this]
-				{
-					getPatchManager().removeDataSource(*m_dataSource);
-				});
-			}
-			if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+				juce::PopupMenu menu;
+				menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
+				menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
+				return menu;
+			};
+
+			menu.addSubMenu("Export...", fileTypeMenu([this](const FileType _fileType)
 			{
-				menu.addItem("Rename...", [this]
+				const auto s = getPatchManager().getSearch(getSearchHandle());
+				if(s)
 				{
-					beginEdit();
-				});
-			}
-			menu.showMenuAsync({});
+					std::vector patches(s->results.begin(), s->results.end());
+					getPatchManager().exportPresets(std::move(patches), _fileType);
+				}
+			}));
 		}
+		menu.showMenuAsync({});
 	}
 
 	void DatasourceTreeItem::refresh()

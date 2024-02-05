@@ -8,6 +8,7 @@
 
 namespace jucePluginEditorLib
 {
+	enum class FileType;
 	class Editor;
 }
 
@@ -52,6 +53,9 @@ namespace jucePluginEditorLib::patchManager
 		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name);
 
 		void paint(juce::Graphics& g) override;
+
+		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const;
+		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, FileType _fileType) const;
 
 	private:
 		bool selectPatch(uint32_t _part, int _offset);

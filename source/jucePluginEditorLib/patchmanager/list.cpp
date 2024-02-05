@@ -105,16 +105,7 @@ namespace jucePluginEditorLib::patchManager
 		if(patches.empty())
 			return false;
 
-		sortPatches(patches, getSourceType());
-
-		auto& editor = m_patchManager.getEditor();
-
-		editor.savePreset([this, p = std::move(patches), _fileType](const juce::File& _file)
-		{
-			exportPresets(_file, p, _fileType);
-		});
-
-		return true;
+		return getPatchManager().exportPresets(std::move(patches), _fileType);
 	}
 
 	bool List::onClicked(const juce::MouseEvent& _mouseEvent)
@@ -149,7 +140,7 @@ namespace jucePluginEditorLib::patchManager
 				const auto row = getSelectedRow();
 				const auto pos = getRowPosition(row, true);
 
-				menu.addItem("Rename...", [this, patch, row, pos]
+				menu.addItem("Rename...", [this, patch, pos]
 				{
 					beginEdit(this, pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
 					{
@@ -413,24 +404,6 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		return patches;
-	}
-
-	void List::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType _fileType) const
-	{
-		FileType type = _fileType;
-		const auto name = Editor::createValidFilename(type, _file);
-
-		std::vector<pluginLib::patchDB::Data> patchData;
-		for (const auto& patch : _patches)
-		{
-			const auto patchSysex = m_patchManager.prepareSave(patch);
-
-			if(!patchSysex.empty())
-				patchData.push_back(patchSysex);
-		}
-
-		if(!m_patchManager.getEditor().savePresets(type, name, patchData))
-			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
 	}
 
 	pluginLib::patchDB::DataSourceNodePtr List::getDataSource() const

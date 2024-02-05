@@ -210,11 +210,14 @@ namespace genericVirusUI
 			m_controller.setSinglePresetName(parameterValues, _patch->getName());
 
 		// apply program
+		auto bank = toMidiByte(virusLib::BankNumber::A);
 		auto program = data[pluginLib::MidiDataType::Program];
 
 		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
 		{
-			program = _patch->program <= 127 ? static_cast<uint8_t>(_patch->program) : 127;
+			const auto bankOffset = _patch->program / 128;
+			program = static_cast<uint8_t>(_patch->program - bankOffset * 128);
+			bank += static_cast<uint8_t>(bankOffset);
 		}
 
 		// apply categories
@@ -250,7 +253,7 @@ namespace genericVirusUI
 		parameterValues[indicesCategory[0]] = val0;
 		parameterValues[indicesCategory[1]] = val1;
 
-		return m_controller.createSingleDump(toMidiByte(virusLib::BankNumber::A), program, parameterValues);
+		return m_controller.createSingleDump(bank, program, parameterValues);
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
@@ -299,7 +302,6 @@ namespace genericVirusUI
 
 		for(uint32_t i=0; i<parameterValuesA.size(); ++i)
 		{
-			const auto& k = i;
 			const auto& itA = parameterValuesA[i];
 			const auto& itB = parameterValuesB[i];
 

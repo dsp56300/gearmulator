@@ -324,6 +324,44 @@ namespace jucePluginEditorLib::patchManager
 		g.fillAll(juce::Colour(0,0,0));
 	}
 
+	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const
+	{
+		FileType type = _fileType;
+		const auto name = Editor::createValidFilename(type, _file);
+
+		std::vector<pluginLib::patchDB::Data> patchData;
+		for (const auto& patch : _patches)
+		{
+			const auto patchSysex = prepareSave(patch);
+
+			if(!patchSysex.empty())
+				patchData.push_back(patchSysex);
+		}
+
+		if(!getEditor().savePresets(type, name, patchData))
+			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
+	}
+
+	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, FileType _fileType) const
+	{
+		if(_patches.size() > 128)
+		{
+			if(1 != juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, 
+				"Patch Manager",
+				"You are trying to export more than 128 presets into a single file. Note that this dump exceeds the size of one bank and may not be compatible with your hardware"))
+				return true;
+		}
+
+		List::sortPatches(_patches, pluginLib::patchDB::SourceType::LocalStorage);
+
+		getEditor().savePreset([this, p = std::move(_patches), _fileType](const juce::File& _file)
+		{
+			exportPresets(_file, p, _fileType);
+		});
+
+		return true;
+	}
+
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const
 	{
 		return m_editor.getTemplate(_name);
