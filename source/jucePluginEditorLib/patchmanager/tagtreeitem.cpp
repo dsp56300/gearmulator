@@ -99,6 +99,7 @@ namespace jucePluginEditorLib::patchManager
 					menu.addItem("Clear Color", [this, tagType]
 					{
 						getPatchManager().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
+						getPatchManager().repaint();
 					});
 				}
 
