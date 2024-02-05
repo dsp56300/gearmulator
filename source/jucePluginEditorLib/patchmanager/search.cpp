@@ -44,5 +44,6 @@ namespace jucePluginEditorLib::patchManager
 
 		m_text = t;
 		onTextChanged(t);
+		repaint();
 	}
 }
