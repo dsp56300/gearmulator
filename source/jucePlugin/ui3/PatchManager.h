@@ -41,6 +41,7 @@ namespace genericVirusUI
 
 	private:
 		void addRomPatches();
+		pluginLib::patchDB::DataSource createRomDataSource(uint32_t _bank) const;
 
 		Virus::Controller& m_controller;
 	};
