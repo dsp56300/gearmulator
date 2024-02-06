@@ -11,6 +11,14 @@ namespace jucePluginEditorLib::patchManager
 
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
+		const auto sourceType = toSourceType(_type);
+
+		if(sourceType == pluginLib::patchDB::SourceType::Invalid)
+			return;
+
+		pluginLib::patchDB::SearchRequest req;
+		req.sourceType = sourceType;
+		search(std::move(req));
 	}
 
 	void GroupTreeItem::updateFromTags(const std::set<std::string>& _tags)
@@ -113,6 +121,8 @@ namespace jucePluginEditorLib::patchManager
 
 		for (const auto& it : m_itemsByDataSource)
 			it.second->processDirty(_dirtySearches);
+
+		TreeItem::processDirty(_dirtySearches);
 	}
 
 	void GroupTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

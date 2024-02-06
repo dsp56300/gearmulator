@@ -87,6 +87,11 @@ namespace pluginLib::patchDB
 			if (!matchDataSource(patchSource.get(), sourceNode))
 				return false;
 		}
+		else if(sourceType != SourceType::Invalid)
+		{
+			if(patchSource->type != sourceType)
+				return false;
+		}
 
 		// name
 		if (!matchStringsIgnoreCase(_patch.getName(), name))
@@ -117,6 +122,6 @@ namespace pluginLib::patchDB
 
 	bool SearchRequest::operator==(const SearchRequest& _r) const
 	{
-		return name == _r.name && tags == _r.tags && sourceNode == _r.sourceNode && patch == _r.patch;
+		return name == _r.name && tags == _r.tags && sourceNode == _r.sourceNode && patch == _r.patch && sourceType == _r.sourceType;
 	}
 }

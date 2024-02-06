@@ -48,4 +48,15 @@ namespace jucePluginEditorLib::patchManager
 		default:											return GroupType::Invalid;
 		}
 	}
+
+	pluginLib::patchDB::SourceType toSourceType(const GroupType _groupType)
+	{
+		switch (_groupType)
+		{
+		case GroupType::DataSources:	return pluginLib::patchDB::SourceType::File;
+		case GroupType::LocalStorage:	return pluginLib::patchDB::SourceType::LocalStorage;
+		case GroupType::Factory:		return pluginLib::patchDB::SourceType::Rom;
+		default:						return pluginLib::patchDB::SourceType::Invalid;
+		}
+	}
 }
