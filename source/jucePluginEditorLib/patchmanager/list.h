@@ -42,7 +42,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const Patches& getPatches() const
 		{
-			if (m_filter.empty())
+			if (m_filter.empty() && !m_hideDuplicates)
 				return m_patches;
 			return m_filteredPatches;
 		}
