@@ -331,7 +331,10 @@ namespace jucePluginEditorLib::patchManager
 		std::set<pluginLib::patchDB::PatchKey> patches;
 
 		for (const auto& patch : _patches)
-			patches.insert(pluginLib::patchDB::PatchKey(*patch));
+		{
+			if(!patch->source.expired())
+				patches.insert(pluginLib::patchDB::PatchKey(*patch));
+		}
 		return setSelectedPatches(patches);
 	}
 
