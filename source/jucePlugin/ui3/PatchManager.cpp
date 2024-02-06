@@ -18,17 +18,6 @@ namespace Virus
 
 namespace genericVirusUI
 {
-	pluginLib::patchDB::DataSource createRomDataSource(const uint32_t _bank)
-	{
-		pluginLib::patchDB::DataSource ds;
-		ds.type = pluginLib::patchDB::SourceType::Rom;
-		ds.bank = _bank;
-		char temp[32];
-		snprintf(temp, sizeof(temp), "ROM %c", 'A' + _bank);
-		ds.name = temp;
-		return ds;
-	}
-
 	void PatchManager::selectRomPreset(uint32_t _part, virusLib::BankNumber _bank, uint8_t _program)
 	{
 		const pluginLib::patchDB::DataSource ds = createRomDataSource(toArrayIndex(_bank));
@@ -364,4 +353,14 @@ namespace genericVirusUI
 			addDataSource(createRomDataSource(b));
 		}
 	}
+
+	pluginLib::patchDB::DataSource PatchManager::createRomDataSource(const uint32_t _bank) const
+	{
+		pluginLib::patchDB::DataSource ds;
+		ds.type = pluginLib::patchDB::SourceType::Rom;
+		ds.bank = _bank;
+		ds.name = m_controller.getBankName(_bank);
+		return ds;
+	}
+
 }
