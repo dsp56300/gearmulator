@@ -4,6 +4,8 @@
 #include "patchmanager.h"
 #include "savepatchdesc.h"
 
+#include "../../synthLib/buildconfig.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	// Juce is funny:
@@ -120,7 +122,11 @@ namespace jucePluginEditorLib::patchManager
 			}
 			else
 			{
+#if SYNTHLIB_DEMO_MODE
+				pm.getEditor().showDemoRestrictionMessageBox();
+#else
 				pm.copyPatchesTo(source, {patch}, row);
+#endif
 			}
 
 			repaint();
