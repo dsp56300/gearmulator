@@ -352,7 +352,7 @@ namespace Virus
         return parseSingle(_data, _parameterValues, _msg, unused);
 	}
 
-	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const
 	{
         const auto packetName = midiPacketName(MidiPacketType::SingleDump);
 
@@ -669,7 +669,7 @@ namespace Virus
         return createSingleDump(MidiPacketType::SingleDump, _bank, _program, _paramValues);
     }
 
-    std::vector<uint8_t> Controller::createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues)
+    std::vector<uint8_t> Controller::createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
     {
         const auto* m = getMidiPacket(midiPacketName(_packet));
 		assert(m && "midi packet not found");
