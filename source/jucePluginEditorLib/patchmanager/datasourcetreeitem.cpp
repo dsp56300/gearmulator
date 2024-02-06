@@ -3,9 +3,12 @@
 #include <cassert>
 
 #include "patchmanager.h"
+#include "../pluginEditor.h"
 
 #include "../../jucePluginLib/patchdb/datasource.h"
 #include "../../jucePluginLib/patchdb/search.h"
+
+#include "../../synthLib/buildconfig.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -75,7 +78,11 @@ namespace jucePluginEditorLib::patchManager
 		}
 		else
 		{
+#if SYNTHLIB_DEMO_MODE
+			getPatchManager().getEditor().showDemoRestrictionMessageBox();
+#else
 			getPatchManager().copyPatchesTo(m_dataSource, _patches);
+#endif
 		}
 	}
 
