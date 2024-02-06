@@ -44,7 +44,9 @@ namespace genericVirusUI
 		{
 			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
-				pmParent = findComponent("page_presets");
+				pmParent = findComponent("page_presets", false);
+			if(!pmParent)
+				pmParent = findComponent("page_2_browser");
 			setPatchManager(new PatchManager(*this, pmParent, dir));
 		}
 
