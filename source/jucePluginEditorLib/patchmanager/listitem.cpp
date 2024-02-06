@@ -6,6 +6,8 @@
 
 #include "../../synthLib/buildconfig.h"
 
+#include "../pluginEditor.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	// Juce is funny:
