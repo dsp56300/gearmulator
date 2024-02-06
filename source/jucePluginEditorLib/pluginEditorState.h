@@ -38,9 +38,14 @@ namespace jucePluginEditorLib
 			}
 		};
 
-		explicit PluginEditorState(Processor& _processor, pluginLib::Controller& _controller,
-		                           std::vector<Skin> _includedSkins);
+		explicit PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins);
 		virtual ~PluginEditorState() = default;
+
+		PluginEditorState(PluginEditorState&&) = delete;
+		PluginEditorState(const PluginEditorState&) = delete;
+
+		PluginEditorState& operator = (PluginEditorState&&) = delete;
+		PluginEditorState& operator = (const PluginEditorState&) = delete;
 
 		void exportCurrentSkin() const;
 		Skin readSkinFromConfig() const;
@@ -66,7 +71,10 @@ namespace jucePluginEditorLib
 
 		void loadDefaultSkin();
 
-		virtual void initContextMenu(juce::PopupMenu& _menu) {};
+		virtual void initContextMenu(juce::PopupMenu& _menu) {}
+
+		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
+		void getPerInstanceConfig(std::vector<uint8_t>& _data);
 
 	protected:
 		virtual genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) = 0;
@@ -78,9 +86,12 @@ namespace jucePluginEditorLib
 		void loadSkin(const Skin& _skin);
 		void setGuiScale(int _scale) const;
 
-		std::unique_ptr<juce::Component> m_virusEditor;
+		genericUI::Editor* getEditor() const;
+
+		std::unique_ptr<juce::Component> m_editor;
 		Skin m_currentSkin;
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
+		std::vector<uint8_t> m_instanceConfig;
 	};
 }

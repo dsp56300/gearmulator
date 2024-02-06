@@ -7,6 +7,8 @@
 
 #include "../../jucePluginLib/parameterbinding.h"
 
+#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+
 namespace genericVirusUI
 {
 	Parts::Parts(VirusEditor& _editor) : m_editor(_editor)
@@ -31,6 +33,13 @@ namespace genericVirusUI
 
 			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
 
+			m_mouseListeners.push_back(new PartMouseListener(static_cast<int>(i), [this, &_editor](const juce::MouseEvent&, const int _part)
+			{
+				_editor.startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(_part), m_presetName[_part]);
+			}));
+
+			m_presetName[i]->addMouseListener(m_mouseListeners.back(), false);
+
 			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
 			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
 
@@ -47,7 +56,14 @@ namespace genericVirusUI
 		updateAll();
 	}
 
-	Parts::~Parts() = default;
+	Parts::~Parts()
+	{
+		for(size_t i=0; i<m_presetName.size(); ++i)
+		{
+			m_presetName[i]->removeMouseListener(m_mouseListeners[i]);
+			delete m_mouseListeners[i];
+		}
+	}
 
 	void Parts::onProgramChange() const
 	{
@@ -74,9 +90,10 @@ namespace genericVirusUI
 		if(m_presetPrev.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		auto* pb = m_editor.getPatchBrowser();
-		if(!pb || !pb->selectPrevPreset())
-			m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectPrevPreset(static_cast<uint32_t>(_part)))
+			return;
+		m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectNextPreset(size_t _part) const
@@ -84,9 +101,10 @@ namespace genericVirusUI
 		if(m_presetNext.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		auto* pb = m_editor.getPatchBrowser();
-		if(!pb || !pb->selectNextPreset())
-			m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectNextPreset(static_cast<uint32_t>(_part)))
+			return;
+		m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectPreset(size_t _part) const
@@ -102,10 +120,10 @@ namespace genericVirusUI
             juce::PopupMenu p;
             for (uint8_t j = 0; j < presetNames.size(); j++)
             {
-                const auto presetName = presetNames[j];
+                const auto& presetName = presetNames[j];
                 p.addItem(presetName, [this, bank, j, pt] 
                 {
-                    m_editor.getController().setCurrentPartPreset(pt, bank, j);
+					m_editor.selectRomPreset(pt, bank, j);
                 });
             }
             selector.addSubMenu(m_editor.getController().getBankName(b), p);

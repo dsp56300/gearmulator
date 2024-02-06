@@ -191,6 +191,11 @@ namespace Virus
         return getPresetName("SingleName", _values);
     }
 
+    std::string Controller::getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
+    {
+        return getPresetName("SingleName", _values);
+    }
+
     std::string Controller::getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const
     {
         return getPresetName("MultiName", _values);
@@ -215,7 +220,26 @@ namespace Virus
         return name;
     }
 
-    void Controller::setSinglePresetName(uint8_t _part, const juce::String& _name) const
+    std::string Controller::getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const
+    {
+        std::string name;
+        for(uint32_t i=0; i<kNameLength; ++i)
+        {
+	        const std::string paramName = _paramNamePrefix + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            const auto it = _values[idx];
+            if(!it)
+                break;
+
+            name += static_cast<char>(*it);
+        }
+        return name;
+    }
+
+    void Controller::setSinglePresetName(const uint8_t _part, const juce::String& _name) const
     {
 		for (int i=0; i<kNameLength; i++)
 		{
@@ -235,7 +259,20 @@ namespace Virus
 		}
 	}
 
-	bool Controller::isMultiMode() const
+    void Controller::setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const
+    {
+        for(uint32_t i=0; i<kNameLength; ++i)
+        {
+	        const std::string paramName = "SingleName" + std::to_string(i);
+            const auto idx = getParameterIndexByName(paramName);
+            if(idx == InvalidParameterIndex)
+                break;
+
+            _values[idx] = (i < _name.size()) ? _name[i] : ' ';
+        }
+    }
+
+    bool Controller::isMultiMode() const
 	{
         const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
 		const auto& value = getParameter(paramIdx)->getValueObject();
@@ -309,7 +346,7 @@ namespace Virus
         return m_currentPresetSource[_part];
 	}
 
-	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::ParamValues& _parameterValues, const pluginLib::SysEx& _msg) const
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg) const
 	{
         MidiPacketType unused;
         return parseSingle(_data, _parameterValues, _msg, unused);
@@ -365,17 +402,6 @@ namespace Virus
             return {res, size};
         return {};
 	}
-
-	void Controller::parseSingle(const pluginLib::SysEx& msg)
-	{
-		pluginLib::MidiPacket::Data data;
-        pluginLib::MidiPacket::ParamValues parameterValues;
-
-    	if(!parseSingle(data, parameterValues, msg))
-            return;
-
-        parseSingle(msg, data, parameterValues);
-    }
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{
@@ -450,11 +476,17 @@ namespace Virus
             }
 
 			if (onProgramChange)
-				onProgramChange();
+				onProgramChange(patch.progNumber);
 		}
 		else
 		{
-			m_singles[virusLib::toArrayIndex(patch.bankNumber)][patch.progNumber] = patch;
+            const auto bank = toArrayIndex(patch.bankNumber);
+            const auto program = patch.progNumber;
+
+			m_singles[bank][program] = patch;
+
+            if(onRomPatchReceived)
+				onRomPatchReceived(patch.bankNumber, program);
 		}
 	}
 
@@ -632,7 +664,7 @@ namespace Virus
         return dst;
     }
 
-    std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::ParamValues& _paramValues)
+    std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
     {
         return createSingleDump(MidiPacketType::SingleDump, _bank, _program, _paramValues);
     }
@@ -652,14 +684,17 @@ namespace Virus
         data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
         data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
 
-        for (const auto& it : _paramValues)
+        for(uint32_t i=0; i<_paramValues.size(); ++i)
         {
-            const auto* p = getParameter(it.first.second, _program == virusLib::SINGLE ? 0 : _program);
+            const auto& v = _paramValues[i];
+            if(!v)
+                continue;
+            const auto* p = getParameter(i);
             assert(p);
             if(!p)
                 return {};
-            const auto key = std::make_pair(it.first.first, p->getDescription().name);
-            paramValues.insert(std::make_pair(key, it.second));
+            const auto key = std::make_pair(pluginLib::MidiPacket::AnyPart, p->getDescription().name);
+            paramValues.insert(std::make_pair(key, *v));
         }
 
         pluginLib::MidiPacket::Sysex dst;
@@ -671,7 +706,7 @@ namespace Virus
     std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram, const bool _modifyBank, const bool _modifyProgram)
     {
 		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::ParamValues parameterValues;
+		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
         MidiPacketType usedPacketType;
 		if(!parseSingle(data, parameterValues, _sysex, usedPacketType))
@@ -727,5 +762,42 @@ namespace Virus
             }
         }
         return temp;
+    }
+
+    bool Controller::activatePatch(const std::vector<unsigned char>& _sysex)
+    {
+		// re-pack, force to edit buffer
+		return activatePatch(_sysex, isMultiMode() ? getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE));
+    }
+
+    bool Controller::activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part)
+    {
+        if(_part == virusLib::ProgramType::SINGLE)
+        {
+            if(isMultiMode())
+	            _part = 0;
+        }
+        else if(_part >= 16)
+        {
+            return false;
+        }
+        else if(!isMultiMode() && _part == 0)
+        {
+            _part = virusLib::ProgramType::SINGLE;
+        }
+
+        const auto program = static_cast<uint8_t>(_part);
+
+    	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program, true, true);
+
+		if(msg.empty())
+			return false;
+
+		sendSysEx(msg);
+		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
+
+		setCurrentPartPresetSource(program == virusLib::ProgramType::SINGLE ? 0 : program, PresetSource::Browser);
+
+		return true;
     }
 }; // namespace Virus

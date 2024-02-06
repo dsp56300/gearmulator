@@ -177,12 +177,24 @@ namespace synthLib
         return str;
     }
 
-    static std::string getExtension(const std::string &_name)
+    std::string getExtension(const std::string &_name)
     {
         const auto pos = _name.find_last_of('.');
         if (pos != std::string::npos)
             return _name.substr(pos);
         return {};
+    }
+
+    size_t getFileSize(const std::string& _file)
+    {
+        FILE* hFile = fopen(_file.c_str(), "rb");
+        if (!hFile)
+            return 0;
+
+        fseek(hFile, 0, SEEK_END);
+        const auto size = static_cast<size_t>(ftell(hFile));
+        fclose(hFile);
+        return size;
     }
 
     std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize, const bool _stripPluginComponentFolders)
@@ -228,13 +240,7 @@ namespace synthLib
                 continue;
             }
 
-            FILE *hFile = fopen(file.c_str(), "rb");
-            if (!hFile)
-	            continue;
-
-            fseek(hFile, 0, SEEK_END);
-            const auto size = static_cast<size_t>(ftell(hFile));
-            fclose(hFile);
+            const auto size = getFileSize(file);
 
             if (_minSize && size < _minSize)
 	            continue;
@@ -269,6 +275,9 @@ namespace synthLib
 
     bool hasExtension(const std::string& _filename, const std::string& _extension)
     {
+        if (_extension.empty())
+            return true;
+
         return lowercase(getExtension(_filename)) == lowercase(_extension);
     }
 
@@ -313,7 +322,7 @@ namespace synthLib
             return true;
         }
 
-    	if(_data.size() < static_cast<size_t>(size))
+    	if(_data.size() != static_cast<size_t>(size))
             _data.resize(size);
 
     	const auto read = fread(&_data[0], 1, _data.size(), hFile);

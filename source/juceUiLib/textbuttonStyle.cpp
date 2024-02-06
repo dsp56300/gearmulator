@@ -6,6 +6,13 @@ namespace genericUI
 	{
 	}
 
+	juce::Font TextButtonStyle::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)
+	{
+		if (const auto f = getFont())
+			return *f;
+		return UiObjectStyle::getTextButtonFont(_textButton, buttonHeight);
+	}
+
 	void TextButtonStyle::apply(juce::Button& _target) const
 	{
 		_target.setColour(juce::TextButton::ColourIds::textColourOffId, m_color);

@@ -8,6 +8,14 @@
 #include "parameterdescription.h"
 #include "parameterlink.h"
 
+#include "juce_core/juce_core.h"
+
+namespace juce
+{
+	class var;
+	class DynamicObject;
+}
+
 namespace pluginLib
 {
 	class ParameterDescriptions

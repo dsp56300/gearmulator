@@ -5404,30 +5404,12 @@
                     }
                 },
                 {
-                    "name" : "ContainerFileSelector",
+                    "name" : "ContainerPatchManager",
                     "component" : {
-                        "x" : "6",
-                        "y" : "181",
-                        "width" : "1008",
-                        "height" : "813"
-                    }
-                },
-                {
-                    "name" : "ContainerPatchList",
-                    "component" : {
-                        "x" : "1034",
-                        "y" : "30",
-                        "width" : "1041",
-                        "height" : "914"
-                    }
-                },
-                {
-                    "name" : "ContainerPatchListSearchBox",
-                    "component" : {
-                        "x" : "1034",
-                        "y" : "944",
-                        "width" : "1041",
-                        "height" : "50"
+                        "x" : "2",
+                        "y" : "2",
+                        "width" : "2073",
+                        "height" : "990"
                     }
                 },
                 {

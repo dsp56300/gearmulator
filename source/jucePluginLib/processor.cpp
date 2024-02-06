@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "types.h"
 
 #include "../synthLib/deviceException.h"
 #include "../synthLib/os.h"
@@ -16,8 +17,6 @@ namespace pluginLib
 {
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 1;
-
-	using PluginStream = synthLib::BinaryStream<uint32_t>;
 
 	Processor::Processor(const BusesProperties& _busesProperties) : juce::AudioProcessor(_busesProperties)
 	{

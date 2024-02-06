@@ -7,6 +7,8 @@
 #include "../synthLib/os.h"
 #include "../synthLib/sysexToMidi.h"
 
+#include "patchmanager/patchmanager.h"
+
 namespace jucePluginEditorLib
 {
 	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
@@ -16,6 +18,8 @@ namespace jucePluginEditorLib
 		, m_skinFolder(std::move(_skinFolder))
 	{
 	}
+
+	Editor::~Editor() = default;
 
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
@@ -120,6 +124,42 @@ namespace jucePluginEditorLib
 	{
 		const auto &[title, msg] = getDemoRestrictionText();
 		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
+	}
+
+	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
+	{
+		m_patchManager.reset(_patchManager);
+
+		if(_patchManager && !m_instanceConfig.empty())
+			m_patchManager->setPerInstanceConfig(m_instanceConfig);
+	}
+
+	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+	{
+		m_instanceConfig = _data;
+
+		if(m_patchManager)
+			m_patchManager->setPerInstanceConfig(_data);
+	}
+
+	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	{
+		if(m_patchManager)
+		{
+			m_instanceConfig.clear();
+			m_patchManager->getPerInstanceConfig(m_instanceConfig);
+		}
+
+		if(!m_instanceConfig.empty())
+			_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+	}
+
+	void Editor::setCurrentPart(uint8_t _part)
+	{
+		genericUI::Editor::setCurrentPart(_part);
+
+		if(m_patchManager)
+			m_patchManager->setCurrentPart(_part);
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

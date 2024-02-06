@@ -58,6 +58,7 @@ namespace genericUI
 		m_rootObject->createJuceTree(*this);
 		m_rootObject->createTabGroups(*this);
 		m_rootObject->createControllerLinks(*this);
+		m_rootObject->registerTemplates(*this);
 
 		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 	}
@@ -213,6 +214,19 @@ namespace genericUI
 		return m_rootObject ? m_rootObject->getControllerLinkCountRecursive() : 0;
 	}
 
+	void Editor::registerTemplate(const std::shared_ptr<UiObject>& _value)
+	{
+		const auto name = _value->getName();
+
+		if (name.empty())
+			throw std::runtime_error("Every template needs to have a name");
+
+		if (m_templates.find(name) != m_templates.end())
+			throw std::runtime_error("Template with name '" + name + "' exists more than once");
+
+		m_templates.insert({ name, _value });
+	}
+
 	void Editor::setEnabled(juce::Component& _component, const bool _enable)
 	{
 		if(_component.getProperties().contains("disabledAlpha"))
@@ -231,5 +245,13 @@ namespace genericUI
 	void Editor::setCurrentPart(uint8_t _part)
 	{
 		m_rootObject->setCurrentPart(*this, _part);
+	}
+
+	std::shared_ptr<UiObject> Editor::getTemplate(const std::string& _name) const
+	{
+		const auto& it = m_templates.find(_name);
+		if (it == m_templates.end())
+			return {};
+		return it->second;
 	}
 }

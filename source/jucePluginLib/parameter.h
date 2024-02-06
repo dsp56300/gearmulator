@@ -1,10 +1,10 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-
 #include <set>
 
 #include "parameterdescription.h"
+
+#include "juce_audio_processors/juce_audio_processors.h"
 
 namespace pluginLib
 {

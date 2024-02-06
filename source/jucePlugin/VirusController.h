@@ -77,14 +77,19 @@ namespace Virus
     	void selectNextPreset(uint8_t _part);
         std::string getBankName(uint32_t _index) const;
 
+    	bool activatePatch(const std::vector<unsigned char>& _sysex);
+    	bool activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part);
+
         static void printMessage(const pluginLib::SysEx &);
 
         juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getSinglePresetName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
         std::string getMultiPresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
         std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::ParamValues& _values) const;
+        std::string getPresetName(const std::string& _paramNamePrefix, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 
     	const Singles& getSinglePresets() const
         {
@@ -107,7 +112,9 @@ namespace Virus
     	}
 
 		void setSinglePresetName(uint8_t _part, const juce::String& _name) const;
-		bool isMultiMode() const;
+        void setSinglePresetName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _name) const;
+
+    	bool isMultiMode() const;
 
     	// part 0 - 15 (ignored when single! 0x40...)
 		void setCurrentPartPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _prg);
@@ -121,8 +128,9 @@ namespace Virus
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
 		void parseSysexMessage(const pluginLib::SysEx &) override;
         void onStateLoaded() override;
-		std::function<void()> onProgramChange = {};
+		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
+		std::function<void(virusLib::BankNumber _bank, uint32_t _program)> onRomPatchReceived = {};
 
 		bool requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const;
 		bool requestSingle(uint8_t _bank, uint8_t _program) const;
@@ -157,7 +165,6 @@ namespace Virus
 
         MultiPatch m_multiEditBuffer;
 
-        void parseSingle(const pluginLib::SysEx& _msg);
         void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
     	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);

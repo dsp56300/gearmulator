@@ -29,7 +29,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, getConfigOptions())
+	, ::getConfigOptions())
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 
@@ -222,11 +222,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 //==============================================================================
 
-juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
+jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 {
-	if(!m_editorState)
-		m_editorState.reset(new PluginEditorState(*this, getController()));
-    return new jucePluginEditorLib::EditorWindow(*this, *m_editorState, getConfig());
+	return new PluginEditorState(*this, getController());
 }
 
 void AudioPluginAudioProcessor::updateLatencySamples()

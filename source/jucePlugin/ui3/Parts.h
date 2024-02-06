@@ -8,6 +8,23 @@ namespace genericVirusUI
 {
 	class VirusEditor;
 
+	class PartMouseListener : public juce::MouseListener
+	{
+	public:
+		explicit PartMouseListener(const int _part, const std::function<void(const juce::MouseEvent&, int)>& _callback) : m_part(_part), m_callback(_callback)
+		{
+		}
+
+		void mouseDrag(const juce::MouseEvent& _event) override
+		{
+			m_callback(_event, m_part);
+		}
+
+	private:
+		int m_part;
+		std::function<void(const juce::MouseEvent&, int)> m_callback;
+	};
+
 	class Parts
 	{
 	public:
@@ -39,5 +56,6 @@ namespace genericVirusUI
 		std::vector<juce::Slider*> m_partPan;
 
 		std::vector<juce::TextButton*> m_presetName;
+		std::vector<PartMouseListener*> m_mouseListeners;
 	};
 }

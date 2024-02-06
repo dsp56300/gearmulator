@@ -8,6 +8,7 @@
 #include "../version.h"
 
 #include "../../jucePluginLib/parameterbinding.h"
+#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "../../synthLib/os.h"
 
@@ -37,7 +38,15 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
-		m_patchBrowser.reset(new PatchBrowser(*this));
+		const auto configOptions = getProcessor().getConfigOptions();
+		const auto dir = configOptions.getDefaultFile().getParentDirectory();
+
+		{
+			auto pmParent = findComponent("ContainerPatchManager", false);
+			if(!pmParent)
+				pmParent = findComponent("page_presets");
+			setPatchManager(new PatchManager(*this, pmParent, dir));
+		}
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
 
@@ -69,7 +78,7 @@ namespace genericVirusUI
 			m_romSelector->setSelectedId(1, juce::dontSendNotification);
 		}
 
-		getController().onProgramChange = [this] { onProgramChange(); };
+		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
 
 		addMouseListener(this, true);
 
@@ -103,9 +112,14 @@ namespace genericVirusUI
 			if (text.trim().length() > 0)
 			{
 				getController().setSinglePresetName(getController().getCurrentPart(), text);
-				onProgramChange();
+				onProgramChange(getController().getCurrentPart());
 			}
 		};
+		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent& _mouseEvent, int )
+		{
+			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(getController().getCurrentPart()), m_presetName);
+		});
+		m_presetName->addMouseListener(m_presetNameMouseListener, false);
 
 		auto* menuButton = findComponentT<juce::Button>("Menu", false);
 
@@ -118,6 +132,10 @@ namespace genericVirusUI
 
 	VirusEditor::~VirusEditor()
 	{
+		m_presetName->removeMouseListener(m_presetNameMouseListener);
+		delete m_presetNameMouseListener;
+		m_presetNameMouseListener = nullptr;
+
 		m_focusedParameter.reset();
 
 		m_parameterBinding.clearBindings();
@@ -128,6 +146,18 @@ namespace genericVirusUI
 	Virus::Controller& VirusEditor::getController() const
 	{
 		return static_cast<Virus::Controller&>(m_processor.getController());
+	}
+
+	void VirusEditor::selectRomPreset(const uint8_t _part, const virusLib::BankNumber _bank, const uint8_t _program) const
+	{
+		if(getPatchManager())
+		{
+			static_cast<PatchManager*>(getPatchManager())->selectRomPreset(_part, _bank, _program);
+		}
+		else
+		{
+			getController().setCurrentPartPreset(_part, _bank, _program);
+		}
 	}
 
 	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
@@ -150,11 +180,6 @@ namespace genericVirusUI
 		return findEmbeddedResource(_filename, _size);
 	}
 
-	PatchBrowser* VirusEditor::getPatchBrowser()
-	{
-		return m_patchBrowser.get();
-	}
-
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
 	{
 		return {
@@ -165,12 +190,14 @@ namespace genericVirusUI
 				"* Preset saving is disabled"};
 	}
 
-	void VirusEditor::onProgramChange()
+	void VirusEditor::onProgramChange(int _part)
 	{
 		m_parts->onProgramChange();
 		updatePresetName();
 		updatePlayModeButtons();
 		updateDeviceModel();
+		if(getPatchManager())
+			getPatchManager()->onProgramChanged(_part);
 	}
 
 	void VirusEditor::onPlayModeChanged()
@@ -236,24 +263,24 @@ namespace genericVirusUI
 	{
 		juce::PopupMenu menu;
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(FileType)>& _callback)
+		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
 		{
 			juce::PopupMenu subMenu;
 
-			subMenu.addItem(".syx", [_callback](){_callback(FileType::Syx); });
-			subMenu.addItem(".mid", [_callback](){_callback(FileType::Mid); });
+			subMenu.addItem(".syx", [_callback](){_callback(jucePluginEditorLib::FileType::Syx); });
+			subMenu.addItem(".mid", [_callback](){_callback(jucePluginEditorLib::FileType::Mid); });
 
 			_menu.addSubMenu(_name, subMenu);
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](FileType _type)
+		addEntry(menu, "Current Single (Edit Buffer)", [this](jucePluginEditorLib::FileType _type)
 		{
 			savePresets(SaveType::CurrentSingle, _type);
 		});
 
 		if(getController().isMultiMode())
 		{
-			addEntry(menu, "Arrangement (Multi + 16 Singles)", [this](FileType _type)
+			addEntry(menu, "Arrangement (Multi + 16 Singles)", [this](jucePluginEditorLib::FileType _type)
 			{
 				savePresets(SaveType::Arrangement, _type);
 			});
@@ -262,7 +289,7 @@ namespace genericVirusUI
 		juce::PopupMenu banksMenu;
 		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
-			addEntry(banksMenu, getController().getBankName(b), [this, b](const FileType _type)
+			addEntry(banksMenu, getController().getBankName(b), [this, b](const jucePluginEditorLib::FileType _type)
 			{
 				savePresets(SaveType::Bank, _type, b);
 			});
@@ -277,33 +304,37 @@ namespace genericVirusUI
 	{
 		Editor::loadPreset([this](const juce::File& _result)
 		{
-			const auto ext = _result.getFileExtension().toLowerCase();
+			pluginLib::patchDB::DataList results;
 
-			PatchBrowser::PatchList patches;
-
-			m_patchBrowser->loadBankFile(patches, nullptr, _result);
-
-			if (patches.empty())
+			if(!getPatchManager()->loadFile(results, _result.getFullPathName().toStdString()))
 				return;
 
-			if (patches.size() == 1)
+			auto& c = getController();
+
+			// we attempt to convert all results as some of them might not be valid preset data
+			for(size_t i=0; i<results.size();)
 			{
-				// load to edit buffer of current part
-				const auto data = getController().modifySingleDump(patches.front()->sysex, virusLib::BankNumber::EditBuffer, 
-					getController().isMultiMode() ? getController().getCurrentPart() : virusLib::SINGLE, true, true);
-				getController().sendSysEx(data);
-			}
-			else
-			{
-				// load to bank A
-				for(uint8_t i=0; i<static_cast<uint8_t>(patches.size()); ++i)
-				{
-					const auto data = getController().modifySingleDump(patches[i]->sysex, virusLib::BankNumber::A, i, true, false);
-					getController().sendSysEx(data);
-				}
+				// convert to load to edit buffer of current part
+				const auto data = c.modifySingleDump(results[i], virusLib::BankNumber::EditBuffer, c.isMultiMode() ? c.getCurrentPart() : virusLib::SINGLE, true, true);
+				if(data.empty())
+					results.erase(results.begin() + i);
+				else
+					results[i++] = data;
 			}
 
-			getController().onStateLoaded();
+			if (results.size() == 1)
+			{
+				c.sendSysEx(results.front());
+			}
+			else if(results.size() > 1)
+			{
+				juce::NativeMessageBox::showMessageBox(juce::AlertWindow::InfoIcon, "Information", 
+					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
+					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
+				);
+			}
+
+			c.onStateLoaded();
 		});
 	}
 
@@ -325,17 +356,17 @@ namespace genericVirusUI
 		getController().requestArrangement();
 	}
 
-	void VirusEditor::savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/)
+	void VirusEditor::savePresets(SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber/* = 0*/)
 	{
 		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
-			FileType fileType = _fileType;
+			jucePluginEditorLib::FileType fileType = _fileType;
 			const auto file = createValidFilename(fileType, _result);
 			savePresets(file, _saveType, fileType, _bankNumber);
 		});
 	}
 
-	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber/* = 0*/) const
+	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber/* = 0*/) const
 	{
 #if SYNTHLIB_DEMO_MODE
 		return false;

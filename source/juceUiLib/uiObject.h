@@ -33,21 +33,30 @@ namespace genericUI
 	class UiObject
 	{
 	public:
-		explicit UiObject(const juce::var& _json);
+		explicit UiObject(const juce::var& _json, bool _isTemplate = false);
 		~UiObject();
 
 		void createJuceTree(Editor& _editor);
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
 		void createTabGroups(Editor& _editor);
 		void createControllerLinks(Editor& _editor);
+		void registerTemplates(Editor& _editor) const;
 
 		void apply(Editor& _editor, juce::Component& _target);
 		void apply(Editor& _editor, juce::Slider& _target);
 		void apply(Editor& _editor, juce::ComboBox& _target);
 		void apply(Editor& _editor, juce::DrawableButton& _target);
+
 		void apply(Editor& _editor, juce::Label& _target);
+		void apply(Editor& _editor, juce::ScrollBar& _target);
 		void apply(Editor& _editor, juce::TextButton& _target);
 		void apply(Editor& _editor, juce::HyperlinkButton& _target);
+		void apply(Editor& _editor, juce::TreeView& _target);
+		void apply(Editor& _editor, juce::ListBox& _target);
+		void apply(Editor& _editor, juce::TextEditor& _target);
+
+		template<typename TComponent, typename TStyle>
+		void applyT(Editor& _editor, TComponent& _target);
 
 		void collectVariants(std::set<std::string>& _dst, const std::string& _property) const;
 
@@ -61,6 +70,8 @@ namespace genericUI
 		size_t getControllerLinkCountRecursive() const;
 
 		void setCurrentPart(Editor& _editor, uint8_t _part);
+
+		const auto& getName() const { return m_name; }
 
 	private:
 		bool hasComponent(const std::string& _component) const;
@@ -77,9 +88,12 @@ namespace genericUI
 		template<typename Target, typename Style>
 		void createStyle(Editor& _editor, Target& _target, Style* _style);
 
+		bool m_isTemplate;
 		std::string m_name;
 		std::map<std::string, std::map<std::string, std::string>> m_components;
 		std::vector<std::unique_ptr<UiObject>> m_children;
+
+		std::vector<std::shared_ptr<UiObject>> m_templates;
 
 		std::vector<std::unique_ptr<juce::Component>> m_juceObjects;
 		std::unique_ptr<UiObjectStyle> m_style;
