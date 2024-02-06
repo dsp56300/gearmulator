@@ -6,6 +6,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		addGroup(GroupType::Favourites);
 		addGroup(GroupType::LocalStorage);
+		addGroup(GroupType::Factory);
 		addGroup(GroupType::DataSources);
 	}
 }
