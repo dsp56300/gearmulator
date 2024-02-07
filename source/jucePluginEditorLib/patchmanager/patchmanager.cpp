@@ -32,8 +32,13 @@ namespace jucePluginEditorLib::patchManager
 
 		_root->addAndMakeVisible(this);
 
+		auto weight = [&](int _weight)
+		{
+			return rootW * _weight / 100;
+		};
+
 		// 1st column
-		auto w = rootW / 3;
+		auto w = weight(33);
 		m_treeDS = new DatasourceTree(*this);
 		m_treeDS->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
@@ -45,7 +50,7 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_searchTreeDS);
 
 		// 2nd column
-		w >>= 1;
+		w = weight(20);
 		m_treeTags = new TagsTree(*this);
 		m_treeTags->setTopLeftPosition(m_treeDS->getRight() + g_padding, 0);
 		m_treeTags->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
@@ -58,6 +63,7 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_searchTreeTags);
 
 		// 3rd column
+		w = weight(15);
 		m_list = new List(*this);
 		m_list->setTopLeftPosition(m_treeTags->getRight() + g_padding, 0);
 		m_list->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
