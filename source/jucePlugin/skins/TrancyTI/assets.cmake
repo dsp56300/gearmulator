@@ -1,4 +1,6 @@
 set(ASSETS_VirusTI_Trancy
+	${CMAKE_CURRENT_LIST_DIR}/background_channels_1.png
+	${CMAKE_CURRENT_LIST_DIR}/background_channels_16.png
 	${CMAKE_CURRENT_LIST_DIR}/button_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_10.png
@@ -48,9 +50,6 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_7.png
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_8.png
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_9.png
-	${CMAKE_CURRENT_LIST_DIR}/button_env_3.png
-	${CMAKE_CURRENT_LIST_DIR}/button_env_4.png
-	${CMAKE_CURRENT_LIST_DIR}/button_env_filter.png
 	${CMAKE_CURRENT_LIST_DIR}/button_load.png
 	${CMAKE_CURRENT_LIST_DIR}/button_menu.png
 	${CMAKE_CURRENT_LIST_DIR}/button_mono_poly.png
@@ -81,6 +80,8 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_2_browser.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_classic.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_common.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_common_hs.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_grain_complex.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_grain_simple.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_hypersaw.png
@@ -107,6 +108,8 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_chorus_rotary_speaker.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_chorus_vibrato.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_chorus_vintage.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_env_follower.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_env_follower_off.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_filterbank_frequency_shift.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_filterbank_off.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_filterbank_pole_xfade.png
@@ -117,6 +120,8 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_delay_classic.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_delay_tape.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_vocoder.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_vocoder_off.png
 	${CMAKE_CURRENT_LIST_DIR}/slider_knob.png
 
 	${CMAKE_CURRENT_LIST_DIR}/VirusTI_Trancy.json

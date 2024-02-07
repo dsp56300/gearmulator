@@ -7,17 +7,22 @@
         "pages": ["page_1_main", "page_2_browser", "page_3_osc", "page_4_filter", "page_5_lfo", "page_6_matrix", "page_7_arp", "page_8_fx1", "page_9_fx2", "page_common"]
     },
     "children" : [
-        {"name":"bg","image":{"x":"0","y":"0","width":"2638","height":"1301","texture":"background"}},
-        {"name":"PatchName",                "label":{"text":"Osc1Shape","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"594","y":"1188","width":"400","height":"52"}},
+       
+        {"name":"bg","image":{"x":"0","y":"0","width":"2638","height":"1301","texture":"background"}},      
+        {"name":"ContainerChannel16","image" : { "x" : "80", "y" : "90", "width" : "472", "height" : "1093", "texture" : "background_channels_16" },
+	  "condition": { "enableOnParameter": "Play Mode", "enableOnValues": "1,2,3" },},    
+        {"name":"ContainerChannel16","image" : { "x" : "80", "y" : "90", "width" : "472", "height" : "1093", "texture" : "background_channels_1" },
+	  "condition": { "enableOnParameter": "Play Mode", "enableOnValues": "0" },},    
+	{"name":"PatchName",                "label":{"text":"Osc1Shape","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"594","y":"1188","width":"400","height":"52"}},
         {"name":"FocusedParameterValue",    "label":{"text":"-42","textHeight":"25","alignH":"R","alignV":"C","fontFile":"Digital","fontName":"Register","x":"1400","y":"1188","width":"256.7","height":"52"}},
         {"name":"FocusedParameterName",     "label":{"text":"Osc","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"830","y":"1188","width":"600","height":"52"}},
-        {"name":"Menu",                     "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"2315","y":"1175","width":"213","height":"69.5","texture":"button_menu","tileSizeX":"213","tileSizeY":"69.5"}},
+        {"name":"Menu",                     "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"2314","y":"1175","width":"213","height":"69.5","texture":"button_menu","tileSizeX":"213","tileSizeY":"69.5"}},
         {"name":"PlayModeSingle",           "button":{"isToggle":"1","radioGroupId":"5","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"91","y":"1199","width":"213","height":"48","texture":"button_single","tileSizeX":"213","tileSizeY":"48"}},
         {"name":"PlayModeMulti",            "button":{"isToggle":"1","radioGroupId":"5","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"307","y":"1199","width":"213","height":"48","texture":"button_multi","tileSizeX":"213","tileSizeY":"48"}},
-        {"name":"PresetPrev",               "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"1685","y":"1175","width":"88","height":"69.5","texture":"button_prev","tileSizeX":"88","tileSizeY":"69.5"}},
-        {"name":"PresetNext",               "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"1780","y":"1175","width":"88","height":"69.5","texture":"button_next","tileSizeX":"88","tileSizeY":"69.5"}},
-        {"name":"PresetSave",               "button":{"normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2095","y":"1175","width":"213","height":"69.5","texture":"button_save","tileSizeX":"218","tileSizeY":"69.5"}},
-        {"name":"PresetLoad",               "button":{"normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1875","y":"1175","width":"213","height":"69.5","texture":"button_load","tileSizeX":"218","tileSizeY":"69.5"}},        
+        {"name":"PresetPrev",               "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"1686","y":"1175","width":"88","height":"69.5","texture":"button_prev","tileSizeX":"88","tileSizeY":"69.5"}},
+        {"name":"PresetNext",               "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"1783","y":"1175","width":"88","height":"69.5","texture":"button_next","tileSizeX":"88","tileSizeY":"69.5"}},
+        {"name":"PresetSave",               "button":{"normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2097","y":"1175","width":"213","height":"69.5","texture":"button_save","tileSizeX":"218","tileSizeY":"69.5"}},
+        {"name":"PresetLoad",               "button":{"normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1880","y":"1175","width":"213","height":"69.5","texture":"button_load","tileSizeX":"218","tileSizeY":"69.5"}},        
         {"name":"button_1_main",            "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"576","y":"30","width":"191","height":"69.5","texture":"mainbutton_main","tileSizeX":"191","tileSizeY":"69.5",}},
         {"name":"button_2_browser",         "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"773","y":"30","width":"191","height":"69.5","texture":"mainbutton_browser","tileSizeX":"191","tileSizeY":"69.5",}},
         {"name":"button_3_osc",             "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"969","y":"30","width":"191","height":"69.5","texture":"mainbutton_osc","tileSizeX":"191","tileSizeY":"69.5",}},
@@ -148,7 +153,17 @@
         "image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_3_osc" },            
             "children" : [
 
-                {
+               	{
+		    "name" : "ContainerOsc2ModeHyperSaw",
+		    "image" : { "x" : "658", "y" : "13", "width" : "660", "height" : "580", "texture" : "panel_3_osc_common_hs" }, 
+		    "condition": { "enableOnParameter": "Osc2 Mode", "enableOnValues": "1" },
+		},
+               	{
+		    "name" : "ContainerOsc2ModeHyperSaw",
+		    "image" : { "x" : "658", "y" : "13", "width" : "660", "height" : "580", "texture" : "panel_3_osc_common" }, 
+		    "condition": { "enableOnParameter": "Osc2 Mode", "enableOnValues": "0,2,3,4,5,6,7,8" },
+		},		
+		{
                     "name" : "ContainerOsc1ModeClassic",
                     "image" : { "x" : "24", "y" : "44", "width" : "651", "height" : "621", "texture" : "panel_3_osc_classic" }, 
                     "condition": { "enableOnParameter": "Osc1 Mode", "enableOnValues": "0" },
@@ -163,8 +178,8 @@
                     "image" : { "x" : "24", "y" : "44", "width" : "651", "height" : "621", "texture" : "panel_3_osc_hypersaw" }, 
                     "condition": { "enableOnParameter": "Osc1 Mode", "enableOnValues": "1" },
                         "children" : [
-                            { "name" : "Osc1HyperSaw/DetuneSpread",    "parameterAttachment" : { "parameter" : "Osc1 HyperSaw/DetuneSpread" },    "rotary" : { }, "spritesheet" : { "x" : "122", "y" : "145", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
-                            { "name" : "Osc1HyperSaw/Density",         "parameterAttachment" : { "parameter" : "Osc1 HyperSaw/Density" },         "rotary" : { }, "spritesheet" : { "x" : "375", "y" : "145", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },                            
+                            { "name" : "Osc1HyperSaw/DetuneSpread",    "parameterAttachment" : { "parameter" : "Osc1 HyperSaw/DetuneSpread" },    "rotary" : { }, "spritesheet" : { "x" : "130", "y" : "130", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                            { "name" : "Osc1HyperSaw/Density",         "parameterAttachment" : { "parameter" : "Osc1 HyperSaw/Density" },         "rotary" : { }, "spritesheet" : { "x" : "353", "y" : "130", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },                            
                         ]
                 },
                 {
@@ -230,8 +245,8 @@
                     "image" : { "x" : "1317", "y" : "44", "width" : "651", "height" : "621", "texture" : "panel_3_osc_hypersaw" }, 
                     "condition": { "enableOnParameter": "Osc2 Mode", "enableOnValues": "1" },
                         "children" : [
-                            { "name" : "Osc2HyperSaw/DetuneSpread",    "parameterAttachment" : { "parameter" : "Osc2 HyperSaw/DetuneSpread" },    "rotary" : { }, "spritesheet" : { "x" : "122", "y" : "145", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
-                            { "name" : "Osc2HyperSaw/Density",         "parameterAttachment" : { "parameter" : "Osc2 HyperSaw/Density" },         "rotary" : { }, "spritesheet" : { "x" : "375", "y" : "145", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },                            
+                            { "name" : "Osc2HyperSaw/DetuneSpread",    "parameterAttachment" : { "parameter" : "Osc2 HyperSaw/DetuneSpread" },    "rotary" : { }, "spritesheet" : { "x" : "130", "y" : "130", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                            { "name" : "Osc2HyperSaw/Density",         "parameterAttachment" : { "parameter" : "Osc2 HyperSaw/Density" },         "rotary" : { }, "spritesheet" : { "x" : "353", "y" : "130", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },                            
                         ]
                 },
                 {
@@ -281,10 +296,8 @@
                         ]
                 },                 
                 
-                
-                { "name" : "Osc1Mode",          "parameterAttachment" : { "parameter" : "Osc1 Mode" },                  "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C","x" : "202", "y" : "75", "width" : "223", "height" : "45", "offsetR" : "-60" } }, 
-                { "name" : "Osc2Mode",          "parameterAttachment" : { "parameter" : "Osc2 Mode" },                  "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C","x" : "1495", "y" : "75", "width" : "223", "height" : "45", "offsetR" : "-60" } }, 
-                                                
+                { "name" : "Osc1Mode",          "parameterAttachment" : { "parameter" : "Osc1 Mode" },                  "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C","x" : "202", "y" : "75", "width" : "223", "height" : "45", "offsetR" : "-10" } }, 
+                { "name" : "Osc2Mode",          "parameterAttachment" : { "parameter" : "Osc2 Mode" },                  "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C","x" : "1495", "y" : "75", "width" : "223", "height" : "45", "offsetR" : "-10" } },                              
 
                 {
                     "name" : "ContainerOsc2Mode",
@@ -370,52 +383,53 @@
                 { "name" : "DelaySend",         "parameterAttachment" : { "parameter" : "Delay Send" },                 "rotary" : {"style" : "LinearHorizontal" }, "spritesheet" : { "x" : "1137", "y" : "896", "width" : "355", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "355", "tileSizeY" : "63" } },
                 { "name" : "ReverbSend",        "parameterAttachment" : { "parameter" : "Reverb Send" },                "rotary" : {"style" : "LinearHorizontal" }, "spritesheet" : { "x" : "1572", "y" : "896", "width" : "355", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "355", "tileSizeY" : "63" } },              
 
-                { "name" : "Cutoff1",           "parameterAttachment" : { "parameter" : "Cutoff" },                     "rotary" : { }, "spritesheet" : { "x" : "135", "y" : "73", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
-                { "name" : "Resonance1",        "parameterAttachment" : { "parameter" : "Filter1 Resonance" },          "rotary" : { }, "spritesheet" : { "x" : "400", "y" : "73", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                { "name" : "Cutoff1",           "parameterAttachment" : { "parameter" : "Cutoff" },                     "rotary" : { }, "spritesheet" : { "x" : "150", "y" : "80", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                { "name" : "Resonance1",        "parameterAttachment" : { "parameter" : "Filter1 Resonance" },          "rotary" : { }, "spritesheet" : { "x" : "381", "y" : "80", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
                 { "name" : "EnvAmount1",        "parameterAttachment" : { "parameter" : "Filter1 Env Amt" },            "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Keyfollow1",        "parameterAttachment" : { "parameter" : "Filter1 Keyfollow" },          "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "ResVelo1",          "parameterAttachment" : { "parameter" : "Resonance1 Velocity" },        "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "EnvVelo1",          "parameterAttachment" : { "parameter" : "Flt1 EnvAmt Velocity" },       "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
 
-                { "name" : "Cutoff2",           "parameterAttachment" : { "parameter" : "Cutoff2" },                    "rotary" : { }, "spritesheet" : { "x" : "1432", "y" : "73", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
-                { "name" : "Resonance2",        "parameterAttachment" : { "parameter" : "Filter2 Resonance" },          "rotary" : { }, "spritesheet" : { "x" : "1696", "y" : "73", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                { "name" : "Cutoff2",           "parameterAttachment" : { "parameter" : "Cutoff2" },                    "rotary" : { }, "spritesheet" : { "x" : "1447", "y" : "80", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                { "name" : "Resonance2",        "parameterAttachment" : { "parameter" : "Filter2 Resonance" },          "rotary" : { }, "spritesheet" : { "x" : "1672", "y" : "80", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
                 { "name" : "EnvAmount2",        "parameterAttachment" : { "parameter" : "Filter2 Env Amt" },            "rotary" : { }, "spritesheet" : { "x" : "1345", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Keyfollow2",        "parameterAttachment" : { "parameter" : "Filter2 Keyfollow" },          "rotary" : { }, "spritesheet" : { "x" : "1819", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "ResVelo2",          "parameterAttachment" : { "parameter" : "Resonance2 Velocity" },        "rotary" : { }, "spritesheet" : { "x" : "1661", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "EnvVelo2",          "parameterAttachment" : { "parameter" : "Flt2 EnvAmt Velocity" },       "rotary" : { }, "spritesheet" : { "x" : "1503", "y" : "386", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
 
-                { "name" : "FilterBalance",     "parameterAttachment" : { "parameter" : "Filter Balance" },             "rotary" : { }, "spritesheet" : { "x" : "915", "y" : "74", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+                { "name" : "FilterBalance",        "parameterAttachment" : { "parameter" : "Filter Balance" },                "rotary" : {"style" : "LinearHorizontal" }, "spritesheet" : { "x" : "810", "y" : "143", "width" : "355", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "355", "tileSizeY" : "63" } },              
 
-				{ "name" : "4_filter_env_filter",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_filter" },
-				  "children" : [
-					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Filter Env Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Filter Env Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
-				]},
 
-				{ "name" : "4_filter_env_3",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_3" },
-				  "children" : [
-					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 3/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 3/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 3/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 3/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 3/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
-				]},
+		{ "name" : "4_filter_env_filter",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_filter" },
+		  "children" : [
+			{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Filter Env Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Filter Env Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+		]},
 
-				{ "name" : "4_filter_env_4",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_4" },
-				  "children" : [
-					{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 4/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 4/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 4/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 4/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
-					{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 4/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
-				]},
+		{ "name" : "4_filter_env_3",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_3" },
+		  "children" : [
+			{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 3/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 3/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 3/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 3/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 3/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+		]},
 
-                { "name" : "button_env_filter", "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"609","width":"245","height":"61","texture":"button_env_filter","tileSizeX":"245","tileSizeY":"61",}},
-                { "name" : "button_env_3",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"668","width":"245","height":"61","texture":"button_env_3","tileSizeX":"245","tileSizeY":"61",}},
-                { "name" : "button_env_4",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"728","width":"245","height":"61","texture":"button_env_4","tileSizeX":"245","tileSizeY":"61",}},                              
+		{ "name" : "4_filter_env_4",	"image" : { "x" : "0", "y" : "572", "width" : "1070", "height" : "217", "texture" : "panel_4_filter_env_4" },
+		  "children" : [
+			{ "name" : "Attack",        "parameterAttachment" : { "parameter" : "Envelope 4/Attack" },          "rotary" : { }, "spritesheet" : { "x" : "50" , "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Decay",         "parameterAttachment" : { "parameter" : "Envelope 4/Decay" },           "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Sustain",       "parameterAttachment" : { "parameter" : "Envelope 4/Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "366", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Time",          "parameterAttachment" : { "parameter" : "Envelope 4/Sustain Time" },    "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
+			{ "name" : "Release",       "parameterAttachment" : { "parameter" : "Envelope 4/Release" },         "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "72", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
+		]},
+
+                { "name" : "button_env_filter", "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"606","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78",}},
+                { "name" : "button_env_3",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"661","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78",}},
+                { "name" : "button_env_4",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"716","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78",}},                              
 
                 { "name" : "Attack",            "parameterAttachment" : { "parameter" : "Amp Env Attack" },             "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Decay",             "parameterAttachment" : { "parameter" : "Amp Env Decay" },              "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
@@ -423,19 +437,19 @@
                 { "name" : "Time",              "parameterAttachment" : { "parameter" : "Amp Env Sustain Time" },       "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Release",           "parameterAttachment" : { "parameter" : "Amp Env Release" },            "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
             ],
-			"tabgroup": {
-				"name": "envelopeSelect",
-				"buttons": ["button_env_filter", "button_env_3", "button_env_4"],
-				"pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
-			},
-			"controllerlinks": [
-				{ "source": "Cutoff1", "dest": "Cutoff2", "condition":"LinkEnv" },					{ "source": "Cutoff2", "dest": "Cutoff1", "condition":"LinkEnv" },
-				{ "source": "Resonance1", "dest": "Resonance2", "condition":"LinkEnv" },			{ "source": "Resonance2", "dest": "Resonance1", "condition":"LinkEnv" },
-				{ "source": "EnvAmount1", "dest": "EnvAmount2", "condition":"LinkEnv" },			{ "source": "EnvAmount2", "dest": "EnvAmount1", "condition":"LinkEnv" },
-				{ "source": "Keyfollow1", "dest": "Keyfollow2", "condition":"LinkEnv" },			{ "source": "Keyfollow2", "dest": "Keyfollow1", "condition":"LinkEnv" },
-				{ "source": "ResVelo1", "dest": "ResVelo2", "condition":"LinkEnv" },				{ "source": "ResVelo2", "dest": "ResVelo1", "condition":"LinkEnv" },
-				{ "source": "EnvVelo1", "dest": "EnvVelo2", "condition":"LinkEnv" },				{ "source": "EnvVelo2", "dest": "EnvVelo1", "condition":"LinkEnv" },
-			]
+		"tabgroup": {
+			"name": "envelopeSelect",
+			"buttons": ["button_env_filter", "button_env_3", "button_env_4"],
+			"pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
+		},
+		"controllerlinks": [
+			{ "source": "Cutoff1",    "dest": "Cutoff2", "condition":"LinkEnv" },					{ "source": "Cutoff2", "dest": "Cutoff1", "condition":"LinkEnv" },
+			{ "source": "Resonance1", "dest": "Resonance2", "condition":"LinkEnv" },			{ "source": "Resonance2", "dest": "Resonance1", "condition":"LinkEnv" },
+			{ "source": "EnvAmount1", "dest": "EnvAmount2", "condition":"LinkEnv" },			{ "source": "EnvAmount2", "dest": "EnvAmount1", "condition":"LinkEnv" },
+			{ "source": "Keyfollow1", "dest": "Keyfollow2", "condition":"LinkEnv" },			{ "source": "Keyfollow2", "dest": "Keyfollow1", "condition":"LinkEnv" },
+			{ "source": "ResVelo1",   "dest": "ResVelo2", "condition":"LinkEnv" },				{ "source": "ResVelo2", "dest": "ResVelo1", "condition":"LinkEnv" },
+			{ "source": "EnvVelo1",   "dest": "EnvVelo2", "condition":"LinkEnv" },				{ "source": "EnvVelo2", "dest": "EnvVelo1", "condition":"LinkEnv" },
+		]
         },
         {
         "name" : "page_5_lfo",            
@@ -1052,10 +1066,23 @@
 
                 { "name" : "DistortionCurve",   "parameterAttachment" : { "parameter" : "Distortion Curve" },           "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "352", "y" : "652", "width" : "274", "height" : "45", "offsetR" : "-60" }},
 
-                { "name" : "InputFollowerLevel","parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "878", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-                { "name" : "InputFollowerAtt",  "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "188", "y" : "878", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-                { "name" : "InputFollowerRel",  "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "326", "y" : "878", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-                { "name" : "InputFollowerMode", "parameterAttachment" : { "parameter" : "Input Follower Mode" },        "combobox" : { "text" : "Wave 42", "textHeight" : "28", "alignH" : "L", "alignV" : "C", "x" : "452", "y" : "901", "width" : "170", "height" : "52", "offsetR" : "-60" }},
+
+                { "name" : "ContainerEnvFollowerOn", 
+                  "condition": { "enableOnParameter": "Input Follower Mode", "enableOnValues": "1,2,3" }, 
+                  "image" : { "x" : "0", "y" : "786", "width" : "676", "height" : "338", "texture" : "panel_8_fx1_env_follower" },               
+                        "children" : [ 
+			{ "name" : "InputFollowerLevel","parameterAttachment" : { "parameter" : "Filter Env Sustain" },         "rotary" : { }, "spritesheet" : { "x" : "53", "y" : "91", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+			{ "name" : "InputFollowerAtt",  "parameterAttachment" : { "parameter" : "Filter Env Attack" },          "rotary" : { }, "spritesheet" : { "x" : "190", "y" : "91", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+			{ "name" : "InputFollowerRel",  "parameterAttachment" : { "parameter" : "Filter Env Release" },         "rotary" : { }, "spritesheet" : { "x" : "328", "y" : "91", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+
+                    ]
+                }, 
+                { "name" : "ContainerEnvFollowerOff", 
+                  "condition": { "enableOnParameter": "Input Follower Mode", "enableOnValues": "0" }, 
+                  "image" : { "x" : "0", "y" : "786", "width" : "676", "height" : "338", "texture" : "panel_8_fx1_env_follower_off" },               
+                }, 
+
+          	{ "name" : "InputFollowerMode", "parameterAttachment" : { "parameter" : "Input Follower Mode" },        "combobox" : { "text" : "Wave 42", "textHeight" : "28", "alignH" : "L", "alignV" : "C", "x" : "452", "y" : "901", "width" : "170", "height" : "52", "offsetR" : "-60" }},
                 
                 { "name" : "EqLowGain",         "parameterAttachment" : { "parameter" : "LowEQ Gain" },                 "rotary" : { }, "spritesheet" : { "x" : "748", "y" : "878", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                 { "name" : "EqLowFreq",         "parameterAttachment" : { "parameter" : "LowEQ Frequency" },            "rotary" : { }, "spritesheet" : { "x" : "906", "y" : "878", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
@@ -1073,34 +1100,41 @@
         {
         "name" : "page_9_fx2",        
         "image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_9_fx2"},
-            "children" : [
-                 
+            "children" : [                
                 {
-                    "name" : "ContainerOsc1ModeGrainFormatComplex",
-
-                    "condition": { "enableOnParameter": "Vocoder Mode", "enableOnValues": "1,2,3,4,5,6,7,8" },
-                    "component" : { "x" : "0", "y" : "0", "width" : "2638", "height" : "1301"}, 
-                    "componentProperties" : { "disabledAlpha" : "0.5"}, 
+                    "name" : "ContainerVocoderOn",
+		    "image" : { "x" : "0", "y" : "699", "width" : "1966", "height" : "332", "texture" : "panel_9_fx2_vocoder" }, 		    
+                    "condition": { "enableOnParameter": "Vocoder Mode", "enableOnValues": "1,2,3,4,5,6,7,8" },	
+			"children" : [                            
+				{ "name" : "VocBands",          "parameterAttachment" : { "parameter" : "Vocoder/Bands" },       "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "78", "y" : "213", "width" : "275", "height" : "52", "offsetR" : "-60" }},
+				{ "name" : "VocSourceBalance",  "parameterAttachment" : { "parameter" : "Vocoder/Balance" },           "rotary" : {"style" : "LinearHorizontal"}, "spritesheet" : { "x" : "414", "y" : "84", "width" : "285", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "285", "tileSizeY" : "63" }},
+				{ "name" : "VocSpectralBalance","parameterAttachment" : { "parameter" : "Vocoder/Spectral Balance" },  "rotary" : {"style" : "LinearHorizontal"}, "spritesheet" : { "x" : "414", "y" : "209", "width" : "285", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "285", "tileSizeY" : "63" }},
+				{ "name" : "VocAttack",         "parameterAttachment" : { "parameter" : "Vocoder/Attack" },        "rotary" : { }, "spritesheet" : { "x" : "765", "y" : "68", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				{ "name" : "VocRelease",        "parameterAttachment" : { "parameter" : "Vocoder/Release" },         "rotary" : { }, "spritesheet" : { "x" : "764", "y" : "203", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				{ "name" : "VocCenterFreq",     "parameterAttachment" : { "parameter" : "Vocoder/Carrier Center Frequency" },                   "rotary" : { }, "spritesheet" : { "x" : "966", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
 				
-					"children" : [                            
-						{ "name" : "VocBands",          "parameterAttachment" : { "parameter" : "Vocoder/Bands" },       "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "78", "y" : "912", "width" : "275", "height" : "52", "offsetR" : "-60" }},
-						{ "name" : "VocSourceBalance",  "parameterAttachment" : { "parameter" : "Vocoder/Balance" },           "rotary" : {"style" : "LinearHorizontal"}, "spritesheet" : { "x" : "414", "y" : "781", "width" : "285", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "285", "tileSizeY" : "63" }},
-						{ "name" : "VocSpectralBalance","parameterAttachment" : { "parameter" : "Vocoder/Spectral Balance" },  "rotary" : {"style" : "LinearHorizontal"}, "spritesheet" : { "x" : "414", "y" : "905", "width" : "285", "height" : "63", "texture" : "slider_knob", "tileSizeX" : "285", "tileSizeY" : "63" }},
-						{ "name" : "VocAttack",         "parameterAttachment" : { "parameter" : "Vocoder/Attack" },        "rotary" : { }, "spritesheet" : { "x" : "765", "y" : "764", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocRelease",        "parameterAttachment" : { "parameter" : "Vocoder/Release" },         "rotary" : { }, "spritesheet" : { "x" : "764", "y" : "900", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocCenterFreq",     "parameterAttachment" : { "parameter" : "Vocoder/Carrier Center Frequency" },                   "rotary" : { }, "spritesheet" : { "x" : "966", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocCarrSpread",     "parameterAttachment" : { "parameter" : "Vocoder/Modulator Frequency Spread" },        "rotary" : { }, "spritesheet" : { "x" : "1125", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocCarrQ",          "parameterAttachment" : { "parameter" : "Vocoder/Modulator Q Factor" },        "rotary" : { }, "spritesheet" : { "x" : "1282", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocoderLink",       "parameterAttachment" : { "parameter" : "Vocoder Link" },      "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1396", "y" : "904", "width" : "79", "height" : "78", "texture" : "button_1", "tileSizeX" : "79", "tileSizeY" : "78" } },                
-						{ "name" : "VocModQ",           "parameterAttachment" : { "parameter" : "Vocoder/Carrier Q Factor" },        "rotary" : { }, "spritesheet" : { "x" : "1484", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocModSpread",      "parameterAttachment" : { "parameter" : "Carrier Frequency Spread" },        "rotary" : { }, "spritesheet" : { "x" : "1642", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-						{ "name" : "VocModOffset",      "parameterAttachment" : { "parameter" : "Vocoder/Modulator Frequency Offset" },                  "rotary" : { }, "spritesheet" : { "x" : "1800", "y" : "832", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-					],
-					"controllerlinks": [
-						{ "source": "VocCarrSpread", "dest": "VocModQ", "condition":"VocoderLink"},
-						{ "source": "VocModQ", "dest": "VocCarrSpread", "condition":"VocoderLink"}
-					]
+				{ "name" : "VocCarrSpread",     "parameterAttachment" : { "parameter" : "Carrier Frequency Spread" },        "rotary" : { }, "spritesheet" : { "x" : "1125", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				{ "name" : "VocCarrQ",          "parameterAttachment" : { "parameter" : "Vocoder/Carrier Q Factor" },        "rotary" : { }, "spritesheet" : { "x" : "1282", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				
+				{ "name" : "VocoderLink",       "parameterAttachment" : { "parameter" : "Vocoder Link" },      "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1396", "y" : "204", "width" : "79", "height" : "78", "texture" : "button_1", "tileSizeX" : "79", "tileSizeY" : "78" } },                
+				{ "name" : "VocModQ",           "parameterAttachment" : { "parameter" : "Vocoder/Modulator Q Factor" },        "rotary" : { }, "spritesheet" : { "x" : "1484", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				
+				{ "name" : "VocModSpread",      "parameterAttachment" : { "parameter" : "Vocoder/Modulator Frequency Spread" },        "rotary" : { }, "spritesheet" : { "x" : "1642", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+				{ "name" : "VocModOffset",      "parameterAttachment" : { "parameter" : "Vocoder/Modulator Frequency Offset" },                  "rotary" : { }, "spritesheet" : { "x" : "1800", "y" : "132", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+			],
+			"controllerlinks": [
+				{ "source": "VocCarrQ", "dest": "VocModQ", "condition":"VocoderLink"},
+				{ "source": "VocCarrSpread", "dest": "VocModSpread", "condition":"VocoderLink"},
+				{ "source": "VocModQ", "dest": "VocCarrQ", "condition":"VocoderLink"},
+				{ "source": "VocModSpread", "dest": "VocCarrSpread", "condition":"VocoderLink"}
+			]
                 },
+		{
+                    "name" : "ContainerVocoderOff",
+		    "image" : { "x" : "0", "y" : "699", "width" : "1966", "height" : "332", "texture" : "panel_9_fx2_vocoder_off" }, 
+                    "condition": { "enableOnParameter": "Vocoder Mode", "enableOnValues": "0" },
+                },
+		
                 { "name" : "VocoderMode",       "parameterAttachment" : { "parameter" : "Vocoder Mode" },             "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "78", "y" : "789", "width" : "275", "height" : "52", "offsetR" : "-60" }},
                
                 {
@@ -1130,7 +1164,7 @@
                 }, 
                 { "name" : "DelayClock",        "parameterAttachment" : { "parameter" : "Delay Clock" },            "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "526", "y" : "93", "width" : "275", "height" : "43", "offsetR" : "-60" }},                                                        
                 { "name" : "DelayMode",        "parameterAttachment" : { "parameter" : "Delay Mode" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "526", "y" : "208", "width" : "275", "height" : "43", "offsetR" : "-60" }},
-                { "name" : "DelayType",        "parameterAttachment" : { "parameter" : "Delay Type" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "243", "y" : "160", "width" : "275", "height" : "43", "offsetR" : "-60" }},
+                { "name" : "DelayType",        "parameterAttachment" : { "parameter" : "Delay Type" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "243", "y" : "160", "width" : "275", "height" : "43", "offsetR" : "-120" }},
  
                 { "name" : "ReverbDecayTime",   "parameterAttachment" : { "parameter" : "Reverb Time"},            "rotary" : { }, "spritesheet" : { "x" : "846", "y" : "480", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                 { "name" : "ReverbDamping",     "parameterAttachment" : { "parameter" : "Reverb Damping" },         "rotary" : { }, "spritesheet" : { "x" : "1004", "y" : "480", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
@@ -1138,9 +1172,9 @@
                 { "name" : "ReverbPredelay",    "parameterAttachment" : { "parameter" : "Reverb Predelay" },        "rotary" : { }, "spritesheet" : { "x" : "1329", "y" : "480", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                 { "name" : "ReverbFeedback",    "parameterAttachment" : { "parameter" : "Reverb Feedback" },        "rotary" : { }, "spritesheet" : { "x" : "1487", "y" : "480", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                
                 { "name" : "ReverbClock",       "parameterAttachment" : { "parameter" : "Reverb Clock" },           "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "1639", "y" : "503", "width" : "270", "height" : "52", "offsetR" : "-60" }},              
-                { "name" : "ReverbMode",        "parameterAttachment" : { "parameter" : "Reverb Mode" },            "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "526", "y" : "503", "width" : "270", "height" : "52", "offsetR" : "-60" }},              
+                { "name" : "ReverbMode",        "parameterAttachment" : { "parameter" : "Reverb Mode" },            "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "526", "y" : "503", "width" : "270", "height" : "52", "offsetR" : "-120" }},              
                 
-                { "name" : "ReverbType",        "parameterAttachment" : { "parameter" : "Reverb Type" },            "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "243", "y" : "503", "width" : "270", "height" : "52", "offsetR" : "-60" }},              
+                { "name" : "ReverbType",        "parameterAttachment" : { "parameter" : "Reverb Type" },            "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "243", "y" : "503", "width" : "270", "height" : "52", "offsetR" : "-120" }},              
                 
                 { "name" : "DelaySend",         "parameterAttachment" : { "parameter" : "Delay Send" },             "rotary" : { }, "spritesheet" : { "x" : "54", "y" : "114", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" }},
                 { "name" : "ReverbSend",        "parameterAttachment" : { "parameter" : "Reverb Send" },            "rotary" : { }, "spritesheet" : { "x" : "54", "y" : "462", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" }},            
