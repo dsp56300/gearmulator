@@ -9,7 +9,8 @@ namespace jucePluginEditorLib::patchManager
 		switch (_groupType)
 		{
 		case GroupType::DataSources:
-		case GroupType::LocalStorage:	return pluginLib::patchDB::TagType::Invalid;
+		case GroupType::LocalStorage:
+		case GroupType::Factory:		return pluginLib::patchDB::TagType::Invalid;
 		case GroupType::Categories:		return pluginLib::patchDB::TagType::Category;
 		case GroupType::Tags:			return pluginLib::patchDB::TagType::Tag;
 		case GroupType::Favourites:		return pluginLib::patchDB::TagType::Favourites;
@@ -31,6 +32,31 @@ namespace jucePluginEditorLib::patchManager
 		case pluginLib::patchDB::TagType::CustomB:		return GroupType::CustomB;
 		case pluginLib::patchDB::TagType::CustomC:		return GroupType::CustomC;
 		default:										return GroupType::Invalid;
+		}
+	}
+
+	GroupType toGroupType(const pluginLib::patchDB::SourceType _sourceType)
+	{
+		switch (_sourceType)
+		{
+		case pluginLib::patchDB::SourceType::Rom:			return GroupType::Factory;
+		case pluginLib::patchDB::SourceType::LocalStorage:	return GroupType::LocalStorage;
+		case pluginLib::patchDB::SourceType::Folder:
+		case pluginLib::patchDB::SourceType::File:			return GroupType::DataSources;
+		case pluginLib::patchDB::SourceType::Invalid:
+		case pluginLib::patchDB::SourceType::Count:
+		default:											return GroupType::Invalid;
+		}
+	}
+
+	pluginLib::patchDB::SourceType toSourceType(const GroupType _groupType)
+	{
+		switch (_groupType)
+		{
+		case GroupType::DataSources:	return pluginLib::patchDB::SourceType::File;
+		case GroupType::LocalStorage:	return pluginLib::patchDB::SourceType::LocalStorage;
+		case GroupType::Factory:		return pluginLib::patchDB::SourceType::Rom;
+		default:						return pluginLib::patchDB::SourceType::Invalid;
 		}
 	}
 }

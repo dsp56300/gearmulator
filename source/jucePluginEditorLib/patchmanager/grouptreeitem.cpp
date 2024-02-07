@@ -11,6 +11,7 @@ namespace jucePluginEditorLib::patchManager
 
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
+		onParentSearchChanged({});
 	}
 
 	void GroupTreeItem::updateFromTags(const std::set<std::string>& _tags)
@@ -113,6 +114,8 @@ namespace jucePluginEditorLib::patchManager
 
 		for (const auto& it : m_itemsByDataSource)
 			it.second->processDirty(_dirtySearches);
+
+		TreeItem::processDirty(_dirtySearches);
 	}
 
 	void GroupTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
@@ -234,6 +237,29 @@ namespace jucePluginEditorLib::patchManager
 
 		for (const auto& it : m_itemsByTag)
 			it.second->setParentSearchRequest(_parentSearch);
+	}
+
+	void GroupTreeItem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
+	{
+		TreeItem::onParentSearchChanged(_parentSearchRequest);
+
+		const auto sourceType = toSourceType(m_type);
+
+		if(sourceType != pluginLib::patchDB::SourceType::Invalid)
+		{
+			pluginLib::patchDB::SearchRequest req = _parentSearchRequest;
+			req.sourceType = sourceType;
+			search(std::move(req));
+		}
+
+		const auto tagType = toTagType(m_type);
+
+		if(tagType != pluginLib::patchDB::TagType::Invalid)
+		{
+			pluginLib::patchDB::SearchRequest req = _parentSearchRequest;
+			req.anyTagOfType.insert(tagType);
+			search(std::move(req));
+		}
 	}
 
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)

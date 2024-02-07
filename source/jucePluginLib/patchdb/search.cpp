@@ -87,6 +87,11 @@ namespace pluginLib::patchDB
 			if (!matchDataSource(patchSource.get(), sourceNode))
 				return false;
 		}
+		else if(sourceType != SourceType::Invalid)
+		{
+			if(patchSource->type != sourceType)
+				return false;
+		}
 
 		// name
 		if (!matchStringsIgnoreCase(_patch.getName(), name))
@@ -107,6 +112,18 @@ namespace pluginLib::patchDB
 				return false;
 		}
 
+		for (const auto& tagOfType : anyTagOfType)
+		{
+			if(_patch.getTags(tagOfType).empty())
+				return false;
+		}
+
+		for (const auto& tagOfType : noTagOfType)
+		{
+			if(!_patch.getTags(tagOfType).empty())
+				return false;
+		}
+
 		return true;
 	}
 
@@ -117,6 +134,6 @@ namespace pluginLib::patchDB
 
 	bool SearchRequest::operator==(const SearchRequest& _r) const
 	{
-		return name == _r.name && tags == _r.tags && sourceNode == _r.sourceNode && patch == _r.patch;
+		return name == _r.name && tags == _r.tags && sourceNode == _r.sourceNode && patch == _r.patch && sourceType == _r.sourceType;
 	}
 }

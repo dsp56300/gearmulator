@@ -27,7 +27,7 @@ namespace jucePluginEditorLib::patchManager
 		void updateTags(GroupType _type);
 		void updateTags(pluginLib::patchDB::TagType _type);
 
-		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
+		virtual void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
 		void paint(juce::Graphics& g) override;
 
@@ -37,7 +37,7 @@ namespace jucePluginEditorLib::patchManager
 
 		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds);
 
-		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
+		virtual void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _searchRequest);
 
 		void addGroup(GroupType _type, const std::string& _name);
 

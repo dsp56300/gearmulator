@@ -1030,6 +1030,12 @@ namespace pluginLib::patchDB
 
 		auto searchInDs = [&](const DataSourceNodePtr& _ds)
 		{
+			if(!_search.request.sourceNode && _search.getSourceType() != SourceType::Invalid)
+			{
+				if(_ds->type != _search.request.sourceType)
+					return true;
+			}
+
 			bool isCancelled;
 			{
 				std::shared_lock lockSearches(m_searchesMutex);
@@ -1061,7 +1067,7 @@ namespace pluginLib::patchDB
 			return true;
 		};
 
-		if(_search.getSourceType() == SourceType::File || _search.getSourceType() == SourceType::LocalStorage)
+		if(_search.request.sourceNode && (_search.getSourceType() == SourceType::File || _search.getSourceType() == SourceType::LocalStorage))
 		{
 			const auto& it = m_dataSources.find(*_search.request.sourceNode);
 

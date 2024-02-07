@@ -42,6 +42,7 @@ namespace jucePluginEditorLib::patchManager
 		DatasourceTreeItem* getItem(const pluginLib::patchDB::DataSource& _ds) const;
 
 		void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch) override;
+		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
 	private:
 		DatasourceTreeItem* createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource);

@@ -18,6 +18,7 @@ namespace jucePluginEditorLib::patchManager
 		"Invalid",
 		"Data Sources",
 		"User",
+		"Factory",
 		"Categories",
 		"Tags",
 		"Favourites",
@@ -73,30 +74,36 @@ namespace jucePluginEditorLib::patchManager
 	{
 		auto* itemDs = getItem(GroupType::DataSources);
 		auto* itemLocalStorage = getItem(GroupType::LocalStorage);
+		auto* itemFactory = getItem(GroupType::Factory);
 
-		if (!itemDs || !itemLocalStorage)
+		if (!itemDs || !itemLocalStorage || !itemFactory)
 			return;
 
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> allDataSources;
 
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> readOnlyDataSources;
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> storageDataSources;
+		std::vector<pluginLib::patchDB::DataSourceNodePtr> factoryDataSources;
 
 		m_patchManager.getDataSources(allDataSources);
 
 		readOnlyDataSources.reserve(allDataSources.size());
 		storageDataSources.reserve(allDataSources.size());
+		factoryDataSources.reserve(allDataSources.size());
 
 		for (const auto& ds : allDataSources)
 		{
 			if (ds->type == pluginLib::patchDB::SourceType::LocalStorage)
 				storageDataSources.push_back(ds);
+			else if (ds->type == pluginLib::patchDB::SourceType::Rom)
+				factoryDataSources.push_back(ds);
 			else
 				readOnlyDataSources.push_back(ds);
 		}
 
 		itemDs->updateFromDataSources(readOnlyDataSources);
 		itemLocalStorage->updateFromDataSources(storageDataSources);
+		itemFactory->updateFromDataSources(factoryDataSources);
 	}
 
 	void Tree::updateTags(const GroupType _type)
@@ -170,7 +177,7 @@ namespace jucePluginEditorLib::patchManager
 
 	DatasourceTreeItem* Tree::getItem(const pluginLib::patchDB::DataSource& _ds)
 	{
-		const auto it = m_groupItems.find(_ds.type == pluginLib::patchDB::SourceType::LocalStorage ?  GroupType::LocalStorage : GroupType::DataSources);
+		const auto it = m_groupItems.find(toGroupType(_ds.type));
 		if(it == m_groupItems.end())
 			return nullptr;
 		const auto* item = it->second;

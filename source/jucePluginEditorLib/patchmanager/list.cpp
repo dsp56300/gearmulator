@@ -438,6 +438,8 @@ namespace jucePluginEditorLib::patchManager
 		setSelectedPatches(selected);
 
 		repaint();
+
+		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
 	void List::sortPatches(Patches& _patches, pluginLib::patchDB::SourceType _sourceType)

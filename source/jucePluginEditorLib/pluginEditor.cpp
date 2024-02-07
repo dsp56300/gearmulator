@@ -28,7 +28,7 @@ namespace jucePluginEditorLib
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Choose syx/midi banks to import",
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi", true);
+			"*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr", true);
 
 		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
@@ -54,7 +54,7 @@ namespace jucePluginEditorLib
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Save preset(s) as syx or mid",
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi", true);
+			"*.syx,*.mid", true);
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 

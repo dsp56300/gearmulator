@@ -8,6 +8,10 @@
 
 #include "../../virusLib/microcontroller.h"
 #include "../../virusLib/device.h"
+#include "../../virusLib/midiFileToRomData.h"
+
+#include "../../synthLib/midiToSysex.h"
+#include "../../synthLib/os.h"
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 
@@ -110,7 +114,7 @@ namespace genericVirusUI
 		const auto idxPhaserMix = c.getParameterIndexByName("Phaser Mix");
 		const auto idxChorusMix = c.getParameterIndexByName("Chorus Mix");
 
-		auto patch = std::make_shared<Patch>();
+		auto patch = std::make_shared<pluginLib::patchDB::Patch>();
 
 		{
 			const auto it = data.find(pluginLib::MidiDataType::Bank);
@@ -264,7 +268,81 @@ namespace genericVirusUI
 		if (virusLib::Device::parsePowercorePreset(_results, _data))
 			return true;
 
-		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
+		if(!synthLib::MidiToSysex::extractSysexFromData(_results, _data))
+			return false;
+
+		if(!_results.empty())
+		{
+			if(_data.size() > 500000)
+			{
+				virusLib::MidiFileToRomData romLoader;
+
+				for (const auto& result : _results)
+				{
+					if(!romLoader.add(result))
+						break;
+				}
+				if(romLoader.isComplete())
+				{
+					const auto& data = romLoader.getData();
+
+					if(data.size() > 0x10000)
+					{
+						// presets are written to ROM address 0x50000, the second half of an OS update is therefore at 0x10000
+						constexpr ptrdiff_t startAddr = 0x10000;
+						ptrdiff_t addr = startAddr;
+						uint32_t index = 0;
+
+						while(addr + 0x100 <= static_cast<ptrdiff_t>(data.size()))
+						{
+							std::vector chunk(data.begin() + addr, data.begin() + addr + 0x100);
+
+							// validate
+//							const auto idxH = chunk[2];
+							const auto idxL = chunk[3];
+
+							if(/*idxH != (index >> 7) || */idxL != (index & 0x7f))
+								break;
+
+							bool validName = true;
+							for(size_t i=240; i<240+10; ++i)
+							{
+								if(chunk[i] < 32 || chunk[i] > 128)
+								{
+									validName = false;
+									break;
+								}
+							}
+
+							if(!validName)
+								continue;
+
+							addr += 0x100;
+							++index;
+						}
+
+						if(index > 0)
+						{
+							_results.clear();
+
+							for(uint32_t i=0; i<index; ++i)
+							{
+								// pack into sysex
+								std::vector<uint8_t>& sysex = _results.emplace_back(std::vector<uint8_t>
+									{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10, static_cast<uint8_t>(0x01 + (i >> 7)), static_cast<uint8_t>(i & 0x7f)}
+								);
+								sysex.insert(sysex.end(), data.begin() + i * 0x100 + startAddr, data.begin() + i * 0x100 + 0x100 + startAddr);
+								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex, 5));
+								sysex.push_back(0xf7);
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		return !_results.empty();
 	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part)
