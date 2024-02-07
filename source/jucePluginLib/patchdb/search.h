@@ -18,6 +18,8 @@ namespace pluginLib::patchDB
 		DataSourceNodePtr sourceNode;
 		PatchPtr patch;	// used by the UI to restore selection of a patch, the data source of this request patch will be null, the result will tell the UI which datasource it is in
 		SourceType sourceType = SourceType::Invalid;
+		std::set<TagType> anyTagOfType;
+		std::set<TagType> noTagOfType;
 
 		bool match(const Patch& _patch) const;
 		bool isValid() const;

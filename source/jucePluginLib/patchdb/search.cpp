@@ -112,6 +112,18 @@ namespace pluginLib::patchDB
 				return false;
 		}
 
+		for (const auto& tagOfType : anyTagOfType)
+		{
+			if(_patch.getTags(tagOfType).empty())
+				return false;
+		}
+
+		for (const auto& tagOfType : noTagOfType)
+		{
+			if(!_patch.getTags(tagOfType).empty())
+				return false;
+		}
+
 		return true;
 	}
 
