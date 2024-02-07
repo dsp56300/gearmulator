@@ -17,10 +17,6 @@ namespace genericVirusUI
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		struct Patch final : pluginLib::patchDB::Patch
-		{
-		};
-
 		PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir);
 		~PatchManager() override;
 

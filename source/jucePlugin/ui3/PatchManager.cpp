@@ -114,7 +114,7 @@ namespace genericVirusUI
 		const auto idxPhaserMix = c.getParameterIndexByName("Phaser Mix");
 		const auto idxChorusMix = c.getParameterIndexByName("Chorus Mix");
 
-		auto patch = std::make_shared<Patch>();
+		auto patch = std::make_shared<pluginLib::patchDB::Patch>();
 
 		{
 			const auto it = data.find(pluginLib::MidiDataType::Bank);
