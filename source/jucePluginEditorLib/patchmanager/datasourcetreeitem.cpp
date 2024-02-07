@@ -181,4 +181,20 @@ namespace jucePluginEditorLib::patchManager
 		});
 		return true;
 	}
+
+	juce::String DatasourceTreeItem::getTooltip()
+	{
+		const auto& ds = getDataSource();
+		if(!ds)
+			return {};
+		switch (ds->type)
+		{
+		case pluginLib::patchDB::SourceType::Invalid:
+		case pluginLib::patchDB::SourceType::Rom:
+		case pluginLib::patchDB::SourceType::Count:
+			return{};
+		default:
+			return ds->name;
+		}
+	}
 }

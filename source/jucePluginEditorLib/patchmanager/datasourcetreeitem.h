@@ -33,6 +33,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto& getDataSource() const { return m_dataSource; }
 
+		juce::String getTooltip() override;
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
