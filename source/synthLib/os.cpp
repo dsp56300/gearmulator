@@ -136,12 +136,17 @@ namespace synthLib
         {
             while ((ent = readdir(dir)))
             {
+				std::string f = ent->d_name;
+
+				if(f == "." || f == "..")
+					continue;
+
                 std::string file = _folder;
 
             	if(file.back() != '/' && file.back() != '\\')
                     file += '/';
 
-            	file += ent->d_name;
+            	file += f;
 
                 _files.push_back(file);
             }
@@ -195,6 +200,19 @@ namespace synthLib
         const auto size = static_cast<size_t>(ftell(hFile));
         fclose(hFile);
         return size;
+    }
+
+    bool isDirectory(const std::string& _path)
+    {
+#ifdef USE_DIRENT
+		struct stat statbuf;
+		stat(_path.c_str(), &statbuf);
+		if (S_ISDIR(statbuf.st_mode))
+            return true;
+        return false;
+#else
+        return std::filesystem::is_directory(_path);
+#endif
     }
 
     std::string findFile(const std::string& _extension, const size_t _minSize, const size_t _maxSize, const bool _stripPluginComponentFolders)

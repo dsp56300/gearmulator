@@ -23,6 +23,7 @@ namespace synthLib
 	std::string getExtension(const std::string& _name);
 	bool hasExtension(const std::string& _filename, const std::string& _extension);
 	size_t getFileSize(const std::string& _file);
+	bool isDirectory(const std::string& _path);
 
 	void setFlushDenormalsToZero();
 
