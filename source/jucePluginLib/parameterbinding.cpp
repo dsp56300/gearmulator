@@ -94,20 +94,34 @@ namespace pluginLib
 		_combo.onChange = nullptr;
 		_combo.clear();
 
-		int idx = 1;
-		uint32_t count = 0;
-		for (const auto& vs : v->getAllValueStrings())
+		using Entry = std::pair<uint8_t, std::string>;
+
+		std::vector<Entry> sortedValues;
+
+		const auto& allValues = v->getAllValueStrings();
+		uint8_t i = 0;
+		for (const auto& vs : allValues)
 		{
 			if(vs.isNotEmpty())
+				sortedValues.emplace_back(i, vs.toStdString());
+			++i;
+		}
+		/* TODO: this is bad because a string "Wave 9" comes after a "Wave 30"
+		std::sort(sortedValues.begin(), sortedValues.end(), [](const Entry& _a, const Entry& _b)
+		{
+			return _a.second < _b.second;
+		});
+		*/
+		uint32_t count = 0;
+
+		for (const auto& vs : sortedValues)
+		{
+			_combo.addItem(vs.second, vs.first + 1);
+			if(++count == 16)
 			{
-				_combo.addItem(vs, idx);
-				if(++count == 16)
-				{
-					_combo.getRootMenu()->addColumnBreak();
-					count = 0;
-				}
+				_combo.getRootMenu()->addColumnBreak();
+				count = 0;
 			}
-			idx++;
 		}
 
 		_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
