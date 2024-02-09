@@ -590,7 +590,7 @@
 		],
 		"modmatrixSource":
  		[
-			"Off", 			"PitchBnd", 	"ChanPres", 	"ModWheel", 	"Breath", 		"Contr3", 		"Foot", 		"Data", 
+			"Off", 			"PitchBnd", 	"ChanPres", 	"ModWheel", 	"Breath", 		"Contr 3", 		"Foot", 		"Data", 
 			"Balance", 		"Contr 9", 		"Express", 		"Contr 12", 	"Contr 13", 	"Contr 14", 	"Contr 15", 	"Contr 16", 
 			"HoldPed", 		"PortaSw", 		"SostPed", 		"AmpEnv", 		"FiltEnv", 		"Lfo 1", 		"Lfo 2", 		"Lfo 3",
 			"VeloOn", 		"VeloOff", 		"KeyFlw", 		"Random"
