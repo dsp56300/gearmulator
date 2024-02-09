@@ -135,11 +135,11 @@ namespace pluginLib
 
 		const auto listenerId = m_nextListenerId++;
 
-		v->onValueChanged.emplace_back(std::make_pair(listenerId, [this, &_combo, v]()
+		v->onValueChanged.emplace_back(listenerId, [this, &_combo, v]()
 		{
 			const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
-		}));
+		});
 
 		const BoundParameter p{v, &_combo, _param, _part, listenerId};
 		addBinding(p);
