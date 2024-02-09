@@ -106,10 +106,38 @@ namespace pluginLib
 				sortedValues.emplace_back(i, vs.toStdString());
 			++i;
 		}
-		/* TODO: this is bad because a string "Wave 9" comes after a "Wave 30"
+		/*
 		std::sort(sortedValues.begin(), sortedValues.end(), [](const Entry& _a, const Entry& _b)
 		{
-			return _a.second < _b.second;
+			const auto aOff =_a.second == "Off" || _a.second == "-";
+			const auto bOff =_b.second == "Off" || _b.second == "-";
+
+			if(aOff && !bOff)
+				return true;
+
+			if(!aOff && bOff)
+				return false;
+
+			auto noDigitsString = [](const std::string& _s)
+			{
+				std::string s;
+				s.reserve(_s.size());
+				for (const char c : _s)
+				{
+					if(isdigit(c))
+						break;
+					s += c;
+				}
+				return s;
+			};
+
+			const auto a = noDigitsString(_a.second);
+			const auto b = noDigitsString(_b.second);
+
+			if(a == b)
+				return _a.first < _b.first;
+
+			return a < b;
 		});
 		*/
 		uint32_t count = 0;
