@@ -29,17 +29,26 @@ namespace pluginLib
 		if (newValue == m_lastValue)
 			return;
 
-		_origin = ChangedBy::Derived;
-
 		m_lastValue = newValue;
-		m_lastValueOrigin = _origin;
+		m_lastValueOrigin = ChangedBy::Derived;
 
 		if(getDescription().isPublic)
 		{
-			beginChangeGesture();
 			const float v = convertTo0to1(static_cast<float>(newValue));
-			setValueNotifyingHost(v, _origin);
-			endChangeGesture();
+
+			switch (_origin)
+			{
+			case ChangedBy::ControlChange:
+			case ChangedBy::HostAutomation:
+			case ChangedBy::Derived:
+				setValue(v, ChangedBy::Derived); 
+				break;
+			default:
+				beginChangeGesture();
+				setValueNotifyingHost(v, ChangedBy::Derived);
+				endChangeGesture();
+				break;
+			}
 		}
 		else
 		{
