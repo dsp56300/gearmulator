@@ -175,7 +175,7 @@ bool ROMFile::initialize()
 			for (auto& presetFile: fw.Presets)
 			{
 				imemstream stream(presetFile);
-				loadPresetFile(stream);
+				loadPresetFile(stream, m_tiModel);
 			}
 
 			for (const auto & preset : fw.Presets)
@@ -240,7 +240,7 @@ bool ROMFile::initialize()
 				for (auto& presetFile: firmware.Presets)
 				{
 					imemstream stream(presetFile);
-					loadPresetFile(stream);
+					loadPresetFile(stream, _model);
 				}
 			}
 		};
@@ -251,6 +251,20 @@ bool ROMFile::initialize()
 	}
 #endif
 	return true;
+}
+
+uint32_t ROMFile::getRomBankCount(const TIModel _model)
+{
+	switch (_model)
+	{
+	case TIModel::TI:
+		return 26 - 7;
+	case TIModel::Snow:
+		return 8;
+	case TIModel::TI2:
+		return 26 - 5;
+	}
+	return 0;
 }
 
 std::string ROMFile::findROM()
@@ -355,13 +369,13 @@ bool ROMFile::loadPresetFiles()
 			res = false;
 			continue;
 		}
-		res &= loadPresetFile(file);
+		res &= loadPresetFile(file, m_tiModel);
 		file.close();
 	}
 	return res;
 }
 
-bool ROMFile::loadPresetFile(std::istream& _file)
+bool ROMFile::loadPresetFile(std::istream& _file, TIModel _model)
 {
 	_file.seekg(0, std::ios_base::end);
 	const auto fileSize = _file.tellg();
@@ -372,7 +386,7 @@ bool ROMFile::loadPresetFile(std::istream& _file)
 
 	if (fileSize == 0x1b0000)		// TI
 	{
-		singleCount = 128 * 26;
+		singleCount = 128 * getRomBankCount(_model);
 		multiCount = 0;
 	}
 	else if (fileSize == 0x40000)	// Snow A

@@ -42,9 +42,17 @@ namespace Virus
         switch(p.getModel())
         {
         default:
-        case virusLib::ROMFile::Model::ABC:  m_singles.resize(8);  break;
-        case virusLib::ROMFile::Model::Snow: m_singles.resize(10); break;
-        case virusLib::ROMFile::Model::TI:   m_singles.resize(66); break;
+        case virusLib::ROMFile::Model::ABC:
+        	m_singles.resize(8);
+        	break;
+        case virusLib::ROMFile::Model::Snow:
+        case virusLib::ROMFile::Model::TI:
+        	m_singles.resize(
+                virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::TI) +
+                virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::TI2) +
+                virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::Snow) +
+                2
+            ); break;
         }
 
     	registerParams(p);
@@ -738,27 +746,36 @@ namespace Virus
 
         if(getBankCount() <= 26)
         {
-	        sprintf(temp, "Bank %c", 'A' + _index);
+	        snprintf(temp, sizeof(temp), "Bank %c", 'A' + _index);
+        }
+        else if(_index < 2)
+        {
+	        snprintf(temp, sizeof(temp), "RAM Bank %c", 'A' + _index);
         }
         else
         {
+            _index -= 2;
+
+            const auto countSnow    = virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::Snow);
+            const auto countTI      = virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::TI);
+            const auto countTI2     = virusLib::ROMFile::getRomBankCount(virusLib::ROMFile::TIModel::TI2);
+
             switch(m_processor.getTIModel())
             {
             case virusLib::ROMFile::TIModel::Snow: 
-                if(_index < 10)	            sprintf(temp, "Snow Bank %c", 'A' + _index);
-                else if(_index < 26 + 10)	sprintf(temp, "TI Bank %c", 'A' + (_index - 10));
-                else			    		sprintf(temp, "TI2 Bank %c", 'A' + (_index - 26 - 10));
+                if(_index < countSnow)                  sprintf(temp, "Snow Rom %c", 'A' + _index);
+                else if(_index < countTI + countSnow)	sprintf(temp, "TI Rom %c", 'A' + (_index - countSnow));
+                else			                 		sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI - countSnow));
                 break;
             case virusLib::ROMFile::TIModel::TI:
-                if(_index < 2)	            sprintf(temp, "RAM Bank %c", 'A' + _index);
-                else if(_index < 28)	    sprintf(temp, "TI Rom %c", 'A' + (_index - 2));
-                else if(_index < 28 + 26)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - 28));
-                else			    		sprintf(temp, "Snow Rom %c", 'A' + (_index - 28 - 26));
+                if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
+                else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
+                else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countSnow));
                 break;
             case virusLib::ROMFile::TIModel::TI2: 
-                if(_index < 28)	            sprintf(temp, "TI2 Bank %c", 'A' + _index);
-                else if(_index < 28 + 26)	sprintf(temp, "TI Bank %c", 'A' + (_index - 28));
-                else			    		sprintf(temp, "Snow Bank %c", 'A' + (_index - 28 - 26));
+                if(_index < countTI2)	                sprintf(temp, "TI2 Rom %c", 'A' + _index);
+                else if(_index < countTI2 + countTI)	sprintf(temp, "TI Rom %c", 'A' + (_index - countTI2));
+                else			    	            	sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI2 - countTI));
                 break;
             }
         }

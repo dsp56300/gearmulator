@@ -119,6 +119,8 @@ public:
 		return 128;
 	}
 
+	static uint32_t getRomBankCount(TIModel _model);
+
 	static std::string findROM();
 
 	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData);
@@ -130,7 +132,7 @@ public:
 private:
 	std::vector<Chunk> readChunks(std::istream& _file, TIModel _wantedTIModel);
 	bool loadPresetFiles();
-	bool loadPresetFile(std::istream& _file);
+	bool loadPresetFile(std::istream& _file, TIModel _model);
 
 	bool initialize();
 
