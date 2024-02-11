@@ -192,6 +192,9 @@ bool ROMFile::initialize()
 			loadPresetFiles();
 		}
 
+		// The Snow even has multis, but they are not sequencer compatible, drop them
+		m_multis.clear();
+
 		if(m_multis.empty())
 		{
 			// there is no multi in the TI presets, but there is an init multi in the F.bin
