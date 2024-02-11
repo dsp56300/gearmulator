@@ -252,7 +252,7 @@ void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t f
 
 bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, const bool isMulti)
 {
-	if(!isValid(preset))
+	if(!isMulti && !isValid(preset))
 		return false;
 
 	std::lock_guard lock(m_mutex);
