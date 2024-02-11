@@ -15,6 +15,9 @@ Release Notes
 - [Imp] Patch Manager added. The patch manager replaced the old preset browser and provides a modern 
         user experience to manage presets.
         Introduction:  https://dsp56300.wordpress.com/2024/02/06/patch-manager-introduction/
+
+Osirus:
+
 - [Imp] Support more file formats to load presets from. All supported formats now are:
        .syx/.mid Virus A/B/C/TI/TI2 preset dumps
        .fxb/.vstpreset Presets saved by DAW from Virus Powercore and Virus TI Control Software
