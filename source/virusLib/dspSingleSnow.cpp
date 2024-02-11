@@ -14,13 +14,13 @@ namespace virusLib
 		const auto s = static_cast<uint32_t>(_samples);
 
 		const T* inputs0[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		const T* inputs1[] = {_inputs[3], _inputs[2], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const T* inputs1[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs0, s, _latency);
 		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs1, s, _latency);
 
-		T* outputs0[] = {_outputs[1], _outputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		T* outputs1[] = {nullptr, nullptr, _outputs[3], _outputs[2], _outputs[5], _outputs[4], _outputs[7], _outputs[6], nullptr, nullptr, nullptr, nullptr};
+		T* outputs0[] = {_outputs[0], _outputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		T* outputs1[] = {nullptr, nullptr, _outputs[2], _outputs[3], _outputs[4], _outputs[5], _outputs[6], _outputs[7], nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioOutputInterleaved(outputs0, s);
 		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputs1, s);
