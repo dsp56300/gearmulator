@@ -20,7 +20,7 @@ namespace virusLib
 		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs1, s, _latency);
 
 		T* outputs0[] = {_outputs[0], _outputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		T* outputs1[] = {nullptr, nullptr, _outputs[2], _outputs[3], _outputs[4], _outputs[5], _outputs[6], _outputs[7], nullptr, nullptr, nullptr, nullptr};
+		T* outputs1[] = {nullptr, nullptr, nullptr, nullptr, _outputs[2], _outputs[3], _outputs[4], _outputs[5], _outputs[6], _outputs[7], nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioOutputInterleaved(outputs0, s);
 		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputs1, s);
