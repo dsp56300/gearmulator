@@ -22,7 +22,7 @@ namespace pluginLib
 			func.second();
 	}
 
-    void Parameter::setDerivedValue(const int _value, ChangedBy _origin)
+    void Parameter::setDerivedValue(const int _value, ChangedBy _origin, bool _notifyHost)
     {
 		const int newValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
 
@@ -32,7 +32,7 @@ namespace pluginLib
 		m_lastValue = newValue;
 		m_lastValueOrigin = ChangedBy::Derived;
 
-		if(getDescription().isPublic)
+		if(_notifyHost && getDescription().isPublic)
 		{
 			const float v = convertTo0to1(static_cast<float>(newValue));
 
@@ -106,7 +106,7 @@ namespace pluginLib
 		for (const auto& parameter : m_derivedParameters)
 		{
 			if(!parameter->m_changingDerivedValues)
-				parameter->setDerivedValue(m_value.getValue(), _origin);
+				parameter->setDerivedValue(m_value.getValue(), _origin, true);
 		}
 
 		m_changingDerivedValues = false;
@@ -140,7 +140,7 @@ namespace pluginLib
 		m_changingDerivedValues = true;
 
 		for (const auto& p : m_derivedParameters)
-			p->setDerivedValue(newValue, _origin);
+			p->setDerivedValue(newValue, _origin, notifyHost);
 
 		m_changingDerivedValues = false;
 	}
