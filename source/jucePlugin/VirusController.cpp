@@ -434,11 +434,10 @@ namespace Virus
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
 	            auto* p = getParameter(it->first.second, ch);
-				p->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
-
-	            for (const auto& derivedParam : p->getDerivedParameters())
-		            derivedParam->setValueFromSynth(it->second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+				p->setValueFromSynth(it->second, false, pluginLib::Parameter::ChangedBy::PresetChange);
             }
+
+            m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
@@ -516,8 +515,10 @@ namespace Virus
                 if(desc.page != virusLib::PAGE_C)
                     continue;
 
-                param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::PresetChange);
+                param->setValueFromSynth(value, false, pluginLib::Parameter::ChangedBy::PresetChange);
 			}
+
+			m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 		}
     }
 

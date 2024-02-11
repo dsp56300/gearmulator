@@ -54,6 +54,7 @@ set(CPACK_RPM_PACKAGE_DESCRIPTION ${CPACK_PACKAGE_DESCRIPTION_SUMMARY})
 # ----------------- source
 
 add_subdirectory(source)
+add_subdirectory(doc)
 
 # ----------------- CPack parameters based on source
 

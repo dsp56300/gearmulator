@@ -85,7 +85,7 @@ namespace pluginLib
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
-		void setDerivedValue(int _value, ChangedBy _origin);
+		void setDerivedValue(int _value, ChangedBy _origin, bool _notifyHost);
 		void sendToSynth();
 
         Controller &m_ctrl;
