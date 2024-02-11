@@ -5,7 +5,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_D
 
 set(SOURCES
 	parameterDescriptions_C.json
-	parameterDescriptions_Snow.json
 	parameterDescriptions_TI.json
 	ParameterNames.h
 	PluginEditorState.cpp
@@ -34,7 +33,6 @@ set(SOURCES
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS
 	"parameterDescriptions_C.json"
-	"parameterDescriptions_Snow.json"
 	"parameterDescriptions_TI.json"
 )
 
