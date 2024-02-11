@@ -306,6 +306,9 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 		}
 		else if(program < m_singleEditBuffers.size())
 		{
+			if(program >= getPartCount())
+				return false;
+
 			m_singleEditBuffers[program] = preset;
 		}
 	}
@@ -332,6 +335,15 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 void Microcontroller::sendControlCommand(const ControlCommand _command, const uint8_t _value)
 {
 	send(globalSettingsPage(), 0x0, _command, _value);
+}
+
+uint32_t Microcontroller::getPartCount() const
+{
+	if(m_rom.getModel() == ROMFile::Model::Snow)
+		return 4;
+	if(m_rom.getTIModel() == ROMFile::TIModel::Snow)
+		return 4;
+	return 16;
 }
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)

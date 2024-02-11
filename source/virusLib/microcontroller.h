@@ -61,6 +61,8 @@ public:
 
 	const ROMFile& getROM() const { return m_rom; }
 
+	uint32_t getPartCount() const;
+
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);
