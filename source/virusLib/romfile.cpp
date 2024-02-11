@@ -262,7 +262,7 @@ uint32_t ROMFile::getRomBankCount(const TIModel _model)
 	case TIModel::Snow:
 		return 8;
 	case TIModel::TI2:
-		return 26 - 5;
+		return 26 - 5 + 4;
 	}
 	return 0;
 }
@@ -384,15 +384,16 @@ bool ROMFile::loadPresetFile(std::istream& _file, TIModel _model)
 	uint32_t multiCount = 0;
 	uint32_t multiOffset = 0;
 
-	if (fileSize == 0x1b0000)		// TI
+	if (fileSize == 0x1b0000)		// TI/TI2
 	{
-		singleCount = 128 * getRomBankCount(_model);
-		multiCount = 0;
+		if(_model == TIModel::TI2)
+			singleCount = 128 * (26 - 5);
+		else
+			singleCount = 128 * (26 - 7);
 	}
 	else if (fileSize == 0x40000)	// Snow A
 	{
 		singleCount = 512;
-		multiCount = 0;
 	}
 	else if (fileSize == 0x68000)	// Snow B
 	{

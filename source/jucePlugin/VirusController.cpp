@@ -770,7 +770,7 @@ namespace Virus
             case virusLib::ROMFile::TIModel::TI:
                 if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
                 else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
-                else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countSnow));
+                else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countTI2));
                 break;
             case virusLib::ROMFile::TIModel::TI2: 
                 if(_index < countTI2)	                sprintf(temp, "TI2 Rom %c", 'A' + _index);
