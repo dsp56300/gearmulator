@@ -421,7 +421,7 @@ bool ROMFile::loadPresetFile(std::istream& _file, TIModel _model)
 	if(multiCount)
 	{
 		const auto off = std::max(singleCount, multiOffset);
-		_file.seekg(off);
+		_file.seekg(off * 512);
 
 		for (uint32_t i = 0; i < multiCount; ++i)
 		{
