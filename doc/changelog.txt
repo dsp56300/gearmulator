@@ -10,6 +10,10 @@ Release Notes
 - [Fix] Issues with linked parameters confusing Bitwig / Ableton and other hosts
 - [Fix] Slow plugin loading times in some hosts due to excessive initial parameter automation updates
 
+OsTIrus:
+
+- [Imp] Removed ROM banks that are empty anyway
+
 1.3.3 (2024.02.07)
 
 - [Imp] Patch Manager added. The patch manager replaced the old preset browser and provides a modern 
