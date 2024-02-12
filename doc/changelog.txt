@@ -15,6 +15,7 @@ Release Notes
 OsTIrus:
 
 - [Imp] Removed ROM banks that are empty anyway
+- [Imp] GUI has been reworked slightly and many GUI related issues have been fixed
 
 Osirus/OsTIrus:
 
