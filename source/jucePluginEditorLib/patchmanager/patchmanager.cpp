@@ -99,6 +99,23 @@ namespace jucePluginEditorLib::patchManager
 			t->apply(getEditor(), *m_status);
 		}
 
+		juce::StretchableLayoutManager lm;
+
+		m_stretchableManager.setItemLayout(0, 100, rootW * 0.5, m_treeDS->getWidth());		m_stretchableManager.setItemLayout(1, 5, 5, 5);
+		m_stretchableManager.setItemLayout(2, 100, rootW * 0.5, m_treeTags->getWidth());	m_stretchableManager.setItemLayout(3, 5, 5, 5);
+		m_stretchableManager.setItemLayout(4, 100, rootW * 0.5, m_list->getWidth());		m_stretchableManager.setItemLayout(5, 5, 5, 5);
+		m_stretchableManager.setItemLayout(6, 100, rootW * 0.5, m_info->getWidth());
+
+		m_resizerBarA.setSize(5, rootH);
+		m_resizerBarB.setSize(5, rootH);
+		m_resizerBarC.setSize(5, rootH);
+
+		addAndMakeVisible(m_resizerBarA);
+		addAndMakeVisible(m_resizerBarB);
+		addAndMakeVisible(m_resizerBarC);
+
+		resized();
+
 		startTimer(200);
 	}
 
@@ -370,6 +387,31 @@ namespace jucePluginEditorLib::patchManager
 		});
 
 		return true;
+	}
+
+	void PatchManager::resized()
+	{
+		if(!m_treeDS)
+			return;
+
+		Component* comps[] = {m_treeDS, &m_resizerBarA, m_treeTags, &m_resizerBarB, m_list, &m_resizerBarC, m_info};
+		m_stretchableManager.layOutComponents(comps, (int)std::size(comps), 0, 0, getWidth(), getHeight(), false, false);
+
+		auto layoutXAxis = [](Component* _target, const Component* _source)
+		{
+			_target->setTopLeftPosition(_source->getX(), _target->getY());
+			_target->setSize(_source->getWidth(), _target->getHeight());
+		};
+
+		layoutXAxis(m_searchTreeDS, m_treeDS);
+		layoutXAxis(m_searchTreeTags, m_treeTags);
+		layoutXAxis(m_searchList, m_list);
+		layoutXAxis(m_status, m_info);
+	}
+
+	juce::Colour PatchManager::getResizerBarColor() const
+	{
+		return m_treeDS->findColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId);
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const

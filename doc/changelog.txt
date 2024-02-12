@@ -3,6 +3,7 @@ Release Notes
 1.3.4 (TBD)
 
 - [Imp] Preset Manager: Add tooltip for data source to show the full path in case its cut off
+- [Imp] Preset Manager: Columns can now be resized by dragging
 
 - [Fix] Preset Manager: Fix subfolders not enumerated on Mac & Linux
 - [Fix] Add missing .vstpreset, .fxb and .cpr file extensions to file selector when loading a patch via "Load" button
