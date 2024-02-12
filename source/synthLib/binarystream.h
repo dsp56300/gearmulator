@@ -55,6 +55,41 @@ namespace synthLib
 			return result;
 		}
 
+		uint32_t getWritePos() const
+		{
+			return (uint32_t)const_cast<BinaryStream&>(*this).tellp();
+		}
+
+		uint32_t getReadPos() const
+		{
+			return (uint32_t)const_cast<BinaryStream&>(*this).tellg();
+		}
+
+		void setWritePos(const uint32_t _pos)
+		{
+			seekp(_pos);
+		}
+
+		void setReadPos(const uint32_t _pos)
+		{
+			seekg(_pos);
+		}
+
+		bool endOfStream() const
+		{
+			return eof() || (getReadPos() == size());
+		}
+
+		SizeType size() const
+		{
+			const auto readPos = getReadPos();
+			auto& s = const_cast<BinaryStream&>(*this);
+			s.seekg(0, std::ios_base::end);
+			const auto size = s.tellg();
+			s.seekg(readPos);
+			return (SizeType)size;
+		}
+
 		// ___________________________________
 		// write
 		//
@@ -134,13 +169,24 @@ namespace synthLib
 		void read4CC(char const(&_str)[N])
 		{
 			char res[5];
-			res[0] = read<char>();
-			res[1] = read<char>();
-			res[2] = read<char>();
-			res[3] = read<char>();
-			res[4] = 0;
+			read4CC(res);
 
 			return strcmp(res, _str) == 0;
+		}
+
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		void read4CC(char (&_str)[N])
+		{
+			_str[0] = 'E';
+			_str[1] = 'R';
+			_str[2] = 'R';
+			_str[3] = 'R';
+			_str[4] = 0;
+
+			_str[0] = read<char>();
+			_str[1] = read<char>();
+			_str[2] = read<char>();
+			_str[3] = read<char>();
 		}
 
 		// ___________________________________
@@ -153,5 +199,100 @@ namespace synthLib
 			if(fail())
 				throw std::range_error("end-of-stream");
 		}
+	};
+
+	class ChunkWriter
+	{
+	public:
+		using SizeType = BinaryStream::SizeType;
+
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		ChunkWriter(BinaryStream& _stream, char const(&_4Cc)[N], const uint32_t _version = 1) : m_stream(_stream)
+		{
+			m_stream.write4CC(_4Cc);
+			m_stream.write(_version);
+			m_lengthWritePos = m_stream.getWritePos();
+			m_stream.write<SizeType>(0);
+		}
+
+		~ChunkWriter()
+		{
+			const auto currentWritePos = m_stream.getWritePos();
+			const SizeType chunkDataLength = currentWritePos - m_lengthWritePos - sizeof(SizeType);
+			m_stream.setWritePos(m_lengthWritePos);
+			m_stream.write(chunkDataLength);
+			m_stream.setWritePos(currentWritePos);
+		}
+
+	private:
+		BinaryStream& m_stream;
+		SizeType m_lengthWritePos = 0;
+	};
+
+	class ChunkReader
+	{
+	public:
+		using SizeType = ChunkWriter::SizeType;
+		using ChunkCallback = std::function<void(BinaryStream&, uint32_t)>;	// data, version
+
+		struct Chunk
+		{
+			char fourcc[5];
+			uint32_t expectedVersion;
+			ChunkCallback callback;
+		};
+
+		ChunkReader(BinaryStream& _stream) : m_stream(_stream)
+		{
+		}
+
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		void add(char const(&_4Cc)[N], const uint32_t _version, const ChunkCallback& _callback)
+		{
+			Chunk c;
+			strcpy(c.fourcc, _4Cc);
+			c.expectedVersion = _version;
+			c.callback = _callback;
+			supportedChunks.emplace_back(std::move(c));
+		}
+
+		void read() const
+		{
+			while(!m_stream.endOfStream())
+			{
+				char fourCC[5];
+				m_stream.read4CC(fourCC);
+				const auto version = m_stream.read<uint32_t>();
+				const auto length = m_stream.read<SizeType>();
+
+				bool hasReadChunk = false;
+
+				for (const auto& chunk : supportedChunks)
+				{
+					if(0 != strcmp(chunk.fourcc, fourCC))
+						continue;
+
+					if(version > chunk.expectedVersion)
+						break;
+
+					std::vector<uint8_t> chunkData;
+					chunkData.reserve(length);
+					for(size_t i=0; i<length; ++i)
+						chunkData.push_back(m_stream.read<uint8_t>());
+
+					hasReadChunk = true;
+					BinaryStream s(chunkData);
+					chunk.callback(s, version);
+					break;
+				}
+
+				if(!hasReadChunk)
+					m_stream.setReadPos(m_stream.getReadPos() + length);
+			}
+		}
+
+	private:
+		BinaryStream& m_stream;
+		std::vector<Chunk> supportedChunks;
 	};
 }
