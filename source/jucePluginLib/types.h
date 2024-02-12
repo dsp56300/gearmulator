@@ -4,5 +4,5 @@
 
 namespace pluginLib
 {
-	using PluginStream = synthLib::BinaryStream<uint32_t>;
+	using PluginStream = synthLib::BinaryStream;
 }

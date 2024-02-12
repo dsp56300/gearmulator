@@ -7,10 +7,11 @@
 
 namespace synthLib
 {
-	template<typename SizeType>
 	class BinaryStream final : std::stringstream
 	{
 	public:
+		using SizeType = uint32_t;
+
 		BinaryStream() = default;
 
 		template<typename T> explicit BinaryStream(const std::vector<T>& _data)
@@ -83,6 +84,16 @@ namespace synthLib
 			write(std::string(_value));
 		}
 
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		void write4CC(char const(&_str)[N])
+		{
+			write(_str[0]);
+			write(_str[1]);
+			write(_str[2]);
+			write(_str[3]);
+		}
+
+
 		// ___________________________________
 		// read
 		//
@@ -117,6 +128,19 @@ namespace synthLib
 			std::stringstream::read(s.data(), size);
 			checkFail();
 			return s;
+		}
+
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		void read4CC(char const(&_str)[N])
+		{
+			char res[5];
+			res[0] = read<char>();
+			res[1] = read<char>();
+			res[2] = read<char>();
+			res[3] = read<char>();
+			res[4] = 0;
+
+			return strcmp(res, _str) == 0;
 		}
 
 		// ___________________________________
