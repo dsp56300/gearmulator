@@ -3,6 +3,7 @@ Release Notes
 1.3.4 (TBD)
 
 - [Imp] Preset Manager: Add tooltip for data source to show the full path in case its cut off
+- [Imp] Preset Manager: Columns can now be resized by dragging
 
 - [Fix] Preset Manager: Fix subfolders not enumerated on Mac & Linux
 - [Fix] Add missing .vstpreset, .fxb and .cpr file extensions to file selector when loading a patch via "Load" button
@@ -19,6 +20,9 @@ OsTIrus:
 - [Imp] Patch Manager added. The patch manager replaced the old preset browser and provides a modern 
         user experience to manage presets.
         Introduction:  https://dsp56300.wordpress.com/2024/02/06/patch-manager-introduction/
+
+Osirus:
+
 - [Imp] Support more file formats to load presets from. All supported formats now are:
        .syx/.mid Virus A/B/C/TI/TI2 preset dumps
        .fxb/.vstpreset Presets saved by DAW from Virus Powercore and Virus TI Control Software

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "resizerbar.h"
 #include "../../jucePluginLib/patchdb/db.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -57,6 +58,10 @@ namespace jucePluginEditorLib::patchManager
 		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const;
 		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, FileType _fileType) const;
 
+		void resized() override;
+
+		juce::Colour getResizerBarColor() const;
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 
@@ -106,5 +111,11 @@ namespace jucePluginEditorLib::patchManager
 		State m_state;
 
 		std::map<Tree*, std::set<const TreeItem*>> m_selectedItems;
+
+		juce::StretchableLayoutManager m_stretchableManager;
+
+		ResizerBar m_resizerBarA{*this, &m_stretchableManager, 1};
+		ResizerBar m_resizerBarB{*this, &m_stretchableManager, 3};
+		ResizerBar m_resizerBarC{*this, &m_stretchableManager, 5};
 	};
 }
