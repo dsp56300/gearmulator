@@ -5,6 +5,7 @@
 #include <iosfwd>
 #include <sstream>
 #include <vector>
+#include <cstring>
 
 namespace synthLib
 {
