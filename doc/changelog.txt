@@ -8,7 +8,7 @@ Release Notes
 - [Fix] Preset Manager: Fix subfolders not enumerated on Mac & Linux
 - [Fix] Add missing .vstpreset, .fxb and .cpr file extensions to file selector when loading a patch via "Load" button
 - [Fix] Parameter value change by double-click on knob to reset it was not sent to host for automation
-- [Fix] Issues with linked parameters confusing Bitwig / Ableton and other hosts
+- [Fix] Linked parameters confused Bitwig / Ableton and other hosts
 - [Fix] Slow plugin loading times in some hosts due to excessive initial parameter automation updates
 
 Osirus/OsTIrus:
