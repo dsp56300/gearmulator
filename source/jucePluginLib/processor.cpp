@@ -187,6 +187,49 @@ namespace pluginLib
 		return true;
 	}
 
+	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
+	{
+		synthLib::BinaryStream s;
+
+		{
+			synthLib::ChunkWriter cw(s, "GAIN", 1);
+			s.write<uint32_t>(1);	// version
+			s.write(m_inputGain);
+			s.write(m_outputGain);
+		}
+
+		s.toVector(_targetBuffer, true);
+	}
+
+	void Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		auto readGain = [this](synthLib::BinaryStream& _s)
+		{
+			const auto version = _s.read<uint32_t>();
+			if (version != 1)
+				return;
+			m_inputGain = _s.read<float>();
+			m_outputGain = _s.read<float>();
+		};
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			synthLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+		}
+
+		synthLib::BinaryStream s(_sourceBuffer);
+		synthLib::ChunkReader cr(s);
+
+		cr.add("GAIN", 1, [readGain](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			readGain(_binaryStream);
+		});
+
+		cr.tryRead();
+	}
+
 	//==============================================================================
 	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 	{
@@ -285,12 +328,15 @@ namespace pluginLib
 				getPlugin().setState(buffer);
 				ss.read(buffer);
 
-				try
+				if(!buffer.empty())
 				{
-					loadCustomData(buffer);
-				}
-				catch (std::range_error&)
-				{
+					try
+					{
+						loadCustomData(buffer);
+					}
+					catch (std::range_error&)
+					{
+					}
 				}
 			}
 			catch (std::range_error& e)

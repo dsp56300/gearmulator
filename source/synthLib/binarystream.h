@@ -25,17 +25,29 @@ namespace synthLib
 		// tools
 		//
 
-		void toVector(std::vector<uint8_t>& _buffer)
+		void toVector(std::vector<uint8_t>& _buffer, bool _append = false)
 		{
 			const auto size = tellp();
 			if(size <= 0)
 			{
-				_buffer.clear();
+				if(!_append)
+					_buffer.clear();
 				return;
 			}
-			_buffer.resize(size);
+
 			seekg(0);
-			std::stringstream::read(reinterpret_cast<char*>(_buffer.data()), size);
+
+			if(_append)
+			{
+				const auto currentSize = _buffer.size();
+				_buffer.resize(currentSize + size);
+				std::stringstream::read(reinterpret_cast<char*>(&_buffer[currentSize]), size);
+			}
+			else
+			{
+				_buffer.resize(size);
+				std::stringstream::read(reinterpret_cast<char*>(_buffer.data()), size);
+			}
 		}
 
 		bool checkString(const std::string& _str)

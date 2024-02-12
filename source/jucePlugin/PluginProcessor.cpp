@@ -183,6 +183,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	getPlugin().process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
                      static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
+	applyOutputGain(outputs, buffer.getNumSamples());
+
     m_midiOut.clear();
     getPlugin().getMidiOut(m_midiOut);
 

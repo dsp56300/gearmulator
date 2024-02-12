@@ -46,8 +46,34 @@ namespace pluginLib
 		virtual bool setLatencyBlocks(uint32_t _blocks);
 		virtual void updateLatencySamples() = 0;
 
-		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer) {}
-		virtual void loadCustomData(const std::vector<uint8_t>& _sourceBuffer) {}
+		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer);
+		virtual void loadCustomData(const std::vector<uint8_t>& _sourceBuffer);
+
+		template<size_t N> void applyOutputGain(std::array<float*, N>& _buffers, const size_t _numSamples)
+		{
+			applyGain(_buffers, _numSamples, getOutputGain());
+		}
+
+		template<size_t N> static void applyGain(std::array<float*, N>& _buffers, const size_t _numSamples, const float _gain)
+		{
+			if(_gain == 1.0f)
+				return;
+
+			if(!_numSamples)
+				return;
+
+			for (float* buf : _buffers)
+			{
+				if (buf)
+				{
+					for (int i = 0; i < _numSamples; ++i)
+						buf[i] *= _gain;
+				}
+			}
+		}
+		
+		float getOutputGain() const { return m_outputGain; }
+		void setOutputGain(const float _gain) { m_outputGain = _gain; }
 
 	private:
 		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
@@ -86,5 +112,9 @@ namespace pluginLib
 		std::unique_ptr<juce::MidiOutput> m_midiOutput{};
 		std::unique_ptr<juce::MidiInput> m_midiInput{};
 		std::vector<synthLib::SMidiEvent> m_midiOut{};
+
+	private:
+		float m_outputGain = 1.0f;
+		float m_inputGain = 1.0f;
 	};
 }
