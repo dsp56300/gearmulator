@@ -217,6 +217,7 @@ namespace pluginLib
 		{
 			synthLib::BinaryStream ss(_sourceBuffer);
 			readGain(ss);
+			return;
 		}
 
 		synthLib::BinaryStream s(_sourceBuffer);
