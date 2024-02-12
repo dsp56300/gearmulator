@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <iosfwd>
 #include <sstream>
 #include <vector>
@@ -256,7 +257,7 @@ namespace synthLib
 			supportedChunks.emplace_back(std::move(c));
 		}
 
-		void read() const
+		void read()
 		{
 			while(!m_stream.endOfStream())
 			{
@@ -266,6 +267,8 @@ namespace synthLib
 				const auto length = m_stream.read<SizeType>();
 
 				bool hasReadChunk = false;
+
+				++m_numChunks;
 
 				for (const auto& chunk : supportedChunks)
 				{
@@ -281,6 +284,7 @@ namespace synthLib
 						chunkData.push_back(m_stream.read<uint8_t>());
 
 					hasReadChunk = true;
+					++m_numRead;
 					BinaryStream s(chunkData);
 					chunk.callback(s, version);
 					break;
@@ -291,8 +295,35 @@ namespace synthLib
 			}
 		}
 
+		bool tryRead()
+		{
+			const auto pos = m_stream.getReadPos();
+			try
+			{
+				read();
+				return true;
+			}
+			catch(std::range_error&)
+			{
+				m_stream.setReadPos(pos);
+				return false;
+			}
+		}
+
+		uint32_t numRead() const
+		{
+			return m_numRead;
+		}
+
+		uint32_t numChunks() const
+		{
+			return m_numChunks;
+		}
+
 	private:
 		BinaryStream& m_stream;
 		std::vector<Chunk> supportedChunks;
+		uint32_t m_numRead = 0;
+		uint32_t m_numChunks = 0;
 	};
 }
