@@ -3,6 +3,8 @@
 #include "pluginEditorState.h"
 #include "pluginEditorWindow.h"
 
+#include "../synthLib/binarystream.h"
+
 namespace jucePluginEditorLib
 {
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions)
@@ -47,7 +49,28 @@ namespace jucePluginEditorLib
 
 	void Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
 	{
-		m_editorStateData = _sourceBuffer;
+		// Compatibility with old Vavra versions that only wrote gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			pluginLib::Processor::loadCustomData(_sourceBuffer);
+			return;
+		}
+
+		pluginLib::Processor::loadCustomData(_sourceBuffer);
+
+		synthLib::BinaryStream s(_sourceBuffer);
+
+		synthLib::ChunkReader cr(s);
+		cr.add("EDST", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		{
+			_binaryStream.read(m_editorStateData);
+		});
+
+		// if there is no chunk in the data, it's an old non-Vavra chunk that only carries the editor state
+		if(!cr.tryRead() || cr.numRead() == 0)
+		{
+			m_editorStateData = _sourceBuffer;
+		}
 
 		if(m_editorState)
 			m_editorState->setPerInstanceConfig(m_editorStateData);
@@ -55,6 +78,8 @@ namespace jucePluginEditorLib
 
 	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
 	{
+		pluginLib::Processor::saveCustomData(_targetBuffer);
+
 		if(m_editorState)
 		{
 			m_editorStateData.clear();
@@ -62,6 +87,14 @@ namespace jucePluginEditorLib
 		}
 
 		if(!m_editorStateData.empty())
-			_targetBuffer.insert(_targetBuffer.end(), m_editorStateData.begin(), m_editorStateData.end());
+		{
+			synthLib::BinaryStream s;
+			{
+				synthLib::ChunkWriter cw(s, "EDST", 1);
+				s.write(m_editorStateData);
+			}
+
+			s.toVector(_targetBuffer, true);
+		}
 	}
 }
