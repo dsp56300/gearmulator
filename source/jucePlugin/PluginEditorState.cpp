@@ -26,18 +26,43 @@ genericUI::Editor* PluginEditorState::createEditor(const Skin& _skin, std::funct
 void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 {
 	jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
-
-	juce::PopupMenu gainMenu;
-
 	auto& p = m_processor;
 
-	const auto gain = m_processor.getOutputGain();
+	{
+		juce::PopupMenu gainMenu;
 
-	gainMenu.addItem("-12 db", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
-	gainMenu.addItem("-6 db", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
-	gainMenu.addItem("0 db (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-	gainMenu.addItem("+6 db", true, gain == 2, [&p] { p.setOutputGain(2); });
-	gainMenu.addItem("+12 db", true, gain == 4, [&p] { p.setOutputGain(4); });
+		const auto gain = m_processor.getOutputGain();
 
-	_menu.addSubMenu("Output Gain", gainMenu);
+		gainMenu.addItem("-12 db", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
+		gainMenu.addItem("-6 db", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
+		gainMenu.addItem("0 db (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+		gainMenu.addItem("+6 db", true, gain == 2, [&p] { p.setOutputGain(2); });
+		gainMenu.addItem("+12 db", true, gain == 4, [&p] { p.setOutputGain(4); });
+
+		_menu.addSubMenu("Output Gain", gainMenu);
+	}
+
+	const auto percent = m_processor.getDspClockPercent();
+	const auto hz = m_processor.getDspClockHz();
+
+	juce::PopupMenu clockMenu;
+
+	auto makeEntry = [&](const int _percent)
+	{
+		const auto mhz = hz * _percent / 100 / 1000000;
+		std::stringstream ss;
+		ss << _percent << "% (" << mhz << " MHz)";
+		if(_percent == 100)
+			ss << " (Default)";
+		clockMenu.addItem(ss.str(), true, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
+	};
+
+	makeEntry(50);
+	makeEntry(75);
+	makeEntry(100);
+	makeEntry(125);
+	makeEntry(150);
+	makeEntry(200);
+
+	_menu.addSubMenu("DSP Clock", clockMenu);
 }

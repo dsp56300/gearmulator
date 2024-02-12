@@ -231,6 +231,27 @@ namespace pluginLib
 		cr.tryRead();
 	}
 
+	bool Processor::setDspClockPercent(const int _percent)
+	{
+		if(!m_device)
+			return false;
+		return m_device->setDspClockPercent(_percent);
+	}
+
+	uint32_t Processor::getDspClockPercent() const
+	{
+		if(!m_device)
+			return 0;
+		return m_device->getDspClockPercent();
+	}
+
+	uint64_t Processor::getDspClockHz() const
+	{
+		if(!m_device)
+			return 0;
+		return m_device->getDspClockHz();
+	}
+
 	//==============================================================================
 	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 	{

@@ -358,4 +358,27 @@ namespace virusLib
 		_dsp.startDSPThread(_createDebugger);
 		return res;
 	}
+
+	bool Device::setDspClockPercent(const int _percent)
+	{
+		if(!m_dsp)
+			return false;
+
+		bool res = m_dsp->getPeriphX().getEsaiClock().setSpeedPercent(_percent);
+
+		if(m_dsp2)
+			res &= m_dsp2->getPeriphX().getEsaiClock().setSpeedPercent(_percent);
+
+		return res;
+	}
+
+	uint32_t Device::getDspClockPercent() const
+	{
+		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedPercent();
+	}
+
+	uint64_t Device::getDspClockHz() const
+	{
+		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedInHz();
+	}
 }
