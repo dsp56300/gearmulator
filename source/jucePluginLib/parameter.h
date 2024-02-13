@@ -39,6 +39,7 @@ namespace pluginLib
 		bool isMetaParameter() const override;
 
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
+		int getUnnormalizedValue() const { return juce::roundToInt(m_value.getValue()); }
 		void setValue(float _newValue) override;
 		void setValue(float _newValue, ChangedBy _origin);
 		void setValueFromSynth(int newValue, bool notifyHost, ChangedBy _origin);

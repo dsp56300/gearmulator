@@ -13,7 +13,7 @@ namespace genericVirusUI
 {
 	Parts::Parts(VirusEditor& _editor) : m_editor(_editor)
 	{
-		_editor.findComponents<juce::Button>(m_partSelect, "SelectPart");
+		_editor.findComponents<genericUI::Button<juce::DrawableButton>>(m_partSelect, "SelectPart");
 		_editor.findComponents<juce::Button>(m_presetPrev, "PresetPrev");
 		_editor.findComponents<juce::Button>(m_presetNext, "PresetNext");
 
@@ -24,6 +24,13 @@ namespace genericVirusUI
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
 			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
+			m_partSelect[i]->onDown = [this, i](const juce::MouseEvent& _e)
+			{
+				if(!_e.mods.isPopupMenu())
+					return false;
+				selectPartMidiChannel(i);
+				return true;
+			};
 
 			if(i < m_presetPrev.size())
 				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
@@ -83,6 +90,30 @@ namespace genericVirusUI
 	void Parts::selectPart(const size_t _part) const
 	{
 		m_editor.setPart(_part);
+	}
+
+	void Parts::selectPartMidiChannel(const size_t _part) const
+	{
+		if(!m_editor.getController().isMultiMode())
+			return;
+
+		juce::PopupMenu menu;
+
+		const auto idx= m_editor.getController().getParameterIndexByName("Part Midi Channel");
+		if(idx == pluginLib::Controller::InvalidParameterIndex)
+			return;
+
+		const auto v = m_editor.getController().getParameter(idx, static_cast<uint8_t>(_part));
+
+		for(uint8_t i=0; i<16; ++i)
+		{
+			menu.addItem("Midi Channel " + std::to_string(i + 1), true, v->getUnnormalizedValue() == i, [v, i]
+			{
+				v->setValue(v->convertTo0to1(i), pluginLib::Parameter::ChangedBy::Ui);
+			});
+		}
+
+		menu.showMenuAsync({});
 	}
 
 	void Parts::selectPrevPreset(size_t _part) const
