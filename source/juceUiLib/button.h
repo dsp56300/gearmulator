@@ -14,9 +14,13 @@ namespace genericUI
 	{
 	public:
 		using T::T;
+		using Callback = std::function<bool(const juce::MouseEvent&)>;
 
 		void mouseDown(const juce::MouseEvent& _e) override
 	    {
+			if(onDown && onDown(_e))
+				return;
+
 	        if (!allowRightClick() && _e.mods.isPopupMenu())
 	            return;
 
@@ -33,6 +37,9 @@ namespace genericUI
 
 	    void mouseUp(const juce::MouseEvent& _e) override
 	    {
+			if(onUp && onUp(_e))
+				return;
+
 	        if (!allowRightClick() && _e.mods.isPopupMenu())
 	            return;
 
@@ -55,6 +62,9 @@ namespace genericUI
 		{
 			return m_allowRightClick;
 		}
+
+		Callback onDown;
+		Callback onUp;
 
 	private:
 		bool m_allowRightClick = false;
