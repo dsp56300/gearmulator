@@ -41,6 +41,11 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
+}
+
+void PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+{
+	jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 
 	const auto percent = m_processor.getDspClockPercent();
 	const auto hz = m_processor.getDspClockHz();
@@ -54,7 +59,7 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 		ss << _percent << "% (" << mhz << " MHz)";
 		if(_percent == 100)
 			ss << " (Default)";
-		clockMenu.addItem(ss.str(), true, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
+		clockMenu.addItem(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
 	};
 
 	makeEntry(50);
