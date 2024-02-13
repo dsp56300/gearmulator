@@ -120,5 +120,6 @@ namespace pluginLib
 	private:
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
+		uint32_t m_dspClockPercent = 100;
 	};
 }
