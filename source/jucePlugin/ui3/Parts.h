@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "../juceUiLib/button.h"
 
 namespace genericVirusUI
 {
@@ -37,6 +37,7 @@ namespace genericVirusUI
 
 	private:
 		void selectPart(size_t _part) const;
+		void selectPartMidiChannel(size_t _part) const;
 		void selectPrevPreset(size_t _part) const;
 		void selectNextPreset(size_t _part) const;
 		void selectPreset(size_t _part) const;
@@ -48,7 +49,7 @@ namespace genericVirusUI
 
 		VirusEditor& m_editor;
 
-		std::vector<juce::Button*> m_partSelect;
+		std::vector<genericUI::Button<juce::DrawableButton>*> m_partSelect;
 		std::vector<juce::Button*> m_presetPrev;
 		std::vector<juce::Button*> m_presetNext;
 

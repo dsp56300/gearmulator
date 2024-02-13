@@ -86,6 +86,8 @@ void EditorWindow::mouseDown(const juce::MouseEvent& event)
 
 	if(dynamic_cast<juce::TextEditor*>(event.eventComponent))
 		return;
+	if(dynamic_cast<juce::Button*>(event.eventComponent))
+		return;
 
 	m_state.openMenu();
 }
