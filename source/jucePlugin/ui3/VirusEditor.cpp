@@ -343,7 +343,7 @@ namespace genericVirusUI
 		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
 
 		auto* param = getController().getParameter(playMode);
-		param->setValue(_playMode, pluginLib::Parameter::ChangedBy::Ui);
+		param->setValue(param->convertTo0to1(_playMode), pluginLib::Parameter::ChangedBy::Ui);
 
 		// we send this directly here as we request a new arrangement below, we don't want to wait on juce to inform the knob to have changed
 		getController().sendParameterChange(*param, _playMode);
