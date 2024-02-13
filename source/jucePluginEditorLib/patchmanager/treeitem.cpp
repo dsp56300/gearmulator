@@ -123,16 +123,16 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		if (const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
+		if (dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
 		{
-			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
+			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
 
 			if(!patches.empty())
 				patchesDropped(patches);
 		}
 		else
 		{
-			const auto* desc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
+			const auto* desc = SavePatchDesc::fromDragSource(dragSourceDetails);
 
 			if(!desc)
 				return;
@@ -161,7 +161,7 @@ namespace jucePluginEditorLib::patchManager
 			return isInterestedInPatchList(list, *arr);
 		}
 
-		if(const auto* desc = dynamic_cast<const SavePatchDesc*>(_dragSourceDetails.description.getObject()))
+		if(const auto* desc = SavePatchDesc::fromDragSource(_dragSourceDetails))
 			return isInterestedInSavePatchDesc(*desc);
 
 		return false;

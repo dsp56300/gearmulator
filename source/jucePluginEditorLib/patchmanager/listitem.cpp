@@ -65,7 +65,7 @@ namespace jucePluginEditorLib::patchManager
 		if(list && list == &m_list && m_list.canReorderPatches())
 			return true;
 
-		const auto* savePatchDesc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
+		const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
 
 		if(!savePatchDesc)
 			return false;
@@ -86,11 +86,9 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto row = drag == DragType::Above ? m_row : m_row + 1;
 
-		const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get());
-
-		if(list)
+		if(const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get()))
 		{
-			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
+			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
 
 			if(!patches.empty() && pm.movePatchesTo(row, patches))
 				m_list.refreshContent();
@@ -101,7 +99,7 @@ namespace jucePluginEditorLib::patchManager
 			if(!source)
 				return;
 
-			const auto* savePatchDesc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
+			const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
 			if(!savePatchDesc)
 				return;
 
@@ -168,7 +166,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 		else
 		{
-			const auto* savePatchDesc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
+			const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
 
 			if(savePatchDesc)
 			{

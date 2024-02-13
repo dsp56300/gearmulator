@@ -13,6 +13,11 @@ namespace jucePluginEditorLib::patchManager
 
 		auto getPart() const { return m_part; }
 
+		static const SavePatchDesc* fromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
+		{
+			return dynamic_cast<const SavePatchDesc*>(_source.description.getObject());
+		}
+
 	private:
 		int m_part;
 	};

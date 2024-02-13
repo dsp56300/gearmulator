@@ -35,6 +35,8 @@ namespace jucePluginEditorLib::patchManager
 			getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
 			getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
 		}
+
+		setRowSelectedOnMouseDown(false);
 	}
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
@@ -294,14 +296,10 @@ namespace jucePluginEditorLib::patchManager
 	{
 		ListBoxModel::selectedRowsChanged(lastRowSelected);
 
-		if(m_ignoreSelectedRowsChanged)
-			return;
+		if(!m_ignoreSelectedRowsChanged)
+			activateSelectedPatch();
 
 		const auto patches = getSelectedPatches();
-
-		if(patches.size() == 1)
-			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
-
 		getPatchManager().setListStatus(static_cast<uint32_t>(patches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
@@ -377,6 +375,14 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	void List::activateSelectedPatch() const
+	{
+		const auto patches = getSelectedPatches();
+
+		if(patches.size() == 1)
+			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
+	}
+
 	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
 	{
 		if (!m_search)
@@ -389,8 +395,12 @@ namespace jucePluginEditorLib::patchManager
 			setContent(m_search);
 	}
 
-	std::vector<pluginLib::patchDB::PatchPtr> List::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const
+	std::vector<pluginLib::patchDB::PatchPtr> List::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
+		if(!list)
+			return {};
+
 		const auto* arr = _dragSourceDetails.description.getArray();
 		if (!arr)
 			return {};
@@ -402,7 +412,7 @@ namespace jucePluginEditorLib::patchManager
 			if (!var.isInt())
 				continue;
 			const int idx = var;
-			if (const auto patch = getPatch(idx))
+			if (const auto patch = list->getPatch(idx))
 				patches.push_back(patch);
 		}
 
@@ -510,6 +520,13 @@ namespace jucePluginEditorLib::patchManager
 	bool List::hasFilters() const
 	{
 		return hasTagFilters() || !m_filter.empty();
+	}
+
+	pluginLib::patchDB::SearchHandle List::getSearchHandle() const
+	{
+		if(!m_search)
+			return pluginLib::patchDB::g_invalidSearchHandle;
+		return m_search->handle;
 	}
 
 	void List::sortPatches()

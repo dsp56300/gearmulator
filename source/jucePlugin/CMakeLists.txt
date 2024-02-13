@@ -23,6 +23,8 @@ set(SOURCES
     ui3/Parts.h
 	ui3/PatchManager.cpp
 	ui3/PatchManager.h
+	ui3/PartButton.cpp
+	ui3/PartButton.h
     ui3/Tabs.cpp
     ui3/Tabs.h
     ui3/VirusEditor.cpp

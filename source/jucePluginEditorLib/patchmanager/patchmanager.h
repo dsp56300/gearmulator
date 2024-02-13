@@ -62,10 +62,12 @@ namespace jucePluginEditorLib::patchManager
 
 		juce::Colour getResizerBarColor() const;
 
-	private:
-		bool selectPatch(uint32_t _part, int _offset);
+		bool copyPart(uint8_t _target, uint8_t _source);
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
+
+	private:
+		bool selectPatch(uint32_t _part, int _offset);
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchKey& _patch);
