@@ -52,6 +52,8 @@ namespace genericVirusUI
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
+		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;
+
 	private:
 		void onProgramChange(int _part);
 		void onPlayModeChanged();

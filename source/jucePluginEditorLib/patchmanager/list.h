@@ -56,6 +56,8 @@ namespace jucePluginEditorLib::patchManager
 		bool setSelectedPatches(const std::set<Patch>& _patches);
 		bool setSelectedPatches(const std::set<pluginLib::patchDB::PatchKey>& _patches);
 
+		void activateSelectedPatch() const;
+
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
 		static std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
@@ -86,6 +88,8 @@ namespace jucePluginEditorLib::patchManager
 		bool canReorderPatches() const;
 		bool hasTagFilters() const;
 		bool hasFilters() const;
+
+		pluginLib::patchDB::SearchHandle getSearchHandle() const;
 
 	private:
 		void sortPatches();

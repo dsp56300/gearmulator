@@ -1,5 +1,6 @@
 #include "Parts.h"
 
+#include "PartButton.h"
 #include "VirusEditor.h"
 
 #include "../VirusController.h"
@@ -19,7 +20,7 @@ namespace genericVirusUI
 
 		_editor.findComponents<juce::Slider>(m_partVolume, "PartVolume");
 		_editor.findComponents<juce::Slider>(m_partPan, "PartPan");
-		_editor.findComponents<juce::TextButton>(m_presetName, "PresetName");
+		_editor.findComponents<PartButton>(m_presetName, "PresetName");
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
@@ -38,14 +39,7 @@ namespace genericVirusUI
 			if(i < m_presetNext.size())
 				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
 
-			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
-
-			m_mouseListeners.push_back(new PartMouseListener(static_cast<int>(i), [this, &_editor](const juce::MouseEvent&, const int _part)
-			{
-				_editor.startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(_part), m_presetName[_part]);
-			}));
-
-			m_presetName[i]->addMouseListener(m_mouseListeners.back(), false);
+			m_presetName[i]->initalize(static_cast<uint8_t>(i));
 
 			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
 			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
@@ -63,14 +57,7 @@ namespace genericVirusUI
 		updateAll();
 	}
 
-	Parts::~Parts()
-	{
-		for(size_t i=0; i<m_presetName.size(); ++i)
-		{
-			m_presetName[i]->removeMouseListener(m_mouseListeners[i]);
-			delete m_mouseListeners[i];
-		}
-	}
+	Parts::~Parts() = default;
 
 	void Parts::onProgramChange() const
 	{
@@ -136,30 +123,6 @@ namespace genericVirusUI
 		if(pm && pm->selectNextPreset(static_cast<uint32_t>(_part)))
 			return;
 		m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
-	}
-
-	void Parts::selectPreset(size_t _part) const
-	{
-		juce::PopupMenu selector;
-
-		const auto pt = static_cast<uint8_t>(_part);
-
-        for (uint8_t b = 0; b < m_editor.getController().getBankCount(); ++b)
-        {
-            const auto bank = virusLib::fromArrayIndex(b);
-            auto presetNames = m_editor.getController().getSinglePresetNames(bank);
-            juce::PopupMenu p;
-            for (uint8_t j = 0; j < presetNames.size(); j++)
-            {
-                const auto& presetName = presetNames[j];
-                p.addItem(presetName, [this, bank, j, pt] 
-                {
-					m_editor.selectRomPreset(pt, bank, j);
-                });
-            }
-            selector.addSubMenu(m_editor.getController().getBankName(b), p);
-		}
-		selector.showMenuAsync(juce::PopupMenu::Options());
 	}
 
 	void Parts::updatePresetNames() const

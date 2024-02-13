@@ -2,10 +2,11 @@
 
 #include <vector>
 
-#include "../juceUiLib/button.h"
+#include "../../juceUiLib/button.h"
 
 namespace genericVirusUI
 {
+	class PartButton;
 	class VirusEditor;
 
 	class PartMouseListener : public juce::MouseListener
@@ -40,7 +41,6 @@ namespace genericVirusUI
 		void selectPartMidiChannel(size_t _part) const;
 		void selectPrevPreset(size_t _part) const;
 		void selectNextPreset(size_t _part) const;
-		void selectPreset(size_t _part) const;
 
 		void updatePresetNames() const;
 		void updateSelectedPart() const;
@@ -56,7 +56,6 @@ namespace genericVirusUI
 		std::vector<juce::Slider*> m_partVolume;
 		std::vector<juce::Slider*> m_partPan;
 
-		std::vector<juce::TextButton*> m_presetName;
-		std::vector<PartMouseListener*> m_mouseListeners;
+		std::vector<PartButton*> m_presetName;
 	};
 }

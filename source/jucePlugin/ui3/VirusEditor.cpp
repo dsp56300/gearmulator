@@ -1,6 +1,7 @@
 #include "VirusEditor.h"
 
 #include "BinaryData.h"
+#include "PartButton.h"
 
 #include "../ParameterNames.h"
 #include "../PluginProcessor.h"
@@ -188,6 +189,14 @@ namespace genericVirusUI
 				"\n"
 				"* The plugin state is not preserved\n"
 				"* Preset saving is disabled"};
+	}
+
+	genericUI::Button<juce::TextButton>* VirusEditor::createJuceComponent(genericUI::Button<juce::TextButton>* _button, genericUI::UiObject& _object)
+	{
+		if(_object.getName() == "PresetName")
+			return new PartButton(*this);
+
+		return Editor::createJuceComponent(_button, _object);
 	}
 
 	void VirusEditor::onProgramChange(int _part)

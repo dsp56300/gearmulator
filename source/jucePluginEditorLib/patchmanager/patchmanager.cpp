@@ -212,7 +212,7 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
-	bool PatchManager::setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch)
+	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch)
 	{
 		if(!activatePatch(_patch, _part))
 			return false;
@@ -412,6 +412,26 @@ namespace jucePluginEditorLib::patchManager
 	juce::Colour PatchManager::getResizerBarColor() const
 	{
 		return m_treeDS->findColour(juce::TreeView::ColourIds::selectedItemBackgroundColourId);
+	}
+
+	bool PatchManager::copyPart(const uint8_t _target, const uint8_t _source)
+	{
+		if(_target == _source)
+			return false;
+
+		const auto source = requestPatchForPart(_source);
+		if(!source)
+			return false;
+
+		if(!activatePatch(source, _target))
+			return false;
+
+		m_state.copy(_target, _source);
+
+		if(getCurrentPart() == _target)
+			setSelectedPatch(_target, m_state.getPatch(_target));
+
+		return true;
 	}
 
 	std::shared_ptr<genericUI::UiObject> PatchManager::getTemplate(const std::string& _name) const

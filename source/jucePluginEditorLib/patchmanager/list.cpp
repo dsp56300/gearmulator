@@ -296,14 +296,10 @@ namespace jucePluginEditorLib::patchManager
 	{
 		ListBoxModel::selectedRowsChanged(lastRowSelected);
 
-		if(m_ignoreSelectedRowsChanged)
-			return;
+		if(!m_ignoreSelectedRowsChanged)
+			activateSelectedPatch();
 
 		const auto patches = getSelectedPatches();
-
-		if(patches.size() == 1)
-			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
-
 		getPatchManager().setListStatus(static_cast<uint32_t>(patches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
@@ -377,6 +373,14 @@ namespace jucePluginEditorLib::patchManager
 		m_ignoreSelectedRowsChanged = false;
 		scrollToEnsureRowIsOnscreen((minRow + maxRow) >> 1);
 		return true;
+	}
+
+	void List::activateSelectedPatch() const
+	{
+		const auto patches = getSelectedPatches();
+
+		if(patches.size() == 1)
+			m_patchManager.setSelectedPatch(*patches.begin(), m_search->handle);
 	}
 
 	void List::processDirty(const pluginLib::patchDB::Dirty& _dirty)
@@ -516,6 +520,13 @@ namespace jucePluginEditorLib::patchManager
 	bool List::hasFilters() const
 	{
 		return hasTagFilters() || !m_filter.empty();
+	}
+
+	pluginLib::patchDB::SearchHandle List::getSearchHandle() const
+	{
+		if(!m_search)
+			return pluginLib::patchDB::g_invalidSearchHandle;
+		return m_search->handle;
 	}
 
 	void List::sortPatches()

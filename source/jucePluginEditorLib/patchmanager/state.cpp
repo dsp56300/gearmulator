@@ -158,4 +158,9 @@ namespace jucePluginEditorLib::patchManager
 			return;
 		m_parts[_part].clear();
 	}
+
+	void State::copy(const uint8_t _target, const uint8_t _source)
+	{
+		m_parts[_target] = m_parts[_source];
+	}
 }

@@ -58,6 +58,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void clear(const uint32_t _part);
+		void copy(uint8_t _target, uint8_t _source);
 
 	private:
 		PatchManager& m_patchManager;
