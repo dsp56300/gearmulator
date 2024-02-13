@@ -443,12 +443,9 @@
 			"pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
 		},
 		"controllerlinks": [
-			{ "source": "Cutoff1",    "dest": "Cutoff2", "condition":"LinkEnv" },					{ "source": "Cutoff2", "dest": "Cutoff1", "condition":"LinkEnv" },
 			{ "source": "Resonance1", "dest": "Resonance2", "condition":"LinkEnv" },			{ "source": "Resonance2", "dest": "Resonance1", "condition":"LinkEnv" },
 			{ "source": "EnvAmount1", "dest": "EnvAmount2", "condition":"LinkEnv" },			{ "source": "EnvAmount2", "dest": "EnvAmount1", "condition":"LinkEnv" },
-			{ "source": "Keyfollow1", "dest": "Keyfollow2", "condition":"LinkEnv" },			{ "source": "Keyfollow2", "dest": "Keyfollow1", "condition":"LinkEnv" },
-			{ "source": "ResVelo1",   "dest": "ResVelo2", "condition":"LinkEnv" },				{ "source": "ResVelo2", "dest": "ResVelo1", "condition":"LinkEnv" },
-			{ "source": "EnvVelo1",   "dest": "EnvVelo2", "condition":"LinkEnv" },				{ "source": "EnvVelo2", "dest": "EnvVelo1", "condition":"LinkEnv" },
+			{ "source": "Keyfollow1", "dest": "Keyfollow2", "condition":"LinkEnv" },			{ "source": "Keyfollow2", "dest": "Keyfollow1", "condition":"LinkEnv" }
 		]
         },
         {

@@ -17,6 +17,8 @@ OsTIrus:
 
 - [Imp] Removed ROM banks that are empty anyway
 - [Imp] GUI has been reworked slightly and many GUI related issues have been fixed
+- [Fix] Cutoff, Filter Env by Velocity and Filter Resonance by Velocity were linked 
+        when Filter Link is active
 
 Osirus/OsTIrus:
 
