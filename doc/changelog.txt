@@ -16,6 +16,7 @@ Release Notes
 Osirus/OsTIrus:
 
 - [Imp] Added output gain adjustment to context menu (already present in Vavra before)
+- [Imp] The Midi Receive Channel of a part in Multi Mode can now be adjusted by right clicking on the part select button
 
 1.3.3 (2024.02.07)
 
