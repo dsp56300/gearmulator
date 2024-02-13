@@ -75,7 +75,7 @@ namespace pluginLib
 		float getOutputGain() const { return m_outputGain; }
 		void setOutputGain(const float _gain) { m_outputGain = _gain; }
 		
-		bool setDspClockPercent(int _percent = 100);
+		bool setDspClockPercent(uint32_t _percent = 100);
 		uint32_t getDspClockPercent() const;
 		uint64_t getDspClockHz() const;
 
@@ -120,5 +120,6 @@ namespace pluginLib
 	private:
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
+		uint32_t m_dspClockPercent = 100;
 	};
 }

@@ -5,6 +5,7 @@
 #include "../synthLib/deviceException.h"
 #include "../synthLib/os.h"
 #include "../synthLib/binarystream.h"
+#include "dsp56kEmu/fastmath.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -174,6 +175,8 @@ namespace pluginLib
 			m_device.reset(new DummyDevice());
 		}
 
+		m_device->setDspClockPercent(m_dspClockPercent);
+
 		m_plugin.reset(new synthLib::Plugin(m_device.get()));
 
 		return *m_plugin;
@@ -196,6 +199,12 @@ namespace pluginLib
 			s.write<uint32_t>(1);	// version
 			s.write(m_inputGain);
 			s.write(m_outputGain);
+		}
+
+		if(m_dspClockPercent != 100)
+		{
+			synthLib::ChunkWriter cw(s, "DSPC", 1);
+			s.write(m_dspClockPercent);
 		}
 
 		s.toVector(_targetBuffer, true);
@@ -228,20 +237,30 @@ namespace pluginLib
 			readGain(_binaryStream);
 		});
 
+		cr.add("DSPC", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			auto p = _binaryStream.read<uint32_t>();
+			p = dsp56k::clamp<uint32_t>(p, 50, 200);
+			setDspClockPercent(p);
+		});
+
 		cr.tryRead();
 	}
 
-	bool Processor::setDspClockPercent(const int _percent)
+	bool Processor::setDspClockPercent(const uint32_t _percent)
 	{
 		if(!m_device)
 			return false;
-		return m_device->setDspClockPercent(_percent);
+		if(!m_device->setDspClockPercent(_percent))
+			return false;
+		m_dspClockPercent = _percent;
+		return true;
 	}
 
 	uint32_t Processor::getDspClockPercent() const
 	{
 		if(!m_device)
-			return 0;
+			return m_dspClockPercent;
 		return m_device->getDspClockPercent();
 	}
 
