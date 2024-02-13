@@ -231,7 +231,7 @@ namespace pluginLib
 		cr.tryRead();
 	}
 
-	bool Processor::setDspClockPercent(const int _percent)
+	bool Processor::setDspClockPercent(const uint32_t _percent)
 	{
 		if(!m_device)
 			return false;

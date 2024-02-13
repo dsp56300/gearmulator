@@ -359,7 +359,7 @@ namespace virusLib
 		return res;
 	}
 
-	bool Device::setDspClockPercent(const int _percent)
+	bool Device::setDspClockPercent(const uint32_t _percent)
 	{
 		if(!m_dsp)
 			return false;
