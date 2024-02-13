@@ -75,7 +75,7 @@ namespace genericUI
 
 	private:
 		bool hasComponent(const std::string& _component) const;
-		template<typename T> T* createJuceObject(Editor& _editor);
+		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
 		void createCondition(Editor& _editor, juce::Component& _target);
 

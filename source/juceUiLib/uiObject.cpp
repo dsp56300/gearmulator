@@ -19,6 +19,8 @@
 
 #include <cassert>
 
+#include "button.h"
+
 namespace genericUI
 {
 	UiObject::UiObject(const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate)
@@ -248,15 +250,15 @@ namespace genericUI
 		}
 		else if(hasComponent("button"))
 		{
-			createJuceObject(_editor, new juce::DrawableButton(m_name, juce::DrawableButton::ImageRaw));
+			createJuceObject<Button<juce::DrawableButton>>(_editor, m_name, juce::DrawableButton::ImageRaw);
 		}
 		else if(hasComponent("hyperlinkbutton"))
 		{
-			createJuceObject<juce::HyperlinkButton>(_editor);
+			createJuceObject<Button<juce::HyperlinkButton>>(_editor);
 		}
 		else if(hasComponent("textbutton"))
 		{
-			createJuceObject<juce::TextButton>(_editor);
+			createJuceObject<Button<juce::TextButton>>(_editor);
 		}
 		else if(hasComponent("label"))
 		{
@@ -512,9 +514,9 @@ namespace genericUI
 			_target.getProperties().set(juce::Identifier(prop.first.c_str()), juce::var(prop.second.c_str()));
 	}
 
-	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
+	template <typename T, class... Args> T* UiObject::createJuceObject(Editor& _editor, Args... _args)
 	{
-		return createJuceObject(_editor, new T());
+		return createJuceObject(_editor, new T(_args...));
 	}
 
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor, T* _object)
