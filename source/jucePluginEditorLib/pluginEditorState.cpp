@@ -223,31 +223,34 @@ void PluginEditorState::openMenu()
 
 	initContextMenu(menu);
 
-	const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
-
-	juce::PopupMenu advancedMenu;
-	advancedMenu.addItem("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
 	{
-		if(!allowAdvanced)
+		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
+
+		juce::PopupMenu advancedMenu;
+		advancedMenu.addItem("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
 		{
-			if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning", 
-				"Changing these settings may cause instability of the plugin.\n"
-				"\n"
-				"Please confirm to continue.")
-				)
-				m_processor.getConfig().setValue("allow_advanced_options", true);
-		}
-		else
+			if(!allowAdvanced)
+			{
+				if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning", 
+					"Changing these settings may cause instability of the plugin.\n"
+					"\n"
+					"Please confirm to continue.")
+					)
+					m_processor.getConfig().setValue("allow_advanced_options", true);
+			}
+			else
+			{
+				m_processor.getConfig().setValue("allow_advanced_options", juce::var(false));
+			}
+		});
+
+		advancedMenu.addSeparator();
+
+		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
 		{
-			m_processor.getConfig().setValue("allow_advanced_options", juce::var(false));
+			menu.addSubMenu("Advanced...", advancedMenu);
 		}
-	});
-
-	advancedMenu.addSeparator();
-
-	initAdvancedContextMenu(advancedMenu, allowAdvanced);
-
-	menu.addSubMenu("Advanced...", advancedMenu);
+	}
 
 	menu.showMenuAsync(juce::PopupMenu::Options());
 }

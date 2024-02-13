@@ -41,7 +41,7 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 	}
 }
 
-void PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
 {
 	jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 
@@ -68,4 +68,6 @@ void PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _en
 	makeEntry(200);
 
 	_menu.addSubMenu("DSP Clock", clockMenu);
+
+	return true;
 }
