@@ -11,6 +11,7 @@ Release Notes
 - [Fix] Parameter value change by double-click on knob to reset it was not sent to host for automation
 - [Fix] Linked parameters confused Bitwig / Ableton and other hosts
 - [Fix] Slow plugin loading times in some hosts due to excessive initial parameter automation updates
+- [Fix] Part context menu and global context menu opened at the same time on right click
 
 Osirus/OsTIrus:
 
