@@ -391,8 +391,12 @@ namespace jucePluginEditorLib::patchManager
 			setContent(m_search);
 	}
 
-	std::vector<pluginLib::patchDB::PatchPtr> List::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) const
+	std::vector<pluginLib::patchDB::PatchPtr> List::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
+		if(!list)
+			return {};
+
 		const auto* arr = _dragSourceDetails.description.getArray();
 		if (!arr)
 			return {};
@@ -404,7 +408,7 @@ namespace jucePluginEditorLib::patchManager
 			if (!var.isInt())
 				continue;
 			const int idx = var;
-			if (const auto patch = getPatch(idx))
+			if (const auto patch = list->getPatch(idx))
 				patches.push_back(patch);
 		}
 

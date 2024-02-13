@@ -123,9 +123,9 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		if (const auto* list = dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
+		if (dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
 		{
-			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
+			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
 
 			if(!patches.empty())
 				patchesDropped(patches);

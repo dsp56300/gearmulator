@@ -86,11 +86,9 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto row = drag == DragType::Above ? m_row : m_row + 1;
 
-		const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get());
-
-		if(list)
+		if(const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get()))
 		{
-			const auto patches = list->getPatchesFromDragSource(dragSourceDetails);
+			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
 
 			if(!patches.empty() && pm.movePatchesTo(row, patches))
 				m_list.refreshContent();
