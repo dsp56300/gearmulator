@@ -217,7 +217,7 @@ namespace jucePluginEditorLib::patchManager
 		if(!activatePatch(_patch, _part))
 			return false;
 
-		m_state.setSelectedPatch(getCurrentPart(), pluginLib::patchDB::PatchKey(*_patch), _fromSearch);
+		m_state.setSelectedPatch(_part, pluginLib::patchDB::PatchKey(*_patch), _fromSearch);
 
 		if(_part == getCurrentPart())
 			m_info->setPatch(_patch);
