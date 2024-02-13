@@ -516,7 +516,14 @@ namespace genericUI
 
 	template <typename T, class... Args> T* UiObject::createJuceObject(Editor& _editor, Args... _args)
 	{
-		return createJuceObject(_editor, new T(_args...));
+		T* comp = nullptr;
+
+		comp = _editor.createJuceComponent(comp, *this, _args...);
+
+		if(!comp)
+			comp = new T(_args...);
+
+		return createJuceObject(_editor, comp);
 	}
 
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor, T* _object)
