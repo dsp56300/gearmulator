@@ -132,7 +132,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 		else
 		{
-			const auto* desc = dynamic_cast<const SavePatchDesc*>(dragSourceDetails.description.getObject());
+			const auto* desc = SavePatchDesc::fromDragSource(dragSourceDetails);
 
 			if(!desc)
 				return;
@@ -161,7 +161,7 @@ namespace jucePluginEditorLib::patchManager
 			return isInterestedInPatchList(list, *arr);
 		}
 
-		if(const auto* desc = dynamic_cast<const SavePatchDesc*>(_dragSourceDetails.description.getObject()))
+		if(const auto* desc = SavePatchDesc::fromDragSource(_dragSourceDetails))
 			return isInterestedInSavePatchDesc(*desc);
 
 		return false;

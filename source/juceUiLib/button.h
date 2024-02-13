@@ -16,7 +16,7 @@ namespace genericUI
 		using T::T;
 		using Callback = std::function<bool(const juce::MouseEvent&)>;
 
-		void mouseDown(const juce::MouseEvent& _e) override
+		virtual void mouseDown(const juce::MouseEvent& _e) override
 	    {
 			if(onDown && onDown(_e))
 				return;
@@ -27,7 +27,7 @@ namespace genericUI
 			T::mouseDown(_e);
 	    }
 
-	    void mouseDrag(const juce::MouseEvent& _e) override
+	    virtual void mouseDrag(const juce::MouseEvent& _e) override
 	    {
 	        if (!allowRightClick() && _e.mods.isPopupMenu())
 	            return;
@@ -35,7 +35,7 @@ namespace genericUI
 			T::mouseDrag(_e);
 	    }
 
-	    void mouseUp(const juce::MouseEvent& _e) override
+	    virtual void mouseUp(const juce::MouseEvent& _e) override
 	    {
 			if(onUp && onUp(_e))
 				return;
