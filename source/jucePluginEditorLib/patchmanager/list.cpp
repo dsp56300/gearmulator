@@ -35,6 +35,8 @@ namespace jucePluginEditorLib::patchManager
 			getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
 			getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
 		}
+
+		setRowSelectedOnMouseDown(false);
 	}
 
 	void List::setContent(const pluginLib::patchDB::SearchHandle& _handle)
