@@ -331,6 +331,9 @@ namespace pluginLib
 		const auto parameterLinks = json["parameterlinks"].getArray();
 		parseParameterLinks(errors, parameterLinks);
 
+		const auto regions = json["regions"].getArray();
+		parseParameterRegions(errors, regions);
+
 		auto res = errors.str();
 
 		if(!res.empty())
@@ -527,7 +530,7 @@ namespace pluginLib
 			m_midiPackets.insert(std::make_pair(_key, packet));
 	}
 
-	void ParameterDescriptions::parseParameterLinks(std::stringstream& _errors, juce::Array<juce::var>* _links)
+	void ParameterDescriptions::parseParameterLinks(std::stringstream& _errors, const juce::Array<juce::var>* _links)
 	{
 		if(!_links)
 			return;
@@ -612,5 +615,118 @@ namespace pluginLib
 		}
 
 		m_parameterLinks.push_back(link);
+	}
+
+	void ParameterDescriptions::parseParameterRegions(std::stringstream& _errors, const juce::Array<juce::var>* _regions)
+	{
+		if(!_regions)
+			return;
+
+		for (const auto& _region : *_regions)
+			parseParameterRegion(_errors, _region);
+	}
+
+	void ParameterDescriptions::parseParameterRegion(std::stringstream& _errors, const juce::var& _value)
+	{
+		const auto id = _value["id"].toString().toStdString();
+		const auto name = _value["name"].toString().toStdString();
+		const auto parameters = _value["parameters"].getArray();
+		const auto regions = _value["regions"].getArray();
+
+		if(id.empty())
+		{
+			_errors << "region needs to have an id\n";
+			return;
+		}
+
+		if(m_regions.find(id) != m_regions.end())
+		{
+			_errors << "region with id '" << id << "' already exists\n";
+			return;
+		}
+
+		if(name.empty())
+		{
+			_errors << "region with id " << id << " needs to have a name\n";
+			return;
+		}
+
+		if(!parameters && !regions)
+		{
+			_errors << "region with id " << id << " needs to at least one parameter or region\n";
+			return;
+		}
+
+		std::unordered_map<std::string, const Description*> paramMap;
+
+		if(parameters)
+		{
+			const auto& params = *parameters;
+
+			for (const auto& i : params)
+			{
+				const auto& param = i.toString().toStdString();
+
+				if(param.empty())
+				{
+					_errors << "Empty parameter name in parameter list for region " << id << '\n';
+					return;
+				}
+
+				uint32_t idx = 0;
+
+				if(!getIndexByName(idx, param))
+				{
+					_errors << "Parameter with name '" << param << "' not found for region " << id << '\n';
+					return;
+				}
+
+				const auto* desc = &m_descriptions[idx];
+
+				if(paramMap.find(param) != paramMap.end())
+				{
+					_errors << "Parameter with name '" << param << "' has been specified more than once for region " << id << '\n';
+					return;
+				}
+
+				paramMap.insert({param, desc});
+			}
+		}
+
+		if(regions)
+		{
+			const auto& regs = *regions;
+
+			for (const auto& i : regs)
+			{
+				const auto& reg = i.toString().toStdString();
+
+				if(reg.empty())
+				{
+					_errors << "Empty region specified in region '" << id << "'\n";
+					return;
+				}
+
+				const auto it = m_regions.find(reg);
+
+				if(it == m_regions.end())
+				{
+					_errors << "Region with id '" << reg << "' not found for region '" << id << "'\n";
+					return;
+				}
+
+				const auto& region = it->second;
+
+				const auto& regParams = region.getParams();
+
+				for (const auto& itParam : regParams)
+				{
+					if(paramMap.find(itParam.first) == paramMap.end())
+						paramMap.insert(itParam);
+				}
+			}
+		}
+
+		m_regions.insert({id, ParameterRegion(id, name, std::move(paramMap))});
 	}
 }

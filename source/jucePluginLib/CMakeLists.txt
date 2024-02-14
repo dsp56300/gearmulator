@@ -11,6 +11,7 @@ set(SOURCES
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
+	parameterregion.cpp parameterregion.h
 	processor.cpp processor.h
 	types.h
 )
