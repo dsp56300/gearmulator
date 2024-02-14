@@ -272,30 +272,40 @@ namespace pluginLib
 		return m_descriptions.getMidiPacket(_name);
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const
+	bool Controller::createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, const uint8_t _part) const
 	{
         const auto* m = getMidiPacket(_packetName);
 		assert(m && "midi packet not found");
         if(!m)
             return false;
 
-		MidiPacket::NamedParamValues paramValues;
-
         MidiPacket::ParamIndices indices;
 		m->getParameterIndices(indices, m_descriptions);
 
-		if(!indices.empty())
-		{
-			for (const auto& index : indices)
-			{
-				auto* p = getParameter(index.second, _part);
-				if(!p)
-					return false;
+		if(indices.empty())
+			return true;
 
-				const auto v = getParameterValue(p);
-				paramValues.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
-			}
-		}
+		for (const auto& index : indices)
+        {
+	        auto* p = getParameter(index.second, _part);
+	        if(!p)
+		        return false;
+
+	        const auto v = getParameterValue(p);
+	        _params.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
+        }
+
+		return true;
+	}
+
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const
+	{
+		MidiPacket::NamedParamValues paramValues;
+
+		if(!createNamedParamValues(paramValues, _packetName, _part))
+			return false;
+
+        const auto* m = getMidiPacket(_packetName);
 
 		if(!m->create(_sysex, _params, paramValues))
         {
@@ -361,6 +371,54 @@ namespace pluginLib
 		const std::lock_guard l(m_pluginMidiOutLock);
         std::swap(m_pluginMidiOut, _events);
 		m_pluginMidiOut.clear();
+	}
+
+	bool Controller::lockRegion(const std::string& _id)
+	{
+		if(m_lockedRegions.find(_id) != m_lockedRegions.end())
+			return true;
+
+		if(m_descriptions.getRegions().find(_id) == m_descriptions.getRegions().end())
+			return false;
+
+		m_lockedRegions.insert(_id);
+		return true;
+	}
+
+	bool Controller::unlockRegion(const std::string& _id)
+	{
+		return m_lockedRegions.erase(_id);
+	}
+
+	const std::set<std::string>& Controller::getLockedRegions() const
+	{
+		return m_lockedRegions;
+	}
+
+	bool Controller::isRegionLocked(const std::string& _id)
+	{
+		return m_lockedRegions.find(_id) != m_lockedRegions.end();
+	}
+
+	std::unordered_set<std::string> Controller::getLockedParameters() const
+	{
+		if(m_lockedRegions.empty())
+			return {};
+
+		std::unordered_set<std::string> result;
+
+		for (const auto& name : m_lockedRegions)
+		{
+			const auto& it = m_descriptions.getRegions().find(name);
+			if(it == m_descriptions.getRegions().end())
+				continue;
+
+			const auto& region = it->second;
+			for (const auto& itParam : region.getParams())
+				result.insert(itParam.first);
+		}
+
+		return result;
 	}
 
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)

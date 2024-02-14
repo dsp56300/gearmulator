@@ -324,7 +324,7 @@ namespace genericVirusUI
 			for(size_t i=0; i<results.size();)
 			{
 				// convert to load to edit buffer of current part
-				const auto data = c.modifySingleDump(results[i], virusLib::BankNumber::EditBuffer, c.isMultiMode() ? c.getCurrentPart() : virusLib::SINGLE, true, true);
+				const auto data = c.modifySingleDump(results[i], virusLib::BankNumber::EditBuffer, c.isMultiMode() ? c.getCurrentPart() : virusLib::SINGLE);
 				if(data.empty())
 					results.erase(results.begin() + i);
 				else

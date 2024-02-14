@@ -36,6 +36,7 @@ namespace pluginLib
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
+		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;
 		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const;
 
 		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
@@ -55,6 +56,14 @@ namespace pluginLib
         // this is called by the plug-in on audio thread!
         void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
 		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
+
+		bool lockRegion(const std::string& _id);
+		bool unlockRegion(const std::string& _id);
+		const std::set<std::string>& getLockedRegions() const;
+		bool isRegionLocked(const std::string& _id);
+		std::unordered_set<std::string> getLockedParameters() const;
+
+		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
 
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
@@ -113,5 +122,6 @@ namespace pluginLib
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
 		std::array<ParameterList, 16> m_paramsByParamType;
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
+		std::set<std::string> m_lockedRegions;
 	};
 }

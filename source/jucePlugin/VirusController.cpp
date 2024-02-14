@@ -681,7 +681,7 @@ namespace Virus
         return dst;
     }
 
-    std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram, const bool _modifyBank, const bool _modifyProgram)
+    std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram)
     {
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
@@ -689,10 +689,32 @@ namespace Virus
 		if(!parseSingle(data, parameterValues, _sysex))
 			return {};
 
-		return createSingleDump(_modifyBank ? toMidiByte(_newBank) : data[pluginLib::MidiDataType::Bank], _modifyProgram ? _newProgram : data[pluginLib::MidiDataType::Program], parameterValues);
+        if(_newBank == virusLib::BankNumber::EditBuffer)
+        {
+	        const auto lockedParams = getLockedParameters();
+
+	        if(!lockedParams.empty())
+	        {
+                const uint8_t part = _newProgram == virusLib::SINGLE ? 0 : _newProgram;
+                pluginLib::MidiPacket::NamedParamValues currentParams;
+		        createNamedParamValues(currentParams, midiPacketName(MidiPacketType::SingleDump), part);
+
+                for (const auto& name : lockedParams)
+                {
+                    const auto it = currentParams.find({pluginLib::MidiPacket::AnyPart, name});
+                    if(it == currentParams.end())
+	                    continue;
+
+                	const uint32_t idx = getParameterIndexByName(name);
+                    if(idx != InvalidParameterIndex)
+	                    parameterValues[idx] = it->second;
+                }
+	        }
+        }
+		return createSingleDump(toMidiByte(_newBank), _newProgram, parameterValues);
     }
 
-    void Controller::selectPrevPreset(uint8_t _part)
+    void Controller::selectPrevPreset(const uint8_t _part)
     {
 		if(getCurrentPartProgram(_part) > 0)
 		{
@@ -739,7 +761,7 @@ namespace Virus
 
         const auto program = static_cast<uint8_t>(_part);
 
-    	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program, true, true);
+    	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program);
 
 		if(msg.empty())
 			return false;
