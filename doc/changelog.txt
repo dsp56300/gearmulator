@@ -4,7 +4,7 @@ Release Notes
 
 DSP:
 
-- [Imp] Small performance improvements when JIT needs to recompile code
+- [Imp] Small performance improvements when JIT compiler needs to recompile code
 
 Framework:
 
@@ -26,6 +26,9 @@ Osirus/OsTIrus:
 - [Imp] The Midi Receive Channel of a part in Multi Mode can now be adjusted by right clicking on the part select button
 - [Imp] Patch Manager: Allow to drag & drop patches from patch list to part slots
 - [Imp] Patches can now be copied to other parts via drag & drop
+- [Imp] Parameter regions can now be locked/unlocked via a context menu. Locked parameters do not change
+        when a preset is loaded. This is useful for example if you want to keep an Arp pattern
+        while searching for a preset, etc.
 
 1.3.3 (2024.02.07)
 
