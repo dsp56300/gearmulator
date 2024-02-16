@@ -223,6 +223,49 @@ void PluginEditorState::openMenu()
 
 	initContextMenu(menu);
 
+	juce::PopupMenu lockRegions;
+
+	auto& regions = m_processor.getController().getParameterDescriptions().getRegions();
+
+	lockRegions.addItem("Unlock All", [&]
+	{
+		for (const auto& region : regions)
+			m_processor.getController().unlockRegion(region.first);
+	});
+
+	lockRegions.addItem("Lock All", [&]
+	{
+		for (const auto& region : regions)
+			m_processor.getController().lockRegion(region.first);
+	});
+
+	lockRegions.addSeparator();
+
+	uint32_t count = 0;
+
+	std::map<std::string, pluginLib::ParameterRegion> sortedRegions;
+	for (const auto& region : regions)
+		sortedRegions.insert(region);
+
+	for (const auto& region : sortedRegions)
+	{
+		lockRegions.addItem(region.second.getName(), true, m_processor.getController().isRegionLocked(region.first), [this, id=region.first]
+		{
+			if(m_processor.getController().isRegionLocked(id))
+				m_processor.getController().unlockRegion(id);
+			else
+				m_processor.getController().lockRegion(id);
+		});
+
+		if(++count == 16)
+		{
+			lockRegions.addColumnBreak();
+			count = 0;
+		}
+	}
+
+	menu.addSubMenu("Lock Regions...", lockRegions);
+
 	{
 		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
 

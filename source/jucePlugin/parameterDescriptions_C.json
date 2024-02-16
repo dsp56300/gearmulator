@@ -375,6 +375,124 @@
  		{"page":114, "class":"Global", "index":126, "name":"LCD Contrast", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":127, "name":"Master Volume", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false}
  	],
+	"regions":
+	[
+		{	"id":"oscA", "name": "Oscillator 1",
+			"parameters":["Osc1 Shape", "Osc1 Pulsewidth", "Osc1 Wave Select", "Osc1 Semitone", "Osc1 Keyfollow", "Osc1 Shape Velocity"]
+		},
+		{	"id":"oscB", "name": "Oscillator 2",
+			"parameters":["Osc2 Shape", "Osc2 Pulsewidth", "Osc2 Wave Select", "Osc2 Semitone", "Osc2 Detune", "Osc2 FM Amount", "Osc2 Sync", "Osc2 Filt Env Amt", "FM Filt Env Amt", "Osc2 Keyfollow", "Osc FM Mode", "Osc2 Shape Velocity", "Fm Amount Velocity"]
+		},
+		{	"id":"oscC", "name": "Oscillator 3",
+			"parameters":["Osc3 Mode", "Osc3 Volume", "Osc3 Semitone", "Osc3 Detune"]
+		},
+		{	"id":"oscCommon", "name": "Osc Common",
+			"parameters":["Osc Balance", "Suboscillator Volume", "Suboscillator Shape", "Osc Mainvolume", "Ringmodulator Volume", "Osc Init Phase", "PulseWidth Velocity"]
+		},
+		{	"id":"noise", "name": "Noise",
+			"parameters":["Noise Volume", "Noise Color"]
+		},
+		{	"id":"filterA", "name": "Filter 1",
+			"parameters":["Cutoff", "Filter1 Resonance", "Filter1 Env Amt", "Filter1 Keyfollow", "Filter1 Mode", "Filter1 Env Polarity", "Flt1 EnvAmt Velocity", "Resonance1 Velocity"]
+		},
+		{	"id":"filterB", "name": "Filter 2",
+			"parameters":["Cutoff2", "Filter2 Resonance", "Filter2 Env Amt", "Filter2 Keyfollow", "Filter2 Mode", "Filter2 Env Polarity", "Filter2 Cutoff Link", "Flt2 EnvAmt Velocity", "Resonance2 Velocity"]
+		},
+		{	"id":"filterCommon", "name": "Filters Common",
+			"parameters":["Filter Balance", "Saturation Curve", "Filter Routing", "Filter Keytrack Base"]
+		},
+		{	"id":"envFilter", "name": "Filter Env",
+			"parameters":["Filter Env Attack", "Filter Env Decay", "Filter Env Sustain", "Filter Env Sustain Time", "Filter Env Release"]
+		},
+		{	"id":"envAmp", "name": "Amp Env",
+			"parameters":["Amp Env Attack", "Amp Env Decay", "Amp Env Sustain", "Amp Env Sustain Time", "Amp Env Release"]
+		},
+		{	"id":"lfoA", "name": "LFO 1",
+			"parameters":["Lfo1 Rate", "Lfo1 Shape", "Lfo1 Env Mode", "Lfo1 Mode", "Lfo1 Symmetry", "Lfo1 Keyfollow", "Lfo1 Keytrigger", "Osc1 Lfo1 Amount", "Osc2 Lfo1 Amount", "PW Lfo1 Amount", "Reso Lfo1 Amount", "FiltGain Lfo1 Amount", "Lfo1 Clock", "LFO1 Assign Dest", "LFO1 Assign Amount"]
+		},
+		{	"id":"lfoB", "name": "LFO 2",
+			"parameters":["Lfo2 Rate", "Lfo2 Shape", "Lfo2 Env Mode", "Lfo2 Mode", "Lfo2 Symmetry", "Lfo2 Keyfollow", "Lfo2 Keytrigger", "Shape Lfo2 Amount", "FM Lfo2 Amount", "Cutoff1 Lfo2 Amount", "Cutoff2 Lfo2 Amount", "Pan Lfo2 Amount", "Lfo2 Clock", "LFO2 Assign Dest", "LFO2 Assign Amount"]
+		},
+		{	"id":"lfoC", "name": "LFO 3",
+			"parameters":["Lfo3 Rate", "Lfo3 Shape", "Lfo3 Mode", "Lfo3 Keyfollow", "Lfo3 Destination", "Osc Lfo3 Amount", "Lfo3 Fade-In Time", "Lfo3 Clock"]
+		},
+		{	"id":"amp", "name": "Amp",
+			"parameters":["Patch Volume", "Amp Velocity", "Panorama Velocity", "Second Output Balance"]
+		},
+		{	"id":"common", "name": "Common",
+			"parameters":["Transpose", "Key Mode", "Control Smooth Mode", "Bender Range Up", "Bender Range Down", "Bender Scale"]
+		},
+		{	"id":"unison", "name": "Unison",
+			"parameters":["Unison Mode", "Unison Detune", "Unison Pan Spread", "Unison Lfo Phase"]
+		},
+		{	"id":"chorus", "name": "Chorus",
+			"parameters":["Chorus Mix", "Chorus Rate", "Chorus Depth", "Chorus Delay", "Chorus Feedback", "Chorus Lfo Shape"]
+		},
+		{	"id":"delayReverb", "name": "Delay/Reverb",
+			"parameters":["Delay/Reverb Mode", "Effect Send", "Delay Time", "Delay Feedback", "Dly Rate / Rev Decay", "Dly Depth ", "Rev Size", "Delay Lfo Shape", "Reverb Damping", "Delay Color", "Delay Clock"]
+		},
+		{	"id":"arp", "name": "Arpeggiator",
+			"parameters":["Arp Mode", "Arp Pattern Selct", "Arp Octave Range", "Arp Hold Enable", "Arp Note Length", "Arp Swing", "Arp Clock"]
+		},
+		{	"id":"punch", "name": "Punch Intensity",
+			"parameters":["Punch Intensity"]
+		},
+		{	"id":"input", "name": "Input",
+			"parameters":["Input Mode", "Input Select", "Input Ringmodulator"]
+		},
+		{	"id":"assignA", "name": "Assign 1",
+			"parameters":["Assign1 Source", "Assign1 Destination", "Assign1 Amount"]
+		},
+		{	"id":"assignB", "name": "Assign 2",
+			"parameters":["Assign2 Source", "Assign2 Destination1", "Assign2 Amount1", "Assign2 Destination2", "Assign2 Amount2"]
+		},
+		{	"id":"assignC", "name": "Assign 3",
+			"parameters":["Assign3 Source", "Assign3 Destination1", "Assign3 Amount1", "Assign3 Destination2", "Assign3 Amount2", "Assign3 Destination3", "Assign3 Amount3"]
+		},
+		{	"id":"assignD", "name": "Assign 4",
+			"parameters":["Assign 4 Source", "Assign 4 Destination", "Assign 4 Amount"]
+		},
+		{	"id":"assignE", "name": "Assign 5",
+			"parameters":["Assign 5 Source", "Assign 5 Destination", "Assign 5 Amount"]
+		},
+		{	"id":"assignF", "name": "Assign 6",
+			"parameters":["Assign 6 Source", "Assign 6 Destination", "Assign 6 Amount"]
+		},
+		{	"id":"phaser", "name": "Phaser",
+			"parameters":["Phaser Mode", "Phaser Mix", "Phaser Rate", "Phaser Depth", "Phaser Frequency", "Phaser Feedback", "Phaser Spread"]
+		},
+		{	"id":"eq", "name": "Equalizer",
+			"parameters":["LowEQ Gain", "LowEQ Frequency", "MidEQ Gain", "MidEQ Frequency", "MidEQ Q-Factor", "HighEQ Gain", "HighEQ Frequency"]
+		},
+		{	"id":"bassBoost", "name": "Analog Boost",
+			"parameters":["Bass Intensity", "Bass Tune"]
+		},
+		{	"id":"distortion", "name": "Distortion",
+			"parameters":["Distortion Curve", "Distortion Intensity"]
+		},
+		{	"id":"vocoder", "name": "Vocoder",
+			"parameters":["Vocoder Mode", "Filter Select", "Filter Env Sustain Time", "Filter Env Release", "Filter Env Decay", "Cutoff", "Filter1 Resonance", "Filter1 Keyfollow", "Cutoff2", "Filter2 Resonance", "Filter2 Keyfollow"]
+		},
+		{	"id":"inputFollower", "name": "Input Follower",
+			"parameters":["Input Follower Mode", "Filter Env Sustain", "Filter Env Attack", "Filter Env Release"]
+		},
+		
+		{	"id":"oscs", "name": "Oscillators",
+			"regions":["oscA", "oscB", "oscC", "oscCommon", "noise"]
+		},
+		{	"id":"filters", "name": "Filters",
+			"regions":["filterA", "filterB", "filterCommon", "envFilter"]
+		},
+		{	"id":"lfos", "name": "LFOs",
+			"regions":["lfoA", "lfoB", "lfoC"]
+		},
+		{	"id":"fx", "name": "Effects",
+			"regions":["delayReverb", "chorus", "phaser", "bassBoost", "distortion", "eq", "punch"]
+		},
+		{	"id":"modmatrix", "name": "Modulation Slots",
+			"regions":["assignA", "assignB", "assignC", "assignD", "assignE", "assignF"]
+		}
+	],
 	"parameterlinks":
 	[
 		{
@@ -667,7 +785,7 @@
 		],
  		"oscFMMode":
  		[
-		"Pos-Tri",	"Tri",	"Wave",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
+			"Pos-Tri",	"Tri",	"Wave",	"Noise",	"In L",	"In L+R",	"In R",	"Aux1 L",	"Aux1 L+R",	"Aux1 R",	"Aux2 L",	"Aux2 L+R",	"Aux2 R"
 		],
 		"vocoderMode":
 		[
