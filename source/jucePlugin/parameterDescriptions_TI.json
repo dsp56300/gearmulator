@@ -670,6 +670,168 @@
 		{"page":115, "index":126, "class":"Global", "name":"LCD Contrast", "min":0, "max":127, "default":64, "isPublic":false, "isDiscrete":false, "isBool":false},
 		{"page":115, "index":127, "class":"Global", "name":"Master Volume", "min":0, "max":127, "default":64, "isPublic":false, "isDiscrete":false, "isBool":false},		
 	],
+	"regions":
+	[
+		{	"id":"oscA", "name": "Oscillator 1",
+			"parameters":[	"Osc1 HyperSaw/Density", "Osc1 Shape", "Osc1 Wavetable/WaveTableIndex", "Osc1 HyperSaw/DetuneSpread", "Osc1 Pulsewidth", "Osc1 Wave Select", "Osc1 Wavetable/WaveTableSelect", "Osc1 Semitone", "Osc1 Keyfollow", "Osc1 Shape Velocity",
+							"Osc1 Mode", "Osc1 Wavetable/Sync", "Osc1 Wavetable/FormantShift", "Osc1 Wavetable/Internal Detune", "Osc1 Wavetable/Interpolation"
+			]
+		},
+		{	"id":"oscB", "name": "Oscillator 2",
+			"parameters":[	"Osc2 HyperSaw/Density", "Osc2 Shape", "Osc2 Wavetable/WaveTableIndex", "Osc2 HyperSaw/DetuneSpread", "Osc2 Pulsewidth", "Osc2 Wave Select", "Osc2 Wavetable/WaveTableSelect","Osc2 Semitone", "Osc2 Detune", "Osc2 HyperSaw/CrossOscSyncFreq", "Osc2 FM Amount", "Osc2 Wavetable/FM Amount", "Osc2 Sync", "Osc2 Filt Env Amt", "Osc2 HyperSaw/FilterEnv > Pitch", "Osc2 Wavetable/FilterEnv > Pitch", "FM Filt Env Amt", "Osc2 Wavetable/FilterEnv > FM", "Osc2 HyperSaw/FilterEnv > SyncFrequency", "Osc2 Keyfollow", "Osc FM Mode", "Osc2 Wavetable/FM Mode WaveTable", "Osc2 Shape Velocity", "Fm Amount Velocity",
+							"Osc2 Mode", "Osc2 Wavetable/Sync", "Osc2 Wavetable/FormantShift", "Osc2 Wavetable/Interpolation", "Osc2 Wavetable/Internal Detune"
+			]
+		},
+		{	"id":"oscC", "name": "Oscillator 3",
+			"parameters":["Osc3 Mode", "Osc3 Volume", "Osc3 Semitone", "Osc3 Detune", "Osc 3/BackupMode"]
+		},
+		{	"id":"oscCommon", "name": "Osc Common",
+			"parameters":["Osc Balance", "Suboscillator Volume", "Suboscillator Shape", "Osc Mainvolume", "Ringmodulator Volume", "Osc Init Phase", "PulseWidth Velocity", "Oscillators/BackupKeyMode", "Oscillators/Select"]
+		},
+		{	"id":"noise", "name": "Noise",
+			"parameters":["Noise Volume", "Noise Color"]
+		},
+		{	"id":"filterA", "name": "Filter 1",
+			"parameters":["Cutoff", "Filter1 Resonance", "Filter1 Env Amt", "Filter1 Keyfollow", "Filter1 Mode", "Filter1 Env Polarity", "Flt1 EnvAmt Velocity", "Resonance1 Velocity"]
+		},
+		{	"id":"filterB", "name": "Filter 2",
+			"parameters":["Cutoff2", "Filter2 Resonance", "Filter2 Env Amt", "Filter2 Keyfollow", "Offset for FilterLink", "Filter2 Mode", "Filter2 Env Polarity", "Filter2 Cutoff Link", "Flt2 EnvAmt Velocity", "Resonance2 Velocity"]
+		},
+		{	"id":"filterCommon", "name": "Filters Common",
+			"parameters":["Filter Balance", "Saturation Curve", "Filter Routing", "Filter Keytrack Base"]
+		},
+		{	"id":"envFilter", "name": "Filter Env",
+			"parameters":["Filter Env Attack", "Filter Env Decay", "Filter Env Sustain", "Filter Env Sustain Time", "Filter Env Release"]
+		},
+		{	"id":"envAmp", "name": "Amp Env",
+			"parameters":["Amp Env Attack", "Amp Env Decay", "Amp Env Sustain", "Amp Env Sustain Time", "Amp Env Release"]
+		},
+		{	"id":"env3", "name": "Envelope 3",
+			"parameters":["Envelope 3/Attack", "Envelope 3/Decay", "Envelope 3/Sustain", "Envelope 3/Sustain Time", "Envelope 3/Release"]
+		},
+		{	"id":"env4", "name": "Envelope 4",
+			"parameters":["Envelope 4/Attack", "Envelope 4/Decay", "Envelope 4/Sustain", "Envelope 4/Sustain Time", "Envelope 4/Release"]
+		},
+		{	"id":"lfoA", "name": "LFO 1",
+			"parameters":["Lfo1 Rate", "Lfo1 Shape", "Lfo1 Env Mode", "Lfo1 Mode", "Lfo1 Symmetry", "Lfo1 Keyfollow", "Lfo1 Keytrigger", "Osc1 Lfo1 Amount", "Osc2 Lfo1 Amount", "PW Lfo1 Amount", "Reso Lfo1 Amount", "FiltGain Lfo1 Amount", "Lfo1 Clock", "LFO1 Assign Dest", "LFO1 Assign Amount", "LFO 1/BackupShape"]
+		},
+		{	"id":"lfoB", "name": "LFO 2",
+			"parameters":["Lfo2 Rate", "Lfo2 Shape", "Lfo2 Env Mode", "Lfo2 Mode", "Lfo2 Symmetry", "Lfo2 Keyfollow", "Lfo2 Keytrigger", "Shape Lfo2 Amount", "FM Lfo2 Amount", "Cutoff1 Lfo2 Amount", "Cutoff2 Lfo2 Amount", "Pan Lfo2 Amount", "Lfo2 Clock", "LFO2 Assign Dest", "LFO2 Assign Amount", "LFO 2/BackupShape"]
+		},
+		{	"id":"lfoC", "name": "LFO 3",
+			"parameters":["Lfo3 Rate", "Lfo3 Shape", "Lfo3 Mode", "Lfo3 Keyfollow", "Lfo3 Destination", "Osc Lfo3 Amount", "Lfo3 Fade-In Time", "Lfo3 Clock", "LFO 3/BackupShape"]
+		},
+		{	"id":"amp", "name": "Amp",
+			"parameters":["Patch Volume", "Amp Velocity", "Panorama Velocity", "Second Output Balance"]
+		},
+		{	"id":"common", "name": "Common",
+			"parameters":["Transpose", "Key Mode", "Control Smooth Mode", "Bender Range Up", "Bender Range Down", "Bender Scale"]
+		},
+		{	"id":"unison", "name": "Unison",
+			"parameters":["Unison Mode", "Unison Detune", "Unison Pan Spread", "Unison Lfo Phase"]
+		},
+		{	"id":"chorus", "name": "Chorus",
+			"parameters":["Chorus/Type", "Chorus/Mix2", "Chorus Mix", "Chorus Rate", "Chorus/Speed", "Chorus/Distance", "Chorus Depth", "Chorus/Amount", "Chorus Delay", "Chorus/Mic Angle", "Chorus Feedback", "Chorus/LowHigh Bal", "Chorus Lfo Shape", "Chorus/X Over"]
+		},
+		{	"id":"delay", "name": "Delay",
+			"parameters":[	"Delay Mode", "Delay Send", "Delay/Tape Delay Time", "Delay Time", "Delay Feedback", "Delay/Tape Delay Feedback", "Dly Rate / Rev Decay", "Dly Depth ", "Delay/Tape Delay Modulation", "Delay Lfo Shape", "Delay Color", "Delay/Tape Delay Center Frequency", "Delay Clock",
+							"Delay Type", "Delay Tape Delay Ratio", "Delay Tape Delay Left Clock", "Delay Tape Delay Right Clock", "Delay Tape Delay Bandwidth"
+			]
+		},
+		{	"id":"reverb", "name": "Reverb",
+			"parameters":["Reverb Mode", "Reverb Send", "Reverb Type", "Reverb Time", "Reverb Damping", "Reverb Color", "Reverb Predelay", "Reverb Clock", "Reverb Feedback"]
+		},
+		{	"id":"arp", "name": "Arpeggiator",
+			"parameters":[	"Arp Mode", "Arp Pattern Selct", "Arp Octave Range", "Arp Hold Enable", "Arp Note Length", "Arp Swing", "Arp Clock",
+							"Arpeggiator/UserPatternLength", "Arpeggiator/BackupMode",
+
+							"Step 1 Length", "Step 1 Velocity", "Step 1 Bitfield", "Step 2 Length", "Step 2 Velocity", "Step 2 Bitfield", "Step 3 Length", "Step 3 Velocity", "Step 3 Bitfield", "Step 4 Length", "Step 4 Velocity", "Step 4 Bitfield",
+							"Step 5 Length", "Step 5 Velocity", "Step 5 Bitfield", "Step 6 Length", "Step 6 Velocity", "Step 6 Bitfield", "Step 7 Length", "Step 7 Velocity", "Step 7 Bitfield", "Step 8 Length", "Step 8 Velocity", "Step 8 Bitfield",
+							"Step 9 Length", "Step 9 Velocity", "Step 9 Bitfield", "Step 10 Length", "Step 10 Velocity", "Step 10 Bitfield", "Step 11 Length", "Step 11 Velocity", "Step 11 Bitfield", "Step 12 Length", "Step 12 Velocity", "Step 12 Bitfield",
+							"Step 13 Length", "Step 13 Velocity", "Step 13 Bitfield", "Step 14 Length", "Step 14 Velocity", "Step 14 Bitfield", "Step 15 Length", "Step 15 Velocity", "Step 15 Bitfield", "Step 16 Length", "Step 16 Velocity", "Step 16 Bitfield",
+							"Step 17 Length", "Step 17 Velocity", "Step 17 Bitfield", "Step 18 Length", "Step 18 Velocity", "Step 18 Bitfield", "Step 19 Length", "Step 19 Velocity", "Step 19 Bitfield", "Step 20 Length", "Step 20 Velocity", "Step 20 Bitfield",
+							"Step 21 Length", "Step 21 Velocity", "Step 21 Bitfield", "Step 22 Length", "Step 22 Velocity", "Step 22 Bitfield", "Step 23 Length", "Step 23 Velocity", "Step 23 Bitfield", "Step 24 Length", "Step 24 Velocity", "Step 24 Bitfield",
+							"Step 25 Length", "Step 25 Velocity", "Step 25 Bitfield", "Step 26 Length", "Step 26 Velocity", "Step 26 Bitfield", "Step 27 Length", "Step 27 Velocity", "Step 27 Bitfield", "Step 28 Length", "Step 28 Velocity", "Step 28 Bitfield",
+							"Step 29 Length", "Step 29 Velocity", "Step 29 Bitfield", "Step 30 Length", "Step 30 Velocity", "Step 30 Bitfield", "Step 31 Length", "Step 31 Velocity", "Step 31 Bitfield", "Step 32 Length", "Step 32 Velocity", "Step 32 Bitfield"
+			]
+		},
+		{	"id":"punch", "name": "Punch Intensity",
+			"parameters":["Punch Intensity"]
+		},
+		{	"id":"input", "name": "Input",
+			"parameters":["Input Mode", "Input Select", "Input Ringmodulator"]
+		},
+		{	"id":"assignA", "name": "Assign 1",
+			"parameters":[	"Assign1 Source", "Assign1 Destination", "Assign1 Amount",
+							"Assign 1 Destination 2", "Assign 1 Amount 2", "Assign 1 Destination 3", "Assign 1 Amount 3"
+			]
+		},
+		{	"id":"assignB", "name": "Assign 2",
+			"parameters":[	"Assign2 Source", "Assign2 Destination1", "Assign2 Amount1", "Assign2 Destination2", "Assign2 Amount2",
+							"Assign 2 Destination 3", "Assign 2 Amount 3"
+			]
+		},
+		{	"id":"assignC", "name": "Assign 3",
+			"parameters":["Assign3 Source", "Assign3 Destination1", "Assign3 Amount1", "Assign3 Destination2", "Assign3 Amount2", "Assign3 Destination3", "Assign3 Amount3"]
+		},
+		{	"id":"assignD", "name": "Assign 4",
+			"parameters":[	"Assign 4 Source", "Assign 4 Destination", "Assign 4 Amount",
+							"Assign 4 Destination 2", "Assign 4 Amount 2", "Assign 4 Destination 3", "Assign 4 Amount 3"
+			]
+		},
+		{	"id":"assignE", "name": "Assign 5",
+			"parameters":[	"Assign 5 Source", "Assign 5 Destination", "Assign 5 Amount",
+			"Assign 5 Destination 2", "Assign 5 Amount 2", "Assign 5 Destination 3", "Assign 5 Amount 3"]
+		},
+		{	"id":"assignF", "name": "Assign 6",
+			"parameters":[	"Assign 6 Source", "Assign 6 Destination", "Assign 6 Amount",
+							"Assign 6 Destination 2", "Assign 6 Amount 2", "Assign 6 Destination 3", "Assign 6 Amount 3"
+			]
+		},
+		{	"id":"phaser", "name": "Phaser",
+			"parameters":["Phaser Mode", "Phaser Mix", "Phaser Rate", "Phaser Depth", "Phaser Frequency", "Phaser Feedback", "Phaser Spread"]
+		},
+		{	"id":"eq", "name": "Equalizer",
+			"parameters":["LowEQ Gain", "LowEQ Frequency", "MidEQ Gain", "MidEQ Frequency", "MidEQ Q-Factor", "HighEQ Gain", "HighEQ Frequency"]
+		},
+		{	"id":"bassBoost", "name": "Analog Boost",
+			"parameters":["Bass Intensity", "Bass Tune"]
+		},
+		{	"id":"distortion", "name": "Distortion",
+			"parameters":["Distortion Curve", "Distortion Intensity", "Patch Distortion/Treble Booster", "Patch Distortion/High Cut", "Patch Distortion/Mix", "Patch Distortion/Quality", "Patch Distortion/Tone127", "Patch Distortion/Tone64"]
+		},
+		{	"id":"vocoder", "name": "Vocoder",
+			"parameters":["Vocoder Mode", "Filter Select", "Vocoder/Carrier Center Frequency", "Vocoder/Modulator Center Frequency", "Vocoder/Modulator Frequency Offset", "Vocoder/Carrier Q Factor", "Vocoder/Modulator Q Factor", "Carrier Frequency Spread", "Vocoder/Modulator Frequency Spread", "Vocoder/Balance", "Vocoder/Attack", "Vocoder/Release", "Vocoder/Spectral Balance", "Vocoder/Bands", "Vocoder Link"]
+		},
+		{	"id":"inputFollower", "name": "Input Follower",
+			"parameters":["Input Follower Mode", "Input Follower/Attack", "Input Follower/Level", "Input Follower/Release"]
+		},
+		{	"id":"filterBank", "name": "Filter Bank",
+			"parameters":["Filter Bank/Type", "Filter Bank/Mix", "Filter Bank/Comb Frequency", "Filter Bank/Filter Frequency", "Filter Bank/Frequency", "Filter Bank/Vowel Frequency", "Filter Bank/Stereo Phase", "Filter Bank/Filter Type", "Filter Bank/Poles", "Filter Bank/Shape L", "Filter Bank/Shape R", "Filter Bank/Slope", "Filter Bank/Resonance", "Character Type"]
+		},
+		{	"id":"atomizer", "name": "Atomizer",
+			"parameters":["Atomizer"]
+		},
+
+		{	"id":"oscs", "name": "Oscillators",
+			"regions":["oscA", "oscB", "oscC", "oscCommon", "noise"]
+		},
+		{	"id":"filters", "name": "Filters",
+			"regions":["filterA", "filterB", "filterCommon", "envFilter"]
+		},
+		{	"id":"lfos", "name": "LFOs",
+			"regions":["lfoA", "lfoB", "lfoC"],
+			"parameters":["LFOs/Select"]
+		},
+		{	"id":"fx", "name": "Effects",
+			"regions":["delay", "reverb", "chorus", "phaser", "bassBoost", "distortion", "eq", "punch", "filterBank"],
+			"parameters":["FX Upper/Select", "FX Lower/Select"]
+		},
+		{	"id":"modmatrix", "name": "Modulation Slots",
+			"regions":["assignA", "assignB", "assignC", "assignD", "assignE", "assignF"],
+			"parameters":["Assigns/Slot Select"]
+		}
+	],
 	"valuelists":
 	{
 		"unsignedZero":
