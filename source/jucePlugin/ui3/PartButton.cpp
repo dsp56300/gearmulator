@@ -20,6 +20,11 @@ namespace genericVirusUI
 		return jucePluginEditorLib::PartButton<TextButton>::isInterestedInDragSource(_dragSourceDetails);  // NOLINT(clang-diagnostic-undefined-func-template)
 	}
 
+	void PartButton::paint(juce::Graphics& g)
+	{
+		jucePluginEditorLib::PartButton<TextButton>::paint(g);
+	}
+
 	void PartButton::onClick()
 	{
 		selectPreset(getPart());
