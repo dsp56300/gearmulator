@@ -743,7 +743,7 @@ namespace Virus
                 }
 	        }
         }
-		return createSingleDump(toMidiByte(_newBank), _newProgram, parameterValues);
+		return createSingleDump(usedPacketType, toMidiByte(_newBank), _newProgram, parameterValues);
     }
 
     void Controller::selectPrevPreset(const uint8_t _part)
