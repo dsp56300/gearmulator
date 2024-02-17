@@ -673,11 +673,6 @@ namespace Virus
         return dst;
     }
 
-    std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
-    {
-        return createSingleDump(MidiPacketType::SingleDump, _bank, _program, _paramValues);
-    }
-
     std::vector<uint8_t> Controller::createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
     {
         const auto* m = getMidiPacket(midiPacketName(_packet));
