@@ -8,8 +8,9 @@ Osirus/OsTIrus:
 
 OsTIrus:
 
+- [Fix] GUI displayed parts as disabled in multi mode if any other part than the first one was selected
 - [Fix] B/C presets failed to load via patch manager
-- [Fix] B/C presets stored to a user bank might sound incorrect after loading them back from the user bank
+- [Fix] B/C presets stored to a user bank might sound incorrect after load
 
 1.3.4 (TBD)
 
