@@ -2,6 +2,10 @@ Release Notes
 
 1.3.5 (TBD)
 
+DSP:
+
+- [Imp] Reduced host memory consumption
+
 Osirus/OsTIrus:
 
 - [Fix] It was not possible to select a part preset via left-click menu on macOS
