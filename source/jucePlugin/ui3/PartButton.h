@@ -16,6 +16,8 @@ namespace genericVirusUI
 
 		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
 
+		void paint(juce::Graphics& g) override;
+
 		void onClick() override;
 	private:
 		void selectPreset(uint8_t _part) const;

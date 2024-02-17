@@ -41,9 +41,7 @@ namespace jucePluginEditorLib
 		void paint(juce::Graphics& g) override;
 
 		void mouseDrag(const juce::MouseEvent& _event) override;
-		void mouseDown(const juce::MouseEvent& _event) override;
 		void mouseUp(const juce::MouseEvent& _event) override;
-		void mouseExit(const juce::MouseEvent& _event) override;
 
 		virtual void onClick() {}
 
@@ -54,6 +52,5 @@ namespace jucePluginEditorLib
 		Editor& m_editor;
 		uint8_t m_part = 0xff;
 		bool m_isDragTarget = false;
-		bool m_leftMouseDown = false;
 	};
 }

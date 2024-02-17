@@ -91,31 +91,15 @@ namespace jucePluginEditorLib
 	template <typename T> void PartButton<T>::mouseDrag(const juce::MouseEvent& _event)
 	{
 		m_editor.startDragging(new patchManager::SavePatchDesc(m_part), this);
-		m_leftMouseDown = false;
 		genericUI::Button<T>::mouseDrag(_event);
-	}
-
-	template <typename T> void PartButton<T>::mouseDown(const juce::MouseEvent& _event)
-	{
-		if(!_event.mods.isPopupMenu())
-			m_leftMouseDown = true;
-		genericUI::Button<T>::mouseDown(_event);
 	}
 
 	template <typename T> void PartButton<T>::mouseUp(const juce::MouseEvent& _event)
 	{
-		if(!_event.mods.isPopupMenu() && m_leftMouseDown)
-		{
-			m_leftMouseDown = false;
+		if(!_event.mods.isPopupMenu() && genericUI::Button<T>::isDown() && genericUI::Button<T>::isOver())
 			onClick();
-		}
-		genericUI::Button<T>::mouseUp(_event);
-	}
 
-	template <typename T> void PartButton<T>::mouseExit(const juce::MouseEvent& _event)
-	{
-		m_leftMouseDown = false;
-		genericUI::Button<T>::mouseExit(_event);
+		genericUI::Button<T>::mouseUp(_event);
 	}
 
 	template <typename T> void PartButton<T>::setIsDragTarget(const bool _isDragTarget)

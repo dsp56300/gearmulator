@@ -1,5 +1,11 @@
 Release Notes 
 
+1.3.5 (TBD)
+
+Osirus/OsTIrus:
+
+- [Fix] It was not possible to select a part preset via left-click menu on macOS
+
 1.3.4 (TBD)
 
 DSP:
@@ -26,6 +32,12 @@ OsTIrus:
 - [Imp] GUI has been reworked slightly and many GUI related issues have been fixed
 - [Fix] Cutoff, Filter Env by Velocity and Filter Resonance by Velocity were linked 
         when Filter Link is active
+
+Osirus:
+
+- [Imp] Parameter regions can now be locked/unlocked via a context menu. Locked parameters do not change
+        when a preset is loaded. This is useful for example if you want to keep an Arp pattern
+        while searching for a preset, etc.
 
 Osirus/OsTIrus:
 
