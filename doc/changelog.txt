@@ -20,6 +20,12 @@ Framework:
 - [Fix] Long plugin loading times in some hosts due to excessive initial parameter automation updates
 - [Fix] Part context menu and global context menu opened at the same time on right click
 
+Osirus:
+
+- [Imp] Parameter regions can now be locked/unlocked via a context menu. Locked parameters do not change
+        when a preset is loaded. This is useful for example if you want to keep an Arp pattern
+        while searching for a preset, etc.
+
 Osirus/OsTIrus:
 
 - [Imp] Added output gain adjustment to context menu (already present in Vavra before)
