@@ -38,120 +38,127 @@ int main(int _argc, char* _argv[])
 
 	try
 	{
-		const CommandLine cmd(_argc, _argv);
+		bool forever = true;
 
-		if(cmd.contains("rom") && cmd.contains("preset"))
+		while(forever)
 		{
-			const auto romFile = cmd.get("rom");
-			const auto preset = cmd.get("preset");
+			const CommandLine cmd(_argc, _argv);
 
-			IntegrationTest test(cmd, romFile, preset, std::string());
-			return test.run();
-		}
-		if(cmd.contains("folder"))
-		{
-			std::vector<std::string> subfolders;
-			synthLib::getDirectoryEntries(subfolders, cmd.get("folder"));
+			forever = cmd.contains("forever");
 
-			if(subfolders.empty())
+			if(cmd.contains("rom") && cmd.contains("preset"))
 			{
-				std::cout << "Nothing found for testing in folder " << cmd.get("folder") << std::endl;
-				return -1;
+				const auto romFile = cmd.get("rom");
+				const auto preset = cmd.get("preset");
+
+				IntegrationTest test(cmd, romFile, preset, std::string());
+				return test.run();
 			}
-
-			for (auto& subfolder : subfolders)
+			if(cmd.contains("folder"))
 			{
-				if(subfolder.find("/.") != std::string::npos)
-					continue;
+				std::vector<std::string> subfolders;
+				synthLib::getDirectoryEntries(subfolders, cmd.get("folder"));
 
-				std::vector<std::string> files;
-				synthLib::getDirectoryEntries(files, subfolder);
-
-				std::string romFile;
-				std::string presetsFile;
-
-				if(files.empty())
+				if(subfolders.empty())
 				{
-					std::cout << "Directory " << subfolder << " doesn't contain any files" << std::endl;
+					std::cout << "Nothing found for testing in folder " << cmd.get("folder") << std::endl;
 					return -1;
 				}
 
-				for (auto& file : files)
+				for (auto& subfolder : subfolders)
 				{
-					if(synthLib::hasExtension(file, ".txt"))
-						presetsFile = file;
-					if(synthLib::hasExtension(file, ".bin"))
-						romFile = file;
-				}
-
-				if(romFile.empty())
-				{
-					std::cout << "Failed to find ROM in folder " << subfolder << std::endl;
-					return -1;
-				}
-				if(presetsFile.empty())
-				{
-					std::cout << "Failed to find presets file in folder " << subfolder << std::endl;
-					return -1;
-				}
-
-				if(romFile.find("firmware") != std::string::npos)
-				{
-					auto* hFile = fopen(romFile.c_str(), "rb");
-					size_t size = 0;
-					if(hFile)
-					{
-						fseek(hFile, 0, SEEK_END);
-						size = ftell(hFile);
-						fclose(hFile);
-					}
-					if(size > virusLib::ROMFile::getRomSizeModelABC())
-					{
-						std::cout << "Ignoring TI verification tests, TI is not supported" << std::endl;
+					if(subfolder.find("/.") != std::string::npos)
 						continue;
+
+					std::vector<std::string> files;
+					synthLib::getDirectoryEntries(files, subfolder);
+
+					std::string romFile;
+					std::string presetsFile;
+
+					if(files.empty())
+					{
+						std::cout << "Directory " << subfolder << " doesn't contain any files" << std::endl;
+						return -1;
+					}
+
+					for (auto& file : files)
+					{
+						if(synthLib::hasExtension(file, ".txt"))
+							presetsFile = file;
+						if(synthLib::hasExtension(file, ".bin"))
+							romFile = file;
+					}
+
+					if(romFile.empty())
+					{
+						std::cout << "Failed to find ROM in folder " << subfolder << std::endl;
+						return -1;
+					}
+					if(presetsFile.empty())
+					{
+						std::cout << "Failed to find presets file in folder " << subfolder << std::endl;
+						return -1;
+					}
+
+					if(romFile.find("firmware") != std::string::npos)
+					{
+						auto* hFile = fopen(romFile.c_str(), "rb");
+						size_t size = 0;
+						if(hFile)
+						{
+							fseek(hFile, 0, SEEK_END);
+							size = ftell(hFile);
+							fclose(hFile);
+						}
+						if(size > virusLib::ROMFile::getRomSizeModelABC())
+						{
+							std::cout << "Ignoring TI verification tests, TI is not supported" << std::endl;
+							continue;
+						}
+					}
+
+					std::vector<std::string> presets;
+
+					std::ifstream ss;
+					ss.open(presetsFile.c_str(), std::ios::in);
+
+					if(!ss.is_open())
+					{
+						std::cout << "Failed to open presets file " << presetsFile << std::endl;
+						return -1;
+					}
+
+					std::string line;
+
+					while(std::getline(ss, line))
+					{
+						while(!line.empty() && line.find_last_of("\r\n") != std::string::npos)
+							line = line.substr(0, line.size()-1);
+						if(!line.empty())
+							presets.push_back(line);
+					}
+
+					ss.close();
+
+					if(presets.empty())
+					{
+						std::cout << "Presets file " << presetsFile << "  is empty" << std::endl;
+						return -1;
+					}
+
+					for (auto& preset : presets)
+					{
+						IntegrationTest test(cmd, romFile, preset, subfolder + '/');
+						if(test.run() != 0)
+							return -1;
 					}
 				}
 
-				std::vector<std::string> presets;
-
-				std::ifstream ss;
-				ss.open(presetsFile.c_str(), std::ios::in);
-
-				if(!ss.is_open())
-				{
-					std::cout << "Failed to open presets file " << presetsFile << std::endl;
-					return -1;
-				}
-
-				std::string line;
-
-				while(std::getline(ss, line))
-				{
-					while(!line.empty() && line.find_last_of("\r\n") != std::string::npos)
-						line = line.substr(0, line.size()-1);
-					if(!line.empty())
-						presets.push_back(line);
-				}
-
-				ss.close();
-
-				if(presets.empty())
-				{
-					std::cout << "Presets file " << presetsFile << "  is empty" << std::endl;
-					return -1;
-				}
-
-				for (auto& preset : presets)
-				{
-					IntegrationTest test(cmd, romFile, preset, subfolder + '/');
-					if(test.run() != 0)
-						return -1;
-				}
+				if(!forever)
+					return 0;
 			}
-
-			return 0;
 		}
-
 		std::cout << "invalid command line arguments" << std::endl;
 		return -1;
 	}
