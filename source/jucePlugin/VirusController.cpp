@@ -688,18 +688,8 @@ namespace Virus
         data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
         data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
 
-        for(uint32_t i=0; i<_paramValues.size(); ++i)
-        {
-            const auto& v = _paramValues[i];
-            if(!v)
-                continue;
-            const auto* p = getParameter(i);
-            assert(p);
-            if(!p)
-                return {};
-            const auto key = std::make_pair(pluginLib::MidiPacket::AnyPart, p->getDescription().name);
-            paramValues.insert(std::make_pair(key, *v));
-        }
+        if(!createNamedParamValues(paramValues, _paramValues))
+            return {};
 
         pluginLib::MidiPacket::Sysex dst;
         if(!m->create(dst, data, paramValues))

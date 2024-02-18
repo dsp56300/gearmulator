@@ -298,22 +298,52 @@ namespace pluginLib
 		return true;
 	}
 
-	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const
+	bool Controller::createNamedParamValues(MidiPacket::NamedParamValues& _dest, const MidiPacket::AnyPartParamValues& _source) const
+	{
+        for(uint32_t i=0; i<_source.size(); ++i)
+        {
+            const auto& v = _source[i];
+            if(!v)
+                continue;
+            const auto* p = getParameter(i);
+            assert(p);
+            if(!p)
+                return false;
+            const auto key = std::make_pair(MidiPacket::AnyPart, p->getDescription().name);
+            _dest.insert(std::make_pair(key, *v));
+        }
+		return true;
+	}
+
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const
 	{
 		MidiPacket::NamedParamValues paramValues;
 
 		if(!createNamedParamValues(paramValues, _packetName, _part))
 			return false;
 
+		return createMidiDataFromPacket(_sysex, _packetName, _data, paramValues);
+	}
+
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const
+	{
         const auto* m = getMidiPacket(_packetName);
 
-		if(!m->create(_sysex, _params, paramValues))
+		if(!m->create(_sysex, _data, _values))
         {
 	        assert(false && "failed to create midi packet");
 	        _sysex.clear();
 	        return false;
         }
         return true;
+	}
+
+	bool Controller::createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const
+	{
+		MidiPacket::NamedParamValues namedParams;
+		if(!createNamedParamValues(namedParams, _values))
+			return false;
+		return createMidiDataFromPacket(_sysex, _packetName, _data, namedParams);
 	}
 
 	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const
