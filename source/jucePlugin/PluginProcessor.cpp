@@ -120,7 +120,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     	inputs[channel] = buffer.getReadPointer(channel);
 
     for (int channel = 0; channel < totalNumOutputChannels; ++channel)
-    	outputs[channel] = buffer.getWritePointer(channel);
+		outputs[channel] = buffer.getWritePointer(channel);
 
 	for(const auto metadata : midiMessages)
 	{
@@ -131,9 +131,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		if(message.isSysEx() || message.getRawDataSize() > 3)
 		{
 			ev.sysex.resize(message.getRawDataSize());
-			memcpy( &ev.sysex[0], message.getRawData(), ev.sysex.size());
+			memcpy(ev.sysex.data(), message.getRawData(), ev.sysex.size());
 
-			// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but its already there
+			// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but it's already there
 			if(ev.sysex.size() > 1)
 			{
 				if(ev.sysex.front() == 0xf0 && ev.sysex[1] == 0xf0)

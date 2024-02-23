@@ -73,6 +73,6 @@ namespace virusLib
 	void Hdi08MidiQueue::onAudioWritten()
 	{
 		++m_numSamplesWritten;
-		sendPendingMidiEvents(m_numSamplesWritten >> 1);
+		sendPendingMidiEvents(m_numSamplesWritten);
 	}
 }
