@@ -5,6 +5,11 @@ Release Notes
 DSP:
 
 - [Imp] Reduced host memory consumption
+- [Imp] Performance improvements
+
+Framework:
+
+- [Imp] Patch Manager: Add "Locate" context menu entry for patch to select the data source that contains it
 
 Osirus/OsTIrus:
 

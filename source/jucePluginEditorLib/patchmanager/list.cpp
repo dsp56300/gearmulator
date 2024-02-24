@@ -150,6 +150,11 @@ namespace jucePluginEditorLib::patchManager
 							getPatchManager().renamePatch(patch, _name);
 					});
 				});
+
+				menu.addItem("Locate", [this, patch, pos]
+				{
+					m_patchManager.setSelectedDataSource(patch->source.lock());
+				});
 			}
 
 			if(!m_search->request.tags.empty())
