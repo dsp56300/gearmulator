@@ -306,7 +306,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 	constexpr uint32_t blockSize = 64;
 
-	constexpr uint32_t notifyThreshold = ((blockSize<<1) - 4);
+	constexpr uint32_t notifyThreshold = (blockSize - 4);
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
@@ -332,8 +332,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		}
 
 		callbackCount++;
-		if((callbackCount & 0x07) == 0)
-			audioCallback(callbackCount>>3);
+		if((callbackCount & 0x3) == 0)
+			audioCallback(callbackCount>>2);
 	}, 0);
 
 	bootDSP(_createDebugger).join();
