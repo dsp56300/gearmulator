@@ -868,7 +868,7 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 	return partProgramChange(_part, partSingle);
 }
 
-void Microcontroller::process(size_t _size)
+void Microcontroller::process()
 {
 	m_hdi08.exec();
 
