@@ -173,7 +173,7 @@ std::string ConsoleApp::getSingleNameAsFilename() const
 
 void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 {
-	uc->process(1);	// FIXME wrong value
+	uc->process();
 
 	constexpr uint8_t baseChannel = 0;
 

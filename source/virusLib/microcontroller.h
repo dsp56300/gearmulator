@@ -38,7 +38,7 @@ public:
 	void sendInitControlCommands();
 
 	void createDefaultState();
-	void process(size_t _size);
+	void process();
 
 #if !SYNTHLIB_DEMO_MODE
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
