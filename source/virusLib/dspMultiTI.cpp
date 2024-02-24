@@ -91,25 +91,28 @@ namespace virusLib
 
 		uint32_t blockIdx = 0;
 
-		for(uint32_t i=0; i<_frames; ++i)
+		static constexpr uint32_t offset = 9;
+
 		{
-			if(!m_magicTimer)
-			{
-				at(blockIdx + 0xa) = g_magicNumber;
-				m_magicTimer = g_magicIntervalSamples;
-			}
+			uint32_t i=0;
 
-			static volatile uint32_t offset = 1;
+			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[0][i]);
+			at(blockIdx + offset                          ) = m_previousInput;
 
-//			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[0][i]);
-//			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[1][i]);
+			blockIdx += g_esai1RxBlockSize;
+		}
 
-			--m_magicTimer;
+		for(uint32_t i=1; i<_frames; ++i)
+		{
+			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[0][i]);
+			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[1][i-1]);
 
 			blockIdx += g_esai1RxBlockSize;
 		}
 
 		_esai.processAudioInput(data(), _frames * 2, 3, _latency * 2);
+
+		m_previousInput = dsp56k::sample2dsp<T>(_inputs[1][_frames-1]);
 	}
 
 	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "Master"), m_dsp2(0x100000, true, "Slave ")

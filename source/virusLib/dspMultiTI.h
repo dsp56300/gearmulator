@@ -33,6 +33,7 @@ namespace virusLib
 
 		private:
 			uint32_t m_magicTimer = 0;
+			dsp56k::TWord m_previousInput = 0;
 		};
 
 		template<typename T> struct EsaiBufs
