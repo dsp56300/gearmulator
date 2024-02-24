@@ -41,6 +41,7 @@ namespace virusLib
 			Esai1Out dspA;
 			Esai1Out dspB;
 			Esai1in in;
+			T m_previousInput = 0;
 		};
 
 		DspMultiTI();

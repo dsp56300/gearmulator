@@ -146,12 +146,22 @@ namespace virusLib
 		_buffers.in.processAudioinput(_dsp.getPeriphY().getEsai(), s, _latency, _inputs);
 
 		// Slave ESAI input gets the analog input in regular fashion
-		// TODO: phase issue, one channel is offset by 1 sample
-		inputs[0] = &_inputs[0][0];
-		inputs[1] = &_inputs[1][0];
-		_dsp2.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
-		inputs[0] = nullptr;
-		inputs[1] = nullptr;
+
+		_dsp2.getPeriphX().getEsai().processAudioInput<T>(1, _latency, [&](size_t _s, dsp56k::Audio::RxFrame& _frame)
+		{
+			_frame.resize(2);
+			_frame[0][0] = dsp56k::sample2dsp<T>(_inputs[0][0]);
+			_frame[1][0] = dsp56k::sample2dsp<T>(_buffers.m_previousInput);
+		});
+
+		_dsp2.getPeriphX().getEsai().processAudioInput<T>(s - 1, _latency, [&](size_t _s, dsp56k::Audio::RxFrame& _frame)
+		{
+			_frame.resize(2);
+			_frame[0][0] = dsp56k::sample2dsp<T>(_inputs[0][_s]);
+			_frame[1][0] = dsp56k::sample2dsp<T>(_inputs[1][_s+1]);
+		});
+
+		_buffers.m_previousInput = _inputs[1][s-1];
 
 		// Slave ESAI_1 does not get the ADC at all but only data from the master, we don't need it here
 		_dsp2.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 2, _latency * 2);
@@ -160,14 +170,14 @@ namespace virusLib
 
 		T* outputs[12] = { nullptr };
 
-		// DAC outputs on the master are fed by ESAI in regular fashion
+		// DAC outputs on the Master are sent in regular fashion
 		outputs[4] = _outputs[0];		outputs[5] = _outputs[1];
 		outputs[6] = _outputs[2];		outputs[7] = _outputs[3];
 		outputs[8] = _outputs[4];		outputs[9] = _outputs[5];
 
 		_dsp.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s);
 
-		// USB outputs on the Slave are sent in regular fashion via ESAI
+		// USB outputs on the Slave are sent in regular fashion
 		outputs[4] = _outputs[6];		outputs[5] = _outputs[7];
 		outputs[6] = _outputs[8];		outputs[7] = _outputs[9];
 		outputs[8] = _outputs[10];		outputs[9] = _outputs[11];
