@@ -13,13 +13,35 @@ namespace virusLib
 	class DspMultiTI final : public DspSingle
 	{
 	public:
+		static constexpr uint32_t InvalidOffset		= 0xffffffff;
+
 		template<typename T, size_t Size> using EsaiBuf = std::array<std::vector<T>, Size>;
+
+		class Esai1Out : public std::vector<dsp56k::TWord>
+		{
+		public:
+			template<typename T>
+			void processAudioOutput(dsp56k::Esai& _esai, uint32_t _frames, const synthLib::TAudioOutputsT<T>& _outputs, uint32_t _firstOutChannel, const std::array<uint32_t, 6>& _sourceIndices);
+
+		private:
+			uint32_t m_blockStart = InvalidOffset;
+		};
+
+		class Esai1in : public std::vector<dsp56k::TWord>
+		{
+		public:
+			template<typename T>
+			void processAudioinput(dsp56k::Esai& _esai, uint32_t _frames, uint32_t _latency, const synthLib::TAudioInputsT<T>& _inputs);
+
+		private:
+			uint32_t m_magicTimer = 0;
+		};
 
 		template<typename T> struct EsaiBufs
 		{
-			EsaiBuf<T, 2> input;
-			EsaiBuf<T, 4> dspAout;
-			EsaiBuf<T, 4> dspBout;
+			Esai1Out dspA;
+			Esai1Out dspB;
+			Esai1in in;
 		};
 
 		DspMultiTI();

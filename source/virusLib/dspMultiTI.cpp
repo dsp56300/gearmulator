@@ -2,121 +2,180 @@
 
 #if VIRUS_SUPPORT_TI
 
-constexpr uint32_t g_esai1Padding = 3;
-
 namespace virusLib
 {
-	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "Master"), m_dsp2(0x100000, true, "Slave ")
-	{
-		getHDI08().writeHDR(0x0000);			// this = Master
-		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp2 = Slave
+	constexpr uint32_t g_esai1TxBlockSize = 6 * 3 * 2;		// 6 = number of TX pins, 3 = number of slots per frame, 2 = double data rate
+	constexpr uint32_t g_esai1TxPadding = g_esai1TxBlockSize;
 
-		getPeriphX().getEsai().writeEmptyAudioIn(1);
-		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(1);
-	}
+	constexpr uint32_t g_esai1RxBlockSize = 4 * 3 * 2;		// 4 = number of RX pins, 3 = number of slots per frame, 2 = double data rate
+	constexpr uint32_t g_esai1RxPadding = g_esai1RxBlockSize;
 
+	constexpr uint32_t g_magicIntervalSamples = 256;
+
+	static constexpr dsp56k::TWord g_magicNumber	= 0xedc987;
+	
 	void audioAdd(float& _dst, float _src)
 	{
 		_dst += _src;
 	}
 
-	void audioAdd(dsp56k::TWord& _dst, dsp56k::TWord _src)
+	void audioAdd(dsp56k::TWord& _dst, const dsp56k::TWord _src)
 	{
 		auto dst = dsp56k::signextend<int32_t, 24>(static_cast<int32_t>(_dst));
 		dst += dsp56k::signextend<int32_t, 24>(static_cast<int32_t>(_src));
 		_dst = static_cast<dsp56k::TWord>(dst) & 0xffffff;
 	}
 
-	template<typename T>
-	void mixEsai1Output(T* _dstL, T* _dstR, const T* _srcL, const T* _srcR, uint32_t _samples, int32_t _srcOffsetL, int32_t _srcOffsetR)
-	{
-		if(!_dstL || !_dstR)
-			return;
-
-		_srcL += _srcOffsetL;
-		_srcR += _srcOffsetR;
-
-		for(uint32_t i=0; i<_samples; ++i, _srcL += 3, _srcR += 3)
-		{
-			audioAdd(_dstL[i], *_srcL);
-			audioAdd(_dstR[i], *_srcR);
-		}
-	}
-
-	template<typename T>
-	void createEsai1Input(T* _dstL, T* _dstR, const T* _srcL, const T* _srcR, uint32_t _samples, int32_t _dstOffsetL, int32_t _dstOffsetR)
-	{
-		if(!_dstL || !_dstR)
-			return;
-
-		int32_t iDstL = _dstOffsetL;
-		int32_t iDstR = _dstOffsetR;
-
-		for(uint32_t i=0; i<_samples; ++i, iDstL += 3, iDstR += 3)
-		{
-			_dstL[iDstL  ]   = _srcL[i];
-			_dstR[iDstR  ]   = _srcR[i];
-		}
-	}
-
 	template <typename T, size_t Size> void ensureSize(DspMultiTI::EsaiBuf<T, Size>& _buf, size_t _size)
 	{
-		if (_buf[0].size() < _size)
-		{
-			for (auto &buffer : _buf)
-				buffer.resize(_size, 0);
-		}
+		if (_buf[0].size() >= _size)
+			return;
+
+		for (auto &buffer : _buf)
+			buffer.resize(_size, 0);
+	}
+
+	template <typename T> void ensureSize(std::vector<T>& _buf, size_t _size)
+	{
+		if(_buf.size() > _size)
+			return;
+		_buf.resize(_size, 0);
 	}
 
 	template <typename T> void ensureSize(DspMultiTI::EsaiBufs<T> &_bufs, size_t _size)
 	{
-		ensureSize(_bufs.input, _size);
-		ensureSize(_bufs.dspAout, _size);
-		ensureSize(_bufs.dspBout, _size);
+		ensureSize(_bufs.dspA, _size);
+		ensureSize(_bufs.dspB, _size);
 	}
 
-	template <typename T> void wrapPadding(std::vector<T>& _buf, const size_t _usedSize)
+	template <typename T> void wrapPadding(std::vector<T>& _buf, const uint32_t _usedSize)
 	{
 		size_t iSrc = _usedSize;
 
-		for (size_t i=0; i<g_esai1Padding; ++i, ++iSrc)
+		for (size_t i=0; i<g_esai1TxPadding; ++i, ++iSrc)
 			_buf[i] = _buf[iSrc];
 	}
 
-	template <typename T, size_t Size> void wrapPadding(DspMultiTI::EsaiBuf<T, Size>& _buf, size_t _usedSize)
+	template <typename T, size_t Size> void wrapPadding(DspMultiTI::EsaiBuf<T, Size>& _buf, uint32_t _usedSize)
 	{
 		for (size_t i=0; i<_buf.size(); ++i)
 			wrapPadding(_buf[i], _usedSize);
 	}
-
-	template <typename T> void wrapPadding(DspMultiTI::EsaiBufs<T>& _bufs, size_t _usedSize)
+	
+	template <typename T> void DspMultiTI::Esai1Out::processAudioOutput(dsp56k::Esai& _esai, uint32_t _frames, const synthLib::TAudioOutputsT<T>& _outputs, uint32_t _firstOutChannel, const std::array<uint32_t, 6>& _sourceIndices)
 	{
-		wrapPadding(_bufs.input, _usedSize);
-		wrapPadding(_bufs.dspAout, _usedSize);
-		wrapPadding(_bufs.dspBout, _usedSize);
+		ensureSize(*this, _frames * g_esai1TxBlockSize + g_esai1TxPadding);
+
+		_esai.processAudioOutput(data() + g_esai1TxPadding, _frames * 2);
+
+		if(m_blockStart == InvalidOffset)
+		{
+			for(uint32_t i=g_esai1TxPadding; i<g_esai1TxBlockSize * _frames + g_esai1TxPadding; ++i)
+			{
+				if(at(i) != g_magicNumber)
+					continue;
+
+				// OS writes the magic value to position $b of its internal ring buffer
+				const auto off = i - 0xb;
+
+				m_blockStart = off / g_esai1TxBlockSize;	
+				m_blockStart = off - m_blockStart * g_esai1TxBlockSize;
+				break;
+			}
+		}
+
+		if(m_blockStart != InvalidOffset)
+		{
+			const auto* p = &at(m_blockStart);
+
+			for(size_t i=0; i<_frames; ++i)
+			{
+				_outputs[_firstOutChannel  ][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[0]]);
+				_outputs[_firstOutChannel+1][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[1]]);
+
+				_outputs[_firstOutChannel+2][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[2]]);
+				_outputs[_firstOutChannel+3][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[3]]);
+
+				_outputs[_firstOutChannel+4][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[4]]);
+				_outputs[_firstOutChannel+5][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[5]]);
+
+				p += g_esai1TxBlockSize;
+			}
+		}
+
+		wrapPadding(*this, _frames * g_esai1TxBlockSize);
+	}
+
+	template <typename T> void DspMultiTI::Esai1in::processAudioinput(dsp56k::Esai& _esai, uint32_t _frames, uint32_t _latency, const synthLib::TAudioInputsT<T>& _inputs)
+	{
+		ensureSize(*this, _frames * g_esai1RxBlockSize);
+
+		uint32_t blockIdx = 0;
+
+		for(uint32_t i=0; i<_frames; ++i)
+		{
+			if(!m_magicTimer)
+			{
+				at(blockIdx + 0xa) = g_magicNumber;
+				m_magicTimer = g_magicIntervalSamples;
+			}
+
+			static volatile uint32_t offset = 1;
+
+//			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[0][i]);
+//			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[1][i]);
+
+			--m_magicTimer;
+
+			blockIdx += g_esai1RxBlockSize;
+		}
+
+		_esai.processAudioInput(data(), _frames * 2, 3, _latency * 2);
+	}
+
+	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "Master"), m_dsp2(0x100000, true, "Slave ")
+	{
+		getHDI08().writeHDR(0x0000);			// this = Master
+		m_dsp2.getHDI08().writeHDR(0x8000);		// m_dsp2 = Slave
+
+		getPeriphX().getEsai().writeEmptyAudioIn(2);
+		m_dsp2.getPeriphX().getEsai().writeEmptyAudioIn(2);
 	}
 
 	template <typename T>
 	void processAudioTI(DspMultiTI& _dsp, DspSingle& _dsp2, DspMultiTI::EsaiBufs<T>& _buffers, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, const uint32_t _latency)
 	{
+		/*
+		auto& esaiAX = _dsp.getPeriphX().getEsai();
+		auto& esaiAY = _dsp.getPeriphY().getEsai();
+
+		auto& esaiBX = _dsp2.getPeriphX().getEsai();
+		auto& esaiBY = _dsp2.getPeriphY().getEsai();
+
+		LOG( "esaiAX clock divider " << esaiAX.getTxClockDivider());
+		LOG( "esaiAX clock prescale " << esaiAX.getTxClockPrescale());
+
+		LOG( "esaiAY clock divider " << esaiAY.getTxClockDivider());
+		LOG( "esaiAY clock prescale " << esaiAY.getTxClockPrescale());
+
+		LOG( "esaiBX clock divider " << esaiBX.getTxClockDivider());
+		LOG( "esaiBX clock prescale " << esaiBX.getTxClockPrescale());
+
+		LOG( "esaiBY clock divider " << esaiBY.getTxClockDivider());
+		LOG( "esaiBY clock prescale " << esaiBY.getTxClockPrescale());
+		*/
 		const auto s = static_cast<uint32_t>(_samples);
 
-		ensureSize(_buffers, s * 3 + g_esai1Padding);
-
 		// ESAI inputs
-		const T* inputs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+		const T* inputs[8] = { nullptr };
 
 		// Master ESAI input might be the USB input, we don't need it as we only have one input
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
 
-		createEsai1Input(&_buffers.input[0][g_esai1Padding], &_buffers.input[1][g_esai1Padding], &_inputs[1][0], &_inputs[0][0], s, 0, -2);
+//		createEsai1Input(&_buffers.input[0][g_esai1Padding], &_buffers.input[1][g_esai1Padding], &_inputs[1][0], &_inputs[0][0], s, 0, -2);
 
 		// Master ESAI_1 input gets the analog input from the slave, inject the interleaved input here
-		inputs[2] = &_buffers.input[0][0];
-		inputs[3] = &_buffers.input[1][0];
-		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
-		inputs[2] = nullptr;
-		inputs[3] = nullptr;
+		_buffers.in.processAudioinput(_dsp.getPeriphY().getEsai(), s, _latency, _inputs);
 
 		// Slave ESAI input gets the analog input in regular fashion
 		// TODO: phase issue, one channel is offset by 1 sample
@@ -127,10 +186,11 @@ namespace virusLib
 		inputs[1] = nullptr;
 
 		// Slave ESAI_1 does not get the ADC at all but only data from the master, we don't need it here
-		_dsp2.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 3, _latency * 3);
+		_dsp2.getPeriphY().getEsai().processAudioInputInterleaved(inputs, s * 2, _latency * 2);
 
 		// ESAI outputs
-		T* outputs[] = { nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
+
+		T* outputs[12] = { nullptr };
 
 		// DAC outputs on the master are fed by ESAI in regular fashion
 		outputs[4] = _outputs[0];		outputs[5] = _outputs[1];
@@ -147,25 +207,21 @@ namespace virusLib
 		_dsp2.getPeriphX().getEsai().processAudioOutputInterleaved(outputs, s);
 
 		// ESAI_1 outputs
-
-		T* outputsMixA[] = {&_buffers.dspAout[0][g_esai1Padding], &_buffers.dspAout[1][g_esai1Padding], &_buffers.dspAout[2][g_esai1Padding], &_buffers.dspAout[3][g_esai1Padding], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		T* outputsMixB[] = {&_buffers.dspBout[0][g_esai1Padding], &_buffers.dspBout[1][g_esai1Padding], &_buffers.dspBout[2][g_esai1Padding], &_buffers.dspBout[3][g_esai1Padding], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		constexpr auto halfBS = g_esai1TxBlockSize >> 1;
 
 		// USB outputs on the Master are sent to the Slave via ESAI_1 in 1/3 interleaved format => unpack it
-		_dsp.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixA, s * 3);
-#if 1
-		mixEsai1Output(_outputs[6] , _outputs[7] , outputsMixA[3], outputsMixA[2], s, -2, 0);	// USB 1
-		mixEsai1Output(_outputs[8] , _outputs[9] , outputsMixA[0], outputsMixA[1], s, 1, -1);	// USB 2
-		mixEsai1Output(_outputs[10], _outputs[11], outputsMixA[2], outputsMixA[3], s, 1, -1);	// USB 3
-#endif
+		_buffers.dspA.processAudioOutput(_dsp.getPeriphY().getEsai(), s, _outputs, 6, {
+			5, 5+halfBS,
+			16+halfBS, 16,
+			17+halfBS, 17
+		});
+
 		// DAC outputs on the Slave are send via ESAI_1 to the Master in 1/3 interleaved format => unpack it
-		_dsp2.getPeriphY().getEsai().processAudioOutputInterleaved(outputsMixB, s * 3);
-#if 1
-		mixEsai1Output(_outputs[0], _outputs[1], outputsMixB[1], outputsMixB[0], s, -2, 0); // Out 1
-		mixEsai1Output(_outputs[2], _outputs[3], outputsMixB[3], outputsMixB[2], s, -2, 0); // Out 2
-		mixEsai1Output(_outputs[4], _outputs[5], outputsMixB[0], outputsMixB[1], s, 1, -1); // Out 3
-#endif
-		wrapPadding(_buffers, s*3);
+		_buffers.dspB.processAudioOutput(_dsp2.getPeriphY().getEsai(), s, _outputs, 0, {
+			4,4+halfBS,
+			5,5+halfBS,
+			16+halfBS,16
+		});
 	}
 
 	void DspMultiTI::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples, uint32_t _latency)
