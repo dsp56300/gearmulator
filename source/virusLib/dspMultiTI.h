@@ -15,8 +15,6 @@ namespace virusLib
 	public:
 		static constexpr uint32_t InvalidOffset		= 0xffffffff;
 
-		template<typename T, size_t Size> using EsaiBuf = std::array<std::vector<T>, Size>;
-
 		class Esai1Out : public std::vector<dsp56k::TWord>
 		{
 		public:

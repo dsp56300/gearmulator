@@ -26,26 +26,11 @@ namespace virusLib
 		_dst = static_cast<dsp56k::TWord>(dst) & 0xffffff;
 	}
 
-	template <typename T, size_t Size> void ensureSize(DspMultiTI::EsaiBuf<T, Size>& _buf, size_t _size)
-	{
-		if (_buf[0].size() >= _size)
-			return;
-
-		for (auto &buffer : _buf)
-			buffer.resize(_size, 0);
-	}
-
 	template <typename T> void ensureSize(std::vector<T>& _buf, size_t _size)
 	{
 		if(_buf.size() > _size)
 			return;
 		_buf.resize(_size, 0);
-	}
-
-	template <typename T> void ensureSize(DspMultiTI::EsaiBufs<T> &_bufs, size_t _size)
-	{
-		ensureSize(_bufs.dspA, _size);
-		ensureSize(_bufs.dspB, _size);
 	}
 
 	template <typename T> void wrapPadding(std::vector<T>& _buf, const uint32_t _usedSize)
@@ -56,12 +41,6 @@ namespace virusLib
 			_buf[i] = _buf[iSrc];
 	}
 
-	template <typename T, size_t Size> void wrapPadding(DspMultiTI::EsaiBuf<T, Size>& _buf, uint32_t _usedSize)
-	{
-		for (size_t i=0; i<_buf.size(); ++i)
-			wrapPadding(_buf[i], _usedSize);
-	}
-	
 	template <typename T> void DspMultiTI::Esai1Out::processAudioOutput(dsp56k::Esai& _esai, uint32_t _frames, const synthLib::TAudioOutputsT<T>& _outputs, uint32_t _firstOutChannel, const std::array<uint32_t, 6>& _sourceIndices)
 	{
 		ensureSize(*this, _frames * g_esai1TxBlockSize + g_esai1TxPadding);
@@ -151,18 +130,6 @@ namespace virusLib
 
 		auto& esaiBX = _dsp2.getPeriphX().getEsai();
 		auto& esaiBY = _dsp2.getPeriphY().getEsai();
-
-		LOG( "esaiAX clock divider " << esaiAX.getTxClockDivider());
-		LOG( "esaiAX clock prescale " << esaiAX.getTxClockPrescale());
-
-		LOG( "esaiAY clock divider " << esaiAY.getTxClockDivider());
-		LOG( "esaiAY clock prescale " << esaiAY.getTxClockPrescale());
-
-		LOG( "esaiBX clock divider " << esaiBX.getTxClockDivider());
-		LOG( "esaiBX clock prescale " << esaiBX.getTxClockPrescale());
-
-		LOG( "esaiBY clock divider " << esaiBY.getTxClockDivider());
-		LOG( "esaiBY clock prescale " << esaiBY.getTxClockPrescale());
 		*/
 		const auto s = static_cast<uint32_t>(_samples);
 
@@ -171,8 +138,6 @@ namespace virusLib
 
 		// Master ESAI input might be the USB input, we don't need it as we only have one input
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs, s, _latency);
-
-//		createEsai1Input(&_buffers.input[0][g_esai1Padding], &_buffers.input[1][g_esai1Padding], &_inputs[1][0], &_inputs[0][0], s, 0, -2);
 
 		// Master ESAI_1 input gets the analog input from the slave, inject the interleaved input here
 		_buffers.in.processAudioinput(_dsp.getPeriphY().getEsai(), s, _latency, _inputs);
