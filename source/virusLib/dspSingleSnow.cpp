@@ -13,8 +13,8 @@ namespace virusLib
 	{
 		const auto s = static_cast<uint32_t>(_samples);
 
-		const T* inputs0[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
-		const T* inputs1[] = {_inputs[1], _inputs[0], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const T* inputs0[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const T* inputs1[] = {_inputs[0], _inputs[1], nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		_dsp.getPeriphX().getEsai().processAudioInputInterleaved(inputs0, s, _latency);
 		_dsp.getPeriphY().getEsai().processAudioInputInterleaved(inputs1, s, _latency);
