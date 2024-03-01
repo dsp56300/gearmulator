@@ -308,9 +308,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
-	constexpr uint32_t blockSize = _blockSize;
-
-	constexpr uint32_t notifyThreshold = blockSize > 4 ? blockSize - 4 : 0;
+	const uint32_t blockSize = _blockSize;
+	const uint32_t notifyThreshold = blockSize > 4 ? blockSize - 4 : 0;
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
