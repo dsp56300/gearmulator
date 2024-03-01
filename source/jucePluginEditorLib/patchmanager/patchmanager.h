@@ -66,6 +66,8 @@ namespace jucePluginEditorLib::patchManager
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
+		bool setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) const;
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 
@@ -97,6 +99,8 @@ namespace jucePluginEditorLib::patchManager
 		void onSelectedItemsChanged();
 
 		void changeListenerCallback (juce::ChangeBroadcaster* _source) override;
+
+		static void selectTreeItem(TreeItem* _item);
 
 		Editor& m_editor;
 

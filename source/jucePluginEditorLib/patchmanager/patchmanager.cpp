@@ -225,6 +225,16 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	bool PatchManager::setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) const
+	{
+		if(auto* item = m_treeDS->getItem(*_ds))
+		{
+			selectTreeItem(item);
+			return true;
+		}
+		return false;
+	}
+
 	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		if(!isValid(_patch))
@@ -580,14 +590,7 @@ namespace jucePluginEditorLib::patchManager
 			// select the tree item that contains the data source and expand all parents to make it visible
 			if(_selectTreeItem)
 			{
-				item->setSelected(true, true);
-
-				auto* parent = item->getParentItem();
-				while(parent)
-				{
-					parent->setOpen(true);
-					parent = parent->getParentItem();
-				}
+				selectTreeItem(item);
 			}
 
 			return searchHandle;
@@ -662,5 +665,22 @@ namespace jucePluginEditorLib::patchManager
 				repaint();
 			}
 		}
+	}
+
+	void PatchManager::selectTreeItem(TreeItem* _item)
+	{
+		if(!_item)
+			return;
+
+		_item->setSelected(true, true);
+
+		auto* parent = _item->getParentItem();
+		while(parent)
+		{
+			parent->setOpen(true);
+			parent = parent->getParentItem();
+		}
+
+		_item->getOwnerView()->scrollToKeepItemVisible(_item);
 	}
 }

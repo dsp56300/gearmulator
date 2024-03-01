@@ -177,7 +177,7 @@ std::string ConsoleApp::getSingleNameAsFilename() const
 
 void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
 {
-	uc->process(1);	// FIXME wrong value
+	uc->process();
 
 	constexpr uint8_t baseChannel = 0;
 
@@ -308,8 +308,9 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
-	const auto bs2 = _blockSize<<1;
-	const auto notifyThreshold = bs2 > 4 ? bs2 - 4 : 0;
+	constexpr uint32_t blockSize = _blockSize;
+
+	constexpr uint32_t notifyThreshold = blockSize > 4 ? blockSize - 4 : 0;
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
@@ -323,7 +324,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		// The DSP thread needs to lock & unlock a mutex to inform the waiting thread (us) that data is
 		// available if the output ring buffer was completely drained. We can omit this by ensuring that
 		// the output buffer never becomes completely empty.
-		const auto sizeReached = esai.getAudioOutputs().size() >= notifyThreshold;
+		const auto availableSize = esai.getAudioOutputs().size();
+		const auto sizeReached = availableSize >= notifyThreshold;
 
 		--notifyTimeout;
 
@@ -335,8 +337,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		}
 
 		callbackCount++;
-		if((callbackCount & 0x07) == 0)
-			audioCallback(callbackCount>>3);
+		if((callbackCount & 0x3) == 0)
+			audioCallback(callbackCount>>2);
 	}, 0);
 
 	bootDSP(_createDebugger).join();

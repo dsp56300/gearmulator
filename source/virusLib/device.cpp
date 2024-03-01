@@ -356,7 +356,7 @@ namespace virusLib
 	void Device::onAudioWritten()
 	{
 		m_mc->getMidiQueue(0).onAudioWritten();
-		m_mc->process(1);
+		m_mc->process();
 	}
 
 	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)

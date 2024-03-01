@@ -33,8 +33,8 @@ void AudioProcessor::processBlock(const uint32_t _blockSize)
 			m_outputBuffers[i].resize(_blockSize);
 			m_inputBuffers[i].resize(_blockSize);
 
-			m_inputs[i] = &m_inputBuffers[i][0];
-			m_outputs[i] = &m_outputBuffers[i][0];
+			m_inputs[i] = m_inputBuffers[i].data();
+			m_outputs[i] = m_outputBuffers[i].data();
 		}
 
 		m_stereoOutput.reserve(m_outputBuffers.size() * 2);
