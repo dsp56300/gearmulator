@@ -14,6 +14,8 @@
 
 #include <cstring>	// memcpy
 
+#include "dsp56kEmu/memory.h"
+
 #ifdef _WIN32
 #define NOMINMAX
 #include <Windows.h>
@@ -121,7 +123,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 
 bool ROMFile::initialize()
 {
-	std::istream *dsp = new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData));
+	const std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
 	
 	const auto chunks = readChunks(*dsp);
 
@@ -169,7 +171,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	}
 	else 
 	{
-		LOG("Invalid ROM, unexpected filesize")
+		LOG("Invalid ROM, unexpected filesize");
 		return {};
 	}
 
@@ -215,7 +217,11 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 {
 	// Load BootROM in DSP memory
 	for (uint32_t i=0; i<bootRom.data.size(); i++)
-		dsp.memory().set(dsp56k::MemArea_P, bootRom.offset + i, bootRom.data[i]);
+	{
+		const auto p = bootRom.offset + i;
+		dsp.memory().set(dsp56k::MemArea_P, p, bootRom.data[i]);
+		dsp.getJit().notifyProgramMemWrite(p);
+	}
 
 //	dsp.memory().saveAssembly((m_file + "_BootROM.asm").c_str(), bootRom.offset, bootRom.size, false, false, &periph);
 

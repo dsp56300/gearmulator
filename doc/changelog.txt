@@ -1,5 +1,72 @@
 Release Notes 
 
+1.3.5 (TBD)
+
+DSP:
+
+- [Imp] Reduced host memory consumption
+- [Imp] Performance improvements
+
+Framework:
+
+- [Imp] Patch Manager: Add "Locate" context menu entry for patch to select the data source that contains it
+
+Osirus/OsTIrus:
+
+- [Fix] It was not possible to select a part preset via left-click menu on macOS
+
+1.3.4 (TBD)
+
+DSP:
+
+- [Imp] Small performance improvements when JIT compiler needs to recompile code
+
+Framework:
+
+- [Imp] Patch Manager: Add tooltip for data source to show the full path in case its cut off
+- [Imp] Patch Manager: Columns can now be resized by dragging
+- [Imp] The DSP can now be underclocked/overclocked via context menu between 50% and 200%. This is
+        an advanced setting that needs to be confirmed before activation
+
+- [Fix] Patch Manager: Fix subfolders not enumerated on Mac & Linux
+- [Fix] Add missing .vstpreset, .fxb and .cpr file extensions to file selector when loading a patch via "Load" button
+- [Fix] Parameter value change by double-click on knob to reset it was not sent to host for automation
+- [Fix] Linked parameters confused Bitwig / Ableton and other hosts
+- [Fix] Long plugin loading times in some hosts due to excessive initial parameter automation updates
+- [Fix] Part context menu and global context menu opened at the same time on right click
+
+Osirus:
+
+- [Imp] Parameter regions can now be locked/unlocked via a context menu. Locked parameters do not change
+        when a preset is loaded. This is useful for example if you want to keep an Arp pattern
+        while searching for a preset, etc.
+
+Osirus/OsTIrus:
+
+- [Imp] Added output gain adjustment to context menu (already present in Vavra before)
+- [Imp] The Midi Receive Channel of a part in Multi Mode can now be adjusted by right clicking on the part select button
+- [Imp] Patch Manager: Allow to drag & drop patches from patch list to part slots
+- [Imp] Patches can now be copied to other parts via drag & drop
+- [Imp] Parameter regions can now be locked/unlocked via a context menu. Locked parameters do not change
+        when a preset is loaded. This is useful for example if you want to keep an Arp pattern
+        while searching for a preset, etc.
+
+1.3.3 (2024.02.07)
+
+- [Imp] Patch Manager added. The patch manager replaced the old preset browser and provides a modern 
+        user experience to manage presets.
+        Introduction:  https://dsp56300.wordpress.com/2024/02/06/patch-manager-introduction/
+
+Osirus:
+
+- [Imp] Support more file formats to load presets from. All supported formats now are:
+       .syx/.mid Virus A/B/C/TI/TI2 preset dumps
+       .fxb/.vstpreset Presets saved by DAW from Virus Powercore and Virus TI Control Software
+       .cpr Cubase Project Files
+       .mid Virus A/B/C OS Update files that include Factory Presets
+
+- [Fix] Virus A presets from a very old firmware failed to load
+
 1.2.25 (2023.01.08)
 
 - [Imp] DSP56300 plugins are now also available in CLAP plugin format

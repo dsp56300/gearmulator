@@ -1,6 +1,7 @@
 #include "midiToSysex.h"
 
 #include <cstdio>
+#include <cstring>	// memcmp
 
 #include "dsp56kEmu/logging.h"
 
@@ -139,23 +140,63 @@ namespace synthLib
 		return true;
 	}
 
-	void MidiToSysex::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src)
+	void MidiToSysex::splitMultipleSysex(std::vector<std::vector<uint8_t>>& _dst, const std::vector<uint8_t>& _src, const bool _isMidiFileData/* = false*/)
 	{
+		if(!_isMidiFileData)
+		{
+			std::vector<size_t> indices;
+
+			for (size_t i = 0; i < _src.size(); ++i)
+			{
+				if (indices.size() & 1)
+				{
+					if (_src[i] == 0xf7)
+						indices.push_back(i);
+				}
+				else if (_src[i] == 0xf0)
+				{
+					indices.push_back(i);
+				}
+			}
+
+			if (indices.size() & 1)
+				indices.pop_back();
+
+			for(size_t i=0; i<indices.size(); i += 2)
+			{
+				auto& e =_dst.emplace_back();
+				e.assign(_src.begin() + indices[i], _src.begin() + indices[i + 1] + 1);
+			}
+			return;
+		}
+
 		for (size_t i = 0; i < _src.size(); ++i)
 		{
 			if (_src[i] != 0xf0)
 				continue;
 
-			for (size_t j = i + 1; j < _src.size(); ++j)
+			uint32_t numBytesRead = 0;
+			uint32_t length = 0;
+
+			readVarLen(numBytesRead, length, &_src[i + 1], _src.size() - i - 1);
+
+			// do some simple validation here, I've seen midi files where sysex is stored without varlength encoding
+			if (length == 0 || (numBytesRead > 1 && length < 128))
+				numBytesRead = 0;
+
+			const auto jStart = i + numBytesRead + 1;
+
+			for(size_t j = jStart; j < _src.size(); ++j)
 			{
-				if (_src[j] != 0xf7)
+				if(_src[j] <= 0xf0)
 					continue;
 
 				std::vector<uint8_t> entry;
-				entry.insert(entry.begin(), _src.begin() + i, _src.begin() + j + 1);
-
-				_dst.emplace_back(entry);
-
+				entry.reserve(j - jStart + 2);
+				entry.push_back(0xf0);
+				entry.insert(entry.end(), _src.begin() + jStart, _src.begin() + j);
+				entry.push_back(0xf7);
+				_dst.emplace_back(std::move(entry));
 				i = j;
 				break;
 			}
@@ -174,7 +215,9 @@ namespace synthLib
 
 	bool MidiToSysex::extractSysexFromData(std::vector<std::vector<uint8_t>>& _messages, const std::vector<uint8_t>& _data)
 	{
-		splitMultipleSysex(_messages, _data);
+		constexpr uint8_t midiHeader[] = "MThd";
+		const auto isMidiFile = _data.size() >= 4 && memcmp(_data.data(), midiHeader, 4) == 0;
+		splitMultipleSysex(_messages, _data, isMidiFile);
 		return !_messages.empty();
 	}
 
@@ -246,5 +289,27 @@ namespace synthLib
 			} while (c & 0x80);
 		}
 		return(value);
+	}
+
+	void MidiToSysex::readVarLen(uint32_t& _numBytesRead, uint32_t& _result, const uint8_t* _data, const size_t _numBytes)
+	{
+		_numBytesRead = 0;
+		_result = 0;
+
+		for(size_t i=0; i<_numBytes; ++i)
+		{
+			const auto b = _data[i];
+
+			const uint32_t v = b & 0x7f;
+
+			_result += v;
+
+			++_numBytesRead;
+
+			if (b & 0x80)
+				_result <<= 7;
+			else
+				break;
+		}
 	}
 }

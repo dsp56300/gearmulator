@@ -1,5 +1,6 @@
 #include "Parts.h"
 
+#include "PartButton.h"
 #include "VirusEditor.h"
 
 #include "../VirusController.h"
@@ -7,21 +8,30 @@
 
 #include "../../jucePluginLib/parameterbinding.h"
 
+#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+
 namespace genericVirusUI
 {
 	Parts::Parts(VirusEditor& _editor) : m_editor(_editor)
 	{
-		_editor.findComponents<juce::Button>(m_partSelect, "SelectPart");
+		_editor.findComponents<genericUI::Button<juce::DrawableButton>>(m_partSelect, "SelectPart");
 		_editor.findComponents<juce::Button>(m_presetPrev, "PresetPrev");
 		_editor.findComponents<juce::Button>(m_presetNext, "PresetNext");
 
 		_editor.findComponents<juce::Slider>(m_partVolume, "PartVolume");
 		_editor.findComponents<juce::Slider>(m_partPan, "PartPan");
-		_editor.findComponents<juce::TextButton>(m_presetName, "PresetName");
+		_editor.findComponents<PartButton>(m_presetName, "PresetName");
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
 			m_partSelect[i]->onClick = [this, i]{ selectPart(i); };
+			m_partSelect[i]->onDown = [this, i](const juce::MouseEvent& _e)
+			{
+				if(!_e.mods.isPopupMenu())
+					return false;
+				selectPartMidiChannel(i);
+				return true;
+			};
 
 			if(i < m_presetPrev.size())
 				m_presetPrev[i]->onClick = [this, i]{ selectPrevPreset(i); };
@@ -29,7 +39,7 @@ namespace genericVirusUI
 			if(i < m_presetNext.size())
 				m_presetNext[i]->onClick = [this, i]{ selectNextPreset(i); };
 
-			m_presetName[i]->onClick = [this, i]{ selectPreset(i); };
+			m_presetName[i]->initalize(static_cast<uint8_t>(i));
 
 			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
 			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
@@ -69,14 +79,39 @@ namespace genericVirusUI
 		m_editor.setPart(_part);
 	}
 
+	void Parts::selectPartMidiChannel(const size_t _part) const
+	{
+		if(!m_editor.getController().isMultiMode())
+			return;
+
+		juce::PopupMenu menu;
+
+		const auto idx= m_editor.getController().getParameterIndexByName("Part Midi Channel");
+		if(idx == pluginLib::Controller::InvalidParameterIndex)
+			return;
+
+		const auto v = m_editor.getController().getParameter(idx, static_cast<uint8_t>(_part));
+
+		for(uint8_t i=0; i<16; ++i)
+		{
+			menu.addItem("Midi Channel " + std::to_string(i + 1), true, v->getUnnormalizedValue() == i, [v, i]
+			{
+				v->setValue(v->convertTo0to1(i), pluginLib::Parameter::ChangedBy::Ui);
+			});
+		}
+
+		menu.showMenuAsync({});
+	}
+
 	void Parts::selectPrevPreset(size_t _part) const
 	{
 		if(m_presetPrev.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		auto* pb = m_editor.getPatchBrowser();
-		if(!pb || !pb->selectPrevPreset())
-			m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectPrevPreset(static_cast<uint32_t>(_part)))
+			return;
+		m_editor.getController().selectPrevPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::selectNextPreset(size_t _part) const
@@ -84,33 +119,10 @@ namespace genericVirusUI
 		if(m_presetNext.size() == 1)
 			_part = m_editor.getController().getCurrentPart();
 
-		auto* pb = m_editor.getPatchBrowser();
-		if(!pb || !pb->selectNextPreset())
-			m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
-	}
-
-	void Parts::selectPreset(size_t _part) const
-	{
-		juce::PopupMenu selector;
-
-		const auto pt = static_cast<uint8_t>(_part);
-
-        for (uint8_t b = 0; b < m_editor.getController().getBankCount(); ++b)
-        {
-            const auto bank = virusLib::fromArrayIndex(b);
-            auto presetNames = m_editor.getController().getSinglePresetNames(bank);
-            juce::PopupMenu p;
-            for (uint8_t j = 0; j < presetNames.size(); j++)
-            {
-                const auto presetName = presetNames[j];
-                p.addItem(presetName, [this, bank, j, pt] 
-                {
-                    m_editor.getController().setCurrentPartPreset(pt, bank, j);
-                });
-            }
-            selector.addSubMenu(m_editor.getController().getBankName(b), p);
-		}
-		selector.showMenuAsync(juce::PopupMenu::Options());
+		auto* pm = m_editor.getPatchManager();
+		if(pm && pm->selectNextPreset(static_cast<uint32_t>(_part)))
+			return;
+		m_editor.getController().selectNextPreset(static_cast<uint8_t>(_part));
 	}
 
 	void Parts::updatePresetNames() const

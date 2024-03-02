@@ -15,12 +15,12 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 
 int PluginEditorState::getWidth() const
 {
-	return m_virusEditor ? m_virusEditor->getWidth() : 0;
+	return m_editor ? m_editor->getWidth() : 0;
 }
 
 int PluginEditorState::getHeight() const
 {
-	return m_virusEditor ? m_virusEditor->getHeight() : 0;
+	return m_editor ? m_editor->getHeight() : 0;
 }
 
 const std::vector<PluginEditorState::Skin>& PluginEditorState::getIncludedSkins()
@@ -30,7 +30,7 @@ const std::vector<PluginEditorState::Skin>& PluginEditorState::getIncludedSkins(
 
 juce::Component* PluginEditorState::getUiRoot() const
 {
-	return m_virusEditor.get();
+	return m_editor.get();
 }
 
 void PluginEditorState::disableBindings()
@@ -55,6 +55,26 @@ void PluginEditorState::loadDefaultSkin()
 	loadSkin(skin);
 }
 
+void PluginEditorState::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+{
+	m_instanceConfig = _data;
+
+	if(m_editor && !m_instanceConfig.empty())
+		getEditor()->setPerInstanceConfig(m_instanceConfig);
+}
+
+void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
+{
+	if(m_editor)
+	{
+		m_instanceConfig.clear();
+		getEditor()->getPerInstanceConfig(m_instanceConfig);
+	}
+
+	if(!m_instanceConfig.empty())
+		_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+}
+
 void PluginEditorState::loadSkin(const Skin& _skin)
 {
 	if(m_currentSkin == _skin)
@@ -63,15 +83,18 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 	m_currentSkin = _skin;
 	writeSkinToConfig(_skin);
 
-	if (m_virusEditor)
+	if (m_editor)
 	{
+		m_instanceConfig.clear();
+		getEditor()->getPerInstanceConfig(m_instanceConfig);
+
 		m_parameterBinding.clearBindings();
 
-		auto* parent = m_virusEditor->getParentComponent();
+		auto* parent = m_editor->getParentComponent();
 
-		if(parent && parent->getIndexOfChildComponent(m_virusEditor.get()) > -1)
-			parent->removeChildComponent(m_virusEditor.get());
-		m_virusEditor.reset();
+		if(parent && parent->getIndexOfChildComponent(m_editor.get()) > -1)
+			parent->removeChildComponent(m_editor.get());
+		m_editor.reset();
 	}
 
 	m_rootScale = 1.0f;
@@ -79,20 +102,23 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 	try
 	{
 		auto* editor = createEditor(_skin, [this] { openMenu(); });
-		m_virusEditor.reset(editor);
+		m_editor.reset(editor);
 		m_rootScale = editor->getScale();
 
-		m_virusEditor->setTopLeftPosition(0, 0);
+		m_editor->setTopLeftPosition(0, 0);
 
 		if(evSkinLoaded)
-			evSkinLoaded(m_virusEditor.get());
+			evSkinLoaded(m_editor.get());
+
+		if(!m_instanceConfig.empty())
+			getEditor()->setPerInstanceConfig(m_instanceConfig);
 	}
 	catch(const std::runtime_error& _err)
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
 		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
-		m_virusEditor.reset();
+		m_editor.reset();
 
 		loadSkin(m_includedSkins[0]);
 	}
@@ -102,6 +128,11 @@ void PluginEditorState::setGuiScale(int _scale) const
 {
 	if(evSetGuiScale)
 		evSetGuiScale(_scale);
+}
+
+genericUI::Editor* PluginEditorState::getEditor() const
+{
+	return static_cast<genericUI::Editor*>(m_editor.get());
 }
 
 void PluginEditorState::openMenu()
@@ -155,9 +186,9 @@ void PluginEditorState::openMenu()
 		}
 	}
 
-	if(m_virusEditor && m_currentSkin.folder.empty())
+	if(m_editor && m_currentSkin.folder.empty())
 	{
-		auto* editor = m_virusEditor.get();
+		auto* editor = m_editor.get();
 		if(editor)
 		{
 			skinMenu.addSeparator();
@@ -192,15 +223,87 @@ void PluginEditorState::openMenu()
 
 	initContextMenu(menu);
 
+	juce::PopupMenu lockRegions;
+
+	auto& regions = m_processor.getController().getParameterDescriptions().getRegions();
+
+	lockRegions.addItem("Unlock All", [&]
+	{
+		for (const auto& region : regions)
+			m_processor.getController().unlockRegion(region.first);
+	});
+
+	lockRegions.addItem("Lock All", [&]
+	{
+		for (const auto& region : regions)
+			m_processor.getController().lockRegion(region.first);
+	});
+
+	lockRegions.addSeparator();
+
+	uint32_t count = 0;
+
+	std::map<std::string, pluginLib::ParameterRegion> sortedRegions;
+	for (const auto& region : regions)
+		sortedRegions.insert(region);
+
+	for (const auto& region : sortedRegions)
+	{
+		lockRegions.addItem(region.second.getName(), true, m_processor.getController().isRegionLocked(region.first), [this, id=region.first]
+		{
+			if(m_processor.getController().isRegionLocked(id))
+				m_processor.getController().unlockRegion(id);
+			else
+				m_processor.getController().lockRegion(id);
+		});
+
+		if(++count == 16)
+		{
+			lockRegions.addColumnBreak();
+			count = 0;
+		}
+	}
+
+	menu.addSubMenu("Lock Regions...", lockRegions);
+
+	{
+		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
+
+		juce::PopupMenu advancedMenu;
+		advancedMenu.addItem("Enable Advanced Options", true, allowAdvanced, [this, allowAdvanced]
+		{
+			if(!allowAdvanced)
+			{
+				if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning", 
+					"Changing these settings may cause instability of the plugin.\n"
+					"\n"
+					"Please confirm to continue.")
+					)
+					m_processor.getConfig().setValue("allow_advanced_options", true);
+			}
+			else
+			{
+				m_processor.getConfig().setValue("allow_advanced_options", juce::var(false));
+			}
+		});
+
+		advancedMenu.addSeparator();
+
+		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
+		{
+			menu.addSubMenu("Advanced...", advancedMenu);
+		}
+	}
+
 	menu.showMenuAsync(juce::PopupMenu::Options());
 }
 
 void PluginEditorState::exportCurrentSkin() const
 {
-	if(!m_virusEditor)
+	if(!m_editor)
 		return;
 
-	auto* editor = dynamic_cast<genericUI::Editor*>(m_virusEditor.get());
+	const auto* editor = dynamic_cast<const genericUI::Editor*>(m_editor.get());
 
 	if(!editor)
 		return;
@@ -209,7 +312,7 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, "OK", m_virusEditor.get());
+		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, "OK", m_editor.get());
 	}
 	else
 	{

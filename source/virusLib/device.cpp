@@ -7,6 +7,8 @@
 
 #include "../synthLib/deviceException.h"
 
+#include <cstring>
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
@@ -76,6 +78,7 @@ namespace virusLib
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
@@ -93,8 +96,9 @@ namespace virusLib
 			return false;
 		return m_mc->setState(messages);
 	}
+#endif
 
-	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string& _4cc)
+	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc)
 	{
 		for(uint32_t i=0; i<_data.size() - _4cc.size(); ++i)
 		{
@@ -333,7 +337,7 @@ namespace virusLib
 	void Device::onAudioWritten()
 	{
 		m_mc->getMidiQueue(0).onAudioWritten();
-		m_mc->process(1);
+		m_mc->process();
 	}
 
 	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
@@ -353,5 +357,28 @@ namespace virusLib
 		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
 		_dsp.startDSPThread(_createDebugger);
 		return res;
+	}
+
+	bool Device::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_dsp)
+			return false;
+
+		bool res = m_dsp->getPeriphX().getEsaiClock().setSpeedPercent(_percent);
+
+		if(m_dsp2)
+			res &= m_dsp2->getPeriphX().getEsaiClock().setSpeedPercent(_percent);
+
+		return res;
+	}
+
+	uint32_t Device::getDspClockPercent() const
+	{
+		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedPercent();
+	}
+
+	uint64_t Device::getDspClockHz() const
+	{
+		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedInHz();
 	}
 }

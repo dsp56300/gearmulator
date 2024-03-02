@@ -26,7 +26,7 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, getConfigOptions())
+	, ::getConfigOptions())
 {
 	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
 
@@ -117,7 +117,7 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
     	inputs[channel] = buffer.getReadPointer(channel);
 
     for (int channel = 0; channel < totalNumOutputChannels; ++channel)
-    	outputs[channel] = buffer.getWritePointer(channel);
+		outputs[channel] = buffer.getWritePointer(channel);
 
 	for(const auto metadata : midiMessages)
 	{
@@ -128,9 +128,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 		if(message.isSysEx() || message.getRawDataSize() > 3)
 		{
 			ev.sysex.resize(message.getRawDataSize());
-			memcpy( &ev.sysex[0], message.getRawData(), ev.sysex.size());
+			memcpy(ev.sysex.data(), message.getRawData(), ev.sysex.size());
 
-			// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but its already there
+			// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but it's already there
 			if(ev.sysex.size() > 1)
 			{
 				if(ev.sysex.front() == 0xf0 && ev.sysex[1] == 0xf0)
@@ -183,6 +183,8 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 	getPlugin().process(inputs, outputs, buffer.getNumSamples(), static_cast<float>(pos.bpm),
                      static_cast<float>(pos.ppqPosition), pos.isPlaying);
 
+	applyOutputGain(outputs, buffer.getNumSamples());
+
     m_midiOut.clear();
     getPlugin().getMidiOut(m_midiOut);
 
@@ -219,11 +221,9 @@ void AudioPluginAudioProcessor::processBlock (juce::AudioBuffer<float>& buffer,
 
 //==============================================================================
 
-juce::AudioProcessorEditor* AudioPluginAudioProcessor::createEditor()
+jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 {
-	if(!m_editorState)
-		m_editorState.reset(new PluginEditorState(*this, getController()));
-    return new jucePluginEditorLib::EditorWindow(*this, *m_editorState, getConfig());
+	return new PluginEditorState(*this, getController());
 }
 
 void AudioPluginAudioProcessor::updateLatencySamples()

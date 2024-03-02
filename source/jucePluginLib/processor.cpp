@@ -1,9 +1,11 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "types.h"
 
 #include "../synthLib/deviceException.h"
 #include "../synthLib/os.h"
 #include "../synthLib/binarystream.h"
+#include "dsp56kEmu/fastmath.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -16,8 +18,6 @@ namespace pluginLib
 {
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 1;
-
-	using PluginStream = synthLib::BinaryStream<uint32_t>;
 
 	Processor::Processor(const BusesProperties& _busesProperties) : juce::AudioProcessor(_busesProperties)
 	{
@@ -175,6 +175,8 @@ namespace pluginLib
 			m_device.reset(new DummyDevice());
 		}
 
+		m_device->setDspClockPercent(m_dspClockPercent);
+
 		m_plugin.reset(new synthLib::Plugin(m_device.get()));
 
 		return *m_plugin;
@@ -186,6 +188,87 @@ namespace pluginLib
 			return false;
 		updateLatencySamples();
 		return true;
+	}
+
+	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
+	{
+		synthLib::BinaryStream s;
+
+		{
+			synthLib::ChunkWriter cw(s, "GAIN", 1);
+			s.write<uint32_t>(1);	// version
+			s.write(m_inputGain);
+			s.write(m_outputGain);
+		}
+
+		if(m_dspClockPercent != 100)
+		{
+			synthLib::ChunkWriter cw(s, "DSPC", 1);
+			s.write(m_dspClockPercent);
+		}
+
+		s.toVector(_targetBuffer, true);
+	}
+
+	void Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		auto readGain = [this](synthLib::BinaryStream& _s)
+		{
+			const auto version = _s.read<uint32_t>();
+			if (version != 1)
+				return;
+			m_inputGain = _s.read<float>();
+			m_outputGain = _s.read<float>();
+		};
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			synthLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+			return;
+		}
+
+		synthLib::BinaryStream s(_sourceBuffer);
+		synthLib::ChunkReader cr(s);
+
+		cr.add("GAIN", 1, [readGain](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			readGain(_binaryStream);
+		});
+
+		cr.add("DSPC", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			auto p = _binaryStream.read<uint32_t>();
+			p = dsp56k::clamp<uint32_t>(p, 50, 200);
+			setDspClockPercent(p);
+		});
+
+		cr.tryRead();
+	}
+
+	bool Processor::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_device)
+			return false;
+		if(!m_device->setDspClockPercent(_percent))
+			return false;
+		m_dspClockPercent = _percent;
+		return true;
+	}
+
+	uint32_t Processor::getDspClockPercent() const
+	{
+		if(!m_device)
+			return m_dspClockPercent;
+		return m_device->getDspClockPercent();
+	}
+
+	uint64_t Processor::getDspClockHz() const
+	{
+		if(!m_device)
+			return 0;
+		return m_device->getDspClockHz();
 	}
 
 	//==============================================================================
@@ -211,7 +294,7 @@ namespace pluginLib
 	    // You should use this method to store your parameters in the memory block.
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
-
+#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> buffer;
 		getPlugin().getState(buffer, synthLib::StateTypeGlobal);
 
@@ -227,27 +310,35 @@ namespace pluginLib
 		ss.toVector(buf);
 
 		destData.append(buf.data(), buf.size());
+#endif
 	}
 
 	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
-	    // You should use this method to restore your parameters from this memory block,
+#if !SYNTHLIB_DEMO_MODE
+		// You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
 		setState(_data, _sizeInBytes);
+#endif
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
 		destData.append(state.data(), state.size());
+#endif
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		setState(data, sizeInBytes);
+#endif
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
@@ -278,12 +369,15 @@ namespace pluginLib
 				getPlugin().setState(buffer);
 				ss.read(buffer);
 
-				try
+				if(!buffer.empty())
 				{
-					loadCustomData(buffer);
-				}
-				catch (std::range_error&)
-				{
+					try
+					{
+						loadCustomData(buffer);
+					}
+					catch (std::range_error&)
+					{
+					}
 				}
 			}
 			catch (std::range_error& e)
@@ -300,6 +394,7 @@ namespace pluginLib
 		if (hasController())
 			getController().onStateLoaded();
 	}
+#endif
 
 	//==============================================================================
 

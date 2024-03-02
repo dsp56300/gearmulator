@@ -20,11 +20,12 @@ namespace virusLib
 
 		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
 
+#if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override;
 		bool setStateFromUnknownCustomData(const std::vector<uint8_t>& _state) override;
-
-		static bool find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string& _4cc);
+#endif
+		static bool find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc);
 		static bool parseTIcontrolPreset(std::vector<synthLib::SMidiEvent>& _events, const std::vector<uint8_t>& _state);
 		static bool parsePowercorePreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data);
 
@@ -36,6 +37,10 @@ namespace virusLib
 
 		static void createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom);
 		static std::thread bootDSP(DspSingle& _dsp, const ROMFile& _rom, bool _createDebugger);
+		
+		bool setDspClockPercent(uint32_t _percent) override;
+		uint32_t getDspClockPercent() const override;
+		uint64_t getDspClockHz() const override;
 
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;

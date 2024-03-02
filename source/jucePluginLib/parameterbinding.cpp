@@ -27,6 +27,11 @@ namespace pluginLib
 		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
 	}
 
+	void ParameterBinding::MouseListener::mouseDoubleClick(const juce::MouseEvent& event)
+	{
+		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::ChangedBy::ControlChange);
+	}
+
 	ParameterBinding::~ParameterBinding()
 	{
 		clearBindings();
@@ -89,20 +94,62 @@ namespace pluginLib
 		_combo.onChange = nullptr;
 		_combo.clear();
 
-		int idx = 1;
-		uint32_t count = 0;
-		for (const auto& vs : v->getAllValueStrings())
+		using Entry = std::pair<uint8_t, std::string>;
+
+		std::vector<Entry> sortedValues;
+
+		const auto& allValues = v->getAllValueStrings();
+		uint8_t i = 0;
+		for (const auto& vs : allValues)
 		{
 			if(vs.isNotEmpty())
+				sortedValues.emplace_back(i, vs.toStdString());
+			++i;
+		}
+		/*
+		std::sort(sortedValues.begin(), sortedValues.end(), [](const Entry& _a, const Entry& _b)
+		{
+			const auto aOff =_a.second == "Off" || _a.second == "-";
+			const auto bOff =_b.second == "Off" || _b.second == "-";
+
+			if(aOff && !bOff)
+				return true;
+
+			if(!aOff && bOff)
+				return false;
+
+			auto noDigitsString = [](const std::string& _s)
 			{
-				_combo.addItem(vs, idx);
-				if(++count == 16)
+				std::string s;
+				s.reserve(_s.size());
+				for (const char c : _s)
 				{
-					_combo.getRootMenu()->addColumnBreak();
-					count = 0;
+					if(isdigit(c))
+						break;
+					s += c;
 				}
+				return s;
+			};
+
+			const auto a = noDigitsString(_a.second);
+			const auto b = noDigitsString(_b.second);
+
+			if(a == b)
+				return _a.first < _b.first;
+
+			return a < b;
+		});
+		*/
+		uint32_t count = 0;
+
+		for (const auto& vs : sortedValues)
+		{
+			_combo.addItem(vs.second, vs.first + 1);
+			if(++count == 16)
+			{
+				_combo.getRootMenu()->addColumnBreak();
+				count = 0;
 			}
-			idx++;
 		}
 
 		_combo.setSelectedId(static_cast<int>(v->getValueObject().getValueSource().getValue()) + 1, juce::dontSendNotification);
@@ -130,11 +177,11 @@ namespace pluginLib
 
 		const auto listenerId = m_nextListenerId++;
 
-		v->onValueChanged.emplace_back(std::make_pair(listenerId, [this, &_combo, v]()
+		v->onValueChanged.emplace_back(listenerId, [this, &_combo, v]()
 		{
 			const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
-		}));
+		});
 
 		const BoundParameter p{v, &_combo, _param, _part, listenerId};
 		addBinding(p);

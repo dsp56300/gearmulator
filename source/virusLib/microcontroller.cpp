@@ -75,7 +75,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 			if(ROMFile::getSingleName(single).size() != 10)
 			{
 				failed = true;
-				break;				
+				break;
 			}
 
 			singles.emplace_back(single);
@@ -868,7 +868,7 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 	return partProgramChange(_part, partSingle);
 }
 
-void Microcontroller::process(size_t _size)
+void Microcontroller::process()
 {
 	m_hdi08.exec();
 
@@ -883,6 +883,7 @@ void Microcontroller::process(size_t _size)
 	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
+#if !SYNTHLIB_DEMO_MODE
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
@@ -960,6 +961,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 
 	return true;
 }
+#endif
 
 void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
@@ -1158,6 +1160,6 @@ void Microcontroller::receiveUpgradedPreset()
 
 bool Microcontroller::isValid(const TPreset& _preset)
 {
-	return _preset.front() > 0;
+	return _preset[240] >= 32 && _preset[240] <= 127;
 }
 }

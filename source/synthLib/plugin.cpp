@@ -84,7 +84,7 @@ namespace synthLib
 	{
 		return m_device->isValid();
 	}
-
+#if !SYNTHLIB_DEMO_MODE
 	bool Plugin::getState(std::vector<uint8_t>& _state, StateType _type) const
 	{
 		if(!m_device)
@@ -119,7 +119,7 @@ namespace synthLib
 
 		return m_device->setState(state, stateType);
 	}
-
+#endif
 	void Plugin::insertMidiEvent(const SMidiEvent& _ev)
 	{
 		if(m_midiIn.empty() || m_midiIn.back().offset <= _ev.offset)

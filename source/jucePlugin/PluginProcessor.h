@@ -19,7 +19,7 @@ public:
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
     void processBlock (juce::AudioBuffer<float>&, juce::MidiBuffer&) override;
     using AudioProcessor::processBlock;
-    juce::AudioProcessorEditor* createEditor() override;
+    jucePluginEditorLib::PluginEditorState* createEditorState() override;
     const juce::String getName() const override;
 
     bool acceptsMidi() const override;

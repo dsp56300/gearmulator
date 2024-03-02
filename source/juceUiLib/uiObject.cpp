@@ -6,16 +6,24 @@
 
 #include "editor.h"
 
-#include "rotaryStyle.h"
-#include "comboboxStyle.h"
 #include "buttonStyle.h"
-#include "textbuttonStyle.h"
+#include "comboboxStyle.h"
 #include "hyperlinkbuttonStyle.h"
 #include "labelStyle.h"
+#include "listBoxStyle.h"
+#include "rotaryStyle.h"
+#include "scrollbarStyle.h"
+#include "textbuttonStyle.h"
+#include "textEditorStyle.h"
+#include "treeViewStyle.h"
+
+#include <cassert>
+
+#include "button.h"
 
 namespace genericUI
 {
-	UiObject::UiObject(const juce::var& _json)
+	UiObject::UiObject(const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate)
 	{
 		auto* obj = _json.getDynamicObject();
 
@@ -78,6 +86,15 @@ namespace genericUI
 		}
 	}
 
+	void UiObject::registerTemplates(Editor& _editor) const
+	{
+		for(auto& s : m_templates)
+			_editor.registerTemplate(s);
+
+		for (auto& ch : m_children)
+			ch->registerTemplates(_editor);
+	}
+
 	void UiObject::apply(Editor& _editor, juce::Component& _target)
 	{
 		const auto x = getPropertyInt("x");
@@ -85,15 +102,17 @@ namespace genericUI
 		const auto w = getPropertyInt("width");
 		const auto h = getPropertyInt("height");
 
-		if(w < 1 || h < 1)
+		if(w > 0 && h > 0)
+		{
+			_target.setTopLeftPosition(x, y);
+			_target.setSize(w, h);
+		}
+		else if (!m_isTemplate)
 		{
 			std::stringstream ss;
 			ss << "Size " << w << "x" << h << " for object named " << m_name << " is invalid, each side must be > 0";
 			throw std::runtime_error(ss.str());
 		}
-
-		_target.setTopLeftPosition(x, y);
-		_target.setSize(w, h);
 
 		createCondition(_editor, _target);
 	}
@@ -146,25 +165,52 @@ namespace genericUI
 
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new LabelStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::Label, LabelStyle>(_editor, _target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::ScrollBar& _target)
+	{
+		applyT<juce::ScrollBar, ScrollBarStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::TextButton& _target)
 	{
-		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new TextButtonStyle(_editor);
-		createStyle(_editor, _target, s);
-		s->apply(_target);
+		applyT<juce::TextButton, TextButtonStyle>(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::HyperlinkButton& _target)
 	{
+		applyT<juce::HyperlinkButton, HyperlinkButtonStyle>(_editor, _target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::TreeView& _target)
+	{
+		applyT<juce::TreeView, TreeViewStyle>(_editor, _target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::ListBox& _target)
+	{
+		applyT<juce::ListBox, ListBoxStyle>(_editor, _target);
+	}
+
+	void UiObject::apply(Editor& _editor, juce::TextEditor& _target)
+	{
+		applyT<juce::TextEditor, TextEditorStyle>(_editor, _target);
+	}
+
+	template <typename TComponent, typename TStyle> void UiObject::applyT(Editor& _editor, TComponent& _target)
+	{
 		apply(_editor, static_cast<juce::Component&>(_target));
-		auto* s = new HyperlinkButtonStyle(_editor);
+
+		TStyle* s = nullptr;
+
+		if (!m_style)
+			s = new TStyle(_editor);
+
 		createStyle(_editor, _target, s);
+
+		s = dynamic_cast<TStyle*>(m_style.get());
+		assert(s);
 		s->apply(_target);
 	}
 
@@ -176,6 +222,9 @@ namespace genericUI
 			_dst.insert(res);
 
 		for (const auto& child : m_children)
+			child->collectVariants(_dst, _property);
+
+		for (const auto& child : m_templates)
 			child->collectVariants(_dst, _property);
 	}
 
@@ -201,15 +250,15 @@ namespace genericUI
 		}
 		else if(hasComponent("button"))
 		{
-			createJuceObject(_editor, new juce::DrawableButton(m_name, juce::DrawableButton::ImageRaw));
+			createJuceObject<Button<juce::DrawableButton>>(_editor, m_name, juce::DrawableButton::ImageRaw);
 		}
 		else if(hasComponent("hyperlinkbutton"))
 		{
-			createJuceObject<juce::HyperlinkButton>(_editor);
+			createJuceObject<Button<juce::HyperlinkButton>>(_editor);
 		}
 		else if(hasComponent("textbutton"))
 		{
-			createJuceObject<juce::TextButton>(_editor);
+			createJuceObject<Button<juce::TextButton>>(_editor);
 		}
 		else if(hasComponent("label"))
 		{
@@ -361,6 +410,14 @@ namespace genericUI
 					}
 				}
 			}
+			else if (key == "templates")
+			{
+				if (const auto children = value.getArray())
+				{
+					for (const auto& c : *children)
+						m_templates.emplace_back(std::make_shared<UiObject>(c, true));
+				}
+			}
 			else if(key == "tabgroup")
 			{
 				auto buttons = value["buttons"].getArray();
@@ -457,9 +514,16 @@ namespace genericUI
 			_target.getProperties().set(juce::Identifier(prop.first.c_str()), juce::var(prop.second.c_str()));
 	}
 
-	template <typename T> T* UiObject::createJuceObject(Editor& _editor)
+	template <typename T, class... Args> T* UiObject::createJuceObject(Editor& _editor, Args... _args)
 	{
-		return createJuceObject(_editor, new T());
+		T* comp = nullptr;
+
+		comp = _editor.createJuceComponent(comp, *this, _args...);
+
+		if(!comp)
+			comp = new T(_args...);
+
+		return createJuceObject(_editor, comp);
 	}
 
 	template <typename T> T* UiObject::createJuceObject(Editor& _editor, T* _object)
@@ -507,7 +571,8 @@ namespace genericUI
 
 	template <typename Target, typename Style> void UiObject::createStyle(Editor& _editor, Target& _target, Style* _style)
 	{
-		m_style.reset(_style);
+		if(_style)
+			m_style.reset(_style);
 		m_style->apply(_editor, *this);
 		_target.setLookAndFeel(m_style.get());
 	}
