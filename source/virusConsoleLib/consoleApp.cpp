@@ -338,17 +338,15 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	}, 0);
 
 	bootDSP(_createDebugger).join();
-
 	/*
-	const std::string romFile = m_romName;
+	const std::string romFile = m_rom.getFilename();
 	auto& mem = m_dsp1->getMemory();
 
-	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
-	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
+	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.sizeXY());
+	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.sizeXY());
 	mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
-	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
+	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.sizeP(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
 	*/
-
 	std::vector<synthLib::SMidiEvent> midiEvents;
 
 	AudioProcessor proc(m_rom.getSamplerate(), _audioOutputFilename, m_demo != nullptr, _maxSampleCount, m_dsp1.get(), m_dsp2);
