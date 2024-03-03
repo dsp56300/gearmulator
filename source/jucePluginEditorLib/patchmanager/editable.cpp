@@ -28,6 +28,7 @@ namespace jucePluginEditorLib::patchManager
 		_parent->addAndMakeVisible(m_editorLabel);
 
 		m_editorLabel->showEditor();
+		m_editorLabel->getCurrentTextEditor()->addListener(this);
 
 		m_finishedEditingCallback = std::move(_callback);
 
@@ -43,11 +44,20 @@ namespace jucePluginEditorLib::patchManager
 				m_finishedEditingCallback(true, text);
 			destroyEditorLabel();
 		}
-		Listener::editorHidden(_label, _textEditor);
+		juce::Label::Listener::editorHidden(_label, _textEditor);
 	}
 
 	void Editable::labelTextChanged(juce::Label* _label)
 	{
+		if(m_editorLabel)
+			m_editorLabel->repaint();
+	}
+
+	void Editable::textEditorTextChanged(juce::TextEditor& _textEditor)
+	{
+		if(m_editorLabel)
+			m_editorLabel->repaint();
+		_textEditor.repaint();
 	}
 
 	void Editable::destroyEditorLabel()
