@@ -69,14 +69,12 @@ namespace virusLib
 
 			for(size_t i=0; i<_frames; ++i)
 			{
-				_outputs[_firstOutChannel  ][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[0]]);
-				_outputs[_firstOutChannel+1][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[1]]);
-
-				_outputs[_firstOutChannel+2][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[2]]);
-				_outputs[_firstOutChannel+3][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[3]]);
-
-				_outputs[_firstOutChannel+4][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[4]]);
-				_outputs[_firstOutChannel+5][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[5]]);
+				if(_outputs[_firstOutChannel  ]) _outputs[_firstOutChannel  ][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[0]]);
+				if(_outputs[_firstOutChannel+1]) _outputs[_firstOutChannel+1][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[1]]);
+				if(_outputs[_firstOutChannel+2]) _outputs[_firstOutChannel+2][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[2]]);
+				if(_outputs[_firstOutChannel+3]) _outputs[_firstOutChannel+3][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[3]]);
+				if(_outputs[_firstOutChannel+4]) _outputs[_firstOutChannel+4][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[4]]);
+				if(_outputs[_firstOutChannel+5]) _outputs[_firstOutChannel+5][i] += dsp56k::dsp2sample<T>(p[_sourceIndices[5]]);
 
 				p += g_esai1TxBlockSize;
 			}
