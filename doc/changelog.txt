@@ -6,6 +6,13 @@ DSP:
 
 - [Imp] Performance improvements
 
+- [Fix] Crash on x86 processors in various circumstances
+
+Framework:
+
+- [Fix] PatchManager: Edit field not refreshing text while typing in some hosts when adding 
+        a user bank or favourite
+
 Osirus:
 
 - [Fix] Crash when loading Virus B OS 4.58
