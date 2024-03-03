@@ -123,7 +123,8 @@ void Microcontroller::sendInitControlCommands()
 			0xF4F473, 0x401000,						// Samplerate 44100 Hz
 			0xF00020, 0x330110, 0x734000, 0x00F700,
 			0xF00020, 0x330110, 0x734009, 0x02F702,	// USB Mode = 3 out 1 in
-			0xF00020, 0x330110, 0x73400E, 0x00F700,	// ??
+			0xF00020, 0x330110, 0x73400E, 0x00F700,	// 1 = Change DSP Clock from 133 MHz to 153 MHz
+			0xF00020, 0x330110, 0x73406D, 0x64F764, // DSP clock adjustment in percent (roughly), default $64 = 100%, max $79 = 121%, lowest possible value $0 = 39 MHz :)
 			0xF00020, 0x330110, 0x73400D, 0x00F700, // ??
 			0xF00020, 0x330110, 0x734010, 0x00F700,	// Samplerate = 44100 Hz
 			0xF00020, 0x330110, 0x734019, 0x01F701,	// EQ = Enable
@@ -157,7 +158,6 @@ void Microcontroller::sendInitControlCommands()
 			0xF00020, 0x330110, 0x73405F, 0x00F700, // Midi Control High Page = 0 = Do NOT allow Poly Pressure
 			0xF00020, 0x330110, 0x734060, 0x00F700, // Midi Arp Send = 0 = off
 			0xF00020, 0x330110, 0x73406A, 0x01F701, // Midi Clock RX = 1 = enabled
-			0xF00020, 0x330110, 0x73406D, 0x64F764, // ??
 			0xF00020, 0x330110, 0x73406E, 0x00F700, // Soft Knob Config Mode 1 = 0
 			0xF00020, 0x330110, 0x73406F, 0x00F700, // Soft Knob Config Mode 2 = 0
 			0xF00020, 0x330110, 0x734070, 0x00F700, // Soft Knob Config Dest 1 = 0
