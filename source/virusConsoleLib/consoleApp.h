@@ -1,9 +1,6 @@
 #pragma once
 #include <string>
 
-#include "esaiListener.h"
-#include "esaiListenerToCallback.h"
-#include "dsp56kEmu/memory.h"
 #include "dsp56kEmu/dsp.h"
 
 #include "../virusLib/romfile.h"
@@ -38,13 +35,13 @@ private:
 
 	std::thread bootDSP(bool _createDebugger) const;
 	dsp56k::IPeripherals& getYPeripherals() const;
-	void audioCallback(uint32_t audioCallbackCount);
+	void audioCallback(uint32_t _audioCallbackCount);
 
 	const std::string m_romName;
 	virusLib::ROMFile m_rom;
 	std::unique_ptr<virusLib::DspSingle> m_dsp1;
 	virusLib::DspSingle* m_dsp2 = nullptr;
-	std::unique_ptr<virusLib::Microcontroller> uc;
+	std::unique_ptr<virusLib::Microcontroller> m_uc;
 	std::unique_ptr<virusLib::DemoPlayback> m_demo;
 
 	virusLib::Microcontroller::TPreset m_preset;
