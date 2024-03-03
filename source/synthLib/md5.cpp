@@ -2,6 +2,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include <cstring>	// memcpy
+
 namespace synthLib
 {
 	// leftrotate function definition
