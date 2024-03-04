@@ -16,7 +16,9 @@ set(SOURCES
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
+	dspMemoryPatch.cpp dspMemoryPatch.h
 	hybridcontainer.h
+	md5.cpp md5.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiToSysex.cpp midiToSysex.h
 	midiTypes.h

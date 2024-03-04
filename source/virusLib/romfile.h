@@ -6,6 +6,8 @@
 
 #include "dsp56kEmu/types.h"
 
+#include "../synthLib/md5.h"
+
 namespace dsp56k
 {
 	class Peripherals56362;
@@ -123,11 +125,13 @@ public:
 
 	static std::string findROM();
 
-	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData);
+	static bool loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, synthLib::MD5& _dataHash);
 
 	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
 
 	std::string getFilename() const { return isValid() ? m_romFileName : std::string(); }
+
+	const auto& getHash() const { return m_romDataHash; }
 
 private:
 	std::vector<Chunk> readChunks(std::istream& _file, TIModel _wantedTIModel);
@@ -148,6 +152,7 @@ private:
 
 	std::string m_romFileName;
 	std::vector<uint8_t> m_romFileData;
+	synthLib::MD5 m_romDataHash;
 };
 
 }

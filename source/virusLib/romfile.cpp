@@ -11,6 +11,7 @@
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #include "../synthLib/os.h"
+#include "../synthLib/md5.h"
 
 #include "midiFileToRomData.h"
 
@@ -48,8 +49,10 @@ ROMFile::ROMFile(const std::string& _path, TIModel _wantedTIModel) : m_tiModel(_
 	}
 	else
 	{
-		if(!loadROMData(m_romFileName, m_romFileData))
+		if(!loadROMData(m_romFileName, m_romFileData, m_romDataHash))
 			return;
+
+		LOG("ROM hash: " << m_romDataHash.toString());
 	}
 
 	if(initialize())
@@ -61,7 +64,7 @@ ROMFile::ROMFile(std::vector<uint8_t> _data, const TIModel _wantedTiModel) : m_t
 	initialize();
 }
 
-bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData)
+bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, synthLib::MD5& _dataHash)
 {
 	// try binary roms first
 	const auto file = findROM();
@@ -71,6 +74,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 		if(synthLib::readFile(_loadedData, file) && !_loadedData.empty())
 		{
 			_loadedFile = file;
+			_dataHash = synthLib::MD5(_loadedData);
 			return true;
 		}
 	}
@@ -99,6 +103,7 @@ bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loade
 					continue;
 				gotSector0 = true;
 				_loadedFile = f;
+				_dataHash = synthLib::MD5(loader.getData());
 				_loadedData.insert(_loadedData.begin(), loader.getData().begin(), loader.getData().end());
 			}
 			else if(loader.getFirstSector() == 8)

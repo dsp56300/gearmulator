@@ -10,11 +10,12 @@
 
 #include <cstring>
 
+#include "dspMemoryPatches.h"
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
-		: synthLib::Device()
-		, m_rom(_rom)
+		: m_rom(_rom)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware ROM file (firmware.bin) is required, but was not found.");
@@ -33,15 +34,7 @@ namespace virusLib
 		if(m_dsp2)
 			m_mc->addDSP(*m_dsp2, true);
 
-		auto loader = bootDSP(*m_dsp, m_rom, _createDebugger);
-
-		if(m_dsp2)
-		{
-			auto loader2 = bootDSP(*m_dsp2, m_rom, false);
-			loader2.join();
-		}
-
-		loader.join();
+		bootDSPs(m_dsp.get(), m_dsp2, m_rom, _createDebugger);
 
 //		m_dsp->getMemory().saveAssembly("P.asm", 0, m_dsp->getMemory().sizeP(), true, false, m_dsp->getDSP().getPeriph(0), m_dsp->getDSP().getPeriph(1));
 
@@ -398,6 +391,21 @@ namespace virusLib
 		return res;
 	}
 
+	void Device::bootDSPs(DspSingle* _dspA, DspSingle* _dspB, const ROMFile& _rom, bool _createDebugger)
+	{
+		auto loader = bootDSP(*_dspA, _rom, _createDebugger);
+
+		if(_dspB)
+		{
+			auto loader2 = bootDSP(*_dspB, _rom, false);
+			loader2.join();
+		}
+
+		loader.join();
+
+//		applyDspMemoryPatches(_dspA, _dspB, _rom);
+	}
+
 	bool Device::setDspClockPercent(const uint32_t _percent)
 	{
 		if(!m_dsp)
@@ -419,5 +427,16 @@ namespace virusLib
 	uint64_t Device::getDspClockHz() const
 	{
 		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedInHz();
+	}
+
+	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)
+	{
+		DspMemoryPatches::apply(_dspA, _rom.getHash());
+		DspMemoryPatches::apply(_dspB, _rom.getHash());
+	}
+
+	void Device::applyDspMemoryPatches() const
+	{
+		applyDspMemoryPatches(m_dsp.get(), m_dsp2, m_rom);
 	}
 }

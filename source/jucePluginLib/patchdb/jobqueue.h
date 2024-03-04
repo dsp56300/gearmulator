@@ -5,7 +5,8 @@
 #include <mutex>
 #include <condition_variable>
 #include <thread>
-#include <future>
+#include <vector>
+#include <memory>
 
 #include "dsp56kEmu/threadtools.h"
 

@@ -17,6 +17,7 @@ set(SOURCES
 	demoplayback.cpp demoplayback.h
 	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
+	dspMemoryPatches.cpp dspMemoryPatches.h
 	dspSingle.cpp dspSingle.h
 	dspSingleSnow.cpp dspSingleSnow.h
 	dspMultiTI.cpp dspMultiTI.h

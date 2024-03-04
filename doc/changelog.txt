@@ -1,6 +1,23 @@
 Release Notes 
 
-1.3.5 (TBD)
+1.3.6 (2024.03.03)
+
+DSP:
+
+- [Imp] Performance improvements
+
+- [Fix] Crash on x86 processors in various circumstances
+
+Framework:
+
+- [Fix] PatchManager: Edit field not refreshing text while typing in some hosts when adding 
+        a user bank or favourite
+
+Osirus:
+
+- [Fix] Crash when loading Virus B OS 4.58
+
+1.3.5 (2024.03.01)
 
 DSP:
 
