@@ -27,7 +27,7 @@ public:
 
 	static void waitReturn();
 
-	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0, bool _createDebugger = false);
+	void run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount = 0, bool _createDebugger = false, bool _dumpAssembler = false);
 
 	const virusLib::ROMFile& getRom() const { return m_rom; }
 

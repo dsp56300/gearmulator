@@ -202,7 +202,7 @@ void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 		m_demo->process(1);
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, bool _createDebugger/* = false*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, bool _createDebugger/* = false*/, bool _dumpAssembler/* = false*/)
 {
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
@@ -241,15 +241,18 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	}, 0);
 
 	bootDSP(_createDebugger).join();
-	/*
-	const std::string romFile = m_rom.getFilename();
-	auto& mem = m_dsp1->getMemory();
 
-	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.sizeXY());
-	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.sizeXY());
-	mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
-	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.sizeP(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
-	*/
+	if(_dumpAssembler)
+	{
+		const std::string romFile = m_rom.getFilename();
+		auto& mem = m_dsp1->getMemory();
+
+		mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.sizeXY());
+		mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.sizeXY());
+		mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
+		mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.sizeP(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
+	}
+
 	std::vector<synthLib::SMidiEvent> midiEvents;
 
 	AudioProcessor proc(m_rom.getSamplerate(), _audioOutputFilename, m_demo != nullptr, _maxSampleCount, m_dsp1.get(), m_dsp2);
