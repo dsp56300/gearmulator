@@ -6,6 +6,7 @@ add_library(virusLib STATIC)
 set(SOURCES
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
+	dspMemoryPatches.cpp dspMemoryPatches.h
 	dspSingle.cpp dspSingle.h
 	hdi08List.cpp hdi08List.h
 	hdi08MidiQueue.cpp hdi08MidiQueue.h

@@ -9,6 +9,8 @@
 
 #include <cstring>
 
+#include "dspMemoryPatches.h"
+
 namespace virusLib
 {
 	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
@@ -362,7 +364,7 @@ namespace virusLib
 
 		loader.join();
 
-		applyDspMemoryPatches(_dspA, _dspB, _rom);
+//		applyDspMemoryPatches(_dspA, _dspB, _rom);
 	}
 
 	bool Device::setDspClockPercent(const uint32_t _percent)
@@ -386,5 +388,16 @@ namespace virusLib
 	uint64_t Device::getDspClockHz() const
 	{
 		return !m_dsp ? 0 : m_dsp->getPeriphX().getEsaiClock().getSpeedInHz();
+	}
+
+	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)
+	{
+		DspMemoryPatches::apply(_dspA, _rom.getHash());
+		DspMemoryPatches::apply(_dspB, _rom.getHash());
+	}
+
+	void Device::applyDspMemoryPatches() const
+	{
+		applyDspMemoryPatches(m_dsp.get(), m_dsp2, m_rom);
 	}
 }

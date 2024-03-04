@@ -7,6 +7,12 @@
 #include "romfile.h"
 #include "microcontroller.h"
 
+namespace synthLib
+{
+	struct DspMemoryPatch;
+	struct DspMemoryPatches;
+}
+
 namespace virusLib
 {
 	class Device final : public synthLib::Device
@@ -43,6 +49,8 @@ namespace virusLib
 		uint32_t getDspClockPercent() const override;
 		uint64_t getDspClockHz() const override;
 
+		static void applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom);
+		void applyDspMemoryPatches() const;
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
