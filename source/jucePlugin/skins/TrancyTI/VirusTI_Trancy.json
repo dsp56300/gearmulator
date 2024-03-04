@@ -5,7 +5,7 @@
         "name": "pages",
         "buttons": ["button_1_main", "button_2_browser", "button_3_osc", "button_4_filter", "button_5_lfo", "button_6_matrix", "button_7_arp", "button_8_fx1", "button_9_fx2", "button_common"],
         "pages": ["page_1_main", "page_2_browser", "page_3_osc", "page_4_filter", "page_5_lfo", "page_6_matrix", "page_7_arp", "page_8_fx1", "page_9_fx2", "page_common"]
-    },
+    },   
     "children" : [
        
         {"name":"bg","image":{"x":"0","y":"0","width":"2638","height":"1301","texture":"background"}},      
@@ -113,7 +113,6 @@
         {"name":"PartPan",                  "rotary":{},"spritesheet":{"x":"457","y":"1111","width":"70","height":"70","texture":"knob_small","tileSizeX":"70","tileSizeY":"70"}},       
         {"name":"SelectPart",               "button":{"isToggle":"1","radioGroupId":"16","normalImage":"0","downImage":"0","normalImageOn":"1","downImageOn":"1","x":"88","y":"1119","width":"58","height":"56.5","texture":"button_channel_16","tileSizeX":"58","tileSizeY":"56.5"}},
         {"name":"PresetName",               "textbutton":{"text":"OvertureCK","textHeight":"28","x":"150","y":"1126","width":"176","height":"41", "alignH" : "L"}},
-             
         {
         
         "name" : "page_1_main",
@@ -142,12 +141,18 @@
         {
         "name" : "page_2_browser",                
         "image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_2_browser" },
-            "children" : [
-                { "name" : "ContainerFileSelector",         "component" : { "x" : "-13", "y" : "47", "width" : "992",    "height" : "968" } }, 
-                { "name" : "ContainerPatchListSearchBox",   "component" : { "x" : "1015", "y" : "955", "width" : "922", "height" : "50" } }, 
-                { "name" : "ContainerPatchList",            "component" : { "x" : "1015", "y" : "50", "width" : "922", "height" : "885" } },
+	"children" : [
+                {
+                    "name" : "ContainerPatchManager",
+                    "component" : {
+                        "x" : "20",
+                        "y" : "45",
+                        "width" : "1925",
+                        "height" : "960"
+                    }
+                },
             ]
-        },        
+        },         
         {
         "name" : "page_3_osc",        
         "image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_3_osc" },            
