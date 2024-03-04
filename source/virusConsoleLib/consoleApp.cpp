@@ -55,17 +55,9 @@ void ConsoleApp::waitReturn()
 	std::cin.ignore();
 }
 
-std::thread ConsoleApp::bootDSP(const bool _createDebugger) const
+void ConsoleApp::bootDSP(const bool _createDebugger) const
 {
-	auto loader = virusLib::Device::bootDSP(*m_dsp1, m_rom, _createDebugger);
-
-	if(m_dsp2)
-	{
-		auto loader2 = virusLib::Device::bootDSP(*m_dsp2, m_rom, false);
-		loader2.join();
-	}
-
-	return loader;
+	virusLib::Device::bootDSPs(m_dsp1.get(), m_dsp2, m_rom, _createDebugger);
 }
 
 dsp56k::IPeripherals& ConsoleApp::getYPeripherals() const
@@ -240,7 +232,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 			audioCallback(callbackCount>>2);
 	}, 0);
 
-	bootDSP(_createDebugger).join();
+	bootDSP(_createDebugger);
 
 	if(_dumpAssembler)
 	{

@@ -37,6 +37,7 @@ namespace virusLib
 
 		static void createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom);
 		static std::thread bootDSP(DspSingle& _dsp, const ROMFile& _rom, bool _createDebugger);
+		static void bootDSPs(DspSingle* _dspA, DspSingle* _dspB, const ROMFile& _rom, bool _createDebugger);
 		
 		bool setDspClockPercent(uint32_t _percent) override;
 		uint32_t getDspClockPercent() const override;
