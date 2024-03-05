@@ -673,33 +673,35 @@ namespace Virus
 
     std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram)
     {
-		pluginLib::MidiPacket::Data data;
+		const auto lockedParams = getLockedParameters();
+
+        if(lockedParams.empty() || _newBank != virusLib::BankNumber::EditBuffer)
+        {
+            auto data = _sysex;
+            data[7] = toMidiByte(_newBank);
+            data[8] = _newProgram;
+            return data;
+        }
+
+    	pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
 		if(!parseSingle(data, parameterValues, _sysex))
 			return {};
 
-        if(_newBank == virusLib::BankNumber::EditBuffer)
+        const uint8_t part = _newProgram == virusLib::SINGLE ? 0 : _newProgram;
+        pluginLib::MidiPacket::NamedParamValues currentParams;
+        createNamedParamValues(currentParams, midiPacketName(MidiPacketType::SingleDump), part);
+
+        for (const auto& name : lockedParams)
         {
-	        const auto lockedParams = getLockedParameters();
+            const auto it = currentParams.find({pluginLib::MidiPacket::AnyPart, name});
+            if(it == currentParams.end())
+                continue;
 
-	        if(!lockedParams.empty())
-	        {
-                const uint8_t part = _newProgram == virusLib::SINGLE ? 0 : _newProgram;
-                pluginLib::MidiPacket::NamedParamValues currentParams;
-		        createNamedParamValues(currentParams, midiPacketName(MidiPacketType::SingleDump), part);
-
-                for (const auto& name : lockedParams)
-                {
-                    const auto it = currentParams.find({pluginLib::MidiPacket::AnyPart, name});
-                    if(it == currentParams.end())
-	                    continue;
-
-                	const uint32_t idx = getParameterIndexByName(name);
-                    if(idx != InvalidParameterIndex)
-	                    parameterValues[idx] = it->second;
-                }
-	        }
+        	const uint32_t idx = getParameterIndexByName(name);
+            if(idx != InvalidParameterIndex)
+                parameterValues[idx] = it->second;
         }
 		return createSingleDump(toMidiByte(_newBank), _newProgram, parameterValues);
     }
