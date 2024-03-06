@@ -180,6 +180,11 @@ namespace jucePluginEditorLib::patchManager
 		setCount(static_cast<uint32_t>(_search.getResultSize()));
 	}
 
+	const pluginLib::patchDB::SearchRequest& TreeItem::getParentSearchRequest() const
+	{
+		return m_parentSearchRequest;
+	}
+
 	void TreeItem::setText(const std::string& _text)
 	{
 		if (m_text == _text)

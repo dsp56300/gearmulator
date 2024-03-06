@@ -291,6 +291,8 @@ namespace jucePluginEditorLib::patchManager
 
 		m_itemsByTag.insert({ _tag, item });
 
+		item->onParentSearchChanged(getParentSearchRequest());
+
 		return item;
 	}
 
