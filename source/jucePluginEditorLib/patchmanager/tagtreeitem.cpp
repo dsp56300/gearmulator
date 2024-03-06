@@ -106,6 +106,35 @@ namespace jucePluginEditorLib::patchManager
 				menu.showMenuAsync({});
 			}
 		}
+		else
+		{
+			// we have the (for Juce) overly complex task to deselect a tree item on left click
+			// Juce does not let us though, this click is sent on mouse down and it reselects the item
+			// again on mouse up.
+			const auto selectedWasChanged = m_selectedWasChanged;
+			m_selectedWasChanged = false;
+
+			if(!selectedWasChanged && isSelected() && getOwnerView()->isMultiSelectEnabled())
+			{
+				m_forceDeselect = true;
+				setSelected(false, false);
+			}
+		}
+	}
+
+	void TagTreeItem::itemSelectionChanged(const bool _isNowSelected)
+	{
+		if(_isNowSelected && m_forceDeselect)
+		{
+			m_forceDeselect = false;
+
+			juce::MessageManager::callAsync([this]()
+			{
+				setSelected(false, false);
+			});
+		}
+		m_selectedWasChanged = true;
+		TreeItem::itemSelectionChanged(_isNowSelected);
 	}
 
 	pluginLib::patchDB::Color TagTreeItem::getColor() const
