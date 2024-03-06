@@ -62,7 +62,12 @@ namespace pluginLib::patchDB
 				sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
 		}
 
-		return _file.replaceWithData(sysexBuffer.data(), sysexBuffer.size());
+		if(!_file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+		{
+			pushError("Failed to write to file " + _file.getFullPathName().toStdString() + ", make sure that it is not write protected");
+			return false;
+		}
+		return true;
 	}
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
@@ -1585,7 +1590,7 @@ namespace pluginLib::patchDB
 		return m_settingsDir.getChildFile(filename + ".syx");
 	}
 
-	bool DB::saveLocalStorage() const
+	bool DB::saveLocalStorage()
 	{
 		std::map<DataSourceNodePtr, std::set<PatchPtr>> localStoragePatches;
 
