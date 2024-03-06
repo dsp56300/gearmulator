@@ -73,6 +73,7 @@ namespace jucePluginEditorLib::patchManager
 		void search(pluginLib::patchDB::SearchRequest&& _request);
 		virtual void processSearchUpdated(const pluginLib::patchDB::Search& _search);
 		virtual void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) {}
+		const pluginLib::patchDB::SearchRequest& getParentSearchRequest() const;
 
 	private:
 		bool mightContainSubItems() override { return true; }

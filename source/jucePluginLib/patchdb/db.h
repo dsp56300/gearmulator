@@ -73,7 +73,7 @@ namespace pluginLib::patchDB
 		bool isLoading() const { return m_loading; }
 		bool isScanning() const { return !m_loader.empty(); }
 
-		static bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
+		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
 
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
@@ -128,7 +128,7 @@ namespace pluginLib::patchDB
 		juce::File getJsonFile(const DataSource& _ds) const;
 		juce::File getLocalStorageFile(const DataSource& _ds) const;
 
-		bool saveLocalStorage() const;
+		bool saveLocalStorage();
 
 		void pushError(std::string _string);
 
