@@ -273,12 +273,7 @@ namespace jucePluginEditorLib::patchManager
 
 		m_itemsByDataSource.insert({ _dataSource, item });
 
-		const auto oldNumSubItems = getNumSubItems();
-
 		validateParent(_dataSource, item);
-
-		if(getNumSubItems() == 1 && oldNumSubItems == 0)
-			setOpen(true);
 
 		return item;
 	}
