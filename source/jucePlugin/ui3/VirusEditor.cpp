@@ -333,7 +333,7 @@ namespace genericVirusUI
 
 			if (results.size() == 1)
 			{
-				c.sendSysEx(results.front());
+				c.activatePatch(results.front());
 			}
 			else if(results.size() > 1)
 			{
@@ -342,8 +342,6 @@ namespace genericVirusUI
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
 				);
 			}
-
-			c.onStateLoaded();
 		});
 	}
 

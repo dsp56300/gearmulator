@@ -699,7 +699,7 @@ namespace Virus
             if(it == currentParams.end())
                 continue;
 
-        	const uint32_t idx = getParameterIndexByName(name);
+			const uint32_t idx = getParameterIndexByName(name);
             if(idx != InvalidParameterIndex)
                 parameterValues[idx] = it->second;
         }
