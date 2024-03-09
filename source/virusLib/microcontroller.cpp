@@ -1,7 +1,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <cstring> // memcpy
+#include <cstring>	// memcpy
+#include <cmath>>	// floor/abs
 
 #include "microcontroller.h"
 
