@@ -23,7 +23,7 @@ namespace synthLib
 
 		bool setPreferredDeviceSamplerate(float _samplerate);
 
-		void setHostSamplerate(float _samplerate);
+		void setHostSamplerate(float _hostSamplerate, float _preferredDeviceSamplerate);
 		float getHostSamplerate() const { return m_hostSamplerate; }
 
 		void setBlockSize(uint32_t _blockSize);

@@ -312,7 +312,7 @@ namespace pluginLib
 		// initialisation that you need..
 		m_hostSamplerate = static_cast<float>(sampleRate);
 
-		getPlugin().setHostSamplerate(static_cast<float>(sampleRate));
+		getPlugin().setHostSamplerate(static_cast<float>(sampleRate), m_preferredDeviceSamplerate);
 		getPlugin().setBlockSize(samplesPerBlock);
 
 		updateLatencySamples();
