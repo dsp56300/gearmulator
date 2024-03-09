@@ -21,14 +21,18 @@ Osirus:
 
 OsTIrus:
 
-- [Imp] Device samplerate 48 Khz is now supported (previously only 44,1 KHz was used). The
-        preferred samplerate can be selected via context menu and is stored as part of the
-        plugin state, it defaults to "automatic" which attempts to match the host samplerate
+- [Imp] Device samplerate of 48 Khz is now supported, previously only 44,1 KHz was used for the
+        Emulation. If 44,1 KHz or 48 Khz is used is automatically determined based on the
+        host samplerate.
+- [Imp] The DSP code supports more samplerates than the hardware device was able to handle and
+        ranges from 32 Khz to 96 Khz. The samplerate can be overwritten in the advanced options 
+        context menu. The chosen samplerate is preserved as part of the plugin state.
+        Note that higher samplerates may reduce the voice count if the DSP is not overclocked.
 
 - [Fix] Classic Oscillator waveform names were shifted by one
 - [Fix] Added missing Modulation Matrix Destinations
 - [Fix] Oscillator 2 FM Amount not shown in percent but as values 0-127
-- [Fix] Delay/Tape Delay displayed wrong percentage values
+- [Fix] Delay/Tape Delay Feedback displayed wrong percentage values
 - [Fix] Comb Filter Frequency did not display note numbers but percentage values
 
 1.3.6 (2024.03.03)
