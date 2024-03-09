@@ -21,7 +21,7 @@ namespace virusLib
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
 
 		DspSingle* dsp1;
-		createDspInstances(dsp1, m_dsp2, m_rom);
+		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
 
 		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
@@ -284,14 +284,14 @@ namespace virusLib
 		return 6;
 	}
 
-	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom)
+	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
 		_dspA = new DspSingle(0x040000, false);
 
-		configureDSP(*_dspA, _rom);
+		configureDSP(*_dspA, _rom, _samplerate);
 
 		if(_dspB)
-			configureDSP(*_dspB, _rom);
+			configureDSP(*_dspB, _rom, _samplerate);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -355,7 +355,7 @@ namespace virusLib
 		m_mc->process();
 	}
 
-	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
+	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
 	{
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
