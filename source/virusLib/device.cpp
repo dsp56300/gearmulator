@@ -289,7 +289,7 @@ namespace virusLib
 		return m_rom.isTIFamily() ? 12 : 6;
 	}
 
-	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, float _samplerate)
+	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
 #if VIRUS_SUPPORT_TI
 		if(_rom.getModel() == ROMFile::Model::Snow)
