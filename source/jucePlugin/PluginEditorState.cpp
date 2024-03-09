@@ -92,7 +92,7 @@ bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _en
 				if(isPreferred != _usePreferred)
 					continue;
 
-				const auto title = std::to_string(static_cast<int>(std::floorf(samplerate + 0.5f))) + " Hz";
+				const auto title = std::to_string(static_cast<int>(std::floor(samplerate + 0.5f))) + " Hz";
 
 				srMenu.addItem(title, _enabled, std::fabs(samplerate - current) < 1.0f, [this, samplerate] { m_processor.setPreferredDeviceSamplerate(samplerate); });
 			}
