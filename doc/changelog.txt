@@ -14,7 +14,7 @@ Framework:
 - [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
                        data source was selected
 
-Osirus:
+Osirus/OsTIrus:
 
 - [Fix] Locking parameter regions didn't work properly on older version presets and may 
         have caused silence or invalid presets
@@ -28,6 +28,7 @@ OsTIrus:
         ranges from 32 Khz to 96 Khz. The samplerate can be overwritten in the advanced options 
         context menu. The chosen samplerate is preserved as part of the plugin state.
         Note that higher samplerates may reduce the voice count if the DSP is not overclocked.
+- [Imp] Added Master Volume knob to common page
 
 - [Fix] Classic Oscillator waveform names were shifted by one
 - [Fix] Added missing Modulation Matrix Destinations
