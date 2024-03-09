@@ -348,6 +348,8 @@ uint32_t Microcontroller::getPartCount() const
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
+	std::lock_guard lock(m_mutex);
+
 	if(_samplerate >= 48000.0f)
 	{
 		m_hdi08.writeRX({0xF4F473, 0x401001});
