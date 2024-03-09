@@ -948,11 +948,21 @@
                       ]
                 },                  
                 { "name" : "ContainerFilterbankVowelFilter", 
-                  "condition": { "enableOnParameter": "Filter Bank/Type", "enableOnValues": "3,4" }, 
+                  "condition": { "enableOnParameter": "Filter Bank/Type", "enableOnValues": "3" }, 
                   "image" : { "x" : "698", "y" : "525", "width" : "1267", "height" : "237", "texture" : "panel_8_fx1_filterbank_vowel_filter" },               
                         "children" : [   
                         { "name" : "FilterBank/Mix",            "parameterAttachment" : { "parameter" : "Filter Bank/Mix" },            "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
-                        { "name" : "FilterBank/Frequency",      "parameterAttachment" : { "parameter" : "Filter Bank/Frequency" },      "rotary" : { }, "spritesheet" : { "x" : "506", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                        { "name" : "FilterBank/Frequency",      "parameterAttachment" : { "parameter" : "Filter Bank/Vowel Frequency" },      "rotary" : { }, "spritesheet" : { "x" : "506", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                        { "name" : "FilterBank/Resonance",      "parameterAttachment" : { "parameter" : "Filter Bank/Resonance" },   "rotary" : { }, "spritesheet" : { "x" : "664", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},               
+                        { "name" : "FilterBank/Stereo Phase",   "parameterAttachment" : { "parameter" : "Filter Bank/Stereo Phase" },   "rotary" : { }, "spritesheet" : { "x" : "822", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},               
+                      ]
+                },   
+                { "name" : "ContainerFilterbankCombFilter", 
+                  "condition": { "enableOnParameter": "Filter Bank/Type", "enableOnValues": "4" }, 
+                  "image" : { "x" : "698", "y" : "525", "width" : "1267", "height" : "237", "texture" : "panel_8_fx1_filterbank_vowel_filter" },               
+                        "children" : [   
+                        { "name" : "FilterBank/Mix",            "parameterAttachment" : { "parameter" : "Filter Bank/Mix" },            "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                        { "name" : "FilterBank/Frequency",      "parameterAttachment" : { "parameter" : "Filter Bank/Comb Frequency" },      "rotary" : { }, "spritesheet" : { "x" : "506", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                         { "name" : "FilterBank/Resonance",      "parameterAttachment" : { "parameter" : "Filter Bank/Resonance" },   "rotary" : { }, "spritesheet" : { "x" : "664", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},               
                         { "name" : "FilterBank/Stereo Phase",   "parameterAttachment" : { "parameter" : "Filter Bank/Stereo Phase" },   "rotary" : { }, "spritesheet" : { "x" : "822", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},               
                       ]
