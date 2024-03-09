@@ -68,7 +68,7 @@ namespace Virus
 
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
         std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
-        std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram);
+        std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram) const;
 
     	void selectPrevPreset(uint8_t _part);
     	void selectNextPreset(uint8_t _part);

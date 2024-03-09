@@ -64,8 +64,9 @@ namespace pluginLib
 		bool unlockRegion(const std::string& _id);
 		const std::set<std::string>& getLockedRegions() const;
 		bool isRegionLocked(const std::string& _id);
-		std::unordered_set<std::string> getLockedParameters() const;
-
+		std::unordered_set<std::string> getLockedParameterNames() const;
+		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
+		bool isParameterLocked(const std::string& _name) const;
 		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
 
 	protected:

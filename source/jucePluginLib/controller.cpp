@@ -430,7 +430,7 @@ namespace pluginLib
 		return m_lockedRegions.find(_id) != m_lockedRegions.end();
 	}
 
-	std::unordered_set<std::string> Controller::getLockedParameters() const
+	std::unordered_set<std::string> Controller::getLockedParameterNames() const
 	{
 		if(m_lockedRegions.empty())
 			return {};
@@ -449,6 +449,39 @@ namespace pluginLib
 		}
 
 		return result;
+	}
+
+	std::unordered_set<const Parameter*> Controller::getLockedParameters(const uint8_t _part) const
+	{
+		const auto paramNames = getLockedParameterNames();
+
+		std::unordered_set<const Parameter*> results;
+
+		for (const auto& paramName : paramNames)
+		{
+			const auto idx = getParameterIndexByName(paramName);
+			assert(idx != InvalidParameterIndex);
+			const auto* p = getParameter(idx, _part);
+			assert(p != nullptr);
+			results.insert(p);
+		}
+
+		return results;
+	}
+
+	bool Controller::isParameterLocked(const std::string& _name) const
+	{
+		const auto& regions = getLockedRegions();
+		for (const auto& region : regions)
+		{
+			const auto& it = m_descriptions.getRegions().find(region);
+			if(it == m_descriptions.getRegions().end())
+				continue;
+
+			if(it->second.containsParameter(_name))
+				return true;
+		}
+		return false;
 	}
 
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
