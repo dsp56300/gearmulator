@@ -12,6 +12,11 @@ Framework:
 - [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
                        data source was selected
 
+Osirus:
+
+- [Fix] Locking parameter regions didn't work properly on older version presets and may 
+        have caused silence or invalid presets
+
 1.3.6 (2024.03.03)
 
 DSP:
