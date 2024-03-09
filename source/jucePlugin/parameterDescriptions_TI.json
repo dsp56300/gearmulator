@@ -47,7 +47,7 @@
 		{"page":112, "index":25, "name":"Osc2 Semitone", "displayName":"Oscillator 2 Detune In Semitones", "min":16, "max":112, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":112, "index":26, "name":"Osc2 Detune", "displayName":"Oscillator 2 Fine Detune", "min":0, "max":127, "default":32, "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":27, "name":"Osc2 HyperSaw/CrossOscSyncFreq", "displayName":"X-Sync Frequency", "min":0, "max":127, "default":0, "isPublic":true, "isDiscrete":false, "isBool":false},
-		{"page":112, "index":27, "name":"Osc2 FM Amount", "displayName":"Oscillator 2 FM Amount", "min":0, "max":127, "default":0, "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":112, "index":27, "name":"Osc2 FM Amount", "displayName":"Oscillator 2 FM Amount", "min":0, "max":127, "default":0, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":27, "name":"Osc2 Wavetable/FM Amount", "displayName":"Oscillator 2 Wavetable/FM Amount", "min":0, "max":127, "default":0, "toText":"unipolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":28, "name":"Osc2 Sync", "displayName":"Oscillator 1 Sync", "min":0, "max":1, "default":0, "isPublic":true, "isDiscrete":false, "isBool":true},
 		{"page":112, "index":29, "name":"Osc2 Filt Env Amt", "displayName":"Filter Envelope > Pitch", "min":0, "max":127, "default":64, "toText":"biPolarPercent", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
