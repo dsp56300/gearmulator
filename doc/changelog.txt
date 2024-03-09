@@ -17,6 +17,12 @@ Osirus:
 - [Fix] Locking parameter regions didn't work properly on older version presets and may 
         have caused silence or invalid presets
 
+OsTIrus:
+
+- [Imp] Device samplerate 48 Khz is now supported (previously only 44,1 KHz was used). The
+        preferred samplerate can be selected via context menu and is stored as part of the
+        plugin state, it defaults to "automatic" which attempts to match the host samplerate
+
 1.3.6 (2024.03.03)
 
 DSP:

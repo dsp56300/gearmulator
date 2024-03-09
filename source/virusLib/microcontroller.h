@@ -63,6 +63,8 @@ public:
 
 	uint32_t getPartCount() const;
 
+	void setSamplerate(float _samplerate);
+
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);
 	void sendControlCommand(ControlCommand command, uint8_t value);

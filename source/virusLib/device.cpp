@@ -22,7 +22,7 @@ namespace virusLib
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware ROM file (firmware.bin) is required, but was not found.");
 
 		DspSingle* dsp1;
-		createDspInstances(dsp1, m_dsp2, m_rom);
+		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
 
 		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
@@ -79,6 +79,10 @@ namespace virusLib
 		if(!synthLib::Device::setSamplerate(_samplerate))
 			return false;
 		m_samplerate = _samplerate;
+		configureDSP(*m_dsp, m_rom, m_samplerate);
+		if(m_dsp2)
+			configureDSP(*m_dsp2, m_rom, m_samplerate);
+		m_mc->setSamplerate(_samplerate);
 		return true;
 	}
 
@@ -285,7 +289,7 @@ namespace virusLib
 		return m_rom.isTIFamily() ? 12 : 6;
 	}
 
-	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom)
+	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, float _samplerate)
 	{
 #if VIRUS_SUPPORT_TI
 		if(_rom.getModel() == ROMFile::Model::Snow)
@@ -304,10 +308,10 @@ namespace virusLib
 			_dspA = new DspSingle(_rom.isTIFamily() ? 0x100000 : 0x040000, _rom.isTIFamily());
 		}
 
-		configureDSP(*_dspA, _rom);
+		configureDSP(*_dspA, _rom, _samplerate);
 
 		if(_dspB)
-			configureDSP(*_dspB, _rom);
+			configureDSP(*_dspB, _rom, _samplerate);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -371,7 +375,7 @@ namespace virusLib
 		m_mc->process();
 	}
 
-	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
+	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
 	{
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
@@ -380,15 +384,13 @@ namespace virusLib
 		{
 			auto& clock = _dsp.getPeriphX().getEsaiClock();
 
-			if(_rom.getModel() == ROMFile::Model::Snow)
+			const auto sr = static_cast<int>(_samplerate);
+
+			clock.setExternalClockFrequency(sr * 256);
+
+			if(_rom.getModel() != ROMFile::Model::Snow)
 			{
-				clock.setExternalClockFrequency(44100 * 256);
-			}
-			else
-			{
-//				clock.setSamplerate(static_cast<int>(getSamplerate()));
-				clock.setExternalClockFrequency(44100 * 256);
-				clock.setSamplerate(44100 * 3);
+				clock.setSamplerate(sr * 3);
 				clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
 				clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
 			}
