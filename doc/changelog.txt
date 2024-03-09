@@ -8,6 +8,8 @@ Framework:
                        any category filter
 - [Imp] Patch Manager: Root tree items (Factory Patches, Datasources) are no longer 
                        auto-expand upon load
+- [Imp] Patch Manager: data source names are now shortened
+
 - [Fix] Patch Manager: No error message was displayed if a user bank cannot be written to disk
 - [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
                        data source was selected
