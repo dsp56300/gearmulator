@@ -65,6 +65,19 @@ namespace virusLib
 			return {12000000.0f / 256.0f};
 		case ROMFile::Model::Snow:
 		case ROMFile::Model::TI:
+			return {32000.0f, 44100.0f, 48000.0f, 64000.0f, 88200.0f, 96000.0f};
+		}
+	}
+
+	std::vector<float> Device::getPreferredSamplerates() const
+	{
+		switch (m_rom.getModel())
+		{
+		default:
+		case ROMFile::Model::ABC:
+			return getSupportedSamplerates();
+		case ROMFile::Model::Snow:
+		case ROMFile::Model::TI:
 			return {44100.0f, 48000.0f};
 		}
 	}
@@ -74,7 +87,7 @@ namespace virusLib
 		return m_samplerate;
 	}
 
-	bool Device::setSamplerate(float _samplerate)
+	bool Device::setSamplerate(const float _samplerate)
 	{
 		if(!synthLib::Device::setSamplerate(_samplerate))
 			return false;
@@ -386,7 +399,7 @@ namespace virusLib
 
 			const auto sr = static_cast<int>(_samplerate);
 
-			clock.setExternalClockFrequency(sr * 256);
+			clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
 
 			if(_rom.getModel() != ROMFile::Model::Snow)
 			{

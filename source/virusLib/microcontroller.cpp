@@ -348,16 +348,33 @@ uint32_t Microcontroller::getPartCount() const
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
-	std::lock_guard lock(m_mutex);
+	const auto sr = static_cast<int>(std::floorf(_samplerate + 0.5f));
+	
+	/*
+		0 = 44100 Hz @ EXTAL 11289600 Hz (44100 * 256)
+		1 = 48000 Hz @ EXTAL 12288000 Hz (48000 * 256)
+		2 = 44100 Hz @ ^^
+		3 = 32000 Hz @ ^^
+		4 = 96000 Hz @ ^^
+		5 = 88200 Hz @ ^^
+		6 = 64000 Hz @ ^^
+	*/
 
-	if(_samplerate >= 48000.0f)
+	TWord v;
+
+	switch (sr)
 	{
-		m_hdi08.writeRX({0xF4F473, 0x401001});
+	default:
+	case 44100:	v = 0;	break;
+	case 48000:	v = 1;	break;
+	case 32000:	v = 3;	break;
+	case 96000:	v = 4;	break;
+	case 88200:	v = 5;	break;
+	case 64000:	v = 6;	break;
 	}
-	else
-	{
-		m_hdi08.writeRX({0xF4F473, 0x401000});
-	}
+
+	std::lock_guard lock(m_mutex);
+	m_hdi08.writeRX({0xF4F473, 0x401000 + v});
 }
 
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
