@@ -10,6 +10,9 @@ Framework:
                        auto-expand upon load
 - [Imp] Patch Manager: data source names are now shortened
 
+- [Imp] Inform that changing plugin latency blocks while being in use might cause synchronization
+        problems
+
 - [Fix] Patch Manager: No error message was displayed if a user bank cannot be written to disk
 - [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
                        data source was selected
