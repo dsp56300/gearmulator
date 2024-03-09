@@ -209,13 +209,22 @@ void PluginEditorState::openMenu()
 	scaleMenu.addItem("250%", true, scale == 250, [this] { setGuiScale(250); });
 	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
 
+	auto adjustLatency = [this](const int _blocks)
+	{
+		m_processor.setLatencyBlocks(_blocks);
+
+		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Warning",
+			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
+			"It is advised to save, close & reopen the project to prevent synchronization issues.");
+	};
+
 	const auto latency = m_processor.getPlugin().getLatencyBlocks();
 	juce::PopupMenu latencyMenu;
-	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this] { m_processor.setLatencyBlocks(0); });
-	latencyMenu.addItem("1 (default)", true, latency == 1, [this] { m_processor.setLatencyBlocks(1); });
-	latencyMenu.addItem("2", true, latency == 2, [this] { m_processor.setLatencyBlocks(2); });
-	latencyMenu.addItem("4", true, latency == 4, [this] { m_processor.setLatencyBlocks(4); });
-	latencyMenu.addItem("8", true, latency == 8, [this] { m_processor.setLatencyBlocks(8); });
+	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this, adjustLatency] { adjustLatency(0); });
+	latencyMenu.addItem("1 (default)", true, latency == 1, [this, adjustLatency] { adjustLatency(1); });
+	latencyMenu.addItem("2", true, latency == 2, [this, adjustLatency] { adjustLatency(2); });
+	latencyMenu.addItem("4", true, latency == 4, [this, adjustLatency] { adjustLatency(4); });
+	latencyMenu.addItem("8", true, latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
 	menu.addSubMenu("GUI Skin", skinMenu);
 	menu.addSubMenu("GUI Scale", scaleMenu);
