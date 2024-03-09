@@ -26,6 +26,8 @@ OsTIrus:
 - [Fix] Classic Oscillator waveform names were shifted by one
 - [Fix] Added missing Modulation Matrix Destinations
 - [Fix] Oscillator 2 FM Amount not shown in percent but as values 0-127
+- [Fix] Delay/Tape Delay displayed wrong percentage values
+- [Fix] Comb Filter Frequency did not display note numbers but percentage values
 
 1.3.6 (2024.03.03)
 
