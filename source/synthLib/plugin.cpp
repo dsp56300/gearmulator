@@ -55,11 +55,13 @@ namespace synthLib
 		return true;
 	}
 
-	void Plugin::setHostSamplerate(const float _samplerate)
+	void Plugin::setHostSamplerate(const float _samplerate, float _preferredDeviceSamplerate)
 	{
 		std::lock_guard lock(m_lock);
 
-		m_resampler.setSamplerates(_samplerate, m_device->getSamplerate());
+		m_deviceSamplerate = m_device->getDeviceSamplerate(_preferredDeviceSamplerate, _samplerate);
+		m_device->setSamplerate(m_deviceSamplerate);
+		m_resampler.setSamplerates(_samplerate, m_deviceSamplerate);
 
 		m_hostSamplerate = _samplerate;
 		m_hostSamplerateInv = _samplerate > 0 ? 1.0f / _samplerate : 0.0f;
