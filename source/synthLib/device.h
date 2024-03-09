@@ -29,6 +29,10 @@ namespace synthLib
 			return {getSamplerate()};
 		}
 		virtual float getSamplerate() const = 0;
+		virtual std::vector<float> getPreferredSamplerates() const
+		{
+			return getSupportedSamplerates();
+		}
 
 		bool isSamplerateSupported(const float& _samplerate) const;
 

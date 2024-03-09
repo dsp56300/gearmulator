@@ -75,20 +75,16 @@ namespace synthLib
 
 	float Device::getDeviceSamplerateForHostSamplerate(const float _hostSamplerate) const
 	{
-		// if the host samplerate is supported directly, we use it
-		if(isSamplerateSupported(_hostSamplerate))
-			return _hostSamplerate;
-
-		const auto supported = getSupportedSamplerates();
+		const auto preferred = getPreferredSamplerates();
 
 		// if there is no choice we need to use the only one that is supported
-		if(supported.size() == 1)
-			return getSupportedSamplerates().front();
+		if(preferred.size() == 1)
+			return preferred.front();
 
 		// find the lowest possible samplerate that is higher than the host samplerate
-		const std::set samplerates(supported.begin(), supported.end());
+		const std::set samplerates(preferred.begin(), preferred.end());
 
-		for (const float sr : supported)
+		for (const float sr : preferred)
 		{
 			if(sr >= _hostSamplerate)
 				return sr;

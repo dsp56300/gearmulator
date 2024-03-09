@@ -22,6 +22,7 @@ namespace virusLib
 		~Device() override;
 
 		std::vector<float> getSupportedSamplerates() const override;
+		std::vector<float> getPreferredSamplerates() const override;
 		float getSamplerate() const override;
 		bool setSamplerate(float _samplerate) override;
 
