@@ -13,8 +13,9 @@
 
 namespace virusLib
 {
-	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
+	Device::Device(const ROMFile& _rom, const float _preferredDeviceSamplerate, const float _hostSamplerate, const bool _createDebugger/* = false*/)
 		: m_rom(_rom)
+		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
@@ -54,9 +55,30 @@ namespace virusLib
 		m_dsp.reset();
 	}
 
+	std::vector<float> Device::getSupportedSamplerates() const
+	{
+		switch (m_rom.getModel())
+		{
+		default:
+		case ROMFile::Model::ABC:
+			return {12000000.0f / 256.0f};
+		case ROMFile::Model::Snow:
+		case ROMFile::Model::TI:
+			return {44100.0f, 48000.0f};
+		}
+	}
+
 	float Device::getSamplerate() const
 	{
-		return 12000000.0f / 256.0f;
+		return m_samplerate;
+	}
+
+	bool Device::setSamplerate(float _samplerate)
+	{
+		if(!synthLib::Device::setSamplerate(_samplerate))
+			return false;
+		m_samplerate = _samplerate;
+		return true;
 	}
 
 	bool Device::isValid() const
