@@ -39,22 +39,6 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
-
-	const auto samplerates = p.getDeviceSupportedSamplerates();
-
-	if(samplerates.size() > 1)
-	{
-		juce::PopupMenu srMenu;
-
-		const auto current = m_processor.getPreferredDeviceSamplerate();
-
-		srMenu.addItem("Automatic (best match)", true, current == 0.0f, [&p] { p.setPreferredDeviceSamplerate(0.0f); });
-
-		for (const float samplerate : samplerates)
-			srMenu.addItem(std::to_string(static_cast<int>(std::floorf(samplerate + 0.5f))) + " Hz", true, std::fabsf(samplerate - current) < 1.0f, [&p, samplerate] { p.setPreferredDeviceSamplerate(samplerate); });
-
-		_menu.addSubMenu("Device Samplerate", srMenu);
-	}
 }
 
 bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
@@ -84,6 +68,43 @@ bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _en
 	makeEntry(200);
 
 	_menu.addSubMenu("DSP Clock", clockMenu);
+
+	const auto samplerates = m_processor.getDeviceSupportedSamplerates();
+
+	if(samplerates.size() > 1)
+	{
+		juce::PopupMenu srMenu;
+
+		const auto current = m_processor.getPreferredDeviceSamplerate();
+
+		const auto preferred = m_processor.getDevicePreferredSamplerates();
+
+		srMenu.addItem("Automatic (Match with host)", true, current == 0.0f, [this] { m_processor.setPreferredDeviceSamplerate(0.0f); });
+		srMenu.addSeparator();
+		srMenu.addSectionHeader("Official, used automatically");
+
+		auto addSRs = [&](bool _usePreferred)
+		{
+			for (const float samplerate : samplerates)
+			{
+				const auto isPreferred = std::find(preferred.begin(), preferred.end(), samplerate) != preferred.end();
+
+				if(isPreferred != _usePreferred)
+					continue;
+
+				const auto title = std::to_string(static_cast<int>(std::floorf(samplerate + 0.5f))) + " Hz";
+
+				srMenu.addItem(title, _enabled, std::fabsf(samplerate - current) < 1.0f, [this, samplerate] { m_processor.setPreferredDeviceSamplerate(samplerate); });
+			}
+		};
+
+		addSRs(true);
+		srMenu.addSeparator();
+		srMenu.addSectionHeader("Undocumented, use with care");
+		addSRs(false);
+
+		_menu.addSubMenu("Device Samplerate", srMenu);
+	}
 
 	return true;
 }

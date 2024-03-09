@@ -305,6 +305,13 @@ namespace pluginLib
 		return m_device->getSupportedSamplerates();
 	}
 
+	std::vector<float> Processor::getDevicePreferredSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		return m_device->getPreferredSamplerates();
+	}
+
 	//==============================================================================
 	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 	{

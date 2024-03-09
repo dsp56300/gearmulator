@@ -82,6 +82,7 @@ namespace pluginLib
 		bool setPreferredDeviceSamplerate(float _samplerate);
 		float getPreferredDeviceSamplerate() const;
 		std::vector<float> getDeviceSupportedSamplerates() const;
+		std::vector<float> getDevicePreferredSamplerates() const;
 
 		float getHostSamplerate() const { return m_hostSamplerate; }
 
