@@ -39,6 +39,22 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
+
+	const auto samplerates = p.getDeviceSupportedSamplerates();
+
+	if(samplerates.size() > 1)
+	{
+		juce::PopupMenu srMenu;
+
+		const auto current = m_processor.getPreferredDeviceSamplerate();
+
+		srMenu.addItem("Automatic (best match)", true, current == 0.0f, [&p] { p.setPreferredDeviceSamplerate(0.0f); });
+
+		for (const float samplerate : samplerates)
+			srMenu.addItem(std::to_string(static_cast<int>(std::floorf(samplerate + 0.5f))) + " Hz", true, std::fabsf(samplerate - current) < 1.0f, [&p, samplerate] { p.setPreferredDeviceSamplerate(samplerate); });
+
+		_menu.addSubMenu("Device Samplerate", srMenu);
+	}
 }
 
 bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)

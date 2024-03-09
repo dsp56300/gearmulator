@@ -8,7 +8,7 @@
 #if 0
 #define LOGMC(S)	LOG(S)
 #else
-#define LOGMC(S)	{}
+#define LOGMC(S)	do{}while(false)
 #endif
 
 using namespace synthLib;
@@ -17,9 +17,11 @@ namespace synthLib
 {
 	constexpr uint8_t g_stateVersion = 1;
 
-	Plugin::Plugin(Device* _device) : m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut()), m_device(_device)
+	Plugin::Plugin(Device* _device)
+	: m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut())
+	, m_device(_device)
+	, m_deviceSamplerate(_device->getSamplerate())
 	{
-		m_resampler.setDeviceSamplerate(_device->getSamplerate());
 	}
 
 	void Plugin::addMidiEvent(const SMidiEvent& _ev)
@@ -34,12 +36,34 @@ namespace synthLib
 		m_midiInRingBuffer.push_back(_ev);
 	}
 
-	void Plugin::setSamplerate(float _samplerate)
+	bool Plugin::setPreferredDeviceSamplerate(const float _samplerate)
 	{
 		std::lock_guard lock(m_lock);
-		m_resampler.setHostSamplerate(_samplerate);
+
+		const auto sr = m_device->getDeviceSamplerate(_samplerate, m_hostSamplerate);
+
+		if(sr == m_deviceSamplerate)
+			return true;
+
+		if(!m_device->setSamplerate(sr))
+			return false;
+
+		m_deviceSamplerate = sr;
+		m_resampler.setSamplerates(m_hostSamplerate, m_deviceSamplerate);
+
+		updateDeviceLatency();
+		return true;
+	}
+
+	void Plugin::setHostSamplerate(const float _samplerate)
+	{
+		std::lock_guard lock(m_lock);
+
+		m_resampler.setSamplerates(_samplerate, m_device->getSamplerate());
+
 		m_hostSamplerate = _samplerate;
 		m_hostSamplerateInv = _samplerate > 0 ? 1.0f / _samplerate : 0.0f;
+
 		updateDeviceLatency();
 	}
 
@@ -221,7 +245,7 @@ namespace synthLib
 		if(m_dummyBuffer.size() < _minimumSize)
 			m_dummyBuffer.resize(_minimumSize);
 
-		return &m_dummyBuffer[0];
+		return m_dummyBuffer.data();
 	}
 
 	void Plugin::updateDeviceLatency()
@@ -248,7 +272,7 @@ namespace synthLib
 
 	void Plugin::processMidiInEvent(const SMidiEvent& _ev)
 	{
-		// sysex might be send in multiple chunks. Happens if coming from hardware
+		// sysex might be sent in multiple chunks. Happens if coming from hardware
 		if (!_ev.sysex.empty())
 		{
 			const bool isComplete = _ev.sysex.front() == M_STARTOFSYSEX && _ev.sysex.back() == M_ENDOFSYSEX;

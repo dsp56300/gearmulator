@@ -207,6 +207,12 @@ namespace pluginLib
 			s.write(m_dspClockPercent);
 		}
 
+		if(m_preferredDeviceSamplerate > 0)
+		{
+			synthLib::ChunkWriter cw(s, "DSSR", 1);
+			s.write(m_preferredDeviceSamplerate);
+		}
+
 		s.toVector(_targetBuffer, true);
 	}
 
@@ -244,6 +250,12 @@ namespace pluginLib
 			setDspClockPercent(p);
 		});
 
+		cr.add("DSSR", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto sr = _binaryStream.read<float>();
+			setPreferredDeviceSamplerate(sr);
+		});
+
 		cr.tryRead();
 	}
 
@@ -271,12 +283,36 @@ namespace pluginLib
 		return m_device->getDspClockHz();
 	}
 
+	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
+	{
+		m_preferredDeviceSamplerate = _samplerate;
+
+		if(!m_device)
+			return false;
+
+		return getPlugin().setPreferredDeviceSamplerate(_samplerate);
+	}
+
+	float Processor::getPreferredDeviceSamplerate() const
+	{
+		return m_preferredDeviceSamplerate;
+	}
+
+	std::vector<float> Processor::getDeviceSupportedSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		return m_device->getSupportedSamplerates();
+	}
+
 	//==============================================================================
 	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 	{
 		// Use this method as the place to do any pre-playback
 		// initialisation that you need..
-		getPlugin().setSamplerate(static_cast<float>(sampleRate));
+		m_hostSamplerate = static_cast<float>(sampleRate);
+
+		getPlugin().setHostSamplerate(static_cast<float>(sampleRate));
 		getPlugin().setBlockSize(samplesPerBlock);
 
 		updateLatencySamples();

@@ -79,6 +79,12 @@ namespace pluginLib
 		uint32_t getDspClockPercent() const;
 		uint64_t getDspClockHz() const;
 
+		bool setPreferredDeviceSamplerate(float _samplerate);
+		float getPreferredDeviceSamplerate() const;
+		std::vector<float> getDeviceSupportedSamplerates() const;
+
+		float getHostSamplerate() const { return m_hostSamplerate; }
+
 	private:
 		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 		void releaseResources() override;
@@ -121,5 +127,7 @@ namespace pluginLib
 		float m_outputGain = 1.0f;
 		float m_inputGain = 1.0f;
 		uint32_t m_dspClockPercent = 100;
+		float m_preferredDeviceSamplerate = 0.0f;
+		float m_hostSamplerate = 0.0f;
 	};
 }

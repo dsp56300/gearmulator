@@ -18,10 +18,13 @@ namespace virusLib
 	class Device final : public synthLib::Device
 	{
 	public:
-		Device(const ROMFile& _rom, bool _createDebugger = false);
+		Device(const ROMFile& _rom, float _preferredDeviceSamplerate, float _hostSamplerate, bool _createDebugger = false);
 		~Device() override;
 
+		std::vector<float> getSupportedSamplerates() const override;
 		float getSamplerate() const override;
+		bool setSamplerate(float _samplerate) override;
+
 		bool isValid() const override;
 
 		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
@@ -65,5 +68,6 @@ namespace virusLib
 		std::unique_ptr<Microcontroller> m_mc;
 
 		uint32_t m_numSamplesProcessed = 0;
+		float m_samplerate;
 	};
 }

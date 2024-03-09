@@ -439,10 +439,14 @@ namespace Virus
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
 
+            const auto locked = getLockedParameterNames();
+
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
 	            auto* p = getParameter(it->first.second, ch);
-				p->setValueFromSynth(it->second, false, pluginLib::Parameter::ChangedBy::PresetChange);
+
+                if(locked.find(p->getDescription().name) == locked.end())
+					p->setValueFromSynth(it->second, false, pluginLib::Parameter::ChangedBy::PresetChange);
             }
 
             m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
@@ -697,40 +701,23 @@ namespace Virus
         return dst;
     }
 
-    std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram)
+    std::vector<uint8_t> Controller::modifySingleDump(const std::vector<uint8_t>& _sysex, const virusLib::BankNumber _newBank, const uint8_t _newProgram) const
     {
-		const auto lockedParams = getLockedParameters();
+        auto* m = getMidiPacket(midiPacketName(MidiPacketType::SingleDump));
+        assert(m);
 
-        if(lockedParams.empty() || _newBank != virusLib::BankNumber::EditBuffer)
-        {
-            auto data = _sysex;
-            data[7] = toMidiByte(_newBank);
-            data[8] = _newProgram;
-            return data;
-        }
+        const auto idxBank = m->getByteIndexForType(pluginLib::MidiDataType::Bank);
+        const auto idxProgram = m->getByteIndexForType(pluginLib::MidiDataType::Program);
 
-    	pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
+        assert(idxBank != pluginLib::MidiPacket::InvalidIndex);
+        assert(idxProgram != pluginLib::MidiPacket::InvalidIndex);
 
-        MidiPacketType usedPacketType;
-		if(!parseSingle(data, parameterValues, _sysex, usedPacketType))
-			return {};
+        auto data = _sysex;
 
-		const uint8_t part = _newProgram == virusLib::SINGLE ? 0 : _newProgram;
-		pluginLib::MidiPacket::NamedParamValues currentParams;
-		createNamedParamValues(currentParams, midiPacketName(usedPacketType), part);
+        data[idxBank] = toMidiByte(_newBank);
+        data[idxProgram] = _newProgram;
 
-		for (const auto& name : lockedParams)
-		{
-			const auto it = currentParams.find({pluginLib::MidiPacket::AnyPart, name});
-			if(it == currentParams.end())
-				continue;
-
-			const uint32_t idx = getParameterIndexByName(name);
-			if(idx != InvalidParameterIndex)
-				parameterValues[idx] = it->second;
-		}
-		return createSingleDump(usedPacketType, toMidiByte(_newBank), _newProgram, parameterValues);
+        return data;
     }
 
     void Controller::selectPrevPreset(const uint8_t _part)
@@ -793,7 +780,6 @@ namespace Virus
 
     bool Controller::activatePatch(const std::vector<unsigned char>& _sysex)
     {
-		// re-pack, force to edit buffer
 		return activatePatch(_sysex, isMultiMode() ? getCurrentPart() : static_cast<uint8_t>(virusLib::ProgramType::SINGLE));
     }
 
@@ -815,12 +801,24 @@ namespace Virus
 
         const auto program = static_cast<uint8_t>(_part);
 
+		// re-pack, force to edit buffer
     	const auto msg = modifySingleDump(_sysex, virusLib::BankNumber::EditBuffer, program);
 
 		if(msg.empty())
 			return false;
 
+        // if we have locked parameters, get them, send the preset and then send each locked parameter value afterward.
+        // Modifying the preset directly does not work because a preset might be an old version that we do not know
+        const auto lockedParameters = getLockedParameters(static_cast<uint8_t>(_part));
+
 		sendSysEx(msg);
+
+        for (const auto& lockedParameter : lockedParameters)
+        {
+	        const auto v = lockedParameter->getUnnormalizedValue();
+	        sendParameterChange(*lockedParameter, static_cast<uint8_t>(v));
+        }
+
 		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
 
 		setCurrentPartPresetSource(program == virusLib::ProgramType::SINGLE ? 0 : program, PresetSource::Browser);

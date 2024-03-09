@@ -21,7 +21,11 @@ namespace synthLib
 
 		void addMidiEvent(const SMidiEvent& _ev);
 
-		void setSamplerate(float _samplerate);
+		bool setPreferredDeviceSamplerate(float _samplerate);
+
+		void setHostSamplerate(float _samplerate);
+		float getHostSamplerate() const { return m_hostSamplerate; }
+
 		void setBlockSize(uint32_t _blockSize);
 
 		uint32_t getLatencyMidiToOutput() const;
@@ -75,5 +79,7 @@ namespace synthLib
 		bool m_needsStart = false;
 		double m_clockTickPos = 0.0;
 		uint32_t m_extraLatencyBlocks = 1;
+
+		float m_deviceSamplerate = 0.0f;
 	};
 }

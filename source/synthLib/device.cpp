@@ -4,6 +4,8 @@
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/memory.h"
 
+#include <cmath>
+
 using namespace dsp56k;
 
 namespace synthLib
@@ -15,10 +17,10 @@ namespace synthLib
 	{
 		std::vector<float> buf;
 		buf.resize(_numSamples);
-		const auto ptr = &buf[0];
+		const auto ptr = buf.data();
 
-		TAudioInputs in = {ptr, ptr, nullptr, nullptr};//, nullptr, nullptr, nullptr, nullptr};
-		TAudioOutputs out = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
+		const TAudioInputs in = {ptr, ptr, nullptr, nullptr};//, nullptr, nullptr, nullptr, nullptr};
+		const TAudioOutputs out = {ptr, ptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr};
 
 		std::vector<SMidiEvent> midi;
 
@@ -47,5 +49,52 @@ namespace synthLib
 		{
 			LOG("Warning, limited requested latency " << _size << " to maximum value " << maxLatency << ", audio will be out of sync!");
 		}
+	}
+
+	bool Device::isSamplerateSupported(const float& _samplerate) const
+	{
+		for (const auto& sr : getSupportedSamplerates())
+		{
+			if(std::fabsf(sr - _samplerate) < 1.0f)
+				return true;
+		}
+		return false;
+	}
+
+	bool Device::setSamplerate(const float _samplerate)
+	{
+		return isSamplerateSupported(_samplerate);
+	}
+
+	float Device::getDeviceSamplerate(const float _preferredDeviceSamplerate, const float _hostSamplerate) const
+	{
+		if(_preferredDeviceSamplerate > 0.0f && isSamplerateSupported(_preferredDeviceSamplerate))
+			return _preferredDeviceSamplerate;
+		return getDeviceSamplerateForHostSamplerate(_hostSamplerate);
+	}
+
+	float Device::getDeviceSamplerateForHostSamplerate(const float _hostSamplerate) const
+	{
+		// if the host samplerate is supported directly, we use it
+		if(isSamplerateSupported(_hostSamplerate))
+			return _hostSamplerate;
+
+		const auto supported = getSupportedSamplerates();
+
+		// if there is no choice we need to use the only one that is supported
+		if(supported.size() == 1)
+			return getSupportedSamplerates().front();
+
+		// find the lowest possible samplerate that is higher than the host samplerate
+		const std::set samplerates(supported.begin(), supported.end());
+
+		for (const float sr : supported)
+		{
+			if(sr >= _hostSamplerate)
+				return sr;
+		}
+
+		// if all supported device samplerates are lower than the host samplerate, use the maximum that the device supports
+		return *samplerates.rbegin();
 	}
 }
