@@ -249,21 +249,47 @@ namespace genericVirusUI
 		if(!m_deviceModel)
 			return;
 
-		const auto& presets = getController().getSinglePresets();
-		const auto& data = presets.front().front().data;
-		if(data.empty())
-			return;
-
 		std::string m;
 
-		switch(virusLib::Microcontroller::getPresetVersion(data.front()))
+		switch(m_processor.getModel())
 		{
-		case virusLib::A:	m = "A";	break;
-		case virusLib::B:	m = "B";	break;
-		case virusLib::C:	m = "C";	break;
-		case virusLib::D:	m = "TI";	break;
-		case virusLib::D2:	m = "TI2";	break;
-		default:			m = "?";	break;
+		case virusLib::ROMFile::Model::Invalid:
+			return;
+		case virusLib::ROMFile::Model::ABC:
+			{
+				const auto& presets = getController().getSinglePresets();
+				const auto& data = presets.front().front().data;
+				if(data.empty())
+					return;
+
+				switch(virusLib::Microcontroller::getPresetVersion(data.front()))
+				{
+				case virusLib::A:	m = "A";	break;
+				case virusLib::B:	m = "B";	break;
+				case virusLib::C:	m = "C";	break;
+				case virusLib::D:	m = "TI";	break;
+				case virusLib::D2:	m = "TI2";	break;
+				default:			m = "?";	break;
+				}
+			}
+			break;
+		case virusLib::ROMFile::Model::Snow:
+			m = "Snow";
+			break;
+		case virusLib::ROMFile::Model::TI:
+			switch (m_processor.getTIModel())
+			{
+			case virusLib::ROMFile::TIModel::TI:
+				m = "TI";
+				break;
+			case virusLib::ROMFile::TIModel::Snow:
+				m = "Snow";
+				break;
+			case virusLib::ROMFile::TIModel::TI2:
+				m = "TI2";
+				break;
+			}
+			break;
 		}
 
 		m_deviceModel->setText(m, juce::dontSendNotification);
