@@ -55,7 +55,7 @@ namespace synthLib
 	{
 		for (const auto& sr : getSupportedSamplerates())
 		{
-			if(std::fabsf(sr - _samplerate) < 1.0f)
+			if(std::fabs(sr - _samplerate) < 1.0f)
 				return true;
 		}
 		return false;
