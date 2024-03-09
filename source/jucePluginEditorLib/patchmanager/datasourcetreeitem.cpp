@@ -22,10 +22,20 @@ namespace jucePluginEditorLib::patchManager
 			case pluginLib::patchDB::SourceType::Count:
 				return {};
 			case pluginLib::patchDB::SourceType::Rom:
-			case pluginLib::patchDB::SourceType::File:
-			case pluginLib::patchDB::SourceType::Folder:
 			case pluginLib::patchDB::SourceType::LocalStorage:
 				return _ds.name;
+			case pluginLib::patchDB::SourceType::File:
+			case pluginLib::patchDB::SourceType::Folder:
+				{
+					auto n = _ds.name;
+					const auto idxA = n.find_first_of("\\/");
+					const auto idxB = n.find_last_of("\\/");
+					if(idxA != std::string::npos && idxB != std::string::npos && (idxB - idxA) > 1)
+					{
+						return n.substr(0, idxA+1) + ".." + n.substr(idxB);
+					}
+					return n;
+				}
 			default:
 				assert(false);
 				return"invalid";
