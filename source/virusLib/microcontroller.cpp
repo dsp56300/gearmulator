@@ -2,7 +2,7 @@
 #include <chrono>
 #include <thread>
 #include <cstring>	// memcpy
-#include <cmath>>	// floor/abs
+#include <cmath>	// floor/abs
 
 #include "microcontroller.h"
 
