@@ -348,7 +348,7 @@ uint32_t Microcontroller::getPartCount() const
 
 void Microcontroller::setSamplerate(const float _samplerate)
 {
-	const auto sr = static_cast<int>(std::floorf(_samplerate + 0.5f));
+	const auto sr = static_cast<int>(std::floor(_samplerate + 0.5f));
 	
 	/*
 		0 = 44100 Hz @ EXTAL 11289600 Hz (44100 * 256)
