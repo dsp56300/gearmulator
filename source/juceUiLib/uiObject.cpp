@@ -328,13 +328,7 @@ namespace genericUI
 	void UiObject::setCurrentPart(Editor& _editor, const uint8_t _part)
 	{
 		if(m_condition)
-		{
-			m_condition->unbind();
-			
-			const auto v = _editor.getInterface().getParameterValue(m_condition->getParameterIndex(), _part);
-			if(v)
-				m_condition->bind(v);
-		}
+			m_condition->setCurrentPart(_editor, _part);
 
 		for (const auto& child : m_children)
 			child->setCurrentPart(_editor, _part);
@@ -377,7 +371,7 @@ namespace genericUI
 		if(!v)
 			throw std::runtime_error("Parameter named " + paramName + " not found");
 
-		m_condition.reset(new Condition(_target, v, static_cast<uint32_t>(index), values));
+		m_condition.reset(new ConditionByParameterValues(_target, v, static_cast<uint32_t>(index), values));
 	}
 
 	bool UiObject::parse(juce::DynamicObject* _obj)

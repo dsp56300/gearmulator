@@ -12,7 +12,7 @@ namespace genericVirusUI
 		explicit FxPage(const VirusEditor& _editor);
 		~FxPage();
 	private:
-		std::unique_ptr<genericUI::Condition> m_conditionReverb;
-		std::unique_ptr<genericUI::Condition> m_conditionDelay;
+		std::unique_ptr<genericUI::ConditionByParameterValues> m_conditionReverb;
+		std::unique_ptr<genericUI::ConditionByParameterValues> m_conditionDelay;
 	};
 }

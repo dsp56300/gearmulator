@@ -12,16 +12,29 @@ namespace juce
 
 namespace genericUI
 {
-	class Condition : juce::Value::Listener
+	class Editor;
+
+	class Condition
 	{
 	public:
-		Condition(juce::Component& _target, juce::Value* _value, int32_t _parameterIndex, std::set<uint8_t> _values);
-		~Condition() override;
+		virtual ~Condition() = default;
+
+		virtual void setCurrentPart(const Editor& _editor, uint8_t _part) {}
+		virtual void refresh() {}
+	};
+
+	class ConditionByParameterValues : public Condition, juce::Value::Listener
+	{
+	public:
+		ConditionByParameterValues(juce::Component& _target, juce::Value* _value, int32_t _parameterIndex, std::set<uint8_t> _values);
+		~ConditionByParameterValues() override;
 		void valueChanged(juce::Value& _value) override;
 		void bind(juce::Value* _value);
 		void unbind();
 		int32_t getParameterIndex() const { return m_parameterIndex; }
-		void refresh();
+		void refresh() override;
+		void setCurrentPart(const Editor& _editor, uint8_t _part) override;
+
 	private:
 		juce::Component& m_target;
 		const int32_t m_parameterIndex;
