@@ -19,6 +19,8 @@ OsTIrus:
 
 - [Fix] Part Detune knob displayed incorrect value and didn't update while being moved
 
+- [Imp] Reset Oscillator shape to Saw on double click
+
 1.3.7 (TBD)
 
 Framework:
