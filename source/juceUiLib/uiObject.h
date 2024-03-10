@@ -39,10 +39,10 @@ namespace genericUI
 		void createJuceTree(Editor& _editor);
 		void createChildObjects(Editor& _editor, juce::Component& _parent) const;
 		void createTabGroups(Editor& _editor);
-		void createControllerLinks(Editor& _editor);
+		void createControllerLinks(Editor& _editor) const;
 		void registerTemplates(Editor& _editor) const;
 
-		void apply(Editor& _editor, juce::Component& _target);
+		void apply(const Editor& _editor, juce::Component& _target);
 		void apply(Editor& _editor, juce::Slider& _target);
 		void apply(Editor& _editor, juce::ComboBox& _target);
 		void apply(Editor& _editor, juce::DrawableButton& _target);
@@ -77,7 +77,7 @@ namespace genericUI
 		bool hasComponent(const std::string& _component) const;
 		template<typename T, class... Args> T* createJuceObject(Editor& _editor, Args... _args);
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
-		void createCondition(Editor& _editor, juce::Component& _target);
+		void createCondition(const Editor& _editor, juce::Component& _target);
 
 		bool parse(juce::DynamicObject* _obj);
 
