@@ -26,13 +26,9 @@ namespace jucePluginEditorLib::patchManager
 
 		void itemClicked(const juce::MouseEvent&) override;
 
-		void itemSelectionChanged(bool _isNowSelected) override;
-
 		pluginLib::patchDB::Color getColor() const override;
 	private:
 		const GroupType m_group;
 		const std::string m_tag;
-		bool m_selectedWasChanged = false;
-		bool m_forceDeselect = false;
 	};
 }

@@ -105,6 +105,19 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
+		if(_isNowSelected && m_forceDeselect)
+		{
+			m_forceDeselect = false;
+
+			juce::MessageManager::callAsync([this]()
+			{
+				setSelected(false, false);
+			});
+			return;
+		}
+
+		m_selectedWasChanged = true;
+
 		TreeViewItem::itemSelectionChanged(_isNowSelected);
 
 		if(getTree()->isMultiSelectEnabled())
@@ -256,6 +269,33 @@ namespace jucePluginEditorLib::patchManager
 			return;
 		m_parentSearchRequest = _parentSearch;
 		onParentSearchChanged(m_parentSearchRequest);
+	}
+
+	void TreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(_mouseEvent.mods.isPopupMenu())
+		{
+			TreeViewItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		if(!m_deselectOnSecondClick)
+		{
+			TreeViewItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		// we have the (for Juce) overly complex task to deselect a tree item on left click
+		// Juce does not let us though, this click is sent on mouse down and it reselects the item
+		// again on mouse up.
+		const auto selectedWasChanged = m_selectedWasChanged;
+		m_selectedWasChanged = false;
+
+		if(!selectedWasChanged && isSelected() && getOwnerView()->isMultiSelectEnabled())
+		{
+			m_forceDeselect = true;
+			setSelected(false, false);
+		}
 	}
 
 	void TreeItem::cancelSearch()

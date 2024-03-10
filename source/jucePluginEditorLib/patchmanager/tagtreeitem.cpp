@@ -17,6 +17,8 @@ namespace jucePluginEditorLib::patchManager
 
 			search(std::move(sr));
 		}
+
+		setDeselectonSecondClick(true);
 	}
 
 	bool TagTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
@@ -61,80 +63,54 @@ namespace jucePluginEditorLib::patchManager
 
 	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
-		if(_mouseEvent.mods.isPopupMenu())
+		if(!_mouseEvent.mods.isPopupMenu())
 		{
-			const auto tagType = toTagType(getGroupType());
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
 
-			if(tagType != pluginLib::patchDB::TagType::Invalid)
+		const auto tagType = toTagType(getGroupType());
+
+		if(tagType != pluginLib::patchDB::TagType::Invalid)
+		{
+			juce::PopupMenu menu;
+			const auto& s = getPatchManager().getSearch(getSearchHandle());
+			if(s && !s->getResultSize())
 			{
-				juce::PopupMenu menu;
-				const auto& s = getPatchManager().getSearch(getSearchHandle());
-				if(s && !s->getResultSize())
+				menu.addItem("Remove", [this, tagType]
 				{
-					menu.addItem("Remove", [this, tagType]
-					{
-						getPatchManager().removeTag(tagType, m_tag);
-					});
-				}
-				menu.addItem("Set Color...", [this, tagType]
-				{
-					juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
-
-					cs->getProperties().set("tagType", static_cast<int>(tagType));
-					cs->getProperties().set("tag", juce::String(getTag()));
-
-					cs->setSize(400,300);
-					cs->setCurrentColour(juce::Colour(getColor()));
-					cs->addChangeListener(&getPatchManager());
-
-					const auto treeRect = getTree()->getScreenBounds();
-					const auto itemRect = getItemPosition(true);
-					auto rect = itemRect;
-					rect.translate(treeRect.getX(), treeRect.getY());
-
-					juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
+					getPatchManager().removeTag(tagType, m_tag);
 				});
-				if(getColor() != pluginLib::patchDB::g_invalidColor)
-				{
-					menu.addItem("Clear Color", [this, tagType]
-					{
-						getPatchManager().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
-						getPatchManager().repaint();
-					});
-				}
-
-				menu.showMenuAsync({});
 			}
-		}
-		else
-		{
-			// we have the (for Juce) overly complex task to deselect a tree item on left click
-			// Juce does not let us though, this click is sent on mouse down and it reselects the item
-			// again on mouse up.
-			const auto selectedWasChanged = m_selectedWasChanged;
-			m_selectedWasChanged = false;
-
-			if(!selectedWasChanged && isSelected() && getOwnerView()->isMultiSelectEnabled())
+			menu.addItem("Set Color...", [this, tagType]
 			{
-				m_forceDeselect = true;
-				setSelected(false, false);
-			}
-		}
-	}
+				juce::ColourSelector* cs = new juce::ColourSelector(juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders | juce::ColourSelector::showColourspace);
 
-	void TagTreeItem::itemSelectionChanged(const bool _isNowSelected)
-	{
-		if(_isNowSelected && m_forceDeselect)
-		{
-			m_forceDeselect = false;
+				cs->getProperties().set("tagType", static_cast<int>(tagType));
+				cs->getProperties().set("tag", juce::String(getTag()));
 
-			juce::MessageManager::callAsync([this]()
-			{
-				setSelected(false, false);
+				cs->setSize(400,300);
+				cs->setCurrentColour(juce::Colour(getColor()));
+				cs->addChangeListener(&getPatchManager());
+
+				const auto treeRect = getTree()->getScreenBounds();
+				const auto itemRect = getItemPosition(true);
+				auto rect = itemRect;
+				rect.translate(treeRect.getX(), treeRect.getY());
+
+				juce::CallOutBox::launchAsynchronously(std::unique_ptr<juce::Component>(cs), rect, nullptr);
 			});
+			if(getColor() != pluginLib::patchDB::g_invalidColor)
+			{
+				menu.addItem("Clear Color", [this, tagType]
+				{
+					getPatchManager().setTagColor(tagType, getTag(), pluginLib::patchDB::g_invalidColor);
+					getPatchManager().repaint();
+				});
+			}
+
+			menu.showMenuAsync({});
 		}
-		m_selectedWasChanged = true;
-		TreeItem::itemSelectionChanged(_isNowSelected);
 	}
 
 	pluginLib::patchDB::Color TagTreeItem::getColor() const

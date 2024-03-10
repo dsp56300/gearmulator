@@ -99,7 +99,10 @@ namespace jucePluginEditorLib::patchManager
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
 		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
 			return;
+		}
 
 		juce::PopupMenu menu;
 
