@@ -13,6 +13,12 @@ Framework:
 
 - [Fix] Patch Manager: List was not emptied if nothing was selected
 
+OsTIrus:
+
+- [Imp] Reported latency slightly adjusted for better midi timing
+
+- [Fix] Part Detune knob displayed incorrect value and didn't update while being moved
+
 1.3.7 (TBD)
 
 Framework:
