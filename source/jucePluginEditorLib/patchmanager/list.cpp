@@ -59,6 +59,15 @@ namespace jucePluginEditorLib::patchManager
 		m_searchHandle = sh;
 	}
 
+	void List::clear()
+	{
+		m_search.reset();
+		m_patches.clear();
+		m_filteredPatches.clear();
+		updateContent();
+		getPatchManager().setListStatus(0, 0);
+	}
+
 	void List::refreshContent()
 	{
 		setContent(m_search);
