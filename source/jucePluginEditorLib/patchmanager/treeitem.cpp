@@ -243,7 +243,8 @@ namespace jucePluginEditorLib::patchManager
 			_g.setFont(fnt);
 		}
 
-		const juce::String t(m_text);
+		
+		const juce::String t = juce::String::fromUTF8(m_text.c_str());
 		_g.drawText(t, 0, 0, _width, _height, style ? style->getAlign() : juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
