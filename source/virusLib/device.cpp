@@ -282,7 +282,7 @@ namespace virusLib
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples
-		return 324 - 120;	// TI seems to have improved a bit
+		return 324 - 108;	// TI seems to have improved a bit
 	}
 
 	uint32_t Device::getInternalLatencyInputToOutput() const
