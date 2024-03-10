@@ -229,7 +229,7 @@ void Microcontroller::sendInitControlCommands()
 		sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
 		sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 		sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
-		sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
+		sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x0);	// Disable poly pressure to edit parameters on page B
 		sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
 		sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
 		sendControlCommand(DEVICE_ID, OMNI_DEVICE_ID);		// Set device ID to Omni
@@ -431,7 +431,8 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 		}
 		break;
 	case M_POLYPRESSURE:
-		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
+		if(m_globalSettings[MIDI_CONTROL_HIGH_PAGE] == 1)
+			applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
 		break;
 	default:
 		break;
