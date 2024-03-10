@@ -1,5 +1,6 @@
 #include "tagstree.h"
 
+#include "grouptreeitem.h"
 #include "notagtreeitem.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -8,7 +9,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		addGroup(GroupType::Categories);
 		m_uncategorized = new NoTagTreeItem(_pm, pluginLib::patchDB::TagType::Category, "Uncategorized");
-		getRootItem()->addSubItem(m_uncategorized);
+		getItem(GroupType::Categories)->addSubItem(m_uncategorized);
 		addGroup(GroupType::Tags);
 
 		setMultiSelectEnabled(true);
