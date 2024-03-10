@@ -19,7 +19,7 @@ Framework:
 
 Osirus:
 
-- [Imp] Disable poly pressure to control Page B parameters to prevent accidental patch changes 
+- [Imp] Disabled poly pressure to control Page B parameters to prevent accidental patch changes 
         by keyboards that emit MPE messages
 - [Fix] Locking parameter regions didn't work properly on older version presets and may 
         have caused silence or invalid presets
