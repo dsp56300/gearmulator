@@ -163,7 +163,14 @@ namespace synthLib
             {
                 const auto &file = entry.path();
 
-                _files.push_back(file.string());
+                try
+                {
+	                _files.push_back(file.string());
+                }
+                catch(std::exception& e)
+                {
+	                LOG(e.what());
+                }
             }
         }
         catch (...)
