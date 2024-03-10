@@ -646,9 +646,6 @@ namespace jucePluginEditorLib::patchManager
 			const auto* item = *selectedDataSources.begin();
 			selectItem(item);
 		}
-
-		if(selectedDataSources.empty() && selectedTags.empty())
-			m_list->clear();
 	}
 
 	void PatchManager::changeListenerCallback(juce::ChangeBroadcaster* _source)
