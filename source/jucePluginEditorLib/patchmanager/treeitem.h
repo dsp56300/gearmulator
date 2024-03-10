@@ -68,6 +68,10 @@ namespace jucePluginEditorLib::patchManager
 
 		virtual pluginLib::patchDB::Color getColor() const { return pluginLib::patchDB::g_invalidColor; }
 
+		void itemClicked(const juce::MouseEvent&) override;
+
+		void setDeselectonSecondClick(const bool _deselect) { m_deselectOnSecondClick = _deselect; }
+
 	protected:
 		void cancelSearch();
 		void search(pluginLib::patchDB::SearchRequest&& _request);
@@ -93,5 +97,9 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::SearchRequest m_searchRequest;
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+
+		bool m_deselectOnSecondClick = false;
+		bool m_selectedWasChanged = false;
+		bool m_forceDeselect = false;
 	};
 }

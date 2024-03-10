@@ -1,5 +1,18 @@
 Release Notes 
 
+1.3.8 (TBD)
+
+DSP:
+
+- [Imp] Small performance improvements
+
+Framework:
+
+- [Imp] Second click on root tree items of category tree deselects the item
+- [Imp] Patch Manager: "Uncategorized" has been moved into the Categories group
+
+- [Fix] Patch Manager: List was not emptied if nothing was selected
+
 1.3.7 (TBD)
 
 Framework:
