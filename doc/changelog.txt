@@ -12,6 +12,7 @@ Framework:
 - [Imp] Patch Manager: "Uncategorized" has been moved into the Categories group
 
 - [Fix] Patch Manager: List was not emptied if nothing was selected
+- [Fix] Patch Manager: Missing patches if a directory contains files with unicode characters
 
 OsTIrus:
 
