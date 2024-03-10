@@ -910,7 +910,6 @@ bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateTy
 
 bool Microcontroller::setState(const std::vector<unsigned char>& _state, const StateType _type)
 {
-	return true;
 	std::vector<SMidiEvent> events;
 
 	for(size_t i=0; i<_state.size(); ++i)
