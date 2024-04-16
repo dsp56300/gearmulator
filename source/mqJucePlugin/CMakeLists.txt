@@ -13,8 +13,10 @@ set(SOURCES
 	mqLcd.cpp mqLcd.h
 	mqLcdBase.cpp mqLcdBase.h
 	mqLcdText.cpp mqLcdText.h
+	mqPartButton.cpp mqPartButton.h
 	mqPartSelect.cpp mqPartSelect.h
-	mqPatchBrowser.cpp mqPatchBrowser.h
+	mqPatchManager.cpp mqPatchManager.h
+	mqPatchBrowser.h
 	version.h
 )
 

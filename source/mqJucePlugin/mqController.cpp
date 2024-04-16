@@ -3,7 +3,10 @@
 #include <fstream>
 
 #include "mqEditor.h"
+#include "mqFrontPanel.h"
 #include "PluginProcessor.h"
+
+#include "../mqLib/mqstate.h"
 
 #include "../synthLib/os.h"
 
@@ -49,7 +52,7 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 
     startTimer(50);
 
-	onPlayModeChanged.addListener(0, [this]()
+	onPlayModeChanged.addListener(0, [this](bool multiMode)
 	{
 		requestAllPatches();
 	});
@@ -64,11 +67,16 @@ void Controller::setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel)
 
 void Controller::sendSingle(const std::vector<uint8_t>& _sysex)
 {
+	sendSingle(_sysex, getCurrentPart());
+}
+
+void Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _part)
+{
 	auto data = _sysex;
 
-	data[mqLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
-	data[mqLib::IdxLocation] = isMultiMode() ? getCurrentPart() : 0;
-	data[mqLib::IdxDeviceId] = m_deviceId;
+	data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode);
+	data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
+	data[wLib::IdxDeviceId] = m_deviceId;
 
 	const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
 
@@ -138,6 +146,47 @@ std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& 
         name += static_cast<char>(it->second);
     }
     return name;
+}
+
+std::string Controller::getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
+{
+    return getString(_values, "Name", 16);
+}
+
+std::string Controller::getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
+{
+    return getString(_values, "Category", 4);
+}
+
+std::string Controller::getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix,	const size_t _len) const
+{
+    std::string name;
+    for(uint32_t i=0; i<_len; ++i)
+    {
+        char paramName[64];
+        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
+
+        const auto idx = getParameterIndexByName(paramName);
+        if(idx == InvalidParameterIndex)
+            break;
+
+        const auto it = _values[idx];
+        if(!it)
+            break;
+
+        name += static_cast<char>(*it);
+    }
+    return name;
+}
+
+bool Controller::setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
+{
+    return setString(_values, "Name", 16, _value);
+}
+
+bool Controller::setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const
+{
+    return setString(_values, "Category", 4, _value);
 }
 
 void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part)
@@ -217,13 +266,13 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         }
     }
 
-	LOG("Got sysex of size " << _msg.size())
+	LOG("Got sysex of size " << _msg.size());
 
 	std::string name;
     pluginLib::MidiPacket::Data data;
     pluginLib::MidiPacket::ParamValues parameterValues;
 
-    if(parseMidiPacket(name,  data, parameterValues, _msg))
+    if(pluginLib::Controller::parseMidiPacket(name,  data, parameterValues, _msg))
     {
         if(name == midiPacketName(SingleDump))
         {
@@ -240,7 +289,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 			const auto newPlayMode = isMultiMode();
 
 			if(lastPlayMode != newPlayMode)
-				onPlayModeChanged();
+				onPlayModeChanged(newPlayMode);
 			else
 				requestAllPatches();
 		}
@@ -279,6 +328,13 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
     }
 }
 
+bool Controller::parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const
+{
+	const auto* p = getMidiPacket(g_midiPacketNames[_type]);
+	assert(p && "midi packet not found");
+	return pluginLib::Controller::parseMidiPacket(*p, _data, _params, _sysex);
+}
+
 bool Controller::sendSysEx(MidiPacketType _type) const
 {
     std::map<pluginLib::MidiDataType, uint8_t> params;
@@ -305,7 +361,7 @@ void Controller::setPlayMode(const bool _multiMode)
 
 	sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, playMode);
 
-	onPlayModeChanged();
+	onPlayModeChanged(_multiMode);
 }
 
 void Controller::selectNextPreset()
@@ -332,6 +388,45 @@ std::vector<uint8_t> Controller::createSingleDump(const mqLib::MidiBufferNum _bu
 		return {};
 
 	return dst;
+}
+
+std::vector<uint8_t> Controller::createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, const uint8_t _locationOffset, const pluginLib::MidiPacket::AnyPartParamValues& _values) const
+{
+	pluginLib::MidiPacket::Data data;
+
+	data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Bank, static_cast<uint8_t>(_buffer)));
+	data.insert(std::make_pair(pluginLib::MidiDataType::Program, static_cast<uint8_t>(_location) + _locationOffset));
+
+	std::vector<uint8_t> dst;
+
+	if (!createMidiDataFromPacket(dst, midiPacketName(SingleDump), data, _values))
+		return {};
+
+	return dst;
+}
+
+bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const std::vector<uint8_t>& _sysex) const
+{
+	if(parseMidiPacket(SingleDump, _data, _paramValues, _sysex))
+		return true;
+	return parseMidiPacket(SingleDumpQ, _data, _paramValues, _sysex);
+}
+
+bool Controller::setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const
+{
+    for(uint32_t i=0; i<_len && i <_value.size(); ++i)
+    {
+        char paramName[64];
+        snprintf(paramName, sizeof(paramName), "%s%02u", _prefix.c_str(), i);
+
+        const auto idx = getParameterIndexByName(paramName);
+        if(idx == InvalidParameterIndex)
+            break;
+
+        _values[idx] = static_cast<uint8_t>(_value[i]);
+    }
+    return true;
 }
 
 void Controller::selectPreset(int _offset)
@@ -379,7 +474,7 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 		if (!combineParameterChange(v, g_midiPacketNames[MultiDump], _parameter, _value))
 			return;
 
-		const auto& dump = mqLib::State::g_dumps[static_cast<int>(mqLib::State::DumpType::Multi)];
+		const auto& dump = mqLib::State::Dumps[static_cast<int>(mqLib::State::DumpType::Multi)];
 
 		uint32_t idx = desc.index;
 

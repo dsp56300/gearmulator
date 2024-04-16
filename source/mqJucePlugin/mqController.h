@@ -46,13 +46,14 @@ public:
 		std::vector<uint8_t> data;
     };
 
-	pluginLib::Event onPlayModeChanged;
+	pluginLib::Event<bool> onPlayModeChanged;
 
     Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 	~Controller() override;
 
     void setFrontPanel(mqJucePlugin::FrontPanel* _frontPanel);
     void sendSingle(const std::vector<uint8_t>& _sysex);
+    void sendSingle(const std::vector<uint8_t>& _sysex, uint8_t _part);
 
 	bool sendSysEx(MidiPacketType _type) const;
     bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
@@ -64,6 +65,18 @@ public:
     void selectPrevPreset();
 
 	std::vector<uint8_t> createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, uint8_t _part) const;
+	std::vector<uint8_t> createSingleDump(mqLib::MidiBufferNum _buffer, mqLib::MidiSoundLocation _location, uint8_t _locationOffset, const pluginLib::MidiPacket
+	                                      ::AnyPartParamValues& _values) const;
+    bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const std::vector<uint8_t>& _sysex) const;
+
+	std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
+    std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
+    std::string getCategory(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
+    std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
+
+    bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
+    bool setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
+    bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 private:
 	void selectPreset(int _offset);
@@ -73,11 +86,11 @@ private:
 	void timerCallback() override;
     void onStateLoaded() override;
 
-    std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
     void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part);
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseSysexMessage(const pluginLib::SysEx&) override;
+    bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
 
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);

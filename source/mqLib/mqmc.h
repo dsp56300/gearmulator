@@ -6,10 +6,12 @@
 #include "buttons.h"
 #include "lcd.h"
 #include "leds.h"
-#include "am29f.h"
+#include "../wLib/am29f.h"
 
 #include "../mc68k/mc68k.h"
 #include "../mc68k/hdi08periph.h"
+
+#define SUPPORT_NMI_INTERRUPT 0
 
 namespace mqLib
 {
@@ -37,7 +39,9 @@ namespace mqLib
 		bool requestDSPReset() const { return m_dspResetRequest; }
 		void notifyDSPBooted();
 
+#if SUPPORT_NMI_INTERRUPT
 		uint8_t requestDSPinjectNMI() const { return m_dspInjectNmiRequest; }
+#endif
 
 		void dumpMemory(const char* _filename) const;
 		void dumpROM(const char* _filename) const;
@@ -53,9 +57,16 @@ namespace mqLib
 		void onReset() override;
 		uint32_t onIllegalInstruction(uint32_t opcode) override;
 
+		void onPortEWritten();
+		void onPortFWritten();
+		void onPortGPWritten();
+		void onPortQSWritten();
+
+		void processLCDandLEDs();
+
 		const ROM& m_rom;
 		std::vector<uint8_t> m_romRuntimeData;
-		std::unique_ptr<Am29f> m_flash;
+		std::unique_ptr<wLib::Am29f> m_flash;
 		LCD m_lcd;
 		Buttons m_buttons;
 		Leds m_leds;
@@ -68,6 +79,9 @@ namespace mqLib
 		std::list<uint32_t> m_lastPCs;
 		bool m_dspResetRequest = false;
 		bool m_dspResetCompleted = false;
+
+#if SUPPORT_NMI_INTERRUPT
 		uint8_t m_dspInjectNmiRequest = 0;
+#endif
 	};
 }

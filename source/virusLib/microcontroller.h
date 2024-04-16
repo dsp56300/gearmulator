@@ -4,6 +4,7 @@
 
 #include "../synthLib/deviceTypes.h"
 #include "../synthLib/midiTypes.h"
+#include "../synthLib/buildconfig.h"
 
 #include <list>
 #include <mutex>
@@ -15,6 +16,7 @@
 
 namespace virusLib
 {
+	struct FrontpanelState;
 	class DspSingle;
 	class DemoPlayback;
 
@@ -26,7 +28,7 @@ public:
 
 	explicit Microcontroller(DspSingle& _dsp, const ROMFile& romFile, bool _useEsaiBasedMidiTiming);
 
-	bool sendMIDI(const synthLib::SMidiEvent& _ev);
+	bool sendMIDI(const synthLib::SMidiEvent& _ev, FrontpanelState* _fpState = nullptr);
 	bool sendSysex(const std::vector<uint8_t>& _data, std::vector<synthLib::SMidiEvent>& _responses, synthLib::MidiEventSource _source);
 
 	bool writeSingle(BankNumber _bank, uint8_t _program, const TPreset& _data);
@@ -37,11 +39,13 @@ public:
 	void sendInitControlCommands();
 
 	void createDefaultState();
-	void process(size_t _size);
+	void process();
 
+#if !SYNTHLIB_DEMO_MODE
 	bool getState(std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<unsigned char>& _state, synthLib::StateType _type);
 	bool setState(const std::vector<synthLib::SMidiEvent>& _events);
+#endif
 
 	void addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming);
 
@@ -57,6 +61,11 @@ public:
 	bool dspHasBooted() const;
 
 	const ROMFile& getROM() const { return m_rom; }
+
+	uint32_t getPartCount() const;
+
+	uint8_t getPartMidiChannel(uint8_t _part) const;
+	bool isPolyPressureForPageBEnabled() const;
 
 private:
 	bool send(Page page, uint8_t part, uint8_t param, uint8_t value);

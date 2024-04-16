@@ -9,3 +9,5 @@
 /build_win64_VS2019.bat
 /out/
 /build/
+*atom*.sh
+*debug.sh

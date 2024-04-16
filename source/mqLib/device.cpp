@@ -1,9 +1,5 @@
 #include "device.h"
 
-#include "mqmiditypes.h"
-
-#include <cstring>
-
 #include "../synthLib/deviceTypes.h"
 
 #include "mqbuildconfig.h"
@@ -109,13 +105,6 @@ namespace mqLib
 		m_sysexRemote.handleDirtyFlags(m_customSysexOut, dirty);
 	}
 
-	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
-	{
-		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
-
-		m_numSamplesProcessed += static_cast<uint32_t>(_size);
-	}
-
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
 		const auto& sysex = _ev.sysex;
@@ -151,8 +140,15 @@ namespace mqLib
 			m_mq.sendMidiEvent(_ev);
 		}
 
-
 		return true;
 	}
 
+	dsp56k::EsxiClock* Device::getDspEsxiClock() const
+	{
+		auto& mq = const_cast<MicroQ&>(m_mq);
+		auto* p = dynamic_cast<dsp56k::Peripherals56362*>(mq.getHardware()->getDSP().dsp().getPeriph(dsp56k::MemArea_X));
+		if(!p)
+			return nullptr;
+		return &p->getEsaiClock();
+	}
 }

@@ -2,6 +2,7 @@
 
 #include "../jucePluginLib/parameterbinding.h"
 
+class mqPartButton;
 class Controller;
 
 namespace mqJucePlugin
@@ -16,13 +17,14 @@ public:
 
 	void onPlayModeChanged() const;
 
+	void selectPart(uint8_t _index) const;
+
 private:
 	void updateUiState() const;
-	void selectPart(uint8_t _index) const;
 
 	struct Part
 	{
-		juce::Button* button = nullptr;
+		mqPartButton* button = nullptr;
 		juce::Button* led = nullptr;
 	};
 

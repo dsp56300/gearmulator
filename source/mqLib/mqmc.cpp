@@ -30,16 +30,41 @@ namespace mqLib
 	{
 		if(!_rom.isValid())
 			return;
-		m_romRuntimeData.resize(ROM::getSize());
-		memcpy(m_romRuntimeData.data(), m_rom.getData(), ROM::getSize());
+		m_romRuntimeData.resize(ROM::size());
+		memcpy(m_romRuntimeData.data(), m_rom.getData(), ROM::size());
 
-		m_flash.reset(new Am29f(m_romRuntimeData.data(), m_romRuntimeData.size(), false, true));
+		m_flash.reset(new wLib::Am29f(m_romRuntimeData.data(), m_romRuntimeData.size(), false, true));
 
 		m_memory.resize(g_memorySize, 0);
 
 		reset();
 
 		setPC(g_pcInitial);
+
+		getPortGP().setWriteTXCallback([this](const mc68k::Port&)
+		{
+			onPortGPWritten();
+		});
+
+		getPortE().setWriteTXCallback([this](const mc68k::Port&)
+		{
+			onPortEWritten();
+		});
+
+		getPortF().setWriteTXCallback([this](const mc68k::Port&)
+		{
+			onPortFWritten();
+		});
+
+		getPortQS().setDirectionChangeCallback([this](const mc68k::Port&)
+		{
+			onPortQSWritten();
+		});
+
+		getPortQS().setWriteTXCallback([this](const mc68k::Port&)
+		{
+			onPortQSWritten();
+		});
 
 #if 0
 		dumpAssembly(g_romAddress, g_romSize);
@@ -72,49 +97,7 @@ namespace mqLib
 			m_hdi08c.exec(deltaCycles);
 		}
 
-		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
-		if(resetIsOutput)
-		{
-			if(!(getPortQS().read() & (1<<3)))
-			{
-				if(!m_dspResetRequest)
-				{
-#ifdef _DEBUG
-					MCLOG("Request DSP RESET");
-#endif
-					m_dspResetRequest = true;
-					m_dspResetCompleted = false;
-				}
-			}
-		}
-		else
-		{
-			if(m_dspResetCompleted)
-			{
-				m_dspResetRequest = false;
-				getPortQS().writeRX(1<<3);
-			}
-		}
-
-		if(getPortQS().getDirection() & (1<<6))
-		{
-			m_dspInjectNmiRequest = (getPortQS().read() >> 6) & 1;
-			if(m_dspInjectNmiRequest)
-				int debug=0;
-		}
-
 		m_buttons.processButtons(getPortGP(), getPortE());
-
-		if(m_lcd.exec(getPortGP(), getPortF()))
-		{
-//			const std::string s(&m_lcd.getDdRam().front());
-//			if(s.find("SIG") != std::string::npos)
-//				dumpMemory("SIG");
-		}
-		else
-		{
-			m_leds.exec(getPortF(), getPortGP(), getPortE());
-		}
 
 		return deltaCycles;
 	}
@@ -133,7 +116,7 @@ namespace mqLib
 			return readW(m_memory, addr);
 		}
 
-		if(addr >= g_romAddress && addr < g_romAddress + ROM::getSize())
+		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
 			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
@@ -150,7 +133,7 @@ namespace mqLib
 			return readW(m_memory, addr);
 		}
 
-		if(addr >= g_romAddress && addr < g_romAddress + ROM::getSize())
+		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
 			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
@@ -180,7 +163,7 @@ namespace mqLib
 		if(addr < g_memorySize)
 			return m_memory[addr];
 
-		if(addr >= g_romAddress && addr < g_romAddress + ROM::getSize())
+		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 			return m_romRuntimeData[addr - g_romAddress];
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(addr & mc68k::g_peripheralMask);
@@ -215,7 +198,7 @@ namespace mqLib
 			return;
 		}
 
-		if(addr >= g_romAddress && addr < g_romAddress + ROM::getSize())
+		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
 			MCLOG("write16 TO ROM addr=" << MCHEXN(addr, 8) << ", value=" << MCHEXN(val,4) << ", pc=" << MCHEXN(getPC(), 8));
 			m_flash->write(addr - g_romAddress, val);
@@ -262,7 +245,7 @@ namespace mqLib
 			return;
 		}
 
-		if(addr >= g_romAddress && addr < g_romAddress + ROM::getSize())
+		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
 			MCLOG("write8 TO ROM addr=" << MCHEXN(addr, 8) << ", value=" << MCHEXN(val,2) << " char=" << logChar(val) << ", pc=" << MCHEXN(getPC(), 8));
 			m_flash->write(addr - g_romAddress, val);
@@ -305,7 +288,7 @@ namespace mqLib
 	void MqMc::dumpROM(const char* _filename) const
 	{
 		FILE* hFile = fopen((std::string(_filename) + ".bin").c_str(), "wb");
-		fwrite(m_romRuntimeData.data(), 1, ROM::getSize(), hFile);
+		fwrite(m_romRuntimeData.data(), 1, ROM::size(), hFile);
 		fclose(hFile);
 	}
 
@@ -341,5 +324,69 @@ namespace mqLib
 		dumpMemory(ss.str().c_str());
 
 		return Mc68k::onIllegalInstruction(opcode);
+	}
+
+	void MqMc::onPortEWritten()
+	{
+		processLCDandLEDs();
+	}
+
+	void MqMc::onPortFWritten()
+	{
+		processLCDandLEDs();
+	}
+
+	void MqMc::onPortGPWritten()
+	{
+		processLCDandLEDs();
+	}
+
+	void MqMc::onPortQSWritten()
+	{
+		const bool resetIsOutput = getPortQS().getDirection() & (1<<3);
+		if(resetIsOutput)
+		{
+			if(!(getPortQS().read() & (1<<3)))
+			{
+				if(!m_dspResetRequest)
+				{
+#ifdef _DEBUG
+					MCLOG("Request DSP RESET");
+#endif
+					m_dspResetRequest = true;
+					m_dspResetCompleted = false;
+				}
+			}
+		}
+		else
+		{
+			if(m_dspResetCompleted)
+			{
+				m_dspResetRequest = false;
+				getPortQS().writeRX(1<<3);
+			}
+		}
+#if SUPPORT_NMI_INTERRUPT
+		if(getPortQS().getDirection() & (1<<6))
+		{
+			m_dspInjectNmiRequest = (getPortQS().read() >> 6) & 1;
+			if(m_dspInjectNmiRequest)
+				int debug=0;
+		}
+#endif
+	}
+
+	void MqMc::processLCDandLEDs()
+	{
+		if(m_lcd.exec(getPortGP(), getPortF()))
+		{
+//			const std::string s(&m_lcd.getDdRam().front());
+//			if(s.find("SIG") != std::string::npos)
+//				dumpMemory("SIG");
+		}
+		else
+		{
+			m_leds.exec(getPortF(), getPortGP(), getPortE());
+		}
 	}
 }

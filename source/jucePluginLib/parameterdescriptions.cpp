@@ -53,6 +53,14 @@ namespace pluginLib
 		return true;
 	}
 
+	const ValueList* ParameterDescriptions::getValueList(const std::string& _key) const
+	{
+		const auto it = m_valueLists.find(_key);
+		if(it == m_valueLists.end())
+			return nullptr;
+		return &it->second;
+	}
+
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -75,7 +83,7 @@ namespace pluginLib
 			return "Parameter descriptions are empty";
 
 		{
-			const auto valueLists = json["valuelists"];
+			const auto& valueLists = json["valuelists"];
 
 			auto* entries = valueLists.getDynamicObject();
 
@@ -243,6 +251,8 @@ namespace pluginLib
 			d.isBool = readPropertyBool("isBool");
 			d.isBipolar = readPropertyBool("isBipolar");
 			d.step = readPropertyIntWithDefault("step", 0);
+			d.softKnobTargetSelect = readProperty("softknobTargetSelect", false).toString().toStdString();
+			d.softKnobTargetList = readProperty("softknobTargetList", false).toString().toStdString();
 
 			d.toText = valueList;
 
@@ -325,18 +335,71 @@ namespace pluginLib
 			m_nameToIndex.insert(std::make_pair(d.name, static_cast<uint32_t>(i)));
 		}
 
+		// verify soft knob parameters
+		for (auto& desc : m_descriptions)
+		{
+			if(desc.softKnobTargetSelect.empty())
+				continue;
+
+			const auto it = m_nameToIndex.find(desc.softKnobTargetSelect);
+
+			if(it == m_nameToIndex.end())
+			{
+				errors << desc.name << ": soft knob target parameter " << desc.softKnobTargetSelect << " not found" << '\n';
+				continue;
+			}
+
+			if(desc.softKnobTargetList.empty())
+			{
+				errors << desc.name << ": soft knob target list not specified\n";
+				continue;
+			}
+
+			const auto& targetParam = m_descriptions[it->second];
+			auto itList = m_valueLists.find(desc.softKnobTargetList);
+			if(itList == m_valueLists.end())
+			{
+				errors << desc.name << ": soft knob target list '" << desc.softKnobTargetList << "' not found\n";
+				continue;
+			}
+
+			const auto& sourceParamNames = itList->second.texts;
+			if(static_cast<int>(sourceParamNames.size()) != (targetParam.range.getLength() + 1))
+			{
+				errors << desc.name << ": soft knob target list " << desc.softKnobTargetList << " has " << sourceParamNames.size() << " entries but target select parameter " << targetParam.name << " has a range of " << (targetParam.range.getLength()+1) << '\n';
+				continue;
+			}
+
+			for (const auto& paramName : sourceParamNames)
+			{
+				if(paramName.empty())
+					continue;
+
+				const auto itsourceParam = m_nameToIndex.find(paramName);
+
+				if(itsourceParam == m_nameToIndex.end())
+				{
+					errors << desc.name << " - " << targetParam.name << ": soft knob source parameter " << paramName << " not found" << '\n';
+					continue;
+				}
+			}
+		}
+
 		const auto midipackets = json["midipackets"].getDynamicObject();
 		parseMidiPackets(errors, midipackets);
 
 		const auto parameterLinks = json["parameterlinks"].getArray();
 		parseParameterLinks(errors, parameterLinks);
 
+		const auto regions = json["regions"].getArray();
+		parseParameterRegions(errors, regions);
+
 		auto res = errors.str();
 
 		if(!res.empty())
 		{
 			LOG("ParameterDescription parsing issues:\n" << res);
-			assert(false);
+			assert(false && "failed to parse parameter descriptions");
 		}
 
 		return res;
@@ -466,7 +529,7 @@ namespace pluginLib
 				const int last = entry["last"];
 				const int init = entry["init"];
 
-				if(first < 0 || last < 0 || last <= first)
+				if(first < 0 || last < 0 || last < first)
 				{
 					_errors << "specified checksum range " << first << "-" << last << " is not valid, midi packet " << _key << ", index " << i << std::endl;
 					return;
@@ -527,7 +590,7 @@ namespace pluginLib
 			m_midiPackets.insert(std::make_pair(_key, packet));
 	}
 
-	void ParameterDescriptions::parseParameterLinks(std::stringstream& _errors, juce::Array<juce::var>* _links)
+	void ParameterDescriptions::parseParameterLinks(std::stringstream& _errors, const juce::Array<juce::var>* _links)
 	{
 		if(!_links)
 			return;
@@ -612,5 +675,118 @@ namespace pluginLib
 		}
 
 		m_parameterLinks.push_back(link);
+	}
+
+	void ParameterDescriptions::parseParameterRegions(std::stringstream& _errors, const juce::Array<juce::var>* _regions)
+	{
+		if(!_regions)
+			return;
+
+		for (const auto& _region : *_regions)
+			parseParameterRegion(_errors, _region);
+	}
+
+	void ParameterDescriptions::parseParameterRegion(std::stringstream& _errors, const juce::var& _value)
+	{
+		const auto id = _value["id"].toString().toStdString();
+		const auto name = _value["name"].toString().toStdString();
+		const auto parameters = _value["parameters"].getArray();
+		const auto regions = _value["regions"].getArray();
+
+		if(id.empty())
+		{
+			_errors << "region needs to have an id\n";
+			return;
+		}
+
+		if(m_regions.find(id) != m_regions.end())
+		{
+			_errors << "region with id '" << id << "' already exists\n";
+			return;
+		}
+
+		if(name.empty())
+		{
+			_errors << "region with id " << id << " needs to have a name\n";
+			return;
+		}
+
+		if(!parameters && !regions)
+		{
+			_errors << "region with id " << id << " needs to at least one parameter or region\n";
+			return;
+		}
+
+		std::unordered_map<std::string, const Description*> paramMap;
+
+		if(parameters)
+		{
+			const auto& params = *parameters;
+
+			for (const auto& i : params)
+			{
+				const auto& param = i.toString().toStdString();
+
+				if(param.empty())
+				{
+					_errors << "Empty parameter name in parameter list for region " << id << '\n';
+					return;
+				}
+
+				uint32_t idx = 0;
+
+				if(!getIndexByName(idx, param))
+				{
+					_errors << "Parameter with name '" << param << "' not found for region " << id << '\n';
+					return;
+				}
+
+				const auto* desc = &m_descriptions[idx];
+
+				if(paramMap.find(param) != paramMap.end())
+				{
+					_errors << "Parameter with name '" << param << "' has been specified more than once for region " << id << '\n';
+					return;
+				}
+
+				paramMap.insert({param, desc});
+			}
+		}
+
+		if(regions)
+		{
+			const auto& regs = *regions;
+
+			for (const auto& i : regs)
+			{
+				const auto& reg = i.toString().toStdString();
+
+				if(reg.empty())
+				{
+					_errors << "Empty region specified in region '" << id << "'\n";
+					return;
+				}
+
+				const auto it = m_regions.find(reg);
+
+				if(it == m_regions.end())
+				{
+					_errors << "Region with id '" << reg << "' not found for region '" << id << "'\n";
+					return;
+				}
+
+				const auto& region = it->second;
+
+				const auto& regParams = region.getParams();
+
+				for (const auto& itParam : regParams)
+				{
+					if(paramMap.find(itParam.first) == paramMap.end())
+						paramMap.insert(itParam);
+				}
+			}
+		}
+
+		m_regions.insert({id, ParameterRegion(id, name, std::move(paramMap))});
 	}
 }

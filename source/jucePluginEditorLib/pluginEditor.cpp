@@ -7,6 +7,8 @@
 #include "../synthLib/os.h"
 #include "../synthLib/sysexToMidi.h"
 
+#include "patchmanager/patchmanager.h"
+
 namespace jucePluginEditorLib
 {
 	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
@@ -15,7 +17,10 @@ namespace jucePluginEditorLib
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
 	{
+		showDisclaimer();
 	}
+
+	Editor::~Editor() = default;
 
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
@@ -24,7 +29,7 @@ namespace jucePluginEditorLib
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Choose syx/midi banks to import",
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi", true);
+			"*.syx,*.mid,*.midi,*.vstpreset,*.fxb,*.cpr", true);
 
 		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
@@ -44,12 +49,13 @@ namespace jucePluginEditorLib
 
 	void Editor::savePreset(const std::function<void(const juce::File&)>& _callback)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
 		m_fileChooser = std::make_unique<juce::FileChooser>(
 			"Save preset(s) as syx or mid",
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid,*.midi", true);
+			"*.syx,*.mid", true);
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
@@ -67,8 +73,12 @@ namespace jucePluginEditorLib
 			}
 		};
 		m_fileChooser->launchAsync(flags, onFileChosen);
+#else
+		showDemoRestrictionMessageBox();
+#endif
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const
 	{
 		if (_presets.empty())
@@ -95,6 +105,7 @@ namespace jucePluginEditorLib
 		fclose(hFile);
 		return true;
 	}
+#endif
 
 	std::string Editor::createValidFilename(FileType& _type, const juce::File& _file)
 	{
@@ -108,6 +119,69 @@ namespace jucePluginEditorLib
 		else
 			file += _type == FileType::Mid ? ".mid" : ".syx";
 		return file;
+	}
+
+	void Editor::showDemoRestrictionMessageBox() const
+	{
+		const auto &[title, msg] = getDemoRestrictionText();
+		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
+	}
+
+	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
+	{
+		m_patchManager.reset(_patchManager);
+
+		if(_patchManager && !m_instanceConfig.empty())
+			m_patchManager->setPerInstanceConfig(m_instanceConfig);
+	}
+
+	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
+	{
+		m_instanceConfig = _data;
+
+		if(m_patchManager)
+			m_patchManager->setPerInstanceConfig(_data);
+	}
+
+	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	{
+		if(m_patchManager)
+		{
+			m_instanceConfig.clear();
+			m_patchManager->getPerInstanceConfig(m_instanceConfig);
+		}
+
+		if(!m_instanceConfig.empty())
+			_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+	}
+
+	void Editor::setCurrentPart(uint8_t _part)
+	{
+		genericUI::Editor::setCurrentPart(_part);
+
+		if(m_patchManager)
+			m_patchManager->setCurrentPart(_part);
+	}
+
+	void Editor::showDisclaimer() const
+	{
+		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
+		{
+			const juce::MessageBoxOptions options = juce::MessageBoxOptions::makeOptionsOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name,
+	           "It is the sole responsibility of the user to operate this emulator within the bounds of all applicable laws.\n\n"
+
+				"Usage of emulators in conjunction with ROM images you are not legally entitled to own is forbidden by copyright law.\n\n"
+
+				"If you are not legally entitled to use this emulator please discontinue usage immediately.\n\n", 
+
+				"I Agree"
+			);
+
+			juce::NativeMessageBox::showAsync(options, [this](int)
+			{
+				m_processor.getConfig().setValue("disclaimerSeen", true);
+			});
+		}
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

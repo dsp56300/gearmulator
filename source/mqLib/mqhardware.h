@@ -6,16 +6,18 @@
 #include "mqdsp.h"
 #include "mqmc.h"
 #include "mqtypes.h"
-#include "mqmidi.h"
 #include "rom.h"
 
 #include "dsp56kEmu/dspthread.h"
 
 #include "../synthLib/midiTypes.h"
 
+#include "../wLib/wMidi.h"
+#include "../wLib/wHardware.h"
+
 namespace mqLib
 {
-	class Hardware
+	class Hardware : public wLib::Hardware
 	{
 		static constexpr uint32_t g_dspCount = g_useVoiceExpansion ? 3 : 1;
 
@@ -23,7 +25,7 @@ namespace mqLib
 		explicit Hardware(std::string _romFilename);
 		~Hardware();
 
-		bool process();
+		void process();
 
 		MqMc& getUC() { return m_uc; }
 		MqDsp& getDSP(uint32_t _index = 0) { return m_dsps[_index]; }
@@ -81,9 +83,14 @@ namespace mqLib
 		MqMc m_uc;
 		std::array<MqDsp,g_dspCount> m_dsps;
 
-		Midi m_midi;
-		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, true> m_midiIn;
+		wLib::Midi m_midi;
+		dsp56k::RingBuffer<synthLib::SMidiEvent, 16384, true> m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
+
+		std::vector<dsp56k::TWord> m_delayedAudioIn;
+
+		std::vector<dsp56k::TWord> m_dummyInput;
+		std::vector<dsp56k::TWord> m_dummyOutput;
 
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;

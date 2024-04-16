@@ -19,12 +19,9 @@ else()
 endif()
 
 set(SOURCES
-	am29f.cpp am29f.h
 	buttons.cpp buttons.h
 	device.cpp device.h
-	dspBootCode.h
 	lcd.cpp lcd.h
-	lcdfonts.cpp lcdfonts.h
 	leds.cpp leds.h
 	rom.cpp rom.h
 	microq.cpp microq.h
@@ -32,7 +29,6 @@ set(SOURCES
 	mqdsp.cpp mqdsp.h
 	mqhardware.cpp mqhardware.h
 	mqmc.cpp mqmc.h
-	mqmidi.cpp mqmidi.h
 	mqstate.cpp mqstate.h
 	mqmiditypes.h
 	mqsysexremotecontrol.cpp mqsysexremotecontrol.h
@@ -46,8 +42,9 @@ endif()
 target_sources(mqLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(mqLib PUBLIC synthLib 68kEmu)
+target_link_libraries(mqLib PUBLIC synthLib wLib 68kEmu)
 
 if(DSP56300_DEBUGGER)
 	target_link_libraries(mqLib PUBLIC dsp56kDebugger)
 endif()
+set_property(TARGET mqLib PROPERTY FOLDER "Vavra")

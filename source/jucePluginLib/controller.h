@@ -7,6 +7,14 @@
 
 #include <string>
 
+#include "softknob.h"
+
+namespace juce
+{
+	class AudioProcessor;
+	class Value;
+}
+
 namespace pluginLib
 {
 	class Processor;
@@ -18,7 +26,7 @@ namespace pluginLib
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
 		explicit Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson);
-		virtual ~Controller() = default;
+		virtual ~Controller();
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
@@ -30,9 +38,15 @@ namespace pluginLib
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
-		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params, uint8_t _part) const;
+		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;
+		bool createNamedParamValues(MidiPacket::NamedParamValues& _dest, const MidiPacket::AnyPartParamValues& _source) const;
+		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const;
+		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const;
+		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const;
 
 		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
+		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::AnyPartParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
+		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, uint8_t)>& _parameterValues, const std::vector<uint8_t>& _src) const;
 		bool parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
 
@@ -48,6 +62,20 @@ namespace pluginLib
         void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
 		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
 
+		bool lockRegion(const std::string& _id);
+		bool unlockRegion(const std::string& _id);
+		const std::set<std::string>& getLockedRegions() const;
+		bool isRegionLocked(const std::string& _id);
+		std::unordered_set<std::string> getLockedParameterNames() const;
+		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
+		bool isParameterLocked(const std::string& _name) const;
+		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
+
+		const SoftKnob* getSoftknob(const Parameter* _parameter) const
+		{
+			const auto it = m_softKnobs.find(_parameter);
+			return it->second.get();
+		}
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
@@ -95,6 +123,7 @@ namespace pluginLib
 
 		std::mutex m_pluginMidiOutLock;
         std::vector<synthLib::SMidiEvent> m_pluginMidiOut;
+        std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
 
 	protected:
 		// tries to find synth param in both internal and host
@@ -105,5 +134,6 @@ namespace pluginLib
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
 		std::array<ParameterList, 16> m_paramsByParamType;
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
+		std::set<std::string> m_lockedRegions;
 	};
 }

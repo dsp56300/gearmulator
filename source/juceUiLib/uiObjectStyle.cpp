@@ -42,17 +42,14 @@ namespace genericUI
 		auto parseColor = [&_object](juce::Colour& _target, const std::string& _prop)
 		{
 			const auto color = _object.getProperty(_prop);
-
-			if(color.size() != 8)
-				return;
-
-			uint32_t r,g,b,a;
-			sscanf(color.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
-			_target = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
+			UiObjectStyle::parseColor(_target, color);
 		};
 
 		parseColor(m_color, "color");
 		parseColor(m_bgColor, "backgroundColor");
+		parseColor(m_linesColor, "linesColor");
+		parseColor(m_selectedItemBgColor, "selectedItemBackgroundColor");
+		parseColor(m_outlineColor, "outlineColor");
 
 		const auto alignH = _object.getProperty("alignH");
 		if(!alignH.empty())
@@ -94,14 +91,43 @@ namespace genericUI
 		m_offsetB = _object.getPropertyInt("offsetB", -2);
 	}
 
+	std::optional<juce::Font> UiObjectStyle::getFont() const
+	{
+		if (m_fontFile.empty())
+			return {};
+
+		auto font = juce::Font(m_editor.getFont(m_fontFile).getTypefacePtr());
+		applyFontProperties(font);
+		return font;
+	}
+
+	bool UiObjectStyle::parseColor(juce::Colour& _color, const std::string& _colorString)
+	{
+		uint32_t r,g,b,a;
+
+		if(_colorString.size() == 8)
+		{
+			sscanf(_colorString.c_str(), "%02x%02x%02x%02x", &r, &g, &b, &a);
+		}
+		else if(_colorString.size() == 6)
+		{
+			sscanf(_colorString.c_str(), "%02x%02x%02x", &r, &g, &b);
+			a = 255;
+		}
+		else
+		{
+			return false;
+		}
+
+		_color = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
+		return true;
+	}
+
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)
 	{
-		if(!m_fontFile.empty())
-		{
-			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
-			applyFontProperties(font);
-			return font;
-		}
+		if (const auto f = getFont())
+			return *f;
+
 		auto font = LookAndFeel_V4::getComboBoxFont(_comboBox);
 		applyFontProperties(font);
 		return font;
@@ -109,12 +135,9 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getLabelFont(juce::Label& _label)
 	{
-		if(!m_fontFile.empty())
-		{
-			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
-			applyFontProperties(font);
-			return font;
-		}
+		if (const auto f = getFont())
+			return *f;
+
 		auto font = LookAndFeel_V4::getLabelFont(_label);
 		applyFontProperties(font);
 		return font;
@@ -129,12 +152,8 @@ namespace genericUI
 
 	juce::Font UiObjectStyle::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)
 	{
-		if(!m_fontFile.empty())
-		{
-			auto font = juce::Font(m_editor.getFont(m_fontFile).getTypeface());
-			applyFontProperties(font);
-			return font;
-		}
+		if (const auto f = getFont())
+			return *f;
 		auto font = LookAndFeel_V4::getTextButtonFont(_textButton, buttonHeight);
 		applyFontProperties(font);
 		return font;
@@ -156,5 +175,11 @@ namespace genericUI
 			_font.setHeight(static_cast<float>(m_textHeight));
 		_font.setBold(m_bold);
 		_font.setItalic(m_italic);
+	}
+
+	void UiObjectStyle::applyColorIfNotZero(juce::Component& _target, int _id, const juce::Colour& _col)
+	{
+		if(_col.getARGB())
+			_target.setColour(_id, _col);
 	}
 }

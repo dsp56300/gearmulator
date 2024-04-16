@@ -4,6 +4,8 @@
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/peripherals.h"
 
+#include "../wLib/wDsp.h"
+
 namespace mc68k
 {
 	class Hdi08;
@@ -13,7 +15,7 @@ namespace mqLib
 {
 	class Hardware;
 
-	class MqDsp
+	class MqDsp : public wLib::Dsp
 	{
 	public:
 		static constexpr dsp56k::TWord g_bridgedAddr	= 0x080000;	// start of external SRAM, mapped to X and Y

@@ -4,11 +4,19 @@
 #include "../../jucePluginEditorLib/pluginEditor.h"
 #include "../../jucePluginEditorLib/focusedParameter.h"
 
+#include "../../jucePluginLib/event.h"
+
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
-#include "PatchBrowser.h"
+#include "PatchManager.h"
 #include "ControllerLinks.h"
+#include "Leds.h"
+
+namespace virusLib
+{
+	class ROMFile;
+}
 
 namespace jucePluginEditorLib
 {
@@ -41,7 +49,6 @@ namespace genericVirusUI
 
 		void setPart(size_t _part);
 
-		AudioPluginAudioProcessor& getProcessor() const { return m_processor; }
 		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 
 		Virus::Controller& getController() const;
@@ -49,10 +56,12 @@ namespace genericVirusUI
 		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
-		PatchBrowser* getPatchBrowser();
+		std::pair<std::string, std::string> getDemoRestrictionText() const override;
+
+		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;
 
 	private:
-		void onProgramChange();
+		void onProgramChange(int _part);
 		void onPlayModeChanged();
 		void onCurrentPartChanged();
 
@@ -68,20 +77,21 @@ namespace genericVirusUI
 
 		void setPlayMode(uint8_t _playMode);
 
-		void savePresets(SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0);
-		bool savePresets(const std::string& _pathName, SaveType _saveType, FileType _fileType, uint8_t _bankNumber = 0) const;
+		void savePresets(SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0);
+		bool savePresets(const std::string& _pathName, SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0) const;
 
 		AudioPluginAudioProcessor& m_processor;
 		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;
+		std::unique_ptr<Leds> m_leds;
 		std::unique_ptr<Tabs> m_tabs;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
-		std::unique_ptr<PatchBrowser> m_patchBrowser;
 		std::unique_ptr<ControllerLinks> m_controllerLinks;
 
 		juce::Label* m_presetName = nullptr;
+		PartMouseListener* m_presetNameMouseListener  = nullptr;
 
 		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
 
@@ -93,8 +103,8 @@ namespace genericVirusUI
 
 		juce::Label* m_deviceModel = nullptr;
 
-		juce::TooltipWindow m_tooltipWindow;
-
 		std::function<void()> m_openMenuCallback;
+
+		pluginLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};
 }

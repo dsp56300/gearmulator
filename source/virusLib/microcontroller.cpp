@@ -6,10 +6,14 @@
 #include "microcontroller.h"
 
 #include "dspSingle.h"
+#include "frontpanelState.h"
 #include "../synthLib/midiTypes.h"
 
 using namespace dsp56k;
 using namespace synthLib;
+
+namespace virusLib
+{
 
 constexpr virusLib::PlayMode g_defaultPlayMode = virusLib::PlayModeSingle;
 
@@ -24,6 +28,7 @@ constexpr uint8_t g_pageA[] = {0x05, 0x0A, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0
 							   0x3E, 0x3F, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F,
 							   0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5D, 0x5E, 0x61,
 							   0x62, 0x63, 0x64, 0x65, 0x66, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x7B};
+
 constexpr uint8_t g_pageB[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x11,
 							   0x12, 0x13, 0x15, 0x19, 0x1A, 0x1B, 0x1C, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23, 0x24,
 							   0x26, 0x27, 0x29, 0x2A, 0x2B, 0x2C, 0x2D, 0x2E, 0x2F, 0x30, 0x31, 0x32, 0x36, 0x37,
@@ -32,13 +37,9 @@ constexpr uint8_t g_pageB[] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0
 							   0x56, 0x57, 0x58, 0x59, 0x5A, 0x5B, 0x5C, 0x5D, 0x5E, 0x5F, 0x60, 0x61, 0x62, 0x63,
 							   0x64, 0x65, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x7B, 0x7C};
 
-constexpr uint8_t
-	g_pageC_global[] = {45,  63,  64,  65,  66,  67,  68,  69,  70,  85,  86,  87,  90,  91,
-						92,  93,  94,  95,  96,  97,  98,  99,  105, 106, 110, 111, 112, 113,
-						114, 115, 116, 117, 118, 120, 121, 122, 123, 124, 125, 126, 127};
-
-namespace virusLib
-{
+constexpr uint8_t g_pageC_global[] = {45,  63,  64,  65,  66,  67,  68,  69,  70,  85,  86,  87,  90,  91,
+                                      92,  93,  94,  95,  96,  97,  98,  99, 105, 106, 110, 111, 112, 113,
+                                     114, 115, 116, 117, 118, 120, 121, 122, 123, 124, 125, 126, 127};
 
 Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool _useEsaiBasedMidiTiming) : m_rom(_romFile)
 {
@@ -75,7 +76,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 			if(ROMFile::getSingleName(single).size() != 10)
 			{
 				failed = true;
-				break;				
+				break;
 			}
 
 			singles.emplace_back(single);
@@ -110,7 +111,7 @@ void Microcontroller::sendInitControlCommands()
 	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
 	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
-	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x1);	// Enable poly pressure to edit parameters on page B
+	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x0);	// Disable poly pressure to edit parameters on page B
 	sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
 	sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
 	sendControlCommand(DEVICE_ID, OMNI_DEVICE_ID);		// Set device ID to Omni
@@ -215,6 +216,22 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 	send(globalSettingsPage(), 0x0, _command, _value);
 }
 
+
+uint32_t Microcontroller::getPartCount() const
+{
+	return 16;
+}
+
+uint8_t Microcontroller::getPartMidiChannel(const uint8_t _part) const
+{
+	return m_multiEditBuffer[MD_PART_MIDI_CHANNEL + _part];
+}
+
+bool Microcontroller::isPolyPressureForPageBEnabled() const
+{
+	return m_globalSettings[MIDI_CONTROL_HIGH_PAGE] == 1;
+}
+
 bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
 	std::lock_guard lock(m_mutex);
@@ -235,7 +252,7 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 	return true;
 }
 
-bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
+bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/* = nullptr*/)
 {
 	const uint8_t channel = _ev.a & 0x0f;
 	const uint8_t status = _ev.a & 0xf0;
@@ -268,7 +285,8 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 		}
 		break;
 	case M_POLYPRESSURE:
-		applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
+		if(isPolyPressureForPageBEnabled())
+			applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
 		break;
 	default:
 		break;
@@ -276,6 +294,15 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev)
 
 	for (auto& midiQueue : m_midiQueues)
 		midiQueue.add(_ev);
+
+	if(status < 0xf0 && _fpState)
+	{
+		for(uint32_t p=0; p<getPartCount(); ++p)
+		{
+			if(channel == getPartMidiChannel(static_cast<uint8_t>(p)))
+				_fpState->m_midiEventReceived[p] = true;
+		}
+	}
 
 	return true;
 }
@@ -294,13 +321,13 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	if (deviceId != m_globalSettings[DEVICE_ID] && deviceId != OMNI_DEVICE_ID && m_globalSettings[DEVICE_ID] != OMNI_DEVICE_ID)
 	{
-		// ignore messages intended for a different device, allow omni requests
+		// ignore messages intended for a different device but allow omni requests
 		return true;
 	}
 
-	auto buildResponseHeader = [&](SMidiEvent& ev)
+	auto buildResponseHeader = [&](SMidiEvent& _ev)
 	{
-		auto& response = ev.sysex;
+		auto& response = _ev.sysex;
 
 		response.reserve(1024);
 
@@ -453,36 +480,21 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			buildSingleResponse(BankNumber::EditBuffer, SINGLE);
 	};
 
-	auto buildControllerDumpResponse = [&](uint8_t _part)
+	auto buildControllerDumpResponse = [&](const uint8_t _part)
 	{
-		TPreset _dump, _multi;
-		const auto res = requestSingle(BankNumber::EditBuffer, _part, _dump);
-		const auto resm = requestMulti(BankNumber::EditBuffer, 0, _multi);
-		const uint8_t channel = _part == SINGLE ? static_cast<uint8_t>(m_globalSettings[GLOBAL_CHANNEL]) : _multi[static_cast<size_t>(MD_PART_MIDI_CHANNEL) + _part];
-		for (const auto cc : g_pageA)
-		{
-			SMidiEvent ev;
-			ev.source = _source;
-			ev.a = M_CONTROLCHANGE + channel;
-			ev.b = cc;
-			ev.c = _dump[cc];
-			_responses.emplace_back(std::move(ev));
-		}
-		for (const auto cc : g_pageB)
-		{
-			SMidiEvent ev;
-			ev.source = _source;
-			ev.a = M_POLYPRESSURE + channel;
-			ev.b = cc;
-			ev.c = _dump[static_cast<size_t>(cc)+128];
-			_responses.emplace_back(std::move(ev));
-		}
-		
+		TPreset single;
+
+		requestSingle(BankNumber::EditBuffer, _part, single);
+
+		const uint8_t channel = _part == SINGLE ? 0 : _part;
+
+		for (const auto cc : g_pageA)	_responses.emplace_back(M_CONTROLCHANGE + channel, cc, single[cc], 0, _source);
+		for (const auto cc : g_pageB)	_responses.emplace_back(M_POLYPRESSURE, cc, single[cc + 128], 0, _source);
 	};
 
-	auto enqueue = [&]()
+	auto enqueue = [&]
 	{
-		m_pendingSysexInput.emplace_back(std::make_pair(_source, _data));
+		m_pendingSysexInput.emplace_back(_source, _data);
 		return false;
 	};
 
@@ -868,7 +880,7 @@ bool Microcontroller::loadMultiSingle(uint8_t _part, const TPreset& _multi)
 	return partProgramChange(_part, partSingle);
 }
 
-void Microcontroller::process(size_t _size)
+void Microcontroller::process()
 {
 	m_hdi08.exec();
 
@@ -883,6 +895,7 @@ void Microcontroller::process(size_t _size)
 	sendPreset(preset.program, preset.data, preset.isMulti);
 }
 
+#if !SYNTHLIB_DEMO_MODE
 bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateType _type)
 {
 	const auto deviceId = static_cast<uint8_t>(m_globalSettings[DEVICE_ID]);
@@ -960,6 +973,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 
 	return true;
 }
+#endif
 
 void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
@@ -1158,6 +1172,6 @@ void Microcontroller::receiveUpgradedPreset()
 
 bool Microcontroller::isValid(const TPreset& _preset)
 {
-	return _preset.front() > 0;
+	return _preset[240] >= 32 && _preset[240] <= 127;
 }
 }

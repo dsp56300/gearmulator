@@ -13,7 +13,7 @@
 
 namespace mqLib
 {
-	static_assert(std::size(State::g_dumps) == static_cast<uint32_t>(State::DumpType::Count), "data definition missing");
+	static_assert(std::size(State::Dumps) == static_cast<uint32_t>(State::DumpType::Count), "data definition missing");
 
 	State::State(MicroQ& _mq) : m_mq(_mq)
 	{
@@ -47,7 +47,7 @@ namespace mqLib
 		}
 
 		if (_sender == Origin::Device)
-			LOG("Recv: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2))
+			LOG("Recv: " << HEXN(_data.a, 2) << ' ' << HEXN(_data.b, 2) << ' ' << HEXN(_data.c, 2));
 
 		switch(_data.a & 0xf0)
 		{
@@ -234,7 +234,7 @@ namespace mqLib
 				case SysexCommand::DrumDump:
 					{
 						auto m = message;
-						m[IdxDeviceId] = IdDeviceOmni;
+						m[wLib::IdxDeviceId] = wLib::IdDeviceOmni;
 						loadState(m);
 					}
 					break;
@@ -250,8 +250,8 @@ namespace mqLib
 		{
 			auto dump = convertTo(m_romSingles[0]);
 
-			dump[IdxBuffer]   = static_cast<uint8_t>(MidiBufferNum::SingleEditBufferSingleMode);
-			dump[IdxLocation] = 0;
+			dump[wLib::IdxBuffer]   = static_cast<uint8_t>(MidiBufferNum::SingleEditBufferSingleMode);
+			dump[wLib::IdxLocation] = 0;
 
 			forwardToDevice(dump);
 		}
@@ -291,8 +291,8 @@ namespace mqLib
 		if(!convertTo(single, _data))
 			return false;
 
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
 		Single* dst = getSingle(buf, loc);
 
@@ -309,8 +309,8 @@ namespace mqLib
 		if(!convertTo(multi, _data))
 			return false;
 
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
 		auto* m = getMulti(buf, loc);
 		if(!m)
@@ -326,8 +326,8 @@ namespace mqLib
 		if(!convertTo(drum, _data))
 			return false;
 
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
 		auto* d = getDrumMap(buf, loc);
 		if(!d)
@@ -408,25 +408,28 @@ namespace mqLib
 		*p = _data[IdxModeParamValue];
 		return true;
 	}
-	
-	template<size_t Size>
-	static uint8_t* getParameter(std::array<uint8_t, Size>& _dump, const SysEx& _data, State::DumpType _type)
+
+	namespace
 	{
-		const auto& dump = State::g_dumps[static_cast<uint32_t>(_type)];
+		template<size_t Size>
+		uint8_t* getParameter(std::array<uint8_t, Size>& _dump, const SysEx& _data, State::DumpType _type)
+		{
+			const auto& dump = State::Dumps[static_cast<uint32_t>(_type)];
 
-		if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
-			return nullptr;
+			if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
+				return nullptr;
 
-		const auto i = dump.firstParamIndex + ((static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7) | static_cast<uint32_t>(_data[dump.idxParamIndexL]));
+			const auto i = dump.firstParamIndex + ((static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7) | static_cast<uint32_t>(_data[dump.idxParamIndexL]));
 
-		if(i > _dump.size())
-			return nullptr;
-		return &_dump[i];
+			if(i > _dump.size())
+				return nullptr;
+			return &_dump[i];
+		}
 	}
 
 	uint8_t* State::getSingleParameter(const SysEx& _data)
 	{
-		const auto loc = _data[IdxBuffer];
+		const auto loc = _data[wLib::IdxBuffer];
 
 		Single* s = getSingle(getGlobalParameter(GlobalParameter::SingleMultiMode) ? MidiBufferNum::SingleEditBufferMultiMode : MidiBufferNum::SingleEditBufferSingleMode, loc);
 		if(!s)
@@ -456,8 +459,8 @@ namespace mqLib
 
 	bool State::getSingle(Responses& _responses, const SysEx& _data)
 	{
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
 		const auto* s = getSingle(buf, loc);
 		if(!s || !isValid(*s))
@@ -487,7 +490,7 @@ namespace mqLib
 			return &m_romSingles[_loc + 200];
 		case MidiBufferNum::SingleBankX:
 		case MidiBufferNum::DeprecatedSingleBankX:
-			// mQ doesn't have a card, no idea why its mentioned in the MIDI implementaiton
+			// mQ doesn't have a card, no idea why it's mentioned in the MIDI implementaiton
 			return nullptr;
 		case MidiBufferNum::SingleEditBufferSingleMode:
 			m_isEditBuffer = true;
@@ -517,10 +520,10 @@ namespace mqLib
 
 	bool State::getMulti(Responses& _responses, const SysEx& _data)
 	{
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
-		auto* m = getMulti(buf, loc);
+		const auto* m = getMulti(buf, loc);
 		if(!m || !isValid(*m))
 			return false;
 		_responses.push_back(convertTo(*m));
@@ -550,10 +553,10 @@ namespace mqLib
 
 	bool State::getDrumMap(Responses& _responses, const SysEx& _data)
 	{
-		const auto buf = static_cast<MidiBufferNum>(_data[IdxBuffer]);
-		const auto loc = _data[IdxLocation];
+		const auto buf = static_cast<MidiBufferNum>(_data[wLib::IdxBuffer]);
+		const auto loc = _data[wLib::IdxLocation];
 
-		auto* d = getDrumMap(buf, loc);
+		const auto* d = getDrumMap(buf, loc);
 		if(!d || !isValid(*d))
 			return false;
 		_responses.push_back(convertTo(*d));
@@ -677,7 +680,7 @@ namespace mqLib
 
 	bool State::requestDumpParameter(DumpType _type, Responses& _responses, const SysEx& _data)
 	{
-		auto parameterRequestResponse = [&](uint8_t* p)
+		auto parameterRequestResponse = [&](const uint8_t* p)
 		{
 			if(!p)
 				return false;
@@ -720,10 +723,10 @@ namespace mqLib
 		if (_data.front() != 0xf0 || _data.back() != 0xf7)
 			return SysexCommand::Invalid;
 
-		if (_data[IdxIdWaldorf] != IdWaldorf || _data[IdxIdMicroQ] != IdMicroQ)
+		if (_data[wLib::IdxIdWaldorf] != wLib::IdWaldorf || _data[wLib::IdxIdMachine] != IdMicroQ)
 			return SysexCommand::Invalid;
 
-		return static_cast<SysexCommand>(_data[IdxCommand]);
+		return static_cast<SysexCommand>(_data[wLib::IdxCommand]);
 	}
 
 	void State::forwardToDevice(const SysEx& _data) const
@@ -736,22 +739,22 @@ namespace mqLib
 
 	void State::requestGlobal() const
 	{
-		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
+		sendSysex({0xf0, wLib::IdWaldorf, IdMicroQ, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
 	}
 
 	void State::requestSingle(MidiBufferNum _buf, MidiSoundLocation _location) const
 	{
-		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::SingleRequest), static_cast<uint8_t>(_buf), static_cast<uint8_t>(_location), 0xf7});
+		sendSysex({0xf0, wLib::IdWaldorf, IdMicroQ, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::SingleRequest), static_cast<uint8_t>(_buf), static_cast<uint8_t>(_location), 0xf7});
 	}
 
 	void State::requestMulti(MidiBufferNum _buf, uint8_t _location) const
 	{
-		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
+		sendSysex({0xf0, wLib::IdWaldorf, IdMicroQ, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
 	}
 
 	inline void State::sendMulti(const std::vector<uint8_t>& _multiData) const
 	{
-		std::vector<uint8_t> data = { 0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(MidiBufferNum::DeprecatedMultiBankInternal), 0};
+		std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, IdMicroQ, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(MidiBufferNum::DeprecatedMultiBankInternal), 0};
 		data.insert(data.end(), _multiData.begin(), _multiData.end());
 
 		uint8_t checksum = 0;
@@ -768,7 +771,7 @@ namespace mqLib
 
 		const auto p = static_cast<uint8_t>(_param);
 
-		sendSysex({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange),
+		sendSysex({0xf0, wLib::IdWaldorf, IdMicroQ, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalParameterChange),
 			static_cast<uint8_t>(p >> 7), static_cast<uint8_t>(p & 0x7f), _value, 0xf7});
 	}
 

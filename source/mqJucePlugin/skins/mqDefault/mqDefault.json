@@ -26,6 +26,87 @@
             "pageFx"
         ]
     },
+    "templates" : [
+        {
+            "name" : "pm_treeview",
+            "treeview" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "ffda94",
+                "backgroundColor" : "1c1f22ff",
+                "selectedItemBackgroundColor" : "a87a24"
+            }
+        },
+        {
+            "name" : "pm_search",
+            "texteditor" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "ffda94",
+                "outlineColor" : "cf972e",
+                "backgroundColor" : "0e1216ff",
+				"text": "Filter..."
+            }
+        },
+        {
+            "name" : "pm_scrollbar",
+            "scrollbar" : {
+                "color" : "cf972e",
+            }
+        },
+        {
+            "name" : "pm_listbox",
+            "listbox" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "ffda94",
+                "backgroundColor" : "1c1f22ff",
+                "selectedItemBackgroundColor" : "a87a24",
+				"bold": "1",
+				"textHeight": 30
+             }
+        },
+        {
+            "name" : "pm_info_name",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "T",
+                "color" : "ffda94",
+                "backgroundColor" : "1c1f22ff",
+                "textHeight" : "32",
+				"bold": "1"
+            }
+        },
+        {
+            "name" : "pm_info_label",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "B",
+                "color" : "888888ff",
+                "textHeight" : "16"
+            }
+        },
+        {
+            "name" : "pm_info_text",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "T",
+                "color" : "ffda94",
+                "textHeight" : "18"
+            }
+        },
+        {
+            "name" : "pm_status_label",
+            "label" : {
+                "alignH" : "L",
+                "alignV" : "C",
+                "color" : "ffda94",
+                "backgroundColor" : "1c1f22ff",
+                "textHeight" : "18",
+				"bold": "0"
+            }
+        }
+	],
     "children" : [
         {
             "name" : "bakedBG",
@@ -233,6 +314,7 @@
                 "height" : "108"
             },
             "componentProperties" : {
+                "lcdTextColor" : "000000",
                 "lcdBackgroundColor" : "248727"
             }
         },
@@ -2227,7 +2309,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1806.7",
+                        "x" : "1793.657",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2244,7 +2326,24 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1989.3",
+                        "x" : "1950.171",
+                        "y" : "177.7593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "FilterEnvAttackLevel"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2106.686",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2261,7 +2360,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2171.9",
+                        "x" : "2263.2",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2278,7 +2377,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2354.5",
+                        "x" : "2419.714",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2295,7 +2394,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2537.1",
+                        "x" : "2576.229",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2312,7 +2411,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2719.7",
+                        "x" : "2732.743",
                         "y" : "177.7593",
                         "width" : "128",
                         "height" : "128",
@@ -2395,7 +2494,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1806.7",
+                        "x" : "1793.657",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2412,7 +2511,24 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1989.3",
+                        "x" : "1950.171",
+                        "y" : "559.0093",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "AmpEnvAttackLevel"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2106.686",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2429,7 +2545,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2171.9",
+                        "x" : "2263.2",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2446,7 +2562,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2354.5",
+                        "x" : "2419.714",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2463,7 +2579,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2537.1",
+                        "x" : "2576.229",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2480,7 +2596,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2719.7",
+                        "x" : "2732.743",
                         "y" : "559.0093",
                         "width" : "128",
                         "height" : "128",
@@ -2563,7 +2679,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1806.7",
+                        "x" : "1793.657",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2580,7 +2696,24 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1989.3",
+                        "x" : "1950.171",
+                        "y" : "940.2593",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env3AttackLevel"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2106.686",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2597,7 +2730,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2171.9",
+                        "x" : "2263.2",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2614,7 +2747,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2354.5",
+                        "x" : "2419.714",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2631,7 +2764,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2537.1",
+                        "x" : "2576.229",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2648,7 +2781,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2719.7",
+                        "x" : "2732.743",
                         "y" : "940.2593",
                         "width" : "128",
                         "height" : "128",
@@ -2731,7 +2864,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1806.7",
+                        "x" : "1793.657",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -2748,7 +2881,24 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1989.3",
+                        "x" : "1950.171",
+                        "y" : "1321.509",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Env4AttackLevel"
+                    }
+                },
+                {
+                    "name" : "knob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2106.686",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -2765,7 +2915,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2171.9",
+                        "x" : "2263.2",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -2782,7 +2932,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2354.5",
+                        "x" : "2419.714",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -2799,7 +2949,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2537.1",
+                        "x" : "2576.229",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -2816,7 +2966,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2719.7",
+                        "x" : "2732.743",
                         "y" : "1321.509",
                         "width" : "128",
                         "height" : "128",
@@ -12259,10 +12409,10 @@
                 {
                     "name" : "patchbrowser",
                     "component" : {
-                        "x" : "-0.0004882813",
+                        "x" : "5",
                         "y" : "55",
                         "width" : "2890",
-                        "height" : "1460"
+                        "height" : "1465"
                     },
                     "children" : [
                         {
@@ -12271,7 +12421,7 @@
                                 "x" : "0",
                                 "y" : "0",
                                 "width" : "1445",
-                                "height" : "1460"
+                                "height" : "1465"
                             }
                         },
                         {
@@ -12280,14 +12430,14 @@
                                 "x" : "1445",
                                 "y" : "0",
                                 "width" : "1445",
-                                "height" : "1408"
+                                "height" : "1413"
                             }
                         },
                         {
                             "name" : "ContainerPatchListSearchBox",
                             "component" : {
                                 "x" : "1445",
-                                "y" : "1410",
+                                "y" : "1415",
                                 "width" : "1451",
                                 "height" : "50"
                             }

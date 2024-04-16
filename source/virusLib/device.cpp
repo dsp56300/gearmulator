@@ -7,43 +7,49 @@
 
 #include "../synthLib/deviceException.h"
 
+#include <cstring>
+
+#include "dspMemoryPatches.h"
+
 namespace virusLib
 {
-	Device::Device(const ROMFile& _rom, const bool _createDebugger/* = false*/)
-		: synthLib::Device()
-		, m_rom(_rom)
+	Device::Device(ROMFile _rom, const float _preferredDeviceSamplerate, const float _hostSamplerate, const bool _createDebugger/* = false*/)
+		: m_rom(std::move(_rom))
+		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
 
 		DspSingle* dsp1;
-		createDspInstances(dsp1, m_dsp2, m_rom);
+		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
 
-		m_dsp->getPeriphX().getEsai().setCallback([this](dsp56k::Audio*)
+		m_dsp->getAudio().setCallback([this](dsp56k::Audio*)
 		{
 			onAudioWritten();
 		}, 0);
 
-		m_mc.reset(new Microcontroller(*m_dsp, _rom, false));
+		m_mc.reset(new Microcontroller(*m_dsp, m_rom, false));
 
 		if(m_dsp2)
 			m_mc->addDSP(*m_dsp2, true);
 
-		auto loader = bootDSP(*m_dsp, m_rom, _createDebugger);
-
-		if(m_dsp2)
-		{
-			auto loader2 = bootDSP(*m_dsp2, m_rom, false);
-			loader2.join();
-		}
-
-		loader.join();
+		bootDSPs(m_dsp.get(), m_dsp2, m_rom, _createDebugger);
 
 //		m_dsp->getMemory().saveAssembly("P.asm", 0, m_dsp->getMemory().sizeP(), true, false, m_dsp->getDSP().getPeriph(0), m_dsp->getDSP().getPeriph(1));
 
-		while(!m_mc->dspHasBooted())
-			dummyProcess(8);
+		if(m_rom.getModel() == DeviceModel::A)
+		{
+			// The A does not send any event to notify that it has finished booting
+			dummyProcess(32);
+
+			m_dsp->disableESSI1();
+		}
+		else
+		{
+			while(!m_mc->dspHasBooted())
+				dummyProcess(8);
+		}
 
 		m_mc->sendInitControlCommands();
 
@@ -54,14 +60,38 @@ namespace virusLib
 
 	Device::~Device()
 	{
-		m_dsp->getPeriphX().getEsai().setCallback(nullptr,0);
+		m_dsp->getAudio().setCallback(nullptr,0);
 		m_mc.reset();
 		m_dsp.reset();
 	}
 
+	std::vector<float> Device::getSupportedSamplerates() const
+	{
+		switch (m_rom.getModel())
+		{
+		default:
+		case DeviceModel::A:
+		case DeviceModel::B:
+		case DeviceModel::C:
+			return {12000000.0f / 256.0f};
+		case DeviceModel::Snow:
+		case DeviceModel::TI:
+		case DeviceModel::TI2:
+			return {44100.0f, 48000.0f};
+		}
+	}
+
 	float Device::getSamplerate() const
 	{
-		return 12000000.0f / 256.0f;
+		return m_samplerate;
+	}
+
+	bool Device::setSamplerate(float _samplerate)
+	{
+		if(!synthLib::Device::setSamplerate(_samplerate))
+			return false;
+		m_samplerate = _samplerate;
+		return true;
 	}
 
 	bool Device::isValid() const
@@ -71,11 +101,24 @@ namespace virusLib
 
 	void Device::process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
+		m_frontpanelStateDSP.clear();
+
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 
+		m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 0, 2);	// TIMER 1 = ACI = LFO 1 LED
+		m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 1);	// TIMER 2 = ADO = LFO 2/3 LED
+
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
+
+		m_frontpanelStateGui.m_lfoPhases = m_frontpanelStateDSP.m_lfoPhases;
+		m_frontpanelStateGui.m_bpm = m_frontpanelStateDSP.m_bpm;
+		m_frontpanelStateGui.m_logo = m_frontpanelStateDSP.m_logo;
+
+		for(size_t i=0; i<m_frontpanelStateDSP.m_midiEventReceived.size(); ++i)
+			m_frontpanelStateGui.m_midiEventReceived[i] |= m_frontpanelStateDSP.m_midiEventReceived[i];
 	}
 
+#if !SYNTHLIB_DEMO_MODE
 	bool Device::getState(std::vector<uint8_t>& _state, const synthLib::StateType _type)
 	{
 		return m_mc->getState(_state, _type);
@@ -93,13 +136,17 @@ namespace virusLib
 			return false;
 		return m_mc->setState(messages);
 	}
+#endif
 
-	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string& _4cc)
+	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc)
 	{
+		if(_data.size() < _4cc.size())
+			return false;
+
 		for(uint32_t i=0; i<_data.size() - _4cc.size(); ++i)
 		{
 			bool valid = true;
-			for(size_t j=0; j<4; ++j)
+			for(size_t j=0; j<_4cc.size(); ++j)
 			{
 				if(static_cast<char>(_data[i + j]) == _4cc[j])
 					continue;
@@ -265,14 +312,14 @@ namespace virusLib
 		return 6;
 	}
 
-	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom)
+	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
-		_dspA = new DspSingle(0x040000, false);
+		_dspA = new DspSingle(0x040000, false, nullptr, _rom.getModel() == DeviceModel::A);
 
-		configureDSP(*_dspA, _rom);
+		configureDSP(*_dspA, _rom, _samplerate);
 
 		if(_dspB)
-			configureDSP(*_dspB, _rom);
+			configureDSP(*_dspB, _rom, _samplerate);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -282,7 +329,7 @@ namespace virusLib
 //			LOG("MIDI: " << std::hex << (int)_ev.a << " " << (int)_ev.b << " " << (int)_ev.c);
 			auto ev = _ev;
 			ev.offset += m_numSamplesProcessed + getExtraLatencySamples();
-			return m_mc->sendMIDI(ev);
+			return m_mc->sendMIDI(ev, &m_frontpanelStateDSP);
 		}
 
 		std::vector<synthLib::SMidiEvent> responses;
@@ -333,10 +380,10 @@ namespace virusLib
 	void Device::onAudioWritten()
 	{
 		m_mc->getMidiQueue(0).onAudioWritten();
-		m_mc->process(1);
+		m_mc->process();
 	}
 
-	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom)
+	void Device::configureDSP(DspSingle& _dsp, const ROMFile& _rom, const float _samplerate)
 	{
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
@@ -350,8 +397,57 @@ namespace virusLib
 
 	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom, const bool _createDebugger)
 	{
-		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getPeriphX());
+		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getHDI08());
 		_dsp.startDSPThread(_createDebugger);
 		return res;
+	}
+
+	void Device::bootDSPs(DspSingle* _dspA, DspSingle* _dspB, const ROMFile& _rom, bool _createDebugger)
+	{
+		auto loader = bootDSP(*_dspA, _rom, _createDebugger);
+
+		if(_dspB)
+		{
+			auto loader2 = bootDSP(*_dspB, _rom, false);
+			loader2.join();
+		}
+
+		loader.join();
+
+//		applyDspMemoryPatches(_dspA, _dspB, _rom);
+	}
+
+	bool Device::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_dsp)
+			return false;
+
+		bool res = m_dsp->getEsxiClock().setSpeedPercent(_percent);
+
+		if(m_dsp2)
+			res &= m_dsp2->getEsxiClock().setSpeedPercent(_percent);
+
+		return res;
+	}
+
+	uint32_t Device::getDspClockPercent() const
+	{
+		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedPercent();
+	}
+
+	uint64_t Device::getDspClockHz() const
+	{
+		return !m_dsp ? 0 : m_dsp->getEsxiClock().getSpeedInHz();
+	}
+
+	void Device::applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom)
+	{
+		DspMemoryPatches::apply(_dspA, _rom.getHash());
+		DspMemoryPatches::apply(_dspB, _rom.getHash());
+	}
+
+	void Device::applyDspMemoryPatches() const
+	{
+		applyDspMemoryPatches(m_dsp.get(), m_dsp2, m_rom);
 	}
 }

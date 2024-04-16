@@ -1,6 +1,5 @@
 #include "mqdsp.h"
 
-#include "dspBootCode.h"
 #include "mqhardware.h"
 
 #if DSP56300_DEBUGGER
@@ -8,6 +7,8 @@
 #endif
 
 #include "../mc68k/hdi08.h"
+
+#include "../wLib/dspBootCode.h"
 
 namespace mqLib
 {
@@ -24,6 +25,7 @@ namespace mqLib
 	{
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
 		m_periphX.getEsaiClock().setSamplerate(44100); // verified
+		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 
 		auto config = m_dsp.getJit().getConfig();
 
@@ -36,18 +38,22 @@ namespace mqLib
 
 		// fill P memory with something that reminds us if we jump to garbage
 		for(dsp56k::TWord i=0; i<m_memory.sizeP(); ++i)
+		{
 			m_memory.set(dsp56k::MemArea_P, i, 0x000200);	// debug instruction
+			m_dsp.getJit().notifyProgramMemWrite(i);
+		}
 
 		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
-		for(uint32_t i=0; i<std::size(g_dspBootCode); ++i)
+		for(uint32_t i=0; i<std::size(wLib::g_dspBootCode); ++i)
 		{
-			uint32_t code = g_dspBootCode[i];
-			if((g_dspBootCode[i] & 0xffff00) == 0xff0000)
+			uint32_t code = wLib::g_dspBootCode[i];
+			if((wLib::g_dspBootCode[i] & 0xffff00) == 0xff0000)
 			{
-				code = g_bootCodeBase | (g_dspBootCode[i] & 0xff);
+				code = g_bootCodeBase | (wLib::g_dspBootCode[i] & 0xff);
 			}
 
 			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
+			m_dsp.getJit().notifyProgramMemWrite(i + g_bootCodeBase);
 		}
 
 //		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(g_dspBootCode)), true, true, &m_periphX, nullptr);
@@ -175,7 +181,7 @@ namespace mqLib
 //		else
 //			LOG('[' << m_name << "] Inject interrupt" << HEXN(_irq,2));
 
-		dsp().injectInterrupt(_irq);
+		dsp().injectExternalInterrupt(_irq);
 
 		m_hardware.ucYieldLoop([&]()
 		{

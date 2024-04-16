@@ -1,9 +1,13 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "types.h"
 
 #include "../synthLib/deviceException.h"
 #include "../synthLib/os.h"
 #include "../synthLib/binarystream.h"
+#include "../synthLib/midiBufferParser.h"
+
+#include "dsp56kEmu/fastmath.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -15,11 +19,9 @@ namespace synthLib
 namespace pluginLib
 {
 	constexpr char g_saveMagic[] = "DSP56300";
-	constexpr uint32_t g_saveVersion = 1;
+	constexpr uint32_t g_saveVersion = 2;
 
-	using PluginStream = synthLib::BinaryStream<uint32_t>;
-
-	Processor::Processor(const BusesProperties& _busesProperties) : juce::AudioProcessor(_busesProperties)
+	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties))
 	{
 	}
 
@@ -156,24 +158,41 @@ namespace pluginLib
 		{
 			LOG("Failed to create device: " << e.what());
 
-			std::string msg = e.what();
-
-			m_deviceError = e.errorCode();
-
-			if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
+			const auto host = juce::PluginHostType::getHostPath();
+			if(!host.contains("juce_vst3_helper") && !host.contains("juce_lv2_helper"))
 			{
-				msg += "\n\n";
-				msg += "The firmware file needs to be located next to the plugin.";
-				msg += "\n\n";
-				msg += "The plugin was loaded from path:\n\n" + synthLib::getModulePath() + "\n\nCopy the requested file to this path and reload the plugin.";
+				std::string msg = e.what();
+
+				m_deviceError = e.errorCode();
+
+				if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
+				{
+					msg += "\n\n";
+					msg += "The firmware file needs to be located next to the plugin.";
+					msg += "\n\n";
+					msg += "The plugin was loaded from path:\n\n";
+					msg += synthLib::getModulePath();
+#ifdef _DEBUG
+					msg += std::string("from host ") + host.toStdString();
+#endif
+					msg += "\n\nCopy the requested file to this path and reload the plugin.";
+				}
+				juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+					"Device Initialization failed", msg, nullptr, 
+					juce::ModalCallbackFunction::create([](int)
+					{
+					})
+				);
 			}
-			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Device Initialization failed", msg);
 		}
 
 		if(!m_device)
 		{
 			m_device.reset(new DummyDevice());
 		}
+
+		m_device->setDspClockPercent(m_dspClockPercent);
 
 		m_plugin.reset(new synthLib::Plugin(m_device.get()));
 
@@ -188,12 +207,169 @@ namespace pluginLib
 		return true;
 	}
 
+	void Processor::updateLatencySamples()
+	{
+		if(getProperties().isSynth)
+			setLatencySamples(getPlugin().getLatencyMidiToOutput());
+		else
+			setLatencySamples(getPlugin().getLatencyInputToOutput());
+	}
+
+	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
+	{
+		synthLib::BinaryStream s;
+		saveChunkData(s);
+		s.toVector(_targetBuffer, true);
+	}
+
+	void Processor::saveChunkData(synthLib::BinaryStream& s)
+	{
+		{
+			std::vector<uint8_t> buffer;
+			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
+
+			synthLib::ChunkWriter cw(s, "MIDI", 1);
+			s.write(buffer);
+		}
+		{
+			synthLib::ChunkWriter cw(s, "GAIN", 1);
+			s.write<uint32_t>(1);	// version
+			s.write(m_inputGain);
+			s.write(m_outputGain);
+		}
+
+		if(m_dspClockPercent != 100)
+		{
+			synthLib::ChunkWriter cw(s, "DSPC", 1);
+			s.write(m_dspClockPercent);
+		}
+
+		if(m_preferredDeviceSamplerate > 0)
+		{
+			synthLib::ChunkWriter cw(s, "DSSR", 1);
+			s.write(m_preferredDeviceSamplerate);
+		}
+	}
+
+	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		if(_sourceBuffer.empty())
+			return true;
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			synthLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+			return true;
+		}
+
+		synthLib::BinaryStream s(_sourceBuffer);
+		synthLib::ChunkReader cr(s);
+
+		loadChunkData(cr);
+
+		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+	}
+
+	void Processor::loadChunkData(synthLib::ChunkReader& _cr)
+	{
+		_cr.add("MIDI", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			std::vector<uint8_t> buffer;
+			_binaryStream.read(buffer);
+			getPlugin().setState(buffer);
+		});
+
+		_cr.add("GAIN", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			readGain(_binaryStream);
+		});
+
+		_cr.add("DSPC", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			auto p = _binaryStream.read<uint32_t>();
+			p = dsp56k::clamp<uint32_t>(p, 50, 200);
+			setDspClockPercent(p);
+		});
+
+		_cr.add("DSSR", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			const auto sr = _binaryStream.read<float>();
+			setPreferredDeviceSamplerate(sr);
+		});
+	}
+
+	void Processor::readGain(synthLib::BinaryStream& _s)
+	{
+		const auto version = _s.read<uint32_t>();
+		if (version != 1)
+			return;
+		m_inputGain = _s.read<float>();
+		m_outputGain = _s.read<float>();
+	}
+
+	bool Processor::setDspClockPercent(const uint32_t _percent)
+	{
+		if(!m_device)
+			return false;
+		if(!m_device->setDspClockPercent(_percent))
+			return false;
+		m_dspClockPercent = _percent;
+		return true;
+	}
+
+	uint32_t Processor::getDspClockPercent() const
+	{
+		if(!m_device)
+			return m_dspClockPercent;
+		return m_device->getDspClockPercent();
+	}
+
+	uint64_t Processor::getDspClockHz() const
+	{
+		if(!m_device)
+			return 0;
+		return m_device->getDspClockHz();
+	}
+
+	bool Processor::setPreferredDeviceSamplerate(const float _samplerate)
+	{
+		m_preferredDeviceSamplerate = _samplerate;
+
+		if(!m_device)
+			return false;
+
+		return getPlugin().setPreferredDeviceSamplerate(_samplerate);
+	}
+
+	float Processor::getPreferredDeviceSamplerate() const
+	{
+		return m_preferredDeviceSamplerate;
+	}
+
+	std::vector<float> Processor::getDeviceSupportedSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		return m_device->getSupportedSamplerates();
+	}
+
+	std::vector<float> Processor::getDevicePreferredSamplerates() const
+	{
+		if(!m_device)
+			return {};
+		return m_device->getPreferredSamplerates();
+	}
+
 	//==============================================================================
 	void Processor::prepareToPlay(double sampleRate, int samplesPerBlock)
 	{
 		// Use this method as the place to do any pre-playback
-		// initialisation that you need..
-		getPlugin().setSamplerate(static_cast<float>(sampleRate));
+		// initialisation that you need
+		m_hostSamplerate = static_cast<float>(sampleRate);
+
+		getPlugin().setHostSamplerate(static_cast<float>(sampleRate), m_preferredDeviceSamplerate);
 		getPlugin().setBlockSize(samplesPerBlock);
 
 		updateLatencySamples();
@@ -205,21 +381,33 @@ namespace pluginLib
 		// spare memory, etc.
 	}
 
+	bool Processor::isBusesLayoutSupported(const BusesLayout& _busesLayout) const
+	{
+	    // This is the place where you check if the layout is supported.
+	    // In this template code we only support mono or stereo.
+	    // Some plugin hosts, such as certain GarageBand versions, will only
+	    // load plugins that support stereo bus layouts.
+	    if (_busesLayout.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
+	        return false;
+
+	    // This checks if the input is stereo
+	    if (_busesLayout.getMainInputChannelSet() != juce::AudioChannelSet::stereo())
+	        return false;
+
+	    return true;
+	}
+
 	//==============================================================================
 	void Processor::getStateInformation (juce::MemoryBlock& destData)
 	{
 	    // You should use this method to store your parameters in the memory block.
 	    // You could do that either as raw data, or use the XML or ValueTree classes
 	    // as intermediaries to make it easy to save and load complex data.
-
-		std::vector<uint8_t> buffer;
-		getPlugin().getState(buffer, synthLib::StateTypeGlobal);
-
+#if !SYNTHLIB_DEMO_MODE
 		PluginStream ss;
 		ss.write(g_saveMagic);
 		ss.write(g_saveVersion);
-		ss.write(buffer);
-		buffer.clear();
+		std::vector<uint8_t> buffer;
 		saveCustomData(buffer);
 		ss.write(buffer);
 
@@ -227,27 +415,194 @@ namespace pluginLib
 		ss.toVector(buf);
 
 		destData.append(buf.data(), buf.size());
+#endif
 	}
 
 	void Processor::setStateInformation (const void* _data, const int _sizeInBytes)
 	{
-	    // You should use this method to restore your parameters from this memory block,
+#if !SYNTHLIB_DEMO_MODE
+		// You should use this method to restore your parameters from this memory block,
 	    // whose contents will have been created by the getStateInformation() call.
 		setState(_data, _sizeInBytes);
+#endif
 	}
 
 	void Processor::getCurrentProgramStateInformation(juce::MemoryBlock& destData)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		std::vector<uint8_t> state;
 		getPlugin().getState(state, synthLib::StateTypeCurrentProgram);
 		destData.append(state.data(), state.size());
+#endif
 	}
 
 	void Processor::setCurrentProgramStateInformation(const void* data, int sizeInBytes)
 	{
+#if !SYNTHLIB_DEMO_MODE
 		setState(data, sizeInBytes);
+#endif
+	}
+		
+	const juce::String Processor::getName() const
+	{
+	    return getProperties().name;
 	}
 
+	bool Processor::acceptsMidi() const
+	{
+		return getProperties().wantsMidiInput;
+	}
+
+	bool Processor::producesMidi() const
+	{
+		return getProperties().producesMidiOut;
+	}
+
+	bool Processor::isMidiEffect() const
+	{
+		return getProperties().isMidiEffect;
+	}
+
+	void Processor::processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages)
+	{
+	    juce::ScopedNoDenormals noDenormals;
+	    const auto totalNumInputChannels  = getTotalNumInputChannels();
+	    const auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+	    const int numSamples = buffer.getNumSamples();
+
+	    // In case we have more outputs than inputs, this code clears any output
+	    // channels that didn't contain input data, (because these aren't
+	    // guaranteed to be empty - they may contain garbage).
+	    // This is here to avoid people getting screaming feedback
+	    // when they first compile a plugin, but obviously you don't need to keep
+	    // this code if your algorithm always overwrites all the output channels.
+	    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+			buffer.clear (i, 0, numSamples);
+
+	    // This is the place where you'd normally do the guts of your plugin's
+	    // audio processing...
+	    // Make sure to reset the state if your inner loop is processing
+	    // the samples and the outer loop is handling the channels.
+	    // Alternatively, you can process the samples with the channels
+	    // interleaved by keeping the same state.
+
+	    synthLib::TAudioInputs inputs{};
+	    synthLib::TAudioOutputs outputs{};
+
+	    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    		inputs[channel] = buffer.getReadPointer(channel);
+
+	    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+    		outputs[channel] = buffer.getWritePointer(channel);
+
+		for(const auto metadata : midiMessages)
+		{
+			const auto message = metadata.getMessage();
+
+			synthLib::SMidiEvent ev{};
+
+			if(message.isSysEx() || message.getRawDataSize() > 3)
+			{
+				ev.sysex.resize(message.getRawDataSize());
+				memcpy(ev.sysex.data(), message.getRawData(), ev.sysex.size());
+
+				// Juce bug? Or VSTHost bug? Juce inserts f0/f7 when converting VST3 midi packet to Juce packet, but it's already there
+				if(ev.sysex.size() > 1)
+				{
+					if(ev.sysex.front() == 0xf0 && ev.sysex[1] == 0xf0)
+						ev.sysex.erase(ev.sysex.begin());
+
+					if(ev.sysex.size() > 1)
+					{
+						if(ev.sysex[ev.sysex.size()-1] == 0xf7 && ev.sysex[ev.sysex.size()-2] == 0xf7)
+							ev.sysex.erase(ev.sysex.begin());
+					}
+				}
+			}
+			else
+			{
+				ev.a = message.getRawData()[0];
+				ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
+				ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
+
+				const auto status = ev.a & 0xf0;
+
+				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
+				{
+					// forward to UI to react to control input changes that should move knobs
+					getController().addPluginMidiOut({ev});
+				}
+			}
+
+			ev.offset = metadata.samplePosition;
+
+			getPlugin().addMidiEvent(ev);
+		}
+
+		midiMessages.clear();
+
+		bool isPlaying = true;
+		float bpm = 0.0f;
+		float ppqPos = 0.0f;
+
+	    if(const auto* playHead = getPlayHead())
+		{
+			if(auto pos = playHead->getPosition())
+			{
+				isPlaying = pos->getIsPlaying();
+
+				if(pos->getBpm())
+				{
+					bpm = static_cast<float>(*pos->getBpm());
+					processBpm(bpm);
+				}
+				if(pos->getPpqPosition())
+				{
+					ppqPos = static_cast<float>(*pos->getPpqPosition());
+				}
+			}
+		}
+
+		getPlugin().process(inputs, outputs, numSamples, bpm, ppqPos, isPlaying);
+
+		applyOutputGain(outputs, numSamples);
+
+		m_midiOut.clear();
+		getPlugin().getMidiOut(m_midiOut);
+
+	    if (!m_midiOut.empty())
+		{
+			getController().addPluginMidiOut(m_midiOut);
+		}
+
+	    for (auto& e : m_midiOut)
+	    {
+		    if (e.source == synthLib::MidiEventSourceEditor)
+				continue;
+
+			auto toJuceMidiMessage = [&e]()
+			{
+				if(!e.sysex.empty())
+					return juce::MidiMessage(e.sysex.data(), static_cast<int>(e.sysex.size()), 0.0);
+				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
+				if(len == 1)
+					return juce::MidiMessage(e.a, 0.0);
+				if(len == 2)
+					return juce::MidiMessage(e.a, e.b, 0.0);
+				return juce::MidiMessage(e.a, e.b, e.c, 0.0);
+			};
+
+			const juce::MidiMessage message = toJuceMidiMessage();
+			midiMessages.addEvent(message, 0);
+
+			// additionally send to the midi output we've selected in the editor
+			if (m_midiOutput)
+				m_midiOutput->sendMessageNow(message);
+	    }
+	}
+
+#if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{
 		if(_sizeInBytes < 1)
@@ -270,20 +625,28 @@ namespace pluginLib
 
 				const auto version = ss.read<uint32_t>();
 
-				if (version != g_saveVersion)
+				if (version > g_saveVersion)
 					return;
 
 				std::vector<uint8_t> buffer;
-				ss.read(buffer);
-				getPlugin().setState(buffer);
+
+				if(version == 1)
+				{
+					ss.read(buffer);
+					getPlugin().setState(buffer);
+				}
+
 				ss.read(buffer);
 
-				try
+				if(!buffer.empty())
 				{
-					loadCustomData(buffer);
-				}
-				catch (std::range_error&)
-				{
+					try
+					{
+						loadCustomData(buffer);
+					}
+					catch (std::range_error&)
+					{
+					}
 				}
 			}
 			catch (std::range_error& e)
@@ -300,6 +663,7 @@ namespace pluginLib
 		if (hasController())
 			getController().onStateLoaded();
 	}
+#endif
 
 	//==============================================================================
 

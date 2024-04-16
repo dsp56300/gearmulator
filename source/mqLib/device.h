@@ -4,12 +4,16 @@
 #include "mqstate.h"
 #include "mqsysexremotecontrol.h"
 
-#include "../synthLib/device.h"
-#include "../synthLib/midiBufferParser.h"
+#include "../wLib/wDevice.h"
+
+namespace dsp56k
+{
+	class EsaiClock;
+}
 
 namespace mqLib
 {
-	class Device : public synthLib::Device
+	class Device : public wLib::Device
 	{
 	public:
 		Device();
@@ -26,16 +30,13 @@ namespace mqLib
 	protected:
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		void processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples) override;
-		void process(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _size, const std::vector<synthLib::SMidiEvent>& _midiIn, std::vector<synthLib::SMidiEvent>& _midiOut) override;
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
+
+		dsp56k::EsxiClock* getDspEsxiClock() const override;
 
 	private:
 		MicroQ						m_mq;
 		State						m_state;
 		SysexRemoteControl			m_sysexRemote;
-		std::vector<uint8_t>		m_midiOutBuffer;
-		synthLib::MidiBufferParser	m_midiOutParser;
-		std::vector<synthLib::SMidiEvent> m_customSysexOut;
-		uint32_t					m_numSamplesProcessed = 0;
 	};
 }

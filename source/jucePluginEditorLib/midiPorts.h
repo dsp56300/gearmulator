@@ -31,6 +31,7 @@ namespace jucePluginEditorLib
 		int m_lastInputIndex = 0;
 		int m_lastOutputIndex = 0;
 
+		void showMidiPortFailedMessage(const char* _name) const;
 		void updateMidiInput(int _index);
 		void updateMidiOutput(int _index);
 	};

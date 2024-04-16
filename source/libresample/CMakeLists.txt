@@ -7,3 +7,4 @@ set(SOURCES
 	src/resamplesubs.c)
 
 add_library(resample STATIC ${SOURCES})
+set_property(TARGET resample PROPERTY FOLDER "Gearmulator")

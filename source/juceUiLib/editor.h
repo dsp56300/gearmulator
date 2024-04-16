@@ -2,15 +2,16 @@
 
 #include <string>
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "juce_gui_basics/juce_gui_basics.h"
 
+#include "button.h"
 #include "uiObject.h"
 
 #include "editorInterface.h"
 
 namespace genericUI
 {
-	class Editor : public juce::Component
+	class Editor : public juce::Component, public juce::DragAndDropContainer
 	{
 	public:
 		explicit Editor(EditorInterface& _interface);
@@ -74,10 +75,27 @@ namespace genericUI
 
 		size_t getConditionCountRecursive() const;
 		size_t getControllerLinkCountRecursive() const;
+		void registerTemplate(const std::shared_ptr<UiObject>& _value);
 
 		static void setEnabled(juce::Component& _component, bool _enable);
 
-		void setCurrentPart(uint8_t _part);
+		virtual void setCurrentPart(uint8_t _part);
+		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
+
+		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
+
+		std::shared_ptr<UiObject> getTemplate(const std::string& _name) const;
+
+		virtual void setPerInstanceConfig(const std::vector<uint8_t>& _data) {}
+		virtual void getPerInstanceConfig(std::vector<uint8_t>& _data) {}
+
+		virtual juce::Slider* createJuceComponent(juce::Slider*, UiObject& _object) { return nullptr; }
+		virtual juce::Component* createJuceComponent(juce::Component*, UiObject& _object) { return nullptr; }
+		virtual juce::ComboBox* createJuceComponent(juce::ComboBox*, UiObject& _object) { return nullptr; }
+		virtual juce::Label* createJuceComponent(juce::Label*, UiObject& _object) { return nullptr; }
+		virtual Button<juce::HyperlinkButton>* createJuceComponent(Button<juce::HyperlinkButton>*, UiObject& _object) { return nullptr; }
+		virtual Button<juce::DrawableButton>* createJuceComponent(Button<juce::DrawableButton>*, UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) { return nullptr; }
+		virtual Button<juce::TextButton>* createJuceComponent(Button<juce::TextButton>*, UiObject& _object) { return nullptr; }
 
 	private:
 		EditorInterface& m_interface;
@@ -91,6 +109,9 @@ namespace genericUI
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
 		std::map<std::string, TabGroup*> m_tabGroupsByName;
+		std::map<std::string, std::shared_ptr<UiObject>> m_templates;
+
+		juce::TooltipWindow m_tooltipWindow;
 
 		float m_scale = 1.0f;
 	};

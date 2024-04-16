@@ -2,8 +2,9 @@
 
 #include <cstdint>
 #include <functional>
+#include <map>
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "juce_core/juce_core.h"
 
 namespace pluginLib
 {
@@ -52,7 +53,11 @@ namespace pluginLib
 		bool isBipolar;
 		int step = 0;
 		std::string toText;
+		std::string softKnobTargetSelect;
+		std::string softKnobTargetList;
 
 		bool isNonPartSensitive() const;
+
+		bool isSoftKnob() const;
 	};
 }

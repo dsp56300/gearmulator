@@ -18,3 +18,4 @@ if(UNIX AND NOT APPLE)
 endif()
 
 install(TARGETS mqPerformanceTest DESTINATION . COMPONENT VavraPerformanceTest)
+set_property(TARGET mqPerformanceTest PROPERTY FOLDER "Vavra")

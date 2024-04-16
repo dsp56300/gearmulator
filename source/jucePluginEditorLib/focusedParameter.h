@@ -2,6 +2,13 @@
 
 #include "focusedParameterTooltip.h"
 
+#include "juce_events/juce_events.h"
+
+namespace juce
+{
+	class MouseEvent;
+}
+
 namespace genericUI
 {
 	class Editor;

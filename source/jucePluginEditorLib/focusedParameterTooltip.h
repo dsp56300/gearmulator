@@ -1,6 +1,11 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
+namespace juce
+{
+	class String;
+	class Component;
+	class Label;
+}
 
 namespace jucePluginEditorLib
 {
@@ -15,5 +20,6 @@ namespace jucePluginEditorLib
 
 	private:
 		juce::Label* m_label = nullptr;
+		int m_defaultWidth;
 	};
 }

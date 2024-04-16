@@ -37,6 +37,17 @@ namespace synthLib
 		recreate();
 	}
 
+	void ResamplerInOut::setSamplerates(const float _hostSamplerate, const float _deviceSamplerate)
+	{
+		if(m_samplerateDevice == _deviceSamplerate && m_samplerateHost == _hostSamplerate)
+			return;
+
+		m_samplerateDevice = _deviceSamplerate;
+		m_samplerateHost = _hostSamplerate;
+
+		recreate();
+	}
+
 	void ResamplerInOut::recreate()
 	{
 		if(m_samplerateDevice < 1 || m_samplerateHost < 1)

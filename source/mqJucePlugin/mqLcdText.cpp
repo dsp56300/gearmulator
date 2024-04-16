@@ -1,5 +1,7 @@
 #include "mqLcdText.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 MqLcdText::MqLcdText(juce::Label &_lineA, juce::Label &_lineB) : m_lineA(_lineA), m_lineB(_lineB)
 {
 	m_lineA.setJustificationType(juce::Justification::centredLeft);

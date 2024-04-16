@@ -4,7 +4,7 @@
 #include "../synthLib/midiBufferParser.h"
 #include "../synthLib/deviceException.h"
 
-#include "dsp56kEmu/interrupts.h"
+#include <cstring>	// memcpy
 
 #if EMBED_ROM
 #include "romData.h"
@@ -18,8 +18,8 @@ namespace mqLib
 	static_assert(ROM_DATA_SIZE == ROM::g_romSize);
 #endif
 
-	constexpr uint32_t g_syncEsaiFrameRate = 16;
-	constexpr uint32_t g_syncHaltDspEsaiThreshold = 32;
+	constexpr uint32_t g_syncEsaiFrameRate = 8;
+	constexpr uint32_t g_syncHaltDspEsaiThreshold = 16;
 
 	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
@@ -38,9 +38,9 @@ namespace mqLib
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
 
-		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& port)
+		m_uc.getPortF().setDirectionChangeCallback([&](const mc68k::Port& _port)
 		{
-			if(port.getDirection() == 0xff)
+			if(_port.getDirection() == 0xff)
 				setGlobalDefaultParameters();
 		});
 	}
@@ -50,10 +50,9 @@ namespace mqLib
 		m_dsps.front().getPeriph().getEsai().setCallback({}, 0);
 	}
 
-	bool Hardware::process()
+	void Hardware::process()
 	{
 		processUcCycle();
-		return true;
 	}
 	
 	void Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
@@ -126,6 +125,7 @@ namespace mqLib
 	void Hardware::hdiProcessUCtoDSPNMIIrq()
 	{
 		// QS6 is connected to DSP NMI pin but I've never seen this being triggered
+#if SUPPORT_NMI_INTERRUPT
 		const uint8_t requestNMI = m_uc.requestDSPinjectNMI();
 
 		if(m_requestNMI && !requestNMI)
@@ -135,6 +135,7 @@ namespace mqLib
 
 			m_requestNMI = requestNMI;
 		}
+#endif
 	}
 
 	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
@@ -167,7 +168,7 @@ namespace mqLib
 			setupEsaiListener();
 			return;
 		}
-
+		/*
 		m_dsps[1].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
 		m_dsps[2].getPeriph().getPortC().hostWrite(0x10);	// set bit 4 of GPIO Port C, vexp DSPs are waiting for this
 
@@ -211,6 +212,7 @@ namespace mqLib
 		}
 		LOG("Voice Expansion initialization completed");
 		setupEsaiListener();
+		*/
 	}
 
 	void Hardware::setupEsaiListener()
@@ -221,8 +223,7 @@ namespace mqLib
 		{
 			++m_esaiFrameIndex;
 
-			if (m_esaiFrameIndex & 1)
-				processMidiInput();
+			processMidiInput();
 
 			if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 				m_esaiFrameAddedCv.notify_one();
@@ -322,7 +323,7 @@ namespace mqLib
 
 		const auto ucClock = m_uc.getSim().getSystemClockHz();
 
-		constexpr double divInv = 1.0 / (44100.0 * 2.0);	// stereo interleaved
+		constexpr double divInv = 1.0 / 44100.0;	// stereo interleaved
 		const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
 
 		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
@@ -388,8 +389,17 @@ namespace mqLib
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
 
+		// TODO: Right audio input channel needs to be delayed by one frame
+		::memcpy(&m_delayedAudioIn[1], m_audioInputs[1].data(), sizeof(dsp56k::TWord) * _frames);
+
 		inputs[1] = &m_audioInputs[0].front();
-		inputs[0] = &m_audioInputs[1].front();
+		inputs[0] = m_delayedAudioIn.data();
+		inputs[2] = m_dummyInput.data();
+		inputs[3] = m_dummyInput.data();
+		inputs[4] = m_dummyInput.data();
+		inputs[5] = m_dummyInput.data();
+		inputs[6] = m_dummyInput.data();
+		inputs[7] = m_dummyInput.data();
 
 		outputs[1] = &m_audioOutputs[0].front();
 		outputs[0] = &m_audioOutputs[1].front();
@@ -397,6 +407,14 @@ namespace mqLib
 		outputs[2] = &m_audioOutputs[3].front();
 		outputs[5] = &m_audioOutputs[4].front();
 		outputs[4] = &m_audioOutputs[5].front();
+		outputs[6] = m_dummyOutput.data();
+		outputs[7] = m_dummyOutput.data();
+		outputs[8] = m_dummyOutput.data();
+		outputs[9] = m_dummyOutput.data();
+		outputs[10] = m_dummyOutput.data();
+		outputs[11] = m_dummyOutput.data();
+
+		const auto totalFrames = _frames;
 
 		while (_frames)
 		{
@@ -445,7 +463,7 @@ namespace mqLib
 				esai.processAudioInputInterleaved(inputs, processCount, _latency);
 			}
 
-			const auto requiredSize = processCount > 4 ? (processCount << 1) - 8 : 0;
+			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
 
 			if(esai.getAudioOutputs().size() < requiredSize)
 			{
@@ -487,6 +505,8 @@ namespace mqLib
 			outputs[5] += processCount;
 		}
 
+		m_delayedAudioIn[0] = m_audioInputs[1][totalFrames-1];
+
 		m_processAudio = false;
 	}
 
@@ -498,10 +518,18 @@ namespace mqLib
 				input.resize(_frames);
 		}
 
+		if(m_delayedAudioIn.size() < _frames + 1)
+			m_delayedAudioIn.resize(_frames + 1);
+
 		if(m_audioOutputs.front().size() < _frames)
 		{
 			for (auto& output : m_audioOutputs)
 				output.resize(_frames);
 		}
+
+		if(m_dummyInput.size() < _frames)
+			m_dummyInput.resize(_frames);
+		if(m_dummyOutput.size() < _frames)
+			m_dummyOutput.resize(_frames);
 	}
 }

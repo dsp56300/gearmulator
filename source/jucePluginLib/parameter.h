@@ -1,10 +1,10 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
-
 #include <set>
 
 #include "parameterdescription.h"
+
+#include "juce_audio_processors/juce_audio_processors.h"
 
 namespace pluginLib
 {
@@ -39,6 +39,7 @@ namespace pluginLib
 		bool isMetaParameter() const override;
 
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
+		int getUnnormalizedValue() const { return juce::roundToInt(m_value.getValue()); }
 		void setValue(float _newValue) override;
 		void setValue(float _newValue, ChangedBy _origin);
 		void setValueFromSynth(int newValue, bool notifyHost, ChangedBy _origin);
@@ -85,7 +86,7 @@ namespace pluginLib
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
-		void setDerivedValue(int _value, ChangedBy _origin);
+		void setDerivedValue(int _value, ChangedBy _origin, bool _notifyHost);
 		void sendToSynth();
 
         Controller &m_ctrl;

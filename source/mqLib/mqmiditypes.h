@@ -2,14 +2,14 @@
 
 #include <cstdint>
 
+#include "../wLib/wMidiTypes.h"
+
 namespace mqLib
 {
 	enum MidiHeaderByte : uint8_t
 	{
-		IdWaldorf = 0x3e,
 		IdQ = 0x0f,
 		IdMicroQ = 0x10,
-		IdDeviceOmni = 0x7f
 	};
 
 	enum class SysexCommand : uint8_t
@@ -174,40 +174,30 @@ namespace mqLib
 
 	enum SysexIndex
 	{
-		IdxSysexBegin = 0,
-		IdxIdWaldorf = 1,
-		IdxIdMicroQ = 2,
-		IdxDeviceId = 3,
-		IdxCommand = 4,
-
-		// dumps / dump requests
-		IdxBuffer = 5,
-		IdxLocation = 6,
-
 		// first parameter of a dump
 		IdxSingleParamFirst = 7,
 		IdxMultiParamFirst  = IdxSingleParamFirst,
 		IdxDrumParamFirst   = IdxSingleParamFirst,
-		IdxGlobalParamFirst = IdxBuffer,
-		IdxModeParamFirst = IdxBuffer,
+		IdxGlobalParamFirst = wLib::IdxBuffer,
+		IdxModeParamFirst = wLib::IdxBuffer,
 
-		IdxSingleParamIndexH = IdxBuffer + 1,
+		IdxSingleParamIndexH = wLib::IdxBuffer + 1,
 		IdxSingleParamIndexL = IdxSingleParamIndexH + 1,
 		IdxSingleParamValue  = IdxSingleParamIndexL + 1,
 
-		IdxMultiParamIndexH = IdxBuffer,
+		IdxMultiParamIndexH = wLib::IdxBuffer,
 		IdxMultiParamIndexL = IdxMultiParamIndexH + 1,
 		IdxMultiParamValue  = IdxMultiParamIndexL + 1,
 
-		IdxDrumParamIndexH = IdxBuffer,
+		IdxDrumParamIndexH = wLib::IdxBuffer,
 		IdxDrumParamIndexL = IdxMultiParamIndexH + 1,
 		IdxDrumParamValue  = IdxMultiParamIndexL + 1,
 
-		IdxGlobalParamIndexH = IdxBuffer,
+		IdxGlobalParamIndexH = wLib::IdxBuffer,
 		IdxGlobalParamIndexL = IdxGlobalParamIndexH + 1,
 		IdxGlobalParamValue  = IdxGlobalParamIndexL + 1,
 
-		IdxModeParamIndexH = IdxBuffer,
+		IdxModeParamIndexH = wLib::IdxBuffer,
 		IdxModeParamIndexL = IdxModeParamIndexH + 1,
 		IdxModeParamValue  = IdxModeParamIndexL + 1
 	};

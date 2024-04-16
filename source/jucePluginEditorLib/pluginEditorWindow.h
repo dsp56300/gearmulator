@@ -2,8 +2,6 @@
 
 #include <juce_audio_processors/juce_audio_processors.h>
 
-class AudioPluginAudioProcessor;
-
 namespace jucePluginEditorLib
 {
 	class PluginEditorState;
@@ -19,12 +17,16 @@ namespace jucePluginEditorLib
 
 		void paint(juce::Graphics& g) override {}
 
+		void resized() override;
+
 	private:
-		void setGuiScale(juce::Component* _component, int percent);
+		void setGuiScale(juce::Component* _comp, float _percent);
 		void setUiRoot(juce::Component* _component);
 
 		PluginEditorState& m_state;
 		juce::PropertiesFile& m_config;
+
+	    juce::ComponentBoundsConstrainer m_sizeConstrainer;
 
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(EditorWindow)
 	};

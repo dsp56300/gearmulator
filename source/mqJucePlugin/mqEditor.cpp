@@ -4,8 +4,10 @@
 #include "PluginProcessor.h"
 
 #include "mqController.h"
-
-#include "../jucePluginLib/parameterbinding.h"
+#include "mqFrontPanel.h"
+#include "mqPartButton.h"
+#include "mqPartSelect.h"
+#include "mqPatchManager.h"
 
 #include "../mqLib/mqbuildconfig.h"
 
@@ -21,8 +23,22 @@ namespace mqJucePlugin
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
-		if(findComponent("ContainerPatchList", false))
-			m_patchBrowser.reset(new PatchBrowser(*this, _processor.getController(), _processor.getConfig()));
+		if(auto* container = findComponent("patchbrowser", false))
+		{
+			constexpr auto scale = 1.3f;
+			const float x = static_cast<float>(container->getX());
+			const float y = static_cast<float>(container->getY());
+			const float w = static_cast<float>(container->getWidth());
+			const float h = static_cast<float>(container->getHeight());
+			container->setTransform(juce::AffineTransform::scale(scale, scale));
+			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
+			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
+
+			const auto configOptions = getProcessor().getConfigOptions();
+			const auto dir = configOptions.getDefaultFile().getParentDirectory();
+
+			setPatchManager(new PatchManager(*this, container, dir));
+		}
 
 		auto disableButton = [](juce::Component* _comp)
 		{
@@ -90,7 +106,7 @@ namespace mqJucePlugin
 
 		addMouseListener(this, true);
 
-		m_controller.onPlayModeChanged.addListener(PlayModeListenerId, [this]()
+		m_controller.onPlayModeChanged.addListener(PlayModeListenerId, [this](bool)
 		{
 			if(m_btPlayModeMulti)
 				m_btPlayModeMulti->setToggleState(m_controller.isMultiMode(), juce::dontSendNotification);
@@ -128,16 +144,35 @@ namespace mqJucePlugin
 		return findEmbeddedResource(_filename, _size);
 	}
 
+	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
+	{
+		return {"Vavra",
+			"Vavra runs in demo mode\n"
+			"\n"
+			"The following features are disabled:\n"
+			"- Saving/Exporting Presets\n"
+			"- Plugin state is not preserve"
+		};
+	}
+
+	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle _buttonStyle)
+	{
+		if(_object.getName() == "partSelectButton")
+			return new mqPartButton(*this, _name, _buttonStyle);
+
+		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
+	}
+
 	void Editor::mouseEnter(const juce::MouseEvent& _event)
 	{
 		m_focusedParameter->onMouseEnter(_event);
 	}
 
-	void Editor::savePreset(const FileType _type)
+	void Editor::savePreset(const jucePluginEditorLib::FileType _type)
 	{
 		jucePluginEditorLib::Editor::savePreset([&](const juce::File& _file)
 		{
-			FileType type = _type;
+			jucePluginEditorLib::FileType type = _type;
 			const auto file = createValidFilename(type, _file);
 
 			const auto part = m_controller.getCurrentPart();
@@ -154,17 +189,17 @@ namespace mqJucePlugin
 	{
 		juce::PopupMenu menu;
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(FileType)>& _callback)
+		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
 		{
 			juce::PopupMenu subMenu;
 
-			subMenu.addItem(".syx", [_callback]() {_callback(FileType::Syx); });
-			subMenu.addItem(".mid", [_callback]() {_callback(FileType::Mid); });
+			subMenu.addItem(".syx", [_callback]() {_callback(jucePluginEditorLib::FileType::Syx); });
+			subMenu.addItem(".mid", [_callback]() {_callback(jucePluginEditorLib::FileType::Mid); });
 
 			_menu.addSubMenu(_name, subMenu);
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](FileType _type)
+		addEntry(menu, "Current Single (Edit Buffer)", [this](jucePluginEditorLib::FileType _type)
 		{
 			savePreset(_type);
 		});
@@ -174,15 +209,15 @@ namespace mqJucePlugin
 
 	void Editor::onBtPresetPrev()
 	{
-		if (m_patchBrowser->selectPrevPreset())
+		if (getPatchManager() && getPatchManager()->selectPrevPreset(m_controller.getCurrentPart()))
 			return;
-//		m_controller.selectPrevPreset();
+		m_controller.selectPrevPreset();
 	}
 
 	void Editor::onBtPresetNext()
 	{
-		if (m_patchBrowser->selectNextPreset())
+		if (getPatchManager() && getPatchManager()->selectNextPreset(m_controller.getCurrentPart()))
 			return;
-//		m_controller.selectNextPreset();
+		m_controller.selectNextPreset();
 	}
 }

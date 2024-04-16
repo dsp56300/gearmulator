@@ -11,7 +11,7 @@ namespace mqLib
 	void SysexRemoteControl::createSysexHeader(std::vector<uint8_t>& _dst, SysexCommand _cmd)
 	{
 		constexpr uint8_t devId = 0;
-		_dst.assign({0xf0, IdWaldorf, IdMicroQ, devId, static_cast<uint8_t>(_cmd)});
+		_dst.assign({0xf0, wLib::IdWaldorf, IdMicroQ, devId, static_cast<uint8_t>(_cmd)});
 	}
 
 	void SysexRemoteControl::sendSysexLCD(std::vector<synthLib::SMidiEvent>& _dst) const
@@ -102,7 +102,7 @@ namespace mqLib
 		if(_input.size() < 5)
 			return false;
 
-		if(_input[1] != IdWaldorf || _input[2] != IdMicroQ)
+		if(_input[1] != wLib::IdWaldorf || _input[2] != IdMicroQ)
 			return false;
 
 		const auto cmd = _input[4];

@@ -3,6 +3,7 @@
 #include <array>
 
 #include <cpp-terminal/window.hpp>
+#undef B0	// added on macOS via termios.h, collides with DSP Register::B0
 
 #include "../mqConsoleLib/mqGuiBase.h"
 

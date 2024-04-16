@@ -22,3 +22,4 @@ target_sources(mqConsoleLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(mqConsoleLib PUBLIC mqLib cpp-terminal)
+set_property(TARGET mqConsoleLib PROPERTY FOLDER "Vavra")

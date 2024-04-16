@@ -10,6 +10,8 @@
 #include "../synthLib/deviceTypes.h"
 #include "../synthLib/midiTypes.h"
 
+#include "../wLib/wState.h"
+
 namespace synthLib
 {
 	struct SMidiEvent;
@@ -19,10 +21,10 @@ namespace mqLib
 {
 	class MicroQ;
 
-	using SysEx = std::vector<uint8_t>;
-	using Responses = std::vector<SysEx>;
+	using SysEx = wLib::SysEx;
+	using Responses = wLib::Responses;
 
-	class State
+	class State : public wLib::State
 	{
 	public:
 		enum class Origin
@@ -57,7 +59,7 @@ namespace mqLib
 			uint32_t dumpSize;
 		};
 
-		static constexpr Dump g_dumps[] = 
+		static constexpr Dump Dumps[] = 
 		{
 			{DumpType::Single, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, SysexCommand::SingleParameterRequest, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 392},
 			{DumpType::Multi, SysexCommand::MultiRequest, SysexCommand::MultiDump, SysexCommand::MultiParameterChange, SysexCommand::MultiParameterRequest, IdxMultiParamFirst, IdxMultiParamIndexH, IdxMultiParamIndexL, IdxMultiParamValue, 393},
@@ -68,13 +70,13 @@ namespace mqLib
 			{DumpType::SingleQ, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, SysexCommand::SingleParameterRequest, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 393},
 		};
 
-		using Single = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
-		using Multi = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Multi)].dumpSize>;
-		using DrumMap = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Drum)].dumpSize>;
-		using Global = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Global)].dumpSize>;
-		using Mode = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::Mode)].dumpSize>;
+		using Single = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
+		using Multi = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Multi)].dumpSize>;
+		using DrumMap = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Drum)].dumpSize>;
+		using Global = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Global)].dumpSize>;
+		using Mode = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Mode)].dumpSize>;
 
-		using SingleQ = std::array<uint8_t, g_dumps[static_cast<uint32_t>(DumpType::SingleQ)].dumpSize>;
+		using SingleQ = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::SingleQ)].dumpSize>;
 
 		State(MicroQ& _mq);
 
@@ -90,20 +92,6 @@ namespace mqLib
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 	private:
-		template<size_t Size> static bool convertTo(std::array<uint8_t, Size>& _dst, const SysEx& _data)
-		{
-			if(_data.size() != Size)
-				return false;
-			std::copy(_data.begin(), _data.end(), _dst.begin());
-			return true;
-		}
-
-		template<size_t Size> static SysEx convertTo(const std::array<uint8_t, Size>& _src)
-		{
-			SysEx dst;
-			dst.insert(dst.begin(), _src.begin(), _src.end());
-			return dst;
-		}
 
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src)
 		{
@@ -119,7 +107,7 @@ namespace mqLib
 		{
 			uint8_t& c = _src[_src.size() - 2];
 			c = 0;
-			for(size_t i=IdxCommand; i<_src.size()-2; ++i)
+			for(size_t i = wLib::IdxCommand; i<_src.size()-2; ++i)
 				c += _src[i];
 			c &= 0x7f;
 		}
@@ -130,7 +118,7 @@ namespace mqLib
 				return false;
 			uint8_t& c = _src[_src.size() - 2];
 			c = 0;
-			for(size_t i=IdxCommand; i<_src.size()-2; ++i)
+			for(size_t i= wLib::IdxCommand; i<_src.size()-2; ++i)
 				c += _src[i];
 			c &= 0x7f;
 			return true;

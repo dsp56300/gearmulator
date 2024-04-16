@@ -27,3 +27,4 @@ if(UNIX AND NOT APPLE)
 endif()
 
 #install(TARGETS mqTestConsole DESTINATION . COMPONENT STANDALONE)
+set_property(TARGET mqTestConsole PROPERTY FOLDER "Vavra")

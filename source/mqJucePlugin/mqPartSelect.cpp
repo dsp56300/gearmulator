@@ -2,13 +2,14 @@
 
 #include "mqController.h"
 #include "mqEditor.h"
+#include "mqPartButton.h"
 
 mqPartSelect::mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
 	: m_editor(_editor)
 	, m_controller(_controller)
 	, m_parameterBinding(_parameterBinding)
 {
-	std::vector<juce::Button*> buttons;
+	std::vector<mqPartButton*> buttons;
 	std::vector<juce::Button*> leds;
 
 	_editor.findComponents(buttons, "partSelectButton", 16);
@@ -23,7 +24,8 @@ mqPartSelect::mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controlle
 
 		auto index = static_cast<uint8_t>(i);
 
-		part.button->onClick = [this,index]	{ selectPart(index); };
+		part.button->initalize(static_cast<uint8_t>(i));
+
 		part.led->onClick = [this, index]	{ selectPart(index); };
 	}
 

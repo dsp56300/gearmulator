@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <unordered_map>
@@ -72,7 +74,8 @@ namespace pluginLib
 
 		using ParamIndices = std::set<ParamIndex>;
 		using ParamValues = std::unordered_map<ParamIndex, uint8_t, ParamIndexHash>;	// part, index => value
-		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;	// part, name => value
+		using AnyPartParamValues = std::vector<std::optional<uint8_t>>;					// index => value
+		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;		// part, name => value
 		using Sysex = std::vector<uint8_t>;
 
 		MidiPacket() = default;
@@ -83,7 +86,9 @@ namespace pluginLib
 
 		bool create(std::vector<uint8_t>& _dst, const Data& _data, const NamedParamValues& _paramValues) const;
 		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
+		bool parse(Data& _data, AnyPartParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
+		bool parse(Data& _data, const std::function<void(ParamIndex, uint8_t)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
 		bool getDefinitionsForByteIndex(std::vector<const MidiDataDefinition*>& _result, uint32_t _byteIndex) const;
 		bool getParameterIndicesForByteIndex(std::vector<ParamIndex>& _result, const ParameterDescriptions& _parameters, uint32_t _byteIndex) const;
@@ -94,7 +99,10 @@ namespace pluginLib
 
 		bool updateChecksums(Sysex& _data) const;
 
+		bool hasPartDependentParameters() const { return m_numDifferentPartsUsedInParameters; }
+
 	private:
+
 		static uint8_t calcChecksum(const MidiDataDefinition& _d, const Sysex& _src);
 
 		const std::string m_name;
@@ -103,5 +111,6 @@ namespace pluginLib
 		std::vector<std::vector<uint32_t>> m_byteToDefinitionIndex;
 		uint32_t m_byteSize = 0;
 		bool m_hasParameters = false;
+		uint32_t m_numDifferentPartsUsedInParameters = 0;
 	};
 }

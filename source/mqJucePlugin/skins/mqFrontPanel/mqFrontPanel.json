@@ -59,6 +59,7 @@
                 "height" : "108"
             },
             "componentProperties" : {
+                "lcdTextColor" : "000000",
                 "lcdBackgroundColor" : "248727"
             }
         },

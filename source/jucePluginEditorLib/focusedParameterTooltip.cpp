@@ -1,8 +1,10 @@
 #include "focusedParameterTooltip.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace jucePluginEditorLib
 {
-	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label)
+	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0)
 	{
 		setVisible(false);
 	}
@@ -33,8 +35,14 @@ namespace jucePluginEditorLib
 				parent = parent->getParentComponent();
 			}
 
-			x += (_component->getWidth()>>1) - (m_label->getWidth()>>1);
+			int labelWidth = m_defaultWidth;
+
+			if(_value.length() > 3)
+				labelWidth += (m_label->getHeight()>>1) * (_value.length() - 3);
+
+			x += (_component->getWidth()>>1) - (labelWidth>>1);
 			y += _component->getHeight() + (m_label->getHeight()>>1);
+
 			/*
 			// global to local of tooltip parent
 			parent = m_label->getParentComponent();
@@ -50,6 +58,7 @@ namespace jucePluginEditorLib
 				y += static_cast<int>(m_label->getProperties()["offsetY"]);
 
 			m_label->setTopLeftPosition(x,y);
+			m_label->setSize(labelWidth, m_label->getHeight());
 			m_label->setText(_value, juce::dontSendNotification);
 			m_label->setVisible(true);
 			m_label->toFront(false);

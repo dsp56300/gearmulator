@@ -6,6 +6,9 @@
 #include "esaiListenerToFile.h"
 
 #include "../virusLib/device.h"
+#include "../virusLib/romloader.h"
+
+#include "dsp56kEmu/dsp.h"
 
 namespace virusLib
 {
@@ -19,7 +22,7 @@ class EsaiListener;
 
 ConsoleApp::ConsoleApp(const std::string& _romFile)
 : m_romName(_romFile)
-, m_rom(_romFile)
+, m_rom(ROMLoader::findROM(_romFile))
 , m_preset({})
 {
 	if (!m_rom.isValid())
@@ -29,18 +32,18 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 	}
 
 	virusLib::DspSingle* dsp1 = nullptr;
-	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom);
+	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom, 46875.0f);
 	m_dsp1.reset(dsp1);
 
-	uc.reset(new Microcontroller(*m_dsp1, m_rom, false));
+	m_uc.reset(new Microcontroller(*m_dsp1, m_rom, false));
 	if(m_dsp2)
-		uc->addDSP(*m_dsp2, false);
+		m_uc->addDSP(*m_dsp2, false);
 }
 
 ConsoleApp::~ConsoleApp()
 {
 	m_demo.reset();
-	uc.reset();
+	m_uc.reset();
 	m_dsp1.reset();
 	m_dsp2 = nullptr;
 }
@@ -55,17 +58,9 @@ void ConsoleApp::waitReturn()
 	std::cin.ignore();
 }
 
-std::thread ConsoleApp::bootDSP(const bool _createDebugger) const
+void ConsoleApp::bootDSP(const bool _createDebugger) const
 {
-	auto loader = virusLib::Device::bootDSP(*m_dsp1, m_rom, _createDebugger);
-
-	if(m_dsp2)
-	{
-		auto loader2 = virusLib::Device::bootDSP(*m_dsp2, m_rom, false);
-		loader2.join();
-	}
-
-	return loader;
+	virusLib::Device::bootDSPs(m_dsp1.get(), m_dsp2, m_rom, _createDebugger);
 }
 
 dsp56k::IPeripherals& ConsoleApp::getYPeripherals() const
@@ -126,7 +121,7 @@ bool ConsoleApp::loadSingle(const std::string& _preset)
 
 bool ConsoleApp::loadDemo(const std::string& _filename)
 {
-	m_demo.reset(new DemoPlayback(*uc));
+	m_demo.reset(new DemoPlayback(*m_uc));
 
 	if(m_demo->loadFile(_filename))
 	{
@@ -143,7 +138,7 @@ bool ConsoleApp::loadInternalDemo()
 	if(m_rom.getDemoData().empty())
 		return false;
 
-	m_demo.reset(new DemoPlayback(*uc));
+	m_demo.reset(new DemoPlayback(*m_uc));
 
 	if(m_demo->loadBinData(m_rom.getDemoData()))
 	{
@@ -171,147 +166,53 @@ std::string ConsoleApp::getSingleNameAsFilename() const
 	return "virusEmu_" + audioFilename + ".wav";
 }
 
-void ConsoleApp::audioCallback(uint32_t audioCallbackCount)
+void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 {
-	uc->process(1);	// FIXME wrong value
+	m_uc->process();
 
-	constexpr uint8_t baseChannel = 0;
-
-	switch (audioCallbackCount)
+	switch (_audioCallbackCount)
 	{
 	case 1:
+		m_dsp1->drainESSI1();
 		LOG("Sending Init Control Commands");
-		uc->sendInitControlCommands();
+		m_uc->sendInitControlCommands();
 		break;
 	case 256:
+		m_dsp1->drainESSI1();
+		m_dsp1->disableESSI1();
 		if(!m_demo)
 		{
 			LOG("Sending Preset");
-#if 0
-			uc->writeSingle(BankNumber::EditBuffer, 0, m_preset);	// cmdline
-			v.getSingle(1, 6, m_preset);							// Anubis MS
-			uc->writeSingle(BankNumber::EditBuffer, 1, m_preset);
-			v.getSingle(1, 10, m_preset);							// Impact MS
-			uc->writeSingle(BankNumber::EditBuffer, 2, m_preset);
-			v.getSingle(1, 3, m_preset);							// Impact MS
-			uc->writeSingle(BankNumber::EditBuffer, 3, m_preset);
-#elif 0
-			uc->writeSingle(BankNumber::EditBuffer, 0, m_preset);	// cmdline
-			uc->writeSingle(BankNumber::EditBuffer, 1, m_preset);
-			v.getSingle(1, 6, m_preset);							// Anubis MS
-			uc->writeSingle(BankNumber::EditBuffer, 2, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 3, m_preset);
-			v.getSingle(10, 56, m_preset);							// Impact MS
-			uc->writeSingle(BankNumber::EditBuffer, 4, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 5, m_preset);
-#else
-			uc->writeSingle(BankNumber::EditBuffer, virusLib::SINGLE, m_preset);
-#endif
-/*			uc->writeSingle(BankNumber::EditBuffer, 3, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 4, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 5, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 6, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 7, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 8, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 9, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 10, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 11, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 12, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 13, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 14, m_preset);
-			uc->writeSingle(BankNumber::EditBuffer, 15, m_preset);
-*/		}
+			m_uc->writeSingle(BankNumber::EditBuffer, virusLib::SINGLE, m_preset);
+		}
 		break;
 	case 512:
 		if(!m_demo)
 		{
 			LOG("Sending Note On");
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 36, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 48, 0x5f));	// Note On
-			for(uint8_t i=0; i<1; ++i)
-				uc->sendMIDI(SMidiEvent(0x90 + i, 60, 0x5f));		// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 60, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 63, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 67, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 72, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 75, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0x90 + baseChannel, 79, 0x5f));	// Note On
-//			uc->sendMIDI(SMidiEvent(0xb0, 1, 0));		// Modwheel 0
-			uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
+			m_uc->sendMIDI(SMidiEvent(0x90, 60, 0x5f));		// Note On
+			m_uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 		}
 		break;
-/*	case 8000:
-		LOG("Sending 2nd Note On");
-		uc->sendMIDI(SMidiEvent(0x90, 67, 0x7f));	// Note On
-		uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
-		break;
-	case 16000:
-		LOG("Sending 3rd Note On");
-		uc->sendMIDI(SMidiEvent(0x90, 63, 0x7f));	// Note On
-		uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
-		break;
-*/
 	}
-#if 0
-	static uint8_t cycle = 0;
 
-	static uint8_t channel = 0;
-	static int totalNoteCount = 1;
-
-	if(audioCallbackCount >= 1024 && (audioCallbackCount & 2047) == 0)
-	{
-		static uint8_t note = 127;
-		if(note >= 96)
-		{
-			note = 24;
-
-			switch(cycle)
-			{
-			case 0:				note += 0;				break;
-			case 1:				note += 3;				break;
-			case 2:				note += 7;				break;
-			case 3:				note += 10;				break;
-			case 4:				note += 5;				break;
-			case 5:				note += 2;				break;
-			}
-			++cycle;
-			if(cycle == 6)
-				cycle = 0;
-		}
-		if(cycle < 7)
-		{
-			totalNoteCount++;
-			LOG("Sending Note On for note " << static_cast<int>(note) << ", total notes " << totalNoteCount);
-			uc->sendMIDI(SMidiEvent(0x90 + baseChannel + channel, note, 0x5f));	// Note On
-			channel++;
-			if(channel >= 6)
-//			if(channel >= 16)
-				channel = 0;
-			uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
-
-//			if(totalNoteCount >= 40)
-//				dsp.enableTrace(static_cast<dsp56k::DSP::TraceMode>(dsp56k::DSP::Ops | dsp56k::DSP::Regs | dsp56k::DSP::StackIndent));
-		}
-		note += 12;
-	}
-#endif
-	if(m_demo && audioCallbackCount >= 256)
+	if(m_demo && _audioCallbackCount >= 256)
 		m_demo->process(1);
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, bool _createDebugger/* = false*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, bool _createDebugger/* = false*/, bool _dumpAssembler/* = false*/)
 {
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
 	constexpr uint32_t blockSize = 64;
 
-	constexpr uint32_t notifyThreshold = ((blockSize<<1) - 4);
+	constexpr uint32_t notifyThreshold = blockSize - 4;
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
 
-	auto& esai = m_dsp1->getPeriphX().getEsai();
+	auto& esai = m_dsp1->getAudio();
 	int32_t notifyTimeout = 0;
 
 	esai.setCallback([&](dsp56k::Audio*)
@@ -320,7 +221,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		// The DSP thread needs to lock & unlock a mutex to inform the waiting thread (us) that data is
 		// available if the output ring buffer was completely drained. We can omit this by ensuring that
 		// the output buffer never becomes completely empty.
-		const auto sizeReached = esai.getAudioOutputs().size() >= notifyThreshold;
+		const auto availableSize = esai.getAudioOutputs().size();
+		const auto sizeReached = availableSize >= notifyThreshold;
 
 		--notifyTimeout;
 
@@ -332,21 +234,22 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		}
 
 		callbackCount++;
-		if((callbackCount & 0x07) == 0)
-			audioCallback(callbackCount>>3);
+		if((callbackCount & 0x3) == 0)
+			audioCallback(callbackCount>>2);
 	}, 0);
 
-	bootDSP(_createDebugger).join();
+	bootDSP(_createDebugger);
 
-	/*
-	const std::string romFile = m_romName;
-	auto& mem = m_dsp1->getMemory();
+	if(_dumpAssembler)
+	{
+		const std::string romFile = m_rom.getFilename();
+		auto& mem = m_dsp1->getMemory();
 
-	mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.size());
-	mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.size());
-	mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
-	mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.size(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
-	*/
+		mem.saveAsText((romFile + "_X.txt").c_str(), dsp56k::MemArea_X, 0, mem.sizeXY());
+		mem.saveAsText((romFile + "_Y.txt").c_str(), dsp56k::MemArea_Y, 0, mem.sizeXY());
+		mem.save((romFile + "_P.bin").c_str(), dsp56k::MemArea_P);
+		mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.sizeP(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
+	}
 
 	std::vector<synthLib::SMidiEvent> midiEvents;
 
@@ -356,7 +259,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	{
 		sem.wait();
 		proc.processBlock(blockSize);
-		uc->readMidiOut(midiEvents);
+		m_uc->readMidiOut(midiEvents);
 		midiEvents.clear();
 	}
 
