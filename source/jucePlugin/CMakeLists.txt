@@ -5,6 +5,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_D
 
 set(SOURCES
 	parameterDescriptions_C.json
+	parameterDescriptions_TI.json
 	ParameterNames.h
 	PluginEditorState.cpp
 	PluginEditorState.h
@@ -14,6 +15,8 @@ set(SOURCES
 	VirusController.h
 	version.h
 
+	ui3/ArpUserPattern.cpp
+	ui3/ArpUserPattern.h
 	ui3/ControllerLinks.cpp
 	ui3/ControllerLinks.h
 	ui3/FxPage.cpp
@@ -34,12 +37,13 @@ set(SOURCES
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
-SET(ASSETS "parameterDescriptions_C.json")
+SET(ASSETS
+	"parameterDescriptions_C.json"
+	"parameterDescriptions_TI.json"
+)
 
-include(skins/Galaxpel/assets.cmake)
-include(skins/Hoverland/assets.cmake)
-include(skins/Trancy/assets.cmake)
+include(skins/TrancyTI/assets.cmake)
 
-juce_add_binary_data(jucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_VirusC_Galaxpel} ${ASSETS_VirusC_Hoverland} ${ASSETS_VirusC_Trancy})
+juce_add_binary_data(jucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_VirusTI_Trancy})
 
-createJucePluginWithFX(jucePlugin "Osirus" "TusV" "TusF" jucePlugin_BinaryData virusLib)
+createJucePluginWithFX(jucePlugin "OsTIrus" "Ttip" "Ttif" jucePlugin_BinaryData virusLib)

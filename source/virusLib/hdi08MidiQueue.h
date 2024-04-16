@@ -22,8 +22,8 @@ namespace virusLib
 	class Hdi08MidiQueue
 	{
 	public:
-		explicit Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, bool _useEsaiBasedTiming);
-		explicit Hdi08MidiQueue(Hdi08MidiQueue&& _s) noexcept : m_output(_s.m_output), m_esai(_s.m_esai), m_useEsaiBasedTiming(_s.m_useEsaiBasedTiming)
+		explicit Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, bool _useEsaiBasedTiming, bool _isTI);
+		explicit Hdi08MidiQueue(Hdi08MidiQueue&& _s) noexcept : m_output(_s.m_output), m_esai(_s.m_esai), m_useEsaiBasedTiming(_s.m_useEsaiBasedTiming), m_isTI(_s.m_isTI)
 		{
 			assert(_s.m_pendingMidiEvents.empty());
 			_s.m_useEsaiBasedTiming = false;
@@ -42,6 +42,7 @@ namespace virusLib
 		Hdi08Queue& m_output;
 		dsp56k::Audio& m_esai;
 		bool m_useEsaiBasedTiming;
+		bool m_isTI;
 
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;
 

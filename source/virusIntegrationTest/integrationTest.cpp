@@ -12,6 +12,7 @@
 
 #include "../synthLib/wavReader.h"
 #include "../synthLib/os.h"
+#include "../virusLib/buildconfig.h"
 
 namespace synthLib
 {
@@ -101,6 +102,7 @@ int main(int _argc, char* _argv[])
 						return -1;
 					}
 
+#if !VIRUS_SUPPORT_TI
 					if(romFile.find("firmware") != std::string::npos)
 					{
 						auto* hFile = fopen(romFile.c_str(), "rb");
@@ -117,6 +119,7 @@ int main(int _argc, char* _argv[])
 							continue;
 						}
 					}
+#endif
 
 					std::vector<std::string> presets;
 

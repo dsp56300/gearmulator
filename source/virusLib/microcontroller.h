@@ -64,6 +64,9 @@ public:
 
 	uint32_t getPartCount() const;
 
+
+	void setSamplerate(float _samplerate);
+
 	uint8_t getPartMidiChannel(uint8_t _part) const;
 	bool isPolyPressureForPageBEnabled() const;
 

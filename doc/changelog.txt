@@ -25,6 +25,14 @@ Osirus/OsTIrus:
 
 - [Fix] Plugin may crash if a patch data source folder contains files not belonging to presets
 
+OsTIrus:
+
+- [Imp] Adjusted default Master Volume to 92 to match the TI hardware in USB mode
+
+- [Fix] Midi indicators on parts blocked mouse clicks, making it difficult to select a part
+- [Fix] Added missing Reverb Predelay knob if predelay clock is set to Off
+- [Fix] Removed invalid entry in Arp clock selection
+
 1.3.10
 
 Osirus/OsTIrus:
@@ -32,6 +40,11 @@ Osirus/OsTIrus:
 - [Fix] Part volume knob for part 1 was bound to selected part instead of part 1
 - [Fix] Selecting a ROM preset via part drop down didn't work after switching to
         another ROM
+
+OsTIrus:
+
+- [Fix] Corrupted audio on ARM CPUs
+- [Fix] Soft Knob 3 destination wasn't loaded from existing patches
 
 1.3.9
 
@@ -65,6 +78,29 @@ Osirus/OsTIrus:
 - [Fix] Crash if preset is selected in Single mode while parameters are locked
 - [Fix] Part Volume knob did not work in Single mode
 
+OsTIrus:
+
+- [Imp] Reduced host CPU consumption
+- [Imp] Soft Knobs are now implemented
+- [Imp] Add ability to switch between TI2 and TI Snow
+- [Imp] Added LFO LEDs (TI2 only, because the Snow doesn't have LFO LEDs)
+- [Imp] Added part activity indicator LEDs
+- [Imp] Added pulsating Logo animation that existed on the hardware too
+- [Imp] GUI: Added Snow Logo on Snow Device / added Snow part view
+- [Imp] Added Master Volume in Common Section
+- [Imp] Added Arp user pattern visualization
+
+- [Fix] Notes were dropped when the DSP reached its internal maximum of 55 voices
+        Note that this behaviour can still occur if you overclock the DSP. There is
+        currently no way around it if the firmware is not patched
+- [Fix] Some patches generated corrupted audio, for example 'AoilioA BC'
+- [Fix] Chorus Mix and Chorus Mix 2 had the same automation name
+- [Fix] Hyper Chorus did not work
+- [Fix] Various GUI issues in FX sections Distortion, Characters, Chorus, Filterbank, Reverb
+- [Fix] Cutoff 2 is reset to center on double click instead of max
+- [Fix] Fixed typo in Matrix Section
+- [Fix] Performance issues when tweaking knobs
+
 1.3.8 (2024.03.11)
 
 DSP:
@@ -77,6 +113,14 @@ Framework:
 - [Imp] Patch Manager: "Uncategorized" has been moved into the Categories group
 
 - [Fix] Patch Manager: Missing patches if a directory contains files with unicode characters
+
+OsTIrus:
+
+- [Imp] Reported latency slightly adjusted for better midi timing
+
+- [Fix] Part Detune knob displayed incorrect value and didn't update while being moved
+
+- [Imp] Reset Oscillator shape to Saw on double click
 
 1.3.7
 
@@ -95,12 +139,29 @@ Framework:
 - [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
                        data source was selected
 
-Osirus:
+Osirus/OsTIrus:
 
 - [Imp] Disabled poly pressure to control Page B parameters to prevent accidental patch changes 
         by keyboards that emit MPE messages
 - [Fix] Locking parameter regions didn't work properly on older version presets and may 
         have caused silence or invalid presets
+
+OsTIrus:
+
+- [Imp] Device samplerate of 48 Khz is now supported, previously only 44,1 KHz was used for the
+        Emulation. If 44,1 KHz or 48 Khz is used is automatically determined based on the
+        host samplerate.
+- [Imp] The DSP code supports more samplerates than the hardware device was able to handle and
+        ranges from 32 Khz to 96 Khz. The samplerate can be overwritten in the advanced options 
+        context menu. The chosen samplerate is preserved as part of the plugin state.
+        Note that higher samplerates may reduce the voice count if the DSP is not overclocked.
+- [Imp] Added Master Volume knob to common page
+
+- [Fix] Classic Oscillator waveform names were shifted by one
+- [Fix] Added missing Modulation Matrix Destinations
+- [Fix] Oscillator 2 FM Amount not shown in percent but as values 0-127
+- [Fix] Delay/Tape Delay Feedback displayed wrong percentage values
+- [Fix] Comb Filter Frequency did not display note numbers but percentage values
 
 1.3.6 (2024.03.03)
 
@@ -134,6 +195,14 @@ Osirus/OsTIrus:
 
 - [Fix] It was not possible to select a part preset via left-click menu on macOS
 
+OsTIrus:
+
+- [Fix] GUI displayed parts as disabled in multi mode if any other part than the first one was selected
+- [Fix] B/C presets failed to load via patch manager
+- [Fix] B/C presets stored to a user bank might sound incorrect after load
+- [Fix] Plugin may hang if large buffer sizes are used
+- [Fix] AU validation failed if TI rom was present
+
 1.3.4 (TBD)
 
 DSP:
@@ -153,6 +222,13 @@ Framework:
 - [Fix] Linked parameters confused Bitwig / Ableton and other hosts
 - [Fix] Long plugin loading times in some hosts due to excessive initial parameter automation updates
 - [Fix] Part context menu and global context menu opened at the same time on right click
+
+OsTIrus:
+
+- [Imp] Removed ROM banks that are empty anyway
+- [Imp] GUI has been reworked slightly and many GUI related issues have been fixed
+- [Fix] Cutoff, Filter Env by Velocity and Filter Resonance by Velocity were linked 
+        when Filter Link is active
 
 Osirus:
 

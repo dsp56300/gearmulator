@@ -62,22 +62,41 @@ public:
 
 	uint32_t getSamplerate() const
 	{
-		return 12000000 / 256;
+		return isTIFamily() ? 44100 : 12000000 / 256;
 	}
 
-	static uint32_t getMultiPresetSize()
+	static uint32_t getMultiPresetSize(const DeviceModel _model)
 	{
 		return 256;
+//		return isTIFamily(_model) ? 256 : 256;
+	}
+	uint32_t getMultiPresetSize() const
+	{
+		return getMultiPresetSize(m_model);
 	}
 
-	static uint32_t getSinglePresetSize()
+	static uint32_t getSinglePresetSize(const DeviceModel _model)
 	{
-		return 256;
+		return virusLib::isTIFamily(_model) ? 512 : 256;
+	}
+	uint32_t getSinglePresetSize() const
+	{
+		return getSinglePresetSize(m_model);
 	}
 
 	static uint8_t getSinglesPerBank()
 	{
 		return 128;
+	}
+
+	static constexpr uint32_t getRomSizeModelD()
+	{
+		return 1024 * 1024;
+	}
+
+	static constexpr uint32_t getRomSizeModelDInstaller()
+	{
+		return 1024 * 1024 * 7;
 	}
 
 	static constexpr uint32_t getRomSizeModelABC()
@@ -90,6 +109,8 @@ public:
 		return 128;
 	}
 
+	static uint32_t getRomBankCount(DeviceModel _model);
+
 	const std::vector<uint8_t>& getDemoData() const { return m_demoData; }
 
 	std::string getFilename() const { return isValid() ? m_romFileName : std::string(); }
@@ -97,8 +118,11 @@ public:
 	const auto& getHash() const { return m_romDataHash; }
 
 private:
+	std::vector<Chunk> readChunks(std::istream& _file, DeviceModel _wantedTIModel);
+	bool loadPresetFiles();
+	bool loadPresetFile(std::istream& _file, DeviceModel _model);
+
 	bool initialize();
-	std::vector<Chunk> readChunks(std::istream& _file);
 
 	BootRom bootRom;
 	std::vector<uint32_t> m_commandStream;

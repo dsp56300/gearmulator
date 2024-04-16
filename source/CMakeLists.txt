@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 
 # ----------------- DSP56300 emulator
 
@@ -37,7 +38,7 @@ endif()
 
 # ----------------- Synth Osirus
 
-if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS)
+if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 	add_subdirectory(virusLib)
 	add_subdirectory(virusConsoleLib)
 	add_subdirectory(virusTestConsole)

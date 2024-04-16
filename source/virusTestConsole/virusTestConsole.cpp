@@ -79,7 +79,7 @@ int main(int _argc, char* _argv[])
 
 	const std::string audioFilename = app->getSingleNameAsFilename();
 
-	app->run(audioFilename, 0, g_createDebugger, g_dumpAssembly);
+	app->run(audioFilename, 0, 64, g_createDebugger, g_dumpAssembly);
 
 	std::cout << "Program ended. Press key to exit." << std::endl;
 	ConsoleApp::waitReturn();

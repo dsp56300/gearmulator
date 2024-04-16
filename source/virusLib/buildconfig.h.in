@@ -1,0 +1,3 @@
+#pragma once
+
+#cmakedefine01 VIRUS_SUPPORT_TI

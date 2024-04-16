@@ -188,7 +188,8 @@ namespace genericVirusUI
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
-		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
+		Virus::Controller::MidiPacketType usedPacketType;
+		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex, usedPacketType))
 			return _patch->sysex;
 
 		// apply name
@@ -239,7 +240,7 @@ namespace genericVirusUI
 		parameterValues[indicesCategory[0]] = val0;
 		parameterValues[indicesCategory[1]] = val1;
 
-		return m_controller.createSingleDump(bank, program, parameterValues);
+		return m_controller.createSingleDump(usedPacketType, bank, program, parameterValues);
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)

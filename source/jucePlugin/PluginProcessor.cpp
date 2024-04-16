@@ -13,10 +13,10 @@ namespace
 	juce::PropertiesFile::Options getConfigOptions()
 	{
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300 Emulator";
+		opts.applicationName = "DSP56300Emulator_OsTIrus";
 		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300 Emulator";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		opts.folderName = "DSP56300Emulator_OsTIrus";
+		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
 		return opts;
 	}
 }
@@ -29,9 +29,12 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
 #if JucePlugin_IsSynth
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 1", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
+                   .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect})
-	, m_roms(virusLib::ROMLoader::findROMs())
+	, m_roms(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow))
 {
 	evRomChanged.retain(getSelectedRom());
 
@@ -98,7 +101,7 @@ bool AudioPluginAudioProcessor::setSelectedRom(const uint32_t _index)
 synthLib::Device* AudioPluginAudioProcessor::createDevice()
 {
 	const auto* rom = getSelectedRom();
-	return new virusLib::Device(rom ? *rom : virusLib::ROMFile::invalid(), getPreferredDeviceSamplerate(), getHostSamplerate());
+	return new virusLib::Device(rom ? *rom : virusLib::ROMFile::invalid(), getPreferredDeviceSamplerate(), getHostSamplerate(), true);
 }
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()

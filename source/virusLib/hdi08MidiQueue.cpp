@@ -7,7 +7,7 @@
 
 namespace virusLib
 {
-	Hdi08MidiQueue::Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, const bool _useEsaiBasedTiming) : m_output(_output), m_esai(_dsp.getAudio()), m_useEsaiBasedTiming(_useEsaiBasedTiming)
+	Hdi08MidiQueue::Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, const bool _useEsaiBasedTiming, const bool _isTI) : m_output(_output), m_esai(_dsp.getAudio()), m_useEsaiBasedTiming(_useEsaiBasedTiming), m_isTI(_isTI)
 	{
 		if(_useEsaiBasedTiming)
 		{
@@ -43,11 +43,13 @@ namespace virusLib
 
 	void Hdi08MidiQueue::sendMidiToDSP(uint8_t _a, const uint8_t _b, const uint8_t _c) const
 	{
-		m_output.writeHostFlags(1, 1);
+		const char flagA = m_isTI ? 0 : 1;
+
+		m_output.writeHostFlags(flagA, 1);
 
 		auto sendMIDItoDSP = [this](const uint8_t _midiByte)
 		{
-			const dsp56k::TWord word = static_cast<dsp56k::TWord>(_midiByte) << 16;
+			const dsp56k::TWord word = static_cast<dsp56k::TWord>(_midiByte) << 16 | (m_isTI ? 0xffff : 0);
 			m_output.writeRX(&word, 1);
 		};
 

@@ -1,5 +1,6 @@
 #include "VirusEditor.h"
 
+#include "ArpUserPattern.h"
 #include "BinaryData.h"
 #include "PartButton.h"
 
@@ -47,7 +48,9 @@ namespace genericVirusUI
 		{
 			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
-				pmParent = findComponent("page_presets");
+				pmParent = findComponent("page_presets", false);
+			if(!pmParent)
+				pmParent = findComponent("page_2_browser");
 			setPatchManager(new PatchManager(*this, pmParent, dir));
 		}
 
@@ -84,7 +87,10 @@ namespace genericVirusUI
 				int id = 1;
 
 				for (const auto& rom : roms)
-					m_romSelector->addItem(juce::File(rom.getFilename()).getFileNameWithoutExtension(), id++);
+				{
+					const auto name = juce::File(rom.getFilename()).getFileNameWithoutExtension();
+					m_romSelector->addItem(name + " (" + rom.getModelName() + ')', id++);
+				}
 			}
 
 			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
@@ -211,6 +217,14 @@ namespace genericVirusUI
 		return Editor::createJuceComponent(_button, _object);
 	}
 
+	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
+	{
+		if(_object.getName() == "ArpUserGraphics")
+			return new ArpUserPattern(*this);
+
+		return Editor::createJuceComponent(_component, _object);
+	}
+
 	void VirusEditor::onProgramChange(int _part)
 	{
 		m_parts->onProgramChange();
@@ -258,24 +272,36 @@ namespace genericVirusUI
 		if(!m_deviceModel)
 			return;
 
-		auto* rom = m_processor.getSelectedRom();
-		if(!rom)
-			return;
-
-		virusLib::ROMFile::TPreset data;
-		if(!rom->getSingle(0, 0, data))
-			return;
-
 		std::string m;
 
-		switch(virusLib::Microcontroller::getPresetVersion(data.front()))
+		switch(m_processor.getModel())
 		{
-		case virusLib::A:	m = "A";	break;
-		case virusLib::B:	m = "B";	break;
-		case virusLib::C:	m = "C";	break;
-		case virusLib::D:	m = "TI";	break;
-		case virusLib::D2:	m = "TI2";	break;
-		default:			m = "?";	break;
+		case virusLib::DeviceModel::Invalid:
+			return;
+		case virusLib::DeviceModel::ABC:
+			{
+				auto* rom = m_processor.getSelectedRom();
+				if(!rom)
+					return;
+
+				virusLib::ROMFile::TPreset data;
+				if(!rom->getSingle(0, 0, data))
+					return;
+
+				switch(virusLib::Microcontroller::getPresetVersion(data.front()))
+				{
+				case virusLib::A:	m = "A";	break;
+				case virusLib::B:	m = "B";	break;
+				case virusLib::C:	m = "C";	break;
+				case virusLib::D:	m = "TI";	break;
+				case virusLib::D2:	m = "TI2";	break;
+				default:			m = "?";	break;
+				}
+			}
+			break;
+		case virusLib::DeviceModel::Snow:	m = "Snow";	break;
+		case virusLib::DeviceModel::TI:		m = "TI";	break;
+		case virusLib::DeviceModel::TI2:	m = "TI2";	break;
 		}
 
 		m_deviceModel->setText(m, juce::dontSendNotification);

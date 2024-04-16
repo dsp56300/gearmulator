@@ -8,9 +8,7 @@
 
 const std::vector<PluginEditorState::Skin> g_includedSkins =
 {
-	{"Hoverland", "VirusC_Hoverland.json", ""},
-	{"Trancy", "VirusC_Trancy.json", ""},
-	{"Galaxpel", "VirusC_Galaxpel.json", ""}
+	{"TI Trancy", "VirusTI_Trancy.json", ""}
 };
 
 PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller) : jucePluginEditorLib::PluginEditorState(_processor, _controller, g_includedSkins)

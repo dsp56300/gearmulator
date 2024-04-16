@@ -1,7 +1,8 @@
 #include <vector>
 #include <chrono>
 #include <thread>
-#include <cstring> // memcpy
+#include <cstring>	// memcpy
+#include <cmath>	// floor/abs
 
 #include "microcontroller.h"
 
@@ -61,7 +62,7 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 	bool failed = false;
 
 	// read all singles from ROM and copy first ROM banks to RAM banks
-	for(uint32_t b=0; b<26 && !failed; ++b)
+	for(uint32_t b=0; b<128 && !failed; ++b)
 	{
 		std::vector<TPreset> singles;
 
@@ -105,16 +106,135 @@ Microcontroller::Microcontroller(DspSingle& _dsp, const ROMFile& _romFile, bool 
 void Microcontroller::sendInitControlCommands()
 {
 	writeHostBitsWithWait(0, 1);
+//	const std::vector<TWord> magic = { 0xf4f473, 0xf4f46e, 0xf4f46f, 0xf4f477 };	// snow
+//	const std::vector<TWord> magic = { 0xf4f453, 0xf4f44e, 0xf4f44f, 0xf4f457 };	// SNOW
+//	const std::vector<TWord> magic = { 0xf4f454, 0xf4f449, 0xf4f453, 0xf4f44e, 0xf4f44f, 0xf4f457 };	// TISNOW
+//	const std::vector<TWord> magic = { 0xf4f473, 0x407f01, 0xf4f473, 0x401000, 0xf4f46e, 0x407f01, 0xf4f46e, 0x401000, 0xf4f46f, 0x407f01, 0xf4f46f, 0x401000, 0xf4f477, 0x407f01, 0xf4f477, 0x401000 };
+//	const std::vector<TWord> magic = { 0xf4f473, 0x407f00, 0xf4f46e, 0x407f01, 0xf4f46f, 0x407f02, 0xf4f477, 0x407f03 };
+//	m_hdi08.writeRX(magic);
 
 	LOG("Sending Init Control Commands");
 
-	sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
-	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
-	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
-	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x0);	// Disable poly pressure to edit parameters on page B
-	sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
-	sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
-	sendControlCommand(DEVICE_ID, OMNI_DEVICE_ID);		// Set device ID to Omni
+	if(m_rom.isTIFamily())
+	{
+		const std::vector<TWord> initCodeDS =
+		{
+			0xF4F473, 0x407F00,
+			0xF4F473, 0x401000,						// Samplerate 44100 Hz
+//			0xF47555, 0x104000, 0x0C0104, 0x000319, 0x007F00, 0x00407F, 0x000000, 0x00007E, 0x003728, 0x607F62, 0x3E3420, 0x190040, 0x406000, 0x663100, 0x402300, 0x401509, 0x2F233E, 0x286B6A, 0x400600, 0x010200, 0x384719, 0x137F00, 0x7F7F40, 0x150000, 0x006501, 0x010057, 0x000040, 0x404040, 0x4B5402, 0x010040, 0x000040, 0x404040, 0x407B01, 0x400400, 0x000269, 0x7F4000, 0x01017F, 0x001060, 0x126801, 0x00011B, 0x7F5010, 0x0C0140, 0x000000, 0x010000, 0x000040, 0x000000, 0x004000, 0x610100, 0x000100, 0x4B0000, 0x390400, 0x000000, 0x7F0000, 0x01423E, 0x010001, 0x000124, 0x000040, 0x000000, 0x000040, 0x40282B, 0x554040, 0x404049, 0x2C4060, 0x4D4040, 0x004040, 0x401603, 0x03107F, 0x144900, 0x004002, 0x490F19, 0x2B186A, 0x184814, 0x010000, 0x410000, 0x7F607F, 0x004864, 0x334040, 0x282000, 0x000000, 0x056556, 0x071845, 0x023C00, 0x202054, 0x202049, 0x202042, 0x430001, 0x000100, 0x010001, 0x440354, 0x373062, 0x000000, 0x400304, 0x020000, 0x000000, 0x7F4040, 0x7F7F40, 0x000005, 0x000200, 0x000000, 0x010000, 0x000000, 0x004000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x400000, 0x000000, 0x000000, 0x007F7F, 0x400000, 0x000000, 0x144600, 0x404614, 0x460040, 0x460135, 0x004000, 0x400040, 0x004000, 0x400040, 0x0B2903, 0x400000, 0x000000, 0x000000, 0x010002, 0x000000, 0x010000, 0x00001F, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x02697F, 0x400001, 0x000006,
+			0xF4F473, 0x401000,						// Samplerate 44100 Hz
+			0xF00020, 0x330110, 0x734000, 0x00F700,
+			0xF00020, 0x330110, 0x734009, 0x02F702,	// USB Mode = 3 out 1 in
+			0xF00020, 0x330110, 0x73400E, 0x00F700,	// Set DSP clock base to $0 = 133 Mhz ($1 = 153 MHz)
+			0xF00020, 0x330110, 0x73406D, 0x64F764, // DSP clock adjustment in percent (roughly), default $64 = 100%, max $79 = 121%
+			0xF00020, 0x330110, 0x73400D, 0x00F700, // ??
+			0xF00020, 0x330110, 0x734010, 0x00F700,	// Samplerate = 44100 Hz
+			0xF00020, 0x330110, 0x734019, 0x01F701,	// EQ = Enable
+			0xF00020, 0x330110, 0x73401A, 0x01F701,	// Arp = Enable
+			0xF00020, 0x330110, 0x73401B, 0x01F701, // Delay = Enable
+			0xF00020, 0x330110, 0x73401C, 0x01F701, // Reverb = Enable
+			0xF00020, 0x330110, 0x73401D, 0x00F700, // Analog Input Phono Mode = off
+			0xF00020, 0x330110, 0x73402D, 0x00F700,	// Second Output Select = 0
+			0xF00020, 0x330110, 0x734032, 0x6EF76E, // BPM LED Brightness Ratio = $6e
+			0xF00020, 0x330110, 0x734033, 0x50F750, // LED Brightness = $50
+			0xF00020, 0x330110, 0x734034, 0x7fF77f, // Logo Groove = $7f
+			0xF00020, 0x330110, 0x734035, 0x40F740, // Random Patch Generator Depth = $40
+			0xF00020, 0x330110, 0x734036, 0x0CF70C, // Random Patch Generator Amount = $54
+			0xF00020, 0x330110, 0x73403B, 0x01F701, // USB Output Midi Data Cable Number = 1
+			0xF00020, 0x330110, 0x73403C, 0x01F701, // USB Output Panel Data Cable Number = 1
+			0xF00020, 0x330110, 0x73403E, 0x40F740, // Keyboard Param Velocity Curve = $40
+			0xF00020, 0x330110, 0x734040, 0x01F701, // Keyboard Param Local On = On
+			0xF00020, 0x330110, 0x734041, 0x00F700, // Keyboard Param Channel Mode = 0
+			0xF00020, 0x330110, 0x734042, 0x40F740, // Keyboard Param Transpose = $40
+			0xF00020, 0x330110, 0x734043, 0x01F701, // Keyboard Param Modwheel = 1
+			0xF00020, 0x330110, 0x734044, 0x40F740, // Keyboard Param Hold Pedal = $40
+			0xF00020, 0x330110, 0x734045, 0x00F700, // Keyboard Param Pedal 2 Mode = 0
+			0xF00020, 0x330110, 0x734046, 0x40F740, // Keyboard Param Pressure Sensitivity = $40
+			0xF00020, 0x330110, 0x73404C, 0x00F700, // Pure Tuning = 0
+			0xF00020, 0x330110, 0x734057, 0x01F701, // Midi Volume Enable = On
+			0xF00020, 0x330110, 0x73405A, 0x00F700,	// Input Thru Level = 0
+			0xF00020, 0x330110, 0x73405B, 0x00F700, // Input Boost = 0
+			0xF00020, 0x330110, 0x73405C, 0x40F740,	// Master Tune = +/- 0
+			0xF00020, 0x330110, 0x73405D, 0x10F710, // device ID $10 = omni
+			0xF00020, 0x330110, 0x73405E, 0x01F701, // Midi Control Low Page = 1 = allow midi CC
+			0xF00020, 0x330110, 0x73405F, 0x00F700, // Midi Control High Page = 0 = Do NOT allow Poly Pressure
+			0xF00020, 0x330110, 0x734060, 0x00F700, // Midi Arp Send = 0 = off
+			0xF00020, 0x330110, 0x73406A, 0x01F701, // Midi Clock RX = 1 = enabled
+			0xF00020, 0x330110, 0x73406E, 0x00F700, // Soft Knob Config Mode 1 = 0
+			0xF00020, 0x330110, 0x73406F, 0x00F700, // Soft Knob Config Mode 2 = 0
+			0xF00020, 0x330110, 0x734070, 0x00F700, // Soft Knob Config Dest 1 = 0
+			0xF00020, 0x330110, 0x734071, 0x00F700, // Soft Knob Config Dest 2 = 0
+			0xF00020, 0x330110, 0x734072, 0x00F700, // Soft Knob Config Mode 3 = 0
+//			0xF0FFFF, 0x00FFFF, 0x20FFFF, 0x33FFFF, 0x01FFFF, 0x10FFFF, 0x73FFFF, 0x01FFFF, 0x10FFFF, 0x00FFFF, 0xF7FFFF,	// parameter $10 for Part 1 = 0
+			0xF00020, 0x330110, 0x734073, 0x00F700,	// Soft Knob Config Dest 3 = 0
+			0xF00020, 0x330110, 0x734079, 0x01F701,	// Panel Destination = 1
+			0xF00020, 0x330110, 0x73407C, 0x00F700,	// Global Channel = 0
+			0xF00020, 0x330110, 0x73407D, 0x02F702, // LED Mode = 2
+			0xF00020, 0x330110, 0x73407F, 0x63F763,	// Master Volume = 99
+//			0xF47555, 0x104000, 0x0C0104, 0x000319, 0x007F00, 0x00407F, 0x000000, 0x00007E, 0x003728, 0x607F62, 0x3E3420, 0x190040, 0x406000, 0x663100, 0x402300, 0x401509, 0x2F233E, 0x286B6A, 0x400600, 0x010200, 0x384719, 0x137F00, 0x7F7F40, 0x150000, 0x006501, 0x010057, 0x000040, 0x404040, 0x4B5402, 0x010040, 0x000040, 0x404040, 0x407B01, 0x400400, 0x000269, 0x7F4000, 0x01017F, 0x001060, 0x126801, 0x00011B, 0x7F5010, 0x0C0140, 0x000000, 0x010000, 0x000040, 0x000000, 0x004000, 0x610100, 0x000100, 0x4B0000, 0x390400, 0x000000, 0x7F0000, 0x01423E, 0x010001, 0x000124, 0x000040, 0x000000, 0x000040, 0x40282B, 0x554040, 0x404049, 0x2C4060, 0x4D4040, 0x004040, 0x401603, 0x03107F, 0x144900, 0x004002, 0x490F19, 0x2B186A, 0x184814, 0x010000, 0x410000, 0x7F607F, 0x004864, 0x334040, 0x282000, 0x000000, 0x056556, 0x071845, 0x023C00, 0x202054, 0x202049, 0x202042, 0x430001, 0x000100, 0x010001, 0x440354, 0x373062, 0x000000, 0x400304, 0x020000, 0x000000, 0x7F4040, 0x7F7F40, 0x000005, 0x000200, 0x000000, 0x010000, 0x000000, 0x004000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x400000, 0x000000, 0x000000, 0x007F7F, 0x400000, 0x000000, 0x144600, 0x404614, 0x460040, 0x460135, 0x004000, 0x400040, 0x004000, 0x400040, 0x0B2903, 0x400000, 0x000000, 0x000000, 0x010002, 0x000000, 0x010000, 0x00001F, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x406401, 0x406400, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x000000, 0x02697F, 0x400001, 0x000006,
+			0xF4F473, 0x401000,						// Samplerate 44100 Hz
+//			0xF4F473, 0x401001,						// Samplerate 48000 Hz
+		};
+
+		m_hdi08.writeRX(initCodeDS);
+
+#if 0
+		constexpr uint8_t prts = 0x4f;
+
+		enum class Output : uint8_t
+		{
+			Out1L,		Out1,		Out1R,
+			Out2L,		Out2,		Out2R,
+			Out3L,		Out3,		Out3R,
+			Usb1L,		Usb1,		Usb1R,
+			Usb2L,		Usb2,		Usb2R,
+			Usb3L,		Usb3,		Usb3R
+		};
+
+		constexpr auto oa = static_cast<uint8_t>(Output::Usb1);
+		constexpr auto ob = static_cast<uint8_t>(Output::Usb2);
+		constexpr auto oc = static_cast<uint8_t>(Output::Usb3);
+
+		constexpr uint8_t multi[] =
+		{
+			0x02,0x01,0x00,0x01,0x49,0x6e,0x69,0x74,0x20,0x4d,0x75,0x6c,0x74,0x69,0x00,0x39,	// Internal/"Init Multi"/Clock Tempo
+			0x01,0x3c,0x00,0x10,0x00,0x01,0x01,0x00,0x40,0x40,0x40,0x40,0x40,0x00,0x40,0x40,	// Delay/Internal
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// Bank Number
+			0x00,0x00,0x00,0x00,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,	// Program Number
+			0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f,	// Midi Channel
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// Low Key
+			0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,0x7f,	// High Key
+			0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,	// Transpose
+			0x40,0x42,0x43,0x41,0x47,0x42,0x46,0x41,0x48,0x46,0x44,0x40,0x40,0x40,0x40,0x40,	// Detune
+			0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,	// Part Volume
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// Midi Volume Init
+			oa  ,oa  ,ob  ,ob  ,oc  ,oc  ,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,0x01,	// Output Select
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// Effect Send
+			0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,	// Internal
+			0x41,0x46,0x40,0x48,0x41,0x49,0x47,0x41,0x42,0x47,0x40,0x45,0x41,0x49,0x47,0x46,	// Internal
+			prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts,prts		// Part State
+		};
+
+		TPreset data;
+		memcpy(&data[0], multi, std::size(multi));
+
+		sendControlCommand(PLAY_MODE, PlayModeMulti);
+
+		const auto words = presetToDSPWords(data, true);
+
+		sendPreset(0, words, true);
+#endif
+	}
+//	else
+	{
+		sendControlCommand(MIDI_CLOCK_RX, 0x1);				// Enable MIDI clock receive
+		sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
+		sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
+		sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x0);	// Disable poly pressure to edit parameters on page B
+		sendControlCommand(MASTER_VOLUME, 92);				// Set master volume to 92, we tested it against a USB-connected TI and this is the perfect match
+		sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
+		sendControlCommand(DEVICE_ID, OMNI_DEVICE_ID);		// Set device ID to Omni
+	}
 }
 
 void Microcontroller::createDefaultState()
@@ -134,7 +254,7 @@ void Microcontroller::writeHostBitsWithWait(const uint8_t flag0, const uint8_t f
 
 bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, const bool isMulti)
 {
-	if(!isValid(preset))
+	if(!isMulti && !isValid(preset))
 		return false;
 
 	std::lock_guard lock(m_mutex);
@@ -188,6 +308,9 @@ bool Microcontroller::sendPreset(const uint8_t program, const TPreset& preset, c
 		}
 		else if(program < m_singleEditBuffers.size())
 		{
+			if(program >= getPartCount())
+				return false;
+
 			m_singleEditBuffers[program] = preset;
 		}
 	}
@@ -216,9 +339,41 @@ void Microcontroller::sendControlCommand(const ControlCommand _command, const ui
 	send(globalSettingsPage(), 0x0, _command, _value);
 }
 
+void Microcontroller::setSamplerate(const float _samplerate)
+{
+	const auto sr = static_cast<int>(std::floor(_samplerate + 0.5f));
+	
+	/*
+		0 = 44100 Hz @ EXTAL 11289600 Hz (44100 * 256)
+		1 = 48000 Hz @ EXTAL 12288000 Hz (48000 * 256)
+		2 = 44100 Hz @ ^^
+		3 = 32000 Hz @ ^^
+		4 = 96000 Hz @ ^^
+		5 = 88200 Hz @ ^^
+		6 = 64000 Hz @ ^^
+	*/
+
+	TWord v;
+
+	switch (sr)
+	{
+	default:
+	case 44100:	v = 0;	break;
+	case 48000:	v = 1;	break;
+	case 32000:	v = 3;	break;
+	case 96000:	v = 4;	break;
+	case 88200:	v = 5;	break;
+	case 64000:	v = 6;	break;
+	}
+
+	std::lock_guard lock(m_mutex);
+	m_hdi08.writeRX({0xF4F473, 0x401000 + v});
+}
 
 uint32_t Microcontroller::getPartCount() const
 {
+	if(m_rom.getModel() == DeviceModel::Snow)
+		return 4;
 	return 16;
 }
 
@@ -357,7 +512,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 		const auto size = _type == DUMP_SINGLE ? m_rom.getSinglePresetSize() : m_rom.getMultiPresetSize();
 
-		const auto modelABCsize = ROMFile::getSinglePresetSize();
+		const auto modelABCsize = ROMFile::getSinglePresetSize(DeviceModel::ABC);
 
 		for(size_t i=0; i<modelABCsize; ++i)
 			response.push_back(_dump[i]);
@@ -507,7 +662,18 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				LOG("Received Single dump, Bank " << (int)toMidiByte(bank) << ", program " << (int)program);
 				TPreset preset;
 				preset.fill(0);
-				std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
+				if(_data.size() == 524 && m_rom.isTIFamily())
+				{
+					// D preset
+					auto data(_data);
+
+					data.erase(data.begin() + 0x100 + g_sysexPresetHeaderSize);	// A/B/C checksum, not needed on D
+					std::copy_n(data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
+				}
+				else
+				{
+					std::copy_n(_data.data() + g_sysexPresetHeaderSize, std::min(preset.size(), _data.size() - g_sysexPresetHeaderSize - g_sysexPresetFooterSize), preset.begin());
+				}
 				return writeSingle(bank, program, preset);
 			}
 		case DUMP_MULTI:
@@ -571,9 +737,12 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				return enqueue();
 			buildArrangementResponse();
 			break;
+		case PAGE_6E:
+		case PAGE_6F:
 		case PAGE_A:
 		case PAGE_B:
 		case PAGE_C:
+		case PAGE_D:
 			{
 				const auto page = static_cast<Page>(cmd);
 
@@ -666,8 +835,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 std::vector<TWord> Microcontroller::presetToDSPWords(const TPreset& _preset, const bool _isMulti) const
 {
+	const auto presetVersion = getPresetVersion(_preset);
+	const auto presetModel = presetVersion <= C ? DeviceModel::ABC : DeviceModel::Snow;
+
 	const auto targetByteSize = _isMulti ? m_rom.getMultiPresetSize() : m_rom.getSinglePresetSize();
-	const auto sourceByteSize = _isMulti ? ROMFile::getMultiPresetSize() : ROMFile::getSinglePresetSize();
+	const auto sourceByteSize = _isMulti ? ROMFile::getMultiPresetSize(presetModel) : ROMFile::getSinglePresetSize(presetModel);
 
 	const auto sourceWordSize = (sourceByteSize + 2) / 3;
 	const auto targetWordSize = (targetByteSize + 2) / 3;
@@ -979,7 +1151,7 @@ void Microcontroller::addDSP(DspSingle& _dsp, bool _useEsaiBasedMidiTiming)
 {
 	m_hdi08.addHDI08(_dsp.getHDI08());
 	m_hdi08TxParsers.emplace_back(*this);
-	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming);
+	m_midiQueues.emplace_back(_dsp, m_hdi08.getQueue(m_hdi08.size()-1), _useEsaiBasedMidiTiming, m_rom.isTIFamily());
 }
 
 void Microcontroller::processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents)
@@ -1084,6 +1256,8 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	{
 	case PAGE_A:	offset = 0;	break;
 	case PAGE_B:	offset = 1;	break;
+	case PAGE_6E:	offset = 2;	break;
+	case PAGE_6F:	offset = 3;	break;
 	default:
 		return;
 	}
@@ -1110,13 +1284,17 @@ void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t 
 
 Page Microcontroller::globalSettingsPage() const
 {
-	return PAGE_C;
+	return m_rom.isTIFamily() ? PAGE_D : PAGE_C;
 }
 
 bool Microcontroller::isPageSupported(Page _page) const
 {
 	switch (_page)
 	{
+	case PAGE_6E:
+	case PAGE_6F:
+	case PAGE_D:
+		return m_rom.isTIFamily();
 	case PAGE_A:
 	case PAGE_B:
 	case PAGE_C:

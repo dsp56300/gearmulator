@@ -1,6 +1,7 @@
 #include "device.h"
 
-#include "dspSingle.h"
+#include "dspMultiTI.h"
+#include "dspSingleSnow.h"
 #include "romfile.h"
 
 #include "dsp56kEmu/jit.h"
@@ -18,7 +19,7 @@ namespace virusLib
 		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
 		if(!m_rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Either a ROM file (.bin) or an OS update file (.mid) is required, but neither was found.");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware ROM file (firmware.bin) is required, but was not found.");
 
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
@@ -77,6 +78,20 @@ namespace virusLib
 		case DeviceModel::Snow:
 		case DeviceModel::TI:
 		case DeviceModel::TI2:
+			return {32000.0f, 44100.0f, 48000.0f, 64000.0f, 88200.0f, 96000.0f};
+		}
+	}
+
+	std::vector<float> Device::getPreferredSamplerates() const
+	{
+		switch (m_rom.getModel())
+		{
+		default:
+		case DeviceModel::ABC:
+			return getSupportedSamplerates();
+		case DeviceModel::Snow:
+		case DeviceModel::TI:
+		case DeviceModel::TI2:
 			return {44100.0f, 48000.0f};
 		}
 	}
@@ -86,11 +101,15 @@ namespace virusLib
 		return m_samplerate;
 	}
 
-	bool Device::setSamplerate(float _samplerate)
+	bool Device::setSamplerate(const float _samplerate)
 	{
 		if(!synthLib::Device::setSamplerate(_samplerate))
 			return false;
 		m_samplerate = _samplerate;
+		configureDSP(*m_dsp, m_rom, m_samplerate);
+		if(m_dsp2)
+			configureDSP(*m_dsp2, m_rom, m_samplerate);
+		m_mc->setSamplerate(_samplerate);
 		return true;
 	}
 
@@ -105,8 +124,35 @@ namespace virusLib
 
 		synthLib::Device::process(_inputs, _outputs, _size, _midiIn, _midiOut);
 
-		m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 0, 2);	// TIMER 1 = ACI = LFO 1 LED
-		m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 1);	// TIMER 2 = ADO = LFO 2/3 LED
+		if(m_rom.isTIFamily())
+		{
+			// Apparently this LED model did not want a completely closed PWM
+			constexpr auto minimumValue = 0.785339653f;
+			constexpr auto maximumValue = 0.999146f;
+
+			if(m_rom.getModel() == DeviceModel::Snow)
+			{
+				m_frontpanelStateDSP.m_lfoPhases[0] = 1.f;
+				m_frontpanelStateDSP.m_lfoPhases[1] = 1.f;
+				m_frontpanelStateDSP.m_lfoPhases[2] = 1.f;
+				m_frontpanelStateDSP.m_logo = 1.f;
+
+				FrontpanelState::updatePhaseFromTimer(m_frontpanelStateDSP.m_bpm, m_dsp->getDSP(), 1, 0.83f, 1.0f);
+			}
+			else
+			{
+				m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 0, 1, minimumValue, maximumValue);
+				m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 2, minimumValue, maximumValue);
+				m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 2, 0, minimumValue, maximumValue);
+
+				FrontpanelState::updatePhaseFromTimer(m_frontpanelStateDSP.m_logo, m_dsp2->getDSP(), 0, 0.963654f, 1);
+			}
+		}
+		else
+		{
+			m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 0, 2);	// TIMER 1 = ACI = LFO 1 LED
+			m_frontpanelStateDSP.updateLfoPhaseFromTimer(m_dsp->getDSP(), 1, 1);	// TIMER 2 = ADO = LFO 2/3 LED
+		}
 
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 
@@ -292,7 +338,12 @@ namespace virusLib
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples
-		return 324;
+		constexpr auto latency = 324;
+
+		if(m_rom.isTIFamily())
+			return latency - 108;	// TI seems to have improved a bit
+
+		return latency;	
 	}
 
 	uint32_t Device::getInternalLatencyInputToOutput() const
@@ -309,12 +360,27 @@ namespace virusLib
 
 	uint32_t Device::getChannelCountOut()
 	{
-		return 6;
+		return m_rom.isTIFamily() ? 12 : 6;
 	}
 
 	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
-		_dspA = new DspSingle(0x040000, false, nullptr, _rom.getModel() == DeviceModel::A);
+#if VIRUS_SUPPORT_TI
+		if(_rom.getModel() == DeviceModel::Snow)
+		{
+			_dspA = new DspSingleSnow();
+		}
+		else if(_rom.getModel() == DeviceModel::TI || _rom.getModel() == DeviceModel::TI2)
+		{
+			auto* dsp = new DspMultiTI();
+			_dspA = dsp;
+			_dspB = &dsp->getDSP2();
+		}
+		else
+#endif
+		{
+			_dspA = new DspSingle(_rom.isTIFamily() ? 0x100000 : 0x040000, _rom.isTIFamily(), nullptr, _rom.getModel() == DeviceModel::A);
+		}
 
 		configureDSP(*_dspA, _rom, _samplerate);
 
@@ -388,9 +454,30 @@ namespace virusLib
 		auto& jit = _dsp.getJIT();
 		auto conf = jit.getConfig();
 
-		conf.aguSupportBitreverse = false;
-		conf.aguSupportMultipleWrapModulo = false;
-		conf.dynamicPeripheralAddressing = false;
+		if(_rom.isTIFamily())
+		{
+			auto& clock = _dsp.getPeriphX().getEsaiClock();
+
+			const auto sr = static_cast<int>(_samplerate);
+
+			clock.setExternalClockFrequency(std::min(sr, 48000) * 256);
+
+			if(_rom.getModel() != DeviceModel::Snow)
+			{
+				clock.setSamplerate(sr * 3);
+				clock.setEsaiDivider(&_dsp.getPeriphY().getEsai(), 0);
+				clock.setEsaiDivider(&_dsp.getPeriphX().getEsai(), 2);
+			}
+
+			conf.aguSupportBitreverse = true;
+			conf.maxDoIterations = 32;
+
+			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
+		}
+		else
+		{
+			conf.aguSupportBitreverse = false;
+		}
 
 		jit.setConfig(conf);
 	}

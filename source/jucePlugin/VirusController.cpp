@@ -26,7 +26,8 @@ namespace Virus
 	    "requestcontrollerdump",
 	    "parameterchange",
 	    "singledump",
-	    "multidump"
+	    "multidump",
+	    "singledump_C",
     };
 
     static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -36,7 +37,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p.getModel())), m_processor(p), m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -44,9 +45,15 @@ namespace Virus
         case virusLib::DeviceModel::A:
         case virusLib::DeviceModel::B:
         case virusLib::DeviceModel::C:    m_singles.resize(8);  break;
-        case virusLib::DeviceModel::Snow: m_singles.resize(10); break;
+        case virusLib::DeviceModel::Snow:
         case virusLib::DeviceModel::TI:
-        case virusLib::DeviceModel::TI2:  m_singles.resize(26); break;
+        case virusLib::DeviceModel::TI2:
+        	m_singles.resize(
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI) +
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2) +
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow) +
+                2
+            ); break;
         }
 
     	registerParams(p);
@@ -94,7 +101,7 @@ namespace Virus
             if(deviceId != m_deviceId && deviceId != virusLib::OMNI_DEVICE_ID)
                 return; // not intended to this device!
 
-            if(name == midiPacketName(MidiPacketType::SingleDump))
+            if(name == midiPacketName(MidiPacketType::SingleDump) || name == midiPacketName(MidiPacketType::SingleDump_C))
                 parseSingle(_msg, data, parameterValues);
             else if(name == midiPacketName(MidiPacketType::MultiDump))
                 parseMulti(_msg, data, parameterValues);
@@ -350,12 +357,20 @@ namespace Virus
 
 	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg) const
 	{
+        MidiPacketType unused;
+        return parseSingle(_data, _parameterValues, _msg, unused);
+	}
+
+	bool Controller::parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const
+	{
         const auto packetName = midiPacketName(MidiPacketType::SingleDump);
 
     	auto* m = getMidiPacket(packetName);
 
     	if(!m)
             return false;
+
+    	usedPacketType = MidiPacketType::SingleDump;
 
         if(_msg.size() > m->size())
         {
@@ -365,12 +380,21 @@ namespace Virus
 	    	return parseMidiPacket(*m, _data, _parameterValues, temp);
         }
 
+		if(_msg.size() < m->size())
+        {
+			const auto* mc = getMidiPacket(midiPacketName(MidiPacketType::SingleDump_C));
+	    	if(!mc)
+	            return false;
+            usedPacketType = MidiPacketType::SingleDump_C;
+	    	return parseMidiPacket(*mc, _data, _parameterValues, _msg);
+        }
+
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
 
-	std::string Controller::loadParameterDescriptions()
+	std::string Controller::loadParameterDescriptions(const virusLib::DeviceModel _model)
 	{
-        const auto name = "parameterDescriptions_C.json";
+		const auto name = _model == virusLib::DeviceModel::Invalid || virusLib::isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
         const auto path = synthLib::getModulePath() +  name;
 
         const std::ifstream f(path.c_str(), std::ios::in);
@@ -654,9 +678,9 @@ namespace Virus
         return dst;
     }
 
-    std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
+    std::vector<uint8_t> Controller::createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues)
     {
-        const auto* m = getMidiPacket(midiPacketName(MidiPacketType::SingleDump));
+        const auto* m = getMidiPacket(midiPacketName(_packet));
 		assert(m && "midi packet not found");
 
     	if(!m)
@@ -716,7 +740,45 @@ namespace Virus
     std::string Controller::getBankName(uint32_t _index) const
     {
         char temp[32]{0};
-        sprintf(temp, "Bank %c", 'A' + _index);
+
+        if(getBankCount() <= 26)
+        {
+	        snprintf(temp, sizeof(temp), "Bank %c", 'A' + _index);
+        }
+        else if(_index < 2)
+        {
+	        snprintf(temp, sizeof(temp), "RAM Bank %c", 'A' + _index);
+        }
+        else
+        {
+            _index -= 2;
+
+            const auto countSnow    = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow);
+            const auto countTI      = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI);
+            const auto countTI2     = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2);
+
+            switch(m_processor.getModel())
+            {
+            case virusLib::DeviceModel::Snow: 
+                if(_index < countSnow)                  sprintf(temp, "Snow Rom %c", 'A' + _index);
+                else if(_index < countTI + countSnow)	sprintf(temp, "TI Rom %c", 'A' + (_index - countSnow));
+                else			                 		sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI - countSnow));
+                break;
+            case virusLib::DeviceModel::TI:
+                if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
+                else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
+                else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countTI2));
+                break;
+            case virusLib::DeviceModel::TI2: 
+                if(_index < countTI2)	                sprintf(temp, "TI2 Rom %c", 'A' + _index);
+                else if(_index < countTI2 + countTI)	sprintf(temp, "TI Rom %c", 'A' + (_index - countTI2));
+                else			    	            	sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI2 - countTI));
+                break;
+            default:
+                assert(false);
+                break;
+            }
+        }
         return temp;
     }
 

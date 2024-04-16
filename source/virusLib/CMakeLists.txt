@@ -3,12 +3,25 @@ project(virusLib)
 
 add_library(virusLib STATIC)
 
+if(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
+	set(VIRUS_SUPPORT_TI on)
+else()
+	set(VIRUS_SUPPORT_TI off)
+endif()
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h.in ${CMAKE_CURRENT_SOURCE_DIR}/buildconfig.h)
+
 set(SOURCES
+	buildconfig.h
+	buildconfig.h.in
 	demoplayback.cpp demoplayback.h
+	demoplaybackTI.cpp demoplaybackTI.h
 	device.cpp device.h
 	deviceModel.cpp deviceModel.h
 	dspMemoryPatches.cpp dspMemoryPatches.h
 	dspSingle.cpp dspSingle.h
+	dspSingleSnow.cpp dspSingleSnow.h
+	dspMultiTI.cpp dspMultiTI.h
 	frontpanelState.cpp frontpanelState.h
 	hdi08List.cpp hdi08List.h
 	hdi08MidiQueue.cpp hdi08MidiQueue.h
@@ -19,6 +32,7 @@ set(SOURCES
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
 	midiFileToRomData.cpp midiFileToRomData.h
+	unpacker.cpp unpacker.h
 	utils.h
 )
 

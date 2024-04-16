@@ -7,6 +7,7 @@
 
 #include "../virusLib/device.h"
 #include "../virusLib/romloader.h"
+#include "../virusLib/demoplaybackTI.h"
 
 #include "dsp56kEmu/dsp.h"
 
@@ -22,7 +23,7 @@ class EsaiListener;
 
 ConsoleApp::ConsoleApp(const std::string& _romFile)
 : m_romName(_romFile)
-, m_rom(ROMLoader::findROM(_romFile))
+, m_rom(ROMLoader::findROM(_romFile, DeviceModel::TI2))
 , m_preset({})
 {
 	if (!m_rom.isValid())
@@ -65,6 +66,9 @@ void ConsoleApp::bootDSP(const bool _createDebugger) const
 
 dsp56k::IPeripherals& ConsoleApp::getYPeripherals() const
 {
+	if (m_rom.isTIFamily())
+		return m_dsp1->getPeriphY();
+
 	return m_dsp1->getPeriphNop();
 }
 
@@ -121,7 +125,7 @@ bool ConsoleApp::loadSingle(const std::string& _preset)
 
 bool ConsoleApp::loadDemo(const std::string& _filename)
 {
-	m_demo.reset(new DemoPlayback(*m_uc));
+	m_demo.reset(m_rom.isTIFamily() ? new DemoPlaybackTI(*m_uc) : new DemoPlayback(*m_uc));
 
 	if(m_demo->loadFile(_filename))
 	{
@@ -138,7 +142,7 @@ bool ConsoleApp::loadInternalDemo()
 	if(m_rom.getDemoData().empty())
 		return false;
 
-	m_demo.reset(new DemoPlayback(*m_uc));
+	m_demo.reset(m_rom.isTIFamily() ? new DemoPlaybackTI(*m_uc) : new DemoPlayback(*m_uc));
 
 	if(m_demo->loadBinData(m_rom.getDemoData()))
 	{
@@ -200,14 +204,13 @@ void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 		m_demo->process(1);
 }
 
-void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, bool _createDebugger/* = false*/, bool _dumpAssembler/* = false*/)
+void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, uint32_t _blockSize/* = 64*/, bool _createDebugger/* = false*/, bool _dumpAssembler/* = false*/)
 {
 	assert(!_audioOutputFilename.empty());
 //	dsp.enableTrace((DSP::TraceMode)(DSP::Ops | DSP::Regs | DSP::StackIndent));
 
-	constexpr uint32_t blockSize = 64;
-
-	constexpr uint32_t notifyThreshold = blockSize - 4;
+	const uint32_t blockSize = _blockSize;
+	const uint32_t notifyThreshold = blockSize > 4 ? blockSize - 4 : 0;
 
 	uint32_t callbackCount = 0;
 	dsp56k::Semaphore sem(1);
@@ -263,5 +266,5 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		midiEvents.clear();
 	}
 
-	esai.setCallback(nullptr,0);
+	esai.setCallback([&](dsp56k::Audio*){},0);
 }

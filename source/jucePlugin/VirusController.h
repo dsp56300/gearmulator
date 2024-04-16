@@ -4,6 +4,7 @@
 #include "../jucePluginLib/controller.h"
 
 #include "../virusLib/microcontrollerTypes.h"
+#include "../virusLib/romfile.h"
 
 #include "../synthLib/plugin.h"
 
@@ -45,6 +46,7 @@ namespace Virus
 			ParameterChange,
 			SingleDump,
 			MultiDump,
+            SingleDump_C,
 
 			Count
 		};
@@ -67,7 +69,7 @@ namespace Virus
 		~Controller() override;
 
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
-        std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
+        std::vector<uint8_t> createSingleDump(MidiPacketType _packet, uint8_t _bank, uint8_t _program, const pluginLib::MidiPacket::AnyPartParamValues& _paramValues);
         std::vector<uint8_t> modifySingleDump(const std::vector<uint8_t>& _sysex, virusLib::BankNumber _newBank, uint8_t _newProgram) const;
 
     	void selectPrevPreset(uint8_t _part);
@@ -149,9 +151,10 @@ namespace Virus
 		uint8_t getDeviceId() const { return m_deviceId; }
 
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg) const;
+        bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
-        static std::string loadParameterDescriptions();
+        static std::string loadParameterDescriptions(const virusLib::DeviceModel _model);
 
 		void timerCallback() override;
 

@@ -4,6 +4,8 @@
 #include "romfile.h"
 #include "utils.h"
 
+#include "unpacker.h"
+
 #include "../dsp56300/source/dsp56kEmu/dsp.h"
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
@@ -11,6 +13,7 @@
 
 #include <cstring>	// memcpy
 
+#include "demoplaybackTI.h"
 #include "dsp56kEmu/memory.h"
 
 namespace virusLib
@@ -31,9 +34,26 @@ ROMFile ROMFile::invalid()
 
 bool ROMFile::initialize()
 {
-	const std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
-	
-	const auto chunks = readChunks(*dsp);
+	std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
+
+#if VIRUS_SUPPORT_TI
+	ROMUnpacker::Firmware fw;
+
+	// Check if we are dealing with a TI installer file, if so, unpack it first
+	if (ROMUnpacker::isValidInstaller(*dsp))
+	{
+		fw = ROMUnpacker::getFirmware(*dsp, m_model);
+		if (!fw.isValid())
+		{
+			LOG("Could not unpack ROM file");
+			return false;
+		}
+
+		// Wrap into a stream so we can pass it into readChunks
+		dsp.reset(new imemstream(fw.DSP));
+	}
+#endif
+	const auto chunks = readChunks(*dsp, m_model);
 
 	if (chunks.empty())
 		return false;
@@ -61,21 +81,130 @@ bool ROMFile::initialize()
 	printf("Program BootROM offset = 0x%x\n", bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(m_commandStream.size()));
 
+#if VIRUS_SUPPORT_TI
+	if(isTIFamily())
+	{
+		if (!fw.Presets.empty())
+		{
+			for (auto& presetFile: fw.Presets)
+			{
+				imemstream stream(presetFile);
+				loadPresetFile(stream, m_model);
+			}
+
+			for (const auto & preset : fw.Presets)
+			{
+				m_demoData.insert(m_demoData.begin(), preset.begin(), preset.end());
+				if(DemoPlaybackTI::findDemoData(m_demoData))
+					break;
+
+				m_demoData.clear();
+			}
+		}
+		else
+		{
+			loadPresetFiles();
+		}
+
+		// The Snow even has multis, but they are not sequencer compatible, drop them
+		m_multis.clear();
+
+		if(m_multis.empty())
+		{
+			// there is no multi in the TI presets, but there is an init multi in the F.bin
+
+			const std::string search = "Init Multi";
+			const auto searchSize = search.size();
+
+			for(size_t i=0; i<fw.DSP.size() && m_multis.empty(); ++i)
+			{
+				for(size_t j=0; j<searchSize && m_multis.empty(); ++j)
+				{
+					if(fw.DSP[i+j] != search[j])
+						break;
+
+					if(j == searchSize-1)
+					{
+						TPreset preset;
+						memcpy(&preset[0], &fw.DSP[i - 4], std::size(preset));
+
+						// validate that we found the correct data by checking part volumes. It might just be a string somewhere in the data
+						for(size_t k=0; k<16; ++k)
+						{
+							if(preset[k + 0x8b] != 0x40)
+								break;
+
+							if(k == 15)
+							{
+								for(size_t k=0; k<getPresetsPerBank(); ++k)
+									m_multis.push_back(preset);
+							}
+						}
+					}
+				}
+			}
+		}
+
+		// try to load the presets from the other roms, too
+		auto loadFirmwarePresets = [this](const DeviceModel _model)
+		{
+			if(m_model == _model)
+				return;
+			const std::unique_ptr<imemstream> file(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
+			const auto firmware = ROMUnpacker::getFirmware(*file, _model);
+			if(!firmware.Presets.empty())
+			{
+				for (auto& presetFile: firmware.Presets)
+				{
+					imemstream stream(presetFile);
+					loadPresetFile(stream, _model);
+				}
+			}
+		};
+
+		loadFirmwarePresets(DeviceModel::TI);
+		loadFirmwarePresets(DeviceModel::TI2);
+		loadFirmwarePresets(DeviceModel::Snow);
+	}
+#endif
 	return true;
 }
 
-std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
+uint32_t ROMFile::getRomBankCount(const DeviceModel _model)
+{
+	switch (_model)
+	{
+	case DeviceModel::TI:
+		return 26 - 7;
+	case DeviceModel::Snow:
+		return 8;
+	case DeviceModel::TI2:
+		return 26 - 5 + 4;
+	default:
+		return 8;
+	}
+}
+
+std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, const DeviceModel _wantedTIModel)
 {
 	_file.seekg(0, std::ios_base::end);
 	const auto fileSize = _file.tellg();
 
-	uint32_t offset = 0x18000;
-	int lastChunkId = 4;
+	uint32_t offset;
+	int lastChunkId;
 
-	if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
+	if(fileSize == getRomSizeModelD())
+	{
+		m_model = _wantedTIModel;
+		offset = 0x70000;
+		lastChunkId = 14;
+	}
+	else if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
 	{
 		// ABC
 		m_model = DeviceModel::C;
+		offset = 0x18000;
+		lastChunkId = 4;
 	}
 	else 
 	{
@@ -125,6 +254,85 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	return chunks;
 }
 
+bool ROMFile::loadPresetFiles()
+{
+	bool res = true;
+	for (auto &filename: {"S.bin", "P.bin"})
+	{
+		std::ifstream file(filename, std::ios::binary | std::ios::ate);
+		if (!file.is_open())
+		{
+			LOG("Failed to open preset file " << filename);
+			res = false;
+			continue;
+		}
+		res &= loadPresetFile(file, m_model);
+		file.close();
+	}
+	return res;
+}
+
+bool ROMFile::loadPresetFile(std::istream& _file, DeviceModel _model)
+{
+	_file.seekg(0, std::ios_base::end);
+	const auto fileSize = _file.tellg();
+
+	uint32_t singleCount = 0;
+	uint32_t multiCount = 0;
+	uint32_t multiOffset = 0;
+
+	if (fileSize == 0x1b0000)		// TI/TI2
+	{
+		if(_model == DeviceModel::TI2)
+			singleCount = 128 * (26 - 5);
+		else
+			singleCount = 128 * (26 - 7);
+	}
+	else if (fileSize == 0x40000)	// Snow A
+	{
+		singleCount = 512;
+	}
+	else if (fileSize == 0x68000)	// Snow B
+	{
+		singleCount = 512;
+		multiCount = 128;
+		multiOffset = 768;
+	}
+	else
+	{
+		LOG("Unknown file size " << fileSize << " for preset file");
+		return false;
+	}
+
+	_file.seekg(0);
+
+	for(uint32_t i=0; i<singleCount; ++i)
+	{
+		TPreset single;
+		_file.read(reinterpret_cast<char*>(&single), sizeof(single));
+		m_singles.emplace_back(single);
+
+		LOG("Loaded single " << i << ", name = " << getSingleName(single));
+	}
+
+	if(multiCount)
+	{
+		const auto off = std::max(singleCount, multiOffset);
+		_file.seekg(off * 512);
+
+		for (uint32_t i = 0; i < multiCount; ++i)
+		{
+			TPreset multi;
+			_file.read(reinterpret_cast<char*>(&multi), sizeof(multi));
+			m_multis.emplace_back(multi);
+
+			LOG("Loaded multi " << i << ", name = " << getMultiName(multi));
+		}
+	}
+
+	return true;
+}
+
 std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::HDI08& _hdi08) const
 {
 	// Load BootROM in DSP memory
@@ -155,6 +363,15 @@ std::string ROMFile::getModelName() const
 
 bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out) const
 {
+	if(isTIFamily())
+	{
+		const auto offset = _bank * getSinglesPerBank() + _presetNumber;
+		if (offset >= m_singles.size())
+			return false;
+		_out = m_singles[offset];
+		return true;
+	}
+
 	const uint32_t offset = 0x50000 + (_bank * 0x8000) + (_presetNumber * getSinglePresetSize());
 
 	return getPreset(offset, _out);
@@ -162,6 +379,15 @@ bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out)
 
 bool ROMFile::getMulti(const int _presetNumber, TPreset& _out) const
 {
+	if(isTIFamily())
+	{
+		if (_presetNumber >= m_multis.size())
+			return false;
+
+		_out = m_multis[_presetNumber];
+		return true;
+	}
+
 	return getPreset(0x48000 + (_presetNumber * getMultiPresetSize()), _out);
 }
 
