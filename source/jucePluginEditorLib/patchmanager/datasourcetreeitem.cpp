@@ -22,10 +22,20 @@ namespace jucePluginEditorLib::patchManager
 			case pluginLib::patchDB::SourceType::Count:
 				return {};
 			case pluginLib::patchDB::SourceType::Rom:
-			case pluginLib::patchDB::SourceType::File:
-			case pluginLib::patchDB::SourceType::Folder:
 			case pluginLib::patchDB::SourceType::LocalStorage:
 				return _ds.name;
+			case pluginLib::patchDB::SourceType::File:
+			case pluginLib::patchDB::SourceType::Folder:
+				{
+					auto n = _ds.name;
+					const auto idxA = n.find_first_of("\\/");
+					const auto idxB = n.find_last_of("\\/");
+					if(idxA != std::string::npos && idxB != std::string::npos && (idxB - idxA) > 1)
+					{
+						return n.substr(0, idxA+1) + ".." + n.substr(idxB);
+					}
+					return n;
+				}
 			default:
 				assert(false);
 				return"invalid";
@@ -64,7 +74,7 @@ namespace jucePluginEditorLib::patchManager
 		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
 	}
 
-	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc/* = nullptr*/)
 	{
 		TreeItem::patchesDropped(_patches);
 
@@ -81,7 +91,9 @@ namespace jucePluginEditorLib::patchManager
 #if SYNTHLIB_DEMO_MODE
 			getPatchManager().getEditor().showDemoRestrictionMessageBox();
 #else
-			getPatchManager().copyPatchesTo(m_dataSource, _patches);
+			const int part = _savePatchDesc ? _savePatchDesc->getPart() : -1;
+
+			getPatchManager().copyPatchesToLocalStorage(m_dataSource, _patches, part);
 #endif
 		}
 	}
@@ -89,7 +101,10 @@ namespace jucePluginEditorLib::patchManager
 	void DatasourceTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
 		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
 			return;
+		}
 
 		juce::PopupMenu menu;
 

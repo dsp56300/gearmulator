@@ -18,6 +18,8 @@ set(SOURCES
 	ui3/ControllerLinks.h
 	ui3/FxPage.cpp
 	ui3/FxPage.h
+    ui3/Leds.cpp
+    ui3/Leds.h
     ui3/Parts.cpp
     ui3/Parts.h
 	ui3/PatchManager.cpp

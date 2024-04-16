@@ -26,11 +26,11 @@ namespace genericVirusUI
 		std::function<void(const juce::MouseEvent&, int)> m_callback;
 	};
 
-	class Parts
+	class Parts : juce::Timer
 	{
 	public:
 		explicit Parts(VirusEditor& _editor);
-		virtual ~Parts();
+		~Parts() override;
 
 		void onProgramChange() const;
 		void onPlayModeChanged() const;
@@ -47,6 +47,8 @@ namespace genericVirusUI
 		void updateAll() const;
 		void updateSingleOrMultiMode() const;
 
+		void timerCallback() override;
+
 		VirusEditor& m_editor;
 
 		std::vector<genericUI::Button<juce::DrawableButton>*> m_partSelect;
@@ -55,6 +57,7 @@ namespace genericVirusUI
 
 		std::vector<juce::Slider*> m_partVolume;
 		std::vector<juce::Slider*> m_partPan;
+		std::vector<juce::Component*> m_partActive;
 
 		std::vector<PartButton*> m_presetName;
 	};

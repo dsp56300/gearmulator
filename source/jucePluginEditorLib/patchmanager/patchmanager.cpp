@@ -13,6 +13,7 @@
 #include "../pluginEditor.h"
 
 #include "../../jucePluginLib/types.h"
+
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -94,6 +95,10 @@ namespace jucePluginEditorLib::patchManager
 			t->apply(getEditor(), *m_searchTreeTags);
 		}
 
+		m_searchList->setTextToShowWhenEmpty("Search...", m_searchList->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
+		m_searchTreeDS->setTextToShowWhenEmpty("Search...", m_searchTreeDS->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
+		m_searchTreeTags->setTextToShowWhenEmpty("Search...", m_searchTreeTags->findColour(juce::TextEditor::textColourId).withAlpha(0.5f));
+
 		if(const auto t = getTemplate("pm_status_label"))
 		{
 			t->apply(getEditor(), *m_status);
@@ -147,6 +152,8 @@ namespace jucePluginEditorLib::patchManager
 		m_list->processDirty(dirty);
 
 		m_status->setScanning(isScanning());
+
+		m_info->processDirty(dirty);
 
 		if(!dirty.errors.empty())
 		{
@@ -235,6 +242,14 @@ namespace jucePluginEditorLib::patchManager
 		return false;
 	}
 
+	pluginLib::patchDB::DataSourceNodePtr PatchManager::getSelectedDataSource() const
+	{
+		const auto* item = dynamic_cast<DatasourceTreeItem*>(m_treeDS->getSelectedItem(0));
+		if(!item)
+			return {};
+		return item->getDataSource();
+	}
+
 	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		if(!isValid(_patch))
@@ -271,6 +286,72 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	void PatchManager::copyPatchesToLocalStorage(const pluginLib::patchDB::DataSourceNodePtr& _ds, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, int _part)
+	{
+		copyPatchesTo(_ds, _patches, -1, [this, _part](const std::vector<pluginLib::patchDB::PatchPtr>& _savedPatches)
+		{
+			if(_part == -1)
+				return;
+
+			juce::MessageManager::callAsync([this, _part, _savedPatches]
+			{
+				setSelectedPatch(_part, _savedPatches.front());
+			});
+		});
+	}
+
+	uint32_t PatchManager::createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part)
+	{
+		const auto& state = getState();
+		const auto key = state.getPatch(_part);
+
+		uint32_t countAdded = 0;
+
+		if(key.isValid() && key.source->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			// the key that is stored in the state might not contain patches, find the real data source in the DB
+			const auto ds = getDataSource(*key.source);
+
+			if(ds)
+			{
+				if(const auto p = ds->getPatch(key))
+				{
+					if(*p == key)
+					{
+						++countAdded;
+						_menu.addItem("Overwrite patch '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part]
+						{
+							const auto newPatch = requestPatchForPart(_part);
+							if(newPatch)
+							{
+								replacePatch(p, newPatch);
+							}
+						});
+					}
+				}
+			}
+		}
+
+		if(const auto ds = getSelectedDataSource())
+		{
+			if(ds->type == pluginLib::patchDB::SourceType::LocalStorage)
+			{
+				++countAdded;
+				_menu.addItem("Add to user bank '" + ds->name + "'", true, false, [this, ds, _part]
+				{
+					const auto newPatch = requestPatchForPart(_part);
+
+					if(!newPatch)
+						return;
+
+					copyPatchesToLocalStorage(ds, {newPatch}, static_cast<int>(_part));
+				});
+			}
+		}
+
+		return countAdded;
+	}
+
 	bool PatchManager::selectPrevPreset(const uint32_t _part)
 	{
 		return selectPatch(_part, -1);
@@ -288,7 +369,7 @@ namespace jucePluginEditorLib::patchManager
 		if(searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
 			return false;
 
-		auto s = getSearch(searchHandle);
+		const auto s = getSearch(searchHandle);
 		if(!s)
 			return false;
 

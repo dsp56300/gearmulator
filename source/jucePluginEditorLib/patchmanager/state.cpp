@@ -111,7 +111,7 @@ namespace jucePluginEditorLib::patchManager
 
 		for(uint32_t i=0; i<patches.size(); ++i)
 		{
-			if(pluginLib::patchDB::PatchKey(*patches[i]) == _patch)
+			if(*patches[i] == _patch)
 			{
 				index = i;
 				break;

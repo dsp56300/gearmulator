@@ -76,12 +76,24 @@ namespace jucePluginEditorLib::patchManager
 		m_content.deleteAllChildren();
 	}
 
-	void Info::setPatch(const pluginLib::patchDB::PatchPtr& _patch) const
+	void Info::setPatch(const pluginLib::patchDB::PatchPtr& _patch)
 	{
 		if (!_patch)
 		{
 			clear();
 			return;
+		}
+
+		if(_patch != m_patch)
+		{
+			m_patchManager.cancelSearch(m_searchHandle);
+
+			pluginLib::patchDB::SearchRequest req;
+			req.patch = _patch;
+
+			m_searchHandle = m_patchManager.search(std::move(req));
+
+			m_patch = _patch;
 		}
 
 		m_name->setText(_patch->getName(), juce::sendNotification);
@@ -92,8 +104,12 @@ namespace jucePluginEditorLib::patchManager
 		doLayout();
 	}
 
-	void Info::clear() const
+	void Info::clear()
 	{
+		m_patch.reset();
+		m_patchManager.cancelSearch(m_searchHandle);
+		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+
 		m_name->setText({}, juce::sendNotification);
 		m_source->setText({}, juce::sendNotification);
 		m_categories->setText({}, juce::sendNotification);
@@ -146,6 +162,14 @@ namespace jucePluginEditorLib::patchManager
 	void Info::paint(juce::Graphics& g)
 	{
 		g.fillAll(m_name->findColour(juce::Label::backgroundColourId));
+	}
+
+	void Info::processDirty(const pluginLib::patchDB::Dirty& _dirty)
+	{
+		if(_dirty.searches.find(m_searchHandle) == _dirty.searches.end())
+			return;
+
+		setPatch(m_patch);
 	}
 
 	juce::Label* Info::addChild(juce::Label* _label)

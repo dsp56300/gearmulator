@@ -7,11 +7,16 @@
 
 namespace jucePluginEditorLib
 {
-	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions)
-	: pluginLib::Processor(_busesProperties)
+	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
+	: pluginLib::Processor(_busesProperties, _properties)
 	, m_configOptions(_configOptions)
 	, m_config(_configOptions)
 	{
+	}
+
+	Processor::~Processor()
+	{
+		assert(!m_editorState && "call destroyEditorState in destructor of derived class");
 	}
 
 	bool Processor::setLatencyBlocks(const uint32_t _blocks)
@@ -47,38 +52,14 @@ namespace jucePluginEditorLib
 	    return new EditorWindow(*this, *m_editorState, getConfig());
 	}
 
-	void Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	void Processor::destroyEditorState()
 	{
-		// Compatibility with old Vavra versions that only wrote gain parameters
-		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
-		{
-			pluginLib::Processor::loadCustomData(_sourceBuffer);
-			return;
-		}
-
-		pluginLib::Processor::loadCustomData(_sourceBuffer);
-
-		synthLib::BinaryStream s(_sourceBuffer);
-
-		synthLib::ChunkReader cr(s);
-		cr.add("EDST", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
-		{
-			_binaryStream.read(m_editorStateData);
-		});
-
-		// if there is no chunk in the data, it's an old non-Vavra chunk that only carries the editor state
-		if(!cr.tryRead() || cr.numRead() == 0)
-		{
-			m_editorStateData = _sourceBuffer;
-		}
-
-		if(m_editorState)
-			m_editorState->setPerInstanceConfig(m_editorStateData);
+		m_editorState.reset();
 	}
 
-	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
+	void Processor::saveChunkData(synthLib::BinaryStream& s)
 	{
-		pluginLib::Processor::saveCustomData(_targetBuffer);
+		pluginLib::Processor::saveChunkData(s);
 
 		if(m_editorState)
 		{
@@ -88,13 +69,30 @@ namespace jucePluginEditorLib
 
 		if(!m_editorStateData.empty())
 		{
-			synthLib::BinaryStream s;
-			{
-				synthLib::ChunkWriter cw(s, "EDST", 1);
-				s.write(m_editorStateData);
-			}
-
-			s.toVector(_targetBuffer, true);
+			synthLib::ChunkWriter cw(s, "EDST", 1);
+			s.write(m_editorStateData);
 		}
+	}
+
+	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		// if there is no chunk in the data, but the data is not empty, it's an old non-Vavra chunk that only carries the editor state
+		if(!pluginLib::Processor::loadCustomData(_sourceBuffer))
+			m_editorStateData = _sourceBuffer;
+
+		if(m_editorState)
+			m_editorState->setPerInstanceConfig(m_editorStateData);
+
+		return true;
+	}
+	
+	void Processor::loadChunkData(synthLib::ChunkReader& _cr)
+	{
+		pluginLib::Processor::loadChunkData(_cr);
+
+		_cr.add("EDST", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		{
+			_binaryStream.read(m_editorStateData);
+		});
 	}
 }

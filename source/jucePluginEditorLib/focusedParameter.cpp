@@ -91,8 +91,15 @@ namespace jucePluginEditorLib
 
 		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(m_controller.getCurrentPart());
 
-		const auto* p = m_controller.getParameter(v, static_cast<uint8_t>(part));
+		auto* p = m_controller.getParameter(v, static_cast<uint8_t>(part));
 
+		// do not show soft knob parameter if the softknob is bound to another parameter
+		if(p && p->getDescription().isSoftKnob())
+		{
+			const auto* softKnob = m_controller.getSoftknob(p);
+			if(softKnob && softKnob->isBound())
+				p = softKnob->getTargetParameter();
+		}
 		if(!p)
 		{
 			if (m_focusedParameterName)

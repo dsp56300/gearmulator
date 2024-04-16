@@ -32,6 +32,7 @@ namespace pluginLib::patchDB
 		void removeDataSource(const DataSource& _ds, bool _save = true);
 		void refreshDataSource(const DataSourceNodePtr& _ds);
 		void renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName);
+		DataSourceNodePtr getDataSource(const DataSource& _ds);
 
 		void getDataSources(std::vector<DataSourceNodePtr>& _dataSources)
 		{
@@ -61,7 +62,8 @@ namespace pluginLib::patchDB
 		std::shared_ptr<Search> getSearch(SearchHandle _handle);
 		std::shared_ptr<Search> getSearch(const DataSource& _dataSource);
 
-		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches, int _insertRow = -1);
+		void copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches, int _insertRow = -1,
+		                   const std::function<void(const std::vector<PatchPtr>&)>& _successCallback = {});
 		void removePatches(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 		bool movePatchesTo(uint32_t _position, const std::vector<PatchPtr>& _patches);
 
@@ -73,7 +75,7 @@ namespace pluginLib::patchDB
 		bool isLoading() const { return m_loading; }
 		bool isScanning() const { return !m_loader.empty(); }
 
-		static bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
+		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
 
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
@@ -113,7 +115,7 @@ namespace pluginLib::patchDB
 		void updateSearches(const std::vector<PatchPtr>& _patches);
 		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
 
-		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds);
+		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const;
 
 		Color getTagColorInternal(TagType _type, const Tag& _tag) const;
 
@@ -128,13 +130,17 @@ namespace pluginLib::patchDB
 		juce::File getJsonFile(const DataSource& _ds) const;
 		juce::File getLocalStorageFile(const DataSource& _ds) const;
 
-		bool saveLocalStorage() const;
+		bool saveLocalStorage();
 
 		void pushError(std::string _string);
+
+		bool loadCache();
+		void saveCache();
 
 		// IO
 		juce::File m_settingsDir;
 		juce::File m_jsonFileName;
+		juce::File m_cacheFileName;
 
 		// loader
 		JobQueue m_loader;
@@ -161,5 +167,6 @@ namespace pluginLib::patchDB
 
 		// state
 		bool m_loading = true;
+		bool m_cacheDirty = false;
 	};
 }

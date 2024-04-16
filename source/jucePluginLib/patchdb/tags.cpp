@@ -2,8 +2,40 @@
 
 #include "juce_core/juce_core.h"
 
+#include "../../synthLib/binarystream.h"
+
 namespace pluginLib::patchDB
 {
+	void Tags::write(synthLib::BinaryStream& _s) const
+	{
+		synthLib::ChunkWriter cw(_s, chunks::g_tags, 1);
+		_s.write(m_added.size());
+		for (const auto& added : m_added)
+			_s.write(added);
+		_s.write(m_removed.size());
+		for (const auto& removed : m_removed)
+			_s.write(removed);
+	}
+
+	bool Tags::read(synthLib::BinaryStream& _stream)
+	{
+		auto in = _stream.tryReadChunk(chunks::g_tags, 1);
+		if(!in)
+			return false;
+
+		const auto numAdded = in.read<size_t>();
+
+		for(size_t i=0; i<numAdded; ++i)
+			m_added.insert(in.readString());
+
+		const auto numRemoved = in.read<size_t>();
+
+		for(size_t i=0; i<numRemoved; ++i)
+			m_removed.insert(in.readString());
+
+		return true;
+	}
+
 	bool Tags::operator==(const Tags& _t) const
 	{
 		if(m_added.size() != _t.m_added.size())
@@ -11,13 +43,13 @@ namespace pluginLib::patchDB
 		if(m_removed.size() != _t.m_removed.size())
 			return false;
 
-		for (auto e : m_added)
+		for (const auto& e : m_added)
 		{
 			if(_t.m_added.find(e) == _t.m_added.end())
 				return false;
 		}
 
-		for (auto e : m_removed)
+		for (const auto& e : m_removed)
 		{
 			if(_t.m_removed.find(e) == _t.m_removed.end())
 				return false;
@@ -208,6 +240,42 @@ namespace pluginLib::patchDB
 			if(!(it->second == tags.second))
 				return false;
 		}
+		return true;
+	}
+
+	void TypedTags::write(synthLib::BinaryStream& _s) const
+	{
+		synthLib::ChunkWriter cw(_s, chunks::g_typedTags, 1);
+		_s.write(m_tags.size());
+
+		for (const auto& t : m_tags)
+		{
+			_s.write(t.first);
+			t.second.write(_s);
+		}
+	}
+
+	bool TypedTags::read(synthLib::BinaryStream& _stream)
+	{
+		auto in = _stream.tryReadChunk(chunks::g_typedTags, 1);
+
+		if(!in)
+			return false;
+
+		const auto count = in.read<size_t>();
+
+		for(size_t i=0; i<count; ++i)
+		{
+			const auto type = in.read<TagType>();
+
+			Tags t;
+
+			if(!t.read(in))
+				return false;
+
+			m_tags.insert({type, t});
+		}
+
 		return true;
 	}
 }

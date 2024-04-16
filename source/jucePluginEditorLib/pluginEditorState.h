@@ -94,5 +94,6 @@ namespace jucePluginEditorLib
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
 		std::vector<uint8_t> m_instanceConfig;
+		std::string m_skinFolderName;
 	};
 }

@@ -7,7 +7,7 @@
 
 namespace virusLib
 {
-	Hdi08MidiQueue::Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, const bool _useEsaiBasedTiming) : m_output(_output), m_esai(_dsp.getPeriphX().getEsai()), m_useEsaiBasedTiming(_useEsaiBasedTiming)
+	Hdi08MidiQueue::Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, const bool _useEsaiBasedTiming) : m_output(_output), m_esai(_dsp.getAudio()), m_useEsaiBasedTiming(_useEsaiBasedTiming)
 	{
 		if(_useEsaiBasedTiming)
 		{

@@ -58,6 +58,8 @@ namespace jucePluginEditorLib
 
 		void setCurrentPart(uint8_t _part) override;
 
+		void showDisclaimer() const;
+
 	private:
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;

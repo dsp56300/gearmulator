@@ -17,11 +17,11 @@ namespace virusLib
 		return load(sysex);
 	}
 
-	bool MidiFileToRomData::load(const std::vector<uint8_t>& _fileData)
+	bool MidiFileToRomData::load(const std::vector<uint8_t>& _fileData, bool _isMidiFileData/* = false*/)
 	{
 		std::vector<std::vector<uint8_t>> packets;
 
-		synthLib::MidiToSysex::splitMultipleSysex(packets, _fileData);
+		synthLib::MidiToSysex::splitMultipleSysex(packets, _fileData, _isMidiFileData);
 
 		return add(packets);
 	}

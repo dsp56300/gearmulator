@@ -19,11 +19,13 @@ namespace genericVirusUI
 		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_openMenuCallback(std::move(_openMenuCallback))
+		m_openMenuCallback(std::move(_openMenuCallback)),
+		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create(_jsonFilename);
 
 		m_parts.reset(new Parts(*this));
+		m_leds.reset(new Leds(*this, _processorRef));
 
 		// be backwards compatible with old skins
 		if(getTabGroupCount() == 0)
@@ -71,12 +73,29 @@ namespace genericVirusUI
 
 		if(m_romSelector)
 		{
-			if(!_processorRef.isPluginValid())
-				m_romSelector->addItem("<No ROM found>", 1);
-			else
-				m_romSelector->addItem(_processorRef.getRomName(), 1);
+			const auto roms = m_processor.getRoms();
 
-			m_romSelector->setSelectedId(1, juce::dontSendNotification);
+			if(roms.empty())
+			{
+				m_romSelector->addItem("<No ROM found>", 1);
+			}
+			else
+			{
+				int id = 1;
+
+				for (const auto& rom : roms)
+					m_romSelector->addItem(juce::File(rom.getFilename()).getFileNameWithoutExtension(), id++);
+			}
+
+			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
+
+			m_romSelector->onChange = [this, roms]
+			{
+				const auto oldIndex = m_processor.getSelectedRomIndex();
+				const auto newIndex = m_romSelector->getSelectedId() - 1;
+				if(!m_processor.setSelectedRom(newIndex))
+					m_romSelector->setSelectedId(static_cast<int>(oldIndex) + 1);
+			};
 		}
 
 		getController().onProgramChange = [this](int _part) { onProgramChange(_part); };
@@ -95,8 +114,6 @@ namespace genericVirusUI
 		}
 
 		m_deviceModel = findComponentT<juce::Label>("DeviceModel", false);
-
-		updateDeviceModel();
 
 		auto* presetSave = findComponentT<juce::Button>("PresetSave", false);
 		if(presetSave)
@@ -129,6 +146,13 @@ namespace genericVirusUI
 
 		updatePresetName();
 		updatePlayModeButtons();
+
+		m_romChangedListener = [this](auto)
+		{
+			updateDeviceModel();
+			updateKeyValueConditions("deviceModel", virusLib::getModelName(m_processor.getModel()));
+			m_parts->onPlayModeChanged();
+		};
 	}
 
 	VirusEditor::~VirusEditor()
@@ -147,18 +171,6 @@ namespace genericVirusUI
 	Virus::Controller& VirusEditor::getController() const
 	{
 		return static_cast<Virus::Controller&>(m_processor.getController());
-	}
-
-	void VirusEditor::selectRomPreset(const uint8_t _part, const virusLib::BankNumber _bank, const uint8_t _program) const
-	{
-		if(getPatchManager())
-		{
-			static_cast<PatchManager*>(getPatchManager())->selectRomPreset(_part, _bank, _program);
-		}
-		else
-		{
-			getController().setCurrentPartPreset(_part, _bank, _program);
-		}
 	}
 
 	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
@@ -204,7 +216,6 @@ namespace genericVirusUI
 		m_parts->onProgramChange();
 		updatePresetName();
 		updatePlayModeButtons();
-		updateDeviceModel();
 		if(getPatchManager())
 			getPatchManager()->onProgramChanged(_part);
 	}
@@ -247,9 +258,12 @@ namespace genericVirusUI
 		if(!m_deviceModel)
 			return;
 
-		const auto& presets = getController().getSinglePresets();
-		const auto& data = presets.front().front().data;
-		if(data.empty())
+		auto* rom = m_processor.getSelectedRom();
+		if(!rom)
+			return;
+
+		virusLib::ROMFile::TPreset data;
+		if(!rom->getSingle(0, 0, data))
 			return;
 
 		std::string m;
@@ -265,12 +279,16 @@ namespace genericVirusUI
 		}
 
 		m_deviceModel->setText(m, juce::dontSendNotification);
-		m_deviceModel = nullptr;	// only update once
 	}
 
 	void VirusEditor::savePreset()
 	{
 		juce::PopupMenu menu;
+
+		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu, getPatchManager()->getCurrentPart());
+
+		if(countAdded)
+			menu.addSeparator();
 
 		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
 		{
@@ -282,14 +300,14 @@ namespace genericVirusUI
 			_menu.addSubMenu(_name, subMenu);
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](jucePluginEditorLib::FileType _type)
+		addEntry(menu, "Export Current Single (Edit Buffer)", [this](jucePluginEditorLib::FileType _type)
 		{
 			savePresets(SaveType::CurrentSingle, _type);
 		});
 
 		if(getController().isMultiMode())
 		{
-			addEntry(menu, "Arrangement (Multi + 16 Singles)", [this](jucePluginEditorLib::FileType _type)
+			addEntry(menu, "Export Arrangement (Multi + 16 Singles)", [this](jucePluginEditorLib::FileType _type)
 			{
 				savePresets(SaveType::Arrangement, _type);
 			});
@@ -304,7 +322,7 @@ namespace genericVirusUI
 			});
 		}
 
-		menu.addSubMenu("Bank", banksMenu);
+		menu.addSubMenu("Export Bank", banksMenu);
 
 		menu.showMenuAsync(juce::PopupMenu::Options());
 	}
@@ -333,7 +351,7 @@ namespace genericVirusUI
 
 			if (results.size() == 1)
 			{
-				c.sendSysEx(results.front());
+				c.activatePatch(results.front());
 			}
 			else if(results.size() > 1)
 			{
@@ -342,8 +360,6 @@ namespace genericVirusUI
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
 				);
 			}
-
-			c.onStateLoaded();
 		});
 	}
 

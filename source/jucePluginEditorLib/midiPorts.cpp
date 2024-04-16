@@ -75,6 +75,13 @@ namespace jucePluginEditorLib
 		delete deviceManager;
 	}
 
+	void MidiPorts::showMidiPortFailedMessage(const char* _name) const
+	{
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name, 
+			std::string("Failed to open Midi ") + _name + ".\n\n"
+			"Make sure that the device is not already in use by another program.", nullptr, juce::ModalCallbackFunction::create([](int){}));
+	}
+
 	void MidiPorts::updateMidiInput(int index)
 	{
 	    const auto list = juce::MidiInput::getAvailableDevices();
@@ -99,6 +106,7 @@ namespace jucePluginEditorLib
 
 	    if (!m_processor.setMidiInput(newInput.identifier))
 	    {
+			showMidiPortFailedMessage("Input");
 	        m_midiIn->setSelectedItemIndex(0, juce::dontSendNotification);
 	        m_lastInputIndex = 0;
 	        return;
@@ -130,6 +138,7 @@ namespace jucePluginEditorLib
 	    const auto newOutput = list[index];
 	    if (!m_processor.setMidiOutput(newOutput.identifier))
 	    {
+			showMidiPortFailedMessage("Output");
 	        m_midiOut->setSelectedItemIndex(0, juce::dontSendNotification);
 	        m_lastOutputIndex = 0;
 	        return;

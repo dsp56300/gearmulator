@@ -125,7 +125,14 @@ namespace jucePluginEditorLib::patchManager
 #if SYNTHLIB_DEMO_MODE
 				pm.getEditor().showDemoRestrictionMessageBox();
 #else
-				pm.copyPatchesTo(source, {patch}, row);
+				const auto part = savePatchDesc->getPart();
+				pm.copyPatchesTo(source, {patch}, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+				{
+					juce::MessageManager::callAsync([this, part, _patches]
+					{
+						m_list.getPatchManager().setSelectedPatch(part, _patches.front());
+					});
+				});
 #endif
 			}
 

@@ -6,7 +6,7 @@
 
 namespace dsp56k
 {
-	class Esai;
+	class Audio;
 }
 
 namespace synthLib
@@ -40,7 +40,7 @@ namespace virusLib
 		void sendMidiToDSP(uint8_t _a, uint8_t _b, uint8_t _c) const;
 
 		Hdi08Queue& m_output;
-		dsp56k::Esai& m_esai;
+		dsp56k::Audio& m_esai;
 		bool m_useEsaiBasedTiming;
 
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 1024, false> m_pendingMidiEvents;

@@ -7,6 +7,9 @@
 
 #include "../synthLib/os.h"
 
+constexpr bool g_createDebugger = false;
+constexpr bool g_dumpAssembly = false;
+
 using namespace dsp56k;
 using namespace virusLib;
 using namespace synthLib;
@@ -76,7 +79,7 @@ int main(int _argc, char* _argv[])
 
 	const std::string audioFilename = app->getSingleNameAsFilename();
 
-	app->run(audioFilename);
+	app->run(audioFilename, 0, g_createDebugger, g_dumpAssembly);
 
 	std::cout << "Program ended. Press key to exit." << std::endl;
 	ConsoleApp::waitReturn();

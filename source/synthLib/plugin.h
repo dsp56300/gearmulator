@@ -21,7 +21,11 @@ namespace synthLib
 
 		void addMidiEvent(const SMidiEvent& _ev);
 
-		void setSamplerate(float _samplerate);
+		bool setPreferredDeviceSamplerate(float _samplerate);
+
+		void setHostSamplerate(float _hostSamplerate, float _preferredDeviceSamplerate);
+		float getHostSamplerate() const { return m_hostSamplerate; }
+
 		void setBlockSize(uint32_t _blockSize);
 
 		uint32_t getLatencyMidiToOutput() const;
@@ -31,6 +35,9 @@ namespace synthLib
 		void getMidiOut(std::vector<SMidiEvent>& _midiOut);
 
 		bool isValid() const;
+
+		Device* getDevice() const { return m_device; }
+		void setDevice(Device* _device);
 
 #if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
@@ -58,7 +65,7 @@ namespace synthLib
 		mutable std::mutex m_lock;
 		mutable std::mutex m_lockAddMidiEvent;
 
-		Device* const m_device;
+		Device* m_device;
 
 		std::vector<float> m_dummyBuffer;
 
@@ -75,5 +82,7 @@ namespace synthLib
 		bool m_needsStart = false;
 		double m_clockTickPos = 0.0;
 		uint32_t m_extraLatencyBlocks = 1;
+
+		float m_deviceSamplerate = 0.0f;
 	};
 }

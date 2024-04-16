@@ -67,12 +67,19 @@ namespace jucePluginEditorLib::patchManager
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch, pluginLib::patchDB::SearchHandle _fromSearch);
 
 		bool setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) const;
+		pluginLib::patchDB::DataSourceNodePtr getSelectedDataSource() const;
 
-	private:
-		bool selectPatch(uint32_t _part, int _offset);
+		const State& getState() const { return m_state; }
 
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch);
 		bool setSelectedPatch(uint32_t _part, const pluginLib::patchDB::PatchKey& _patch);
+
+		void copyPatchesToLocalStorage(const pluginLib::patchDB::DataSourceNodePtr& _ds, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, int _part);
+
+		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part);
+
+	private:
+		bool selectPatch(uint32_t _part, int _offset);
 
 	public:
 		auto& getEditor() const { return m_editor; }

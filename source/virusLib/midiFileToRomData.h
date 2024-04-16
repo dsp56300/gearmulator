@@ -16,7 +16,7 @@ namespace virusLib
 		}
 
 		bool load(const std::string& _filename);
-		bool load(const std::vector<uint8_t>& _fileData);
+		bool load(const std::vector<uint8_t>& _fileData, bool _isMidiFileData = false);
 
 		bool add(const std::vector<Packet>& _packets);
 		bool add(const Packet& _packet);

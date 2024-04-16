@@ -9,11 +9,14 @@
 #include "../../synthLib/os.h"
 #include "../../synthLib/midiToSysex.h"
 #include "../../synthLib/hybridcontainer.h"
+#include "../../synthLib/binarystream.h"
 
 #include "dsp56kEmu/logging.h"
 
 namespace pluginLib::patchDB
 {
+	static constexpr bool g_cacheEnabled = false;
+
 	namespace
 	{
 		std::string createValidFilename(const std::string& _name)
@@ -34,6 +37,7 @@ namespace pluginLib::patchDB
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
 	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
+	, m_cacheFileName(m_settingsDir.getChildFile("patchmanagerdb.cache"))
 	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
 	{
 	}
@@ -41,7 +45,14 @@ namespace pluginLib::patchDB
 	DB::~DB()
 	{
 		assert(m_loader.destroyed() && "stopLoaderThread() needs to be called by derived class in destructor");
+
+		// we can only save the cache if the db is not doing anything in the background
+		const bool loading = !m_loader.empty();
+
 		stopLoaderThread();
+
+		if(!loading && m_cacheDirty && g_cacheEnabled)
+			saveCache();
 	}
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds)
@@ -62,7 +73,12 @@ namespace pluginLib::patchDB
 				sysexBuffer.insert(sysexBuffer.end(), patchSysex.begin(), patchSysex.end());
 		}
 
-		return _file.replaceWithData(sysexBuffer.data(), sysexBuffer.size());
+		if(!_file.replaceWithData(sysexBuffer.data(), sysexBuffer.size()))
+		{
+			pushError("Failed to write to file " + _file.getFullPathName().toStdString() + ", make sure that it is not write protected");
+			return false;
+		}
+		return true;
 	}
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
@@ -210,6 +226,15 @@ namespace pluginLib::patchDB
 		});
 	}
 
+	DataSourceNodePtr DB::getDataSource(const DataSource& _ds)
+	{
+		std::shared_lock lock(m_dataSourcesMutex);
+		const auto it = m_dataSources.find(_ds);
+		if(it == m_dataSources.end())
+			return {};
+		return it->second;
+	}
+
 	bool DB::setTagColor(const TagType _type, const Tag& _tag, const Color _color)
 	{
 		std::shared_lock lock(m_patchesMutex);
@@ -335,6 +360,9 @@ namespace pluginLib::patchDB
 
 	void DB::cancelSearch(const uint32_t _handle)
 	{
+		if(_handle == g_invalidSearchHandle)
+			return;
+
 		std::unique_lock lock(m_searchesMutex);
 		m_cancelledSearches.insert(_handle);
 		m_searches.erase(_handle);
@@ -364,12 +392,12 @@ namespace pluginLib::patchDB
 		return nullptr;
 	}
 
-	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches, int _insertRow/* = -1*/)
+	void DB::copyPatchesTo(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches, int _insertRow/* = -1*/, const std::function<void(const std::vector<PatchPtr>&)>& _successCallback/* = {}*/)
 	{
 		if (_ds->type != SourceType::LocalStorage)
 			return;
 
-		runOnLoaderThread([this, _ds, _patches, _insertRow]
+		runOnLoaderThread([this, _ds, _patches, _insertRow, _successCallback]
 		{
 			{
 				std::shared_lock lockDs(m_dataSourcesMutex);
@@ -415,6 +443,14 @@ namespace pluginLib::patchDB
 			addPatches(newPatches);
 
 			createConsecutiveProgramNumbers(_ds);
+
+			if(_successCallback)
+			{
+				runOnUiThread([_successCallback, newPatches]
+				{
+					_successCallback(newPatches);
+				});
+			}
 
 			saveJson();
 		});
@@ -539,8 +575,6 @@ namespace pluginLib::patchDB
 		{
 			if(patch->source.expired())
 				continue;
-
-			const auto key = PatchKey(*patch);
 
 			auto mods = patch->modifications;
 
@@ -729,7 +763,8 @@ namespace pluginLib::patchDB
 
 		runOnLoaderThread([this]
 		{
-			loadJson();
+			if(!g_cacheEnabled || !loadCache())
+				loadJson();
 		});
 	}
 
@@ -1127,7 +1162,15 @@ namespace pluginLib::patchDB
 				}
 
 				if (countChanged)
+				{
 					searchDirty = true;
+				}
+				else
+				{
+					// this type of search is used to indicate that a patch has changed its properties, mark as dirty in this case too
+					if(search->request.patch == patch)
+						searchDirty = true;
+				}
 			}
 			if (searchDirty)
 				dirtySearches.insert(handle);
@@ -1174,7 +1217,7 @@ namespace pluginLib::patchDB
 		return res;
 	}
 
-	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds)
+	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const
 	{
 		std::unique_lock lockPatches(m_patchesMutex);
 		return _ds->createConsecutiveProgramNumbers();
@@ -1266,7 +1309,7 @@ namespace pluginLib::patchDB
 					if(colors)
 					{
 						std::unordered_map<Tag, Color> newTags;
-						for (auto itCol : colors->getProperties())
+						for (const auto& itCol : colors->getProperties())
 						{
 							const auto tag = itCol.name.toString().toStdString();
 							const auto col = static_cast<juce::int64>(itCol.value);
@@ -1377,6 +1420,8 @@ namespace pluginLib::patchDB
 
 	bool DB::saveJson()
 	{
+		m_cacheDirty = true;
+
 		if (!m_jsonFileName.hasWriteAccess())
 		{
 			pushError("No write access to file:\n" + m_jsonFileName.getFullPathName().toStdString());
@@ -1585,7 +1630,7 @@ namespace pluginLib::patchDB
 		return m_settingsDir.getChildFile(filename + ".syx");
 	}
 
-	bool DB::saveLocalStorage() const
+	bool DB::saveLocalStorage()
 	{
 		std::map<DataSourceNodePtr, std::set<PatchPtr>> localStoragePatches;
 
@@ -1631,5 +1676,336 @@ namespace pluginLib::patchDB
 	{
 		std::unique_lock lockUi(m_uiMutex);
 		m_dirty.errors.emplace_back(std::move(_string));
+	}
+
+	bool DB::loadCache()
+	{
+		m_cacheDirty = true;
+
+		if(!m_cacheFileName.existsAsFile())
+			return false;
+
+		std::vector<uint8_t> data;
+		if(!synthLib::readFile(data, m_cacheFileName.getFullPathName().toStdString()))
+			return false;
+
+		m_cacheFileName.deleteFile();
+
+		synthLib::BinaryStream inStream(data);
+
+		auto stream = inStream.tryReadChunk(chunks::g_patchManager);
+
+		if(!stream)
+			return false;
+
+		std::unique_lock lockDS(m_dataSourcesMutex);
+		std::unique_lock lockP(m_patchesMutex);
+
+		std::map<DataSource, DataSourceNodePtr> resultDataSources;
+		std::unordered_map<TagType, std::set<Tag>> resultTags;
+		std::unordered_map<TagType, std::unordered_map<Tag, uint32_t>> resultTagColors;
+		std::map<PatchKey, PatchModificationsPtr> resultPatchModifications;
+
+		if(auto s = stream.tryReadChunk(chunks::g_patchManagerDataSources, 1))
+		{
+			const auto numDatasources = s.read<uint32_t>();
+
+			std::vector<DataSource> dataSources;
+			dataSources.reserve(numDatasources);
+
+			for(uint32_t i=0; i<numDatasources; ++i)
+			{
+				DataSource& ds = dataSources.emplace_back();
+				if(!ds.read(s))
+					return false;
+			}
+
+			// read tree information
+			std::map<uint32_t, uint32_t> childToParentMap;
+			const auto childToParentCount = s.read<uint32_t>();
+			for(uint32_t i=0; i<childToParentCount; ++i)
+			{
+				const auto child = s.read<uint32_t>();
+				const auto parent = s.read<uint32_t>();
+				childToParentMap.insert({child, parent});
+			}
+
+			std::vector<DataSourceNodePtr> nodes;
+			nodes.resize(dataSources.size());
+
+			// create root nodes first
+			for(uint32_t i=0; i<dataSources.size(); ++i)
+			{
+				if(childToParentMap.find(i) != childToParentMap.end())
+					continue;
+
+				const auto& ds = dataSources[i];
+				const auto node = std::make_shared<DataSourceNode>(ds);
+				nodes[i] = node;
+				resultDataSources.insert({ds, node});
+			}
+
+			// now iteratively create children until there are none left
+			while(!childToParentMap.empty())
+			{
+				for(auto it = childToParentMap.begin(); it != childToParentMap.end();)
+				{
+					const auto childId = it->first;
+					const auto parentId = it->second;
+
+					const auto& parent = nodes[parentId];
+					if(!parent)
+					{
+						++it;
+						continue;
+					}
+
+					const auto& ds = dataSources[childId];
+					const auto node = std::make_shared<DataSourceNode>(ds);
+					node->setParent(parent);
+					nodes[childId] = node;
+					resultDataSources.insert({ds, node});
+
+					it = childToParentMap.erase(it);
+				}
+			}
+
+			// now as we have the datasources created as nodes, patches need to know the datasource nodes they are part of
+			for (const auto& it : resultDataSources)
+			{
+				for(auto& patch : it.second->patches)
+					patch->source = it.second->weak_from_this();
+			}
+		}
+		else
+			return false;
+
+		if(auto s = stream.tryReadChunk(chunks::g_patchManagerTags, 1))
+		{
+			const auto tagTypeCount = s.read<uint32_t>();
+
+			for(uint32_t i=0; i<tagTypeCount; ++i)
+			{
+				const auto tagType = static_cast<TagType>(s.read<uint8_t>());
+				const auto tagCount = s.read<uint32_t>();
+
+				std::set<Tag> tags;
+				for(uint32_t t=0; t<tagCount; ++t)
+					tags.insert(s.readString());
+
+				resultTags.insert({tagType, tags});
+			}
+		}
+		else
+			return false;
+
+		if(auto s = stream.tryReadChunk(chunks::g_patchManagerTagColors, 1))
+		{
+			const auto tagTypeCount = s.read<uint32_t>();
+
+			for(uint32_t i=0; i<tagTypeCount; ++i)
+			{
+				const auto tagType = static_cast<TagType>(s.read<uint8_t>());
+				std::unordered_map<Tag, Color> tagToColor;
+
+				const auto count = s.read<uint32_t>();
+				for(uint32_t c=0; c<count; ++c)
+				{
+					const auto tag = s.readString();
+					const auto color = s.read<Color>();
+					tagToColor.insert({tag, color});
+				}
+				resultTagColors.insert({tagType, tagToColor});
+			}
+		}
+		else
+			return false;
+
+		if(auto s = stream.tryReadChunk(chunks::g_patchManagerPatchModifications, 1))
+		{
+			const auto count = s.read<uint32_t>();
+
+			for(uint32_t i=0; i<count; ++i)
+			{
+				auto key = PatchKey::fromString(s.readString());
+
+				const auto itDS = resultDataSources.find(*key.source);
+				if(itDS != resultDataSources.end())
+					key.source = itDS->second;
+
+				auto mods = std::make_shared<PatchModifications>();
+				if(!mods->read(s))
+					return false;
+
+				resultPatchModifications.insert({key, mods});
+
+				for (const auto& it : resultDataSources)
+				{
+					for (const auto& patch : it.second->patches)
+					{
+						if(*patch != key)
+							continue;
+
+						patch->modifications = mods;
+						mods->patch = patch;
+					}
+				}
+			}
+		}
+		else
+			return false;
+
+		m_dataSources = resultDataSources;
+		m_tags = resultTags;
+		m_tagColors = resultTagColors;
+		m_patchModifications = resultPatchModifications;
+
+		for (const auto& it: resultDataSources)
+		{
+			const auto& patches = it.second->patches;
+			updateSearches({patches.begin(), patches.end()});
+		}
+
+		{
+			std::unique_lock lockUi(m_uiMutex);
+
+			m_dirty.dataSources = true;
+			m_dirty.patches = true;
+
+			for (const auto& it : m_tags)
+				m_dirty.tags.insert(it.first);
+		}
+
+		m_cacheFileName.deleteFile();
+		m_cacheDirty = false;
+
+		return true;
+	}
+
+	void DB::saveCache()
+	{
+		if(!m_cacheFileName.hasWriteAccess())
+			return;
+
+		synthLib::BinaryStream outStream;
+		{
+			std::shared_lock lockDS(m_dataSourcesMutex);
+			std::shared_lock lockP(m_patchesMutex);
+
+			synthLib::ChunkWriter cw(outStream, chunks::g_patchManager, 1);
+			{
+				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
+
+				outStream.write<uint32_t>(static_cast<uint32_t>(m_dataSources.size()));
+
+				// create an id map to save space when writing child->parent dependencies
+				std::map<DataSource, uint32_t> idMap;
+				uint32_t index = 0;
+
+				// write datasources and create id map
+				for (const auto& it : m_dataSources)
+				{
+					idMap.insert({it.first, index++});
+
+					it.second->write(outStream);
+				}
+
+				// create child->parent map
+				std::map<uint32_t, uint32_t> childToParent;
+
+				for (const auto& it : m_dataSources)
+				{
+					const auto& childDS = it.second;
+					const auto& parentDS = childDS->getParent();
+
+					if(parentDS)
+					{
+						const auto idChild = idMap.find(*childDS)->second;
+						const auto idParent = idMap.find(*parentDS)->second;
+
+						childToParent.insert({idChild, idParent});
+					}
+				}
+
+				// write child->parent dependency tree
+				outStream.write<uint32_t>(static_cast<uint32_t>(childToParent.size()));
+
+				for (const auto& it : childToParent)
+				{
+					outStream.write(it.first);
+					outStream.write(it.second);
+				}
+			}
+
+			{
+				// write tags
+				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTags, 1);
+
+				outStream.write(static_cast<uint32_t>(m_tags.size()));
+
+				for (const auto& it : m_tags)
+				{
+					const auto tagType = it.first;
+					const auto& tags = it.second;
+
+					if(tags.empty())
+						continue;
+
+					outStream.write(static_cast<uint8_t>(tagType));
+					outStream.write(static_cast<uint32_t>(tags.size()));
+
+					for (const auto& tag : tags)
+						outStream.write(tag);
+				}
+			}
+
+			{
+				// write tag colors
+				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTagColors, 1);
+
+				outStream.write(static_cast<uint32_t>(m_tagColors.size()));
+
+				for (const auto& it : m_tagColors)
+				{
+					const auto tagType = it.first;
+					const auto& mapStringToColor = it.second;
+
+					if(mapStringToColor.empty())
+						continue;
+
+					outStream.write(static_cast<uint8_t>(tagType));
+					outStream.write(static_cast<uint32_t>(mapStringToColor.size()));
+
+					for (const auto& itStringToColor : mapStringToColor)
+					{
+						outStream.write(itStringToColor.first);
+						outStream.write(itStringToColor.second);
+					}
+				}
+			}
+
+			{
+				// write patch modifications
+				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerPatchModifications, 1);
+
+				outStream.write(static_cast<uint32_t>(m_patchModifications.size()));
+
+				for (const auto& it : m_patchModifications)
+				{
+					const auto key = it.first;
+					const auto mods = it.second;
+
+					outStream.write(key.toString(true));
+					mods->write(outStream);
+				}
+			}
+		}
+
+		std::vector<uint8_t> buffer;
+		outStream.toVector(buffer);
+
+		m_cacheFileName.replaceWithData(buffer.data(), buffer.size());
+
+		m_cacheDirty = false;
 	}
 }

@@ -8,6 +8,8 @@
 
 #include "juce_core/juce_core.h"
 
+#include "../../synthLib/binarystream.h"
+
 namespace pluginLib::patchDB
 {
 	std::pair<PatchPtr, PatchModificationsPtr> Patch::createCopy(const DataSourceNodePtr& _ds) const
@@ -41,6 +43,60 @@ namespace pluginLib::patchDB
 		tags = _patch.tags;
 		hash = _patch.hash;
 		sysex = _patch.sysex;
+	}
+
+	void Patch::write(synthLib::BinaryStream& _s) const
+	{
+		synthLib::ChunkWriter chunkWriter(_s, chunks::g_patch, 1);
+
+		_s.write(name);
+		_s.write(bank);
+
+		if(modifications && !modifications->empty())
+		{
+			_s.write<uint8_t>(1);
+			modifications->write(_s);
+		}
+		else
+		{
+			_s.write<uint8_t>(0);
+		}
+		tags.write(_s);
+
+		_s.write(hash);
+		_s.write(sysex);
+	}
+
+	bool Patch::read(synthLib::BinaryStream& _in)
+	{
+		auto in = _in.tryReadChunk(chunks::g_patch, 1);
+		if(!in)
+			return false;
+
+		name = in.readString();
+		bank = in.read<uint32_t>();
+
+		const auto hasMods = in.read<uint8_t>();
+
+		if(hasMods)
+		{
+			modifications = std::make_shared<PatchModifications>();
+			if(!modifications->read(in))
+				return false;
+		}
+
+		if(!tags.read(in))
+			return false;
+
+		hash = in.read<PatchHash>();
+		in.read(sysex);
+
+		return true;
+	}
+
+	bool Patch::operator==(const PatchKey& _key) const
+	{
+		return program == _key.program && hash == _key.hash && PatchKey::equals(source.lock(), _key.source);
 	}
 
 	const TypedTags& Patch::getTags() const

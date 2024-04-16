@@ -30,3 +30,5 @@ source_group("source" FILES ${SOURCES})
 
 target_include_directories(juceUiLib PUBLIC ../JUCE/modules)
 target_compile_definitions(juceUiLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+target_compile_definitions(juceUiLib PUBLIC JUCE_MODAL_LOOPS_PERMITTED=1)
+set_property(TARGET juceUiLib PROPERTY FOLDER "Gearmulator")

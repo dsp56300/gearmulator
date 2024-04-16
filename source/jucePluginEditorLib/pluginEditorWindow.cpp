@@ -20,7 +20,7 @@ EditorWindow::EditorWindow(juce::AudioProcessor& _p, PluginEditorState& _s, juce
 	m_state.evSetGuiScale = [&](const int _scale)
 	{
 		if(getNumChildComponents() > 0)
-			setGuiScale(getChildComponent(0), _scale);
+			setGuiScale(getChildComponent(0), static_cast<float>(_scale));
 	};
 
 	m_state.enableBindings();
@@ -38,17 +38,54 @@ EditorWindow::~EditorWindow()
 	setUiRoot(nullptr);
 }
 
-void EditorWindow::setGuiScale(juce::Component* _comp, int percent)
+void EditorWindow::resized()
 {
-	if(!_comp)
+	AudioProcessorEditor::resized();
+
+	auto* comp = getChildComponent(0);
+	if(!comp)
 		return;
 
-	const auto s = static_cast<float>(percent)/100.0f * m_state.getRootScale();
+	if(!m_state.getWidth() || !m_state.getHeight())
+		return;
+
+	const auto targetW = getWidth();
+	const auto targetH = getHeight();
+
+	const auto scaleX = static_cast<float>(getWidth()) / static_cast<float>(m_state.getWidth());
+	const auto scaleY = static_cast<float>(getHeight()) / static_cast<float>(m_state.getHeight());
+
+	const auto scale = std::min(scaleX, scaleY);
+
+	const auto w = scale * static_cast<float>(m_state.getWidth());
+	const auto h = scale * static_cast<float>(m_state.getHeight());
+
+	const auto offX = (static_cast<float>(targetW) - w) * 0.5f;
+	const auto offY = (static_cast<float>(targetH) - h) * 0.5f;
+
+	comp->setTransform(juce::AffineTransform::scale(scale,scale).translated(offX, offY));
+
+	const auto percent = 100.f * scale / m_state.getRootScale();
+	m_config.setValue("scale", percent);
+	m_config.saveIfNeeded();
+
+	AudioProcessorEditor::resized();
+}
+
+void EditorWindow::setGuiScale(juce::Component* _comp, const float _percent)
+{
+	if(!m_state.getWidth() || !m_state.getHeight())
+		return;
+
+	const auto s = _percent / 100.0f * m_state.getRootScale();
 	_comp->setTransform(juce::AffineTransform::scale(s,s));
 
-	setSize(static_cast<int>(m_state.getWidth() * s), static_cast<int>(m_state.getHeight() * s));
+	const auto w = static_cast<int>(static_cast<float>(m_state.getWidth()) * s);
+	const auto h = static_cast<int>(static_cast<float>(m_state.getHeight()) * s);
 
-	m_config.setValue("scale", percent);
+	setSize(w, h);
+
+	m_config.setValue("scale", _percent);
 	m_config.saveIfNeeded();
 }
 
@@ -59,10 +96,22 @@ void EditorWindow::setUiRoot(juce::Component* _component)
 	if(!_component)
 		return;
 
-    const auto scale = m_config.getIntValue("scale", 100);
+	if(!m_state.getWidth() || !m_state.getHeight())
+		return;
 
-	setGuiScale(_component, scale);
+    const auto scale = static_cast<float>(m_config.getDoubleValue("scale", 100));
+
 	addAndMakeVisible(_component);
+	setGuiScale(_component, scale);
+
+	m_sizeConstrainer.setMinimumSize(m_state.getWidth() / 10, m_state.getHeight() / 10);
+	m_sizeConstrainer.setMaximumSize(m_state.getWidth() * 4, m_state.getHeight() * 4);
+
+	m_sizeConstrainer.setFixedAspectRatio(static_cast<double>(m_state.getWidth()) / static_cast<double>(m_state.getHeight()));
+	
+	setResizable(true, true);
+	setConstrainer(nullptr);
+	setConstrainer(&m_sizeConstrainer);
 }
 
 void EditorWindow::mouseDown(const juce::MouseEvent& event)

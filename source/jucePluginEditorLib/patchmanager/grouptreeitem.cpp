@@ -48,6 +48,8 @@ namespace jucePluginEditorLib::patchManager
 			if (getNumSubItems() == 1 && oldNumSubItems == 0)
 				setOpen(true);
 		}
+
+		setDeselectonSecondClick(true);
 	}
 
 	void GroupTreeItem::removeItem(const DatasourceTreeItem* _item)
@@ -120,76 +122,91 @@ namespace jucePluginEditorLib::patchManager
 
 	void GroupTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
 	{
-		if(_mouseEvent.mods.isPopupMenu())
+		if(!_mouseEvent.mods.isPopupMenu())
 		{
 			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
 
-			juce::PopupMenu menu;
+		juce::PopupMenu menu;
 
-			const auto tagType = toTagType(m_type);
+		const auto tagType = toTagType(m_type);
 
-			if(m_type == GroupType::DataSources)
+		if(m_type == GroupType::DataSources)
+		{
+			menu.addItem("Add Folders...", [this]
 			{
-				menu.addItem("Add Folder...", [this]
-				{
-					juce::FileChooser fc("Select Folder");
+				juce::FileChooser fc("Select Folders");
 
-					if(fc.browseForDirectory())
+				if(fc.showDialog(
+					juce::FileBrowserComponent::openMode | 
+					juce::FileBrowserComponent::canSelectDirectories | 
+					juce::FileBrowserComponent::canSelectMultipleItems
+					, nullptr))
+				{
+					for (const auto& r : fc.getResults())
 					{
-						const auto result = fc.getResult().getFullPathName().toStdString();
+						const auto result = r.getFullPathName().toStdString();
 						pluginLib::patchDB::DataSource ds;
 						ds.type = pluginLib::patchDB::SourceType::Folder;
 						ds.name = result;
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
-				});
+				}
+			});
 
-				menu.addItem("Add File...", [this]
+			menu.addItem("Add Files...", [this]
+			{
+				juce::FileChooser fc("Select Files");
+				if(fc.showDialog(
+					juce::FileBrowserComponent::openMode |
+					juce::FileBrowserComponent::canSelectFiles |
+					juce::FileBrowserComponent::canSelectMultipleItems,
+					nullptr))
 				{
-					juce::FileChooser fc("Select File");
-					if(fc.browseForFileToOpen())
+					for (const auto&r : fc.getResults())
 					{
-						const auto result = fc.getResult().getFullPathName().toStdString();
+						const auto result = r.getFullPathName().toStdString();
 						pluginLib::patchDB::DataSource ds;
 						ds.type = pluginLib::patchDB::SourceType::File;
 						ds.name = result;
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
-				});
-			}
-			else if(m_type == GroupType::LocalStorage)
-			{
-				menu.addItem("Create...", [this]
-				{
-					beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
-					{
-						pluginLib::patchDB::DataSource ds;
-
-						ds.name = _newText;
-						ds.type = pluginLib::patchDB::SourceType::LocalStorage;
-						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
-						ds.timestamp = std::chrono::system_clock::now();
-
-						getPatchManager().addDataSource(ds);
-					});
-				});
-			}
-			if(tagType != pluginLib::patchDB::TagType::Invalid)
-			{
-				menu.addItem("Add...", [this]
-				{
-					beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
-					{
-						if (!_newText.empty())
-							getPatchManager().addTag(toTagType(m_type), _newText);
-					});
-				});
-			}
-
-			menu.showMenuAsync(juce::PopupMenu::Options());
+				}
+			});
 		}
+		else if(m_type == GroupType::LocalStorage)
+		{
+			menu.addItem("Create...", [this]
+			{
+				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+				{
+					pluginLib::patchDB::DataSource ds;
+
+					ds.name = _newText;
+					ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+					ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+					ds.timestamp = std::chrono::system_clock::now();
+
+					getPatchManager().addDataSource(ds);
+				});
+			});
+		}
+		if(tagType != pluginLib::patchDB::TagType::Invalid)
+		{
+			menu.addItem("Add...", [this]
+			{
+				beginEdit("Enter name...", [this](bool _success, const std::string& _newText)
+				{
+					if (!_newText.empty())
+						getPatchManager().addTag(toTagType(m_type), _newText);
+				});
+			});
+		}
+
+		menu.showMenuAsync(juce::PopupMenu::Options());
 	}
 
 	void GroupTreeItem::setFilter(const std::string& _filter)
@@ -273,12 +290,7 @@ namespace jucePluginEditorLib::patchManager
 
 		m_itemsByDataSource.insert({ _dataSource, item });
 
-		const auto oldNumSubItems = getNumSubItems();
-
 		validateParent(_dataSource, item);
-
-		if(getNumSubItems() == 1 && oldNumSubItems == 0)
-			setOpen(true);
 
 		return item;
 	}
@@ -290,6 +302,8 @@ namespace jucePluginEditorLib::patchManager
 		validateParent(item);
 
 		m_itemsByTag.insert({ _tag, item });
+
+		item->onParentSearchChanged(getParentSearchRequest());
 
 		return item;
 	}

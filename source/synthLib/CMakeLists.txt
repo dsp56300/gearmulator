@@ -10,13 +10,15 @@ add_library(synthLib STATIC)
 set(SOURCES
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
-	binarystream.h
+	binarystream.cpp binarystream.h
 	buildconfig.h buildconfig.h.in
 	configFile.cpp configFile.h
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
+	dspMemoryPatch.cpp dspMemoryPatch.h
 	hybridcontainer.h
+	md5.cpp md5.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiToSysex.cpp midiToSysex.h
 	midiTypes.h
@@ -38,3 +40,4 @@ target_link_libraries(synthLib PUBLIC resample dsp56kEmu)
 if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)
 endif()
+set_property(TARGET synthLib PROPERTY FOLDER "Gearmulator")

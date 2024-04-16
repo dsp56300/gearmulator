@@ -5,6 +5,9 @@
 #include <memory>
 
 #include "patch.h"
+#include "patchmodifications.h"
+
+#include "../../synthLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
@@ -131,6 +134,16 @@ namespace pluginLib::patchDB
 		return patches.erase(_patch);
 	}
 
+	PatchPtr DataSource::getPatch(const PatchKey& _key) const
+	{
+		for (const auto& patch : patches)
+		{
+			if(*patch == _key)
+				return patch;
+		}
+		return {};
+	}
+
 	std::string DataSource::toString() const
 	{
 		std::stringstream ss;
@@ -142,6 +155,51 @@ namespace pluginLib::patchDB
 //		if (program != g_invalidProgram)
 //			ss << "|prog|" << program;
 		return ss.str();
+	}
+
+	void DataSource::write(synthLib::BinaryStream& _outStream) const
+	{
+		synthLib::ChunkWriter cw(_outStream, chunks::g_datasource, 1);
+
+		_outStream.write(static_cast<uint8_t>(type));
+		_outStream.write(static_cast<uint8_t>(origin));
+		_outStream.write(name);
+		_outStream.write(bank);
+
+		_outStream.write(static_cast<uint32_t>(patches.size()));
+
+		for (const auto& patch : patches)
+			patch->write(_outStream);
+	}
+
+	bool DataSource::read(synthLib::BinaryStream& _inStream)
+	{
+		auto in = _inStream.tryReadChunk(chunks::g_datasource);
+		if(!in)
+			return false;
+
+		type = static_cast<SourceType>(in.read<uint8_t>());
+		origin = static_cast<DataSourceOrigin>(in.read<uint8_t>());
+		name = in.readString();
+		bank = in.read<uint32_t>();
+
+		const auto numPatches = in.read<uint32_t>();
+
+		for(uint32_t i=0; i<numPatches; ++i)
+		{
+			const auto patch = std::make_shared<Patch>();
+			if(!patch->read(in))
+				return false;
+
+			if(patch->modifications)
+			{
+				patch->modifications->patch = patch;
+				patch->modifications->updateCache();
+			}
+			patches.insert(patch);
+		}
+
+		return true;
 	}
 
 	DataSourceNode::DataSourceNode(const DataSource& _ds) : DataSource(_ds)

@@ -1,7 +1,5 @@
 #include "uiObject.h"
 
-#include <juce_audio_processors/juce_audio_processors.h>
-
 #include <utility>
 
 #include "editor.h"
@@ -69,18 +67,18 @@ namespace genericUI
 			_editor.registerTabGroup(&m_tabGroup);
 		}
 
-		for (auto& ch : m_children)
+		for (const auto& ch : m_children)
 		{
 			ch->createTabGroups(_editor);
 		}
 	}
 
-	void UiObject::createControllerLinks(Editor& _editor)
+	void UiObject::createControllerLinks(Editor& _editor) const
 	{
-		for (auto& link : m_controllerLinks)
+		for (const auto& link : m_controllerLinks)
 			link->create(_editor);
 
-		for (auto& ch : m_children)
+		for (const auto& ch : m_children)
 		{
 			ch->createControllerLinks(_editor);
 		}
@@ -95,7 +93,7 @@ namespace genericUI
 			ch->registerTemplates(_editor);
 	}
 
-	void UiObject::apply(Editor& _editor, juce::Component& _target)
+	void UiObject::apply(const Editor& _editor, juce::Component& _target)
 	{
 		const auto x = getPropertyInt("x");
 		const auto y = getPropertyInt("y");
@@ -325,38 +323,35 @@ namespace genericUI
 		return count;
 	}
 
-	void UiObject::setCurrentPart(Editor& _editor, uint8_t _part)
+	void UiObject::setCurrentPart(Editor& _editor, const uint8_t _part)
 	{
 		if(m_condition)
-		{
-			m_condition->unbind();
-			
-			const auto v = _editor.getInterface().getParameterValue(m_condition->getParameterIndex(), _part);
-			if(v)
-				m_condition->bind(v);
-		}
+			m_condition->setCurrentPart(_editor, _part);
 
 		for (const auto& child : m_children)
 			child->setCurrentPart(_editor, _part);
 	}
 
-	void UiObject::createCondition(Editor& _editor, juce::Component& _target)
+	void UiObject::updateKeyValueConditions(const std::string& _key, const std::string& _value) const
+	{
+		auto* cond = dynamic_cast<ConditionByKeyValue*>(m_condition.get());
+		if(cond && cond->getKey() == _key)
+			cond->setValue(_value);
+
+		for (const auto& child : m_children)
+			child->updateKeyValueConditions(_key, _value);
+	}
+
+	void UiObject::createCondition(const Editor& _editor, juce::Component& _target)
 	{
 		if(!hasComponent("condition"))
 			return;
-
-		const auto paramName = getProperty("enableOnParameter");
-
-		const auto index = _editor.getInterface().getParameterIndexByName(paramName);
-
-		if(index < 0)
-			throw std::runtime_error("Parameter named " + paramName + " not found");
 
 		const auto conditionValues = getProperty("enableOnValues");
 
 		size_t start = 0;
 
-		std::set<uint8_t> values;
+		std::set<std::string> values;
 
 		for(size_t i=0; i<=conditionValues.size(); ++i)
 		{
@@ -366,18 +361,48 @@ namespace genericUI
 				continue;
 
 			const auto valueString = conditionValues.substr(start, i - start);
-			const int val = strtol(valueString.c_str(), nullptr, 10);
-			values.insert(static_cast<uint8_t>(val));
+
+			values.insert(valueString);
 
 			start = i + 1;
 		}
+		
+		if(values.empty())
+			throw std::runtime_error("Condition does not specify any values");
 
-		const auto v = _editor.getInterface().getParameterValue(index, 0);
+		const auto paramName = getProperty("enableOnParameter");
 
-		if(!v)
-			throw std::runtime_error("Parameter named " + paramName + " not found");
+		if(!paramName.empty())
+		{
+			const auto paramIndex = _editor.getInterface().getParameterIndexByName(paramName);
 
-		m_condition.reset(new Condition(_target, v, static_cast<uint32_t>(index), values));
+			if(paramIndex < 0)
+				throw std::runtime_error("Parameter named " + paramName + " not found");
+
+			const auto v = _editor.getInterface().getParameterValue(paramIndex, 0);
+
+			if(!v)
+				throw std::runtime_error("Parameter named " + paramName + " not found");
+
+			std::set<uint8_t> valuesInt;
+
+			for (const auto& valueString : values)
+			{
+				const int val = strtol(valueString.c_str(), nullptr, 10);
+				valuesInt.insert(static_cast<uint8_t>(val));
+			}
+
+			m_condition.reset(new ConditionByParameterValues(_target, v, static_cast<uint32_t>(paramIndex), valuesInt));
+		}
+		else
+		{
+			auto key = getProperty("enableOnKey");
+
+			if(key.empty())
+				throw std::runtime_error("Unknown condition type, neither 'enableOnParameter' nor 'enableOnKey' specified");
+
+			m_condition.reset(new ConditionByKeyValue(_target, std::move(key), std::move(values)));
+		}
 	}
 
 	bool UiObject::parse(juce::DynamicObject* _obj)

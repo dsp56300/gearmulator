@@ -9,6 +9,11 @@
 #include "tags.h"
 #include "patchdbtypes.h"
 
+namespace synthLib
+{
+	class BinaryStream;
+}
+
 namespace pluginLib::patchDB
 {
 	using PatchHash = std::array<uint8_t, 16>;
@@ -27,6 +32,15 @@ namespace pluginLib::patchDB
 		std::pair<PatchPtr, PatchModificationsPtr> createCopy(const DataSourceNodePtr& _ds) const;
 
 		void replaceData(const Patch& _patch);
+
+		void write(synthLib::BinaryStream& _s) const;
+		bool read(synthLib::BinaryStream& _in);
+
+		bool operator == (const PatchKey& _key) const;
+		bool operator != (const PatchKey& _key) const
+		{
+			return !(*this == _key);
+		}
 
 	private:
 		Patch(const Patch&) = default;

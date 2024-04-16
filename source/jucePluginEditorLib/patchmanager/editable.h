@@ -7,7 +7,7 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	class Editable : juce::Label::Listener
+	class Editable : juce::Label::Listener, juce::TextEditor::Listener
 	{
 	public:
 		using FinishedEditingCallback = std::function<void(bool, const std::string&)>;
@@ -20,6 +20,7 @@ namespace jucePluginEditorLib::patchManager
 		// juce::Label::Listener
 		void editorHidden(juce::Label*, juce::TextEditor&) override;
 		void labelTextChanged(juce::Label* _label) override;
+		void textEditorTextChanged (juce::TextEditor&) override;
 
 	private:
 		void destroyEditorLabel();

@@ -20,3 +20,5 @@ add_test(NAME virusIntegrationTests COMMAND ${CMAKE_COMMAND}
 	-DROOT_DIR=${CMAKE_BINARY_DIR} 
 	-P ${CMAKE_CURRENT_SOURCE_DIR}/runTest.cmake)
 set_tests_properties(virusIntegrationTests PROPERTIES LABELS "IntegrationTest")
+
+set_property(TARGET virusIntegrationTest PROPERTY FOLDER "Virus")

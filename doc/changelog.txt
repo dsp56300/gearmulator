@@ -1,6 +1,125 @@
 Release Notes 
 
-1.3.5 (TBD)
+1.3.11
+
+Framework:
+
+- [Imp] Added disclaimer about ROM usage
+- [Imp] Add warning message if a Midi port cannot be opened because it is already in use
+- [Imp] Third-party skins are now expected to be in a folder that is named like the plugin:
+        skins_PlugName, for example skins_Osirus.
+        Currently selected skins are still loaded and you can export the current skin to
+        disk to create the new folder automatically. Move other skins to the new
+        folder manually.
+
+Patch Manager:
+
+- [Imp] Database is now cached so subsequent loads are faster. If a datasource needs to be
+        updated, right click and select "Refresh" to force a rescan
+- [Imp] Added a default text "Search..." to search boxes independent from the used skin
+- [Imp] Allow to add multiple files/folders at once when adding datasources
+
+- [Fix] Info about selected patch not updated when patch renamed or tags modified
+
+Osirus/OsTIrus:
+
+- [Fix] Plugin may crash if a patch data source folder contains files not belonging to presets
+
+1.3.10
+
+Osirus/OsTIrus:
+
+- [Fix] Part volume knob for part 1 was bound to selected part instead of part 1
+- [Fix] Selecting a ROM preset via part drop down didn't work after switching to
+        another ROM
+
+1.3.9
+
+DSP:
+
+- [Imp] Small performance optimizations
+
+- [Fix] DSP thread not set to high priority on Mac/Linux
+
+Framework:
+
+- [Imp] Upgraded Juce to version 7.0.10
+- [Imp] Plugin window can now have an arbitrary size by dragging the bottom right corner
+- [Imp] Added support for the LV2 plugin format
+- [Imp] Added options to Save button to allow storing the current preset in a user bank
+
+- [Fix] VST3 packaging corrected for Windows & Linux to match specification as stated at
+        https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Locations+Format/Plugin+Format.html
+- [Fix] Patch Manager: Failed to parse folder that contains UTF-8 characters
+- [Fix] Patch Manager: Selection was not updated when a part is saved to a user bank
+- [Fix] Knob movement via mouse wheel didn't update automation & parameter display
+
+Osirus/OsTIrus:
+
+- [Imp] Multiple ROMs are now supported. The ROM can be chosen from the dropdown, the
+        selected ROM is saved in the DAW plugin state. Note that the ROM content
+        is not saved, only the filename. If the ROM cannot be found when reopening
+        a project, the first one that is found is used instead.
+- [Imp] Added support for Virus A
+
+- [Fix] Crash if preset is selected in Single mode while parameters are locked
+- [Fix] Part Volume knob did not work in Single mode
+
+1.3.8 (2024.03.11)
+
+DSP:
+
+- [Imp] Small performance improvements
+
+Framework:
+
+- [Imp] Second click on root tree items of category tree deselects the item
+- [Imp] Patch Manager: "Uncategorized" has been moved into the Categories group
+
+- [Fix] Patch Manager: Missing patches if a directory contains files with unicode characters
+
+1.3.7
+
+Framework:
+
+- [Imp] Patch Manager: A category can now be deselected via second mouse click to remove 
+                       any category filter
+- [Imp] Patch Manager: Root tree items (Factory Patches, Datasources) are no longer 
+                       auto-expand upon load
+- [Imp] Patch Manager: data source names are now shortened
+
+- [Imp] Inform that changing plugin latency blocks while being in use might cause synchronization
+        problems
+
+- [Fix] Patch Manager: No error message was displayed if a user bank cannot be written to disk
+- [Fix] Patch Manager: It was not possible to add presets to a newly created tag until another
+                       data source was selected
+
+Osirus:
+
+- [Imp] Disabled poly pressure to control Page B parameters to prevent accidental patch changes 
+        by keyboards that emit MPE messages
+- [Fix] Locking parameter regions didn't work properly on older version presets and may 
+        have caused silence or invalid presets
+
+1.3.6 (2024.03.03)
+
+DSP:
+
+- [Imp] Performance improvements
+
+- [Fix] Crash on x86 processors in various circumstances
+
+Framework:
+
+- [Fix] PatchManager: Edit field not refreshing text while typing in some hosts when adding 
+        a user bank or favourite
+
+Osirus:
+
+- [Fix] Crash when loading Virus B OS 4.58
+
+1.3.5 (2024.03.01)
 
 DSP:
 

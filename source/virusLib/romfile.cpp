@@ -1,4 +1,3 @@
-#include <cassert>
 #include <fstream>
 #include <algorithm>
 
@@ -10,115 +9,24 @@
 
 #include "../synthLib/os.h"
 
-#include "midiFileToRomData.h"
-
 #include <cstring>	// memcpy
 
 #include "dsp56kEmu/memory.h"
 
-#ifdef _WIN32
-#define NOMINMAX
-#include <Windows.h>
-#endif
-
 namespace virusLib
 {
-ROMFile::ROMFile(const std::string& _path, const Model _model/* = Model::ABC*/)
+
+ROMFile::ROMFile(std::vector<uint8_t> _data, std::string _name, const DeviceModel _model/* = DeviceModel::ABC*/) : m_model(_model), m_romFileName(std::move(_name)), m_romFileData(std::move(_data))
 {
-	if(!_path.empty())
-	{
-		m_romFileName = _path;
-
-		// Open file
-		LOG("Loading ROM at " << _path);
-
-		if(!synthLib::readFile(m_romFileData, _path))
-		{
-			LOG("Failed to load ROM at '" << _path << "'");
-	#ifdef _WIN32
-			const auto errorMessage = std::string("Failed to load ROM file. Make sure it is put next to the plugin and ends with .bin");
-			::MessageBoxA(nullptr, errorMessage.c_str(), "ROM not found", MB_OK);
-	#endif
-			return;
-		}
-	}
-	else
-	{
-		const auto expectedSize = _model == Model::ABC ? getRomSizeModelABC() : 0;
-
-		if(!loadROMData(m_romFileName, m_romFileData, expectedSize, expectedSize))
-			return;
-	}
-
 	if(initialize())
-		printf("ROM File: %s\n", m_romFileName.c_str());
+		return;
+	m_romFileData.clear();
+	bootRom.size = 0;
 }
 
-ROMFile::ROMFile(std::vector<uint8_t> _data) : m_romFileData(std::move(_data))
+ROMFile ROMFile::invalid()
 {
-	initialize();
-}
-
-std::string ROMFile::findROM()
-{
-	return synthLib::findROM(getRomSizeModelABC());
-}
-
-bool ROMFile::loadROMData(std::string& _loadedFile, std::vector<uint8_t>& _loadedData, const size_t _expectedSizeMin, const size_t _expectedSizeMax)
-{
-	// try binary roms first
-	const auto file = synthLib::findROM(_expectedSizeMin, _expectedSizeMax);
-
-	if(!file.empty())
-	{
-		if(synthLib::readFile(_loadedData, file) && !_loadedData.empty())
-		{
-			_loadedFile = file;
-			return true;
-		}
-	}
-
-	// if that didn't work, load an OS update as rom
-	auto loadMidiAsRom = [&](const std::string& _path)
-	{
-		_loadedFile.clear();
-		_loadedData.clear();
-
-		std::vector<std::string> files;
-
-		synthLib::findFiles(files, _path, ".mid", 512 * 1024, 600 * 1024);
-		
-		bool gotSector0 = false;
-		bool gotSector8 = false;
-
-		for (const auto& f : files)
-		{
-			MidiFileToRomData loader;
-			if(!loader.load(f) || loader.getData().size() != getRomSizeModelABC() / 2)
-				continue;
-			if(loader.getFirstSector() == 0)
-			{
-				if(gotSector0)
-					continue;
-				gotSector0 = true;
-				_loadedFile = f;
-				_loadedData.insert(_loadedData.begin(), loader.getData().begin(), loader.getData().end());
-			}
-			else if(loader.getFirstSector() == 8)
-			{
-				if(gotSector8)
-					continue;
-				gotSector8 = true;
-				_loadedData.insert(_loadedData.end(), loader.getData().begin(), loader.getData().end());
-			}
-		}
-		return gotSector0 && _loadedData.size() >= getRomSizeModelABC() / 2;
-	};
-
-	if(loadMidiAsRom(synthLib::getModulePath()))
-		return true;
-
-	return loadMidiAsRom(synthLib::getModulePath(false));
+	return ROMFile({}, {}, DeviceModel::Invalid);
 }
 
 bool ROMFile::initialize()
@@ -167,7 +75,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
 	{
 		// ABC
-		m_model = Model::ABC;
+		m_model = DeviceModel::C;
 	}
 	else 
 	{
@@ -191,9 +99,13 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 		_file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
 		if(i == 0 && chunk.chunk_id == 3 && lastChunkId == 4)	// Virus A has one chunk less
+		{
+			m_model = DeviceModel::A;
 			lastChunkId = 3;
+		}
 
-		assert(chunk.chunk_id == lastChunkId - i);
+		if(chunk.chunk_id != lastChunkId - i)
+			return {};
 
 		// Format uses a special kind of size where the first byte should be decreased by 1
 		const uint16_t len = ((chunk.size1 - 1) << 8) | chunk.size2;
@@ -213,7 +125,7 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file)
 	return chunks;
 }
 
-std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph) const
+std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::HDI08& _hdi08) const
 {
 	// Load BootROM in DSP memory
 	for (uint32_t i=0; i<bootRom.data.size(); i++)
@@ -228,12 +140,17 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::Peripherals56362& periph)
 	// Attach command stream
 	std::thread feedCommandStream([&]()
 	{
-		periph.getHDI08().writeRX(m_commandStream);
+		_hdi08.writeRX(m_commandStream);
 	});
 
 	// Initialize the DSP
 	dsp.setPC(bootRom.offset);
 	return feedCommandStream;
+}
+
+std::string ROMFile::getModelName() const
+{
+	return virusLib::getModelName(getModel());
 }
 
 bool ROMFile::getSingle(const int _bank, const int _presetNumber, TPreset& _out) const

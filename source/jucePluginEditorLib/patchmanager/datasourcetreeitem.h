@@ -22,7 +22,7 @@ namespace jucePluginEditorLib::patchManager
 		bool isInterestedInSavePatchDesc(const SavePatchDesc& _desc) override;
 		bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) override;
 
-		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
+		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr) override;
 
 		void itemClicked(const juce::MouseEvent&) override;
 		void refresh();

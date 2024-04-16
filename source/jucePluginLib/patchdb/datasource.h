@@ -4,8 +4,15 @@
 
 #include "patchdbtypes.h"
 
+namespace synthLib
+{
+	class BinaryStream;
+}
+
 namespace pluginLib::patchDB
 {
+	struct PatchKey;
+
 	struct DataSource
 	{
 		SourceType type = SourceType::Invalid;
@@ -77,6 +84,8 @@ namespace pluginLib::patchDB
 			return !(*this == _ds);
 		}
 
+		PatchPtr getPatch(const PatchKey& _key) const;
+
 		bool operator < (const DataSource& _ds) const
 		{
 //			if (parent < _ds.parent)	return true;
@@ -105,6 +114,9 @@ namespace pluginLib::patchDB
 		}
 
 		std::string toString() const;
+
+		void write(synthLib::BinaryStream& _outStream) const;
+		bool read(synthLib::BinaryStream& _inStream);
 	};
 
 	struct DataSourceNode final : DataSource, std::enable_shared_from_this<DataSourceNode>

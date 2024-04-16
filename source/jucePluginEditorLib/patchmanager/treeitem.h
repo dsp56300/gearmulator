@@ -42,7 +42,7 @@ namespace jucePluginEditorLib::patchManager
 		bool beginEdit(const std::string& _initialText, FinishedEditingCallback&& _callback);
 
 		virtual void patchDropped(const pluginLib::patchDB::PatchPtr& _patch) {}
-		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches);
+		virtual void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr);
 
 		bool hasSearch() const;
 
@@ -68,11 +68,16 @@ namespace jucePluginEditorLib::patchManager
 
 		virtual pluginLib::patchDB::Color getColor() const { return pluginLib::patchDB::g_invalidColor; }
 
+		void itemClicked(const juce::MouseEvent&) override;
+
+		void setDeselectonSecondClick(const bool _deselect) { m_deselectOnSecondClick = _deselect; }
+
 	protected:
 		void cancelSearch();
 		void search(pluginLib::patchDB::SearchRequest&& _request);
 		virtual void processSearchUpdated(const pluginLib::patchDB::Search& _search);
 		virtual void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) {}
+		const pluginLib::patchDB::SearchRequest& getParentSearchRequest() const;
 
 	private:
 		bool mightContainSubItems() override { return true; }
@@ -92,5 +97,9 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::SearchRequest m_searchRequest;
 		uint32_t m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
+
+		bool m_deselectOnSecondClick = false;
+		bool m_selectedWasChanged = false;
+		bool m_forceDeselect = false;
 	};
 }

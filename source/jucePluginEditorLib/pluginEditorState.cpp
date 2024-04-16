@@ -10,6 +10,7 @@ namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
+	, m_skinFolderName("skins_" + _processor.getProperties().name)
 {
 }
 
@@ -124,7 +125,7 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 	}
 }
 
-void PluginEditorState::setGuiScale(int _scale) const
+void PluginEditorState::setGuiScale(const int _scale) const
 {
 	if(evSetGuiScale)
 		evSetGuiScale(_scale);
@@ -138,18 +139,23 @@ genericUI::Editor* PluginEditorState::getEditor() const
 void PluginEditorState::openMenu()
 {
 	const auto& config = m_processor.getConfig();
-    const auto scale = config.getIntValue("scale", 100);
+    const auto scale = juce::roundToInt(config.getDoubleValue("scale", 100));
 
 	juce::PopupMenu menu;
 
 	juce::PopupMenu skinMenu;
 
-	auto addSkinEntry = [this, &skinMenu](const PluginEditorState::Skin& _skin)
+	bool loadedSkinIsPartOfList = false;
+
+	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList](const Skin& _skin)
 	{
-		skinMenu.addItem(_skin.displayName, true, _skin == getCurrentSkin(),[this, _skin] {loadSkin(_skin);});
+		const auto isCurrent = _skin == getCurrentSkin();
+		if(isCurrent)
+			loadedSkinIsPartOfList = true;
+		skinMenu.addItem(_skin.displayName, true, isCurrent,[this, _skin] {loadSkin(_skin);});
 	};
 
-	for (const auto & skin : PluginEditorState::getIncludedSkins())
+	for (const auto & skin : getIncludedSkins())
 		addSkinEntry(skin);
 
 	bool haveSkinsOnDisk = false;
@@ -158,7 +164,7 @@ void PluginEditorState::openMenu()
 	const auto modulePath = synthLib::getModulePath();
 
 	std::vector<std::string> entries;
-	synthLib::getDirectoryEntries(entries, modulePath + "skins");
+	synthLib::getDirectoryEntries(entries, modulePath + m_skinFolderName);
 
 	for (const auto& entry : entries)
 	{
@@ -186,32 +192,48 @@ void PluginEditorState::openMenu()
 		}
 	}
 
-	if(m_editor && m_currentSkin.folder.empty())
+	if(!loadedSkinIsPartOfList)
+		addSkinEntry(getCurrentSkin());
+
+	if(m_editor && m_currentSkin.folder.empty() || m_currentSkin.folder.find(m_skinFolderName) == std::string::npos)
 	{
 		auto* editor = m_editor.get();
 		if(editor)
 		{
 			skinMenu.addSeparator();
-			skinMenu.addItem("Export current skin to 'skins' folder on disk", true, false, [this]{exportCurrentSkin();});
+			skinMenu.addItem("Export current skin to '" + m_skinFolderName + "' folder on disk", true, false, [this]{exportCurrentSkin();});
 		}
 	}
 
 	juce::PopupMenu scaleMenu;
 	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
+	scaleMenu.addItem("65%", true, scale == 65, [this] { setGuiScale(65); });
 	scaleMenu.addItem("75%", true, scale == 75, [this] { setGuiScale(75); });
+	scaleMenu.addItem("85%", true, scale == 85, [this] { setGuiScale(85); });
 	scaleMenu.addItem("100%", true, scale == 100, [this] { setGuiScale(100); });
 	scaleMenu.addItem("125%", true, scale == 125, [this] { setGuiScale(125); });
 	scaleMenu.addItem("150%", true, scale == 150, [this] { setGuiScale(150); });
+	scaleMenu.addItem("175%", true, scale == 175, [this] { setGuiScale(175); });
 	scaleMenu.addItem("200%", true, scale == 200, [this] { setGuiScale(200); });
+	scaleMenu.addItem("250%", true, scale == 250, [this] { setGuiScale(250); });
 	scaleMenu.addItem("300%", true, scale == 300, [this] { setGuiScale(300); });
+
+	auto adjustLatency = [this](const int _blocks)
+	{
+		m_processor.setLatencyBlocks(_blocks);
+
+		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Warning",
+			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
+			"It is advised to save, close & reopen the project to prevent synchronization issues.");
+	};
 
 	const auto latency = m_processor.getPlugin().getLatencyBlocks();
 	juce::PopupMenu latencyMenu;
-	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this] { m_processor.setLatencyBlocks(0); });
-	latencyMenu.addItem("1 (default)", true, latency == 1, [this] { m_processor.setLatencyBlocks(1); });
-	latencyMenu.addItem("2", true, latency == 2, [this] { m_processor.setLatencyBlocks(2); });
-	latencyMenu.addItem("4", true, latency == 4, [this] { m_processor.setLatencyBlocks(4); });
-	latencyMenu.addItem("8", true, latency == 8, [this] { m_processor.setLatencyBlocks(8); });
+	latencyMenu.addItem("0 (DAW will report proper CPU usage)", true, latency == 0, [this, adjustLatency] { adjustLatency(0); });
+	latencyMenu.addItem("1 (default)", true, latency == 1, [this, adjustLatency] { adjustLatency(1); });
+	latencyMenu.addItem("2", true, latency == 2, [this, adjustLatency] { adjustLatency(2); });
+	latencyMenu.addItem("4", true, latency == 4, [this, adjustLatency] { adjustLatency(4); });
+	latencyMenu.addItem("8", true, latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
 	menu.addSubMenu("GUI Skin", skinMenu);
 	menu.addSubMenu("GUI Scale", scaleMenu);
@@ -304,7 +326,7 @@ void PluginEditorState::exportCurrentSkin() const
 	if(!editor)
 		return;
 
-	const auto res = editor->exportToFolder(synthLib::getModulePath() + "skins/");
+	const auto res = editor->exportToFolder(synthLib::getModulePath() + m_skinFolderName + '/');
 
 	if(!res.empty())
 	{

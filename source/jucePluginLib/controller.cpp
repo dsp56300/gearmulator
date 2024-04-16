@@ -16,7 +16,12 @@ namespace pluginLib
 	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
 	{
 	}
-	
+
+	Controller::~Controller()
+	{
+		m_softKnobs.clear();
+	}
+
 	void Controller::registerParams(juce::AudioProcessor& _processor)
     {
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
@@ -112,8 +117,29 @@ namespace pluginLib
 			}
 			_processor.addParameterGroup(std::move(group));
 		}
+
 		_processor.addParameterGroup(std::move(globalParams));
-	}
+
+		// initialize all soft knobs for all parts
+		std::vector<size_t> softKnobs;
+
+		for (size_t i=0; i<m_descriptions.getDescriptions().size(); ++i)
+		{
+			const auto& desc = m_descriptions.getDescriptions()[i];
+			if(!desc.isSoftKnob())
+				continue;
+			softKnobs.push_back(i);
+		}
+
+		for(size_t part = 0; part<m_paramsByParamType.size(); ++part)
+		{
+			for (const auto& softKnobParam : softKnobs)
+			{
+				auto* sk = new SoftKnob(*this, static_cast<uint8_t>(part), static_cast<uint32_t>(softKnobParam));
+				m_softKnobs.insert({sk->getParameter(), std::unique_ptr<SoftKnob>(sk)});
+			}
+		}
+    }
 
 	void Controller::sendSysEx(const pluginLib::SysEx& msg) const
     {
@@ -430,7 +456,7 @@ namespace pluginLib
 		return m_lockedRegions.find(_id) != m_lockedRegions.end();
 	}
 
-	std::unordered_set<std::string> Controller::getLockedParameters() const
+	std::unordered_set<std::string> Controller::getLockedParameterNames() const
 	{
 		if(m_lockedRegions.empty())
 			return {};
@@ -449,6 +475,39 @@ namespace pluginLib
 		}
 
 		return result;
+	}
+
+	std::unordered_set<const Parameter*> Controller::getLockedParameters(const uint8_t _part) const
+	{
+		const auto paramNames = getLockedParameterNames();
+
+		std::unordered_set<const Parameter*> results;
+
+		for (const auto& paramName : paramNames)
+		{
+			const auto idx = getParameterIndexByName(paramName);
+			assert(idx != InvalidParameterIndex);
+			const auto* p = getParameter(idx, _part);
+			assert(p != nullptr);
+			results.insert(p);
+		}
+
+		return results;
+	}
+
+	bool Controller::isParameterLocked(const std::string& _name) const
+	{
+		const auto& regions = getLockedRegions();
+		for (const auto& region : regions)
+		{
+			const auto& it = m_descriptions.getRegions().find(region);
+			if(it == m_descriptions.getRegions().end())
+				continue;
+
+			if(it->second.containsParameter(_name))
+				return true;
+		}
+		return false;
 	}
 
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)

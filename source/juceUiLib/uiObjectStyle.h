@@ -1,6 +1,6 @@
 #pragma once
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "juce_gui_basics/juce_gui_basics.h"
 
 #include <optional>
 
@@ -25,6 +25,8 @@ namespace genericUI
 		const auto& getAlign() const { return m_align; }
 
 		std::optional<juce::Font> getFont() const;
+
+		static bool parseColor(juce::Colour& _color, const std::string& _colorString);
 
 	protected:
 		juce::Font getComboBoxFont(juce::ComboBox&) override;

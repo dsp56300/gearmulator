@@ -4,11 +4,15 @@
 #include "VirusEditor.h"
 
 #include "../VirusController.h"
+#include "../PluginProcessor.h"
 #include "../ParameterNames.h"
+
+#include "../../jucePluginEditorLib/pluginProcessor.h"
+#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "../../jucePluginLib/parameterbinding.h"
 
-#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "../../virusLib/device.h"
 
 namespace genericVirusUI
 {
@@ -21,6 +25,7 @@ namespace genericVirusUI
 		_editor.findComponents<juce::Slider>(m_partVolume, "PartVolume");
 		_editor.findComponents<juce::Slider>(m_partPan, "PartPan");
 		_editor.findComponents<PartButton>(m_presetName, "PresetName");
+		_editor.findComponents<juce::Component>(m_partActive, "PartActive");
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
@@ -55,6 +60,17 @@ namespace genericVirusUI
 		}
 
 		updateAll();
+
+		if(!m_partActive.empty())
+		{
+			for (const auto & partActive : m_partActive)
+			{
+				partActive->setInterceptsMouseClicks(false, false);
+				partActive->setVisible(false);
+			}
+
+			startTimer(1000/20);
+		}
 	}
 
 	Parts::~Parts() = default;
@@ -150,9 +166,11 @@ namespace genericVirusUI
 	{
 	    const auto multiMode = m_editor.getController().isMultiMode();
 
+		const auto partCount = multiMode ? static_cast<AudioPluginAudioProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
+
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
-			const bool visible = multiMode || !i;
+			const bool visible = i < partCount;
 
 			VirusEditor::setEnabled(*m_partSelect[i], visible);
 			VirusEditor::setEnabled(*m_partPan[i], visible);
@@ -165,6 +183,28 @@ namespace genericVirusUI
 				VirusEditor::setEnabled(*m_presetNext[i], visible);
 
 			m_presetName[i]->setVisible(visible);
+		}
+
+		const auto volumeParam = m_editor.getController().getParameterIndexByName(multiMode ? Virus::g_paramPartVolume : Virus::g_paramPatchVolume);
+		m_editor.getParameterBinding().bind(*m_partVolume[0], volumeParam, 0);
+		m_partVolume[0]->getProperties().set("parameter", static_cast<int>(volumeParam));
+	}
+
+	void Parts::timerCallback()
+	{
+		auto* device = dynamic_cast<virusLib::Device*>(m_editor.getProcessor().getPlugin().getDevice());
+
+		if(!device)
+			return;
+
+		auto& fpState = device->getFrontpanelState();
+
+		const uint32_t maxPart = m_editor.getController().isMultiMode() ? 16 : 1;
+
+		for(uint32_t i=0; i<m_partActive.size(); ++i)
+		{
+			m_partActive[i]->setVisible(i < maxPart && fpState.m_midiEventReceived[i]);
+			fpState.m_midiEventReceived[i] = false;
 		}
 	}
 

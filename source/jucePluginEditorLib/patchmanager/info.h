@@ -19,13 +19,16 @@ namespace jucePluginEditorLib::patchManager
 		Info(PatchManager& _pm);
 		~Info() override;
 
-		void setPatch(const pluginLib::patchDB::PatchPtr& _patch) const;
-		void clear() const;
+		void setPatch(const pluginLib::patchDB::PatchPtr& _patch);
+		void clear();
 
 		static std::string toText(const pluginLib::patchDB::Tags& _tags);
 		static std::string toText(const pluginLib::patchDB::DataSourceNodePtr& _source);
 
 		void paint(juce::Graphics& g) override;
+
+		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
+
 	private:
 		juce::Label* addChild(juce::Label* _label);
 		void doLayout() const;
@@ -42,5 +45,8 @@ namespace jucePluginEditorLib::patchManager
 		juce::Label* m_categories = nullptr;
 		juce::Label* m_lbTags = nullptr;
 		juce::Label* m_tags = nullptr;
+
+		pluginLib::patchDB::PatchPtr m_patch;
+		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	};
 }

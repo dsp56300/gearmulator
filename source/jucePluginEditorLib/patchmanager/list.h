@@ -29,6 +29,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void setContent(const pluginLib::patchDB::SearchHandle& _handle);
 		void setContent(pluginLib::patchDB::SearchRequest&& _request);
+		void clear();
 
 		void refreshContent();
 

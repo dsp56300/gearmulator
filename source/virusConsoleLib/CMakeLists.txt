@@ -15,3 +15,4 @@ target_sources(virusConsoleLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusConsoleLib PUBLIC virusLib)
+set_property(TARGET virusConsoleLib PROPERTY FOLDER "Virus")

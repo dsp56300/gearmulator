@@ -34,7 +34,7 @@ namespace virusLib
 			else if(_data == 0xf50000)
 			{
 				m_state = State::StatusReport;
-				m_remainingStatusBytes = m_mc.getROM().getModel() == ROMFile::Model::ABC ? 1 : 2;
+				m_remainingStatusBytes = isABCFamily(m_mc.getROM().getModel()) ? 1 : 2;
 			}
 			else if(_data == 0xf400f4)
 			{

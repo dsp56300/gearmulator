@@ -2,7 +2,9 @@
 
 #include "patch.h"
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "juce_core/juce_core.h"
+
+#include "../../synthLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
@@ -105,5 +107,26 @@ namespace pluginLib::patchDB
 	bool PatchModifications::empty() const
 	{
 		return name.empty() && tags.empty();
+	}
+
+	void PatchModifications::write(synthLib::BinaryStream& _outStream) const
+	{
+		synthLib::ChunkWriter cw(_outStream, chunks::g_patchModification, 1);
+		_outStream.write(name);
+		tags.write(_outStream);
+	}
+
+	bool PatchModifications::read(synthLib::BinaryStream& _binaryStream)
+	{
+		auto in = _binaryStream.tryReadChunk(chunks::g_patchModification, 1);
+		if(!in)
+			return false;
+
+		name = in.readString();
+
+		if(!tags.read(in))
+			return false;
+
+		return true;
 	}
 }

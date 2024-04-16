@@ -53,7 +53,11 @@ namespace pluginLib
 		bool isBipolar;
 		int step = 0;
 		std::string toText;
+		std::string softKnobTargetSelect;
+		std::string softKnobTargetList;
 
 		bool isNonPartSensitive() const;
+
+		bool isSoftKnob() const;
 	};
 }

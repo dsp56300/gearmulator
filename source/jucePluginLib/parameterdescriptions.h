@@ -9,8 +9,6 @@
 #include "parameterlink.h"
 #include "parameterregion.h"
 
-#include "juce_core/juce_core.h"
-
 namespace juce
 {
 	class var;
@@ -38,6 +36,8 @@ namespace pluginLib
 		const std::unordered_map<std::string, MidiPacket>& getMidiPackets() const { return m_midiPackets; }
 
 		const auto& getRegions() const { return m_regions; }
+
+		const ValueList* getValueList(const std::string& _key) const;
 
 	private:
 		std::string loadJson(const std::string& _jsonString);

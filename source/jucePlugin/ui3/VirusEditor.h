@@ -4,11 +4,19 @@
 #include "../../jucePluginEditorLib/pluginEditor.h"
 #include "../../jucePluginEditorLib/focusedParameter.h"
 
+#include "../../jucePluginLib/event.h"
+
 #include "Parts.h"
 #include "Tabs.h"
 #include "FxPage.h"
 #include "PatchManager.h"
 #include "ControllerLinks.h"
+#include "Leds.h"
+
+namespace virusLib
+{
+	class ROMFile;
+}
 
 namespace jucePluginEditorLib
 {
@@ -45,8 +53,6 @@ namespace genericVirusUI
 
 		Virus::Controller& getController() const;
 
-		void selectRomPreset(uint8_t _part, virusLib::BankNumber _bank, uint8_t _program) const;
-
 		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
@@ -78,6 +84,7 @@ namespace genericVirusUI
 		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;
+		std::unique_ptr<Leds> m_leds;
 		std::unique_ptr<Tabs> m_tabs;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 		std::unique_ptr<FxPage> m_fxPage;
@@ -97,5 +104,7 @@ namespace genericVirusUI
 		juce::Label* m_deviceModel = nullptr;
 
 		std::function<void()> m_openMenuCallback;
+
+		pluginLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};
 }

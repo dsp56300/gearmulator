@@ -25,6 +25,7 @@ namespace pluginLib
 			void mouseDown(const juce::MouseEvent& event) override;
 			void mouseUp(const juce::MouseEvent& event) override;
 			void mouseDrag(const juce::MouseEvent& event) override;
+			void mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel) override;
 			void mouseDoubleClick(const juce::MouseEvent& event) override;
 
 		private:

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "PatchManager.h"
-#include "juce_gui_basics/juce_gui_basics.h"
-
 #include "../../jucePluginEditorLib/partbutton.h"
 
 namespace genericVirusUI

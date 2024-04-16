@@ -3,7 +3,7 @@
 #include "../dsp56300/source/dsp56kEmu/logging.h"
 
 #ifndef _WIN32
-// filesystem is only available on Mac OS Catalina 10.15+
+// filesystem is only available on macOS Catalina 10.15+
 // filesystem causes linker errors in gcc-8 if linked statically
 #define USE_DIRENT
 #endif
@@ -159,22 +159,31 @@ namespace synthLib
 #else
     	try
         {
-            for (const std::filesystem::directory_entry &entry : std::filesystem::directory_iterator(_folder))
+            const auto u8Path = std::filesystem::u8path(_folder);
+            for (const std::filesystem::directory_entry &entry : std::filesystem::directory_iterator(u8Path))
             {
                 const auto &file = entry.path();
 
-                _files.push_back(file.string());
+                try
+                {
+	                _files.push_back(file.u8string());
+                }
+                catch(std::exception& e)
+                {
+	                LOG(e.what());
+                }
             }
         }
-        catch (...)
+        catch (std::exception& e)
         {
+            LOG(e.what());
             return false;
         }
 #endif
         return !_files.empty();
     }
 
-    static std::string lowercase(const std::string &_src)
+    std::string lowercase(const std::string &_src)
     {
         std::string str(_src);
         for (char& i : str)
@@ -190,9 +199,25 @@ namespace synthLib
         return {};
     }
 
+    std::string getFilenameWithoutPath(const std::string& _name)
+    {
+        const auto pos = _name.find_last_of("/\\");
+        if (pos != std::string::npos)
+            return _name.substr(pos + 1);
+        return _name;
+    }
+
+    std::string getPath(const std::string& _filename)
+    {
+        const auto pos = _filename.find_last_of("/\\");
+        if (pos != std::string::npos)
+            return _filename.substr(0, pos);
+        return _filename;
+    }
+
     size_t getFileSize(const std::string& _file)
     {
-        FILE* hFile = fopen(_file.c_str(), "rb");
+        FILE* hFile = openFile(_file, "rb");
         if (!hFile)
             return 0;
 
@@ -310,12 +335,12 @@ namespace synthLib
 
     bool writeFile(const std::string& _filename, const std::vector<uint8_t>& _data)
     {
-        return writeFile(_filename, &_data[0], _data.size());
+        return writeFile(_filename, _data.data(), _data.size());
     }
 
     bool writeFile(const std::string& _filename, const uint8_t* _data, size_t _size)
     {
-        auto* hFile = fopen(_filename.c_str(), "wb");
+        auto* hFile = openFile(_filename, "wb");
         if(!hFile)
             return false;
         const auto written = fwrite(&_data[0], 1, _size, hFile);
@@ -325,7 +350,7 @@ namespace synthLib
 
     bool readFile(std::vector<uint8_t>& _data, const std::string& _filename)
     {
-        auto* hFile = fopen(_filename.c_str(), "rb");
+        auto* hFile = openFile(_filename, "rb");
         if(!hFile)
             return false;
 
@@ -343,8 +368,26 @@ namespace synthLib
     	if(_data.size() != static_cast<size_t>(size))
             _data.resize(size);
 
-    	const auto read = fread(&_data[0], 1, _data.size(), hFile);
+    	const auto read = fread(_data.data(), 1, _data.size(), hFile);
         fclose(hFile);
         return read == _data.size();
+    }
+
+    FILE* openFile(const std::string& _name, const char* _mode)
+    {
+#ifdef _WIN32
+        // convert filename
+		std::wstring nameW;
+		nameW.resize(_name.size());
+		const int newSize = MultiByteToWideChar(CP_UTF8, 0, _name.c_str(), static_cast<int>(_name.size()), const_cast<wchar_t *>(nameW.c_str()), static_cast<int>(_name.size()));
+		nameW.resize(newSize);
+
+        // convert mode
+        wchar_t mode[32]{0};
+		MultiByteToWideChar(CP_UTF8, 0, _mode, static_cast<int>(strlen(_mode)), mode, (int)std::size(mode));
+		return _wfopen(nameW.c_str(), mode);
+#else
+		return fopen(_name.c_str(), _mode);
+#endif
     }
 } // namespace synthLib

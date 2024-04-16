@@ -20,5 +20,6 @@ namespace jucePluginEditorLib
 
 	private:
 		juce::Label* m_label = nullptr;
+		int m_defaultWidth;
 	};
 }

@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include <juce_audio_processors/juce_audio_processors.h>
+#include "juce_gui_basics/juce_gui_basics.h"
 
 #include "button.h"
 #include "uiObject.h"
@@ -80,6 +80,7 @@ namespace genericUI
 		static void setEnabled(juce::Component& _component, bool _enable);
 
 		virtual void setCurrentPart(uint8_t _part);
+		void updateKeyValueConditions(const std::string& _key, const std::string& _value) const;
 
 		juce::TooltipWindow& getTooltipWindow() { return m_tooltipWindow; }
 

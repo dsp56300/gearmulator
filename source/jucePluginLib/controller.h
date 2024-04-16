@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include "softknob.h"
+
 namespace juce
 {
 	class AudioProcessor;
@@ -24,7 +26,7 @@ namespace pluginLib
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
 		explicit Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson);
-		virtual ~Controller() = default;
+		virtual ~Controller();
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
@@ -64,10 +66,16 @@ namespace pluginLib
 		bool unlockRegion(const std::string& _id);
 		const std::set<std::string>& getLockedRegions() const;
 		bool isRegionLocked(const std::string& _id);
-		std::unordered_set<std::string> getLockedParameters() const;
-
+		std::unordered_set<std::string> getLockedParameterNames() const;
+		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
+		bool isParameterLocked(const std::string& _name) const;
 		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
 
+		const SoftKnob* getSoftknob(const Parameter* _parameter) const
+		{
+			const auto it = m_softKnobs.find(_parameter);
+			return it->second.get();
+		}
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
@@ -115,6 +123,7 @@ namespace pluginLib
 
 		std::mutex m_pluginMidiOutLock;
         std::vector<synthLib::SMidiEvent> m_pluginMidiOut;
+        std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
 
 	protected:
 		// tries to find synth param in both internal and host

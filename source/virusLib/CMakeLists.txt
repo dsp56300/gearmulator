@@ -6,12 +6,16 @@ add_library(virusLib STATIC)
 set(SOURCES
 	demoplayback.cpp demoplayback.h
 	device.cpp device.h
+	deviceModel.cpp deviceModel.h
+	dspMemoryPatches.cpp dspMemoryPatches.h
 	dspSingle.cpp dspSingle.h
+	frontpanelState.cpp frontpanelState.h
 	hdi08List.cpp hdi08List.h
 	hdi08MidiQueue.cpp hdi08MidiQueue.h
 	hdi08TxParser.cpp hdi08TxParser.h
 	hdi08Queue.cpp hdi08Queue.h
 	romfile.cpp romfile.h
+	romloader.cpp romloader.h
 	microcontroller.cpp microcontroller.h
 	microcontrollerTypes.cpp microcontrollerTypes.h
 	midiFileToRomData.cpp midiFileToRomData.h
@@ -26,3 +30,5 @@ target_link_libraries(virusLib PUBLIC synthLib)
 if(DSP56300_DEBUGGER)
 	target_link_libraries(virusLib PUBLIC dsp56kDebugger)
 endif()
+
+set_property(TARGET virusLib PROPERTY FOLDER "Virus")

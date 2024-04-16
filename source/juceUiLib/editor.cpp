@@ -242,9 +242,14 @@ namespace genericUI
 		}
 	}
 
-	void Editor::setCurrentPart(uint8_t _part)
+	void Editor::setCurrentPart(const uint8_t _part)
 	{
 		m_rootObject->setCurrentPart(*this, _part);
+	}
+
+	void Editor::updateKeyValueConditions(const std::string& _key, const std::string& _value) const
+	{
+		m_rootObject->updateKeyValueConditions(_key, _value);
 	}
 
 	std::shared_ptr<UiObject> Editor::getTemplate(const std::string& _name) const

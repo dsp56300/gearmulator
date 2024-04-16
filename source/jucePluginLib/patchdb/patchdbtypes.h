@@ -79,4 +79,19 @@ namespace pluginLib::patchDB
 
 	using Color = uint32_t;
 	static constexpr uint32_t g_invalidColor = 0;
+
+	namespace chunks
+	{
+		constexpr char g_patchManager[] = "Pmpm";
+		constexpr char g_patchManagerDataSources[] = "PmDs";
+		constexpr char g_patchManagerTagColors[] = "PmTC";
+		constexpr char g_patchManagerTags[] = "PmTs";
+		constexpr char g_patchManagerPatchModifications[] = "PMds";
+
+		constexpr char g_patchModification[] = "PMod";
+		constexpr char g_datasource[] = "DatS";
+		constexpr char g_patch[] = "Patc";
+		constexpr char g_typedTags[] = "TpTg";
+		constexpr char g_tags[] = "Tags";
+	}
 }

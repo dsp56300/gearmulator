@@ -20,6 +20,9 @@ namespace pluginLib::patchDB
 
 		bool empty() const;
 
+		void write(synthLib::BinaryStream& _outStream) const;
+		bool read(synthLib::BinaryStream& _binaryStream);
+
 		std::weak_ptr<Patch> patch;
 		TypedTags tags;
 		std::string name;

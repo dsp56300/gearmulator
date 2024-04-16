@@ -24,7 +24,23 @@ namespace synthLib
 		virtual uint32_t getInternalLatencyMidiToOutput() const { return 0; }
 		virtual uint32_t getInternalLatencyInputToOutput() const { return 0; }
 
+		virtual std::vector<float> getSupportedSamplerates() const
+		{
+			return {getSamplerate()};
+		}
 		virtual float getSamplerate() const = 0;
+		virtual std::vector<float> getPreferredSamplerates() const
+		{
+			return getSupportedSamplerates();
+		}
+
+		bool isSamplerateSupported(const float& _samplerate) const;
+
+		virtual bool setSamplerate(float _samplerate);
+
+		float getDeviceSamplerate(float _preferredDeviceSamplerate, float _hostSamplerate) const;
+		float getDeviceSamplerateForHostSamplerate(float _hostSamplerate) const;
+
 		virtual bool isValid() const = 0;
 
 #if SYNTHLIB_DEMO_MODE == 0

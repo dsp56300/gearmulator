@@ -16,6 +16,11 @@ namespace pluginLib
 		const auto& getName() const { return m_name; }
 		const auto& getParams() const { return m_params; }
 
+		bool containsParameter(const std::string& _name) const
+		{
+			return m_params.find(_name) != m_params.end();
+		}
+
 	private:
 		const std::string m_id;
 		const std::string m_name;

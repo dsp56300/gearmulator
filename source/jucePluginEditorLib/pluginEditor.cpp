@@ -17,6 +17,7 @@ namespace jucePluginEditorLib
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
 	{
+		showDisclaimer();
 	}
 
 	Editor::~Editor() = default;
@@ -160,6 +161,27 @@ namespace jucePluginEditorLib
 
 		if(m_patchManager)
 			m_patchManager->setCurrentPart(_part);
+	}
+
+	void Editor::showDisclaimer() const
+	{
+		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
+		{
+			const juce::MessageBoxOptions options = juce::MessageBoxOptions::makeOptionsOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name,
+	           "It is the sole responsibility of the user to operate this emulator within the bounds of all applicable laws.\n\n"
+
+				"Usage of emulators in conjunction with ROM images you are not legally entitled to own is forbidden by copyright law.\n\n"
+
+				"If you are not legally entitled to use this emulator please discontinue usage immediately.\n\n", 
+
+				"I Agree"
+			);
+
+			juce::NativeMessageBox::showAsync(options, [this](int)
+			{
+				m_processor.getConfig().setValue("disclaimerSeen", true);
+			});
+		}
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

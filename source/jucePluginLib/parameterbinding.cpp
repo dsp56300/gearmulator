@@ -27,6 +27,11 @@ namespace pluginLib
 		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
 	}
 
+	void ParameterBinding::MouseListener::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
+	{
+		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
+	}
+
 	void ParameterBinding::MouseListener::mouseDoubleClick(const juce::MouseEvent& event)
 	{
 		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::ChangedBy::ControlChange);

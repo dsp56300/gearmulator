@@ -105,6 +105,19 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
+		if(_isNowSelected && m_forceDeselect)
+		{
+			m_forceDeselect = false;
+
+			juce::MessageManager::callAsync([this]()
+			{
+				setSelected(false, false);
+			});
+			return;
+		}
+
+		m_selectedWasChanged = true;
+
 		TreeViewItem::itemSelectionChanged(_isNowSelected);
 
 		if(getTree()->isMultiSelectEnabled())
@@ -138,7 +151,7 @@ namespace jucePluginEditorLib::patchManager
 				return;
 
 			if(auto patch = getPatchManager().requestPatchForPart(desc->getPart()))
-				patchesDropped({patch});
+				patchesDropped({patch}, desc);
 		}
 	}
 
@@ -178,6 +191,11 @@ namespace jucePluginEditorLib::patchManager
 	void TreeItem::processSearchUpdated(const pluginLib::patchDB::Search& _search)
 	{
 		setCount(static_cast<uint32_t>(_search.getResultSize()));
+	}
+
+	const pluginLib::patchDB::SearchRequest& TreeItem::getParentSearchRequest() const
+	{
+		return m_parentSearchRequest;
 	}
 
 	void TreeItem::setText(const std::string& _text)
@@ -225,7 +243,8 @@ namespace jucePluginEditorLib::patchManager
 			_g.setFont(fnt);
 		}
 
-		const juce::String t(m_text);
+		
+		const juce::String t = juce::String::fromUTF8(m_text.c_str());
 		_g.drawText(t, 0, 0, _width, _height, style ? style->getAlign() : juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
@@ -253,6 +272,33 @@ namespace jucePluginEditorLib::patchManager
 		onParentSearchChanged(m_parentSearchRequest);
 	}
 
+	void TreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(_mouseEvent.mods.isPopupMenu())
+		{
+			TreeViewItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		if(!m_deselectOnSecondClick)
+		{
+			TreeViewItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		// we have the (for Juce) overly complex task to deselect a tree item on left click
+		// Juce does not let us though, this click is sent on mouse down and it reselects the item
+		// again on mouse up.
+		const auto selectedWasChanged = m_selectedWasChanged;
+		m_selectedWasChanged = false;
+
+		if(!selectedWasChanged && isSelected() && getOwnerView()->isMultiSelectEnabled())
+		{
+			m_forceDeselect = true;
+			setSelected(false, false);
+		}
+	}
+
 	void TreeItem::cancelSearch()
 	{
 		if(m_searchHandle == pluginLib::patchDB::g_invalidSearchHandle)
@@ -262,7 +308,7 @@ namespace jucePluginEditorLib::patchManager
 		m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 	}
 
-	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	void TreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc/* = nullptr*/)
 	{
 		for (const auto& patch : _patches)
 			patchDropped(patch);

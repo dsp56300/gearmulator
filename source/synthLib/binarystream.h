@@ -1,24 +1,156 @@
 #pragma once
 
+#include <cassert>
 #include <cstdint>
 #include <functional>
-#include <iosfwd>
 #include <sstream>
 #include <vector>
 #include <cstring>
 
 namespace synthLib
 {
-	class BinaryStream final : std::stringstream
+	class StreamBuffer
 	{
 	public:
-		using SizeType = uint32_t;
+		StreamBuffer() = default;
+		explicit StreamBuffer(std::vector<uint8_t>&& _buffer) : m_vector(std::move(_buffer))
+		{
+		}
+		explicit StreamBuffer(const size_t _capacity)
+		{
+			m_vector.reserve(_capacity);
+		}
+		StreamBuffer(uint8_t* _buffer, const size_t _size) : m_buffer(_buffer), m_size(_size), m_fixedSize(true)
+		{
+		}
+		StreamBuffer(StreamBuffer& _parent, const size_t _childSize) : m_buffer(&_parent.buffer()[_parent.tellg()]), m_size(_childSize), m_fixedSize(true)
+		{
+			// force eof if range is not valid
+			if(_parent.tellg() + _childSize > _parent.size())
+			{
+				assert(false && "invalid range");
+				m_readPos = _childSize;
+			}
+
+			// seek parent forward
+			_parent.seekg(_parent.tellg() + _childSize);
+		}
+		StreamBuffer(StreamBuffer&& _source) noexcept
+			: m_buffer(_source.m_buffer)
+			, m_size(_source.m_size)
+			, m_fixedSize(_source.m_fixedSize)
+			, m_readPos(_source.m_readPos)
+			, m_writePos(_source.m_writePos)
+			, m_vector(std::move(_source.m_vector))
+			, m_fail(_source.m_fail)
+		{
+			_source.destroy();
+		}
+
+		StreamBuffer& operator = (StreamBuffer&& _source) noexcept
+		{
+			m_buffer = _source.m_buffer;
+			m_size = _source.m_size;
+			m_fixedSize = _source.m_fixedSize;
+			m_readPos = _source.m_readPos;
+			m_writePos = _source.m_writePos;
+			m_vector = std::move(_source.m_vector);
+
+			_source.destroy();
+
+			return *this;
+		}
+
+		void seekg(const size_t _pos)		{ m_readPos = _pos; }
+		size_t tellg() const				{ return m_readPos; }
+		void seekp(const size_t _pos)		{ m_writePos = _pos; }
+		size_t tellp() const				{ return m_writePos; }
+		bool eof() const					{ return tellg() >= size(); }
+		bool fail() const					{ return m_fail; }
+
+		bool read(uint8_t* _dst, size_t _size)
+		{
+			const auto remaining = size() - tellg();
+			if(remaining < _size)
+			{
+				m_fail = true;
+				return false;
+			}
+			::memcpy(_dst, &buffer()[m_readPos], _size);
+			m_readPos += _size;
+			return true;
+		}
+		bool write(const uint8_t* _src, size_t _size)
+		{
+			const auto remaining = size() - tellp();
+			if(remaining < _size)
+			{
+				if(m_fixedSize)
+				{
+					m_fail = true;
+					return false;
+				}
+				m_vector.resize(tellp() + _size);
+			}
+			::memcpy(&buffer()[m_writePos], _src, _size);
+			m_writePos += _size;
+			return true;
+		}
+
+		explicit operator bool () const
+		{
+			return !eof();
+		}
+
+	private:
+		size_t size() const					{ return m_fixedSize ? m_size : m_vector.size(); }
+
+		uint8_t* buffer()
+		{
+			if(m_fixedSize)
+				return m_buffer;
+			return m_vector.data();
+		}
+
+		void destroy()
+		{
+			m_buffer = nullptr;
+			m_size = 0;
+			m_fixedSize = false;
+			m_readPos = 0;
+			m_writePos = 0;
+			m_vector.clear();
+			m_fail = false;
+		}
+
+		uint8_t* m_buffer = nullptr;
+		size_t m_size = 0;
+		bool m_fixedSize = false;
+		size_t m_readPos = 0;
+		size_t m_writePos = 0;
+		std::vector<uint8_t> m_vector;
+		bool m_fail = false;
+	};
+
+	using StreamSizeType = uint32_t;
+
+	class BinaryStream final : StreamBuffer
+	{
+	public:
+		using Base = StreamBuffer;
+		using SizeType = StreamSizeType;
 
 		BinaryStream() = default;
 
+		using StreamBuffer::operator bool;
+
+		explicit BinaryStream(BinaryStream& _parent, SizeType _length) : StreamBuffer(_parent, _length)
+		{
+		}
+
 		template<typename T> explicit BinaryStream(const std::vector<T>& _data)
 		{
-			std::stringstream::write(reinterpret_cast<const char*>(_data.data()), _data.size() * sizeof(T));
+			Base::write(reinterpret_cast<const uint8_t*>(_data.data()), _data.size() * sizeof(T));
 			seekg(0);
 		}
 
@@ -26,7 +158,7 @@ namespace synthLib
 		// tools
 		//
 
-		void toVector(std::vector<uint8_t>& _buffer, bool _append = false)
+		void toVector(std::vector<uint8_t>& _buffer, const bool _append = false)
 		{
 			const auto size = tellp();
 			if(size <= 0)
@@ -42,12 +174,12 @@ namespace synthLib
 			{
 				const auto currentSize = _buffer.size();
 				_buffer.resize(currentSize + size);
-				std::stringstream::read(reinterpret_cast<char*>(&_buffer[currentSize]), size);
+				Base::read(&_buffer[currentSize], size);
 			}
 			else
 			{
 				_buffer.resize(size);
-				std::stringstream::read(reinterpret_cast<char*>(_buffer.data()), size);
+				Base::read(_buffer.data(), size);
 			}
 		}
 
@@ -63,46 +195,18 @@ namespace synthLib
 			}
 			std::string s;
 			s.resize(size);
-			std::stringstream::read(s.data(), size);
+			Base::read(reinterpret_cast<uint8_t*>(s.data()), size);
 			const auto result = _str == s;
 			seekg(pos);
 			return result;
 		}
 
-		uint32_t getWritePos() const
-		{
-			return (uint32_t)const_cast<BinaryStream&>(*this).tellp();
-		}
+		uint32_t getWritePos() const			{ return static_cast<uint32_t>(tellp()); }
+		uint32_t getReadPos() const				{ return static_cast<uint32_t>(tellg()); }
+		bool endOfStream() const				{ return eof(); }
 
-		uint32_t getReadPos() const
-		{
-			return (uint32_t)const_cast<BinaryStream&>(*this).tellg();
-		}
-
-		void setWritePos(const uint32_t _pos)
-		{
-			seekp(_pos);
-		}
-
-		void setReadPos(const uint32_t _pos)
-		{
-			seekg(_pos);
-		}
-
-		bool endOfStream() const
-		{
-			return eof() || (getReadPos() == size());
-		}
-
-		SizeType size() const
-		{
-			const auto readPos = getReadPos();
-			auto& s = const_cast<BinaryStream&>(*this);
-			s.seekg(0, std::ios_base::end);
-			const auto size = s.tellg();
-			s.seekg(readPos);
-			return (SizeType)size;
-		}
+		void setWritePos(const uint32_t _pos)	{ seekp(_pos); }
+		void setReadPos(const uint32_t _pos)	{ seekg(_pos); }
 
 		// ___________________________________
 		// write
@@ -110,7 +214,7 @@ namespace synthLib
 
 		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const T& _value)
 		{
-			std::stringstream::write(reinterpret_cast<const char*>(&_value), sizeof(_value));
+			Base::write(reinterpret_cast<const uint8_t*>(&_value), sizeof(_value));
 		}
 
 		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const std::vector<T>& _vector)
@@ -118,14 +222,14 @@ namespace synthLib
 			const auto size = static_cast<SizeType>(_vector.size());
 			write(size);
 			if(size)
-				std::stringstream::write(reinterpret_cast<const char*>(_vector.data()), sizeof(T) * size);
+				Base::write(reinterpret_cast<const uint8_t*>(_vector.data()), sizeof(T) * size);
 		}
 
 		void write(const std::string& _string)
 		{
 			const auto s = static_cast<SizeType>(_string.size());
 			write(s);
-			std::stringstream::write(_string.c_str(), s);
+			Base::write(reinterpret_cast<const uint8_t*>(_string.c_str()), s);
 		}
 
 		void write(const char* const _value)
@@ -150,7 +254,7 @@ namespace synthLib
 		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> T read()
 		{
 			T v{};
-			std::stringstream::read(reinterpret_cast<char*>(&v), sizeof(v));
+			Base::read(reinterpret_cast<uint8_t*>(&v), sizeof(v));
 			checkFail();
 			return v;
 		}
@@ -165,7 +269,7 @@ namespace synthLib
 				return;
 			}
 			_vector.resize(size);
-			std::stringstream::read(reinterpret_cast<char*>(_vector.data()), sizeof(T) * size);
+			Base::read(reinterpret_cast<uint8_t*>(_vector.data()), sizeof(T) * size);
 			checkFail();
 		}
 
@@ -174,7 +278,7 @@ namespace synthLib
 			const auto size = read<SizeType>();
 			std::string s;
 			s.resize(size);
-			std::stringstream::read(s.data(), size);
+			Base::read(reinterpret_cast<uint8_t*>(s.data()), size);
 			checkFail();
 			return s;
 		}
@@ -203,6 +307,17 @@ namespace synthLib
 			_str[3] = read<char>();
 		}
 
+		BinaryStream readChunk();
+		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
+		BinaryStream tryReadChunk(char const(&_4Cc)[N], uint32_t _versionMax = 1)
+		{
+			return tryReadChunkInternal(_4Cc, _versionMax);
+		}
+
+	private:
+		BinaryStream tryReadChunkInternal(const char* _4Cc, uint32_t _versionMax = 1);
+
+
 		// ___________________________________
 		// helpers
 		//
@@ -212,6 +327,25 @@ namespace synthLib
 		{
 			if(fail())
 				throw std::range_error("end-of-stream");
+		}
+	};
+
+	struct Chunk
+	{
+		using SizeType = BinaryStream::SizeType;
+
+		char fourCC[5];
+		uint32_t version;
+		SizeType length;
+		BinaryStream data;
+
+		bool read(BinaryStream& _parentStream)
+		{
+			_parentStream.read4CC(fourCC);
+			version = _parentStream.read<uint32_t>();
+			length = _parentStream.read<SizeType>();
+			data = BinaryStream(_parentStream, length);
+			return !data.endOfStream();
 		}
 	};
 
@@ -228,6 +362,12 @@ namespace synthLib
 			m_lengthWritePos = m_stream.getWritePos();
 			m_stream.write<SizeType>(0);
 		}
+
+		ChunkWriter() = delete;
+		ChunkWriter(ChunkWriter&&) = delete;
+		ChunkWriter(const ChunkWriter&) = delete;
+		ChunkWriter& operator = (ChunkWriter&&) = delete;
+		ChunkWriter& operator = (const ChunkWriter&) = delete;
 
 		~ChunkWriter()
 		{
@@ -249,71 +389,59 @@ namespace synthLib
 		using SizeType = ChunkWriter::SizeType;
 		using ChunkCallback = std::function<void(BinaryStream&, uint32_t)>;	// data, version
 
-		struct Chunk
+		struct ChunkCallbackData
 		{
-			char fourcc[5];
+			char fourCC[5];
 			uint32_t expectedVersion;
 			ChunkCallback callback;
 		};
 
-		ChunkReader(BinaryStream& _stream) : m_stream(_stream)
+		explicit ChunkReader(BinaryStream& _stream) : m_stream(_stream)
 		{
 		}
 
 		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
 		void add(char const(&_4Cc)[N], const uint32_t _version, const ChunkCallback& _callback)
 		{
-			Chunk c;
-			strcpy(c.fourcc, _4Cc);
+			ChunkCallbackData c;
+			strcpy(c.fourCC, _4Cc);
 			c.expectedVersion = _version;
 			c.callback = _callback;
 			supportedChunks.emplace_back(std::move(c));
 		}
 
-		void read()
+		void read(const uint32_t _count = 0)
 		{
-			while(!m_stream.endOfStream())
-			{
-				char fourCC[5];
-				m_stream.read4CC(fourCC);
-				const auto version = m_stream.read<uint32_t>();
-				const auto length = m_stream.read<SizeType>();
+			uint32_t count = 0;
 
-				bool hasReadChunk = false;
+			while(!m_stream.endOfStream() && (!_count || ++count <= _count))
+			{
+				Chunk chunk;
+				chunk.read(m_stream);
 
 				++m_numChunks;
 
-				for (const auto& chunk : supportedChunks)
+				for (const auto& chunkData : supportedChunks)
 				{
-					if(0 != strcmp(chunk.fourcc, fourCC))
+					if(0 != strcmp(chunkData.fourCC, chunk.fourCC))
 						continue;
 
-					if(version > chunk.expectedVersion)
+					if(chunk.version > chunkData.expectedVersion)
 						break;
 
-					std::vector<uint8_t> chunkData;
-					chunkData.reserve(length);
-					for(size_t i=0; i<length; ++i)
-						chunkData.push_back(m_stream.read<uint8_t>());
-
-					hasReadChunk = true;
 					++m_numRead;
-					BinaryStream s(chunkData);
-					chunk.callback(s, version);
+					chunkData.callback(chunk.data, chunk.version);
 					break;
 				}
-
-				if(!hasReadChunk)
-					m_stream.setReadPos(m_stream.getReadPos() + length);
 			}
 		}
 
-		bool tryRead()
+		bool tryRead(const uint32_t _count = 0)
 		{
 			const auto pos = m_stream.getReadPos();
 			try
 			{
-				read();
+				read(_count);
 				return true;
 			}
 			catch(std::range_error&)
@@ -335,7 +463,7 @@ namespace synthLib
 
 	private:
 		BinaryStream& m_stream;
-		std::vector<Chunk> supportedChunks;
+		std::vector<ChunkCallbackData> supportedChunks;
 		uint32_t m_numRead = 0;
 		uint32_t m_numChunks = 0;
 	};

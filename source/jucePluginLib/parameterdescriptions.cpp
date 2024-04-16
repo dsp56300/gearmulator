@@ -53,6 +53,14 @@ namespace pluginLib
 		return true;
 	}
 
+	const ValueList* ParameterDescriptions::getValueList(const std::string& _key) const
+	{
+		const auto it = m_valueLists.find(_key);
+		if(it == m_valueLists.end())
+			return nullptr;
+		return &it->second;
+	}
+
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -75,7 +83,7 @@ namespace pluginLib
 			return "Parameter descriptions are empty";
 
 		{
-			const auto valueLists = json["valuelists"];
+			const auto& valueLists = json["valuelists"];
 
 			auto* entries = valueLists.getDynamicObject();
 
@@ -243,6 +251,8 @@ namespace pluginLib
 			d.isBool = readPropertyBool("isBool");
 			d.isBipolar = readPropertyBool("isBipolar");
 			d.step = readPropertyIntWithDefault("step", 0);
+			d.softKnobTargetSelect = readProperty("softknobTargetSelect", false).toString().toStdString();
+			d.softKnobTargetList = readProperty("softknobTargetList", false).toString().toStdString();
 
 			d.toText = valueList;
 
@@ -325,6 +335,56 @@ namespace pluginLib
 			m_nameToIndex.insert(std::make_pair(d.name, static_cast<uint32_t>(i)));
 		}
 
+		// verify soft knob parameters
+		for (auto& desc : m_descriptions)
+		{
+			if(desc.softKnobTargetSelect.empty())
+				continue;
+
+			const auto it = m_nameToIndex.find(desc.softKnobTargetSelect);
+
+			if(it == m_nameToIndex.end())
+			{
+				errors << desc.name << ": soft knob target parameter " << desc.softKnobTargetSelect << " not found" << '\n';
+				continue;
+			}
+
+			if(desc.softKnobTargetList.empty())
+			{
+				errors << desc.name << ": soft knob target list not specified\n";
+				continue;
+			}
+
+			const auto& targetParam = m_descriptions[it->second];
+			auto itList = m_valueLists.find(desc.softKnobTargetList);
+			if(itList == m_valueLists.end())
+			{
+				errors << desc.name << ": soft knob target list '" << desc.softKnobTargetList << "' not found\n";
+				continue;
+			}
+
+			const auto& sourceParamNames = itList->second.texts;
+			if(static_cast<int>(sourceParamNames.size()) != (targetParam.range.getLength() + 1))
+			{
+				errors << desc.name << ": soft knob target list " << desc.softKnobTargetList << " has " << sourceParamNames.size() << " entries but target select parameter " << targetParam.name << " has a range of " << (targetParam.range.getLength()+1) << '\n';
+				continue;
+			}
+
+			for (const auto& paramName : sourceParamNames)
+			{
+				if(paramName.empty())
+					continue;
+
+				const auto itsourceParam = m_nameToIndex.find(paramName);
+
+				if(itsourceParam == m_nameToIndex.end())
+				{
+					errors << desc.name << " - " << targetParam.name << ": soft knob source parameter " << paramName << " not found" << '\n';
+					continue;
+				}
+			}
+		}
+
 		const auto midipackets = json["midipackets"].getDynamicObject();
 		parseMidiPackets(errors, midipackets);
 
@@ -339,7 +399,7 @@ namespace pluginLib
 		if(!res.empty())
 		{
 			LOG("ParameterDescription parsing issues:\n" << res);
-			assert(false);
+			assert(false && "failed to parse parameter descriptions");
 		}
 
 		return res;
@@ -469,7 +529,7 @@ namespace pluginLib
 				const int last = entry["last"];
 				const int init = entry["init"];
 
-				if(first < 0 || last < 0 || last <= first)
+				if(first < 0 || last < 0 || last < first)
 				{
 					_errors << "specified checksum range " << first << "-" << last << " is not valid, midi packet " << _key << ", index " << i << std::endl;
 					return;
