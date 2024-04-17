@@ -19,6 +19,9 @@ namespace genericVirusUI
 				{
 					auto* d = dynamic_cast<virusLib::Device*>(_processor.getPlugin().getDevice());
 
+					if(!d)
+						return 0.0f;
+
 					const auto v = std::clamp(d->getFrontpanelState().m_lfoPhases[i], 0.0f, 1.0f);
 					return std::pow(1.0f - v, 0.2f);
 				});
@@ -32,6 +35,9 @@ namespace genericVirusUI
 			m_logo->setSourceCallback([&_processor]
 			{
 				auto* d = dynamic_cast<virusLib::Device*>(_processor.getPlugin().getDevice());
+
+				if(!d)
+					return 0.0f;
 
 				const auto& s = d->getFrontpanelState();
 				
