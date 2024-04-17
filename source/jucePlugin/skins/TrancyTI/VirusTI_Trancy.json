@@ -23,7 +23,7 @@
 			},				
 			{
 				"name":"ContainerChannel16","image" : { "x" : "0", "y" : "0", "width" : "472", "height" : "1093", "texture" : "background_channels_16" }, 
-				"condition": { "enableOnKey": "deviceModel", "enableOnValues": "TI,TI2" }					
+				"condition": { "enableOnKey": "deviceModel", "enableOnValues": "TI,TI2,<invalid>" }					
 			}
 			
 		]
@@ -37,7 +37,7 @@
 			},				
 			{
 				"name":"ContainerChannel16","image" : { "x" : "0", "y" : "0", "width" : "472", "height" : "1093", "texture" : "background_channels_disable_16" }, 
-				"condition": { "enableOnKey": "deviceModel", "enableOnValues": "TI,TI2" }					
+				"condition": { "enableOnKey": "deviceModel", "enableOnValues": "TI,TI2,<invalid>" }					
 			}
 			
 		]
