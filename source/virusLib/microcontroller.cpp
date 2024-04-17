@@ -112,7 +112,7 @@ void Microcontroller::sendInitControlCommands()
 	sendControlCommand(GLOBAL_CHANNEL, 0x0);			// Set global midi channel to 0
 	sendControlCommand(MIDI_CONTROL_LOW_PAGE, 0x1);		// Enable midi CC to edit parameters on page A
 	sendControlCommand(MIDI_CONTROL_HIGH_PAGE, 0x0);	// Disable poly pressure to edit parameters on page B
-	sendControlCommand(MASTER_VOLUME, 127);				// Set master volume to maximum
+	sendControlCommand(MASTER_VOLUME, 92);				// Set master volume to 92, this matches the Virus TI in USB mode
 	sendControlCommand(MASTER_TUNE, 64);				// Set master tune to 0
 	sendControlCommand(DEVICE_ID, OMNI_DEVICE_ID);		// Set device ID to Omni
 }
