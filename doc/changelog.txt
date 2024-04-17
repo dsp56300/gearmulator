@@ -32,6 +32,7 @@ OsTIrus:
 - [Fix] Midi indicators on parts blocked mouse clicks, making it difficult to select a part
 - [Fix] Added missing Reverb Predelay knob if predelay clock is set to Off
 - [Fix] Removed invalid entry in Arp clock selection
+- [Fix] Do not crash if no ROM is found
 
 1.3.10
 
