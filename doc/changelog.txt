@@ -23,11 +23,11 @@ Patch Manager:
 
 Osirus/OsTIrus:
 
+- [Imp] Adjusted default Master Volume to 92 to match the TI hardware in USB mode
+
 - [Fix] Plugin may crash if a patch data source folder contains files not belonging to presets
 
 OsTIrus:
-
-- [Imp] Adjusted default Master Volume to 92 to match the TI hardware in USB mode
 
 - [Fix] Midi indicators on parts blocked mouse clicks, making it difficult to select a part
 - [Fix] Added missing Reverb Predelay knob if predelay clock is set to Off
