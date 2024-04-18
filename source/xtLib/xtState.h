@@ -59,7 +59,7 @@ namespace xt
 		static constexpr Dump Dumps[] = 
 		{
 			{DumpType::Single, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 265},
-			{DumpType::Multi , SysexCommand::MultiRequest , SysexCommand::MultiDump , SysexCommand::MultiParameterChange , IdxMultiParamFirst , IdxMultiParamIndexH , IdxMultiParamIndexL , IdxMultiParamValue , 393},
+			{DumpType::Multi , SysexCommand::MultiRequest , SysexCommand::MultiDump , SysexCommand::MultiParameterChange , IdxMultiParamFirst , IdxMultiParamIndexH , IdxMultiParamIndexL , IdxMultiParamValue , 265},
 			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 39},
 			{DumpType::Mode  , SysexCommand::ModeRequest  , SysexCommand::ModeDump  , SysexCommand::ModeParameterChange  , IdxModeParamFirst  , IdxModeParamIndexH  , IdxModeParamIndexL  , IdxModeParamValue  , 8},
 		};
@@ -149,14 +149,7 @@ namespace xt
 
 		static bool isValid(const Single& _single)
 		{
-			return _single[IdxSingleParamFirst] == 1;
-		}
-
-		static bool isValid(const Multi& _multi)
-		{
-			return _multi.front() == 0xf0;
-			// we cannot do this anymore as drum map & multi have the same length
-//			return _multi[IdxMultiParamFirst] > 0;			// Note: no version number in a multi, assume that Multi volume has to be > 0 to be valid
+			return _single.front() == 0xf0;
 		}
 
 		static bool isValid(const Global& _global)
@@ -166,7 +159,7 @@ namespace xt
 
 		static bool isValid(const Mode& _mode)
 		{
-			return _mode.front() == 0xf0;					// unable to derive from the packet itself
+			return _mode.front() == 0xf0;
 		}
 
 		static SysexCommand getCommand(const SysEx& _data);

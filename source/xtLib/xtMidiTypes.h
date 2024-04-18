@@ -64,7 +64,7 @@ namespace xt
 		IdxMultiParamValue  = IdxMultiParamIndexL + 1,
 
 		IdxGlobalParamIndexH = wLib::IdxBuffer,
-		IdxGlobalParamIndexL = IdxGlobalParamIndexH + 1,
+		IdxGlobalParamIndexL = IdxGlobalParamIndexH,
 		IdxGlobalParamValue  = IdxGlobalParamIndexL + 1,
 
 		IdxModeParamIndexH = wLib::IdxBuffer,

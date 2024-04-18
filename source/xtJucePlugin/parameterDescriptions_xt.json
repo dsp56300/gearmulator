@@ -292,7 +292,7 @@
 		// MULTI
 		
 		// GLOBAL
- 		{"page":200, "index":0, "class":"Global", "name":"MainVolume"},
+ 		{"page":200, "index":12, "class":"Global", "name":"MainVolume"},
 
 		// SOFT KNOBS
 		{"page":300, "index":0, "name":"PlayParamValueA", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamA", "softknobTargetList":"playParamTargets"},
@@ -766,7 +766,6 @@
 			{"type": "byte", "value": "0e"},
 			{"type": "deviceid"},
 			{"type": "byte", "value": "24"},
-			{"type": "page"},
 			{"type": "paramindex"},
 			{"type": "paramvalue"},
 			{"type": "byte", "value": "f7"}

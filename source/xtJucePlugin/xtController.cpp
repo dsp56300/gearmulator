@@ -13,36 +13,41 @@
 
 #include "xtFrontPanel.h"
 
-constexpr const char* g_midiPacketNames[] =
-{
-    "requestsingle",
-    "requestmulti",
-    "requestsinglebank",
-    "requestmultibank",
-    "requestglobal",
-    "requestmode",
-    "requestallsingles",
-    "singleparameterchange",
-    "multiparameterchange",
-    "globalparameterchange",
-    "singledump",
-    "multidump",
-    "globaldump",
-    "modedump",
-    "emuRequestLcd",
-    "emuRequestLeds",
-    "emuSendButton",
-    "emuSendRotary"
-};
-
-static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
-
 namespace
 {
+	constexpr const char* g_midiPacketNames[] =
+	{
+	    "requestsingle",
+	    "requestmulti",
+	    "requestsinglebank",
+	    "requestmultibank",
+	    "requestglobal",
+	    "requestmode",
+	    "requestallsingles",
+	    "singleparameterchange",
+	    "multiparameterchange",
+	    "globalparameterchange",
+	    "singledump",
+	    "multidump",
+	    "globaldump",
+	    "modedump",
+	    "emuRequestLcd",
+	    "emuRequestLeds",
+	    "emuSendButton",
+	    "emuSendRotary"
+	};
+
+	static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
+
 	const char* midiPacketName(Controller::MidiPacketType _type)
 	{
 		return g_midiPacketNames[static_cast<uint32_t>(_type)];
 	}
+
+	constexpr uint8_t g_pageMulti = 100;
+	constexpr uint8_t g_pageGlobal = 200;
+	constexpr uint8_t g_pageSoftKnobs = 300;
+	constexpr uint8_t g_pageControllers = 400;
 }
 
 Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_deviceId(_deviceId)
@@ -468,40 +473,55 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 
 	std::map<pluginLib::MidiDataType, uint8_t> data;
 
-	if (desc.page >= 100)
+	switch (desc.page)
 	{
-//		assert(false && "unable to send multi parameter change");
-		/*
-		uint8_t v;
+	case g_pageGlobal:
+		{
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, _parameter.getDescription().index & 0x7f));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, _value));
 
-		if (!combineParameterChange(v, g_midiPacketNames[MultiDump], _parameter, _value))
-			return;
-
-		uint32_t idx = desc.index;
-
-		if(desc.page > 100)
-			idx += (static_cast<uint32_t>(xt::MultiParameter::Inst1) - static_cast<uint32_t>(xt::MultiParameter::Inst0)) * (desc.page - 101);
-
-		data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
-		data.insert(std::make_pair(pluginLib::MidiDataType::Page, idx >> 7));
-		data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, idx & 0x7f));
-		data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
-
-		sendSysEx(MultiParameterChange, data);
-		*/
+			sendSysEx(GlobalParameterChange, data);
+		}
 		return;
+	case g_pageMulti:
+		{
+			uint8_t v;
+
+			if (!combineParameterChange(v, g_midiPacketNames[MultiDump], _parameter, _value))
+				return;
+
+			uint32_t idx = desc.index;
+
+			if(desc.page > 100)
+				idx += (static_cast<uint32_t>(xt::MultiParameter::Inst1First) - static_cast<uint32_t>(xt::MultiParameter::Inst0First)) * (desc.page - 101);
+
+			data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
+			data.insert(std::make_pair(pluginLib::MidiDataType::Page, idx >> 7));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, idx & 0x7f));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
+
+			sendSysEx(MultiParameterChange, data);
+		}
+		return;
+	case g_pageSoftKnobs:
+		break;
+	case g_pageControllers:
+		break;
+	default:
+		{
+			uint8_t v;
+			if (!combineParameterChange(v, g_midiPacketNames[SingleDump], _parameter, _value))
+				return;
+
+			data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
+			data.insert(std::make_pair(pluginLib::MidiDataType::Page, desc.page));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, desc.index));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
+
+			sendSysEx(SingleParameterChange, data);
+		}
+		break;
 	}
-
-	uint8_t v;
-	if (!combineParameterChange(v, g_midiPacketNames[SingleDump], _parameter, _value))
-		return;
-
-	data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
-	data.insert(std::make_pair(pluginLib::MidiDataType::Page, desc.page));
-	data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, desc.index));
-	data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
-
-	sendSysEx(SingleParameterChange, data);
 }
 
 bool Controller::sendGlobalParameterChange(xt::GlobalParameter _param, uint8_t _value)

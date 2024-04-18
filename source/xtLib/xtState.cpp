@@ -364,7 +364,10 @@ namespace xt
 			if(dump.idxParamIndexH >= _data.size() || dump.idxParamIndexL >= _data.size())
 				return nullptr;
 
-			const auto i = dump.firstParamIndex + ((static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7) | static_cast<uint32_t>(_data[dump.idxParamIndexL]));
+			auto i = dump.firstParamIndex;
+			if (dump.idxParamIndexH != dump.idxParamIndexL)
+				i += static_cast<uint32_t>(_data[dump.idxParamIndexH]) << 7;
+			i += static_cast<uint32_t>(_data[dump.idxParamIndexL]);
 
 			if(i > _dump.size())
 				return nullptr;
