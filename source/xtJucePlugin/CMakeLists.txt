@@ -11,6 +11,7 @@ set(SOURCES
 	xtController.cpp xtController.h
 	xtEditor.cpp xtEditor.h
 	xtFrontPanel.cpp xtFrontPanel.h
+	xtFocusedParameter.cpp xtFocusedParmeter.h
 	xtLcd.cpp xtLcd.h
 	xtPatchManager.cpp xtPatchManager.h
 	version.h
