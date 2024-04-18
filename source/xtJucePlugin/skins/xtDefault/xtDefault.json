@@ -718,20 +718,47 @@
                     }
                 },
                 {
-                    "name" : "xtKnob",
-                    "rotary" : {
-                    },
-                    "spritesheet" : {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
                         "x" : "328.8624",
                         "y" : "1051.851",
                         "width" : "128",
                         "height" : "128",
-                        "texture" : "xt_encoder_ranged",
+                        "texture" : "xtknob",
                         "tileSizeX" : "128",
                         "tileSizeY" : "128"
                     },
                     "parameterAttachment" : {
-                        "parameter" : "O2FmAmount"
+                        "parameter" : "O2Sync"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "440.8624",
+                        "y" : "1035.851",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "O2Sync"
                     }
                 },
                 {
@@ -739,7 +766,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "38.10242",
+                        "x" : "52.86243",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -756,7 +783,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "217.3624",
+                        "x" : "275.8624",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -778,13 +805,13 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "396.6224",
-                        "y" : "1282.485",
-                        "width" : "128",
-                        "height" : "128",
-                        "texture" : "xtknob",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
+                        "x" : "472.3624",
+                        "y" : "1317.485",
+                        "width" : "64",
+                        "height" : "64",
+                        "texture" : "xtknob_small",
+                        "tileSizeX" : "64",
+                        "tileSizeY" : "64"
                     },
                     "parameterAttachment" : {
                         "parameter" : "O2Link"
@@ -800,8 +827,8 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "508.6224",
-                        "y" : "1266.485",
+                        "x" : "488.3624",
+                        "y" : "1383.425",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -1031,7 +1058,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "651.4058",
+                        "x" : "667.2058",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1053,7 +1080,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "828.2058",
+                        "x" : "890.2058",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1075,7 +1102,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "940.2058",
+                        "x" : "1002.206",
                         "y" : "1266.485",
                         "width" : "32",
                         "height" : "32",
@@ -1097,13 +1124,13 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1005.006",
-                        "y" : "1282.485",
-                        "width" : "128",
-                        "height" : "128",
-                        "texture" : "xtknob",
-                        "tileSizeX" : "128",
-                        "tileSizeY" : "128"
+                        "x" : "1083.206",
+                        "y" : "1315.485",
+                        "width" : "64",
+                        "height" : "64",
+                        "texture" : "xtknob_small",
+                        "tileSizeX" : "64",
+                        "tileSizeY" : "64"
                     },
                     "parameterAttachment" : {
                         "parameter" : "W2Link"
@@ -1119,8 +1146,8 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1117.006",
-                        "y" : "1266.485",
+                        "x" : "1099.206",
+                        "y" : "1380.905",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",

@@ -31,9 +31,9 @@
  		{"index":13 , "name":"O2Semi"       , "min":52, "max":76, "isBipolar":true, "toText":"signed"},
  		{"index":14 , "name":"O2Detune"     , "isBipolar":true},
 
- 		{"index":16 , "name":"O2BendRange"  , "min":0, "max":122, "toText":"pbrange"},
- 		{"index":17 , "name":"O2KeyTrack"   , "min":0, "max":76, "default":64, "toText":"keytrack76"},
- 		{"index":18 , "name":"O2FmAmount"},
+ 		{"index":16 , "name":"O2Sync"       , "min":0, "max":1, "toText":"offOn"},
+ 		{"index":17 , "name":"O2BendRange"  , "min":0, "max":122, "toText":"pbrange"},
+ 		{"index":18 , "name":"O2KeyTrack"   , "min":0, "max":76, "default":64, "toText":"keytrack76"},
  		{"index":19 , "name":"O2Link"       , "min":0, "max":1, "toText":"offOn"},
 
 		// Wavetable
@@ -781,32 +781,32 @@
 			{"type": "program"},
 
 			{"type": "param", "name": "Version"},					// 0
-			{"type": "param", "name": "O1Octave"},
-			{"type": "param", "name": "O1Semi"},
-			{"type": "param", "name": "O1Detune"},
-			{"type": "null"},
-			{"type": "param", "name": "O1BendRange"},
-			{"type": "param", "name": "O1KeyTrack"},
-			{"type": "param", "name": "O1FmAmount"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "param", "name": "O2Octave"},
-			{"type": "param", "name": "O2Semi"},
-			{"type": "param", "name": "O2Detune"},
-			{"type": "null"},
-			{"type": "param", "name": "O2BendRange"},
-			{"type": "param", "name": "O2KeyTrack"},
-			{"type": "param", "name": "O2FmAmount"},
-			{"type": "param", "name": "O2Link"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "null"},
-			{"type": "param", "name": "Wave"},
-			{"type": "param", "name": "W1StartW"},
+			{"type": "param", "name": "O1Octave"},					// 1
+			{"type": "param", "name": "O1Semi"},                                    // 2
+			{"type": "param", "name": "O1Detune"},                                  // 3 
+			{"type": "null"},                                                       // 4
+			{"type": "param", "name": "O1BendRange"},                               // 5
+			{"type": "param", "name": "O1KeyTrack"},                                // 6
+			{"type": "param", "name": "O1FmAmount"},                                // 7
+			{"type": "null"},                                                       // 9
+			{"type": "null"},                                                       // 9
+			{"type": "null"},                                                       // 10
+			{"type": "null"},                                                       // 11
+			{"type": "param", "name": "O2Octave"},                                  // 12
+			{"type": "param", "name": "O2Semi"},                                    // 13
+			{"type": "param", "name": "O2Detune"},                                  // 14
+			{"type": "null"},                                                       // 15
+			{"type": "param", "name": "O2Sync"},                                    // 16
+			{"type": "param", "name": "O2BendRange"},                               // 17
+			{"type": "param", "name": "O2KeyTrack"},                                // 18
+			{"type": "param", "name": "O2Link"},                                    // 19
+			{"type": "null"},                			                // 20
+			{"type": "null"},                                                       //
+			{"type": "null"},                                                       //
+			{"type": "null"},                                                       //
+			{"type": "null"},                                                       //
+			{"type": "param", "name": "Wave"},                                      //
+			{"type": "param", "name": "W1StartW"},                                  //
 			{"type": "param", "name": "W1StartP"},
 			{"type": "param", "name": "W1EnvAmount"},
 			{"type": "param", "name": "W1EnvVelAmount"},
