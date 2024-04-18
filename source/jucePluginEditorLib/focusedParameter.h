@@ -31,6 +31,8 @@ namespace jucePluginEditorLib
 
 		void onMouseEnter(const juce::MouseEvent& _event);
 
+		virtual void updateParameter(const std::string& _name, const std::string& _value);
+
 	private:
 		void timerCallback() override;
 		void updateControlLabel(juce::Component* _component);
