@@ -470,7 +470,7 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 
 	if (desc.page >= 100)
 	{
-		assert(false && "unable to send multi parameter change");
+//		assert(false && "unable to send multi parameter change");
 		/*
 		uint8_t v;
 

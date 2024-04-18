@@ -289,8 +289,22 @@
  		{"index":254, "name":"Name14", "min":32, "max":127, "isDiscrete":true, "toText":"ascii"},
  		{"index":255, "name":"Name15", "min":32, "max":127, "isDiscrete":true, "toText":"ascii"},
 
+		// MULTI
+		
 		// GLOBAL
- 		{"index":1000, "class":"Global", "name":"MainVolume"}
+ 		{"page":200, "index":0, "class":"Global", "name":"MainVolume"},
+
+		// SOFT KNOBS
+		{"page":300, "index":0, "name":"PlayParamValueA", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamA", "softknobTargetList":"playParamTargets"},
+		{"page":300, "index":1, "name":"PlayParamValueB", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamB", "softknobTargetList":"playParamTargets"},
+		{"page":300, "index":2, "name":"PlayParamValueC", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamC", "softknobTargetList":"playParamTargets"},
+		{"page":300, "index":3, "name":"PlayParamValueD", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamD", "softknobTargetList":"playParamTargets"},
+
+		// CONTROLLERS
+		{"page":400, "index":0, "name":"ControlW"},
+		{"page":400, "index":1, "name":"ControlX"},
+		{"page":400, "index":2, "name":"ControlY"},
+		{"page":400, "index":3, "name":"ControlZ"}
  	],
  	"valuelists":
  	{
@@ -428,6 +442,31 @@
 			"LFO2 Rate", "LFO2 Shape", "LFO2 Delay", "LFO2 Sync", "LFO2 Symmetry", "LFO2 Humanize", "LFO2 Phase", 
 			"Osc 1 FM Amount", "Filter 1 Special", "Glide Time", 
 			"Control W", "Control X", "Control Y", "Control Z"		
+		],
+		"playParamTargets":
+		[
+			"O1Octave", "O1Semi", "O1Detune", "O1BendRange", "O1KeyTrack", 
+			"O2Octave", "O2Semi", "O2Detune", "O2BendRange", "O2KeyTrack", 
+			"Wave", 
+			"W1StartW", "W1StartP", "W1EnvAmount", "W1EnvVelAmount", "W1Keytrack", 
+			"W2StartW", "W2StartP", "W2EnvAmount", "W2EnvVelAmount", "W2Keytrack", 
+			"MixW1", "MixW2", "MixRingMod", "MixNoise", 
+			"Aliasing", "TimeQuant", "Clipping", 
+			"F1Cutoff", "F1Resonance", "F1Type", "F1KeyTrack", "F1EnvAmount", "F1EnvVelAmount", 
+			"F2Cutoff", "F2Type", "F2KeyTrack", 
+			"AmpVolume", "AmpVelocity", "AmpKeytrack", 
+			"ChorusEnabled",
+			"Pan", 
+			"PanKeytrack",
+			"GlideEnabled", "GlideEnabled", 
+			"ArpMode", "ArpTempo", "ArpClock", "ArpRange", "ArpPattern", "ArpDirection", "ArpNoteOrder", "ArpVelocity", 
+			"AllocationMode", "Assignment", 
+			"F1EnvAttack", "F1EnvDecay", "F1EnvSustain", "F1EnvRelease", 
+			"AmpEnvAttack", "AmpEnvDecay", "AmpEnvSustain", "AmpEnvRelease", 
+			"Lfo1Rate", "Lfo1Shape", "Lfo1Delay", "Lfo1Sync", "Lfo1Symmetry", "Lfo1Humanize", 
+			"Lfo2Rate", "Lfo2Shape", "Lfo2Delay", "Lfo2Sync", "Lfo2Symmetry", "Lfo2Humanize", "Lfo2Phase", 
+			"O1FmAmount", "F1ContextSensitive", "GlideTime", 
+			"ControlW", "ControlX", "ControlY", "ControlZ"		
 		],
 		"filter1Type":
 		[

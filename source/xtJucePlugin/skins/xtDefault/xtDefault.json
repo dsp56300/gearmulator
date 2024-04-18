@@ -62,7 +62,7 @@
                 "tileSizeY" : "128"
             },
             "parameterAttachment" : {
-                "parameter" : "O1Semi"
+                "parameter" : "PlayParamValueA"
             }
         },
         {
@@ -79,7 +79,7 @@
                 "tileSizeY" : "128"
             },
             "parameterAttachment" : {
-                "parameter" : "O1Semi"
+                "parameter" : "PlayParamValueB"
             }
         },
         {
@@ -96,7 +96,7 @@
                 "tileSizeY" : "128"
             },
             "parameterAttachment" : {
-                "parameter" : "O1Semi"
+                "parameter" : "PlayParamValueC"
             }
         },
         {
@@ -113,7 +113,7 @@
                 "tileSizeY" : "128"
             },
             "parameterAttachment" : {
-                "parameter" : "O1Semi"
+                "parameter" : "PlayParamValueD"
             }
         },
         {
