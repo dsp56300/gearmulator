@@ -13,6 +13,8 @@ set(SOURCES
 	xtFrontPanel.cpp xtFrontPanel.h
 	xtFocusedParameter.cpp xtFocusedParameter.h
 	xtLcd.cpp xtLcd.h
+	xtPartButton.cpp xtPartButton.h
+	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	version.h
 )

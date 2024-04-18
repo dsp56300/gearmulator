@@ -1,6 +1,10 @@
 #pragma once
 
+#include "xtParts.h"
+
 #include "../jucePluginEditorLib/pluginEditor.h"
+
+#include "../jucePluginLib/event.h"
 
 class XtLcd;
 class Controller;
@@ -40,12 +44,25 @@ namespace xtJucePlugin
 		Controller& getXtController() const { return m_controller; }
 
 		XtLcd* getLcd() const;
+		Parts& getParts() const;
+
+		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
+
+		void setCurrentPart(uint8_t _part) override;
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
 
 		Controller& m_controller;
+		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
+		std::unique_ptr<Parts> m_parts;
+
+		pluginLib::EventListener<bool> m_playModeChangeListener;
+
+		juce::Button* m_btMultiMode = nullptr;
+		juce::Button* m_ledMultiMode = nullptr;
+		juce::Button* m_btSave = nullptr;
 	};
 }
