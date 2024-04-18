@@ -110,10 +110,10 @@ private:
 	const uint8_t m_deviceId;
 
 	Patch m_singleEditBuffer;
-	std::array<Patch,16> m_singleEditBuffers;
+	std::array<Patch,8> m_singleEditBuffers;
 	std::array<uint8_t, 39> m_globalData{};
 	std::array<uint8_t, 1> m_modeData{};
-	std::array<uint32_t, 16> m_currentSingles{0};
+	std::array<uint32_t, 8> m_currentSingles{0};
 	uint32_t m_currentSingle = 0;
 	xtJucePlugin::FrontPanel* m_frontPanel = nullptr;
 };
