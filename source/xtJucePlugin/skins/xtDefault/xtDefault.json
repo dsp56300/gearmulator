@@ -2027,28 +2027,6 @@
                     }
                 },
                 {
-                    "name" : "dropdown",
-                    "combobox" : {
-                        "offsetL" : "15",
-                        "offsetT" : "1",
-                        "offsetR" : "-15",
-                        "offsetB" : "-1",
-                        "text" : "Clock",
-                        "textHeight" : "30",
-                        "color" : "000000FF",
-                        "alignH" : "L",
-                        "alignV" : "C",
-                        "bold" : "1",
-                        "x" : "3121.595",
-                        "y" : "1330.06",
-                        "width" : "145.2011",
-                        "height" : "50"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "Lfo2Sync"
-                    }
-                },
-                {
                     "name" : "xtKnob",
                     "rotary" : {
                     },
@@ -2114,6 +2092,45 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo2Humanize"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2977.796",
+                        "y" : "1285.955",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Phase"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "On",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3120.796",
+                        "y" : "1355.06",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2Sync"
                     }
                 }
             ]
