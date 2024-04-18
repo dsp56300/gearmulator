@@ -20,6 +20,11 @@ namespace xtJucePlugin
 
 		void processSysex(const std::vector<uint8_t>& _msg) const;
 
+		XtLcd* getLcd() const
+		{
+			return m_lcd.get();
+		}
+
 	private:
 		void processLCDUpdate(const std::vector<uint8_t>& _msg) const;
 		void processLedUpdate(const std::vector<uint8_t>& _msg) const;

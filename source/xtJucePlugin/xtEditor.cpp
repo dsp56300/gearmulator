@@ -4,10 +4,9 @@
 #include "PluginProcessor.h"
 
 #include "xtController.h"
+#include "xtFocusedParameter.h"
 #include "xtFrontPanel.h"
 #include "xtPatchManager.h"
-
-#include "../jucePluginEditorLib/focusedParameter.h"
 
 namespace xtJucePlugin
 {
@@ -17,7 +16,7 @@ namespace xtJucePlugin
 	{
 		create(_jsonFilename);
 
-		m_focusedParameter.reset(new jucePluginEditorLib::FocusedParameter(m_controller, _binding, *this));
+		m_focusedParameter.reset(new FocusedParameter(m_controller, _binding, *this));
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
@@ -75,6 +74,11 @@ namespace xtJucePlugin
 			"- Saving/Exporting Presets\n"
 			"- Plugin state is not preserve"
 		};
+	}
+
+	XtLcd* Editor::getLcd() const
+	{
+		return m_frontPanel->getLcd();
 	}
 
 	void Editor::mouseEnter(const juce::MouseEvent& _event)

@@ -2,6 +2,7 @@
 
 #include "../jucePluginEditorLib/pluginEditor.h"
 
+class XtLcd;
 class Controller;
 
 namespace jucePluginEditorLib
@@ -17,6 +18,7 @@ namespace pluginLib
 
 namespace xtJucePlugin
 {
+	class FocusedParameter;
 	class FrontPanel;
 	class PatchManager;
 
@@ -37,11 +39,13 @@ namespace xtJucePlugin
 
 		Controller& getXtController() const { return m_controller; }
 
+		XtLcd* getLcd() const;
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
 
 		Controller& m_controller;
-		std::unique_ptr<jucePluginEditorLib::FocusedParameter> m_focusedParameter;
+
+		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
 	};
 }
