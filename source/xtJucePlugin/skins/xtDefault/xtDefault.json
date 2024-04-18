@@ -24,6 +24,88 @@
             "pageWave"
         ]
     },
+    "templates" : [
+        {
+            "name" : "pm_treeview",
+            "treeview" : {
+                "textHeight" : "14",
+                "color" : "FF8C00FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "selectedItemBackgroundColor" : "572D00FF"
+            }
+        },
+        {
+            "name" : "pm_listbox",
+            "listbox" : {
+                "textHeight" : "30",
+                "color" : "FF8C00FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "C",
+                "selectedItemBackgroundColor" : "542D01FF"
+            }
+        },
+        {
+            "name" : "pm_search",
+            "texteditor" : {
+                "text" : "Search...",
+                "textHeight" : "14",
+                "color" : "FF8C00FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "C"
+            }
+        },
+        {
+            "name" : "pm_scrollbar",
+            "scrollbar" : {
+                "color" : "C66C08FF"
+            }
+        },
+        {
+            "name" : "pm_info_name",
+            "label" : {
+                "textHeight" : "32",
+                "color" : "CA6D08FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "T",
+                "bold" : "1"
+            }
+        },
+        {
+            "name" : "pm_info_label",
+            "label" : {
+                "textHeight" : "16",
+                "color" : "808080FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "T"
+            }
+        },
+        {
+            "name" : "pm_info_text",
+            "label" : {
+                "textHeight" : "16",
+                "color" : "C96D08FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "T"
+            }
+        },
+        {
+            "name" : "pm_status_label",
+            "label" : {
+                "textHeight" : "16",
+                "color" : "FF8C00FF",
+                "backgroundColor" : "1D1D1DFF",
+                "alignH" : "L",
+                "alignV" : "C"
+            }
+        }
+    ],
     "children" : [
         {
             "name" : "bakedBG",
@@ -135,7 +217,7 @@
             }
         },
         {
-            "name" : "pageButtonPatchManager",
+            "name" : "pageButtonMain",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -154,7 +236,7 @@
             }
         },
         {
-            "name" : "pageButtonWave",
+            "name" : "pageButtonMod",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -173,7 +255,7 @@
             }
         },
         {
-            "name" : "pageButtonMain",
+            "name" : "pageButtonArp",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -182,7 +264,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2824.109",
+                "x" : "2724.399",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -192,7 +274,7 @@
             }
         },
         {
-            "name" : "pageButtonMod",
+            "name" : "pageButtonWave",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -211,7 +293,7 @@
             }
         },
         {
-            "name" : "pageButtonArp",
+            "name" : "pageButtonPatchManager",
             "button" : {
                 "isToggle" : "1",
                 "normalImage" : "0",
@@ -547,9 +629,9 @@
                     "name" : "ContainerPatchManager",
                     "component" : {
                         "x" : "0",
-                        "y" : "48",
+                        "y" : "70",
                         "width" : "3322.7",
-                        "height" : "1431.802"
+                        "height" : "1409.802"
                     }
                 }
             ]
@@ -6063,8 +6145,8 @@
             "label" : {
                 "text" : "42",
                 "textHeight" : "40",
-                "color" : "099DB5FF",
-                "backgroundColor" : "000000FF",
+                "color" : "FF8C00FF",
+                "backgroundColor" : "1D1D1DFF",
                 "alignH" : "C",
                 "alignV" : "C",
                 "x" : "1385",
