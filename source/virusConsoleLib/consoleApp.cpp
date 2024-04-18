@@ -179,7 +179,7 @@ void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 	case 1:
 		m_dsp1->drainESSI1();
 		LOG("Sending Init Control Commands");
-		m_uc->sendInitControlCommands();
+		m_uc->sendInitControlCommands(127);	// set Master Volume to max
 		break;
 	case 256:
 		m_dsp1->drainESSI1();

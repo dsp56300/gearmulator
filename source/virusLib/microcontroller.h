@@ -36,7 +36,7 @@ public:
 	bool requestMulti(BankNumber _bank, uint8_t _program, TPreset& _data);
 	bool requestSingle(BankNumber _bank, uint8_t _program, TPreset& _data);
 
-	void sendInitControlCommands();
+	void sendInitControlCommands(uint8_t _masterVolume = 0xff);
 
 	void createDefaultState();
 	void process();
