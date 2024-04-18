@@ -1,0 +1,17 @@
+CFLAGS=-I..
+CXXFLAGS=-I..
+CPPFLAGS=-I..
+
+RM = del
+
+all: c_test.obj cxx_test.obj
+
+clean:
+	-$(RM) *.obj *.i *.ii
+
+.SUFFIXES: .i .ii
+preproc: c_test.i cxx_test.ii
+.cpp.ii:
+	$(CXX) /E $(CXXFLAGS) $< >$@
+.c.i:
+	$(CC) /E $(CFLAGS) $< >$@

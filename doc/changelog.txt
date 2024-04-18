@@ -23,6 +23,8 @@ Patch Manager:
 
 Osirus/OsTIrus:
 
+- [Imp] Adjusted default Master Volume to 92 to match the TI hardware in USB mode
+
 - [Fix] Plugin may crash if a patch data source folder contains files not belonging to presets
 
 1.3.10
