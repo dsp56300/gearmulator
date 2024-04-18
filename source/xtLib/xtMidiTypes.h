@@ -112,4 +112,52 @@ namespace xt
 	{
 		Mode = 0	// 0 = Single, 1 = Multi
 	};
+
+	enum class MultiParameter
+	{
+		Volume,
+		ControlW,
+		ControlX,
+		ControlY,
+		ControlZ,
+		ArpTempo,
+		Reserved6, Reserved7, Reserved8, Reserved9, Reserved10, Reserved11, Reserved12, Reserved13, Reserved14, Reserved15,
+		Name00, Name01, Name02, Name03, Name04, Name05, Name06, Name07, Name08, Name09, Name10, Name11, Name12, Name13, Name14, Name15,
+
+		Inst0SoundBank,
+		Inst0SoundNumber,
+		Inst0MidiChannel,
+		Inst0Volume,
+		Inst0Transpose,
+		Inst0Detune,
+		Inst0Output,
+		Inst0Status,	// off/on
+		Inst0Pan,
+		Inst0PanMod,	// off, on, inverse
+		Inst0Reserved10,
+		Inst0Reserved11,
+		Inst0VeloLow,
+		Inst0VeloHigh,
+		Inst0KeyLow,
+		Inst0KeyHigh,
+		Inst0ArpActive,	// off, on, hold, Sound Arp
+		Inst0ArpClock,
+		Inst0ArpRange,
+		Inst0ArpPattern,
+		Inst0ArpDir,
+		Inst0ArpNoteOrder,
+		Inst0ApVelocity,
+		Inst0ArpReset,
+		Inst0ArpNotesOut,
+		Inst0Reserved25,
+		Inst0Reserved26,
+		Inst0Reserved27,
+
+		Inst1First,
+
+		Inst0First = Inst0SoundBank,
+		Inst0Last = Inst0Reserved27,
+	};
+
+	static_assert(static_cast<uint8_t>(MultiParameter::Inst1First) - static_cast<uint8_t>(MultiParameter::Inst0First) == 28);
 }
