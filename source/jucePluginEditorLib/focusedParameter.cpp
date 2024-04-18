@@ -60,6 +60,34 @@ namespace jucePluginEditorLib
 			updateControlLabel(component);
 	}
 
+	void FocusedParameter::updateParameter(const std::string& _name, const std::string& _value)
+	{
+		if (m_focusedParameterName)
+		{
+			if(_name.empty())
+			{
+				m_focusedParameterName->setVisible(false);
+			}
+			else
+			{
+				m_focusedParameterName->setText(_name, juce::dontSendNotification);
+				m_focusedParameterName->setVisible(true);
+			}
+		}
+		if(m_focusedParameterValue)
+		{
+			if(_value.empty())
+			{
+				m_focusedParameterValue->setVisible(false);
+			}
+			else
+			{
+				m_focusedParameterValue->setText(_value, juce::dontSendNotification);
+				m_focusedParameterValue->setVisible(true);
+			}
+		}
+	}
+
 	void FocusedParameter::timerCallback()
 	{
 		updateControlLabel(nullptr);
@@ -78,10 +106,7 @@ namespace jucePluginEditorLib
 
 		if(!_component || !_component->getProperties().contains("parameter"))
 		{
-			if (m_focusedParameterName)
-				m_focusedParameterName->setVisible(false);
-			if (m_focusedParameterValue)
-				m_focusedParameterValue->setVisible(false);
+			updateParameter({}, {});
 			m_tooltip->setVisible(false);
 			return;
 		}
@@ -102,29 +127,16 @@ namespace jucePluginEditorLib
 		}
 		if(!p)
 		{
-			if (m_focusedParameterName)
-				m_focusedParameterName->setVisible(false);
-			if (m_focusedParameterValue)
-				m_focusedParameterValue->setVisible(false);
+			updateParameter({}, {});
 			m_tooltip->setVisible(false);
 			return;
 		}
 
-		const auto value = p->getText(p->getValue(), 0);
+		const auto value = p->getText(p->getValue(), 0).toStdString();
 
 		const auto& desc = p->getDescription();
 
-		if (m_focusedParameterName)
-		{
-			m_focusedParameterName->setText(desc.displayName, juce::dontSendNotification);
-			m_focusedParameterName->setVisible(true);
-		}
-
-		if (m_focusedParameterValue)
-		{
-			m_focusedParameterValue->setText(value, juce::dontSendNotification);
-			m_focusedParameterValue->setVisible(true);
-		}
+		updateParameter(desc.displayName, value);
 
 		m_tooltip->initialize(_component, value);
 
