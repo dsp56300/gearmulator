@@ -1421,6 +1421,7 @@ namespace pluginLib::patchDB
 	bool DB::saveJson()
 	{
 		m_cacheDirty = true;
+		m_cacheFileName.deleteFile();
 
 		if (!m_jsonFileName.hasWriteAccess())
 		{
@@ -1688,8 +1689,6 @@ namespace pluginLib::patchDB
 		std::vector<uint8_t> data;
 		if(!synthLib::readFile(data, m_cacheFileName.getFullPathName().toStdString()))
 			return false;
-
-		m_cacheFileName.deleteFile();
 
 		synthLib::BinaryStream inStream(data);
 
