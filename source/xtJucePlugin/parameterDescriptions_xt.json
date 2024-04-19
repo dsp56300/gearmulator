@@ -292,19 +292,19 @@
 		// MULTI
 		
 		// GLOBAL
- 		{"page":200, "index":12, "class":"Global", "name":"MainVolume"},
+ 		{"page":20, "index":12, "class":"Global", "name":"MainVolume"},
 
 		// SOFT KNOBS
-		{"page":300, "index":0, "name":"PlayParamValueA", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamA", "softknobTargetList":"playParamTargets"},
-		{"page":300, "index":1, "name":"PlayParamValueB", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamB", "softknobTargetList":"playParamTargets"},
-		{"page":300, "index":2, "name":"PlayParamValueC", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamC", "softknobTargetList":"playParamTargets"},
-		{"page":300, "index":3, "name":"PlayParamValueD", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamD", "softknobTargetList":"playParamTargets"},
+		{"page":30, "index":0, "name":"PlayParamValueA", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamA", "softknobTargetList":"playParamTargets"},
+		{"page":30, "index":1, "name":"PlayParamValueB", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamB", "softknobTargetList":"playParamTargets"},
+		{"page":30, "index":2, "name":"PlayParamValueC", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamC", "softknobTargetList":"playParamTargets"},
+		{"page":30, "index":3, "name":"PlayParamValueD", "min":0, "max":127, "isPublic":true, "softknobTargetSelect":"PlayParamD", "softknobTargetList":"playParamTargets"},
 
 		// CONTROLLERS
-		{"page":400, "index":0, "name":"ControlW"},
-		{"page":400, "index":1, "name":"ControlX"},
-		{"page":400, "index":2, "name":"ControlY"},
-		{"page":400, "index":3, "name":"ControlZ"}
+		{"page":40, "index":0, "name":"ControlW"},
+		{"page":40, "index":1, "name":"ControlX"},
+		{"page":40, "index":2, "name":"ControlY"},
+		{"page":40, "index":3, "name":"ControlZ"}
  	],
  	"valuelists":
  	{

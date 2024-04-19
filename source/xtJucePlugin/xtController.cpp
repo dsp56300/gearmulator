@@ -44,10 +44,10 @@ namespace
 		return g_midiPacketNames[static_cast<uint32_t>(_type)];
 	}
 
-	constexpr uint8_t g_pageMulti = 100;
-	constexpr uint8_t g_pageGlobal = 200;
-	constexpr uint8_t g_pageSoftKnobs = 300;
-	constexpr uint8_t g_pageControllers = 400;
+	constexpr uint32_t g_pageMulti = 10;
+	constexpr uint32_t g_pageGlobal = 20;
+	constexpr uint32_t g_pageSoftKnobs = 30;
+	constexpr uint32_t g_pageControllers = 40;
 }
 
 Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_deviceId(_deviceId)
@@ -250,6 +250,13 @@ void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiP
 	}
 }
 
+void Controller::parseGlobal(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
+{
+	memcpy(m_globalData.data(), &_msg[xt::IdxGlobalParamFirst], sizeof(m_globalData));
+
+	applyPatchParameters(_params, 0);
+}
+
 void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 {
     if(_msg.size() >= 5)
@@ -286,7 +293,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
 		}
 		else if(name == midiPacketName(GlobalDump))
         {
-            memcpy(m_globalData.data(), &_msg[xt::IdxGlobalParamFirst], sizeof(m_globalData));
+			parseGlobal(_msg, data, parameterValues);
         }
 		else if(name == midiPacketName(ModeDump))
         {
