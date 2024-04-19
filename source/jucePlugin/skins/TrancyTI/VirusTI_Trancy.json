@@ -1268,7 +1268,7 @@
                     "image" : { "x" : "0", "y" : "0", "width" : "1966", "height" : "328", "texture" : "panel_9_fx2_delay_tape_clocked" }, 
                     "condition": { "enableOnParameter": "Delay Type", "enableOnValues": "1" },
                         "children" : [
-                        { "name" : "DelayTapeDelayTime(ms)",          "parameterAttachment" : { "parameter" : "Delay/Tape Delay Time" },             "rotary" : { }, "spritesheet" : { "x" : "846", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                        { "name" : "DelayTapeDelayTime(ms)",          "image" : { "x" : "846", "y" : "97", "width" : "138", "height" : "137", "texture" : "button_disable_white" }},
                         { "name" : "DelayTapeDelayFeedback",          "parameterAttachment" : { "parameter" : "Delay/Tape Delay Feedback" },         "rotary" : { }, "spritesheet" : { "x" : "1004", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                         { "name" : "Delay/TapeDelayCenterFrequency",  "parameterAttachment" : { "parameter" : "Delay/Tape Delay Center Frequency" },            "rotary" : { }, "spritesheet" : { "x" : "1171", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                         { "name" : "DelayTapeDelayBandwidth",         "parameterAttachment" : { "parameter" : "Delay Tape Delay Bandwidth" },   "rotary" : { }, "spritesheet" : { "x" : "1329", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
@@ -1300,6 +1300,7 @@
                     "condition": { "enableOnParameter": "Delay Type", "enableOnValues": "0" },
                         "children" : [
                         { "name" : "DelayTime",         "parameterAttachment" : { "parameter" : "Delay Time" },             "rotary" : { }, "spritesheet" : { "x" : "846", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
+                        { "name" : "DelayTimeDisabled",          "condition": { "enableOnParameter": "Delay Clock", "enableOnValues": "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16" }, "image" : { "x" : "846", "y" : "97", "width" : "138", "height" : "137", "texture" : "button_disable_white" }},
                         { "name" : "DelayFeedback",     "parameterAttachment" : { "parameter" : "Delay Feedback" },         "rotary" : { }, "spritesheet" : { "x" : "1004", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                         { "name" : "DelayColor",        "parameterAttachment" : { "parameter" : "Delay Color" },            "rotary" : { }, "spritesheet" : { "x" : "1171", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},
                         { "name" : "DelayRate",         "parameterAttachment" : { "parameter" : "Dly Rate / Rev Decay" },   "rotary" : { }, "spritesheet" : { "x" : "1329", "y" : "135", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},

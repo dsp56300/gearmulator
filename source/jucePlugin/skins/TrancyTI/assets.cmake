@@ -53,6 +53,7 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_8.png
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_9.png
 	${CMAKE_CURRENT_LIST_DIR}/button_disable.png
+	${CMAKE_CURRENT_LIST_DIR}/button_disable_white.png
 	${CMAKE_CURRENT_LIST_DIR}/button_load.png
 	${CMAKE_CURRENT_LIST_DIR}/button_menu.png
 	${CMAKE_CURRENT_LIST_DIR}/button_mono_poly.png
