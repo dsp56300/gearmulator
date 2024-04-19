@@ -2,6 +2,10 @@ Release Notes
 
 1.3.12
 
+Framework:
+
+- [Fix] VST3 plugins were rejected by some hosts on macOS
+
 OsTIrus:
 
 - [Fix] Delay Time knob is now disabled if not applicable
