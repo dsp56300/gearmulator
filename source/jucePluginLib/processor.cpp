@@ -584,7 +584,12 @@ namespace pluginLib
 			auto toJuceMidiMessage = [&e]()
 			{
 				if(!e.sysex.empty())
+				{
+					assert(e.sysex.front() == 0xf0);
+					assert(e.sysex.back() == 0xf7);
+
 					return juce::MidiMessage(e.sysex.data(), static_cast<int>(e.sysex.size()), 0.0);
+				}
 				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
 				if(len == 1)
 					return juce::MidiMessage(e.a, 0.0);
