@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 3.15)
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
-option(${CMAKE_PROJECT_NAME}_SYNTH_XT "Build XT" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
 
 # ----------------- DSP56300 emulator
 
@@ -89,7 +89,7 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 	endif()
 endif()
 
-if(${CMAKE_PROJECT_NAME}_SYNTH_XT)
+if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
 	add_subdirectory(xtLib)
 	add_subdirectory(xtTestConsole)
 
