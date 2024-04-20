@@ -12,9 +12,9 @@ endif()
 
 set(postfix "_partial")
 
-macro(copyArtefacts TARGET FOLDER)
+macro(copyArtefacts TARGET FOLDER FILEFILTER)
 	set(RCLONE_RESULT 0)
-	file(GLOB files LIST_DIRECTORIES false "${ROOT_DIR}/*.zip" "${ROOT_DIR}/*.deb" "${ROOT_DIR}/*.rpm")
+	file(GLOB files LIST_DIRECTORIES false "${ROOT_DIR}/*${FILEFILTER}*.zip" "${ROOT_DIR}/*${FILEFILTER}*.deb" "${ROOT_DIR}/*${FILEFILTER}*.rpm")
 	foreach(fileLocal ${files})
 		
 		file(SIZE ${fileLocal} fileSize)
