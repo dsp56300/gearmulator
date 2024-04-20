@@ -57,6 +57,7 @@ namespace xtJucePlugin
 		{
 			m_btMultiMode->setToggleState(isMultiMode, juce::dontSendNotification);
 			m_ledMultiMode->setToggleState(isMultiMode, juce::dontSendNotification);
+			m_frontPanel->getLcd()->refresh();
 		};
 
 		m_btSave = findComponentT<juce::DrawableButton>("SaveButton");
@@ -134,6 +135,8 @@ namespace xtJucePlugin
 		m_parameterBinding.setPart(_part);
 
 		jucePluginEditorLib::Editor::setCurrentPart(_part);
+
+		m_frontPanel->getLcd()->refresh();
 	}
 
 	void Editor::mouseEnter(const juce::MouseEvent& _event)

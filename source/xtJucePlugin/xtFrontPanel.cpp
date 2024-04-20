@@ -23,7 +23,7 @@ namespace xtJucePlugin
 		auto *lcdArea = _editor.findComponentT<juce::Component>("lcdArea", false);
 
 		if (lcdArea)
-			m_lcd.reset(new XtLcd(*lcdArea));
+			m_lcd.reset(new XtLcd(*lcdArea, m_controller));
 
 		auto* shadow = _editor.findComponent("lcdshadow", false);
 

@@ -4,12 +4,15 @@
 
 #include "../jucePluginEditorLib/lcd.h"
 
+class Controller;
+
 class XtLcd final : public jucePluginEditorLib::Lcd
 {
 public:
-	explicit XtLcd(Component& _parent);
+	explicit XtLcd(Component& _parent, Controller& _controller);
 	~XtLcd() override;
 
+	void refresh();
 	void setText(const std::array<uint8_t, 80> &_text);
 
 	bool getOverrideText(std::vector<std::vector<uint8_t>>& _lines) override;
@@ -19,6 +22,7 @@ public:
 
 private:
 	std::array<uint8_t, 80> m_currentText;
+	Controller& m_controller;
 	std::string m_paramName;
 	std::string m_paramValue;
 };
