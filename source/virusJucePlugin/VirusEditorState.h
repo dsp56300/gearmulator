@@ -2,12 +2,12 @@
 
 #include "../jucePluginEditorLib/pluginEditorState.h"
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
-class PluginEditorState : public jucePluginEditorLib::PluginEditorState
+class VirusEditorState : public jucePluginEditorLib::PluginEditorState
 {
 public:
-	explicit PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller, const std::vector<PluginEditorState::Skin>& _includedSkins);
+	explicit VirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller, const std::vector<VirusEditorState::Skin>& _includedSkins);
 
 	genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) override;
 

@@ -19,7 +19,7 @@ namespace
 
 //==============================================================================
 OsTIrusProcessor::OsTIrusProcessor() :
-    AudioPluginAudioProcessor(BusesProperties()
+    VirusProcessor(BusesProperties()
                    .withInput("Input", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Output", juce::AudioChannelSet::stereo(), true)
 #if JucePlugin_IsSynth

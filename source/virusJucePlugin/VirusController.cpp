@@ -3,7 +3,7 @@
 #include <fstream>
 
 #include "ParameterNames.h"
-#include "PluginProcessor.h"
+#include "VirusProcessor.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 #include "../synthLib/os.h"
@@ -37,7 +37,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p)), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(VirusProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p)), m_processor(p), m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -392,7 +392,7 @@ namespace Virus
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
 
-	std::string Controller::loadParameterDescriptions(const AudioPluginAudioProcessor& _processor)
+	std::string Controller::loadParameterDescriptions(const VirusProcessor& _processor)
 	{
         const auto model = _processor.getModel();
 		const auto name = model == virusLib::DeviceModel::Invalid || isTIFamily(model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";

@@ -1,23 +1,23 @@
-#include "PluginEditorState.h"
+#include "VirusEditorState.h"
 
-#include "PluginProcessor.h"
+#include "VirusProcessor.h"
 
 #include "VirusEditor.h"
 
 #include "../synthLib/os.h"
 
-PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller, const std::vector<PluginEditorState::Skin>& _includedSkins)
+VirusEditorState::VirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller, const std::vector<VirusEditorState::Skin>& _includedSkins)
 	: jucePluginEditorLib::PluginEditorState(_processor, _controller, _includedSkins)
 {
 	loadDefaultSkin();
 }
 
-genericUI::Editor* PluginEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
+genericUI::Editor* VirusEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
 {
-	return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<AudioPluginAudioProcessor&>(m_processor), _skin.jsonFilename, _skin.folder, _openMenuCallback);
+	return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin.jsonFilename, _skin.folder, _openMenuCallback);
 }
 
-void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
+void VirusEditorState::initContextMenu(juce::PopupMenu& _menu)
 {
 	jucePluginEditorLib::PluginEditorState::initContextMenu(_menu);
 	auto& p = m_processor;
@@ -37,7 +37,7 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 	}
 }
 
-bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+bool VirusEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
 {
 	jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 

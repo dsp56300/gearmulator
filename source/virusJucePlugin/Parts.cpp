@@ -4,7 +4,7 @@
 #include "VirusEditor.h"
 
 #include "VirusController.h"
-#include "PluginProcessor.h"
+#include "VirusProcessor.h"
 #include "ParameterNames.h"
 
 #include "../jucePluginEditorLib/pluginProcessor.h"
@@ -166,7 +166,7 @@ namespace genericVirusUI
 	{
 	    const auto multiMode = m_editor.getController().isMultiMode();
 
-		const auto partCount = multiMode ? static_cast<AudioPluginAudioProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
+		const auto partCount = multiMode ? static_cast<VirusProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{

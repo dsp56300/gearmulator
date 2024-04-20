@@ -17,7 +17,7 @@ namespace juce
 	class Component;
 }
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
 namespace jucePluginEditorLib
 {

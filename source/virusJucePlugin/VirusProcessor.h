@@ -10,11 +10,11 @@
 #include "../jucePluginEditorLib/pluginProcessor.h"
 
 //==============================================================================
-class AudioPluginAudioProcessor : public jucePluginEditorLib::Processor
+class VirusProcessor : public jucePluginEditorLib::Processor
 {
 public:
-    AudioPluginAudioProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms);
-    ~AudioPluginAudioProcessor() override;
+    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms);
+    ~VirusProcessor() override;
 
     void processBpm(float _bpm) override;
 
@@ -65,7 +65,7 @@ private:
     void loadChunkData(synthLib::ChunkReader& _cr) override;
 
     //==============================================================================
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
 
 	std::vector<virusLib::ROMFile>      m_roms;
     uint32_t                            m_selectedRom = 0;

@@ -8,7 +8,7 @@
 
 #include "../synthLib/plugin.h"
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
 namespace Virus
 {
@@ -65,7 +65,7 @@ namespace Virus
             PresetSource source = PresetSource::Unknown;
         };
 
-    	Controller(AudioPluginAudioProcessor &, unsigned char deviceId = 0x00);
+    	Controller(VirusProcessor &, unsigned char deviceId = 0x00);
 		~Controller() override;
 
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
@@ -154,7 +154,7 @@ namespace Virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
-        static std::string loadParameterDescriptions(const AudioPluginAudioProcessor& _processor);
+        static std::string loadParameterDescriptions(const VirusProcessor& _processor);
 
 		void timerCallback() override;
 
@@ -171,7 +171,7 @@ namespace Virus
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
         void parseControllerDump(const synthLib::SMidiEvent&);
 
-        AudioPluginAudioProcessor& m_processor;
+        VirusProcessor& m_processor;
         unsigned char m_deviceId;
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};

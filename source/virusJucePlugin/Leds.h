@@ -5,7 +5,7 @@
 
 #include "../../jucePluginEditorLib/led.h"
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
 namespace genericUI
 {
@@ -17,7 +17,7 @@ namespace genericVirusUI
 	class Leds
 	{
 	public:
-		Leds(const genericUI::Editor& _editor, AudioPluginAudioProcessor& _processor);
+		Leds(const genericUI::Editor& _editor, VirusProcessor& _processor);
 		~Leds();
 
 	private:

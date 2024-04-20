@@ -19,16 +19,16 @@ set(SOURCES
 	Parts.h
 	PatchManager.cpp
 	PatchManager.h
-	PluginEditorState.cpp
-	PluginEditorState.h
-	PluginProcessor.cpp
-	PluginProcessor.h
 	Tabs.cpp
 	Tabs.h
 	VirusController.cpp
 	VirusController.h
 	VirusEditor.cpp
 	VirusEditor.h
+	VirusEditorState.cpp
+	VirusEditorState.h
+	VirusProcessor.cpp
+	VirusProcessor.h
 )
 
 add_library(virusJucePlugin STATIC)

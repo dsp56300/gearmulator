@@ -29,7 +29,7 @@ namespace pluginLib
 	class ParameterBinding;
 }
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
 namespace genericVirusUI
 {
@@ -43,7 +43,7 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, AudioPluginAudioProcessor& _processorRef, const std::string& _jsonFilename,
+		VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename,
 		            std::string _skinFolder, std::function<void()> _openMenuCallback);
 		~VirusEditor() override;
 
@@ -81,7 +81,7 @@ namespace genericVirusUI
 		void savePresets(SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0);
 		bool savePresets(const std::string& _pathName, SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0) const;
 
-		AudioPluginAudioProcessor& m_processor;
+		VirusProcessor& m_processor;
 		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;

@@ -1,9 +1,8 @@
 #pragma once
 
-#include "../virusJucePlugin/PluginProcessor.h"
+#include "../virusJucePlugin/VirusProcessor.h"
 
-//==============================================================================
-class OsTIrusProcessor : public AudioPluginAudioProcessor
+class OsTIrusProcessor : public VirusProcessor
 {
 public:
     OsTIrusProcessor();

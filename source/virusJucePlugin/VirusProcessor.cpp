@@ -1,5 +1,5 @@
-#include "PluginProcessor.h"
-#include "PluginEditorState.h"
+#include "VirusProcessor.h"
+#include "VirusEditorState.h"
 #include "ParameterNames.h"
 
 #include "../virusLib/romloader.h"
@@ -9,7 +9,7 @@
 #include "../synthLib/os.h"
 
 //==============================================================================
-AudioPluginAudioProcessor::AudioPluginAudioProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms)
+VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms)
 	: jucePluginEditorLib::Processor(_busesProperties, _configOptions, _properties)
 	, m_roms(_roms)
 {
@@ -21,14 +21,14 @@ AudioPluginAudioProcessor::AudioPluginAudioProcessor(const BusesProperties& _bus
 	Processor::setLatencyBlocks(latencyBlocks);
 }
 
-AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
+VirusProcessor::~VirusProcessor()
 {
 	destroyEditorState();
 }
 
 //==============================================================================
 
-void AudioPluginAudioProcessor::processBpm(const float _bpm)
+void VirusProcessor::processBpm(const float _bpm)
 {
 	// clamp to virus range, 63-190
 	const auto bpmValue = juce::jmin(127, juce::jmax(0, static_cast<int>(_bpm)-63));
@@ -40,7 +40,7 @@ void AudioPluginAudioProcessor::processBpm(const float _bpm)
 	clockParam->getValueObject().setValue(bpmValue);
 }
 
-bool AudioPluginAudioProcessor::setSelectedRom(const uint32_t _index)
+bool VirusProcessor::setSelectedRom(const uint32_t _index)
 {
 	if(_index >= m_roms.size())
 		return false;
@@ -70,13 +70,13 @@ bool AudioPluginAudioProcessor::setSelectedRom(const uint32_t _index)
 	}
 }
 
-synthLib::Device* AudioPluginAudioProcessor::createDevice()
+synthLib::Device* VirusProcessor::createDevice()
 {
 	const auto* rom = getSelectedRom();
 	return new virusLib::Device(rom ? *rom : virusLib::ROMFile::invalid(), getPreferredDeviceSamplerate(), getHostSamplerate(), true);
 }
 
-pluginLib::Controller* AudioPluginAudioProcessor::createController()
+pluginLib::Controller* VirusProcessor::createController()
 {
 	// force creation of device as the controller decides how to initialize based on the used ROM
 	getPlugin();
@@ -84,7 +84,7 @@ pluginLib::Controller* AudioPluginAudioProcessor::createController()
 	return new Virus::Controller(*this);
 }
 
-void AudioPluginAudioProcessor::saveChunkData(synthLib::BinaryStream& s)
+void VirusProcessor::saveChunkData(synthLib::BinaryStream& s)
 {
 	auto* rom = getSelectedRom();
 	if(rom)
@@ -97,7 +97,7 @@ void AudioPluginAudioProcessor::saveChunkData(synthLib::BinaryStream& s)
 	Processor::saveChunkData(s);
 }
 
-void AudioPluginAudioProcessor::loadChunkData(synthLib::ChunkReader& _cr)
+void VirusProcessor::loadChunkData(synthLib::ChunkReader& _cr)
 {
 	_cr.add("ROM ", 2, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
 	{

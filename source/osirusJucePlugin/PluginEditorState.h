@@ -1,11 +1,11 @@
 #pragma once
 
-#include "../virusJucePlugin/pluginEditorState.h"
+#include "../virusJucePlugin/VirusEditorState.h"
 
-class AudioPluginAudioProcessor;
+class VirusProcessor;
 
-class OsirusEditorState : public PluginEditorState
+class OsirusEditorState : public VirusEditorState
 {
 public:
-	explicit OsirusEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller);
+	explicit OsirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller);
 };
