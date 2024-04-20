@@ -3,16 +3,16 @@
 #include "PartButton.h"
 #include "VirusEditor.h"
 
-#include "../VirusController.h"
-#include "../PluginProcessor.h"
-#include "../ParameterNames.h"
+#include "VirusController.h"
+#include "PluginProcessor.h"
+#include "ParameterNames.h"
 
-#include "../../jucePluginEditorLib/pluginProcessor.h"
-#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "../jucePluginEditorLib/pluginProcessor.h"
+#include "../jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
-#include "../../jucePluginLib/parameterbinding.h"
+#include "../jucePluginLib/parameterbinding.h"
 
-#include "../../virusLib/device.h"
+#include "../virusLib/device.h"
 
 namespace genericVirusUI
 {

@@ -1,18 +1,18 @@
 #include "VirusEditor.h"
 
 #include "ArpUserPattern.h"
-#include "BinaryData.h"
 #include "PartButton.h"
 
-#include "../ParameterNames.h"
-#include "../PluginProcessor.h"
-#include "../VirusController.h"
-#include "../version.h"
+#include "ParameterNames.h"
+#include "PluginProcessor.h"
+#include "VirusController.h"
 
-#include "../../jucePluginLib/parameterbinding.h"
-#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "../jucePluginLib/parameterbinding.h"
+#include "../jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
-#include "../../synthLib/os.h"
+#include "../synthLib/os.h"
+
+#include "version.h"
 
 namespace genericVirusUI
 {
@@ -179,19 +179,9 @@ namespace genericVirusUI
 		return static_cast<Virus::Controller&>(m_processor.getController());
 	}
 
-	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
+	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size) const
 	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_size = static_cast<uint32_t>(size);
-			return res;
-		}
-		return nullptr;
+		return m_processor.findEmbeddedResource(_filename.c_str(), _size);
 	}
 
 	const char* VirusEditor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
@@ -202,8 +192,8 @@ namespace genericVirusUI
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
 	{
 		return {
-				JucePlugin_Name " - Demo Mode",
-				JucePlugin_Name " runs in demo mode, the following restrictions apply:\n"
+				m_processor.getProperties().name + " - Demo Mode",
+				m_processor.getProperties().name + " runs in demo mode, the following restrictions apply:\n"
 				"\n"
 				"* The plugin state is not preserved\n"
 				"* Preset saving is disabled"};

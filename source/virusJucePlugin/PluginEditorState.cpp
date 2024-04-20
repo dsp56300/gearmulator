@@ -2,16 +2,12 @@
 
 #include "PluginProcessor.h"
 
-#include "ui3/VirusEditor.h"
+#include "VirusEditor.h"
 
 #include "../synthLib/os.h"
 
-const std::vector<PluginEditorState::Skin> g_includedSkins =
-{
-	{"TI Trancy", "VirusTI_Trancy.json", ""}
-};
-
-PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller) : jucePluginEditorLib::PluginEditorState(_processor, _controller, g_includedSkins)
+PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller, const std::vector<PluginEditorState::Skin>& _includedSkins)
+	: jucePluginEditorLib::PluginEditorState(_processor, _controller, _includedSkins)
 {
 	loadDefaultSkin();
 }

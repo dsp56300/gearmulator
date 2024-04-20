@@ -7,7 +7,7 @@ class AudioPluginAudioProcessor;
 class PluginEditorState : public jucePluginEditorLib::PluginEditorState
 {
 public:
-	explicit PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller);
+	explicit PluginEditorState(AudioPluginAudioProcessor& _processor, pluginLib::Controller& _controller, const std::vector<PluginEditorState::Skin>& _includedSkins);
 
 	genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) override;
 

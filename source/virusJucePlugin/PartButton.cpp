@@ -1,7 +1,7 @@
 #include "PartButton.h"
 
 #include "VirusEditor.h"
-#include "../VirusController.h"
+#include "VirusController.h"
 #include "../../jucePluginEditorLib/patchmanager/list.h"
 
 #include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"

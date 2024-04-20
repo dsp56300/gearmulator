@@ -53,7 +53,7 @@ namespace genericVirusUI
 
 		Virus::Controller& getController() const;
 
-		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
+		const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size) const;
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;

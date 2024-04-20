@@ -13,10 +13,8 @@
 class AudioPluginAudioProcessor : public jucePluginEditorLib::Processor
 {
 public:
-    AudioPluginAudioProcessor();
+    AudioPluginAudioProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms);
     ~AudioPluginAudioProcessor() override;
-
-    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 
     void processBpm(float _bpm) override;
 
@@ -54,7 +52,9 @@ public:
 	    return getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
     }
 
-	// _____________
+    virtual const char* findEmbeddedResource(const char* _name, uint32_t& _size) const = 0;
+
+    // _____________
 	//
 private:
     synthLib::Device* createDevice() override;

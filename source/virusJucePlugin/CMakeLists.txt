@@ -1,0 +1,45 @@
+cmake_minimum_required(VERSION 3.15)
+project(virusJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
+
+set(SOURCES
+	ArpUserPattern.cpp
+	ArpUserPattern.h
+	ControllerLinks.cpp
+	ControllerLinks.h
+	FxPage.cpp
+	FxPage.h
+	Leds.cpp
+	Leds.h
+	ParameterNames.h
+	PartButton.cpp
+	PartButton.h
+	Parts.cpp
+	Parts.h
+	PatchManager.cpp
+	PatchManager.h
+	PluginEditorState.cpp
+	PluginEditorState.h
+	PluginProcessor.cpp
+	PluginProcessor.h
+	Tabs.cpp
+	Tabs.h
+	VirusController.cpp
+	VirusController.h
+	VirusEditor.cpp
+	VirusEditor.h
+)
+
+add_library(virusJucePlugin STATIC)
+
+target_sources(virusJucePlugin PRIVATE ${SOURCES})
+source_group("source" FILES ${SOURCES})
+
+target_link_libraries(virusJucePlugin PUBLIC jucePluginEditorLib virusLib)
+
+target_include_directories(virusJucePlugin PUBLIC ../JUCE/modules)
+
+target_compile_definitions(virusJucePlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+
+set_property(TARGET virusJucePlugin PROPERTY FOLDER "Virus")

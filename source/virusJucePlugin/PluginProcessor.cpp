@@ -8,33 +8,10 @@
 #include "../synthLib/binarystream.h"
 #include "../synthLib/os.h"
 
-namespace
-{
-	juce::PropertiesFile::Options getConfigOptions()
-	{
-		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300Emulator_OsTIrus";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300Emulator_OsTIrus";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
-		return opts;
-	}
-}
-
 //==============================================================================
-AudioPluginAudioProcessor::AudioPluginAudioProcessor() :
-    jucePluginEditorLib::Processor(BusesProperties()
-                   .withInput("Input", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("Output", juce::AudioChannelSet::stereo(), true)
-#if JucePlugin_IsSynth
-                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("USB 1", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
-                   .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
-#endif
-	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect})
-	, m_roms(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow))
+AudioPluginAudioProcessor::AudioPluginAudioProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms)
+	: jucePluginEditorLib::Processor(_busesProperties, _configOptions, _properties)
+	, m_roms(_roms)
 {
 	evRomChanged.retain(getSelectedRom());
 
@@ -50,11 +27,6 @@ AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 }
 
 //==============================================================================
-
-jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
-{
-	return new PluginEditorState(*this, getController());
-}
 
 void AudioPluginAudioProcessor::processBpm(const float _bpm)
 {
@@ -146,11 +118,4 @@ void AudioPluginAudioProcessor::loadChunkData(synthLib::ChunkReader& _cr)
 	});
 
 	Processor::loadChunkData(_cr);
-}
-
-//==============================================================================
-// This creates new instances of the plugin..
-juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
-{
-    return new AudioPluginAudioProcessor();
 }

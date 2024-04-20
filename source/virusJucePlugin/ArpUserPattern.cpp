@@ -2,7 +2,7 @@
 
 #include "VirusEditor.h"
 
-#include "../VirusController.h"
+#include "VirusController.h"
 
 #include "../juceUiLib/uiObjectStyle.h"
 

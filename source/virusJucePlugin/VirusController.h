@@ -154,7 +154,7 @@ namespace Virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
-        static std::string loadParameterDescriptions(const virusLib::DeviceModel _model);
+        static std::string loadParameterDescriptions(const AudioPluginAudioProcessor& _processor);
 
 		void timerCallback() override;
 

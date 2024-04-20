@@ -8,7 +8,7 @@
 #include "../virusLib/microcontrollerTypes.h"
 #include "../synthLib/os.h"
 
-#include "ui3/VirusEditor.h"
+#include "VirusEditor.h"
 
 using MessageType = virusLib::SysexMessageType;
 
@@ -37,7 +37,7 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p.getModel())), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(AudioPluginAudioProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p)), m_processor(p), m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -392,9 +392,10 @@ namespace Virus
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
 
-	std::string Controller::loadParameterDescriptions(const virusLib::DeviceModel _model)
+	std::string Controller::loadParameterDescriptions(const AudioPluginAudioProcessor& _processor)
 	{
-		const auto name = _model == virusLib::DeviceModel::Invalid || virusLib::isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
+        const auto model = _processor.getModel();
+		const auto name = model == virusLib::DeviceModel::Invalid || isTIFamily(model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
         const auto path = synthLib::getModulePath() +  name;
 
         const std::ifstream f(path.c_str(), std::ios::in);
@@ -406,7 +407,7 @@ namespace Virus
         }
 
         uint32_t size;
-        const auto res = genericVirusUI::VirusEditor::findEmbeddedResource(name, size);
+        const auto res = _processor.findEmbeddedResource(name, size);
         if(res)
             return {res, size};
         return {};

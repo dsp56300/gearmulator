@@ -2,7 +2,7 @@
 
 #include "VirusEditor.h"
 
-#include "../PluginProcessor.h"
+#include "PluginProcessor.h"
 
 namespace genericVirusUI
 {

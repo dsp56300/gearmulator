@@ -2,8 +2,8 @@
 
 #include "VirusEditor.h"
 
-#include "../ParameterNames.h"
-#include "../VirusController.h"
+#include "ParameterNames.h"
+#include "VirusController.h"
 
 namespace genericVirusUI
 {
