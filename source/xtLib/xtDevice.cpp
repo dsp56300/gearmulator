@@ -72,6 +72,9 @@ namespace xt
 
 		if(!m_customSysexOut.empty())
 		{
+			for (auto& custom : m_customSysexOut)
+				custom.source = synthLib::MidiEventSourceEditor;	// do not send to output
+
 			_midiOut.insert(_midiOut.begin(), m_customSysexOut.begin(), m_customSysexOut.end());
 			m_customSysexOut.clear();
 		}
