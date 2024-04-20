@@ -66,8 +66,8 @@ namespace xtJucePlugin
 		{
 			program = std::clamp(_patch->program, 0u, 299u);
 
-			bank = program / 100;
-			program -= bank * 100;
+			bank = program / 128;
+			program -= bank * 128;
 		}
 
 		return m_controller.createSingleDump(static_cast<xt::LocationH>(static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank), static_cast<uint8_t>(program), parameterValues);
