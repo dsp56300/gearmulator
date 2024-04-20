@@ -61,7 +61,7 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 
     startTimer(50);
 
-	onPlayModeChanged.addListener(0, [this](bool multiMode)
+	onPlayModeChanged.addListener([this](bool multiMode)
 	{
 		requestAllPatches();
 	});
