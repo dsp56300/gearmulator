@@ -29,6 +29,8 @@ set(SOURCES
 	VirusEditorState.h
 	VirusProcessor.cpp
 	VirusProcessor.h
+	version.h.in
+	version.h
 )
 
 add_library(virusJucePlugin STATIC)
