@@ -15,7 +15,7 @@
 
 namespace pluginLib::patchDB
 {
-	static constexpr bool g_cacheEnabled = false;
+	static constexpr bool g_cacheEnabled = true;
 
 	namespace
 	{
