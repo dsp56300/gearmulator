@@ -54,6 +54,7 @@ namespace virusLib
 				LOG("Begin reading sysex");
 				m_state = State::Sysex;
 				m_sysexData.push_back(byte);
+				m_sysexReceiveIndex = 1;
 			}
 			else
 			{
@@ -119,6 +120,11 @@ namespace virusLib
 					m_midiData.clear();
 					return append(_data);
 				}
+
+				// TI seems to send 3 valid bytes and then a fourth invalid one, no idea what this is good for, drop it
+				++m_sysexReceiveIndex;
+				if(m_mc.getROM().isTIFamily() && (m_sysexReceiveIndex & 3) == 0)
+					return true;
 
 				m_sysexData.push_back(byte);
 

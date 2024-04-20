@@ -58,6 +58,7 @@ namespace virusLib
 		std::vector<uint8_t> m_presetData;
 		std::vector<dsp56k::TWord> m_dspStatus;
 
+		uint32_t m_sysexReceiveIndex = 0;
 		uint32_t m_remainingPresetBytes = 0;
 		uint32_t m_remainingStatusBytes = 0;
 
