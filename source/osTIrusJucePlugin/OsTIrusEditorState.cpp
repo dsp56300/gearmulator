@@ -1,6 +1,5 @@
-#include "PluginEditorState.h"
-
-#include "PluginProcessor.h"
+#include "OsTIrusEditorState.h"
+#include "OsTIrusProcessor.h"
 
 const std::vector<jucePluginEditorLib::PluginEditorState::Skin> g_includedSkins =
 {

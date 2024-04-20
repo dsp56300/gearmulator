@@ -3,11 +3,10 @@ project(osTIrusJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	parameterDescriptions_TI.json
-	PluginEditorState.cpp
-	PluginEditorState.h
-	PluginProcessor.cpp
-	PluginProcessor.h
-	version.h
+	OsTIrusEditorState.cpp
+	OsTIrusEditorState.h
+	OsTIrusProcessor.cpp
+	OsTIrusProcessor.h
 )
 
 SET(ASSETS "parameterDescriptions_TI.json")

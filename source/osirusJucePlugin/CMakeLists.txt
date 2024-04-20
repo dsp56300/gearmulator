@@ -3,11 +3,10 @@ project(osirusJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	parameterDescriptions_C.json
-	PluginEditorState.cpp
-	PluginEditorState.h
-	PluginProcessor.cpp
-	PluginProcessor.h
-	version.h
+	OsirusEditorState.cpp
+	OsirusEditorState.h
+	OsirusProcessor.cpp
+	OsirusProcessor.h
 )
 
 SET(ASSETS "parameterDescriptions_C.json")
