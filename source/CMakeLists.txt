@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
-option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XT "Build XT" on)
 
