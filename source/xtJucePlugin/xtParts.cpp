@@ -27,10 +27,19 @@ namespace xtJucePlugin
 
 	bool Parts::selectPart(const uint8_t _part)
 	{
-		if(_part >= m_parts.size())
+		auto fail = [this]()
+		{
+			juce::MessageManager::callAsync([this]
+			{
+				updateUi();
+			});
 			return false;
+		};
+
+		if(_part < m_parts.size())
+			return fail();
 		if(_part > 0 && !m_editor.getXtController().isMultiMode())
-			return false;
+			return fail();
 		m_editor.setCurrentPart(_part);
 
 		updateUi();
