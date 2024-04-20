@@ -611,7 +611,7 @@ void Controller::requestAllPatches() const
 	{
 		requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 
-		// the other singles 1-15 are requested one after the other after a single has been received
+		// the other singles 1-7 are requested one after the other after a single has been received
 		requestSingle(xt::LocationH::SingleEditBufferMultiMode, 0);
 	}
 	else

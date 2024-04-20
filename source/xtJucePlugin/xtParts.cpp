@@ -36,7 +36,7 @@ namespace xtJucePlugin
 			return false;
 		};
 
-		if(_part < m_parts.size())
+		if(_part >= m_parts.size())
 			return fail();
 		if(_part > 0 && !m_editor.getXtController().isMultiMode())
 			return fail();
