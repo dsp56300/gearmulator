@@ -9,16 +9,11 @@
 #include "../synthLib/os.h"
 
 //==============================================================================
-VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms)
-	: jucePluginEditorLib::Processor(_busesProperties, _configOptions, _properties)
+VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, const virusLib::DeviceModel _defaultModel)
+	: Processor(_busesProperties, _configOptions, _properties)
 	, m_roms(_roms)
+	, m_defaultModel(_defaultModel)
 {
-	evRomChanged.retain(getSelectedRom());
-
-	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
-
-	const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
-	Processor::setLatencyBlocks(latencyBlocks);
 }
 
 VirusProcessor::~VirusProcessor()
@@ -70,6 +65,16 @@ bool VirusProcessor::setSelectedRom(const uint32_t _index)
 	}
 }
 
+void VirusProcessor::postConstruct()
+{
+	evRomChanged.retain(getSelectedRom());
+
+	m_clockTempoParam = getController().getParameterIndexByName(Virus::g_paramClockTempo);
+
+	const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
+	Processor::setLatencyBlocks(latencyBlocks);
+}
+
 synthLib::Device* VirusProcessor::createDevice()
 {
 	const auto* rom = getSelectedRom();
@@ -81,7 +86,7 @@ pluginLib::Controller* VirusProcessor::createController()
 	// force creation of device as the controller decides how to initialize based on the used ROM
 	getPlugin();
 
-	return new Virus::Controller(*this);
+	return new Virus::Controller(*this, m_defaultModel);
 }
 
 void VirusProcessor::saveChunkData(synthLib::BinaryStream& s)

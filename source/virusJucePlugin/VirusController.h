@@ -65,7 +65,7 @@ namespace Virus
             PresetSource source = PresetSource::Unknown;
         };
 
-    	Controller(VirusProcessor &, unsigned char deviceId = 0x00);
+    	Controller(VirusProcessor&, virusLib::DeviceModel _defaultModel, unsigned char deviceId = 0x00);
 		~Controller() override;
 
         std::vector<uint8_t> createSingleDump(uint8_t _part, uint8_t _bank, uint8_t _program);
@@ -154,7 +154,7 @@ namespace Virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
-        static std::string loadParameterDescriptions(const VirusProcessor& _processor);
+        std::string loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor);
 
 		void timerCallback() override;
 
@@ -172,6 +172,8 @@ namespace Virus
         void parseControllerDump(const synthLib::SMidiEvent&);
 
         VirusProcessor& m_processor;
+        virusLib::DeviceModel m_defaultModel;
+
         unsigned char m_deviceId;
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};

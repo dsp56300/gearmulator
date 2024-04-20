@@ -37,7 +37,11 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(VirusProcessor &p, unsigned char deviceId) : pluginLib::Controller(p, loadParameterDescriptions(p)), m_processor(p), m_deviceId(deviceId)
+    Controller::Controller(VirusProcessor &p, const virusLib::DeviceModel _defaultModel, unsigned char deviceId)
+		: pluginLib::Controller(p, loadParameterDescriptions(_defaultModel, p))
+		, m_processor(p)
+		, m_defaultModel(_defaultModel)
+		, m_deviceId(deviceId)
     {
         switch(p.getModel())
         {
@@ -392,10 +396,9 @@ namespace Virus
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
 
-	std::string Controller::loadParameterDescriptions(const VirusProcessor& _processor)
+	std::string Controller::loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor)
 	{
-        const auto model = _processor.getModel();
-		const auto name = model == virusLib::DeviceModel::Invalid || isTIFamily(model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
+		const auto name = isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
         const auto path = synthLib::getModulePath() +  name;
 
         const std::ifstream f(path.c_str(), std::ios::in);

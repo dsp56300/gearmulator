@@ -13,7 +13,7 @@
 class VirusProcessor : public jucePluginEditorLib::Processor
 {
 public:
-    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms);
+    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, virusLib::DeviceModel _defaultModel);
     ~VirusProcessor() override;
 
     void processBpm(float _bpm) override;
@@ -54,6 +54,9 @@ public:
 
     virtual const char* findEmbeddedResource(const char* _name, uint32_t& _size) const = 0;
 
+protected:
+    void postConstruct();
+
     // _____________
 	//
 private:
@@ -68,6 +71,7 @@ private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
 
 	std::vector<virusLib::ROMFile>      m_roms;
+    const virusLib::DeviceModel			m_defaultModel;
     uint32_t                            m_selectedRom = 0;
 
 	uint32_t							m_clockTempoParam = 0xffffffff;

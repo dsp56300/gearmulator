@@ -30,8 +30,9 @@ OsTIrusProcessor::OsTIrusProcessor() :
                    .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
 	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect}
-	, virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow))
+	, virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow), virusLib::DeviceModel::TI2)
 {
+	postConstruct();
 }
 
 OsTIrusProcessor::~OsTIrusProcessor()
