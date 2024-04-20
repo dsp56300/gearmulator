@@ -313,11 +313,18 @@ namespace pluginLib
 
 		for (const auto& index : indices)
         {
-	        auto* p = getParameter(index.second, _part);
-	        if(!p)
-		        return false;
-
-	        const auto v = getParameterValue(p);
+			auto* p = getParameter(index.second, _part);
+			if(!p)
+				return false;
+			auto* largestP = p;
+			// we might have more than 1 parameter per index, use the one with the largest range
+			const auto& derived = p->getDerivedParameters();
+			for (const auto& parameter : derived)
+	        {
+				if(parameter->getDescription().range.getLength() > p->getDescription().range.getLength())
+					largestP = parameter;
+	        }
+	        const auto v = getParameterValue(largestP);
 	        _params.insert(std::make_pair(std::make_pair(index.first, p->getDescription().name), v));
         }
 
