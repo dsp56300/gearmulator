@@ -19,7 +19,7 @@ namespace xtJucePlugin
 			part.m_button = buttons[i];
 			part.m_led = leds[i];
 
-			part.m_button->setPart(static_cast<uint8_t>(i));
+			part.m_button->initalize(static_cast<uint8_t>(i));
 		}
 
 		updateUi();

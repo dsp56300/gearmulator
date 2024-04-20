@@ -10,14 +10,8 @@ namespace xtJucePlugin
 	{
 	}
 
-	void PartButton::setPart(const uint8_t _part)
-	{
-		m_part = _part;
-	}
-
 	void PartButton::onClick()
 	{
-		if(!m_editor.getParts().selectPart(m_part))
-			setToggleState(false, juce::dontSendNotification);
+		m_editor.getParts().selectPart(getPart());
 	}
 }
