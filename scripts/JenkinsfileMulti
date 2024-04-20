@@ -6,12 +6,12 @@ pipeline {
 		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
-		choice(name: 'Branch', choices: ['master', 'snow'], description: '')
-		booleanParam(name: 'FXPlugins', defaultValue: false, description: '')
+		choice(name: 'Branch', choices: ['osirus', 'ostirus', 'vavra'], description: '')
+		booleanParam(name: 'FXPlugins', defaultValue: true, description: '')
 		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
-		booleanParam(name: 'Deploy', defaultValue: true, description: '')
+		booleanParam(name: 'Deploy', defaultValue: false, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '')
-		choice(name: 'UploadFolder', choices: ['', '/alpha', '/beta'], description: '')
+		choice(name: 'UploadFolder', choices: ['/internal', '', '/alpha', '/beta', '/donators', ''], description: '')
 	}
 	stages {
 		stage('Prepare') {
@@ -23,7 +23,7 @@ pipeline {
 					if(params.LinuxX86)					currentBuild.displayName += " Lx"
 					if(params.Mac)						currentBuild.displayName += " M"
 					if(params.Win)						currentBuild.displayName += " W"
-					if(params.FXPlugins)				 currentBuild.displayName += " FX"
+					if(params.FXPlugins)				currentBuild.displayName += " FX"
 					if(params.IntegrationTests)			currentBuild.displayName += " i"
 					if(params.Deploy)					currentBuild.displayName += " d"
 					if(params.Upload)					currentBuild.displayName += " u"

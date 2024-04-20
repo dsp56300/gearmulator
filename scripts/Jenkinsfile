@@ -32,6 +32,11 @@ pipeline {
 				cmakeBuild();
 			}
 		}
+		stage('Pack') {
+			steps {
+				doPack();
+			}
+		}
 		stage('Integration Tests') {
 			when {
 				expression {
@@ -40,16 +45,6 @@ pipeline {
 			}
 			steps {
 				doIntegrationTests();
-			}
-		}
-		stage('Pack') {
-			when {
-				expression {
-					return params.Deploy || params.Upload
-				}
-			}
-			steps {
-				doPack();
 			}
 		}
 		stage('Deploy') {
@@ -87,6 +82,21 @@ def genericSh(cmd)
 	}
 }
 
+def hasLabel(String label)
+{
+    def res = false
+    
+    env.NODE_LABELS.split(' ').each
+    { l ->
+        if (l.equals(label))
+        {
+            res = true
+        }
+    }
+
+    return res
+}
+
 def formatArg(_arg)
 {
 	if(isUnix())
@@ -103,13 +113,10 @@ def deleteFile(name)
 		bat "del ${name}"
 }
 
-def supportTI()
-{
-	return params.Branch == 'snow' ? 'ON' : 'OFF'
-}
 def needsJuce()
 {
-	return params.Deploy || params.Upload ? 'ON' : 'OFF'
+    //return params.Deploy || params.Upload ? 'ON' : 'OFF'
+	return true
 }
 def buildFxPlugins()
 {
@@ -140,16 +147,23 @@ def doCheckout()
 def cmakeBuild()
 {
 	def buildDir = cmakeBuildDir();
-	def ti = supportTI();
 
-	dir(cmakeBuildDir()) {
-		deleteFile('CMakeCache.txt')	// we need to do this to be able to change option in the command line below. Otherwise, they won't change for an existing project
-	}
+	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
+	    if(hasLabel("mac")) {
+        	genericSh "cmake . -G Xcode -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
+	    } else {
+        	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
+	    }
 
-	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release -DVIRUS_SUPPORT_TI=${ti}"
-
-	dir(cmakeBuildDir()) {
-		genericSh 'cmake --build . --config Release'
+    	dir(cmakeBuildDir()) {
+    	    if(hasLabel("m2")) {
+        		genericSh 'cmake --build . --config Release --parallel 6'
+    	    } else if(hasLabel("pi5")) {
+        		genericSh 'cmake --build . --config Release --parallel 2'
+    		} else {
+    		    genericSh 'cmake --build . --config Release --parallel 2'
+    		}
+    	}
 	}
 }
 
