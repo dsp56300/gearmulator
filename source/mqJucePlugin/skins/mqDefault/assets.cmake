@@ -1,0 +1,34 @@
+set(ASSETS_mqDefault
+	${CMAKE_CURRENT_LIST_DIR}/button.png
+	${CMAKE_CURRENT_LIST_DIR}/Digital.ttf
+	${CMAKE_CURRENT_LIST_DIR}/encoder_ranged.png
+	${CMAKE_CURRENT_LIST_DIR}/encoder_ranged_red.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Chorus.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1FiveFX.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Flanger.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Overdrive.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Phaser.png
+	${CMAKE_CURRENT_LIST_DIR}/fx1Vocoder.png
+	${CMAKE_CURRENT_LIST_DIR}/fx251Delay.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2Delay.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2DelayClocked.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2DelayNotClocked.png
+	${CMAKE_CURRENT_LIST_DIR}/fx2Reverb.png
+	${CMAKE_CURRENT_LIST_DIR}/lcdshadow.png
+	${CMAKE_CURRENT_LIST_DIR}/led.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_11.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_5.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_6.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_7.png
+	${CMAKE_CURRENT_LIST_DIR}/ledcircle_9.png
+	${CMAKE_CURRENT_LIST_DIR}/mqDefaultBG.png
+	${CMAKE_CURRENT_LIST_DIR}/pageFilters.png
+	${CMAKE_CURRENT_LIST_DIR}/pageFx.png
+	${CMAKE_CURRENT_LIST_DIR}/pageLfo.png
+	${CMAKE_CURRENT_LIST_DIR}/pageMulti.png
+	${CMAKE_CURRENT_LIST_DIR}/pageOsc.png
+	${CMAKE_CURRENT_LIST_DIR}/pagePatchBrowser.png
+	${CMAKE_CURRENT_LIST_DIR}/toggleWithLED.png
+
+	${CMAKE_CURRENT_LIST_DIR}/mqDefault.json
+)

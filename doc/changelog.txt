@@ -47,6 +47,11 @@ OsTIrus:
 
 1.3.10
 
+Vavra:
+
+- [Fix] AU validation got stuck
+- [Fix] LCD color being fully transparent if not specified in skin
+
 Osirus/OsTIrus:
 
 - [Fix] Part volume knob for part 1 was bound to selected part instead of part 1
@@ -112,6 +117,10 @@ OsTIrus:
 - [Fix] Cutoff 2 is reset to center on double click instead of max
 - [Fix] Fixed typo in Matrix Section
 - [Fix] Performance issues when tweaking knobs
+
+microQ:
+
+- [Fix] Added missing Attack Level parameter that was missing for all envelopes
 
 1.3.8 (2024.03.11)
 
@@ -215,6 +224,13 @@ OsTIrus:
 - [Fix] Plugin may hang if large buffer sizes are used
 - [Fix] AU validation failed if TI rom was present
 
+Vavra:
+
+- [Imp] LCD text color can now be adjusted via skin (export included skin and search
+        for "lcdTextColor" in json)
+
+- [Fix] Phase of input was not correct
+
 1.3.4 (TBD)
 
 DSP:
@@ -241,6 +257,10 @@ OsTIrus:
 - [Imp] GUI has been reworked slightly and many GUI related issues have been fixed
 - [Fix] Cutoff, Filter Env by Velocity and Filter Resonance by Velocity were linked 
         when Filter Link is active
+
+Vavra:
+
+- [Fix] Possible crash in midi processing code
 
 Osirus:
 

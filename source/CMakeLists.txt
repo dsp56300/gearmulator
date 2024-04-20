@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.15)
 
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
-option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_XT "Build XT" on)
 
 # ----------------- DSP56300 emulator
 
@@ -51,5 +53,47 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 		if(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 			add_subdirectory(osTIrusJucePlugin)
 		endif()
+	endif()
+endif()
+
+# ----------------- Waldorf synths
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XT)
+	add_subdirectory(mc68k)
+	add_subdirectory(wLib)
+endif()
+
+# ----------------- Synth Vavra
+
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
+	add_subdirectory(mqLib)
+
+	# needed for test console
+	set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+	set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
+	add_subdirectory(cpp-terminal)
+
+	if(NOT ANDROID)
+		add_subdirectory(portmidi)
+	endif()
+
+	set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
+	add_subdirectory(portaudio)
+
+	add_subdirectory(mqConsoleLib)
+	add_subdirectory(mqTestConsole)
+	add_subdirectory(mqPerformanceTest)
+
+	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+		add_subdirectory(mqJucePlugin)
+	endif()
+endif()
+
+if(${CMAKE_PROJECT_NAME}_SYNTH_XT)
+	add_subdirectory(xtLib)
+	add_subdirectory(xtTestConsole)
+
+	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
+		add_subdirectory(xtJucePlugin)
 	endif()
 endif()
