@@ -116,22 +116,22 @@ namespace pluginLib
 	{
 		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
 
-		if (clampedValue == m_lastValue)
-			return;
-
-		m_lastValue = clampedValue;
-		m_lastValueOrigin = _origin;
-
-		if (notifyHost && getDescription().isPublic)
+		if (clampedValue != m_lastValue)
 		{
-			beginChangeGesture();
-			const auto v = convertTo0to1(static_cast<float>(clampedValue));
-			setValueNotifyingHost(v, _origin);
-			endChangeGesture();
-		}
-		else
-		{
-			m_value.setValue(clampedValue);
+			m_lastValue = clampedValue;
+			m_lastValueOrigin = _origin;
+
+			if (notifyHost && getDescription().isPublic)
+			{
+				beginChangeGesture();
+				const auto v = convertTo0to1(static_cast<float>(clampedValue));
+				setValueNotifyingHost(v, _origin);
+				endChangeGesture();
+			}
+			else
+			{
+				m_value.setValue(clampedValue);
+			}
 		}
 
 		if (m_changingDerivedValues)
