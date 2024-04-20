@@ -22,6 +22,7 @@ namespace mqLib
 		synthLib::SMidiEvent ev;
 		createSysexHeader(ev.sysex, SysexCommand::EmuLCD);
 		ev.sysex.insert(ev.sysex.end(), lcdData.begin(), lcdData.end());
+		ev.sysex.push_back(0xf7);
 
 		_dst.emplace_back(ev);
 	}
@@ -42,6 +43,7 @@ namespace mqLib
 		synthLib::SMidiEvent ev;
 		createSysexHeader(ev.sysex, SysexCommand::EmuLCDCGRata);
 		ev.sysex.insert(ev.sysex.end(), lcdData.begin(), lcdData.end());
+		ev.sysex.push_back(0xf7);
 
 		_dst.emplace_back(ev);
 	}
@@ -63,6 +65,7 @@ namespace mqLib
 		ev.sysex.push_back((buttons>>16) & 0xff);
 		ev.sysex.push_back((buttons>>8) & 0xff);
 		ev.sysex.push_back(buttons & 0xff);
+		ev.sysex.push_back(0xf7);
 	}
 
 	void SysexRemoteControl::sendSysexLEDs(std::vector<synthLib::SMidiEvent>& _dst) const
@@ -81,6 +84,7 @@ namespace mqLib
 		response.push_back((leds>>16) & 0xff);
 		response.push_back((leds>>8) & 0xff);
 		response.push_back(leds & 0xff);
+		response.push_back(0xf7);
 	}
 
 	void SysexRemoteControl::sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst) const
@@ -95,6 +99,7 @@ namespace mqLib
 			const auto value = m_mq.getEncoder(static_cast<Buttons::Encoders>(i));
 			response.push_back(value);
 		}
+		response.push_back(0xf7);
 	}
 
 	bool SysexRemoteControl::receive(std::vector<synthLib::SMidiEvent>& _output, const std::vector<unsigned char>& _input) const
