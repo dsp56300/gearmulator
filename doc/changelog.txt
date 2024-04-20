@@ -10,6 +10,7 @@ OsTIrus:
 
 - [Fix] Delay Time knob is now disabled if not applicable
 - [Fix] Invalid bytes embedded in sysex messages
+- [Fix] Some patch parameters might have shown incorrect values after copying a part
 
 1.3.11
 
