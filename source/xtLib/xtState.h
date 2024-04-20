@@ -61,7 +61,7 @@ namespace xt
 			{DumpType::Single, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 265},
 			{DumpType::Multi , SysexCommand::MultiRequest , SysexCommand::MultiDump , SysexCommand::MultiParameterChange , IdxMultiParamFirst , IdxMultiParamIndexH , IdxMultiParamIndexL , IdxMultiParamValue , 265},
 			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 39},
-			{DumpType::Mode  , SysexCommand::ModeRequest  , SysexCommand::ModeDump  , SysexCommand::ModeParameterChange  , IdxModeParamFirst  , IdxModeParamIndexH  , IdxModeParamIndexL  , IdxModeParamValue  , 8},
+			{DumpType::Mode  , SysexCommand::ModeRequest  , SysexCommand::ModeDump  , SysexCommand::ModeParameterChange  , IdxModeParamFirst  , IdxModeParamIndexH  , IdxModeParamIndexL  , IdxModeParamValue  , 7},
 		};
 
 		using Single = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
