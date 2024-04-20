@@ -9,6 +9,7 @@ Framework:
 OsTIrus:
 
 - [Fix] Delay Time knob is now disabled if not applicable
+- [Fix] Invalid bytes embedded in sysex messages
 
 1.3.11
 
