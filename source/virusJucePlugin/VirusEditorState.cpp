@@ -35,6 +35,24 @@ void VirusEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
+
+	if(const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor()))
+	{
+		const auto& leds = editor->getLeds();
+
+		if(leds && leds->supportsLogoAnimation())
+		{
+			_menu.addItem("Enable Logo Animation", true, leds->isLogoAnimationEnabled(), [this]
+			{
+				const auto* editor = dynamic_cast<genericVirusUI::VirusEditor*>(getEditor());
+				if(editor)
+				{
+					const auto& leds = editor->getLeds();
+					leds->toggleLogoAnimation();
+				}
+			});
+		}
+	}
 }
 
 bool VirusEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
