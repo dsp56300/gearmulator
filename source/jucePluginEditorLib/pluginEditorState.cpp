@@ -241,8 +241,6 @@ void PluginEditorState::openMenu()
 
 	menu.addSeparator();
 
-	initContextMenu(menu);
-
 	auto& regions = m_processor.getController().getParameterDescriptions().getRegions();
 
 	if(!regions.empty())
@@ -286,8 +284,10 @@ void PluginEditorState::openMenu()
 			}
 		}
 
-		menu.addSubMenu("Lock Regions...", lockRegions);
+		menu.addSubMenu("Lock Regions", lockRegions);
 	}
+
+	initContextMenu(menu);
 
 	{
 		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
