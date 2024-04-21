@@ -2,15 +2,43 @@
 
 ## Emulation of classic VA synths of the late 90s/2000s that used the Motorola 56300 family DSP
 
-This project aims at emulating various musical devices that used the Motorola 56300 family DSPs. At the moment, it can run the Access Virus B, C, Classic and Rack XL
+This project emulates various musical devices that used the Motorola 56300 family DSPs.
 
-Standalone VST3 and AU plugins are supported. VST2 is supported, too, but only if you provide the VST2 SDK, otherwise, the VST2 build is skipped.
+The supported plugin formats are [FST](https://github.com/pierreguillot/FTS), VST3, AU, CLAP and LV2.
 
-The emulator should compile just fine on any platform that supports C++17, no configure is needed as the code uses C++17 standard data types. For performance reasons, it makes excessive use of C++17 features, for example to parse opcode definitions at compile time and to create jump tables of template permutations, so C++17 is a strong requirement.
+Supported architectures: 64 bit x86 aka x64 and ARM aarch64 (Raspberry Pi, Apple Silicon). Note that 32 bit
+architectures are not supported!
+
+Platforms: Windows 7+, macOS 10.13+, Linux
+
+At the moment, the following synthesizers are supported:
+
+* Osirus: Access Virus A,B,C
+* OsTIrus: Access Virus TI/TI2/Snow
+* Vavra: Waldorf microQ
+
+### Compiling
+
+The emulator compiles on any platform that supports C++17.
 
 The build system used is [cmake](https://cmake.org/).
 
-Contributions are welcome! Feel free to send PRs.
+#### cmake options
+
+| Variable | Description | Default |
+|--|--|--|
+| gearmulator_BUILD_JUCEPLUGIN | Build Juce based audio plugins | on |
+| gearmulator_BUILD_JUCEPLUGIN_CLAP | Build CLAP plugins | on |
+| gearmulator_BUILD_JUCEPLUGIN_LV2 | Build LV2 plugins | on |
+| gearmulator_BUILD_FX_PLUGIN | Additionally build FX versions of all plugins | off |
+
+Additional options to select which devices to build:
+
+| Variable | Description | Default |
+|--|--|--|
+| gearmulator_SYNTH_OSIRUS | Build Osirus | on |
+| gearmulator_SYNTH_OSTIRUS | Build OsTIrus | on |
+| gearmulator_SYNTH_VAVRA | Build Vavra | on |
 
 ### Join us on Discord
 
