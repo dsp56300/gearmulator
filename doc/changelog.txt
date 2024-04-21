@@ -8,6 +8,9 @@ Framework:
 
 OsTIrus:
 
+- [Imp] Add ability to turn off pulsating logo animation, either click on the logo or
+        toggle it via context menu
+
 - [Fix] Delay Time knob is now disabled if not applicable
 - [Fix] Invalid bytes embedded in sysex messages
 - [Fix] Some patch parameters might have shown incorrect values after copying a part
