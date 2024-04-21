@@ -1875,7 +1875,6 @@ namespace pluginLib::patchDB
 				m_dirty.tags.insert(it.first);
 		}
 
-		m_cacheFileName.deleteFile();
 		m_cacheDirty = false;
 
 		return true;
