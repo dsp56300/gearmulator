@@ -239,6 +239,8 @@ void PluginEditorState::openMenu()
 	menu.addSubMenu("GUI Scale", scaleMenu);
 	menu.addSubMenu("Latency (blocks)", latencyMenu);
 
+	menu.addSeparator();
+
 	initContextMenu(menu);
 
 	auto& regions = m_processor.getController().getParameterDescriptions().getRegions();
@@ -312,6 +314,7 @@ void PluginEditorState::openMenu()
 
 		if(initAdvancedContextMenu(advancedMenu, allowAdvanced))
 		{
+			menu.addSeparator();
 			menu.addSubMenu("Advanced...", advancedMenu);
 		}
 	}
