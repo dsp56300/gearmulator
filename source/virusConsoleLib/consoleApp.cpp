@@ -21,9 +21,20 @@ using namespace synthLib;
 
 class EsaiListener;
 
+namespace
+{
+	ROMFile findRom(const std::string& _name)
+	{
+		auto result = ROMLoader::findROM(_name, DeviceModel::TI2);
+		if(result.isValid())
+			return result;
+		return ROMLoader::findROM(_name, DeviceModel::ABC);
+	}
+}
+
 ConsoleApp::ConsoleApp(const std::string& _romFile)
 : m_romName(_romFile)
-, m_rom(ROMLoader::findROM(_romFile, DeviceModel::TI2))
+, m_rom(findRom(_romFile))
 , m_preset({})
 {
 	if (!m_rom.isValid())
