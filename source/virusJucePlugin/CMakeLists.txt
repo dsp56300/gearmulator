@@ -43,5 +43,6 @@ target_link_libraries(virusJucePlugin PUBLIC jucePluginEditorLib virusLib)
 target_include_directories(virusJucePlugin PUBLIC ../JUCE/modules)
 
 target_compile_definitions(virusJucePlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
+target_compile_definitions(virusJucePlugin PUBLIC JUCE_MODAL_LOOPS_PERMITTED=1)
 
 set_property(TARGET virusJucePlugin PROPERTY FOLDER "Virus")
