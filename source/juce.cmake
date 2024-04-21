@@ -53,6 +53,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		JUCE_VST3_CAN_REPLACE_VST2=0
 		JUCE_WIN_PER_MONITOR_DPI_AWARE=0
 		JUCE_MODAL_LOOPS_PERMITTED=1
+		JUCE_USE_OGGVORBIS=0
+		JUCE_USE_MP3AUDIOFORMAT=0
+		JUCE_USE_FLAC=0
+		JUCE_USE_WINDOWS_MEDIA_FORMAT=0
 	)
 
 	target_link_libraries(${targetName}
