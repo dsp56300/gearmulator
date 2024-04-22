@@ -4,7 +4,7 @@
 
 This project emulates various musical devices that used the Motorola 56300 family DSPs.
 
-The supported plugin formats are [FST](https://github.com/pierreguillot/FTS), VST3, AU, CLAP and LV2.
+The supported plugin formats are [FST](https://github.com/pierreguillot/FTS), VST3, AU, [CLAP](https://cleveraudio.org/) and [LV2](https://lv2plug.in/).
 
 Supported architectures: 64 bit x86 aka x64 and ARM aarch64 (Raspberry Pi, Apple Silicon). Note that 32 bit
 architectures are not supported!
