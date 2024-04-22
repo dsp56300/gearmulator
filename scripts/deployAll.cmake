@@ -1,7 +1,7 @@
 include(${CMAKE_CURRENT_LIST_DIR}/synths.cmake)
 
 if(NOT FOLDER)
-	message(FATAL_ERROR "No upload folder specified")
+	set(FOLDER "")
 endif()
 
 if(NOT gearmulator_BINARY_DIR)
