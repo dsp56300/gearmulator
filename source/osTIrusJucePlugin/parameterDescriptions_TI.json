@@ -668,7 +668,7 @@
 		{"page":115, "index":124, "class":"Global", "name":"Midi Channel", "min":0, "max":15, "default":0, "isPublic":true, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":125, "class":"Global", "name":"Led Mode", "min":0, "max":6, "default":2, "isPublic":false, "isDiscrete":true, "isBool":false},
 		{"page":115, "index":126, "class":"Global", "name":"LCD Contrast", "min":0, "max":127, "default":64, "isPublic":false, "isDiscrete":false, "isBool":false},
-		{"page":115, "index":127, "class":"Global", "name":"Master Volume", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false},		
+		{"page":115, "index":127, "class":"Global", "name":"Master Volume", "min":0, "max":127, "default":92, "isPublic":true, "isDiscrete":false, "isBool":false},		
 	],
 	"regions":
 	[
