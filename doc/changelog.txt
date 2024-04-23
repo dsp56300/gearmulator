@@ -35,6 +35,8 @@ OsTIrus:
 
 Vavra:
 
+- [Fix] Remove unused "Factory" category from patch manager as Vavra doesn't contain
+        any factory presets
 - [Fix] Invalid sysex messages sent to plugin midi output
 
 1.3.11
