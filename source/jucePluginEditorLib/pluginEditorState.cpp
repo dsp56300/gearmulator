@@ -118,7 +118,7 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
-		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Skin load failed", _err.what(), "OK");
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what(), nullptr, juce::ModalCallbackFunction::create([](int){}));
 		m_editor.reset();
 
 		loadSkin(m_includedSkins[0]);
@@ -336,11 +336,11 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, "OK", m_editor.get());
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, m_editor.get(), juce::ModalCallbackFunction::create([](int){}));
 	}
 	else
 	{
-		juce::AlertWindow::showMessageBoxAsync(juce::AlertWindow::InfoIcon, "Export finished", "Skin successfully exported");
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", m_editor.get(), juce::ModalCallbackFunction::create([](int){}));
 	}
 }
 
