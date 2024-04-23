@@ -296,7 +296,11 @@ namespace pluginLib
 	{
 		for (const auto& b : m_bindings)
 			disableBinding(b);
+		clear();
+	}
 
+	void ParameterBinding::clear()
+	{
 		m_bindings.clear();
 		m_boundParameters.clear();
 		m_boundComponents.clear();

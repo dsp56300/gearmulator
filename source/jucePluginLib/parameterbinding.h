@@ -57,6 +57,7 @@ namespace pluginLib
 		void bind(juce::Button &_control, uint32_t _param, uint8_t _part);
 
 		void clearBindings();
+		void clear();
 		void setPart(uint8_t _part);
 
 		void disableBindings();

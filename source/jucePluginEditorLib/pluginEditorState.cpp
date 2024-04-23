@@ -119,6 +119,8 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
 		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what(), nullptr, juce::ModalCallbackFunction::create([](int){}));
+
+		m_parameterBinding.clear();
 		m_editor.reset();
 
 		loadSkin(m_includedSkins[0]);
