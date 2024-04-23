@@ -1,5 +1,19 @@
 Release Notes 
 
+1.3.13
+
+Framework:
+
+- [Imp] Added warning message if running under Rosetta as performance will be bad
+
+- [Fix] Do not crash if a skin cannot be loaded
+
+Osirus:
+
+- [Imp] Added support for Virus Rack and Rack XL OS via .mid file
+
+- [Fix] Older Virus B firmware 4.58 failed to load
+
 1.3.12
 
 Framework:
