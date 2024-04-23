@@ -78,7 +78,14 @@ void VirusProcessor::postConstruct()
 synthLib::Device* VirusProcessor::createDevice()
 {
 	const auto* rom = getSelectedRom();
-	return new virusLib::Device(rom ? *rom : virusLib::ROMFile::invalid(), getPreferredDeviceSamplerate(), getHostSamplerate(), true);
+
+	if(!rom || !rom->isValid())
+	{
+		if(isTIFamily(m_defaultModel))
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A Virus TI firmware (.bin) is required, but was not found.");
+		throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A Virus A/B/C operating system (.bin or .mid) is required, but was not found.");
+	}
+	return new virusLib::Device(*rom, getPreferredDeviceSamplerate(), getHostSamplerate(), true);
 }
 
 pluginLib::Controller* VirusProcessor::createController()
