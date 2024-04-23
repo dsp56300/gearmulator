@@ -36,7 +36,7 @@ namespace jucePluginEditorLib
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const std::function<void(const juce::File&)>& _callback);
 #if !SYNTHLIB_DEMO_MODE
-		bool savePresets(FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const;
+		static bool savePresets(FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
 #endif
 		static std::string createValidFilename(FileType& _type, const juce::File& _file);
 
@@ -61,6 +61,8 @@ namespace jucePluginEditorLib
 		void showDisclaimer() const;
 
 	private:
+		void onDisclaimerFinished() const;
+
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
 		int getParameterIndexByName(const std::string& _name) override;
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;

@@ -79,7 +79,7 @@ namespace jucePluginEditorLib
 	}
 
 #if !SYNTHLIB_DEMO_MODE
-	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets) const
+	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets)
 	{
 		if (_presets.empty())
 			return false;
@@ -180,8 +180,31 @@ namespace jucePluginEditorLib
 			juce::NativeMessageBox::showAsync(options, [this](int)
 			{
 				m_processor.getConfig().setValue("disclaimerSeen", true);
+				onDisclaimerFinished();
 			});
 		}
+		else
+		{
+			onDisclaimerFinished();
+		}
+	}
+
+	void Editor::onDisclaimerFinished() const
+	{
+		if(!synthLib::isRunningUnderRosetta())
+			return;
+
+		const auto& name = m_processor.getProperties().name;
+
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+			name + " - Rosetta detected", 
+			name + " appears to be running in Rosetta mode.\n"
+			"\n"
+			"The DSP emulation core will perform much worse when being executed under Rosetta. We strongly recommend to run your DAW as a native Apple Silicon application", 
+			nullptr, juce::ModalCallbackFunction::create([this](int)
+			{
+				m_processor.getConfig().setValue("disclaimerSeen", true);
+			}));
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
