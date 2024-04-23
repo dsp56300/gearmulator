@@ -224,13 +224,23 @@ namespace virusLib
 			if(fd.type == MidiPresets)
 				continue;
 
-			auto model = detectModel(fd.data);
+			DeviceModel model;
 
-			if(model == DeviceModel::Invalid)
+			if(isTIFamily(_model))
 			{
-				assert(false && "retry model detection for debugging purposes below");
-				detectModel(fd.data);
-				model = _model;	// Must be based on DSP 56362 or hell breaks loose
+				// model is specified externally as firmware has every model inside
+				model = _model;
+			}
+			else
+			{
+				model = detectModel(fd.data);
+
+				if(model == DeviceModel::Invalid)
+				{
+					assert(false && "retry model detection for debugging purposes below");
+					detectModel(fd.data);
+					model = _model;	// Must be based on DSP 56362 or hell breaks loose
+				}
 			}
 
 			if(fd.type == BinaryRom)
