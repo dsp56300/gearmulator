@@ -39,15 +39,25 @@ namespace virusLib
 
 //		m_dsp->getMemory().saveAssembly("P.asm", 0, m_dsp->getMemory().sizeP(), true, false, m_dsp->getDSP().getPeriph(0), m_dsp->getDSP().getPeriph(1));
 
-		if(m_rom.getModel() == DeviceModel::A)
+		switch(m_rom.getModel())
 		{
+		case DeviceModel::A:
 			// The A does not send any event to notify that it has finished booting
 			dummyProcess(32);
-
 			m_dsp->disableESSI1();
-		}
-		else
-		{
+			break;
+		case DeviceModel::B:
+			// Rack Classic doesn't send that it has finished booting either, wait a bit for the event but abort if it takes too long
+			{
+				constexpr auto maxRetries = 256;
+				uint32_t r=0;
+				while(!m_mc->dspHasBooted() && ++r <= maxRetries)
+					dummyProcess(8);
+				if(r >= maxRetries)
+					LOG("Timed out while waiting for the device to finish booting, expecting that it has booted");
+			}
+			break;
+		default:
 			while(!m_mc->dspHasBooted())
 				dummyProcess(8);
 		}
