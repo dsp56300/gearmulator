@@ -36,6 +36,8 @@ namespace virusLib
 
 		static FileData loadFile(const std::string& _name);
 
+		static DeviceModel detectModel(const std::vector<uint8_t>& _data);
+
 		static std::vector<ROMFile> initializeRoms(const std::vector<std::string>& _files, DeviceModel _model);
 	};
 }

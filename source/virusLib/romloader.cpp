@@ -1,5 +1,7 @@
 #include "romloader.h"
 
+#include <algorithm>
+
 #include "midiFileToRomData.h"
 
 #include "../synthLib/os.h"
@@ -144,6 +146,48 @@ namespace virusLib
 		return data;
 	}
 
+	DeviceModel ROMLoader::detectModel(const std::vector<uint8_t>& _data)
+	{
+		// examples
+		// A: (C)ACCESS [08-20-2001-16:58:54][v280g]
+		// B: (C)ACCESS [12-23-2003-14:43:27][VB_490T]
+		// C: (C)ACCESS [11-10-2003-12:15:42][vc_650b]
+
+		const std::string key = "(C)ACCESS [";
+		const auto result = std::search(_data.begin(), _data.end(), std::begin(key), std::end(key));
+		if(result == _data.end())
+			return DeviceModel::Invalid;
+
+		const auto bracketOpen = std::find(result+static_cast<int32_t>(key.size())+1, _data.end(), '[');
+		if(bracketOpen == _data.end())
+			return DeviceModel::Invalid;
+
+		const auto bracketClose = std::find(bracketOpen+1, _data.end(), ']');
+		if(bracketClose == _data.end())
+			return DeviceModel::Invalid;
+
+		const auto versionString = synthLib::lowercase(std::string(bracketOpen+1, bracketClose-1));
+
+		const auto test = [&versionString](const char* _key)
+		{
+			return versionString.find(_key) == 0;
+		};
+
+		if(test("vb") || test("vcl") || test("vrt"))
+			return DeviceModel::B;
+
+		if(test("vc") || test("vr_6"))
+			return DeviceModel::C;
+
+		if(test("vr"))
+			return DeviceModel::B;
+
+		if(test("v2"))
+			return DeviceModel::A;
+
+		return DeviceModel::Invalid;
+	}
+
 	std::vector<ROMFile> ROMLoader::initializeRoms(const std::vector<std::string>& _files, const DeviceModel _model)
 	{
 		if(_files.empty())
@@ -180,10 +224,19 @@ namespace virusLib
 			if(fd.type == MidiPresets)
 				continue;
 
+			auto model = detectModel(fd.data);
+
+			if(model == DeviceModel::Invalid)
+			{
+				assert(false && "retry model detection for debugging purposes below");
+				detectModel(fd.data);
+				model = _model;	// Must be based on DSP 56362 or hell breaks loose
+			}
+
 			if(fd.type == BinaryRom)
 			{
 				// load as-is
-				auto& rom = roms.emplace_back(fd.data, fd.filename, _model);
+				auto& rom = roms.emplace_back(fd.data, fd.filename, model);
 				if(!rom.isValid())
 					roms.pop_back();
 			}
@@ -193,7 +246,7 @@ namespace virusLib
 				if(presets.empty())
 				{
 					// none available, use without presets
-					auto& rom = roms.emplace_back(fd.data, fd.filename, _model);
+					auto& rom = roms.emplace_back(fd.data, fd.filename, model);
 					if(!rom.isValid())
 						roms.pop_back();
 				}
@@ -204,7 +257,7 @@ namespace virusLib
 					auto data = fd.data;
 					data.insert(data.end(), p.data.begin(), p.data.end());
 
-					auto& rom = roms.emplace_back(data, fd.filename, _model);
+					auto& rom = roms.emplace_back(data, fd.filename, model);
 					if(!rom.isValid())
 						roms.pop_back();
 					else if(presets.size() > 1)

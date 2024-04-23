@@ -53,7 +53,7 @@ bool ROMFile::initialize()
 		dsp.reset(new imemstream(fw.DSP));
 	}
 #endif
-	const auto chunks = readChunks(*dsp, m_model);
+	const auto chunks = readChunks(*dsp);
 
 	if (chunks.empty())
 		return false;
@@ -185,7 +185,7 @@ uint32_t ROMFile::getRomBankCount(const DeviceModel _model)
 	}
 }
 
-std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, const DeviceModel _wantedTIModel)
+std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file) const
 {
 	_file.seekg(0, std::ios_base::end);
 	const auto fileSize = _file.tellg();
@@ -195,14 +195,14 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, const Devic
 
 	if(fileSize == getRomSizeModelD())
 	{
-		m_model = _wantedTIModel;
+		assert(isTIFamily());
 		offset = 0x70000;
 		lastChunkId = 14;
 	}
 	else if (fileSize == getRomSizeModelABC() || fileSize == getRomSizeModelABC()/2)	// the latter is a ROM without presets
 	{
 		// ABC
-		m_model = DeviceModel::C;
+		assert(isABCFamily(m_model));
 		offset = 0x18000;
 		lastChunkId = 4;
 	}
@@ -227,11 +227,8 @@ std::vector<ROMFile::Chunk> ROMFile::readChunks(std::istream& _file, const Devic
 		_file.read(reinterpret_cast<char*>(&chunk.size1), 1);
 		_file.read(reinterpret_cast<char*>(&chunk.size2), 1);
 
-		if(i == 0 && chunk.chunk_id == 3 && lastChunkId == 4)	// Virus A has one chunk less
-		{
-			m_model = DeviceModel::A;
+		if(i == 0 && chunk.chunk_id == 3 && lastChunkId == 4)	// Virus A and old Virus B OSs have one chunk less
 			lastChunkId = 3;
-		}
 
 		if(chunk.chunk_id != lastChunkId - i)
 			return {};

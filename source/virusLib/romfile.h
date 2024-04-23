@@ -118,7 +118,7 @@ public:
 	const auto& getHash() const { return m_romDataHash; }
 
 private:
-	std::vector<Chunk> readChunks(std::istream& _file, DeviceModel _wantedTIModel);
+	std::vector<Chunk> readChunks(std::istream& _file) const;
 	bool loadPresetFiles();
 	bool loadPresetFile(std::istream& _file, DeviceModel _model);
 
