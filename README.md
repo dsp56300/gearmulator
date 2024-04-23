@@ -1,5 +1,10 @@
 # Gearmulator
 
+[![Build][s0]][l0]
+
+[s0]: https://github.com/dsp56300/gearmulator/workflows/CMake/badge.svg
+[l0]: https://github.com/dsp56300/gearmulator/actions
+
 ## Emulation of classic VA synths of the late 90s/2000s that used the Motorola 56300 family DSP
 
 This project emulates various musical devices that used the Motorola 56300 family DSPs.
