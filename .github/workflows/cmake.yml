@@ -19,7 +19,7 @@ jobs:
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
       with:
         submodules: "recursive"
 
