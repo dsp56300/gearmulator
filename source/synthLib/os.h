@@ -44,4 +44,6 @@ namespace synthLib
 	bool readFile(std::vector<uint8_t>& _data, const std::string& _filename);
 
 	FILE* openFile(const std::string& _name, const char* _mode);
+
+	bool isRunningUnderRosetta();
 } // namespace synthLib
