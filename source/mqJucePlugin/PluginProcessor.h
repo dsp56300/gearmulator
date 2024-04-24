@@ -16,7 +16,6 @@ public:
     synthLib::Device* createDevice() override;
 
     pluginLib::Controller* createController() override;
-
 private:
 
     //==============================================================================
