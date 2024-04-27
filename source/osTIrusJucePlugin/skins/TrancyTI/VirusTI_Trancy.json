@@ -1159,13 +1159,24 @@
                 }, 
                                 
                 { "name" : "ContainerDistortion5_tone127", 
-                  "condition": { "enableOnParameter": "Distortion Curve", "enableOnValues": "21,22,23,25,26" }, 
+                  "condition": { "enableOnParameter": "Distortion Curve", "enableOnValues": "22,23,26" }, 
                   "image" : { "x" : "303", "y" : "262", "width" : "373", "height" : "500", "texture" : "panel_8_fx1_5" },               
                         "children" : [  
                             
                             { "name" : "DistortionIntens",      "parameterAttachment" : { "parameter" : "Distortion Intensity" },   "rotary" : { }, "spritesheet" : { "x" : "218", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                            
                             { "name" : "PatchDistortion/Mix",   "parameterAttachment" : { "parameter" : "Patch Distortion/Mix" },   "rotary" : { }, "spritesheet" : { "x" : "60", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                                                                                  
                             { "name" : "PatchDistortion/Tone127",  "parameterAttachment" : { "parameter" : "Patch Distortion/Tone127" },   "rotary" : { }, "spritesheet" : { "x" : "60", "y" : "253", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                                                  
+                            { "name" : "PatchDistortion/High Cut", "parameterAttachment" : { "parameter" : "Patch Distortion/High Cut" },         "rotary" : { }, "spritesheet" : { "x" : "218", "y" : "253", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                             
+                      ]
+                }, 
+
+                { "name" : "ContainerDistortion5_noTone", 
+                  "condition": { "enableOnParameter": "Distortion Curve", "enableOnValues": "21,25" }, 
+                  "image" : { "x" : "303", "y" : "262", "width" : "373", "height" : "500", "texture" : "panel_8_fx1_6" },
+                        "children" : [  
+                            
+                            { "name" : "DistortionIntens",      "parameterAttachment" : { "parameter" : "Distortion Intensity" },   "rotary" : { }, "spritesheet" : { "x" : "218", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                            
+                            { "name" : "PatchDistortion/Mix",   "parameterAttachment" : { "parameter" : "Patch Distortion/Mix" },   "rotary" : { }, "spritesheet" : { "x" : "60", "y" : "85", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                                                                                  
                             { "name" : "PatchDistortion/High Cut", "parameterAttachment" : { "parameter" : "Patch Distortion/High Cut" },         "rotary" : { }, "spritesheet" : { "x" : "218", "y" : "253", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" }},                             
                       ]
                 }, 

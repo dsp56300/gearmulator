@@ -108,6 +108,7 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_3.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_4.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_5.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_6.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_characters.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_characters_off.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_chorus_air_chorus.png
