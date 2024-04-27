@@ -1954,9 +1954,6 @@ namespace pluginLib::patchDB
 					const auto tagType = it.first;
 					const auto& tags = it.second;
 
-					if(tags.empty())
-						continue;
-
 					outStream.write(static_cast<uint8_t>(tagType));
 					outStream.write(static_cast<uint32_t>(tags.size()));
 
@@ -1975,9 +1972,6 @@ namespace pluginLib::patchDB
 				{
 					const auto tagType = it.first;
 					const auto& mapStringToColor = it.second;
-
-					if(mapStringToColor.empty())
-						continue;
 
 					outStream.write(static_cast<uint8_t>(tagType));
 					outStream.write(static_cast<uint32_t>(mapStringToColor.size()));
