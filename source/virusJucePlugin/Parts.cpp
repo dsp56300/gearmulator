@@ -97,20 +97,24 @@ namespace genericVirusUI
 
 	void Parts::selectPartMidiChannel(const size_t _part) const
 	{
-		if(!m_editor.getController().isMultiMode())
+		const auto multiMode = m_editor.getController().isMultiMode();
+
+		if(!multiMode && _part > 0)
 			return;
 
 		juce::PopupMenu menu;
 
-		const auto idx= m_editor.getController().getParameterIndexByName("Part Midi Channel");
+		const auto idx = m_editor.getController().getParameterIndexByName(multiMode ? "Part Midi Channel" : "Midi Channel");
 		if(idx == pluginLib::Controller::InvalidParameterIndex)
 			return;
 
-		const auto v = m_editor.getController().getParameter(idx, static_cast<uint8_t>(_part));
+		const auto v = m_editor.getController().getParameter(idx, static_cast<uint8_t>(multiMode ? _part : 0));
+
+		const std::string name = multiMode ? "Midi Channel " : "Global Midi Channel ";
 
 		for(uint8_t i=0; i<16; ++i)
 		{
-			menu.addItem("Midi Channel " + std::to_string(i + 1), true, v->getUnnormalizedValue() == i, [v, i]
+			menu.addItem(name + ' ' + std::to_string(i + 1), true, v->getUnnormalizedValue() == i, [v, i]
 			{
 				v->setValue(v->convertTo0to1(i), pluginLib::Parameter::ChangedBy::Ui);
 			});
