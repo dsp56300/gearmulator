@@ -98,12 +98,12 @@ namespace pluginLib
 
         	bool operator<(const ParamIndex& _p) const
             {
-				if (page < _p.page)         return false;
-				if (page > _p.page)         return true;
-				if (partNum < _p.partNum)   return false;
-				if (partNum > _p.partNum)   return true;
-				if (paramNum < _p.paramNum) return false;
-				if (paramNum > _p.paramNum) return true;
+				if (page < _p.page)         return true;
+				if (page > _p.page)         return false;
+				if (partNum < _p.partNum)   return true;
+				if (partNum > _p.partNum)   return false;
+				if (paramNum < _p.paramNum) return true;
+				if (paramNum > _p.paramNum) return false;
 				return false;
 			}
 
