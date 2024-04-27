@@ -181,11 +181,11 @@ namespace virusLib
 				// use the uc to generate our sysex header
 				if(isMulti)
 				{
-					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x31, 0x01, 0x00, 0xf7}, responses, synthLib::MidiEventSourceEditor);
+					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x31, 0x01, 0x00, 0xf7}, responses, synthLib::MidiEventSource::Editor);
 				}
 				else
 				{
-					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x30, 0x01, program, 0xf7}, responses, synthLib::MidiEventSourceEditor);
+					m_mc.sendSysex({0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x30, 0x01, program, 0xf7}, responses, synthLib::MidiEventSource::Editor);
 				}
 
 				auto& s = responses.front().sysex;
@@ -300,7 +300,7 @@ namespace virusLib
 		case EventType::MidiSysex:
 			{
 				std::vector<synthLib::SMidiEvent> responses;
-				m_mc.sendSysex(_event.data, responses, synthLib::MidiEventSourcePlugin);
+				m_mc.sendSysex(_event.data, responses, synthLib::MidiEventSource::Plugin);
 			}
 			break;
 		case EventType::Midi:

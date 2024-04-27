@@ -816,11 +816,11 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				}
 
 				// bounce back to UI if not sent by editor
-				if(_source != MidiEventSourceEditor)
+				if(_source != MidiEventSource::Editor)
 				{
 					SMidiEvent ev;
 					ev.sysex = _data;
-					ev.source = MidiEventSourceEditor;	// don't send to output
+					ev.source = MidiEventSource::Editor;	// don't send to output
 					_responses.push_back(ev);
 				}
 
@@ -1075,9 +1075,9 @@ bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateTy
 	std::vector<SMidiEvent> responses;
 
 	if(_type == StateTypeGlobal)
-		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
+		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, responses, MidiEventSource::Plugin);
 
-	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
+	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, responses, MidiEventSource::Plugin);
 
 	if(responses.empty())
 		return false;
@@ -1132,7 +1132,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 	{
 		if(!event.sysex.empty())
 		{
-			sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
+			sendSysex(event.sysex, unusedResponses, MidiEventSource::Plugin);
 			unusedResponses.clear();
 		}
 		else

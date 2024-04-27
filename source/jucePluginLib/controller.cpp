@@ -145,7 +145,7 @@ namespace pluginLib
     {
         synthLib::SMidiEvent ev;
         ev.sysex = msg;
-		ev.source = synthLib::MidiEventSourceEditor;
+		ev.source = synthLib::MidiEventSource::Editor;
 		sendMidiEvent(ev);
     }
 
@@ -154,7 +154,7 @@ namespace pluginLib
         m_processor.addMidiEvent(_ev);
     }
 
-	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSourceEditor*/) const
+	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSource::Editor*/) const
 	{
         m_processor.addMidiEvent(synthLib::SMidiEvent(_a, _b, _c, _offset, _source));
 	}

@@ -91,7 +91,7 @@ namespace pluginLib
 			}
 			syx.push_back(0xf7);
 			synthLib::SMidiEvent sm;
-			sm.source = synthLib::MidiEventSourcePlugin;
+			sm.source = synthLib::MidiEventSource::Plugin;
 			sm.sysex = syx;
 			getController().parseSysexMessage(syx);
 
@@ -116,7 +116,7 @@ namespace pluginLib
 			if (count >= 1 && count <= 3)
 			{
 				synthLib::SMidiEvent sm;
-				sm.source = synthLib::MidiEventSourcePlugin;
+				sm.source = synthLib::MidiEventSource::Plugin;
 				sm.a = rawData[0];
 				sm.b = count > 1 ? rawData[1] : 0;
 				sm.c = count > 2 ? rawData[2] : 0;
@@ -125,7 +125,7 @@ namespace pluginLib
 			else
 			{
 				synthLib::SMidiEvent sm;
-				sm.source = synthLib::MidiEventSourcePlugin;
+				sm.source = synthLib::MidiEventSource::Plugin;
 				auto syx = SysEx();
 				for (int i = 0; i < count; i++)
 				{
@@ -578,7 +578,7 @@ namespace pluginLib
 
 	    for (auto& e : m_midiOut)
 	    {
-		    if (e.source == synthLib::MidiEventSourceEditor)
+		    if (e.source == synthLib::MidiEventSource::Editor)
 				continue;
 
 			auto toJuceMidiMessage = [&e]()
