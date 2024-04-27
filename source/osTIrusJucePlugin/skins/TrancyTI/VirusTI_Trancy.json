@@ -1321,7 +1321,7 @@
 			]
                 }, 
 
-                { "name" : "DelayMode",        "parameterAttachment" : { "parameter" : "Delay Mode" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "230", "y" : "210", "width" : "275", "height" : "43", "offsetR" : "-60" }},
+                { "name" : "DelayMode",        "parameterAttachment" : { "parameter" : "Delay Mode" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "230", "y" : "210", "width" : "275", "height" : "43", "offsetR" : "-60" }, "condition": { "enableOnParameter": "Delay Type", "enableOnValues": "0" }},
                 { "name" : "DelayType",        "parameterAttachment" : { "parameter" : "Delay Type" },              "combobox" : { "text" : "Wave 42", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "x" : "230", "y" : "95", "width" : "275", "height" : "43", "offsetR" : "--60" }},
  
   
