@@ -50,9 +50,9 @@
 
 	
   
-	{"name":"PatchName",                "label":{"text":"Osc1Shape","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"594","y":"1188","width":"400","height":"52"}},
-        {"name":"FocusedParameterValue",    "label":{"text":"-42","textHeight":"25","alignH":"R","alignV":"C","fontFile":"Digital","fontName":"Register","x":"1400","y":"1188","width":"256.7","height":"52"}},
-        {"name":"FocusedParameterName",     "label":{"text":"Osc","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"830","y":"1188","width":"600","height":"52"}},
+	{"name":"PatchName",                "label":{"text":"Osc1Shape","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"594","y":"1186","width":"400","height":"52"}},
+        {"name":"FocusedParameterValue",    "label":{"text":"-42","textHeight":"25","alignH":"R","alignV":"C","fontFile":"Digital","fontName":"Register","x":"1400","y":"1186","width":"256.7","height":"52"}},
+        {"name":"FocusedParameterName",     "label":{"text":"Osc","textHeight":"25","alignH":"L","alignV":"C","fontFile":"Digital","fontName":"Register","x":"830","y":"1186","width":"600","height":"52"}},
         {"name":"Menu",                     "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"2314","y":"1175","width":"213","height":"69.5","texture":"button_menu","tileSizeX":"213","tileSizeY":"69.5"}},
         {"name":"PlayModeSingle",           "button":{"isToggle":"1","radioGroupId":"5","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"91","y":"1199","width":"213","height":"48","texture":"button_single","tileSizeX":"213","tileSizeY":"48"}},
         {"name":"PlayModeMulti",            "button":{"isToggle":"1","radioGroupId":"5","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"307","y":"1199","width":"213","height":"48","texture":"button_multi","tileSizeX":"213","tileSizeY":"48"}},
