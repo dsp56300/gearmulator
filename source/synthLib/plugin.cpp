@@ -224,7 +224,7 @@ namespace synthLib
 
 			m_isPlaying = false;
 
-			SMidiEvent evStop;
+			SMidiEvent evStop(MidiEventSource::Internal);
 			evStop.a = M_STOP;
 			m_midiIn.insert(m_midiIn.begin(), evStop);
 			m_clockTickPos = 0.0;
@@ -249,7 +249,7 @@ namespace synthLib
 
 			LOGMC("insert tick at " << i);
 
-			SMidiEvent evClock;
+			SMidiEvent evClock(MidiEventSource::Internal);
 			evClock.a = M_TIMINGCLOCK;
 			evClock.offset = i;
 

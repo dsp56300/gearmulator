@@ -135,7 +135,7 @@ namespace virusLib
 
 			auto sendMidiEvent = [&](const size_t _offset)
 			{
-				synthLib::SMidiEvent ev;
+				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Internal);
 				ev.a = data[_offset];
 				ev.b = data.size() > _offset + 1 ? data[_offset + 1] : 0;
 				ev.c = data.size() > _offset + 2 ? data[_offset + 2] : 0;

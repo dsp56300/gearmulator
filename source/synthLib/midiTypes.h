@@ -194,8 +194,12 @@ namespace synthLib
 
 	enum class MidiEventSource
 	{
-		Plugin,
-		Editor,
+		Unknown,
+		Plugin,			// sent from the plugin to the outside world, i.e. the plugins midi output
+		Editor,			// sent from the editor to the plugins input
+		Host,			// sent from DAW/Host to plugin
+		PhysicalInput,	// sent from an additional physical input to the plugin and the editor
+		Internal,		// not to be routed anywhere, internal communication only
 	};
 
 	struct SMidiEvent
@@ -205,7 +209,7 @@ namespace synthLib
 		uint32_t offset;
 		MidiEventSource source;
 
-		SMidiEvent(const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0, const MidiEventSource _source = MidiEventSource::Plugin)
+		SMidiEvent(const MidiEventSource _source = MidiEventSource::Unknown, const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0)
 			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
 		{
 		}

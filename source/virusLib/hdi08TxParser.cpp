@@ -140,7 +140,7 @@ namespace virusLib
 
 					LOG("Received sysex: " << s.str());
 
-					synthLib::SMidiEvent ev;
+					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Plugin);
 					std::swap(ev.sysex, m_sysexData);
 					m_midiData.emplace_back(ev);
 

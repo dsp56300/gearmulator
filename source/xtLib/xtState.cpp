@@ -659,14 +659,14 @@ namespace xt
 
 	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
 	{
-		synthLib::SMidiEvent e;
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
 	}
 
 	void State::sendSysex(const SysEx& _data) const
 	{
-		synthLib::SMidiEvent e;
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
 	}
