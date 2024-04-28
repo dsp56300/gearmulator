@@ -47,10 +47,11 @@ namespace pluginLib::patchDB
 
 	void Patch::write(synthLib::BinaryStream& _s) const
 	{
-		synthLib::ChunkWriter chunkWriter(_s, chunks::g_patch, 1);
+		synthLib::ChunkWriter chunkWriter(_s, chunks::g_patch, 2);
 
 		_s.write(name);
 		_s.write(bank);
+		_s.write(program);
 
 		if(modifications && !modifications->empty())
 		{
@@ -69,12 +70,13 @@ namespace pluginLib::patchDB
 
 	bool Patch::read(synthLib::BinaryStream& _in)
 	{
-		auto in = _in.tryReadChunk(chunks::g_patch, 1);
+		auto in = _in.tryReadChunk(chunks::g_patch, 2);
 		if(!in)
 			return false;
 
 		name = in.readString();
 		bank = in.read<uint32_t>();
+		program = in.read<uint32_t>();
 
 		const auto hasMods = in.read<uint8_t>();
 

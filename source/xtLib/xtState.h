@@ -89,7 +89,8 @@ namespace xt
 			if(!isValid(_src))
 				return false;
 			auto src = _src;
-			wLib::State::updateChecksum(src, _checksumStartIndex);
+			if(_checksumStartIndex != ~0)
+				wLib::State::updateChecksum(src, _checksumStartIndex);
 			_dst.insert(_dst.end(), src.begin(), src.end());
 			return true;
 		}

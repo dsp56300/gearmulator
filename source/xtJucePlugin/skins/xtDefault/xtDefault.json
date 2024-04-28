@@ -14,14 +14,16 @@
             "pageButtonPatchManager",
             "pageButtonMod",
             "pageButtonArp",
-            "pageButtonWave"
+            "pageButtonWave",
+            "pageButtonMulti"
         ],
         "pages" : [
             "pageOsc",
             "pagePatchManager",
             "pageMod",
             "pageArp",
-            "pageWave"
+            "pageWave",
+            "pageMulti"
         ]
     },
     "templates" : [
@@ -226,7 +228,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2417.109",
+                "x" : "2438.109",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -245,7 +247,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2604.909",
+                "x" : "2591.109",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -264,7 +266,26 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2792.709",
+                "x" : "2744.109",
+                "y" : "69.64844",
+                "width" : "128",
+                "height" : "128",
+                "texture" : "xtknob",
+                "tileSizeX" : "128",
+                "tileSizeY" : "128"
+            }
+        },
+        {
+            "name" : "pageButtonMulti",
+            "button" : {
+                "isToggle" : "1",
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "2897.109",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -283,7 +304,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "3040.309",
+                "x" : "3075.109",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -641,8 +662,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2159",
-                "y" : "69.65002",
+                "x" : "2163",
+                "y" : "298.17",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xtknob",
@@ -660,8 +681,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2271",
-                "y" : "53.65002",
+                "x" : "2275",
+                "y" : "282.17",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -672,15 +693,14 @@
         {
             "name" : "SaveButton",
             "button" : {
-                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "1",
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2159",
-                "y" : "298.17",
+                "x" : "2163",
+                "y" : "69.65002",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xtknob",
@@ -6229,6 +6249,2146 @@
                 "height" : "1479.802",
                 "texture" : "xtPageWave"
             }
+        },
+        {
+            "name" : "pageMulti",
+            "image" : {
+                "x" : "35.99988",
+                "y" : "489",
+                "width" : "3322.7",
+                "height" : "1479.802",
+                "texture" : "xtPageMulti"
+            },
+            "children" : [
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "143.6687",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "143.6687",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "41.6687",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "231.6687",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "41.6687",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "231.6687",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "48.6687",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "231.6687",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "143.6687",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "207.6687",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "207.6687",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "143.6687",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "255.6687",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "559.0063",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "559.0063",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "457.0063",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "647.0063",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "457.0063",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "647.0063",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "464.0063",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "647.0063",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "559.0063",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "623.0063",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "623.0063",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "559.0063",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "671.0063",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "974.3438",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "974.3438",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "872.3438",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1062.344",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "872.3438",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1062.344",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "879.3438",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1062.344",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "974.3438",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1038.344",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1038.344",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "974.3438",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1086.344",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1389.681",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1389.681",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1287.681",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1477.681",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1287.681",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1477.681",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1294.681",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1477.681",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1389.681",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1453.681",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1453.681",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1389.681",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1501.681",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1805.019",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1805.019",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1703.019",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1893.019",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1703.019",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1893.019",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1710.019",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1893.019",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "1805.019",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1869.019",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "1869.019",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1805.019",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "1917.019",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2220.356",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2220.356",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2118.356",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2308.356",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2118.356",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2308.356",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2125.356",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2308.356",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2220.356",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2284.356",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2284.356",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2220.356",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2332.356",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2635.693",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2635.693",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2533.693",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2723.693",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2533.693",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2723.693",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2540.693",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2723.693",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2635.693",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2699.693",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2699.693",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2635.693",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "2747.693",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Enabled"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "3051.031",
+                        "y" : "155.6703",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Transpose"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "3051.031",
+                        "y" : "343.4504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Detune"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C-2",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2949.031",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7KeyLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "C6",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3139.031",
+                        "y" : "581.2306",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7KeyHigh"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "0",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "2949.031",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7VeloLow"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "127",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3139.031",
+                        "y" : "705.0107",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7VeloHigh"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2956.031",
+                        "y" : "779.791",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Pan"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "inverse",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3139.031",
+                        "y" : "845.1909",
+                        "width" : "142",
+                        "height" : "46"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7PanMod"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "3051.031",
+                        "y" : "968.571",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Volume"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "1",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3115.031",
+                        "y" : "1156.351",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7MidiChannel"
+                    }
+                },
+                {
+                    "name" : "dropdown",
+                    "combobox" : {
+                        "offsetL" : "15",
+                        "offsetT" : "1",
+                        "offsetR" : "-15",
+                        "offsetB" : "-1",
+                        "text" : "Main",
+                        "textHeight" : "30",
+                        "color" : "000000FF",
+                        "alignH" : "L",
+                        "alignV" : "C",
+                        "bold" : "1",
+                        "x" : "3115.031",
+                        "y" : "1230.131",
+                        "width" : "170",
+                        "height" : "50"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Output"
+                    }
+                },
+                {
+                    "name" : "xtButton",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "1",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "3051.031",
+                        "y" : "1303.912",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xtknob",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Enabled"
+                    }
+                },
+                {
+                    "name" : "xtLed",
+                    "button" : {
+                        "isToggle" : "1",
+                        "normalImage" : "0",
+                        "overImage" : "0",
+                        "downImage" : "0",
+                        "normalImageOn" : "1",
+                        "overImageOn" : "1",
+                        "downImageOn" : "1",
+                        "x" : "3163.031",
+                        "y" : "1287.912",
+                        "width" : "32",
+                        "height" : "32",
+                        "texture" : "led",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Enabled"
+                    }
+                }
+            ]
         },
         {
             "name" : "FocusedParameterTooltip",

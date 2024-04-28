@@ -1690,194 +1690,202 @@ namespace pluginLib::patchDB
 		if(!synthLib::readFile(data, m_cacheFileName.getFullPathName().toStdString()))
 			return false;
 
-		synthLib::BinaryStream inStream(data);
-
-		auto stream = inStream.tryReadChunk(chunks::g_patchManager);
-
-		if(!stream)
-			return false;
-
-		std::unique_lock lockDS(m_dataSourcesMutex);
-		std::unique_lock lockP(m_patchesMutex);
-
-		std::map<DataSource, DataSourceNodePtr> resultDataSources;
-		std::unordered_map<TagType, std::set<Tag>> resultTags;
-		std::unordered_map<TagType, std::unordered_map<Tag, uint32_t>> resultTagColors;
-		std::map<PatchKey, PatchModificationsPtr> resultPatchModifications;
-
-		if(auto s = stream.tryReadChunk(chunks::g_patchManagerDataSources, 1))
+		try
 		{
-			const auto numDatasources = s.read<uint32_t>();
+			synthLib::BinaryStream inStream(data);
 
-			std::vector<DataSource> dataSources;
-			dataSources.reserve(numDatasources);
+			auto stream = inStream.tryReadChunk(chunks::g_patchManager, 2);
 
-			for(uint32_t i=0; i<numDatasources; ++i)
+			if(!stream)
+				return false;
+
+			std::unique_lock lockDS(m_dataSourcesMutex);
+			std::unique_lock lockP(m_patchesMutex);
+
+			std::map<DataSource, DataSourceNodePtr> resultDataSources;
+			std::unordered_map<TagType, std::set<Tag>> resultTags;
+			std::unordered_map<TagType, std::unordered_map<Tag, uint32_t>> resultTagColors;
+			std::map<PatchKey, PatchModificationsPtr> resultPatchModifications;
+
+			if(auto s = stream.tryReadChunk(chunks::g_patchManagerDataSources, 1))
 			{
-				DataSource& ds = dataSources.emplace_back();
-				if(!ds.read(s))
-					return false;
-			}
+				const auto numDatasources = s.read<uint32_t>();
 
-			// read tree information
-			std::map<uint32_t, uint32_t> childToParentMap;
-			const auto childToParentCount = s.read<uint32_t>();
-			for(uint32_t i=0; i<childToParentCount; ++i)
-			{
-				const auto child = s.read<uint32_t>();
-				const auto parent = s.read<uint32_t>();
-				childToParentMap.insert({child, parent});
-			}
+				std::vector<DataSource> dataSources;
+				dataSources.reserve(numDatasources);
 
-			std::vector<DataSourceNodePtr> nodes;
-			nodes.resize(dataSources.size());
-
-			// create root nodes first
-			for(uint32_t i=0; i<dataSources.size(); ++i)
-			{
-				if(childToParentMap.find(i) != childToParentMap.end())
-					continue;
-
-				const auto& ds = dataSources[i];
-				const auto node = std::make_shared<DataSourceNode>(ds);
-				nodes[i] = node;
-				resultDataSources.insert({ds, node});
-			}
-
-			// now iteratively create children until there are none left
-			while(!childToParentMap.empty())
-			{
-				for(auto it = childToParentMap.begin(); it != childToParentMap.end();)
+				for(uint32_t i=0; i<numDatasources; ++i)
 				{
-					const auto childId = it->first;
-					const auto parentId = it->second;
+					DataSource& ds = dataSources.emplace_back();
+					if(!ds.read(s))
+						return false;
+				}
 
-					const auto& parent = nodes[parentId];
-					if(!parent)
-					{
-						++it;
+				// read tree information
+				std::map<uint32_t, uint32_t> childToParentMap;
+				const auto childToParentCount = s.read<uint32_t>();
+				for(uint32_t i=0; i<childToParentCount; ++i)
+				{
+					const auto child = s.read<uint32_t>();
+					const auto parent = s.read<uint32_t>();
+					childToParentMap.insert({child, parent});
+				}
+
+				std::vector<DataSourceNodePtr> nodes;
+				nodes.resize(dataSources.size());
+
+				// create root nodes first
+				for(uint32_t i=0; i<dataSources.size(); ++i)
+				{
+					if(childToParentMap.find(i) != childToParentMap.end())
 						continue;
-					}
 
-					const auto& ds = dataSources[childId];
+					const auto& ds = dataSources[i];
 					const auto node = std::make_shared<DataSourceNode>(ds);
-					node->setParent(parent);
-					nodes[childId] = node;
+					nodes[i] = node;
 					resultDataSources.insert({ds, node});
-
-					it = childToParentMap.erase(it);
 				}
-			}
 
-			// now as we have the datasources created as nodes, patches need to know the datasource nodes they are part of
-			for (const auto& it : resultDataSources)
-			{
-				for(auto& patch : it.second->patches)
-					patch->source = it.second->weak_from_this();
-			}
-		}
-		else
-			return false;
-
-		if(auto s = stream.tryReadChunk(chunks::g_patchManagerTags, 1))
-		{
-			const auto tagTypeCount = s.read<uint32_t>();
-
-			for(uint32_t i=0; i<tagTypeCount; ++i)
-			{
-				const auto tagType = static_cast<TagType>(s.read<uint8_t>());
-				const auto tagCount = s.read<uint32_t>();
-
-				std::set<Tag> tags;
-				for(uint32_t t=0; t<tagCount; ++t)
-					tags.insert(s.readString());
-
-				resultTags.insert({tagType, tags});
-			}
-		}
-		else
-			return false;
-
-		if(auto s = stream.tryReadChunk(chunks::g_patchManagerTagColors, 1))
-		{
-			const auto tagTypeCount = s.read<uint32_t>();
-
-			for(uint32_t i=0; i<tagTypeCount; ++i)
-			{
-				const auto tagType = static_cast<TagType>(s.read<uint8_t>());
-				std::unordered_map<Tag, Color> tagToColor;
-
-				const auto count = s.read<uint32_t>();
-				for(uint32_t c=0; c<count; ++c)
+				// now iteratively create children until there are none left
+				while(!childToParentMap.empty())
 				{
-					const auto tag = s.readString();
-					const auto color = s.read<Color>();
-					tagToColor.insert({tag, color});
+					for(auto it = childToParentMap.begin(); it != childToParentMap.end();)
+					{
+						const auto childId = it->first;
+						const auto parentId = it->second;
+
+						const auto& parent = nodes[parentId];
+						if(!parent)
+						{
+							++it;
+							continue;
+						}
+
+						const auto& ds = dataSources[childId];
+						const auto node = std::make_shared<DataSourceNode>(ds);
+						node->setParent(parent);
+						nodes[childId] = node;
+						resultDataSources.insert({ds, node});
+
+						it = childToParentMap.erase(it);
+					}
 				}
-				resultTagColors.insert({tagType, tagToColor});
-			}
-		}
-		else
-			return false;
 
-		if(auto s = stream.tryReadChunk(chunks::g_patchManagerPatchModifications, 1))
-		{
-			const auto count = s.read<uint32_t>();
-
-			for(uint32_t i=0; i<count; ++i)
-			{
-				auto key = PatchKey::fromString(s.readString());
-
-				const auto itDS = resultDataSources.find(*key.source);
-				if(itDS != resultDataSources.end())
-					key.source = itDS->second;
-
-				auto mods = std::make_shared<PatchModifications>();
-				if(!mods->read(s))
-					return false;
-
-				resultPatchModifications.insert({key, mods});
-
+				// now as we have the datasources created as nodes, patches need to know the datasource nodes they are part of
 				for (const auto& it : resultDataSources)
 				{
-					for (const auto& patch : it.second->patches)
-					{
-						if(*patch != key)
-							continue;
+					for(auto& patch : it.second->patches)
+						patch->source = it.second->weak_from_this();
+				}
+			}
+			else
+				return false;
 
-						patch->modifications = mods;
-						mods->patch = patch;
+			if(auto s = stream.tryReadChunk(chunks::g_patchManagerTags, 1))
+			{
+				const auto tagTypeCount = s.read<uint32_t>();
+
+				for(uint32_t i=0; i<tagTypeCount; ++i)
+				{
+					const auto tagType = static_cast<TagType>(s.read<uint8_t>());
+					const auto tagCount = s.read<uint32_t>();
+
+					std::set<Tag> tags;
+					for(uint32_t t=0; t<tagCount; ++t)
+						tags.insert(s.readString());
+
+					resultTags.insert({tagType, tags});
+				}
+			}
+			else
+				return false;
+
+			if(auto s = stream.tryReadChunk(chunks::g_patchManagerTagColors, 1))
+			{
+				const auto tagTypeCount = s.read<uint32_t>();
+
+				for(uint32_t i=0; i<tagTypeCount; ++i)
+				{
+					const auto tagType = static_cast<TagType>(s.read<uint8_t>());
+					std::unordered_map<Tag, Color> tagToColor;
+
+					const auto count = s.read<uint32_t>();
+					for(uint32_t c=0; c<count; ++c)
+					{
+						const auto tag = s.readString();
+						const auto color = s.read<Color>();
+						tagToColor.insert({tag, color});
+					}
+					resultTagColors.insert({tagType, tagToColor});
+				}
+			}
+			else
+				return false;
+
+			if(auto s = stream.tryReadChunk(chunks::g_patchManagerPatchModifications, 1))
+			{
+				const auto count = s.read<uint32_t>();
+
+				for(uint32_t i=0; i<count; ++i)
+				{
+					auto key = PatchKey::fromString(s.readString());
+
+					const auto itDS = resultDataSources.find(*key.source);
+					if(itDS != resultDataSources.end())
+						key.source = itDS->second;
+
+					auto mods = std::make_shared<PatchModifications>();
+					if(!mods->read(s))
+						return false;
+
+					resultPatchModifications.insert({key, mods});
+
+					for (const auto& it : resultDataSources)
+					{
+						for (const auto& patch : it.second->patches)
+						{
+							if(*patch != key)
+								continue;
+
+							patch->modifications = mods;
+							mods->patch = patch;
+						}
 					}
 				}
 			}
+			else
+				return false;
+
+			m_dataSources = resultDataSources;
+			m_tags = resultTags;
+			m_tagColors = resultTagColors;
+			m_patchModifications = resultPatchModifications;
+
+			for (const auto& it: resultDataSources)
+			{
+				const auto& patches = it.second->patches;
+				updateSearches({patches.begin(), patches.end()});
+			}
+
+			{
+				std::unique_lock lockUi(m_uiMutex);
+
+				m_dirty.dataSources = true;
+				m_dirty.patches = true;
+
+				for (const auto& it : m_tags)
+					m_dirty.tags.insert(it.first);
+			}
+
+			m_cacheDirty = false;
+
+			return true;
 		}
-		else
+		catch(const std::range_error& e)
+		{
+			LOG("Failed to read patch manager cache, " << e.what());
 			return false;
-
-		m_dataSources = resultDataSources;
-		m_tags = resultTags;
-		m_tagColors = resultTagColors;
-		m_patchModifications = resultPatchModifications;
-
-		for (const auto& it: resultDataSources)
-		{
-			const auto& patches = it.second->patches;
-			updateSearches({patches.begin(), patches.end()});
 		}
-
-		{
-			std::unique_lock lockUi(m_uiMutex);
-
-			m_dirty.dataSources = true;
-			m_dirty.patches = true;
-
-			for (const auto& it : m_tags)
-				m_dirty.tags.insert(it.first);
-		}
-
-		m_cacheDirty = false;
-
-		return true;
 	}
 
 	void DB::saveCache()
@@ -1890,7 +1898,7 @@ namespace pluginLib::patchDB
 			std::shared_lock lockDS(m_dataSourcesMutex);
 			std::shared_lock lockP(m_patchesMutex);
 
-			synthLib::ChunkWriter cw(outStream, chunks::g_patchManager, 1);
+			synthLib::ChunkWriter cw(outStream, chunks::g_patchManager, 2);
 			{
 				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
 
@@ -1946,9 +1954,6 @@ namespace pluginLib::patchDB
 					const auto tagType = it.first;
 					const auto& tags = it.second;
 
-					if(tags.empty())
-						continue;
-
 					outStream.write(static_cast<uint8_t>(tagType));
 					outStream.write(static_cast<uint32_t>(tags.size()));
 
@@ -1967,9 +1972,6 @@ namespace pluginLib::patchDB
 				{
 					const auto tagType = it.first;
 					const auto& mapStringToColor = it.second;
-
-					if(mapStringToColor.empty())
-						continue;
 
 					outStream.write(static_cast<uint8_t>(tagType));
 					outStream.write(static_cast<uint32_t>(mapStringToColor.size()));

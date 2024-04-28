@@ -65,7 +65,7 @@ int main()
 
 	auto sendEncoder = [&](const uint8_t _encoder, const int8_t _delta)
 	{
-		synthLib::SMidiEvent e;
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Host);
 		constexpr uint8_t idm = 0x26;	// RMTP
 		const uint8_t uu = _encoder;	// encoder
 		const uint8_t mm = 64 + _delta;	// movement
@@ -144,7 +144,7 @@ int main()
 		sleep();
 		LOG("PROGRAM CHANGE " << static_cast<int>(p));
 		sleep();
-		uc->sendMidiEvent({synthLib::M_PROGRAMCHANGE, p, 0});
+		uc->sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_PROGRAMCHANGE, p, 0});
 
 		processLength(128);
 
@@ -155,12 +155,12 @@ int main()
 				sleep();
 				LOG("NOTE ON " << static_cast<int>(note));
 				sleep();
-				uc->sendMidiEvent({synthLib::M_NOTEON, note, 127});
+				uc->sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_NOTEON, note, 127});
 				processLength(period);
 				sleep();
 				LOG("NOTE OFF " << static_cast<int>(note));
 				sleep();
-				uc->sendMidiEvent({synthLib::M_NOTEOFF, note, 127});
+				uc->sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_NOTEOFF, note, 127});
 				processLength(period);
 			}
 		}

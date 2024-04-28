@@ -241,6 +241,7 @@ namespace xt
 
 	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
 	{
+		append(_state, m_mode, ~0);
 		append(_state, m_global, wLib::IdxCommand);
 
 		append(_state, m_currentMulti, wLib::IdxCommand);
@@ -387,7 +388,21 @@ namespace xt
 
 	uint8_t* State::getMultiParameter(const SysEx& _data)
 	{
-		return getParameter(m_currentMulti, _data, DumpType::Multi);
+		const auto& dump = Dumps[static_cast<uint8_t>(DumpType::Multi)];
+
+		const auto idxH = _data[dump.idxParamIndexH];
+		const auto idxL = _data[dump.idxParamIndexL];
+		const auto val = _data[dump.idxParamValue];
+
+		if(idxH == 0)
+			return &m_currentMulti[dump.firstParamIndex + idxL];
+
+		constexpr auto inst0 = static_cast<uint8_t>(MultiParameter::Inst0First);
+		constexpr auto inst1 = static_cast<uint8_t>(MultiParameter::Inst1First);
+
+		const auto idx = inst0 + idxL * (inst1 - inst0);
+
+		return &m_currentMulti[idx];
 	}
 
 	uint8_t* State::getGlobalParameter(const SysEx& _data)
@@ -644,14 +659,14 @@ namespace xt
 
 	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
 	{
-		synthLib::SMidiEvent e;
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
 	}
 
 	void State::sendSysex(const SysEx& _data) const
 	{
-		synthLib::SMidiEvent e;
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
 		m_xt.sendMidiEvent(e);
 	}

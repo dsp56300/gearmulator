@@ -19,7 +19,7 @@ if(APPLE)
 	message("CMAKE_OSX_DEPLOYMENT_TARGET: " ${CMAKE_OSX_DEPLOYMENT_TARGET})
 endif()
 
-project(gearmulator VERSION 1.3.12)
+project(gearmulator VERSION 1.3.13)
 
 include(base.cmake)
 include(CTest)
@@ -66,5 +66,6 @@ set(CPACK_COMPONENTS_GROUPING IGNORE)
 set(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 set(CPACK_RPM_COMPONENT_INSTALL ON)
+set(CPACK_PACKAGING_INSTALL_PREFIX /usr/local)
 
 include(CPack)

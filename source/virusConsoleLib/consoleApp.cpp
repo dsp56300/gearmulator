@@ -205,7 +205,7 @@ void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 		if(!m_demo)
 		{
 			LOG("Sending Note On");
-			m_uc->sendMIDI(SMidiEvent(0x90, 60, 0x5f));		// Note On
+			m_uc->sendMIDI(SMidiEvent(MidiEventSource::Host, 0x90, 60, 0x5f));		// Note On
 			m_uc->sendPendingMidiEvents(std::numeric_limits<uint32_t>::max());
 		}
 		break;

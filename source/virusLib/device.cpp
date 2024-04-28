@@ -18,9 +18,6 @@ namespace virusLib
 		: m_rom(std::move(_rom))
 		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
-		if(!m_rom.isValid())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware ROM file (firmware.bin) is required, but was not found.");
-
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);

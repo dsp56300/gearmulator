@@ -15,6 +15,7 @@ set(ASSETS_xtDefault
 	${CMAKE_CURRENT_LIST_DIR}/xtknob_small.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageArp.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageMod.png
+	${CMAKE_CURRENT_LIST_DIR}/xtPageMulti.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageOsc.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPagePatchManager.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageWave.png

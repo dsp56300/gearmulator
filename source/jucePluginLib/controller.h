@@ -84,7 +84,7 @@ namespace pluginLib
 		bool sendSysEx(const std::string& _packetName) const;
 		bool sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 		void sendMidiEvent(const synthLib::SMidiEvent& _ev) const;
-		void sendMidiEvent(uint8_t _a, uint8_t _b, uint8_t _c, uint32_t _offset = 0, synthLib::MidiEventSource _source = synthLib::MidiEventSourceEditor) const;
+		void sendMidiEvent(uint8_t _a, uint8_t _b, uint8_t _c, uint32_t _offset = 0, synthLib::MidiEventSource _source = synthLib::MidiEventSource::Editor) const;
 
 		bool combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const;
 
@@ -98,12 +98,12 @@ namespace pluginLib
 
         	bool operator<(const ParamIndex& _p) const
             {
-				if (page < _p.page)         return false;
-				if (page > _p.page)         return true;
-				if (partNum < _p.partNum)   return false;
-				if (partNum > _p.partNum)   return true;
-				if (paramNum < _p.paramNum) return false;
-				if (paramNum > _p.paramNum) return true;
+				if (page < _p.page)         return true;
+				if (page > _p.page)         return false;
+				if (partNum < _p.partNum)   return true;
+				if (partNum > _p.partNum)   return false;
+				if (paramNum < _p.paramNum) return true;
+				if (paramNum > _p.paramNum) return false;
 				return false;
 			}
 

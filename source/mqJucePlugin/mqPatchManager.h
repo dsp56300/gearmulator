@@ -12,7 +12,7 @@ namespace mqJucePlugin
 	{
 	public:
 		PatchManager(Editor& _editor, juce::Component* _root, const juce::File& _dir);
-		~PatchManager();
+		~PatchManager() override;
 
 		// PatchManager overrides
 		bool requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part) override;

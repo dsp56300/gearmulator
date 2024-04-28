@@ -22,7 +22,7 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir) : DB(_dir), m_editor(_editor), m_state(*this)
+	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes) : DB(_dir), m_editor(_editor), m_state(*this)
 	{
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;
@@ -40,7 +40,7 @@ namespace jucePluginEditorLib::patchManager
 
 		// 1st column
 		auto w = weight(33);
-		m_treeDS = new DatasourceTree(*this);
+		m_treeDS = new DatasourceTree(*this, _groupTypes);
 		m_treeDS->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
 		m_searchTreeDS = new SearchTree(*m_treeDS);
@@ -119,7 +119,7 @@ namespace jucePluginEditorLib::patchManager
 		addAndMakeVisible(m_resizerBarB);
 		addAndMakeVisible(m_resizerBarC);
 
-		resized();
+		PatchManager::resized();
 
 		startTimer(200);
 	}

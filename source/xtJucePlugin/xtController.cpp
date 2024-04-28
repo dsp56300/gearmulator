@@ -45,6 +45,14 @@ namespace
 	}
 
 	constexpr uint32_t g_pageMulti = 10;
+	constexpr uint32_t g_pageMultiInst0 = 11;
+	constexpr uint32_t g_pageMultiInst1 = 12;
+	constexpr uint32_t g_pageMultiInst2 = 13;
+	constexpr uint32_t g_pageMultiInst3 = 14;
+	constexpr uint32_t g_pageMultiInst4 = 15;
+	constexpr uint32_t g_pageMultiInst5 = 16;
+	constexpr uint32_t g_pageMultiInst6 = 17;
+	constexpr uint32_t g_pageMultiInst7 = 18;
 	constexpr uint32_t g_pageGlobal = 20;
 	constexpr uint32_t g_pageSoftKnobs = 30;
 	constexpr uint32_t g_pageControllers = 40;
@@ -491,20 +499,30 @@ void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, con
 		}
 		return;
 	case g_pageMulti:
+	case g_pageMultiInst0:
+	case g_pageMultiInst1:
+	case g_pageMultiInst2:
+	case g_pageMultiInst3:
+	case g_pageMultiInst4:
+	case g_pageMultiInst5:
+	case g_pageMultiInst6:
+	case g_pageMultiInst7:
 		{
 			uint8_t v;
 
 			if (!combineParameterChange(v, g_midiPacketNames[MultiDump], _parameter, _value))
 				return;
 
-			uint32_t idx = desc.index;
+			uint8_t page;
 
-			if(desc.page > 100)
-				idx += (static_cast<uint32_t>(xt::MultiParameter::Inst1First) - static_cast<uint32_t>(xt::MultiParameter::Inst0First)) * (desc.page - 101);
+			if(desc.page > g_pageMulti)
+				page = desc.page - g_pageMultiInst0;
+			else
+				page = static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer);
 
 			data.insert(std::make_pair(pluginLib::MidiDataType::Part, _parameter.getPart()));
-			data.insert(std::make_pair(pluginLib::MidiDataType::Page, idx >> 7));
-			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, idx & 0x7f));
+			data.insert(std::make_pair(pluginLib::MidiDataType::Page, page));
+			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterIndex, desc.index));
 			data.insert(std::make_pair(pluginLib::MidiDataType::ParameterValue, v));
 
 			sendSysEx(MultiParameterChange, data);

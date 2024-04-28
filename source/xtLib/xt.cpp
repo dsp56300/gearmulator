@@ -17,7 +17,7 @@ namespace xt
 		// create hardware, will use in-memory ROM if no ROM provided
 		const auto romFile = synthLib::findROM(g_romSize, g_romSize);
 		if(romFile.empty())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Failed to find device ROM");
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Failed to find XT operating system file (.bin)");
 
 		MCLOG("Boot using ROM " << romFile);
 

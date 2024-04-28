@@ -143,9 +143,8 @@ namespace pluginLib
 
 	void Controller::sendSysEx(const pluginLib::SysEx& msg) const
     {
-        synthLib::SMidiEvent ev;
+        synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
         ev.sysex = msg;
-		ev.source = synthLib::MidiEventSourceEditor;
 		sendMidiEvent(ev);
     }
 
@@ -154,9 +153,9 @@ namespace pluginLib
         m_processor.addMidiEvent(_ev);
     }
 
-	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSourceEditor*/) const
+	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSource::Editor*/) const
 	{
-        m_processor.addMidiEvent(synthLib::SMidiEvent(_a, _b, _c, _offset, _source));
+        m_processor.addMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
 	}
 
 	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const

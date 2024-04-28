@@ -6,6 +6,7 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "state.h"
+#include "types.h"
 
 namespace jucePluginEditorLib
 {
@@ -31,7 +32,9 @@ namespace jucePluginEditorLib::patchManager
 	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::ChangeListener
 	{
 	public:
-		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir);
+		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
+
+		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;
 
 		void timerCallback() override;

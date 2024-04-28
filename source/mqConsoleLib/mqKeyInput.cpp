@@ -66,19 +66,19 @@ namespace mqConsoleLib
 			case Key::F12:				encRotate(EncoderType::Matrix4, 1);			break;
 			case '7':
 				// Midi Note On
-				mq.sendMidiEvent({synthLib::M_NOTEON, synthLib::Note_C3, 0x7f});
+				mq.sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_NOTEON, synthLib::Note_C3, 0x7f});
 				break;
 			case '8':	
 				// Midi Note Off
-				mq.sendMidiEvent({synthLib::M_NOTEOFF, synthLib::Note_C3, 0x7f});
+				mq.sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_NOTEOFF, synthLib::Note_C3, 0x7f});
 				break;
 			case '9':
 				// Modwheel Max
-				mq.sendMidiEvent({synthLib::M_CONTROLCHANGE, synthLib::MC_MODULATION, 0x7f});
+				mq.sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_CONTROLCHANGE, synthLib::MC_MODULATION, 0x7f});
 				break;
 			case '0':	
 				// Modwheel Min
-				mq.sendMidiEvent({synthLib::M_CONTROLCHANGE, synthLib::MC_MODULATION, 0x0});
+				mq.sendMidiEvent({synthLib::MidiEventSource::Host, synthLib::M_CONTROLCHANGE, synthLib::MC_MODULATION, 0x0});
 				break;
 			case '!':
 				hw->getDSP(0).dumpPMem("dspA_dump_P_" + std::to_string(hw->getUcCycles()));

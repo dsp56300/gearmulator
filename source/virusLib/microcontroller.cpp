@@ -1,5 +1,4 @@
 #include <vector>
-#include <chrono>
 #include <thread>
 #include <cstring>	// memcpy
 #include <cmath>	// floor/abs
@@ -499,8 +498,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 		if(!isValid(_dump))
 			return;
 
-		SMidiEvent ev;
-		ev.source = _source;
+		SMidiEvent ev(_source);
 
 		auto& response = ev.sysex;
 
@@ -585,8 +583,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 	auto buildGlobalResponse = [&](const uint8_t _param)
 	{
-		SMidiEvent ev;
-		ev.source = _source;
+		SMidiEvent ev(_source);
 		auto& response = ev.sysex;
 
 		buildResponseHeader(ev);
@@ -643,8 +640,8 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 
 		const uint8_t channel = _part == SINGLE ? 0 : _part;
 
-		for (const auto cc : g_pageA)	_responses.emplace_back(M_CONTROLCHANGE + channel, cc, single[cc], 0, _source);
-		for (const auto cc : g_pageB)	_responses.emplace_back(M_POLYPRESSURE, cc, single[cc + 128], 0, _source);
+		for (const auto cc : g_pageA)	 _responses.emplace_back(_source, M_CONTROLCHANGE + channel, cc, single[cc], 0);
+		for (const auto cc : g_pageB)	 _responses.emplace_back(_source, M_POLYPRESSURE, cc, single[cc + 128], 0);
 	};
 
 	auto enqueue = [&]
@@ -816,11 +813,10 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				}
 
 				// bounce back to UI if not sent by editor
-				if(_source != MidiEventSourceEditor)
+				if(_source != MidiEventSource::Editor)
 				{
-					SMidiEvent ev;
+					SMidiEvent ev(MidiEventSource::Editor);		// don't send to output
 					ev.sysex = _data;
-					ev.source = MidiEventSourceEditor;	// don't send to output
 					_responses.push_back(ev);
 				}
 
@@ -1075,9 +1071,9 @@ bool Microcontroller::getState(std::vector<unsigned char>& _state, const StateTy
 	std::vector<SMidiEvent> responses;
 
 	if(_type == StateTypeGlobal)
-		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
+		sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_TOTAL, M_ENDOFSYSEX}, responses, MidiEventSource::Internal);
 
-	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, responses, MidiEventSourcePlugin);
+	sendSysex({M_STARTOFSYSEX, 0x00, 0x20, 0x33, 0x01, deviceId, REQUEST_ARRANGEMENT, M_ENDOFSYSEX}, responses, MidiEventSource::Internal);
 
 	if(responses.empty())
 		return false;
@@ -1105,9 +1101,9 @@ bool Microcontroller::setState(const std::vector<unsigned char>& _state, const S
 			{
 				if(_state[i] == 0xf7)
 				{
-					SMidiEvent ev;
+					SMidiEvent ev(MidiEventSource::Internal);
 					ev.sysex.resize(i + 1 - begin);
-					memcpy(&ev.sysex[0], &_state[begin], ev.sysex.size());
+					memcpy(ev.sysex.data(), &_state[begin], ev.sysex.size());
 					events.emplace_back(ev);
 					break;
 				}
@@ -1132,7 +1128,7 @@ bool Microcontroller::setState(const std::vector<synthLib::SMidiEvent>& _events)
 	{
 		if(!event.sysex.empty())
 		{
-			sendSysex(event.sysex, unusedResponses, MidiEventSourcePlugin);
+			sendSysex(event.sysex, unusedResponses, MidiEventSource::Internal);
 			unusedResponses.clear();
 		}
 		else

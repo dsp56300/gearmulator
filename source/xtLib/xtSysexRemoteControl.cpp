@@ -23,7 +23,7 @@ namespace xt
 		std::array<char, 80> lcdData{};
 		m_mq.readLCD(lcdData);
 
-		synthLib::SMidiEvent ev;
+		synthLib::SMidiEvent ev(synthLib::MidiEventSource::Internal);
 		createSysexHeader(ev.sysex, SysexCommand::EmuLCD);
 		ev.sysex.insert(ev.sysex.end(), lcdData.begin(), lcdData.end());
 
@@ -41,7 +41,7 @@ namespace xt
 				buttons |= (1<<i);
 		}
 
-		auto& ev = _dst.emplace_back();
+		auto& ev = _dst.emplace_back(synthLib::MidiEventSource::Internal);
 
 		createSysexHeader(ev.sysex, SysexCommand::EmuButtons);
 
@@ -60,7 +60,7 @@ namespace xt
 			if(m_mq.getLedState(static_cast<LedType>(i)))
 				leds |= (1<<i);
 		}
-		auto& ev = _dst.emplace_back();
+		auto& ev = _dst.emplace_back(synthLib::MidiEventSource::Internal);
 		auto& response = ev.sysex;
 		createSysexHeader(response, SysexCommand::EmuLEDs);
 		response.push_back((leds>>24) & 0xff);
@@ -72,7 +72,7 @@ namespace xt
 
 	void SysexRemoteControl::sendSysexRotaries(std::vector<synthLib::SMidiEvent>& _dst) const
 	{
-/*		auto& ev= _dst.emplace_back();
+/*		auto& ev= _dst.emplace_back(synthLib::MidiEventSource::Internal);
 		auto& response = ev.sysex;
 
 		createSysexHeader(response, SysexCommand::EmuRotaries);

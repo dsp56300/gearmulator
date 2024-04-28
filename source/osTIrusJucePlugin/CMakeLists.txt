@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(osTIrusJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	skins/TrancyTI/VirusTI_Trancy.json
 	parameterDescriptions_TI.json
 	OsTIrusEditorState.cpp
 	OsTIrusEditorState.h

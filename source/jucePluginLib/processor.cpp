@@ -90,8 +90,7 @@ namespace pluginLib
 				syx.push_back(raw[i]);
 			}
 			syx.push_back(0xf7);
-			synthLib::SMidiEvent sm;
-			sm.source = synthLib::MidiEventSourcePlugin;
+			synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
 			sm.sysex = syx;
 			getController().parseSysexMessage(syx);
 
@@ -111,33 +110,29 @@ namespace pluginLib
 		}
 		else
 		{
+			synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
+
 			const auto count = message.getRawDataSize();
 			const auto* rawData = message.getRawData();
 			if (count >= 1 && count <= 3)
 			{
-				synthLib::SMidiEvent sm;
-				sm.source = synthLib::MidiEventSourcePlugin;
 				sm.a = rawData[0];
 				sm.b = count > 1 ? rawData[1] : 0;
 				sm.c = count > 2 ? rawData[2] : 0;
-				addMidiEvent(sm);
 			}
 			else
 			{
-				synthLib::SMidiEvent sm;
-				sm.source = synthLib::MidiEventSourcePlugin;
 				auto syx = SysEx();
 				for (int i = 0; i < count; i++)
-				{
 					syx.push_back(rawData[i]);
-				}
 				sm.sysex = syx;
-				addMidiEvent(sm);
 			}
+
+			addMidiEvent(sm);
 		}
 	}
 
-	pluginLib::Controller& Processor::getController()
+	Controller& Processor::getController()
 	{
 	    if (m_controller == nullptr)
 	        m_controller.reset(createController());
@@ -500,7 +495,7 @@ namespace pluginLib
 		{
 			const auto message = metadata.getMessage();
 
-			synthLib::SMidiEvent ev{};
+			synthLib::SMidiEvent ev(synthLib::MidiEventSource::Host);
 
 			if(message.isSysEx() || message.getRawDataSize() > 3)
 			{
@@ -578,7 +573,7 @@ namespace pluginLib
 
 	    for (auto& e : m_midiOut)
 	    {
-		    if (e.source == synthLib::MidiEventSourceEditor)
+		    if (e.source == synthLib::MidiEventSource::Editor)
 				continue;
 
 			auto toJuceMidiMessage = [&e]()

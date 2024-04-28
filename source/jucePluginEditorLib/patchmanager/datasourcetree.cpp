@@ -2,11 +2,9 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	DatasourceTree::DatasourceTree(PatchManager& _pm): Tree(_pm)
+	DatasourceTree::DatasourceTree(PatchManager& _pm, const std::initializer_list<GroupType>& _groupTypes) : Tree(_pm)
 	{
-		addGroup(GroupType::Favourites);
-		addGroup(GroupType::LocalStorage);
-		addGroup(GroupType::Factory);
-		addGroup(GroupType::DataSources);
+		for (const auto& groupType : _groupTypes)
+			addGroup(groupType);
 	}
 }

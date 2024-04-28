@@ -309,13 +309,13 @@ namespace synthLib
 
 		BinaryStream readChunk();
 		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
-		BinaryStream tryReadChunk(char const(&_4Cc)[N], uint32_t _versionMax = 1)
+		BinaryStream tryReadChunk(char const(&_4Cc)[N], const uint32_t _version = 1)
 		{
-			return tryReadChunkInternal(_4Cc, _versionMax);
+			return tryReadChunkInternal(_4Cc, _version);
 		}
 
 	private:
-		BinaryStream tryReadChunkInternal(const char* _4Cc, uint32_t _versionMax = 1);
+		BinaryStream tryReadChunkInternal(const char* _4Cc, uint32_t _version = 1);
 
 
 		// ___________________________________
