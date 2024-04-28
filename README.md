@@ -1,9 +1,17 @@
 # Gearmulator
 
-[![Build][s0]][l0]
+[![CMake][s0]][l0] [![Nightly][s1]][l1] ![GPLv3][s2] [![Discord][s3]][l3]
 
-[s0]: https://github.com/dsp56300/gearmulator/workflows/CMake/badge.svg
-[l0]: https://github.com/dsp56300/gearmulator/actions
+[s0]: https://github.com/dsp56300/gearmulator/actions/workflows/cmake.yml/badge.svg
+[l0]: https://github.com/dsp56300/gearmulator/actions/workflows/cmake.yml
+
+[s1]: https://github.com/dsp56300/gearmulator/actions/workflows/nightly.yml/badge.svg
+[l1]: https://github.com/dsp56300/gearmulator/actions/workflows/nightly.yml
+
+[s2]: https://img.shields.io/badge/license-GPLv3-blue.svg
+
+[s3]: https://img.shields.io/discord/829099347975208970?label=Discord
+[l3]: https://discord.gg/WJ9cxySnsM
 
 ## Emulation of classic VA synths of the late 90s/2000s that used the Motorola 56300 family DSP
 
