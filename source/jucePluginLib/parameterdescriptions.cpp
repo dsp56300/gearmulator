@@ -394,6 +394,9 @@ namespace pluginLib
 		const auto regions = json["regions"].getArray();
 		parseParameterRegions(errors, regions);
 
+		const auto controllers = json["controllerMap"].getArray();
+		parseControllerMap(errors, controllers);
+
 		auto res = errors.str();
 
 		if(!res.empty())
@@ -788,5 +791,72 @@ namespace pluginLib
 		}
 
 		m_regions.insert({id, ParameterRegion(id, name, std::move(paramMap))});
+	}
+
+	void ParameterDescriptions::parseControllerMap(std::stringstream& _errors, const juce::Array<juce::var>* _controllers)
+	{
+		if(!_controllers)
+			return;
+
+		for (const auto& controller : *_controllers)
+			parseController(_errors, controller);
+	}
+
+	void ParameterDescriptions::parseController(std::stringstream& _errors, const juce::var& _value)
+	{
+		const auto ccStr = _value["cc"].toString().toStdString();
+		const auto ppStr = _value["pp"].toString().toStdString();
+		const auto paramName = _value["param"].toString().toStdString();
+
+		if(ccStr.empty() && ppStr.empty())
+		{
+			_errors << "Controller needs to define control change (cc) or poly pressure (pp) parameter\n";
+			return;
+		}
+
+		static constexpr uint8_t Invalid = 0xff;
+
+		uint8_t cc = Invalid;
+		uint8_t pp = Invalid;
+
+		if(!ccStr.empty())
+		{
+			cc = static_cast<uint8_t>(::strtol(ccStr.c_str(), nullptr, 10));
+			if(cc < 0 || cc > 127)
+			{
+				_errors << "Controller needs to be in range 0-127, param " << paramName << '\n';
+				return;
+			}
+		}
+
+		if(!ppStr.empty())
+		{
+			pp = static_cast<uint8_t>(::strtol(ppStr.c_str(), nullptr, 10));
+			if(pp < 0 || pp > 127)
+			{
+				_errors << "Poly Pressure parameter needs to be in range 0-127, param " << paramName << '\n';
+				return;
+			}
+		}
+
+		if(paramName.empty())
+		{
+			_errors << "Target parameter name 'param' must not be empty\n";
+			return;
+		}
+
+		uint32_t paramIndex = 0;
+
+		if(!getIndexByName(paramIndex, paramName))
+		{
+			_errors << "Parameter with name " << paramName << " not found\n";
+			return;
+		}
+
+		if(cc != Invalid)
+			m_controllerMap[synthLib::M_CONTROLCHANGE][cc].push_back(paramIndex);
+
+		if(pp != Invalid)
+			m_controllerMap[synthLib::M_POLYPRESSURE][pp].push_back(paramIndex);
 	}
 }
