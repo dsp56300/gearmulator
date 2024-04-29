@@ -9,6 +9,11 @@
 #include "parameterlink.h"
 #include "parameterregion.h"
 
+namespace synthLib
+{
+	struct SMidiEvent;
+}
+
 namespace juce
 {
 	class var;
@@ -38,6 +43,8 @@ namespace pluginLib
 		const auto& getRegions() const { return m_regions; }
 
 		const ValueList* getValueList(const std::string& _key) const;
+
+		const std::vector<uint32_t>& getControlledParameters(const synthLib::SMidiEvent& _ev);
 
 	private:
 		std::string loadJson(const std::string& _jsonString);
