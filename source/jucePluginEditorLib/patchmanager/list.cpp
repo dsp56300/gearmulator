@@ -170,7 +170,7 @@ namespace jucePluginEditorLib::patchManager
 			{
 				menu.addItem("Remove selected", [this, s = std::move(selectedPatches)]
 				{
-					const std::vector patches(s.begin(), s.end());
+					const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
 					pluginLib::patchDB::TypedTags removeTags;
 
 					// converted "added" tags to "removed" tags
@@ -193,7 +193,7 @@ namespace jucePluginEditorLib::patchManager
 				{
 					if(showDeleteConfirmationMessageBox())
 					{
-						const std::vector patches(s.begin(), s.end());
+						const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
 						m_patchManager.removePatches(m_search->request.sourceNode, patches);
 					}
 				});
