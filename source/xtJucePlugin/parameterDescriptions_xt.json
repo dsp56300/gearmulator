@@ -23,7 +23,7 @@
  		{"index":3 , "name":"O1Detune"     , "isBipolar":true},
 
  		{"index":5 , "name":"O1BendRange"  , "min":0, "max":122, "toText":"pbrange"},
- 		{"index":6 , "name":"O1KeyTrack"   , "min":0, "max":76, "default":64, "toText":"keytrack76"},
+ 		{"index":6 , "name":"O1KeyTrack"   , "min":0, "max":76, "default":48, "toText":"keytrack77"},
  		{"index":7 , "name":"O1FmAmount"},
 
 		// Osc 2
@@ -33,7 +33,7 @@
 
  		{"index":16 , "name":"O2Sync"       , "min":0, "max":1, "toText":"offOn"},
  		{"index":17 , "name":"O2BendRange"  , "min":0, "max":122, "toText":"pbrange"},
- 		{"index":18 , "name":"O2KeyTrack"   , "min":0, "max":76, "default":64, "toText":"keytrack76"},
+ 		{"index":18 , "name":"O2KeyTrack"   , "min":0, "max":76, "default":48, "toText":"keytrack77"},
  		{"index":19 , "name":"O2Link"       , "min":0, "max":1, "toText":"offOn"},
 
 		// Wavetable
@@ -44,7 +44,7 @@
  		{"index":27, "name":"W1StartP", "min":0 , "max":127, "toText":"waveStartPhase"},
  		{"index":28, "name":"W1EnvAmount", "min":0 , "max":127, "isBipolar":true, "toText":"signed"},
  		{"index":29, "name":"W1EnvVelAmount", "min":0 , "max":127, "isBipolar":true, "toText":"signed"},
- 		{"index":30, "name":"W1Keytrack", "min":0 , "max":127, "toText":"keytrack127"},
+ 		{"index":30, "name":"W1Keytrack", "min":0 , "max":127, "default":64, "toText":"keytrack128"},
  		{"index":31, "name":"W1Limit", "min":0 , "max":1, "toText":"offOn"},
 
 		// Wave 2
@@ -52,7 +52,7 @@
  		{"index":37, "name":"W2StartP", "min":0 , "max":127, "toText":"waveStartPhase"},
  		{"index":38, "name":"W2EnvAmount", "min":0 , "max":127, "isBipolar":true, "toText":"signed"},
  		{"index":39, "name":"W2EnvVelAmount", "min":0 , "max":127, "isBipolar":true, "toText":"signed"},
- 		{"index":40, "name":"W2Keytrack", "min":0 , "max":127, "toText":"keytrack127"},
+ 		{"index":40, "name":"W2Keytrack", "min":0 , "max":127, "default":64, "toText":"keytrack128"},
  		{"index":41, "name":"W2Limit", "min":0 , "max":1, "toText":"offOn"},
  		{"index":42, "name":"W2Link", "min":0 , "max":1, "toText":"offOn"},
 
@@ -78,7 +78,7 @@
  		{"index":62, "name":"F1Cutoff"},
  		{"index":63, "name":"F1Resonance"},
  		{"index":64, "name":"F1Type", "min":0, "max":9, "isDiscrete":true, "toText":"filter1Type"},
- 		{"index":65, "name":"F1KeyTrack", "toText":"keytrack127"},
+ 		{"index":65, "name":"F1KeyTrack", "default":64, "toText":"keytrack128"},
  		{"index":66, "name":"F1EnvAmount", "toText":"signed", "default":64, "isBipolar":true},
  		{"index":67, "name":"F1EnvVelAmount", "toText":"signed", "default":64, "isBipolar":true},
 
@@ -86,7 +86,7 @@
 
  		{"index":73, "name":"F2Cutoff"},
  		{"index":74, "name":"F2Type", "min":0, "max":1, "isDiscrete":true, "toText":"filter2Type"},
- 		{"index":75, "name":"F2KeyTrack", "toText":"keytrack127"},
+ 		{"index":75, "name":"F2KeyTrack", "default":64, "toText":"keytrack128"},
 
 		{"index":76, "name":"EffectType", "min":0, "max":34, "toText":"effectType", "isDiscrete":true},
 
@@ -94,7 +94,7 @@
  		{"index":77, "name":"AmpVolume"},
 		
  		{"index":79, "name":"AmpVelocity", "isBipolar":true, "toText":"signed"},
- 		{"index":80, "name":"AmpKeytrack", "isBipolar":true, "toText":"keytrack127"},
+ 		{"index":80, "name":"AmpKeytrack", "isBipolar":true, "default":64, "toText":"keytrack128"},
 
  		{"index":81, "name":"EffectParamA"},
  		
@@ -103,7 +103,7 @@
 		{"index":83, "name":"EffectParamB"},
 
  		{"index":84, "name":"Pan", "isBipolar":true, "toText":"pan"},
- 		{"index":85, "name":"PanKeytrack", "isBipolar":true, "toText":"keytrack127"},
+ 		{"index":85, "name":"PanKeytrack", "isBipolar":true, "default":64, "toText":"keytrack128"},
  		{"index":86, "name":"EffectParamC"},
 		
 		// Glide
@@ -854,27 +854,20 @@
 			"C8", "C#8", "D8", "D#8", "E8", "F8", "F#8", "G8"
 		],
 
-		// TODO
-		"keytrack76":
+		"keytrack77":
 		[
-			"-200%", "-197%", "-194%", "-191%", "-188%", "-185%", "-182%", "-179%",
-			"-175%", "-172%", "-169%", "-166%", "-163%", "-160%", "-157%", "-154%",
-			"-150%", "-147%", "-144%", "-141%", "-138%", "-135%", "-132%", "-129%",
-			"-125%", "-122%", "-119%", "-116%", "-113%", "-110%", "-107%", "-104%",
-			"-100%", "-97%", "-94%", "-91%", "-88%", "-85%", "-82%", "-79%",
-			"-75%", "-72%", "-69%", "-66%", "-63%", "-60%", "-57%", "-54%",
-			"-50%", "-47%", "-44%", "-41%", "-38%", "-35%", "-32%", "-29%",
-			"-25%", "-22%", "-19%", "-16%", "-13%", "-10%", "-7%", "-4%",
-			"0%", "+3%", "+6%", "+9%", "+12%", "+15%", "+18%", "+21%",
-			"+25%", "+28%", "+31%", "+34%", "+37%", "+40%", "+43%", "+46%",
-			"+50%", "+53%", "+56%", "+59%", "+62%", "+65%", "+68%", "+71%",
-			"+75%", "+78%", "+81%", "+84%", "+87%", "+90%", "+93%", "+96%",
-			"+100%", "+103%", "+106%", "+109%", "+112%", "+115%", "+118%", "+121%",
-			"+125%", "+128%", "+131%", "+134%", "+137%", "+140%", "+143%", "+146%",
-			"+150%", "+153%", "+156%", "+159%", "+162%", "+165%", "+168%", "+171%",
-			"+175%", "+178%", "+181%", "+184%", "+187%", "+190%", "+193%", "+197%"
+			"-100%", "-95%", "-90%", "-85%", "-80%", "-75%", "-70%", "-65%",
+			"-60%", "-55%", "-50%", "-45%", "-40%", "-35%", "-30%", "-25%",
+			"-20%", "-15%", "-10%", "-5%", "0%", "5%", "10%", "15%", 
+			"20%", "25%", "30%", "35%", "40%", "45%", "50%", "55%", 
+			"60%", "65%", "70%", "75%", "80%", "85%", "90%", "91%", 
+			"92%", "93%", "94%", "95%", "96%", "97%", "98%", "99%", 
+			"100%", "101%", "102%", "103%", "104%", "105%", "106%", "107%", 
+			"108%", "109%", "110%", "115%", "120%", "125%", "130%", "135%", 
+			"140%", "145%", "150%", "155%", "160%", "165%", "170%", "175%", 
+			"180%", "185%", "190%", "195%", "200%"
 		],
-		"keytrack127":
+		"keytrack128":
 		[
 			"-200%", "-197%", "-194%", "-191%", "-188%", "-185%", "-182%", "-179%",
 			"-175%", "-172%", "-169%", "-166%", "-163%", "-160%", "-157%", "-154%",
