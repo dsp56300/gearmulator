@@ -152,7 +152,7 @@ namespace jucePluginEditorLib::patchManager
 				const auto s = getPatchManager().getSearch(getSearchHandle());
 				if(s)
 				{
-					std::vector patches(s->results.begin(), s->results.end());
+					std::vector<pluginLib::patchDB::PatchPtr> patches(s->results.begin(), s->results.end());
 					getPatchManager().exportPresets(std::move(patches), _fileType);
 				}
 			}));

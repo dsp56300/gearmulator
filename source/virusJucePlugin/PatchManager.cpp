@@ -289,7 +289,7 @@ namespace genericVirusUI
 
 						while(addr + 0x100 <= static_cast<ptrdiff_t>(data.size()))
 						{
-							std::vector chunk(data.begin() + addr, data.begin() + addr + 0x100);
+							std::vector<uint8_t> chunk(data.begin() + addr, data.begin() + addr + 0x100);
 
 							// validate
 //							const auto idxH = chunk[2];

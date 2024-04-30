@@ -9,6 +9,11 @@
 #include "parameterlink.h"
 #include "parameterregion.h"
 
+namespace synthLib
+{
+	struct SMidiEvent;
+}
+
 namespace juce
 {
 	class var;
@@ -39,6 +44,8 @@ namespace pluginLib
 
 		const ValueList* getValueList(const std::string& _key) const;
 
+		const std::vector<uint32_t>& getControlledParameters(const synthLib::SMidiEvent& _ev);
+
 	private:
 		std::string loadJson(const std::string& _jsonString);
 		void parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets);
@@ -50,11 +57,15 @@ namespace pluginLib
 		void parseParameterRegions(std::stringstream& _errors, const juce::Array<juce::var>* _regions);
 		void parseParameterRegion(std::stringstream& _errors, const juce::var& _value);
 
+		void parseControllerMap(std::stringstream& _errors, const juce::Array<juce::var>* _controllers);
+		void parseController(std::stringstream& _errors, const juce::var& _value);
+
 		std::unordered_map<std::string, ValueList> m_valueLists;
 		std::vector<Description> m_descriptions;
 		std::unordered_map<std::string, uint32_t> m_nameToIndex;
 		std::unordered_map<std::string, MidiPacket> m_midiPackets;
 		std::vector<ParameterLink> m_parameterLinks;
 		std::unordered_map<std::string, ParameterRegion> m_regions;
+		std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<uint32_t>>> m_controllerMap;	// type (control change, poly pressure) => index (modwheel, main vol, ...) => parameter index
 	};
 }

@@ -18,7 +18,7 @@ namespace pluginLib::patchDB
 
 		// note that this does NOT sort the patches member, it is a set that cannot be sorted, we only generate consecutive program numbers here
 
-		std::vector patchesVector(patches.begin(), patches.end());
+		std::vector<PatchPtr> patchesVector(patches.begin(), patches.end());
 
 		sortByProgram(patchesVector);
 
@@ -96,7 +96,7 @@ namespace pluginLib::patchDB
 
 	bool DataSource::movePatchesTo(const uint32_t _position, const std::vector<PatchPtr>& _patches)
 	{
-		std::vector patchesVec(patches.begin(), patches.end());
+		std::vector<PatchPtr> patchesVec(patches.begin(), patches.end());
 		sortByProgram(patchesVec);
 
 		createConsecutiveProgramNumbers(patchesVec);
