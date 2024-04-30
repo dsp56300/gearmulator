@@ -52,6 +52,7 @@ namespace xt
 		IdxSingleParamFirst = 7,
 		IdxSingleChecksumStart = IdxSingleParamFirst,
 		IdxMultiParamFirst  = IdxSingleParamFirst,
+		IdxMultiChecksumStart = IdxMultiParamFirst,
 		IdxGlobalParamFirst = wLib::IdxBuffer,
 		IdxModeParamFirst = wLib::IdxBuffer,
 

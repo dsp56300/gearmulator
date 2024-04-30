@@ -183,7 +183,7 @@ namespace pluginLib
 
 						if(checksum != s)
 						{
-							LOG("Packet checksum error, calculated " << std::hex << static_cast<int>(checksum) << " but data contains " << static_cast<int>(s));
+							LOG("Packet checksum error, calculated " << std::hex << static_cast<int>(checksum) << " but data contains " << static_cast<int>(s) << ", packet type " << m_name);
 							if(!_ignoreChecksumErrors)
 								return false;
 						}

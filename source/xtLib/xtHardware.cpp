@@ -1,6 +1,5 @@
 #include "xtHardware.h"
 
-#include "../synthLib/midiTypes.h"
 #include "../synthLib/midiBufferParser.h"
 #include "../synthLib/deviceException.h"
 
@@ -8,15 +7,9 @@
 
 namespace xt
 {
-	constexpr uint32_t g_syncEsaiFrameRate = 8;
-	constexpr uint32_t g_syncHaltDspEsaiThreshold = 16;
-
-	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
-	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
-
-	Hardware::Hardware(std::string _romFilename)
-		: m_romFileName(std::move(_romFilename))
-		, m_rom(m_romFileName, nullptr)
+	Hardware::Hardware(const std::string& _romFilename)
+		: wLib::Hardware(40000)
+		, m_rom(_romFilename, nullptr)
 		, m_uc(m_rom)
 		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
 		, m_midi(m_uc.getQSM())
@@ -35,16 +28,6 @@ namespace xt
 		processUcCycle();
 	}
 	
-	void Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
-	{
-		m_midiIn.push_back(_ev);
-	}
-
-	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
-	{
-		m_midi.readTransmitBuffer(_data);
-	}
-
 	void Hardware::resetMidiCounter()
 	{
 		// wait for DSP to enter blocking state
@@ -58,45 +41,6 @@ namespace xt
 			std::this_thread::yield();
 
 		m_midiOffsetCounter = 0;
-	}
-
-	void Hardware::hdiProcessUCtoDSPNMIIrq()
-	{
-		// QS6 is connected to DSP NMI pin but I've never seen this being triggered
-#if SUPPORT_NMI_INTERRUPT
-		const uint8_t requestNMI = m_uc.requestDSPinjectNMI();
-
-		if(m_requestNMI && !requestNMI)
-		{
-//			LOG("uc request DSP NMI");
-			m_dsps.front().hdiSendIrqToDSP(dsp56k::Vba_NMI);
-
-			m_requestNMI = requestNMI;
-		}
-#endif
-	}
-
-	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
-	{
-		const auto dspHalted = m_haltDSP;
-
-		resumeDSP();
-
-		while(_continue())
-		{
-			if(m_processAudio)
-			{
-				std::this_thread::yield();
-			}
-			else
-			{
-				std::unique_lock uLock(m_esaiFrameAddedMutex);
-				m_esaiFrameAddedCv.wait(uLock);
-			}
-		}
-
-		if(dspHalted)
-			haltDSP();
 	}
 
 	void Hardware::initVoiceExpansion()
@@ -114,32 +58,9 @@ namespace xt
 
 		esaiA.setCallback([&](dsp56k::Audio*)
 		{
-/*			auto& dsp = m_dsps.front().dsp();
-			auto& mem = dsp.memory();
-			mem.saveAssembly("xt_dspA.asm", 0, mem.sizeP(), true, false, dsp.getPeriph(0), dsp.getPeriph(1));
-*/
 			m_bootCompleted = true;
-			++m_esaiFrameIndex;
 
-			processMidiInput();
-
-			if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
-				m_esaiFrameAddedCv.notify_one();
-
-			m_requestedFramesAvailableMutex.lock();
-
-			if(m_requestedFrames && esaiA.getAudioOutputs().size() >= m_requestedFrames)
-			{
-				m_requestedFramesAvailableMutex.unlock();
-				m_requestedFramesAvailableCv.notify_one();
-			}
-			else
-			{
-				m_requestedFramesAvailableMutex.unlock();
-			}
-
-			std::unique_lock uLock(m_haltDSPmutex);
-			m_haltDSPcv.wait(uLock, [&]{ return m_haltDSP == false; });
+			onEsaiCallback(esaiA);
 		}, 0);
 	}
 
@@ -153,8 +74,6 @@ namespace xt
 
 		for (auto& dsp : m_dsps)
 			dsp.transferHostFlagsUc2Dsdp();
-
-		hdiProcessUCtoDSPNMIIrq();
 
 		for (auto& dsp : m_dsps)
 			dsp.hdiTransferDSPtoUC();
@@ -170,97 +89,6 @@ namespace xt
 				}
 			}
 			m_uc.notifyDSPBooted();
-		}
-	}
-
-	void Hardware::haltDSP()
-	{
-		if(m_haltDSP)
-			return;
-
-		std::lock_guard uLockHalt(m_haltDSPmutex);
-		m_haltDSP = true;
-	}
-
-	void Hardware::resumeDSP()
-	{
-		if(!m_haltDSP)
-			return;
-
-		{
-			std::lock_guard uLockHalt(m_haltDSPmutex);
-			m_haltDSP = false;
-		}
-		m_haltDSPcv.notify_one();
-	}
-
-	void Hardware::syncUcToDSP()
-	{
-		if(m_remainingUcCycles > 0)
-			return;
-
-		// we can only use ESAI to clock the uc once it has been enabled
-		if(m_esaiFrameIndex <= 0)
-			return;
-
-		if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
-		{
-			resumeDSP();
-			std::unique_lock uLock(m_esaiFrameAddedMutex);
-			m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
-		}
-
-		const auto esaiFrameIndex = m_esaiFrameIndex;
-
-		const auto ucClock = m_uc.getSim().getSystemClockHz();
-
-		constexpr double divInv = 1.0 / 40000.0;
-		const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
-
-		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
-
-		m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
-		m_remainingUcCycles += static_cast<int64_t>(m_remainingUcCyclesD);
-		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
-
-		if(esaiDelta > g_syncHaltDspEsaiThreshold)
-		{
-			haltDSP();
-		}
-		else
-		{
-			resumeDSP();
-		}
-
-		m_lastEsaiFrameIndex = esaiFrameIndex;
-	}
-
-	void Hardware::processMidiInput()
-	{
-		++m_midiOffsetCounter;
-
-		while(!m_midiIn.empty())
-		{
-			const auto& e = m_midiIn.front();
-
-			if(e.offset > m_midiOffsetCounter)
-				break;
-
-			if(!e.sysex.empty())
-			{
-				m_midi.writeMidi(e.sysex);
-			}
-			else
-			{
-				m_midi.writeMidi(e.a);
-				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
-				if (len > 1)
-					m_midi.writeMidi(e.b);
-				if (len > 2)
-					m_midi.writeMidi(e.c);
-			}
-
-			m_midiIn.pop_front();
 		}
 	}
 
