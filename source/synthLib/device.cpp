@@ -82,7 +82,7 @@ namespace synthLib
 			return preferred.front();
 
 		// find the lowest possible samplerate that is higher than the host samplerate
-		const std::set samplerates(preferred.begin(), preferred.end());
+		const std::set<float> samplerates(preferred.begin(), preferred.end());
 
 		for (const float sr : preferred)
 		{
