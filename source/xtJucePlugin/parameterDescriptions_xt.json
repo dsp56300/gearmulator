@@ -1554,7 +1554,7 @@
 			{"type": "null"},
 			{"type": "null"},
 
-			{"type": "checksum", "first": 5, "last": 262},
+			{"type": "checksum", "first": 7, "last": 262},
 			{"type": "byte", "value": "f7"}
 		],
 		"globaldump": [
@@ -1597,7 +1597,7 @@
 			{"type": "null"},					// Reserved30,
 			{"type": "null"},					// Reserved31
 
-			{"type": "checksum", "first": 5, "last": 37},
+			{"type": "checksum", "first": 5, "last": 36},
 			{"type": "byte", "value": "f7"}
 		],
 

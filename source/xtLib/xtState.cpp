@@ -31,11 +31,36 @@ namespace xt
 		for (const auto& message : messages)
 			receive(nop, message, Origin::External);
 
-		// if device receives a multi, it switches to multi mode. Switch back to single mode if single mode was requested
-//		if(getGlobalParameter(GlobalParameter::SingleMultiMode) == 0)
-//			sendGlobalParameter(GlobalParameter::SingleMultiMode, 0);
-
 		return true;
+	}
+
+	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
+	{
+		append(_state, m_mode, ~0);
+		append(_state, m_global, wLib::IdxCommand);
+
+		const auto multiMode = isMultiMode();
+
+		// if we are in multimode, write multis last, otherwise, write singles last
+		// This causes the relevant things to be activated last when loading
+		if(multiMode)
+		{
+			for (const auto& s: m_currentInstrumentSingles)
+				append(_state, s, IdxSingleChecksumStart);
+			append(_state, m_currentMulti, IdxMultiChecksumStart);
+			for (const auto& s: m_currentMultiSingles)
+				append(_state, s, IdxSingleChecksumStart);
+		}
+		else
+		{
+			append(_state, m_currentMulti, IdxMultiChecksumStart);
+			for (const auto& s: m_currentMultiSingles)
+				append(_state, s, IdxSingleChecksumStart);
+			for (const auto& s: m_currentInstrumentSingles)
+				append(_state, s, IdxSingleChecksumStart);
+		}
+
+		return !_state.empty();
 	}
 
 	bool State::receive(Responses& _responses, const synthLib::SMidiEvent& _data, Origin _sender)
@@ -239,24 +264,6 @@ namespace xt
 		}
 	}
 
-	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
-	{
-		append(_state, m_mode, ~0);
-		append(_state, m_global, wLib::IdxCommand);
-
-		append(_state, m_currentMulti, wLib::IdxCommand);
-
-		const auto multiMode = isMultiMode();
-
-		for(size_t i=0; i<m_currentMultiSingles.size(); ++i)
-		{
-			auto s = (multiMode || i >= m_currentInstrumentSingles.size()) ? m_currentMultiSingles[i] : m_currentInstrumentSingles[i];
-			append(_state, s, IdxSingleChecksumStart);
-		}
-
-		return !_state.empty();
-	}
-
 	bool State::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
 		return loadState(_state);
@@ -394,13 +401,13 @@ namespace xt
 		const auto idxL = _data[dump.idxParamIndexL];
 		const auto val = _data[dump.idxParamValue];
 
-		if(idxH == 0)
+		if(idxH == 0x20)
 			return &m_currentMulti[dump.firstParamIndex + idxL];
 
 		constexpr auto inst0 = static_cast<uint8_t>(MultiParameter::Inst0First);
 		constexpr auto inst1 = static_cast<uint8_t>(MultiParameter::Inst1First);
 
-		const auto idx = inst0 + idxL * (inst1 - inst0);
+		const auto idx = dump.firstParamIndex + inst0 + idxH * (inst1 - inst0) + idxL;
 
 		return &m_currentMulti[idx];
 	}
@@ -445,17 +452,9 @@ namespace xt
 		case LocationH::SingleEditBufferMultiMode:
 			{
 				m_isEditBuffer = true;
-				if(isMultiMode())
-				{
-					if(_loc >= m_currentMultiSingles.size())
-						return nullptr;
-					return &m_currentMultiSingles[_loc];
-				}
-				if(_loc < m_currentInstrumentSingles.size())
-					return &m_currentInstrumentSingles[_loc];
-				if (_loc < m_currentMultiSingles.size())
-					return &m_currentMultiSingles[_loc];
-				return nullptr;
+				if(_loc >= m_currentMultiSingles.size())
+					return nullptr;
+				return &m_currentMultiSingles[_loc];
 		}
 		default:
 			return nullptr;
@@ -622,6 +621,11 @@ namespace xt
 	void State::requestGlobal() const
 	{
 		sendSysex({0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::GlobalRequest), 0xf7});
+	}
+
+	void State::requestMode() const
+	{
+		sendSysex({0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::ModeRequest), 0xf7});
 	}
 
 	void State::requestSingle(LocationH _buf, uint8_t _location) const
