@@ -132,14 +132,14 @@ namespace xt
 	{
 		// request global settings and wait for them. Once they are valid, send init state
 		requestGlobal();
-//		m_xt.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::ModeRequest), 0xf7});
+		requestMode();
 
 		synthLib::MidiBufferParser parser;
 		Responses unused;
 		std::vector<uint8_t> midi;
 		std::vector<synthLib::SMidiEvent> events;
 
-		while(!isValid(m_global))// || !isValid(m_mode))
+		while(!isValid(m_global) || !isValid(m_mode))
 		{
 			m_xt.process(8);
 			midi.clear();

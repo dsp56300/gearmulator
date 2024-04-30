@@ -168,6 +168,7 @@ namespace xt
 		void forwardToDevice(const SysEx& _data) const;
 
 		void requestGlobal() const;
+		void requestMode() const;
 		void requestSingle(LocationH _buf, uint8_t _location) const;
 		void requestMulti(LocationH _buf, uint8_t _location) const;
 		void sendMulti(const std::vector<uint8_t>& _multiData) const;
