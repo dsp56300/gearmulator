@@ -9,10 +9,12 @@ namespace wLib
 	class ROM
 	{
 	public:
-		explicit ROM(const std::string& _filename, const uint32_t _expectedSize, const uint8_t* _data = nullptr) : m_data(_data)
+		explicit ROM(const std::string& _filename, const uint32_t _expectedSize, std::vector<uint8_t> _data = {}) : m_buffer(std::move(_data))
 		{
-			if (!_filename.empty())
+			if (m_buffer.size() != _expectedSize)
 				loadFromFile(_filename, _expectedSize);
+			else
+				m_data = m_buffer.data();
 		}
 		virtual ~ROM() = default;
 

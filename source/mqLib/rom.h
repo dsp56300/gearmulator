@@ -9,7 +9,7 @@ namespace mqLib
 	public:
 		static constexpr uint32_t g_romSize = 524288;
 
-		explicit ROM(const std::string& _filename, const uint8_t* _data = nullptr) : wLib::ROM(_filename, g_romSize, _data)
+		explicit ROM(const std::string& _filename) : wLib::ROM(_filename, g_romSize)
 		{
 		}
 

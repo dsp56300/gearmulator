@@ -6,21 +6,11 @@
 
 #include <cstring>	// memcpy
 
-#if EMBED_ROM
-#include "romData.h"
-#else
-constexpr uint8_t* ROM_DATA = nullptr;
-#endif
-
 namespace mqLib
 {
-#if EMBED_ROM
-	static_assert(ROM_DATA_SIZE == ROM::g_romSize);
-#endif
-
 	Hardware::Hardware(const std::string& _romFilename)
 		: wLib::Hardware(44100)
-		, m_rom(_romFilename, ROM_DATA)
+		, m_rom(_romFilename)
 		, m_uc(m_rom)
 #if MQ_VOICE_EXPANSION
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1) , MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}

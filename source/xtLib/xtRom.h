@@ -11,7 +11,7 @@ namespace xt
 	public:
 		static constexpr uint32_t Size = g_romSize;
 
-		Rom(const std::string& _filename, const uint8_t* _data) : ROM(_filename, Size, _data)
+		Rom(const std::string& _filename) : ROM(_filename, Size)
 		{
 		}
 
