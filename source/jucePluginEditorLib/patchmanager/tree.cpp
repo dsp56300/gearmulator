@@ -76,7 +76,7 @@ namespace jucePluginEditorLib::patchManager
 		auto* itemLocalStorage = getItem(GroupType::LocalStorage);
 		auto* itemFactory = getItem(GroupType::Factory);
 
-		if (!itemDs || !itemLocalStorage || !itemFactory)
+		if (!itemDs || !itemLocalStorage)
 			return;
 
 		std::vector<pluginLib::patchDB::DataSourceNodePtr> allDataSources;
@@ -103,7 +103,9 @@ namespace jucePluginEditorLib::patchManager
 
 		itemDs->updateFromDataSources(readOnlyDataSources);
 		itemLocalStorage->updateFromDataSources(storageDataSources);
-		itemFactory->updateFromDataSources(factoryDataSources);
+
+		if (itemFactory)
+			itemFactory->updateFromDataSources(factoryDataSources);
 	}
 
 	void Tree::updateTags(const GroupType _type)
