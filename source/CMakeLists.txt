@@ -57,7 +57,7 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 endif()
 
 # ----------------- Waldorf synths
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XT)
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
 	add_subdirectory(mc68k)
 	add_subdirectory(wLib)
 endif()
