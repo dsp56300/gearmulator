@@ -13,12 +13,10 @@ namespace wLib
 		{
 			if (m_buffer.size() != _expectedSize)
 				loadFromFile(_filename, _expectedSize);
-			else
-				m_data = m_buffer.data();
 		}
 		virtual ~ROM() = default;
 
-		const uint8_t* getData() const { return m_data; }
+		const uint8_t* getData() const { return m_buffer.data(); }
 		bool isValid() const { return !m_buffer.empty(); }
 		virtual uint32_t getSize() const = 0;
 
@@ -30,7 +28,6 @@ namespace wLib
 	private:
 		bool loadFromFile(const std::string& _filename, uint32_t _expectedSize);
 
-		const uint8_t* m_data;
 		std::vector<uint8_t> m_buffer;
 	};	
 }

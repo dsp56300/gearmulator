@@ -11,6 +11,9 @@ namespace wLib
 
 	bool ROM::loadFromFile(const std::string& _filename, const uint32_t _expectedSize)
 	{
+		if(_filename.empty())
+			return false;
+
 		if(!synthLib::readFile(m_buffer, _filename))
 			return false;
 
@@ -24,12 +27,7 @@ namespace wLib
 				m_buffer.resize(_expectedSize, 0xff);
 		}
 
-		if(!m_buffer.empty())
-		{
-			m_data = m_buffer.data();
-			return true;
-		}
-		return false;
+		return m_buffer.size() == _expectedSize;
 	}
 
 	bool ROM::loadFromMidi(std::vector<unsigned char>& _buffer, const std::string& _filename)
