@@ -1,6 +1,5 @@
 #include "mqhardware.h"
 
-#include "../synthLib/midiTypes.h"
 #include "../synthLib/midiBufferParser.h"
 #include "../synthLib/deviceException.h"
 
