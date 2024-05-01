@@ -6,6 +6,7 @@
 #include "xtController.h"
 #include "xtFocusedParameter.h"
 #include "xtFrontPanel.h"
+#include "xtPartName.h"
 #include "xtPatchManager.h"
 #include "../jucePluginLib/parameterbinding.h"
 
@@ -121,12 +122,21 @@ namespace xtJucePlugin
 
 	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(
 		genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name,
-		juce::DrawableButton::ButtonStyle _buttonStyle)
+		const juce::DrawableButton::ButtonStyle _buttonStyle)
 	{
 		if(_name == "PartButtonSmall")
 			return new PartButton(*this, _name, _buttonStyle);
 
 		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
+	}
+
+	genericUI::Button<juce::TextButton>* Editor::createJuceComponent(genericUI::Button<juce::TextButton>* _button,
+		genericUI::UiObject& _object)
+	{
+		if(_object.getName() == "PatchName")
+			return new PartName(*this);
+
+		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)
