@@ -14,7 +14,8 @@ namespace xt
 	: m_flash(m_romRuntimeData.data(), m_romRuntimeData.size(), false, true)
 	, m_pic(*this, m_lcd)
 	{
-		assert(_rom.isValid() && _rom.getSize() == m_romRuntimeData.size());
+		if(!_rom.isValid())
+			return;
 
 		memcpy(m_romRuntimeData.data(), _rom.getData(), g_romSize);
 		m_memory.fill(0);
