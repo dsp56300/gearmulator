@@ -2,9 +2,11 @@
 
 #include "romfile.h"
 
+#include "../synthLib/romLoader.h"
+
 namespace virusLib
 {
-	class ROMLoader
+	class ROMLoader : public synthLib::RomLoader
 	{
 	public:
 		enum FileType
@@ -31,9 +33,6 @@ namespace virusLib
 		static ROMFile findROM(const std::string& _filename, DeviceModel _model = DeviceModel::ABC);
 
 	private:
-		static std::vector<std::string> findFiles(const std::string& _extension, size_t _minSize, size_t _maxSize);
-		static std::vector<std::string> findFiles(const std::string& _path, const std::string& _extension, size_t _minSize, size_t _maxSize);
-
 		static FileData loadFile(const std::string& _name);
 
 		static DeviceModel detectModel(const std::vector<uint8_t>& _data);
