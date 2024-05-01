@@ -11,38 +11,23 @@ namespace wLib
 
 	bool ROM::loadFromFile(const std::string& _filename, const uint32_t _expectedSize)
 	{
-		FILE* hFile = fopen(_filename.c_str(), "rb");
-		if(!hFile)
+		if(_filename.empty())
 			return false;
 
-		(void)fseek(hFile, 0, SEEK_END);
-		const auto size = ftell(hFile);
-		(void)fseek(hFile, 0, SEEK_SET);
+		if(!synthLib::readFile(m_buffer, _filename))
+			return false;
 
-		m_buffer.resize(size);
-		const auto numRead = fread(m_buffer.data(), 1, size, hFile);
-		(void)fclose(hFile);
-
-		if(numRead != static_cast<size_t>(size))
+		if(m_buffer.size() != _expectedSize)
 		{
 			m_buffer.clear();
-			return false;
-		}
 
-		if(numRead != _expectedSize)
-		{
 			loadFromMidi(m_buffer, _filename);
 
 			if (!m_buffer.empty() && m_buffer.size() < _expectedSize)
 				m_buffer.resize(_expectedSize, 0xff);
 		}
 
-		if(!m_buffer.empty())
-		{
-			m_data = m_buffer.data();
-			return true;
-		}
-		return false;
+		return m_buffer.size() == _expectedSize;
 	}
 
 	bool ROM::loadFromMidi(std::vector<unsigned char>& _buffer, const std::string& _filename)
@@ -56,6 +41,11 @@ namespace wLib
 		return loadFromSysExBuffer(_buffer, data);
 	}
 
+	bool ROM::loadFromMidiData(std::vector<uint8_t>& _buffer, const std::vector<uint8_t>& _midiData)
+	{
+		return loadFromSysExBuffer(_buffer, _midiData, true);
+	}
+
 	bool ROM::loadFromSysExFile(std::vector<uint8_t>& _buffer, const std::string& _filename)
 	{
 		_buffer.clear();
@@ -66,12 +56,12 @@ namespace wLib
 		return loadFromSysExBuffer(_buffer, buf);
 	}
 
-	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const std::vector<uint8_t>& _sysex)
+	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const std::vector<uint8_t>& _sysex, bool _isMidiFileData/* = false*/)
 	{
 		_buffer.reserve(_sysex.size());
 
 		std::vector<std::vector<uint8_t>> messages;
-		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex);
+		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex, _isMidiFileData);
 
 		uint16_t expectedCounter = 1;
 

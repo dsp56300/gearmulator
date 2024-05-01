@@ -118,8 +118,7 @@ namespace wLib
 
 		const auto ucClock = getUc().getSim().getSystemClockHz();
 
-		constexpr double divInv = 1.0 / 44100.0;	// stereo interleaved
-		const double ucCyclesPerFrame = static_cast<double>(ucClock) * divInv;
+		const double ucCyclesPerFrame = static_cast<double>(ucClock) * m_samplerateInv;
 
 		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
 

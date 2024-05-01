@@ -26,6 +26,7 @@ set(SOURCES
 	plugin.cpp plugin.h
 	resampler.cpp resampler.h
 	resamplerInOut.cpp resamplerInOut.h
+	romLoader.cpp romLoader.h
 	sysexToMidi.cpp sysexToMidi.h
 	wavReader.cpp wavReader.h
 	wavTypes.h

@@ -5,11 +5,13 @@
 
 #include <cstring>	// memcpy
 
+#include "xtRomLoader.h"
+
 namespace xt
 {
-	Hardware::Hardware(const std::string& _romFilename)
+	Hardware::Hardware()
 		: wLib::Hardware(40000)
-		, m_rom(_romFilename, nullptr)
+		, m_rom(RomLoader::findROM())
 		, m_uc(m_rom)
 		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
 		, m_midi(m_uc.getQSM())

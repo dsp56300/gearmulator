@@ -20,7 +20,7 @@ namespace xt
 		static constexpr uint32_t g_dspCount = 1;
 
 	public:
-		explicit Hardware(const std::string& _romFilename);
+		explicit Hardware();
 		virtual ~Hardware();
 
 		void process();

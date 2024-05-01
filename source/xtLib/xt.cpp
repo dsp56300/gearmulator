@@ -7,21 +7,13 @@
 #include "dsp56kEmu/threadtools.h"
 
 #include "xtHardware.h"
-
-#include "../mc68k/logging.h"
+#include "xtRomLoader.h"
 
 namespace xt
 {
 	Xt::Xt()
 	{
-		// create hardware, will use in-memory ROM if no ROM provided
-		const auto romFile = synthLib::findROM(g_romSize, g_romSize);
-		if(romFile.empty())
-			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Failed to find XT operating system file (.bin)");
-
-		MCLOG("Boot using ROM " << romFile);
-
-		m_hw.reset(new Hardware(romFile));
+		m_hw.reset(new Hardware());
 
 		if(!isValid())
 			return;

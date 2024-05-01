@@ -14,6 +14,7 @@ set(SOURCES
 	xtMidiTypes.h
 	xtPic.cpp xtPic.h
 	xtRom.cpp xtRom.h
+	xtRomLoader.cpp xtRomLoader.h
 	xtState.cpp xtState.h
 	xtSysexRemoteControl.cpp xtSysexRemoteControl.h
 	xtUc.cpp xtUc.h
