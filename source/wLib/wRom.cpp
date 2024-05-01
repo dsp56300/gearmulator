@@ -11,26 +11,13 @@ namespace wLib
 
 	bool ROM::loadFromFile(const std::string& _filename, const uint32_t _expectedSize)
 	{
-		FILE* hFile = fopen(_filename.c_str(), "rb");
-		if(!hFile)
+		if(!synthLib::readFile(m_buffer, _filename))
 			return false;
 
-		(void)fseek(hFile, 0, SEEK_END);
-		const auto size = ftell(hFile);
-		(void)fseek(hFile, 0, SEEK_SET);
-
-		m_buffer.resize(size);
-		const auto numRead = fread(m_buffer.data(), 1, size, hFile);
-		(void)fclose(hFile);
-
-		if(numRead != static_cast<size_t>(size))
+		if(m_buffer.size() != _expectedSize)
 		{
 			m_buffer.clear();
-			return false;
-		}
 
-		if(numRead != _expectedSize)
-		{
 			loadFromMidi(m_buffer, _filename);
 
 			if (!m_buffer.empty() && m_buffer.size() < _expectedSize)
