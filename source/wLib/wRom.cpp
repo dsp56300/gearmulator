@@ -43,6 +43,11 @@ namespace wLib
 		return loadFromSysExBuffer(_buffer, data);
 	}
 
+	bool ROM::loadFromMidiData(std::vector<uint8_t>& _buffer, const std::vector<uint8_t>& _midiData)
+	{
+		return loadFromSysExBuffer(_buffer, _midiData, true);
+	}
+
 	bool ROM::loadFromSysExFile(std::vector<uint8_t>& _buffer, const std::string& _filename)
 	{
 		_buffer.clear();
@@ -53,12 +58,12 @@ namespace wLib
 		return loadFromSysExBuffer(_buffer, buf);
 	}
 
-	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const std::vector<uint8_t>& _sysex)
+	bool ROM::loadFromSysExBuffer(std::vector<unsigned char>& _buffer, const std::vector<uint8_t>& _sysex, bool _isMidiFileData/* = false*/)
 	{
 		_buffer.reserve(_sysex.size());
 
 		std::vector<std::vector<uint8_t>> messages;
-		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex);
+		synthLib::MidiToSysex::splitMultipleSysex(messages, _sysex, _isMidiFileData);
 
 		uint16_t expectedCounter = 1;
 

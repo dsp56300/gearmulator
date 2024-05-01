@@ -23,8 +23,9 @@ namespace wLib
 		virtual uint32_t getSize() const = 0;
 
 		static bool loadFromMidi(std::vector<uint8_t>& _buffer, const std::string& _filename);
+		static bool loadFromMidiData(std::vector<uint8_t>& _buffer, const std::vector<uint8_t>& _midiData);
 		static bool loadFromSysExFile(std::vector<uint8_t>& _buffer, const std::string& _filename);
-		static bool loadFromSysExBuffer(std::vector<uint8_t> &_buffer, const std::vector<uint8_t> &_sysex);
+		static bool loadFromSysExBuffer(std::vector<uint8_t> &_buffer, const std::vector<uint8_t> &_sysex, bool _isMidiFileData = false);
 
 	private:
 		bool loadFromFile(const std::string& _filename, uint32_t _expectedSize);
