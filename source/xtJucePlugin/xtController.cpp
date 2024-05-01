@@ -62,10 +62,9 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 {
     registerParams(p);
 
-//  sendSysEx(RequestAllSingles);
 	sendSysEx(RequestGlobal);
 	sendSysEx(RequestMode);
-//  sendGlobalParameterChange(xtLib::GlobalParameter::SingleMultiMode, 1);
+	requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 
     startTimer(50);
 
@@ -170,6 +169,26 @@ std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& 
     return name;
 }
 
+std::string Controller::getSingleName(const uint8_t _part) const
+{
+    std::string name;
+    for(uint32_t i=0; i<16; ++i)
+    {
+        char paramName[16];
+        (void)snprintf(paramName, sizeof(paramName), "Name%02u", i);
+        const auto idx = getParameterIndexByName(paramName);
+        if(idx == InvalidParameterIndex)
+            break;
+
+		const auto* p = getParameter(idx, _part);
+        if(!p)
+            break;
+
+        name += static_cast<char>(p->getUnnormalizedValue());
+    }
+    return name;
+}
+
 std::string Controller::getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const
 {
     return getString(_values, "Name", 16);
@@ -241,6 +260,8 @@ void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::Midi
 		if(prog + 1 < m_singleEditBuffers.size())
 			requestSingle(xt::LocationH::SingleEditBufferMultiMode, prog + 1);
     }
+
+	onProgramChanged(prog);
 }
 
 void Controller::parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data,	const pluginLib::MidiPacket::ParamValues& _params) const

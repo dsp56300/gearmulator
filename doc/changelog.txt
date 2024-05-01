@@ -7,6 +7,8 @@ Framework:
 - [Imp] Added warning message if running under Rosetta as performance will be bad
 
 - [Fix] Do not crash if a skin cannot be loaded
+- [Fix] Fix Patch Manager may crash the plugin while loading cache
+- [Fix] Patch Manager list ordering incorrect when being loaded from cache
 
 Osirus:
 
@@ -14,9 +16,24 @@ Osirus:
 
 - [Fix] Older Virus B firmware 4.58 failed to load
 
+Osirus/OsTIrus:
+
+- [Imp] Allow to select global midi channel via context menu if not in Multi Mode
+
+OsTIrus:
+
+- [Fix] Removed Tone knob for Curry & Chili overdrive modes as it doesn't have any effect
+- [Fix] Oscillator 2 Interpolation & Local Detune knobs were swapped
+- [Fix] Removed delay mode parameter from tape delays
+- [Fix] Midi Controller 40 displayed Vocoder Carrier Center Frequency instead of Cutoff 
+        in LCD
+- [Fix] LCD text was not properly vertically centered
+
 Vavra:
 
 - [Fix] Modulation Slot amounts didn't reset to center on double click
+- [Fix] Remove unused "Factory" category from patch manager as Vavra doesn't contain
+        any factory presets
 
 1.3.12
 
@@ -35,8 +52,6 @@ OsTIrus:
 
 Vavra:
 
-- [Fix] Remove unused "Factory" category from patch manager as Vavra doesn't contain
-        any factory presets
 - [Fix] Invalid sysex messages sent to plugin midi output
 
 1.3.11

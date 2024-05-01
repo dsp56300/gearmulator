@@ -719,12 +719,396 @@
             },
             "children" : [
                 {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "49",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "49",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI0Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "87",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "227.9752",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "227.9752",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI1Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "265.9752",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "406.9504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "406.9504",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI2Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "444.9504",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "585.9257",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "585.9257",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI3Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "623.9257",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "764.9009",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "764.9009",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI4Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "802.9009",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "943.8761",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "943.8761",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI5Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "981.8761",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "1122.851",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "1122.851",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI6Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "1160.851",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "128.0017",
+                        "y" : "1301.827",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Volume"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "0.001708984",
+                        "y" : "1301.827",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "MI7Pan"
+                    }
+                },
+                {
+                    "name" : "PatchName",
+                    "textbutton" : {
+                        "text" : "ABCDEFGHIJKLMNOP",
+                        "textHeight" : "34",
+                        "color" : "323232FF",
+                        "backgroundColor" : "B66207FF",
+                        "bold" : "1",
+                        "x" : "283",
+                        "y" : "1339.827",
+                        "width" : "300.9623",
+                        "height" : "53.42"
+                    }
+                },
+                {
                     "name" : "ContainerPatchManager",
                     "component" : {
-                        "x" : "0",
-                        "y" : "70",
-                        "width" : "3322.7",
-                        "height" : "1409.802"
+                        "x" : "631.9624",
+                        "y" : "48",
+                        "width" : "2690.738",
+                        "height" : "1431.802"
                     }
                 }
             ]

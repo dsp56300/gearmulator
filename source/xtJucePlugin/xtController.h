@@ -51,6 +51,7 @@ public:
 	};
 
 	pluginLib::Event<bool> onPlayModeChanged;
+	pluginLib::Event<uint8_t> onProgramChanged;
 
 	Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 	~Controller() override;
@@ -71,6 +72,7 @@ public:
 	std::vector<uint8_t> createSingleDump(xt::LocationH _buffer, uint8_t _location, const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 	bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _paramValues, const std::vector<uint8_t>& _sysex) const;
 
+	std::string getSingleName(uint8_t _part) const;
 	std::string getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const;
 	std::string getSingleName(const pluginLib::MidiPacket::AnyPartParamValues& _values) const;
 	std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;

@@ -14,6 +14,7 @@ set(SOURCES
 	xtFocusedParameter.cpp xtFocusedParameter.h
 	xtLcd.cpp xtLcd.h
 	xtPartButton.cpp xtPartButton.h
+	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	version.h

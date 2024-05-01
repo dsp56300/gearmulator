@@ -6,21 +6,24 @@
 
 namespace xtJucePlugin
 {
+	class PartName;
+
 	class Parts
 	{
 	public:
 		Parts(Editor& _editor);
 
-		bool selectPart(uint8_t _part);
+		bool selectPart(uint8_t _part) const;
 
 	private:
-		void updateUi();
+		void updateUi() const;
 
 		Editor& m_editor;
 
 		struct Part
 		{
 			PartButton* m_button = nullptr;
+			PartName* m_name = nullptr;
 			juce::Button* m_led = nullptr;
 		};
 

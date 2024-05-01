@@ -47,6 +47,7 @@ namespace xtJucePlugin
 		Parts& getParts() const;
 
 		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
+		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;
 
 		void setCurrentPart(uint8_t _part) override;
 	private:
