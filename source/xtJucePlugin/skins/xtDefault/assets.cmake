@@ -18,7 +18,6 @@ set(ASSETS_xtDefault
 	${CMAKE_CURRENT_LIST_DIR}/xtPageMulti.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageOsc.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPagePatchManager.png
-	${CMAKE_CURRENT_LIST_DIR}/xtPageWave.png
 
 	${CMAKE_CURRENT_LIST_DIR}/xtDefault.json
 )
