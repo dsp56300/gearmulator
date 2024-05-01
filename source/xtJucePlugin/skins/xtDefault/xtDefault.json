@@ -14,7 +14,6 @@
             "pageButtonPatchManager",
             "pageButtonMod",
             "pageButtonArp",
-            "pageButtonWave",
             "pageButtonMulti"
         ],
         "pages" : [
@@ -22,7 +21,6 @@
             "pagePatchManager",
             "pageMod",
             "pageArp",
-            "pageWave",
             "pageMulti"
         ]
     },
@@ -122,8 +120,8 @@
         {
             "name" : "lcdArea",
             "component" : {
-                "x" : "196.0613",
-                "y" : "168.1559",
+                "x" : "154.0613",
+                "y" : "143.1559",
                 "width" : "1273.877",
                 "height" : "98.43307"
             },
@@ -137,8 +135,8 @@
             "rotary" : {
             },
             "spritesheet" : {
-                "x" : "310.85",
-                "y" : "285.7459",
+                "x" : "268.85",
+                "y" : "309.5459",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xt_encoder_ranged",
@@ -154,8 +152,8 @@
             "rotary" : {
             },
             "spritesheet" : {
-                "x" : "614.95",
-                "y" : "303.7759",
+                "x" : "572.95",
+                "y" : "309.5459",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xt_encoder_ranged",
@@ -171,8 +169,8 @@
             "rotary" : {
             },
             "spritesheet" : {
-                "x" : "919.05",
-                "y" : "303.7759",
+                "x" : "877.05",
+                "y" : "309.5459",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xt_encoder_ranged",
@@ -188,8 +186,8 @@
             "rotary" : {
             },
             "spritesheet" : {
-                "x" : "1223.15",
-                "y" : "285.7459",
+                "x" : "1181.15",
+                "y" : "309.5459",
                 "width" : "128",
                 "height" : "128",
                 "texture" : "xt_encoder_ranged",
@@ -209,8 +207,8 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "113.3613",
-                "y" : "199.3724",
+                "x" : "94.06128",
+                "y" : "174.3724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -228,7 +226,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2438.109",
+                "x" : "2436.313",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -247,7 +245,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2591.109",
+                "x" : "2589.313",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -266,7 +264,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2744.109",
+                "x" : "2742.313",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -285,26 +283,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "2897.109",
-                "y" : "69.64844",
-                "width" : "128",
-                "height" : "128",
-                "texture" : "xtknob",
-                "tileSizeX" : "128",
-                "tileSizeY" : "128"
-            }
-        },
-        {
-            "name" : "pageButtonWave",
-            "button" : {
-                "isToggle" : "1",
-                "normalImage" : "0",
-                "overImage" : "0",
-                "downImage" : "1",
-                "normalImageOn" : "1",
-                "overImageOn" : "1",
-                "downImageOn" : "1",
-                "x" : "3075.109",
+                "x" : "2895.313",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -323,7 +302,7 @@
                 "normalImageOn" : "1",
                 "overImageOn" : "1",
                 "downImageOn" : "1",
-                "x" : "3228.109",
+                "x" : "3222.513",
                 "y" : "69.64844",
                 "width" : "128",
                 "height" : "128",
@@ -1420,7 +1399,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "679.2058",
+                        "x" : "738.6444",
                         "y" : "81.31683",
                         "width" : "128",
                         "height" : "128",
@@ -1437,7 +1416,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "902.2058",
+                        "x" : "961.6444",
                         "y" : "81.31683",
                         "width" : "128",
                         "height" : "128",
@@ -1454,7 +1433,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "728.2058",
+                        "x" : "738.6444",
                         "y" : "311.9504",
                         "width" : "128",
                         "height" : "128",
@@ -1471,7 +1450,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "951.2058",
+                        "x" : "961.6444",
                         "y" : "311.9504",
                         "width" : "128",
                         "height" : "128",
@@ -1488,7 +1467,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "756.7058",
+                        "x" : "738.6444",
                         "y" : "542.5841",
                         "width" : "128",
                         "height" : "128",
@@ -1510,7 +1489,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "979.7058",
+                        "x" : "961.6444",
                         "y" : "542.5841",
                         "width" : "128",
                         "height" : "128",
@@ -1532,7 +1511,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1091.706",
+                        "x" : "1073.644",
                         "y" : "526.5841",
                         "width" : "32",
                         "height" : "32",
@@ -1549,7 +1528,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "756.7058",
+                        "x" : "741.0411",
                         "y" : "821.2178",
                         "width" : "128",
                         "height" : "128",
@@ -1566,7 +1545,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "979.7058",
+                        "x" : "964.0411",
                         "y" : "821.2178",
                         "width" : "128",
                         "height" : "128",
@@ -1583,7 +1562,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "728.2058",
+                        "x" : "741.0411",
                         "y" : "1051.851",
                         "width" : "128",
                         "height" : "128",
@@ -1600,7 +1579,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "951.2058",
+                        "x" : "964.0411",
                         "y" : "1051.851",
                         "width" : "128",
                         "height" : "128",
@@ -1617,7 +1596,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "667.2058",
+                        "x" : "651.5411",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1639,7 +1618,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "890.2058",
+                        "x" : "874.5411",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1661,7 +1640,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1002.206",
+                        "x" : "986.5411",
                         "y" : "1266.485",
                         "width" : "32",
                         "height" : "32",
@@ -1683,7 +1662,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1083.206",
+                        "x" : "1067.541",
                         "y" : "1315.485",
                         "width" : "64",
                         "height" : "64",
@@ -1705,7 +1684,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1099.206",
+                        "x" : "1083.541",
                         "y" : "1380.905",
                         "width" : "32",
                         "height" : "32",
@@ -1722,7 +1701,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1312.489",
+                        "x" : "1348.979",
                         "y" : "97.48016",
                         "width" : "128",
                         "height" : "128",
@@ -1739,7 +1718,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1350.389",
+                        "x" : "1348.979",
                         "y" : "298.4406",
                         "width" : "128",
                         "height" : "128",
@@ -1756,7 +1735,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1371.789",
+                        "x" : "1348.979",
                         "y" : "499.4009",
                         "width" : "128",
                         "height" : "128",
@@ -1773,7 +1752,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1381.999",
+                        "x" : "1348.979",
                         "y" : "700.3613",
                         "width" : "128",
                         "height" : "128",
@@ -1790,7 +1769,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1370.499",
+                        "x" : "1348.979",
                         "y" : "901.3215",
                         "width" : "128",
                         "height" : "128",
@@ -1807,7 +1786,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1674.036",
+                        "x" : "1690.314",
                         "y" : "99",
                         "width" : "128",
                         "height" : "128",
@@ -1824,7 +1803,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1674.036",
+                        "x" : "1690.314",
                         "y" : "299.29",
                         "width" : "128",
                         "height" : "128",
@@ -1841,7 +1820,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1674.036",
+                        "x" : "1690.314",
                         "y" : "499.58",
                         "width" : "128",
                         "height" : "128",
@@ -1858,7 +1837,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1674.036",
+                        "x" : "1690.314",
                         "y" : "699.87",
                         "width" : "128",
                         "height" : "128",
@@ -1875,7 +1854,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1674.036",
+                        "x" : "1690.314",
                         "y" : "900.1599",
                         "width" : "128",
                         "height" : "128",
@@ -1900,7 +1879,7 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "1696.973",
+                        "x" : "1729.818",
                         "y" : "1170.608",
                         "width" : "225",
                         "height" : "50"
@@ -1914,7 +1893,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1285.321",
+                        "x" : "1342.8",
                         "y" : "1281.715",
                         "width" : "128",
                         "height" : "128",
@@ -1931,7 +1910,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1517.089",
+                        "x" : "1558.146",
                         "y" : "1281.715",
                         "width" : "128",
                         "height" : "128",
@@ -1948,7 +1927,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1748.857",
+                        "x" : "1773.491",
                         "y" : "1281.715",
                         "width" : "128",
                         "height" : "128",
@@ -1965,7 +1944,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1980.625",
+                        "x" : "1988.836",
                         "y" : "1281.715",
                         "width" : "128",
                         "height" : "128",
@@ -6623,16 +6602,6 @@
                     }
                 }
             ]
-        },
-        {
-            "name" : "pageWave",
-            "image" : {
-                "x" : "35.99988",
-                "y" : "489",
-                "width" : "3322.7",
-                "height" : "1479.802",
-                "texture" : "xtPageWave"
-            }
         },
         {
             "name" : "pageMulti",
