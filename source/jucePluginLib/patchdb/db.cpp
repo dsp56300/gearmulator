@@ -182,6 +182,7 @@ namespace pluginLib::patchDB
 		{
 			_ds->setParent(parent);
 			addDataSource(_ds);
+			saveJson();
 		});
 	}
 
