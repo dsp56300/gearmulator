@@ -3,6 +3,7 @@
 #include <cassert>
 #include <sstream>
 
+#include "db.h"
 #include "patchmodifications.h"
 #include "serialization.h"
 
@@ -29,10 +30,7 @@ namespace pluginLib::patchDB
 			newMods = std::make_shared<PatchModifications>(*mods);
 
 		if(newMods)
-		{
-			p->modifications = newMods;
-			newMods->patch = p;
-		}
+			DB::assign(p, newMods);
 
 		return { p, newMods };
 	}

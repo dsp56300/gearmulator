@@ -4,6 +4,7 @@
 #include <sstream>
 #include <memory>
 
+#include "db.h"
 #include "patch.h"
 #include "patchmodifications.h"
 
@@ -191,11 +192,8 @@ namespace pluginLib::patchDB
 			if(!patch->read(in))
 				return false;
 
-			if(patch->modifications)
-			{
-				patch->modifications->patch = patch;
-				patch->modifications->updateCache();
-			}
+			DB::assign(patch, patch->modifications);
+
 			patches.insert(patch);
 		}
 

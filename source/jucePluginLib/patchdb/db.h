@@ -77,6 +77,8 @@ namespace pluginLib::patchDB
 
 		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
 
+		static void assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods);
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
