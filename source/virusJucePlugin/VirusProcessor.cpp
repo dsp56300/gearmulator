@@ -18,6 +18,7 @@ VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const ju
 
 VirusProcessor::~VirusProcessor()
 {
+	destroyController();
 	destroyEditorState();
 }
 

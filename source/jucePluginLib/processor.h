@@ -105,6 +105,9 @@ namespace pluginLib
 
 		virtual void processBpm(float _bpm) {};
 
+	protected:
+		void destroyController();
+
 	private:
 		void prepareToPlay(double sampleRate, int maximumExpectedSamplesPerBlock) override;
 		void releaseResources() override;

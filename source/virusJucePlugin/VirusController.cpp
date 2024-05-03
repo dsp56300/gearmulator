@@ -37,37 +37,21 @@ namespace Virus
 	    return g_midiPacketNames[static_cast<uint32_t>(_type)];
     }
 
-    Controller::Controller(VirusProcessor &p, const virusLib::DeviceModel _defaultModel, unsigned char deviceId)
+    Controller::Controller(VirusProcessor& p, const virusLib::DeviceModel _defaultModel, unsigned char deviceId)
 		: pluginLib::Controller(p, loadParameterDescriptions(_defaultModel, p))
 		, m_processor(p)
 		, m_defaultModel(_defaultModel)
 		, m_deviceId(deviceId)
+		, m_onRomChanged(p.evRomChanged)
     {
-        switch(p.getModel())
-        {
-        default:
-        case virusLib::DeviceModel::A:
-        case virusLib::DeviceModel::B:
-        case virusLib::DeviceModel::C:    m_singles.resize(8);  break;
-        case virusLib::DeviceModel::Snow:
-        case virusLib::DeviceModel::TI:
-        case virusLib::DeviceModel::TI2:
-        	m_singles.resize(
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI) +
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2) +
-                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow) +
-                2
-            ); break;
-        }
-
-    	registerParams(p);
+     	registerParams(p);
 
 		// add lambda to enforce updating patches when virus switch from/to multi/single.
         const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
 		auto* parameter = getParameter(paramIdx);
         if(parameter)
 		{
-			parameter->onValueChanged.emplace_back(std::make_pair(0, [this] {
+			parameter->onValueChanged.emplace_back(0, [this] {
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);
                 requestMulti(0, prg);
@@ -76,13 +60,24 @@ namespace Virus
 				{
 					onMsgDone();
 				}
-			}));
+			});
 		}
+
 		requestTotal();
 		requestArrangement();
 
-    	for(uint8_t i=3; i<=getBankCount(); ++i)
-			requestSingleBank(i);
+		// ABC models have different factory presets depending on the used ROM, but for the TI we have all presets from all models loaded anyway so no need to replace them at runtime
+		if(isTIFamily(m_processor.getModel()))
+		{
+			requestRomBanks();
+		}
+		else
+		{
+			m_onRomChanged = [this](const virusLib::ROMFile*)
+			{
+				requestRomBanks();
+			};
+		}
 
     	startTimer(5);
 	}
@@ -614,6 +609,32 @@ namespace Virus
     bool Controller::requestArrangement() const
     {
         return sendSysEx(MidiPacketType::RequestArrangement);
+    }
+
+    void Controller::requestRomBanks()
+    {
+		switch(m_processor.getModel())
+		{
+        default:
+        case virusLib::DeviceModel::A:
+        case virusLib::DeviceModel::B:
+        case virusLib::DeviceModel::C:
+			m_singles.resize(8);
+			break;
+        case virusLib::DeviceModel::Snow:
+        case virusLib::DeviceModel::TI:
+        case virusLib::DeviceModel::TI2:
+        	m_singles.resize(
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI) +
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2) +
+                virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow) +
+                2
+            );
+			break;
+        }
+
+    	for(uint8_t i=3; i<=getBankCount(); ++i)
+			requestSingleBank(i);
     }
 
     bool Controller::sendSysEx(MidiPacketType _type) const

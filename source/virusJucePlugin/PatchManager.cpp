@@ -43,9 +43,14 @@ namespace genericVirusUI
 				const auto& bank = banks[index];
 
 				if(_program == bank.size() - 1)
-					addDataSource(createRomDataSource(index));
+				{
+					const auto romDS = createRomDataSource(index);
+					removeDataSource(romDS);
+					addDataSource(romDS);
+				}
 			}
 		};
+
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB, "Virus Features");
 	}

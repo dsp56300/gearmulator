@@ -27,7 +27,7 @@ namespace pluginLib
 
 	Processor::~Processor()
 	{
-		m_controller.reset();
+		destroyController();
 		m_plugin.reset();
 		m_device.reset();
 	}
@@ -355,6 +355,11 @@ namespace pluginLib
 		if(!m_device)
 			return {};
 		return m_device->getPreferredSamplerates();
+	}
+
+	void Processor::destroyController()
+	{
+		m_controller.reset();
 	}
 
 	//==============================================================================
