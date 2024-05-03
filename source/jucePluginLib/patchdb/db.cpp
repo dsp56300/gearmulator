@@ -162,6 +162,11 @@ namespace pluginLib::patchDB
 			removePatchesFromSearches(removedPatches);
 
 			{
+				std::unique_lock pl(m_patchesMutex);
+				preservePatchModifications(removedPatches);
+			}
+
+			{
 				std::unique_lock lockUi(m_uiMutex);
 
 				m_dirty.dataSources = true;
@@ -497,6 +502,7 @@ namespace pluginLib::patchDB
 					return;
 
 				removePatchesFromSearches(removedPatches);
+				preservePatchModifications(removedPatches);
 
 				{
 					std::unique_lock lockUi(m_uiMutex);
@@ -959,14 +965,7 @@ namespace pluginLib::patchDB
 		if (it == patches.end())
 			return false;
 
-		auto mods = _patch->modifications;
-
-		if(mods && !mods->empty())
-		{
-			mods->patch.reset();
-			mods->updateCache();
-			m_patchModifications.insert({PatchKey(*_patch), mods});
-		}
+		preservePatchModifications(_patch);
 
 		patches.erase(it);
 
@@ -1221,6 +1220,25 @@ namespace pluginLib::patchDB
 			}
 		}
 		return res;
+	}
+
+	void DB::preservePatchModifications(const PatchPtr& _patch)
+	{
+		auto mods = _patch->modifications;
+
+		if(!mods || mods->empty())
+			return;
+
+		mods->patch.reset();
+		mods->updateCache();
+
+		m_patchModifications.insert({PatchKey(*_patch), mods});
+	}
+
+	void DB::preservePatchModifications(const std::vector<PatchPtr>& _patches)
+	{
+		for (const auto& patch : _patches)
+			preservePatchModifications(patch);
 	}
 
 	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const

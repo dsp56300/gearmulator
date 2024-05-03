@@ -117,6 +117,9 @@ namespace pluginLib::patchDB
 		void updateSearches(const std::vector<PatchPtr>& _patches);
 		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
 
+		void preservePatchModifications(const PatchPtr& _patch);
+		void preservePatchModifications(const std::vector<PatchPtr>& _patches);
+
 		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const;
 
 		Color getTagColorInternal(TagType _type, const Tag& _tag) const;
