@@ -290,9 +290,13 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 		menu.addSeparator();
-		menu.addItem("Hide Duplicates", true, m_hideDuplicates, [this]
+		menu.addItem("Hide Duplicates (by hash)", true, m_hideDuplicatesByHash, [this]
 		{
-			setFilter(m_filter, !m_hideDuplicates);
+			setFilter(m_filter, !m_hideDuplicatesByHash, m_hideDuplicatesByName);
+		});
+		menu.addItem("Hide Duplicates (by name)", true, m_hideDuplicatesByName, [this]
+		{
+			setFilter(m_filter, m_hideDuplicatesByHash, !m_hideDuplicatesByName);
 		});
 		menu.showMenuAsync({});
 		return true;
@@ -533,18 +537,19 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::setFilter(const std::string& _filter)
 	{
-		setFilter(_filter, m_hideDuplicates);
+		setFilter(_filter, m_hideDuplicatesByHash, m_hideDuplicatesByName);
 	}
 
-	void List::setFilter(const std::string& _filter, const bool _hideDuplicates)
+	void List::setFilter(const std::string& _filter, const bool _hideDuplicatesByHash, const bool _hideDuplicatesByName)
 	{
-		if (m_filter == _filter && _hideDuplicates == m_hideDuplicates)
+		if (m_filter == _filter && _hideDuplicatesByHash == m_hideDuplicatesByHash && m_hideDuplicatesByName == _hideDuplicatesByName)
 			return;
 
 		const auto selected = getSelectedPatches();
 
 		m_filter = _filter;
-		m_hideDuplicates = _hideDuplicates;
+		m_hideDuplicatesByHash = _hideDuplicatesByHash;
+		m_hideDuplicatesByName = _hideDuplicatesByName;
 
 		filterPatches();
 		updateContent();
@@ -646,7 +651,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void List::filterPatches()
 	{
-		if (m_filter.empty() && !m_hideDuplicates)
+		if (m_filter.empty() && !m_hideDuplicatesByHash && !m_hideDuplicatesByName)
 		{
 			m_filteredPatches.clear();
 			return;
@@ -655,15 +660,23 @@ namespace jucePluginEditorLib::patchManager
 		m_filteredPatches.reserve(m_patches.size());
 		m_filteredPatches.clear();
 
-		std::set<pluginLib::patchDB::PatchHash> knownPatches;
+		std::set<pluginLib::patchDB::PatchHash> knownHashes;
+		std::set<std::string> knownNames;
 
 		for (const auto& patch : m_patches)
 		{
-			if(m_hideDuplicates)
+			if(m_hideDuplicatesByHash)
 			{
-				if(knownPatches.find(patch->hash) != knownPatches.end())
+				if(knownHashes.find(patch->hash) != knownHashes.end())
 					continue;
-				knownPatches.insert(patch->hash);
+				knownHashes.insert(patch->hash);
+			}
+
+			if(m_hideDuplicatesByName)
+			{
+				if(knownNames.find(patch->getName()) != knownNames.end())
+					continue;
+				knownNames.insert(patch->getName());
 			}
 
 			if (m_filter.empty() || match(patch))

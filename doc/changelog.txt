@@ -10,6 +10,11 @@ Framework:
 
 Patch Manager:
 
+- [Imp] Added context menu setting to hide duplicates by name
+- [Imp] Added options to add/remove patches to/from tags, categories & favourites 
+        via context menu
+
+- [Fix] Name of user bank not displayed in patch information panel
 - [Fix] Fix possible crash when loading cache
 - [Fix] List ordering incorrect when being loaded from cache
 - [Fix] Tags/Favourites got lost in some circumstances
