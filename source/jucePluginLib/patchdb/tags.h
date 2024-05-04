@@ -57,6 +57,11 @@ namespace pluginLib::patchDB
 		const auto& getAdded() const { return m_added; }
 		const auto& getRemoved() const { return m_removed; }
 
+		bool containsAdded() const
+		{
+			return !m_added.empty();
+		}
+
 		bool containsAdded(const Tag& _tag) const
 		{
 			return m_added.find(_tag) != m_added.end();
@@ -91,6 +96,7 @@ namespace pluginLib::patchDB
 		bool add(const TypedTags& _tags);
 		bool erase(TagType _type, const Tag& _tag);
 		bool addRemoved(TagType _type, const Tag& _tag);
+		bool containsAdded() const;
 		bool containsAdded(TagType _type, const Tag& _tag) const;
 		bool containsRemoved(TagType _type, const Tag& _tag) const;
 		void clear();

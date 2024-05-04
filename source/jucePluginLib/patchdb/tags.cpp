@@ -109,6 +109,16 @@ namespace pluginLib::patchDB
 		return it->second.addRemoved(_tag);
 	}
 
+	bool TypedTags::containsAdded() const
+	{
+		for (const auto& it : m_tags)
+		{
+			if(it.second.containsAdded())
+				return true;
+		}
+		return false;
+	}
+
 	bool TypedTags::erase(const TagType _type, const Tag& _tag)
 	{
 		const auto it = m_tags.find(_type);
