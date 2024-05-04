@@ -13,6 +13,9 @@ namespace xtJucePlugin
 	public:
 		explicit PartName(Editor& _editor);
 
+		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
+		void mouseDrag(const juce::MouseEvent& _event) override;
+
 	private:
 		void updatePartName();
 

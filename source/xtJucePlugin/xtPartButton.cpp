@@ -1,5 +1,6 @@
 #include "xtPartButton.h"
 
+#include "xtController.h"
 #include "xtEditor.h"
 
 namespace xtJucePlugin
@@ -13,5 +14,19 @@ namespace xtJucePlugin
 	void PartButton::onClick()
 	{
 		m_editor.getParts().selectPart(getPart());
+	}
+
+	bool PartButton::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
+	{
+		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
+			return false;
+		return jucePluginEditorLib::PartButton<DrawableButton>::isInterestedInDragSource(dragSourceDetails);
+	}
+
+	void PartButton::mouseDrag(const juce::MouseEvent& _event)
+	{
+		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
+			return;
+		jucePluginEditorLib::PartButton<DrawableButton>::mouseDrag(_event);
 	}
 }
