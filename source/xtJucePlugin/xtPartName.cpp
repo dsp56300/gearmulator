@@ -11,15 +11,29 @@ namespace xtJucePlugin
 	, m_onProgramChanged(_editor.getXtController().onProgramChanged)
 	, m_onPlayModeChanged(_editor.getXtController().onPlayModeChanged)
 	{
-		m_onPlayModeChanged = [this](const bool& _multiMode)
+		m_onPlayModeChanged = [this](const bool&)
 		{
 			updatePartName();
 		};
 
-		m_onProgramChanged = [this](uint8_t _program)
+		m_onProgramChanged = [this](uint8_t)
 		{
 			updatePartName();
 		};
+	}
+
+	bool PartName::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	{
+		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
+			return false;
+		return PartButton<TextButton>::isInterestedInDragSource(_dragSourceDetails);
+	}
+
+	void PartName::mouseDrag(const juce::MouseEvent& _event)
+	{
+		if(getPart() > 0 && !m_editor.getXtController().isMultiMode())
+			return;
+		PartButton<TextButton>::mouseDrag(_event);
 	}
 
 	void PartName::updatePartName()

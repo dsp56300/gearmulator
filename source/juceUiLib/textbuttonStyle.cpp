@@ -4,6 +4,8 @@ namespace genericUI
 {
 	void TextButtonStyle::drawButtonBackground(juce::Graphics& _graphics, juce::Button& _button, const juce::Colour& backgroundColour, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 	{
+		if(m_bgColor.getAlpha())
+			_graphics.fillAll(m_bgColor);
 	}
 
 	juce::Font TextButtonStyle::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)

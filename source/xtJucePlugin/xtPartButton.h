@@ -13,6 +13,9 @@ namespace xtJucePlugin
 
 		void onClick() override;
 
+		bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
+		void mouseDrag(const juce::MouseEvent& _event) override;
+
 	private:
 		Editor& m_editor;
 	};
