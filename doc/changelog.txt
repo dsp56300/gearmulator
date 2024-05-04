@@ -7,14 +7,19 @@ Framework:
 - [Imp] Added warning message if running under Rosetta as performance will be bad
 
 - [Fix] Do not crash if a skin cannot be loaded
-- [Fix] Fix Patch Manager may crash the plugin while loading cache
-- [Fix] Patch Manager list ordering incorrect when being loaded from cache
+
+Patch Manager:
+
+- [Fix] Fix possible crash when loading cache
+- [Fix] List ordering incorrect when being loaded from cache
+- [Fix] Tags/Favourites got lost in some circumstances
 
 Osirus:
 
 - [Imp] Added support for Virus Rack and Rack XL OS via .mid file
 
 - [Fix] Older Virus B firmware 4.58 failed to load
+- [Fix] Patch Manager: Factory presets were not refreshed when ROM is switched
 
 Osirus/OsTIrus:
 
