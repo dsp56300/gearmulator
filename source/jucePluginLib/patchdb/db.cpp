@@ -81,6 +81,16 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
+	void DB::assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods)
+	{
+		if(!_patch || !_mods)
+			return;
+
+		_patch->modifications = _mods;
+		_mods->patch = _patch;
+		_mods->updateCache();
+	}
+
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
 	{
 		const auto needsSave = _save && _ds.origin == DataSourceOrigin::Manual && _ds.type != SourceType::Rom;
@@ -152,6 +162,11 @@ namespace pluginLib::patchDB
 			removePatchesFromSearches(removedPatches);
 
 			{
+				std::unique_lock pl(m_patchesMutex);
+				preservePatchModifications(removedPatches);
+			}
+
+			{
 				std::unique_lock lockUi(m_uiMutex);
 
 				m_dirty.dataSources = true;
@@ -182,6 +197,7 @@ namespace pluginLib::patchDB
 		{
 			_ds->setParent(parent);
 			addDataSource(_ds);
+			saveJson();
 		});
 	}
 
@@ -486,6 +502,7 @@ namespace pluginLib::patchDB
 					return;
 
 				removePatchesFromSearches(removedPatches);
+				preservePatchModifications(removedPatches);
 
 				{
 					std::unique_lock lockUi(m_uiMutex);
@@ -581,8 +598,7 @@ namespace pluginLib::patchDB
 			if(!mods)
 			{
 				mods = std::make_shared<PatchModifications>();
-				mods->patch = patch;
-				patch->modifications = mods;
+				assign(patch, mods);
 			}
 
 			if (!mods->modifyTags(_tags))
@@ -623,13 +639,10 @@ namespace pluginLib::patchDB
 			if(!mods)
 			{
 				mods = std::make_shared<PatchModifications>();
-				mods->patch = _patch;
-				_patch->modifications = mods;
+				assign(_patch, mods);
 			}
 
 			mods->name = _name;
-
-			mods->updateCache();
 
 			updateSearches({_patch});
 		}
@@ -913,12 +926,10 @@ namespace pluginLib::patchDB
 			const auto itMod = m_patchModifications.find(key);
 			if (itMod != m_patchModifications.end())
 			{
-				patch->modifications = itMod->second;
+				auto mods = itMod->second;
+				assign(patch, mods);
 
 				m_patchModifications.erase(itMod);
-
-				patch->modifications->patch = patch;
-				patch->modifications->updateCache();
 			}
 
 			// add to all known categories, tags, etc
@@ -954,13 +965,7 @@ namespace pluginLib::patchDB
 		if (it == patches.end())
 			return false;
 
-		auto mods = _patch->modifications;
-
-		if(mods && !mods->empty())
-		{
-			mods->patch.reset();
-			m_patchModifications.insert({PatchKey(*_patch), mods});
-		}
+		preservePatchModifications(_patch);
 
 		patches.erase(it);
 
@@ -1217,6 +1222,25 @@ namespace pluginLib::patchDB
 		return res;
 	}
 
+	void DB::preservePatchModifications(const PatchPtr& _patch)
+	{
+		auto mods = _patch->modifications;
+
+		if(!mods || mods->empty())
+			return;
+
+		mods->patch.reset();
+		mods->updateCache();
+
+		m_patchModifications.insert({PatchKey(*_patch), mods});
+	}
+
+	void DB::preservePatchModifications(const std::vector<PatchPtr>& _patches)
+	{
+		for (const auto& patch : _patches)
+			preservePatchModifications(patch);
+	}
+
 	bool DB::createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const
 	{
 		std::unique_lock lockPatches(m_patchesMutex);
@@ -1360,10 +1384,7 @@ namespace pluginLib::patchDB
 			const auto it = patchModifications.find(key);
 			if(it != patchModifications.end())
 			{
-				patch->modifications = it->second;
-				patch->modifications->patch = patch;
-				patch->modifications->updateCache();
-
+				assign(patch, it->second);
 				patchModifications.erase(it);
 
 				if(patchModifications.empty())
@@ -1847,8 +1868,7 @@ namespace pluginLib::patchDB
 							if(*patch != key)
 								continue;
 
-							patch->modifications = mods;
-							mods->patch = patch;
+							assign(patch, mods);
 						}
 					}
 				}

@@ -147,6 +147,8 @@ namespace jucePluginEditorLib::patchManager
 		case pluginLib::patchDB::SourceType::Rom:
 		case pluginLib::patchDB::SourceType::Folder:
 			return _source->name;
+		case pluginLib::patchDB::SourceType::LocalStorage:
+			return _source->name;
 		case pluginLib::patchDB::SourceType::File:
 			{
 				auto t = _source->name;

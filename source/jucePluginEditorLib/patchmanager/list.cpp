@@ -145,6 +145,11 @@ namespace jucePluginEditorLib::patchManager
 		{
 			menu.addSeparator();
 
+			pluginLib::patchDB::TypedTags tags;
+
+			for (const auto& selectedPatch : selectedPatches)
+				tags.add(selectedPatch->getTags());
+
 			if(selectedPatches.size() == 1)
 			{
 				const auto& patch = *selectedPatches.begin();
@@ -160,7 +165,7 @@ namespace jucePluginEditorLib::patchManager
 					});
 				});
 
-				menu.addItem("Locate", [this, patch, pos]
+				menu.addItem("Locate", [this, patch]
 				{
 					m_patchManager.setSelectedDataSource(patch->source.lock());
 				});
@@ -168,7 +173,7 @@ namespace jucePluginEditorLib::patchManager
 
 			if(!m_search->request.tags.empty())
 			{
-				menu.addItem("Remove selected", [this, s = std::move(selectedPatches)]
+				menu.addItem("Remove selected", [this, s = selectedPatches]
 				{
 					const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
 					pluginLib::patchDB::TypedTags removeTags;
@@ -189,7 +194,7 @@ namespace jucePluginEditorLib::patchManager
 			}
 			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
 			{
-				menu.addItem("Deleted selected", [this, s = std::move(selectedPatches)]
+				menu.addItem("Deleted selected", [this, s = selectedPatches]
 				{
 					if(showDeleteConfirmationMessageBox())
 					{
@@ -197,6 +202,91 @@ namespace jucePluginEditorLib::patchManager
 						m_patchManager.removePatches(m_search->request.sourceNode, patches);
 					}
 				});
+			}
+
+			if(tags.containsAdded())
+			{
+				bool haveSeparator = false;
+
+				for (const auto& it : tags.get())
+				{
+					const auto type = it.first;
+
+					const auto& t = it.second;
+
+					if(t.empty())
+						continue;
+
+					const auto tagTypeName = m_patchManager.getTagTypeName(type);
+
+					if(tagTypeName.empty())
+						continue;
+
+					juce::PopupMenu tagMenu;
+
+					for (const auto& tag : t.getAdded())
+					{
+						pluginLib::patchDB::TypedTags removeTags;
+						removeTags.addRemoved(type, tag);
+
+						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
+
+						tagMenu.addItem(tag, [this, s = std::move(patches), removeTags]
+						{
+							m_patchManager.modifyTags(s, removeTags);
+						});
+					}
+
+					if(!haveSeparator)
+					{
+						menu.addSeparator();
+						haveSeparator = true;
+					}
+
+					menu.addSubMenu("Remove from " + tagTypeName, tagMenu);
+				}
+			}
+
+			{
+				bool haveSeparator = false;
+
+				for(uint32_t i=0; i<static_cast<uint32_t>(pluginLib::patchDB::TagType::Count); ++i)
+				{
+					const auto type = static_cast<pluginLib::patchDB::TagType>(i);
+					std::set<pluginLib::patchDB::Tag> availTags;
+					m_patchManager.getTags(type, availTags);
+
+					if(availTags.empty())
+						continue;
+
+					const auto tagTypeName = m_patchManager.getTagTypeName(type);
+
+					if(tagTypeName.empty())
+						continue;
+
+					juce::PopupMenu tagMenu;
+
+					for (const auto& tag : availTags)
+					{
+						pluginLib::patchDB::TypedTags addedTags;
+						addedTags.add(type, tag);
+
+						std::vector<pluginLib::patchDB::PatchPtr> patches{selectedPatches.begin(), selectedPatches.end()};
+
+						tagMenu.addItem(tag, [this, addedTags, s = std::move(patches)]
+						{
+							m_patchManager.modifyTags(s, addedTags);
+						});
+					}
+
+					if(!haveSeparator)
+					{
+						menu.addSeparator();
+						haveSeparator = true;
+					}
+
+					menu.addSubMenu("Add to " + tagTypeName, tagMenu);
+				}
 			}
 		}
 		menu.addSeparator();

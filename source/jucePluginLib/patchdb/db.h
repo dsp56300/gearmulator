@@ -77,6 +77,8 @@ namespace pluginLib::patchDB
 
 		bool writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches);
 
+		static void assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods);
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
 
@@ -114,6 +116,9 @@ namespace pluginLib::patchDB
 		bool executeSearch(Search& _search);
 		void updateSearches(const std::vector<PatchPtr>& _patches);
 		bool removePatchesFromSearches(const std::vector<PatchPtr>& _keys);
+
+		void preservePatchModifications(const PatchPtr& _patch);
+		void preservePatchModifications(const std::vector<PatchPtr>& _patches);
 
 		bool createConsecutiveProgramNumbers(const DataSourceNodePtr& _ds) const;
 

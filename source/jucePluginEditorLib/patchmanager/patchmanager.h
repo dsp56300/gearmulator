@@ -54,7 +54,8 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
 
-		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name);
+		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type) const;
+		bool addGroupTreeItemForTag(pluginLib::patchDB::TagType _type, const std::string& _name) const;
 
 		void paint(juce::Graphics& g) override;
 
@@ -80,6 +81,9 @@ namespace jucePluginEditorLib::patchManager
 		void copyPatchesToLocalStorage(const pluginLib::patchDB::DataSourceNodePtr& _ds, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, int _part);
 
 		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part);
+
+		std::string getTagTypeName(pluginLib::patchDB::TagType _type) const;
+		void setTagTypeName(pluginLib::patchDB::TagType _type, const std::string& _name);
 
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
@@ -133,5 +137,7 @@ namespace jucePluginEditorLib::patchManager
 		ResizerBar m_resizerBarA{*this, &m_stretchableManager, 1};
 		ResizerBar m_resizerBarB{*this, &m_stretchableManager, 3};
 		ResizerBar m_resizerBarC{*this, &m_stretchableManager, 5};
+
+		std::unordered_map<pluginLib::patchDB::TagType, std::string> m_tagTypeNames;
 	};
 }

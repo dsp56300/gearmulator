@@ -2,6 +2,7 @@
 
 #include "../jucePluginLib/parameterdescriptions.h"
 #include "../jucePluginLib/controller.h"
+#include "../jucePluginLib/event.h"
 
 #include "../virusLib/microcontrollerTypes.h"
 #include "../virusLib/romfile.h"
@@ -139,6 +140,7 @@ namespace Virus
 
     	bool requestTotal() const;
     	bool requestArrangement() const;
+		void requestRomBanks();
         
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
 		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
@@ -178,5 +180,6 @@ namespace Virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
+		pluginLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
     };
 }; // namespace Virus
