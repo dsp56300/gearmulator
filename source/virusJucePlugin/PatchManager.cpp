@@ -24,6 +24,9 @@ namespace genericVirusUI
 {
 	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _dir), m_controller(_editor.getController())
 	{
+		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
+		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
+
 		addRomPatches();
 
 		startLoaderThread();
@@ -51,8 +54,8 @@ namespace genericVirusUI
 			}
 		};
 
-		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA, "Virus Model");
-		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB, "Virus Features");
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
 	}
 
 	PatchManager::~PatchManager()

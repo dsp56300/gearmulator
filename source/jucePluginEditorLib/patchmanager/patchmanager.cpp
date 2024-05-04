@@ -24,6 +24,10 @@ namespace jucePluginEditorLib::patchManager
 
 	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes) : DB(_dir), m_editor(_editor), m_state(*this)
 	{
+		setTagTypeName(pluginLib::patchDB::TagType::Category, "Category");
+		setTagTypeName(pluginLib::patchDB::TagType::Tag, "Tag");
+		setTagTypeName(pluginLib::patchDB::TagType::Favourites, "Favourite");
+
 		const auto rootW = _root->getWidth() / g_scale;
 		const auto rootH = _root->getHeight() / g_scale;
 		const auto scale = juce::AffineTransform::scale(g_scale);
@@ -352,6 +356,27 @@ namespace jucePluginEditorLib::patchManager
 		return countAdded;
 	}
 
+	std::string PatchManager::getTagTypeName(const pluginLib::patchDB::TagType _type) const
+	{
+		const auto it = m_tagTypeNames.find(_type);
+		if(it == m_tagTypeNames.end())
+		{
+			return {};
+		}
+		return it->second;
+	}
+
+	void PatchManager::setTagTypeName(const pluginLib::patchDB::TagType _type, const std::string& _name)
+	{
+		if(_name.empty())
+		{
+			m_tagTypeNames.erase(_type);
+			return;
+		}
+
+		m_tagTypeNames[_type] = _name;
+	}
+
 	bool PatchManager::selectPrevPreset(const uint32_t _part)
 	{
 		return selectPatch(_part, -1);
@@ -420,7 +445,12 @@ namespace jucePluginEditorLib::patchManager
 		return DB::getPatchColor(_patch, ignoreTags);
 	}
 
-	bool PatchManager::addGroupTreeItemForTag(const pluginLib::patchDB::TagType _type, const std::string& _name)
+	bool PatchManager::addGroupTreeItemForTag(const pluginLib::patchDB::TagType _type) const
+	{
+		return addGroupTreeItemForTag(_type, getTagTypeName(_type));
+	}
+
+	bool PatchManager::addGroupTreeItemForTag(const pluginLib::patchDB::TagType _type, const std::string& _name) const
 	{
 		const auto groupType = toGroupType(_type);
 		if(groupType == GroupType::Invalid)
