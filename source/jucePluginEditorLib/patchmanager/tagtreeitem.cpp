@@ -71,7 +71,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto tagType = toTagType(getGroupType());
 
-		if(tagType != pluginLib::patchDB::TagType::Invalid)
+		if(tagType != pluginLib::patchDB::TagType::Invalid && getOwnerView()->getNumSelectedItems() == 1)
 		{
 			juce::PopupMenu menu;
 			const auto& s = getPatchManager().getSearch(getSearchHandle());
