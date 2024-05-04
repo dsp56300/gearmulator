@@ -43,7 +43,7 @@ namespace jucePluginEditorLib::patchManager
 
 		const Patches& getPatches() const
 		{
-			if (m_filter.empty() && !m_hideDuplicates)
+			if (m_filter.empty() && !m_hideDuplicatesByHash && !m_hideDuplicatesByName)
 				return m_patches;
 			return m_filteredPatches;
 		}
@@ -73,7 +73,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		void setFilter(const std::string& _filter);
-		void setFilter(const std::string& _filter, bool _hideDuplicates);
+		void setFilter(const std::string& _filter, bool _hideDuplicatesByHash, bool _hideDuplicatesByName);
 
 		PatchManager& getPatchManager() const
 		{
@@ -108,7 +108,8 @@ namespace jucePluginEditorLib::patchManager
 		Patches m_patches;
 		Patches m_filteredPatches;
 		std::string m_filter;
-		bool m_hideDuplicates = false;
+		bool m_hideDuplicatesByHash = false;
+		bool m_hideDuplicatesByName = false;
 		pluginLib::patchDB::SearchHandle m_searchHandle = pluginLib::patchDB::g_invalidSearchHandle;
 		bool m_ignoreSelectedRowsChanged = false;
 	};
