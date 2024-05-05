@@ -5,6 +5,7 @@ Release Notes
 Framework:
 
 - [Imp] Added warning message if running under Rosetta as performance will be bad
+- [Imp] Added 'Panic' menu to send All Notes Off / reboot device
 
 - [Fix] Do not crash if a skin cannot be loaded
 

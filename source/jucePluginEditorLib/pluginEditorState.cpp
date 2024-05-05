@@ -292,6 +292,40 @@ void PluginEditorState::openMenu()
 	initContextMenu(menu);
 
 	{
+		menu.addSeparator();
+
+		juce::PopupMenu panicMenu;
+
+		panicMenu.addItem("Send 'All Notes Off'", [this]
+		{
+			for(uint8_t c=0; c<16; ++c)
+			{
+				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE + c, synthLib::MC_ALLNOTESOFF);
+				m_processor.addMidiEvent(ev);
+			}
+		});
+
+		panicMenu.addItem("Send 'Note Off' for every Note", [this]
+		{
+			for(uint8_t c=0; c<16; ++c)
+			{
+				for(uint8_t n=0; n<128; ++n)
+				{
+					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor, synthLib::M_NOTEOFF + c, n, 64, n * 256);
+					m_processor.addMidiEvent(ev);
+				}
+			}
+		});
+
+		panicMenu.addItem("Reboot Device", [this]
+		{
+			m_processor.rebootDevice();
+		});
+
+		menu.addSubMenu("Panic", panicMenu);
+	}
+
+	{
 		const auto allowAdvanced = config.getBoolValue("allow_advanced_options", false);
 
 		juce::PopupMenu advancedMenu;

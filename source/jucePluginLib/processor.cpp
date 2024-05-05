@@ -703,4 +703,25 @@ namespace pluginLib
 	{
 		return 0.0f;
 	}
+
+	bool Processor::rebootDevice()
+	{
+		try
+		{
+			synthLib::Device* device = createDevice();
+			getPlugin().setDevice(device);
+			(void)m_device.release();
+			m_device.reset(device);
+
+			return true;
+		}
+		catch(const synthLib::DeviceException& e)
+		{
+			juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				"Device creation failed:",
+				std::string("Failed to create device:\n\n") + 
+				e.what() + "\n\n");
+			return false;
+		}
+	}
 }
