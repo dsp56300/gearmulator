@@ -336,19 +336,56 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 
+		auto createSaveToUserBankEntry = [this, &countAdded, _part, &_menu](const pluginLib::patchDB::DataSourceNodePtr& _ds)
+		{
+			++countAdded;
+			_menu.addItem("Add to user bank '" + _ds->name + "'", true, false, [this, _ds, _part]
+			{
+				const auto newPatch = requestPatchForPart(_part);
+
+				if(!newPatch)
+					return;
+
+				copyPatchesToLocalStorage(_ds, {newPatch}, static_cast<int>(_part));
+			});
+		};
+
 		if(const auto ds = getSelectedDataSource())
 		{
 			if(ds->type == pluginLib::patchDB::SourceType::LocalStorage)
+				createSaveToUserBankEntry(ds);
+		}
+
+		if(!countAdded)
+		{
+			const auto existingLocalDS = getDataSourcesOfSourceType(pluginLib::patchDB::SourceType::LocalStorage);
+
+			if(!existingLocalDS.empty())
+			{
+				for (const auto& ds : existingLocalDS)
+					createSaveToUserBankEntry(ds);
+			}
+			else
 			{
 				++countAdded;
-				_menu.addItem("Add to user bank '" + ds->name + "'", true, false, [this, ds, _part]
+				_menu.addItem("Create new user bank and add patch", true, false, [this, _part]
 				{
 					const auto newPatch = requestPatchForPart(_part);
 
 					if(!newPatch)
 						return;
 
-					copyPatchesToLocalStorage(ds, {newPatch}, static_cast<int>(_part));
+					pluginLib::patchDB::DataSource ds;
+
+					ds.name = "User Bank";
+					ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+					ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+					ds.timestamp = std::chrono::system_clock::now();
+					addDataSource(ds, false, [newPatch, _part, this](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
+					{
+						if(_success)
+							copyPatchesToLocalStorage(_ds, {newPatch}, static_cast<int>(_part));
+					});
 				});
 			}
 		}
