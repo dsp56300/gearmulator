@@ -225,6 +225,10 @@ namespace jucePluginEditorLib::patchManager
 
 	bool GroupTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		// if there are no favourites yet, allow to drag onto this group node and create a default tag automatically if patches are dropped
+		if(m_type == GroupType::Favourites && m_itemsByTag.empty() && TreeItem::isInterestedInDragSource(_dragSourceDetails))
+			return true;
+
 		if (isOpen())
 			return false;
 
@@ -277,6 +281,35 @@ namespace jucePluginEditorLib::patchManager
 			req.anyTagOfType.insert(tagType);
 			search(std::move(req));
 		}
+	}
+
+	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	{
+		if(m_type == GroupType::Favourites)
+			return true;
+		return TreeItem::isInterestedInPatchList(_list, _indices);
+	}
+
+	void GroupTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc)
+	{
+		if(!m_itemsByTag.empty() || m_type != GroupType::Favourites)
+		{
+			TreeItem::patchesDropped(_patches, _savePatchDesc);
+			return;
+		}
+
+		const auto tagType = toTagType(m_type);
+
+		if(tagType == pluginLib::patchDB::TagType::Invalid)
+		{
+			TreeItem::patchesDropped(_patches, _savePatchDesc);
+			return;
+		}
+
+		constexpr const char* const tag = "Favourites";
+
+		getPatchManager().addTag(tagType, tag);
+		TagTreeItem::modifyTags(getPatchManager(), tagType, tag, _patches);
 	}
 
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)

@@ -22,6 +22,8 @@ namespace jucePluginEditorLib::patchManager
 		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc = nullptr) override;
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
+		static void modifyTags(PatchManager& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches);
+
 		const auto& getTag() const { return m_tag; }
 
 		void itemClicked(const juce::MouseEvent&) override;
