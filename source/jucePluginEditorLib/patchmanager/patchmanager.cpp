@@ -356,38 +356,35 @@ namespace jucePluginEditorLib::patchManager
 				createSaveToUserBankEntry(ds);
 		}
 
-		if(!countAdded)
+		const auto existingLocalDS = getDataSourcesOfSourceType(pluginLib::patchDB::SourceType::LocalStorage);
+
+		if(!existingLocalDS.empty())
 		{
-			const auto existingLocalDS = getDataSourcesOfSourceType(pluginLib::patchDB::SourceType::LocalStorage);
+			for (const auto& ds : existingLocalDS)
+				createSaveToUserBankEntry(ds);
+		}
+		else
+		{
+			++countAdded;
+			_menu.addItem("Create new user bank and add patch", true, false, [this, _part]
+			{
+				const auto newPatch = requestPatchForPart(_part);
 
-			if(!existingLocalDS.empty())
-			{
-				for (const auto& ds : existingLocalDS)
-					createSaveToUserBankEntry(ds);
-			}
-			else
-			{
-				++countAdded;
-				_menu.addItem("Create new user bank and add patch", true, false, [this, _part]
+				if(!newPatch)
+					return;
+
+				pluginLib::patchDB::DataSource ds;
+
+				ds.name = "User Bank";
+				ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+				ds.timestamp = std::chrono::system_clock::now();
+				addDataSource(ds, false, [newPatch, _part, this](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
 				{
-					const auto newPatch = requestPatchForPart(_part);
-
-					if(!newPatch)
-						return;
-
-					pluginLib::patchDB::DataSource ds;
-
-					ds.name = "User Bank";
-					ds.type = pluginLib::patchDB::SourceType::LocalStorage;
-					ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
-					ds.timestamp = std::chrono::system_clock::now();
-					addDataSource(ds, false, [newPatch, _part, this](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
-					{
-						if(_success)
-							copyPatchesToLocalStorage(_ds, {newPatch}, static_cast<int>(_part));
-					});
+					if(_success)
+						copyPatchesToLocalStorage(_ds, {newPatch}, static_cast<int>(_part));
 				});
-			}
+			});
 		}
 
 		return countAdded;
