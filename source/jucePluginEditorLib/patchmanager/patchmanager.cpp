@@ -336,32 +336,26 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 
-		auto createSaveToUserBankEntry = [this, &countAdded, _part, &_menu](const pluginLib::patchDB::DataSourceNodePtr& _ds)
-		{
-			++countAdded;
-			_menu.addItem("Add to user bank '" + _ds->name + "'", true, false, [this, _ds, _part]
-			{
-				const auto newPatch = requestPatchForPart(_part);
-
-				if(!newPatch)
-					return;
-
-				copyPatchesToLocalStorage(_ds, {newPatch}, static_cast<int>(_part));
-			});
-		};
-
-		if(const auto ds = getSelectedDataSource())
-		{
-			if(ds->type == pluginLib::patchDB::SourceType::LocalStorage)
-				createSaveToUserBankEntry(ds);
-		}
-
 		const auto existingLocalDS = getDataSourcesOfSourceType(pluginLib::patchDB::SourceType::LocalStorage);
 
 		if(!existingLocalDS.empty())
 		{
+			if(countAdded)
+				_menu.addSeparator();
+
 			for (const auto& ds : existingLocalDS)
-				createSaveToUserBankEntry(ds);
+			{
+				++countAdded;
+				_menu.addItem("Add to user bank '" + ds->name + "'", true, false, [this, ds, _part]
+				{
+					const auto newPatch = requestPatchForPart(_part);
+
+					if(!newPatch)
+						return;
+
+					copyPatchesToLocalStorage(ds, {newPatch}, static_cast<int>(_part));
+				});
+			}
 		}
 		else
 		{
