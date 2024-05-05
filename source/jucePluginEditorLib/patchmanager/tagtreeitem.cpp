@@ -38,14 +38,7 @@ namespace jucePluginEditorLib::patchManager
 		if (tagType == pluginLib::patchDB::TagType::Invalid)
 			return;
 
-		pluginLib::patchDB::TypedTags tags;
-		if (juce::ModifierKeys::currentModifiers.isShiftDown())
-			tags.addRemoved(tagType, getTag());
-		else
-			tags.add(tagType, getTag());
-
-		getPatchManager().modifyTags(_patches, tags);
-		getPatchManager().repaint();
+		modifyTags(getPatchManager(), tagType, getTag(), _patches);
 	}
 
 	void TagTreeItem::onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest)
@@ -59,6 +52,18 @@ namespace jucePluginEditorLib::patchManager
 		sr.tags.add(tagType, getTag());
 
 		search(std::move(sr));
+	}
+
+	void TagTreeItem::modifyTags(PatchManager& _pm, pluginLib::patchDB::TagType _type, const std::string& _tag, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	{
+		pluginLib::patchDB::TypedTags tags;
+		if (juce::ModifierKeys::currentModifiers.isShiftDown())
+			tags.addRemoved(_type, _tag);
+		else
+			tags.add(_type, _tag);
+
+		_pm.modifyTags(_patches, tags);
+		_pm.repaint();
 	}
 
 	void TagTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

@@ -162,7 +162,7 @@ namespace jucePluginEditorLib::patchManager
 		if (list)
 		{
 			const auto* arr = _dragSourceDetails.description.getArray();
-			if (!arr)
+			if (!arr || arr->isEmpty())
 				return false;
 
 			for (const auto& var : *arr)
