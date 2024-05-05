@@ -23,16 +23,19 @@ namespace pluginLib::patchDB
 	class DB
 	{
 	public:
+		using DataSourceLoadedCallback = std::function<void(bool,DataSourceNodePtr)>;
+
 		DB(juce::File _dir);
 		virtual ~DB();
 
 		void uiProcess(Dirty& _dirty);
 
-		DataSourceNodePtr addDataSource(const DataSource& _ds);
+		DataSourceNodePtr addDataSource(const DataSource& _ds, const DataSourceLoadedCallback& = [](bool, std::shared_ptr<DataSourceNode>) {});
 		void removeDataSource(const DataSource& _ds, bool _save = true);
 		void refreshDataSource(const DataSourceNodePtr& _ds);
 		void renameDataSource(const DataSourceNodePtr& _ds, const std::string& _newName);
 		DataSourceNodePtr getDataSource(const DataSource& _ds);
+		std::set<DataSourceNodePtr> getDataSourcesOfSourceType(SourceType _type);
 
 		void getDataSources(std::vector<DataSourceNodePtr>& _dataSources)
 		{
@@ -80,7 +83,7 @@ namespace pluginLib::patchDB
 		static void assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods);
 
 	protected:
-		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save);
+		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save, const DataSourceLoadedCallback& = [](bool , std::shared_ptr<DataSourceNode>) {});
 
 	public:
 		virtual bool loadData(DataList& _results, const DataSourceNodePtr& _ds);

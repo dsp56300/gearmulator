@@ -55,9 +55,9 @@ namespace pluginLib::patchDB
 			saveCache();
 	}
 
-	DataSourceNodePtr DB::addDataSource(const DataSource& _ds)
+	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const DataSourceLoadedCallback& _callback)
 	{
-		return addDataSource(_ds, true);
+		return addDataSource(_ds, true, _callback);
 	}
 
 	bool DB::writePatchesToFile(const juce::File& _file, const std::vector<PatchPtr>& _patches)
@@ -91,18 +91,24 @@ namespace pluginLib::patchDB
 		_mods->updateCache();
 	}
 
-	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save)
+	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save, const DataSourceLoadedCallback& _callback)
 	{
 		const auto needsSave = _save && _ds.origin == DataSourceOrigin::Manual && _ds.type != SourceType::Rom;
 
 		auto ds = std::make_shared<DataSourceNode>(_ds);
 
-		runOnLoaderThread([this, ds, needsSave]
+		runOnLoaderThread([this, ds, needsSave, _callback]
+		{
+			addDataSource(ds);
+
+			runOnUiThread([ds, _callback]
 			{
-				addDataSource(ds);
-				if(needsSave)
-					saveJson();
+				_callback(true, ds);
 			});
+
+			if(needsSave)
+				saveJson();
+		});
 
 		return ds;
 	}
@@ -249,6 +255,22 @@ namespace pluginLib::patchDB
 		if(it == m_dataSources.end())
 			return {};
 		return it->second;
+	}
+
+	std::set<DataSourceNodePtr> DB::getDataSourcesOfSourceType(const SourceType _type)
+	{
+		std::set<DataSourceNodePtr> results;
+
+		{
+			std::shared_lock lockDS(m_dataSourcesMutex);
+			for (const auto& ds : m_dataSources)
+			{
+				if(ds.second->type == _type)
+					results.insert(ds.second);
+			}
+		}
+
+		return results;
 	}
 
 	bool DB::setTagColor(const TagType _type, const Tag& _tag, const Color _color)
