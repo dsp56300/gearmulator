@@ -105,6 +105,8 @@ namespace pluginLib
 
 		virtual void processBpm(float _bpm) {};
 
+		bool rebootDevice();
+
 	protected:
 		void destroyController();
 
