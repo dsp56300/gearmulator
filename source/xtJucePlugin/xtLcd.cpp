@@ -58,8 +58,19 @@ void XtLcd::setText(const std::array<uint8_t, 80>& _text)
 
 bool XtLcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
 {
-	const std::string lineA(std::string("Xenia v") + g_pluginVersionString);
-	const std::string lineB = __DATE__ " " __TIME__;
+	std::string lineA(std::string("Xenia v") + g_pluginVersionString);
+	std::string lineB = __DATE__ " " __TIME__;
+
+	constexpr char lineAright[] = "From TUS";
+	constexpr char lineBright[] = "with <3";
+
+	while(lineA.size() < 40 - std::size(lineAright) + 1)
+		lineA.push_back(' ');
+	lineA += lineAright;
+
+	while(lineB.size() < 40 - std::size(lineBright) + 1)
+		lineB.push_back(' ');
+	lineB += lineBright;
 
 	_lines = 
 	{
