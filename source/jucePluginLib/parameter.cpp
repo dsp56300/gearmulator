@@ -69,9 +69,47 @@ namespace pluginLib
 
 		// ignore initial update
 		if (m_lastValue != -1)
-			m_ctrl.sendParameterChange(*this, static_cast<uint8_t>(value));
+		{
+			if(m_rateLimit)
+			{
+				sendParameterChangeDelayed(static_cast<uint8_t>(value), ++m_uniqueDelayCallbackId);
+			}
+			else
+			{
+				m_lastSendTime = milliseconds();
+				m_ctrl.sendParameterChange(*this, static_cast<uint8_t>(value));
+			}
+		}
 
 		m_lastValue = value;
+    }
+
+    uint64_t Parameter::milliseconds()
+    {
+		const auto t = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch());
+		return t.count();
+    }
+
+    void Parameter::sendParameterChangeDelayed(const uint8_t _value, uint32_t _uniqueId)
+    {
+		if(_uniqueId != m_uniqueDelayCallbackId)
+			return;
+
+		const auto ms = milliseconds();
+
+		const auto elapsed = ms - m_lastSendTime;
+		if(elapsed >= m_rateLimit)
+		{
+			m_lastSendTime = ms;
+			m_ctrl.sendParameterChange(*this, _value);
+		}
+		else
+		{
+			juce::Timer::callAfterDelay(static_cast<int>(elapsed), [this, _value, _uniqueId]
+			{
+				sendParameterChangeDelayed(_value, _uniqueId);
+			});
+		}
     }
 
     void Parameter::setValueNotifyingHost(const float _value, const ChangedBy _origin)
@@ -79,6 +117,11 @@ namespace pluginLib
 		setValue(_value, _origin);
 		sendValueChangedMessageToListeners(_value);
 	}
+
+    void Parameter::setRateLimitMilliseconds(const uint32_t _ms)
+    {
+	    m_rateLimit = _ms;
+    }
 
     bool Parameter::isMetaParameter() const
     {
