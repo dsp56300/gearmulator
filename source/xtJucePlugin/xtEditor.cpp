@@ -71,6 +71,22 @@ namespace xtJucePlugin
 			if(countAdded)
 				menu.showMenuAsync(juce::PopupMenu::Options());
 		};
+
+		if(auto* btWavePlus = findComponentT<juce::Button>("wtPlus", false))
+		{
+			btWavePlus->onClick = [this]
+			{
+				changeWave(1);
+			};
+		}
+
+		if(auto* btWaveMinus = findComponentT<juce::Button>("wtMinus", false))
+		{
+			btWaveMinus->onClick = [this]
+			{
+				changeWave(-1);
+			};
+		}
 	}
 
 	Editor::~Editor()
@@ -152,5 +168,39 @@ namespace xtJucePlugin
 	void Editor::mouseEnter(const juce::MouseEvent& _event)
 	{
 		m_focusedParameter->onMouseEnter(_event);
+	}
+
+	void Editor::changeWave(const int _step) const
+	{
+		if(!_step)
+			return;
+
+		uint32_t index;
+		if(!m_controller.getParameterDescriptions().getIndexByName(index, "Wave"))
+			return;
+
+		auto* p = m_controller.getParameter(index, m_controller.getCurrentPart());
+
+		if(!p)
+			return;
+
+		const auto& desc = p->getDescription();
+		const auto& range = desc.range;
+
+		int v = p->getUnnormalizedValue();
+
+		const auto& valList = desc.valueList;
+
+		while(v >= range.getStart() && v <= range.getEnd())
+		{
+			v += _step;
+			const auto newText = valList.valueToText(v);
+
+			if(newText.empty())
+				continue;
+
+			p->setValue(p->convertTo0to1(static_cast<float>(v)), pluginLib::Parameter::ChangedBy::Ui);
+			break;
+		}
 	}
 }

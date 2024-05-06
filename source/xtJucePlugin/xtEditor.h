@@ -52,6 +52,7 @@ namespace xtJucePlugin
 		void setCurrentPart(uint8_t _part) override;
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
+		void changeWave(int _step) const;
 
 		Controller& m_controller;
 		pluginLib::ParameterBinding& m_parameterBinding;
