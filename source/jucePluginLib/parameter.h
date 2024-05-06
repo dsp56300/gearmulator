@@ -83,11 +83,15 @@ namespace pluginLib
 
 		void setValueNotifyingHost(float _value, ChangedBy _origin);
 
+		void setRateLimitMilliseconds(uint32_t _ms);
+
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
 		void setDerivedValue(int _value, ChangedBy _origin, bool _notifyHost);
 		void sendToSynth();
+		static uint64_t milliseconds();
+		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
 
         Controller &m_ctrl;
 		const Description m_desc;
@@ -99,5 +103,9 @@ namespace pluginLib
 		juce::Value m_value;
 		std::set<Parameter*> m_derivedParameters;
 		bool m_changingDerivedValues = false;
+
+		uint32_t m_rateLimit = 0;		// milliseconds
+		uint64_t m_lastSendTime = 0;
+		uint32_t m_uniqueDelayCallbackId = 0;
     };
 }
