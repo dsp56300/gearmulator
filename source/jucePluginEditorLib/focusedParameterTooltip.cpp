@@ -7,6 +7,9 @@ namespace jucePluginEditorLib
 	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0)
 	{
 		setVisible(false);
+
+		if(isValid())
+			m_label->setInterceptsMouseClicks(false,false);
 	}
 
 	void FocusedParameterTooltip::setVisible(bool _visible) const
