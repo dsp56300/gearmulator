@@ -72,6 +72,15 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 	{
 		requestAllPatches();
 	});
+
+	// slow down edits of the wavetable, device gets overloaded quickly if we send too many changes
+	uint32_t idx;
+	getParameterDescriptions().getIndexByName(idx, "Wave");
+	for(uint8_t i=0; i<m_singleEditBuffers.size(); ++i)
+	{
+		auto* p = getParameter(idx, i);
+		p->setRateLimitMilliseconds(250);
+	}
 }
 
 Controller::~Controller() = default;
