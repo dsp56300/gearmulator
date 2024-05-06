@@ -12,6 +12,8 @@ set(ASSETS_xtDefault
 	${CMAKE_CURRENT_LIST_DIR}/xt_encoder_ranged_red.png
 	${CMAKE_CURRENT_LIST_DIR}/xtDefaultBG.png
 	${CMAKE_CURRENT_LIST_DIR}/xtknob.png
+	${CMAKE_CURRENT_LIST_DIR}/xtknob_minus.png
+	${CMAKE_CURRENT_LIST_DIR}/xtknob_plus.png
 	${CMAKE_CURRENT_LIST_DIR}/xtknob_small.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageArp.png
 	${CMAKE_CURRENT_LIST_DIR}/xtPageMod.png
