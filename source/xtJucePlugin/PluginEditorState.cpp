@@ -25,9 +25,9 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 	juce::PopupMenu gainMenu;
 
-	gainMenu.addItem("0 db (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-	gainMenu.addItem("+6 db", true, gain == 2, [&p] { p.setOutputGain(2); });
-	gainMenu.addItem("+12 db", true, gain == 4, [&p] { p.setOutputGain(4); });
+	gainMenu.addItem("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+	gainMenu.addItem("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
+	gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
 	_menu.addSubMenu("Output Gain", gainMenu);
 }

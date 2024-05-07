@@ -27,11 +27,11 @@ void VirusEditorState::initContextMenu(juce::PopupMenu& _menu)
 
 		const auto gain = m_processor.getOutputGain();
 
-		gainMenu.addItem("-12 db", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
-		gainMenu.addItem("-6 db", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
-		gainMenu.addItem("0 db (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
-		gainMenu.addItem("+6 db", true, gain == 2, [&p] { p.setOutputGain(2); });
-		gainMenu.addItem("+12 db", true, gain == 4, [&p] { p.setOutputGain(4); });
+		gainMenu.addItem("-12 dB", true, gain == 0.25f, [&p] { p.setOutputGain(0.25f); });
+		gainMenu.addItem("-6 dB", true, gain == 0.5f, [&p] { p.setOutputGain(0.5f); });
+		gainMenu.addItem("0 dB (default)", true, gain == 1, [&p] { p.setOutputGain(1); });
+		gainMenu.addItem("+6 dB", true, gain == 2, [&p] { p.setOutputGain(2); });
+		gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
