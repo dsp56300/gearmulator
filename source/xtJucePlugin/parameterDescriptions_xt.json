@@ -822,7 +822,7 @@
 		],
 		"lfoSync":
 		[
-			"Off", "On", "Clock"
+			"Off", "On", "", "Clock"
 		],
 		// TODO
 		"lfoPhase":
