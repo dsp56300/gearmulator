@@ -134,7 +134,7 @@ namespace jucePluginEditorLib::patchManager
 
 		if(m_type == GroupType::DataSources)
 		{
-			menu.addItem("Add Folders...", [this]
+			menu.addItem("Add folders...", [this]
 			{
 				juce::FileChooser fc("Select Folders");
 
@@ -156,7 +156,7 @@ namespace jucePluginEditorLib::patchManager
 				}
 			});
 
-			menu.addItem("Add Files...", [this]
+			menu.addItem("Add files...", [this]
 			{
 				juce::FileChooser fc("Select Files");
 				if(fc.showDialog(
