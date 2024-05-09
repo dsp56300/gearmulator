@@ -194,7 +194,7 @@ namespace jucePluginEditorLib::patchManager
 			}
 			else if(getSourceType() == pluginLib::patchDB::SourceType::LocalStorage)
 			{
-				menu.addItem("Deleted selected", [this, s = selectedPatches]
+				menu.addItem("Delete selected", [this, s = selectedPatches]
 				{
 					if(showDeleteConfirmationMessageBox())
 					{
