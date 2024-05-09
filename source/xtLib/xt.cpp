@@ -22,6 +22,7 @@ namespace xt
 
 		m_ucThread.reset(new std::thread([&]()
 		{
+			dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
 			dsp56k::ThreadTools::setCurrentThreadName("MC68331");
 			while(!m_destroy)
 				processUcThread();
