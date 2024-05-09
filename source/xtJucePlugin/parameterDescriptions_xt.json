@@ -737,7 +737,7 @@
 		],
 		"arpMode":
 		[
-			"Off", "On", "Hold"
+			"Off", "On", "Hold", "Sound"
 		],
 		"arpTempo":
 		[
