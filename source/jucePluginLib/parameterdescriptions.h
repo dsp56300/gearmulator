@@ -51,6 +51,9 @@ namespace pluginLib
 
 	private:
 		std::string loadJson(const std::string& _jsonString);
+
+		std::string parseValueList(const std::string& _key, const juce::var& _values);
+
 		void parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets);
 		void parseMidiPacket(std::stringstream& _errors, const std::string& _key, const juce::var& _value);
 
