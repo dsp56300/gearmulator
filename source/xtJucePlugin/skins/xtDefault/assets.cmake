@@ -10,7 +10,13 @@ set(ASSETS_xtDefault
 	${CMAKE_CURRENT_LIST_DIR}/led.png
 	${CMAKE_CURRENT_LIST_DIR}/xt_encoder_ranged.png
 	${CMAKE_CURRENT_LIST_DIR}/xt_encoder_ranged_red.png
+	${CMAKE_CURRENT_LIST_DIR}/xt_encoder_unused.png
 	${CMAKE_CURRENT_LIST_DIR}/xtDefaultBG.png
+	${CMAKE_CURRENT_LIST_DIR}/xtFilterExtraBandwidth.png
+	${CMAKE_CURRENT_LIST_DIR}/xtFilterExtraBPOffset.png
+	${CMAKE_CURRENT_LIST_DIR}/xtFilterExtraOsc2FM.png
+	${CMAKE_CURRENT_LIST_DIR}/xtFilterExtraSHRate.png
+	${CMAKE_CURRENT_LIST_DIR}/xtFilterExtraWave.png
 	${CMAKE_CURRENT_LIST_DIR}/xtknob.png
 	${CMAKE_CURRENT_LIST_DIR}/xtknob_minus.png
 	${CMAKE_CURRENT_LIST_DIR}/xtknob_plus.png
