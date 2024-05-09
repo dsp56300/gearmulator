@@ -10,8 +10,7 @@ namespace pluginLib
 {
 	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString)
 	{
-		const auto err = loadJson(_jsonString);
-		LOG(err);
+		m_errors = loadJson(_jsonString);
 	}
 
 	const MidiPacket* ParameterDescriptions::getMidiPacket(const std::string& _name) const

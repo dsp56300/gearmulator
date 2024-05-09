@@ -25,7 +25,7 @@ namespace pluginLib
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
-		explicit Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson);
+		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
 		virtual ~Controller();
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
