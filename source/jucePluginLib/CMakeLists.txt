@@ -12,6 +12,7 @@ set(SOURCES
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
 	parameterregion.cpp parameterregion.h
+	parametervaluelist.cpp parametervaluelist.h
 	processor.cpp processor.h
 	softknob.cpp softknob.h
 	types.h
