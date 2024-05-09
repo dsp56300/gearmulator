@@ -290,11 +290,11 @@ namespace jucePluginEditorLib::patchManager
 			}
 		}
 		menu.addSeparator();
-		menu.addItem("Hide Duplicates (by hash)", true, m_hideDuplicatesByHash, [this]
+		menu.addItem("Hide duplicates (by hash)", true, m_hideDuplicatesByHash, [this]
 		{
 			setFilter(m_filter, !m_hideDuplicatesByHash, m_hideDuplicatesByName);
 		});
-		menu.addItem("Hide Duplicates (by name)", true, m_hideDuplicatesByName, [this]
+		menu.addItem("Hide duplicates (by name)", true, m_hideDuplicatesByName, [this]
 		{
 			setFilter(m_filter, m_hideDuplicatesByHash, !m_hideDuplicatesByName);
 		});
