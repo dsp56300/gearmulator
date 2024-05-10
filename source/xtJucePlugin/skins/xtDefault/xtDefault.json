@@ -653,7 +653,7 @@
         {
             "name" : "MultiModeLED",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "0",
