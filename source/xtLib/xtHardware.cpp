@@ -122,12 +122,12 @@ namespace xt
 		inputs[6] = m_dummyInput.data();
 		inputs[7] = m_dummyInput.data();
 
-		outputs[1] = &m_audioOutputs[0].front();
-		outputs[0] = &m_audioOutputs[1].front();
-		outputs[3] = &m_audioOutputs[2].front();
-		outputs[2] = &m_audioOutputs[3].front();
-		outputs[5] = m_dummyOutput.data();
+		outputs[0] = &m_audioOutputs[0].front();
+		outputs[1] = &m_audioOutputs[1].front();
+		outputs[2] = &m_audioOutputs[2].front();
+		outputs[3] = &m_audioOutputs[3].front();
 		outputs[4] = m_dummyOutput.data();
+		outputs[5] = m_dummyOutput.data();
 		outputs[6] = m_dummyOutput.data();
 		outputs[7] = m_dummyOutput.data();
 		outputs[8] = m_dummyOutput.data();
