@@ -78,9 +78,6 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 void PluginEditorState::loadSkin(const Skin& _skin)
 {
-	if(m_currentSkin == _skin)
-		return;
-
 	m_currentSkin = _skin;
 	writeSkinToConfig(_skin);
 
