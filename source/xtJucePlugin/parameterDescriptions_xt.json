@@ -82,7 +82,7 @@
  		{"index":66, "name":"F1EnvAmount", "toText":"signed", "isBipolar":true},
  		{"index":67, "name":"F1EnvVelAmount", "toText":"signed", "isBipolar":true},
 
- 		{"index":70, "name":"F1ContextSensitive"},
+ 		{"index":70, "name":"F1Extra"},
 
  		{"index":73, "name":"F2Cutoff", "default":127},
  		{"index":74, "name":"F2Type", "min":0, "max":1, "isDiscrete":true, "toText":"filter2Type"},
@@ -658,7 +658,7 @@
 			"Amlifier Env Attack", "Amlifier Env Decay", "Amplifier Env Sustain", "Amplifier Env Release",
 			"LFO 1 Rate", "LFO 1 Shape", "LFO 1 Delay", "LFO 1 Sync", "LFO 1 Symmetry", "LFO 1 Humanize",
 			"LFO 2 Rate", "LFO 2 Shape", "LFO 2 Delay", "LFO 2 Sync", "LFO 2 Symmetry", "LFO 2 Humanize", "LFO 2 Phase",
-			"Osc 1 FM Amount", "Filter 1 Context", "Glide Time",
+			"Osc 1 FM Amount", "Filter 1 Extra", "Glide Time",
 			"Control W", "Control X", "Control Y", "Control Z"
 		],
 		"playParamTargets":
@@ -683,7 +683,7 @@
 			"AmpEnvAttack", "AmpEnvDecay", "AmpEnvSustain", "AmpEnvRelease",
 			"Lfo1Rate", "Lfo1Shape", "Lfo1Delay", "Lfo1Sync", "Lfo1Symmetry", "Lfo1Humanize",
 			"Lfo2Rate", "Lfo2Shape", "Lfo2Delay", "Lfo2Sync", "Lfo2Symmetry", "Lfo2Humanize", "Lfo2Phase",
-			"O1FmAmount", "F1ContextSensitive", "GlideTime",
+			"O1FmAmount", "F1Extra", "GlideTime",
 			"ControlW", "ControlX", "ControlY", "ControlZ"
 		],
 		"filter1Type":
@@ -841,7 +841,7 @@
 			"Pitch", "Osc 1 Pitch", "Osc 2 Pitch", "Wave 1 Startwave", "Wave 2 Startwave", "Mix Wave 1", "Mix Wave 2", "Mix Ring Mod", "Mix Noise", "Filter 1 Cutoff", "Filter 1 Resonance", "Filter 2 Cutoff",
 			"Volume", "Pan", "Filter Env Attack", "Filter Env Decay", "Filter Env Sustain", "Filter Env Release", "Amp Env Attack", "Amp Env Decay", "Amp Env Sustain", "Amp Env Release",
 			"Wave Env Times", "Wave Env Levels", "Free Env Times", "Free Env Levels", "LFO 1 Rate", "LFO 1 Level", "LFO 2 Rate", "LFO 2 Level", "Mod #1 Amount", "Mod #2 Amount", "Mod #3 Amount",
-			"Mod #4 Amount", "FM Amount", "F1 Context"
+			"Mod #4 Amount", "FM Amount", "F1 Extra"
 		],
 		"midiChannel":
 		[
@@ -1083,7 +1083,7 @@
 			{"type": "param", "name": "F1EnvVelAmount"},
 			{"type": "null"},
 			{"type": "null"},
-			{"type": "param", "name": "F1ContextSensitive"},
+			{"type": "param", "name": "F1Extra"},
 			{"type": "null"},
 			{"type": "null"},
 			{"type": "param", "name": "F2Cutoff"},
