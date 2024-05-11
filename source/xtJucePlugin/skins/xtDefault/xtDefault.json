@@ -323,7 +323,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2471.35",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -334,7 +334,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -343,7 +343,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2487.35",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -363,7 +363,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2583.85",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -374,7 +374,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -383,7 +383,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2599.85",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -403,7 +403,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2696.35",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -414,7 +414,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -423,7 +423,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2712.35",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -443,7 +443,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2808.85",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -454,7 +454,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -463,7 +463,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2824.85",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -483,7 +483,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2921.35",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -494,7 +494,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -503,7 +503,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "2937.35",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -523,7 +523,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3033.85",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -534,7 +534,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -543,7 +543,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3049.85",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -563,7 +563,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3146.35",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -574,7 +574,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -583,7 +583,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3162.35",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -603,7 +603,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3258.85",
-                "y" : "328.1724",
+                "y" : "357.1724",
                 "width" : "64",
                 "height" : "64",
                 "texture" : "xtknob_small",
@@ -614,7 +614,7 @@
         {
             "name" : "PartLedSmall",
             "button" : {
-                "isToggle" : "1",
+                "isToggle" : "0",
                 "radioGroupId" : "97",
                 "normalImage" : "0",
                 "overImage" : "0",
@@ -623,7 +623,7 @@
                 "overImageOn" : "1",
                 "downImageOn" : "1",
                 "x" : "3274.85",
-                "y" : "393.1724",
+                "y" : "322.1724",
                 "width" : "32",
                 "height" : "32",
                 "texture" : "led",
@@ -653,6 +653,7 @@
         {
             "name" : "MultiModeLED",
             "button" : {
+                "isToggle" : "0",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "0",
@@ -1279,7 +1280,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -1303,7 +1304,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "52.86243",
+                        "x" : "105.8624",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1320,7 +1321,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "275.8624",
+                        "x" : "328.8624",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1342,8 +1343,8 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "472.3624",
-                        "y" : "1317.485",
+                        "x" : "2",
+                        "y" : "731",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -1357,15 +1358,15 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "488.3624",
-                        "y" : "1383.425",
+                        "x" : "19",
+                        "y" : "691",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -1539,7 +1540,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -1631,7 +1632,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "651.5411",
+                        "x" : "741.0411",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1653,7 +1654,7 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "874.5411",
+                        "x" : "964.6444",
                         "y" : "1282.485",
                         "width" : "128",
                         "height" : "128",
@@ -1668,14 +1669,14 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "986.5411",
+                        "x" : "1076.644",
                         "y" : "1266.485",
                         "width" : "32",
                         "height" : "32",
@@ -1697,8 +1698,8 @@
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1067.541",
-                        "y" : "1315.485",
+                        "x" : "1136",
+                        "y" : "731",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -1712,15 +1713,15 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
                         "normalImageOn" : "1",
                         "overImageOn" : "1",
                         "downImageOn" : "1",
-                        "x" : "1083.541",
-                        "y" : "1380.905",
+                        "x" : "1153",
+                        "y" : "691",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -2050,7 +2051,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -2094,7 +2095,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -2510,10 +2511,10 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "2559.695",
-                        "y" : "1330.06",
-                        "width" : "145.2011",
-                        "height" : "50"
+                        "x" : "2581.695",
+                        "y" : "1174",
+                        "width" : "131",
+                        "height" : "48"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo1Sync"
@@ -2558,8 +2559,8 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2583.196",
-                        "y" : "1109.255",
+                        "x" : "2415.896",
+                        "y" : "1285.955",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "xt_encoder_ranged",
@@ -2648,8 +2649,8 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "3145.096",
-                        "y" : "1109.255",
+                        "x" : "2977.796",
+                        "y" : "1285.955",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "xt_encoder_ranged",
@@ -2682,7 +2683,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "2977.796",
+                        "x" : "3145.096",
                         "y" : "1285.955",
                         "width" : "128",
                         "height" : "128",
@@ -2707,10 +2708,10 @@
                         "alignH" : "L",
                         "alignV" : "C",
                         "bold" : "1",
-                        "x" : "3120.796",
-                        "y" : "1355.06",
-                        "width" : "142",
-                        "height" : "46"
+                        "x" : "3142.796",
+                        "y" : "1174",
+                        "width" : "131",
+                        "height" : "48"
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo2Sync"
@@ -4023,7 +4024,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -4111,7 +4112,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -4906,7 +4907,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -4936,7 +4937,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "31.99988",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -4950,7 +4951,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -4958,7 +4959,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "47.99988",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -4980,7 +4981,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "219.1749",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -4994,7 +4995,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5002,7 +5003,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "235.1749",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5024,7 +5025,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "406.3499",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5038,7 +5039,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5046,7 +5047,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "422.3499",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5068,7 +5069,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "593.5249",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5082,7 +5083,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5090,7 +5091,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "609.5249",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5112,7 +5113,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "780.6999",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5126,7 +5127,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5134,7 +5135,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "796.6999",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5156,7 +5157,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "967.8749",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5170,7 +5171,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5178,7 +5179,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "983.8749",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5200,7 +5201,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1155.05",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5214,7 +5215,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5222,7 +5223,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1171.05",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5244,7 +5245,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1342.225",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5258,7 +5259,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5266,7 +5267,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1358.225",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5288,7 +5289,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1529.4",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5302,7 +5303,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5310,7 +5311,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1545.4",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5332,7 +5333,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1716.575",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5346,7 +5347,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5354,7 +5355,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1732.575",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5376,7 +5377,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1903.75",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5390,7 +5391,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5398,7 +5399,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "1919.75",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5420,7 +5421,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2090.925",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5434,7 +5435,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5442,7 +5443,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2106.925",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5464,7 +5465,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2278.1",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5478,7 +5479,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5486,7 +5487,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2294.1",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5508,7 +5509,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2465.275",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5522,7 +5523,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5530,7 +5531,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2481.275",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5552,7 +5553,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2652.45",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5566,7 +5567,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5574,7 +5575,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2668.45",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5596,7 +5597,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2839.625",
-                        "y" : "397.9996",
+                        "y" : "443.9996",
                         "width" : "64",
                         "height" : "64",
                         "texture" : "xtknob_small",
@@ -5610,7 +5611,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -5618,7 +5619,7 @@
                         "overImageOn" : "1",
                         "downImageOn" : "1",
                         "x" : "2855.625",
-                        "y" : "462.9996",
+                        "y" : "408.9996",
                         "width" : "32",
                         "height" : "32",
                         "texture" : "led",
@@ -5635,7 +5636,7 @@
                     },
                     "spritesheet" : {
                         "x" : "3106.18",
-                        "y" : "367.78",
+                        "y" : "382.78",
                         "width" : "128",
                         "height" : "128",
                         "texture" : "xt_encoder_ranged",
@@ -6377,7 +6378,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -6465,7 +6466,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -6981,7 +6982,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -7247,7 +7248,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -7513,7 +7514,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -7779,7 +7780,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -8045,7 +8046,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -8311,7 +8312,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -8577,7 +8578,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
@@ -8843,7 +8844,7 @@
                 {
                     "name" : "xtLed",
                     "button" : {
-                        "isToggle" : "1",
+                        "isToggle" : "0",
                         "normalImage" : "0",
                         "overImage" : "0",
                         "downImage" : "0",
