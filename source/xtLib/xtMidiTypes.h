@@ -8,6 +8,7 @@ namespace xt
 {
 	enum MidiHeaderByte : uint8_t
 	{
+		IdMw1 = 0x00,
 		IdMw2 = 0x0e,
 	};
 
@@ -161,4 +162,11 @@ namespace xt
 	};
 
 	static_assert(static_cast<uint8_t>(MultiParameter::Inst1First) - static_cast<uint8_t>(MultiParameter::Inst0First) == 28);
+
+	namespace Mw1
+	{
+		static constexpr uint32_t g_singleDumpLength = 187;
+		static constexpr uint32_t g_singleNameLength = 16;
+		static constexpr uint32_t g_singleNamePosition = 153;
+	};
 }

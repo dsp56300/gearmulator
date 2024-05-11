@@ -20,7 +20,9 @@ namespace xtJucePlugin
 		, m_editor(_editor)
 		, m_controller(_editor.getXtController())
 	{
+		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
 		startLoaderThread();
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 	}
 
 	PatchManager::~PatchManager()
@@ -41,6 +43,25 @@ namespace xtJucePlugin
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex)
 	{
+		if(_sysex.size() == xt::Mw1::g_singleDumpLength)
+		{
+			if(_sysex[1] == wLib::IdWaldorf && _sysex[2] == xt::IdMw1)
+			{
+				// MW1 single dump
+				auto p = std::make_shared<pluginLib::patchDB::Patch>();
+
+				p->name.resize(xt::Mw1::g_singleNameLength, ' ');
+				memcpy(p->name.data(), &_sysex[xt::Mw1::g_singleNamePosition], xt::Mw1::g_singleNameLength);
+				while(p->name.back() == ' ')
+					p->name.pop_back();
+
+				p->sysex = std::move(_sysex);
+
+				p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW1");
+				return p;
+			}
+		}
+
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameters;
 		if(!m_controller.parseSingle(data, parameters, _sysex))
@@ -50,6 +71,8 @@ namespace xtJucePlugin
 
 		p->sysex = std::move(_sysex);
 		p->name = m_controller.getSingleName(parameters);
+
+		p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW2");
 
 		return p;
 	}
@@ -102,9 +125,17 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
+	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		m_controller.sendSingle(_patch->sysex, static_cast<uint8_t>(_part));
+		if(!m_controller.sendSingle(_patch->sysex, static_cast<uint8_t>(_part)))
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
+				"MW1 patches can only be loaded to the first part.\n"
+				"\n"
+				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank."
+				, nullptr, juce::ModalCallbackFunction::create([](int){}));
+		}
 		return true;
 	}
 }

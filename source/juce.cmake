@@ -94,6 +94,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			CLAP_MANUAL_URL "https://dsp56300.wordpress.com"
 			)
 		set_property(TARGET ${targetName}_CLAP PROPERTY FOLDER ${targetName})
+		add_dependencies(${targetName}_All ${targetName}_CLAP)
 	endif()
 
 	if(UNIX AND NOT APPLE)
