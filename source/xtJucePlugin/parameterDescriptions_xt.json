@@ -830,7 +830,7 @@
 		[
 			"Off", "LFO 1", "LFO 1 * MW", "LFO 1 * AT", "LFO 2", "Filter Env", "Amp Env", "Wave Env", "Free Env", "Key Follow", "Keytrack", "Velocity", "Release Vel", "Aftertouch", "Poly Pressure", "Pitch Bend",
 			"Modwheel", "Sustain Pedal", "Foot Control", "Breath Control", "Control W", "Control X", "Control Y", "Control Z", "Control Delay", "Modifier #1", "Modifier #2", "Modifier #3", "Modifier #4",
-			"MIDI Clock", "min", "MAX"
+			"MIDI Clock", "Min", "Max"
 		],
 		"modType":
 		[
