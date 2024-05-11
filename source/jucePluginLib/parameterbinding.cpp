@@ -133,10 +133,15 @@ namespace pluginLib
 	
 		uint32_t count = 0;
 
-		for (const auto& vs : sortedValues)
+		// we want our long menus to be split into columns of 16 rows each
+		// but only if we have have more entries than one and a half such column
+		const uint32_t splitAt = (sortedValues.size() > 24) ? 16 : 0;
+
+		for (const auto &vs : sortedValues)
 		{
 			_combo.addItem(vs.second, vs.first + 1);
-			if(++count == 16)
+
+			if (++count == splitAt)
 			{
 				_combo.getRootMenu()->addColumnBreak();
 				count = 0;
