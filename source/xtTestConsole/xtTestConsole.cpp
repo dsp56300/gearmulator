@@ -74,7 +74,7 @@ int main()
 		uc->sendMidiEvent(e);
 	};
 
-	sendButton(xt::ButtonType::Play, true);	// play/shift
+	sendButton(xt::ButtonType::Play, true);		// play/shift
 	processLength(64 * 5);
 	sendButton(xt::ButtonType::Power, true);	// power
 	processLength(64 * 5);

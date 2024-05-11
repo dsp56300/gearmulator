@@ -8,6 +8,7 @@
 #include "../synthLib/os.h"
 #include "../synthLib/midiToSysex.h"
 #include "../synthLib/midiBufferParser.h"
+
 #include "dsp56kEmu/logging.h"
 
 namespace xt
@@ -116,8 +117,24 @@ namespace xt
 		return false;
 	}
 
-	bool State::receive(Responses& _responses, const SysEx& _data, Origin _sender)
+	bool State::receive(Responses& _responses, const SysEx& _data, const Origin _sender)
 	{
+		if(_data.size() == Mw1::g_singleDumpLength)
+		{
+			m_sender = _sender;
+			forwardToDevice(_data);
+
+			// MW1 dump doesn't contain any information about which part or bank it is loaded into, the first
+			// part is always the target
+			// Invalidate the currently cached single. We cannot do the conversion here, the hardware has to.
+			// The editor needs to request the single after sending a MW1 dump, which will fill our cache again
+			if(isMultiMode())
+				m_currentMultiSingles[0].fill(0);
+			else
+				m_currentInstrumentSingles.front().fill(0);
+			return true;
+		}
+
 		const auto cmd = getCommand(_data);
 
 		if(cmd == SysexCommand::Invalid)
@@ -399,7 +416,7 @@ namespace xt
 
 		const auto idxH = _data[dump.idxParamIndexH];
 		const auto idxL = _data[dump.idxParamIndexL];
-		const auto val = _data[dump.idxParamValue];
+//		const auto val = _data[dump.idxParamValue];
 
 		if(idxH == 0x20)
 			return &m_currentMulti[dump.firstParamIndex + idxL];

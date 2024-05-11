@@ -85,13 +85,25 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 
 Controller::~Controller() = default;
 
-void Controller::sendSingle(const std::vector<uint8_t>& _sysex)
+bool Controller::sendSingle(const std::vector<uint8_t>& _sysex)
 {
-	sendSingle(_sysex, getCurrentPart());
+	return sendSingle(_sysex, getCurrentPart());
 }
 
-void Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _part)
+bool Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _part)
 {
+	if(_sysex.size() == xt::Mw1::g_singleDumpLength)
+	{
+		// No program/bank bytes are part of the dump, send as-is and request the result
+
+		if(_part > 0)
+			return false;	// we cannot support this as the hardware loads a MW1 to the "current" instrument, which is always the first one
+
+		pluginLib::Controller::sendSysEx(_sysex);
+		requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
+		return true;
+	}
+
 	auto data = _sysex;
 
 	data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
@@ -101,10 +113,12 @@ void Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _p
 	const auto* p = getMidiPacket(g_midiPacketNames[SingleDump]);
 
 	if (!p->updateChecksums(data))
-		return;
+		return false;
 
 	pluginLib::Controller::sendSysEx(data);
     parseSysexMessage(data);
+
+	return true;
 }
 
 const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size)

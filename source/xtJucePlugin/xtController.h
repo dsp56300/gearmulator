@@ -56,8 +56,8 @@ public:
 	Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 	~Controller() override;
 
-	void sendSingle(const std::vector<uint8_t>& _sysex);
-	void sendSingle(const std::vector<uint8_t>& _sysex, uint8_t _part);
+	bool sendSingle(const std::vector<uint8_t>& _sysex);
+	bool sendSingle(const std::vector<uint8_t>& _sysex, uint8_t _part);
 
 	bool sendSysEx(MidiPacketType _type) const;
 	bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
