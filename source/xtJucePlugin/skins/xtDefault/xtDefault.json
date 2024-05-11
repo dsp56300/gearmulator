@@ -653,7 +653,6 @@
         {
             "name" : "MultiModeLED",
             "button" : {
-                "isToggle" : "1",
                 "normalImage" : "0",
                 "overImage" : "0",
                 "downImage" : "0",
@@ -1737,7 +1736,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1341.844",
+                        "x" : "1353.739",
                         "y" : "97.48016",
                         "width" : "128",
                         "height" : "128",
@@ -1754,7 +1753,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1341.844",
+                        "x" : "1353.739",
                         "y" : "298.4406",
                         "width" : "128",
                         "height" : "128",
@@ -1771,7 +1770,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1341.844",
+                        "x" : "1353.739",
                         "y" : "499.4009",
                         "width" : "128",
                         "height" : "128",
@@ -1788,7 +1787,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1341.844",
+                        "x" : "1353.739",
                         "y" : "700.3613",
                         "width" : "128",
                         "height" : "128",
@@ -1805,7 +1804,7 @@
                     "rotary" : {
                     },
                     "spritesheet" : {
-                        "x" : "1341.844",
+                        "x" : "1353.739",
                         "y" : "901.3215",
                         "width" : "128",
                         "height" : "128",
@@ -2252,12 +2251,104 @@
                         "y" : "370.17",
                         "width" : "128",
                         "height" : "128",
+                        "texture" : "xt_encoder_unused",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "0,1,2,3,4,5,10,11"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2695.837",
+                        "y" : "370.17",
+                        "width" : "128",
+                        "height" : "128",
                         "texture" : "xt_encoder_ranged",
                         "tileSizeX" : "128",
                         "tileSizeY" : "128"
                     },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "6,7,8,9,12"
+                    },
                     "parameterAttachment" : {
-                        "parameter" : "F1ContextSensitive"
+                        "parameter" : "F1Extra"
+                    }
+                },
+                {
+                    "name": "xtFilterExtraWave",
+                    "image": {
+                        "x": "2715.0",
+                        "y": "501.0",
+                        "width": "91",
+                        "height": "28",
+                        "texture": "xtFilterExtraWave"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "6"
+                    }
+                },
+                {
+                    "name": "xtFilterExtraBPOffset",
+                    "image": {
+                        "x": "2680.0",
+                        "y": "501.0",
+                        "width": "161",
+                        "height": "28",
+                        "texture": "xtFilterExtraBPOffset"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "7"
+                    }
+                },
+                {
+                    "name": "xtFilterExtraOsc2FM",
+                    "image": {
+                        "x": "2684.0",
+                        "y": "501.0",
+                        "width": "152",
+                        "height": "28",
+                        "texture": "xtFilterExtraOsc2FM"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "8"
+                    }
+                },
+                {
+                    "name": "xtFilterExtraSHRate",
+                    "image": {
+                        "x": "2683.0",
+                        "y": "501.0",
+                        "width": "154",
+                        "height": "28",
+                        "texture": "xtFilterExtraSHRate"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "9"
+                    }
+                },
+                {
+                    "name": "xtFilterExtraBandwidth",
+                    "image": {
+                        "x": "2675.0",
+                        "y": "501.0",
+                        "width": "173",
+                        "height": "28",
+                        "texture": "xtFilterExtraBandwidth"
+                    },
+                    "condition": {
+                        "enableOnParameter": "F1Type",
+                        "enableOnValues": "12"
                     }
                 },
                 {
@@ -6549,9 +6640,6 @@
                         "y" : "1186.728",
                         "width" : "280",
                         "height" : "50"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "F1Type"
                     }
                 },
                 {
@@ -6571,9 +6659,6 @@
                         "y" : "1296.728",
                         "width" : "280",
                         "height" : "50"
-                    },
-                    "parameterAttachment" : {
-                        "parameter" : "F1Type"
                     }
                 },
                 {

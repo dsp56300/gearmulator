@@ -30,83 +30,83 @@
         {
             "name" : "pm_treeview",
             "treeview" : {
+                "textHeight" : "14",
+                "color" : "FFDA94FF",
+                "backgroundColor" : "1C1F22FF",
                 "alignH" : "L",
                 "alignV" : "C",
-                "color" : "ffda94",
-                "backgroundColor" : "1c1f22ff",
-                "selectedItemBackgroundColor" : "a87a24"
+                "selectedItemBackgroundColor" : "A87A24FF"
             }
         },
         {
             "name" : "pm_search",
             "texteditor" : {
+                "text" : "Filter...",
+                "textHeight" : "14",
+                "color" : "FFDA94FF",
+                "backgroundColor" : "0E1216FF",
                 "alignH" : "L",
-                "alignV" : "C",
-                "color" : "ffda94",
-                "outlineColor" : "cf972e",
-                "backgroundColor" : "0e1216ff",
-				"text": "Filter..."
+                "alignV" : "C"
             }
         },
         {
             "name" : "pm_scrollbar",
             "scrollbar" : {
-                "color" : "cf972e",
+                "color" : "CF972EFF"
             }
         },
         {
             "name" : "pm_listbox",
             "listbox" : {
+                "textHeight" : "30",
+                "color" : "FFDA94FF",
+                "backgroundColor" : "1C1F22FF",
                 "alignH" : "L",
                 "alignV" : "C",
-                "color" : "ffda94",
-                "backgroundColor" : "1c1f22ff",
-                "selectedItemBackgroundColor" : "a87a24",
-				"bold": "1",
-				"textHeight": 30
-             }
+                "bold" : "1",
+                "selectedItemBackgroundColor" : "A87A24FF"
+            }
         },
         {
             "name" : "pm_info_name",
             "label" : {
+                "textHeight" : "32",
+                "color" : "FFDA94FF",
+                "backgroundColor" : "1C1F22FF",
                 "alignH" : "L",
                 "alignV" : "T",
-                "color" : "ffda94",
-                "backgroundColor" : "1c1f22ff",
-                "textHeight" : "32",
-				"bold": "1"
+                "bold" : "1"
             }
         },
         {
             "name" : "pm_info_label",
             "label" : {
+                "textHeight" : "16",
+                "color" : "888888FF",
                 "alignH" : "L",
-                "alignV" : "B",
-                "color" : "888888ff",
-                "textHeight" : "16"
+                "alignV" : "T"
             }
         },
         {
             "name" : "pm_info_text",
             "label" : {
+                "textHeight" : "16",
+                "color" : "FFDA94FF",
                 "alignH" : "L",
-                "alignV" : "T",
-                "color" : "ffda94",
-                "textHeight" : "18"
+                "alignV" : "T"
             }
         },
         {
             "name" : "pm_status_label",
             "label" : {
+                "textHeight" : "16",
+                "color" : "FFDA94FF",
+                "backgroundColor" : "1C1F22FF",
                 "alignH" : "L",
-                "alignV" : "C",
-                "color" : "ffda94",
-                "backgroundColor" : "1c1f22ff",
-                "textHeight" : "18",
-				"bold": "0"
+                "alignV" : "C"
             }
         }
-	],
+    ],
     "children" : [
         {
             "name" : "bakedBG",

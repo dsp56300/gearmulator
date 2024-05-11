@@ -6,6 +6,8 @@
 #include "processor.h"
 #include "dsp56kEmu/logging.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"	// juce::NativeMessageBox
+
 namespace pluginLib
 {
 	uint8_t getParameterValue(Parameter* _p)
@@ -15,6 +17,13 @@ namespace pluginLib
 
 	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
 	{
+		if(!m_descriptions.isValid())
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+				_processor.getProperties().name + " - Failed to parse Parameter Descriptions json", 
+				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors(), 
+				nullptr, juce::ModalCallbackFunction::create([](int){}));
+		}
 	}
 
 	Controller::~Controller()

@@ -103,48 +103,34 @@ namespace pluginLib
 
 		std::vector<Entry> sortedValues;
 
-		const auto& allValues = v->getAllValueStrings();
-		uint8_t i = 0;
-		for (const auto& vs : allValues)
+		const auto& desc = v->getDescription();
+		const auto& valueList = desc.valueList;
+
+		if(valueList.order.empty())
 		{
-			if(vs.isNotEmpty())
-				sortedValues.emplace_back(i, vs.toStdString());
-			++i;
-		}
-		/*
-		std::sort(sortedValues.begin(), sortedValues.end(), [](const Entry& _a, const Entry& _b)
-		{
-			const auto aOff =_a.second == "Off" || _a.second == "-";
-			const auto bOff =_b.second == "Off" || _b.second == "-";
-
-			if(aOff && !bOff)
-				return true;
-
-			if(!aOff && bOff)
-				return false;
-
-			auto noDigitsString = [](const std::string& _s)
+			uint8_t i = 0;
+			const auto& allValues = v->getAllValueStrings();
+			for (const auto& vs : allValues)
 			{
-				std::string s;
-				s.reserve(_s.size());
-				for (const char c : _s)
-				{
-					if(isdigit(c))
-						break;
-					s += c;
-				}
-				return s;
-			};
-
-			const auto a = noDigitsString(_a.second);
-			const auto b = noDigitsString(_b.second);
-
-			if(a == b)
-				return _a.first < _b.first;
-
-			return a < b;
-		});
-		*/
+				if(vs.isNotEmpty())
+					sortedValues.emplace_back(i, vs.toStdString());
+				++i;
+			}
+		}
+		else
+		{
+			for(uint32_t i=0; i<valueList.order.size(); ++i)
+			{
+				const auto value = valueList.orderToValue(i);
+				if(value == ValueList::InvalidIndex)
+					continue;
+				const auto text = valueList.valueToText(value);
+				if(text.empty())
+					continue;
+				sortedValues.emplace_back(value, text);
+			}
+		}
+	
 		uint32_t count = 0;
 
 		for (const auto& vs : sortedValues)

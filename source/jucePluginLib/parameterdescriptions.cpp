@@ -10,8 +10,7 @@ namespace pluginLib
 {
 	ParameterDescriptions::ParameterDescriptions(const std::string& _jsonString)
 	{
-		const auto err = loadJson(_jsonString);
-		LOG(err);
+		m_errors = loadJson(_jsonString);
 	}
 
 	const MidiPacket* ParameterDescriptions::getMidiPacket(const std::string& _name) const
@@ -101,6 +100,8 @@ namespace pluginLib
 		if (descsArray == nullptr)
 			return "Parameter descriptions are empty";
 
+		std::stringstream errors;
+
 		{
 			const auto& valueLists = json["valuelists"];
 
@@ -114,32 +115,14 @@ namespace pluginLib
 			for(int i=0; i<entryProps.size(); ++i)
 			{
 				const auto key = std::string(entryProps.getName(i).toString().toUTF8());
-				const auto values = entryProps.getValueAt(i).getArray();
+				const auto& values = entryProps.getValueAt(i);
 
-				if(m_valueLists.find(key) != m_valueLists.end())
-					return "value list " + key + " is defined twice";
+				const auto result = parseValueList(key, values);
 
-				if(!values || values->isEmpty())
-					return std::string("value list ") + key + " is not a valid array of strings";
-
-				ValueList vl;
-				vl.texts.reserve(values->size());
-
-				for (auto&& value : *values)
-				{
-					const auto text = static_cast<std::string>(value.toString().toUTF8());
-
-					if (vl.textToValueMap.find(text) == vl.textToValueMap.end())
-						vl.textToValueMap.insert(std::make_pair(text, static_cast<uint32_t>(vl.texts.size())));
-
-					vl.texts.push_back(text);
-				}
-
-				m_valueLists.insert(std::make_pair(key, vl));
+				if(!result.empty())
+					errors << "Failed to parse value list " << key << ": " << result << '\n';
 			}
 		}
-
-		std::stringstream errors;
 
 		const auto& descs = *descsArray;
 
@@ -425,6 +408,80 @@ namespace pluginLib
 		}
 
 		return res;
+	}
+
+
+	std::string ParameterDescriptions::parseValueList(const std::string& _key, const juce::var& _values)
+	{
+		auto valuesArray = _values.getArray();
+
+		if(m_valueLists.find(_key) != m_valueLists.end())
+			return "value list " + _key + " is defined twice";
+
+		ValueList vl;
+
+		if(valuesArray)
+		{
+			if(valuesArray->isEmpty())
+				return std::string("value list ") + _key + " is not a valid array of strings";
+
+			vl.texts.reserve(valuesArray->size());
+
+			for (auto&& value : *valuesArray)
+			{
+				const auto text = static_cast<std::string>(value.toString().toUTF8());
+				vl.texts.push_back(text);
+			}
+
+			for(uint32_t i=0; i<vl.texts.size(); ++i)
+				vl.order.push_back(i);
+		}
+		else
+		{
+			const auto valueMap = _values.getDynamicObject();
+			if(!valueMap)
+			{
+				return std::string("value list ") + _key + " neither contains an array of strings nor a map of values => strings";
+			}
+
+			std::set<uint32_t> knownValues;
+
+			for (const auto& it : valueMap->getProperties())
+			{
+				const auto keyName = it.name.toString().toStdString();
+				const auto& value = it.value;
+
+				const auto key = std::strtol(keyName.c_str(), nullptr, 10);
+
+				if(key < 0)
+				{
+					return std::string("Invalid parameter index '") + keyName + " in value list '" + _key + "', values must be >= 0";
+				}
+				if(knownValues.find(key) != knownValues.end())
+				{
+					return std::string("Parameter index '") + keyName + " in value list '" + _key + " has been specified twice";
+				}
+				knownValues.insert(key);
+
+				const auto requiredLength = key+1;
+
+				if(vl.texts.size() < requiredLength)
+					vl.texts.resize(requiredLength);
+
+				vl.texts[key] = value.toString().toStdString();
+				vl.order.push_back(key);
+			}
+		}
+
+		for (const auto& text : vl.texts)
+		{
+			if (vl.textToValueMap.find(text) == vl.textToValueMap.end())
+				vl.textToValueMap.insert(std::make_pair(text, static_cast<uint32_t>(vl.texts.size())));
+		}
+
+		m_valueLists.insert(std::make_pair(_key, vl));
+
+		return {};
 	}
 
 	void ParameterDescriptions::parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets)
