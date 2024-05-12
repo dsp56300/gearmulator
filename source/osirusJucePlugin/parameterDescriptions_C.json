@@ -370,7 +370,7 @@
  		{"page":114, "class":"Global", "index":121, "name":"Panel Destination", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":122, "name":"Play Mode", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":123, "name":"Part Number", "min":0, "max":127, "isPublic":false, "isDiscrete":true, "isBool":false}, // $0 .. $15, $40
- 		{"page":114, "class":"Global", "index":124, "name":"Global Channel", "min":0, "max":15, "isPublic":true, "isDiscrete":true, "isBool":false},
+ 		{"page":114, "class":"Global", "index":124, "name":"Midi Channel", "min":0, "max":15, "isPublic":true, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":125, "name":"Led Mode", "min":0, "max":2, "isPublic":false, "isDiscrete":true, "isBool":false},
  		{"page":114, "class":"Global", "index":126, "name":"LCD Contrast", "min":0, "max":127, "isPublic":false, "isDiscrete":false, "isBool":false},
  		{"page":114, "class":"Global", "index":127, "name":"Master Volume", "min":0, "max":127, "isPublic":true, "isDiscrete":false, "isBool":false}
