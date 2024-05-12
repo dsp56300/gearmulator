@@ -1,5 +1,38 @@
 Release Notes 
 
+1.3.14
+
+Framework:
+
+- [Imp] Rename "db" to "dB" in all gain context menus (mkruselj)
+- [Imp] Column breaks for dropdown menu based parameters improved (mkruselj)
+- [Imp] Selecting the same skin again reloads it, useful for skin
+        developers (mkruselj)
+
+Patch Manager:
+
+- [Fix] Typo "Deleted Selected" in patch context menu (mkruselj)
+
+Xenia:
+
+- [Imp] Adjusted/improved parameter value lists and default values (mkruselj)
+- [Imp] Filter "Extra" parameter label is updated according to the selected 
+        filter type (mkruselj)
+- [Imp] Adjust various labels to match hardware naming (mkruselj)
+- [Imp] Add support for Microwave 1 patches.
+- [Imp] Added tag "MW Model" with tags for MW1 and MW2(/XT(k))
+
+- [Fix] Left/Right channels reversed (mkruselj)
+- [Fix] MC68331 thread was not set to high priority
+- [Fix] Midi In/Out selectors had Filter 1 Type parameter attached
+
+Vavra:
+
+- [Imp] Update default/reset values for various parameters (mkruselj)
+- [Imp] Adjust naming of various labels (mkruselj)
+
+- [Fix] MC68331 thread was not set to high priority
+
 1.3.13
 
 Framework:
