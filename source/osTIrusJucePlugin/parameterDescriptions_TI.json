@@ -1321,10 +1321,6 @@
 		[
 			"RAM-A", "RAM-B", "RAM-C", "RAM-D", "ROM-A", "ROM-B", "ROM-C", "ROM-D", "ROM-E", "ROM-F", "ROM-G", "ROM-H", "ROM-I", "ROM-J", "ROM-K", "ROM-L", "ROM-M", "ROM-N", "ROM-O", "ROM-P", "ROM-Q", "ROM-R", "ROM-S", "ROM-T", "ROM-U", "ROM-V", "ROM-W", "ROM-X", "ROM-Y", "ROM-Z"
 		],
-		"locationRAM/ROM":
-		[
-			"RAM-A", "RAM-B", "RAM-C", "RAM-D", "ROM-A", "ROM-B", "ROM-C", "ROM-D", "ROM-E", "ROM-F", "ROM-G", "ROM-H", "ROM-I", "ROM-J", "ROM-K", "ROM-L", "ROM-M", "ROM-N", "ROM-O", "ROM-P", "ROM-Q", "ROM-R", "ROM-S", "ROM-T", "ROM-U", "ROM-V", "ROM-W", "ROM-X", "ROM-Y", "ROM-Z"
-		],
 		"nameOutputSelectWithoutOff":
 		[
 			"Out1 L", "Out1 L+R", "Out1 R",
