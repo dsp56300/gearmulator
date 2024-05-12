@@ -277,5 +277,10 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		midiEvents.clear();
 	}
 
+	// wait until DSP enters blocking state so that resetting the callback is safe
+	auto& audio = m_dsp1->getAudio();
+	while(!audio.getAudioOutputs().full() && !audio.getAudioInputs().empty())
+		std::this_thread::yield();
+
 	esai.setCallback([&](dsp56k::Audio*){},0);
 }
