@@ -44,7 +44,7 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 	}
 
 	virusLib::DspSingle* dsp1 = nullptr;
-	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom, 46875.0f);
+	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom, static_cast<float>(m_rom.getSamplerate()));
 	m_dsp1.reset(dsp1);
 
 	m_uc.reset(new Microcontroller(*m_dsp1, m_rom, false));
