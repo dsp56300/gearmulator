@@ -44,7 +44,7 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 	}
 
 	virusLib::DspSingle* dsp1 = nullptr;
-	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom, 46875.0f);
+	virusLib::Device::createDspInstances(dsp1, m_dsp2, m_rom, static_cast<float>(m_rom.getSamplerate()));
 	m_dsp1.reset(dsp1);
 
 	m_uc.reset(new Microcontroller(*m_dsp1, m_rom, false));
@@ -276,6 +276,11 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		m_uc->readMidiOut(midiEvents);
 		midiEvents.clear();
 	}
+
+	// wait until DSP enters blocking state so that resetting the callback is safe
+	auto& audio = m_dsp1->getAudio();
+	while(!audio.getAudioOutputs().full() && !audio.getAudioInputs().empty())
+		std::this_thread::yield();
 
 	esai.setCallback([&](dsp56k::Audio*){},0);
 }
