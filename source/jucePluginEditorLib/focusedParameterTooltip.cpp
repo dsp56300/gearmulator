@@ -1,10 +1,13 @@
 #include "focusedParameterTooltip.h"
 
+#include "pluginEditor.h"
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace jucePluginEditorLib
 {
-	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0)
+	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label *_label, const genericUI::Editor &_editor) :
+		m_label(_label), m_editor(_editor), m_defaultWidth(_label ? _label->getWidth() : 0)
 	{
 		setVisible(false);
 
@@ -46,22 +49,16 @@ namespace jucePluginEditorLib
 			x += (_component->getWidth()>>1) - (labelWidth>>1);
 			y += _component->getHeight() + (m_label->getHeight()>>1);
 
-			/*
-			// global to local of tooltip parent
-			parent = m_label->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x -= parent->getX();
-				y -= parent->getY();
-				parent = parent->getParentComponent();
-			}
-			*/
 			if(m_label->getProperties().contains("offsetY"))
 				y += static_cast<int>(m_label->getProperties()["offsetY"]);
 
 			m_label->setTopLeftPosition(x,y);
 			m_label->setSize(labelWidth, m_label->getHeight());
+
+			const auto editorRect = m_editor.getBounds();
+			auto labelRect = m_label->getBounds();
+
+			m_label->setBounds(labelRect.constrainedWithin(editorRect));
 			m_label->setText(_value, juce::dontSendNotification);
 			m_label->setVisible(true);
 			m_label->toFront(false);
