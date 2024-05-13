@@ -96,15 +96,15 @@
  		{"index":79, "name":"AmpVelocity", "isBipolar":true, "toText":"signed"},
  		{"index":80, "name":"AmpKeytrack", "isBipolar":true, "toText":"keytrack128"},
 
- 		{"index":81, "name":"EffectParamA"},
+ 		{"index":81, "name":"EffectParamA", "default":64},
 
 		{"index":82, "name":"ChorusEnabled", "min":0, "max":1, "isBool":true, "toText":"offOn"},
 
-		{"index":83, "name":"EffectParamB"},
+		{"index":83, "name":"EffectParamB", "default":64},
 
  		{"index":84, "name":"Pan", "isBipolar":true, "toText":"pan"},
  		{"index":85, "name":"PanKeytrack", "isBipolar":true, "toText":"keytrack128"},
- 		{"index":86, "name":"EffectParamC"},
+ 		{"index":86, "name":"EffectParamC", "default":64},
 
 		// Glide
  		{"index":87, "name":"GlideEnabled", "min":0, "max":1, "isBool":true, "toText":"offOn"},
