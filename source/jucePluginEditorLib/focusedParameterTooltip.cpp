@@ -14,13 +14,23 @@ namespace jucePluginEditorLib
 
 	void FocusedParameterTooltip::setVisible(bool _visible) const
 	{
-		if (isValid())
+		if(isValid())
 			m_label->setVisible(_visible);
+	}
+
+	int FocusedParameterTooltip::getTooltipDisplayTime() const
+	{
+		int time = 0;
+
+		if(m_label->getProperties().contains("displayTime"))
+			time = static_cast<int>(m_label->getProperties()["displayTime"]);
+
+		return time;
 	}
 
 	void FocusedParameterTooltip::initialize(juce::Component* _component, const juce::String& _value) const
 	{
-		if (!isValid())
+		if(!isValid())
 			return;
 
 		if(dynamic_cast<juce::Slider*>(_component) && _component->isShowing())

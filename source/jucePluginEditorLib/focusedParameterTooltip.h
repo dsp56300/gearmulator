@@ -15,6 +15,7 @@ namespace jucePluginEditorLib
 		FocusedParameterTooltip(juce::Label* _label);
 
 		bool isValid() const { return m_label != nullptr; }
+		int getTooltipDisplayTime() const;
 		void setVisible(bool _visible) const;
 		void initialize(juce::Component* _component, const juce::String& _value) const;
 

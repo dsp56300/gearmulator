@@ -47,7 +47,7 @@ namespace jucePluginEditorLib
 	FocusedParameter::~FocusedParameter()
 	{
 		m_tooltip.reset();
-
+	
 		for (auto* p : m_boundParameters)
 			p->removeListener(g_listenerId);
 	}
@@ -140,6 +140,8 @@ namespace jucePluginEditorLib
 
 		m_tooltip->initialize(_component, value);
 
-		startTimer(3000);
+		const int tooltipTime = m_tooltip->getTooltipDisplayTime();
+
+		startTimer(tooltipTime == 0 ? 1500 : tooltipTime);
 	}
 }
