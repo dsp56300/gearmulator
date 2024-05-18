@@ -1250,7 +1250,11 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	uint32_t offset;
 	switch(_page)
 	{
-	case PAGE_A:	offset = 0;	break;
+	case PAGE_A:
+		if(_param < g_pageA[0])	// _param 0 (= bank select MSB) destroys the preset version. Skip anything below first valid parameter
+			return;
+		offset = 0;
+		break;
 	case PAGE_B:	offset = 1;	break;
 	case PAGE_6E:	offset = 2;	break;
 	case PAGE_6F:	offset = 3;	break;
