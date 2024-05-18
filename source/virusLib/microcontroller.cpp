@@ -390,6 +390,13 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 {
 	std::lock_guard lock(m_mutex);
 
+	if(_page == globalSettingsPage())
+	{
+		if(m_globalSettings[_param] == _value)
+			return true;
+		m_globalSettings[_param] = _value;
+	}
+
 	writeHostBitsWithWait(0,1);
 
 	TWord buf[] = {0xf4f400, 0x0};
@@ -399,10 +406,6 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 //	LOG("Send command, page " << (int)_page << ", part " << (int)_part << ", param " << (int)_param << ", value " << (int)_value);
 
-	if(_page == globalSettingsPage())
-	{
-		m_globalSettings[_param] = _value;
-	}
 	return true;
 }
 
