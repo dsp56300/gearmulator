@@ -89,7 +89,8 @@ void Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _p
 	}
 
 	pluginLib::Controller::sendSysEx(data);
-    parseSysexMessage(data);
+	requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode, 
+		isMultiMode() ? mqLib::MidiSoundLocation::EditBufferFirstMultiSingle : mqLib::MidiSoundLocation::EditBufferCurrentSingle);
 }
 
 std::string Controller::loadParameterDescriptions()

@@ -116,7 +116,7 @@ bool Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _p
 		return false;
 
 	pluginLib::Controller::sendSysEx(data);
-    parseSysexMessage(data);
+	requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
 
 	return true;
 }
