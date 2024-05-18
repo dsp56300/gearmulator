@@ -126,7 +126,8 @@ namespace Virus
 
 		juce::String getCurrentPartPresetName(uint8_t _part) const;
 		uint32_t getBankCount() const { return static_cast<uint32_t>(m_singles.size()); }
-		void parseSysexMessage(const pluginLib::SysEx &) override;
+		bool parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source) override;
+		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
         void onStateLoaded() override;
 		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
@@ -171,7 +172,7 @@ namespace Virus
     	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
-        void parseControllerDump(const synthLib::SMidiEvent&);
+        bool parseControllerDump(const synthLib::SMidiEvent&);
 
         VirusProcessor& m_processor;
         virusLib::DeviceModel m_defaultModel;

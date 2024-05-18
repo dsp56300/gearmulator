@@ -815,14 +815,6 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 					}
 				}
 
-				// bounce back to UI if not sent by editor
-				if(_source != MidiEventSource::Editor)
-				{
-					SMidiEvent ev(MidiEventSource::Editor);		// don't send to output
-					ev.sysex = _data;
-					_responses.push_back(ev);
-				}
-
 				return send(page, part, param, value);
 			}
 		default:

@@ -89,8 +89,10 @@ private:
     void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part);
     void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
     void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
-    void parseSysexMessage(const pluginLib::SysEx&) override;
     bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
+
+    bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource _source) override;
+	bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
     bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);

@@ -87,7 +87,7 @@ namespace Virus
 	    stopTimer();
     }
 
-	void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
+    bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 	{
         std::string name;
     	pluginLib::MidiPacket::Data data;
@@ -98,7 +98,7 @@ namespace Virus
             const auto deviceId = data[pluginLib::MidiDataType::DeviceId];
 
             if(deviceId != m_deviceId && deviceId != virusLib::OMNI_DEVICE_ID)
-                return; // not intended to this device!
+                return false; // not intended to this device!
 
             if(name == midiPacketName(MidiPacketType::SingleDump) || name == midiPacketName(MidiPacketType::SingleDump_C))
                 parseSingle(_msg, data, parameterValues);
@@ -111,13 +111,20 @@ namespace Virus
 		        LOG("Controller: Begin unhandled SysEx! --");
 		        printMessage(_msg);
 		        LOG("Controller: End unhandled SysEx! --");
+				return false;
             }
-			return;
+			return true;
         }
 
         LOG("Controller: Begin unknown SysEx! --");
         printMessage(_msg);
         LOG("Controller: End unknown SysEx! --");
+		return false;
+    }
+
+    bool Controller::parseControllerMessage(const synthLib::SMidiEvent& e)
+    {
+		return parseControllerDump(e);
     }
 
     juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
@@ -534,7 +541,7 @@ namespace Virus
 		}
     }
 
-	void Controller::parseControllerDump(const synthLib::SMidiEvent& m)
+	bool Controller::parseControllerDump(const synthLib::SMidiEvent& m)
 	{
 		const uint8_t status = m.a & 0xf0;
     	const uint8_t part = m.a & 0x0f;
@@ -546,11 +553,13 @@ namespace Virus
 		else if (status == synthLib::M_POLYPRESSURE)
 			page = virusLib::PAGE_B;
 		else
-			return;
+			return false;
 
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
 			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
+
+		return true;
 	}
 
     void Controller::printMessage(const pluginLib::SysEx &msg)
@@ -663,7 +672,7 @@ namespace Virus
 			}
             else
 			{
-				parseSysexMessage(msg.sysex);               
+				parseSysexMessage(msg.sysex, msg.source);
 			}
         }
     }
