@@ -362,7 +362,7 @@ namespace virusLib
 		uint32_t presetIdx = 0;
 
 		// presets start at $20
-		// They are "raw" presets, i.e. 512 bytes or preset data each
+		// They are "raw" presets, i.e. 512 bytes of preset data each
 		// The sysex packaging is missing, i.e. the single dump header, the checksums and the sysex terminator
 		for(size_t i=0x20; i<_data.size() - presetSize; i += presetSize)
 		{
