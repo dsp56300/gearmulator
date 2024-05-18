@@ -342,6 +342,61 @@ namespace virusLib
 		return !_sysexPresets.empty();
 	}
 
+	bool Device::parseVTIBackup(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)
+	{
+		if(_data.size() < 512)
+			return false;
+
+		// first 11 bytes are the serial number. Check if they're all ASCII
+		for(size_t i=0; i<11; ++i)
+		{
+			if(_data[i] < 32 || _data[i] > 127)
+				return false;
+		}
+
+		constexpr size_t presetSize = sizeof(Microcontroller::TPreset);
+		Microcontroller::TPreset preset;
+
+		constexpr uint32_t maxPresets = (4 + 26) * 128;	// 4x RAM banks, 26x ROM banks, 128 patches per bank
+
+		uint32_t presetIdx = 0;
+
+		// presets start at $20
+		// They are "raw" presets, i.e. 512 bytes or preset data each
+		// The sysex packaging is missing, i.e. the single dump header, the checksums and the sysex terminator
+		for(size_t i=0x20; i<_data.size() - presetSize; i += presetSize)
+		{
+			memcpy(preset.data(), &_data[i], presetSize);
+
+			const auto name = ROMFile::getSingleName(preset);
+
+			if(name.size() != 10)
+				break;
+
+			auto& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{
+				0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, DUMP_SINGLE,
+				static_cast<uint8_t>((presetIdx >> 7) & 0x7f),
+				static_cast<uint8_t>(presetIdx & 0x7f)});
+
+			sysex.reserve(9 + 256 + 1 + 256 + 2);	// header, 256 preset bytes, 1st checksum, 256 preset bytes, 2nd checksum, EOX
+
+			for(size_t j=0; j<256; ++j)
+				sysex.push_back(preset[j]);
+			sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+			for(size_t j=256; j<512; ++j)
+				sysex.push_back(preset[j]);
+			sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+			sysex.push_back(0xf7);
+
+			++presetIdx;
+
+			if(presetIdx == maxPresets)
+				break;
+		}
+
+		return true;
+	}
+
 	uint32_t Device::getInternalLatencyMidiToOutput() const
 	{
 		// Note that this is an average value, midi latency drifts in a range of roughly +/- 61 samples

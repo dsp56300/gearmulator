@@ -270,6 +270,9 @@ namespace genericVirusUI
 		if (virusLib::Device::parsePowercorePreset(_results, _data))
 			return true;
 
+		if(virusLib::Device::parseVTIBackup(_results, _data))
+			return true;
+
 		if(!synthLib::MidiToSysex::extractSysexFromData(_results, _data))
 			return false;
 
