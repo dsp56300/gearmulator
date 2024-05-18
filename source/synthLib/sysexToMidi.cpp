@@ -54,7 +54,7 @@ namespace synthLib
 
 	void SysexToMidi::writeBuf(std::ostream& _dst, const std::vector<uint8_t>& _data)
 	{
-		_dst.write(reinterpret_cast<const char*>(&_data[0]), static_cast<std::streamsize>(_data.size()));
+		_dst.write(reinterpret_cast<const char*>(_data.data()), static_cast<std::streamsize>(_data.size()));
 	}
 
 	void SysexToMidi::writeUInt8(std::ostream& _dst, uint8_t _data)
