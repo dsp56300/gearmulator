@@ -138,7 +138,7 @@ namespace Virus
 		const auto index = _data.find(pluginLib::MidiDataType::ParameterIndex)->second;
 		const auto value = _data.find(pluginLib::MidiDataType::ParameterValue)->second;
 
-        const auto& partParams = findSynthParam(part, page, index);
+        const auto& partParams = findSynthParam(part == virusLib::SINGLE ? 0 : part, page, index);
 
     	if (partParams.empty() && part != 0 && part != virusLib::SINGLE)
 		{
