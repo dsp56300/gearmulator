@@ -44,7 +44,7 @@ namespace synthLib
 			_dst.write(reinterpret_cast<const char*>(&message[1]), static_cast<std::streamsize>(message.size() - 1));
 		}
 		const auto newPos = _dst.tellp();
-		const auto trackChunkLength = newPos - trackChunkBegin;
+		const auto trackChunkLength = newPos - trackChunkBegin - 4;	// exclude the chunk length
 
 		writeBuf(_dst, {0xff,0x2f,0x00});	// end of track
 
