@@ -21,7 +21,7 @@ namespace jucePluginEditorLib
 		if (m_focusedParameterValue)
 			m_focusedParameterValue->setVisible(false);
 
-		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false)));
+		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false), _editor));
 
 		updateControlLabel(nullptr);
 
