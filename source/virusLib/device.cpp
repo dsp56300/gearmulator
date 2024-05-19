@@ -193,10 +193,10 @@ namespace virusLib
 
 	bool Device::find4CC(uint32_t& _offset, const std::vector<uint8_t>& _data, const std::string_view& _4cc)
 	{
-		if(_data.size() < _4cc.size())
+		if(_data.size() < (_offset + _4cc.size()))
 			return false;
 
-		for(uint32_t i=0; i<_data.size() - _4cc.size(); ++i)
+		for(uint32_t i=_offset; i<_data.size() - _4cc.size(); ++i)
 		{
 			bool valid = true;
 			for(size_t j=0; j<_4cc.size(); ++j)
@@ -222,124 +222,142 @@ namespace virusLib
 
 		uint32_t readPos = 0;
 
-		if(!find4CC(readPos, _state, "MIDI"))
-			return false;
+		uint32_t numFound = 0;
 
-		if(readPos >= _state.size())
-			return false;
-
-		auto readLen = [&_state](const size_t _offset) -> uint32_t
+		while(readPos < _state.size() - 4)
 		{
-			if(_offset + 4 > _state.size())
-				return 0;
-			const uint32_t o =
-				(static_cast<uint32_t>(_state[_offset+0]) << 24) | 
-				(static_cast<uint32_t>(_state[_offset+1]) << 16) |
-				(static_cast<uint32_t>(_state[_offset+2]) << 8) |
-				(static_cast<uint32_t>(_state[_offset+3]));
-			return o;
-		};
-
-		auto nextLen = [&readPos, &readLen]() -> uint32_t
-		{
-			const auto len = readLen(readPos);
-			readPos += 4;
-			return len;
-		};
-
-		const auto dataLen = nextLen();
-
-		if(dataLen + readPos > _state.size())
-			return false;
-
-		const auto controllerAssignmentsLen = nextLen();
-
-		readPos += controllerAssignmentsLen;
-		
-		while(readPos < _state.size())
-		{
-			const auto midiDataLen = nextLen();
-
-			if(!midiDataLen)
+			if(!find4CC(readPos, _state, "MIDI"))
 				break;
 
-			if((readPos + midiDataLen) > _state.size())
-				return false;
+			if(readPos >= _state.size())
+				break;
 
-			synthLib::SMidiEvent& e = _events.emplace_back();
-
-			e.sysex.assign(_state.begin() + readPos, _state.begin() + readPos + midiDataLen);
-
-			if(e.sysex.front() != 0xf0)
+			auto readLen = [&_state](const size_t _offset) -> uint32_t
 			{
-				assert(e.sysex.size() <= 3);
-				e.a = e.sysex[0];
-				if(e.sysex.size() > 1)
-					e.b = e.sysex[1];
-				if(e.sysex.size() > 2)
-					e.c = e.sysex[2];
+				if(_offset + 4 > _state.size())
+					return 0;
+				const uint32_t o =
+					(static_cast<uint32_t>(_state[_offset+0]) << 24) | 
+					(static_cast<uint32_t>(_state[_offset+1]) << 16) |
+					(static_cast<uint32_t>(_state[_offset+2]) << 8) |
+					(static_cast<uint32_t>(_state[_offset+3]));
+				return o;
+			};
 
-				e.sysex.clear();
-			}
+			auto nextLen = [&readPos, &readLen]() -> uint32_t
+			{
+				const auto len = readLen(readPos);
+				readPos += 4;
+				return len;
+			};
 
-			readPos += midiDataLen;
+			const auto dataLen = nextLen();
+
+			if(dataLen + readPos > _state.size())
+				break;
+
+			const auto controllerAssignmentsLen = nextLen();
+
+			readPos += controllerAssignmentsLen;
+			
+			while(readPos < _state.size())
+			{
+				const auto midiDataLen = nextLen();
+
+				if(!midiDataLen)
+					break;
+
+				if((readPos + midiDataLen) > _state.size())
+					break;
+
+				synthLib::SMidiEvent& e = _events.emplace_back();
+
+				e.sysex.assign(_state.begin() + readPos, _state.begin() + readPos + midiDataLen);
+
+				if(e.sysex.front() != 0xf0)
+				{
+					assert(e.sysex.size() <= 3);
+					e.a = e.sysex[0];
+					if(e.sysex.size() > 1)
+						e.b = e.sysex[1];
+					if(e.sysex.size() > 2)
+						e.c = e.sysex[2];
+
+					e.sysex.clear();
+				}
+
+				readPos += midiDataLen;
+
+				if(!e.sysex.empty())
+					++numFound;
+			}			
 		}
 
-		return true;
+		return numFound > 0;
 	}
 
 	bool Device::parsePowercorePreset(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)
 	{
 		uint32_t off = 0;
 
-		// VST2 fxp/fxb chunk must exist
-		if(!find4CC(off, _data, "CcnK"))
-			return false;
+		uint32_t numFound = 0;
 
-		uint32_t pos = 0;
-
-		// fxp or fxb?
-		if(find4CC(off, _data, "FPCh"))
-			pos = off + 0x34;					// fxp
-		else if(find4CC(off, _data, "FBCh"))
-			pos = off + 0x98;					// fxb
-		else
-			return false;
-
-		if(pos >= _data.size())
-			return false;
-
-		++pos;	// skip first byte, version?
-
-		constexpr uint32_t presetSize = 256;			// presets seem to be stored without sysex packaging
-		constexpr uint32_t padding = 5;					// five unknown bytes betweeen two presets
-
-		uint8_t programIndex = 0;
-
-		while((pos + presetSize) <= static_cast<uint32_t>(_data.size()))
+		while(off < _data.size() - 4)
 		{
-			Microcontroller::TPreset p;
-			memcpy(&p.front(), &_data[pos], presetSize);
-
-			const auto version = Microcontroller::getPresetVersion(p);
-			if(version != C)
-				break;
-			const auto name = ROMFile::getSingleName(p);
-			if(name.size() != 10)
+			// VST2 fxp/fxb chunk must exist
+			if(!find4CC(off, _data, "CcnK"))
 				break;
 
-			// pack into sysex
-			std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
-			sysex.insert(sysex.end(), _data.begin() + pos, _data.begin() + pos + presetSize);
-			sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
-			sysex.push_back(0xf7);
+			off += 4;
 
-			++programIndex;
-			pos += presetSize;
-			pos += padding;
+			uint32_t pos;
+
+			// fxp or fxb?
+			if(find4CC(off, _data, "FPCh"))
+				pos = off + 0x34;					// fxp
+			else if(find4CC(off, _data, "FBCh"))
+				pos = off + 0x98;					// fxb
+			else
+				continue;
+
+			if(pos >= _data.size())
+				break;
+
+			++pos;	// skip first byte, version?
+
+			constexpr uint32_t presetSize = 256;			// presets seem to be stored without sysex packaging
+			constexpr uint32_t padding = 5;					// five unknown bytes betweeen two presets
+
+			uint8_t programIndex = 0;
+
+			while((pos + presetSize) <= static_cast<uint32_t>(_data.size()))
+			{
+				Microcontroller::TPreset p;
+				memcpy(&p.front(), &_data[pos], presetSize);
+
+				const auto version = Microcontroller::getPresetVersion(p);
+				if(version != C)
+					break;
+				const auto name = ROMFile::getSingleName(p);
+				if(name.size() != 10)
+					break;
+
+				// pack into sysex
+				std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
+				sysex.insert(sysex.end(), _data.begin() + pos, _data.begin() + pos + presetSize);
+				sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+				sysex.push_back(0xf7);
+
+				++numFound;
+
+				++programIndex;
+				pos += presetSize;
+				pos += padding;
+			}
+			off = pos;
 		}
 
-		return !_sysexPresets.empty();
+		return numFound > 0;
 	}
 
 	bool Device::parseVTIBackup(std::vector<std::vector<uint8_t>>& _sysexPresets, const std::vector<uint8_t>& _data)
