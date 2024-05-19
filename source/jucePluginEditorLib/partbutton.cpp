@@ -15,7 +15,7 @@ namespace jucePluginEditorLib
 			if(!list)
 				return {};
 
-			const auto patches = patchManager::List::getPatchesFromDragSource(_source);
+			const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragSource(_source);
 
 			if (patches.size() != 1)
 				return {};
@@ -90,7 +90,9 @@ namespace jucePluginEditorLib
 	
 	template <typename T> void PartButton<T>::mouseDrag(const juce::MouseEvent& _event)
 	{
-		m_editor.startDragging(new patchManager::SavePatchDesc(m_part), this);
+		auto* patchManager = m_editor.getPatchManager();
+		if(patchManager)
+			m_editor.startDragging(new patchManager::SavePatchDesc(*patchManager, m_part), this);
 		genericUI::Button<T>::mouseDrag(_event);
 	}
 

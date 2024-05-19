@@ -139,10 +139,12 @@ namespace genericVirusUI
 				onProgramChange(getController().getCurrentPart());
 			}
 		};
-		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent& _mouseEvent, int )
+
+		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent&, int)
 		{
-			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(getController().getCurrentPart()), m_presetName);
+			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(*getPatchManager(), getController().getCurrentPart()), m_presetName);
 		});
+
 		m_presetName->addMouseListener(m_presetNameMouseListener, false);
 
 		auto* menuButton = findComponentT<juce::Button>("Menu", false);
