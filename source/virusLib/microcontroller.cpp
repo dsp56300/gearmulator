@@ -443,7 +443,12 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 		break;
 	case M_POLYPRESSURE:
 		if(isPolyPressureForPageBEnabled())
+		{
 			applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
+			auto e = _ev;
+			e.source = MidiEventSource::Plugin;
+			m_midiOutput.push_back(e);
+		}
 		break;
 	default:
 		break;
@@ -1170,24 +1175,30 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	std::lock_guard lock(m_mutex);
 	processHdi08Tx(_midiOut);
 
-	if (m_pendingSysexInput.empty())
-		return;
-
-	uint32_t eraseCount = 0;
-
-	for (const auto& input : m_pendingSysexInput)
+	if (!m_pendingSysexInput.empty())
 	{
-		if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
-			break;
+		uint32_t eraseCount = 0;
 
-		sendSysex(input.second, _midiOut, input.first);
-		++eraseCount;
+		for (const auto& input : m_pendingSysexInput)
+		{
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				break;
+
+			sendSysex(input.second, _midiOut, input.first);
+			++eraseCount;
+		}
+
+		if(eraseCount == m_pendingSysexInput.size())
+			m_pendingSysexInput.clear();
+		else if(eraseCount > 0)
+			m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
 	}
 
-	if(eraseCount == m_pendingSysexInput.size())
-		m_pendingSysexInput.clear();
-	else if(eraseCount > 0)
-		m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
+	if(!m_midiOutput.empty())
+	{
+		_midiOut.insert(_midiOut.end(), m_midiOutput.begin(), m_midiOutput.end());
+		m_midiOutput.clear();
+	}
 }
 
 void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)

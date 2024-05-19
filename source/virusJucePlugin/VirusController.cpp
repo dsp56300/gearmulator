@@ -551,7 +551,12 @@ namespace Virus
 		if (status == synthLib::M_CONTROLCHANGE)
 			page = virusLib::PAGE_A;
 		else if (status == synthLib::M_POLYPRESSURE)
+		{
+			// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
+			if(m.source != synthLib::MidiEventSource::Plugin)
+				return false;
 			page = virusLib::PAGE_B;
+		}
 		else
 			return false;
 
