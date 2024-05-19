@@ -21,7 +21,7 @@ namespace jucePluginEditorLib
 
 	uint32_t FocusedParameterTooltip::getTooltipDisplayTime() const
 	{
-		if (!m_label->getProperties().contains("displayTime"))
+		if (!isValid() || !m_label->getProperties().contains("displayTime"))
 			return 0;
 
 		const auto time = static_cast<int>(m_label->getProperties()["displayTime"]);
