@@ -739,8 +739,8 @@ namespace pluginLib::patchDB
 	{
 		const auto size = synthLib::getFileSize(_file);
 
-		// unlikely that a 4mb file has useful data for us, skip
-		if (!size || size >= static_cast<size_t>(4 * 1024 * 1024))
+		// unlikely that a 8mb file has useful data for us, skip
+		if (!size || size >= static_cast<size_t>(8 * 1024 * 1024))
 			return false;
 
 		Data data;
