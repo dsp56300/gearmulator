@@ -7,17 +7,12 @@ namespace juce
 	class Label;
 }
 
-namespace genericUI
-{
-	class Editor;
-}
-
 namespace jucePluginEditorLib
 {
 	class FocusedParameterTooltip
 	{
 	public:
-		FocusedParameterTooltip(juce::Label* _label, const genericUI::Editor& _editor);
+		FocusedParameterTooltip(juce::Label* _label, const juce::Component& _bounds);
 
 		bool isValid() const { return m_label != nullptr; }
 		void setVisible(bool _visible) const;
@@ -26,6 +21,6 @@ namespace jucePluginEditorLib
 	private:
 		juce::Label* m_label = nullptr;
 		int m_defaultWidth;
-		const genericUI::Editor& m_editor;
+		const juce::Component& m_bounds;
 	};
 }
