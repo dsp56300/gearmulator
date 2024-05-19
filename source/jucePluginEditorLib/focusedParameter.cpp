@@ -140,8 +140,8 @@ namespace jucePluginEditorLib
 
 		m_tooltip->initialize(_component, value);
 
-		const int tooltipTime = m_tooltip->getTooltipDisplayTime();
+		const auto tooltipTime = m_tooltip->getTooltipDisplayTime();
 
-		startTimer(tooltipTime == 0 ? 1500 : tooltipTime);
+		startTimer(tooltipTime == 0 ? 1500 : static_cast<int>(tooltipTime));
 	}
 }

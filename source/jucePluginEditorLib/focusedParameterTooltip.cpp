@@ -19,14 +19,13 @@ namespace jucePluginEditorLib
 			m_label->setVisible(_visible);
 	}
 
-	int FocusedParameterTooltip::getTooltipDisplayTime() const
+	uint32_t FocusedParameterTooltip::getTooltipDisplayTime() const
 	{
-		int time = 0;
+		if (!m_label->getProperties().contains("displayTime"))
+			return 0;
 
-		if(m_label->getProperties().contains("displayTime"))
-			time = static_cast<int>(m_label->getProperties()["displayTime"]);
-
-		return time;
+		const auto time = static_cast<int>(m_label->getProperties()["displayTime"]);
+		return time > 0 ? time : 0;
 	}
 
 	void FocusedParameterTooltip::initialize(juce::Component* _component, const juce::String& _value) const
