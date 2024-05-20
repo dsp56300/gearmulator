@@ -18,6 +18,35 @@ namespace jucePluginEditorLib::patchManager
 		return m_patches;
 	}
 
+	bool SavePatchDesc::writePatchesToFile(const juce::File& _file) const
+	{
+		const auto& patches = getPatches();
+
+		if(patches.empty())
+			return false;
+
+		std::vector<std::vector<uint8_t>> patchesData;
+
+		for (auto& patch : patches)
+		{
+			auto data = m_patchManager.prepareSave(patch.second);
+			if(data.empty())
+				return false;
+			patchesData.emplace_back(std::move(data));
+		}
+
+		std::stringstream ss;
+
+		synthLib::SysexToMidi::write(ss, patchesData);
+
+		const auto size = ss.tellp();
+		std::vector<char> buffer;
+		buffer.resize(size);
+		ss.read(buffer.data(), size);
+
+		return _file.replaceWithData(buffer.data(), size);
+	}
+
 	std::vector<pluginLib::patchDB::PatchPtr> SavePatchDesc::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 		const auto* savePatchDesc = fromDragSource(_dragSourceDetails);

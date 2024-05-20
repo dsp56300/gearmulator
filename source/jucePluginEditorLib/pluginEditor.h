@@ -60,6 +60,8 @@ namespace jucePluginEditorLib
 
 		void showDisclaimer() const;
 
+		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles) override;
+
 	private:
 		void onDisclaimerFinished() const;
 
@@ -80,5 +82,7 @@ namespace jucePluginEditorLib
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
 		std::vector<uint8_t> m_instanceConfig;
+		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
+		std::vector<juce::File> m_dragAndDropFiles;
 	};
 }

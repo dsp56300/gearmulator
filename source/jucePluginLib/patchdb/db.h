@@ -82,6 +82,8 @@ namespace pluginLib::patchDB
 
 		static void assign(const PatchPtr& _patch, const PatchModificationsPtr& _mods);
 
+		static std::string createValidFilename(const std::string& _name);
+
 	protected:
 		DataSourceNodePtr addDataSource(const DataSource& _ds, bool _save, const DataSourceLoadedCallback& = [](bool , std::shared_ptr<DataSourceNode>) {});
 

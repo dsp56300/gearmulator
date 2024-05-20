@@ -29,6 +29,8 @@ namespace jucePluginEditorLib::patchManager
 		bool isPartValid() const { return m_part != InvalidPart; }
 		bool hasPatches() const { return !getPatches().empty(); }
 
+		bool writePatchesToFile(const juce::File& _file) const;
+
 		static const SavePatchDesc* fromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
 		{
 			return dynamic_cast<const SavePatchDesc*>(_source.description.getObject());

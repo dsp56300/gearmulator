@@ -8,6 +8,7 @@
 #include "../synthLib/sysexToMidi.h"
 
 #include "patchmanager/patchmanager.h"
+#include "patchmanager/savepatchdesc.h"
 
 namespace jucePluginEditorLib
 {
@@ -20,7 +21,11 @@ namespace jucePluginEditorLib
 		showDisclaimer();
 	}
 
-	Editor::~Editor() = default;
+	Editor::~Editor()
+	{
+		for (const auto& file : m_dragAndDropFiles)
+			file.deleteFile();
+	}
 
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
@@ -187,6 +192,47 @@ namespace jucePluginEditorLib
 		{
 			onDisclaimerFinished();
 		}
+	}
+
+	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
+	{
+		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(sourceDetails);
+
+		if(!savePatchDesc || !savePatchDesc->hasPatches())
+			return false;
+
+		// try to create human-readable filename first
+		const auto patch = savePatchDesc->getPatches().begin()->second;
+
+		auto patchFileName = patch->getName();
+
+		while(!patchFileName.empty() && patchFileName.back() == ' ')
+			patchFileName.pop_back();
+
+		patchFileName = m_processor.getProperties().name + "_" + patchManager::PatchManager::createValidFilename(patchFileName) + ".mid";
+
+		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
+
+		auto file = juce::File(pathName);
+
+		if(file.hasWriteAccess())
+		{
+			m_dragAndDropFiles.emplace_back(file);
+		}
+		else
+		{
+			// failed, create temp file
+			const auto& tempFile = m_dragAndDropTempFiles.emplace_back(std::make_shared<juce::TemporaryFile>(patchFileName));
+			file = tempFile->getFile();
+		}
+
+		if(!savePatchDesc->writePatchesToFile(file))
+			return false;
+
+		files.add(file.getFullPathName());
+
+		canMoveFiles = true;
+		return true;
 	}
 
 	void Editor::onDisclaimerFinished() const

@@ -48,8 +48,10 @@ namespace synthLib
 
 		writeBuf(_dst, {0xff,0x2f,0x00});	// end of track
 
+		const auto end = _dst.tellp();
 		_dst.seekp(trackChunkBegin);
 		writeUInt32(_dst, static_cast<uint32_t>(trackChunkLength));
+		_dst.seekp(end);
 	}
 
 	void SysexToMidi::writeBuf(std::ostream& _dst, const std::vector<uint8_t>& _data)

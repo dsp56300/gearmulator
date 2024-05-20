@@ -17,23 +17,6 @@ namespace pluginLib::patchDB
 {
 	static constexpr bool g_cacheEnabled = true;
 
-	namespace
-	{
-		std::string createValidFilename(const std::string& _name)
-		{
-			std::string result;
-			result.reserve(_name.size());
-
-			for (const char c : _name)
-			{
-				if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-					result += c;
-				else
-					result += '_';
-			}
-			return result;
-		}
-	}
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
 	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
@@ -89,6 +72,21 @@ namespace pluginLib::patchDB
 		_patch->modifications = _mods;
 		_mods->patch = _patch;
 		_mods->updateCache();
+	}
+
+	std::string DB::createValidFilename(const std::string& _name)
+	{
+		std::string result;
+		result.reserve(_name.size());
+
+		for (const char c : _name)
+		{
+			if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+				result += c;
+			else
+				result += '_';
+		}
+		return result;
 	}
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save, const DataSourceLoadedCallback& _callback)
