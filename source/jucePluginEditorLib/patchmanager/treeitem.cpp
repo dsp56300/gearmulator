@@ -220,6 +220,21 @@ namespace jucePluginEditorLib::patchManager
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
 
+	bool TreeItem::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		return TreeViewItem::isInterestedInFileDrag(_files);
+	}
+
+	void TreeItem::filesDropped(const juce::StringArray& _files, const int _insertIndex)
+	{
+		const auto patches = m_patchManager.loadPatchesFromFiles(_files);
+
+		if(!patches.empty())
+			patchesDropped(patches);
+		else
+			TreeViewItem::filesDropped(_files, _insertIndex);
+	}
+
 	int TreeItem::compareElements(const TreeViewItem* _a, const TreeViewItem* _b)
 	{
 		const auto* a = dynamic_cast<const TreeItem*>(_a);

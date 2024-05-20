@@ -98,6 +98,9 @@ namespace jucePluginEditorLib::patchManager
 
 		virtual bool activatePatch(const std::string& _filename, uint32_t _part);
 
+		std::vector<pluginLib::patchDB::PatchPtr> loadPatchesFromFiles(const juce::StringArray& _files);
+		std::vector<pluginLib::patchDB::PatchPtr> loadPatchesFromFiles(const std::vector<std::string>& _files);
+
 		void onLoadFinished() override;
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
