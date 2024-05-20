@@ -473,10 +473,12 @@ namespace pluginLib
 			}
 		}
 
-		for (const auto& text : vl.texts)
+		for(uint32_t i=0; i<vl.texts.size(); ++i)
 		{
+			const auto& text = vl.texts[i];
+
 			if (vl.textToValueMap.find(text) == vl.textToValueMap.end())
-				vl.textToValueMap.insert(std::make_pair(text, static_cast<uint32_t>(vl.texts.size())));
+				vl.textToValueMap.insert(std::make_pair(text, i));
 		}
 
 		m_valueLists.insert(std::make_pair(_key, vl));
