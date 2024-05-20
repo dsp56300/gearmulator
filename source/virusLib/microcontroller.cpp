@@ -390,6 +390,13 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 {
 	std::lock_guard lock(m_mutex);
 
+	if(_page == globalSettingsPage())
+	{
+		if(m_globalSettings[_param] == _value)
+			return true;
+		m_globalSettings[_param] = _value;
+	}
+
 	writeHostBitsWithWait(0,1);
 
 	TWord buf[] = {0xf4f400, 0x0};
@@ -399,10 +406,6 @@ bool Microcontroller::send(const Page _page, const uint8_t _part, const uint8_t 
 
 //	LOG("Send command, page " << (int)_page << ", part " << (int)_part << ", param " << (int)_param << ", value " << (int)_value);
 
-	if(_page == globalSettingsPage())
-	{
-		m_globalSettings[_param] = _value;
-	}
 	return true;
 }
 
@@ -440,7 +443,12 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 		break;
 	case M_POLYPRESSURE:
 		if(isPolyPressureForPageBEnabled())
+		{
 			applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
+			auto e = _ev;
+			e.source = MidiEventSource::Plugin;
+			m_midiOutput.push_back(e);
+		}
 		break;
 	default:
 		break;
@@ -812,14 +820,6 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 					}
 				}
 
-				// bounce back to UI if not sent by editor
-				if(_source != MidiEventSource::Editor)
-				{
-					SMidiEvent ev(MidiEventSource::Editor);		// don't send to output
-					ev.sysex = _data;
-					_responses.push_back(ev);
-				}
-
 				return send(page, part, param, value);
 			}
 		default:
@@ -1175,24 +1175,30 @@ void Microcontroller::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	std::lock_guard lock(m_mutex);
 	processHdi08Tx(_midiOut);
 
-	if (m_pendingSysexInput.empty())
-		return;
-
-	uint32_t eraseCount = 0;
-
-	for (const auto& input : m_pendingSysexInput)
+	if (!m_pendingSysexInput.empty())
 	{
-		if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
-			break;
+		uint32_t eraseCount = 0;
 
-		sendSysex(input.second, _midiOut, input.first);
-		++eraseCount;
+		for (const auto& input : m_pendingSysexInput)
+		{
+			if(!m_pendingPresetWrites.empty() || waitingForPresetReceiveConfirmation())
+				break;
+
+			sendSysex(input.second, _midiOut, input.first);
+			++eraseCount;
+		}
+
+		if(eraseCount == m_pendingSysexInput.size())
+			m_pendingSysexInput.clear();
+		else if(eraseCount > 0)
+			m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
 	}
 
-	if(eraseCount == m_pendingSysexInput.size())
-		m_pendingSysexInput.clear();
-	else if(eraseCount > 0)
-		m_pendingSysexInput.erase(m_pendingSysexInput.begin(), m_pendingSysexInput.begin() + eraseCount);
+	if(!m_midiOutput.empty())
+	{
+		_midiOut.insert(_midiOut.end(), m_midiOutput.begin(), m_midiOutput.end());
+		m_midiOutput.clear();
+	}
 }
 
 void Microcontroller::sendPendingMidiEvents(const uint32_t _maxOffset)
@@ -1250,7 +1256,11 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	uint32_t offset;
 	switch(_page)
 	{
-	case PAGE_A:	offset = 0;	break;
+	case PAGE_A:
+		if(_param < g_pageA[0])	// _param 0 (= bank select MSB) destroys the preset version. Skip anything below first valid parameter
+			return;
+		offset = 0;
+		break;
 	case PAGE_B:	offset = 1;	break;
 	case PAGE_6E:	offset = 2;	break;
 	case PAGE_6F:	offset = 3;	break;

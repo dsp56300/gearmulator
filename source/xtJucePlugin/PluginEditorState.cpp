@@ -64,7 +64,7 @@ bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _en
 }
 
 
-genericUI::Editor* PluginEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
+jucePluginEditorLib::Editor* PluginEditorState::createEditor(const Skin& _skin)
 {
 	return new xtJucePlugin::Editor(m_processor, m_parameterBinding, _skin.folder, _skin.jsonFilename);
 }

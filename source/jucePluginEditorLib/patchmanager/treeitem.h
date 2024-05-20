@@ -59,8 +59,10 @@ namespace jucePluginEditorLib::patchManager
 
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
 
-		virtual bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) { return false; }
-		virtual bool isInterestedInSavePatchDesc(const SavePatchDesc& _desc) { return false; }
+		virtual bool isInterestedInPatchList(const List* _sourceList, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)		{ return false; }
+
+		bool isInterestedInFileDrag(const juce::StringArray& _files) override;
+		void filesDropped(const juce::StringArray& _files, int _insertIndex) override;
 
 		virtual int compareElements(const TreeViewItem* _a, const TreeViewItem* _b);
 

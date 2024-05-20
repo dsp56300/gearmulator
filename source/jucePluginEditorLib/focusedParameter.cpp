@@ -21,7 +21,7 @@ namespace jucePluginEditorLib
 		if (m_focusedParameterValue)
 			m_focusedParameterValue->setVisible(false);
 
-		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false)));
+		m_tooltip.reset(new FocusedParameterTooltip(_editor.findComponentT<juce::Label>("FocusedParameterTooltip", false), _editor));
 
 		updateControlLabel(nullptr);
 
@@ -47,7 +47,7 @@ namespace jucePluginEditorLib
 	FocusedParameter::~FocusedParameter()
 	{
 		m_tooltip.reset();
-
+	
 		for (auto* p : m_boundParameters)
 			p->removeListener(g_listenerId);
 	}
@@ -140,6 +140,11 @@ namespace jucePluginEditorLib
 
 		m_tooltip->initialize(_component, value);
 
-		startTimer(3000);
+		if(!m_tooltip->isValid())
+			return;
+
+		const auto tooltipTime = m_tooltip->getTooltipDisplayTime();
+
+		startTimer(tooltipTime == 0 ? 1500 : static_cast<int>(tooltipTime));
 	}
 }

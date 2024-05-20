@@ -9,6 +9,7 @@
 #include "../../jucePluginLib/patchdb/search.h"
 
 #include "../../synthLib/buildconfig.h"
+#include "../../synthLib/os.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -64,14 +65,17 @@ namespace jucePluginEditorLib::patchManager
 		search(std::move(sr));
 	}
 
-	bool DatasourceTreeItem::isInterestedInSavePatchDesc(const SavePatchDesc& _desc)
+	bool DatasourceTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
 	}
 
-	bool DatasourceTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	bool DatasourceTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
 	{
-		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+			return true;
+
+		return TreeItem::isInterestedInFileDrag(files);
 	}
 
 	void DatasourceTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc/* = nullptr*/)
@@ -157,6 +161,20 @@ namespace jucePluginEditorLib::patchManager
 				}
 			}));
 		}
+
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			const auto clipboardPatches = getPatchManager().getPatchesFromClipboard();
+
+			if(!clipboardPatches.empty())
+			{
+				menu.addSeparator();
+				menu.addItem("Paste from Clipboard", [this, clipboardPatches]
+				{
+					getPatchManager().copyPatchesToLocalStorage(m_dataSource, clipboardPatches, -1);
+				});
+			}
+		}
 		menu.showMenuAsync({});
 	}
 
@@ -211,5 +229,23 @@ namespace jucePluginEditorLib::patchManager
 		default:
 			return ds->name;
 		}
+	}
+
+	juce::var DatasourceTreeItem::getDragSourceDescription()
+	{
+		if(!m_dataSource || m_dataSource->patches.empty())
+			return TreeItem::getDragSourceDescription();
+
+		std::vector<pluginLib::patchDB::PatchPtr> patchesVec{m_dataSource->patches.begin(), m_dataSource->patches.end()};
+
+		pluginLib::patchDB::DataSource::sortByProgram(patchesVec);
+
+		uint32_t i=0;
+		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patchesMap;
+
+		for (const auto& patch : patchesVec)
+			patchesMap.insert({i++, patch});
+
+		return new SavePatchDesc(getPatchManager(), std::move(patchesMap), synthLib::getFilenameWithoutPath(m_dataSource->name));
 	}
 }

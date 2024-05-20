@@ -189,6 +189,11 @@ namespace mqJucePlugin
 	{
 		juce::PopupMenu menu;
 
+		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu, getPatchManager()->getCurrentPart());
+
+		if(countAdded)
+			menu.addSeparator();
+
 		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
 		{
 			juce::PopupMenu subMenu;

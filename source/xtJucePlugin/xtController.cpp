@@ -116,7 +116,7 @@ bool Controller::sendSingle(const std::vector<uint8_t>& _sysex, const uint8_t _p
 		return false;
 
 	pluginLib::Controller::sendSysEx(data);
-    parseSysexMessage(data);
+	requestSingle(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode, 0);
 
 	return true;
 }
@@ -164,7 +164,7 @@ void Controller::timerCallback()
     for (const auto& e : events)
     {
 	    if(!e.sysex.empty())
-            parseSysexMessage(e.sysex);
+            parseSysexMessage(e.sysex, e.source);
     }
 }
 
@@ -309,7 +309,7 @@ void Controller::parseGlobal(const pluginLib::SysEx& _msg, const pluginLib::Midi
 	applyPatchParameters(_params, 0);
 }
 
-void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
+bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 {
     if(_msg.size() >= 5)
     {
@@ -321,7 +321,7 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
         case xt::SysexCommand::EmuLEDs:
 			if(m_frontPanel)
 				m_frontPanel->processSysex(_msg);
-            return;
+            return true;
         default:
             break;
         }
@@ -333,61 +333,69 @@ void Controller::parseSysexMessage(const pluginLib::SysEx& _msg)
     pluginLib::MidiPacket::Data data;
     pluginLib::MidiPacket::ParamValues parameterValues;
 
-    if(pluginLib::Controller::parseMidiPacket(name,  data, parameterValues, _msg))
+    if(!pluginLib::Controller::parseMidiPacket(name,  data, parameterValues, _msg))
+		return false;
+
+    if(name == midiPacketName(SingleDump))
     {
-        if(name == midiPacketName(SingleDump))
-        {
-	        parseSingle(_msg, data, parameterValues);
-        }
-		else if (name == midiPacketName(MultiDump))
-		{
-			parseMulti(_msg, data, parameterValues);
-		}
-		else if(name == midiPacketName(GlobalDump))
-        {
-			parseGlobal(_msg, data, parameterValues);
-        }
-		else if(name == midiPacketName(ModeDump))
-        {
-			const auto lastPlayMode = isMultiMode();
-            memcpy(m_modeData.data(), &_msg[xt::IdxModeParamFirst], sizeof(m_modeData));
-			const auto newPlayMode = isMultiMode();
-
-			if(lastPlayMode != newPlayMode)
-				onPlayModeChanged(newPlayMode);
-			else
-				requestAllPatches();
-		}
-        else if(name == midiPacketName(SingleParameterChange))
-        {
-            const auto page = data[pluginLib::MidiDataType::Page];
-            const auto index = data[pluginLib::MidiDataType::ParameterIndex];
-            const auto part = data[pluginLib::MidiDataType::Part];
-            const auto value = data[pluginLib::MidiDataType::ParameterValue];
-
-        	auto& params = findSynthParam(part, page, index);
-
-            for (auto& param : params)
-	            param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
-
-            LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
-        }
-        else if(name == midiPacketName(GlobalParameterChange))
-        {
-            const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
-            const auto value = data[pluginLib::MidiDataType::ParameterValue];
-
-			if(m_globalData[index] != value)
-			{
-				LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
-				m_globalData[index] = value;
-			}
-        }
-        else
-        {
-	        LOG("Received unknown sysex of size " << _msg.size());
-        }
+	    parseSingle(_msg, data, parameterValues);
     }
+    else if (name == midiPacketName(MultiDump))
+    {
+	    parseMulti(_msg, data, parameterValues);
+    }
+    else if(name == midiPacketName(GlobalDump))
+    {
+	    parseGlobal(_msg, data, parameterValues);
+    }
+    else if(name == midiPacketName(ModeDump))
+    {
+	    const auto lastPlayMode = isMultiMode();
+	    memcpy(m_modeData.data(), &_msg[xt::IdxModeParamFirst], sizeof(m_modeData));
+	    const auto newPlayMode = isMultiMode();
+
+	    if(lastPlayMode != newPlayMode)
+		    onPlayModeChanged(newPlayMode);
+	    else
+		    requestAllPatches();
+    }
+    else if(name == midiPacketName(SingleParameterChange))
+    {
+	    const auto page = data[pluginLib::MidiDataType::Page];
+	    const auto index = data[pluginLib::MidiDataType::ParameterIndex];
+	    const auto part = data[pluginLib::MidiDataType::Part];
+	    const auto value = data[pluginLib::MidiDataType::ParameterValue];
+
+	    auto& params = findSynthParam(part, page, index);
+
+	    for (auto& param : params)
+		    param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
+
+	    LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
+    }
+    else if(name == midiPacketName(GlobalParameterChange))
+    {
+	    const auto index = (static_cast<uint32_t>(data[pluginLib::MidiDataType::Page]) << 7) + static_cast<uint32_t>(data[pluginLib::MidiDataType::ParameterIndex]);
+	    const auto value = data[pluginLib::MidiDataType::ParameterValue];
+
+	    if(m_globalData[index] != value)
+	    {
+		    LOG("Global parameter " << index << " changed to value " << static_cast<int>(value));
+		    m_globalData[index] = value;
+	    }
+    }
+    else
+    {
+	    LOG("Received unknown sysex of size " << _msg.size());
+		return false;
+    }
+	return true;
+}
+
+bool Controller::parseControllerMessage(const synthLib::SMidiEvent&)
+{
+	// TODO
+	return false;
 }
 
 bool Controller::parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const

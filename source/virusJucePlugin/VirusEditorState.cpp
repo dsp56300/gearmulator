@@ -12,9 +12,9 @@ VirusEditorState::VirusEditorState(VirusProcessor& _processor, pluginLib::Contro
 	loadDefaultSkin();
 }
 
-genericUI::Editor* VirusEditorState::createEditor(const Skin& _skin, std::function<void()> _openMenuCallback)
+jucePluginEditorLib::Editor* VirusEditorState::createEditor(const Skin& _skin)
 {
-	return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin.jsonFilename, _skin.folder, _openMenuCallback);
+	return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin.jsonFilename, _skin.folder);
 }
 
 void VirusEditorState::initContextMenu(juce::PopupMenu& _menu)

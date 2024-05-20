@@ -431,6 +431,13 @@ namespace pluginLib
 		return false;
 	}
 
+	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)
+	{
+		if(_e.sysex.empty())
+			return parseControllerMessage(_e);
+		return parseSysexMessage(_e.sysex, _e.source);
+	}
+
 	void Controller::addPluginMidiOut(const std::vector<synthLib::SMidiEvent>& _events)
 	{
         const std::lock_guard l(m_pluginMidiOutLock);

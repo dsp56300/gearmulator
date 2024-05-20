@@ -17,23 +17,6 @@ namespace pluginLib::patchDB
 {
 	static constexpr bool g_cacheEnabled = true;
 
-	namespace
-	{
-		std::string createValidFilename(const std::string& _name)
-		{
-			std::string result;
-			result.reserve(_name.size());
-
-			for (const char c : _name)
-			{
-				if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-					result += c;
-				else
-					result += '_';
-			}
-			return result;
-		}
-	}
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
 	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
@@ -89,6 +72,21 @@ namespace pluginLib::patchDB
 		_patch->modifications = _mods;
 		_mods->patch = _patch;
 		_mods->updateCache();
+	}
+
+	std::string DB::createValidFilename(const std::string& _name)
+	{
+		std::string result;
+		result.reserve(_name.size());
+
+		for (const char c : _name)
+		{
+			if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+				result += c;
+			else
+				result += '_';
+		}
+		return result;
 	}
 
 	DataSourceNodePtr DB::addDataSource(const DataSource& _ds, const bool _save, const DataSourceLoadedCallback& _callback)
@@ -739,8 +737,8 @@ namespace pluginLib::patchDB
 	{
 		const auto size = synthLib::getFileSize(_file);
 
-		// unlikely that a 4mb file has useful data for us, skip
-		if (!size || size >= static_cast<size_t>(4 * 1024 * 1024))
+		// unlikely that a 8mb file has useful data for us, skip
+		if (!size || size >= static_cast<size_t>(8 * 1024 * 1024))
 			return false;
 
 		Data data;

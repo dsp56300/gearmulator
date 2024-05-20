@@ -8,6 +8,7 @@
 #include "../synthLib/sysexToMidi.h"
 
 #include "patchmanager/patchmanager.h"
+#include "patchmanager/savepatchdesc.h"
 
 namespace jucePluginEditorLib
 {
@@ -20,7 +21,11 @@ namespace jucePluginEditorLib
 		showDisclaimer();
 	}
 
-	Editor::~Editor() = default;
+	Editor::~Editor()
+	{
+		for (const auto& file : m_dragAndDropFiles)
+			file.deleteFile();
+	}
 
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
@@ -187,6 +192,96 @@ namespace jucePluginEditorLib
 		{
 			onDisclaimerFinished();
 		}
+	}
+
+	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
+	{
+		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(sourceDetails);
+
+		if(!savePatchDesc || !savePatchDesc->hasPatches())
+			return false;
+
+		// try to create human-readable filename first
+		const auto patchFileName = savePatchDesc->getExportFileName(m_processor.getProperties().name);
+		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
+
+		auto file = juce::File(pathName);
+
+		if(file.hasWriteAccess())
+		{
+			m_dragAndDropFiles.emplace_back(file);
+		}
+		else
+		{
+			// failed, create temp file
+			const auto& tempFile = m_dragAndDropTempFiles.emplace_back(std::make_shared<juce::TemporaryFile>(patchFileName));
+			file = tempFile->getFile();
+		}
+
+		if(!savePatchDesc->writePatchesToFile(file))
+			return false;
+
+		files.add(file.getFullPathName());
+
+		canMoveFiles = true;
+		return true;
+	}
+
+	void Editor::copyCurrentPatchToClipboard() const
+	{
+		// copy patch of current part to Clipboard
+		const auto p = m_patchManager->requestPatchForPart(m_patchManager->getCurrentPart());
+
+		if(!p)
+			return;
+
+		const auto patchAsString = m_patchManager->toString(p);
+
+		if(patchAsString.empty())
+			return;
+
+		const auto time = juce::Time::getCurrentTime();
+
+		std::stringstream ss;
+		ss << getProcessor().getProperties().name << " - Patch copied at " << time.formatted("%Y.%m.%d %H:%M") << time.getUTCOffsetString(true);
+		ss << '\n';
+		ss << "Patch '" << p->getName() << "' data:\n";
+		ss << "```\n";
+		ss << patchAsString << '\n';
+		ss << "```";
+		juce::SystemClipboard::copyTextToClipboard(ss.str());
+	}
+
+	bool Editor::replaceCurrentPatchFromClipboard() const
+	{
+		return m_patchManager->activatePatchFromClipboard();
+	}
+
+	void Editor::openMenu()
+	{
+		onOpenMenu(this);
+	}
+
+	bool Editor::keyPressed(const juce::KeyPress& _key)
+	{
+		if(_key.getModifiers().isCommandDown())
+		{
+			switch(_key.getKeyCode())
+			{
+			case 'c':
+			case 'C':
+				copyCurrentPatchToClipboard();
+				return true;
+			case 'v':
+			case 'V':
+				if(replaceCurrentPatchFromClipboard())
+					return true;
+				break;
+			default:
+				return genericUI::Editor::keyPressed(_key);
+			}
+		}
+		return genericUI::Editor::keyPressed(_key);
 	}
 
 	void Editor::onDisclaimerFinished() const

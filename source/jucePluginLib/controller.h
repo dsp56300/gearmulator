@@ -55,7 +55,11 @@ namespace pluginLib
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
 
-		virtual void parseSysexMessage(const SysEx&) = 0;
+		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
+		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;
+
+		virtual bool parseMidiMessage(const synthLib::SMidiEvent& _e);
+
 		virtual void onStateLoaded() = 0;
 
         // this is called by the plug-in on audio thread!

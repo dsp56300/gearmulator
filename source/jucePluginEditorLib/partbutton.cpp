@@ -1,9 +1,12 @@
 #include "partbutton.h"
 
 #include "pluginEditor.h"
+#include "pluginProcessor.h"
 #include "patchmanager/list.h"
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
+
+#include "../synthLib/os.h"
 
 namespace jucePluginEditorLib
 {
@@ -15,7 +18,7 @@ namespace jucePluginEditorLib
 			if(!list)
 				return {};
 
-			const auto patches = patchManager::List::getPatchesFromDragSource(_source);
+			const auto& patches = patchManager::SavePatchDesc::getPatchesFromDragSource(_source);
 
 			if (patches.size() != 1)
 				return {};
@@ -33,6 +36,44 @@ namespace jucePluginEditorLib
 
 		const auto patch = getPatchFromDragSource(_dragSourceDetails);
 		return patch.first != nullptr;
+	}
+
+	template <typename T> bool PartButton<T>::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		if(_files.size() != 1)
+			return false;
+		return true;
+	}
+
+	template <typename T> void PartButton<T>::fileDragEnter(const juce::StringArray& files, int x, int y)
+	{
+		if(isInterestedInFileDrag(files))
+			setIsDragTarget(true);
+		FileDragAndDropTarget::fileDragEnter(files, x, y);
+	}
+
+	template <typename T> void PartButton<T>::fileDragExit(const juce::StringArray& files)
+	{
+		FileDragAndDropTarget::fileDragExit(files);
+		setIsDragTarget(false);
+	}
+
+	template <typename T> void PartButton<T>::filesDropped(const juce::StringArray& _files, int, int)
+	{
+		setIsDragTarget(false);
+
+		auto* pm = m_editor.getPatchManager();
+		if(!pm)
+			return;
+
+		if(!pm->activatePatch(_files.begin()->toStdString(), getPart()))
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+				m_editor.getProcessor().getProperties().name, 
+				"Failed to load patch. Make sure that the format is supported and that the file only contains one patch.\n"
+				"\n"
+				"Drag files with multiple patches onto the Patch Manager instead to import them", nullptr, juce::ModalCallbackFunction::create([](int){}));
+		}
 	}
 
 	template <typename T> void PartButton<T>::itemDragEnter(const SourceDetails& dragSourceDetails)
@@ -90,7 +131,9 @@ namespace jucePluginEditorLib
 	
 	template <typename T> void PartButton<T>::mouseDrag(const juce::MouseEvent& _event)
 	{
-		m_editor.startDragging(new patchManager::SavePatchDesc(m_part), this);
+		auto* patchManager = m_editor.getPatchManager();
+		if(patchManager)
+			m_editor.startDragging(new patchManager::SavePatchDesc(*patchManager, m_part), this);
 		genericUI::Button<T>::mouseDrag(_event);
 	}
 

@@ -7,11 +7,6 @@
 
 #include "../jucePluginLib/parameterbinding.h"
 
-namespace genericUI
-{
-	class Editor;
-}
-
 namespace juce
 {
 	class Component;
@@ -21,6 +16,7 @@ class VirusProcessor;
 
 namespace jucePluginEditorLib
 {
+	class Editor;
 	class Processor;
 
 	class PluginEditorState
@@ -78,12 +74,12 @@ namespace jucePluginEditorLib
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);
 
 	protected:
-		virtual genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) = 0;
+		virtual Editor* createEditor(const Skin& _skin) = 0;
 
 		Processor& m_processor;
 		pluginLib::ParameterBinding m_parameterBinding;
 
-		genericUI::Editor* getEditor() const;
+		Editor* getEditor() const;
 
 	private:
 		void loadSkin(const Skin& _skin);

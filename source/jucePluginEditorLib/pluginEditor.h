@@ -4,6 +4,8 @@
 
 #include "../synthLib/buildconfig.h"
 
+#include "../jucePluginLib/event.h"
+
 #include "types.h"
 
 namespace pluginLib
@@ -23,6 +25,8 @@ namespace jucePluginEditorLib
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
+		pluginLib::Event<Editor*> onOpenMenu;
+
 		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
 		~Editor() override;
 
@@ -60,7 +64,15 @@ namespace jucePluginEditorLib
 
 		void showDisclaimer() const;
 
+		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles) override;
+
+		void copyCurrentPatchToClipboard() const;
+		bool replaceCurrentPatchFromClipboard() const;
+
+		virtual void openMenu();
 	private:
+		bool keyPressed(const juce::KeyPress& _key) override;
+
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
@@ -80,5 +92,7 @@ namespace jucePluginEditorLib
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
 		std::vector<uint8_t> m_instanceConfig;
+		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
+		std::vector<juce::File> m_dragAndDropFiles;
 	};
 }

@@ -16,11 +16,10 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
 		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_openMenuCallback(std::move(_openMenuCallback)),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create(_jsonFilename);
@@ -139,16 +138,23 @@ namespace genericVirusUI
 				onProgramChange(getController().getCurrentPart());
 			}
 		};
-		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent& _mouseEvent, int )
+
+		m_presetNameMouseListener = new PartMouseListener(pluginLib::MidiPacket::AnyPart, [this](const juce::MouseEvent&, int)
 		{
-			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(getController().getCurrentPart()), m_presetName);
+			startDragging(new jucePluginEditorLib::patchManager::SavePatchDesc(*getPatchManager(), getController().getCurrentPart()), m_presetName);
 		});
+
 		m_presetName->addMouseListener(m_presetNameMouseListener, false);
 
 		auto* menuButton = findComponentT<juce::Button>("Menu", false);
 
 		if(menuButton)
-			menuButton->onClick = m_openMenuCallback;
+		{
+			menuButton->onClick = [this]()
+			{
+				openMenu();
+			};
+		}
 
 		updatePresetName();
 		updatePlayModeButtons();

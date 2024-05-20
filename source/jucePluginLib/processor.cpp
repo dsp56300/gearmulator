@@ -79,6 +79,8 @@ namespace pluginLib
 
 	void Processor::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
 	{
+		synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
+
 		const auto* raw = message.getSysExData();
 		if (raw)
 		{
@@ -90,10 +92,9 @@ namespace pluginLib
 				syx.push_back(raw[i]);
 			}
 			syx.push_back(0xf7);
-			synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
-			sm.sysex = syx;
-			getController().parseSysexMessage(syx);
+			sm.sysex = std::move(syx);
 
+			getController().parseMidiMessage(sm);
 			addMidiEvent(sm);
 
 			if (m_midiOutput)
@@ -110,8 +111,6 @@ namespace pluginLib
 		}
 		else
 		{
-			synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
-
 			const auto count = message.getRawDataSize();
 			const auto* rawData = message.getRawData();
 			if (count >= 1 && count <= 3)
@@ -128,6 +127,7 @@ namespace pluginLib
 				sm.sysex = syx;
 			}
 
+			getController().parseMidiMessage(sm);
 			addMidiEvent(sm);
 		}
 	}

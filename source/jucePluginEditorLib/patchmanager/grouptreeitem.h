@@ -44,9 +44,11 @@ namespace jucePluginEditorLib::patchManager
 		void setParentSearchRequest(const pluginLib::patchDB::SearchRequest& _parentSearch) override;
 		void onParentSearchChanged(const pluginLib::patchDB::SearchRequest& _parentSearchRequest) override;
 
-		bool isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices) override;
+		bool isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches) override;
 		void patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc) override;
 
+		bool isInterestedInFileDrag(const juce::StringArray& _files) override;
+		void filesDropped(const juce::StringArray& _files, int _insertIndex) override;
 	private:
 		DatasourceTreeItem* createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource);
 		TagTreeItem* createSubItem(const std::string& _tag);

@@ -5,6 +5,8 @@
 #include "search.h"
 #include "tagtreeitem.h"
 
+#include "../../synthLib/os.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	class DatasourceTreeItem;
@@ -283,11 +285,11 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		if(m_type == GroupType::Favourites)
 			return true;
-		return TreeItem::isInterestedInPatchList(_list, _indices);
+		return TreeItem::isInterestedInPatchList(_list, _patches);
 	}
 
 	void GroupTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc)
@@ -310,6 +312,72 @@ namespace jucePluginEditorLib::patchManager
 
 		getPatchManager().addTag(tagType, tag);
 		TagTreeItem::modifyTags(getPatchManager(), tagType, tag, _patches);
+	}
+
+	bool GroupTreeItem::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		if(_files.isEmpty())
+			return TreeItem::isInterestedInFileDrag(_files);
+
+		switch (m_type)
+		{
+		case GroupType::DataSources:
+			{
+				// do not allow to add data sources from temporary directory
+				const auto tempDir = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString();
+				for (const auto& file : _files)
+				{
+					if(file.toStdString().find(tempDir) == 0)
+						return false;
+				}
+				return true;
+			}
+		case GroupType::LocalStorage:
+			return true;
+		default:
+			return TreeItem::isInterestedInFileDrag(_files);
+		}
+	}
+
+	void GroupTreeItem::filesDropped(const juce::StringArray& _files, const int _insertIndex)
+	{
+		if(m_type == GroupType::DataSources)
+		{
+			for (const auto& file : _files)
+			{
+				pluginLib::patchDB::DataSource ds;
+				ds.name = file.toStdString();
+				ds.type = pluginLib::patchDB::SourceType::File;
+				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+
+				getPatchManager().addDataSource(ds);
+			}
+		}
+		else if(m_type == GroupType::LocalStorage)
+		{
+			for (const auto& file : _files)
+			{
+				auto patches = getPatchManager().loadPatchesFromFiles(std::vector<std::string>{file.toStdString()});
+
+				if(patches.empty())
+					continue;
+
+				pluginLib::patchDB::DataSource ds;
+				ds.name = synthLib::getFilenameWithoutPath(file.toStdString());
+				ds.type = pluginLib::patchDB::SourceType::LocalStorage;
+				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
+
+				getPatchManager().addDataSource(ds, [this, patches](const bool _success, const std::shared_ptr<pluginLib::patchDB::DataSourceNode>& _ds)
+				{
+					if(_success)
+						getPatchManager().copyPatchesToLocalStorage(_ds, patches, -1);
+				});
+			}
+		}
+		else
+		{
+			TreeItem::filesDropped(_files, _insertIndex);
+		}
 	}
 
 	DatasourceTreeItem* GroupTreeItem::createItemForDataSource(const pluginLib::patchDB::DataSourceNodePtr& _dataSource)

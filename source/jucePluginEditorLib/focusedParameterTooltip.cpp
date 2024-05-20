@@ -4,7 +4,8 @@
 
 namespace jucePluginEditorLib
 {
-	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label* _label) : m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0)
+	FocusedParameterTooltip::FocusedParameterTooltip(juce::Label *_label, const juce::Component& _bounds)
+		: m_label(_label), m_defaultWidth(_label ? _label->getWidth() : 0), m_bounds(_bounds)
 	{
 		setVisible(false);
 
@@ -14,13 +15,22 @@ namespace jucePluginEditorLib
 
 	void FocusedParameterTooltip::setVisible(bool _visible) const
 	{
-		if (isValid())
+		if(isValid())
 			m_label->setVisible(_visible);
+	}
+
+	uint32_t FocusedParameterTooltip::getTooltipDisplayTime() const
+	{
+		if (!isValid() || !m_label->getProperties().contains("displayTime"))
+			return 0;
+
+		const auto time = static_cast<int>(m_label->getProperties()["displayTime"]);
+		return time > 0 ? time : 0;
 	}
 
 	void FocusedParameterTooltip::initialize(juce::Component* _component, const juce::String& _value) const
 	{
-		if (!isValid())
+		if(!isValid())
 			return;
 
 		if(dynamic_cast<juce::Slider*>(_component) && _component->isShowing())
@@ -46,22 +56,16 @@ namespace jucePluginEditorLib
 			x += (_component->getWidth()>>1) - (labelWidth>>1);
 			y += _component->getHeight() + (m_label->getHeight()>>1);
 
-			/*
-			// global to local of tooltip parent
-			parent = m_label->getParentComponent();
-
-			while(parent && parent != this)
-			{
-				x -= parent->getX();
-				y -= parent->getY();
-				parent = parent->getParentComponent();
-			}
-			*/
 			if(m_label->getProperties().contains("offsetY"))
 				y += static_cast<int>(m_label->getProperties()["offsetY"]);
 
 			m_label->setTopLeftPosition(x,y);
 			m_label->setSize(labelWidth, m_label->getHeight());
+
+			const auto editorRect = m_bounds.getBounds();
+			const auto labelRect = m_label->getBounds();
+
+			m_label->setBounds(labelRect.constrainedWithin(editorRect));
 			m_label->setText(_value, juce::dontSendNotification);
 			m_label->setVisible(true);
 			m_label->toFront(false);

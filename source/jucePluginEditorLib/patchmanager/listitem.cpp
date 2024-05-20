@@ -86,25 +86,23 @@ namespace jucePluginEditorLib::patchManager
 
 		const auto row = drag == DragType::Above ? m_row : m_row + 1;
 
-		if(const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get()))
-		{
-			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
+		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
 
+		if(patches.empty())
+			return;
+
+		const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
+		assert(savePatchDesc);
+
+		if(dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get()))
+		{
 			if(!patches.empty() && pm.movePatchesTo(row, patches))
 				m_list.refreshContent();
 		}
-		else
+		else if(patches.size() == 1 && savePatchDesc->isPartValid())
 		{
 			const auto& source = m_list.getDataSource();
 			if(!source)
-				return;
-
-			const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
-			if(!savePatchDesc)
-				return;
-
-			const auto patch = pm.requestPatchForPart(savePatchDesc->getPart());
-			if(!patch)
 				return;
 
 			if(drag == DragType::Over)
@@ -117,7 +115,7 @@ namespace jucePluginEditorLib::patchManager
 					"Replace Patch", 
 					"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart()+1) + "?"))
 				{
-					pm.replacePatch(existingPatch, patch);
+					pm.replacePatch(existingPatch, patches.front());
 				}
 			}
 			else
@@ -126,7 +124,8 @@ namespace jucePluginEditorLib::patchManager
 				pm.getEditor().showDemoRestrictionMessageBox();
 #else
 				const auto part = savePatchDesc->getPart();
-				pm.copyPatchesTo(source, {patch}, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+
+				pm.copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 				{
 					juce::MessageManager::callAsync([this, part, _patches]
 					{

@@ -61,8 +61,6 @@ namespace jucePluginEditorLib::patchManager
 
 		void processDirty(const pluginLib::patchDB::Dirty& _dirty);
 
-		static std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails);
-
 		pluginLib::patchDB::DataSourceNodePtr getDataSource() const;
 
 		static Patch getPatch(const Patches& _patches, const size_t _index)

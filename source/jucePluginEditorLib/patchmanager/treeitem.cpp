@@ -136,48 +136,19 @@ namespace jucePluginEditorLib::patchManager
 
 	void TreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
-		if (dynamic_cast<List*>(dragSourceDetails.sourceComponent.get()))
-		{
-			const auto patches = List::getPatchesFromDragSource(dragSourceDetails);
+		const auto patches = SavePatchDesc::getPatchesFromDragSource(dragSourceDetails);
 
-			if(!patches.empty())
-				patchesDropped(patches);
-		}
-		else
-		{
-			const auto* desc = SavePatchDesc::fromDragSource(dragSourceDetails);
-
-			if(!desc)
-				return;
-
-			if(auto patch = getPatchManager().requestPatchForPart(desc->getPart()))
-				patchesDropped({patch}, desc);
-		}
+		if(!patches.empty())
+			patchesDropped(patches);
 	}
 
 	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
 		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
 
-		if (list)
-		{
-			const auto* arr = _dragSourceDetails.description.getArray();
-			if (!arr || arr->isEmpty())
-				return false;
+		const auto& patches = SavePatchDesc::getPatchesFromDragSource(_dragSourceDetails);
 
-			for (const auto& var : *arr)
-			{
-				if (!var.isInt())
-					return false;
-			}
-
-			return isInterestedInPatchList(list, *arr);
-		}
-
-		if(const auto* desc = SavePatchDesc::fromDragSource(_dragSourceDetails))
-			return isInterestedInSavePatchDesc(*desc);
-
-		return false;
+		return isInterestedInPatchList(list, patches);
 	}
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
@@ -247,6 +218,21 @@ namespace jucePluginEditorLib::patchManager
 		const juce::String t = juce::String::fromUTF8(m_text.c_str());
 		_g.drawText(t, 0, 0, _width, _height, style ? style->getAlign() : juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);
+	}
+
+	bool TreeItem::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		return TreeViewItem::isInterestedInFileDrag(_files);
+	}
+
+	void TreeItem::filesDropped(const juce::StringArray& _files, const int _insertIndex)
+	{
+		const auto patches = m_patchManager.loadPatchesFromFiles(_files);
+
+		if(!patches.empty())
+			patchesDropped(patches);
+		else
+			TreeViewItem::filesDropped(_files, _insertIndex);
 	}
 
 	int TreeItem::compareElements(const TreeViewItem* _a, const TreeViewItem* _b)

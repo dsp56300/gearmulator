@@ -44,17 +44,19 @@ namespace synthLib
 			_dst.write(reinterpret_cast<const char*>(&message[1]), static_cast<std::streamsize>(message.size() - 1));
 		}
 		const auto newPos = _dst.tellp();
-		const auto trackChunkLength = newPos - trackChunkBegin;
+		const auto trackChunkLength = newPos - trackChunkBegin - 4;	// exclude the chunk length
 
 		writeBuf(_dst, {0xff,0x2f,0x00});	// end of track
 
+		const auto end = _dst.tellp();
 		_dst.seekp(trackChunkBegin);
 		writeUInt32(_dst, static_cast<uint32_t>(trackChunkLength));
+		_dst.seekp(end);
 	}
 
 	void SysexToMidi::writeBuf(std::ostream& _dst, const std::vector<uint8_t>& _data)
 	{
-		_dst.write(reinterpret_cast<const char*>(&_data[0]), static_cast<std::streamsize>(_data.size()));
+		_dst.write(reinterpret_cast<const char*>(_data.data()), static_cast<std::streamsize>(_data.size()));
 	}
 
 	void SysexToMidi::writeUInt8(std::ostream& _dst, uint8_t _data)
