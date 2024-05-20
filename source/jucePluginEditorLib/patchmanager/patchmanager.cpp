@@ -593,16 +593,12 @@ namespace jucePluginEditorLib::patchManager
 		if(_part >= m_state.getPartCount())
 			return false;
 
-		pluginLib::patchDB::DataList results;
-		loadFile(results, _filename);
+		const auto patches = loadPatchesFromFiles(std::vector<std::string>{_filename});
 
-		if(results.empty())
+		if(patches.empty())
 			return false;
 
-		auto result = results.front();
-		const auto patch = initializePatch(std::move(result));
-		if(!patch)
-			return false;
+		const auto& patch = patches.front();
 
 		if(!activatePatch(patch, _part))
 			return false;
@@ -611,6 +607,35 @@ namespace jucePluginEditorLib::patchManager
 			m_list->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
 
 		return true;
+	}
+
+	std::vector<pluginLib::patchDB::PatchPtr> PatchManager::loadPatchesFromFiles(const juce::StringArray& _files)
+	{
+		std::vector<std::string> files;
+
+		for (const auto& file : _files)
+			files.push_back(file.toStdString());
+
+		return loadPatchesFromFiles(files);
+	}
+
+	std::vector<pluginLib::patchDB::PatchPtr> PatchManager::loadPatchesFromFiles(const std::vector<std::string>& _files)
+	{
+		std::vector<pluginLib::patchDB::PatchPtr> patches;
+
+		for (const auto& file : _files)
+		{
+			pluginLib::patchDB::DataList results;
+			if(!loadFile(results, file) || results.empty())
+				continue;
+
+			for (auto& result : results)
+			{
+				if(const auto patch = initializePatch(std::move(result)))
+					patches.push_back(patch);
+			}
+		}
+		return patches;
 	}
 
 	void PatchManager::onLoadFinished()
