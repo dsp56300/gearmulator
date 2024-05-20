@@ -283,11 +283,11 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		if(m_type == GroupType::Favourites)
 			return true;
-		return TreeItem::isInterestedInPatchList(_list, _indices);
+		return TreeItem::isInterestedInPatchList(_list, _patches);
 	}
 
 	void GroupTreeItem::patchesDropped(const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const SavePatchDesc* _savePatchDesc)

@@ -64,7 +64,7 @@ namespace jucePluginEditorLib::patchManager
 		search(std::move(sr));
 	}
 
-	bool DatasourceTreeItem::isInterestedInSavePatchDesc(const SavePatchDesc& _desc)
+	bool DatasourceTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		return m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage;
 	}

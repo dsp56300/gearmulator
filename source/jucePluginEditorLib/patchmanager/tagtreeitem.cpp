@@ -26,7 +26,7 @@ namespace jucePluginEditorLib::patchManager
 		return TreeItem::isInterestedInDragSource(dragSourceDetails) && hasSearch();
 	}
 
-	bool TagTreeItem::isInterestedInPatchList(const List* _list, const juce::Array<juce::var>& _indices)
+	bool TagTreeItem::isInterestedInPatchList(const List*, const std::vector<pluginLib::patchDB::PatchPtr>&)
 	{
 		return hasSearch() && toTagType(getGroupType()) != pluginLib::patchDB::TagType::Invalid;
 	}

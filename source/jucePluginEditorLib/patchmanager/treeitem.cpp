@@ -146,25 +146,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
 
-		if (list)
-		{
-			const auto* arr = _dragSourceDetails.description.getArray();
-			if (!arr || arr->isEmpty())
-				return false;
+		const auto& patches = SavePatchDesc::getPatchesFromDragSource(_dragSourceDetails);
 
-			for (const auto& var : *arr)
-			{
-				if (!var.isInt())
-					return false;
-			}
-
-			return isInterestedInPatchList(list, *arr);
-		}
-
-		if(const auto* desc = SavePatchDesc::fromDragSource(_dragSourceDetails))
-			return isInterestedInSavePatchDesc(*desc);
-
-		return false;
+		return isInterestedInPatchList(list, patches);
 	}
 
 	void TreeItem::search(pluginLib::patchDB::SearchRequest&& _request)
