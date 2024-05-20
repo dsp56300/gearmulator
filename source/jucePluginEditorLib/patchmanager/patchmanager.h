@@ -96,6 +96,8 @@ namespace jucePluginEditorLib::patchManager
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) = 0;
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
+		virtual bool activatePatch(const std::string& _filename, uint32_t _part);
+
 		void onLoadFinished() override;
 
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);

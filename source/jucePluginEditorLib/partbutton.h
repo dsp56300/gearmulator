@@ -14,7 +14,7 @@ namespace jucePluginEditorLib
 	class Editor;
 
 	template<typename T>
-	class PartButton : public genericUI::Button<T>, public juce::DragAndDropTarget
+	class PartButton : public genericUI::Button<T>, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
 	{
 	public:
 		template<class... TArgs>
@@ -37,6 +37,12 @@ namespace jucePluginEditorLib
 		void itemDragEnter(const SourceDetails& dragSourceDetails) override;
 		void itemDragExit(const SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const SourceDetails& _dragSourceDetails) override;
+
+		bool isInterestedInFileDrag (const juce::StringArray& _files) override;
+
+		void fileDragEnter(const juce::StringArray& files, int x, int y) override;
+		void fileDragExit(const juce::StringArray& files) override;
+		void filesDropped(const juce::StringArray& _files, int x, int y) override;
 
 		void paint(juce::Graphics& g) override;
 

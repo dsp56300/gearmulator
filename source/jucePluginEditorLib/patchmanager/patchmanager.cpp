@@ -588,6 +588,31 @@ namespace jucePluginEditorLib::patchManager
 		return m_editor.getTemplate(_name);
 	}
 
+	bool PatchManager::activatePatch(const std::string& _filename, const uint32_t _part)
+	{
+		if(_part >= m_state.getPartCount())
+			return false;
+
+		pluginLib::patchDB::DataList results;
+		loadFile(results, _filename);
+
+		if(results.empty())
+			return false;
+
+		auto result = results.front();
+		const auto patch = initializePatch(std::move(result));
+		if(!patch)
+			return false;
+
+		if(!activatePatch(patch, _part))
+			return false;
+
+		if(getCurrentPart() == _part)
+			m_list->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
+
+		return true;
+	}
+
 	void PatchManager::onLoadFinished()
 	{
 		DB::onLoadFinished();
