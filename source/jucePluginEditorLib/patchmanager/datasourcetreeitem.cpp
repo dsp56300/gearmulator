@@ -9,6 +9,7 @@
 #include "../../jucePluginLib/patchdb/search.h"
 
 #include "../../synthLib/buildconfig.h"
+#include "../../synthLib/os.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -221,12 +222,16 @@ namespace jucePluginEditorLib::patchManager
 		if(!m_dataSource || m_dataSource->patches.empty())
 			return TreeItem::getDragSourceDescription();
 
+		std::vector<pluginLib::patchDB::PatchPtr> patchesVec{m_dataSource->patches.begin(), m_dataSource->patches.end()};
+
+		pluginLib::patchDB::DataSource::sortByProgram(patchesVec);
+
 		uint32_t i=0;
-		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patches;
+		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patchesMap;
 
-		for (const auto& patch : m_dataSource->patches)
-			patches.insert({i++, patch});
+		for (const auto& patch : patchesVec)
+			patchesMap.insert({i++, patch});
 
-		return new SavePatchDesc(getPatchManager(), std::move(patches));
+		return new SavePatchDesc(getPatchManager(), std::move(patchesMap), synthLib::getFilenameWithoutPath(m_dataSource->name));
 	}
 }

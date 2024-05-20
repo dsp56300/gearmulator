@@ -202,15 +202,7 @@ namespace jucePluginEditorLib
 			return false;
 
 		// try to create human-readable filename first
-		const auto patch = savePatchDesc->getPatches().begin()->second;
-
-		auto patchFileName = patch->getName();
-
-		while(!patchFileName.empty() && patchFileName.back() == ' ')
-			patchFileName.pop_back();
-
-		patchFileName = m_processor.getProperties().name + "_" + patchManager::PatchManager::createValidFilename(patchFileName) + ".mid";
-
+		const auto patchFileName = savePatchDesc->getExportFileName(m_processor.getProperties().name);
 		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
 
 		auto file = juce::File(pathName);

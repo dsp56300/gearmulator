@@ -14,13 +14,9 @@ namespace jucePluginEditorLib::patchManager
 		static constexpr int InvalidPart = -1;
 
 	public:
-		SavePatchDesc(PatchManager& _pm, const int _part) : m_patchManager(_pm), m_part(_part)
-		{
-		}
+		SavePatchDesc(PatchManager& _pm, const int _part, std::string _name = {});
 
-		SavePatchDesc(PatchManager& _pm, std::map<uint32_t, pluginLib::patchDB::PatchPtr>&& _patches) : m_patchManager(_pm), m_part(InvalidPart), m_patches(std::move(_patches))
-		{
-		}
+		SavePatchDesc(PatchManager& _pm, std::map<uint32_t, pluginLib::patchDB::PatchPtr>&& _patches, std::string _name = {});
 
 		auto getPart() const { return m_part; }
 
@@ -30,6 +26,10 @@ namespace jucePluginEditorLib::patchManager
 		bool hasPatches() const { return !getPatches().empty(); }
 
 		bool writePatchesToFile(const juce::File& _file) const;
+
+		const std::string& getName() const { return m_name; }
+
+		std::string getExportFileName(const std::string& _prefix) const;
 
 		static const SavePatchDesc* fromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
 		{
@@ -42,5 +42,6 @@ namespace jucePluginEditorLib::patchManager
 		PatchManager& m_patchManager;
 		int m_part;
 		mutable std::map<uint32_t, pluginLib::patchDB::PatchPtr> m_patches;
+		const std::string m_name;
 	};
 }
