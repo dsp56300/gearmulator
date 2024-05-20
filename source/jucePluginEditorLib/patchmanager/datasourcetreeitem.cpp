@@ -215,4 +215,18 @@ namespace jucePluginEditorLib::patchManager
 			return ds->name;
 		}
 	}
+
+	juce::var DatasourceTreeItem::getDragSourceDescription()
+	{
+		if(!m_dataSource || m_dataSource->patches.empty())
+			return TreeItem::getDragSourceDescription();
+
+		uint32_t i=0;
+		std::map<uint32_t, pluginLib::patchDB::PatchPtr> patches;
+
+		for (const auto& patch : m_dataSource->patches)
+			patches.insert({i++, patch});
+
+		return new SavePatchDesc(getPatchManager(), std::move(patches));
+	}
 }

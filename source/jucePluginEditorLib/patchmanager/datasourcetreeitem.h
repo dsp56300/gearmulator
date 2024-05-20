@@ -35,6 +35,8 @@ namespace jucePluginEditorLib::patchManager
 		const auto& getDataSource() const { return m_dataSource; }
 
 		juce::String getTooltip() override;
+
+		juce::var getDragSourceDescription() override;
 	private:
 		const pluginLib::patchDB::DataSourceNodePtr m_dataSource;
 	};
