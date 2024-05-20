@@ -43,8 +43,7 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename,
-		            std::string _skinFolder, std::function<void()> _openMenuCallback);
+		VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
@@ -105,8 +104,6 @@ namespace genericVirusUI
 		juce::Button* m_playModeToggle = nullptr;
 
 		juce::Label* m_deviceModel = nullptr;
-
-		std::function<void()> m_openMenuCallback;
 
 		pluginLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};

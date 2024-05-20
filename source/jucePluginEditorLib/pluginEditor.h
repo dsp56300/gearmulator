@@ -4,6 +4,8 @@
 
 #include "../synthLib/buildconfig.h"
 
+#include "../jucePluginLib/event.h"
+
 #include "types.h"
 
 namespace pluginLib
@@ -23,6 +25,8 @@ namespace jucePluginEditorLib
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
 	{
 	public:
+		pluginLib::Event<Editor*> onOpenMenu;
+
 		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
 		~Editor() override;
 
@@ -65,6 +69,7 @@ namespace jucePluginEditorLib
 		void copyCurrentPatchToClipboard() const;
 		bool replaceCurrentPatchFromClipboard() const;
 
+		virtual void openMenu();
 	private:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

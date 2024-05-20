@@ -257,6 +257,11 @@ namespace jucePluginEditorLib
 		return m_patchManager->activatePatchFromClipboard();
 	}
 
+	void Editor::openMenu()
+	{
+		onOpenMenu(this);
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())

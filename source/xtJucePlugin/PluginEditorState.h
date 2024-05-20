@@ -18,5 +18,5 @@ public:
 	void initContextMenu(juce::PopupMenu& _menu) override;
 	bool initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled) override;
 private:
-	genericUI::Editor* createEditor(const Skin& _skin, std::function<void()> _openMenuCallback) override;
+	jucePluginEditorLib::Editor* createEditor(const Skin& _skin) override;
 };

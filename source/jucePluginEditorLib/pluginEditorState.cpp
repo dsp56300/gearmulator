@@ -103,8 +103,14 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 	try
 	{
-		auto* editor = createEditor(_skin, [this] { openMenu(); });
+		auto* editor = createEditor(_skin);
 		m_editor.reset(editor);
+
+		getEditor()->onOpenMenu.addListener([this](Editor*)
+		{
+			openMenu();
+		});
+
 		m_rootScale = editor->getScale();
 
 		m_editor->setTopLeftPosition(0, 0);
@@ -134,9 +140,9 @@ void PluginEditorState::setGuiScale(const int _scale) const
 		evSetGuiScale(_scale);
 }
 
-genericUI::Editor* PluginEditorState::getEditor() const
+Editor* PluginEditorState::getEditor() const
 {
-	return static_cast<genericUI::Editor*>(m_editor.get());
+	return dynamic_cast<Editor*>(m_editor.get());
 }
 
 void PluginEditorState::openMenu()
@@ -200,7 +206,7 @@ void PluginEditorState::openMenu()
 
 	if(m_editor && m_currentSkin.folder.empty() || m_currentSkin.folder.find(m_skinFolderName) == std::string::npos)
 	{
-		auto* editor = m_editor.get();
+		auto* editor = getEditor();
 		if(editor)
 		{
 			skinMenu.addSeparator();
@@ -394,10 +400,7 @@ void PluginEditorState::openMenu()
 
 void PluginEditorState::exportCurrentSkin() const
 {
-	if(!m_editor)
-		return;
-
-	const auto* editor = dynamic_cast<const genericUI::Editor*>(m_editor.get());
+	auto* editor = getEditor();
 
 	if(!editor)
 		return;
@@ -406,11 +409,11 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, m_editor.get(), juce::ModalCallbackFunction::create([](int){}));
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, editor, juce::ModalCallbackFunction::create([](int){}));
 	}
 	else
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", m_editor.get(), juce::ModalCallbackFunction::create([](int){}));
+		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", editor, juce::ModalCallbackFunction::create([](int){}));
 	}
 }
 

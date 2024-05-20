@@ -16,11 +16,10 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder, std::function<void()> _openMenuCallback) :
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
 		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
-		m_openMenuCallback(std::move(_openMenuCallback)),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
 		create(_jsonFilename);
@@ -150,7 +149,12 @@ namespace genericVirusUI
 		auto* menuButton = findComponentT<juce::Button>("Menu", false);
 
 		if(menuButton)
-			menuButton->onClick = m_openMenuCallback;
+		{
+			menuButton->onClick = [this]()
+			{
+				openMenu();
+			};
+		}
 
 		updatePresetName();
 		updatePlayModeButtons();
