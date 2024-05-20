@@ -161,6 +161,20 @@ namespace jucePluginEditorLib::patchManager
 				}
 			}));
 		}
+
+		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+		{
+			const auto clipboardPatches = getPatchManager().getPatchesFromClipboard();
+
+			if(!clipboardPatches.empty())
+			{
+				menu.addSeparator();
+				menu.addItem("Paste from Clipboard", [this, clipboardPatches]
+				{
+					getPatchManager().copyPatchesToLocalStorage(m_dataSource, clipboardPatches, -1);
+				});
+			}
+		}
 		menu.showMenuAsync({});
 	}
 

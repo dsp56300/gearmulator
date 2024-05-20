@@ -62,7 +62,12 @@ namespace jucePluginEditorLib
 
 		bool shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles) override;
 
+		void copyCurrentPatchToClipboard() const;
+		bool replaceCurrentPatchFromClipboard() const;
+
 	private:
+		bool keyPressed(const juce::KeyPress& _key) override;
+
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;

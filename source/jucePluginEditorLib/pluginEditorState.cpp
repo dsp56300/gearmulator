@@ -1,10 +1,14 @@
 #include "pluginEditorState.h"
 
+#include "pluginEditor.h"
 #include "pluginProcessor.h"
-#include "../synthLib/os.h"
-#include "dsp56kEmu/logging.h"
 
+#include "patchmanager/patchmanager.h"
+
+#include "../synthLib/os.h"
 #include "../juceUiLib/editor.h"
+
+#include "dsp56kEmu/logging.h"
 
 namespace jucePluginEditorLib
 {
@@ -320,6 +324,39 @@ void PluginEditorState::openMenu()
 		});
 
 		menu.addSubMenu("Panic", panicMenu);
+	}
+
+	if(auto* editor = dynamic_cast<Editor*>(getEditor()))
+	{
+		menu.addSeparator();
+
+#ifdef JUCE_MAC
+		const std::string ctrlName = "Cmd";
+#else
+		const std::string ctrlName = "Ctrl";
+#endif
+
+		{
+			juce::PopupMenu::Item item("Copy current Patch to Clipboard");
+			item.shortcutKeyDescription = ctrlName + "+C";
+			item.action = [editor]
+			{
+				editor->copyCurrentPatchToClipboard();
+			};
+			menu.addItem(item);
+		}
+
+		auto patches = editor->getPatchManager()->getPatchesFromClipboard();
+		if(!patches.empty())
+		{
+			juce::PopupMenu::Item item("Replace current Patch from Clipboard");
+			item.shortcutKeyDescription = ctrlName + "+V";
+			item.action = [editor]
+			{
+				editor->replaceCurrentPatchFromClipboard();
+			};
+			menu.addItem(item);
+		}
 	}
 
 	{

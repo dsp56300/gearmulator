@@ -85,6 +85,12 @@ namespace jucePluginEditorLib::patchManager
 		std::string getTagTypeName(pluginLib::patchDB::TagType _type) const;
 		void setTagTypeName(pluginLib::patchDB::TagType _type, const std::string& _name);
 
+		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromString(const std::string& _text);
+		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromClipboard();
+		bool activatePatchFromString(const std::string& _text);
+		bool activatePatchFromClipboard();
+		std::string toString(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _bytesPerLine = 32) const;
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 

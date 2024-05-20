@@ -227,6 +227,58 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	void Editor::copyCurrentPatchToClipboard() const
+	{
+		// copy patch of current part to Clipboard
+		const auto p = m_patchManager->requestPatchForPart(m_patchManager->getCurrentPart());
+
+		if(!p)
+			return;
+
+		const auto patchAsString = m_patchManager->toString(p);
+
+		if(patchAsString.empty())
+			return;
+
+		const auto time = juce::Time::getCurrentTime();
+
+		std::stringstream ss;
+		ss << getProcessor().getProperties().name << " - Patch copied at " << time.formatted("%Y.%m.%d %H:%M") << time.getUTCOffsetString(true);
+		ss << '\n';
+		ss << "Patch '" << p->getName() << "' data:\n";
+		ss << "```\n";
+		ss << patchAsString << '\n';
+		ss << "```";
+		juce::SystemClipboard::copyTextToClipboard(ss.str());
+	}
+
+	bool Editor::replaceCurrentPatchFromClipboard() const
+	{
+		return m_patchManager->activatePatchFromClipboard();
+	}
+
+	bool Editor::keyPressed(const juce::KeyPress& _key)
+	{
+		if(_key.getModifiers().isCommandDown())
+		{
+			switch(_key.getKeyCode())
+			{
+			case 'c':
+			case 'C':
+				copyCurrentPatchToClipboard();
+				return true;
+			case 'v':
+			case 'V':
+				if(replaceCurrentPatchFromClipboard())
+					return true;
+				break;
+			default:
+				return genericUI::Editor::keyPressed(_key);
+			}
+		}
+		return genericUI::Editor::keyPressed(_key);
+	}
+
 	void Editor::onDisclaimerFinished() const
 	{
 		if(!synthLib::isRunningUnderRosetta())
