@@ -513,7 +513,7 @@ namespace jucePluginEditorLib::patchManager
 				patchData.push_back(patchSysex);
 		}
 
-		if(!getEditor().savePresets(type, name, patchData))
+		if(!Editor::savePresets(type, name, patchData))
 			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
 #endif
 	}
