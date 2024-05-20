@@ -5,7 +5,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_D
 
 set(SOURCES
 	parameterDescriptions_xt.json
-	PluginEditor.cpp PluginEditor.h
 	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
 	xtController.cpp xtController.h
