@@ -209,6 +209,14 @@ namespace pluginLib
 		return it->second;
 	}
 
+	Parameter* ParameterBinding::getBoundParameter(const juce::Component* _component) const
+	{
+		const auto it = m_boundComponents.find(_component);
+		if(it == m_boundComponents.end())
+			return nullptr;
+		return it->second;
+	}
+
 	void ParameterBinding::removeMouseListener(juce::Slider& _slider)
 	{
 		const auto it = m_sliderMouseListeners.find(&_slider);
