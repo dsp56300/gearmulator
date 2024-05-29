@@ -96,15 +96,15 @@
  		{"index":79, "name":"AmpVelocity", "isBipolar":true, "toText":"signed"},
  		{"index":80, "name":"AmpKeytrack", "isBipolar":true, "toText":"keytrack128"},
 
- 		{"index":81, "name":"EffectParamA"},
+ 		{"index":81, "name":"EffectParamA", "default":64},
 
 		{"index":82, "name":"ChorusEnabled", "min":0, "max":1, "isBool":true, "toText":"offOn"},
 
-		{"index":83, "name":"EffectParamB"},
+		{"index":83, "name":"EffectParamB", "default":64},
 
  		{"index":84, "name":"Pan", "isBipolar":true, "toText":"pan"},
  		{"index":85, "name":"PanKeytrack", "isBipolar":true, "toText":"keytrack128"},
- 		{"index":86, "name":"EffectParamC"},
+ 		{"index":86, "name":"EffectParamC", "default":64},
 
 		// Glide
  		{"index":87, "name":"GlideEnabled", "min":0, "max":1, "isBool":true, "toText":"offOn"},
@@ -171,12 +171,12 @@
 		{"index":141, "name":"WaveEnvTrigger", "min":0, "max":2, "isDiscrete":true, "toText":"envTrigger"},
 
 		{"index":142, "name":"WaveKeyOnLoop", "min":0, "max":1, "toText":"offOn", "isBool":true},
-		{"index":143, "name":"WaveKeyOnLoopStart", "min":0, "max":7, "isDiscrete":true},
-		{"index":144, "name":"WaveKeyOnLoopEnd", "min":0, "max":7, "isDiscrete":true},
+		{"index":143, "name":"WaveKeyOnLoopStart", "min":0, "max":7, "isDiscrete":true, "toText":"loopStartEnd"},
+		{"index":144, "name":"WaveKeyOnLoopEnd", "min":0, "max":7, "isDiscrete":true, "toText":"loopStartEnd"},
 
 		{"index":145, "name":"WaveKeyOffLoop", "min":0, "max":1, "toText":"offOn", "isBool":true},
-		{"index":146, "name":"WaveKeyOffLoopStart", "min":0, "max":7, "isDiscrete":true},
-		{"index":147, "name":"WaveKeyOffLoopEnd", "min":0, "max":7, "isDiscrete":true},
+		{"index":146, "name":"WaveKeyOffLoopStart", "min":0, "max":7, "isDiscrete":true, "toText":"loopStartEnd"},
+		{"index":147, "name":"WaveKeyOffLoopEnd", "min":0, "max":7, "isDiscrete":true, "toText":"loopStartEnd"},
 
 		{"index":149, "name":"FreeEnvTime1"},		{"index":150, "name":"FreeEnvLevel1", "isBipolar":true, "toText":"signed", "default":127},
 		{"index":151, "name":"FreeEnvTime2"},		{"index":152, "name":"FreeEnvLevel2", "isBipolar":true, "toText":"signed"},
@@ -620,6 +620,10 @@
 			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
 			"60",	"Triangle",	"Square",	"Sawtooth"
 		],
+		"loopStartEnd":
+		[
+			"1", "2", "3", "4", "5", "6", "7", "8"
+		],
 		"aliasing":
 		[
 			"Off", "1", "2", "3", "4", "5"
@@ -830,7 +834,7 @@
 		[
 			"Off", "LFO 1", "LFO 1 * MW", "LFO 1 * AT", "LFO 2", "Filter Env", "Amp Env", "Wave Env", "Free Env", "Key Follow", "Keytrack", "Velocity", "Release Vel", "Aftertouch", "Poly Pressure", "Pitch Bend",
 			"Modwheel", "Sustain Pedal", "Foot Control", "Breath Control", "Control W", "Control X", "Control Y", "Control Z", "Control Delay", "Modifier #1", "Modifier #2", "Modifier #3", "Modifier #4",
-			"MIDI Clock", "min", "MAX"
+			"MIDI Clock", "Min", "Max"
 		],
 		"modType":
 		[
