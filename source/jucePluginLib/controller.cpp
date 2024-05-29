@@ -532,6 +532,26 @@ namespace pluginLib
 		return false;
 	}
 
+	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const
+	{
+		if(!_param)
+			return {};
+		return getRegionIdsForParameter(_param->getDescription().name);
+	}
+
+	std::set<std::string> Controller::getRegionIdsForParameter(const std::string& _name) const
+	{
+		const auto& regions = getParameterDescriptions().getRegions();
+
+		std::set<std::string> result;
+		for (const auto& region : regions)
+		{
+			if(region.second.containsParameter(_name))
+				result.insert(region.first);
+		}
+		return result;
+	}
+
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
 	{
 		return new Parameter(_controller, _desc, _part, _uid);

@@ -73,6 +73,9 @@ namespace pluginLib
 		std::unordered_set<std::string> getLockedParameterNames() const;
 		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
 		bool isParameterLocked(const std::string& _name) const;
+		std::set<std::string> getRegionIdsForParameter(const Parameter* _param) const;
+		std::set<std::string> getRegionIdsForParameter(const std::string& _name) const;
+
 		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
 
 		const SoftKnob* getSoftknob(const Parameter* _parameter) const
