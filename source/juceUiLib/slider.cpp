@@ -5,7 +5,7 @@ namespace genericUI
 	void Slider::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 	{
 		// we use the default behaviour if ctrl/cmd is not pressed. If it is, we want to inc/dec single steps
-		if(!event.mods.isCommandDown())
+		if(!event.mods.isCommandDown() || !isEnabled())
 		{
 			juce::Slider::mouseWheelMove(event, wheel);
 			return;
