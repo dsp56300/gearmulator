@@ -152,7 +152,7 @@ namespace genericVirusUI
 		{
 			menuButton->onClick = [this]()
 			{
-				openMenu();
+				openMenu(nullptr);
 			};
 		}
 

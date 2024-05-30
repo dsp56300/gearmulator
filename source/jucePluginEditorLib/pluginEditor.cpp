@@ -257,9 +257,18 @@ namespace jucePluginEditorLib
 		return m_patchManager->activatePatchFromClipboard();
 	}
 
-	void Editor::openMenu()
+	void Editor::openMenu(juce::MouseEvent* _event)
 	{
-		onOpenMenu(this);
+		onOpenMenu(this, _event);
+	}
+
+	bool Editor::openContextMenuForParameter(const juce::MouseEvent* _event)
+	{
+		if(!_event || !_event->originalComponent)
+			return false;
+
+		// TODO
+		return false;
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

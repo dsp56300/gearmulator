@@ -106,9 +106,9 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 		auto* editor = createEditor(_skin);
 		m_editor.reset(editor);
 
-		getEditor()->onOpenMenu.addListener([this](Editor*)
+		getEditor()->onOpenMenu.addListener([this](Editor*, const juce::MouseEvent* _e)
 		{
-			openMenu();
+			openMenu(_e);
 		});
 
 		m_rootScale = editor->getScale();
@@ -145,8 +145,14 @@ Editor* PluginEditorState::getEditor() const
 	return dynamic_cast<Editor*>(m_editor.get());
 }
 
-void PluginEditorState::openMenu()
+void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 {
+	if(_event && _event->mods.isPopupMenu() && getEditor())
+	{
+		if(getEditor()->openContextMenuForParameter(_event))
+			return;
+	}
+
 	const auto& config = m_processor.getConfig();
     const auto scale = juce::roundToInt(config.getDoubleValue("scale", 100));
 
