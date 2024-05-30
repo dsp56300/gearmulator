@@ -11,6 +11,8 @@
 
 namespace genericUI
 {
+	class Slider;
+
 	class Editor : public juce::Component, public juce::DragAndDropContainer
 	{
 	public:
@@ -89,7 +91,7 @@ namespace genericUI
 		virtual void setPerInstanceConfig(const std::vector<uint8_t>& _data) {}
 		virtual void getPerInstanceConfig(std::vector<uint8_t>& _data) {}
 
-		virtual juce::Slider* createJuceComponent(juce::Slider*, UiObject& _object) { return nullptr; }
+		virtual Slider* createJuceComponent(Slider*, UiObject& _object) { return nullptr; }
 		virtual juce::Component* createJuceComponent(juce::Component*, UiObject& _object) { return nullptr; }
 		virtual juce::ComboBox* createJuceComponent(juce::ComboBox*, UiObject& _object) { return nullptr; }
 		virtual juce::Label* createJuceComponent(juce::Label*, UiObject& _object) { return nullptr; }

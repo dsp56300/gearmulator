@@ -14,6 +14,7 @@ set(SOURCES
 	buttonStyle.cpp buttonStyle.h
 	labelStyle.cpp labelStyle.h
 	scrollbarStyle.cpp scrollbarStyle.h
+	slider.cpp slider.h
 	textbuttonStyle.cpp textbuttonStyle.h
 	textEditorStyle.cpp textEditorStyle.h
 	treeViewStyle.cpp treeViewStyle.h
