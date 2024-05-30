@@ -11,6 +11,7 @@
 #include "tree.h"
 
 #include "../pluginEditor.h"
+#include "../pluginProcessor.h"
 
 #include "../../jucePluginLib/types.h"
 #include "../../jucePluginLib/clipboard.h"
@@ -880,14 +881,14 @@ namespace jucePluginEditorLib::patchManager
 
 	std::vector<pluginLib::patchDB::PatchPtr> PatchManager::getPatchesFromString(const std::string& _text)
 	{
-		pluginLib::patchDB::DataList results = pluginLib::Clipboard::getSysexFromString(_text);
+		auto data = pluginLib::Clipboard::getDataFromString(m_editor.getProcessor(), _text);
 
-		if(results.empty())
+		if(data.sysex.empty())
 			return {};
 
 		std::vector<pluginLib::patchDB::PatchPtr> patches;
 
-		for (auto& result : results)
+		for (auto& result : data.sysex)
 		{
 			if(const auto patch = initializePatch(std::move(result)))
 				patches.push_back(patch);
@@ -916,13 +917,13 @@ namespace jucePluginEditorLib::patchManager
 		return activatePatchFromString(juce::SystemClipboard::getTextFromClipboard().toStdString());
 	}
 
-	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _bytesPerLine/* = 32*/) const
+	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
 		if(!_patch)
 			return {};
 
 		const auto data = prepareSave(_patch);
 
-		return pluginLib::Clipboard::midiDataToString(data, _bytesPerLine);
+		return pluginLib::Clipboard::createJsonString(m_editor.getProcessor(), {}, {}, data);
 	}
 }

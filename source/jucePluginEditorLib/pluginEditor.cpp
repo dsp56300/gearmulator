@@ -3,7 +3,7 @@
 #include "pluginProcessor.h"
 
 #include "../jucePluginLib/parameterbinding.h"
-#include "../jucePluginLib/pluginVersion.h"
+#include "../jucePluginLib/clipboard.h"
 
 #include "../synthLib/os.h"
 #include "../synthLib/sysexToMidi.h"
@@ -238,19 +238,8 @@ namespace jucePluginEditorLib
 
 		const auto patchAsString = m_patchManager->toString(p);
 
-		if(patchAsString.empty())
-			return;
-
-		const auto time = juce::Time::getCurrentTime();
-
-		std::stringstream ss;
-		ss << getProcessor().getProperties().name << " " << pluginLib::Version::getVersionString() << " - Patch copied at " << time.formatted("%Y.%m.%d %H:%M") << time.getUTCOffsetString(true);
-		ss << '\n';
-		ss << "Patch '" << p->getName() << "' data:\n";
-		ss << "```\n";
-		ss << patchAsString << '\n';
-		ss << "```";
-		juce::SystemClipboard::copyTextToClipboard(ss.str());
+		if(!patchAsString.empty())
+			juce::SystemClipboard::copyTextToClipboard(patchAsString);
 	}
 
 	bool Editor::replaceCurrentPatchFromClipboard() const
