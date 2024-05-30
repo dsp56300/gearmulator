@@ -36,6 +36,8 @@ namespace pluginLib
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
+		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::ChangedBy _changedBy) const;
+
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
 		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;
@@ -73,6 +75,9 @@ namespace pluginLib
 		std::unordered_set<std::string> getLockedParameterNames() const;
 		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
 		bool isParameterLocked(const std::string& _name) const;
+		std::set<std::string> getRegionIdsForParameter(const Parameter* _param) const;
+		std::set<std::string> getRegionIdsForParameter(const std::string& _name) const;
+
 		const ParameterDescriptions& getParameterDescriptions() const { return m_descriptions; }
 
 		const SoftKnob* getSoftknob(const Parameter* _parameter) const

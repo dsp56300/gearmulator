@@ -1,6 +1,6 @@
 #include "mqLcd.h"
 
-#include "version.h"
+#include "../jucePluginLib/pluginVersion.h"
 
 #include "../wLib/lcdfonts.h"
 
@@ -26,8 +26,8 @@ void MqLcd::setCgRam(std::array<uint8_t, 64>& _data)
 
 bool MqLcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
 {
-	const std::string lineA(std::string("Vavra v") + g_pluginVersionString);
-	const std::string lineB = __DATE__ " " __TIME__;
+	const std::string lineA(std::string("Vavra v") + pluginLib::Version::getVersionString());
+	const std::string lineB = pluginLib::Version::getVersionDateTime();
 
 	_lines = 
 	{

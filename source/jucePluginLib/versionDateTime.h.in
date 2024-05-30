@@ -1,0 +1,4 @@
+#pragma once
+
+static constexpr const char* const g_pluginVersionDate = "@versionDate@";
+static constexpr const char* const g_pluginVersionTime = "@versionTime@";

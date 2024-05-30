@@ -42,6 +42,7 @@ namespace pluginLib
 		int getUnnormalizedValue() const { return juce::roundToInt(m_value.getValue()); }
 		void setValue(float _newValue) override;
 		void setValue(float _newValue, ChangedBy _origin);
+		void setUnnormalizedValue(int _newValue, ChangedBy _origin);
 		void setValueFromSynth(int newValue, bool notifyHost, ChangedBy _origin);
 
 		bool isDiscrete() const override { return m_desc.isDiscrete; }

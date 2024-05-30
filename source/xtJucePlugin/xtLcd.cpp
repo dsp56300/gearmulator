@@ -1,7 +1,8 @@
 #include "xtLcd.h"
 
-#include "version.h"
 #include "xtController.h"
+
+#include "../jucePluginLib/pluginVersion.h"
 
 #include "../wLib/lcdfonts.h"
 
@@ -58,8 +59,8 @@ void XtLcd::setText(const std::array<uint8_t, 80>& _text)
 
 bool XtLcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
 {
-	std::string lineA(std::string("Xenia v") + g_pluginVersionString);
-	std::string lineB = __DATE__ " " __TIME__;
+	std::string lineA(std::string("Xenia v") + pluginLib::Version::getVersionString());
+	std::string lineB = pluginLib::Version::getVersionDateTime();
 
 	constexpr char lineAright[] = "From TUS";
 	constexpr char lineBright[] = "with <3";

@@ -301,6 +301,28 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
+	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::ChangedBy _changedBy) const
+	{
+		bool res = false;
+
+		for (const auto& it : _values)
+		{
+			const auto& name = it.first;
+			const auto& value = it.second;
+
+			const auto index = getParameterIndexByName(name);
+			auto* param = getParameter(index, _part);
+
+			if(param)
+			{
+				res = true;
+				param->setUnnormalizedValue(value, _changedBy);
+			}
+		}
+
+		return res;
+	}
+
 	const MidiPacket* Controller::getMidiPacket(const std::string& _name) const
 	{
 		return m_descriptions.getMidiPacket(_name);
@@ -530,6 +552,26 @@ namespace pluginLib
 				return true;
 		}
 		return false;
+	}
+
+	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const
+	{
+		if(!_param)
+			return {};
+		return getRegionIdsForParameter(_param->getDescription().name);
+	}
+
+	std::set<std::string> Controller::getRegionIdsForParameter(const std::string& _name) const
+	{
+		const auto& regions = getParameterDescriptions().getRegions();
+
+		std::set<std::string> result;
+		for (const auto& region : regions)
+		{
+			if(region.second.containsParameter(_name))
+				result.insert(region.first);
+		}
+		return result;
 	}
 
 	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
