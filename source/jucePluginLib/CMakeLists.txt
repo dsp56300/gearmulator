@@ -5,6 +5,7 @@ configure_file(${CMAKE_CURRENT_LIST_DIR}/version.h.in ${CMAKE_CURRENT_LIST_DIR}/
 
 set(SOURCES
 	createVersionDateTime.cmake
+	clipboard.cpp clipboard.h
 	controller.cpp controller.h
 	dummydevice.cpp dummydevice.h
 	event.cpp event.h
