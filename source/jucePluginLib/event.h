@@ -11,10 +11,9 @@ namespace pluginLib
 	public:
 		using ListenerId = size_t;
 		using Callback = std::function<void(const Ts&...)>;
+		using MyTuple = std::tuple<std::decay_t<Ts>...>;
 
 		static constexpr ListenerId InvalidListenerId = ~0;
-
-		Event() = default;
 
 		ListenerId addListener(const Callback& _callback)
 		{
@@ -69,7 +68,7 @@ namespace pluginLib
 		{
 			invoke(_args...);
 			m_hasRetainedValue = true;
-			m_retainedValue = std::tuple<Ts...>(_args...);
+			m_retainedValue = MyTuple(_args...);
 		}
 
 		void clearRetained()
@@ -81,7 +80,7 @@ namespace pluginLib
 		std::map<ListenerId, Callback> m_listeners;
 
 		bool m_hasRetainedValue = false;
-		std::tuple<std::remove_reference_t<Ts>...> m_retainedValue;
+		MyTuple m_retainedValue;
 	};
 
 	template<typename ...Ts>

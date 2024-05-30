@@ -7,7 +7,7 @@
 
 namespace pluginLib
 {
-	ParameterBinding::MouseListener::MouseListener(pluginLib::Parameter* _param, juce::Slider& _slider)
+	ParameterBinding::MouseListener::MouseListener(Parameter* _param, juce::Slider& _slider)
 	: m_param(_param), m_slider(&_slider)
 	{
 	}
