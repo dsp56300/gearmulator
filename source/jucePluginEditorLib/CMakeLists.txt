@@ -8,6 +8,8 @@ set(SOURCES
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h
+	parameterOverlay.cpp parameterOverlay.h
+	parameterOverlays.cpp parameterOverlays.h
 	partbutton.cpp partbutton.h
 	pluginEditor.cpp pluginEditor.h
 	pluginEditorWindow.cpp pluginEditorWindow.h

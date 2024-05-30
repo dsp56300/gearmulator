@@ -1,14 +1,14 @@
 #pragma once
 
 #include "imagePool.h"
+#include "parameterOverlays.h"
+#include "types.h"
 
 #include "../juceUiLib/editor.h"
 
 #include "../synthLib/buildconfig.h"
 
 #include "../jucePluginLib/event.h"
-
-#include "types.h"
 
 namespace pluginLib
 {
@@ -105,5 +105,6 @@ namespace jucePluginEditorLib
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
 		ImagePool m_imagePool;
+		ParameterOverlays m_overlays;
 	};
 }

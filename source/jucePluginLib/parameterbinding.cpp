@@ -264,10 +264,14 @@ namespace pluginLib
 
 		m_boundParameters.insert(std::make_pair(_boundParameter.parameter, _boundParameter.component));
 		m_boundComponents.insert(std::make_pair(_boundParameter.component, _boundParameter.parameter));
+
+		onBind(_boundParameter);
 	}
 
 	void ParameterBinding::disableBinding(const BoundParameter& _b)
 	{
+		onUnbind(_b);
+
 		m_boundParameters.erase(_b.parameter);
 		m_boundComponents.erase(_b.component);
 

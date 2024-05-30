@@ -18,6 +18,7 @@ namespace jucePluginEditorLib
 		, m_processor(_processor)
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
+		, m_overlays(*this, _binding)
 	{
 		showDisclaimer();
 	}
@@ -261,7 +262,7 @@ namespace jucePluginEditorLib
 		if(!param)
 			return false;
 
-		const auto& controller = m_processor.getController();
+		auto& controller = m_processor.getController();
 
 		const auto& regions = controller.getParameterDescriptions().getRegions();
 		const auto paramRegionIds = controller.getRegionIdsForParameter(param);

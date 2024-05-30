@@ -97,6 +97,8 @@ namespace genericUI
 		virtual Button<juce::DrawableButton>* createJuceComponent(Button<juce::DrawableButton>*, UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) { return nullptr; }
 		virtual Button<juce::TextButton>* createJuceComponent(Button<juce::TextButton>*, UiObject& _object) { return nullptr; }
 
+		const UiObject& getRootObject() const { return *(m_rootObject.get()); }
+
 	private:
 		EditorInterface& m_interface;
 
