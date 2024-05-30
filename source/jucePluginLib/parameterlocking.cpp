@@ -116,18 +116,20 @@ namespace pluginLib
 		return false;
 	}
 
-	void ParameterLocking::setParametersLocked(const ParameterRegion& _parameterRegion, bool _locked)
+	void ParameterLocking::setParametersLocked(const ParameterRegion& _parameterRegion, const bool _locked) const
 	{
 		for (const auto& param : _parameterRegion.getParams())
 		{
+			// if a region is unlocked but other regions still lock the same parameter, do nothing
+			if(!_locked && isParameterLocked(param.first))
+				continue;
+
 			const auto idx = m_controller.getParameterIndexByName(param.first);
 
 			for(uint8_t part=0; part<16; ++part)
 			{
-				auto* param = m_controller.getParameter(idx, part);
-
-				if(param)
-					param->setLocked(_locked);
+				if(auto* p = m_controller.getParameter(idx, part))
+					p->setLocked(_locked);
 			}
 		}
 	}

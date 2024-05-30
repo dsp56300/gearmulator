@@ -25,7 +25,7 @@ namespace pluginLib
 		bool isParameterLocked(const std::string& _name) const;
 
 	private:
-		void setParametersLocked(const ParameterRegion& _parameterRegion, bool _locked);
+		void setParametersLocked(const ParameterRegion& _parameterRegion, bool _locked) const;
 
 		Controller& m_controller;
 
