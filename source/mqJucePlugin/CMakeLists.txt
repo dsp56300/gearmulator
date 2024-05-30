@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(jucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
-
 set(SOURCES
 	parameterDescriptions_mq.json
     PluginEditorState.cpp PluginEditorState.h
@@ -17,7 +15,6 @@ set(SOURCES
 	mqPartSelect.cpp mqPartSelect.h
 	mqPatchManager.cpp mqPatchManager.h
 	mqPatchBrowser.h
-	version.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486

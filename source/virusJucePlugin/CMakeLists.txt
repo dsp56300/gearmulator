@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(virusJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
-
 set(SOURCES
 	ArpUserPattern.cpp
 	ArpUserPattern.h
@@ -29,8 +27,6 @@ set(SOURCES
 	VirusEditorState.h
 	VirusProcessor.cpp
 	VirusProcessor.h
-	version.h.in
-	version.h
 )
 
 add_library(virusJucePlugin STATIC)

@@ -1,7 +1,8 @@
 #include "xtLcd.h"
 
-#include "version.h"
 #include "xtController.h"
+
+#include "../jucePluginEditorLib/version.h"
 
 #include "../wLib/lcdfonts.h"
 

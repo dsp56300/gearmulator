@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 3.15)
 project(xtJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
-
 set(SOURCES
 	parameterDescriptions_xt.json
 	PluginEditorState.cpp PluginEditorState.h
@@ -16,7 +14,6 @@ set(SOURCES
 	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
-	version.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486

@@ -9,10 +9,9 @@
 
 #include "../jucePluginLib/parameterbinding.h"
 #include "../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "../jucePluginEditorLib/version.h"
 
 #include "../synthLib/os.h"
-
-#include "version.h"
 
 namespace genericVirusUI
 {

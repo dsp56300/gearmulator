@@ -1,6 +1,6 @@
 #include "mqLcd.h"
 
-#include "version.h"
+#include "../jucePluginEditorLib/version.h"
 
 #include "../wLib/lcdfonts.h"
 
