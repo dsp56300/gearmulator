@@ -15,8 +15,6 @@ namespace pluginLib
 
 		static constexpr ListenerId InvalidListenerId = ~0;
 
-		Event() = default;
-
 		ListenerId addListener(const Callback& _callback)
 		{
 			ListenerId id;
