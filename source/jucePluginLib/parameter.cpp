@@ -4,9 +4,9 @@
 
 namespace pluginLib
 {
-	Parameter::Parameter(Controller &ctrl, const pluginLib::Description& _desc, const uint8_t _partNum, const int uniqueId) :
-		juce::RangedAudioParameter(genId(_desc, _partNum, uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName), m_ctrl(ctrl),
-		m_desc(_desc), m_partNum(_partNum), m_uniqueId(uniqueId)
+	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId) :
+		juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName), m_ctrl(_controller),
+		m_desc(_desc), m_partNum(_partNum), m_uniqueId(_uniqueId)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
@@ -212,7 +212,7 @@ namespace pluginLib
 		return res;
 	}
 
-	juce::String Parameter::genId(const pluginLib::Description &d, const int part, const int uniqueId)
+	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
 	{
 		if(uniqueId > 0)
 			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
@@ -224,6 +224,16 @@ namespace pluginLib
 		if(m_desc.defaultValue  != Description::NoDefaultValue)
 			return static_cast<uint8_t>(m_desc.defaultValue);
 		return 0;
+	}
+
+	void Parameter::setLocked(const bool _locked)
+	{
+		if(m_isLocked == _locked)
+			return;
+
+		m_isLocked = _locked;
+
+		onLockedChanged(this, m_isLocked);
 	}
 
 	void Parameter::addDerivedParameter(Parameter* _param)

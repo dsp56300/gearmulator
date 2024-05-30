@@ -446,7 +446,7 @@ namespace Virus
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
 
-            const auto locked = getLockedParameterNames();
+            const auto locked = m_locking.getLockedParameterNames();
 
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
@@ -852,7 +852,7 @@ namespace Virus
 
         // if we have locked parameters, get them, send the preset and then send each locked parameter value afterward.
         // Modifying the preset directly does not work because a preset might be an old version that we do not know
-        const auto lockedParameters = getLockedParameters(static_cast<uint8_t>(_part == virusLib::SINGLE ? 0 : _part));
+        const auto lockedParameters = m_locking.getLockedParameters(static_cast<uint8_t>(_part == virusLib::SINGLE ? 0 : _part));
 
 		sendSysEx(msg);
 
