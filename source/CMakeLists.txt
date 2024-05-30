@@ -34,6 +34,7 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	add_subdirectory(jucePluginLib)
 	add_subdirectory(juceUiLib)
 	add_subdirectory(jucePluginEditorLib)
+	add_subdirectory(jucePluginData)
 	
 	include(juce.cmake)
 endif()

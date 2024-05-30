@@ -2,6 +2,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "event.h"
+
 namespace juce
 {
 	class Button;
@@ -43,6 +45,9 @@ namespace pluginLib
 			uint8_t part = CurrentPart;
 			uint32_t onChangeListenerId = 0;
 		};
+
+		Event<const BoundParameter&> onBind;
+		Event<const BoundParameter&> onUnbind;
 
 		ParameterBinding(Controller& _controller) : m_controller(_controller)
 		{

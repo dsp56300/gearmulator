@@ -15,7 +15,7 @@ namespace pluginLib
 		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
 	}
 
-	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson)
+	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson), m_locking(*this)
 	{
 		if(!m_descriptions.isValid())
 		{
@@ -471,87 +471,6 @@ namespace pluginLib
 		const std::lock_guard l(m_pluginMidiOutLock);
         std::swap(m_pluginMidiOut, _events);
 		m_pluginMidiOut.clear();
-	}
-
-	bool Controller::lockRegion(const std::string& _id)
-	{
-		if(m_lockedRegions.find(_id) != m_lockedRegions.end())
-			return true;
-
-		if(m_descriptions.getRegions().find(_id) == m_descriptions.getRegions().end())
-			return false;
-
-		m_lockedRegions.insert(_id);
-		return true;
-	}
-
-	bool Controller::unlockRegion(const std::string& _id)
-	{
-		return m_lockedRegions.erase(_id);
-	}
-
-	const std::set<std::string>& Controller::getLockedRegions() const
-	{
-		return m_lockedRegions;
-	}
-
-	bool Controller::isRegionLocked(const std::string& _id)
-	{
-		return m_lockedRegions.find(_id) != m_lockedRegions.end();
-	}
-
-	std::unordered_set<std::string> Controller::getLockedParameterNames() const
-	{
-		if(m_lockedRegions.empty())
-			return {};
-
-		std::unordered_set<std::string> result;
-
-		for (const auto& name : m_lockedRegions)
-		{
-			const auto& it = m_descriptions.getRegions().find(name);
-			if(it == m_descriptions.getRegions().end())
-				continue;
-
-			const auto& region = it->second;
-			for (const auto& itParam : region.getParams())
-				result.insert(itParam.first);
-		}
-
-		return result;
-	}
-
-	std::unordered_set<const Parameter*> Controller::getLockedParameters(const uint8_t _part) const
-	{
-		const auto paramNames = getLockedParameterNames();
-
-		std::unordered_set<const Parameter*> results;
-
-		for (const auto& paramName : paramNames)
-		{
-			const auto idx = getParameterIndexByName(paramName);
-			assert(idx != InvalidParameterIndex);
-			const auto* p = getParameter(idx, _part);
-			assert(p != nullptr);
-			results.insert(p);
-		}
-
-		return results;
-	}
-
-	bool Controller::isParameterLocked(const std::string& _name) const
-	{
-		const auto& regions = getLockedRegions();
-		for (const auto& region : regions)
-		{
-			const auto& it = m_descriptions.getRegions().find(region);
-			if(it == m_descriptions.getRegions().end())
-				continue;
-
-			if(it->second.containsParameter(_name))
-				return true;
-		}
-		return false;
 	}
 
 	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const

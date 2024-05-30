@@ -1,12 +1,14 @@
 #pragma once
 
+#include "imagePool.h"
+#include "parameterOverlays.h"
+#include "types.h"
+
 #include "../juceUiLib/editor.h"
 
 #include "../synthLib/buildconfig.h"
 
 #include "../jucePluginLib/event.h"
-
-#include "types.h"
 
 namespace pluginLib
 {
@@ -76,6 +78,8 @@ namespace jucePluginEditorLib
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
 		bool setParameters(const std::map<std::string, uint8_t>& _paramValues) const;
 
+		auto& getImagePool() { return m_imagePool; }
+
 	private:
 		bool keyPressed(const juce::KeyPress& _key) override;
 
@@ -100,5 +104,7 @@ namespace jucePluginEditorLib
 		std::vector<uint8_t> m_instanceConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
+		ImagePool m_imagePool;
+		ParameterOverlays m_overlays;
 	};
 }

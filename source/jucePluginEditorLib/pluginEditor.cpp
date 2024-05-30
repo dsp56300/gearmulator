@@ -18,6 +18,7 @@ namespace jucePluginEditorLib
 		, m_processor(_processor)
 		, m_binding(_binding)
 		, m_skinFolder(std::move(_skinFolder))
+		, m_overlays(*this, _binding)
 	{
 		showDisclaimer();
 	}
@@ -261,7 +262,7 @@ namespace jucePluginEditorLib
 		if(!param)
 			return false;
 
-		const auto& controller = m_processor.getController();
+		auto& controller = m_processor.getController();
 
 		const auto& regions = controller.getParameterDescriptions().getRegions();
 		const auto paramRegionIds = controller.getRegionIdsForParameter(param);
@@ -270,6 +271,24 @@ namespace jucePluginEditorLib
 			return false;
 
 		juce::PopupMenu menu;
+
+		for (const auto& regionId : paramRegionIds)
+		{
+			const auto& regionName = regions.find(regionId)->second.getName();
+
+			const auto isLocked = controller.getParameterLocking().isRegionLocked(regionId);
+
+			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked]
+			{
+				auto& locking = m_processor.getController().getParameterLocking();
+				if(isLocked)
+					locking.unlockRegion(regionId);
+				else
+					locking.lockRegion(regionId);
+			});
+		}
+
+		menu.addSeparator();
 
 		for (const auto& regionId : paramRegionIds)
 		{

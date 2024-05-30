@@ -6,6 +6,8 @@
 
 #include "juce_audio_processors/juce_audio_processors.h"
 
+#include "event.h"
+
 namespace pluginLib
 {
 	struct Description;
@@ -25,7 +27,9 @@ namespace pluginLib
 			Derived
 		};
 
-		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int uniqueId);
+		Event<Parameter*, bool> onLockedChanged;
+
+		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId);
 
         juce::Value &getValueObject() { return m_value; }
         const juce::Value &getValueObject() const { return m_value; }
@@ -68,6 +72,9 @@ namespace pluginLib
 			return m_desc.valueList.valueToText(juce::roundToInt(v));
 		}
 
+		void setLocked(bool _locked);
+		bool isLocked() const { return m_isLocked; }
+
 		// allow 'injecting' additional code for specific parameter.
 		// eg. multi/single value change requires triggering more logic.
 		std::list<std::pair<uint32_t, std::function<void()>>> onValueChanged;
@@ -94,7 +101,7 @@ namespace pluginLib
 		static uint64_t milliseconds();
 		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
 
-        Controller &m_ctrl;
+        Controller& m_ctrl;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
 		const uint8_t m_partNum;
@@ -108,5 +115,6 @@ namespace pluginLib
 		uint32_t m_rateLimit = 0;		// milliseconds
 		uint64_t m_lastSendTime = 0;
 		uint32_t m_uniqueDelayCallbackId = 0;
+		bool m_isLocked = false;
     };
 }

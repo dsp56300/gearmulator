@@ -262,16 +262,18 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		juce::PopupMenu lockRegions;
 
+		auto& locking = m_processor.getController().getParameterLocking();
+
 		lockRegions.addItem("Unlock All", [&]
 		{
 			for (const auto& region : regions)
-				m_processor.getController().unlockRegion(region.first);
+				locking.unlockRegion(region.first);
 		});
 
 		lockRegions.addItem("Lock All", [&]
 		{
 			for (const auto& region : regions)
-				m_processor.getController().lockRegion(region.first);
+				locking.lockRegion(region.first);
 		});
 
 		lockRegions.addSeparator();
@@ -284,12 +286,14 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 		for (const auto& region : sortedRegions)
 		{
-			lockRegions.addItem(region.second.getName(), true, m_processor.getController().isRegionLocked(region.first), [this, id=region.first]
+			lockRegions.addItem(region.second.getName(), true, m_processor.getController().getParameterLocking().isRegionLocked(region.first), [this, id=region.first]
 			{
-				if(m_processor.getController().isRegionLocked(id))
-					m_processor.getController().unlockRegion(id);
+				auto& locking = m_processor.getController().getParameterLocking();
+
+				if(locking.isRegionLocked(id))
+					locking.unlockRegion(id);
 				else
-					m_processor.getController().lockRegion(id);
+					locking.lockRegion(id);
 			});
 
 			if(++count == 16)

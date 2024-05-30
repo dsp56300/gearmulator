@@ -81,7 +81,7 @@ namespace pluginLib
 		std::map<ListenerId, Callback> m_listeners;
 
 		bool m_hasRetainedValue = false;
-		std::tuple<Ts...> m_retainedValue;
+		std::tuple<std::remove_reference_t<Ts>...> m_retainedValue;
 	};
 
 	template<typename ...Ts>

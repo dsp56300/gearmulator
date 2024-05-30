@@ -2,12 +2,12 @@
 
 #include "parameterdescriptions.h"
 #include "parameter.h"
+#include "parameterlocking.h"
+#include "softknob.h"
 
 #include "../synthLib/midiTypes.h"
 
 #include <string>
-
-#include "softknob.h"
 
 namespace juce
 {
@@ -68,13 +68,8 @@ namespace pluginLib
         void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
 		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
 
-		bool lockRegion(const std::string& _id);
-		bool unlockRegion(const std::string& _id);
-		const std::set<std::string>& getLockedRegions() const;
-		bool isRegionLocked(const std::string& _id);
-		std::unordered_set<std::string> getLockedParameterNames() const;
-		std::unordered_set<const Parameter*> getLockedParameters(uint8_t _part) const;
-		bool isParameterLocked(const std::string& _name) const;
+		ParameterLocking& getParameterLocking() { return m_locking; }
+
 		std::set<std::string> getRegionIdsForParameter(const Parameter* _param) const;
 		std::set<std::string> getRegionIdsForParameter(const std::string& _name) const;
 
@@ -143,6 +138,6 @@ namespace pluginLib
 		std::map<ParamIndex, ParameterList> m_synthParams; // exposed and managed by audio processor
 		std::array<ParameterList, 16> m_paramsByParamType;
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
-		std::set<std::string> m_lockedRegions;
+		ParameterLocking m_locking;
 	};
 }
