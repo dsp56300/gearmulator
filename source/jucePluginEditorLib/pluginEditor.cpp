@@ -257,8 +257,129 @@ namespace jucePluginEditorLib
 		if(!_event || !_event->originalComponent)
 			return false;
 
-		// TODO
-		return false;
+		const auto* param = m_binding.getBoundParameter(_event->originalComponent);
+		if(!param)
+			return false;
+
+		const auto& controller = m_processor.getController();
+
+		const auto& regions = controller.getParameterDescriptions().getRegions();
+		const auto paramRegionIds = controller.getRegionIdsForParameter(param);
+
+		if(paramRegionIds.empty())
+			return false;
+
+		juce::PopupMenu menu;
+
+		for (const auto& regionId : paramRegionIds)
+		{
+			const auto& regionName = regions.find(regionId)->second.getName();
+
+			menu.addItem(std::string("Copy region '") + regionName + "'", [this, regionId]
+			{
+				copyRegionToClipboard(regionId);
+			});
+		}
+
+		const auto data = pluginLib::Clipboard::getDataFromString(m_processor, juce::SystemClipboard::getTextFromClipboard().toStdString());
+
+		if(!data.parameterValuesByRegion.empty())
+		{
+			bool haveSeparator = false;
+
+			for (const auto& paramRegionId : paramRegionIds)
+			{
+				const auto it = data.parameterValuesByRegion.find(paramRegionId);
+
+				if(it == data.parameterValuesByRegion.end())
+					continue;
+
+				// if region is not fully covered, skip it
+				const auto& region = regions.find(it->first)->second;
+				if(it->second.size() < region.getParams().size())
+					continue;
+
+				const auto& parameterValues = it->second;
+
+				if(!haveSeparator)
+				{
+					menu.addSeparator();
+					haveSeparator = true;
+				}
+
+				const auto& regionName = regions.find(paramRegionId)->second.getName();
+
+				menu.addItem("Paste region '" + regionName + "'", [this, parameterValues]
+				{
+					setParameters(parameterValues);
+				});
+			}
+
+			menu.addSeparator();
+
+			const auto& desc = param->getDescription();
+			const auto& paramName = desc.name;
+
+			const auto itParam = data.parameterValues.find(paramName);
+
+			if(itParam != data.parameterValues.end())
+			{
+				const auto& paramValue = itParam->second;
+
+				const auto& valueText = desc.valueList.valueToText(paramValue);
+
+				menu.addItem("Paste value '" + valueText + "' for parameter '" + desc.displayName + "'", [this, paramName, paramValue]
+				{
+					pluginLib::Clipboard::Data::ParameterValues params;
+					params.insert({paramName, paramValue});
+					setParameters(params);
+				});
+			}
+		}
+
+		menu.showMenuAsync({});
+
+		return true;
+	}
+
+	bool Editor::copyRegionToClipboard(const std::string& _regionId) const
+	{
+		const auto& regions = m_processor.getController().getParameterDescriptions().getRegions();
+		const auto it = regions.find(_regionId);
+		if(it == regions.end())
+			return false;
+
+		const auto& region = it->second;
+
+		const auto& params = region.getParams();
+
+		std::vector<std::string> paramsList;
+		paramsList.reserve(params.size());
+
+		for (const auto& p : params)
+			paramsList.push_back(p.first);
+
+		return copyParametersToClipboard(paramsList, _regionId);
+	}
+
+	bool Editor::copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId) const
+	{
+		const auto result = pluginLib::Clipboard::parametersToString(m_processor, _params, _regionId);
+
+		if(result.empty())
+			return false;
+
+		juce::SystemClipboard::copyTextToClipboard(result);
+
+		return true;
+	}
+
+	bool Editor::setParameters(const std::map<std::string, uint8_t>& _paramValues) const
+	{
+		if(_paramValues.empty())
+			return false;
+
+		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::ChangedBy::Ui);
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

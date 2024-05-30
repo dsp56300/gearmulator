@@ -72,6 +72,10 @@ namespace jucePluginEditorLib
 		virtual void openMenu(juce::MouseEvent* _event);
 		virtual bool openContextMenuForParameter(const juce::MouseEvent* _event);
 
+		bool copyRegionToClipboard(const std::string& _regionId) const;
+		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
+		bool setParameters(const std::map<std::string, uint8_t>& _paramValues) const;
+
 	private:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

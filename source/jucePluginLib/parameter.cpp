@@ -155,6 +155,12 @@ namespace pluginLib
 		m_changingDerivedValues = false;
     }
 
+    void Parameter::setUnnormalizedValue(const int _newValue, const ChangedBy _origin)
+    {
+		const auto v = convertTo0to1(static_cast<float>(_newValue));
+		setValue(v, _origin);
+    }
+
     void Parameter::setValueFromSynth(int newValue, const bool notifyHost, ChangedBy _origin)
 	{
 		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
