@@ -3,7 +3,7 @@
 #include "version.h"
 #include "versionDateTime.h"
 
-namespace jucePluginEditorLib
+namespace pluginLib
 {
 	std::string Version::getVersionString()
 	{

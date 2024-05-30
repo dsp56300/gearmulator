@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
-configure_file(${CMAKE_CURRENT_LIST_DIR}/version.h.in ${CMAKE_CURRENT_LIST_DIR}/version.h)
-
 set(SOURCES
-	createVersionDateTime.cmake
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
 	lcd.cpp lcd.h
@@ -15,10 +12,7 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
-	pluginVersion.cpp pluginVersion.h
 	types.h
-	version.h.in version.h
-	versionDateTime.h.in versionDateTime.h
 )
 
 set(SOURCES_PM
@@ -57,9 +51,3 @@ target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib)
 target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")
-
-add_custom_command(
-	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/_doesnotexist_versionDateTime.h	# fake, causes regeneration for every build, exactly what we want
-	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h	# valid
-	COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/createVersionDateTime.cmake"
-)

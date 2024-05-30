@@ -10,7 +10,7 @@
 #include "../jucePluginLib/parameterbinding.h"
 
 #include "../jucePluginEditorLib/patchmanager/savepatchdesc.h"
-#include "../jucePluginEditorLib/pluginVersion.h"
+#include "../jucePluginLib/pluginVersion.h"
 
 #include "../synthLib/os.h"
 
@@ -109,13 +109,13 @@ namespace genericVirusUI
 
 		if(auto* versionInfo = findComponentT<juce::Label>("VersionInfo", false))
 		{
-		    const std::string message = "DSP 56300 Emulator Version " + jucePluginEditorLib::Version::getVersionString() + " - " + jucePluginEditorLib::Version::getVersionDateTime();
+		    const std::string message = "DSP 56300 Emulator Version " + pluginLib::Version::getVersionString() + " - " + pluginLib::Version::getVersionDateTime();
 			versionInfo->setText(message, juce::dontSendNotification);
 		}
 
 		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
 		{
-			versionNumber->setText(jucePluginEditorLib::Version::getVersionString(), juce::dontSendNotification);
+			versionNumber->setText(pluginLib::Version::getVersionString(), juce::dontSendNotification);
 		}
 
 		m_deviceModel = findComponentT<juce::Label>("DeviceModel", false);

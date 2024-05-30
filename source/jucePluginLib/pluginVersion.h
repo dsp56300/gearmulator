@@ -1,7 +1,7 @@
 #pragma once
 #include <string>
 
-namespace jucePluginEditorLib
+namespace pluginLib
 {
 	class Version
 	{
