@@ -39,15 +39,15 @@ namespace pluginLib
 
 		struct BoundParameter
 		{
-			pluginLib::Parameter* parameter = nullptr;
+			Parameter* parameter = nullptr;
 			juce::Component* component = nullptr;
 			uint32_t type = 0xffffffff;
 			uint8_t part = CurrentPart;
 			uint32_t onChangeListenerId = 0;
 		};
 
-		Event<const BoundParameter&> onBind;
-		Event<const BoundParameter&> onUnbind;
+		Event<BoundParameter> onBind;
+		Event<BoundParameter> onUnbind;
 
 		ParameterBinding(Controller& _controller) : m_controller(_controller)
 		{
@@ -88,5 +88,5 @@ namespace pluginLib
 		std::map<const juce::Component*, pluginLib::Parameter*> m_boundComponents;
 		std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
 		uint32_t m_nextListenerId = 100000;
-		};
+	};
 }
