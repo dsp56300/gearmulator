@@ -4,6 +4,7 @@ project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
+	imagePool.cpp imagePool.h
 	lcd.cpp lcd.h
 	led.cpp led.h
 	midiPorts.cpp midiPorts.h
@@ -47,7 +48,7 @@ target_sources(jucePluginEditorLib PRIVATE ${SOURCES} ${SOURCES_PM})
 source_group("source" FILES ${SOURCES})
 source_group("source\\patchmanager" FILES ${SOURCES_PM})
 
-target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib)
+target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData)
 target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")
