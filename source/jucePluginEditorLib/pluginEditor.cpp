@@ -3,6 +3,7 @@
 #include "pluginProcessor.h"
 
 #include "../jucePluginLib/parameterbinding.h"
+#include "../jucePluginLib/pluginVersion.h"
 
 #include "../synthLib/os.h"
 #include "../synthLib/sysexToMidi.h"
@@ -243,7 +244,7 @@ namespace jucePluginEditorLib
 		const auto time = juce::Time::getCurrentTime();
 
 		std::stringstream ss;
-		ss << getProcessor().getProperties().name << " - Patch copied at " << time.formatted("%Y.%m.%d %H:%M") << time.getUTCOffsetString(true);
+		ss << getProcessor().getProperties().name << " " << pluginLib::Version::getVersionString() << " - Patch copied at " << time.formatted("%Y.%m.%d %H:%M") << time.getUTCOffsetString(true);
 		ss << '\n';
 		ss << "Patch '" << p->getName() << "' data:\n";
 		ss << "```\n";
