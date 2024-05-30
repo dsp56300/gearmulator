@@ -275,6 +275,24 @@ namespace jucePluginEditorLib
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
 
+			const auto isLocked = controller.getParameterLocking().isRegionLocked(regionId);
+
+			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked]
+			{
+				auto& locking = m_processor.getController().getParameterLocking();
+				if(isLocked)
+					locking.unlockRegion(regionId);
+				else
+					locking.lockRegion(regionId);
+			});
+		}
+
+		menu.addSeparator();
+
+		for (const auto& regionId : paramRegionIds)
+		{
+			const auto& regionName = regions.find(regionId)->second.getName();
+
 			menu.addItem(std::string("Copy region '") + regionName + "'", [this, regionId]
 			{
 				copyRegionToClipboard(regionId);
