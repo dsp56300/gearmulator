@@ -2,6 +2,7 @@
 
 #include <functional>
 #include <map>
+#include <cassert>
 
 namespace pluginLib
 {
@@ -93,11 +94,13 @@ namespace pluginLib
 
 		static constexpr MyListenerId InvalidListenerId = MyEvent::InvalidListenerId;
 
-		explicit EventListener(MyEvent& _event) : m_event(_event), m_listenerId(InvalidListenerId)
+		EventListener() = default;
+
+		explicit EventListener(MyEvent& _event) : m_event(&_event), m_listenerId(InvalidListenerId)
 		{
 		}
 
-		EventListener(MyEvent& _event, const MyCallback& _callback) : m_event(_event), m_listenerId(_event.addListener(_callback))
+		EventListener(MyEvent& _event, const MyCallback& _callback) : m_event(&_event), m_listenerId(_event.addListener(_callback))
 		{
 		}
 
@@ -108,17 +111,58 @@ namespace pluginLib
 		
 		EventListener(const EventListener&) = delete;
 		EventListener& operator = (const EventListener&) = delete;
-		EventListener& operator = (EventListener&& _source) = delete;
+
+		EventListener& operator = (EventListener&& _source) noexcept
+		{
+			if(&_source == this)
+				return *this;
+
+			removeListener();
+
+			m_event = _source.m_event;
+			m_listenerId = _source.m_listenerId;
+
+			_source.m_listenerId = InvalidListenerId;
+
+			return *this;
+		}
 
 		~EventListener()
 		{
 			removeListener();
 		}
 
-		EventListener& operator = (const MyCallback& _callback)
+		void set(const MyCallback& _func)
 		{
 			removeListener();
-			m_listenerId = m_event.addListener(_callback);
+			assert(m_event);
+			if(m_event)
+				m_listenerId = m_event->addListener(_func);
+		}
+
+		void set(Event<Ts...>& _event, const MyCallback& _func)
+		{
+			removeListener();
+			m_event = &_event;
+			m_listenerId = _event.addListener(_func);
+		}
+
+		bool isBound() const { return m_listenerId != InvalidListenerId; }
+		bool isValid() const { return m_event != nullptr; }
+
+		EventListener& operator = (const MyCallback& _callback)
+		{
+			set(_callback);
+			return *this;
+		}
+
+		EventListener& operator = (Event<Ts...>& _event) noexcept
+		{
+			if(&_event == m_event)
+				return *this;
+
+			removeListener();
+			m_event = &_event;
 			return *this;
 		}
 
@@ -128,11 +172,11 @@ namespace pluginLib
 			if(m_listenerId == InvalidListenerId)
 				return;
 
-			m_event.removeListener(m_listenerId);
+			m_event->removeListener(m_listenerId);
 			m_listenerId = InvalidListenerId;
 		}
 
-		MyEvent& m_event;
-		MyListenerId m_listenerId;
+		MyEvent* m_event = nullptr;
+		MyListenerId m_listenerId = InvalidListenerId;
 	};
 }
