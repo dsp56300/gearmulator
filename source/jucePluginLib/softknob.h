@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "parameter.h"
+#include "parameterlistener.h"
 
 namespace pluginLib
 {
@@ -41,8 +41,8 @@ namespace pluginLib
 		Parameter* m_targetSelect = nullptr;
 		Parameter* m_targetParam = nullptr;
 
-		ParameterValueChangeListener m_sourceParamListener;
-		ParameterValueChangeListener m_targetSelectListener;
-		ParameterValueChangeListener m_targetParamListener;
+		ParameterListener m_sourceParamListener;
+		ParameterListener m_targetSelectListener;
+		ParameterListener m_targetParamListener;
 	};
 }

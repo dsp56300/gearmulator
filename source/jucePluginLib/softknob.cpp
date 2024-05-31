@@ -27,12 +27,12 @@ namespace pluginLib
 		m_targetSelect = _controller.getParameter(idxTargetSelect, _part);
 		assert(m_targetSelect);
 
-		m_targetSelectListener.set(m_targetSelect->onValueChanged, [this](auto*)
+		m_targetSelectListener.set(m_targetSelect, [this](auto*)
 		{
 			onTargetChanged();
 		});
 
-		m_sourceParamListener.set(m_sourceParam->onValueChanged,[this](auto*)
+		m_sourceParamListener.set(m_sourceParam, [this](auto*)
 		{
 			onSourceValueChanged();
 		});
@@ -95,7 +95,7 @@ namespace pluginLib
 		if(!m_targetParam)
 			return;
 
-		m_targetParamListener.set(m_targetParam->onValueChanged, [this](pluginLib::Parameter*)
+		m_targetParamListener.set(m_targetParam, [this](pluginLib::Parameter*)
 		{
 			onTargetValueChanged();
 		});

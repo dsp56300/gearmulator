@@ -3,7 +3,7 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "event.h"
-#include "parameter.h"
+#include "parameterlistener.h"
 
 namespace juce
 {
@@ -44,7 +44,7 @@ namespace pluginLib
 			juce::Component* component = nullptr;
 			uint32_t type = 0xffffffff;
 			uint8_t part = CurrentPart;
-			size_t onChangeListenerId = ParameterValueChangeListener::InvalidListenerId;
+			size_t onChangeListenerId = ParameterListener::InvalidListenerId;
 		};
 
 		Event<BoundParameter> onBind;

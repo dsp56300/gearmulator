@@ -27,7 +27,7 @@ namespace jucePluginEditorLib
 		{
 			for (const auto& param : params.second)
 			{
-				m_boundParameters.insert({param, pluginLib::EventListener(param->onValueChanged, [this](const pluginLib::Parameter* _param)
+				m_boundParameters.insert({param, pluginLib::ParameterListener(param, [this](const pluginLib::Parameter* _param)
 				{
 					if (_param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
 						_param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)

@@ -289,10 +289,10 @@ namespace pluginLib
 		if(button != nullptr)
 			button->getToggleStateValue().referTo(juce::Value());
 
-		if(_b.onChangeListenerId != ParameterValueChangeListener::InvalidListenerId)
+		if(_b.onChangeListenerId != ParameterListener::InvalidListenerId)
 		{
 			_b.parameter->onValueChanged.removeListener(_b.onChangeListenerId);
-			_b.onChangeListenerId = ParameterValueChangeListener::InvalidListenerId;
+			_b.onChangeListenerId = ParameterListener::InvalidListenerId;
 		}
 	}
 

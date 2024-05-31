@@ -15,6 +15,7 @@ set(SOURCES
 	parameterdescription.cpp parameterdescription.h
 	parameterdescriptions.cpp parameterdescriptions.h
 	parameterlink.cpp parameterlink.h
+	parameterlistener.cpp parameterlistener.h
 	parameterlocking.cpp parameterlocking.h
 	parameterregion.cpp parameterregion.h
 	parametervaluelist.cpp parametervaluelist.h
