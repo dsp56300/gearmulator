@@ -172,6 +172,11 @@ void Controller::onStateLoaded()
 {
 }
 
+uint8_t Controller::getPartCount()
+{
+	return 8;
+}
+
 std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 {
     std::string name;
