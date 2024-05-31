@@ -10,8 +10,6 @@
 
 namespace pluginLib
 {
-	struct Description;
-
 	class Controller;
 
 	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
