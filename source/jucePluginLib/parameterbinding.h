@@ -3,6 +3,7 @@
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "event.h"
+#include "parameter.h"
 
 namespace juce
 {
@@ -43,7 +44,7 @@ namespace pluginLib
 			juce::Component* component = nullptr;
 			uint32_t type = 0xffffffff;
 			uint8_t part = CurrentPart;
-			uint32_t onChangeListenerId = 0;
+			size_t onChangeListenerId = ParameterValueChangeListener::InvalidListenerId;
 		};
 
 		Event<BoundParameter> onBind;
@@ -76,7 +77,7 @@ namespace pluginLib
 		void removeMouseListener(juce::Slider& _slider);
 
 		void addBinding(const BoundParameter& _boundParameter);
-		void disableBinding(const BoundParameter& _b);
+		void disableBinding(BoundParameter& _b);
 
 		Controller& m_controller;
 
@@ -87,6 +88,5 @@ namespace pluginLib
 		std::map<const pluginLib::Parameter*, juce::Component*> m_boundParameters;
 		std::map<const juce::Component*, pluginLib::Parameter*> m_boundComponents;
 		std::map<juce::Slider*, MouseListener*> m_sliderMouseListeners;
-		uint32_t m_nextListenerId = 100000;
 	};
 }
