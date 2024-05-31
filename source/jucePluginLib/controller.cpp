@@ -15,7 +15,11 @@ namespace pluginLib
 		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
 	}
 
-	Controller::Controller(pluginLib::Processor& _processor, const std::string& _parameterDescJson) : m_processor(_processor), m_descriptions(_parameterDescJson), m_locking(*this)
+	Controller::Controller(Processor& _processor, const std::string& _parameterDescJson)
+		: m_processor(_processor)
+		, m_descriptions(_parameterDescJson)
+		, m_locking(*this)
+		, m_parameterLinks(*this)
 	{
 		if(!m_descriptions.isValid())
 		{

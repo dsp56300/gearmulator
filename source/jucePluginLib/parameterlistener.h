@@ -16,6 +16,7 @@ namespace pluginLib
 		using Callback = Base::MyCallback;
 
 		ParameterListener() = default;
+		ParameterListener(Parameter* _p);
 		ParameterListener(Parameter* _p, const Callback& _callback);
 
 		void set(Parameter* _parameter, const Callback& _callback);

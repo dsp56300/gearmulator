@@ -274,6 +274,8 @@ namespace jucePluginEditorLib
 
 		juce::PopupMenu menu;
 
+		// Lock / Unlock
+
 		for (const auto& regionId : paramRegionIds)
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
@@ -290,6 +292,8 @@ namespace jucePluginEditorLib
 			});
 		}
 
+		// Copy to clipboard
+
 		menu.addSeparator();
 
 		for (const auto& regionId : paramRegionIds)
@@ -301,6 +305,8 @@ namespace jucePluginEditorLib
 				copyRegionToClipboard(regionId);
 			});
 		}
+
+		// Paste from clipboard
 
 		const auto data = pluginLib::Clipboard::getDataFromString(m_processor, juce::SystemClipboard::getTextFromClipboard().toStdString());
 

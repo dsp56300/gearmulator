@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "parameterlinks.h"
+
 namespace juce
 {
 	class AudioProcessor;
@@ -70,6 +72,7 @@ namespace pluginLib
 		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
 
 		ParameterLocking& getParameterLocking() { return m_locking; }
+		ParameterLinks& getParameterLinks() { return m_parameterLinks; }
 
 		std::set<std::string> getRegionIdsForParameter(const Parameter* _param) const;
 		std::set<std::string> getRegionIdsForParameter(const std::string& _name) const;
@@ -140,5 +143,6 @@ namespace pluginLib
 		std::array<ParameterList, 16> m_paramsByParamType;
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 		ParameterLocking m_locking;
+		ParameterLinks m_parameterLinks;
 	};
 }

@@ -97,8 +97,10 @@ namespace jucePluginEditorLib
 	void ParameterOverlay::updateOverlays()
 	{
 		const auto isLocked = m_parameter != nullptr && m_parameter->isLocked();
+		const auto isLinked = m_parameter != nullptr && (m_parameter->getLinkState() & pluginLib::Source);
 
 		toggleOverlay(m_imageLock, ImagePool::Type::Lock, isLocked);
+		toggleOverlay(m_imageLock, ImagePool::Type::Link, isLinked);
 	}
 
 	void ParameterOverlay::setParameter(pluginLib::Parameter* _parameter)
@@ -109,7 +111,9 @@ namespace jucePluginEditorLib
 		if(m_parameter)
 		{
 			m_parameter->onLockedChanged.removeListener(m_parameterLockChangedListener);
+			m_parameter->onLinkStateChanged.removeListener(m_parameterLinkChangedListener);
 			m_parameterLockChangedListener = InvalidListenerId;
+			m_parameterLinkChangedListener = InvalidListenerId;
 		}
 
 		m_parameter = _parameter;
@@ -117,6 +121,10 @@ namespace jucePluginEditorLib
 		if(m_parameter)
 		{
 			m_parameterLockChangedListener = m_parameter->onLockedChanged.addListener([this](pluginLib::Parameter*, const bool&)
+			{
+				updateOverlays();
+			});
+			m_parameterLinkChangedListener = m_parameter->onLinkStateChanged.addListener([this](pluginLib::Parameter*, const pluginLib::ParameterLinkType&)
 			{
 				updateOverlays();
 			});

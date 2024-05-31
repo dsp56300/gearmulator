@@ -43,6 +43,7 @@ namespace jucePluginEditorLib
 		pluginLib::Parameter* m_parameter = nullptr;
 
 		size_t m_parameterLockChangedListener = InvalidListenerId;
+		size_t m_parameterLinkChangedListener = InvalidListenerId;
 
 		juce::DrawableImage* m_imageLock = nullptr;
 	};

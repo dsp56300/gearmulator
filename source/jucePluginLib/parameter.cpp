@@ -121,6 +121,22 @@ namespace pluginLib
 	    m_rateLimit = _ms;
     }
 
+    void Parameter::setLinkState(const ParameterLinkType _type)
+    {
+		const auto prev = m_linkType;
+		m_linkType = static_cast<ParameterLinkType>(m_linkType | _type);
+		if(m_linkType != prev)
+			onLinkStateChanged(this, m_linkType);
+    }
+
+    void Parameter::clearLinkState(const ParameterLinkType _type)
+    {
+		const auto prev = m_linkType;
+		m_linkType = static_cast<ParameterLinkType>(m_linkType & ~_type);
+		if(m_linkType != prev)
+			onLinkStateChanged(this, m_linkType);
+    }
+
     bool Parameter::isMetaParameter() const
     {
 	    return !m_derivedParameters.empty();
