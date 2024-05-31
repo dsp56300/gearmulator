@@ -101,7 +101,7 @@ namespace pluginLib
 		{
 		}
 
-		EventListener(EventListener&& _listener) noexcept : m_event(_listener), m_listenerId(_listener.m_listenerId)
+		EventListener(EventListener&& _listener) noexcept : m_event(_listener.m_event), m_listenerId(_listener.m_listenerId)
 		{
 			_listener.m_listenerId = InvalidListenerId;
 		}
