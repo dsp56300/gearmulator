@@ -119,4 +119,6 @@ namespace pluginLib
 		uint32_t m_uniqueDelayCallbackId = 0;
 		bool m_isLocked = false;
     };
+
+	using ParameterValueChangeListener = EventListener<Parameter*>;
 }

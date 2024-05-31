@@ -8,11 +8,6 @@
 
 namespace genericVirusUI
 {
-	namespace
-	{
-		constexpr uint32_t g_listenerId = 0xaa;
-	}
-
 	ArpUserPattern::ArpUserPattern(const VirusEditor& _editor) : m_controller(_editor.getController())
 	{
 		bindParameters();
@@ -20,7 +15,7 @@ namespace genericVirusUI
 
 	void ArpUserPattern::paint(juce::Graphics& g)
 	{
-		if(!m_patternLength)
+		if(!m_patternLength.first)
 			return;
 
 		if(m_gradientStrength <= 0.0f)
@@ -50,13 +45,13 @@ namespace genericVirusUI
 
 		float x = 0.0f;
 
-		for(int i=0; i<std::min(m_patternLength->getUnnormalizedValue() + 1, static_cast<int>(m_steps.size())); ++i)
+		for(int i=0; i<std::min(m_patternLength.first->getUnnormalizedValue() + 1, static_cast<int>(m_steps.size())); ++i)
 		{
-			const auto stepW = m_steps[i].length->getValue() * maxstepW;
-			const auto stepH = m_steps[i].velocity->getValue() * h;
+			const auto stepW = m_steps[i].length.first->getValue() * maxstepW;
+			const auto stepH = m_steps[i].velocity.first->getValue() * h;
 			const auto y = h - stepH;
 
-			g.setGradientFill(m_steps[i].bitfield->getUnnormalizedValue() > 0 ? rectGradientActive : rectGradientInactive);
+			g.setGradientFill(m_steps[i].bitfield.first->getUnnormalizedValue() > 0 ? rectGradientActive : rectGradientInactive);
 			g.fillRect(x, y, stepW, stepH);
 
 			x += maxstepW;
@@ -83,16 +78,16 @@ namespace genericVirusUI
 		m_patternLength = bindParameter("Arpeggiator/UserPatternLength");
 	}
 
-	void ArpUserPattern::unbindParameter(pluginLib::Parameter*& _parameter)
+	void ArpUserPattern::unbindParameter(BoundParam& _parameter)
 	{
-		assert(_parameter);
-		_parameter->removeListener(g_listenerId);
-		_parameter = nullptr;
+		assert(_parameter.first);
+		_parameter.second.removeListener();
+		_parameter.first = nullptr;
 	}
 
 	void ArpUserPattern::unbindParameters()
 	{
-		if(!m_patternLength)
+		if(!m_patternLength.first)
 			return;
 
 		unbindParameter(m_patternLength);
@@ -105,19 +100,17 @@ namespace genericVirusUI
 		}
 	}
 
-	pluginLib::Parameter* ArpUserPattern::bindParameter(const std::string& _name)
+	ArpUserPattern::BoundParam ArpUserPattern::bindParameter(const std::string& _name)
 	{
 		const auto idx = m_controller.getParameterIndexByName(_name);
 		assert(idx != pluginLib::Controller::InvalidParameterIndex);
 		auto* p = m_controller.getParameter(idx, m_controller.getCurrentPart());
 		assert(p);
 
-		p->onValueChanged.emplace_back(g_listenerId, [this]()
+		return std::make_pair(p, pluginLib::ParameterValueChangeListener(p->evValueChanged, [this](pluginLib::Parameter*)
 		{
 			onParameterChanged();
-		});
-
-		return p;
+		}));
 	}
 
 	void ArpUserPattern::onParameterChanged()

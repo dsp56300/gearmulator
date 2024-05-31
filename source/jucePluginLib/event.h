@@ -3,6 +3,7 @@
 #include <functional>
 #include <map>
 #include <cassert>
+#include <optional>
 
 namespace pluginLib
 {
@@ -47,6 +48,14 @@ namespace pluginLib
 		void removeListener(const ListenerId _id)
 		{
 			m_listeners.erase(_id);
+		}
+
+		std::optional<Callback> getListener(const ListenerId _id) const
+		{
+			const auto it = m_listeners.find(_id);
+			if(it != m_listeners.end())
+				return it->second;
+			return {};
 		}
 
 		void clear()
@@ -140,11 +149,32 @@ namespace pluginLib
 				m_listenerId = m_event->addListener(_func);
 		}
 
-		void set(Event<Ts...>& _event, const MyCallback& _func)
+		void set(MyEvent& _event, const MyCallback& _func)
 		{
 			removeListener();
 			m_event = &_event;
 			m_listenerId = _event.addListener(_func);
+		}
+
+		void set(MyEvent& _event)
+		{
+			if(&_event == m_event)
+				return;
+
+			if(isBound())
+			{
+				if(auto callback = m_event->getListener(m_listenerId))
+				{
+					m_event->removeListener(m_listenerId);
+					m_listenerId = _event.addListener(callback);
+				}
+				else
+				{
+					removeListener();
+				}
+			}
+
+			m_event = &_event;
 		}
 
 		bool isBound() const { return m_listenerId != InvalidListenerId; }
@@ -156,17 +186,12 @@ namespace pluginLib
 			return *this;
 		}
 
-		EventListener& operator = (Event<Ts...>& _event) noexcept
+		EventListener& operator = (MyEvent& _event) noexcept
 		{
-			if(&_event == m_event)
-				return *this;
-
-			removeListener();
-			m_event = &_event;
+			set(_event);
 			return *this;
 		}
 
-	private:
 		void removeListener()
 		{
 			if(m_listenerId == InvalidListenerId)
@@ -176,6 +201,7 @@ namespace pluginLib
 			m_listenerId = InvalidListenerId;
 		}
 
+	private:
 		MyEvent* m_event = nullptr;
 		MyListenerId m_listenerId = InvalidListenerId;
 	};
