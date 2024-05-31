@@ -26,6 +26,7 @@ namespace pluginLib
 		};
 
 		Event<Parameter*, bool> onLockedChanged;
+		Event<Parameter*> onValueChanged;
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId);
 
@@ -73,19 +74,11 @@ namespace pluginLib
 		void setLocked(bool _locked);
 		bool isLocked() const { return m_isLocked; }
 
-		// allow 'injecting' additional code for specific parameter.
-		// eg. multi/single value change requires triggering more logic.
-		std::list<std::pair<uint32_t, std::function<void()>>> onValueChanged;
-
-		Event<Parameter*> evValueChanged;
-
 		void addDerivedParameter(Parameter* _param);
 
 		int getUniqueId() const { return m_uniqueId; }
 
 		const std::set<Parameter*>& getDerivedParameters() { return m_derivedParameters; }
-
-		bool removeListener(uint32_t _id);
 
 		ChangedBy getChangeOrigin() const { return m_lastValueOrigin; }
 

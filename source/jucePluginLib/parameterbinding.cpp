@@ -171,7 +171,7 @@ namespace pluginLib
 			v->getValueObject().setValue(id - 1);
 		};
 
-		const auto listenerId = v->evValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
+		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
 		{
 			const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
@@ -291,7 +291,7 @@ namespace pluginLib
 
 		if(_b.onChangeListenerId != ParameterValueChangeListener::InvalidListenerId)
 		{
-			_b.parameter->evValueChanged.removeListener(_b.onChangeListenerId);
+			_b.parameter->onValueChanged.removeListener(_b.onChangeListenerId);
 			_b.onChangeListenerId = ParameterValueChangeListener::InvalidListenerId;
 		}
 	}

@@ -51,7 +51,7 @@ namespace Virus
 		auto* parameter = getParameter(paramIdx);
         if(parameter)
 		{
-			parameter->evValueChanged.addListener([this](pluginLib::Parameter*)
+			parameter->onValueChanged.addListener([this](pluginLib::Parameter*)
 			{
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);

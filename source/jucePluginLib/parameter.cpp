@@ -17,11 +17,7 @@ namespace pluginLib
     void Parameter::valueChanged(juce::Value &)
     {
 		sendToSynth();
-
-		for (const auto& func : onValueChanged)
-			func.second();
-
-		evValueChanged(this);
+		onValueChanged(this);
 	}
 
     void Parameter::setDerivedValue(const int _value, ChangedBy _origin, bool _notifyHost)
@@ -194,24 +190,6 @@ namespace pluginLib
 			p->setDerivedValue(newValue, _origin, notifyHost);
 
 		m_changingDerivedValues = false;
-	}
-
-	bool Parameter::removeListener(const uint32_t _id)
-	{
-		bool res = false;
-		for(auto it = onValueChanged.begin(); it !=onValueChanged.end();)
-		{
-			if(it->first == _id)
-			{
-				it = onValueChanged.erase(it);
-				res = true;
-			}
-			else
-			{
-				++it;
-			}
-		}
-		return res;
 	}
 
 	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)

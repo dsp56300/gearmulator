@@ -107,7 +107,7 @@ namespace genericVirusUI
 		auto* p = m_controller.getParameter(idx, m_controller.getCurrentPart());
 		assert(p);
 
-		return std::make_pair(p, pluginLib::ParameterValueChangeListener(p->evValueChanged, [this](pluginLib::Parameter*)
+		return std::make_pair(p, pluginLib::ParameterValueChangeListener(p->onValueChanged, [this](pluginLib::Parameter*)
 		{
 			onParameterChanged();
 		}));
