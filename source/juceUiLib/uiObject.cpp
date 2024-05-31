@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include "button.h"
+#include "slider.h"
 
 namespace genericUI
 {
@@ -232,7 +233,7 @@ namespace genericUI
 
 		if(hasComponent("rotary"))
 		{
-			createJuceObject<juce::Slider>(_editor);
+			createJuceObject<Slider>(_editor);
 		}
 		else if(hasComponent("image"))
 		{

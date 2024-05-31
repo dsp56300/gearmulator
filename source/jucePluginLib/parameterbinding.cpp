@@ -134,7 +134,7 @@ namespace pluginLib
 		uint32_t count = 0;
 
 		// we want our long menus to be split into columns of 16 rows each
-		// but only if we have have more entries than one and a half such column
+		// but only if we have more entries than one and a half such column
 		const uint32_t splitAt = (sortedValues.size() > 24) ? 16 : 0;
 
 		for (const auto &vs : sortedValues)
@@ -171,9 +171,7 @@ namespace pluginLib
 			v->getValueObject().setValue(id - 1);
 		};
 
-		const auto listenerId = m_nextListenerId++;
-
-		v->onValueChanged.emplace_back(listenerId, [this, &_combo, v]()
+		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
 		{
 			const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
@@ -268,7 +266,7 @@ namespace pluginLib
 		onBind(_boundParameter);
 	}
 
-	void ParameterBinding::disableBinding(const BoundParameter& _b)
+	void ParameterBinding::disableBinding(BoundParameter& _b)
 	{
 		onUnbind(_b);
 
@@ -291,13 +289,16 @@ namespace pluginLib
 		if(button != nullptr)
 			button->getToggleStateValue().referTo(juce::Value());
 
-		if(_b.onChangeListenerId)
-			_b.parameter->removeListener(_b.onChangeListenerId);
+		if(_b.onChangeListenerId != ParameterValueChangeListener::InvalidListenerId)
+		{
+			_b.parameter->onValueChanged.removeListener(_b.onChangeListenerId);
+			_b.onChangeListenerId = ParameterValueChangeListener::InvalidListenerId;
+		}
 	}
 
 	void ParameterBinding::clearBindings()
 	{
-		for (const auto& b : m_bindings)
+		for (auto& b : m_bindings)
 			disableBinding(b);
 		clear();
 	}
@@ -325,7 +326,7 @@ namespace pluginLib
 		m_disabledBindings.clear();
 		std::swap(m_bindings, m_disabledBindings);
 
-		for (const auto& b : m_disabledBindings)
+		for (auto& b : m_disabledBindings)
 			disableBinding(b);
 	}
 

@@ -10,9 +10,11 @@ namespace pluginLib
 	{
 	}
 
-	bool ParameterLocking::lockRegion(const std::string& _id)
+	bool ParameterLocking::lockRegion(const uint8_t _part, const std::string& _id)
 	{
-		if(m_lockedRegions.find(_id) != m_lockedRegions.end())
+		auto& lockedRegions = getLockedRegions(_part);
+
+		if(lockedRegions.find(_id) != lockedRegions.end())
 			return true;
 
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
@@ -22,16 +24,18 @@ namespace pluginLib
 		if(it == regions.end())
 			return false;
 
-		m_lockedRegions.insert(_id);
+		lockedRegions.insert(_id);
 
-		setParametersLocked(it->second, true);
+		setParametersLocked(it->second, _part, true);
 
 		return true;
 	}
 
-	bool ParameterLocking::unlockRegion(const std::string& _id)
+	bool ParameterLocking::unlockRegion(const uint8_t _part, const std::string& _id)
 	{
-		if(!m_lockedRegions.erase(_id))
+		auto& lockedRegions = getLockedRegions(_part);
+
+		if(!lockedRegions.erase(_id))
 			return false;
 
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
@@ -41,32 +45,33 @@ namespace pluginLib
 		if(it == regions.end())
 			return false;
 
-		m_lockedRegions.erase(_id);
+		lockedRegions.erase(_id);
 
-		setParametersLocked(it->second, false);
+		setParametersLocked(it->second, _part, false);
+
 		return true;
 	}
 
-	const std::set<std::string>& ParameterLocking::getLockedRegions() const
+	const std::set<std::string>& ParameterLocking::getLockedRegions(const uint8_t _part) const
 	{
-		return m_lockedRegions;
+		return m_lockedRegions[_part];
 	}
 
-	bool ParameterLocking::isRegionLocked(const std::string& _id)
+	bool ParameterLocking::isRegionLocked(const uint8_t _part, const std::string& _id)
 	{
-		return m_lockedRegions.find(_id) != m_lockedRegions.end();
+		return m_lockedRegions[_part].find(_id) != m_lockedRegions[_part].end();
 	}
 
-	std::unordered_set<std::string> ParameterLocking::getLockedParameterNames() const
+	std::unordered_set<std::string> ParameterLocking::getLockedParameterNames(const uint8_t _part) const
 	{
-		if(m_lockedRegions.empty())
+		if(m_lockedRegions[_part].empty())
 			return {};
 
 		std::unordered_set<std::string> result;
 
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
 
-		for (const auto& name : m_lockedRegions)
+		for (const auto& name : m_lockedRegions[_part])
 		{
 			const auto& it = regions.find(name);
 			if(it == regions.end())
@@ -82,7 +87,7 @@ namespace pluginLib
 
 	std::unordered_set<const Parameter*> ParameterLocking::getLockedParameters(const uint8_t _part) const
 	{
-		const auto paramNames = getLockedParameterNames();
+		const auto paramNames = getLockedParameterNames(_part);
 
 		std::unordered_set<const Parameter*> results;
 
@@ -98,11 +103,11 @@ namespace pluginLib
 		return results;
 	}
 
-	bool ParameterLocking::isParameterLocked(const std::string& _name) const
+	bool ParameterLocking::isParameterLocked(uint8_t _part, const std::string& _name) const
 	{
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
 
-		const auto& lockedRegions = getLockedRegions();
+		const auto& lockedRegions = getLockedRegions(_part);
 
 		for (const auto& region : lockedRegions)
 		{
@@ -116,21 +121,18 @@ namespace pluginLib
 		return false;
 	}
 
-	void ParameterLocking::setParametersLocked(const ParameterRegion& _parameterRegion, const bool _locked) const
+	void ParameterLocking::setParametersLocked(const ParameterRegion& _parameterRegion, const uint8_t _part, const bool _locked) const
 	{
 		for (const auto& param : _parameterRegion.getParams())
 		{
 			// if a region is unlocked but other regions still lock the same parameter, do nothing
-			if(!_locked && isParameterLocked(param.first))
+			if(!_locked && isParameterLocked(_part, param.first))
 				continue;
 
 			const auto idx = m_controller.getParameterIndexByName(param.first);
 
-			for(uint8_t part=0; part<16; ++part)
-			{
-				if(auto* p = m_controller.getParameter(idx, part))
-					p->setLocked(_locked);
-			}
+			if(auto* p = m_controller.getParameter(idx, _part))
+				p->setLocked(_locked);
 		}
 	}
 }

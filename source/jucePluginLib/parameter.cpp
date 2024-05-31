@@ -10,16 +10,14 @@ namespace pluginLib
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
-		m_range.interval = m_desc.step ? m_desc.step : (m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f);
+		m_range.interval = m_desc.step ? static_cast<float>(m_desc.step) : (m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f);
 		m_value.addListener(this);
     }
 
     void Parameter::valueChanged(juce::Value &)
     {
 		sendToSynth();
-
-		for (const auto& func : onValueChanged)
-			func.second();
+		onValueChanged(this);
 	}
 
     void Parameter::setDerivedValue(const int _value, ChangedBy _origin, bool _notifyHost)
@@ -192,24 +190,6 @@ namespace pluginLib
 			p->setDerivedValue(newValue, _origin, notifyHost);
 
 		m_changingDerivedValues = false;
-	}
-
-	bool Parameter::removeListener(const uint32_t _id)
-	{
-		bool res = false;
-		for(auto it = onValueChanged.begin(); it !=onValueChanged.end();)
-		{
-			if(it->first == _id)
-			{
-				it = onValueChanged.erase(it);
-				res = true;
-			}
-			else
-			{
-				++it;
-			}
-		}
-		return res;
 	}
 
 	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)

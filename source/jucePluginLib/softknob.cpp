@@ -16,10 +16,10 @@ namespace pluginLib
 		, m_part(_part)
 		, m_uniqueId(g_softKnobListenerId++)
 	{
-		m_param = _controller.getParameter(_parameterIndex, _part);
-		assert(m_param);
+		m_sourceParam = _controller.getParameter(_parameterIndex, _part);
+		assert(m_sourceParam);
 
-		const auto& desc = m_param->getDescription();
+		const auto& desc = m_sourceParam->getDescription();
 
 		const auto idxTargetSelect = _controller.getParameterIndexByName(desc.softKnobTargetSelect);
 		assert(idxTargetSelect != Controller::InvalidParameterIndex);
@@ -27,12 +27,12 @@ namespace pluginLib
 		m_targetSelect = _controller.getParameter(idxTargetSelect, _part);
 		assert(m_targetSelect);
 
-		m_targetSelect->onValueChanged.emplace_back(m_uniqueId, [this]()
+		m_targetSelectListener.set(m_targetSelect->onValueChanged, [this](auto*)
 		{
 			onTargetChanged();
 		});
 
-		m_param->onValueChanged.emplace_back(m_uniqueId, [this]()
+		m_sourceParamListener.set(m_sourceParam->onValueChanged,[this](auto*)
 		{
 			onSourceValueChanged();
 		});
@@ -43,8 +43,8 @@ namespace pluginLib
 	SoftKnob::~SoftKnob()
 	{
 		unbind();
-		m_param->removeListener(m_uniqueId);
-		m_targetSelect->removeListener(m_uniqueId);
+		m_sourceParamListener.reset();
+		m_targetSelectListener.reset();
 	}
 
 	void SoftKnob::onTargetChanged()
@@ -57,7 +57,7 @@ namespace pluginLib
 		if(!m_targetParam)
 			return;
 
-		const auto v = m_param->getValue();
+		const auto v = m_sourceParam->getValue();
 		m_targetParam->setValue(v, Parameter::ChangedBy::Derived);
 	}
 
@@ -65,14 +65,14 @@ namespace pluginLib
 	{
 		assert(m_targetParam);
 		const auto v = m_targetParam->getValue();
-		m_param->setValue(v, Parameter::ChangedBy::Derived);
+		m_sourceParam->setValue(v, Parameter::ChangedBy::Derived);
 	}
 
 	void SoftKnob::bind()
 	{
 		unbind();
 
-		const auto* valueList = m_controller.getParameterDescriptions().getValueList(m_param->getDescription().softKnobTargetList);
+		const auto* valueList = m_controller.getParameterDescriptions().getValueList(m_sourceParam->getDescription().softKnobTargetList);
 		if(!valueList)
 			return;
 
@@ -95,7 +95,7 @@ namespace pluginLib
 		if(!m_targetParam)
 			return;
 
-		m_targetParam->onValueChanged.emplace_back(m_uniqueId, [this]()
+		m_targetParamListener.set(m_targetParam->onValueChanged, [this](pluginLib::Parameter*)
 		{
 			onTargetValueChanged();
 		});
@@ -105,8 +105,7 @@ namespace pluginLib
 
 	void SoftKnob::unbind()
 	{
-		if(m_targetParam)
-			m_targetParam->removeListener(m_uniqueId);
+		m_targetParamListener.reset();
 		m_targetParam = nullptr;
 	}
 }

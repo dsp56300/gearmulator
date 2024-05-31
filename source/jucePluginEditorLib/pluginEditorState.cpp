@@ -260,20 +260,22 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	if(!regions.empty())
 	{
+		const auto part = m_processor.getController().getCurrentPart();
+
 		juce::PopupMenu lockRegions;
 
 		auto& locking = m_processor.getController().getParameterLocking();
 
-		lockRegions.addItem("Unlock All", [&]
+		lockRegions.addItem("Unlock All", [&, part]
 		{
 			for (const auto& region : regions)
-				locking.unlockRegion(region.first);
+				locking.unlockRegion(part, region.first);
 		});
 
-		lockRegions.addItem("Lock All", [&]
+		lockRegions.addItem("Lock All", [&, part]
 		{
 			for (const auto& region : regions)
-				locking.lockRegion(region.first);
+				locking.lockRegion(part, region.first);
 		});
 
 		lockRegions.addSeparator();
@@ -286,14 +288,14 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 		for (const auto& region : sortedRegions)
 		{
-			lockRegions.addItem(region.second.getName(), true, m_processor.getController().getParameterLocking().isRegionLocked(region.first), [this, id=region.first]
+			lockRegions.addItem(region.second.getName(), true, m_processor.getController().getParameterLocking().isRegionLocked(part, region.first), [this, id=region.first, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 
-				if(locking.isRegionLocked(id))
-					locking.unlockRegion(id);
+				if(locking.isRegionLocked(part, id))
+					locking.unlockRegion(part, id);
 				else
-					locking.lockRegion(id);
+					locking.lockRegion(part, id);
 			});
 
 			if(++count == 16)
