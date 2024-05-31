@@ -65,6 +65,8 @@ namespace genericVirusUI
 
 	void ArpUserPattern::onCurrentPartChanged()
 	{
+		unbindParameters();
+		bindParameters();
 	}
 
 	void ArpUserPattern::bindParameters()

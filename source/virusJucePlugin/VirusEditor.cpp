@@ -216,7 +216,11 @@ namespace genericVirusUI
 	juce::Component* VirusEditor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
 	{
 		if(_object.getName() == "ArpUserGraphics")
-			return new ArpUserPattern(*this);
+		{
+			assert(m_arpUserPattern == nullptr);
+			m_arpUserPattern = new ArpUserPattern(*this);
+			return m_arpUserPattern;
+		}
 
 		return Editor::createJuceComponent(_component, _object);
 	}
@@ -240,6 +244,8 @@ namespace genericVirusUI
 	void VirusEditor::onCurrentPartChanged()
 	{
 		m_parts->onCurrentPartChanged();
+		if(m_arpUserPattern)
+			m_arpUserPattern->onCurrentPartChanged();
 		updatePresetName();
 	}
 

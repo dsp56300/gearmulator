@@ -33,6 +33,8 @@ class VirusProcessor;
 
 namespace genericVirusUI
 {
+	class ArpUserPattern;
+
 	class VirusEditor : public jucePluginEditorLib::Editor
 	{
 	public:
@@ -104,6 +106,8 @@ namespace genericVirusUI
 		juce::Button* m_playModeToggle = nullptr;
 
 		juce::Label* m_deviceModel = nullptr;
+
+		ArpUserPattern* m_arpUserPattern = nullptr;
 
 		pluginLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};
