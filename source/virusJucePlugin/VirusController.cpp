@@ -46,12 +46,13 @@ namespace Virus
     {
      	registerParams(p);
 
-		// add lambda to enforce updating patches when virus switch from/to multi/single.
+		// add lambda to enforce updating patches when virus switches from/to multi/single.
         const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
 		auto* parameter = getParameter(paramIdx);
         if(parameter)
 		{
-			parameter->onValueChanged.emplace_back(0, [this] {
+			parameter->evValueChanged.addListener([this](pluginLib::Parameter*)
+			{
 				const uint8_t prg = isMultiMode() ? 0x0 : virusLib::SINGLE;
 				requestSingle(0, prg);
                 requestMulti(0, prg);
