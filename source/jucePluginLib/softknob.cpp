@@ -21,10 +21,7 @@ namespace pluginLib
 
 		const auto& desc = m_sourceParam->getDescription();
 
-		const auto idxTargetSelect = _controller.getParameterIndexByName(desc.softKnobTargetSelect);
-		assert(idxTargetSelect != Controller::InvalidParameterIndex);
-
-		m_targetSelect = _controller.getParameter(idxTargetSelect, _part);
+		m_targetSelect = _controller.getParameter(desc.softKnobTargetSelect, _part);
 		assert(m_targetSelect);
 
 		m_targetSelectListener.set(m_targetSelect, [this](auto*)
@@ -87,11 +84,7 @@ namespace pluginLib
 		if(targetName.empty())
 			return;
 
-		const auto targetParamIdx = m_controller.getParameterIndexByName(targetName);
-		if(targetParamIdx == Controller::InvalidParameterIndex)
-			return;
-
-		m_targetParam = m_controller.getParameter(targetParamIdx, m_part);
+		m_targetParam = m_controller.getParameter(targetName, m_part);
 		if(!m_targetParam)
 			return;
 

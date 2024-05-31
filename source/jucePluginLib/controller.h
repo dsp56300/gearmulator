@@ -33,6 +33,7 @@ namespace pluginLib
         juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
         Parameter* getParameter(uint32_t _index) const;
         Parameter* getParameter(uint32_t _index, uint8_t _part) const;
+        Parameter* getParameter(const std::string& _name, uint8_t _part) const;
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 

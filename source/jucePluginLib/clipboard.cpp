@@ -120,8 +120,7 @@ namespace pluginLib
 
 			for (const auto& param : _parameters)
 			{
-				const auto paramIdx = c.getParameterIndexByName(param);
-				const auto* p = c.getParameter(paramIdx, part);
+				const auto* p = c.getParameter(param, part);
 
 				if(!p)
 					continue;

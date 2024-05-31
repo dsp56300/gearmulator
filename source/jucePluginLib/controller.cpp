@@ -295,6 +295,14 @@ namespace pluginLib
 		return m_paramsByParamType[_part][_index];
 	}
 
+	Parameter* Controller::getParameter(const std::string& _name, const uint8_t _part) const
+	{
+		const auto idx = getParameterIndexByName(_name);
+		if(idx == InvalidParameterIndex)
+			return nullptr;
+		return getParameter(idx, _part);
+	}
+
 	uint32_t Controller::getParameterIndexByName(const std::string& _name) const
 	{
 		uint32_t index;
@@ -310,10 +318,7 @@ namespace pluginLib
 			const auto& name = it.first;
 			const auto& value = it.second;
 
-			const auto index = getParameterIndexByName(name);
-			auto* param = getParameter(index, _part);
-
-			if(param)
+			if(auto* param = getParameter(name, _part))
 			{
 				res = true;
 				param->setUnnormalizedValue(value, _changedBy);

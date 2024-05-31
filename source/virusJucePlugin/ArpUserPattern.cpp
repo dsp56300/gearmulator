@@ -102,9 +102,7 @@ namespace genericVirusUI
 
 	ArpUserPattern::BoundParam ArpUserPattern::bindParameter(const std::string& _name)
 	{
-		const auto idx = m_controller.getParameterIndexByName(_name);
-		assert(idx != pluginLib::Controller::InvalidParameterIndex);
-		auto* p = m_controller.getParameter(idx, m_controller.getCurrentPart());
+		auto* p = m_controller.getParameter(_name, m_controller.getCurrentPart());
 		assert(p);
 
 		return std::make_pair(p, pluginLib::ParameterListener(p, [this](pluginLib::Parameter*)
