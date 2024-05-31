@@ -270,21 +270,23 @@ namespace jucePluginEditorLib
 		if(paramRegionIds.empty())
 			return false;
 
+		const auto part = param->getPart();
+
 		juce::PopupMenu menu;
 
 		for (const auto& regionId : paramRegionIds)
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
 
-			const auto isLocked = controller.getParameterLocking().isRegionLocked(regionId);
+			const auto isLocked = controller.getParameterLocking().isRegionLocked(part, regionId);
 
-			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked]
+			menu.addItem(std::string(isLocked ? "Unlock" : "Lock") + std::string(" region '") + regionName + "'", [this, regionId, isLocked, part]
 			{
 				auto& locking = m_processor.getController().getParameterLocking();
 				if(isLocked)
-					locking.unlockRegion(regionId);
+					locking.unlockRegion(part, regionId);
 				else
-					locking.lockRegion(regionId);
+					locking.lockRegion(part, regionId);
 			});
 		}
 

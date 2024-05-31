@@ -447,7 +447,7 @@ namespace Virus
 
 			const uint8_t ch = patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber;
 
-            const auto locked = m_locking.getLockedParameterNames();
+            const auto locked = m_locking.getLockedParameterNames(ch);
 
             for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
             {
