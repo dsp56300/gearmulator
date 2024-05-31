@@ -81,7 +81,7 @@ namespace genericVirusUI
 	void ArpUserPattern::unbindParameter(BoundParam& _parameter)
 	{
 		assert(_parameter.first);
-		_parameter.second.removeListener();
+		_parameter.second.reset();
 		_parameter.first = nullptr;
 	}
 

@@ -192,6 +192,12 @@ namespace pluginLib
 			return *this;
 		}
 
+		void reset()
+		{
+			removeListener();
+		}
+
+	private:
 		void removeListener()
 		{
 			if(m_listenerId == InvalidListenerId)
@@ -201,7 +207,6 @@ namespace pluginLib
 			m_listenerId = InvalidListenerId;
 		}
 
-	private:
 		MyEvent* m_event = nullptr;
 		MyListenerId m_listenerId = InvalidListenerId;
 	};

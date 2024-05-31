@@ -2,9 +2,10 @@
 
 #include <cstdint>
 
+#include "parameter.h"
+
 namespace pluginLib
 {
-	class Parameter;
 	class Controller;
 
 	class SoftKnob
@@ -18,10 +19,10 @@ namespace pluginLib
 		SoftKnob& operator = (const SoftKnob&) = delete;
 		SoftKnob& operator = (SoftKnob&&) = delete;
 
-		bool isValid() const { return m_param != nullptr && m_targetSelect != nullptr; }
+		bool isValid() const { return m_sourceParam != nullptr && m_targetSelect != nullptr; }
 		bool isBound() const { return m_targetParam != nullptr; }
 
-		Parameter* getParameter() const { return m_param; }
+		Parameter* getParameter() const { return m_sourceParam; }
 		Parameter* getTargetParameter() const { return m_targetParam; }
 
 	private:
@@ -36,8 +37,12 @@ namespace pluginLib
 		const uint8_t m_part;
 		const uint32_t m_uniqueId;
 
-		Parameter* m_param = nullptr;
+		Parameter* m_sourceParam = nullptr;
 		Parameter* m_targetSelect = nullptr;
 		Parameter* m_targetParam = nullptr;
+
+		ParameterValueChangeListener m_sourceParamListener;
+		ParameterValueChangeListener m_targetSelectListener;
+		ParameterValueChangeListener m_targetParamListener;
 	};
 }
