@@ -7,8 +7,6 @@
 
 namespace jucePluginEditorLib
 {
-	static constexpr uint32_t g_listenerId = 1;
-
 	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const pluginLib::ParameterBinding& _parameterBinding, const genericUI::Editor& _editor)
 		: m_parameterBinding(_parameterBinding)
 		, m_controller(_controller)
@@ -29,17 +27,14 @@ namespace jucePluginEditorLib
 		{
 			for (const auto& param : params.second)
 			{
-				m_boundParameters.push_back(param);
-
-				param->onValueChanged.emplace_back(g_listenerId, [this, param]()
+				m_boundParameters.insert({param, pluginLib::EventListener(param->evValueChanged, [this](const pluginLib::Parameter* _param)
 				{
-					if (param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
-						param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
+					if (_param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::PresetChange || 
+						_param->getChangeOrigin() == pluginLib::Parameter::ChangedBy::Derived)
 						return;
-					auto* comp = m_parameterBinding.getBoundComponent(param);
-					if(comp)
+					if(auto* comp = m_parameterBinding.getBoundComponent(_param))
 						updateControlLabel(comp);
-				});
+				})});
 			}
 		}
 	}
@@ -48,8 +43,7 @@ namespace jucePluginEditorLib
 	{
 		m_tooltip.reset();
 	
-		for (auto* p : m_boundParameters)
-			p->removeListener(g_listenerId);
+		m_boundParameters.clear();
 	}
 
 	void FocusedParameter::onMouseEnter(const juce::MouseEvent& _event)
@@ -116,7 +110,7 @@ namespace jucePluginEditorLib
 
 		const int part = props.contains("part") ? static_cast<int>(props["part"]) : static_cast<int>(m_controller.getCurrentPart());
 
-		auto* p = m_controller.getParameter(v, static_cast<uint8_t>(part));
+		const auto* p = m_controller.getParameter(v, static_cast<uint8_t>(part));
 
 		// do not show soft knob parameter if the softknob is bound to another parameter
 		if(p && p->getDescription().isSoftKnob())

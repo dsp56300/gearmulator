@@ -20,6 +20,8 @@ namespace pluginLib
 
 		for (const auto& func : onValueChanged)
 			func.second();
+
+		evValueChanged(this);
 	}
 
     void Parameter::setDerivedValue(const int _value, ChangedBy _origin, bool _notifyHost)

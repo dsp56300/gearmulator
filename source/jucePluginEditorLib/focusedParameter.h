@@ -4,6 +4,8 @@
 
 #include "juce_events/juce_events.h"
 
+#include "../jucePluginLib/event.h"
+
 namespace juce
 {
 	class MouseEvent;
@@ -43,6 +45,6 @@ namespace jucePluginEditorLib
 		juce::Label* m_focusedParameterName = nullptr;
 		juce::Label* m_focusedParameterValue = nullptr;
 		std::unique_ptr<FocusedParameterTooltip> m_tooltip;
-		std::vector<pluginLib::Parameter*> m_boundParameters;
+		std::map<pluginLib::Parameter*, pluginLib::EventListener<pluginLib::Parameter*>> m_boundParameters;
 	};
 }

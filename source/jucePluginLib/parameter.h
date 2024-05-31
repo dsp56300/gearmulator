@@ -79,6 +79,8 @@ namespace pluginLib
 		// eg. multi/single value change requires triggering more logic.
 		std::list<std::pair<uint32_t, std::function<void()>>> onValueChanged;
 
+		Event<Parameter*> evValueChanged;
+
 		void addDerivedParameter(Parameter* _param);
 
 		int getUniqueId() const { return m_uniqueId; }
