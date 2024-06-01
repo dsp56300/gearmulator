@@ -79,14 +79,9 @@ namespace Virus
 				requestRomBanks();
 			};
 		}
-
-    	startTimer(5);
 	}
 
-    Controller::~Controller()
-    {
-	    stopTimer();
-    }
+    Controller::~Controller() = default;
 
     bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 	{
@@ -128,17 +123,6 @@ namespace Virus
 		return parseControllerDump(e);
     }
 
-    juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
-	{
-		const auto& params = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
-		if (params.empty())
-		{
-            // unregistered param?
-            return nullptr;
-        }
-		return &params.front()->getValueObject();
-	}
-
     void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data)
     {
     	const auto page  = _data.find(pluginLib::MidiDataType::Page)->second;
@@ -166,10 +150,10 @@ namespace Virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
+				param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
+			param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 		// TODO:
         /**
          If a
@@ -290,9 +274,7 @@ namespace Virus
 
     bool Controller::isMultiMode() const
 	{
-        const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
-		const auto& value = getParameter(paramIdx)->getValueObject();
-		return value.getValue();
+		return getParameter(g_paramPlayMode, 0)->getUnnormalizedValue();
 	}
 
 	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
@@ -308,7 +290,7 @@ namespace Virus
             auto* param = getParameter(idx, _part);
             if(!param)
                 break;
-            const int v = param->getValueObject().getValue();
+            const auto v = param->getUnnormalizedValue();
 			name += static_cast<char>(v);
 		}
         return name;
@@ -454,10 +436,10 @@ namespace Virus
 	            auto* p = getParameter(it->first.second, ch);
 
                 if(locked.find(p->getDescription().name) == locked.end())
-					p->setValueFromSynth(it->second, false, pluginLib::Parameter::ChangedBy::PresetChange);
+					p->setValueFromSynth(it->second, pluginLib::Parameter::Origin::PresetChange);
             }
 
-            m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+            getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
@@ -535,10 +517,10 @@ namespace Virus
                 if(desc.page != virusLib::PAGE_C)
                     continue;
 
-                param->setValueFromSynth(value, false, pluginLib::Parameter::ChangedBy::PresetChange);
+                param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 			}
 
-			m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 		}
     }
 
@@ -563,7 +545,7 @@ namespace Virus
 
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
-			p->setValueFromSynth(m.c, true, pluginLib::Parameter::ChangedBy::ControlChange);
+			p->setValueFromSynth(m.c, pluginLib::Parameter::Origin::Midi);
 
 		return true;
 	}
@@ -667,25 +649,6 @@ namespace Virus
     {
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
         return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
-    }
-
-    void Controller::timerCallback()
-    {
-        std::vector<synthLib::SMidiEvent> virusOut;
-        getPluginMidiOut(virusOut);
-
-    	for (const auto& msg : virusOut)
-        {
-            if (msg.sysex.empty())
-            {
-                // no sysex
-				parseControllerDump(msg);
-			}
-            else
-			{
-				parseSysexMessage(msg.sysex, msg.source);
-			}
-        }
     }
 
     void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)

@@ -4,46 +4,50 @@
 
 namespace pluginLib
 {
-	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId) :
-		juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName), m_ctrl(_controller),
-		m_desc(_desc), m_partNum(_partNum), m_uniqueId(_uniqueId)
+	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId)
+		: juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName)
+		, m_controller(_controller)
+		, m_desc(_desc)
+		, m_part(_partNum)
+		, m_uniqueId(_uniqueId)
 	{
 		m_range.start = static_cast<float>(m_desc.range.getStart());
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
 		m_range.interval = m_desc.step ? static_cast<float>(m_desc.step) : (m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f);
+
 		m_value.addListener(this);
     }
 
-    void Parameter::valueChanged(juce::Value &)
+    void Parameter::valueChanged(juce::Value&)
     {
 		sendToSynth();
 		onValueChanged(this);
 	}
 
-    void Parameter::setDerivedValue(const int _value, ChangedBy _origin, bool _notifyHost)
+    void Parameter::setDerivedValue(const int _value, const Origin _origin, const bool _notifyHost)
     {
-		const int newValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
+		const int newValue = clampValue(_value);
 
 		if (newValue == m_lastValue)
 			return;
 
 		m_lastValue = newValue;
-		m_lastValueOrigin = ChangedBy::Derived;
+		m_lastValueOrigin = Origin::Derived;
 
 		if(_notifyHost && getDescription().isPublic)
 		{
-			const float v = convertTo0to1(static_cast<float>(newValue));
-
 			switch (_origin)
 			{
-			case ChangedBy::ControlChange:
-			case ChangedBy::HostAutomation:
-			case ChangedBy::Derived:
-				setValue(v, ChangedBy::Derived); 
+			case Origin::Midi:
+			case Origin::HostAutomation:
+			case Origin::Derived:
+			case Origin::PresetChange:
+				setUnnormalizedValue(newValue, Origin::Derived); 
 				break;
-			default:
+			case Origin::Unknown:
+			case Origin::Ui:
 				beginChangeGesture();
-				setValueNotifyingHost(v, ChangedBy::Derived);
+				setUnnormalizedValueNotifyingHost(newValue, Origin::Derived);
 				endChangeGesture();
 				break;
 			}
@@ -75,7 +79,7 @@ namespace pluginLib
 			else
 			{
 				m_lastSendTime = milliseconds();
-				m_ctrl.sendParameterChange(*this, static_cast<uint8_t>(value));
+				m_controller.sendParameterChange(*this, static_cast<uint8_t>(value));
 			}
 		}
 
@@ -99,7 +103,7 @@ namespace pluginLib
 		if(elapsed >= m_rateLimit)
 		{
 			m_lastSendTime = ms;
-			m_ctrl.sendParameterChange(*this, _value);
+			m_controller.sendParameterChange(*this, _value);
 		}
 		else
 		{
@@ -110,11 +114,28 @@ namespace pluginLib
 		}
     }
 
-    void Parameter::setValueNotifyingHost(const float _value, const ChangedBy _origin)
+    int Parameter::clampValue(const int _value) const
     {
-		setValue(_value, _origin);
+		return juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
+    }
+
+    void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
+    {
+		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
 		sendValueChangedMessageToListeners(_value);
 	}
+
+    void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
+    {
+		setUnnormalizedValue(juce::roundToInt(_value), _origin);
+		sendValueChangedMessageToListeners(convertTo0to1(_value));
+    }
+
+    void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
+    {
+		setUnnormalizedValue(_value, _origin);
+		sendValueChangedMessageToListeners(convertTo0to1(static_cast<float>(_value)));
+    }
 
     void Parameter::setRateLimitMilliseconds(const uint32_t _ms)
     {
@@ -144,40 +165,29 @@ namespace pluginLib
 
     void Parameter::setValue(const float _newValue)
 	{
-		setValue(_newValue, ChangedBy::HostAutomation);
+		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_newValue)), Origin::HostAutomation);
 	}
 
-    void Parameter::setValue(const float _newValue, const ChangedBy _origin)
+    void Parameter::setUnnormalizedValue(const int _newValue, const Origin _origin)
     {
 		if (m_changingDerivedValues)
 			return;
 
-		const auto floatValue = convertFrom0to1(_newValue);
 		m_lastValueOrigin = _origin;
-		m_value.setValue(floatValue);
-
+		m_value.setValue(clampValue(_newValue));
 		sendToSynth();
 
-		m_changingDerivedValues = true;
-
-		for (const auto& parameter : m_derivedParameters)
-		{
-			if(!parameter->m_changingDerivedValues)
-				parameter->setDerivedValue(m_value.getValue(), _origin, true);
-		}
-
-		m_changingDerivedValues = false;
+		forwardToDerived(_newValue, _origin, true);
     }
 
-    void Parameter::setUnnormalizedValue(const int _newValue, const ChangedBy _origin)
-    {
-		const auto v = convertTo0to1(static_cast<float>(_newValue));
-		setValue(v, _origin);
-    }
-
-    void Parameter::setValueFromSynth(int newValue, const bool notifyHost, ChangedBy _origin)
+    void Parameter::setValueFromSynth(const int _newValue, const Origin _origin)
 	{
-		const auto clampedValue = juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(newValue)));
+		const auto clampedValue = clampValue(_newValue);
+
+		// we do not want to send an excessive amount of value changes to the host if a preset is
+		// changed, we use updateHostDisplay() (see caller) to inform the host to read all
+		// parameters again instead
+		const auto notifyHost = _origin != Origin::PresetChange;
 
 		if (clampedValue != m_lastValue)
 		{
@@ -187,8 +197,7 @@ namespace pluginLib
 			if (notifyHost && getDescription().isPublic)
 			{
 				beginChangeGesture();
-				const auto v = convertTo0to1(static_cast<float>(clampedValue));
-				setValueNotifyingHost(v, _origin);
+				setUnnormalizedValueNotifyingHost(clampedValue, _origin);
 				endChangeGesture();
 			}
 			else
@@ -197,16 +206,21 @@ namespace pluginLib
 			}
 		}
 
+		forwardToDerived(_newValue, _origin, notifyHost);
+	}
+
+    void Parameter::forwardToDerived(const int _newValue, const Origin _origin, const bool _notifyHost)
+    {
 		if (m_changingDerivedValues)
 			return;
 
 		m_changingDerivedValues = true;
 
 		for (const auto& p : m_derivedParameters)
-			p->setDerivedValue(newValue, _origin, notifyHost);
+			p->setDerivedValue(_newValue, _origin, _notifyHost);
 
 		m_changingDerivedValues = false;
-	}
+    }
 
 	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
 	{

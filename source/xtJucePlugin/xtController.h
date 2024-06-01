@@ -17,7 +17,7 @@ namespace xt
 
 class AudioPluginAudioProcessor;
 
-class Controller : public pluginLib::Controller, juce::Timer
+class Controller : public pluginLib::Controller
 {
 public:
 	enum MidiPacketType
@@ -88,7 +88,6 @@ private:
 
 	static std::string loadParameterDescriptions();
 
-	void timerCallback() override;
 	void onStateLoaded() override;
 	uint8_t getPartCount() override;
 

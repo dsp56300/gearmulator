@@ -22,13 +22,13 @@ namespace pluginLib
 	class Processor;
 	using SysEx = std::vector<uint8_t>;
 
-	class Controller
+	class Controller : juce::Timer
 	{
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
-		virtual ~Controller();
+		~Controller() override;
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
@@ -39,7 +39,7 @@ namespace pluginLib
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
-		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::ChangedBy _changedBy) const;
+		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
@@ -69,9 +69,13 @@ namespace pluginLib
 		virtual void onStateLoaded() = 0;
 
         // this is called by the plug-in on audio thread!
-        void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
-		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
+        void enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>&);
 
+	private:
+		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
+		void processMidiMessages();
+
+	public:
 		ParameterLocking& getParameterLocking() { return m_locking; }
 		ParameterLinks& getParameterLinks() { return m_parameterLinks; }
 
@@ -85,6 +89,9 @@ namespace pluginLib
 			const auto it = m_softKnobs.find(_parameter);
 			return it->second.get();
 		}
+
+		Processor& getProcessor() const { return m_processor; }
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);
@@ -124,15 +131,18 @@ namespace pluginLib
 
 		using ParameterList = std::vector<Parameter*>;
 
+		void timerCallback() override;
+
 	private:
 		Processor& m_processor;
         ParameterDescriptions m_descriptions;
 
 		uint8_t m_currentPart = 0;
 
-		std::mutex m_pluginMidiOutLock;
-        std::vector<synthLib::SMidiEvent> m_pluginMidiOut;
-        std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
+		std::mutex m_midiMessagesLock;
+        std::vector<synthLib::SMidiEvent> m_midiMessages;
+
+		std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
 
 	protected:
 		// tries to find synth param in both internal and host

@@ -32,7 +32,6 @@ namespace pluginLib
 		Processor(const BusesProperties& _busesProperties, Properties _properties);
 		~Processor() override;
 
-		void getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst);
 		void addMidiEvent(const synthLib::SMidiEvent& ev);
 
 		bool setMidiOutput(const juce::String& _out);

@@ -116,7 +116,7 @@ namespace genericVirusUI
 		{
 			menu.addItem(name + ' ' + std::to_string(i + 1), true, v->getUnnormalizedValue() == i, [v, i]
 			{
-				v->setValue(v->convertTo0to1(i), pluginLib::Parameter::ChangedBy::Ui);
+				v->setUnnormalizedValue(i, pluginLib::Parameter::Origin::Ui);
 			});
 		}
 

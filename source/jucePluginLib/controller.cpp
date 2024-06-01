@@ -10,9 +10,9 @@
 
 namespace pluginLib
 {
-	uint8_t getParameterValue(Parameter* _p)
+	uint8_t getParameterValue(const Parameter* _p)
 	{
-		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
+		return static_cast<uint8_t>(_p->getUnnormalizedValue());
 	}
 
 	Controller::Controller(Processor& _processor, const std::string& _parameterDescJson)
@@ -28,10 +28,13 @@ namespace pluginLib
 				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors(), 
 				nullptr, juce::ModalCallbackFunction::create([](int){}));
 		}
+
+		startTimer(10);
 	}
 
 	Controller::~Controller()
 	{
+		stopTimer();
 		m_softKnobs.clear();
 	}
 
@@ -234,7 +237,12 @@ namespace pluginLib
 
 		return true;
 	}
-	
+
+	void Controller::timerCallback()
+	{
+		processMidiMessages();
+	}
+
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
 	    const std::map<pluginLib::MidiDataType, uint8_t> params;
@@ -313,7 +321,7 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
-	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::ChangedBy _changedBy) const
+	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
 	{
 		bool res = false;
 
@@ -355,7 +363,7 @@ namespace pluginLib
 			auto* p = getParameter(index.second, _part);
 			if(!p)
 				return false;
-			auto* largestP = p;
+			const auto* largestP = p;
 			// we might have more than 1 parameter per index, use the one with the largest range
 			const auto& derived = p->getDerivedParameters();
 			for (const auto& parameter : derived)
@@ -469,17 +477,29 @@ namespace pluginLib
 		return parseSysexMessage(_e.sysex, _e.source);
 	}
 
-	void Controller::addPluginMidiOut(const std::vector<synthLib::SMidiEvent>& _events)
+	void Controller::enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>& _events)
 	{
-        const std::lock_guard l(m_pluginMidiOutLock);
-        m_pluginMidiOut.insert(m_pluginMidiOut.end(), _events.begin(), _events.end());
+		if(_events.empty())
+			return;
+
+        const std::lock_guard l(m_midiMessagesLock);
+        m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
 	}
 
-	void Controller::getPluginMidiOut(std::vector<synthLib::SMidiEvent>& _events)
+	void Controller::getMidiMessages(std::vector<synthLib::SMidiEvent>& _events)
 	{
-		const std::lock_guard l(m_pluginMidiOutLock);
-        std::swap(m_pluginMidiOut, _events);
-		m_pluginMidiOut.clear();
+		const std::lock_guard l(m_midiMessagesLock);
+        std::swap(m_midiMessages, _events);
+		m_midiMessages.clear();
+	}
+
+	void Controller::processMidiMessages()
+	{
+	    std::vector<synthLib::SMidiEvent> events;
+	    getMidiMessages(events);
+
+	    for (const auto& e : events)
+		    parseMidiMessage(e);
 	}
 
 	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const

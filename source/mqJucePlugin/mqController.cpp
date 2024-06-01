@@ -50,8 +50,6 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 	sendSysEx(RequestGlobal);
 //  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
 
-    startTimer(50);
-
 	onPlayModeChanged.addListener(0, [this](bool multiMode)
 	{
 		requestAllPatches();
@@ -111,18 +109,6 @@ std::string Controller::loadParameterDescriptions()
     if(res)
         return {res, size};
     return {};
-}
-
-void Controller::timerCallback()
-{
-    std::vector<synthLib::SMidiEvent> events;
-    getPluginMidiOut(events);
-
-    for (const auto& e : events)
-    {
-	    if(!e.sysex.empty())
-            parseSysexMessage(e.sysex, e.source);
-    }
 }
 
 void Controller::onStateLoaded()
@@ -190,16 +176,18 @@ bool Controller::setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values,
     return setString(_values, "Category", 4, _value);
 }
 
-void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part)
+void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part) const
 {
 	for (const auto& it : _params)
 	{
 		auto* p = getParameter(it.first.second, _part);
-		p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+		p->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
 
 		for (const auto& derivedParam : p->getDerivedParameters())
-			derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+			derivedParam->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
 	}
+
+	getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 }
 
 void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)
@@ -305,7 +293,7 @@ bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiE
 	    auto& params = findSynthParam(part, page, index);
 
 	    for (auto& param : params)
-		    param->setValueFromSynth(value, true, pluginLib::Parameter::ChangedBy::ControlChange);
+		    param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 
 	    LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
     }

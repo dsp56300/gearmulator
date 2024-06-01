@@ -13,7 +13,7 @@ class VirusProcessor;
 
 namespace Virus
 {
-    class Controller : public pluginLib::Controller, juce::Timer
+    class Controller : public pluginLib::Controller
     {
     public:
         struct Patch
@@ -81,8 +81,6 @@ namespace Virus
     	bool activatePatch(const std::vector<unsigned char>& _sysex, uint32_t _part);
 
         static void printMessage(const pluginLib::SysEx &);
-
-        juce::Value* getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex);
 
         juce::StringArray getSinglePresetNames(virusLib::BankNumber bank) const;
         std::string getSinglePresetName(const pluginLib::MidiPacket::ParamValues& _values) const;
@@ -161,8 +159,6 @@ namespace Virus
 
     private:
         std::string loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor);
-
-		void timerCallback() override;
 
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode

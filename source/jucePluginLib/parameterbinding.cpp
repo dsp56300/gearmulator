@@ -24,17 +24,17 @@ namespace pluginLib
 
 	void ParameterBinding::MouseListener::mouseDrag(const juce::MouseEvent& event)
 	{
-		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
+		m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
 	}
 
 	void ParameterBinding::MouseListener::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 	{
-		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::ControlChange);
+		m_param->setUnnormalizedValueNotifyingHost(static_cast<float>(m_slider->getValue()), Parameter::Origin::Ui);
 	}
 
 	void ParameterBinding::MouseListener::mouseDoubleClick(const juce::MouseEvent& event)
 	{
-		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::ChangedBy::ControlChange);
+		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::Origin::Ui);
 	}
 
 	ParameterBinding::~ParameterBinding()
@@ -165,7 +165,7 @@ namespace pluginLib
 			if(v->getDescription().isPublic)
 			{
 				v->beginChangeGesture();
-				v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)), Parameter::ChangedBy::ControlChange);
+				v->setUnnormalizedValueNotifyingHost(id - 1, Parameter::Origin::Ui);
 				v->endChangeGesture();
 			}
 			v->getValueObject().setValue(id - 1);
@@ -173,7 +173,7 @@ namespace pluginLib
 
 		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
 		{
-			const auto value = static_cast<int>(v->getValueObject().getValueSource().getValue());
+			const auto value = v->getUnnormalizedValue();
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
 		});
 

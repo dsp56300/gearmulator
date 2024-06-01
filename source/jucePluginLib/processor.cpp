@@ -32,13 +32,6 @@ namespace pluginLib
 		m_device.reset();
 	}
 
-	void Processor::getLastMidiOut(std::vector<synthLib::SMidiEvent>& dst)
-	{
-		juce::ScopedLock lock(getCallbackLock());
-		std::swap(dst, m_midiOut);
-		m_midiOut.clear();
-	}
-
 	void Processor::addMidiEvent(const synthLib::SMidiEvent& ev)
 	{
 		getPlugin().addMidiEvent(ev);
@@ -94,20 +87,8 @@ namespace pluginLib
 			syx.push_back(0xf7);
 			sm.sysex = std::move(syx);
 
-			getController().parseMidiMessage(sm);
+			getController().enqueueMidiMessages({sm});
 			addMidiEvent(sm);
-
-			if (m_midiOutput)
-			{
-				std::vector<synthLib::SMidiEvent> data;
-				getLastMidiOut(data);
-				if (!data.empty())
-				{
-					const auto msg = juce::MidiMessage::createSysExMessage(data.data(), static_cast<int>(data.size()));
-
-					m_midiOutput->sendMessageNow(msg);
-				}
-			}
 		}
 		else
 		{
@@ -127,7 +108,7 @@ namespace pluginLib
 				sm.sysex = syx;
 			}
 
-			getController().parseMidiMessage(sm);
+			getController().enqueueMidiMessages({sm});
 			addMidiEvent(sm);
 		}
 	}
@@ -531,7 +512,7 @@ namespace pluginLib
 				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
 				{
 					// forward to UI to react to control input changes that should move knobs
-					getController().addPluginMidiOut({ev});
+					getController().enqueueMidiMessages({ev});
 				}
 			}
 
@@ -573,38 +554,38 @@ namespace pluginLib
 
 	    if (!m_midiOut.empty())
 		{
-			getController().addPluginMidiOut(m_midiOut);
-		}
+			getController().enqueueMidiMessages(m_midiOut);
 
-	    for (auto& e : m_midiOut)
-	    {
-		    if (e.source == synthLib::MidiEventSource::Editor)
-				continue;
+		    for (auto& e : m_midiOut)
+		    {
+			    if (e.source == synthLib::MidiEventSource::Editor || e.source == synthLib::MidiEventSource::Internal)
+					continue;
 
-			auto toJuceMidiMessage = [&e]()
-			{
-				if(!e.sysex.empty())
+				auto toJuceMidiMessage = [&e]()
 				{
-					assert(e.sysex.front() == 0xf0);
-					assert(e.sysex.back() == 0xf7);
+					if(!e.sysex.empty())
+					{
+						assert(e.sysex.front() == 0xf0);
+						assert(e.sysex.back() == 0xf7);
 
-					return juce::MidiMessage(e.sysex.data(), static_cast<int>(e.sysex.size()), 0.0);
-				}
-				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
-				if(len == 1)
-					return juce::MidiMessage(e.a, 0.0);
-				if(len == 2)
-					return juce::MidiMessage(e.a, e.b, 0.0);
-				return juce::MidiMessage(e.a, e.b, e.c, 0.0);
-			};
+						return juce::MidiMessage(e.sysex.data(), static_cast<int>(e.sysex.size()), 0.0);
+					}
+					const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
+					if(len == 1)
+						return juce::MidiMessage(e.a, 0.0);
+					if(len == 2)
+						return juce::MidiMessage(e.a, e.b, 0.0);
+					return juce::MidiMessage(e.a, e.b, e.c, 0.0);
+				};
 
-			const juce::MidiMessage message = toJuceMidiMessage();
-			midiMessages.addEvent(message, 0);
+				const juce::MidiMessage message = toJuceMidiMessage();
+				midiMessages.addEvent(message, 0);
 
-			// additionally send to the midi output we've selected in the editor
-			if (m_midiOutput)
-				m_midiOutput->sendMessageNow(message);
-	    }
+				// additionally send to the midi output we've selected in the editor
+				if (m_midiOutput)
+					m_midiOutput->sendMessageNow(message);
+		    }
+		}
 	}
 
 #if !SYNTHLIB_DEMO_MODE
