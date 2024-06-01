@@ -22,13 +22,13 @@ namespace pluginLib
 	class Processor;
 	using SysEx = std::vector<uint8_t>;
 
-	class Controller
+	class Controller : juce::Timer
 	{
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
-		virtual ~Controller();
+		~Controller() override;
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
 
@@ -126,6 +126,8 @@ namespace pluginLib
         };
 
 		using ParameterList = std::vector<Parameter*>;
+
+		void timerCallback() override;
 
 	private:
 		Processor& m_processor;

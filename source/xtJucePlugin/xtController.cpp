@@ -66,8 +66,6 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 	sendSysEx(RequestMode);
 	requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 
-    startTimer(50);
-
 	onPlayModeChanged.addListener([this](bool multiMode)
 	{
 		requestAllPatches();
@@ -154,18 +152,6 @@ std::string Controller::loadParameterDescriptions()
     if(res)
         return {res, size};
     return {};
-}
-
-void Controller::timerCallback()
-{
-    std::vector<synthLib::SMidiEvent> events;
-    getPluginMidiOut(events);
-
-    for (const auto& e : events)
-    {
-	    if(!e.sysex.empty())
-            parseSysexMessage(e.sysex, e.source);
-    }
 }
 
 void Controller::onStateLoaded()

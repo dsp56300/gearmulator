@@ -50,8 +50,6 @@ Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : 
 	sendSysEx(RequestGlobal);
 //  sendGlobalParameterChange(mqLib::GlobalParameter::SingleMultiMode, 1);
 
-    startTimer(50);
-
 	onPlayModeChanged.addListener(0, [this](bool multiMode)
 	{
 		requestAllPatches();
@@ -111,18 +109,6 @@ std::string Controller::loadParameterDescriptions()
     if(res)
         return {res, size};
     return {};
-}
-
-void Controller::timerCallback()
-{
-    std::vector<synthLib::SMidiEvent> events;
-    getPluginMidiOut(events);
-
-    for (const auto& e : events)
-    {
-	    if(!e.sysex.empty())
-            parseSysexMessage(e.sysex, e.source);
-    }
 }
 
 void Controller::onStateLoaded()

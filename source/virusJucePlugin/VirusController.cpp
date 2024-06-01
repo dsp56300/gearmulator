@@ -79,14 +79,9 @@ namespace Virus
 				requestRomBanks();
 			};
 		}
-
-    	startTimer(5);
 	}
 
-    Controller::~Controller()
-    {
-	    stopTimer();
-    }
+    Controller::~Controller() = default;
 
     bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 	{
@@ -654,25 +649,6 @@ namespace Virus
     {
         _params.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, m_deviceId));
         return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
-    }
-
-    void Controller::timerCallback()
-    {
-        std::vector<synthLib::SMidiEvent> virusOut;
-        getPluginMidiOut(virusOut);
-
-    	for (const auto& msg : virusOut)
-        {
-            if (msg.sysex.empty())
-            {
-                // no sysex
-				parseControllerDump(msg);
-			}
-            else
-			{
-				parseSysexMessage(msg.sysex, msg.source);
-			}
-        }
     }
 
     void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)

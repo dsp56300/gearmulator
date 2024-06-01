@@ -13,7 +13,7 @@ class VirusProcessor;
 
 namespace Virus
 {
-    class Controller : public pluginLib::Controller, juce::Timer
+    class Controller : public pluginLib::Controller
     {
     public:
         struct Patch
@@ -159,8 +159,6 @@ namespace Virus
 
     private:
         std::string loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor);
-
-		void timerCallback() override;
 
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode

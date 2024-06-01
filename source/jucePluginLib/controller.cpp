@@ -28,10 +28,13 @@ namespace pluginLib
 				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors(), 
 				nullptr, juce::ModalCallbackFunction::create([](int){}));
 		}
+
+		startTimer(50);
 	}
 
 	Controller::~Controller()
 	{
+		stopTimer();
 		m_softKnobs.clear();
 	}
 
@@ -234,7 +237,16 @@ namespace pluginLib
 
 		return true;
 	}
-	
+
+	void Controller::timerCallback()
+	{
+	    std::vector<synthLib::SMidiEvent> events;
+	    getPluginMidiOut(events);
+
+	    for (const auto& e : events)
+		    parseMidiMessage(e);
+	}
+
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
 	    const std::map<pluginLib::MidiDataType, uint8_t> params;

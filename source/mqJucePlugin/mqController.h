@@ -12,7 +12,7 @@ namespace mqJucePlugin
 
 class AudioPluginAudioProcessor;
 
-class Controller : public pluginLib::Controller, juce::Timer
+class Controller : public pluginLib::Controller
 {
 public:
     enum MidiPacketType
@@ -83,7 +83,6 @@ private:
 
     static std::string loadParameterDescriptions();
 
-	void timerCallback() override;
     void onStateLoaded() override;
 
     void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part) const;
