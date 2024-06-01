@@ -37,7 +37,7 @@ namespace pluginLib
 
         const Description& getDescription() const { return m_desc; }
 
-		uint8_t getPart() const { return m_partNum; }
+		uint8_t getPart() const { return m_part; }
 
 		const juce::NormalisableRange<float> &getNormalisableRange() const override { return m_range; }
 
@@ -48,7 +48,7 @@ namespace pluginLib
 		void setValue(float _newValue) override;
 		void setValue(float _newValue, ChangedBy _origin);
 		void setUnnormalizedValue(int _newValue, ChangedBy _origin);
-		void setValueFromSynth(int newValue, bool notifyHost, ChangedBy _origin);
+		void setValueFromSynth(int _newValue, bool _notifyHost, ChangedBy _origin);
 
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
 		bool isBoolean() const override { return m_desc.isBool; }
@@ -100,12 +100,16 @@ namespace pluginLib
 		void sendToSynth();
 		static uint64_t milliseconds();
 		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
+		void forwardToDerived(int _newValue, ChangedBy _origin, bool _notifyHost);
 
-        Controller& m_ctrl;
+		int clampValue(int _value) const;
+
+        Controller& m_controller;
 		const Description m_desc;
 		juce::NormalisableRange<float> m_range;
-		const uint8_t m_partNum;
+		const uint8_t m_part;
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
+
 		int m_lastValue{-1};
 		ChangedBy m_lastValueOrigin = ChangedBy::Unknown;
 		juce::Value m_value;
@@ -115,6 +119,7 @@ namespace pluginLib
 		uint32_t m_rateLimit = 0;		// milliseconds
 		uint64_t m_lastSendTime = 0;
 		uint32_t m_uniqueDelayCallbackId = 0;
+
 		bool m_isLocked = false;
 		ParameterLinkType m_linkType = None;
     };
