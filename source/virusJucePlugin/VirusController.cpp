@@ -128,17 +128,6 @@ namespace Virus
 		return parseControllerDump(e);
     }
 
-    juce::Value* Controller::getParamValue(uint8_t ch, uint8_t bank, uint8_t paramIndex)
-	{
-		const auto& params = findSynthParam(ch, static_cast<uint8_t>(virusLib::PAGE_A + bank), paramIndex);
-		if (params.empty())
-		{
-            // unregistered param?
-            return nullptr;
-        }
-		return &params.front()->getValueObject();
-	}
-
     void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data)
     {
     	const auto page  = _data.find(pluginLib::MidiDataType::Page)->second;
@@ -290,9 +279,7 @@ namespace Virus
 
     bool Controller::isMultiMode() const
 	{
-        const auto paramIdx = getParameterIndexByName(g_paramPlayMode);
-		const auto& value = getParameter(paramIdx)->getValueObject();
-		return value.getValue();
+		return getParameter(g_paramPlayMode, 0)->getUnnormalizedValue();
 	}
 
 	juce::String Controller::getCurrentPartPresetName(const uint8_t _part) const
@@ -308,7 +295,7 @@ namespace Virus
             auto* param = getParameter(idx, _part);
             if(!param)
                 break;
-            const int v = param->getValueObject().getValue();
+            const auto v = param->getUnnormalizedValue();
 			name += static_cast<char>(v);
 		}
         return name;

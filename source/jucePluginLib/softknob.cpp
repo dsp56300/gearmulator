@@ -49,20 +49,20 @@ namespace pluginLib
 		bind();
 	}
 
-	void SoftKnob::onSourceValueChanged()
+	void SoftKnob::onSourceValueChanged() const
 	{
 		if(!m_targetParam)
 			return;
 
-		const auto v = m_sourceParam->getValue();
-		m_targetParam->setValue(v, Parameter::Origin::Derived);
+		const auto v = m_sourceParam->getUnnormalizedValue();
+		m_targetParam->setUnnormalizedValue(v, Parameter::Origin::Derived);
 	}
 
-	void SoftKnob::onTargetValueChanged()
+	void SoftKnob::onTargetValueChanged() const
 	{
 		assert(m_targetParam);
-		const auto v = m_targetParam->getValue();
-		m_sourceParam->setValue(v, Parameter::Origin::Derived);
+		const auto v = m_targetParam->getUnnormalizedValue();
+		m_sourceParam->setUnnormalizedValue(v, Parameter::Origin::Derived);
 	}
 
 	void SoftKnob::bind()

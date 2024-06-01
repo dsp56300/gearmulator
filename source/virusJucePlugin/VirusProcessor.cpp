@@ -30,10 +30,10 @@ void VirusProcessor::processBpm(const float _bpm)
 	const auto bpmValue = juce::jmin(127, juce::jmax(0, static_cast<int>(_bpm)-63));
 	const auto clockParam = getController().getParameter(m_clockTempoParam, 0);
 
-	if (clockParam == nullptr || static_cast<int>(clockParam->getValueObject().getValue()) == bpmValue)
+	if (clockParam == nullptr || clockParam->getUnnormalizedValue() == bpmValue)
 		return;
 
-	clockParam->getValueObject().setValue(bpmValue);
+	clockParam->setUnnormalizedValue(bpmValue, pluginLib::Parameter::Origin::HostAutomation);
 }
 
 bool VirusProcessor::setSelectedRom(const uint32_t _index)

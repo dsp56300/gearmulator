@@ -27,8 +27,8 @@ namespace pluginLib
 
 	private:
 		void onTargetChanged();
-		void onSourceValueChanged();
-		void onTargetValueChanged();
+		void onSourceValueChanged() const;
+		void onTargetValueChanged() const;
 
 		void bind();
 		void unbind();

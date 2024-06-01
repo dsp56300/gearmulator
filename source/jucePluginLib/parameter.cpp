@@ -36,18 +36,18 @@ namespace pluginLib
 
 		if(_notifyHost && getDescription().isPublic)
 		{
-			const float v = convertTo0to1(static_cast<float>(newValue));
-
 			switch (_origin)
 			{
 			case Origin::Midi:
 			case Origin::HostAutomation:
 			case Origin::Derived:
-				setValue(v, Origin::Derived); 
+			case Origin::PresetChange:
+				setUnnormalizedValue(newValue, Origin::Derived); 
 				break;
-			default:
+			case Origin::Unknown:
+			case Origin::Ui:
 				beginChangeGesture();
-				setValueNotifyingHost(v, Origin::Derived);
+				setUnnormalizedValueNotifyingHost(newValue, Origin::Derived);
 				endChangeGesture();
 				break;
 			}
@@ -121,9 +121,21 @@ namespace pluginLib
 
     void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
     {
-		setValue(_value, _origin);
+		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
 		sendValueChangedMessageToListeners(_value);
 	}
+
+    void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
+    {
+		setUnnormalizedValue(juce::roundToInt(_value), _origin);
+		sendValueChangedMessageToListeners(convertTo0to1(_value));
+    }
+
+    void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
+    {
+		setUnnormalizedValue(_value, _origin);
+		sendValueChangedMessageToListeners(convertTo0to1(static_cast<float>(_value)));
+    }
 
     void Parameter::setRateLimitMilliseconds(const uint32_t _ms)
     {
@@ -153,27 +165,19 @@ namespace pluginLib
 
     void Parameter::setValue(const float _newValue)
 	{
-		setValue(_newValue, Origin::HostAutomation);
+		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_newValue)), Origin::HostAutomation);
 	}
 
-    void Parameter::setValue(const float _newValue, const Origin _origin)
+    void Parameter::setUnnormalizedValue(const int _newValue, const Origin _origin)
     {
 		if (m_changingDerivedValues)
 			return;
 
-		const auto floatValue = convertFrom0to1(_newValue);
 		m_lastValueOrigin = _origin;
-		m_value.setValue(floatValue);
-
+		m_value.setValue(clampValue(_newValue));
 		sendToSynth();
 
-		forwardToDerived(m_value.getValue(), _origin, true);
-    }
-
-    void Parameter::setUnnormalizedValue(const int _newValue, const Origin _origin)
-    {
-		const auto v = convertTo0to1(static_cast<float>(_newValue));
-		setValue(v, _origin);
+		forwardToDerived(_newValue, _origin, true);
     }
 
     void Parameter::setValueFromSynth(const int _newValue, const Origin _origin)
@@ -193,8 +197,7 @@ namespace pluginLib
 			if (notifyHost && getDescription().isPublic)
 			{
 				beginChangeGesture();
-				const auto v = convertTo0to1(static_cast<float>(clampedValue));
-				setValueNotifyingHost(v, _origin);
+				setUnnormalizedValueNotifyingHost(clampedValue, _origin);
 				endChangeGesture();
 			}
 			else
@@ -206,7 +209,7 @@ namespace pluginLib
 		forwardToDerived(_newValue, _origin, notifyHost);
 	}
 
-    void Parameter::forwardToDerived(const int _newValue, Origin _origin, const bool _notifyHost)
+    void Parameter::forwardToDerived(const int _newValue, const Origin _origin, const bool _notifyHost)
     {
 		if (m_changingDerivedValues)
 			return;

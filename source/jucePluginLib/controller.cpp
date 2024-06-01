@@ -10,9 +10,9 @@
 
 namespace pluginLib
 {
-	uint8_t getParameterValue(Parameter* _p)
+	uint8_t getParameterValue(const Parameter* _p)
 	{
-		return static_cast<uint8_t>(roundToInt(_p->getValueObject().getValue()));
+		return static_cast<uint8_t>(_p->getUnnormalizedValue());
 	}
 
 	Controller::Controller(Processor& _processor, const std::string& _parameterDescJson)

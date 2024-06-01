@@ -32,8 +32,7 @@ namespace pluginLib
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId);
 
-        juce::Value &getValueObject() { return m_value; }
-        const juce::Value &getValueObject() const { return m_value; }
+        juce::Value& getValueObject() { return m_value; }
 
         const Description& getDescription() const { return m_desc; }
 
@@ -43,10 +42,11 @@ namespace pluginLib
 
 		bool isMetaParameter() const override;
 
-		float getValue() const override { return convertTo0to1(m_value.getValue()); }
 		int getUnnormalizedValue() const { return juce::roundToInt(m_value.getValue()); }
+		float getValue() const override { return convertTo0to1(m_value.getValue()); }
+
 		void setValue(float _newValue) override;
-		void setValue(float _newValue, Origin _origin);
+
 		void setUnnormalizedValue(int _newValue, Origin _origin);
 		void setValueFromSynth(int _newValue, Origin _origin);
 
@@ -85,6 +85,8 @@ namespace pluginLib
 		Origin getChangeOrigin() const { return m_lastValueOrigin; }
 
 		void setValueNotifyingHost(float _value, Origin _origin);
+		void setUnnormalizedValueNotifyingHost(float _value, Origin _origin);
+		void setUnnormalizedValueNotifyingHost(int _value, Origin _origin);
 
 		void setRateLimitMilliseconds(uint32_t _ms);
 
