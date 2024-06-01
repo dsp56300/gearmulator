@@ -16,6 +16,7 @@ namespace jucePluginEditorLib
 	{
 	public:
 		static constexpr size_t InvalidListenerId = pluginLib::Event<int>::InvalidListenerId;
+		static constexpr uint32_t OverlayCount = static_cast<uint32_t>(ImagePool::Type::Count);
 
 		explicit ParameterOverlay(ParameterOverlays& _overlays, juce::Component* _component);
 		~ParameterOverlay();
@@ -33,7 +34,7 @@ namespace jucePluginEditorLib
 
 		OverlayProperties getOverlayProperties() const;
 
-		void toggleOverlay(juce::DrawableImage*& _image, ImagePool::Type _type, bool _enable) const;
+		void toggleOverlay(ImagePool::Type _type, bool _enable, float _opacity = 1.0f);
 
 		void updateOverlays();
 		void setParameter(pluginLib::Parameter* _parameter);
@@ -43,7 +44,8 @@ namespace jucePluginEditorLib
 		pluginLib::Parameter* m_parameter = nullptr;
 
 		size_t m_parameterLockChangedListener = InvalidListenerId;
+		size_t m_parameterLinkChangedListener = InvalidListenerId;
 
-		juce::DrawableImage* m_imageLock = nullptr;
+		std::array<juce::DrawableImage*, OverlayCount> m_images{nullptr,nullptr};
 	};
 }

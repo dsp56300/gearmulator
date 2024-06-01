@@ -166,7 +166,7 @@ namespace pluginLib
 				if(auto callback = m_event->getListener(m_listenerId))
 				{
 					m_event->removeListener(m_listenerId);
-					m_listenerId = _event.addListener(callback);
+					m_listenerId = _event.addListener(*callback);
 				}
 				else
 				{

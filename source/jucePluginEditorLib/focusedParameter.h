@@ -4,7 +4,7 @@
 
 #include "juce_events/juce_events.h"
 
-#include "../jucePluginLib/event.h"
+#include "../jucePluginLib/parameterlistener.h"
 
 namespace juce
 {
@@ -45,6 +45,6 @@ namespace jucePluginEditorLib
 		juce::Label* m_focusedParameterName = nullptr;
 		juce::Label* m_focusedParameterValue = nullptr;
 		std::unique_ptr<FocusedParameterTooltip> m_tooltip;
-		std::map<pluginLib::Parameter*, pluginLib::EventListener<pluginLib::Parameter*>> m_boundParameters;
+		std::map<pluginLib::Parameter*, pluginLib::ParameterListener> m_boundParameters;
 	};
 }

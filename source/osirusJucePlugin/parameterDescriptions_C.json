@@ -493,16 +493,6 @@
 			"regions":["assignA", "assignB", "assignC", "assignD", "assignE", "assignF"]
 		}
 	],
-	"parameterlinks":
-	[
-		{
-			"source": "Cutoff", 
-			"dest": "Cutoff2", 
-			"conditionParameter": "Filter2 Cutoff Link",
-			"conditionValues": [1],
-			"link": "relative"
-		}
-	],
  	"valuelists":
  	{
  		"unsignedZero":

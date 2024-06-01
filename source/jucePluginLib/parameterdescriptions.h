@@ -57,9 +57,6 @@ namespace pluginLib
 		void parseMidiPackets(std::stringstream& _errors, juce::DynamicObject* _packets);
 		void parseMidiPacket(std::stringstream& _errors, const std::string& _key, const juce::var& _value);
 
-		void parseParameterLinks(std::stringstream& _errors, const juce::Array<juce::var>* _links);
-		void parseParameterLink(std::stringstream& _errors, const juce::var& _value);
-
 		void parseParameterRegions(std::stringstream& _errors, const juce::Array<juce::var>* _regions);
 		void parseParameterRegion(std::stringstream& _errors, const juce::var& _value);
 

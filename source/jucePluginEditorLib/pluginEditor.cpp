@@ -274,6 +274,8 @@ namespace jucePluginEditorLib
 
 		juce::PopupMenu menu;
 
+		// Lock / Unlock
+
 		for (const auto& regionId : paramRegionIds)
 		{
 			const auto& regionName = regions.find(regionId)->second.getName();
@@ -290,6 +292,8 @@ namespace jucePluginEditorLib
 			});
 		}
 
+		// Copy to clipboard
+
 		menu.addSeparator();
 
 		for (const auto& regionId : paramRegionIds)
@@ -301,6 +305,8 @@ namespace jucePluginEditorLib
 				copyRegionToClipboard(regionId);
 			});
 		}
+
+		// Paste from clipboard
 
 		const auto data = pluginLib::Clipboard::getDataFromString(m_processor, juce::SystemClipboard::getTextFromClipboard().toStdString());
 
@@ -357,6 +363,42 @@ namespace jucePluginEditorLib
 				});
 			}
 		}
+
+		// Parameter links
+
+		juce::PopupMenu linkMenu;
+
+		menu.addSeparator();
+
+		for (const auto& regionId : paramRegionIds)
+		{
+			juce::PopupMenu regionMenu;
+
+			const auto currentPart = controller.getCurrentPart();
+
+			for(uint8_t p=0; p<controller.getPartCount(); ++p)
+			{
+				if(p == currentPart)
+					continue;
+
+				const auto isLinked = controller.getParameterLinks().isRegionLinked(regionId, currentPart, p);
+
+				regionMenu.addItem(std::string("Link Part ") + std::to_string(p+1), true, isLinked, [this, regionId, isLinked, currentPart, p]
+				{
+					auto& links = m_processor.getController().getParameterLinks();
+
+					if(isLinked)
+						links.unlinkRegion(regionId, currentPart, p);
+					else
+						links.linkRegion(regionId, currentPart, p);
+				});
+			}
+
+			const auto& regionName = regions.find(regionId)->second.getName();
+			linkMenu.addSubMenu("Region '" + regionName + "'", regionMenu);
+		}
+
+		menu.addSubMenu("Parameter Links", linkMenu);
 
 		menu.showMenuAsync({});
 

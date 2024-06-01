@@ -588,6 +588,11 @@ namespace Virus
 		requestArrangement();
 	}
 
+    uint8_t Controller::getPartCount()
+    {
+	    return m_processor.getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
+    }
+
     bool Controller::requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const
     {
         std::map<pluginLib::MidiDataType, uint8_t> data;

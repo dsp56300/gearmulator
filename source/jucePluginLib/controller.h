@@ -9,6 +9,8 @@
 
 #include <string>
 
+#include "parameterlinks.h"
+
 namespace juce
 {
 	class AudioProcessor;
@@ -33,6 +35,7 @@ namespace pluginLib
         juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
         Parameter* getParameter(uint32_t _index) const;
         Parameter* getParameter(uint32_t _index, uint8_t _part) const;
+        Parameter* getParameter(const std::string& _name, uint8_t _part) const;
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
@@ -56,6 +59,7 @@ namespace pluginLib
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
+		virtual uint8_t getPartCount() { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
 		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;
@@ -69,6 +73,7 @@ namespace pluginLib
 		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
 
 		ParameterLocking& getParameterLocking() { return m_locking; }
+		ParameterLinks& getParameterLinks() { return m_parameterLinks; }
 
 		std::set<std::string> getRegionIdsForParameter(const Parameter* _param) const;
 		std::set<std::string> getRegionIdsForParameter(const std::string& _name) const;
@@ -139,5 +144,6 @@ namespace pluginLib
 		std::array<ParameterList, 16> m_paramsByParamType;
 		std::vector<std::unique_ptr<Parameter>> m_synthInternalParamList;
 		ParameterLocking m_locking;
+		ParameterLinks m_parameterLinks;
 	};
 }

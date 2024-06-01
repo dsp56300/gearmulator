@@ -129,6 +129,9 @@ namespace Virus
 		bool parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source) override;
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
         void onStateLoaded() override;
+
+		uint8_t getPartCount() override;
+
 		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
 		std::function<void(virusLib::BankNumber _bank, uint32_t _program)> onRomPatchReceived = {};

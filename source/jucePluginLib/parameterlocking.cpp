@@ -93,9 +93,7 @@ namespace pluginLib
 
 		for (const auto& paramName : paramNames)
 		{
-			const auto idx = m_controller.getParameterIndexByName(paramName);
-			assert(idx != Controller::InvalidParameterIndex);
-			const auto* p = m_controller.getParameter(idx, _part);
+			const auto* p = m_controller.getParameter(paramName, _part);
 			assert(p != nullptr);
 			results.insert(p);
 		}
@@ -129,9 +127,7 @@ namespace pluginLib
 			if(!_locked && isParameterLocked(_part, param.first))
 				continue;
 
-			const auto idx = m_controller.getParameterIndexByName(param.first);
-
-			if(auto* p = m_controller.getParameter(idx, _part))
+			if(auto* p = m_controller.getParameter(param.first, _part))
 				p->setLocked(_locked);
 		}
 	}

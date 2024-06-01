@@ -2,32 +2,29 @@
 
 #include <set>
 
+#include "parameterlistener.h"
+
 namespace pluginLib
 {
-	struct ParameterLink
+	class Parameter;
+
+	class ParameterLink
 	{
-		enum class LinkMode
-		{
-			Absolute,
-			Relative
-		};
+	public:
+		ParameterLink(Parameter* _source, Parameter* _dest);
+		~ParameterLink();
 
-		bool isValid() const
-		{
-			return source != dest;
-		}
+		bool add(Parameter* _target);
+		bool remove(Parameter* _target);
 
-		bool hasConditions() const
-		{
-			return !conditionValues.empty();
-		}
+		bool empty() const { return m_targets.empty(); }
 
-		uint32_t source = 0;
-		uint32_t dest = 0;
+	private:
+		void onSourceValueChanged();
 
-		uint32_t conditionParameter;
-		std::set<uint8_t> conditionValues;
-
-		LinkMode mode = LinkMode::Absolute;
+		Parameter* const m_source;
+		ParameterListener m_sourceListener;
+		std::set<Parameter*> m_targets;
+		int m_sourceValue;
 	};
 }

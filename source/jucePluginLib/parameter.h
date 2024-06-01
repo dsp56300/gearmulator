@@ -7,6 +7,7 @@
 #include "juce_audio_processors/juce_audio_processors.h"
 
 #include "event.h"
+#include "types.h"
 
 namespace pluginLib
 {
@@ -26,6 +27,7 @@ namespace pluginLib
 		};
 
 		Event<Parameter*, bool> onLockedChanged;
+		Event<Parameter*, ParameterLinkType> onLinkStateChanged;
 		Event<Parameter*> onValueChanged;
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId);
@@ -86,6 +88,11 @@ namespace pluginLib
 
 		void setRateLimitMilliseconds(uint32_t _ms);
 
+		void setLinkState(ParameterLinkType _type);
+		void clearLinkState(ParameterLinkType _type);
+
+		ParameterLinkType getLinkState() const { return m_linkType; }
+
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
@@ -109,7 +116,6 @@ namespace pluginLib
 		uint64_t m_lastSendTime = 0;
 		uint32_t m_uniqueDelayCallbackId = 0;
 		bool m_isLocked = false;
+		ParameterLinkType m_linkType = None;
     };
-
-	using ParameterValueChangeListener = EventListener<Parameter*>;
 }

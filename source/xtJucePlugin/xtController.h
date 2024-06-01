@@ -90,6 +90,7 @@ private:
 
 	void timerCallback() override;
 	void onStateLoaded() override;
+	uint8_t getPartCount() override;
 
 	void applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, uint8_t _part) const;
 	void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);

@@ -2,10 +2,11 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../jucePluginLib/parameter.h"
+#include "../jucePluginLib/parameterlistener.h"
 
 namespace pluginLib
 {
+	class Parameter;
 	class Controller;
 }
 
@@ -16,7 +17,7 @@ namespace genericVirusUI
 	class ArpUserPattern : public juce::Component
 	{
 	public:
-		using BoundParam = std::pair<pluginLib::Parameter*, pluginLib::ParameterValueChangeListener>;
+		using BoundParam = std::pair<pluginLib::Parameter*, pluginLib::ParameterListener>;
 
 		ArpUserPattern(const VirusEditor& _editor);
 
