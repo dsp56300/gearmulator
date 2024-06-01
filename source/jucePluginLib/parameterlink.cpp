@@ -32,7 +32,7 @@ namespace pluginLib
 		if(!m_targets.insert(_target).second)
 			return false;
 
-		_target->setUnnormalizedValue(m_sourceValue, Parameter::ChangedBy::Ui);
+		_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
 
 		return true;
 	}

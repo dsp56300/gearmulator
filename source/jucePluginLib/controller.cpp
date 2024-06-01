@@ -313,7 +313,7 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
-	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::ChangedBy _changedBy) const
+	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
 	{
 		bool res = false;
 

@@ -39,7 +39,7 @@ namespace pluginLib
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
-		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::ChangedBy _changedBy) const;
+		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 

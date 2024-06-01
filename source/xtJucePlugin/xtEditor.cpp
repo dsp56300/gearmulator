@@ -199,7 +199,7 @@ namespace xtJucePlugin
 			if(newText.empty())
 				continue;
 
-			p->setValue(p->convertTo0to1(static_cast<float>(v)), pluginLib::Parameter::ChangedBy::Ui);
+			p->setValue(p->convertTo0to1(static_cast<float>(v)), pluginLib::Parameter::Origin::Ui);
 			break;
 		}
 	}

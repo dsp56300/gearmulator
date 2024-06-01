@@ -16,11 +16,11 @@ namespace pluginLib
 	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
 	{
     public:
-		enum class ChangedBy
+		enum class Origin
 		{
 			Unknown,
 			PresetChange,
-			ControlChange,
+			Midi,
 			HostAutomation,
 			Ui,
 			Derived
@@ -46,9 +46,9 @@ namespace pluginLib
 		float getValue() const override { return convertTo0to1(m_value.getValue()); }
 		int getUnnormalizedValue() const { return juce::roundToInt(m_value.getValue()); }
 		void setValue(float _newValue) override;
-		void setValue(float _newValue, ChangedBy _origin);
-		void setUnnormalizedValue(int _newValue, ChangedBy _origin);
-		void setValueFromSynth(int _newValue, bool _notifyHost, ChangedBy _origin);
+		void setValue(float _newValue, Origin _origin);
+		void setUnnormalizedValue(int _newValue, Origin _origin);
+		void setValueFromSynth(int _newValue, bool _notifyHost, Origin _origin);
 
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
 		bool isBoolean() const override { return m_desc.isBool; }
@@ -82,9 +82,9 @@ namespace pluginLib
 
 		const std::set<Parameter*>& getDerivedParameters() { return m_derivedParameters; }
 
-		ChangedBy getChangeOrigin() const { return m_lastValueOrigin; }
+		Origin getChangeOrigin() const { return m_lastValueOrigin; }
 
-		void setValueNotifyingHost(float _value, ChangedBy _origin);
+		void setValueNotifyingHost(float _value, Origin _origin);
 
 		void setRateLimitMilliseconds(uint32_t _ms);
 
@@ -96,11 +96,11 @@ namespace pluginLib
 	private:
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
-		void setDerivedValue(int _value, ChangedBy _origin, bool _notifyHost);
+		void setDerivedValue(int _value, Origin _origin, bool _notifyHost);
 		void sendToSynth();
 		static uint64_t milliseconds();
 		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
-		void forwardToDerived(int _newValue, ChangedBy _origin, bool _notifyHost);
+		void forwardToDerived(int _newValue, Origin _origin, bool _notifyHost);
 
 		int clampValue(int _value) const;
 
@@ -111,7 +111,7 @@ namespace pluginLib
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter
 
 		int m_lastValue{-1};
-		ChangedBy m_lastValueOrigin = ChangedBy::Unknown;
+		Origin m_lastValueOrigin = Origin::Unknown;
 		juce::Value m_value;
 		std::set<Parameter*> m_derivedParameters;
 		bool m_changingDerivedValues = false;

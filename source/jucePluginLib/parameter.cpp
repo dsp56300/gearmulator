@@ -24,7 +24,7 @@ namespace pluginLib
 		onValueChanged(this);
 	}
 
-    void Parameter::setDerivedValue(const int _value, const ChangedBy _origin, const bool _notifyHost)
+    void Parameter::setDerivedValue(const int _value, const Origin _origin, const bool _notifyHost)
     {
 		const int newValue = clampValue(_value);
 
@@ -32,7 +32,7 @@ namespace pluginLib
 			return;
 
 		m_lastValue = newValue;
-		m_lastValueOrigin = ChangedBy::Derived;
+		m_lastValueOrigin = Origin::Derived;
 
 		if(_notifyHost && getDescription().isPublic)
 		{
@@ -40,14 +40,14 @@ namespace pluginLib
 
 			switch (_origin)
 			{
-			case ChangedBy::ControlChange:
-			case ChangedBy::HostAutomation:
-			case ChangedBy::Derived:
-				setValue(v, ChangedBy::Derived); 
+			case Origin::Midi:
+			case Origin::HostAutomation:
+			case Origin::Derived:
+				setValue(v, Origin::Derived); 
 				break;
 			default:
 				beginChangeGesture();
-				setValueNotifyingHost(v, ChangedBy::Derived);
+				setValueNotifyingHost(v, Origin::Derived);
 				endChangeGesture();
 				break;
 			}
@@ -119,7 +119,7 @@ namespace pluginLib
 		return juce::roundToInt(m_range.getRange().clipValue(static_cast<float>(_value)));
     }
 
-    void Parameter::setValueNotifyingHost(const float _value, const ChangedBy _origin)
+    void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
     {
 		setValue(_value, _origin);
 		sendValueChangedMessageToListeners(_value);
@@ -153,10 +153,10 @@ namespace pluginLib
 
     void Parameter::setValue(const float _newValue)
 	{
-		setValue(_newValue, ChangedBy::HostAutomation);
+		setValue(_newValue, Origin::HostAutomation);
 	}
 
-    void Parameter::setValue(const float _newValue, const ChangedBy _origin)
+    void Parameter::setValue(const float _newValue, const Origin _origin)
     {
 		if (m_changingDerivedValues)
 			return;
@@ -170,13 +170,13 @@ namespace pluginLib
 		forwardToDerived(m_value.getValue(), _origin, true);
     }
 
-    void Parameter::setUnnormalizedValue(const int _newValue, const ChangedBy _origin)
+    void Parameter::setUnnormalizedValue(const int _newValue, const Origin _origin)
     {
 		const auto v = convertTo0to1(static_cast<float>(_newValue));
 		setValue(v, _origin);
     }
 
-    void Parameter::forwardToDerived(const int _newValue, ChangedBy _origin, const bool _notifyHost)
+    void Parameter::forwardToDerived(const int _newValue, Origin _origin, const bool _notifyHost)
     {
 		if (m_changingDerivedValues)
 			return;
@@ -189,7 +189,7 @@ namespace pluginLib
 		m_changingDerivedValues = false;
     }
 
-    void Parameter::setValueFromSynth(const int _newValue, const bool _notifyHost, const ChangedBy _origin)
+    void Parameter::setValueFromSynth(const int _newValue, const bool _notifyHost, const Origin _origin)
 	{
 		const auto clampedValue = clampValue(_newValue);
 

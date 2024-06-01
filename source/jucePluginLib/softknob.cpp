@@ -55,14 +55,14 @@ namespace pluginLib
 			return;
 
 		const auto v = m_sourceParam->getValue();
-		m_targetParam->setValue(v, Parameter::ChangedBy::Derived);
+		m_targetParam->setValue(v, Parameter::Origin::Derived);
 	}
 
 	void SoftKnob::onTargetValueChanged()
 	{
 		assert(m_targetParam);
 		const auto v = m_targetParam->getValue();
-		m_sourceParam->setValue(v, Parameter::ChangedBy::Derived);
+		m_sourceParam->setValue(v, Parameter::Origin::Derived);
 	}
 
 	void SoftKnob::bind()

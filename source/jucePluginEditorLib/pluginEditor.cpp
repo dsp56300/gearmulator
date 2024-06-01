@@ -442,7 +442,7 @@ namespace jucePluginEditorLib
 		if(_paramValues.empty())
 			return false;
 
-		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::ChangedBy::Ui);
+		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::Origin::Ui);
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

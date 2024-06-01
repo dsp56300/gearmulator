@@ -24,17 +24,17 @@ namespace pluginLib
 
 	void ParameterBinding::MouseListener::mouseDrag(const juce::MouseEvent& event)
 	{
-		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::Ui);
+		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::Origin::Ui);
 	}
 
 	void ParameterBinding::MouseListener::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 	{
-		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::ChangedBy::Ui);
+		m_param->setValueNotifyingHost(m_param->convertTo0to1(static_cast<float>(m_slider->getValue())), Parameter::Origin::Ui);
 	}
 
 	void ParameterBinding::MouseListener::mouseDoubleClick(const juce::MouseEvent& event)
 	{
-		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::ChangedBy::Ui);
+		m_param->setValueNotifyingHost(m_param->getDefaultValue(), Parameter::Origin::Ui);
 	}
 
 	ParameterBinding::~ParameterBinding()
@@ -165,7 +165,7 @@ namespace pluginLib
 			if(v->getDescription().isPublic)
 			{
 				v->beginChangeGesture();
-				v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)), Parameter::ChangedBy::Ui);
+				v->setValueNotifyingHost(v->convertTo0to1(static_cast<float>(id - 1)), Parameter::Origin::Ui);
 				v->endChangeGesture();
 			}
 			v->getValueObject().setValue(id - 1);
