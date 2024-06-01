@@ -17,7 +17,9 @@ namespace jucePluginEditorLib
 		enum class Type
 		{
 			Lock,
-			Link
+			Link,
+
+			Count
 		};
 
 		using ImageData = std::pair<const char*, size_t>;	// pointer to data, data size
