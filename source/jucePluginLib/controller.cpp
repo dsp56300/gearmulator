@@ -29,7 +29,7 @@ namespace pluginLib
 				nullptr, juce::ModalCallbackFunction::create([](int){}));
 		}
 
-		startTimer(50);
+		startTimer(10);
 	}
 
 	Controller::~Controller()
