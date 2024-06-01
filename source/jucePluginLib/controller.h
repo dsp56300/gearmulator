@@ -69,9 +69,13 @@ namespace pluginLib
 		virtual void onStateLoaded() = 0;
 
         // this is called by the plug-in on audio thread!
-        void addPluginMidiOut(const std::vector<synthLib::SMidiEvent>&);
-		void getPluginMidiOut(std::vector<synthLib::SMidiEvent>&);
+        void enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>&);
 
+	private:
+		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
+		void processMidiMessages();
+
+	public:
 		ParameterLocking& getParameterLocking() { return m_locking; }
 		ParameterLinks& getParameterLinks() { return m_parameterLinks; }
 
@@ -135,9 +139,10 @@ namespace pluginLib
 
 		uint8_t m_currentPart = 0;
 
-		std::mutex m_pluginMidiOutLock;
-        std::vector<synthLib::SMidiEvent> m_pluginMidiOut;
-        std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
+		std::mutex m_midiMessagesLock;
+        std::vector<synthLib::SMidiEvent> m_midiMessages;
+
+		std::map<const Parameter*, std::unique_ptr<SoftKnob>> m_softKnobs;
 
 	protected:
 		// tries to find synth param in both internal and host

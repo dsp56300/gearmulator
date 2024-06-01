@@ -87,7 +87,7 @@ namespace pluginLib
 			syx.push_back(0xf7);
 			sm.sysex = std::move(syx);
 
-			getController().parseMidiMessage(sm);
+			getController().enqueueMidiMessages({sm});
 			addMidiEvent(sm);
 		}
 		else
@@ -108,7 +108,7 @@ namespace pluginLib
 				sm.sysex = syx;
 			}
 
-			getController().parseMidiMessage(sm);
+			getController().enqueueMidiMessages({sm});
 			addMidiEvent(sm);
 		}
 	}
@@ -512,7 +512,7 @@ namespace pluginLib
 				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
 				{
 					// forward to UI to react to control input changes that should move knobs
-					getController().addPluginMidiOut({ev});
+					getController().enqueueMidiMessages({ev});
 				}
 			}
 
@@ -554,7 +554,7 @@ namespace pluginLib
 
 	    if (!m_midiOut.empty())
 		{
-			getController().addPluginMidiOut(m_midiOut);
+			getController().enqueueMidiMessages(m_midiOut);
 
 		    for (auto& e : m_midiOut)
 		    {

@@ -240,11 +240,7 @@ namespace pluginLib
 
 	void Controller::timerCallback()
 	{
-	    std::vector<synthLib::SMidiEvent> events;
-	    getPluginMidiOut(events);
-
-	    for (const auto& e : events)
-		    parseMidiMessage(e);
+		processMidiMessages();
 	}
 
 	bool Controller::sendSysEx(const std::string& _packetName) const
@@ -367,7 +363,7 @@ namespace pluginLib
 			auto* p = getParameter(index.second, _part);
 			if(!p)
 				return false;
-			auto* largestP = p;
+			const auto* largestP = p;
 			// we might have more than 1 parameter per index, use the one with the largest range
 			const auto& derived = p->getDerivedParameters();
 			for (const auto& parameter : derived)
@@ -481,17 +477,29 @@ namespace pluginLib
 		return parseSysexMessage(_e.sysex, _e.source);
 	}
 
-	void Controller::addPluginMidiOut(const std::vector<synthLib::SMidiEvent>& _events)
+	void Controller::enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>& _events)
 	{
-        const std::lock_guard l(m_pluginMidiOutLock);
-        m_pluginMidiOut.insert(m_pluginMidiOut.end(), _events.begin(), _events.end());
+		if(_events.empty())
+			return;
+
+        const std::lock_guard l(m_midiMessagesLock);
+        m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
 	}
 
-	void Controller::getPluginMidiOut(std::vector<synthLib::SMidiEvent>& _events)
+	void Controller::getMidiMessages(std::vector<synthLib::SMidiEvent>& _events)
 	{
-		const std::lock_guard l(m_pluginMidiOutLock);
-        std::swap(m_pluginMidiOut, _events);
-		m_pluginMidiOut.clear();
+		const std::lock_guard l(m_midiMessagesLock);
+        std::swap(m_midiMessages, _events);
+		m_midiMessages.clear();
+	}
+
+	void Controller::processMidiMessages()
+	{
+	    std::vector<synthLib::SMidiEvent> events;
+	    getMidiMessages(events);
+
+	    for (const auto& e : events)
+		    parseMidiMessage(e);
 	}
 
 	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const
