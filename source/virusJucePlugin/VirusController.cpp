@@ -166,10 +166,10 @@ namespace Virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, true, pluginLib::Parameter::Origin::Midi);
+				param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, true, pluginLib::Parameter::Origin::Midi);
+			param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 		// TODO:
         /**
          If a
@@ -454,7 +454,7 @@ namespace Virus
 	            auto* p = getParameter(it->first.second, ch);
 
                 if(locked.find(p->getDescription().name) == locked.end())
-					p->setValueFromSynth(it->second, false, pluginLib::Parameter::Origin::PresetChange);
+					p->setValueFromSynth(it->second, pluginLib::Parameter::Origin::PresetChange);
             }
 
             getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
@@ -535,7 +535,7 @@ namespace Virus
                 if(desc.page != virusLib::PAGE_C)
                     continue;
 
-                param->setValueFromSynth(value, false, pluginLib::Parameter::Origin::PresetChange);
+                param->setValueFromSynth(value, pluginLib::Parameter::Origin::PresetChange);
 			}
 
 			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
@@ -563,7 +563,7 @@ namespace Virus
 
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)
-			p->setValueFromSynth(m.c, true, pluginLib::Parameter::Origin::Midi);
+			p->setValueFromSynth(m.c, pluginLib::Parameter::Origin::Midi);
 
 		return true;
 	}

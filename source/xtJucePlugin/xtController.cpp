@@ -253,10 +253,10 @@ void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& 
 	for (const auto& it : _params)
 	{
 		auto* p = getParameter(it.first.second, _part);
-		p->setValueFromSynth(it.second, false, pluginLib::Parameter::Origin::PresetChange);
+		p->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
 
 		for (const auto& derivedParam : p->getDerivedParameters())
-			derivedParam->setValueFromSynth(it.second, false, pluginLib::Parameter::Origin::PresetChange);
+			derivedParam->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
 	}
 
 	getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
@@ -376,7 +376,7 @@ bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiE
 	    auto& params = findSynthParam(part, page, index);
 
 	    for (auto& param : params)
-		    param->setValueFromSynth(value, true, pluginLib::Parameter::Origin::Midi);
+		    param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
 
 	    LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
     }

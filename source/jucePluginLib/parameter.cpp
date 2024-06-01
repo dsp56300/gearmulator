@@ -176,29 +176,21 @@ namespace pluginLib
 		setValue(v, _origin);
     }
 
-    void Parameter::forwardToDerived(const int _newValue, Origin _origin, const bool _notifyHost)
-    {
-		if (m_changingDerivedValues)
-			return;
-
-		m_changingDerivedValues = true;
-
-		for (const auto& p : m_derivedParameters)
-			p->setDerivedValue(_newValue, _origin, _notifyHost);
-
-		m_changingDerivedValues = false;
-    }
-
-    void Parameter::setValueFromSynth(const int _newValue, const bool _notifyHost, const Origin _origin)
+    void Parameter::setValueFromSynth(const int _newValue, const Origin _origin)
 	{
 		const auto clampedValue = clampValue(_newValue);
+
+		// we do not want to send an excessive amount of value changes to the host if a preset is
+		// changed, we use updateHostDisplay() (see caller) to inform the host to read all
+		// parameters again instead
+		const auto notifyHost = _origin != Origin::PresetChange;
 
 		if (clampedValue != m_lastValue)
 		{
 			m_lastValue = clampedValue;
 			m_lastValueOrigin = _origin;
 
-			if (_notifyHost && getDescription().isPublic)
+			if (notifyHost && getDescription().isPublic)
 			{
 				beginChangeGesture();
 				const auto v = convertTo0to1(static_cast<float>(clampedValue));
@@ -211,8 +203,21 @@ namespace pluginLib
 			}
 		}
 
-		forwardToDerived(_newValue, _origin, _notifyHost);
+		forwardToDerived(_newValue, _origin, notifyHost);
 	}
+
+    void Parameter::forwardToDerived(const int _newValue, Origin _origin, const bool _notifyHost)
+    {
+		if (m_changingDerivedValues)
+			return;
+
+		m_changingDerivedValues = true;
+
+		for (const auto& p : m_derivedParameters)
+			p->setDerivedValue(_newValue, _origin, _notifyHost);
+
+		m_changingDerivedValues = false;
+    }
 
 	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
 	{

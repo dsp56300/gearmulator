@@ -48,7 +48,7 @@ namespace pluginLib
 		void setValue(float _newValue) override;
 		void setValue(float _newValue, Origin _origin);
 		void setUnnormalizedValue(int _newValue, Origin _origin);
-		void setValueFromSynth(int _newValue, bool _notifyHost, Origin _origin);
+		void setValueFromSynth(int _newValue, Origin _origin);
 
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
 		bool isBoolean() const override { return m_desc.isBool; }
