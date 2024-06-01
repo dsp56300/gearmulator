@@ -253,11 +253,13 @@ void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& 
 	for (const auto& it : _params)
 	{
 		auto* p = getParameter(it.first.second, _part);
-		p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+		p->setValueFromSynth(it.second, false, pluginLib::Parameter::ChangedBy::PresetChange);
 
 		for (const auto& derivedParam : p->getDerivedParameters())
-			derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+			derivedParam->setValueFromSynth(it.second, false, pluginLib::Parameter::ChangedBy::PresetChange);
 	}
+
+	getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 }
 
 void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)

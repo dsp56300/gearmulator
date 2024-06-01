@@ -85,6 +85,9 @@ namespace pluginLib
 			const auto it = m_softKnobs.find(_parameter);
 			return it->second.get();
 		}
+
+		Processor& getProcessor() const { return m_processor; }
+
 	protected:
 		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
 		void registerParams(juce::AudioProcessor& _processor);

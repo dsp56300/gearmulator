@@ -190,16 +190,18 @@ bool Controller::setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values,
     return setString(_values, "Category", 4, _value);
 }
 
-void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part)
+void Controller::applyPatchParameters(const pluginLib::MidiPacket::ParamValues& _params, const uint8_t _part) const
 {
 	for (const auto& it : _params)
 	{
 		auto* p = getParameter(it.first.second, _part);
-		p->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+		p->setValueFromSynth(it.second, false, pluginLib::Parameter::ChangedBy::PresetChange);
 
 		for (const auto& derivedParam : p->getDerivedParameters())
-			derivedParam->setValueFromSynth(it.second, true, pluginLib::Parameter::ChangedBy::PresetChange);
+			derivedParam->setValueFromSynth(it.second, false, pluginLib::Parameter::ChangedBy::PresetChange);
 	}
+
+	getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 }
 
 void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params)

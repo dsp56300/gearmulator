@@ -457,7 +457,7 @@ namespace Virus
 					p->setValueFromSynth(it->second, false, pluginLib::Parameter::ChangedBy::PresetChange);
             }
 
-            m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+            getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 
             if(m_currentPresetSource[ch] != PresetSource::Browser)
             {
@@ -538,7 +538,7 @@ namespace Virus
                 param->setValueFromSynth(value, false, pluginLib::Parameter::ChangedBy::PresetChange);
 			}
 
-			m_processor.updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 		}
     }
 
