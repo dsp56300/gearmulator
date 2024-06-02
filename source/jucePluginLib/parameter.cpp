@@ -172,7 +172,15 @@ namespace pluginLib
 
 		m_lastValueOrigin = _origin;
 		m_value.setValue(clampValue(_newValue));
-		sendToSynth();
+
+		if(_origin != Origin::Derived)
+		{
+			sendToSynth();
+		}
+		else
+		{
+			m_value.setValue(_newValue);
+		}
 
 		forwardToDerived(_newValue);
     }
