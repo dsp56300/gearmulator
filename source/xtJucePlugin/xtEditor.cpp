@@ -199,7 +199,7 @@ namespace xtJucePlugin
 			if(newText.empty())
 				continue;
 
-			p->setUnnormalizedValue(v, pluginLib::Parameter::Origin::Ui);
+			p->setUnnormalizedValueNotifyingHost(v, pluginLib::Parameter::Origin::Ui);
 			break;
 		}
 	}
