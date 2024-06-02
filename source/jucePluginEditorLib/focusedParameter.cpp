@@ -7,6 +7,8 @@
 
 namespace jucePluginEditorLib
 {
+	constexpr int g_defaultDisplayTimeout = 1500;	// milliseconds
+
 	FocusedParameter::FocusedParameter(const pluginLib::Controller& _controller, const pluginLib::ParameterBinding& _parameterBinding, const genericUI::Editor& _editor)
 		: m_parameterBinding(_parameterBinding)
 		, m_controller(_controller)
@@ -134,11 +136,8 @@ namespace jucePluginEditorLib
 
 		m_tooltip->initialize(_component, value);
 
-		if(!m_tooltip->isValid())
-			return;
+		const auto tooltipTime = m_tooltip && m_tooltip->isValid() ? m_tooltip->getTooltipDisplayTime() : g_defaultDisplayTimeout;
 
-		const auto tooltipTime = m_tooltip->getTooltipDisplayTime();
-
-		startTimer(tooltipTime == 0 ? 1500 : static_cast<int>(tooltipTime));
+		startTimer(tooltipTime == 0 ? g_defaultDisplayTimeout : static_cast<int>(tooltipTime));
 	}
 }
