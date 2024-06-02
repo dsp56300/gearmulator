@@ -24,7 +24,7 @@ namespace pluginLib
 		onValueChanged(this);
 	}
 
-    void Parameter::setDerivedValue(const int _value, const Origin _origin, const bool _notifyHost)
+    void Parameter::setDerivedValue(const int _value)
     {
 		const int newValue = clampValue(_value);
 
@@ -34,28 +34,7 @@ namespace pluginLib
 		m_lastValue = newValue;
 		m_lastValueOrigin = Origin::Derived;
 
-		if(_notifyHost && getDescription().isPublic)
-		{
-			switch (_origin)
-			{
-			case Origin::Midi:
-			case Origin::HostAutomation:
-			case Origin::Derived:
-			case Origin::PresetChange:
-				setUnnormalizedValue(newValue, Origin::Derived); 
-				break;
-			case Origin::Unknown:
-			case Origin::Ui:
-				beginChangeGesture();
-				setUnnormalizedValueNotifyingHost(newValue, Origin::Derived);
-				endChangeGesture();
-				break;
-			}
-		}
-		else
-		{
-			m_value.setValue(newValue);
-		}
+		m_value.setValue(newValue);
 	}
 
     void Parameter::sendToSynth()
@@ -121,18 +100,21 @@ namespace pluginLib
 
     void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
 		sendValueChangedMessageToListeners(_value);
 	}
 
     void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(_value), _origin);
 		sendValueChangedMessageToListeners(convertTo0to1(_value));
     }
 
     void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(_value, _origin);
 		sendValueChangedMessageToListeners(convertTo0to1(static_cast<float>(_value)));
     }
@@ -158,6 +140,21 @@ namespace pluginLib
 			onLinkStateChanged(this, m_linkType);
     }
 
+    void Parameter::pushChangeGesture()
+    {
+		if(!m_changeGestureCount)
+			beginChangeGesture();
+		++m_changeGestureCount;
+    }
+
+    void Parameter::popChangeGesture()
+    {
+		assert(m_changeGestureCount > 0);
+		--m_changeGestureCount;
+		if(!m_changeGestureCount)
+			endChangeGesture();
+    }
+
     bool Parameter::isMetaParameter() const
     {
 	    return !m_derivedParameters.empty();
@@ -177,7 +174,7 @@ namespace pluginLib
 		m_value.setValue(clampValue(_newValue));
 		sendToSynth();
 
-		forwardToDerived(_newValue, _origin, true);
+		forwardToDerived(_newValue);
     }
 
     void Parameter::setValueFromSynth(const int _newValue, const Origin _origin)
@@ -196,9 +193,7 @@ namespace pluginLib
 
 			if (notifyHost && getDescription().isPublic)
 			{
-				beginChangeGesture();
 				setUnnormalizedValueNotifyingHost(clampedValue, _origin);
-				endChangeGesture();
 			}
 			else
 			{
@@ -206,10 +201,10 @@ namespace pluginLib
 			}
 		}
 
-		forwardToDerived(_newValue, _origin, notifyHost);
+		forwardToDerived(_newValue);
 	}
 
-    void Parameter::forwardToDerived(const int _newValue, const Origin _origin, const bool _notifyHost)
+    void Parameter::forwardToDerived(const int _newValue)
     {
 		if (m_changingDerivedValues)
 			return;
@@ -217,7 +212,7 @@ namespace pluginLib
 		m_changingDerivedValues = true;
 
 		for (const auto& p : m_derivedParameters)
-			p->setDerivedValue(_newValue, _origin, _notifyHost);
+			p->setDerivedValue(_newValue);
 
 		m_changingDerivedValues = false;
     }

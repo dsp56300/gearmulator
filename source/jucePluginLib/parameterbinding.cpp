@@ -14,12 +14,12 @@ namespace pluginLib
 
 	void ParameterBinding::MouseListener::mouseDown(const juce::MouseEvent& event)
 	{
-		m_param->beginChangeGesture();
+		m_param->pushChangeGesture();
 	}
 
 	void ParameterBinding::MouseListener::mouseUp(const juce::MouseEvent& event)
 	{
-		m_param->endChangeGesture();
+		m_param->popChangeGesture();
 	}
 
 	void ParameterBinding::MouseListener::mouseDrag(const juce::MouseEvent& event)
@@ -164,9 +164,7 @@ namespace pluginLib
 
 			if(v->getDescription().isPublic)
 			{
-				v->beginChangeGesture();
 				v->setUnnormalizedValueNotifyingHost(id - 1, Parameter::Origin::Ui);
-				v->endChangeGesture();
 			}
 			v->getValueObject().setValue(id - 1);
 		};

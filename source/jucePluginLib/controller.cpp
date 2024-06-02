@@ -333,7 +333,7 @@ namespace pluginLib
 			if(auto* param = getParameter(name, _part))
 			{
 				res = true;
-				param->setUnnormalizedValue(value, _changedBy);
+				param->setUnnormalizedValueNotifyingHost(value, _changedBy);
 			}
 		}
 
