@@ -48,6 +48,10 @@ namespace pluginLib
 		void setValue(float _newValue) override;
 
 		void setUnnormalizedValue(int _newValue, Origin _origin);
+		void setValueNotifyingHost(float _value, Origin _origin);
+		void setUnnormalizedValueNotifyingHost(float _value, Origin _origin);
+		void setUnnormalizedValueNotifyingHost(int _value, Origin _origin);
+
 		void setValueFromSynth(int _newValue, Origin _origin);
 
 		bool isDiscrete() const override { return m_desc.isDiscrete; }
@@ -84,10 +88,6 @@ namespace pluginLib
 
 		Origin getChangeOrigin() const { return m_lastValueOrigin; }
 
-		void setValueNotifyingHost(float _value, Origin _origin);
-		void setUnnormalizedValueNotifyingHost(float _value, Origin _origin);
-		void setUnnormalizedValueNotifyingHost(int _value, Origin _origin);
-
 		void setRateLimitMilliseconds(uint32_t _ms);
 
 		void setLinkState(ParameterLinkType _type);
@@ -116,11 +116,11 @@ namespace pluginLib
 
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
-		void setDerivedValue(int _value, Origin _origin, bool _notifyHost);
+		void setDerivedValue(const int _value);
 		void sendToSynth();
 		static uint64_t milliseconds();
 		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
-		void forwardToDerived(int _newValue, Origin _origin, bool _notifyHost);
+		void forwardToDerived(const int _newValue);
 
 		int clampValue(int _value) const;
 
