@@ -46,9 +46,9 @@ namespace pluginLib
 				break;
 			case Origin::Unknown:
 			case Origin::Ui:
-				beginChangeGesture();
-				setUnnormalizedValueNotifyingHost(newValue, Origin::Derived);
-				endChangeGesture();
+				{
+					setUnnormalizedValueNotifyingHost(newValue, Origin::Derived);
+				}
 				break;
 			}
 		}
@@ -121,18 +121,21 @@ namespace pluginLib
 
     void Parameter::setValueNotifyingHost(const float _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
 		sendValueChangedMessageToListeners(_value);
 	}
 
     void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(_value), _origin);
 		sendValueChangedMessageToListeners(convertTo0to1(_value));
     }
 
     void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
     {
+		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(_value, _origin);
 		sendValueChangedMessageToListeners(convertTo0to1(static_cast<float>(_value)));
     }
@@ -158,6 +161,21 @@ namespace pluginLib
 			onLinkStateChanged(this, m_linkType);
     }
 
+    void Parameter::pushChangeGesture()
+    {
+		if(!m_changeGestureCount)
+			beginChangeGesture();
+		++m_changeGestureCount;
+    }
+
+    void Parameter::popChangeGesture()
+    {
+		assert(m_changeGestureCount > 0);
+		--m_changeGestureCount;
+		if(!m_changeGestureCount)
+			endChangeGesture();
+    }
+
     bool Parameter::isMetaParameter() const
     {
 	    return !m_derivedParameters.empty();
@@ -173,6 +191,8 @@ namespace pluginLib
 		if (m_changingDerivedValues)
 			return;
 
+		if(_origin == Origin::Midi)
+			int foo=0;
 		m_lastValueOrigin = _origin;
 		m_value.setValue(clampValue(_newValue));
 		sendToSynth();
@@ -196,9 +216,7 @@ namespace pluginLib
 
 			if (notifyHost && getDescription().isPublic)
 			{
-				beginChangeGesture();
 				setUnnormalizedValueNotifyingHost(clampedValue, _origin);
-				endChangeGesture();
 			}
 			else
 			{

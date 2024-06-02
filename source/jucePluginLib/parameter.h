@@ -95,7 +95,25 @@ namespace pluginLib
 
 		ParameterLinkType getLinkState() const { return m_linkType; }
 
+		void pushChangeGesture();
+		void popChangeGesture();
+
 	private:
+
+		struct ScopedChangeGesture
+		{
+			explicit ScopedChangeGesture(Parameter& _p) : m_parameter(_p)
+			{
+				_p.pushChangeGesture();
+			}
+			~ScopedChangeGesture()
+			{
+				m_parameter.popChangeGesture();
+			}
+		private:
+			Parameter& m_parameter;
+		};
+
         static juce::String genId(const Description &d, int part, int uniqueId);
 		void valueChanged(juce::Value &) override;
 		void setDerivedValue(int _value, Origin _origin, bool _notifyHost);
@@ -124,5 +142,6 @@ namespace pluginLib
 
 		bool m_isLocked = false;
 		ParameterLinkType m_linkType = None;
+		uint32_t m_changeGestureCount = 0;
     };
 }
