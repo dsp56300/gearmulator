@@ -28,6 +28,14 @@ namespace jucePluginEditorLib
 	class FocusedParameter : juce::Timer
 	{
 	public:
+		enum class Priority
+		{
+			None,
+			Low,
+			Medium,
+			High
+		};
+
 		FocusedParameter(const pluginLib::Controller& _controller, const pluginLib::ParameterBinding& _parameterBinding, const genericUI::Editor& _editor);
 		~FocusedParameter() override;
 
@@ -37,14 +45,20 @@ namespace jucePluginEditorLib
 
 	private:
 		void timerCallback() override;
-		void updateControlLabel(juce::Component* _component);
+		void updateControlLabel(juce::Component* _component, Priority _prio);
+		void updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param);
+		void updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param, Priority _priority);
+		const pluginLib::Parameter* getParameterFromComponent(juce::Component* _component) const;
 
 		const pluginLib::ParameterBinding& m_parameterBinding;
 		const pluginLib::Controller& m_controller;
 
 		juce::Label* m_focusedParameterName = nullptr;
 		juce::Label* m_focusedParameterValue = nullptr;
+
 		std::unique_ptr<FocusedParameterTooltip> m_tooltip;
+
 		std::map<pluginLib::Parameter*, pluginLib::ParameterListener> m_boundParameters;
+		Priority m_currentPriority = Priority::None;
 	};
 }
