@@ -11,6 +11,8 @@
 
 #include "../mqLib/mqbuildconfig.h"
 
+#include "../jucePluginEditorLib/focusedParameter.h"
+
 namespace mqJucePlugin
 {
 	static constexpr uint32_t PlayModeListenerId = 1;

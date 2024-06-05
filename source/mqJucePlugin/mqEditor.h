@@ -1,7 +1,6 @@
 #pragma once
 
 #include "../jucePluginEditorLib/pluginEditor.h"
-#include "../jucePluginEditorLib/focusedParameter.h"
 
 class mqPartSelect;
 class Controller;
