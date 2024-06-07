@@ -71,6 +71,9 @@ namespace pluginLib
         // this is called by the plug-in on audio thread!
         void enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>&);
 
+		void loadChunkData(synthLib::ChunkReader& _cr);
+		void saveChunkData(synthLib::BinaryStream& s);
+
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
 		void processMidiMessages();

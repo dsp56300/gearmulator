@@ -130,6 +130,40 @@ namespace pluginLib
 		return m_linkedRegions.find(link) != m_linkedRegions.end();
 	}
 
+	void ParameterLinks::saveChunkData(synthLib::BinaryStream& s) const
+	{
+		if(m_linkedRegions.empty())
+			return;
+
+		synthLib::ChunkWriter cw(s, "PLNK", 1);
+
+		s.write(static_cast<uint32_t>(m_linkedRegions.size()));
+
+		for (const auto& linkedRegion : m_linkedRegions)
+		{
+			s.write(linkedRegion.regionId);
+			s.write(linkedRegion.sourcePart);
+			s.write(linkedRegion.destPart);
+		}
+	}
+
+	void ParameterLinks::loadChunkData(synthLib::ChunkReader& _cr)
+	{
+		_cr.add("PLNK", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		{
+			const uint32_t count = _binaryStream.read<uint32_t>();
+
+			for(uint32_t i=0; i<count; ++i)
+			{
+				const auto regionId = _binaryStream.readString();
+				const auto sourcePart = _binaryStream.read<uint8_t>();
+				const auto destPart = _binaryStream.read<uint8_t>();
+
+				linkRegion(regionId, sourcePart, destPart);
+			}
+		});
+	}
+
 	bool ParameterLinks::updateRegionLinks(const ParameterRegion& _region, const uint8_t _partSource, const uint8_t _partDest, const bool _enableLink)
 	{
 		bool res = false;
