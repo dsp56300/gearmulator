@@ -1,5 +1,75 @@
 Release Notes 
 
+1.3.15
+
+Framework:
+
+- [Imp] Patches can now be imported via drag & drop. You can drag .mid, .syx, 
+        .vstpreset, .fxb, .fxp files into the plugin to load them. You can drop
+        patches on a part to load them directly, drop them on the patch manager
+        data sources to add them as new source or drop them onto the user banks
+        area to add a new user bank or add them to an existing one
+- [Imp] Patches can now be dragged to external applications or the desktop. This
+        will export MIDI files. You can drag parts, data sources or an arbitrary
+        number of selected patches from the patch list
+- [Imp] You can now drag parts from one instances to a part of another instance
+        of the same plugin kind to copy/paste patches across instances
+- [Imp] The patch of the currently selected part can now be copied & pasted via 
+        Ctrl/Cmd C/V or via context menu. This copying is text based so that you 
+        can share presets easily in forums etc.
+- [Imp] A data source can now be dragged onto tags to modify all patches at once
+- [Imp] Parameters now have their own context menu. In this context menu you can:
+        - Lock/unlock a region
+        - Copy/paste a region
+        - Link/unlink regions across parts
+- [Imp] Added parameter linking across parts. If you link a region of a part to 
+        another part, knob movements/automation data/MIDI controls for the 
+        source part are forwarded to all parts linked. This eases automation
+        for layered instruments
+- [Imp] Region locks are now per part instead of being global
+- [Imp] Region locks are indicated by displaying an overlay next to each locked
+        parameter.
+- [Imp] Rotaries operated via mouse wheel now increment/decrement in single 
+        steps while shift is pressed
+- [Imp] Tooltip duration shortened to 1.5 seconds (mkruselj)
+- [Imp] Parameter tooltips are now constrained to the plugin window (mkruselj)
+
+- [Fix] Patch export as .mid created broken midi files
+- [Fix] Corrupted data was sent to physical midi output (if selected) at plugin startup
+- [Fix] Parameter change information in LCDs and tooltips were flickering if one knob
+        was modified via mouse while another one was modified via automation or MIDI
+
+Osirus/OsTIrus:
+
+- [Imp] Added support to read presets from .vtibackup files in patch manager
+- [Imp] Support extraction of multiple preset formats from a single file, e.g. if a
+        Cubase .cpr is used as data source, both TI and Powercore presets are now
+        extracted
+
+- [Fix] MIDI Control Change "Bank Select MSB" destroyed the active preset, causing 
+        it to sound different when reloaded
+- [Fix] A MIDI feedback could occur between emulator and hardware connected via physical
+        MIDI ports
+- [Fix] Remote control via hardware was not possible if hardware is running in Single 
+        mode and Page A parameters were sent as control changes
+- [Fix] Editor didn't update knobs if parameters are modified via MIDI control changes 
+        by using the physical midi input port
+
+OsTIrus:
+
+- [Fix] Arpeggiator pattern was always displayed for part 1 regardless of part selection
+
+Vavra:
+
+- [Fix] Excessive parameter changes were sent to host when loading a preset
+
+Xenia:
+
+- [Imp] UI polishing in various areas (mkruselj)
+- [Imp] Improve parameter names & values (mkruselj)
+
+- [Fix] Excessive parameter changes were sent to host when loading a preset
+
 1.3.14
 
 Framework:
