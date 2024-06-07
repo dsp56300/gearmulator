@@ -445,6 +445,14 @@ namespace jucePluginEditorLib
 		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::Origin::Ui);
 	}
 
+	void Editor::parentHierarchyChanged()
+	{
+		genericUI::Editor::parentHierarchyChanged();
+
+		if(isShowing())
+			m_overlays.refreshAll();
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())

@@ -33,6 +33,12 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	void ParameterOverlays::refreshAll() const
+	{
+		for (const auto& overlay : m_overlays)
+			overlay.second->refresh();
+	}
+
 	void ParameterOverlays::onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter)
 	{
 		registerComponent(_parameter.component);
