@@ -58,6 +58,10 @@ namespace pluginLib
 
 		m_sourceValue = newSourceValue;
 
+		// do not apply to linked parameters if the change is caused by a preset load
+		if(m_source->getChangeOrigin() == Parameter::Origin::PresetChange)
+			return;
+
 		const auto origin = m_source->getChangeOrigin();
 
 		for (auto* p : m_targets)
