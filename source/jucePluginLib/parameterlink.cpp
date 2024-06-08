@@ -49,19 +49,22 @@ namespace pluginLib
 
 	void ParameterLink::onSourceValueChanged()
 	{
-		const auto newValue = m_source->getUnnormalizedValue();
+		const auto newSourceValue = m_source->getUnnormalizedValue();
 
-		if(newValue == m_sourceValue)
+		if(newSourceValue == m_sourceValue)
 			return;
 
-		m_sourceValue = newValue;
+		const auto sourceDiff = newSourceValue - m_sourceValue;
+
+		m_sourceValue = newSourceValue;
 
 		const auto origin = m_source->getChangeOrigin();
 
 		for (auto* p : m_targets)
 		{
-			const auto v = p->getDescription().range.clipValue(newValue);
-			p->setUnnormalizedValue(v, origin);
+			const auto newTargetValue = p->getUnnormalizedValue() + sourceDiff;
+			const auto clampedTargetValue = p->getDescription().range.clipValue(newTargetValue);
+			p->setUnnormalizedValue(clampedTargetValue, origin);
 		}
 	}
 }
