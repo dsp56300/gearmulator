@@ -522,6 +522,119 @@
 		{"page":40, "index":2, "name":"ControlY"},
 		{"page":40, "index":3, "name":"ControlZ"}
  	],
+	"regions":
+	[
+		{	"id":"oscA", "name": "Oscillator 1",
+			"parameters":["O1Octave", "O1Semi", "O1Detune", "O1BendRange", "O1KeyTrack", "O1FmAmount"]
+		},
+		{	"id":"oscB", "name": "Oscillator 2",
+			"parameters":["O2Octave", "O2Semi", "O2Detune", "O2Sync", "O2BendRange", "O2KeyTrack", "O2Link"]
+		},
+		{	"id":"waveA", "name": "Wave 1",
+			"parameters":["W1StartW", "W1StartP", "W1EnvAmount", "W1EnvVelAmount", "W1Keytrack", "W1Limit"]
+		},
+		{	"id":"waveB", "name": "Wave 2",
+			"parameters":["W2StartW", "W2StartP", "W2EnvAmount", "W2EnvVelAmount", "W2Keytrack", "W2Limit", "W2Link"]
+		},
+		{	"id":"mixer", "name": "Mixer",
+			"parameters":["MixW1", "MixW2", "MixRingMod", "MixNoise", "MixExternal"]
+		},
+		{	"id":"quality", "name": "Quality",
+			"parameters":["Aliasing", "TimeQuant", "Clipping", "Accuracy"]
+		},
+		{	"id":"filterA", "name": "Filter 1",
+			"parameters":["F1Cutoff", "F1Resonance", "F1Type", "F1KeyTrack", "F1EnvAmount", "F1EnvVelAmount", "F1Extra"]
+		},
+		{	"id":"filterB", "name": "Filter 2",
+			"parameters":["F2Cutoff", "F2Type", "F2KeyTrack"]
+		},
+		{	"id":"fx", "name": "Effects",
+			"parameters":["EffectType", "EffectParamA", "EffectParamB", "EffectParamC", "ChorusEnabled"]
+		},
+		{	"id":"amp", "name": "Amplifier",
+			"parameters":["AmpVolume", "AmpVelocity", "AmpKeytrack", "Pan", "PanKeytrack"]
+		},
+		{	"id":"glide", "name": "Glide",
+			"parameters":["GlideEnabled", "GlideType", "GlideMode", "GlideTime"]
+		},
+		{	"id":"arpUserPattern", "name": "Arpeggiator Pattern",
+			"parameters":["ArpUserPattern1","ArpUserPattern2","ArpUserPattern3","ArpUserPattern4","ArpUserPattern5","ArpUserPattern6","ArpUserPattern7","ArpUserPattern8","ArpUserPattern9","ArpUserPattern10","ArpUserPattern11","ArpUserPattern12","ArpUserPattern13","ArpUserPattern14","ArpUserPattern15","ArpUserPattern16"]
+		},
+		{	"id":"arp", "name": "Arpeggiator",
+			"parameters":["ArpMode", "ArpTempo", "ArpClock", "ArpRange", "ArpPattern", "ArpDirection", "ArpNoteOrder", "ArpVelocity", "ArpReset", "ArpUserPatternLength"],
+			"regions":["arpUserPattern"]
+		},
+		{	"id":"voice", "name": "Voice",
+			"parameters":["AllocationMode", "Assignment", "Detune", "DePan"]
+		},
+		{	"id":"envFilter", "name": "Filter Envelope",
+			"parameters":["F1EnvAttack", "F1EnvDecay", "F1EnvSustain", "F1EnvRelease", "F1EnvTrigger"]
+		},
+		{	"id":"envAmp", "name": "Amp Envelope",
+			"parameters":["AmpEnvAttack", "AmpEnvDecay", "AmpEnvSustain", "AmpEnvRelease", "AmpEnvTrigger"]
+		},
+		{	"id":"envWave", "name": "Wave Envelope",
+			"parameters":[
+				"WaveEnvTime1", "WaveEnvLevel1","WaveEnvTime2", "WaveEnvLevel2","WaveEnvTime3", "WaveEnvLevel3","WaveEnvTime4", "WaveEnvLevel4",
+				"WaveEnvTime5", "WaveEnvLevel5","WaveEnvTime6", "WaveEnvLevel6","WaveEnvTime7", "WaveEnvLevel7","WaveEnvTime8", "WaveEnvLevel8",
+				"WaveEnvTrigger", "WaveKeyOnLoop", "WaveKeyOnLoopStart", "WaveKeyOnLoopEnd", "WaveKeyOffLoop", "WaveKeyOffLoopStart", "WaveKeyOffLoopEnd"
+			]
+		},
+		{	"id":"envFree", "name": "Free Envelope",
+			"parameters":["FreeEnvTime1", "FreeEnvTime2", "FreeEnvTime3", "FreeEnvReleaseTime", "FreeEnvLevel1", "FreeEnvLevel2", "FreeEnvLevel3", "FreeEnvReleaseLevel", "FreeEnvTrigger"]
+		},
+		{	"id":"lfoA", "name": "LFO 1",
+			"parameters":["Lfo1Rate","Lfo1Shape","Lfo1Delay","Lfo1Sync","Lfo1Symmetry","Lfo1Humanize"]
+		},
+		{	"id":"lfoB", "name": "LFO 2",
+			"parameters":["Lfo2Rate","Lfo2Shape","Lfo2Delay","Lfo2Sync","Lfo2Symmetry","Lfo2Humanize","Lfo2Phase"]
+		},
+		{	"id":"modifiers", "name": "Modifiers",
+			"parameters":[
+				"Mod1Source1", "Mod1Source2", "Mod1Type", "Mod1Parameter",
+				"Mod2Source1", "Mod2Source2", "Mod2Type", "Mod2Parameter",
+				"Mod3Source1", "Mod3Source2", "Mod3Type", "Mod3Parameter",
+				"Mod4Source1", "Mod4Source2", "Mod4Type", "Mod4Parameter"
+			]
+		},
+		{	"id":"modSlots", "name": "Modulation Slots",
+			"parameters":[
+				"Slot1Source",  "Slot1Amount",  "Slot1Destination",
+				"Slot2Source",  "Slot2Amount",  "Slot2Destination",
+				"Slot3Source",  "Slot3Amount",  "Slot3Destination",
+				"Slot4Source",  "Slot4Amount",  "Slot4Destination",
+				"Slot5Source",  "Slot5Amount",  "Slot5Destination",
+				"Slot6Source",  "Slot6Amount",  "Slot6Destination",
+				"Slot7Source",  "Slot7Amount",  "Slot7Destination",
+				"Slot8Source",  "Slot8Amount",  "Slot8Destination",
+				"Slot9Source",  "Slot9Amount",  "Slot9Destination",
+				"Slot10Source", "Slot10Amount", "Slot10Destination",
+				"Slot11Source", "Slot11Amount", "Slot11Destination",
+				"Slot12Source", "Slot12Amount", "Slot12Destination",
+				"Slot13Source", "Slot13Amount", "Slot13Destination",
+				"Slot14Source", "Slot14Amount", "Slot14Destination",
+				"Slot15Source", "Slot15Amount", "Slot15Destination",
+				"Slot16Source", "Slot16Amount", "Slot16Destination"
+			]
+		},
+
+		{	"id":"oscillators", "name": "Oscillators",
+			"regions":["oscA", "oscB"]
+		},
+
+		{	"id":"waves", "name": "Waves",
+			"regions":["waveA", "waveB"]
+		},
+
+		{	"id":"filters", "name": "Filters",
+			"regions":["filterA", "filterB"]
+		},
+
+		{	"id":"oscAndWaves", "name": "Oscillators & Waves",
+			"parameters":["Wave"],
+			"regions":["oscillators", "waves"]
+		}
+	],
  	"valuelists":
  	{
  		"unsignedZero":
