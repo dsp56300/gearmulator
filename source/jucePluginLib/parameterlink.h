@@ -11,10 +11,10 @@ namespace pluginLib
 	class ParameterLink
 	{
 	public:
-		ParameterLink(Parameter* _source, Parameter* _dest);
+		ParameterLink(Parameter* _source, Parameter* _dest, bool _applyCurrentSourceToTarget);
 		~ParameterLink();
 
-		bool add(Parameter* _target);
+		bool add(Parameter* _target, bool _applyCurrentSourceToTarget);
 		bool remove(Parameter* _target);
 
 		bool empty() const { return m_targets.empty(); }

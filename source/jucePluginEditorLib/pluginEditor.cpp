@@ -390,7 +390,7 @@ namespace jucePluginEditorLib
 					if(isLinked)
 						links.unlinkRegion(regionId, currentPart, p);
 					else
-						links.linkRegion(regionId, currentPart, p);
+						links.linkRegion(regionId, currentPart, p, true);
 				});
 			}
 

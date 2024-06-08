@@ -17,12 +17,12 @@ namespace pluginLib
 	public:
 		ParameterLinks(Controller& _controller);
 
-		bool add(Parameter* _source, Parameter* _dest);
+		bool add(Parameter* _source, Parameter* _dest, bool _applyCurrentSourceToTarget);
 		bool remove(const Parameter* _source, Parameter* _dest);
 
 		ParameterLinkType getRegionLinkType(const std::string& _regionId, uint8_t _part) const;
 
-		bool linkRegion(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest);
+		bool linkRegion(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest, bool _applyCurrentSourceToTarget);
 		bool unlinkRegion(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest);
 		bool isRegionLinked(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest) const;
 
@@ -52,7 +52,7 @@ namespace pluginLib
 			}
 		};
 
-		bool updateRegionLinks(const ParameterRegion& _region, uint8_t _partSource, uint8_t _partDest, bool _enableLink);
+		bool updateRegionLinks(const ParameterRegion& _region, uint8_t _partSource, uint8_t _partDest, bool _enableLink, bool _applyCurrentSourceToTarget);
 
 		Controller& m_controller;
 		std::map<const Parameter*, std::unique_ptr<ParameterLink>> m_parameterLinks;

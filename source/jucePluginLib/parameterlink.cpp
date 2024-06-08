@@ -5,7 +5,7 @@
 
 namespace pluginLib
 {
-	ParameterLink::ParameterLink(Parameter* _source, Parameter* _dest) : m_source(_source), m_sourceListener(_source)
+	ParameterLink::ParameterLink(Parameter* _source, Parameter* _dest, bool _applyCurrentSourceToTarget) : m_source(_source), m_sourceListener(_source)
 	{
 		m_sourceValue = _source->getUnnormalizedValue();
 
@@ -15,7 +15,7 @@ namespace pluginLib
 		};
 
 		_source->setLinkState(Source);
-		add(_dest);
+		add(_dest, _applyCurrentSourceToTarget);
 	}
 
 	ParameterLink::~ParameterLink()
@@ -23,8 +23,7 @@ namespace pluginLib
 		m_source->clearLinkState(Source);
 	}
 
-	// ReSharper disable once CppParameterMayBeConstPtrOrRef
-	bool ParameterLink::add(Parameter* _target)
+	bool ParameterLink::add(Parameter* _target, bool _applyCurrentSourceToTarget)
 	{
 		if(!_target)
 			return false;
@@ -32,7 +31,8 @@ namespace pluginLib
 		if(!m_targets.insert(_target).second)
 			return false;
 
-		_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
+		if(_applyCurrentSourceToTarget)
+			_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
 
 		return true;
 	}
