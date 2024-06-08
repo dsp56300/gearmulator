@@ -66,6 +66,8 @@ Osirus:
 Vavra:
 
 - [Fix] Excessive parameter changes were sent to host when loading a preset
+- [Fix] Filter mod amount values displayed unsigned values even though the parameter
+        is signed
 
 Xenia:
 
