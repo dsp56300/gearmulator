@@ -2532,6 +2532,31 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo1Rate"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo1Sync",
+                        "enableOnValues" : "0,1"
+                    }
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2415.896",
+                        "y" : "1109.255",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1RateSync"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo1Sync",
+                        "enableOnValues" : "3"
                     }
                 },
                 {
@@ -2622,7 +2647,32 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo2Rate"
-                    }
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo2Sync",
+                        "enableOnValues" : "0,1"
+                    }                    
+                },
+                {
+                    "name" : "xtKnob",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2977.796",
+                        "y" : "1109.255",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2RateSync"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo2Sync",
+                        "enableOnValues" : "3"
+                    }                    
                 },
                 {
                     "name" : "xtKnob",

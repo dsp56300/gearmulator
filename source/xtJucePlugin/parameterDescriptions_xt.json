@@ -186,14 +186,16 @@
 
 		// LFO 1
  		{"index":159, "name":"Lfo1Rate", "default":64},
+ 		{"index":159, "name":"Lfo1RateSync", "step":4, "default":88, "toText":"lfoRateSync"},
  		{"index":160, "name":"Lfo1Shape", "min":0, "max":5, "isDiscrete":true, "toText":"lfoShape"},
 		{"index":161, "name":"Lfo1Delay", "toText":"lfoDelay"},
  		{"index":162, "name":"Lfo1Sync", "min":0 , "max":3, "isDiscrete":true, "toText":"lfoSync"},
  		{"index":163, "name":"Lfo1Symmetry", "isBipolar":true, "toText":"signed"},
  		{"index":164, "name":"Lfo1Humanize"},
-
+		 
  		{"index":166, "name":"Lfo2Rate", "default":64},
  		{"index":167, "name":"Lfo2Shape", "min":0, "max":5, "isDiscrete":true, "toText":"lfoShape"},
+ 		{"index":159, "name":"Lfo2RateSync", "step":4, "default":88, "toText":"lfoRateSync"},
 		{"index":168, "name":"Lfo2Delay", "toText":"lfoDelay"},
  		{"index":169, "name":"Lfo2Sync", "min":0 , "max":3, "isDiscrete":true, "toText":"lfoSync"},
  		{"index":170, "name":"Lfo2Symmetry", "isBipolar":true, "toText":"signed"},
@@ -1015,13 +1017,47 @@
 			"100",	"101",			"102",	"103",	"104",	"105",	"106",	"107",	"108",	"109",	"110",	"111",	"112",	"113",	"114",	"115",	"116",	"117",	"118",	"119",
 			"120",	"121",			"122",	"123",	"124",	"125",	"126"
 		],
+		"lfoRateSync":
+		[
+			"128 Bars", "", "", "",
+			 "96 Bars", "", "", "",
+			 "64 Bars", "", "", "",
+			 "48 Bars", "", "", "",
+			 "36 Bars", "", "", "",
+			 "32 Bars", "", "", "",
+			 "24 Bars", "", "", "",
+			 "18 Bars", "", "", "",
+			 "16 Bars", "", "", "",
+			 "12 Bars", "", "", "",
+			 "9 Bars",  "", "", "",
+			 "8 Bars",  "", "", "",
+			 "6 Bars",  "", "", "",
+			 "4 Bars",  "", "", "",
+			 "3 Bars",  "", "", "",
+			 "2 Bars",  "", "", "",
+			 "1/1",     "", "", "",
+			 "1/2 D",   "", "", "",
+			 "1/2 T",   "", "", "",
+			 "1/2",     "", "", "",
+			 "1/4 D",   "", "", "",
+			 "1/4 T",   "", "", "",
+			 "1/4",     "", "", "",
+			 "1/8 D",   "", "", "",
+			 "1/8 T",   "", "", "",
+			 "1/8",     "", "", "",
+			 "1/16 D",  "", "", "",
+			 "1/16 T",  "", "", "",
+			 "1/16",    "", "", "",
+			 "1/32 D",  "", "", "",
+			 "1/32",    "", "", "",
+			 "1/64",    "", "", "1/64"
+		],
 		"lfoSync":
 		{
 			"0": "Off", 
 			"1": "On",
 			"3": "Clock"
 		},
-
 		"phase":
 		[
  			"Free",	"3°",	"6°",	"8°",	"11°",	"14°",	"17°",	"20°",	"23°",	"25°",	"28°",	"31°",	"34°",	"37°",	"39°",	"42°",	"45°",	"48°",	"51°",	"53°",
