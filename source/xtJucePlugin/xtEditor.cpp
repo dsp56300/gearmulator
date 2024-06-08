@@ -87,6 +87,18 @@ namespace xtJucePlugin
 				changeWave(-1);
 			};
 		}
+
+		auto* btPatchPrev = findComponentT<juce::Button>("patchPrev");
+		btPatchPrev->onClick = [this]
+		{
+			getPatchManager()->selectPrevPreset(m_controller.getCurrentPart());
+		};
+
+		auto* btPatchNext = findComponentT<juce::Button>("patchNext");
+		btPatchNext->onClick = [this]
+		{
+			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
+		};
 	}
 
 	Editor::~Editor()
