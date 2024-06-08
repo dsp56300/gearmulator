@@ -6,8 +6,9 @@
 
 namespace wLib
 {
-	static constexpr float g_sysexSendDelaySeconds = 0.2f;
-	static constexpr uint32_t g_sysexSendDelaySamples = static_cast<uint32_t>(44100.0f * g_sysexSendDelaySeconds);
+	// pause 0.1 seconds for a sysex size of 500, delay is calculated for other sysex sizes accordingly
+	static constexpr float g_sysexSendDelaySeconds = 0.1f;
+	static constexpr uint32_t g_sysexSendDelaySize = 500;
 
 	Midi::Midi(mc68k::Qsm& _qsm) : m_qsm(_qsm)
 	{
@@ -27,8 +28,7 @@ namespace wLib
 			for (const auto b : msg)
 				m_qsm.writeSciRX(b);
 
-			if(msg.size() > 0xf)
-				m_remainingSysexDelay = g_sysexSendDelaySamples;
+			m_remainingSysexDelay = static_cast<uint32_t>(static_cast<float>(msg.size()) * 44100.0f * g_sysexSendDelaySeconds / static_cast<float>(g_sysexSendDelaySize));
 
 			m_pendingSysexBuffers.pop_front();
 		}
