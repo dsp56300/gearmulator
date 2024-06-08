@@ -415,7 +415,7 @@ namespace genericVirusUI
 		return m_controller.activatePatch(_patch->sysex);
 	}
 
-	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
+	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
 		return m_controller.activatePatch(_patch->sysex, _part);
 	}

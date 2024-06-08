@@ -819,17 +819,11 @@ namespace Virus
 		if(msg.empty())
 			return false;
 
-        // if we have locked parameters, get them, send the preset and then send each locked parameter value afterward.
-        // Modifying the preset directly does not work because a preset might be an old version that we do not know
-        const auto lockedParameters = m_locking.getLockedParameters(static_cast<uint8_t>(_part == virusLib::SINGLE ? 0 : _part));
-
 		sendSysEx(msg);
 
-        for (const auto& lockedParameter : lockedParameters)
-        {
-	        const auto v = lockedParameter->getUnnormalizedValue();
-	        sendParameterChange(*lockedParameter, static_cast<uint8_t>(v));
-        }
+        // if we have locked parameters, get them, send the preset and then send each locked parameter value afterward.
+        // Modifying the preset directly does not work because a preset might be an old version that we do not know
+		sendLockedParameters(static_cast<uint8_t>(_part == virusLib::SINGLE ? 0 : _part));
 
 		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
 

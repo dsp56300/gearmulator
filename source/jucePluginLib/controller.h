@@ -31,6 +31,7 @@ namespace pluginLib
 		~Controller() override;
 
 		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
+		void sendLockedParameters(uint8_t _part);
 
         juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
         Parameter* getParameter(uint32_t _index) const;

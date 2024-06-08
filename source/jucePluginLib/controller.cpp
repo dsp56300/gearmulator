@@ -285,7 +285,18 @@ namespace pluginLib
 		return iti->second;
     }
 
-    juce::Value* Controller::getParamValueObject(const uint32_t _index, uint8_t _part) const
+	void Controller::sendLockedParameters(const uint8_t _part)
+	{
+        const auto lockedParameters = m_locking.getLockedParameters(_part);
+
+        for (const auto& p : lockedParameters)
+        {
+	        const auto v = p->getUnnormalizedValue();
+	        sendParameterChange(*p, static_cast<uint8_t>(v));
+        }
+	}
+
+    juce::Value* Controller::getParamValueObject(const uint32_t _index, const uint8_t _part) const
     {
 	    const auto res = getParameter(_index, _part);
 		return res ? &res->getValueObject() : nullptr;
