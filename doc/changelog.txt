@@ -59,6 +59,10 @@ OsTIrus:
 
 - [Fix] Arpeggiator pattern was always displayed for part 1 regardless of part selection
 
+Osirus:
+
+- [Imp] Add support for Virus A .mid OS update firmware file
+
 Vavra:
 
 - [Fix] Excessive parameter changes were sent to host when loading a preset

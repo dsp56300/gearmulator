@@ -8,7 +8,7 @@
 
 namespace virusLib
 {
-	static constexpr uint32_t g_midiSizeMinABC = 512 * 1024;
+	static constexpr uint32_t g_midiSizeMinABC = 500 * 1024;
 	static constexpr uint32_t g_midiSizeMaxABC = 600 * 1024;
 
 	static constexpr uint32_t g_binSizeTImin = 6 * 1024 * 1024;
@@ -104,7 +104,17 @@ namespace virusLib
 		data.data = midiLoader.getData();
 
 		if(data.data.size() != (ROMFile::getRomSizeModelABC()>>1))
-			return {};
+		{
+			if(data.data.size() == 0x38000)
+			{
+				// Virus A midi OS update has $2000 less than all others
+				data.data.resize(ROMFile::getRomSizeModelABC()>>1, 0xff);
+			}
+			else
+			{
+				return {};
+			}
+		}
 
 		if(midiLoader.getFirstSector() == 0)
 			data.type = MidiRom;
