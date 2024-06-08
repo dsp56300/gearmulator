@@ -73,6 +73,7 @@ Xenia:
 
 - [Imp] UI polishing in various areas (mkruselj)
 - [Imp] Improve parameter names & values (mkruselj)
+- [Imp] Added buttons to the top section to select the previous/next patch
 
 - [Fix] Excessive parameter changes were sent to host when loading a preset
 

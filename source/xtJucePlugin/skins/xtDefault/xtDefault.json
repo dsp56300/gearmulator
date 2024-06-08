@@ -679,6 +679,42 @@
             }
         },
         {
+            "name" : "patchPrev",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1861.7",
+                "y" : "355.577",
+                "width" : "64",
+                "height" : "64",
+                "texture" : "xtknob_minus",
+                "tileSizeX" : "64",
+                "tileSizeY" : "64"
+            }
+        },
+        {
+            "name" : "patchNext",
+            "button" : {
+                "normalImage" : "0",
+                "overImage" : "0",
+                "downImage" : "1",
+                "normalImageOn" : "1",
+                "overImageOn" : "1",
+                "downImageOn" : "1",
+                "x" : "1956.3",
+                "y" : "355.577",
+                "width" : "64",
+                "height" : "64",
+                "texture" : "xtknob_plus",
+                "tileSizeX" : "64",
+                "tileSizeY" : "64"
+            }
+        },
+        {
             "name" : "pagePatchManager",
             "image" : {
                 "x" : "35.99988",
@@ -2230,9 +2266,9 @@
                 {
                     "name" : "f1TypeUnused",
                     "image" : {
-                        "x" : "2688.837",
+                        "x" : "2638.837",
                         "y" : "353.9536",
-                        "width" : "142",
+                        "width" : "242",
                         "height" : "164",
                         "texture" : "f1TypeUnused"
                     },
