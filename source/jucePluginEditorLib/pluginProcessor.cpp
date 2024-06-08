@@ -72,6 +72,8 @@ namespace jucePluginEditorLib
 			synthLib::ChunkWriter cw(s, "EDST", 1);
 			s.write(m_editorStateData);
 		}
+
+		getController().saveChunkData(s);
 	}
 
 	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
@@ -94,5 +96,7 @@ namespace jucePluginEditorLib
 		{
 			_binaryStream.read(m_editorStateData);
 		});
+
+		getController().loadChunkData(_cr);
 	}
 }

@@ -65,7 +65,12 @@ namespace jucePluginEditorLib
 
 			auto updatePosition = [&]()
 			{
-				drawableImage->setCentrePosition(static_cast<int>(props.position.x) + m_component->getPosition().x, static_cast<int>(props.position.y) + m_component->getPosition().y);
+				const auto x = static_cast<int>(props.position.x) + m_component->getPosition().x;
+				const auto y = static_cast<int>(props.position.y) + m_component->getPosition().y;
+				const auto w = drawableImage->getWidth();
+				const auto h = drawableImage->getHeight();
+
+				drawableImage->setBoundingBox(juce::Rectangle(x - (w>>1), y - (h>>1), w, h).toFloat());
 			};
 
 			if(!drawableImage)
@@ -81,7 +86,6 @@ namespace jucePluginEditorLib
 //					_image->setOverlayColour(props.color);	// juce cannot do it, it does not multiply but replaced the color entirely
 					drawableImage->setInterceptsMouseClicks(false, false);
 					drawableImage->setAlwaysOnTop(true);
-
 					m_component->getParentComponent()->addAndMakeVisible(drawableImage);
 				}
 			}
@@ -102,6 +106,9 @@ namespace jucePluginEditorLib
 
 	void ParameterOverlay::updateOverlays()
 	{
+		if(m_component->getParentComponent() == nullptr)
+			return;
+
 		const auto isLocked = m_parameter != nullptr && m_parameter->isLocked();
 		const auto isLinkSource = m_parameter != nullptr && (m_parameter->getLinkState() & pluginLib::Source);
 		const auto isLinkTarget = m_parameter != nullptr && (m_parameter->getLinkState() & pluginLib::Target);
@@ -130,11 +137,18 @@ namespace jucePluginEditorLib
 
 		const auto avgWidth = totalWidth / count;
 
-		int x = -(totalWidth >> 1) + (avgWidth>>1) + visibleOverlays[0]->getPosition().x;
+		int x = -static_cast<int>(totalWidth >> 1) + static_cast<int>(avgWidth >> 1) + static_cast<int>(visibleOverlays[0]->getBoundingBox().topLeft.x);
 
 		for(uint32_t i=0; i<count; ++i)
 		{
-			visibleOverlays[i]->setTopLeftPosition(x, visibleOverlays[i]->getPosition().y);
+			auto bounds = visibleOverlays[i]->getBoundingBox();
+			const auto w = bounds.getWidth();
+			const auto fx = static_cast<float>(x);
+			bounds.topLeft.x = fx;
+			bounds.bottomLeft.x = fx;
+			bounds.topRight.x = fx + w;
+			visibleOverlays[i]->setBoundingBox(bounds);
+
 			x += visibleOverlays[i]->getWidth();
 		}
 	}

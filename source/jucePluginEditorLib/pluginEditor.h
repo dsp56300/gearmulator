@@ -80,6 +80,7 @@ namespace jucePluginEditorLib
 
 		auto& getImagePool() { return m_imagePool; }
 
+		void parentHierarchyChanged() override;
 	private:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

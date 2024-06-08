@@ -8,7 +8,7 @@ namespace pluginLib
 	{
 	}
 
-	bool ParameterLinks::add(Parameter* _source, Parameter* _dest)
+	bool ParameterLinks::add(Parameter* _source, Parameter* _dest, bool _applyCurrentSourceToTarget)
 	{
 		if(!_source || !_dest)
 			return false;
@@ -19,9 +19,9 @@ namespace pluginLib
 		const auto it = m_parameterLinks.find(_source);
 
 		if(it != m_parameterLinks.end())
-			return it->second->add(_dest);
+			return it->second->add(_dest, _applyCurrentSourceToTarget);
 
-		m_parameterLinks.insert({_source, std::make_unique<ParameterLink>(_source, _dest)});
+		m_parameterLinks.insert({_source, std::make_unique<ParameterLink>(_source, _dest, _applyCurrentSourceToTarget)});
 		m_destToSource[_dest].insert(_source);
 
 		_dest->setLinkState(Target);
@@ -90,7 +90,7 @@ namespace pluginLib
 		return result;
 	}
 
-	bool ParameterLinks::linkRegion(const std::string& _regionId, const uint8_t _partSource, const uint8_t _partDest)
+	bool ParameterLinks::linkRegion(const std::string& _regionId, const uint8_t _partSource, const uint8_t _partDest, bool _applyCurrentSourceToTarget)
 	{
 		const auto& regions = m_controller.getParameterDescriptions().getRegions();
 
@@ -104,7 +104,7 @@ namespace pluginLib
 		if(!m_linkedRegions.insert(link).second)
 			return false;
 
-		return updateRegionLinks(itRegion->second, _partSource, _partDest, true);
+		return updateRegionLinks(itRegion->second, _partSource, _partDest, true, _applyCurrentSourceToTarget);
 	}
 
 	bool ParameterLinks::unlinkRegion(const std::string& _regionId, const uint8_t _partSource, const uint8_t _partDest)
@@ -121,7 +121,7 @@ namespace pluginLib
 		if(itRegion == regions.end())
 			return false;
 
-		return updateRegionLinks(itRegion->second, _partSource, _partDest, false);
+		return updateRegionLinks(itRegion->second, _partSource, _partDest, false, false);
 	}
 
 	bool ParameterLinks::isRegionLinked(const std::string& _regionId, const uint8_t _partSource, const uint8_t _partDest) const
@@ -130,7 +130,41 @@ namespace pluginLib
 		return m_linkedRegions.find(link) != m_linkedRegions.end();
 	}
 
-	bool ParameterLinks::updateRegionLinks(const ParameterRegion& _region, const uint8_t _partSource, const uint8_t _partDest, const bool _enableLink)
+	void ParameterLinks::saveChunkData(synthLib::BinaryStream& s) const
+	{
+		if(m_linkedRegions.empty())
+			return;
+
+		synthLib::ChunkWriter cw(s, "PLNK", 1);
+
+		s.write(static_cast<uint32_t>(m_linkedRegions.size()));
+
+		for (const auto& linkedRegion : m_linkedRegions)
+		{
+			s.write(linkedRegion.regionId);
+			s.write(linkedRegion.sourcePart);
+			s.write(linkedRegion.destPart);
+		}
+	}
+
+	void ParameterLinks::loadChunkData(synthLib::ChunkReader& _cr)
+	{
+		_cr.add("PLNK", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		{
+			const uint32_t count = _binaryStream.read<uint32_t>();
+
+			for(uint32_t i=0; i<count; ++i)
+			{
+				const auto regionId = _binaryStream.readString();
+				const auto sourcePart = _binaryStream.read<uint8_t>();
+				const auto destPart = _binaryStream.read<uint8_t>();
+
+				linkRegion(regionId, sourcePart, destPart, false);
+			}
+		});
+	}
+
+	bool ParameterLinks::updateRegionLinks(const ParameterRegion& _region, const uint8_t _partSource, const uint8_t _partDest, const bool _enableLink, const bool _applyCurrentSourceToTarget)
 	{
 		bool res = false;
 
@@ -140,7 +174,7 @@ namespace pluginLib
 			auto* paramDest = m_controller.getParameter(name, _partDest);
 
 			if(_enableLink)
-				res |= add(paramSource, paramDest);
+				res |= add(paramSource, paramDest, _applyCurrentSourceToTarget);
 			else
 				res |= remove(paramSource, paramDest);
 		}

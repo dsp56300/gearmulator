@@ -31,6 +31,8 @@ namespace jucePluginEditorLib
 
 		Editor& getEditor() const { return m_editor; }
 
+		void refreshAll() const;
+
 	private:
 		void onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
 		void onUnbind(const pluginLib::ParameterBinding::BoundParameter& _parameter);

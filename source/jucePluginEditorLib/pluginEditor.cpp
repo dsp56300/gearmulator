@@ -390,7 +390,7 @@ namespace jucePluginEditorLib
 					if(isLinked)
 						links.unlinkRegion(regionId, currentPart, p);
 					else
-						links.linkRegion(regionId, currentPart, p);
+						links.linkRegion(regionId, currentPart, p, true);
 				});
 			}
 
@@ -443,6 +443,14 @@ namespace jucePluginEditorLib
 			return false;
 
 		return getProcessor().getController().setParameters(_paramValues, m_processor.getController().getCurrentPart(), pluginLib::Parameter::Origin::Ui);
+	}
+
+	void Editor::parentHierarchyChanged()
+	{
+		genericUI::Editor::parentHierarchyChanged();
+
+		if(isShowing())
+			m_overlays.refreshAll();
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

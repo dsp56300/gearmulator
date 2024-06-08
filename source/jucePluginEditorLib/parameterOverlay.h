@@ -24,6 +24,11 @@ namespace jucePluginEditorLib
 		void onBind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
 		void onUnbind(const pluginLib::ParameterBinding::BoundParameter& _parameter);
 
+		void refresh()
+		{
+			updateOverlays();
+		}
+
 	private:
 		struct OverlayProperties
 		{

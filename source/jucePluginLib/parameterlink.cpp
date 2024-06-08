@@ -5,7 +5,7 @@
 
 namespace pluginLib
 {
-	ParameterLink::ParameterLink(Parameter* _source, Parameter* _dest) : m_source(_source), m_sourceListener(_source)
+	ParameterLink::ParameterLink(Parameter* _source, Parameter* _dest, bool _applyCurrentSourceToTarget) : m_source(_source), m_sourceListener(_source)
 	{
 		m_sourceValue = _source->getUnnormalizedValue();
 
@@ -15,7 +15,7 @@ namespace pluginLib
 		};
 
 		_source->setLinkState(Source);
-		add(_dest);
+		add(_dest, _applyCurrentSourceToTarget);
 	}
 
 	ParameterLink::~ParameterLink()
@@ -23,8 +23,7 @@ namespace pluginLib
 		m_source->clearLinkState(Source);
 	}
 
-	// ReSharper disable once CppParameterMayBeConstPtrOrRef
-	bool ParameterLink::add(Parameter* _target)
+	bool ParameterLink::add(Parameter* _target, bool _applyCurrentSourceToTarget)
 	{
 		if(!_target)
 			return false;
@@ -32,7 +31,8 @@ namespace pluginLib
 		if(!m_targets.insert(_target).second)
 			return false;
 
-		_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
+		if(_applyCurrentSourceToTarget)
+			_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
 
 		return true;
 	}
@@ -49,19 +49,26 @@ namespace pluginLib
 
 	void ParameterLink::onSourceValueChanged()
 	{
-		const auto newValue = m_source->getUnnormalizedValue();
+		const auto newSourceValue = m_source->getUnnormalizedValue();
 
-		if(newValue == m_sourceValue)
+		if(newSourceValue == m_sourceValue)
 			return;
 
-		m_sourceValue = newValue;
+		const auto sourceDiff = newSourceValue - m_sourceValue;
+
+		m_sourceValue = newSourceValue;
+
+		// do not apply to linked parameters if the change is caused by a preset load
+		if(m_source->getChangeOrigin() == Parameter::Origin::PresetChange)
+			return;
 
 		const auto origin = m_source->getChangeOrigin();
 
 		for (auto* p : m_targets)
 		{
-			const auto v = p->getDescription().range.clipValue(newValue);
-			p->setUnnormalizedValue(v, origin);
+			const auto newTargetValue = p->getUnnormalizedValue() + sourceDiff;
+			const auto clampedTargetValue = p->getDescription().range.clipValue(newTargetValue);
+			p->setUnnormalizedValue(clampedTargetValue, origin);
 		}
 	}
 }
