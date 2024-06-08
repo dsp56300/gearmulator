@@ -933,6 +933,173 @@
  		{"class":"NonPartSensitive", "page":116, "index":48, "name":"MI15Button12", "min":0, "max":1, "isDiscrete":true, "mask":1, "shift":4},
  		{"class":"NonPartSensitive", "page":116, "index":48, "name":"MI15ProgChange", "min":0, "max":1, "isDiscrete":true, "mask":1, "shift":5}
  	],
+	"regions":
+	[
+		{	"id":"oscA", "name": "Oscillator 1",
+			"parameters":["O1Octave","O1Semi","O1Detune","O1BendRange","O1KeyTrack","O1FmSource","O1FmAmount","O1Shape","O1PulseWidth","O1PwmSource","O1Pwm","O1SubFreqDiv","O1SubVolume"]
+		},
+		{	"id":"oscB", "name": "Oscillator 2",
+			"parameters":["O2Octave","O2Semi","O2Detune","O2BendRange","O2KeyTrack","O2FmSource","O2FmAmount","O2Shape","O2PulseWidth","O2PwmSource","O2Pwm","O2SubFreqDiv","O2SubVolume","Sync"]
+		},
+		{	"id":"oscC", "name": "Oscillator 3",
+			"parameters":["O3Octave","O3Semi","O3Detune","O3BendRange","O3KeyTrack","O3FmSource","O3FmAmount","O3Shape","O3PulseWidth","O3PwmSource","O3Pwm"]
+		},
+		{	"id":"pitchmod", "name": "Pitch Mod",
+			"parameters":["PitchModSrc", "PitchModAmount"]
+		},
+		{	"id":"glide", "name": "Glide",
+			"parameters":["GlideEnable", "GlideMode", "GlideRate"]
+		},
+		{	"id":"voiceMode", "name": "Voice Mode",
+			"parameters":["VoiceMode", "UnisonoCount", "UnisonoDetune"]
+		},
+		{	"id":"mixer", "name": "Mixer",
+			"parameters":["O1Level","O1Balance","O2Level","O2Balance","O3Level","O3Balance","NoiseLevel","NoiseBalance","RingModLevel","RingModBalance","NoiseModeF1","NoiseModeF2"]
+		},
+		{	"id":"filterA", "name": "Filter 1",
+			"parameters":["F1Type", "F1Cutoff", "F1Resonance", "F1Drive", "F1KeyTrack", "F1EnvMod", "F1VelMod", "F1ModSource", "F1CutoffMod", "F1FmSource", "F1FmAmount", "F1Pan", "F1PanModSource", "F1PanMod"]
+		},
+		{	"id":"filterB", "name": "Filter 2",
+			"parameters":["F2Type", "F2Cutoff", "F2Resonance", "F2Drive", "F2KeyTrack", "F2EnvMod", "F2VelMod", "F2ModSource", "F2CutoffMod", "F2FmSource", "F2FmAmount", "F2Pan", "F2PanModSource", "F2PanMod"]
+		},
+		{	"id":"amp", "name": "Amplifier",
+			"parameters":["AmpVolume", "AmpVelocity", "AmpModSource", "AmpModAmount"]
+		},
+		{	"id":"fx1Chorus", "name": "FX1 Chorus",
+			"parameters":["Fx1ChorusSpeed", "Fx1ChorusDepth", "Fx1ChorusDelay"]
+		},
+		{	"id":"fx2Chorus", "name": "FX2 Chorus",
+			"parameters":["Fx2ChorusSpeed", "Fx2ChorusDepth", "Fx2ChorusDelay"]
+		},
+		{	"id":"fx1Flanger", "name": "FX1 Flanger",
+			"parameters":["Fx1FlangerSpeed", "Fx1FlangerDepth", "Fx1FlangerFeedback", "Fx1FlangerPolarity"]
+		},
+		{	"id":"fx2Flanger", "name": "FX2 Flanger",
+			"parameters":["Fx2FlangerSpeed", "Fx2FlangerDepth", "Fx2FlangerFeedback", "Fx2FlangerPolarity"]
+		},
+		{	"id":"fx1Phaser", "name": "FX1 Phaser",
+			"parameters":["Fx1PhaserSpeed", "Fx1PhaserDepth", "Fx1PhaserFeedback", "Fx1PhaserCenter", "Fx1PhaserSpacing", "Fx1PhaserPolarity"]
+		},
+		{	"id":"fx2Phaser", "name": "FX2 Phaser",
+			"parameters":["Fx2PhaserSpeed", "Fx2PhaserDepth", "Fx2PhaserFeedback", "Fx2PhaserCenter", "Fx2PhaserSpacing", "Fx2PhaserPolarity"]
+		},
+		{	"id":"fx2Delay", "name": "FX2 Delay",
+			"parameters":["Fx2DelayFeedback", "Fx2DelayCutoff", "Fx2DelayPolarity", "Fx2DelayAutopan"]
+		},
+		{	"id":"fx1Overdrive", "name": "FX1 Overdrive",
+			"parameters":["Fx1OverdriveDrive", "Fx1OverdrivePostGain", "Fx1OverdriveCutoff"]
+		},
+		{	"id":"fx2Overdrive", "name": "FX2 Overdrive",
+			"parameters":["Fx2OverdriveDrive", "Fx2OverdrivePostGain", "Fx2OverdriveCutoff"]
+		},
+		{	"id":"fx1five", "name": "FiveFX 1",
+			"parameters":["FiveFX1ChorusSpeed", "FiveFX1ChorusDepth", "FiveFX1Delay", "FiveFX1ChorusDelayL", "FiveFX1SampleAndHold", "FiveFX1Overdrive", "FiveFX1RingModSource", "FiveFX1RingModLevel"]
+		},
+		{	"id":"fx2five", "name": "FiveFX 2",
+			"parameters":["FiveFX2ChorusSpeed", "FiveFX2ChorusDepth", "FiveFX2Delay", "FiveFX2ChorusDelayL", "FiveFX2SampleAndHold", "FiveFX2Overdrive", "FiveFX2RingModSource", "FiveFX2RingModLevel"]
+		},
+		{	"id":"fx1Vocoder", "name": "FX1 Vocoder",
+			"parameters":["Fx1VocoderBands","Fx1VocoderAnalysisSignal","Fx1VocoderAnalysisFreqLow","Fx1VocoderAnalysisFreqHigh","Fx1VocoderOffsetS","Fx1VocoderOffsetHi","Fx1VocoderBandwidth","Fx1VocoderResonance","Fx1VocoderAttack","Fx1VocoderDecay","Fx1VocoderEQLevelLow","Fx1VocoderEQBandMid","Fx1VocoderEQLevelMid","Fx1VocoderEQLevelHigh"]
+		},
+		{	"id":"fx2Vocoder", "name": "FX2 Vocoder",
+			"parameters":["Fx2VocoderBands","Fx2VocoderAnalysisSignal","Fx2VocoderAnalysisFreqLow","Fx2VocoderAnalysisFreqHigh","Fx2VocoderOffsetS","Fx2VocoderOffsetHi","Fx2VocoderBandwidth","Fx2VocoderResonance","Fx2VocoderAttack","Fx2VocoderDecay","Fx2VocoderEQLevelLow","Fx2VocoderEQBandMid","Fx2VocoderEQLevelMid","Fx2VocoderEQLevelHigh"]
+		},
+		{	"id":"fx1Reverb", "name": "FX1 Reverb",
+			"parameters":["Fx1ReverbSize","Fx1ReverbShape","Fx1ReverbDecay","Fx1ReverbPreDelay","Fx1ReverbLowpass","Fx1ReverbHighpass","Fx1ReverbDiffusion","Fx1ReverbDamping"]
+		},
+		{	"id":"fx2Reverb", "name": "FX2 Reverb",
+			"parameters":["Fx2ReverbSize","Fx2ReverbShape","Fx2ReverbDecay","Fx2ReverbPreDelay","Fx2ReverbLowpass","Fx2ReverbHighpass","Fx2ReverbDiffusion","Fx2ReverbDamping"]
+		},
+		{	"id":"fx251Delay", "name": "FX2 5.1 Delay",
+			"parameters":["Fx251DelayDelay","Fx251ClockDelayDelay","Fx251DelayFeedback","Fx251DelayLfeLP","Fx251DelayInputHP","Fx251DelayDelayML","Fx251DelayFSLVolume","Fx251DelayDelayMR","Fx251DelayFSRVolume","Fx251DelayDelayS2L","Fx251DelayCenterSVolume","Fx251DelayDelayS1L","Fx251DelayRearSLVolume","Fx251DelayDelayS1R","Fx251DelayRearSRVolume"]
+		},
+		{	"id":"lfoA", "name": "LFO 1",
+			"parameters":["Lfo1Shape","Lfo1Speed","Lfo1SpeedClocked","Lfo1Sync","Lfo1Clocked","Lfo1StartPhase","Lfo1Delay","Lfo1Fade","Lfo1KeyTrack"]
+		},
+		{	"id":"lfoB", "name": "LFO 2",
+			"parameters":["Lfo2Shape","Lfo2Speed","Lfo2SpeedClocked","Lfo2Sync","Lfo2Clocked","Lfo2StartPhase","Lfo2Delay","Lfo2Fade","Lfo2KeyTrack"]
+		},
+		{	"id":"lfoC", "name": "LFO 3",
+			"parameters":["Lfo3Shape","Lfo3Speed","Lfo3SpeedClocked","Lfo3Sync","Lfo3Clocked","Lfo3StartPhase","Lfo3Delay","Lfo3Fade","Lfo3KeyTrack"]
+		},
+		{	"id":"envFilter", "name": "Filter Envelope",
+			"parameters":["FilterEnvMode","FilterEnvTriggerMode","FilterEnvAttack","FilterEnvAttackLevel","FilterEnvDecay","FilterEnvSustain","FilterEnvDecay2","FilterEnvSustain2","FilterEnvRelease"]
+		},
+		{	"id":"envAmp", "name": "Amp Envelope",
+			"parameters":["AmpEnvMode","AmpEnvTriggerMode","AmpEnvAttack","AmpEnvAttackLevel","AmpEnvDecay","AmpEnvSustain","AmpEnvDecay2","AmpEnvSustain2","AmpEnvRelease"]
+		},
+		{	"id":"env3", "name": "Envelope 3",
+			"parameters":["Env3Mode","Env3TriggerMode","Env3Attack","Env3AttackLevel","Env3Decay","Env3Sustain","Env3Decay2","Env3Sustain2","Env3Release"]
+		},
+		{	"id":"env4", "name": "Envelope 4",
+			"parameters":["Env4Mode","Env4TriggerMode","Env4Attack","Env4AttackLevel","Env4Decay","Env4Sustain","Env4Decay2","Env4Sustain2","Env4Release"]
+		},
+		{	"id":"modifiers", "name": "Modifiers",
+			"parameters":[
+				"Mod1Source1","Mod1Source2","Mod1Operator","Mod1Constant",
+				"Mod2Source1","Mod2Source2","Mod2Operator","Mod2Constant",
+				"Mod3Source1","Mod3Source2","Mod3Operator","Mod3Constant",
+				"Mod4Source1","Mod4Source2","Mod4Operator","Mod4Constant"
+				]
+		},
+		{	"id":"fastMods", "name": "Fast Modulations",
+			"parameters":[
+				"Slot1FSource","Slot1FDestination","Slot1FAmount",
+				"Slot2FSource","Slot2FDestination","Slot2FAmount",
+				"Slot3FSource","Slot3FDestination","Slot3FAmount",
+				"Slot4FSource","Slot4FDestination","Slot4FAmount",
+				"Slot5FSource","Slot5FDestination","Slot5FAmount",
+				"Slot6FSource","Slot6FDestination","Slot6FAmount",
+				"Slot7FSource","Slot7FDestination","Slot7FAmount",
+				"Slot8FSource","Slot8FDestination","Slot8FAmount"
+			]
+		},
+		{	"id":"standardMods", "name": "Standard Modulations",
+			"parameters":[
+				"Slot1SSource","Slot1SDestination","Slot1SAmount",
+				"Slot2SSource","Slot2SDestination","Slot2SAmount",
+				"Slot3SSource","Slot3SDestination","Slot3SAmount",
+				"Slot4SSource","Slot4SDestination","Slot4SAmount",
+				"Slot5SSource","Slot5SDestination","Slot5SAmount",
+				"Slot6SSource","Slot6SDestination","Slot6SAmount",
+				"Slot7SSource","Slot7SDestination","Slot7SAmount",
+				"Slot8SSource","Slot8SDestination","Slot8SAmount"
+			]
+		},
+		{	"id":"arpUserPattern", "name": "Arpeggiator Pattern",
+			"parameters":[
+				"Arp00Step","Arp00Glide","Arp00Accent","Arp01Step","Arp01Glide","Arp01Accent","Arp02Step","Arp02Glide","Arp02Accent","Arp03Step","Arp03Glide","Arp03Accent",
+				"Arp04Step","Arp04Glide","Arp04Accent","Arp05Step","Arp05Glide","Arp05Accent","Arp06Step","Arp06Glide","Arp06Accent","Arp07Step","Arp07Glide","Arp07Accent",
+				"Arp08Step","Arp08Glide","Arp08Accent","Arp09Step","Arp09Glide","Arp09Accent","Arp10Step","Arp10Glide","Arp10Accent","Arp11Step","Arp11Glide","Arp11Accent",
+				"Arp12Step","Arp12Glide","Arp12Accent","Arp13Step","Arp13Glide","Arp13Accent","Arp14Step","Arp14Glide","Arp14Accent","Arp15Step","Arp15Glide","Arp15Accent",
+
+				"Arp00Length","Arp00Timing","Arp01Length","Arp01Timing","Arp02Length","Arp02Timing","Arp03Length","Arp03Timing",
+				"Arp04Length","Arp04Timing","Arp05Length","Arp05Timing","Arp06Length","Arp06Timing","Arp07Length","Arp07Timing",
+				"Arp08Length","Arp08Timing","Arp09Length","Arp09Timing","Arp10Length","Arp10Timing","Arp11Length","Arp11Timing",
+				"Arp12Length","Arp12Timing","Arp13Length","Arp13Timing","Arp14Length","Arp14Timing","Arp15Length","Arp15Timing"
+			]
+		},
+		{	"id":"arp", "name": "Arpeggiator",
+			"parameters":["ArpMode","ArpPattern","ArpMaxNotes","ArpClock","ArpLength","ArpOctaveRange","ArpDirection","ArpSortOrder","ArpVeloMode","ArpTFactor","ArpSameNoteOverlap","ArpPatternReset","ArpPatternLength"],
+			"regions":["arpUserPattern"]
+		},
+	
+		{	"id":"oscillators", "name": "Oscillators",
+			"regions":["oscA","oscB","oscC"]
+		},
+		{	"id":"filters", "name": "Filters",
+			"regions":["filterA","filterB","envFilter"]
+		},
+		{	"id":"fx1", "name": "FX1",
+			"regions":["fx1Chorus","fx1Flanger","fx1Phaser", "fx1five", "fx1Overdrive", "fx1Vocoder", "fx1Reverb"]
+		},
+		{	"id":"fx2", "name": "FX2",
+			"regions":["fx2Chorus","fx2Flanger","fx2Phaser", "fx2five", "fx2Overdrive", "fx2Vocoder", "fx2Reverb", "fx2Delay"]
+		},
+		{	"id":"fx", "name": "FX",
+			"regions":["fx1", "fx2"]
+		},
+	],
  	"valuelists":
  	{
  		"unsignedZero":
