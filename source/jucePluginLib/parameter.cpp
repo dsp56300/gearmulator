@@ -263,4 +263,17 @@ namespace pluginLib
 		m_derivedParameters.insert(_param);
 		_param->m_derivedParameters.insert(this);
 	}
+
+	Parameter::ScopedChangeGesture::ScopedChangeGesture(Parameter& _p) : m_parameter(_p)
+    {
+		if(_p.getDescription().isPublic)
+		    _p.pushChangeGesture();
+    }
+
+    Parameter::ScopedChangeGesture::~ScopedChangeGesture()
+    {
+		if(m_parameter.getDescription().isPublic)
+		    m_parameter.popChangeGesture();
+    }
+
 }
