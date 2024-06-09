@@ -32,7 +32,7 @@ namespace pluginLib
 			return false;
 
 		if(_applyCurrentSourceToTarget)
-			_target->setUnnormalizedValue(m_sourceValue, Parameter::Origin::Ui);
+			_target->setUnnormalizedValueNotifyingHost(m_sourceValue, Parameter::Origin::Ui);
 
 		return true;
 	}
