@@ -101,7 +101,7 @@ namespace pluginLib
 		return results;
 	}
 
-	bool ParameterLocking::isParameterLocked(uint8_t _part, const std::string& _name) const
+	bool ParameterLocking::isParameterLocked(const uint8_t _part, const std::string& _name) const
 	{
 		auto& regions = m_controller.getParameterDescriptions().getRegions();
 
