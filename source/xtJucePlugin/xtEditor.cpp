@@ -99,6 +99,9 @@ namespace xtJucePlugin
 		{
 			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 		};
+
+		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
+		waveEditorButtonParent->setVisible(false);
 	}
 
 	Editor::~Editor()
