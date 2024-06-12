@@ -18,11 +18,24 @@ namespace wLib
 	{
 		std::unique_lock lock(m_mutex);
 
-		if(m_remainingSysexDelay)
-			m_remainingSysexDelay -= std::min(m_remainingSysexDelay, _numSamples);
+		if(m_readingSysex)
+			return;
 
-		while(m_remainingSysexDelay == 0 && !m_transmittingSysex && !m_pendingSysexBuffers.empty())
+		auto remainingSamples = _numSamples;
+
+		while(!m_pendingSysexBuffers.empty())
 		{
+			if(m_remainingSysexDelay > 0)
+			{
+				const auto sub = std::min(m_remainingSysexDelay, remainingSamples);
+				remainingSamples -= sub;
+
+				m_remainingSysexDelay -= sub;
+			}
+
+			if(m_remainingSysexDelay)
+				break;
+
 			const auto& msg = m_pendingSysexBuffers.front();
 
 			for (const auto b : msg)
@@ -40,10 +53,10 @@ namespace wLib
 
 		if(_byte == 0xf0)
 		{
-			m_receivingSysex = true;
+			m_writingSysex = true;
 		}
 
-		if(m_receivingSysex)
+		if(m_writingSysex)
 		{
 			m_pendingSysexMessage.push_back(_byte);
 		}
@@ -54,7 +67,7 @@ namespace wLib
 
 		if (_byte == 0xf7)
 		{
-			m_receivingSysex = false;
+			m_writingSysex = false;
 
 			if (!m_pendingSysexMessage.empty())
 				m_pendingSysexBuffers.push_back(std::move(m_pendingSysexMessage));
@@ -78,9 +91,9 @@ namespace wLib
 			const uint8_t d = data & 0xff;
 
 			if(d == 0xf0)
-				m_transmittingSysex = true;
+				m_readingSysex = true;
 			else if(d == 0xf7)
-				m_transmittingSysex = false;
+				m_readingSysex = false;
 
 			_result.push_back(d);
 		}
