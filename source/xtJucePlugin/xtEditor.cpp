@@ -8,6 +8,8 @@
 #include "xtFrontPanel.h"
 #include "xtPartName.h"
 #include "xtPatchManager.h"
+#include "xtWaveEditor.h"
+
 #include "../jucePluginLib/parameterbinding.h"
 
 namespace xtJucePlugin
@@ -100,12 +102,20 @@ namespace xtJucePlugin
 			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 		};
 
+#if defined(_DEBUG) && defined(_WIN32)
+		auto* waveEditorContainer = findComponent("waveEditorContainer");
+		m_waveEditor = std::make_unique<WaveEditor>(waveEditorContainer, *this);
+		getXtController().setWaveEditor(m_waveEditor.get());
+#else
 		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
 		waveEditorButtonParent->setVisible(false);
+#endif
 	}
 
 	Editor::~Editor()
 	{
+		getXtController().setWaveEditor(nullptr);
+		m_waveEditor.reset();
 		m_frontPanel.reset();
 	}
 

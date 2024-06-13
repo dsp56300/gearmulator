@@ -22,6 +22,7 @@ namespace pluginLib
 
 namespace xtJucePlugin
 {
+	class WaveEditor;
 	class FocusedParameter;
 	class FrontPanel;
 	class PatchManager;
@@ -60,6 +61,7 @@ namespace xtJucePlugin
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
+		std::unique_ptr<WaveEditor> m_waveEditor;
 
 		pluginLib::EventListener<bool> m_playModeChangeListener;
 

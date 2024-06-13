@@ -5,6 +5,13 @@ set(SOURCES
 	parameterDescriptions_xt.json
 	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
+	weData.cpp weData.h
+	weTree.cpp weTree.h
+	weTreeItem.cpp weTreeItem.h
+	weTypes.h
+	weWaveform.cpp weWaveform.h
+	weWaveTree.cpp weWaveTree.h
+	weWaveTreeItem.cpp weWaveTreeItem.h
 	xtController.cpp xtController.h
 	xtEditor.cpp xtEditor.h
 	xtFrontPanel.cpp xtFrontPanel.h
@@ -14,13 +21,13 @@ set(SOURCES
 	xtPartName.cpp xtPartName.h
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
+	xtWaveEditor.cpp xtWaveEditor.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
 # "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS "parameterDescriptions_xt.json")
 
-#include(skins/xtFrontPanel/assets.cmake)
 include(skins/xtDefault/assets.cmake)
 
 juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_xtDefault})

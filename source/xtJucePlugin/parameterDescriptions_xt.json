@@ -2001,6 +2001,43 @@
 			{"type": "paramindex"},
 			{"type": "paramvalue"},
 			{"type": "byte", "value": "f7"}
+		],
+		"requestWave": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "0e"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "02"},
+			{"type": "bank"},
+			{"type": "program"},
+			{"type": "byte", "value": "f7"}
+		],
+		"waveDump": [
+			{"type": "byte", "value": "f0"},
+			{"type": "byte", "value": "3e"},
+			{"type": "byte", "value": "0e"},
+			{"type": "deviceid"},
+			{"type": "byte", "value": "12"},
+			{"type": "bank"},
+			{"type": "program"},
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, {"type": "null"}, 
+			{"type": "checksum", "first": 7, "last": 134},
+			{"type": "byte", "value": "f7"}
 		]
 	}
 }

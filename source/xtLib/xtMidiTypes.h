@@ -169,4 +169,20 @@ namespace xt
 		static constexpr uint32_t g_singleNameLength = 16;
 		static constexpr uint32_t g_singleNamePosition = 153;
 	};
+
+	namespace Wave
+	{
+		static constexpr uint32_t g_romWaveCount = 300;
+		static constexpr uint32_t g_ramWaveCount = 250;
+		static constexpr uint32_t g_firstRamWaveIndex = 1000;
+
+		inline bool isValidWaveIndex(const uint32_t _index)
+		{
+			if(_index >= g_firstRamWaveIndex + g_ramWaveCount)
+				return false;
+			if(_index >= g_romWaveCount && _index < g_firstRamWaveIndex)
+				return false;
+			return true;
+		}
+	}
 }
