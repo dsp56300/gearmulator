@@ -10,6 +10,7 @@
 #include "../xtLib/xtMidiTypes.h"
 
 #include "../jucePluginLib/midipacket.h"
+#include "../jucePluginLib/event.h"
 
 class Controller;
 
@@ -19,6 +20,8 @@ namespace xtJucePlugin
 	{
 	public:
 		static constexpr uint32_t InvalidWaveIndex = std::numeric_limits<uint32_t>::max();
+
+		pluginLib::Event<uint32_t> onWaveChanged;
 
 		WaveEditorData(Controller& _controller);
 

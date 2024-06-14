@@ -95,6 +95,7 @@ namespace xtJucePlugin
 		if(_index < m_romWaves.size())
 		{
 			m_romWaves[_index] = _data;
+			onWaveChanged(_index);
 			return true;
 		}
 		if(_index < xt::Wave::g_firstRamWaveIndex)
@@ -106,6 +107,7 @@ namespace xtJucePlugin
 			return false;
 
 		m_ramWaves[_index] = _data;
+		onWaveChanged(_index);
 		return true;
 	}
 }
