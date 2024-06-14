@@ -63,11 +63,11 @@ namespace xtJucePlugin
 
 		for(uint32_t i=0; i<data.size()>>1; ++i)
 		{
-			auto sample = (_msg[off + i]) << 4 | _msg[off + i + 1];
+			auto sample = (_msg[off + (i<<1)]) << 4 | _msg[off + (i<<1) + 1];
 			sample = sample ^ 0x80;
 
 			data[i] = static_cast<int8_t>(sample);
-			data[64+i] = static_cast<int8_t>(-sample);
+			data[127-i] = static_cast<int8_t>(-sample);
 		}
 
 		setWave(index, data);
