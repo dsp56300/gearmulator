@@ -17,7 +17,7 @@ namespace xtJucePlugin
 		addComponentListener(this);
 
 		m_waveTree.reset(new WaveTree(*this));
-		m_waveTree->setSize(550, getHeight());
+		m_waveTree->setSize(170, getHeight());
 		addAndMakeVisible(m_waveTree.get());
 	}
 

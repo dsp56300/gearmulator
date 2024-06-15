@@ -11,7 +11,7 @@ namespace xtJucePlugin
 	{
 	public:
 		explicit Tree(WaveEditor& _editor);
-		~Tree();
+		~Tree() override;
 
 		WaveEditor& getWaveEditor() const { return m_editor; }
 

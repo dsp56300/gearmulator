@@ -17,7 +17,7 @@ namespace xtJucePlugin
 
 		bool mightContainSubItems() override { return false; }
 
-		static void paintWave(const WaveData& _data, juce::Graphics& _g, int _width, int _height, juce::Colour _colour);
+		static void paintWave(const WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);
 
 	private:
 		void onWaveChanged(uint32_t _index);

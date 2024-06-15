@@ -12,8 +12,8 @@ namespace xtJucePlugin
 		Invalid = -1,
 
 		Rom,
-		Ram,
 		User,
+		Plugin,
 
 		Count
 	};

@@ -9,7 +9,7 @@ namespace xtJucePlugin
 	WaveTree::WaveTree(WaveEditor& _editor) : Tree(_editor)
 	{
 		addCategory(WaveCategory::Rom);
-		addCategory(WaveCategory::Ram);
+		addCategory(WaveCategory::User);
 	}
 
 	void WaveTree::addCategory(WaveCategory _category)
