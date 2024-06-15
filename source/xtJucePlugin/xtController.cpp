@@ -12,6 +12,7 @@
 #include "dsp56kEmu/logging.h"
 
 #include "xtFrontPanel.h"
+#include "xtWaveEditor.h"
 
 namespace
 {
@@ -34,7 +35,11 @@ namespace
 	    "emuRequestLcd",
 	    "emuRequestLeds",
 	    "emuSendButton",
-	    "emuSendRotary"
+	    "emuSendRotary",
+	    "requestWave",
+	    "waveDump",
+		"requestTable",
+		"tableDump"
 	};
 
 	static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -380,6 +385,16 @@ bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiE
 		    m_globalData[index] = value;
 	    }
     }
+	else if(name == midiPacketName(WaveDump))
+	{
+		if(m_waveEditor)
+			m_waveEditor->onReceiveWave(data, _msg);
+	}
+	else if(name == midiPacketName(TableDump))
+	{
+		if(m_waveEditor)
+			m_waveEditor->onReceiveTable(data, _msg);
+	}
     else
     {
 	    LOG("Received unknown sysex of size " << _msg.size());
@@ -496,6 +511,11 @@ bool Controller::setString(pluginLib::MidiPacket::AnyPartParamValues& _values, c
 void Controller::setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel)
 {
 	m_frontPanel = _frontPanel;
+}
+
+void Controller::setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor)
+{
+	m_waveEditor = _waveEditor;
 }
 
 void Controller::selectPreset(const int _offset)
@@ -641,6 +661,32 @@ void Controller::requestMulti(xt::LocationH _buf, uint8_t _location) const
 	params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_buf);
 	params[pluginLib::MidiDataType::Program] = _location;
 	sendSysEx(RequestMulti, params);
+}
+
+bool Controller::requestWave(const uint32_t _number) const
+{
+	if(!xt::Wave::isValidWaveIndex(_number))
+		return false;
+
+	std::map<pluginLib::MidiDataType, uint8_t> params;
+
+	params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_number >> 7);
+	params[pluginLib::MidiDataType::Program] = _number & 0x7f;
+
+	return sendSysEx(RequestWave, params);
+}
+
+bool Controller::requestTable(const uint32_t _number) const
+{
+	if(!xt::Wave::isValidTableIndex(_number))
+		return false;
+
+	std::map<pluginLib::MidiDataType, uint8_t> params;
+
+	params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_number >> 7);
+	params[pluginLib::MidiDataType::Program] = _number & 0x7f;
+
+	return sendSysEx(RequestTable, params);
 }
 
 uint8_t Controller::getGlobalParam(xt::GlobalParameter _type) const

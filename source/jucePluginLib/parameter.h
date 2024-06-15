@@ -102,14 +102,9 @@ namespace pluginLib
 
 		struct ScopedChangeGesture
 		{
-			explicit ScopedChangeGesture(Parameter& _p) : m_parameter(_p)
-			{
-				_p.pushChangeGesture();
-			}
-			~ScopedChangeGesture()
-			{
-				m_parameter.popChangeGesture();
-			}
+			explicit ScopedChangeGesture(Parameter& _p);
+			~ScopedChangeGesture();
+
 		private:
 			Parameter& m_parameter;
 		};

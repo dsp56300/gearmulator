@@ -35,8 +35,8 @@ namespace wLib
 	private:
 		mc68k::Qsm& m_qsm;
 
-		bool m_transmittingSysex = false;
-		bool m_receivingSysex = false;
+		bool m_readingSysex = false;
+		bool m_writingSysex = false;
 		uint32_t m_remainingSysexDelay = 0;
 
 		std::deque< std::vector<uint8_t> > m_pendingSysexBuffers;

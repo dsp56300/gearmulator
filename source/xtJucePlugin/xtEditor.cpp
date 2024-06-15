@@ -8,6 +8,8 @@
 #include "xtFrontPanel.h"
 #include "xtPartName.h"
 #include "xtPatchManager.h"
+#include "xtWaveEditor.h"
+
 #include "../jucePluginLib/parameterbinding.h"
 
 namespace xtJucePlugin
@@ -99,10 +101,21 @@ namespace xtJucePlugin
 		{
 			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 		};
+
+#if defined(_DEBUG) && defined(_WIN32)
+		assert(m_waveEditor);
+		m_waveEditor->initialize();
+#else
+		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
+		waveEditorButtonParent->setVisible(false);
+#endif
 	}
 
 	Editor::~Editor()
 	{
+		if(m_waveEditor)
+			m_waveEditor->destroy();
+		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
 	}
 
@@ -165,6 +178,17 @@ namespace xtJucePlugin
 			return new PartName(*this);
 
 		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object);
+	}
+
+	juce::Component* Editor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
+	{
+		if(_object.getName() == "waveEditorContainer")
+		{
+			m_waveEditor = new WaveEditor(*this);
+			getXtController().setWaveEditor(m_waveEditor);
+			return m_waveEditor;
+		}
+		return jucePluginEditorLib::Editor::createJuceComponent(_component, _object);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)

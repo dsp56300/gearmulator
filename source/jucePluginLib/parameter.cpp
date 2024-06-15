@@ -15,6 +15,7 @@ namespace pluginLib
 		m_range.end = static_cast<float>(m_desc.range.getEnd());
 		m_range.interval = m_desc.step ? static_cast<float>(m_desc.step) : (m_desc.isDiscrete || m_desc.isBool ? 1.0f : 0.0f);
 
+		m_value.setValue(m_range.start);
 		m_value.addListener(this);
     }
 
@@ -263,4 +264,17 @@ namespace pluginLib
 		m_derivedParameters.insert(_param);
 		_param->m_derivedParameters.insert(this);
 	}
+
+	Parameter::ScopedChangeGesture::ScopedChangeGesture(Parameter& _p) : m_parameter(_p)
+    {
+		if(_p.getDescription().isPublic)
+		    _p.pushChangeGesture();
+    }
+
+    Parameter::ScopedChangeGesture::~ScopedChangeGesture()
+    {
+		if(m_parameter.getDescription().isPublic)
+		    m_parameter.popChangeGesture();
+    }
+
 }

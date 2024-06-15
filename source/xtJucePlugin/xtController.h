@@ -6,6 +6,7 @@
 
 namespace xtJucePlugin
 {
+	class WaveEditor;
 	class FrontPanel;
 }
 
@@ -40,6 +41,10 @@ public:
         EmuRequestLeds,
         EmuSendButton,
         EmuSendRotary,
+		RequestWave,
+		WaveDump,
+		RequestTable,
+		TableDump,
 
 		Count
 	};
@@ -82,6 +87,10 @@ public:
 	bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 	void setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel);
+	void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);
+
+	bool requestWave(uint32_t _number) const;
+	bool requestTable(uint32_t _number) const;
 
 private:
 	void selectPreset(int _offset);
@@ -122,4 +131,5 @@ private:
 	std::array<uint32_t, 8> m_currentSingles{0};
 	uint32_t m_currentSingle = 0;
 	xtJucePlugin::FrontPanel* m_frontPanel = nullptr;
+	xtJucePlugin::WaveEditor* m_waveEditor = nullptr;
 };
