@@ -79,6 +79,23 @@ namespace xtJucePlugin
 		}
 	}
 
+	std::optional<WaveData> WaveEditorData::getWave(uint32_t _waveIndex) const
+	{
+		if(_waveIndex < m_romWaves.size())
+			return m_romWaves[_waveIndex];
+
+		if(_waveIndex < xt::Wave::g_firstRamWaveIndex)
+			return {};
+		_waveIndex -= xt::Wave::g_firstRamWaveIndex;
+		if(_waveIndex >= m_ramWaves.size())
+			return {};
+
+		if(!m_ramWaves[_waveIndex])
+			return {};
+
+		return m_ramWaves[_waveIndex];
+	}
+
 	bool WaveEditorData::requestWave(const uint32_t _index)
 	{
 		if(isWaitingForWave())

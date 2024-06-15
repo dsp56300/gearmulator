@@ -29,6 +29,7 @@ namespace xtJucePlugin
 
 		bool isWaitingForWave() const { return m_currentWaveRequestIndex != InvalidWaveIndex; }
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
+		std::optional<WaveData> getWave(uint32_t _waveIndex) const;
 
 	private:
 		bool requestWave(uint32_t _index);

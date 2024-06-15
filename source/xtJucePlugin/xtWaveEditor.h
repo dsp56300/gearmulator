@@ -7,18 +7,24 @@
 
 namespace xtJucePlugin
 {
+	class WaveTree;
 	class Editor;
 
 	class WaveEditor : public juce::Component, juce::ComponentMovementWatcher
 	{
 	public:
 		explicit WaveEditor(juce::Component* _parent, Editor& _editor);
-		~WaveEditor();
+		~WaveEditor() override;
 
 		void visibilityChanged() override;
 		void parentHierarchyChanged() override;
 
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
+
+		const WaveEditorData& getData() const { return m_data; }
+		WaveEditorData& getData() { return m_data; }
+
+		Editor& getEditor() const { return m_editor; }
 
 	private:
 		// ComponentMovementWatcher
@@ -30,6 +36,7 @@ namespace xtJucePlugin
 		void onFirstTimeVisible();
 
 		Editor& m_editor;
+		std::unique_ptr<WaveTree> m_waveTree;
 		WaveEditorData m_data;
 		bool m_wasVisible = false;
 	};

@@ -9,6 +9,7 @@ set(SOURCES
 	weTree.cpp weTree.h
 	weTreeItem.cpp weTreeItem.h
 	weTypes.h
+	weWaveCategoryTreeItem.cpp weWaveCategoryTreeItem.h
 	weWaveform.cpp weWaveform.h
 	weWaveTree.cpp weWaveTree.h
 	weWaveTreeItem.cpp weWaveTreeItem.h

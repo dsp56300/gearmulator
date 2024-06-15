@@ -1,21 +1,30 @@
 #include "xtWaveEditor.h"
 
+#include "weTree.h"
+#include "weWaveTree.h"
 #include "xtEditor.h"
 
 namespace xtJucePlugin
 {
-	constexpr float g_scale = 2.0f;
+	constexpr float g_scale = 2.0f * 1.3f;
 
 	WaveEditor::WaveEditor(Component* _parent, Editor& _editor) : ComponentMovementWatcher(this), m_editor(_editor), m_data(_editor.getXtController())
 	{
-		setTransform(juce::AffineTransform::scale(g_scale, g_scale));
 		setSize(static_cast<int>(static_cast<float>(_parent->getWidth()) / g_scale), static_cast<int>(static_cast<float>(_parent->getHeight()) / g_scale));
+		setTransform(juce::AffineTransform::scale(g_scale));
 		_parent->addAndMakeVisible(this);
+
 		addComponentListener(this);
+
+		m_waveTree.reset(new WaveTree(*this));
+		m_waveTree->setSize(550, getHeight());
+		addAndMakeVisible(m_waveTree.get());
 	}
 
 	WaveEditor::~WaveEditor()
 	{
+		m_waveTree.reset();
+
 		removeComponentListener(this);
 	}
 
