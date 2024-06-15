@@ -12,6 +12,13 @@ namespace xtJucePlugin
 	protected:
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
+		bool paintInBold() const;
+
+		void setPaintRootItemInBold(const bool _enabled)
+		{
+			m_paintRootItemInBold = _enabled;
+		}
+
 	private:
 		bool mightContainSubItems() override
 		{
@@ -19,5 +26,6 @@ namespace xtJucePlugin
 		}
 
 		std::string m_text;
+		bool m_paintRootItemInBold = true;
 	};
 }

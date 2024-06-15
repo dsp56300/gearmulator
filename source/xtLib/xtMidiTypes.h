@@ -175,6 +175,18 @@ namespace xt
 		static constexpr uint32_t g_romWaveCount = 300;
 		static constexpr uint32_t g_ramWaveCount = 250;
 		static constexpr uint32_t g_firstRamWaveIndex = 1000;
+		static constexpr uint32_t g_tableCount = 128;
+		static constexpr uint32_t g_wavesPerTable = 64;
+
+		// these are either algorithmic or invalid, we cannot request them via MIDI
+		static constexpr uint32_t g_algorithmicWavetables[] = {28, 29,
+			30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+			40, 41, 42, 43, 44, 45, 46, 47, 48, 49,
+			50, 51,
+			64, 65, 66, 67, 68, 69,
+			70, 71, 72, 73, 74, 75, 76, 77, 78, 79,
+			80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
+			90, 91, 92, 93, 94, 95};
 
 		inline bool isValidWaveIndex(const uint32_t _index)
 		{
@@ -184,5 +196,11 @@ namespace xt
 				return false;
 			return true;
 		}
+
+		inline bool isValidTableIndex(const uint32_t _index)
+		{
+			return _index < g_tableCount;
+		}
 	}
+
 }

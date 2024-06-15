@@ -24,7 +24,7 @@ namespace xtJucePlugin
 		{
 			if (auto f = style->getFont())
 			{
-				f->setBold(getParentItem() == getOwnerView()->getRootItem());
+				f->setBold(paintInBold());
 				_g.setFont(*f);
 				haveFont = true;
 			}
@@ -32,7 +32,7 @@ namespace xtJucePlugin
 		if(!haveFont)
 		{
 			auto fnt = _g.getCurrentFont();
-			fnt.setBold(getParentItem() == getOwnerView()->getRootItem());
+			fnt.setBold(paintInBold());
 			_g.setFont(fnt);
 		}
 
@@ -42,4 +42,10 @@ namespace xtJucePlugin
 
 		TreeViewItem::paintItem(_g, _width, _height);
 	}
+
+	bool TreeItem::paintInBold() const
+	{
+		return m_paintRootItemInBold && getParentItem() == getOwnerView()->getRootItem();
+	}
+
 }

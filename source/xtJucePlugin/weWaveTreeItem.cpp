@@ -5,7 +5,7 @@
 
 namespace xtJucePlugin
 {
-	WaveTreeItem::WaveTreeItem(WaveEditor& _editor, WaveCategory _category, const uint32_t _waveIndex)
+	WaveTreeItem::WaveTreeItem(WaveEditor& _editor, const WaveCategory _category, const uint32_t _waveIndex)
 		: m_editor(_editor)
 		, m_category(_category)
 		, m_waveIndex(_waveIndex)
@@ -15,7 +15,7 @@ namespace xtJucePlugin
 			onWaveChanged(_waveIndex);
 		});
 
-		setText(WaveCategoryTreeItem::getCategoryName(_category) + ' ' + std::to_string(_waveIndex));
+		setText(getWaveName(_waveIndex));
 	}
 
 	void WaveTreeItem::paintWave(const WaveData& _data, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height, const juce::Colour& _colour)
@@ -37,6 +37,23 @@ namespace xtJucePlugin
 		}
 	}
 
+	std::string WaveTreeItem::getWaveName(const uint32_t _waveIndex)
+	{
+		if(!xt::Wave::isValidWaveIndex(_waveIndex))
+			return {};
+		const auto category = getCategory(_waveIndex);
+		return WaveCategoryTreeItem::getCategoryName(category) + ' ' + std::to_string(_waveIndex);
+	}
+
+	WaveCategory WaveTreeItem::getCategory(const uint32_t _waveIndex)
+	{
+		if(_waveIndex < xt::Wave::g_romWaveCount)
+			return WaveCategory::Rom;
+		if(_waveIndex >= xt::Wave::g_firstRamWaveIndex && _waveIndex < xt::Wave::g_firstRamWaveIndex + xt::Wave::g_ramWaveCount)
+			return WaveCategory::User;
+		return WaveCategory::Invalid;
+	}
+
 	void WaveTreeItem::onWaveChanged(const uint32_t _index)
 	{
 		if(_index != m_waveIndex)
@@ -52,9 +69,7 @@ namespace xtJucePlugin
 	void WaveTreeItem::paintItem(juce::Graphics& g, int width, int height)
 	{
 		if(const auto wave = m_editor.getData().getWave(m_waveIndex))
-		{
 			paintWave(*wave, g, width>>1, 0, width>>1, height, juce::Colour(0xffffffff));
-		}
 
 		TreeItem::paintItem(g, width, height);
 	}

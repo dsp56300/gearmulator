@@ -37,7 +37,9 @@ namespace
 	    "emuSendButton",
 	    "emuSendRotary",
 	    "requestWave",
-	    "waveDump"
+	    "waveDump",
+		"requestTable",
+		"tableDump"
 	};
 
 	static_assert(std::size(g_midiPacketNames) == static_cast<size_t>(Controller::MidiPacketType::Count));
@@ -388,6 +390,11 @@ bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiE
 		if(m_waveEditor)
 			m_waveEditor->onReceiveWave(data, _msg);
 	}
+	else if(name == midiPacketName(TableDump))
+	{
+		if(m_waveEditor)
+			m_waveEditor->onReceiveTable(data, _msg);
+	}
     else
     {
 	    LOG("Received unknown sysex of size " << _msg.size());
@@ -667,6 +674,19 @@ bool Controller::requestWave(const uint32_t _number) const
 	params[pluginLib::MidiDataType::Program] = _number & 0x7f;
 
 	return sendSysEx(RequestWave, params);
+}
+
+bool Controller::requestTable(const uint32_t _number) const
+{
+	if(!xt::Wave::isValidTableIndex(_number))
+		return false;
+
+	std::map<pluginLib::MidiDataType, uint8_t> params;
+
+	params[pluginLib::MidiDataType::Bank] = static_cast<uint8_t>(_number >> 7);
+	params[pluginLib::MidiDataType::Program] = _number & 0x7f;
+
+	return sendSysEx(RequestTable, params);
 }
 
 uint8_t Controller::getGlobalParam(xt::GlobalParameter _type) const

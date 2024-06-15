@@ -5,7 +5,11 @@ set(SOURCES
 	parameterDescriptions_xt.json
 	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
+	weControlTree.cpp weControlTree.h
+	weControlTreeItem.cpp weControlTreeItem.h
 	weData.cpp weData.h
+	weTablesTree.cpp weTablesTree.h
+	weTablesTreeItem.cpp weTablesTreeItem.h
 	weTree.cpp weTree.h
 	weTreeItem.cpp weTreeItem.h
 	weTypes.h

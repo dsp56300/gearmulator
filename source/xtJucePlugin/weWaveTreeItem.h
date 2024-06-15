@@ -19,6 +19,9 @@ namespace xtJucePlugin
 
 		static void paintWave(const WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);
 
+		static std::string getWaveName(uint32_t _waveIndex);
+		static WaveCategory getCategory(uint32_t _waveIndex);
+
 	private:
 		void onWaveChanged(uint32_t _index);
 		void onWaveChanged();

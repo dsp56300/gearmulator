@@ -43,6 +43,8 @@ public:
         EmuSendRotary,
 		RequestWave,
 		WaveDump,
+		RequestTable,
+		TableDump,
 
 		Count
 	};
@@ -88,6 +90,7 @@ public:
 	void setWaveEditor(xtJucePlugin::WaveEditor* _waveEditor);
 
 	bool requestWave(uint32_t _number) const;
+	bool requestTable(uint32_t _number) const;
 
 private:
 	void selectPreset(int _offset);
