@@ -22,6 +22,7 @@ namespace xtJucePlugin
 		static std::string getWaveName(uint32_t _waveIndex);
 		static WaveCategory getCategory(uint32_t _waveIndex);
 
+		void itemSelectionChanged(bool isNowSelected) override;
 	private:
 		void onWaveChanged(uint32_t _index);
 		void onWaveChanged();

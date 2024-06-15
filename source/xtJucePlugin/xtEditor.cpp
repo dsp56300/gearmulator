@@ -113,8 +113,9 @@ namespace xtJucePlugin
 
 	Editor::~Editor()
 	{
+		if(m_waveEditor)
+			m_waveEditor->destroy();
 		getXtController().setWaveEditor(nullptr);
-		m_waveEditor.reset();
 		m_frontPanel.reset();
 	}
 
@@ -183,9 +184,9 @@ namespace xtJucePlugin
 	{
 		if(_object.getName() == "waveEditorContainer")
 		{
-			m_waveEditor.reset(new WaveEditor(*this));
-			getXtController().setWaveEditor(m_waveEditor.get());
-			return m_waveEditor.get();
+			m_waveEditor = new WaveEditor(*this);
+			getXtController().setWaveEditor(m_waveEditor);
+			return m_waveEditor;
 		}
 		return jucePluginEditorLib::Editor::createJuceComponent(_component, _object);
 	}

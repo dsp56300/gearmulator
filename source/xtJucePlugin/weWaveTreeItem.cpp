@@ -30,8 +30,8 @@ namespace xtJucePlugin
 			const auto x0 = static_cast<float>(x - 1) * scaleX + static_cast<float>(_x);
 			const auto x1 = static_cast<float>(x    ) * scaleX + static_cast<float>(_x);
 
-			const auto y0 = static_cast<float>(_data[x - 1] + 128) * scaleY + static_cast<float>(_y);
-			const auto y1 = static_cast<float>(_data[x    ] + 128) * scaleY + static_cast<float>(_y);
+			const auto y0 = static_cast<float>(255 - (_data[x - 1] + 128)) * scaleY + static_cast<float>(_y);
+			const auto y1 = static_cast<float>(255 - (_data[x    ] + 128)) * scaleY + static_cast<float>(_y);
 
 			_g.drawLine(x0, y0, x1, y1);
 		}
@@ -52,6 +52,14 @@ namespace xtJucePlugin
 		if(_waveIndex >= xt::Wave::g_firstRamWaveIndex && _waveIndex < xt::Wave::g_firstRamWaveIndex + xt::Wave::g_ramWaveCount)
 			return WaveCategory::User;
 		return WaveCategory::Invalid;
+	}
+
+	void WaveTreeItem::itemSelectionChanged(bool isNowSelected)
+	{
+		TreeItem::itemSelectionChanged(isNowSelected);
+
+		if(isNowSelected)
+			m_editor.setSelectedWave(m_waveIndex);
 	}
 
 	void WaveTreeItem::onWaveChanged(const uint32_t _index)

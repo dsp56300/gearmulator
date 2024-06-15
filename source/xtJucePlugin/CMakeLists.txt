@@ -8,6 +8,11 @@ set(SOURCES
 	weControlTree.cpp weControlTree.h
 	weControlTreeItem.cpp weControlTreeItem.h
 	weData.cpp weData.h
+	weGraph.cpp weGraph.h
+	weGraphData.cpp weGraphData.h
+	weGraphFreq.cpp weGraphFreq.h
+	weGraphPhase.cpp weGraphPhase.h
+	weGraphTime.cpp weGraphTime.h
 	weTablesTree.cpp weTablesTree.h
 	weTablesTreeItem.cpp weTablesTreeItem.h
 	weTree.cpp weTree.h
@@ -38,3 +43,7 @@ include(skins/xtDefault/assets.cmake)
 juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_xtDefault})
 
 createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib)
+
+target_link_libraries(xtJucePlugin PUBLIC juce::juce_dsp)
+target_link_libraries(xtJucePlugin_FX PUBLIC juce::juce_dsp)
+

@@ -62,7 +62,7 @@ namespace xtJucePlugin
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
-		std::unique_ptr<WaveEditor> m_waveEditor;
+		WaveEditor* m_waveEditor = nullptr;
 
 		pluginLib::EventListener<bool> m_playModeChangeListener;
 
