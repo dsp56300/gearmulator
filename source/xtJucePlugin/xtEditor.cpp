@@ -103,9 +103,8 @@ namespace xtJucePlugin
 		};
 
 #if defined(_DEBUG) && defined(_WIN32)
-		auto* waveEditorContainer = findComponent("waveEditorContainer");
-		m_waveEditor = std::make_unique<WaveEditor>(waveEditorContainer, *this);
-		getXtController().setWaveEditor(m_waveEditor.get());
+		assert(m_waveEditor);
+		m_waveEditor->initialize();
 #else
 		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
 		waveEditorButtonParent->setVisible(false);
@@ -178,6 +177,17 @@ namespace xtJucePlugin
 			return new PartName(*this);
 
 		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object);
+	}
+
+	juce::Component* Editor::createJuceComponent(juce::Component* _component, genericUI::UiObject& _object)
+	{
+		if(_object.getName() == "waveEditorContainer")
+		{
+			m_waveEditor.reset(new WaveEditor(*this));
+			getXtController().setWaveEditor(m_waveEditor.get());
+			return m_waveEditor.get();
+		}
+		return jucePluginEditorLib::Editor::createJuceComponent(_component, _object);
 	}
 
 	void Editor::setCurrentPart(const uint8_t _part)

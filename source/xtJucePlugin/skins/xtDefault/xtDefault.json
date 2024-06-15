@@ -8494,10 +8494,182 @@
                     "name" : "waveEditorContainer",
                     "component" : {
                         "x" : "0",
-                        "y" : "48",
+                        "y" : "0",
                         "width" : "3322.7",
-                        "height" : "1431.802"
-                    }
+                        "height" : "1479.802"
+                    },
+                    "children" : [
+                        {
+                            "name" : "wecWavetableList",
+                            "component" : {
+                                "x" : "0",
+                                "y" : "48",
+                                "width" : "500",
+                                "height" : "1431.802"
+                            }
+                        },
+                        {
+                            "name" : "wecWaveControlTable",
+                            "component" : {
+                                "x" : "540",
+                                "y" : "48",
+                                "width" : "500",
+                                "height" : "1284.952"
+                            }
+                        },
+                        {
+                            "name" : "xtButton",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "638",
+                                "y" : "1372.377",
+                                "width" : "64",
+                                "height" : "64",
+                                "texture" : "xtknob_small",
+                                "tileSizeX" : "64",
+                                "tileSizeY" : "64"
+                            }
+                        },
+                        {
+                            "name" : "xtLed",
+                            "button" : {
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "654",
+                                "y" : "1340.377",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O2Link"
+                            }
+                        },
+                        {
+                            "name" : "xtButton",
+                            "button" : {
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "878",
+                                "y" : "1372.377",
+                                "width" : "64",
+                                "height" : "64",
+                                "texture" : "xtknob_small",
+                                "tileSizeX" : "64",
+                                "tileSizeY" : "64"
+                            }
+                        },
+                        {
+                            "name" : "wecWaveList",
+                            "component" : {
+                                "x" : "1080",
+                                "y" : "48",
+                                "width" : "500",
+                                "height" : "1431.802"
+                            }
+                        },
+                        {
+                            "name" : "wecWaveTime",
+                            "component" : {
+                                "x" : "1620",
+                                "y" : "48",
+                                "width" : "1700",
+                                "height" : "614.5936"
+                            }
+                        },
+                        {
+                            "name" : "xtButton",
+                            "button" : {
+                                "isToggle" : "1",
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "1662",
+                                "y" : "705.9009",
+                                "width" : "64",
+                                "height" : "64",
+                                "texture" : "xtknob_small",
+                                "tileSizeX" : "64",
+                                "tileSizeY" : "64"
+                            }
+                        },
+                        {
+                            "name" : "xtLed",
+                            "button" : {
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "0",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "1678",
+                                "y" : "673.9009",
+                                "width" : "32",
+                                "height" : "32",
+                                "texture" : "led",
+                                "tileSizeX" : "128",
+                                "tileSizeY" : "128"
+                            },
+                            "parameterAttachment" : {
+                                "parameter" : "O2Link"
+                            }
+                        },
+                        {
+                            "name" : "xtButton",
+                            "button" : {
+                                "normalImage" : "0",
+                                "overImage" : "0",
+                                "downImage" : "1",
+                                "normalImageOn" : "1",
+                                "overImageOn" : "1",
+                                "downImageOn" : "1",
+                                "x" : "1815",
+                                "y" : "705.9009",
+                                "width" : "64",
+                                "height" : "64",
+                                "texture" : "xtknob_small",
+                                "tileSizeX" : "64",
+                                "tileSizeY" : "64"
+                            }
+                        },
+                        {
+                            "name" : "wecWaveFreq",
+                            "component" : {
+                                "x" : "1620",
+                                "y" : "865.2081",
+                                "width" : "830",
+                                "height" : "614.5936"
+                            }
+                        },
+                        {
+                            "name" : "wecWavePhase",
+                            "component" : {
+                                "x" : "2490",
+                                "y" : "865.2081",
+                                "width" : "830",
+                                "height" : "614.5936"
+                            }
+                        }
+                    ]
                 }
             ]
         },

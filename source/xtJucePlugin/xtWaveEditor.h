@@ -13,11 +13,10 @@ namespace xtJucePlugin
 	class WaveEditor : public juce::Component, juce::ComponentMovementWatcher
 	{
 	public:
-		explicit WaveEditor(juce::Component* _parent, Editor& _editor);
+		explicit WaveEditor(Editor& _editor);
 		~WaveEditor() override;
 
-		void visibilityChanged() override;
-		void parentHierarchyChanged() override;
+		void initialize();
 
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 
@@ -28,9 +27,9 @@ namespace xtJucePlugin
 
 	private:
 		// ComponentMovementWatcher
-		void componentVisibilityChanged() override;
-		void componentPeerChanged() override {}
-		void componentMovedOrResized(bool wasMoved, bool wasResized) override {}
+		void componentVisibilityChanged() override { checkFirstTimeVisible(); }
+		void componentPeerChanged() override { checkFirstTimeVisible(); }
+		void componentMovedOrResized(bool wasMoved, bool wasResized) override { checkFirstTimeVisible(); }
 
 		void checkFirstTimeVisible();
 		void onFirstTimeVisible();

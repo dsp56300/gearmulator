@@ -17,4 +17,6 @@ namespace xtJucePlugin
 
 		Count
 	};
+
+	static constexpr float g_waveEditorScale = 2.0f * 1.3f;
 }

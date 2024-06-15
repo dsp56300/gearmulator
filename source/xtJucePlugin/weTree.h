@@ -15,6 +15,7 @@ namespace xtJucePlugin
 
 		WaveEditor& getWaveEditor() const { return m_editor; }
 
+		void parentHierarchyChanged() override;
 	private:
 		WaveEditor& m_editor;
 
