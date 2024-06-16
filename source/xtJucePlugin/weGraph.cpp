@@ -6,7 +6,7 @@ namespace xtJucePlugin
 {
 	Graph::Graph(WaveEditor& _editor) : m_editor(_editor), m_data(_editor.getGraphData())
 	{
-		m_onSourceChanged.set(m_data.onSourceChanged, [this](const WaveData& _source)
+		m_onSourceChanged.set(m_data.onSourceChanged, [this](const WaveData&)
 		{
 			onSourceChanged();
 		});
@@ -16,7 +16,7 @@ namespace xtJucePlugin
 	{
 		g.fillAll(findColour(juce::TreeView::ColourIds::backgroundColourId));
 
-		paint(g, 0, 0, getWidth(), getHeight());
+		paint(getData(), getDataSize(),g, 0, 0, getWidth(), getHeight());
 	}
 
 	void Graph::parentHierarchyChanged()
@@ -35,26 +35,26 @@ namespace xtJucePlugin
 		_g.setColour(juce::Colour(0xffffffff));
 
 		const float scaleX = static_cast<float>(_width - 1)  / static_cast<float>(_size -1);
-		const float scaleY = static_cast<float>(_height) / (m_maxValue - m_minValue);
+		const float scaleY = static_cast<float>(_height);
+
+		const float x = static_cast<float>(_x);
+		const float y = static_cast<float>(_y);
 
 		const float h = static_cast<float>(_height);
 
-		for(uint32_t x=1; x<_size; ++x)
+		for(uint32_t i=0; i<_size; ++i)
 		{
-			const auto x0 = static_cast<float>(x - 1) * scaleX + static_cast<float>(_x);
-			const auto x1 = static_cast<float>(x    ) * scaleX + static_cast<float>(_x);
+			const auto x0 = static_cast<float>(i ? (i - 1) : i) * scaleX + x;
+			const auto x1 = static_cast<float>(i    ) * scaleX + x;
 
-			const auto y0 = h - (_data[x - 1] - m_minValue) * scaleY + static_cast<float>(_y) - 1;
-			const auto y1 = h - (_data[x    ] - m_minValue) * scaleY + static_cast<float>(_y) - 1;
+			const auto y0 = h - (normalize(_data[i ? (i - 1) : i])) * scaleY + y - 1;
+			const auto y1 = h - (normalize(_data[i    ])) * scaleY + y - 1;
 
-			_g.drawLine(x0, y0, x1, y1, 3.0f);
+			if(i)
+				_g.drawLine(x0, y0, x1, y1, 3.0f);
+
+			_g.fillEllipse(x0 - 5, y0 - 5, 10, 10);
 		}
-	}
-
-	void Graph::setRange(const float _min, const float _max)
-	{
-		m_minValue = _min;
-		m_maxValue = _max;
 	}
 
 	void Graph::onSourceChanged()

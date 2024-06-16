@@ -11,7 +11,11 @@ namespace xtJucePlugin
 		{
 		}
 
-		void paint(juce::Graphics& _g, int _x, int _y, int _width, int _height) override;
+		float normalize(float _in) const override;
+		float unnormalize(float _in) const override;
+
+		const float* getData() const override;
+		size_t getDataSize() const override;
 	private:
 	};
 }

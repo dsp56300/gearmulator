@@ -6,11 +6,25 @@ namespace xtJucePlugin
 {
 	GraphPhase::GraphPhase(WaveEditor& _editor): Graph(_editor)
 	{
-		setRange(-1,1);
 	}
 
-	void GraphPhase::paint(juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height)
+	float GraphPhase::normalize(const float _in) const
 	{
-		Graph::paint(getGraphData().getPhases(), _g, _x, _y, _width, _height);
+		return (_in + 1.0f) * 0.5f;
+	}
+
+	float GraphPhase::unnormalize(const float _in) const
+	{
+		return _in * 2.0f - 1.0f;
+	}
+
+	const float* GraphPhase::getData() const
+	{
+		return getGraphData().getPhases().data();
+	}
+
+	size_t GraphPhase::getDataSize() const
+	{
+		return getGraphData().getPhases().size();
 	}
 }
