@@ -5,6 +5,8 @@
 
 #include "../jucePluginLib/event.h"
 
+#include "juce_dsp/juce_dsp.h"
+
 namespace xtJucePlugin
 {
 	class GraphData
@@ -12,9 +14,7 @@ namespace xtJucePlugin
 	public:
 		pluginLib::Event<WaveData> onSourceChanged;
 
-		GraphData() : m_source({}), m_data({}), m_frequencies({}), m_phases({})
-		{
-		}
+		GraphData();
 
 		void set(const WaveData& _data);
 
@@ -23,10 +23,17 @@ namespace xtJucePlugin
 		const auto& getPhases() const { return m_phases; }
 
 	private:
+		void updateFrequenciesAndPhases();
+
 		WaveData m_source;
 
 		std::array<float, std::tuple_size_v<WaveData>> m_data;
 		std::array<float, std::tuple_size_v<WaveData>/2> m_frequencies;
 		std::array<float, std::tuple_size_v<WaveData>/2> m_phases;
+
+		std::array<juce::dsp::Complex<float>, std::tuple_size_v<WaveData>> m_fftInData; 
+		std::array<juce::dsp::Complex<float>, std::tuple_size_v<WaveData>> m_fftOutData;
+
+		const juce::dsp::FFT m_fft;
 	};
 }

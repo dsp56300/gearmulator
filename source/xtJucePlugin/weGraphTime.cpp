@@ -6,11 +6,25 @@ namespace xtJucePlugin
 {
 	GraphTime::GraphTime(WaveEditor& _editor): Graph(_editor)
 	{
-		setRange(-1.0f, 1.0f);
 	}
 
-	void GraphTime::paint(juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height)
+	float GraphTime::normalize(const float _in) const
 	{
-		Graph::paint(getGraphData().getData(), _g, _x, _y, _width, _height);
+		return (_in + 1.0f) * 0.5f;
+	}
+
+	float GraphTime::unnormalize(const float _in) const
+	{
+		return _in * 2.0f - 1.0f;
+	}
+
+	const float* GraphTime::getData() const
+	{
+		return getGraphData().getData().data();
+	}
+
+	size_t GraphTime::getDataSize() const
+	{
+		return getGraphData().getData().size();
 	}
 }
