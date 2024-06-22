@@ -2,6 +2,7 @@
 
 #include "weData.h"
 #include "weGraphData.h"
+#include "xtWaveEditorStyle.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -38,6 +39,8 @@ namespace xtJucePlugin
 		const WaveEditorData& getData() const { return m_data; }
 		WaveEditorData& getData() { return m_data; }
 
+		const WaveEditorStyle& getStyle() const { return m_style; }
+
 		Editor& getEditor() const { return m_editor; }
 		GraphData& getGraphData() { return m_graphData; }
 
@@ -70,5 +73,7 @@ namespace xtJucePlugin
 
 		uint32_t m_selectedTable = ~0;
 		uint32_t m_selectedWave = ~0;
+
+		WaveEditorStyle m_style;
 	};
 }

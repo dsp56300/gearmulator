@@ -6,6 +6,7 @@ namespace xtJucePlugin
 {
 	GraphTime::GraphTime(WaveEditor& _editor): Graph(_editor)
 	{
+		setUpdateHoveredPositionWhileDragging(true);
 	}
 
 	float GraphTime::normalize(const float _in) const
@@ -26,5 +27,10 @@ namespace xtJucePlugin
 	size_t GraphTime::getDataSize() const
 	{
 		return getGraphData().getData().size();
+	}
+
+	void GraphTime::modifyValue(const uint32_t _index, const float _unnormalizedValue)
+	{
+		getGraphData().setData(_index, _unnormalizedValue);
 	}
 }

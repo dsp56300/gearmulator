@@ -33,6 +33,32 @@ namespace xtJucePlugin
 		onSourceChanged(m_source);
 	}
 
+	void GraphData::setData(const uint32_t _index, const float _value)
+	{
+		if(m_data[_index] == _value)
+			return;
+		m_data[_index] = _value;
+		m_data[m_data.size() - _index - 1] = -_value;
+		updateFrequenciesAndPhases();
+		onSourceChanged(m_source);
+	}
+
+	void GraphData::setFreq(const uint32_t _index, const float _value)
+	{
+		if(m_frequencies[_index] == _value)
+			return;
+		m_frequencies[_index] = _value;
+		onSourceChanged(m_source);
+	}
+
+	void GraphData::setPhase(const uint32_t _index, const float _value)
+	{
+		if(m_phases[_index] == _value)
+			return;
+		m_phases[_index] = _value;
+		onSourceChanged(m_source);
+	}
+
 	void GraphData::updateFrequenciesAndPhases()
 	{
 		for(size_t i=0; i<m_data.size(); ++i)

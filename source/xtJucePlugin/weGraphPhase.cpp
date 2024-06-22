@@ -27,4 +27,9 @@ namespace xtJucePlugin
 	{
 		return getGraphData().getPhases().size();
 	}
+
+	void GraphPhase::modifyValue(uint32_t _index, float _unnormalizedValue)
+	{
+		getGraphData().setPhase(_index, _unnormalizedValue);
+	}
 }

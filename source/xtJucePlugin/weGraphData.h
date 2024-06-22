@@ -22,6 +22,10 @@ namespace xtJucePlugin
 		const auto& getFrequencies() const { return m_frequencies; }
 		const auto& getPhases() const { return m_phases; }
 
+		void setData(uint32_t _index, float _value);
+		void setFreq(uint32_t _index, float _value);
+		void setPhase(uint32_t _index, float _value);
+
 	private:
 		void updateFrequenciesAndPhases();
 

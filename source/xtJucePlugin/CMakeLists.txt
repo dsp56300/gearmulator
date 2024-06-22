@@ -32,6 +32,7 @@ set(SOURCES
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	xtWaveEditor.cpp xtWaveEditor.h
+	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
