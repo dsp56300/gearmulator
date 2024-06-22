@@ -16,6 +16,7 @@ namespace xtJucePlugin
 
 		const float* getData() const override;
 		size_t getDataSize() const override;
+		void modifyValue(uint32_t _index, float _unnormalizedValue) override;
 	private:
 	};
 }

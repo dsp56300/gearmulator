@@ -23,4 +23,9 @@ namespace xtJucePlugin
 	{
 		return getGraphData().getFrequencies().size();
 	}
+
+	void GraphFreq::modifyValue(uint32_t _index, float _unnormalizedValue)
+	{
+		getGraphData().setFreq(_index, _unnormalizedValue);
+	}
 }

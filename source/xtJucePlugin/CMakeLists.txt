@@ -32,6 +32,7 @@ set(SOURCES
 	xtParts.cpp xtParts.h
 	xtPatchManager.cpp xtPatchManager.h
 	xtWaveEditor.cpp xtWaveEditor.h
+	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
 )
 
 # https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
@@ -45,5 +46,7 @@ juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_xtDefaul
 createJucePluginWithFX(xtJucePlugin "Xenia" "Txts" "Txtf" xtJucePlugin_BinaryData xtLib)
 
 target_link_libraries(xtJucePlugin PUBLIC juce::juce_dsp)
-target_link_libraries(xtJucePlugin_FX PUBLIC juce::juce_dsp)
 
+if(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN)
+	target_link_libraries(xtJucePlugin_FX PUBLIC juce::juce_dsp)
+endif()
