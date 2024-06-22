@@ -48,6 +48,7 @@ namespace xtJucePlugin
 		if(m_frequencies[_index] == _value)
 			return;
 		m_frequencies[_index] = _value;
+		updateDataFromFrequenciesAndPhases();
 		onSourceChanged(m_source);
 	}
 
@@ -56,6 +57,7 @@ namespace xtJucePlugin
 		if(m_phases[_index] == _value)
 			return;
 		m_phases[_index] = _value;
+		updateDataFromFrequenciesAndPhases();
 		onSourceChanged(m_source);
 	}
 
@@ -82,6 +84,33 @@ namespace xtJucePlugin
 				m_phases[i] = std::arg(c) / g_pi;
 //			else
 //				m_phases[i] = 0;
+		}
+	}
+
+	void GraphData::updateDataFromFrequenciesAndPhases()
+	{
+		const auto scale = static_cast<float>(m_fft.getSize()>>1);
+
+		for(uint32_t i=0; i<m_frequencies.size(); ++i)
+		{
+			const auto re = cos(m_phases[i] * g_pi) * scale * m_frequencies[i];
+			const auto im = sin(m_phases[i] * g_pi) * scale * m_frequencies[i];
+
+			m_fftInData[i].real(re);
+			m_fftInData[i].imag(im);
+
+			if(!i)
+				continue;
+
+			m_fftInData[128-i].real(re);
+			m_fftInData[128-i].imag(-im);
+		}
+
+		m_fft.perform(m_fftInData.data(), m_fftOutData.data(), true);
+
+		for(uint32_t i=0; i<m_data.size(); ++i)
+		{
+			m_data[i] = m_fftOutData[i].real();
 		}
 	}
 }
