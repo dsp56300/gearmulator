@@ -28,6 +28,7 @@ namespace xtJucePlugin
 
 	private:
 		void updateFrequenciesAndPhases();
+		void updateDataFromFrequenciesAndPhases();
 
 		WaveData m_source;
 
