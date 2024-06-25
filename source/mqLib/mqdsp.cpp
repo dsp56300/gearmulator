@@ -23,6 +23,9 @@ namespace mqLib
 	, m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr, m_memoryBuffer)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
+		if(!_hardware.isValid())
+			return;
+
 		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // measured as being roughly 33,9MHz, this should be exact
 		m_periphX.getEsaiClock().setSamplerate(44100); // verified
 		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);

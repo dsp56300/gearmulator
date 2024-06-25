@@ -22,6 +22,9 @@ namespace xt
 	, m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr, m_memoryBuffer)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
 	{
+		if(!_hardware.isValid())
+			return;
+
 		m_periphX.getEssiClock().setExternalClockFrequency(10'240'000);	// 10,24 MHz
 		m_periphX.getEssiClock().setSamplerate(40000);
 		m_periphX.getEssiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
