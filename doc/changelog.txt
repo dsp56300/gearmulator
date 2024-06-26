@@ -58,6 +58,7 @@ Osirus/OsTIrus:
 OsTIrus:
 
 - [Fix] Arpeggiator pattern was always displayed for part 1 regardless of part selection
+- [Fix] Modulation sources "Filter Envelope" and "LFO2 Unipolar" didn't work/were swapped
 
 Osirus:
 
