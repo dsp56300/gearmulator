@@ -2315,7 +2315,7 @@
                     "condition" : {
                         "enableOnParameter" : "Lfo2Sync",
                         "enableOnValues" : "0,1"
-                    }                    
+                    }
                 },
                 {
                     "name" : "xtKnob",
@@ -2336,7 +2336,7 @@
                     "condition" : {
                         "enableOnParameter" : "Lfo2Sync",
                         "enableOnValues" : "3"
-                    }                    
+                    }
                 },
                 {
                     "name" : "xtKnob",
