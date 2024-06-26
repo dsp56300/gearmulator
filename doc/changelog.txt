@@ -58,14 +58,20 @@ Osirus/OsTIrus:
 OsTIrus:
 
 - [Fix] Arpeggiator pattern was always displayed for part 1 regardless of part selection
+- [Fix] Modulation sources "Filter Envelope" and "LFO2 Unipolar" didn't work/were swapped
 
 Osirus:
 
 - [Imp] Add support for Virus A .mid OS update firmware file
 
-Vavra:
+Vavra/Xenia:
+
+- [Imp] Added support for lock regions
 
 - [Fix] Excessive parameter changes were sent to host when loading a preset
+
+Vavra:
+
 - [Fix] Filter mod amount values displayed unsigned values even though the parameter
         is signed
 
@@ -74,8 +80,6 @@ Xenia:
 - [Imp] UI polishing in various areas (mkruselj)
 - [Imp] Improve parameter names & values (mkruselj)
 - [Imp] Added buttons to the top section to select the previous/next patch
-
-- [Fix] Excessive parameter changes were sent to host when loading a preset
 
 1.3.14
 
