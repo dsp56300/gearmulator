@@ -7,10 +7,13 @@
 
 #include "os.h"
 
+#ifdef _MSC_VER
+#include <Windows.h>
+#endif
+
 namespace synthLib
 {
 #ifdef _MSC_VER
-#include <Windows.h>
 	std::wstring ToUtf16(const std::string& str)
 	{
 		std::wstring ret;
