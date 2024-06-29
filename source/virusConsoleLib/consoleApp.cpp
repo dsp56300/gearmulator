@@ -23,18 +23,18 @@ class EsaiListener;
 
 namespace
 {
-	ROMFile findRom(const std::string& _name)
+	ROMFile findRom(const std::string& _name, const DeviceModel _tiModel)
 	{
-		auto result = ROMLoader::findROM(_name, DeviceModel::TI2);
+		auto result = ROMLoader::findROM(_name, _tiModel);
 		if(result.isValid())
 			return result;
 		return ROMLoader::findROM(_name, DeviceModel::ABC);
 	}
 }
 
-ConsoleApp::ConsoleApp(const std::string& _romFile)
+ConsoleApp::ConsoleApp(const std::string& _romFile, const DeviceModel _tiModel)
 : m_romName(_romFile)
-, m_rom(findRom(_romFile))
+, m_rom(findRom(_romFile, _tiModel))
 , m_preset({})
 {
 	if (!m_rom.isValid())
@@ -56,10 +56,7 @@ ConsoleApp::ConsoleApp(const std::string& _romFile)
 
 ConsoleApp::~ConsoleApp()
 {
-	m_demo.reset();
-	m_uc.reset();
-	m_dsp1.reset();
-	m_dsp2 = nullptr;
+	destroy();
 }
 
 bool ConsoleApp::isValid() const
@@ -217,6 +214,14 @@ void ConsoleApp::audioCallback(const uint32_t _audioCallbackCount)
 		m_demo->process(1);
 }
 
+void ConsoleApp::destroy()
+{
+	m_demo.reset();
+	m_uc.reset();
+	m_dsp1.reset();
+	m_dsp2 = nullptr;
+}
+
 void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampleCount/* = 0*/, uint32_t _blockSize/* = 64*/, bool _createDebugger/* = false*/, bool _dumpAssembler/* = false*/)
 {
 	assert(!_audioOutputFilename.empty());
@@ -279,10 +284,6 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		midiEvents.clear();
 	}
 
-	// wait until DSP enters blocking state so that resetting the callback is safe
-	auto& audio = m_dsp1->getAudio();
-	while(!audio.getAudioOutputs().full() && !audio.getAudioInputs().empty())
-		std::this_thread::yield();
-
-	esai.setCallback([&](dsp56k::Audio*){},0);
+	m_dsp1.reset();
+	destroy();
 }

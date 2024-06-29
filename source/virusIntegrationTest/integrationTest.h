@@ -9,7 +9,7 @@ class CommandLine;
 class IntegrationTest
 {
 public:
-	explicit IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder);
+	explicit IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, virusLib::DeviceModel _tiModel);
 
 	int run();
 

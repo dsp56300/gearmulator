@@ -9,7 +9,7 @@
 class ConsoleApp
 {
 public:
-	ConsoleApp(const std::string& _romFile);
+	ConsoleApp(const std::string& _romFile, virusLib::DeviceModel _tiModel);
 	~ConsoleApp();
 
 	bool isValid() const;
@@ -34,6 +34,7 @@ private:
 	void bootDSP(bool _createDebugger) const;
 	dsp56k::IPeripherals& getYPeripherals() const;
 	void audioCallback(uint32_t _audioCallbackCount);
+	void destroy();
 
 	const std::string m_romName;
 	virusLib::ROMFile m_rom;
