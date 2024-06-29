@@ -26,8 +26,9 @@ namespace genericVirusUI
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");
-
-		addRomPatches();
+		
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
 
 		startLoaderThread();
 
@@ -54,8 +55,7 @@ namespace genericVirusUI
 			}
 		};
 
-		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
-		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomB);
+		addRomPatches();
 	}
 
 	PatchManager::~PatchManager()
