@@ -34,7 +34,7 @@ int main(int _argc, char* _argv[])
 	}
 	
 	std::unique_ptr<ConsoleApp> app;
-	app.reset(new ConsoleApp({}));
+	app.reset(new ConsoleApp({}, DeviceModel::TI2));
 
 	if(!app->isValid())
 	{

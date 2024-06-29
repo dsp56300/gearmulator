@@ -9,7 +9,7 @@
 class ConsoleApp
 {
 public:
-	ConsoleApp(const std::string& _romFile);
+	ConsoleApp(const std::string& _romFile, virusLib::DeviceModel _tiModel);
 	~ConsoleApp();
 
 	bool isValid() const;

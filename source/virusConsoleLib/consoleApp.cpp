@@ -23,18 +23,18 @@ class EsaiListener;
 
 namespace
 {
-	ROMFile findRom(const std::string& _name)
+	ROMFile findRom(const std::string& _name, const DeviceModel _tiModel)
 	{
-		auto result = ROMLoader::findROM(_name, DeviceModel::TI2);
+		auto result = ROMLoader::findROM(_name, _tiModel);
 		if(result.isValid())
 			return result;
 		return ROMLoader::findROM(_name, DeviceModel::ABC);
 	}
 }
 
-ConsoleApp::ConsoleApp(const std::string& _romFile)
+ConsoleApp::ConsoleApp(const std::string& _romFile, const DeviceModel _tiModel)
 : m_romName(_romFile)
-, m_rom(findRom(_romFile))
+, m_rom(findRom(_romFile, _tiModel))
 , m_preset({})
 {
 	if (!m_rom.isValid())

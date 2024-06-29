@@ -52,7 +52,7 @@ int main(int _argc, char* _argv[])
 				const auto romFile = cmd.get("rom");
 				const auto preset = cmd.get("preset");
 
-				IntegrationTest test(cmd, romFile, preset, std::string());
+				IntegrationTest test(cmd, romFile, preset, std::string(), virusLib::DeviceModel::Snow);
 				return test.run();
 			}
 			if(cmd.contains("folder"))
@@ -152,7 +152,7 @@ int main(int _argc, char* _argv[])
 
 					for (auto& preset : presets)
 					{
-						IntegrationTest test(cmd, romFile, preset, subfolder + '/');
+						IntegrationTest test(cmd, romFile, preset, subfolder + '/', virusLib::DeviceModel::Snow);
 						if(test.run() != 0)
 							return -1;
 					}
@@ -172,12 +172,12 @@ int main(int _argc, char* _argv[])
 	}
 }
 
-IntegrationTest::IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder)
+IntegrationTest::IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, const virusLib::DeviceModel _tiModel)
 	: m_cmd(_commandLine)
 	, m_romFile(std::move(_romFile))
 	, m_presetName(std::move(_presetName))
 	, m_outputFolder(std::move(_outputFolder))
-	, m_app(m_romFile)
+	, m_app(m_romFile, _tiModel)
 {
 }
 
