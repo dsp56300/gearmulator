@@ -71,6 +71,8 @@ int main(int _argc, char* _argv[])
 				{
 					if(subfolder.find("/.") != std::string::npos)
 						continue;
+					if(subfolder.find('#') != std::string::npos)
+						continue;
 
 					std::vector<std::string> files;
 					synthLib::getDirectoryEntries(files, subfolder);
@@ -145,7 +147,7 @@ int main(int _argc, char* _argv[])
 					{
 						while(!line.empty() && line.find_last_of("\r\n") != std::string::npos)
 							line = line.substr(0, line.size()-1);
-						if(!line.empty())
+						if(!line.empty() && line[0] != '#')
 							presets.push_back(line);
 					}
 
