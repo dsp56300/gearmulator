@@ -13,6 +13,7 @@
 #include "../synthLib/wavReader.h"
 #include "../synthLib/os.h"
 #include "../virusLib/buildconfig.h"
+#include "../virusLib/romloader.h"
 
 namespace synthLib
 {
@@ -87,8 +88,14 @@ int main(int _argc, char* _argv[])
 					{
 						if(synthLib::hasExtension(file, ".txt"))
 							presetsFile = file;
-						if(synthLib::hasExtension(file, ".bin"))
+						else if(synthLib::hasExtension(file, ".bin"))
 							romFile = file;
+						else if(synthLib::hasExtension(file, ".mid"))
+						{
+							const auto rom = virusLib::ROMLoader::findROM(file);
+							if(rom.isValid())
+								romFile = file;
+						}
 					}
 
 					if(romFile.empty())
