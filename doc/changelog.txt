@@ -54,6 +54,7 @@ Osirus/OsTIrus:
         mode and Page A parameters were sent as control changes
 - [Fix] Editor didn't update knobs if parameters are modified via MIDI control changes 
         by using the physical midi input port
+- [Fix] Patch Manager: Categories might be empty and plugin crashes when loading a patch
 
 OsTIrus:
 
@@ -74,6 +75,7 @@ Vavra:
 
 - [Fix] Filter mod amount values displayed unsigned values even though the parameter
         is signed
+- [Fix] Patch Manager related options were not shown when pressing the 'Save' button
 
 Xenia:
 
