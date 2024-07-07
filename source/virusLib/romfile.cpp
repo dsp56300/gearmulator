@@ -15,6 +15,7 @@
 
 #include "demoplaybackTI.h"
 #include "dsp56kEmu/memory.h"
+#include "dsp56kEmu/threadtools.h"
 
 namespace virusLib
 {
@@ -343,9 +344,17 @@ std::thread ROMFile::bootDSP(dsp56k::DSP& dsp, dsp56k::HDI08& _hdi08) const
 //	dsp.memory().saveAssembly((m_file + "_BootROM.asm").c_str(), bootRom.offset, bootRom.size, false, false, &periph);
 
 	// Attach command stream
-	std::thread feedCommandStream([&]()
+	size_t i=0;
+	while(!_hdi08.dataRXFull() && i < m_commandStream.size())
+		_hdi08.writeRX(&m_commandStream[i++], 1);
+
+	std::thread feedCommandStream([&_hdi08, this, i]()
 	{
-		_hdi08.writeRX(m_commandStream);
+		if(i >= m_commandStream.size())
+			return;
+
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
+		_hdi08.writeRX(&m_commandStream[i], m_commandStream.size() - i);
 	});
 
 	// Initialize the DSP
