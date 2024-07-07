@@ -1,5 +1,7 @@
 #pragma once
 
+#include "romfile.h"
+
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/memory.h"
 #include "dsp56kEmu/peripherals.h"
@@ -39,6 +41,8 @@ namespace virusLib
 		void disableESSI1();
 		void drainESSI1();
 
+		std::thread boot(const ROMFile::BootRom& _bootRom, const std::vector<dsp56k::TWord>& _commandStream);
+
 		template<typename T> static void ensureSize(std::vector<T>& _buf, size_t _size)
 		{
 			if(_buf.size() >= _size)
@@ -72,5 +76,8 @@ namespace virusLib
 		dsp56k::Jit* m_jit = nullptr;
 
 		std::unique_ptr<dsp56k::DSPThread> m_dspThread;
+
+		std::vector<dsp56k::TWord> m_commandStream;
+		uint32_t m_commandStreamReadIndex = 0;
 	};
 }
