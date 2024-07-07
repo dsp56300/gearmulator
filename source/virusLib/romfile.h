@@ -18,6 +18,8 @@ namespace dsp56k
 
 namespace virusLib
 {
+class DspSingle;
+
 class ROMFile
 {
 public:
@@ -50,9 +52,9 @@ public:
 	static std::string getMultiName(const TPreset& _preset);
 	static std::string getPresetName(const TPreset& _preset, uint32_t _first, uint32_t _last);
 
-	std::thread bootDSP(dsp56k::DSP& dsp, dsp56k::HDI08& _hdi08) const;
+	std::thread bootDSP(DspSingle& _dsp) const;
 
-	bool isValid() const { return bootRom.size > 0; }
+	bool isValid() const { return m_bootRom.size > 0; }
 
 	DeviceModel getModel() const { return m_model; }
 
@@ -124,7 +126,7 @@ private:
 
 	bool initialize();
 
-	BootRom bootRom;
+	BootRom m_bootRom;
 	std::vector<uint32_t> m_commandStream;
 
 	DeviceModel m_model = DeviceModel::Invalid;

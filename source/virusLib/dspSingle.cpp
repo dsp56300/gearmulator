@@ -130,4 +130,45 @@ namespace virusLib
 		while(!outs.empty())
 			outs.pop_front();
 	}
+
+	std::thread DspSingle::boot(const ROMFile::BootRom& _bootRom, const std::vector<dsp56k::TWord>& _commandStream)
+	{
+		// Copy BootROM to DSP memory
+		for (uint32_t i=0; i<_bootRom.data.size(); i++)
+		{
+			const auto p = _bootRom.offset + i;
+			getMemory().set(dsp56k::MemArea_P, p, _bootRom.data[i]);
+			getJIT().notifyProgramMemWrite(p);
+		}
+
+//		dsp.memory().saveAssembly((m_file + "_BootROM.asm").c_str(), bootRom.offset, bootRom.size, false, false, &periph);
+
+		// Write command stream to HDI08 RX
+		m_commandStream = _commandStream;
+		m_commandStreamReadIndex = 0;
+
+		while(!getHDI08().dataRXFull() && m_commandStreamReadIndex < m_commandStream.size())
+			getHDI08().writeRX(&m_commandStream[m_commandStreamReadIndex++], 1);
+
+		getHDI08().setReadRxCallback([this]
+		{
+			if(m_commandStreamReadIndex >= m_commandStream.size())
+			{
+				getHDI08().setReadRxCallback(nullptr);
+				return;
+			}
+
+			getHDI08().writeRX(&m_commandStream[m_commandStreamReadIndex++], 1);
+		});
+
+		std::thread waitForCommandStreamWrite([this]()
+		{
+			while(m_commandStreamReadIndex < m_commandStream.size())
+				std::this_thread::yield();
+		});
+
+		// Initialize the DSP
+		getDSP().setPC(_bootRom.offset);
+		return waitForCommandStreamWrite;
+	}
 }

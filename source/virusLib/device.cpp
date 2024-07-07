@@ -564,7 +564,7 @@ namespace virusLib
 
 	std::thread Device::bootDSP(DspSingle& _dsp, const ROMFile& _rom, const bool _createDebugger)
 	{
-		auto res = _rom.bootDSP(_dsp.getDSP(), _dsp.getHDI08());
+		auto res = _rom.bootDSP(_dsp);
 		_dsp.startDSPThread(_createDebugger);
 		return res;
 	}
