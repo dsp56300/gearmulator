@@ -14,6 +14,8 @@ int main()
 
 	const std::unique_ptr uc(std::make_unique<xt::Xt>());
 
+	uc->getHardware()->getDSP().thread().setLogToStdout(true);
+
 	constexpr uint32_t blockSize = 64;
 	std::vector<dsp56k::TWord> stereoOutput;
 	stereoOutput.resize(blockSize<<1);
