@@ -74,7 +74,9 @@ namespace xt
 //			LOG("read16 from ROM addr=" << HEXN(_addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
+#ifdef _DEBUG
 		dsp56k::nativeDebugBreak();
+#endif
 		return 0;
 	}
 
