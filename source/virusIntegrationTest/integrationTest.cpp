@@ -48,13 +48,20 @@ int main(int _argc, char* _argv[])
 
 			forever = cmd.contains("forever");
 
+			std::vector<std::pair<std::string, std::string>> finishedTests;	// rom, preset
+			finishedTests.reserve(64);
+
 			if(cmd.contains("rom") && cmd.contains("preset"))
 			{
 				const auto romFile = cmd.get("rom");
 				const auto preset = cmd.get("preset");
 
 				IntegrationTest test(cmd, romFile, preset, std::string(), virusLib::DeviceModel::Snow);
-				return test.run();
+
+				const auto res = test.run();
+				if(0 == res)
+					std::cout << "test successful, ROM " << synthLib::getFilenameWithoutPath(romFile) << ", preset " << preset << '\n';
+				return res;
 			}
 			if(cmd.contains("folder"))
 			{
@@ -164,11 +171,17 @@ int main(int _argc, char* _argv[])
 						IntegrationTest test(cmd, romFile, preset, subfolder + '/', virusLib::DeviceModel::Snow);
 						if(test.run() != 0)
 							return -1;
+						finishedTests.emplace_back(romFile, preset);
 					}
 				}
 
 				if(!forever)
+				{
+					std::cout << "All " << finishedTests.size() << " tests finished successfully:" << '\n';
+					for (const auto& [rom,preset] : finishedTests)
+						std::cout << "ROM " << synthLib::getFilenameWithoutPath(rom) << ", preset " << preset << '\n';
 					return 0;
+				}
 			}
 		}
 		std::cout << "invalid command line arguments" << std::endl;
