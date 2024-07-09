@@ -232,6 +232,9 @@ namespace jucePluginEditorLib
 	void Editor::copyCurrentPatchToClipboard() const
 	{
 		// copy patch of current part to Clipboard
+		if(!m_patchManager)
+			return;
+
 		const auto p = m_patchManager->requestPatchForPart(m_patchManager->getCurrentPart());
 
 		if(!p)
@@ -245,6 +248,8 @@ namespace jucePluginEditorLib
 
 	bool Editor::replaceCurrentPatchFromClipboard() const
 	{
+		if(!m_patchManager)
+			return false;
 		return m_patchManager->activatePatchFromClipboard();
 	}
 

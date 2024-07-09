@@ -348,32 +348,36 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		menu.addSeparator();
 
+		if(auto* pm = editor->getPatchManager())
+		{
 #ifdef JUCE_MAC
-		const std::string ctrlName = "Cmd";
+			const std::string ctrlName = "Cmd";
 #else
-		const std::string ctrlName = "Ctrl";
+			const std::string ctrlName = "Ctrl";
 #endif
-
-		{
-			juce::PopupMenu::Item item("Copy current Patch to Clipboard");
-			item.shortcutKeyDescription = ctrlName + "+C";
-			item.action = [editor]
 			{
-				editor->copyCurrentPatchToClipboard();
-			};
-			menu.addItem(item);
-		}
+				juce::PopupMenu::Item item("Copy current Patch to Clipboard");
+				item.shortcutKeyDescription = ctrlName + "+C";
+				item.action = [editor]
+				{
+					editor->copyCurrentPatchToClipboard();
+				};
+				menu.addItem(item);
+			}
 
-		auto patches = editor->getPatchManager()->getPatchesFromClipboard();
-		if(!patches.empty())
-		{
-			juce::PopupMenu::Item item("Replace current Patch from Clipboard");
-			item.shortcutKeyDescription = ctrlName + "+V";
-			item.action = [editor]
 			{
-				editor->replaceCurrentPatchFromClipboard();
-			};
-			menu.addItem(item);
+				auto patches = pm->getPatchesFromClipboard();
+				if(!patches.empty())
+				{
+					juce::PopupMenu::Item item("Replace current Patch from Clipboard");
+					item.shortcutKeyDescription = ctrlName + "+V";
+					item.action = [editor]
+					{
+						editor->replaceCurrentPatchFromClipboard();
+					};
+					menu.addItem(item);
+				}
+			}
 		}
 	}
 

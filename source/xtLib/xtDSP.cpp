@@ -8,6 +8,7 @@
 #endif
 
 #include "../mc68k/hdi08.h"
+#include "dsp56kEmu/aar.h"
 #include "dsp56kEmu/types.h"
 
 namespace xt
@@ -33,8 +34,31 @@ namespace xt
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = true;
+		config.dynamicPeripheralAddressing = false;
 		config.maxInstructionsPerBlock = 0;
+
+		// some startup code uses dynamic peripheral addressing, we allow this only for that code segment
+		config.getBlockConfig = [this](const dsp56k::TWord _pc) -> std::optional<dsp56k::JitConfig>
+		{
+			if(m_dynamicPeripheralAddressingStart == 0)
+			{
+				// find the following op:
+				// clr b M_AAR3,r2
+				const auto opA = m_dsp.memory().get(dsp56k::MemArea_P, _pc);
+				const auto opB = m_dsp.memory().get(dsp56k::MemArea_P, _pc + 1);
+				if(opA == 0x62f41b && opB == dsp56k::M_AAR3)
+				{
+					m_dynamicPeripheralAddressingStart = _pc;
+				}
+			}
+
+			// enable DPA for the address of the op we found + 16 words
+			if(_pc < m_dynamicPeripheralAddressingStart || _pc > m_dynamicPeripheralAddressingStart + 16)
+				return {};
+			auto c = m_dsp.getJit().getConfig();
+			c.dynamicPeripheralAddressing = true;
+			return c;
+		};
 
 		m_dsp.getJit().setConfig(config);
 
