@@ -10,6 +10,8 @@
 
 #include "../wLib/dspBootCode.h"
 
+#include "dsp56kEmu/aar.h"
+
 namespace mqLib
 {
 	static dsp56k::DefaultMemoryValidator g_memoryValidator;
@@ -34,8 +36,14 @@ namespace mqLib
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = true;
+		config.dynamicPeripheralAddressing = false;
+#ifdef _DEBUG
+		config.debugDynamicPeripheralAddressing = true;
+#endif
 		config.maxInstructionsPerBlock = 0;	// TODO: needs to be 1 if DSP factory tests are run, to be investigated
+
+		// allow dynamic peripheral addressing for code following clr b M_AAR3,r2
+		enableDynamicPeripheralAddressing(config, m_dsp, 0x62f41b, dsp56k::M_AAR3, 16);
 
 		m_dsp.getJit().setConfig(config);
 

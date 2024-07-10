@@ -72,7 +72,5 @@ namespace xt
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
-
-		uint32_t m_dynamicPeripheralAddressingStart = 0;
 	};
 }
