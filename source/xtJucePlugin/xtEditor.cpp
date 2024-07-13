@@ -68,6 +68,9 @@ namespace xtJucePlugin
 		{
 			updateMultiButton(_isMultiMode);
 			m_frontPanel->getLcd()->refresh();
+
+			if(!_isMultiMode)
+				m_parts->selectPart(0);
 		};
 
 		m_btSave = findComponentT<juce::DrawableButton>("SaveButton");
