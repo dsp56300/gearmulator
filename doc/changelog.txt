@@ -5,6 +5,7 @@ Release Notes
 Vavra:
 
 - [Fix] Do not crash on right click in device skin
+- [Fix] Reset filter keytrack to 0% on double click, not -200%
 
 Xenia:
 
