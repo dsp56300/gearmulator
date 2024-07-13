@@ -223,62 +223,6 @@ namespace xt
 		setParam(GlobalParameter::InputGain, 3);				// 4
 
 		receive(unused, convertTo(m_global), Origin::External);
-
-		// send default multi
-//		std::vector<uint8_t> defaultMultiData;
-//		createSequencerMultiData(defaultMultiData);
-//		sendMulti(defaultMultiData);
-
-		std::vector<uint8_t> sysex;
-
-		// accept files up to 300k as larger files might be the OS
-		const auto midifile = synthLib::findFile(".mid", 0, 300 * 1024);
-		if(!midifile.empty())
-		{
-			synthLib::MidiToSysex::readFile(sysex, midifile.c_str());
-		}
-
-		if(sysex.empty())
-		{
-			const auto syxFile = synthLib::findFile(".syx", 0, 300 * 1024);
-			if(!syxFile.empty())
-				synthLib::readFile(sysex, syxFile);
-		}
-
-		if (!sysex.empty())
-		{
-			std::vector<std::vector<uint8_t>> messages;
-			synthLib::MidiToSysex::splitMultipleSysex(messages, sysex);
-
-			for (const auto& message : messages)
-			{
-				switch (getCommand(message))
-				{
-				case SysexCommand::SingleDump:
-				case SysexCommand::MultiDump:
-					{
-						auto m = message;
-						m[wLib::IdxDeviceId] = wLib::IdDeviceOmni;
-						loadState(m);
-					}
-					break;
-				default:;
-				}
-			}
-		}
-
-		// switch to Single mode as the multi dump causes it to go to Multi mode
-//		sendGlobalParameter(GlobalParameter::SingleMultiMode, 0);
-
-		if(isValid(m_romSingles[0]))
-		{
-			auto dump = convertTo(m_romSingles[0]);
-
-			dump[wLib::IdxBuffer]   = static_cast<uint8_t>(LocationH::SingleEditBufferSingleMode);
-			dump[wLib::IdxLocation] = 0;
-
-			forwardToDevice(dump);
-		}
 	}
 
 	bool State::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
