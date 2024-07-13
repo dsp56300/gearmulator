@@ -5855,7 +5855,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "EffectParamA"
+                                "parameter" : "DelayTime"
                             }
                         },
                         {
@@ -5922,7 +5922,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "EffectParamA"
+                                "parameter" : "DelayTime"
                             }
                         },
                         {
@@ -5989,7 +5989,7 @@
                                 "tileSizeY" : "128"
                             },
                             "parameterAttachment" : {
-                                "parameter" : "EffectParamA"
+                                "parameter" : "DelayTime"
                             }
                         },
                         {
