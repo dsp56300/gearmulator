@@ -2,14 +2,27 @@ Release Notes
 
 1.3.16
 
+Framework:
+
+- [Fix] Patch Manager: Last selected patch was not always restored properly
+
 Vavra:
 
+- [Imp] Performance improvements
+
 - [Fix] Do not crash on right click in device skin
+- [Fix] Reset filter keytrack to 0% on double click, not -200%
 
 Xenia:
 
 - [Imp] Performance improvements
+- [Imp] Added support for MW1 patches
+- [Imp] FX delay times are now displayed as note length + BPM as on hardware
 
+- [Fix] Initial state of Multi Mode button was always off even though the device
+        might have booted with Multi Mode enabled
+- [Fix] Part selection was not reset to part 1 if switched from Multi to Single
+        mode
 
 1.3.15 (2023.07.06)
 

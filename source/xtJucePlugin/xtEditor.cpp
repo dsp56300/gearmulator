@@ -56,11 +56,21 @@ namespace xtJucePlugin
 			m_controller.setPlayMode(m_btMultiMode->getToggleState());
 		};
 
-		m_playModeChangeListener = [this](const bool& isMultiMode)
+		auto updateMultiButton = [this](const bool _isMultiMode)
 		{
-			m_btMultiMode->setToggleState(isMultiMode, juce::dontSendNotification);
-			m_ledMultiMode->setToggleState(isMultiMode, juce::dontSendNotification);
+			m_btMultiMode->setToggleState(_isMultiMode, juce::dontSendNotification);
+			m_ledMultiMode->setToggleState(_isMultiMode, juce::dontSendNotification);
+		};
+
+		updateMultiButton(m_controller.isMultiMode());
+
+		m_playModeChangeListener = [this, updateMultiButton](const bool& _isMultiMode)
+		{
+			updateMultiButton(_isMultiMode);
 			m_frontPanel->getLcd()->refresh();
+
+			if(!_isMultiMode)
+				m_parts->selectPart(0);
 		};
 
 		m_btSave = findComponentT<juce::DrawableButton>("SaveButton");
