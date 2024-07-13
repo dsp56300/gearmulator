@@ -13,7 +13,10 @@ namespace jucePluginEditorLib::patchManager
 
 		void onTextChanged(const std::string& _text) override;
 
+
+		void setListModel(ListModel* _list);
+
 	private:
-		ListModel& m_list;
+		ListModel* m_list;
 	};
 }

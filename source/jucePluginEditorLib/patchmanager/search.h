@@ -16,6 +16,9 @@ namespace jucePluginEditorLib::patchManager
 		virtual void onTextChanged(const std::string& _text);
 
 		void paint(juce::Graphics& g) override;
+
+		const std::string& getSearchText() const { return m_text; }
+
 	private:
 		void setText(const std::string& _text);
 
