@@ -154,24 +154,26 @@ namespace jucePluginEditorLib::patchManager
 
 	void PatchManager::timerCallback()
 	{
-		pluginLib::patchDB::Dirty dirty;
-		uiProcess(dirty);
+		uiProcess();
+	}
 
-		m_treeDS->processDirty(dirty);
-		m_treeTags->processDirty(dirty);
-		m_list->processDirty(dirty);
+	void PatchManager::processDirty(const pluginLib::patchDB::Dirty& _dirty) const
+	{
+		m_treeDS->processDirty(_dirty);
+		m_treeTags->processDirty(_dirty);
+		m_list->processDirty(_dirty);
 
 		m_status->setScanning(isScanning());
 
-		m_info->processDirty(dirty);
+		m_info->processDirty(_dirty);
 
-		if(!dirty.errors.empty())
+		if(!_dirty.errors.empty())
 		{
 			std::string msg = "Patch Manager encountered errors:\n\n";
-			for(size_t i=0; i<dirty.errors.size(); ++i)
+			for(size_t i=0; i<_dirty.errors.size(); ++i)
 			{
-				msg += dirty.errors[i];
-				if(i < dirty.errors.size() - 1)
+				msg += _dirty.errors[i];
+				if(i < _dirty.errors.size() - 1)
 					msg += "\n";
 			}
 

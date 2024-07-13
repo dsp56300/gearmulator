@@ -28,7 +28,7 @@ namespace pluginLib::patchDB
 		DB(juce::File _dir);
 		virtual ~DB();
 
-		void uiProcess(Dirty& _dirty);
+		void uiProcess();
 
 		DataSourceNodePtr addDataSource(const DataSource& _ds, const DataSourceLoadedCallback& = [](bool, std::shared_ptr<DataSourceNode>) {});
 		void removeDataSource(const DataSource& _ds, bool _save = true);
@@ -99,6 +99,7 @@ namespace pluginLib::patchDB
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const = 0;
+		virtual void processDirty(const Dirty& _dirty) const = 0;
 
 	protected:
 		virtual void onLoadFinished() {}

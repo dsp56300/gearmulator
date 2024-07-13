@@ -350,18 +350,27 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	void DB::uiProcess(Dirty& _dirty)
+	void DB::uiProcess()
 	{
 		std::list<std::function<void()>> uiFuncs;
+
+		Dirty dirty;
 		{
 			std::scoped_lock lock(m_uiMutex);
 			std::swap(uiFuncs, m_uiFuncs);
-			_dirty = m_dirty;
-			m_dirty = {};
+			std::swap(dirty, m_dirty);
 		}
+
+		processDirty(dirty);
 
 		for (const auto& func : uiFuncs)
 			func();
+
+		if(isLoading() && !m_loader.pending())
+		{
+			m_loading = false;
+			onLoadFinished();
+		}
 	}
 
 	uint32_t DB::search(SearchRequest&& _request, SearchCallback&& _callback)
@@ -811,15 +820,6 @@ namespace pluginLib::patchDB
 		m_loader.add([this, f = std::move(_func)]
 		{
 			f();
-
-			if(isLoading() && !m_loader.pending())
-			{
-				runOnUiThread([this]
-				{
-					m_loading = false;
-					onLoadFinished();
-				});
-			}
 		});
 	}
 

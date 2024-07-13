@@ -2,6 +2,10 @@ Release Notes
 
 1.3.16
 
+Framework:
+
+- [Fix] Patch Manager: Last selected patch was not always restored properly
+
 Vavra:
 
 - [Imp] Performance improvements

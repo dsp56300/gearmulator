@@ -38,6 +38,7 @@ namespace jucePluginEditorLib::patchManager
 		~PatchManager() override;
 
 		void timerCallback() override;
+		void processDirty(const pluginLib::patchDB::Dirty& _dirty) const override;
 
 		void setSelectedItem(Tree* _tree, const TreeItem* _item);
 		void addSelectedItem(Tree* _tree, const TreeItem* _item);
