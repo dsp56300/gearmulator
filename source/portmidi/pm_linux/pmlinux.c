@@ -26,6 +26,8 @@
 PmDeviceID pm_default_input_device_id = -1;
 PmDeviceID pm_default_output_device_id = -1;
 
+PmDeviceID find_default_device(char *path, int input, PmDeviceID id);
+
 void pm_init()
 {
     /* Note: it is not an error for PMALSA to fail to initialize. 
