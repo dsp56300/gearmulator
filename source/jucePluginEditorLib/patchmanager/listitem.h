@@ -4,12 +4,12 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	class List;
+	class ListModel;
 
 	class ListItem : public juce::Component, public juce::DragAndDropTarget
 	{
 	public:
-		explicit ListItem(List& _list, int _row);
+		explicit ListItem(ListModel& _list, int _row);
 
 		void setRow(int _row)
 		{
@@ -37,7 +37,7 @@ namespace jucePluginEditorLib::patchManager
 			Over
 		};
 
-		List& m_list;
+		ListModel& m_list;
 		int m_row;
 		DragType m_drag = DragType::Off;
 	};

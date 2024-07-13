@@ -285,7 +285,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	bool GroupTreeItem::isInterestedInPatchList(const ListModel* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		if(m_type == GroupType::Favourites)
 			return true;

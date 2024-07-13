@@ -26,7 +26,7 @@ namespace jucePluginEditorLib::patchManager
 	class SearchTree;
 	class SearchList;
 	class Info;
-	class List;
+	class ListModel;
 	class Tree;
 
 	class PatchManager : public juce::Component, public pluginLib::patchDB::DB, juce::Timer, public juce::ChangeListener
@@ -132,7 +132,7 @@ namespace jucePluginEditorLib::patchManager
 
 		Tree* m_treeDS = nullptr;
 		Tree* m_treeTags = nullptr;
-		List* m_list = nullptr;
+		ListModel* m_list = nullptr;
 		Info* m_info = nullptr;
 
 		SearchTree* m_searchTreeDS = nullptr;

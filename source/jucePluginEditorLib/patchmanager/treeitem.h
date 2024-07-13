@@ -1,8 +1,8 @@
 #pragma once
 
 #include "editable.h"
-#include "list.h"
 #include "savepatchdesc.h"
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "../../jucePluginLib/patchdb/patchdbtypes.h"
@@ -16,7 +16,9 @@ namespace pluginLib::patchDB
 
 namespace jucePluginEditorLib::patchManager
 {
+	class ListModel;
 	class Tree;
+
 	static constexpr uint32_t g_invalidCount = ~0;
 	static constexpr uint32_t g_unknownCount = g_invalidCount - 1;
 
@@ -59,7 +61,7 @@ namespace jucePluginEditorLib::patchManager
 
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
 
-		virtual bool isInterestedInPatchList(const List* _sourceList, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)		{ return false; }
+		virtual bool isInterestedInPatchList(const ListModel* _sourceList, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)		{ return false; }
 
 		bool isInterestedInFileDrag(const juce::StringArray& _files) override;
 		void filesDropped(const juce::StringArray& _files, int _insertIndex) override;
