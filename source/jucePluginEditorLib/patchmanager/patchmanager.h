@@ -21,6 +21,7 @@ namespace genericUI
 
 namespace jucePluginEditorLib::patchManager
 {
+	class List;
 	class Status;
 	class TreeItem;
 	class SearchTree;
@@ -132,7 +133,7 @@ namespace jucePluginEditorLib::patchManager
 
 		Tree* m_treeDS = nullptr;
 		Tree* m_treeTags = nullptr;
-		ListModel* m_list = nullptr;
+		List* m_list = nullptr;
 		Info* m_info = nullptr;
 
 		SearchTree* m_searchTreeDS = nullptr;

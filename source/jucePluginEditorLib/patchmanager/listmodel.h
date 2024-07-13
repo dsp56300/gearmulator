@@ -19,7 +19,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
 
-	class ListModel : public juce::ListBox, juce::ListBoxModel, Editable
+	class ListModel : public juce::ListBoxModel, Editable
 	{
 	public:
 		using Patch = pluginLib::patchDB::PatchPtr;
@@ -37,7 +37,7 @@ namespace jucePluginEditorLib::patchManager
 		int getNumRows() override;
 		void paintListBoxItem(int _rowNumber, juce::Graphics& _g, int _width, int _height, bool _rowIsSelected) override;
 		juce::var getDragSourceDescription(const juce::SparseSet<int>& rowsToDescribe) override;
-		Component* refreshComponentForRow(int rowNumber, bool isRowSelected, Component* existingComponentToUpdate) override;
+		juce::Component* refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate) override;
 
 		void selectedRowsChanged(int lastRowSelected) override;
 
@@ -89,6 +89,18 @@ namespace jucePluginEditorLib::patchManager
 		bool hasFilters() const;
 
 		pluginLib::patchDB::SearchHandle getSearchHandle() const;
+
+		// to be implemented in derived class
+		virtual juce::Colour findColor(int _colorId) = 0;
+		virtual const juce::LookAndFeel& getStyle() const = 0;
+		virtual void onModelChanged() = 0;
+		virtual void redraw() = 0;
+		virtual void ensureVisible(int _row) = 0;
+		virtual int getSelectedEntry() const = 0;
+		virtual juce::SparseSet<int> getSelectedEntries() const = 0;
+		virtual void deselectAll() = 0;
+		virtual void setSelectedEntries(const juce::SparseSet<int>&) = 0;
+		virtual juce::Rectangle<int> getEntryPosition(int _row, bool _relativeToComponentTopLeft) = 0;
 
 	private:
 		void sortPatches();

@@ -142,7 +142,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListItem::mouseDown(const juce::MouseEvent& event)
 	{
-		m_list.mouseDown(event);
+//		m_list.mouseDown(event);
 	}
 
 	bool ListItem::hitTest(int x, int y)

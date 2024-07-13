@@ -8,37 +8,12 @@
 
 #include "../pluginEditor.h"
 
-#include "../../juceUiLib/uiObject.h"
 #include "../../juceUiLib/uiObjectStyle.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	ListModel::ListModel(PatchManager& _pm): m_patchManager(_pm)
 	{
-		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
-		setColour(textColourId, juce::Colour(defaultSkin::colors::itemText));
-
-		getViewport()->setScrollBarsShown(true, false);
-		setModel(this);
-		setMultipleSelectionEnabled(true);
-
-		if (const auto& t = _pm.getTemplate("pm_listbox"))
-			t->apply(_pm.getEditor(), *this);
-
-		if(const auto t = _pm.getTemplate("pm_scrollbar"))
-		{
-			t->apply(_pm.getEditor(), getVerticalScrollBar());
-			t->apply(_pm.getEditor(), getHorizontalScrollBar());
-		}
-		else
-		{
-			getVerticalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getVerticalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getHorizontalScrollBar().setColour(juce::ScrollBar::thumbColourId, juce::Colour(defaultSkin::colors::scrollbar));
-			getHorizontalScrollBar().setColour(juce::ScrollBar::trackColourId, juce::Colour(defaultSkin::colors::scrollbar));
-		}
-
-		setRowSelectedOnMouseDown(false);
 	}
 
 	void ListModel::setContent(const pluginLib::patchDB::SearchHandle& _handle)
@@ -66,7 +41,7 @@ namespace jucePluginEditorLib::patchManager
 		m_search.reset();
 		m_patches.clear();
 		m_filteredPatches.clear();
-		updateContent();
+		onModelChanged();
 		getPatchManager().setListStatus(0, 0);
 	}
 
@@ -90,11 +65,11 @@ namespace jucePluginEditorLib::patchManager
 		sortPatches();
 		filterPatches();
 
-		updateContent();
+		onModelChanged();
 
 		setSelectedPatches(selectedPatches);
 
-		repaint();
+		redraw();
 
 		getPatchManager().setListStatus(static_cast<uint32_t>(selectedPatches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
@@ -155,12 +130,12 @@ namespace jucePluginEditorLib::patchManager
 			if(selectedPatches.size() == 1)
 			{
 				const auto& patch = *selectedPatches.begin();
-				const auto row = getSelectedRow();
-				const auto pos = getRowPosition(row, true);
+				const auto row = getSelectedEntry();
+				const auto pos = getEntryPosition(row, true);
 
 				menu.addItem("Rename...", [this, patch, pos]
 				{
-					beginEdit(this, pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
+					beginEdit(dynamic_cast<juce::Component*>(this), pos, patch->getName(), [this, patch](bool _cond, const std::string& _name)
 					{
 						if(_name != patch->getName())
 							getPatchManager().renamePatch(patch, _name);
@@ -319,7 +294,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListModel::paintListBoxItem(const int _rowNumber, juce::Graphics& _g, const int _width, const int _height, const bool _rowIsSelected)
 	{
-		const auto* style = dynamic_cast<genericUI::UiObjectStyle*>(&getLookAndFeel());
+		const auto* style = dynamic_cast<const genericUI::UiObjectStyle*>(&getStyle());
 
 		if (_rowNumber >= getNumRows())
 			return;	// Juce what are you up to?
@@ -361,7 +336,7 @@ namespace jucePluginEditorLib::patchManager
 //		if(c != pluginLib::patchDB::g_invalidColor)
 //			_g.setColour(juce::Colour(c));
 //		else
-		_g.setColour(findColour(textColourId));
+		_g.setColour(findColor(juce::ListBox::textColourId));
 
 		_g.drawText(text, offsetX, 0, _width - 4, _height, style ? style->getAlign() : juce::Justification::centredLeft, true);
 	}
@@ -387,7 +362,7 @@ namespace jucePluginEditorLib::patchManager
 		return new SavePatchDesc(m_patchManager, std::move(patches));
 	}
 
-	juce::Component* ListModel::refreshComponentForRow(int rowNumber, bool isRowSelected, Component* existingComponentToUpdate)
+	juce::Component* ListModel::refreshComponentForRow(int rowNumber, bool isRowSelected, juce::Component* existingComponentToUpdate)
 	{
 		auto* existing = dynamic_cast<ListItem*>(existingComponentToUpdate);
 
@@ -417,7 +392,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		std::set<Patch> result;
 
-		const auto selectedRows = getSelectedRows();
+		const auto selectedRows = getSelectedEntries();
 		const auto& ranges = selectedRows.getRanges();
 
 		for (const auto& range : ranges)
@@ -450,7 +425,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		if (_patches.empty())
 		{
-			deselectAllRows();
+			deselectAll();
 			return false;
 		}
 
@@ -474,14 +449,14 @@ namespace jucePluginEditorLib::patchManager
 
 		if(selection.isEmpty())
 		{
-			deselectAllRows();
+			deselectAll();
 			return false;
 		}
 
 		m_ignoreSelectedRowsChanged = true;
-		setSelectedRows(selection);
+		setSelectedEntries(selection);
 		m_ignoreSelectedRowsChanged = false;
-		scrollToEnsureRowIsOnscreen((minRow + maxRow) >> 1);
+		ensureVisible((minRow + maxRow) >> 1);
 		return true;
 	}
 
@@ -530,11 +505,11 @@ namespace jucePluginEditorLib::patchManager
 		m_hideDuplicatesByName = _hideDuplicatesByName;
 
 		filterPatches();
-		updateContent();
+		onModelChanged();
 
 		setSelectedPatches(selected);
 
-		repaint();
+		redraw();
 
 		getPatchManager().setListStatus(static_cast<uint32_t>(selected.size()), static_cast<uint32_t>(getPatches().size()));
 	}

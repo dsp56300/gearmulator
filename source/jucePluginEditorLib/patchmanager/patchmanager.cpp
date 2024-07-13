@@ -3,6 +3,7 @@
 #include "datasourcetree.h"
 #include "datasourcetreeitem.h"
 #include "info.h"
+#include "list.h"
 #include "listmodel.h"
 #include "searchlist.h"
 #include "searchtree.h"
@@ -75,7 +76,7 @@ namespace jucePluginEditorLib::patchManager
 
 		// 3rd column
 		w = weight(15);
-		m_list = new ListModel(*this);
+		m_list = new List(*this);
 		m_list->setTopLeftPosition(m_treeTags->getRight() + g_padding, 0);
 		m_list->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
