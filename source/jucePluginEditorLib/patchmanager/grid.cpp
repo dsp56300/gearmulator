@@ -203,9 +203,16 @@ namespace jucePluginEditorLib::patchManager
 		repaint();
 	}
 
-	juce::Rectangle<int> Grid::getEntryPosition(int _row, bool _relativeToComponentTopLeft)
+	juce::Rectangle<int> Grid::getEntryPosition(const int _row, bool _relativeToComponentTopLeft)
 	{
-		// TODO
-		return {};
+		juce::Rectangle<int> result;
+		result.setSize(m_itemWidth, m_itemHeight);
+
+		const auto x = _row / m_viewport.getVisibleRowCount();
+		const auto y = _row - x * m_viewport.getVisibleRowCount();
+
+		result.setPosition(x * m_itemWidth - m_viewport.getViewArea().getX(), y * m_itemHeight - m_viewport.getViewArea().getY());
+
+		return result;
 	}
 }

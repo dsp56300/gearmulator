@@ -3,8 +3,6 @@
 #include "grid.h"
 #include "griditem.h"
 
-#include "dsp56kEmu/logging.h"
-
 namespace jucePluginEditorLib::patchManager
 {
 	GridItemContainer::GridItemContainer(Grid& _grid) : m_grid(_grid)
@@ -50,7 +48,7 @@ namespace jucePluginEditorLib::patchManager
 	            juce::Graphics g (snapshot);
                 g.setOrigin ((getLocalPoint (rowComp, juce::Point<int>()) - imageArea.getPosition()) * additionalScale);
 
-                const auto rowScale = Component::getApproximateScaleFactorForComponent (rowComp) * additionalScale;
+                const auto rowScale = getApproximateScaleFactorForComponent(rowComp) * additionalScale;
 
                 if (g.reduceClipRegion (rowComp->getLocalBounds() * rowScale))
                 {
@@ -69,7 +67,12 @@ namespace jucePluginEditorLib::patchManager
 	{
 		m_itemIndexMouseDown = InvalidItem;
 
-		const auto rows = m_grid.getSelectedEntries();
+		juce::SparseSet<int> rows;
+		const auto hoveredIndex = mouseToItemIndex(_e);
+		if(m_grid.isSelected(hoveredIndex))
+			rows = m_grid.getSelectedEntries();
+		else
+			rows.addRange(juce::Range<int>(static_cast<int>(hoveredIndex), static_cast<int>(hoveredIndex)+1));
 
 		if(!rows.isEmpty())
 		{
@@ -83,7 +86,7 @@ namespace jucePluginEditorLib::patchManager
 			        const auto dragImage = createSnapshotOfRows(rows, x, y);
 
 			        const auto p = juce::Point<int> (x, y) - _e.getEventRelativeTo (this).position.toInt();
-			        dragContainer->startDragging (dragDescription, this, dragImage, true, &p, &_e.source);
+			        dragContainer->startDragging (dragDescription, &m_grid, dragImage, true, &p, &_e.source);
 			    }
 			}
 		}
