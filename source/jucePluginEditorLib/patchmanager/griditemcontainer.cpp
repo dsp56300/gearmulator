@@ -106,10 +106,15 @@ namespace jucePluginEditorLib::patchManager
 		if(i == m_itemIndexMouseDown)
 		{
 			const auto cmd = _e.mods.isCommandDown();
+			const auto shift = _e.mods.isShiftDown();
 
 			if(m_grid.isSelected(i) && cmd)
 			{
 				m_grid.deselectItem(i);
+			}
+			else if(shift)
+			{
+				m_grid.selectRange(i);
 			}
 			else
 			{
