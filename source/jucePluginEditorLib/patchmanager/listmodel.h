@@ -90,6 +90,33 @@ namespace jucePluginEditorLib::patchManager
 
 		pluginLib::patchDB::SearchHandle getSearchHandle() const;
 
+		template<typename T>
+		static std::set<T> toSet(const juce::SparseSet<int>& _sparseSet)
+		{
+			std::set<T> result;
+
+			const auto& ranges = _sparseSet.getRanges();
+
+			for (const auto& range : ranges)
+			{
+				for (int i = range.getStart(); i < range.getEnd(); ++i)
+					result.insert(static_cast<T>(i));
+			}
+			return result;
+		}
+
+		template<typename T>
+		static juce::SparseSet<int> toSparseSet(const std::set<T>& _set)
+		{
+			juce::SparseSet<int> result;
+			for (auto i : _set)
+			{
+				const auto ii = static_cast<int>(i);
+				result.addRange({ii, ii+1});
+			}
+			return result;
+		}
+
 		// to be implemented in derived class
 		virtual juce::Colour findColor(int _colorId) = 0;
 		virtual const juce::LookAndFeel& getStyle() const = 0;

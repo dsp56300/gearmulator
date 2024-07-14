@@ -9,6 +9,8 @@ namespace jucePluginEditorLib::patchManager
 	public:
 		explicit List(PatchManager& _pm);
 
+		static void applyStyleToViewport(const PatchManager& _pm, juce::Viewport& _viewport);
+
 	private:
 		// ListModel
 		juce::Colour findColor(int _colorId) override;

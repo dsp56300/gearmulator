@@ -18,8 +18,6 @@
 #include "../../jucePluginLib/types.h"
 #include "../../jucePluginLib/clipboard.h"
 
-#include "../../synthLib/os.h"
-
 #include "dsp56kEmu/logging.h"
 
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
@@ -84,6 +82,11 @@ namespace jucePluginEditorLib::patchManager
 		m_grid = new Grid(*this);
 		m_grid->setTopLeftPosition(m_list->getPosition());
 		m_grid->setSize(m_list->getWidth(), m_list->getHeight());
+
+		m_grid->setLookAndFeel(&m_list->getLookAndFeel());
+		m_grid->setColour(juce::ListBox::backgroundColourId, m_list->findColour(juce::ListBox::backgroundColourId));
+		m_grid->setColour(juce::ListBox::textColourId, m_list->findColour(juce::ListBox::textColourId));
+		m_grid->setColour(juce::ListBox::outlineColourId, m_list->findColour(juce::ListBox::outlineColourId));
 
 		m_searchList = new SearchList(*m_list);
 		m_searchList->setTopLeftPosition(m_list->getX(), m_list->getHeight() + g_padding);
@@ -651,7 +654,7 @@ namespace jucePluginEditorLib::patchManager
 			return false;
 
 		if(getCurrentPart() == _part)
-			m_list->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
+			getListModel()->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
 
 		return true;
 	}
@@ -850,7 +853,7 @@ namespace jucePluginEditorLib::patchManager
 	void PatchManager::onSelectedItemsChanged()
 	{
 		// trees emit onSelectionChanged in destructor, be sure to guard it 
-		if(!m_list)
+		if(!getListModel())
 			return;
 
 		const auto selectedTags = m_selectedItems[m_treeTags];
@@ -859,7 +862,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 			if(_item->getSearchHandle() != pluginLib::patchDB::g_invalidSearchHandle)
 			{
-				m_list->setContent(_item->getSearchHandle());
+				getListModel()->setContent(_item->getSearchHandle());
 				return true;
 			}
 			return false;
@@ -877,7 +880,7 @@ namespace jucePluginEditorLib::patchManager
 				pluginLib::patchDB::SearchRequest search = (*selectedTags.begin())->getSearchRequest();
 				for (const auto& selectedTag : selectedTags)
 					search.tags.add(selectedTag->getSearchRequest().tags);
-				m_list->setContent(std::move(search));
+				getListModel()->setContent(std::move(search));
 				return;
 			}
 		}
