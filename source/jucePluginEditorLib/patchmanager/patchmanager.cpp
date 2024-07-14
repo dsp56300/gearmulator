@@ -141,6 +141,13 @@ namespace jucePluginEditorLib::patchManager
 
 		PatchManager::resized();
 
+		const auto& config = m_editor.getProcessor().getConfig();
+
+		if(config.getIntValue("pm_layout", static_cast<int>(LayoutType::List)) == static_cast<int>(LayoutType::Grid))
+			setLayout(LayoutType::Grid);
+		else
+			PatchManager::resized();
+
 		startTimer(200);
 	}
 
@@ -212,6 +219,7 @@ namespace jucePluginEditorLib::patchManager
 			onSelectedItemsChanged();
 	}
 
+	// ReSharper disable once CppParameterMayBeConstPtrOrRef - wrong
 	void PatchManager::removeSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
 		const auto it = m_selectedItems.find(_tree);
@@ -255,6 +263,10 @@ namespace jucePluginEditorLib::patchManager
 		{
 			resized();
 		}
+
+		auto& config = m_editor.getProcessor().getConfig();
+		config.setValue("pm_layout", static_cast<int>(_layout));
+		config.saveIfNeeded();
 	}
 
 	bool PatchManager::setGridLayout128()
@@ -759,12 +771,13 @@ namespace jucePluginEditorLib::patchManager
 				return;
 			m_state.setConfig(s);
 		}
-		catch(std::range_error&)
+		catch(std::range_error& e)
 		{
+			LOG("Failed to to load per instance config: " << e.what());
 		}
 	}
 
-	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data) const
 	{
 		pluginLib::PluginStream s;
 		s.write<uint32_t>(1);	// version
