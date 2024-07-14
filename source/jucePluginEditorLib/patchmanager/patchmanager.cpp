@@ -586,6 +586,7 @@ namespace jucePluginEditorLib::patchManager
 			return;
 
 		m_info->setVisible(m_layout == LayoutType::List);
+		m_resizerBarC.setVisible(m_layout == LayoutType::List);
 
 		std::vector<Component*> comps = {m_treeDS, &m_resizerBarA, m_treeTags, &m_resizerBarB, dynamic_cast<juce::Component*>(getListModel())};
 		if(m_layout == LayoutType::List)
@@ -604,8 +605,20 @@ namespace jucePluginEditorLib::patchManager
 
 		layoutXAxis(m_searchTreeDS, m_treeDS);
 		layoutXAxis(m_searchTreeTags, m_treeTags);
-		layoutXAxis(m_searchList, dynamic_cast<Component*>(getListModel()));
-		layoutXAxis(m_status, m_info);
+
+		if(m_layout == LayoutType::List)
+		{
+			layoutXAxis(m_searchList, dynamic_cast<Component*>(getListModel()));
+			layoutXAxis(m_status, m_info);
+		}
+		else
+		{
+			m_searchList->setTopLeftPosition(m_grid->getX(), m_searchList->getY());
+			m_searchList->setSize(m_grid->getWidth()/3 - g_padding, m_searchList->getHeight());
+
+			m_status->setTopLeftPosition(m_searchList->getX() + m_searchList->getWidth() + g_padding, m_searchList->getY());
+			m_status->setSize(m_grid->getWidth()/3*2, m_status->getHeight());
+		}
 	}
 
 	juce::Colour PatchManager::getResizerBarColor() const
