@@ -10,6 +10,12 @@ namespace jucePluginEditorLib::patchManager
 		setSize(static_cast<int>(_grid.getItemWidth()), static_cast<int>(_grid.getItemHeight()));
 	}
 
+	GridItem::~GridItem()
+	{
+		delete m_item;
+		m_item = nullptr;
+	}
+
 	void GridItem::paint(juce::Graphics& _g)
 	{
 		if(m_index >= static_cast<uint32_t>(m_grid.getNumRows()))

@@ -15,6 +15,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 	public:
 		GridItem(Grid& _grid);
+		~GridItem();
 
 		void paint(juce::Graphics& _g) override;
 
