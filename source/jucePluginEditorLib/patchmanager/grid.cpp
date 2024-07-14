@@ -4,9 +4,11 @@
 #include "list.h"
 #include "patchmanager.h"
 
-#include "../../juceUiLib/uiObjectStyle.h"
 #include "../../juceUiLib/uiObject.h"
+
 #include "../pluginEditor.h"
+
+#include "dsp56kEmu/fastmath.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -21,6 +23,8 @@ namespace jucePluginEditorLib::patchManager
 			t->apply(_pm.getEditor(), *this);
 
 		List::applyStyleToViewport(_pm, m_viewport);
+
+		setWantsKeyboardFocus(true);
 	}
 
 	void Grid::paint(juce::Graphics& g)
@@ -79,22 +83,19 @@ namespace jucePluginEditorLib::patchManager
 			m_items.insert({i, std::move(item)});
 		}
 
-		const auto visibleRowCount = m_viewport.getVisibleRowCount();
-
 		for (const auto& it : m_items)
 		{
 			const auto index = it.first;
 			const auto& item = it.second;
 
-			const auto x = index / visibleRowCount;
-			const auto y = index - x * visibleRowCount;
+			const auto [x,y] = getXY(index);
 
 			item->setTopLeftPosition(static_cast<int>(m_itemWidth * x), static_cast<int>(m_itemHeight * y));
 			item->setSize(m_itemWidth, m_itemHeight);
 		}
 	}
 
-	void Grid::selectItem(uint32_t _index, bool _deselectOthers)
+	void Grid::selectItem(const uint32_t _index, const bool _deselectOthers)
 	{
 		if(_deselectOthers)
 		{
@@ -103,10 +104,12 @@ namespace jucePluginEditorLib::patchManager
 
 			m_selectedItems.clear();
 			m_selectedItems.insert(_index);
+			m_lastSelectedItem = _index;
 		}
 		else if(!m_selectedItems.insert(_index).second)
 			return;
 
+		m_lastSelectedItem = _index;
 		selectedRowsChanged(static_cast<int>(_index));
 		repaint();
 	}
@@ -116,6 +119,9 @@ namespace jucePluginEditorLib::patchManager
 		if(!m_selectedItems.erase(_index))
 			return;
 
+		if(_index == m_lastSelectedItem)
+			m_lastSelectedItem = m_selectedItems.empty() ? InvalidItem : *m_selectedItems.begin();
+
 		repaint();
 	}
 
@@ -123,6 +129,38 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto it = m_items.find(_index);
 		return it == m_items.end() ? nullptr : it->second.get();
+	}
+
+	void Grid::selectRange(const uint32_t _newIndex)
+	{
+		const auto oldIndex = m_lastSelectedItem;
+		const auto dir = _newIndex > oldIndex ? 1 : -1;
+
+		for(auto i=oldIndex; ; i += dir)
+		{
+			selectItem(i, false);
+			if(i == _newIndex)
+			{
+				break;
+			}
+		}
+	}
+
+	bool Grid::keyPressed(const juce::KeyPress& _key)
+	{
+		const auto shift = _key.getModifiers().isShiftDown();
+
+		if(_key.isKeyCode(juce::KeyPress::upKey))
+			handleKeySelection(0, -1, shift);
+		else if(_key.isKeyCode(juce::KeyPress::downKey))
+			handleKeySelection(0, 1, shift);
+		else if(_key.isKeyCode(juce::KeyPress::leftKey))
+			handleKeySelection(-1, 0, shift);
+		else if(_key.isKeyCode(juce::KeyPress::rightKey))
+			handleKeySelection(1, 0, shift);
+		else
+			return Component::keyPressed(_key);
+		return true;
 	}
 
 	void Grid::resized()
@@ -147,6 +185,66 @@ namespace jucePluginEditorLib::patchManager
 	{
 		m_itemContainer.setSize(m_itemWidth * getNeededColumnCount(), getHeight());
 		m_viewport.setSize(getWidth(), getHeight());
+	}
+
+	void Grid::handleKeySelection(const int _offsetX, const int _offsetY, bool _shift)
+	{
+		const auto oldXY = getXY(m_lastSelectedItem);
+
+		const auto rows = m_viewport.getVisibleRowCount();
+		const auto columns = getNeededColumnCount();
+
+		auto [newX, newY] = oldXY;
+
+		newX += _offsetX;
+		newY += _offsetY;
+
+		if(newY < 0)
+		{
+			if(newX > 0)
+			{
+				newY += rows;
+				--newX;
+			}
+			else
+			{
+				newX = 0;
+			}
+		}
+		if(newY >= rows)
+		{
+			if(newX < (columns - 1))
+			{
+				newY -= rows;
+				++newX;
+			}
+		}
+
+		if(newX >= columns)
+			newX = columns - 1;
+		if(newX < 0)
+			newX = 0;
+
+		const uint32_t newIndex = dsp56k::clamp(newX * rows + newY, 0, getNumRows() - 1);
+
+		if(_shift)
+		{
+			selectRange(newIndex);
+			ensureVisible(static_cast<int>(newIndex));
+		}
+		else
+		{
+			selectItem(newIndex, true);
+			ensureVisible(static_cast<int>(newIndex));
+		}
+	}
+
+	std::pair<int, int> Grid::getXY(const uint32_t _index) const
+	{
+		const auto c = m_viewport.getVisibleRowCount();
+		const auto x = _index / c;
+		const auto y = _index - x * c;
+		return {static_cast<int>(x),static_cast<int>(y)};
 	}
 
 	juce::Colour Grid::findColor(const int _colorId)
@@ -209,8 +307,7 @@ namespace jucePluginEditorLib::patchManager
 		juce::Rectangle<int> result;
 		result.setSize(m_itemWidth, m_itemHeight);
 
-		const auto x = _row / m_viewport.getVisibleRowCount();
-		const auto y = _row - x * m_viewport.getVisibleRowCount();
+		const auto [x,y] = getXY(static_cast<uint32_t>(_row));
 
 		result.setPosition(x * m_itemWidth - m_viewport.getViewArea().getX(), y * m_itemHeight - m_viewport.getViewArea().getY());
 

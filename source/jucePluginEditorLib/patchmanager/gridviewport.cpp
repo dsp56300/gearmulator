@@ -6,6 +6,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	GridViewport::GridViewport(Grid& _grid) : m_grid(_grid)
 	{
+		setWantsKeyboardFocus(false);
 	}
 
 	void GridViewport::visibleAreaChanged(const juce::Rectangle<int>& _area)

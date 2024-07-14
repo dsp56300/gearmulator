@@ -13,6 +13,8 @@ namespace jucePluginEditorLib::patchManager
 	class Grid : public ListModel, public juce::Component
 	{
 	public:
+		static constexpr uint32_t InvalidItem = ~0;
+
 		Grid(PatchManager& _pm);
 
 		void paint(juce::Graphics& g) override;
@@ -32,12 +34,16 @@ namespace jucePluginEditorLib::patchManager
 		void selectItem(uint32_t _index, bool _deselectOthers);
 		void deselectItem(uint32_t _index);
 		GridItem* getItem(uint32_t _index) const;
+		void selectRange(uint32_t _newIndex);
+		bool keyPressed(const juce::KeyPress& _key) override;
 
 	private:
 		void resized() override;
 		int getNeededColumnCount();
 		int getVisibleRowCount() const;
 		void updateViewportSize();
+		void handleKeySelection(int _offsetX, int _offsetY, bool _shift);
+		std::pair<int, int> getXY(uint32_t _index) const;
 
 	public:
 		// ListModel
@@ -62,5 +68,6 @@ namespace jucePluginEditorLib::patchManager
 		std::map<uint32_t, std::unique_ptr<GridItem>> m_items;
 		std::list<std::unique_ptr<GridItem>> m_itemPool;
 		std::set<uint32_t> m_selectedItems;
+		uint32_t m_lastSelectedItem = InvalidItem;
 	};
 }
