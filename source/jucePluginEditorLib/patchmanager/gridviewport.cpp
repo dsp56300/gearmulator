@@ -18,12 +18,12 @@ namespace jucePluginEditorLib::patchManager
 
 	std::pair<int, int> GridViewport::getItemRangeFromArea(const juce::Rectangle<int>& _area) const
 	{
-		const auto xOffset = _area.getX();
+		const auto xOffset = static_cast<float>(_area.getX());
 
-		const auto firstColumn = xOffset / m_grid.getItemWidth();
-		const auto lastColumn = (xOffset + _area.getWidth() + m_grid.getItemWidth() - 1) / m_grid.getItemWidth();
+		const auto firstColumn = static_cast<int>(xOffset / m_grid.getItemWidth());
+		const auto lastColumn = static_cast<int>((xOffset + static_cast<float>(_area.getWidth()) + m_grid.getItemWidth() - 1.0f) / m_grid.getItemWidth());
 
-		const auto rowCount = _area.getHeight() / m_grid.getItemHeight();
+		const auto rowCount = static_cast<int>(static_cast<float>(_area.getHeight()) / m_grid.getItemHeight());
 
 		const auto firstItem = firstColumn * rowCount;
 		const auto itemCount = (lastColumn - firstColumn) * rowCount + rowCount;
@@ -33,6 +33,6 @@ namespace jucePluginEditorLib::patchManager
 
 	int GridViewport::getVisibleRowCount() const
 	{
-		return getViewArea().getHeight() / m_grid.getItemHeight();
+		return static_cast<int>(static_cast<float>(getViewArea().getHeight()) / m_grid.getItemHeight());
 	}
 }

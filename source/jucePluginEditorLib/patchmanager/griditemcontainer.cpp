@@ -128,9 +128,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto rowsPerCol = m_grid.getViewport().getVisibleRowCount();
 
-		const auto col = _e.x / m_grid.getItemWidth();
-		const auto row = _e.y / m_grid.getItemHeight();
+		const auto col = static_cast<float>(_e.x) / m_grid.getItemWidth();
+		const auto row = static_cast<float>(_e.y) / m_grid.getItemHeight();
 
-		return row + col * rowsPerCol;
+		return static_cast<int>(row) + static_cast<int>(col) * rowsPerCol;
 	}
 }

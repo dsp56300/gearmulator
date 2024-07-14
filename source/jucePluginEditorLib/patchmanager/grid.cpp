@@ -90,8 +90,8 @@ namespace jucePluginEditorLib::patchManager
 
 			const auto [x,y] = getXY(index);
 
-			item->setTopLeftPosition(static_cast<int>(m_itemWidth * x), static_cast<int>(m_itemHeight * y));
-			item->setSize(m_itemWidth, m_itemHeight);
+			item->setTopLeftPosition(static_cast<int>(m_itemWidth * static_cast<float>(x)), static_cast<int>(m_itemHeight * static_cast<float>(y)));
+			item->setSize(static_cast<int>(m_itemWidth), static_cast<int>(m_itemHeight));
 		}
 	}
 
@@ -178,12 +178,18 @@ namespace jucePluginEditorLib::patchManager
 
 	int Grid::getVisibleRowCount() const
 	{
-		return getHeight() / m_itemHeight;
+		const auto viewportResult = m_viewport.getVisibleRowCount();
+		if(viewportResult == 0)
+			return static_cast<int>(static_cast<float>(getHeight()) / m_itemHeight);
+		return viewportResult;
 	}
 
 	void Grid::updateViewportSize()
 	{
-		m_itemContainer.setSize(m_itemWidth * getNeededColumnCount(), getHeight());
+		const auto availableHeight = getHeight() - m_viewport.getScrollBarThickness() - 1;
+		m_itemHeight = static_cast<float>(availableHeight) / 32.0f;
+
+		m_itemContainer.setSize(static_cast<int>(m_itemWidth * static_cast<float>(getNeededColumnCount())), availableHeight);
 		m_viewport.setSize(getWidth(), getHeight());
 	}
 
@@ -305,11 +311,14 @@ namespace jucePluginEditorLib::patchManager
 	juce::Rectangle<int> Grid::getEntryPosition(const int _row, bool _relativeToComponentTopLeft)
 	{
 		juce::Rectangle<int> result;
-		result.setSize(m_itemWidth, m_itemHeight);
+		result.setSize(static_cast<int>(m_itemWidth), static_cast<int>(m_itemHeight));
 
-		const auto [x,y] = getXY(static_cast<uint32_t>(_row));
+		const auto xy = getXY(static_cast<uint32_t>(_row));
 
-		result.setPosition(x * m_itemWidth - m_viewport.getViewArea().getX(), y * m_itemHeight - m_viewport.getViewArea().getY());
+		const float x = static_cast<float>(xy.first) * m_itemWidth  - static_cast<float>(m_viewport.getViewArea().getX());
+		const float y = static_cast<float>(xy.second) * m_itemHeight - static_cast<float>(m_viewport.getViewArea().getY());
+
+		result.setPosition(static_cast<int>(x), static_cast<int>(y));
 
 		return result;
 	}

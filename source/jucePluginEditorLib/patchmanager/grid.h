@@ -19,8 +19,8 @@ namespace jucePluginEditorLib::patchManager
 
 		void paint(juce::Graphics& g) override;
 
-		int getItemWidth() const { return m_itemWidth; }
-		int getItemHeight() const { return m_itemHeight; }
+		auto getItemWidth() const { return m_itemWidth; }
+		auto getItemHeight() const { return m_itemHeight; }
 
 		void setVisibleItemRange(const std::pair<uint32_t, uint32_t>& _range);
 
@@ -59,8 +59,8 @@ namespace jucePluginEditorLib::patchManager
 		juce::Rectangle<int> getEntryPosition(int _row, bool _relativeToComponentTopLeft) override;
 
 	private:
-		int m_itemHeight = 22;
-		int m_itemWidth = 150;
+		float m_itemHeight = 15;
+		float m_itemWidth = 150;
 
 		GridViewport m_viewport;
 		GridItemContainer m_itemContainer;
