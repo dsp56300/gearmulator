@@ -13,7 +13,7 @@ namespace jucePluginEditorLib::patchManager
 
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
-		onParentSearchChanged({});
+		GroupTreeItem::onParentSearchChanged({});
 	}
 
 	void GroupTreeItem::updateFromTags(const std::set<std::string>& _tags)
