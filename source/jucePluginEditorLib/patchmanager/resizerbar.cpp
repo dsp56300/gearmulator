@@ -18,7 +18,15 @@ namespace jucePluginEditorLib::patchManager
 	void ResizerBar::paint(juce::Graphics& g)
 	{
 //		juce::StretchableLayoutResizerBar::paint(g);
-	    if (isMouseOver()|| isMouseButtonDown())
-		        g.fillAll (m_patchManager.getResizerBarColor());
+	    if (isMouseOver() || isMouseButtonDown())
+			g.fillAll (m_patchManager.getResizerBarColor());
+	}
+
+	void ResizerBar::mouseDoubleClick(const juce::MouseEvent& _e)
+	{
+		if(m_patchManager.setGridLayout128())
+			return;
+
+		StretchableLayoutResizerBar::mouseDoubleClick(_e);
 	}
 }

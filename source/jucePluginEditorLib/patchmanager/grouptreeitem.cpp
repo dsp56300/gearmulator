@@ -13,7 +13,7 @@ namespace jucePluginEditorLib::patchManager
 
 	GroupTreeItem::GroupTreeItem(PatchManager& _pm, const GroupType _type, const std::string& _groupName) : TreeItem(_pm, _groupName), m_type(_type)
 	{
-		onParentSearchChanged({});
+		GroupTreeItem::onParentSearchChanged({});
 	}
 
 	void GroupTreeItem::updateFromTags(const std::set<std::string>& _tags)
@@ -285,7 +285,7 @@ namespace jucePluginEditorLib::patchManager
 		}
 	}
 
-	bool GroupTreeItem::isInterestedInPatchList(const List* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+	bool GroupTreeItem::isInterestedInPatchList(const ListModel* _list, const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
 	{
 		if(m_type == GroupType::Favourites)
 			return true;

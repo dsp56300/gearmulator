@@ -1,6 +1,6 @@
 #include "state.h"
 
-#include "list.h"
+#include "listmodel.h"
 #include "patchmanager.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -105,7 +105,7 @@ namespace jucePluginEditorLib::patchManager
 			patches.assign(search->results.begin(), search->results.end());
 		}
 
-		List::sortPatches(patches, search->getSourceType());
+		ListModel::sortPatches(patches, search->getSourceType());
 
 		uint32_t index = pluginLib::patchDB::g_invalidProgram;
 

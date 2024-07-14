@@ -1,6 +1,6 @@
 #include "treeitem.h"
 
-#include "list.h"
+#include "listmodel.h"
 #include "patchmanager.h"
 #include "savepatchdesc.h"
 #include "tree.h"
@@ -144,7 +144,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool TreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
-		const auto* list = dynamic_cast<List*>(_dragSourceDetails.sourceComponent.get());
+		const auto* list = dynamic_cast<ListModel*>(_dragSourceDetails.sourceComponent.get());
 
 		const auto& patches = SavePatchDesc::getPatchesFromDragSource(_dragSourceDetails);
 

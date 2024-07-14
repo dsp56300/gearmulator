@@ -13,6 +13,7 @@ namespace jucePluginEditorLib::patchManager
 		void hasBeenMoved() override;
 		void paint(juce::Graphics& g) override;
 
+		void mouseDoubleClick(const juce::MouseEvent& _e) override;
 	private:
 		PatchManager& m_patchManager;
 	};

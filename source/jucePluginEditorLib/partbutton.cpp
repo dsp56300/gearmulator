@@ -5,6 +5,7 @@
 #include "patchmanager/list.h"
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
+#include "patchmanager/listmodel.h"
 
 #include "../synthLib/os.h"
 
@@ -12,9 +13,9 @@ namespace jucePluginEditorLib
 {
 	namespace
 	{
-		std::pair<pluginLib::patchDB::PatchPtr, patchManager::List*> getPatchFromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
+		std::pair<pluginLib::patchDB::PatchPtr, patchManager::ListModel*> getPatchFromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
 		{
-			auto* list = dynamic_cast<patchManager::List*>(_source.sourceComponent.get());
+			auto* list = dynamic_cast<patchManager::ListModel*>(_source.sourceComponent.get());
 			if(!list)
 				return {};
 

@@ -1,6 +1,6 @@
 #include "listitem.h"
 
-#include "list.h"
+#include "listmodel.h"
 #include "patchmanager.h"
 #include "savepatchdesc.h"
 
@@ -15,7 +15,7 @@ namespace jucePluginEditorLib::patchManager
 	// However, by disabling mouse clicks, we also disable the ability to D&D onto these entries, even though D&D are not clicks...
 	// We solve both by overwriting hitTest() and return true as long as a D&D is in progress, false otherwise
 
-	ListItem::ListItem(List& _list, const int _row) : m_list(_list), m_row(_row)
+	ListItem::ListItem(ListModel& _list, const int _row) : m_list(_list), m_row(_row)
 	{
 //		setInterceptsMouseClicks(false, false);
 	}
@@ -60,7 +60,7 @@ namespace jucePluginEditorLib::patchManager
 		if(m_list.getSourceType() != pluginLib::patchDB::SourceType::LocalStorage)
 			return false;
 
-		const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get());
+		const auto* list = dynamic_cast<const ListModel*>(dragSourceDetails.sourceComponent.get());
 
 		if(list && list == &m_list && m_list.canReorderPatches())
 			return true;
@@ -94,7 +94,7 @@ namespace jucePluginEditorLib::patchManager
 		const auto* savePatchDesc = SavePatchDesc::fromDragSource(dragSourceDetails);
 		assert(savePatchDesc);
 
-		if(dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get()))
+		if(dynamic_cast<const ListModel*>(dragSourceDetails.sourceComponent.get()))
 		{
 			if(!patches.empty() && pm.movePatchesTo(row, patches))
 				m_list.refreshContent();
@@ -142,7 +142,7 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListItem::mouseDown(const juce::MouseEvent& event)
 	{
-		m_list.mouseDown(event);
+//		m_list.mouseDown(event);
 	}
 
 	bool ListItem::hitTest(int x, int y)
@@ -160,7 +160,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		const auto prev = m_drag;
 
-		const auto* list = dynamic_cast<const List*>(dragSourceDetails.sourceComponent.get());
+		const auto* list = dynamic_cast<const ListModel*>(dragSourceDetails.sourceComponent.get());
 
 		if(list && list == &m_list)
 		{

@@ -2,8 +2,10 @@
 
 #include "datasourcetree.h"
 #include "datasourcetreeitem.h"
+#include "grid.h"
 #include "info.h"
 #include "list.h"
+#include "listmodel.h"
 #include "searchlist.h"
 #include "searchtree.h"
 #include "status.h"
@@ -15,8 +17,6 @@
 
 #include "../../jucePluginLib/types.h"
 #include "../../jucePluginLib/clipboard.h"
-
-#include "../../synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -79,11 +79,21 @@ namespace jucePluginEditorLib::patchManager
 		m_list->setTopLeftPosition(m_treeTags->getRight() + g_padding, 0);
 		m_list->setSize(w - g_padding, rootH - g_searchBarHeight - g_padding);
 
+		m_grid = new Grid(*this);
+		m_grid->setTopLeftPosition(m_list->getPosition());
+		m_grid->setSize(m_list->getWidth(), m_list->getHeight());
+
+		m_grid->setLookAndFeel(&m_list->getLookAndFeel());
+		m_grid->setColour(juce::ListBox::backgroundColourId, m_list->findColour(juce::ListBox::backgroundColourId));
+		m_grid->setColour(juce::ListBox::textColourId, m_list->findColour(juce::ListBox::textColourId));
+		m_grid->setColour(juce::ListBox::outlineColourId, m_list->findColour(juce::ListBox::outlineColourId));
+
 		m_searchList = new SearchList(*m_list);
 		m_searchList->setTopLeftPosition(m_list->getX(), m_list->getHeight() + g_padding);
 		m_searchList->setSize(m_list->getWidth(), g_searchBarHeight);
 
 		addAndMakeVisible(m_list);
+		addChildComponent(m_grid);
 		addAndMakeVisible(m_searchList);
 
 		// 4th column
@@ -131,6 +141,13 @@ namespace jucePluginEditorLib::patchManager
 
 		PatchManager::resized();
 
+		const auto& config = m_editor.getProcessor().getConfig();
+
+		if(config.getIntValue("pm_layout", static_cast<int>(LayoutType::List)) == static_cast<int>(LayoutType::Grid))
+			setLayout(LayoutType::Grid);
+		else
+			PatchManager::resized();
+
 		startTimer(200);
 	}
 
@@ -142,9 +159,11 @@ namespace jucePluginEditorLib::patchManager
 		delete m_info;
 		delete m_searchList;
 		delete m_list;
+		delete m_grid;
 
 		// trees emit onSelectionChanged, be sure to guard it 
 		m_list = nullptr;
+		m_grid = nullptr;
 
 		delete m_searchTreeTags;
 		delete m_treeTags;
@@ -161,7 +180,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		m_treeDS->processDirty(_dirty);
 		m_treeTags->processDirty(_dirty);
-		m_list->processDirty(_dirty);
+		getListModel()->processDirty(_dirty);
 
 		m_status->setScanning(isScanning());
 
@@ -200,6 +219,7 @@ namespace jucePluginEditorLib::patchManager
 			onSelectedItemsChanged();
 	}
 
+	// ReSharper disable once CppParameterMayBeConstPtrOrRef - wrong
 	void PatchManager::removeSelectedItem(Tree* _tree, const TreeItem* _item)
 	{
 		const auto it = m_selectedItems.find(_tree);
@@ -214,7 +234,57 @@ namespace jucePluginEditorLib::patchManager
 	{
 		return setSelectedPatch(getCurrentPart(), _patch, _fromSearch);
 	}
-	
+
+	void PatchManager::setLayout(const LayoutType _layout)
+	{
+		if(m_layout == _layout)
+			return;
+
+		auto* oldModel = getListModel();
+
+		m_layout = _layout;
+
+		auto* newModel = getListModel();
+
+		m_searchList->setListModel(newModel);
+
+		newModel->setContent(oldModel->getSearchHandle());
+		newModel->setSelectedEntries(oldModel->getSelectedEntries());
+
+		dynamic_cast<Component*>(newModel)->setVisible(true);
+		dynamic_cast<Component*>(oldModel)->setVisible(false);
+
+		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
+		{
+			m_firstTimeGridLayout = false;
+			setGridLayout128();
+		}
+		else
+		{
+			resized();
+		}
+
+		auto& config = m_editor.getProcessor().getConfig();
+		config.setValue("pm_layout", static_cast<int>(_layout));
+		config.saveIfNeeded();
+	}
+
+	bool PatchManager::setGridLayout128()
+	{
+		if(m_layout != LayoutType::Grid)
+			return false;
+
+		const auto columnCount = 128.0f / static_cast<float>(m_grid->getSuggestedItemsPerRow());
+
+		const auto pos = static_cast<int>(static_cast<float>(getWidth()) - m_grid->getItemWidth() * columnCount - static_cast<float>(m_resizerBarB.getWidth()));
+
+		m_stretchableManager.setItemPosition(3, pos - 1);	// prevent rounding issues
+
+		resized();
+
+		return true;
+	}
+
 	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
 	{
 		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
@@ -226,7 +296,7 @@ namespace jucePluginEditorLib::patchManager
 			return false;
 
 		if(_part == getCurrentPart())
-			m_list->setSelectedPatches({patch});
+			getListModel()->setSelectedPatches({patch});
 
 		return true;
 	}
@@ -293,7 +363,7 @@ namespace jucePluginEditorLib::patchManager
 		m_state.setSelectedPatch(_part, _patch, searchHandle);
 
 		if(getCurrentPart() == _part)
-			m_list->setSelectedPatches({_patch});
+			getListModel()->setSelectedPatches({_patch});
 
 		return true;
 	}
@@ -455,12 +525,12 @@ namespace jucePluginEditorLib::patchManager
 		setSelectedPatch(_part, p, s->handle);
 
 		if(_part == getCurrentPart())
-			m_list->setSelectedPatches({p});
+			getListModel()->setSelectedPatches({p});
 
 		return true;
 	}
 
-	void PatchManager::setListStatus(uint32_t _selected, uint32_t _total)
+	void PatchManager::setListStatus(uint32_t _selected, uint32_t _total) const
 	{
 		m_status->setListStatus(_selected, _total);
 	}
@@ -536,7 +606,7 @@ namespace jucePluginEditorLib::patchManager
 				return true;
 		}
 
-		List::sortPatches(_patches, pluginLib::patchDB::SourceType::LocalStorage);
+		ListModel::sortPatches(_patches, pluginLib::patchDB::SourceType::LocalStorage);
 
 		getEditor().savePreset([this, p = std::move(_patches), _fileType](const juce::File& _file)
 		{
@@ -551,8 +621,17 @@ namespace jucePluginEditorLib::patchManager
 		if(!m_treeDS)
 			return;
 
-		Component* comps[] = {m_treeDS, &m_resizerBarA, m_treeTags, &m_resizerBarB, m_list, &m_resizerBarC, m_info};
-		m_stretchableManager.layOutComponents(comps, (int)std::size(comps), 0, 0, getWidth(), getHeight(), false, false);
+		m_info->setVisible(m_layout == LayoutType::List);
+		m_resizerBarC.setVisible(m_layout == LayoutType::List);
+
+		std::vector<Component*> comps = {m_treeDS, &m_resizerBarA, m_treeTags, &m_resizerBarB, dynamic_cast<juce::Component*>(getListModel())};
+		if(m_layout == LayoutType::List)
+		{
+			comps.push_back(&m_resizerBarC);
+			comps.push_back(m_info);
+		}
+
+		m_stretchableManager.layOutComponents(comps.data(), static_cast<int>(comps.size()), 0, 0, getWidth(), getHeight(), false, false);
 
 		auto layoutXAxis = [](Component* _target, const Component* _source)
 		{
@@ -562,8 +641,20 @@ namespace jucePluginEditorLib::patchManager
 
 		layoutXAxis(m_searchTreeDS, m_treeDS);
 		layoutXAxis(m_searchTreeTags, m_treeTags);
-		layoutXAxis(m_searchList, m_list);
-		layoutXAxis(m_status, m_info);
+
+		if(m_layout == LayoutType::List)
+		{
+			layoutXAxis(m_searchList, dynamic_cast<Component*>(getListModel()));
+			layoutXAxis(m_status, m_info);
+		}
+		else
+		{
+			m_searchList->setTopLeftPosition(m_grid->getX(), m_searchList->getY());
+			m_searchList->setSize(m_grid->getWidth()/3 - g_padding, m_searchList->getHeight());
+
+			m_status->setTopLeftPosition(m_searchList->getX() + m_searchList->getWidth() + g_padding, m_searchList->getY());
+			m_status->setSize(m_grid->getWidth()/3*2, m_status->getHeight());
+		}
 	}
 
 	juce::Colour PatchManager::getResizerBarColor() const
@@ -612,7 +703,7 @@ namespace jucePluginEditorLib::patchManager
 			return false;
 
 		if(getCurrentPart() == _part)
-			m_list->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
+			getListModel()->setSelectedPatches(std::set<pluginLib::patchDB::PatchKey>{});
 
 		return true;
 	}
@@ -680,12 +771,13 @@ namespace jucePluginEditorLib::patchManager
 				return;
 			m_state.setConfig(s);
 		}
-		catch(std::range_error&)
+		catch(std::range_error& e)
 		{
+			LOG("Failed to to load per instance config: " << e.what());
 		}
 	}
 
-	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data)
+	void PatchManager::getPerInstanceConfig(std::vector<uint8_t>& _data) const
 	{
 		pluginLib::PluginStream s;
 		s.write<uint32_t>(1);	// version
@@ -778,6 +870,13 @@ namespace jucePluginEditorLib::patchManager
 		});
 	}
 
+	ListModel* PatchManager::getListModel() const
+	{
+		if(m_layout == LayoutType::List)
+			return m_list;
+		return m_grid;
+	}
+
 	pluginLib::patchDB::SearchHandle PatchManager::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)
 	{
 		if(auto* item = m_treeDS->getItem(_ds))
@@ -804,7 +903,7 @@ namespace jucePluginEditorLib::patchManager
 	void PatchManager::onSelectedItemsChanged()
 	{
 		// trees emit onSelectionChanged in destructor, be sure to guard it 
-		if(!m_list)
+		if(!getListModel())
 			return;
 
 		const auto selectedTags = m_selectedItems[m_treeTags];
@@ -813,7 +912,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 			if(_item->getSearchHandle() != pluginLib::patchDB::g_invalidSearchHandle)
 			{
-				m_list->setContent(_item->getSearchHandle());
+				getListModel()->setContent(_item->getSearchHandle());
 				return true;
 			}
 			return false;
@@ -831,7 +930,7 @@ namespace jucePluginEditorLib::patchManager
 				pluginLib::patchDB::SearchRequest search = (*selectedTags.begin())->getSearchRequest();
 				for (const auto& selectedTag : selectedTags)
 					search.tags.add(selectedTag->getSearchRequest().tags);
-				m_list->setContent(std::move(search));
+				getListModel()->setContent(std::move(search));
 				return;
 			}
 		}

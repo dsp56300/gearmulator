@@ -4,16 +4,19 @@
 
 namespace jucePluginEditorLib::patchManager
 {
-	class List;
+	class ListModel;
 
 	class SearchList : public Search
 	{
 	public:
-		explicit SearchList(List& _list);
+		explicit SearchList(ListModel& _list);
 
 		void onTextChanged(const std::string& _text) override;
 
+
+		void setListModel(ListModel* _list);
+
 	private:
-		List& m_list;
+		ListModel* m_list;
 	};
 }
