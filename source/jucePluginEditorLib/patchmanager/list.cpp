@@ -14,6 +14,8 @@ namespace jucePluginEditorLib::patchManager
 		setColour(backgroundColourId, juce::Colour(defaultSkin::colors::background));
 		setColour(textColourId, juce::Colour(defaultSkin::colors::itemText));
 
+		setRowHeight(18);
+
 		getViewport()->setScrollBarsShown(true, false);
 		setModel(this);
 		setMultipleSelectionEnabled(true);
