@@ -12,6 +12,7 @@ namespace jucePluginEditorLib::patchManager
 	void GridItemContainer::mouseDown(const juce::MouseEvent& _e)
 	{
 		Component::mouseDown(_e);
+		m_isDragging = false;
 		m_itemIndexMouseDown = mouseToItemIndex(_e);
 	}
 
@@ -67,6 +68,9 @@ namespace jucePluginEditorLib::patchManager
 	{
 		m_itemIndexMouseDown = InvalidItem;
 
+		if(m_isDragging)
+			return;
+
 		juce::SparseSet<int> rows;
 		const auto hoveredIndex = mouseToItemIndex(_e);
 		if(m_grid.isSelected(hoveredIndex))
@@ -87,6 +91,7 @@ namespace jucePluginEditorLib::patchManager
 
 			        const auto p = juce::Point<int> (x, y) - _e.getEventRelativeTo (this).position.toInt();
 			        dragContainer->startDragging (dragDescription, &m_grid, dragImage, true, &p, &_e.source);
+					m_isDragging = true;
 			    }
 			}
 		}

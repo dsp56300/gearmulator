@@ -23,5 +23,6 @@ namespace jucePluginEditorLib::patchManager
 
 		Grid& m_grid;
 		uint32_t m_itemIndexMouseDown = InvalidItem;
+		bool m_isDragging = false;
 	};
 }
