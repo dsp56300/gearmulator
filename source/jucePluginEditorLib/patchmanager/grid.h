@@ -60,7 +60,7 @@ namespace jucePluginEditorLib::patchManager
 
 	private:
 		float m_itemHeight = 15;
-		float m_itemWidth = 150;
+		float m_itemWidth = 140;
 
 		GridViewport m_viewport;
 		GridItemContainer m_itemContainer;
