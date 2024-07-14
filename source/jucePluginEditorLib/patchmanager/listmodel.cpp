@@ -131,7 +131,10 @@ namespace jucePluginEditorLib::patchManager
 			{
 				const auto& patch = *selectedPatches.begin();
 				const auto row = getSelectedEntry();
-				const auto pos = getEntryPosition(row, true);
+				auto pos = getEntryPosition(row, true);
+
+				pos.setY(pos.getY()-2);
+				pos.setHeight(pos.getHeight()+4);
 
 				menu.addItem("Rename...", [this, patch, pos]
 				{
