@@ -59,7 +59,7 @@ namespace jucePluginEditorLib::patchManager
 
 		bool selectPatch(uint32_t _part, const pluginLib::patchDB::DataSource& _ds, uint32_t _program);
 
-		void setListStatus(uint32_t _selected, uint32_t _total);
+		void setListStatus(uint32_t _selected, uint32_t _total) const;
 
 		pluginLib::patchDB::Color getPatchColor(const pluginLib::patchDB::PatchPtr& _patch) const;
 
@@ -102,6 +102,8 @@ namespace jucePluginEditorLib::patchManager
 
 		LayoutType getLayout() const { return m_layout; }
 		void setLayout(LayoutType _layout);
+
+		bool setGridLayout128();
 
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
@@ -167,5 +169,6 @@ namespace jucePluginEditorLib::patchManager
 		std::unordered_map<pluginLib::patchDB::TagType, std::string> m_tagTypeNames;
 
 		LayoutType m_layout = LayoutType::List;
+		bool m_firstTimeGridLayout = true;
 	};
 }

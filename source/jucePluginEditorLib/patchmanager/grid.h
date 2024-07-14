@@ -21,6 +21,11 @@ namespace jucePluginEditorLib::patchManager
 
 		auto getItemWidth() const { return m_itemWidth; }
 		auto getItemHeight() const { return m_itemHeight; }
+		auto getSuggestedItemsPerRow() const { return m_suggestedItemsPerRow; }
+
+		void setItemWidth(float _width);
+		void setItemHeight(float _height);
+		void setSuggestedItemsPerRow(uint32_t _count);
 
 		void setVisibleItemRange(const std::pair<uint32_t, uint32_t>& _range);
 
@@ -61,6 +66,7 @@ namespace jucePluginEditorLib::patchManager
 	private:
 		float m_itemHeight = 15;
 		float m_itemWidth = 140;
+		uint32_t m_suggestedItemsPerRow = 32;
 
 		GridViewport m_viewport;
 		GridItemContainer m_itemContainer;

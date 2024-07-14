@@ -35,6 +35,34 @@ namespace jucePluginEditorLib::patchManager
 		Component::paint(g);
 	}
 
+	void Grid::setItemWidth(const float _width)
+	{
+		if(m_itemWidth == _width)
+			return;
+
+		m_itemWidth = _width;
+		updateViewportSize();
+	}
+
+	void Grid::setItemHeight(float _height)
+	{
+		if(_height <= 0.0f)
+			return;
+
+		m_itemHeight = _height;
+		m_suggestedItemsPerRow = 0;
+		updateViewportSize();
+	}
+
+	void Grid::setSuggestedItemsPerRow(uint32_t _count)
+	{
+		if(m_suggestedItemsPerRow == _count)
+			return;
+
+		m_suggestedItemsPerRow = _count;
+		updateViewportSize();
+	}
+
 	void Grid::setVisibleItemRange(const std::pair<uint32_t, uint32_t>& _range)
 	{
 		const auto& start = _range.first;
@@ -187,7 +215,8 @@ namespace jucePluginEditorLib::patchManager
 	void Grid::updateViewportSize()
 	{
 		const auto availableHeight = getHeight() - m_viewport.getScrollBarThickness() - 1;
-		m_itemHeight = static_cast<float>(availableHeight) / 32.0f;
+		if(m_suggestedItemsPerRow)
+			m_itemHeight = static_cast<float>(availableHeight) / static_cast<float>(m_suggestedItemsPerRow);
 
 		m_itemContainer.setSize(static_cast<int>(m_itemWidth * static_cast<float>(getNeededColumnCount())), availableHeight);
 		m_viewport.setSize(getWidth(), getHeight());

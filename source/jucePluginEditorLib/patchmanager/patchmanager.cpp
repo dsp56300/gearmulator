@@ -246,7 +246,31 @@ namespace jucePluginEditorLib::patchManager
 		dynamic_cast<Component*>(newModel)->setVisible(true);
 		dynamic_cast<Component*>(oldModel)->setVisible(false);
 
+		if(m_firstTimeGridLayout && _layout == LayoutType::Grid)
+		{
+			m_firstTimeGridLayout = false;
+			setGridLayout128();
+		}
+		else
+		{
+			resized();
+		}
+	}
+
+	bool PatchManager::setGridLayout128()
+	{
+		if(m_layout != LayoutType::Grid)
+			return false;
+
+		const auto columnCount = 128.0f / static_cast<float>(m_grid->getSuggestedItemsPerRow());
+
+		const auto pos = static_cast<int>(static_cast<float>(getWidth()) - m_grid->getItemWidth() * columnCount - static_cast<float>(m_resizerBarB.getWidth()));
+
+		m_stretchableManager.setItemPosition(3, pos - 1);	// prevent rounding issues
+
 		resized();
+
+		return true;
 	}
 
 	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
@@ -494,7 +518,7 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
-	void PatchManager::setListStatus(uint32_t _selected, uint32_t _total)
+	void PatchManager::setListStatus(uint32_t _selected, uint32_t _total) const
 	{
 		m_status->setListStatus(_selected, _total);
 	}
