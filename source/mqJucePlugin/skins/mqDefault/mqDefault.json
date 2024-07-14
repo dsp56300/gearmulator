@@ -58,7 +58,7 @@
         {
             "name" : "pm_listbox",
             "listbox" : {
-                "textHeight" : "30",
+                "textHeight" : "14",
                 "color" : "FFDA94FF",
                 "backgroundColor" : "1C1F22FF",
                 "alignH" : "L",
