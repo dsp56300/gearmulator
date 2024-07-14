@@ -2,6 +2,11 @@ Release Notes
 
 1.3.17
 
+Framework:
+
+- [Imp] Patch Manager: Added grid layout, you can switch between list and 
+        grid layout via context menu
+
 Vavra:
 
 - [Fix] Font when renaming a patch too large
