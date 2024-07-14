@@ -5,9 +5,13 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
+
 #include "portmidi.h"
 
 #define STRING_MAX 256
+
+int pm_find_default_device(char *pattern, int is_input);
 
 /* skip over spaces, return first non-space */
 void skip_spaces(FILE *inf)
