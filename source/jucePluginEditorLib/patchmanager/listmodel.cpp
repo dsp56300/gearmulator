@@ -278,7 +278,22 @@ namespace jucePluginEditorLib::patchManager
 		{
 			setFilter(m_filter, m_hideDuplicatesByHash, !m_hideDuplicatesByName);
 		});
+
+		menu.addSeparator();
+
+		juce::PopupMenu layoutMenu;
+		layoutMenu.addItem("List + Info", true, m_patchManager.getLayout() == PatchManager::LayoutType::List, [this]
+		{
+			m_patchManager.setLayout(PatchManager::LayoutType::List);
+		});
+		layoutMenu.addItem("Grid", true, m_patchManager.getLayout() == PatchManager::LayoutType::Grid, [this]
+		{
+			m_patchManager.setLayout(PatchManager::LayoutType::Grid);
+		});
+		menu.addSubMenu("Layout", layoutMenu);
+
 		menu.showMenuAsync({});
+
 		return true;
 	}
 
