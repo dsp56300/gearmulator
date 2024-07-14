@@ -27,6 +27,8 @@ namespace jucePluginEditorLib::patchManager
 		setWantsKeyboardFocus(true);
 	}
 
+	Grid::~Grid() = default;
+
 	void Grid::paint(juce::Graphics& g)
 	{
 		if(const auto c = findColor(juce::ListBox::backgroundColourId); c.getAlpha() > 0)

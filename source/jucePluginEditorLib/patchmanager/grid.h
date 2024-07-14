@@ -16,6 +16,12 @@ namespace jucePluginEditorLib::patchManager
 		static constexpr uint32_t InvalidItem = ~0;
 
 		Grid(PatchManager& _pm);
+		~Grid() override;
+
+		Grid(Grid&&) = delete;
+		Grid(const Grid&) = delete;
+		Grid& operator = (Grid&&) = delete;
+		Grid& operator = (const Grid&) = delete;
 
 		void paint(juce::Graphics& g) override;
 
