@@ -172,7 +172,8 @@ namespace jucePluginEditorLib::patchManager
 
 	void Grid::ensureVisible(int _row)
 	{
-		// TODO
+		const auto pos = getEntryPosition(_row, true);
+		m_viewport.autoScroll(pos.getCentreX(), pos.getCentreY(), getWidth()>>1, 1000);
 	}
 
 	int Grid::getSelectedEntry() const
