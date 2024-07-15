@@ -6,8 +6,8 @@
 
 #include "mqController.h"
 
-#include "../jucePluginLib/processor.h"
-#include "../mqLib/device.h"
+#include "jucePluginLib/processor.h"
+#include "mqLib/device.h"
 
 class Controller;
 

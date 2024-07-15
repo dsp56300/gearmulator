@@ -6,7 +6,7 @@
 #include "dsp56kEmu/ringbuffer.h"
 #include "dsp56kEmu/types.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace mc68k
 {

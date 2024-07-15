@@ -1,14 +1,14 @@
 #include "microq.h"
 
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/os.h"
-#include "../synthLib/deviceException.h"
+#include "synthLib/midiTypes.h"
+#include "synthLib/os.h"
+#include "synthLib/deviceException.h"
 
 #include "dsp56kEmu/threadtools.h"
 
 #include "mqhardware.h"
 
-#include "../mc68k/logging.h"
+#include "mc68k/logging.h"
 
 namespace mqLib
 {

@@ -5,7 +5,7 @@
 
 #include "parameterOverlay.h"
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace pluginLib
 {

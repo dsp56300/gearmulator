@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "../juceUiLib/button.h"
+#include "juceUiLib/button.h"
 
 namespace jucePluginEditorLib
 {

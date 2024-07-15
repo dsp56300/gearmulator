@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "../virusConsoleLib/consoleApp.h"
+#include "virusConsoleLib/consoleApp.h"
 
 #include "dsp56kEmu/jitunittests.h"
 #include "dsp56kEmu/interpreterunittests.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 constexpr bool g_createDebugger = false;
 constexpr bool g_dumpAssembly = false;

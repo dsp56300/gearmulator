@@ -7,7 +7,7 @@
 #include "microcontroller.h"
 #include "romfile.h"
 
-#include "../dsp56300/source/dsp56kEmu/logging.h"
+#include "dsp56kEmu/logging.h"
 
 namespace virusLib
 {

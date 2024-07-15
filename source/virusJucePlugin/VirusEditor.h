@@ -1,10 +1,10 @@
 #pragma once
 
-#include "../../jucePluginEditorLib/midiPorts.h"
-#include "../../jucePluginEditorLib/pluginEditor.h"
-#include "../../jucePluginEditorLib/focusedParameter.h"
+#include "jucePluginEditorLib/midiPorts.h"
+#include "jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginEditorLib/focusedParameter.h"
 
-#include "../../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 #include "Parts.h"
 #include "Tabs.h"

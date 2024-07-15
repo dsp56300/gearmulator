@@ -5,7 +5,7 @@
 
 #include "controller.h"
 
-#include "../synthLib/plugin.h"
+#include "synthLib/plugin.h"
 
 namespace synthLib
 {

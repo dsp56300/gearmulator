@@ -2,9 +2,9 @@
 
 #include "xtParts.h"
 
-#include "../jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginEditorLib/pluginEditor.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 class XtLcd;
 class Controller;

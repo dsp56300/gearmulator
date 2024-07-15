@@ -4,7 +4,7 @@
 #include "mqstate.h"
 #include "mqsysexremotecontrol.h"
 
-#include "../wLib/wDevice.h"
+#include "wLib/wDevice.h"
 
 namespace dsp56k
 {

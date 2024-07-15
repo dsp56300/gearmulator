@@ -8,3 +8,5 @@ set(SOURCES
 
 add_library(resample STATIC ${SOURCES})
 set_property(TARGET resample PROPERTY FOLDER "Gearmulator")
+
+target_include_directories(resample PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

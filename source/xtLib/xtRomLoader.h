@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synthLib/romLoader.h"
+#include "synthLib/romLoader.h"
 
 #include <cstdint>
 

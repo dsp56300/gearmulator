@@ -2,7 +2,7 @@
 
 #include <thread>
 
-#include "../portaudio/include/portaudio.h"
+#include "portaudio/include/portaudio.h"
 
 #include "dsp56kEmu/audio.h"
 #include "dsp56kEmu/logging.h"

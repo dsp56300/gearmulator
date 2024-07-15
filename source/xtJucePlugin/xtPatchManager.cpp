@@ -3,8 +3,8 @@
 #include "xtController.h"
 #include "xtEditor.h"
 
-#include "../jucePluginEditorLib/pluginProcessor.h"
-#include "../xtLib/xtMidiTypes.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
+#include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
 {

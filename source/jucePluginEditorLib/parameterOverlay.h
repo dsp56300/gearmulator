@@ -1,7 +1,7 @@
 #pragma once
 
 #include "imagePool.h"
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace juce
 {

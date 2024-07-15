@@ -3,15 +3,15 @@
 #include "VirusEditor.h"
 #include "VirusController.h"
 
-#include "../jucePluginLib/patchdb/datasource.h"
-#include "../jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginLib/patchdb/datasource.h"
+#include "jucePluginEditorLib/pluginEditor.h"
 
-#include "../virusLib/microcontroller.h"
-#include "../virusLib/device.h"
-#include "../virusLib/midiFileToRomData.h"
+#include "virusLib/microcontroller.h"
+#include "virusLib/device.h"
+#include "virusLib/midiFileToRomData.h"
 
-#include "../synthLib/midiToSysex.h"
-#include "../synthLib/os.h"
+#include "synthLib/midiToSysex.h"
+#include "synthLib/os.h"
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 

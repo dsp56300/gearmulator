@@ -2,8 +2,8 @@
 
 #include <array>
 
-#include "../../jucePluginLib/patchdb/patch.h"
-#include "../../jucePluginLib/types.h"
+#include "jucePluginLib/patchdb/patch.h"
+#include "jucePluginLib/types.h"
 
 namespace jucePluginEditorLib::patchManager
 {

@@ -8,7 +8,7 @@
 #include <cstring>	// memcpy
 
 #include "mqbuildconfig.h"
-#include "../mc68k/logging.h"
+#include "mc68k/logging.h"
 
 namespace mqLib
 {

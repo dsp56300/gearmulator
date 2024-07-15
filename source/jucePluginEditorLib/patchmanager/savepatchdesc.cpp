@@ -2,7 +2,7 @@
 
 #include "patchmanager.h"
 
-#include "../../synthLib/sysexToMidi.h"
+#include "synthLib/sysexToMidi.h"
 
 namespace jucePluginEditorLib::patchManager
 {

@@ -5,9 +5,9 @@
 #include "audioProcessor.h"
 #include "esaiListenerToFile.h"
 
-#include "../virusLib/device.h"
-#include "../virusLib/romloader.h"
-#include "../virusLib/demoplaybackTI.h"
+#include "virusLib/device.h"
+#include "virusLib/romloader.h"
+#include "virusLib/demoplaybackTI.h"
 
 #include "dsp56kEmu/dsp.h"
 

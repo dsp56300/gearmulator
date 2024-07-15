@@ -4,7 +4,7 @@
 
 #include "midiFileToRomData.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 namespace virusLib
 {

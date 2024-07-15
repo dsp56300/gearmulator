@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginEditorLib/pluginEditor.h"
 
 class mqPartSelect;
 class Controller;

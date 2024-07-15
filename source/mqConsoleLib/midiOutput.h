@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-#include "../synthLib/midiBufferParser.h"
+#include "synthLib/midiBufferParser.h"
 
 #include "midiDevice.h"
 

@@ -7,12 +7,12 @@
 #include "VirusProcessor.h"
 #include "ParameterNames.h"
 
-#include "../jucePluginEditorLib/pluginProcessor.h"
-#include "../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
-#include "../virusLib/device.h"
+#include "virusLib/device.h"
 
 namespace genericVirusUI
 {

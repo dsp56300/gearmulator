@@ -4,9 +4,9 @@
 #include <cassert>
 #include <utility>
 
-#include "../libresample/include/libresample.h"
+#include "libresample/include/libresample.h"
 
-#include "../dsp56300/source/dsp56kEmu/fastmath.h"
+#include "dsp56kEmu/fastmath.h"
 
 synthLib::Resampler::Resampler(const float _samplerateIn, const float _samplerateOut)
 	: m_samplerateIn(_samplerateIn)

@@ -6,10 +6,10 @@
 #include "xtPic.h"
 #include "xtTypes.h"
 
-#include "../mc68k/mc68k.h"
-#include "../mc68k/hdi08periph.h"
+#include "mc68k/mc68k.h"
+#include "mc68k/hdi08periph.h"
 
-#include "../wLib/am29f.h"
+#include "wLib/am29f.h"
 
 namespace xt
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/patchbrowser.h"
+#include "jucePluginEditorLib/patchbrowser.h"
 
 namespace mqJucePlugin
 {

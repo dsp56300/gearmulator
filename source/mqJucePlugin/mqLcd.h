@@ -4,7 +4,7 @@
 
 #include "mqLcdBase.h"
 
-#include "../jucePluginEditorLib/lcd.h"
+#include "jucePluginEditorLib/lcd.h"
 
 class MqLcd final : public jucePluginEditorLib::Lcd, public MqLcdBase
 {

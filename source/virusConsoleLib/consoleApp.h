@@ -1,10 +1,10 @@
 #pragma once
 #include <string>
 
-#include "../virusLib/romfile.h"
-#include "../virusLib/microcontroller.h"
-#include "../virusLib/demoplayback.h"
-#include "../virusLib/dspSingle.h"
+#include "virusLib/romfile.h"
+#include "virusLib/microcontroller.h"
+#include "virusLib/demoplayback.h"
+#include "virusLib/dspSingle.h"
 
 class ConsoleApp
 {

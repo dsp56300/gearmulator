@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../virusJucePlugin/VirusProcessor.h"
+#include "virusJucePlugin/VirusProcessor.h"
 
 class OsirusProcessor : public VirusProcessor
 {

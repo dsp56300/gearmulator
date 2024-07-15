@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../virusConsoleLib/consoleApp.h"
+#include "virusConsoleLib/consoleApp.h"
 
-#include "../synthLib/wavReader.h"
+#include "synthLib/wavReader.h"
 
 class CommandLine;
 

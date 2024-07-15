@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
 
 class VirusProcessor;
 

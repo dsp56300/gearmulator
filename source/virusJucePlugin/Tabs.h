@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../juceUiLib/tabgroup.h"
+#include "juceUiLib/tabgroup.h"
 
 namespace juce
 {

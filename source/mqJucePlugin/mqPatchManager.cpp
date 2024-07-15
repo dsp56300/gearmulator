@@ -2,7 +2,7 @@
 
 #include "mqController.h"
 #include "mqEditor.h"
-#include "../jucePluginEditorLib/pluginProcessor.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
 
 namespace mqJucePlugin
 {

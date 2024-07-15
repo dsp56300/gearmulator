@@ -7,7 +7,7 @@
 #include "patchmanager/savepatchdesc.h"
 #include "patchmanager/listmodel.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 namespace jucePluginEditorLib
 {

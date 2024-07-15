@@ -2,7 +2,7 @@
 
 #include <deque>
 
-#include "../mc68k/qsm.h"
+#include "mc68k/qsm.h"
 
 namespace wLib
 {

@@ -2,8 +2,8 @@
 
 #include "xtLcd.h"
 
-#include "../mc68k/mc68k.h"
-#include "../mc68k/logging.h"
+#include "mc68k/mc68k.h"
+#include "mc68k/logging.h"
 
 #include <cassert>
 #include <cstdint>

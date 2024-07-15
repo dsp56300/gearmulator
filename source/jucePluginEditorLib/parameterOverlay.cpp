@@ -3,8 +3,8 @@
 #include "pluginEditor.h"
 #include "imagePool.h"
 
-#include "../jucePluginLib/parameter.h"
-#include "../juceUiLib/uiObjectStyle.h"
+#include "jucePluginLib/parameter.h"
+#include "juceUiLib/uiObjectStyle.h"
 
 namespace jucePluginEditorLib
 {

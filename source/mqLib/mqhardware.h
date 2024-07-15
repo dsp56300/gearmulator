@@ -10,10 +10,10 @@
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
-#include "../wLib/wMidi.h"
-#include "../wLib/wHardware.h"
+#include "wLib/wMidi.h"
+#include "wLib/wHardware.h"
 
 namespace mqLib
 {

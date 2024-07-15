@@ -59,3 +59,5 @@ target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePlu
 target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")
+
+target_include_directories(jucePluginEditorLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

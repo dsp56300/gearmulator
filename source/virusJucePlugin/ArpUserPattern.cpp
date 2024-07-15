@@ -4,7 +4,7 @@
 
 #include "VirusController.h"
 
-#include "../juceUiLib/uiObjectStyle.h"
+#include "juceUiLib/uiObjectStyle.h"
 
 namespace genericVirusUI
 {

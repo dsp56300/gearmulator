@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace juce
 {

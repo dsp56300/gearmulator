@@ -3,7 +3,7 @@
 #include "mqEditor.h"
 #include "PluginProcessor.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 const std::vector<PluginEditorState::Skin> g_includedSkins =
 {

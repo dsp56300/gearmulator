@@ -4,7 +4,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../xtLib/xtLeds.h"
+#include "xtLib/xtLeds.h"
 
 class Controller;
 

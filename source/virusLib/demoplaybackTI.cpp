@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "microcontroller.h"
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace virusLib
 {

@@ -2,9 +2,9 @@
 
 #include <cassert>
 
-#include "../dsp56300/source/dsp56kEmu/logging.h"
+#include "dsp56kEmu/logging.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace pluginLib
 {

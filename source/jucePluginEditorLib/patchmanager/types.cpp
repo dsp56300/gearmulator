@@ -1,6 +1,6 @@
 #include "types.h"
 
-#include "../../jucePluginLib/patchdb/patchdbtypes.h"
+#include "jucePluginLib/patchdb/patchdbtypes.h"
 
 namespace jucePluginEditorLib::patchManager
 {

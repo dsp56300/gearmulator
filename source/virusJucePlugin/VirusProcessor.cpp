@@ -2,11 +2,11 @@
 #include "VirusEditorState.h"
 #include "ParameterNames.h"
 
-#include "../virusLib/romloader.h"
+#include "virusLib/romloader.h"
 
-#include "../synthLib/deviceException.h"
-#include "../synthLib/binarystream.h"
-#include "../synthLib/os.h"
+#include "synthLib/deviceException.h"
+#include "synthLib/binarystream.h"
+#include "synthLib/os.h"
 
 //==============================================================================
 VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, const virusLib::DeviceModel _defaultModel)

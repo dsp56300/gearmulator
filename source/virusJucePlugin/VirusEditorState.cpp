@@ -4,7 +4,7 @@
 
 #include "VirusEditor.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 VirusEditorState::VirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller, const std::vector<VirusEditorState::Skin>& _includedSkins)
 	: jucePluginEditorLib::PluginEditorState(_processor, _controller, _includedSkins)

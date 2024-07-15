@@ -6,7 +6,7 @@
 #include "xtHardware.h"
 #include "xtLeds.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace xt
 {

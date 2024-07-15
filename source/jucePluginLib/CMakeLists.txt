@@ -57,3 +57,5 @@ add_custom_command(
 	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h	# valid
 	COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/createVersionDateTime.cmake"
 )
+
+target_include_directories(jucePluginLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

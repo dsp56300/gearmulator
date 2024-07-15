@@ -2,9 +2,9 @@
 
 #include "romfile.h"
 
-#include "../synthLib/deviceTypes.h"
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/buildconfig.h"
+#include "synthLib/deviceTypes.h"
+#include "synthLib/midiTypes.h"
+#include "synthLib/buildconfig.h"
 
 #include <list>
 #include <mutex>

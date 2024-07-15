@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../jucePluginEditorLib/lcd.h"
+#include "jucePluginEditorLib/lcd.h"
 
 class Controller;
 

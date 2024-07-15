@@ -6,9 +6,8 @@
 
 #include "db.h"
 #include "patch.h"
-#include "patchmodifications.h"
 
-#include "../../synthLib/binarystream.h"
+#include "synthLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../jucePluginLib/patchdb/patchdbtypes.h"
+#include "jucePluginLib/patchdb/patchdbtypes.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 

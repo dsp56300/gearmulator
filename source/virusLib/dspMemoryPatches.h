@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synthLib/dspMemoryPatch.h"
+#include "synthLib/dspMemoryPatch.h"
 
 namespace virusLib
 {

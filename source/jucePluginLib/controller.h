@@ -5,7 +5,7 @@
 #include "parameterlocking.h"
 #include "softknob.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 #include <string>
 

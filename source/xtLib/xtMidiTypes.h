@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-#include "../wLib/wMidiTypes.h"
+#include "wLib/wMidiTypes.h"
 
 namespace xt
 {

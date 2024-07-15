@@ -2,7 +2,7 @@
 
 #include "uiObject.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 namespace genericUI
 {

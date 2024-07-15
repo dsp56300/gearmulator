@@ -3,7 +3,7 @@
 #include "xt.h"
 #include "xtState.h"
 #include "xtSysexRemoteControl.h"
-#include "../wLib/wDevice.h"
+#include "wLib/wDevice.h"
 
 namespace dsp56k
 {

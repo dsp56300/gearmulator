@@ -8,7 +8,8 @@
 #include "treeitem.h"
 #include "defaultskin.h"
 
-#include "../../juceUiLib/uiObject.h"
+#include "juceUiLib/uiObject.h"
+
 #include "../pluginEditor.h"
 
 namespace jucePluginEditorLib::patchManager

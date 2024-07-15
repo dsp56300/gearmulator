@@ -2,10 +2,10 @@
 #include "dummydevice.h"
 #include "types.h"
 
-#include "../synthLib/deviceException.h"
-#include "../synthLib/os.h"
-#include "../synthLib/binarystream.h"
-#include "../synthLib/midiBufferParser.h"
+#include "synthLib/deviceException.h"
+#include "synthLib/os.h"
+#include "synthLib/binarystream.h"
+#include "synthLib/midiBufferParser.h"
 
 #include "dsp56kEmu/fastmath.h"
 

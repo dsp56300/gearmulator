@@ -6,9 +6,9 @@
 #include "dsp56kDebugger/debugger.h"
 #endif
 
-#include "../mc68k/hdi08.h"
+#include "mc68k/hdi08.h"
 
-#include "../wLib/dspBootCode.h"
+#include "wLib/dspBootCode.h"
 
 #include "dsp56kEmu/aar.h"
 

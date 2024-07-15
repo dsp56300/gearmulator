@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "../mqLib/mqtypes.h"
+#include "mqLib/mqtypes.h"
 
 namespace mqConsoleLib
 {

@@ -1,6 +1,6 @@
 #include "device.h"
 
-#include "../synthLib/deviceTypes.h"
+#include "synthLib/deviceTypes.h"
 
 #include "mqbuildconfig.h"
 #include "mqhardware.h"

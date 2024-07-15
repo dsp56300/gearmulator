@@ -6,10 +6,10 @@
 #include "buttons.h"
 #include "lcd.h"
 #include "leds.h"
-#include "../wLib/am29f.h"
+#include "wLib/am29f.h"
 
-#include "../mc68k/mc68k.h"
-#include "../mc68k/hdi08periph.h"
+#include "mc68k/mc68k.h"
+#include "mc68k/hdi08periph.h"
 
 #define SUPPORT_NMI_INTERRUPT 0
 

@@ -2,7 +2,7 @@
 
 #include "audioOutput.h"
 
-#include "../synthLib/wavWriter.h"
+#include "synthLib/wavWriter.h"
 
 namespace mqConsoleLib
 {

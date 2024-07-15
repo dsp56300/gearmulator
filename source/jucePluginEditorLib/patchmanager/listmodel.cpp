@@ -8,7 +8,7 @@
 
 #include "../pluginEditor.h"
 
-#include "../../juceUiLib/uiObjectStyle.h"
+#include "juceUiLib/uiObjectStyle.h"
 
 namespace jucePluginEditorLib::patchManager
 {

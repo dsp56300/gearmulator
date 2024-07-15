@@ -6,8 +6,8 @@
 
 #include "mqGuiBase.h"
 
-#include "../mqLib/buttons.h"
-#include "../mqLib/leds.h"
+#include "mqLib/buttons.h"
+#include "mqLib/leds.h"
 
 namespace mqLib
 {

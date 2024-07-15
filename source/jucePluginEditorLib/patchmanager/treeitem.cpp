@@ -5,8 +5,8 @@
 #include "savepatchdesc.h"
 #include "tree.h"
 
-#include "../../jucePluginLib/patchdb/patchdbtypes.h"
-#include "../../juceUiLib/treeViewStyle.h"
+#include "jucePluginLib/patchdb/patchdbtypes.h"
+#include "juceUiLib/treeViewStyle.h"
 
 namespace jucePluginEditorLib::patchManager
 {

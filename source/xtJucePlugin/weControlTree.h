@@ -3,8 +3,8 @@
 #include "weControlTreeItem.h"
 #include "weTree.h"
 
-#include "../jucePluginLib/event.h"
-#include "../xtLib/xtMidiTypes.h"
+#include "jucePluginLib/event.h"
+#include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
 {

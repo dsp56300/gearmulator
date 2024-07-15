@@ -6,8 +6,8 @@
 
 #include "dsp56kEmu/types.h"
 
-#include "../synthLib/audioTypes.h"
-#include "../synthLib/wavWriter.h"
+#include "synthLib/audioTypes.h"
+#include "synthLib/wavWriter.h"
 
 namespace virusLib
 {

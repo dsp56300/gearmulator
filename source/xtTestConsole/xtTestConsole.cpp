@@ -1,12 +1,12 @@
-#include "../synthLib/wavWriter.h"
+#include "synthLib/wavWriter.h"
 
-#include "../xtLib/xtUc.h"
-#include "../xtLib/xtHardware.h"
-#include "../xtLib/xt.h"
+#include "xtLib/xtUc.h"
+#include "xtLib/xtHardware.h"
+#include "xtLib/xt.h"
 
 #include "dsp56kEmu/jitunittests.h"
 
-//#include "../synthLib/os.h"
+//#include "synthLib/os.h"
 
 int main()
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/patchmanager/patchmanager.h"
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
 class Controller;
 

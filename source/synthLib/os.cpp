@@ -1,6 +1,6 @@
 #include "os.h"
 
-#include "../dsp56300/source/dsp56kEmu/logging.h"
+#include "dsp56kEmu/logging.h"
 
 #ifndef _WIN32
 // filesystem is only available on macOS Catalina 10.15+

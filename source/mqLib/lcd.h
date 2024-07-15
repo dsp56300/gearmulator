@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../wLib/lcd.h"
+#include "wLib/lcd.h"
 
 namespace mc68k
 {

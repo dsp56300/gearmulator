@@ -30,3 +30,5 @@ if(DSP56300_DEBUGGER)
 endif()
 
 set_property(TARGET xtLib PROPERTY FOLDER "Xenia")
+
+target_include_directories(xtLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

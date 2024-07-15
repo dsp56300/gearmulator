@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synthLib/binarystream.h"
+#include "synthLib/binarystream.h"
 
 namespace pluginLib
 {

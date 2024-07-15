@@ -6,7 +6,7 @@
 #include "dsp56kEmu/memory.h"
 #include "dsp56kEmu/peripherals.h"
 
-#include "../synthLib/audioTypes.h"
+#include "synthLib/audioTypes.h"
 
 namespace dsp56k
 {

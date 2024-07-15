@@ -2,11 +2,11 @@
 
 #include "pluginProcessor.h"
 
-#include "../jucePluginLib/parameterbinding.h"
-#include "../jucePluginLib/clipboard.h"
+#include "jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/clipboard.h"
 
-#include "../synthLib/os.h"
-#include "../synthLib/sysexToMidi.h"
+#include "synthLib/os.h"
+#include "synthLib/sysexToMidi.h"
 
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"

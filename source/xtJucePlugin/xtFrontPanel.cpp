@@ -4,7 +4,7 @@
 #include "xtEditor.h"
 #include "xtLcd.h"
 
-#include "../xtLib/xtMidiTypes.h"
+#include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
 {

@@ -6,8 +6,8 @@
 #include "PluginEditorState.h"
 #include "xtController.h"
 
-#include "../jucePluginLib/processor.h"
-#include "../xtLib/xtDevice.h"
+#include "jucePluginLib/processor.h"
+#include "xtLib/xtDevice.h"
 
 class Controller;
 

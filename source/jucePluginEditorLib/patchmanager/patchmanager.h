@@ -4,7 +4,7 @@
 #include "state.h"
 #include "types.h"
 
-#include "../../jucePluginLib/patchdb/db.h"
+#include "jucePluginLib/patchdb/db.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 

@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../jucePluginLib/controller.h"
+#include "jucePluginLib/controller.h"
 
-#include "../mqLib/mqmiditypes.h"
-#include "../jucePluginLib/event.h"
+#include "mqLib/mqmiditypes.h"
+#include "jucePluginLib/event.h"
 
 namespace mqJucePlugin
 {

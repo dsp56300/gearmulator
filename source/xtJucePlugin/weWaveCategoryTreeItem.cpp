@@ -1,7 +1,7 @@
 #include "weWaveCategoryTreeItem.h"
 
 #include "weWaveTreeItem.h"
-#include "../xtLib/xtMidiTypes.h"
+#include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
 {

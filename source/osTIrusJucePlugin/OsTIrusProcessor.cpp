@@ -2,7 +2,7 @@
 #include "OsTIrusEditorState.h"
 #include "BinaryData.h"
 
-#include "../virusLib/romloader.h"
+#include "virusLib/romloader.h"
 
 namespace
 {

@@ -6,7 +6,7 @@
 
 #include "dspSingle.h"
 
-#include "../synthLib/audiobuffer.h"
+#include "synthLib/audiobuffer.h"
 
 namespace virusLib
 {

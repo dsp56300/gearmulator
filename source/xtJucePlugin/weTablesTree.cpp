@@ -4,7 +4,7 @@
 #include "weTypes.h"
 #include "weData.h"
 
-#include "../xtLib/xtMidiTypes.h"
+#include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
 {

@@ -6,7 +6,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../jucePluginLib/midipacket.h"
+#include "jucePluginLib/midipacket.h"
 
 namespace xtJucePlugin
 {
