@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synthLib/device.h"
+#include "synthLib/device.h"
 
 namespace pluginLib
 {

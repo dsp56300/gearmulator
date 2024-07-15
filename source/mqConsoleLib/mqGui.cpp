@@ -2,8 +2,8 @@
 
 #include <iostream>
 
-#include "../mqLib/microq.h"
-#include "../mqLib/mqhardware.h"
+#include "mqLib/microq.h"
+#include "mqLib/mqhardware.h"
 
 namespace mqConsoleLib
 {

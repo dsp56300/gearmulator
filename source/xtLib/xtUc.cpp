@@ -5,7 +5,7 @@
 
 #include "xtRom.h"
 
-#include "../mc68k/logging.h"
+#include "mc68k/logging.h"
 #include "dsp56kEmu/utils.h"
 
 namespace xt

@@ -5,8 +5,8 @@
 #include "mqLcd.h"
 #include "mqLcdText.h"
 
-#include "../mqLib/device.h"
-#include "../mqLib/mqmiditypes.h"
+#include "mqLib/device.h"
+#include "mqLib/mqmiditypes.h"
 
 #include "dsp56kEmu/fastmath.h"
 

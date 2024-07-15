@@ -3,7 +3,7 @@
 #include "pluginEditorState.h"
 #include "pluginEditorWindow.h"
 
-#include "../synthLib/binarystream.h"
+#include "synthLib/binarystream.h"
 
 namespace jucePluginEditorLib
 {

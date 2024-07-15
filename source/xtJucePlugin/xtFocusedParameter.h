@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/focusedParameter.h"
+#include "jucePluginEditorLib/focusedParameter.h"
 
 namespace xtJucePlugin
 {

@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <cstring>
 
-#include "../synthLib/os.h"
-#include "../wLib/wRom.h"
+#include "synthLib/os.h"
+#include "wLib/wRom.h"
 
 namespace xt
 {

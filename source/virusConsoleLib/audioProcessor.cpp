@@ -5,9 +5,9 @@
 #include "esaiListenerToFile.h"
 #include "dsp56kEmu/types.h"
 
-#include "../synthLib/wavWriter.h"
+#include "synthLib/wavWriter.h"
 
-#include "../virusLib/dspSingle.h"
+#include "virusLib/dspSingle.h"
 
 AudioProcessor::AudioProcessor(uint32_t _samplerate, std::string _outputFilename, bool _terminateOnSilence, uint32_t _maxSamplecount, virusLib::DspSingle* _dsp1, virusLib::DspSingle* _dsp2)
 : m_samplerate(_samplerate)

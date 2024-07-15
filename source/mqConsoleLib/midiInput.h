@@ -5,7 +5,7 @@
 
 #include "midiDevice.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace mqConsoleLib
 {

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../synthLib/device.h"
-#include "../synthLib/midiBufferParser.h"
+#include "synthLib/device.h"
+#include "synthLib/midiBufferParser.h"
 
 namespace dsp56k
 {

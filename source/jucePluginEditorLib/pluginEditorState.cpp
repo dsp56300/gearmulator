@@ -5,8 +5,8 @@
 
 #include "patchmanager/patchmanager.h"
 
-#include "../synthLib/os.h"
-#include "../juceUiLib/editor.h"
+#include "synthLib/os.h"
+#include "juceUiLib/editor.h"
 
 #include "dsp56kEmu/logging.h"
 

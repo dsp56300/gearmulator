@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "../../juceUiLib/button.h"
+#include "juceUiLib/button.h"
 
 namespace genericVirusUI
 {

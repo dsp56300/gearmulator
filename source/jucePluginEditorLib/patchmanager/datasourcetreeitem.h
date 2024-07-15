@@ -1,6 +1,8 @@
 #pragma once
+
 #include "treeitem.h"
-#include "../../jucePluginLib/patchdb/datasource.h"
+
+#include "jucePluginLib/patchdb/datasource.h"
 
 namespace pluginLib::patchDB
 {

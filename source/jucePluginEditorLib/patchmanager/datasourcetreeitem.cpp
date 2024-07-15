@@ -7,11 +7,11 @@
 
 #include "../pluginEditor.h"
 
-#include "../../jucePluginLib/patchdb/datasource.h"
-#include "../../jucePluginLib/patchdb/search.h"
+#include "jucePluginLib/patchdb/datasource.h"
+#include "jucePluginLib/patchdb/search.h"
 
-#include "../../synthLib/buildconfig.h"
-#include "../../synthLib/os.h"
+#include "synthLib/buildconfig.h"
+#include "synthLib/os.h"
 
 namespace jucePluginEditorLib::patchManager
 {

@@ -6,10 +6,10 @@
 
 #include "unpacker.h"
 
-#include "../dsp56300/source/dsp56kEmu/dsp.h"
-#include "../dsp56300/source/dsp56kEmu/logging.h"
+#include "dsp56kEmu/dsp.h"
+#include "dsp56kEmu/logging.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 #include <cstring>	// memcpy
 

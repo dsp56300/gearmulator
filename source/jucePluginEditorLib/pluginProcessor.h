@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginLib/processor.h"
+#include "jucePluginLib/processor.h"
 
 namespace jucePluginEditorLib
 {

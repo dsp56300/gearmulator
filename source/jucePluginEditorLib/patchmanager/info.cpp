@@ -3,8 +3,10 @@
 #include "patchmanager.h"
 #include "defaultskin.h"
 
-#include "../../jucePluginLib/patchdb/patch.h"
-#include "../../juceUiLib/uiObject.h"
+#include "jucePluginLib/patchdb/patch.h"
+
+#include "juceUiLib/uiObject.h"
+
 #include "../pluginEditor.h"
 
 namespace jucePluginEditorLib::patchManager

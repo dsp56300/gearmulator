@@ -1,9 +1,9 @@
 #pragma once
 
-#include "../../jucePluginEditorLib/patchmanager/patchmanager.h"
-#include "../../jucePluginLib/patchdb/patch.h"
+#include "jucePluginEditorLib/patchmanager/patchmanager.h"
+#include "jucePluginLib/patchdb/patch.h"
 
-#include "../../virusLib/microcontrollerTypes.h"
+#include "virusLib/microcontrollerTypes.h"
 
 namespace Virus
 {

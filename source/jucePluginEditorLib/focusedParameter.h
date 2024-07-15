@@ -4,7 +4,7 @@
 
 #include "juce_events/juce_events.h"
 
-#include "../jucePluginLib/parameterlistener.h"
+#include "jucePluginLib/parameterlistener.h"
 
 namespace juce
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../jucePluginEditorLib/partbutton.h"
+#include "jucePluginEditorLib/partbutton.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 namespace xtJucePlugin
 {

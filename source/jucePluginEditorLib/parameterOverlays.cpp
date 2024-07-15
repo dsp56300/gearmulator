@@ -1,6 +1,6 @@
 #include "parameterOverlays.h"
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace jucePluginEditorLib
 {

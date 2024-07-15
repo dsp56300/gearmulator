@@ -7,10 +7,10 @@
 
 #include "weTypes.h"
 
-#include "../xtLib/xtMidiTypes.h"
+#include "xtLib/xtMidiTypes.h"
 
-#include "../jucePluginLib/midipacket.h"
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/midipacket.h"
+#include "jucePluginLib/event.h"
 
 class Controller;
 

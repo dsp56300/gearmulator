@@ -3,7 +3,7 @@
 #include "weTypes.h"
 #include <tuple>
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 #include "juce_dsp/juce_dsp.h"
 

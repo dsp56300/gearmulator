@@ -5,9 +5,9 @@
 
 #include "microcontroller.h"
 
-#include "../synthLib/midiToSysex.h"
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/os.h"
+#include "synthLib/midiToSysex.h"
+#include "synthLib/midiTypes.h"
+#include "synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 

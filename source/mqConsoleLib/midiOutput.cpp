@@ -1,8 +1,8 @@
 #include "midiOutput.h"
 
 #include "midiInput.h"
-#include "../portmidi/pm_common/portmidi.h"
-#include "../synthLib/midiTypes.h"
+#include "portmidi/pm_common/portmidi.h"
+#include "synthLib/midiTypes.h"
 #include "dsp56kEmu/logging.h"
 
 extern PmTimestamp returnTimeProc(void*);

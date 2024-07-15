@@ -1,6 +1,6 @@
 #include "weTreeItem.h"
 
-#include "../juceUiLib/treeViewStyle.h"
+#include "juceUiLib/treeViewStyle.h"
 
 namespace xtJucePlugin
 {

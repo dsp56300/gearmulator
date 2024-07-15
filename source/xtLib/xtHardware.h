@@ -8,8 +8,8 @@
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "../wLib/wMidi.h"
-#include "../wLib/wHardware.h"
+#include "wLib/wMidi.h"
+#include "wLib/wHardware.h"
 
 namespace xt
 {

@@ -15,8 +15,8 @@
 #include "../pluginEditor.h"
 #include "../pluginProcessor.h"
 
-#include "../../jucePluginLib/types.h"
-#include "../../jucePluginLib/clipboard.h"
+#include "jucePluginLib/types.h"
+#include "jucePluginLib/clipboard.h"
 
 #include "dsp56kEmu/logging.h"
 

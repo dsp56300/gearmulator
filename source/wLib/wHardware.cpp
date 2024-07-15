@@ -3,9 +3,9 @@
 #include "wMidi.h"
 #include "dsp56kEmu/audio.h"
 
-#include "../synthLib/midiBufferParser.h"
+#include "synthLib/midiBufferParser.h"
 
-#include "../mc68k/mc68k.h"
+#include "mc68k/mc68k.h"
 
 namespace wLib
 {

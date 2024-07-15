@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../mqLib/buttons.h"
-#include "../mqLib/leds.h"
+#include "mqLib/buttons.h"
+#include "mqLib/leds.h"
 
 #include "mqLcdBase.h"
 

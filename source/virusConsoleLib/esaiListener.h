@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../synthLib/wavWriter.h"
+#include "synthLib/wavWriter.h"
 
 #include "dsp56kEmu/types.h"
 

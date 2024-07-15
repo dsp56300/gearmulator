@@ -1,6 +1,6 @@
 #include "midiDevice.h"
 
-#include "../portmidi/pm_common/portmidi.h"
+#include "portmidi/pm_common/portmidi.h"
 
 namespace mqConsoleLib
 {

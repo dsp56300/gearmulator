@@ -2,7 +2,7 @@
 
 #include "juce_core/juce_core.h"
 
-#include "../../synthLib/binarystream.h"
+#include "synthLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {

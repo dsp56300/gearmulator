@@ -1,13 +1,13 @@
 #include "xtDSP.h"
 
-#include "../wLib/dspBootCode.h"
+#include "wLib/dspBootCode.h"
 #include "xtHardware.h"
 
 #if DSP56300_DEBUGGER
 #include "dsp56kDebugger/debugger.h"
 #endif
 
-#include "../mc68k/hdi08.h"
+#include "mc68k/hdi08.h"
 #include "dsp56kEmu/aar.h"
 #include "dsp56kEmu/types.h"
 

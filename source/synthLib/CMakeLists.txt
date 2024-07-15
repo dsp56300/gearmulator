@@ -42,3 +42,5 @@ if(NOT MSVC)
 	target_link_libraries(synthLib PUBLIC dl)
 endif()
 set_property(TARGET synthLib PROPERTY FOLDER "Gearmulator")
+
+target_include_directories(synthLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

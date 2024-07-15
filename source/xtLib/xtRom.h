@@ -4,7 +4,7 @@
 
 #include "xtTypes.h"
 
-#include "../wLib/wRom.h"
+#include "wLib/wRom.h"
 
 namespace xt
 {

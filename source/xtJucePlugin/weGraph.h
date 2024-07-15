@@ -3,7 +3,7 @@
 #include "weTypes.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 namespace xtJucePlugin
 {

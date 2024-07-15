@@ -5,9 +5,9 @@
 #include "BinaryData.h"
 #include "PluginProcessor.h"
 
-#include "../xtLib/xtState.h"
+#include "xtLib/xtState.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 

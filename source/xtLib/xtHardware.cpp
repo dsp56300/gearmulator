@@ -1,7 +1,7 @@
 #include "xtHardware.h"
 
-#include "../synthLib/midiBufferParser.h"
-#include "../synthLib/deviceException.h"
+#include "synthLib/midiBufferParser.h"
+#include "synthLib/deviceException.h"
 
 #include <cstring>	// memcpy
 

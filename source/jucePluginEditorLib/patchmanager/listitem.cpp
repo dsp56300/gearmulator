@@ -4,7 +4,7 @@
 #include "patchmanager.h"
 #include "savepatchdesc.h"
 
-#include "../../synthLib/buildconfig.h"
+#include "synthLib/buildconfig.h"
 
 #include "../pluginEditor.h"
 

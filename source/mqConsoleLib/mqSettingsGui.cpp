@@ -5,8 +5,8 @@
 
 #include "audioOutputPA.h"
 #include "midiDevice.h"
-#include "../portmidi/pm_common/portmidi.h"
-#include "../portaudio/include/portaudio.h"
+#include "portmidi/pm_common/portmidi.h"
+#include "portaudio/include/portaudio.h"
 
 #include "dsp56kEmu/logging.h"
 

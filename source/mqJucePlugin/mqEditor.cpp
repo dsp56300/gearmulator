@@ -9,9 +9,9 @@
 #include "mqPartSelect.h"
 #include "mqPatchManager.h"
 
-#include "../mqLib/mqbuildconfig.h"
+#include "mqLib/mqbuildconfig.h"
 
-#include "../jucePluginEditorLib/focusedParameter.h"
+#include "jucePluginEditorLib/focusedParameter.h"
 
 namespace mqJucePlugin
 {

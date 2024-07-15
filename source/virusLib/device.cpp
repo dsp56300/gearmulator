@@ -6,7 +6,7 @@
 
 #include "dsp56kEmu/jit.h"
 
-#include "../synthLib/deviceException.h"
+#include "synthLib/deviceException.h"
 
 #include <cstring>
 

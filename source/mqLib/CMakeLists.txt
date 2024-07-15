@@ -48,3 +48,5 @@ if(DSP56300_DEBUGGER)
 	target_link_libraries(mqLib PUBLIC dsp56kDebugger)
 endif()
 set_property(TARGET mqLib PROPERTY FOLDER "Vavra")
+
+target_include_directories(mqLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

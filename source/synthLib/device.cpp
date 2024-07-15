@@ -1,8 +1,8 @@
 #include "device.h"
 
 #include "audioTypes.h"
-#include "../dsp56300/source/dsp56kEmu/dsp.h"
-#include "../dsp56300/source/dsp56kEmu/memory.h"
+#include "dsp56kEmu/dsp.h"
+#include "dsp56kEmu/memory.h"
 
 #include <cmath>
 

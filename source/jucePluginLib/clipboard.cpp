@@ -1,7 +1,7 @@
 #include "clipboard.h"
 
-#include "../synthLib/midiToSysex.h"
-#include "../synthLib/os.h"
+#include "synthLib/midiToSysex.h"
+#include "synthLib/os.h"
 
 #include <sstream>
 

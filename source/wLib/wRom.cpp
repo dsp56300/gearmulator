@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "../synthLib/os.h"
-#include "../synthLib/midiToSysex.h"
+#include "synthLib/os.h"
+#include "synthLib/midiToSysex.h"
 
 namespace wLib
 {

@@ -1,16 +1,16 @@
 #include <iostream>
 
-#include "../synthLib/wavWriter.h"
+#include "synthLib/wavWriter.h"
 
-#include "../mqLib/microq.h"
-#include "../mqLib/mqhardware.h"
+#include "mqLib/microq.h"
+#include "mqLib/mqhardware.h"
 
 #include "dsp56kEmu/jitunittests.h"
 #include "dsp56kEmu/threadtools.h"
 
 #include <vector>
 
-#include "../mqConsoleLib/mqSettingsGui.h"
+#include "mqConsoleLib/mqSettingsGui.h"
 
 using ButtonType = mqLib::Buttons::ButtonType;
 using EncoderType = mqLib::Buttons::Encoders;

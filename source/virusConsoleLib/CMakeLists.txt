@@ -16,3 +16,5 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(virusConsoleLib PUBLIC virusLib)
 set_property(TARGET virusConsoleLib PROPERTY FOLDER "Virus")
+
+target_include_directories(virusConsoleLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

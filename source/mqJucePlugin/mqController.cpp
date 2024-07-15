@@ -6,9 +6,9 @@
 #include "mqFrontPanel.h"
 #include "PluginProcessor.h"
 
-#include "../mqLib/mqstate.h"
+#include "mqLib/mqstate.h"
 
-#include "../synthLib/os.h"
+#include "synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 

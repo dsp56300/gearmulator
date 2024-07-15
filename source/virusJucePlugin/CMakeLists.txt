@@ -42,3 +42,5 @@ target_compile_definitions(virusJucePlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_I
 target_compile_definitions(virusJucePlugin PUBLIC JUCE_MODAL_LOOPS_PERMITTED=1)
 
 set_property(TARGET virusJucePlugin PROPERTY FOLDER "Virus")
+
+target_include_directories(virusJucePlugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

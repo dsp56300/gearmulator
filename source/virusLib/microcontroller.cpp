@@ -7,7 +7,7 @@
 
 #include "dspSingle.h"
 #include "frontpanelState.h"
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 using namespace dsp56k;
 using namespace synthLib;

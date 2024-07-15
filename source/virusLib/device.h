@@ -2,8 +2,8 @@
 
 #include "dspSingle.h"
 #include "frontpanelState.h"
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/device.h"
+#include "synthLib/midiTypes.h"
+#include "synthLib/device.h"
 
 #include "romfile.h"
 #include "microcontroller.h"

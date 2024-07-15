@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginEditorLib/partbutton.h"
+#include "jucePluginEditorLib/partbutton.h"
 
 #include "xtPartButton.h"
 

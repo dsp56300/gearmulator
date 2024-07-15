@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <vector>
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace synthLib
 {

@@ -23,3 +23,5 @@ source_group("source" FILES ${SOURCES})
 
 target_link_libraries(mqConsoleLib PUBLIC mqLib cpp-terminal)
 set_property(TARGET mqConsoleLib PROPERTY FOLDER "Vavra")
+
+target_include_directories(mqConsoleLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

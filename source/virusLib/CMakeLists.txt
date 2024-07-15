@@ -46,3 +46,5 @@ if(DSP56300_DEBUGGER)
 endif()
 
 set_property(TARGET virusLib PROPERTY FOLDER "Virus")
+
+target_include_directories(virusLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

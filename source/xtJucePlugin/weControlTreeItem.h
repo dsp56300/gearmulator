@@ -2,7 +2,7 @@
 
 #include "weTreeItem.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 namespace xtJucePlugin
 {

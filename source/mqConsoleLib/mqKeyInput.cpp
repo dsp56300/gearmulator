@@ -2,11 +2,11 @@
 
 #include <cpp-terminal/input.hpp>
 
-#include "../mqLib/buttons.h"
-#include "../mqLib/microq.h"
-#include "../mqLib/mqhardware.h"
+#include "mqLib/buttons.h"
+#include "mqLib/microq.h"
+#include "mqLib/mqhardware.h"
 
-#include "../synthLib/midiTypes.h"
+#include "synthLib/midiTypes.h"
 
 using Key = Term::Key;
 using EncoderType = mqLib::Buttons::Encoders;

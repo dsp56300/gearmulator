@@ -6,10 +6,10 @@
 #include "patch.h"
 #include "patchmodifications.h"
 
-#include "../../synthLib/os.h"
-#include "../../synthLib/midiToSysex.h"
-#include "../../synthLib/hybridcontainer.h"
-#include "../../synthLib/binarystream.h"
+#include "synthLib/os.h"
+#include "synthLib/midiToSysex.h"
+#include "synthLib/hybridcontainer.h"
+#include "synthLib/binarystream.h"
 
 #include "dsp56kEmu/logging.h"
 

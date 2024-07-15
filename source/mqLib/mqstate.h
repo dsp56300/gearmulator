@@ -7,10 +7,10 @@
 
 #include "mqmiditypes.h"
 
-#include "../synthLib/deviceTypes.h"
-#include "../synthLib/midiTypes.h"
+#include "synthLib/deviceTypes.h"
+#include "synthLib/midiTypes.h"
 
-#include "../wLib/wState.h"
+#include "wLib/wState.h"
 
 namespace synthLib
 {

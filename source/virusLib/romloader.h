@@ -2,7 +2,7 @@
 
 #include "romfile.h"
 
-#include "../synthLib/romLoader.h"
+#include "synthLib/romLoader.h"
 
 namespace virusLib
 {

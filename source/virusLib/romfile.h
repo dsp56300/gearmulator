@@ -6,7 +6,7 @@
 
 #include "dsp56kEmu/types.h"
 
-#include "../synthLib/md5.h"
+#include "synthLib/md5.h"
 
 #include "deviceModel.h"
 

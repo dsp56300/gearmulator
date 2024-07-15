@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 class mqPartButton;
 class Controller;

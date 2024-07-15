@@ -2,7 +2,7 @@
 
 #include "pluginProcessor.h"
 
-#include "../../juceUiLib/editor.h"
+#include "juceUiLib/editor.h"
 
 namespace jucePluginEditorLib
 {

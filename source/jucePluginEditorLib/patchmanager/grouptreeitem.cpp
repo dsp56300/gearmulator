@@ -5,7 +5,7 @@
 #include "search.h"
 #include "tagtreeitem.h"
 
-#include "../../synthLib/os.h"
+#include "synthLib/os.h"
 
 namespace jucePluginEditorLib::patchManager
 {

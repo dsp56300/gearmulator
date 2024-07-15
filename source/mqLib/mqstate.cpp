@@ -6,9 +6,9 @@
 #include "mqmiditypes.h"
 #include "microq.h"
 
-#include "../synthLib/os.h"
-#include "../synthLib/midiToSysex.h"
-#include "../synthLib/midiBufferParser.h"
+#include "synthLib/os.h"
+#include "synthLib/midiToSysex.h"
+#include "synthLib/midiBufferParser.h"
 #include "dsp56kEmu/logging.h"
 
 namespace mqLib

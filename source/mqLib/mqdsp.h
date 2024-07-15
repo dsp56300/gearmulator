@@ -4,7 +4,7 @@
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/peripherals.h"
 
-#include "../wLib/wDsp.h"
+#include "wLib/wDsp.h"
 
 namespace mc68k
 {

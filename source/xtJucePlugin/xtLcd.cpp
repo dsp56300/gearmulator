@@ -2,9 +2,9 @@
 
 #include "xtController.h"
 
-#include "../jucePluginLib/pluginVersion.h"
+#include "jucePluginLib/pluginVersion.h"
 
-#include "../wLib/lcdfonts.h"
+#include "wLib/lcdfonts.h"
 
 namespace
 {

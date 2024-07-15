@@ -5,15 +5,16 @@
 #include <fstream>
 #include <utility>
 
-#include "../virusConsoleLib/consoleApp.h"
+#include "virusConsoleLib/consoleApp.h"
 
-#include "../dsp56300/source/dsp56kEmu/jitunittests.h"
+#include "dsp56kEmu/jitunittests.h"
+
 #include "../dsp56300/source/disassemble/commandline.h"
 
-#include "../synthLib/wavReader.h"
-#include "../synthLib/os.h"
-#include "../virusLib/buildconfig.h"
-#include "../virusLib/romloader.h"
+#include "synthLib/wavReader.h"
+#include "synthLib/os.h"
+#include "virusLib/buildconfig.h"
+#include "virusLib/romloader.h"
 
 namespace synthLib
 {

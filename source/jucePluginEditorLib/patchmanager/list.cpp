@@ -3,7 +3,7 @@
 #include "defaultskin.h"
 #include "patchmanager.h"
 
-#include "../../juceUiLib/uiObject.h"
+#include "juceUiLib/uiObject.h"
 
 #include "../pluginEditor.h"
 

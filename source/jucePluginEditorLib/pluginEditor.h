@@ -4,11 +4,11 @@
 #include "parameterOverlays.h"
 #include "types.h"
 
-#include "../juceUiLib/editor.h"
+#include "juceUiLib/editor.h"
 
-#include "../synthLib/buildconfig.h"
+#include "synthLib/buildconfig.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 namespace pluginLib
 {

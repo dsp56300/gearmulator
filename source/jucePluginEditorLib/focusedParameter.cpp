@@ -2,9 +2,9 @@
 
 #include "pluginEditor.h"
 
-#include "../jucePluginLib/controller.h"
-#include "../jucePluginLib/parameter.h"
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/controller.h"
+#include "jucePluginLib/parameter.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace jucePluginEditorLib
 {

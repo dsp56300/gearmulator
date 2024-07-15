@@ -2,7 +2,7 @@
 
 #include <functional>
 
-#include "../jucePluginEditorLib/pluginEditorState.h"
+#include "jucePluginEditorLib/pluginEditorState.h"
 
 namespace juce
 {

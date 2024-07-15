@@ -2,14 +2,14 @@
 #include <iostream>
 #include <memory>
 
-#include "../synthLib/os.h"
-#include "../synthLib/wavWriter.h"
-#include "../synthLib/midiTypes.h"
-#include "../synthLib/configFile.h"
+#include "synthLib/os.h"
+#include "synthLib/wavWriter.h"
+#include "synthLib/midiTypes.h"
+#include "synthLib/configFile.h"
 
-#include "../mqLib/microq.h"
-#include "../mqLib/mqhardware.h"
-#include "../mqLib/rom.h"
+#include "mqLib/microq.h"
+#include "mqLib/mqhardware.h"
+#include "mqLib/rom.h"
 
 #include "dsp56kEmu/threadtools.h"
 
@@ -19,13 +19,13 @@
 
 #include <vector>
 
-#include "../mqConsoleLib/audioOutputPA.h"
-#include "../mqConsoleLib/midiInput.h"
-#include "../mqConsoleLib/midiOutput.h"
-#include "../mqConsoleLib/mqGui.h"
-#include "../mqConsoleLib/mqKeyInput.h"
+#include "mqConsoleLib/audioOutputPA.h"
+#include "mqConsoleLib/midiInput.h"
+#include "mqConsoleLib/midiOutput.h"
+#include "mqConsoleLib/mqGui.h"
+#include "mqConsoleLib/mqKeyInput.h"
 
-#include "../mqConsoleLib/mqSettingsGui.h"
+#include "mqConsoleLib/mqSettingsGui.h"
 
 using Term::Terminal;
 using Term::Key;

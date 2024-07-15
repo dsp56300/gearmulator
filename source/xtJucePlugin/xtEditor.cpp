@@ -10,7 +10,7 @@
 #include "xtPatchManager.h"
 #include "xtWaveEditor.h"
 
-#include "../jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/parameterbinding.h"
 
 namespace xtJucePlugin
 {

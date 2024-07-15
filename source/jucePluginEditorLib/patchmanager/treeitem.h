@@ -5,8 +5,8 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../../jucePluginLib/patchdb/patchdbtypes.h"
-#include "../../jucePluginLib/patchdb/search.h"
+#include "jucePluginLib/patchdb/patchdbtypes.h"
+#include "jucePluginLib/patchdb/search.h"
 
 namespace pluginLib::patchDB
 {

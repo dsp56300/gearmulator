@@ -2,9 +2,8 @@
 
 #include "VirusEditor.h"
 #include "VirusController.h"
-#include "../../jucePluginEditorLib/patchmanager/list.h"
 
-#include "../../jucePluginEditorLib/patchmanager/savepatchdesc.h"
+#include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 namespace genericVirusUI
 {

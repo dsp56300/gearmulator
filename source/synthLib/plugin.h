@@ -6,7 +6,7 @@
 #include "resamplerInOut.h"
 #include "buildconfig.h"
 
-#include "../dsp56300/source/dsp56kEmu/ringbuffer.h"
+#include "dsp56kEmu/ringbuffer.h"
 
 #include "deviceTypes.h"
 

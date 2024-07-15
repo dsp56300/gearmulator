@@ -3,7 +3,7 @@
 #include <array>
 #include <cassert>
 
-#include "../portmidi/pm_common/portmidi.h"
+#include "portmidi/pm_common/portmidi.h"
 
 #include <chrono>
 

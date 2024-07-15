@@ -2,7 +2,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../jucePluginLib/parameterlistener.h"
+#include "jucePluginLib/parameterlistener.h"
 
 namespace pluginLib
 {

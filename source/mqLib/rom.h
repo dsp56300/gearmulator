@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../wLib/wRom.h"
+#include "wLib/wRom.h"
 
 namespace mqLib
 {

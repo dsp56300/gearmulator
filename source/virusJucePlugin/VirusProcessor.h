@@ -1,13 +1,13 @@
 #pragma once
 
-#include "../synthLib/plugin.h"
-#include "../virusLib/device.h"
+#include "synthLib/plugin.h"
+#include "virusLib/device.h"
 
-#include "../jucePluginLib/event.h"
+#include "jucePluginLib/event.h"
 
 #include "VirusController.h"
 
-#include "../jucePluginEditorLib/pluginProcessor.h"
+#include "jucePluginEditorLib/pluginProcessor.h"
 
 //==============================================================================
 class VirusProcessor : public jucePluginEditorLib::Processor

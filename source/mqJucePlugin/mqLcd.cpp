@@ -1,8 +1,8 @@
 #include "mqLcd.h"
 
-#include "../jucePluginLib/pluginVersion.h"
+#include "jucePluginLib/pluginVersion.h"
 
-#include "../wLib/lcdfonts.h"
+#include "wLib/lcdfonts.h"
 
 // EW20290GLW display simulation (20*2)
 
