@@ -39,7 +39,13 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	include(juce.cmake)
 endif()
 
-# ----------------- Synth Osirus
+# ----------------- dependencies
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
+	add_subdirectory(mc68k)
+	add_subdirectory(wLib)
+endif()
+
+# ----------------- Synths Osirus/OsTIrus
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 	add_subdirectory(virusLib)
@@ -55,12 +61,6 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
 			add_subdirectory(osTIrusJucePlugin)
 		endif()
 	endif()
-endif()
-
-# ----------------- Waldorf synths
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-	add_subdirectory(mc68k)
-	add_subdirectory(wLib)
 endif()
 
 # ----------------- Synth Vavra
@@ -89,6 +89,8 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
 		add_subdirectory(mqJucePlugin)
 	endif()
 endif()
+
+# ----------------- Synth Xenia
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
 	add_subdirectory(xtLib)
