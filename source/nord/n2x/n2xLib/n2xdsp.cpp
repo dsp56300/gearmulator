@@ -66,7 +66,7 @@ namespace n2x
 		if(!_hw.isValid())
 			return;
 
-		m_periphX.getEsaiClock().setExternalClockFrequency(44100 * 768); // TODO
+		m_periphX.getEsaiClock().setExternalClockFrequency(1'000'000); // TODO 1 MHz correct? That results in a speed of 36 MHz only as PCTL is set to $cd01d3
 		m_periphX.getEsaiClock().setSamplerate(44100); // TODO
 		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Instructions);	// TODO
 
