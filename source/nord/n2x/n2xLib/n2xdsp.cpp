@@ -5,10 +5,10 @@
 
 namespace n2x
 {
-	static constexpr dsp56k::TWord g_xyMemSize			= 0x40000;
-	static constexpr dsp56k::TWord g_externalMemAddr	= 0x20000;
-	static constexpr dsp56k::TWord g_pMemSize			= 0x2000;	// only $0000 < $1400 for DSP, rest for us
-	static constexpr dsp56k::TWord g_bootCodeBase		= 0x1500;
+	static constexpr dsp56k::TWord g_xyMemSize			= 0x20000;
+	static constexpr dsp56k::TWord g_externalMemAddr	= 0x10000;
+	static constexpr dsp56k::TWord g_pMemSize			= 0x8000;
+	static constexpr dsp56k::TWord g_bootCodeBase		= 0x7f00;
 
 	// DSP56362 bootloader
 	static constexpr uint32_t g_dspBootCode[] =
