@@ -31,8 +31,10 @@ namespace n2x
 		if(_addr < g_romSize)											return readW(m_rom.data(), _addr);
 		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)	return readW(m_ram.data(), _addr - g_ramAddress);
 
-		assert(!m_hdi08A.isInRange(_addr));
-		assert(!m_hdi08B.isInRange(_addr));
+		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
+
+		assert(!m_hdi08A.isInRange(pa));
+		assert(!m_hdi08B.isInRange(pa));
 
 		return 0;
 	}
@@ -44,8 +46,8 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(_addr))									return m_hdi08A.read16(pa);
-		if(m_hdi08B.isInRange(_addr))									return m_hdi08B.read16(pa);
+		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read16(pa);
+		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read16(pa);
 
 		return Mc68k::read16(_addr);
 	}
@@ -57,8 +59,8 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(_addr))									return m_hdi08A.read8(pa);
-		if(m_hdi08B.isInRange(_addr))									return m_hdi08B.read8(pa);
+		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read8(pa);
+		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read8(pa);
 
 		return Mc68k::read8(_addr);
 	}
@@ -79,13 +81,13 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(_addr))
+		if(m_hdi08A.isInRange(pa))
 		{
 			m_hdi08A.write16(pa, _val);
 			return;
 		}
 
-		if(m_hdi08B.isInRange(_addr))
+		if(m_hdi08B.isInRange(pa))
 		{
 			m_hdi08B.write16(pa, _val);
 			return;
@@ -110,13 +112,13 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(_addr))
+		if(m_hdi08A.isInRange(pa))
 		{
 			m_hdi08A.write8(pa, _val);
 			return;
 		}
 
-		if(m_hdi08B.isInRange(_addr))
+		if(m_hdi08B.isInRange(pa))
 		{
 			m_hdi08B.write8(pa, _val);
 			return;
