@@ -79,6 +79,7 @@ namespace n2x
 		config.debugDynamicPeripheralAddressing = true;
 #endif
 		config.maxInstructionsPerBlock = 0;
+		config.support16BitSCMode = true;
 
 		m_dsp.getJit().setConfig(config);
 
