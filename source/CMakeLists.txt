@@ -4,6 +4,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_N2X "Build N2x" on)
 
 # ----------------- DSP56300 emulator
 
@@ -40,9 +41,11 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 endif()
 
 # ----------------- dependencies
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
+if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA OR ${CMAKE_PROJECT_NAME}_SYNTH_N2X)
 	add_subdirectory(mc68k)
-	add_subdirectory(wLib)
+	if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
+		add_subdirectory(wLib)
+	endif()
 endif()
 
 # ----------------- Synths Osirus/OsTIrus
@@ -100,3 +103,7 @@ if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
 		add_subdirectory(xtJucePlugin)
 	endif()
 endif()
+
+# ----------------- all nords
+
+add_subdirectory(nord)
