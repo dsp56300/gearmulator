@@ -14,6 +14,9 @@ namespace n2x
 
 		void process();
 
+		Microcontroller& getUC() {return m_uc; }
+		void ucYieldLoop(const std::function<bool()>& _continue);
+
 	private:
 		Rom m_rom;
 		Microcontroller m_uc;

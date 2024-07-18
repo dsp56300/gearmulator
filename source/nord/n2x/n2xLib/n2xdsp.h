@@ -40,7 +40,11 @@ namespace n2x
 		void hdiTransferUCtoDSP(uint32_t _word);
 		void hdiSendIrqToDSP(uint8_t _irq);
 		uint8_t hdiUcReadIsr(uint8_t _isr);
+	public:
+		void transferHostFlagsUc2Dsdp();
+	private:
 		bool hdiTransferDSPtoUC();
+		void waitDspRxEmpty();
 
 		Hardware& m_hardware;
 		mc68k::Hdi08& m_hdiUC;
@@ -56,5 +60,6 @@ namespace n2x
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 
 		bool m_receivedMagicEsaiPacket = false;
+		uint32_t m_hdiHF01 = 0;
 	};
 }

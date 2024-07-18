@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "n2xdsp.h"
 #include "n2xrom.h"
 
 namespace n2x
@@ -14,7 +15,7 @@ namespace n2x
 		m_rom = _rom.data();
 		m_ram.fill(0);
 
-		dumpAssembly("n2x_68k.asm", g_romAddress, g_romSize);
+//		dumpAssembly("n2x_68k.asm", g_romAddress, g_romSize);
 
 		reset();
 
@@ -49,6 +50,24 @@ namespace n2x
 		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read16(pa);
 		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read16(pa);
 
+		if(_addr >= g_frontPanelAddressA && _addr < g_frontPanelAddressA + g_frontPanelSize)
+		{
+			LOG("Read Frontpanel A " << HEX(_addr));
+			return 0;
+		}
+
+		if(_addr >= g_frontPanelAddressB && _addr < g_frontPanelAddressB + g_frontPanelSize)
+		{
+			LOG("Read Frontpanel B " << HEX(_addr));
+			return 0;
+		}
+
+		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
+		{
+			LOG("Read Keyboard A " << HEX(_addr));
+			return 0;
+		}
+
 		return Mc68k::read16(_addr);
 	}
 
@@ -61,6 +80,24 @@ namespace n2x
 
 		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read8(pa);
 		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read8(pa);
+		
+		if(_addr >= g_frontPanelAddressA && _addr < g_frontPanelAddressA + g_frontPanelSize)
+		{
+			LOG("Read Frontpanel A " << HEX(_addr));
+			return 0xff;
+		}
+
+		if(_addr >= g_frontPanelAddressB && _addr < g_frontPanelAddressB + g_frontPanelSize)
+		{
+			LOG("Read Frontpanel B " << HEX(_addr));
+			return 0xff;
+		}
+
+		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
+		{
+			LOG("Read Keyboard A " << HEX(_addr));
+			return 0xff;
+		}
 
 		return Mc68k::read8(_addr);
 	}
@@ -130,10 +167,11 @@ namespace n2x
 	uint32_t Microcontroller::exec()
 	{
 		const auto pc = getPC();
+//		LOG("uc PC=" << HEX(pc));
 		if(pc >= g_ramAddress)
 		{
-			if(pc == 0x1000c8)
-				dumpAssembly("nl2x_68k_ram.asm", g_ramAddress, g_ramSize);
+//			if(pc == 0x1000c8)
+//				dumpAssembly("nl2x_68k_ram.asm", g_ramAddress, g_ramSize);
 		}
 		const auto cycles = Mc68k::exec();
 

@@ -1,7 +1,9 @@
 #include "n2xdsp.h"
 
 #include "n2xhardware.h"
+#include "dsp56kDebugger/debugger.h"
 #include "dsp56kEmu/dspthread.h"
+#include "mc68k/hdi08.h"
 
 namespace n2x
 {
@@ -74,12 +76,13 @@ namespace n2x
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = false;
+		config.dynamicPeripheralAddressing = true;
 #ifdef _DEBUG
 		config.debugDynamicPeripheralAddressing = true;
 #endif
 		config.maxInstructionsPerBlock = 0;
 		config.support16BitSCMode = true;
+		config.dynamicFastInterrupts = true;
 
 		m_dsp.getJit().setConfig(config);
 
@@ -106,6 +109,9 @@ namespace n2x
 		// set OMR pins so that bootcode wants program data via HDI08 RX
 		m_dsp.setPC(g_bootCodeBase);
 		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
+		
+		hdi08().setRXRateLimit(0);
+		hdi08().setTransmitDataAlwaysEmpty(false);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool _needMoreData)
 		{
@@ -123,39 +129,91 @@ namespace n2x
 		{
 			return hdiUcReadIsr(_isr);
 		});
+		m_hdiUC.setInitHdi08Callback([&]
+		{
+			// clear init flag again immediately, code is waiting for it to happen
+			m_hdiUC.icr(m_hdiUC.icr() & 0x7f);
+			m_hdiUC.isr(m_hdiUC.isr() | mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy);
+		});
 
 #if DSP56300_DEBUGGER
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp.dsp())));
-#else
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
+		if(!m_index)
+			m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
+		else
 #endif
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
 
 		m_thread->setLogToStdout(false);
 	}
 
 	void DSP::onUCRxEmpty(bool _needMoreData)
 	{
+		hdiTransferDSPtoUC();
 	}
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
 	{
-		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word));
+		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPC()));
 		hdi08().writeRX(&_word, 1);
+		m_hdiUC.isr(m_hdiUC.isr() & ~(mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy));
 	}
 
-	void DSP::hdiSendIrqToDSP(uint8_t _irq)
+	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
+		LOG('[' << m_name << "] sendIRQtoDSP " << HEXN(_irq, 2));
+
+		waitDspRxEmpty();
+		const auto& rxData = hdi08().rxData();
+		auto& rxHack = const_cast<std::decay_t<decltype(rxData)>&>(rxData);
+
+		if(hdi08().rxData().size() > 1)
+		{
+			dsp56k::TWord v;
+			while(!hdi08().rxData().empty())
+			{
+				v = rxHack.pop_front();
+				LOG("Discarding UC2DSP HDI word " << HEX(v));
+			}
+			LOG("Re-sending word " << HEX(v));
+			hdi08().writeRX(&v,1);
+		}
+
 		dsp().injectExternalInterrupt(_irq);
 
-		while(dsp().hasPendingInterrupts())
+		m_hardware.ucYieldLoop([&]
 		{
-			std::this_thread::yield();
-		}
+			return dsp().hasPendingInterrupts();
+		});
+
+		hdiTransferDSPtoUC();
 	}
 
 	uint8_t DSP::hdiUcReadIsr(uint8_t _isr)
 	{
+		// transfer DSP host flags HF2&3 to uc
+		const auto hf23 = hdi08().readControlRegister() & 0x18;
+		_isr &= ~0x18;
+		_isr |= hf23;
+		if(hdi08().hasRXData())
+			_isr &= ~mc68k::Hdi08::IsrBits::Txde;
+		else if(_isr & mc68k::Hdi08::IsrBits::Txde)
+			_isr |= mc68k::Hdi08::IsrBits::Trdy;
 		return _isr;
+	}
+
+	void DSP::transferHostFlagsUc2Dsdp()
+	{
+		const uint32_t hf01 = m_hdiUC.icr() & 0x18;
+
+		if (hf01 != m_hdiHF01)
+		{
+//			LOG('[' << m_name << "] HDI HF01=" << HEXN((hf01>>3),1));
+
+			waitDspRxEmpty();
+
+			m_hdiHF01 = hf01;
+			hdi08().setPendingHostFlags01(hf01);
+		}
 	}
 
 	bool DSP::hdiTransferDSPtoUC()
@@ -163,11 +221,20 @@ namespace n2x
 		if (m_hdiUC.canReceiveData() && hdi08().hasTX())
 		{
 			const auto v = hdi08().readTX();
-			LOG('[' << m_name << "] HDI dsp2uc=" << HEX(v));
+			LOG('[' << m_name << "] HDI dsp2UC=" << HEX(v));
 			m_hdiUC.writeRx(v);
 			return true;
 		}
 		return false;
 	}
 
+	void DSP::waitDspRxEmpty()
+	{
+		m_hardware.ucYieldLoop([&]()
+		{
+			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingInterrupts();
+		});
+//		assert(!hdi08().hasRXData());
+//		LOG("writeRX wait over");
+	}
 }

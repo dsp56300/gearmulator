@@ -19,5 +19,13 @@ namespace n2x
 	void Hardware::process()
 	{
 		m_uc.exec();
+		m_dspA.transferHostFlagsUc2Dsdp();
+		m_dspB.transferHostFlagsUc2Dsdp();
+	}
+
+	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
+	{
+		while(_continue())
+			std::this_thread::yield();
 	}
 }
