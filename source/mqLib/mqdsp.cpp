@@ -98,7 +98,7 @@ namespace mqLib
 		});
 
 #if DSP56300_DEBUGGER
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp.dsp())));
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
 #else
 		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
 #endif
