@@ -7,7 +7,13 @@
 
 namespace n2x
 {
-	Microcontroller::Microcontroller(const Rom& _rom)
+	// OC2 = PGP4 = SDA
+	// OC3 = PGP5 = SCL
+
+	static constexpr uint32_t g_bitSDA = 4;
+	static constexpr uint32_t g_bitSCL = 5;
+
+	Microcontroller::Microcontroller(const Rom& _rom) : m_midi(getQSM())
 	{
 		if(!_rom.isValid())
 			return;
@@ -20,6 +26,59 @@ namespace n2x
 		reset();
 
 		setPC(g_pcInitial);
+
+		getPortF().writeRX(0xff);
+
+		getPortGP().setWriteTXCallback([this](const mc68k::Port& _port)
+		{
+			const auto v = _port.read();
+			const auto d = _port.getDirection();
+
+			const auto sdaV = (v >> g_bitSDA) & 1;
+			const auto sclV = (v >> g_bitSCL) & 1;
+
+			const auto sdaD = (d >> g_bitSDA) & 1;
+			const auto sclD = (d >> g_bitSCL) & 1;
+
+			LOG("PortGP write SDA=" << sdaV << " SCL=" << sclV);
+
+			if(sdaD && sclD)
+				m_flash.masterWrite(sdaV, sclV);
+			else if(!sdaD && sclD)
+			{
+				if(const auto res = m_flash.masterRead(sclV))
+				{
+					auto r = v;
+					r &= ~(1 << g_bitSDA);
+					r |= *res ? g_bitSDA : 0;
+
+					getPortGP().writeRX(r);
+					LOG("PortGP return SDA=" << *res);
+				}
+				else
+				{
+//					LOG("PortGP return SDA={}, wrong SCL");
+				}
+			}
+		});
+		getPortGP().setDirectionChangeCallback([this](const mc68k::Port& _port)
+		{
+			// OC2 = PGP4 = SDA
+			// OC3 = PGP5 = SCL
+			const auto p = _port.getDirection();
+			const auto sda = (p >> g_bitSDA) & 1;
+			const auto scl = (p >> g_bitSCL) & 1;
+			LOG("PortGP dir SDA=" << (sda?"w":"r") << " SCL=" << (scl?"w":"r"));
+			if(scl)
+			{
+				const auto ack = m_flash.setSdaWrite(sda);
+				if(ack)
+				{
+					LOG("Write ACK " << (*ack));
+					getPortGP().writeRX(*ack ? (1<<g_bitSDA) : 0);
+				}
+			}
+		});
 	}
 
 	uint32_t Microcontroller::read32(uint32_t _addr)

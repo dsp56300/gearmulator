@@ -19,8 +19,9 @@ namespace n2x
 	CSBOOT = BootROM                                $??????        $?????
 	*/
 
-	static constexpr uint32_t g_romSize = 1024 * 512;
-	static constexpr uint32_t g_ramSize = 1024 * 256;
+	static constexpr uint32_t g_romSize				= 1024 * 512;
+	static constexpr uint32_t g_ramSize				= 1024 * 256;
+	static constexpr uint32_t g_flashSize			= 1024 * 64;
 
 	static constexpr uint32_t g_pcInitial			= 0xc2;
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "n2xi2cflash.h"
 #include "n2xtypes.h"
 #include "mc68k/hdi08.h"
 #include "mc68k/hdi08periph.h"
@@ -33,6 +34,7 @@ namespace n2x
 
 		std::array<uint8_t, g_romSize> m_rom;
 		std::array<uint8_t, g_ramSize> m_ram;
+		I2cFlash m_flash;
 
 		Hdi08DspA m_hdi08A;
 		Hdi08DspB m_hdi08B;
