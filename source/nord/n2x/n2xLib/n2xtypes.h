@@ -37,4 +37,45 @@ namespace n2x
 
 	static constexpr uint32_t g_frontPanelSize			= 0x800;
 	static constexpr uint32_t g_keyboardSize			= 0x800;
+
+	enum class ButtonType
+	{
+		// id: MSB = address / LSB = bit mask
+
+		Trigger			= 0x00'01,
+		OctPlus			= 0x00'02,
+		OctMinus		= 0x00'04,
+		Unused0008		= 0x00'08,
+		Up				= 0x00'10,
+		Down			= 0x00'20,
+		Unused0040		= 0x00'40,
+		Unused0080		= 0x00'80,
+
+		Assign			= 0x02'01,
+		Perf			= 0x02'02,
+		Osc2Keytrack	= 0x02'04,
+		OscSync			= 0x02'08,
+		FilterType		= 0x02'10,
+		FilterVelo		= 0x02'20,
+		FilterDist		= 0x02'40,
+		Osc2Shape		= 0x02'80,
+
+		Distortion		= 0x04'01,
+		Arp				= 0x04'02,
+		Store			= 0x04'04,
+		ModEnvDest		= 0x04'08,
+		Lfo1Shape		= 0x04'10,
+		Lfo1Dest		= 0x04'20,
+		Lfo2Shape		= 0x04'40,
+		Osc1Shape		= 0x04'80,
+
+		SlotA			= 0x06'01,
+		SlotB			= 0x06'02,
+		SlotC			= 0x06'04,
+		SlotD			= 0x06'08,
+		Unison			= 0x06'10,
+		Poly			= 0x06'20,
+		Portamento		= 0x06'40,
+		ModwheelDest	= 0x06'80,
+	};
 }
