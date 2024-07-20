@@ -17,8 +17,28 @@ namespace n2x
 		FrontPanel& m_panel;
 	};
 
-	using FrontPanelCS4 = FrontPanelCS<g_frontPanelAddressCS4>;
-	using FrontPanelCS6 = FrontPanelCS<g_frontPanelAddressCS6>;
+	class FrontPanelCS4 : public FrontPanelCS<g_frontPanelAddressCS4>
+	{
+	public:
+		explicit FrontPanelCS4(FrontPanel& _fp);
+	};
+
+	class FrontPanelCS6 : public FrontPanelCS<g_frontPanelAddressCS6>
+	{
+	public:
+		explicit FrontPanelCS6(FrontPanel& _fp);
+
+		void write8(mc68k::PeriphAddress _addr, uint8_t _val) override;
+
+	private:
+		void printLCD();
+
+		uint8_t m_ledLatch8 = 0;
+		uint8_t m_ledLatch10 = 0;
+		uint8_t m_ledLatch12 = 0;
+		std::array<uint8_t,3> m_lcds{0,0,0};
+		std::array<uint8_t,3> m_lcdsPrev{0,0,0};
+	};
 
 	class FrontPanel
 	{
