@@ -138,4 +138,66 @@ namespace xtJucePlugin
 		}
 		return true;
 	}
+
+	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
+	{
+		if(!jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data))
+			return false;
+
+		// check if there are MW1 bank dumps. A bank dump is one sysex with multiple patches. Split them into individual preset dumps
+		static constexpr uint8_t DeviceNum = 0x00;
+		static constexpr uint8_t Mw1BankBegin[] = {0xf0, wLib::IdWaldorf, xt::IdMw1, DeviceNum, xt::Mw1::g_idmPresetBank};
+
+		const int resultCount = static_cast<int>(_results.size());
+
+		for(int r=0; r<resultCount; ++r)
+		{
+			if(_results[r].size() < std::size(Mw1BankBegin))
+				return true;
+
+			if(0 != memcmp(_results[r].data(), Mw1BankBegin, std::size(Mw1BankBegin)))
+				return true;
+
+			// yes, MW1 bank dump
+
+			// remove bank from results
+			const auto source = std::move(_results[r]);
+			_results.erase(_results.begin() + r);
+			--r;
+
+			const auto rawDataSize = source.size() - xt::Mw1::g_sysexHeaderSize - xt::Mw1::g_sysexFooterSize;
+			const auto presetCount = rawDataSize / xt::Mw1::g_singleLength;
+
+			size_t readPos = xt::Mw1::g_sysexHeaderSize;
+
+			_results.reserve(presetCount);
+
+			for(size_t i=0; i<presetCount; ++i)
+			{
+				pluginLib::patchDB::Data data;
+
+				// create single dump preset header
+				data.reserve(xt::Mw1::g_singleDumpLength);
+				data.assign({0xf0, wLib::IdWaldorf, xt::IdMw1, DeviceNum, xt::Mw1::g_idmPreset});
+
+				// add data
+				uint8_t checksum = 0;
+
+				for(size_t j=0; j<xt::Mw1::g_singleLength; ++j, ++readPos)
+				{
+					const auto d = source[readPos];
+					checksum += d;
+					data.push_back(d);
+				}
+
+				// add checksum and EOX. FWIW the XT ignores the checksum anyway
+				data.push_back(checksum & 0x7f);
+				data.push_back(0xf7);
+
+				_results.push_back(std::move(data));
+			}			
+		}
+
+		return true;
+	}
 }
