@@ -153,29 +153,50 @@ namespace n2x
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
 	{
-		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPC()));
+//		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPC()));
 		hdi08().writeRX(&_word, 1);
 		m_hdiUC.isr(m_hdiUC.isr() & ~(mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy));
 	}
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
-		LOG('[' << m_name << "] sendIRQtoDSP " << HEXN(_irq, 2));
-
 		waitDspRxEmpty();
 		const auto& rxData = hdi08().rxData();
 		auto& rxHack = const_cast<std::decay_t<decltype(rxData)>&>(rxData);
 
 		if(hdi08().rxData().size() > 1)
 		{
-			dsp56k::TWord v;
+			dsp56k::TWord vv = ~0;
 			while(!hdi08().rxData().empty())
 			{
-				v = rxHack.pop_front();
+				auto v = rxHack.pop_front();
+//				if(vv == static_cast<dsp56k::TWord>(~0))
+					vv = v;
 				LOG("Discarding UC2DSP HDI word " << HEX(v));
 			}
-			LOG("Re-sending word " << HEX(v));
-			hdi08().writeRX(&v,1);
+			LOG("Re-sending word " << HEX(vv));
+			hdi08().writeRX(&vv,1);
+		}
+
+		if(m_index == 0)
+		{
+			const auto v = rxData.front();
+			const auto pc = m_hardware.getUC().getPrevPC();
+
+			switch (_irq)
+			{
+				case 0x64:	LOG('[' << m_name << "] r7        = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x66:	LOG('[' << m_name << "] x:(r7)    = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x68:	LOG('[' << m_name << "] y:(r7)    = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x6a:	LOG('[' << m_name << "] x:(r7)+   = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x6c:	LOG('[' << m_name << "] y:(r7)+   = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x6e:	LOG('[' << m_name << "] x:(r7)+n7 = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x70:	LOG('[' << m_name << "] y:(r7)+n7 = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				case 0x72:	LOG('[' << m_name << "] n7        = " << HEX(v) << ", pc = " << HEX(pc));	break;
+				default:
+					LOG('[' << m_name << "] sendIRQtoDSP " << HEXN(_irq, 2));
+					break;
+			}
 		}
 
 		dsp().injectExternalInterrupt(_irq);
