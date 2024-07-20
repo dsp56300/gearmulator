@@ -234,6 +234,14 @@ namespace n2x
 //			if(pc == 0x1000c8)
 //				dumpAssembly("nl2x_68k_ram.asm", g_ramAddress, g_ramSize);
 		}
+
+		static volatile bool writeFlash = false;
+
+		if(writeFlash)
+		{
+			writeFlash = false;
+			m_flash.saveAs("flash_runtime.bin");
+		}
 		const auto cycles = Mc68k::exec();
 
 		m_hdi08A.exec(cycles);
