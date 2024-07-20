@@ -5,6 +5,7 @@
 #include "mc68k/hdi08.h"
 #include "mc68k/hdi08periph.h"
 #include "mc68k/mc68k.h"
+#include "wLib/wMidi.h"
 
 namespace n2x
 {
@@ -20,6 +21,7 @@ namespace n2x
 
 		auto& getHdi08A() { return m_hdi08A.getHdi08(); }
 		auto& getHdi08B() { return m_hdi08B.getHdi08(); }
+		auto& getMidi() const	{ return m_midi; }
 
 		uint32_t exec() override;
 
@@ -42,5 +44,8 @@ namespace n2x
 		Hdi08DspB m_hdi08B;
 
 		uint32_t m_prevPC;
+		wLib::Midi m_midi;
+		uint64_t m_totalCycles = 0;
+		bool m_hasSentMidi = false;
 	};
 }

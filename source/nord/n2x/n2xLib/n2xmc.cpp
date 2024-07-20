@@ -4,6 +4,7 @@
 
 #include "n2xdsp.h"
 #include "n2xrom.h"
+#include "synthLib/midiTypes.h"
 
 namespace n2x
 {
@@ -238,6 +239,16 @@ namespace n2x
 		m_hdi08A.exec(cycles);
 		m_hdi08B.exec(cycles);
 
+		m_totalCycles += cycles;
+
+		if(m_totalCycles > 0x1000000 && !m_hasSentMidi)
+		{
+			m_hasSentMidi = true;
+
+			m_midi.writeMidi(synthLib::M_NOTEON);
+			m_midi.writeMidi(synthLib::Note_C3);
+			m_midi.writeMidi(100);
+		}
 		return cycles;
 	}
 }
