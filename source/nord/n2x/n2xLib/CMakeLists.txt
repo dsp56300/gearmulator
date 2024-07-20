@@ -8,8 +8,10 @@ set(SOURCES
 	i2c.cpp i2c.h
 	n2xdevice.cpp n2xdevice.h
 	n2xdsp.cpp n2xdsp.h
+	n2xfrontpanel.cpp n2xfrontpanel.h
 	n2xhardware.cpp n2xhardware.h
 	n2xi2cflash.cpp n2xi2cflash.h
+	n2xkeyboard.cpp n2xkeyboard.h
 	n2xmc.cpp n2xmc.h
 	n2xmiditypes.h
 	n2xrom.cpp n2xrom.h

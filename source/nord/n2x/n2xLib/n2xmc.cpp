@@ -96,6 +96,7 @@ namespace n2x
 
 		assert(!m_hdi08A.isInRange(pa));
 		assert(!m_hdi08B.isInRange(pa));
+		assert(!m_panel.isInRange(pa));
 
 		return 0;
 	}
@@ -110,16 +111,16 @@ namespace n2x
 		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read16(pa);
 		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read16(pa);
 
-		if(_addr >= g_frontPanelAddressA && _addr < g_frontPanelAddressA + g_frontPanelSize)
+		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Read Frontpanel A " << HEX(_addr));
-			return 0;
+			LOG("Read Frontpanel CS4 " << HEX(_addr));
+			return m_panel.cs4().read16(pa);
 		}
 
-		if(_addr >= g_frontPanelAddressB && _addr < g_frontPanelAddressB + g_frontPanelSize)
+		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Read Frontpanel B " << HEX(_addr));
-			return 0;
+			LOG("Read Frontpanel CS6 " << HEX(_addr));
+			return m_panel.cs6().read16(pa);
 		}
 
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
@@ -141,16 +142,16 @@ namespace n2x
 		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read8(pa);
 		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read8(pa);
 		
-		if(_addr >= g_frontPanelAddressA && _addr < g_frontPanelAddressA + g_frontPanelSize)
+		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Read Frontpanel A " << HEX(_addr));
-			return 0xff;
+			LOG("Read Frontpanel CS4 " << HEX(_addr));
+			return 0xff;//m_panel.cs4().read8(pa);
 		}
 
-		if(_addr >= g_frontPanelAddressB && _addr < g_frontPanelAddressB + g_frontPanelSize)
+		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Read Frontpanel B " << HEX(_addr));
-			return 0xff;
+			LOG("Read Frontpanel CS6 " << HEX(_addr));
+			return m_panel.cs6().read8(pa);
 		}
 
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
@@ -190,6 +191,20 @@ namespace n2x
 			return;
 		}
 
+		if(m_panel.cs4().isInRange(pa))
+		{
+			LOG("Write Frontpanel CS4 " << HEX(_addr) << "=" << HEXN(_val, 4));
+			m_panel.cs4().write16(pa, _val);
+			return;
+		}
+
+		if(m_panel.cs6().isInRange(pa))
+		{
+			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 4));
+			m_panel.cs6().write16(pa, _val);
+			return;
+		}
+
 		Mc68k::write16(_addr, _val);
 	}
 
@@ -218,6 +233,20 @@ namespace n2x
 		if(m_hdi08B.isInRange(pa))
 		{
 			m_hdi08B.write8(pa, _val);
+			return;
+		}
+		
+		if(m_panel.cs4().isInRange(pa))
+		{
+			LOG("Write Frontpanel CS4 " << HEX(_addr) << "=" << HEXN(_val, 2));
+			m_panel.cs4().write8(pa, _val);
+			return;
+		}
+
+		if(m_panel.cs6().isInRange(pa))
+		{
+			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 2));
+			m_panel.cs6().write8(pa, _val);
 			return;
 		}
 

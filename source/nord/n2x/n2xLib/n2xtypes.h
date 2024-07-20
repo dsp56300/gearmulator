@@ -19,22 +19,22 @@ namespace n2x
 	CSBOOT = BootROM                                $??????        $?????
 	*/
 
-	static constexpr uint32_t g_romSize				= 1024 * 512;
-	static constexpr uint32_t g_ramSize				= 1024 * 256;
-	static constexpr uint32_t g_flashSize			= 1024 * 64;
+	static constexpr uint32_t g_romSize					= 1024 * 512;
+	static constexpr uint32_t g_ramSize					= 1024 * 256;
+	static constexpr uint32_t g_flashSize				= 1024 * 64;
 
-	static constexpr uint32_t g_pcInitial			= 0xc2;
+	static constexpr uint32_t g_pcInitial				= 0xc2;
 
-	static constexpr uint32_t g_romAddress			= 0;
-	static constexpr uint32_t g_ramAddress			= 0x100000;
+	static constexpr uint32_t g_romAddress				= 0;
+	static constexpr uint32_t g_ramAddress				= 0x100000;
 
-	static constexpr uint32_t g_dspAAddress			= 0x200008;
-	static constexpr uint32_t g_dspBAddress			= 0x200010;
+	static constexpr uint32_t g_dspAAddress				= 0x200008;
+	static constexpr uint32_t g_dspBAddress				= 0x200010;
 
-	static constexpr uint32_t g_frontPanelAddressA	= 0x202800;
-	static constexpr uint32_t g_frontPanelAddressB	= 0x202000;
-	static constexpr uint32_t g_keyboardAddress		= 0x203000;
+	static constexpr uint32_t g_frontPanelAddressCS4	= 0x202800;
+	static constexpr uint32_t g_frontPanelAddressCS6	= 0x202000;
+	static constexpr uint32_t g_keyboardAddress			= 0x203000;
 
-	static constexpr uint32_t g_frontPanelSize		= 0x800;
-	static constexpr uint32_t g_keyboardSize		= 0x800;
+	static constexpr uint32_t g_frontPanelSize			= 0x800;
+	static constexpr uint32_t g_keyboardSize			= 0x800;
 }

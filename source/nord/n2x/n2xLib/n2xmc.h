@@ -1,5 +1,6 @@
 #pragma once
 
+#include "n2xfrontpanel.h"
 #include "n2xi2cflash.h"
 #include "n2xtypes.h"
 #include "mc68k/hdi08.h"
@@ -42,6 +43,7 @@ namespace n2x
 
 		Hdi08DspA m_hdi08A;
 		Hdi08DspB m_hdi08B;
+		FrontPanel m_panel;
 
 		uint32_t m_prevPC;
 		wLib::Midi m_midi;
