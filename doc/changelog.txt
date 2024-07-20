@@ -9,11 +9,14 @@ Framework:
 
 Vavra:
 
-- [Fix] Font when renaming a patch too large
+- [Fix] Font when renaming a patch was too large
 
 Xenia:
 
-- [Fix] Font when renaming a patch too large
+- [Imp] Added support for MW1 bank dumps, i.e. one sysex with 
+        multiple patches
+
+- [Fix] Font when renaming a patch was too large
 
 1.3.16 (2024.07.14)
 
