@@ -23,6 +23,8 @@ namespace n2x
 
 		uint32_t exec() override;
 
+		auto getPrevPC() const { return m_prevPC; }
+
 	private:
 		uint32_t read32(uint32_t _addr) override;
 		uint16_t readImm16(uint32_t _addr) override;
@@ -38,5 +40,7 @@ namespace n2x
 
 		Hdi08DspA m_hdi08A;
 		Hdi08DspB m_hdi08B;
+
+		uint32_t m_prevPC;
 	};
 }

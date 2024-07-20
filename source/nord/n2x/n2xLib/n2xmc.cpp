@@ -226,6 +226,7 @@ namespace n2x
 	uint32_t Microcontroller::exec()
 	{
 		const auto pc = getPC();
+		m_prevPC = pc;
 //		LOG("uc PC=" << HEX(pc));
 		if(pc >= g_ramAddress)
 		{
