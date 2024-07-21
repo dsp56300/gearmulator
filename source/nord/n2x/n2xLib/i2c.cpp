@@ -51,8 +51,6 @@ namespace n2x
 
 				auto res = m_byte & (1<<m_nextBit);
 				--m_nextBit;
-				if(m_nextBit < 0)
-					m_nextBit = BitInvalid;
 				return res;
 			}
 		}
@@ -148,6 +146,10 @@ namespace n2x
 				{
 					onByteWritten();
 				}
+			}
+			else if(m_nextBit == BitAck)
+			{
+				m_nextBit = 7;
 			}
 		}
 	}
