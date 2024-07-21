@@ -11,8 +11,13 @@ namespace n2x
 	// OC2 = PGP4 = SDA
 	// OC3 = PGP5 = SCL
 
+	static constexpr uint32_t g_bitResetDSP = 3;
 	static constexpr uint32_t g_bitSDA = 4;
 	static constexpr uint32_t g_bitSCL = 5;
+	static constexpr uint32_t g_bitResetDAC = 6;
+
+	static constexpr uint32_t g_maskResetDSP = 1 << g_bitResetDSP;
+	static constexpr uint32_t g_maskResetDAC = 1 << g_bitResetDAC;
 
 	Microcontroller::Microcontroller(const Rom& _rom) : m_midi(getQSM())
 	{
@@ -42,6 +47,27 @@ namespace n2x
 			const auto sclD = (d >> g_bitSCL) & 1;
 
 			LOG("PortGP write SDA=" << sdaV << " SCL=" << sclV);
+
+			if(d & g_maskResetDAC)
+			{
+				if(v & g_maskResetDAC)
+				{
+				}
+				else
+				{
+					LOG("Reset DAC");
+				}
+			}
+			if((d & g_maskResetDSP))
+			{
+				if(v & g_maskResetDSP)
+				{
+				}
+				else
+				{
+					LOG("Reset DSP");
+				}
+			}
 
 			if(sdaD && sclD)
 				m_flash.masterWrite(sdaV, sclV);
