@@ -134,6 +134,8 @@ namespace n2x
 			off += 6;
 		}
 
+		buf[4][4] = (m_lcds[0] & (1<<0)) ? '*' : ' ';
+
 		char message[(sizeof(Line) + 1) * buf.size() + 1];
 		size_t i=0;
 		for (const auto& line : buf)
