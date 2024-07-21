@@ -213,7 +213,7 @@ namespace n2x
 
 		m_hardware.ucYieldLoop([&]
 		{
-			return dsp().hasPendingInterrupts();
+			return dsp().hasPendingInterrupts() || hdi08().hasRXData();
 		});
 
 		hdiTransferDSPtoUC();
