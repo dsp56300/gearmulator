@@ -182,9 +182,9 @@ namespace n2x
 				auto v = rxHack.pop_front();
 //				if(vv == static_cast<dsp56k::TWord>(~0))
 					vv = v;
-				LOG("Discarding UC2DSP HDI word " << HEX(v));
+				LOG('[' << m_name << "] Discarding UC2DSP HDI word " << HEX(v));
 			}
-			LOG("Re-sending word " << HEX(vv));
+			LOG('[' << m_name << "] Re-sending word " << HEX(vv));
 			hdi08().writeRX(&vv,1);
 		}
 
