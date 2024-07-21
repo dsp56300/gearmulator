@@ -150,7 +150,15 @@ namespace n2x
 
 	void DSP::onUCRxEmpty(bool _needMoreData)
 	{
-		hdiTransferDSPtoUC();
+		if(_needMoreData)
+		{
+			m_hardware.ucYieldLoop([&]
+			{
+				return dsp().hasPendingInterrupts();
+			});
+		}
+		const bool res = hdiTransferDSPtoUC();
+		assert(!_needMoreData || res);
 	}
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
