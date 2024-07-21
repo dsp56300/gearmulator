@@ -117,8 +117,18 @@ namespace n2x
 
 	uint16_t Microcontroller::readImm16(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)											return readW(m_rom.data(), _addr);
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)	return readW(m_ram.data(), _addr - g_ramAddress);
+		if(_addr < g_romSize)
+		{
+			const auto r = readW(m_rom.data(), _addr);
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
+			return r;
+		}
+		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
+		{
+			const auto r = readW(m_ram.data(), _addr - g_ramAddress);;
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
+			return r;
+		}
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
@@ -131,8 +141,18 @@ namespace n2x
 
 	uint16_t Microcontroller::read16(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)											return readW(m_rom.data(), _addr);
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)	return readW(m_ram.data(), _addr - g_ramAddress);
+		if(_addr < g_romSize)
+		{
+			const auto r = readW(m_rom.data(), _addr);
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
+			return r;
+		}
+		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
+		{
+			const auto r = readW(m_ram.data(), _addr - g_ramAddress);
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
+			return r;
+		}
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
@@ -153,7 +173,8 @@ namespace n2x
 
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
 		{
-			LOG("Read Keyboard A " << HEX(_addr));
+			assert(false && "keyboard access is unexpected");
+			LOG("Read Keyboard " << HEX(_addr));
 			return 0;
 		}
 
@@ -162,8 +183,18 @@ namespace n2x
 
 	uint8_t Microcontroller::read8(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)											return m_rom[_addr];
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)	return m_ram[_addr - g_ramAddress];
+		if(_addr < g_romSize)
+		{
+			const auto r = m_rom[_addr];
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,2));
+			return r;
+		}
+		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
+		{
+			const auto r = m_ram[_addr - g_ramAddress];
+//			LOG("read " << HEX(_addr) << "=" << HEXN(r,2));
+			return r;
+		}
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
@@ -172,20 +203,21 @@ namespace n2x
 		
 		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS4 " << HEX(_addr));
-			return 0xff;//m_panel.cs4().read8(pa);
+//			LOG("Read Frontpanel CS4 " << HEX(_addr));
+			return m_panel.cs4().read8(pa);
 		}
 
 		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS6 " << HEX(_addr));
+//			LOG("Read Frontpanel CS6 " << HEX(_addr));
 			return m_panel.cs6().read8(pa);
 		}
 
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
 		{
-			LOG("Read Keyboard A " << HEX(_addr));
-			return 0xff;
+			assert(false && "keyboard access is unexpected");
+			LOG("Read Keyboard " << HEX(_addr));
+			return 0;
 		}
 
 		return Mc68k::read8(_addr);
@@ -221,14 +253,14 @@ namespace n2x
 
 		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Write Frontpanel CS4 " << HEX(_addr) << "=" << HEXN(_val, 4));
+//			LOG("Write Frontpanel CS4 " << HEX(_addr) << "=" << HEXN(_val, 4));
 			m_panel.cs4().write16(pa, _val);
 			return;
 		}
 
 		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 4));
+//			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 4));
 			m_panel.cs6().write16(pa, _val);
 			return;
 		}
@@ -273,7 +305,7 @@ namespace n2x
 
 		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 2));
+//			LOG("Write Frontpanel CS6 " << HEX(_addr) << "=" << HEXN(_val, 2));
 			m_panel.cs6().write8(pa, _val);
 			return;
 		}
