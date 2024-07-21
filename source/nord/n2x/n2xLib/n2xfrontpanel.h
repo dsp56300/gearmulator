@@ -20,6 +20,7 @@ namespace n2x
 	class FrontPanelCS4 : public FrontPanelCS<g_frontPanelAddressCS4>
 	{
 	public:
+		uint8_t read8(mc68k::PeriphAddress _addr) override;
 		explicit FrontPanelCS4(FrontPanel& _fp);
 	};
 
@@ -29,6 +30,7 @@ namespace n2x
 		explicit FrontPanelCS6(FrontPanel& _fp);
 
 		void write8(mc68k::PeriphAddress _addr, uint8_t _val) override;
+		uint8_t read8(mc68k::PeriphAddress _addr) override;
 
 	private:
 		void printLCD();

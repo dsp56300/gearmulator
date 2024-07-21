@@ -13,6 +13,13 @@ namespace n2x
 	{
 	}
 
+	uint8_t FrontPanelCS4::read8(mc68k::PeriphAddress _addr)
+	{
+		return 0xff;
+
+		return FrontPanelCS<2107392>::read8(_addr);
+	}
+
 	FrontPanelCS4::FrontPanelCS4(FrontPanel& _fp) : FrontPanelCS(_fp)
 	{
 	}
@@ -85,6 +92,29 @@ namespace n2x
 				break;
 		}
 		FrontPanelCS<2105344>::write8(_addr, _val);
+	}
+
+	static uint8_t g_counter = 0;
+
+	uint8_t FrontPanelCS6::read8(mc68k::PeriphAddress _addr)
+	{
+		const auto a = static_cast<uint32_t>(_addr);
+		switch (a)
+		{
+		case g_frontPanelAddressCS6:
+			return 0b11101100;
+			if(++g_counter >= 128)
+			{
+				const auto up = static_cast<uint8_t>(ButtonType::Up) & 0xff;
+				return ~up;
+			}
+			return 0xff;
+		case g_frontPanelAddressCS6 + 2:
+		case g_frontPanelAddressCS6 + 4:
+		case g_frontPanelAddressCS6 + 6:
+			return 0xff;
+		}
+		return FrontPanelCS::read8(_addr);
 	}
 
 	void FrontPanelCS6::printLCD()
