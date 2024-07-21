@@ -5,6 +5,7 @@
 #include "n2xdsp.h"
 #include "n2xrom.h"
 #include "synthLib/midiTypes.h"
+#include "synthLib/os.h"
 
 namespace n2x
 {
@@ -291,12 +292,20 @@ namespace n2x
 		}
 
 		static volatile bool writeFlash = false;
+		static volatile bool writeRam = false;
 
 		if(writeFlash)
 		{
 			writeFlash = false;
 			m_flash.saveAs("flash_runtime.bin");
 		}
+
+		if(writeRam)
+		{
+			writeRam = false;
+			synthLib::writeFile("ram_runtime.bin", m_ram);
+		}
+
 		const auto cycles = Mc68k::exec();
 
 		m_hdi08A.exec(cycles);
