@@ -111,7 +111,9 @@ namespace n2x
 		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
 		
 		hdi08().setRXRateLimit(0);
-		hdi08().setTransmitDataAlwaysEmpty(false);
+//		hdi08().setTransmitDataAlwaysEmpty(false);
+
+		m_periphX.getEsai().writeEmptyAudioIn(2048);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool _needMoreData)
 		{
