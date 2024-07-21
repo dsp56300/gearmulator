@@ -70,6 +70,8 @@ namespace n2x
 		assert((m_deviceSelect & DeviceSelectMask::Area) == DeviceSelectValues::AreaMemory);
 		assert((m_deviceSelect & DeviceSelectMask::Rw) == DeviceSelectValues::Read);
 		const auto res = data()[m_address];
+
+		LOG("I2C op read from " << HEXN(m_address,4) << ", res " << HEXN(res,2));
 		advanceAddress();
 		return res;
 	}
@@ -80,6 +82,8 @@ namespace n2x
 		assert((m_deviceSelect & DeviceSelectMask::Rw) == DeviceSelectValues::Write);
 
 		data()[m_address] = _byte;
+
+		LOG("I2C op write to " << HEXN(m_address,4) << ", val " << HEXN(_byte,2));
 		advanceAddress();
 	}
 

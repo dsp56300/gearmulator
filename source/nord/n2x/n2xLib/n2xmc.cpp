@@ -48,7 +48,7 @@ namespace n2x
 			const auto sdaD = (d >> g_bitSDA) & 1;
 			const auto sclD = (d >> g_bitSCL) & 1;
 
-			LOG("PortGP write SDA=" << sdaV << " SCL=" << sclV);
+//			LOG("PortGP write SDA=" << sdaV << " SCL=" << sclV);
 
 			if(d & g_maskResetDAC)
 			{
