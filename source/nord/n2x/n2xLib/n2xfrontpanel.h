@@ -13,7 +13,7 @@ namespace n2x
 	public:
 		explicit FrontPanelCS(FrontPanel& _fp);
 
-	private:
+	protected:
 		FrontPanel& m_panel;
 	};
 
@@ -32,6 +32,8 @@ namespace n2x
 		void write8(mc68k::PeriphAddress _addr, uint8_t _val) override;
 		uint8_t read8(mc68k::PeriphAddress _addr) override;
 
+		auto getEncoderType() const { return m_selectedEncoder; }
+
 	private:
 		void printLCD();
 
@@ -40,6 +42,7 @@ namespace n2x
 		uint8_t m_ledLatch12 = 0;
 		std::array<uint8_t,3> m_lcds{0,0,0};
 		std::array<uint8_t,3> m_lcdsPrev{0,0,0};
+		EncoderType m_selectedEncoder = EncoderType::PitchBend;
 	};
 
 	class FrontPanel

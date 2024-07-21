@@ -13,15 +13,20 @@ namespace n2x
 	{
 	}
 
-	uint8_t FrontPanelCS4::read8(mc68k::PeriphAddress _addr)
-	{
-		return 0xff;
-
-		return FrontPanelCS<2107392>::read8(_addr);
-	}
-
 	FrontPanelCS4::FrontPanelCS4(FrontPanel& _fp) : FrontPanelCS(_fp)
 	{
+	}
+
+	uint8_t FrontPanelCS4::read8(mc68k::PeriphAddress _addr)
+	{
+		switch (m_panel.cs6().getEncoderType())
+		{
+		case EncoderType::PitchBend:
+		case EncoderType::ModWheel:
+			return 0;	// pretend we're a rack unit
+		default:
+			return 0x80;
+		}
 	}
 
 	FrontPanelCS6::FrontPanelCS6(FrontPanel& _fp) : FrontPanelCS(_fp)
@@ -30,36 +35,12 @@ namespace n2x
 
 	void FrontPanelCS6::write8(const mc68k::PeriphAddress _addr, const uint8_t _val)
 	{
+//		LOG("Write CS6 " << HEXN(_addr - base(),2) << " = " << HEXN(_val,2));
+
 		switch (static_cast<uint32_t>(_addr))
 		{
 			case g_frontPanelAddressCS6 + 0x8:
-				{
-					m_ledLatch8 = _val;
-
-					// 10 / 12 first and then 8 didn't lead to any result
-
-					/*
-					bool gotLCDs = false;
-					if(m_ledLatch12 & (1<<6))
-					{
-						m_lcds[0] = _val;
-						gotLCDs = true;
-					}
-					if(m_ledLatch12 & (1<<7))
-					{
-						m_lcds[1] = _val;
-						gotLCDs = true;
-					}
-					if(m_ledLatch10 & (1<<7))
-					{
-						m_lcds[2] = _val;
-						gotLCDs = true;
-					}
-
-					if(gotLCDs)
-						printLCD();
-					*/
-				}
+				m_ledLatch8 = _val;
 				break;
 			case g_frontPanelAddressCS6 + 0xa:
 				m_ledLatch10 = _val;
@@ -67,6 +48,11 @@ namespace n2x
 				{
 					m_lcds[2] = m_ledLatch8;
 					printLCD();
+				}
+				else
+				{
+//					LOG("Read pot " << HEXN(_val, 2));
+					m_selectedEncoder = static_cast<EncoderType>(_val);
 				}
 				break;
 			case g_frontPanelAddressCS6 + 0xc:
@@ -77,12 +63,12 @@ namespace n2x
 
 					if(m_ledLatch12 & (1<<6))
 					{
-						m_lcds[0] = _val;
+						m_lcds[0] = m_ledLatch8;
 						gotLCDs = true;
 					}
 					if(m_ledLatch12 & (1<<7))
 					{
-						m_lcds[1] = _val;
+						m_lcds[1] = m_ledLatch8;
 						gotLCDs = true;
 					}
 
@@ -91,13 +77,14 @@ namespace n2x
 				}
 				break;
 		}
-		FrontPanelCS<2105344>::write8(_addr, _val);
+		FrontPanelCS::write8(_addr, _val);
 	}
 
 	static uint8_t g_counter = 0;
 
 	uint8_t FrontPanelCS6::read8(mc68k::PeriphAddress _addr)
 	{
+		return 0;
 		const auto a = static_cast<uint32_t>(_addr);
 		switch (a)
 		{
@@ -152,19 +139,24 @@ namespace n2x
 
 		for(auto i=0; i<3; ++i)
 		{
-			drawH(1, 0, m_lcds[i] & (1<<1));
-			drawH(1, 2, m_lcds[i] & (1<<7));
-			drawH(1, 4, m_lcds[i] & (1<<4));
+			auto bt = [&](const uint32_t _bit)
+			{
+				return !(m_lcds[i] & (1<<_bit));
+			};
 
-			drawV(0, 1, m_lcds[i] & (1<<2));
-			drawV(3, 1, m_lcds[i] & (1<<6));
-			drawV(0, 3, m_lcds[i] & (1<<3));
-			drawV(3, 3, m_lcds[i] & (1<<5));
+			drawH(1, 0, bt(7));
+			drawH(1, 2, bt(1));
+			drawH(1, 4, bt(4));
+
+			drawV(0, 1, bt(2));
+			drawV(3, 1, bt(6));
+			drawV(0, 3, bt(3));
+			drawV(3, 3, bt(5));
 
 			off += 6;
 		}
 
-		buf[4][4] = (m_lcds[0] & (1<<0)) ? '*' : ' ';
+		buf[4][4] = (m_lcds[0] & (1<<0)) ? ' ' : '*';
 
 		char message[(sizeof(Line) + 1) * buf.size() + 1];
 		size_t i=0;
