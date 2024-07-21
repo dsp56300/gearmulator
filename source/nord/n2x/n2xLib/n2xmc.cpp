@@ -34,7 +34,8 @@ namespace n2x
 
 		setPC(g_pcInitial);
 
-		getPortF().writeRX(0xff);
+		// keyboard irqs, nothing to worry about it seems
+//		getPortF().writeRX(0xff);
 
 		getPortGP().setWriteTXCallback([this](const mc68k::Port& _port)
 		{
