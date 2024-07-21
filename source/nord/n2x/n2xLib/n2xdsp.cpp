@@ -163,7 +163,7 @@ namespace n2x
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
 	{
-//		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPC()));
+//		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPrevPC()));
 		hdi08().writeRX(&_word, 1);
 		m_hdiUC.isr(m_hdiUC.isr() & ~(mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy));
 	}
