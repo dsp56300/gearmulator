@@ -20,7 +20,7 @@ namespace n2x
 	static constexpr uint32_t g_maskResetDSP = 1 << g_bitResetDSP;
 	static constexpr uint32_t g_maskResetDAC = 1 << g_bitResetDAC;
 
-	Microcontroller::Microcontroller(const Rom& _rom) : m_midi(getQSM())
+	Microcontroller::Microcontroller(const Rom& _rom) : m_hdi08(m_hdi08A, m_hdi08B), m_midi(getQSM())
 	{
 		if(!_rom.isValid())
 			return;
@@ -132,6 +132,7 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
+		assert(!m_hdi08.isInRange(pa));
 		assert(!m_hdi08A.isInRange(pa));
 		assert(!m_hdi08B.isInRange(pa));
 		assert(!m_panel.isInRange(pa));
@@ -156,8 +157,9 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read16(pa);
-		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read16(pa);
+		if(m_hdi08A.isInRange(pa))	return m_hdi08A.read16(pa);
+		if(m_hdi08B.isInRange(pa))	return m_hdi08B.read16(pa);
+		if(m_hdi08.isInRange(pa))	return m_hdi08.read16(pa);
 
 		if(m_panel.cs4().isInRange(pa))
 		{
@@ -198,8 +200,9 @@ namespace n2x
 
 		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
 
-		if(m_hdi08A.isInRange(pa))										return m_hdi08A.read8(pa);
-		if(m_hdi08B.isInRange(pa))										return m_hdi08B.read8(pa);
+		if(m_hdi08A.isInRange(pa))	return m_hdi08A.read8(pa);
+		if(m_hdi08B.isInRange(pa))	return m_hdi08B.read8(pa);
+		if(m_hdi08.isInRange(pa))	return m_hdi08.read8(pa);
 		
 		if(m_panel.cs4().isInRange(pa))
 		{
@@ -251,6 +254,12 @@ namespace n2x
 			return;
 		}
 
+		if(m_hdi08.isInRange(pa))
+		{
+			m_hdi08.write16(pa, _val);
+			return;
+		}
+
 		if(m_panel.cs4().isInRange(pa))
 		{
 //			LOG("Write Frontpanel CS4 " << HEX(_addr) << "=" << HEXN(_val, 4));
@@ -293,6 +302,12 @@ namespace n2x
 		if(m_hdi08B.isInRange(pa))
 		{
 			m_hdi08B.write8(pa, _val);
+			return;
+		}
+		
+		if(m_hdi08.isInRange(pa))
+		{
+			m_hdi08.write8(pa, _val);
 			return;
 		}
 		

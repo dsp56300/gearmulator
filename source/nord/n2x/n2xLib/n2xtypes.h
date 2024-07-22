@@ -28,6 +28,7 @@ namespace n2x
 	static constexpr uint32_t g_romAddress				= 0;
 	static constexpr uint32_t g_ramAddress				= 0x100000;
 
+	static constexpr uint32_t g_dspBothAddress			= 0x200000;
 	static constexpr uint32_t g_dspAAddress				= 0x200008;
 	static constexpr uint32_t g_dspBAddress				= 0x200010;
 

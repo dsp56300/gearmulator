@@ -1,19 +1,16 @@
 #pragma once
 
 #include "n2xfrontpanel.h"
+#include "n2xhdi08.h"
 #include "n2xi2cflash.h"
 #include "n2xtypes.h"
 #include "mc68k/hdi08.h"
-#include "mc68k/hdi08periph.h"
 #include "mc68k/mc68k.h"
 #include "wLib/wMidi.h"
 
 namespace n2x
 {
 	class Rom;
-
-	using Hdi08DspA = mc68k::Hdi08Periph<g_dspAAddress>;
-	using Hdi08DspB = mc68k::Hdi08Periph<g_dspBAddress>;
 
 	class Microcontroller : public mc68k::Mc68k
 	{
@@ -43,6 +40,8 @@ namespace n2x
 
 		Hdi08DspA m_hdi08A;
 		Hdi08DspB m_hdi08B;
+		Hdi08DspBoth m_hdi08;
+
 		FrontPanel m_panel;
 
 		uint32_t m_prevPC;
