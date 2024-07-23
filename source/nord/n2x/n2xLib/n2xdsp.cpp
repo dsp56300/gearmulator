@@ -198,7 +198,7 @@ namespace n2x
 			});
 		}
 		const bool res = hdiTransferDSPtoUC();
-		assert(!_needMoreData || res);
+//		assert(!_needMoreData || res);
 	}
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
@@ -210,44 +210,10 @@ namespace n2x
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
-		waitDspRxEmpty();
+//		waitDspRxEmpty();
 		const auto& rxData = hdi08().rxData();
-		auto& rxHack = const_cast<std::decay_t<decltype(rxData)>&>(rxData);
 
-		if(hdi08().rxData().size() > 1)
-		{
-			dsp56k::TWord vv = ~0;
-			while(!hdi08().rxData().empty())
-			{
-				auto v = rxHack.pop_front();
-//				if(vv == static_cast<dsp56k::TWord>(~0))
-					vv = v;
-				LOG('[' << m_name << "] Discarding UC2DSP HDI word " << HEX(v));
-			}
-			LOG('[' << m_name << "] Re-sending word " << HEX(vv));
-			hdi08().writeRX(&vv,1);
-		}
-
-		if(m_index == 0)
-		{
-			const auto v = rxData.front();
-			const auto pc = m_hardware.getUC().getPrevPC();
-
-			switch (_irq)
-			{
-				case 0x64:	LOG('[' << m_name << "] r7        = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x66:	LOG('[' << m_name << "] x:(r7)    = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x68:	LOG('[' << m_name << "] y:(r7)    = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x6a:	LOG('[' << m_name << "] x:(r7)+   = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x6c:	LOG('[' << m_name << "] y:(r7)+   = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x6e:	LOG('[' << m_name << "] x:(r7)+n7 = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x70:	LOG('[' << m_name << "] y:(r7)+n7 = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				case 0x72:	LOG('[' << m_name << "] n7        = " << HEX(v) << ", pc = " << HEX(pc));	break;
-				default:
-					LOG('[' << m_name << "] sendIRQtoDSP " << HEXN(_irq, 2));
-					break;
-			}
-		}
+		assert(rxData.size() <= 1);
 
 		dsp().injectExternalInterrupt(_irq);
 
@@ -261,6 +227,8 @@ namespace n2x
 
 	uint8_t DSP::hdiUcReadIsr(uint8_t _isr)
 	{
+		hdiTransferDSPtoUC();
+
 		// transfer DSP host flags HF2&3 to uc
 		const auto hf23 = hdi08().readControlRegister() & 0x18;
 		_isr &= ~0x18;
@@ -304,7 +272,7 @@ namespace n2x
 		if (m_hdiUC.canReceiveData() && hdi08().hasTX())
 		{
 			const auto v = hdi08().readTX();
-			LOG('[' << m_name << "] HDI dsp2UC=" << HEX(v));
+//			LOG('[' << m_name << "] HDI dsp2UC=" << HEX(v));
 			m_hdiUC.writeRx(v);
 			return true;
 		}
