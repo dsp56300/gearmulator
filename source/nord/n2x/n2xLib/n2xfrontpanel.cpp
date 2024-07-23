@@ -1,6 +1,7 @@
 #include "n2xfrontpanel.h"
 
 #include <cassert>
+#include <cstring>	// memcpy
 
 #include "dsp56kEmu/logging.h"
 
