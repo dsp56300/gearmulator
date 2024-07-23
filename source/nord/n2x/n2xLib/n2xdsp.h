@@ -35,13 +35,23 @@ namespace n2x
 			return m_periphX;
 		}
 
+		void setEsaiCallback(std::function<void()>&& _func)
+		{
+			m_esaiCallback = std::move(_func);
+		}
+
+		void advanceSamples(uint32_t _samples, uint32_t _latency);
+
 	private:
 		void onUCRxEmpty(bool _needMoreData);
 		void hdiTransferUCtoDSP(uint32_t _word);
 		void hdiSendIrqToDSP(uint8_t _irq);
 		uint8_t hdiUcReadIsr(uint8_t _isr);
+		void onEsaiCallback();
+
 	public:
 		void transferHostFlagsUc2Dsdp();
+
 	private:
 		bool hdiTransferDSPtoUC();
 		void waitDspRxEmpty();
@@ -61,5 +71,14 @@ namespace n2x
 
 		bool m_receivedMagicEsaiPacket = false;
 		uint32_t m_hdiHF01 = 0;
+
+		uint64_t m_numEsaiCallbacks = 0;
+		uint64_t m_maxEsaiCallbacks = 0;
+		uint64_t m_esaiLatency = 0;
+
+		std::function<void()> m_esaiCallback = [] {};
+
+		std::condition_variable m_haltDSPcv;
+		std::mutex m_haltDSPmutex;
 	};
 }

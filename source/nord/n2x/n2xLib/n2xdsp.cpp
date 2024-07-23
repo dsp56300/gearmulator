@@ -178,6 +178,16 @@ namespace n2x
 		m_thread->setLogToStdout(false);
 	}
 
+	void DSP::advanceSamples(const uint32_t _samples, const uint32_t _latency)
+	{
+		{
+			std::lock_guard uLockHalt(m_haltDSPmutex);
+			m_maxEsaiCallbacks += _samples;
+			m_esaiLatency = _latency;
+		}
+		m_haltDSPcv.notify_one();
+	}
+
 	void DSP::onUCRxEmpty(bool _needMoreData)
 	{
 		if(_needMoreData)
@@ -260,6 +270,18 @@ namespace n2x
 		else if(_isr & mc68k::Hdi08::IsrBits::Txde)
 			_isr |= mc68k::Hdi08::IsrBits::Trdy;
 		return _isr;
+	}
+
+	void DSP::onEsaiCallback()
+	{
+		++m_numEsaiCallbacks;
+
+		std::unique_lock uLock(m_haltDSPmutex);
+		m_haltDSPcv.wait(uLock, [&]
+		{
+			return (m_maxEsaiCallbacks + m_esaiLatency) > m_numEsaiCallbacks;
+		});
+		m_esaiCallback();
 	}
 
 	void DSP::transferHostFlagsUc2Dsdp()
