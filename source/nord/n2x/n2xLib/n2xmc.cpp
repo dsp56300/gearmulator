@@ -34,8 +34,8 @@ namespace n2x
 
 		setPC(g_pcInitial);
 
-		// keyboard irqs, nothing to worry about it seems
-//		getPortF().writeRX(0xff);
+		// keyboard irqs, we do not really care but as the UC spinlooped once while waiting for it to become high we set it to high all the time
+		getPortF().writeRX(0xff);
 
 		getPortGP().setWriteTXCallback([this](const mc68k::Port& _port)
 		{
