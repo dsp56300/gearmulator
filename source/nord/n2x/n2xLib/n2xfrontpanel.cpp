@@ -140,8 +140,13 @@ namespace n2x
 		return FrontPanelCS::read8(_addr);
 	}
 
+	static uint32_t g_count = 0;
+
 	void FrontPanelCS6::printLCD()
 	{
+		++g_count;
+		if(g_count & 0x7f)
+			return;
 		/*
 		 --    --    --
 		|  |  |  |  |  |
