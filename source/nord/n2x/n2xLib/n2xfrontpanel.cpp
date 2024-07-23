@@ -111,31 +111,47 @@ namespace n2x
 	}
 
 	static uint32_t g_counter = 0;
-	constexpr uint32_t g_len = 1024;
-	constexpr uint32_t g_threshold = 256;
+	constexpr uint32_t g_len = 4096;
+	constexpr uint32_t g_threshold = 512;
+	static bool wasPressed = false;
+	static bool wasReleased = false;
 
 	uint8_t FrontPanelCS6::read8(mc68k::PeriphAddress _addr)
 	{
+		++g_counter;
+		g_counter &= (g_len - 1);
+		auto press = g_counter >= (g_len - g_threshold);
+
+		if(press)
+			wasPressed = true;
+		else if(!press && wasPressed)
+			wasReleased = true;
+		if(wasReleased)
+			press = false;
+
 		const auto a = static_cast<uint32_t>(_addr);
 		switch (a)
 		{
 		case g_frontPanelAddressCS6:
-			{
-				++g_counter;
-				g_counter &= (g_len - 1);
-				if(g_counter >= (g_len - g_threshold))
-				{
-					constexpr auto bt = static_cast<uint8_t>(ButtonType::Trigger) & 0xff;
-					return 0xff ^ bt;
-				}
-				return 0xff;
-			}
+			return 0xff;
 		case g_frontPanelAddressCS6 + 2:
+			if(press)
+			{
+				constexpr auto bt = static_cast<uint8_t>(ButtonType::OscSync) & 0xff;
+				return 0xff ^ bt;
+			}
 			return 0xff;
 		case g_frontPanelAddressCS6 + 4:
 			return 0xff;
 		case g_frontPanelAddressCS6 + 6:
-			return 0xff;
+			{
+				if(press)
+				{
+					constexpr auto bt = static_cast<uint8_t>(ButtonType::ModwheelDest) & 0xff;
+					return 0xff ^ bt;
+				}
+				return 0xff;
+			}
 		}
 		return FrontPanelCS::read8(_addr);
 	}

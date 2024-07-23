@@ -360,15 +360,16 @@ namespace n2x
 		m_hdi08B.exec(cycles);
 
 		m_totalCycles += cycles;
-
-		if(m_totalCycles > 0x4000000 && !m_hasSentMidi)
+/*
+		if(m_totalCycles > 0x5000000 && !m_hasSentMidi)
 		{
-			m_hasSentMidi = true;
+			m_totalCycles -= 0x5000000;
+//			m_hasSentMidi = true;
 			LOG("Sending MIDI Note On");
 			m_midi.writeMidi(synthLib::M_NOTEON);
-			m_midi.writeMidi(synthLib::Note_C3);
-			m_midi.writeMidi(100);
+			m_midi.writeMidi((rand()%24) + synthLib::Note_C2);
+			m_midi.writeMidi(127);
 		}
-		return cycles;
+*/		return cycles;
 	}
 }
