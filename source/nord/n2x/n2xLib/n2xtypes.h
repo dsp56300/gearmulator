@@ -80,7 +80,7 @@ namespace n2x
 		ModwheelDest	= 0x06'80,
 	};
 
-	enum class EncoderType
+	enum class KnobType
 	{
 		Osc1Fm = 0x38,		Porta,		Lfo2Rate,	MasterVol,		Lfo1Rate,	ModEnvAmt,	ModEnvD,	ModEnvA,
 		AmpEnvD = 0x58,		FilterFreq,	FilterEnvA,	AmpEnvA,		OscMix,		Osc2Fine,	Lfo1Amount,	OscPW,
