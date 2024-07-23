@@ -68,9 +68,39 @@ namespace n2x
 		if(!_hw.isValid())
 			return;
 
-		m_periphX.getEsaiClock().setExternalClockFrequency(1'000'000); // TODO 1 MHz correct? That results in a speed of 36 MHz only as PCTL is set to $cd01d3
-		m_periphX.getEsaiClock().setSamplerate(44100); // TODO
-		m_periphX.getEsaiClock().setClockSource(dsp56k::EsaiClock::ClockSource::Instructions);	// TODO
+		{
+			auto& clock = m_periphX.getEsaiClock();
+			auto& esai = m_periphX.getEsai();
+
+			clock.setExternalClockFrequency(3'333'333); // schematic claims 1 MHz but we measured 10/3 Mhz
+
+			constexpr auto samplerate = g_samplerate;
+			constexpr auto clockMultiplier = 2;
+
+			clock.setSamplerate(samplerate * clockMultiplier);
+
+			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Instructions);	// TODO
+
+			if(m_index == 0)
+			{
+				// DSP A = chip U2 = left on the schematic
+				// Sends its audio to DSP B at twice the sample rate, it sends four words per frame
+				clock.setEsaiDivider(&esai, 0);
+			}
+			else
+			{
+				// DSP B = chip U3 = right on the schematic
+				// receives audio from DSP A at twice the sample rate
+				// sends its audio to the DACs at regular sample rate
+				clock.setEsaiDivider(&esai, 1, 0);
+				clock.setEsaiCounter(&esai, -1, 0);
+			}
+
+			esai.setCallback([this](dsp56k::Audio*)
+			{
+				onEsaiCallback();
+			}, 0);
+		}
 
 		auto config = m_dsp.getJit().getConfig();
 
