@@ -330,8 +330,10 @@ namespace n2x
 
 	uint32_t Microcontroller::exec()
 	{
+#ifdef _DEBUG
 		const auto pc = getPC();
 		m_prevPC = pc;
+
 //		LOG("uc PC=" << HEX(pc));
 		if(pc >= g_ramAddress)
 		{
@@ -353,14 +355,14 @@ namespace n2x
 			writeRam = false;
 			synthLib::writeFile("ram_runtime.bin", m_ram);
 		}
-
+#endif
 		const auto cycles = Mc68k::exec();
 
 		m_hdi08A.exec(cycles);
 		m_hdi08B.exec(cycles);
 
-		m_totalCycles += cycles;
 /*
+		m_totalCycles += cycles;
 		if(m_totalCycles > 0x5000000 && !m_hasSentMidi)
 		{
 			m_totalCycles -= 0x5000000;
