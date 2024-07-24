@@ -23,6 +23,9 @@ int main()
 	std::unique_ptr<n2x::Hardware> hw;
 	hw.reset(new n2x::Hardware());
 
+	hw->getDSPA().getDSPThread().setLogToStdout(true);
+	hw->getDSPB().getDSPThread().setLogToStdout(true);
+
 	std::thread ucThread([&]()
 	{
 		dsp56k::ThreadTools::setCurrentThreadName("MC68331");

@@ -33,6 +33,9 @@ namespace n2x
 				haltDSP();
 		}
 
+		auto& getDSPA() { return m_dspA; }
+		auto& getDSPB() { return m_dspB; }
+
 	private:
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallback();

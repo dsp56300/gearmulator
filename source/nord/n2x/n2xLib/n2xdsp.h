@@ -43,6 +43,8 @@ namespace n2x
 
 		void advanceSamples(uint32_t _samples, uint32_t _latency);
 
+		dsp56k::DSPThread& getDSPThread() const { return *m_thread.get(); }
+
 	private:
 		void onUCRxEmpty(bool _needMoreData);
 		void hdiTransferUCtoDSP(uint32_t _word);
