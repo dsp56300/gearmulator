@@ -122,8 +122,16 @@ namespace wLib
 
 		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
 
+		// if the UC consumed more cycles than it was allowed to, remove them from remaining cycles
+		m_remainingUcCyclesD += static_cast<double>(m_remainingUcCycles);
+
+		// add cycles for the ESAI time that has passed
 		m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
+
+		// set new remaining cycle count
 		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
+
+		// and consume them
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
 		if(esaiDelta > g_syncHaltDspEsaiThreshold)
