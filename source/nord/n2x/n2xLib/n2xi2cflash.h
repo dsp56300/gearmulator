@@ -10,6 +10,10 @@ namespace n2x
 {
 	class I2cFlash : public I2c, public RomData<g_flashSize>
 	{
+	public:
+		I2cFlash();
+
+	private:
 		enum class State
 		{
 			ReadDeviceSelect,	AckDeviceSelect,
@@ -33,7 +37,6 @@ namespace n2x
 			Write      = 0b0000'000'0,
 		};
 
-	protected:
 		void onStartCondition() override;
 		void onStopCondition() override;
 		void onByteWritten() override;

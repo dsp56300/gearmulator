@@ -6,6 +6,14 @@
 
 namespace n2x
 {
+	template<> RomData<g_flashSize>::RomData();
+
+	I2cFlash::I2cFlash()
+	{
+		if(!isValid())
+			data().fill(0xff);
+	}
+
 	void I2cFlash::onStartCondition()
 	{
 		m_state = State::ReadDeviceSelect;
