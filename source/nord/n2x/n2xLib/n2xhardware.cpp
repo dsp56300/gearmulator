@@ -199,15 +199,21 @@ namespace n2x
 		}
 
 		const auto esaiFrameIndex = m_esaiFrameIndex;
-
-		const auto ucClock = m_uc.getSim().getSystemClockHz();
-
-		const double ucCyclesPerFrame = static_cast<double>(ucClock) * m_samplerateInv;
-
 		const auto esaiDelta = esaiFrameIndex - m_lastEsaiFrameIndex;
 
+		const auto ucClock = m_uc.getSim().getSystemClockHz();
+		const double ucCyclesPerFrame = static_cast<double>(ucClock) * m_samplerateInv;
+
+		// if the UC consumed more cycles than it was allowed to, remove them from remaining cycles
+		m_remainingUcCyclesD += static_cast<double>(m_remainingUcCycles);
+
+		// add cycles for the ESAI time that has passed
 		m_remainingUcCyclesD += ucCyclesPerFrame * static_cast<double>(esaiDelta);
+
+		// set new remaining cycle count
 		m_remainingUcCycles = static_cast<int64_t>(m_remainingUcCyclesD);
+
+		// and consume them
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
 		if(esaiDelta > g_syncHaltDspEsaiThreshold)
