@@ -49,11 +49,6 @@ namespace n2x
 		void hdiSendIrqToDSP(uint8_t _irq);
 		uint8_t hdiUcReadIsr(uint8_t _isr);
 		void onEsaiCallback();
-
-	public:
-		void transferHostFlagsUc2Dsdp();
-
-	private:
 		bool hdiTransferDSPtoUC();
 		void waitDspRxEmpty();
 

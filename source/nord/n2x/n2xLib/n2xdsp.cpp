@@ -254,21 +254,6 @@ namespace n2x
 		m_esaiCallback();
 	}
 
-	void DSP::transferHostFlagsUc2Dsdp()
-	{
-		const uint32_t hf01 = m_hdiUC.icr() & 0x18;
-
-		if (hf01 != m_hdiHF01)
-		{
-//			LOG('[' << m_name << "] HDI HF01=" << HEXN((hf01>>3),1));
-
-			waitDspRxEmpty();
-
-			m_hdiHF01 = hf01;
-			hdi08().setPendingHostFlags01(hf01);
-		}
-	}
-
 	bool DSP::hdiTransferDSPtoUC()
 	{
 		if (m_hdiUC.canReceiveData() && hdi08().hasTX())

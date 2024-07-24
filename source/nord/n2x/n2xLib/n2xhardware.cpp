@@ -33,11 +33,9 @@ namespace n2x
 		syncUCtoDSP();
 
 		const auto deltaCycles = m_uc.exec();
+
 		if(m_esaiFrameIndex > 0)
 			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
-
-		m_dspA.transferHostFlagsUc2Dsdp();
-		m_dspB.transferHostFlagsUc2Dsdp();
 	}
 
 	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
