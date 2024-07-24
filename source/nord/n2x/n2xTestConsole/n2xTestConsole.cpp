@@ -1,5 +1,6 @@
 #include <iostream>
 
+#include "dsp56kEmu/threadtools.h"
 #include "n2xLib/n2xhardware.h"
 #include "n2xLib/n2xrom.h"
 #include "synthLib/wavWriter.h"
@@ -24,8 +25,20 @@ int main()
 
 	std::thread ucThread([&]()
 	{
+		dsp56k::ThreadTools::setCurrentThreadName("MC68331");
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
+
 		while(true)
+		{
 			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+			hw->processUC();
+		}
 	});
 
 	constexpr uint32_t blockSize = 64;
