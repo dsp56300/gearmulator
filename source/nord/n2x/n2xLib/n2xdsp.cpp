@@ -106,7 +106,7 @@ namespace n2x
 
 		config.aguSupportBitreverse = true;
 		config.linkJitBlocks = true;
-		config.dynamicPeripheralAddressing = true;
+		config.dynamicPeripheralAddressing = false;
 #ifdef _DEBUG
 		config.debugDynamicPeripheralAddressing = true;
 #endif
