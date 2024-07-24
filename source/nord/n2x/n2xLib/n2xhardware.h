@@ -21,13 +21,19 @@ namespace n2x
 
 		const auto& getAudioOutputs() const { return m_audioOutputs; }
 
-		void processAudio(const uint32_t _frames)
+		void processAudio(uint32_t _frames, uint32_t _latency);
+
+		void resumeDSPsForFunc(const std::function<void()>& _callback)
 		{
-			return processAudio(_frames, _frames);
+			const auto halted = m_haltDSP;
+			if(halted)
+				resumeDSP();
+			_callback();
+			if(halted)
+				haltDSP();
 		}
 
 	private:
-		void processAudio(uint32_t _frames, uint32_t _latency);
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallback();
 		void syncUCtoDSP();

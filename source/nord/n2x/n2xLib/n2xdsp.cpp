@@ -176,6 +176,11 @@ namespace n2x
 		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
 
 		m_thread->setLogToStdout(false);
+
+		m_vbaInterruptDone = dsp().registerInterruptFunc([this]
+		{
+			m_triggerInterruptDone.notify();
+		});
 	}
 
 	void DSP::advanceSamples(const uint32_t _samples, const uint32_t _latency)
@@ -211,15 +216,12 @@ namespace n2x
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
 //		waitDspRxEmpty();
-		const auto& rxData = hdi08().rxData();
-
-		assert(rxData.size() <= 1);
-
 		dsp().injectExternalInterrupt(_irq);
 
-		m_hardware.ucYieldLoop([&]
+		dsp().injectExternalInterrupt(m_vbaInterruptDone);
+		m_hardware.resumeDSPsForFunc([&]
 		{
-			return dsp().hasPendingInterrupts() || hdi08().hasRXData();
+			m_triggerInterruptDone.wait();
 		});
 
 		hdiTransferDSPtoUC();

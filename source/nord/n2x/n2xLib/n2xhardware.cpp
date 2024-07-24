@@ -67,7 +67,7 @@ namespace n2x
 			haltDSP();
 	}
 
-	void Hardware::processAudio(uint32_t _frames, uint32_t _latency)
+	void Hardware::processAudio(uint32_t _frames, const uint32_t _latency)
 	{
 		ensureBufferSize(_frames);
 
@@ -92,11 +92,11 @@ namespace n2x
 
 		while (_frames)
 		{
-			const auto processCount = std::min(_frames, static_cast<uint32_t>(16));
+			const auto processCount = std::min(_frames, static_cast<uint32_t>(64));
 			_frames -= processCount;
 
-			m_dspA.advanceSamples(processCount, 0);
-			m_dspB.advanceSamples(processCount, 0);
+			m_dspA.advanceSamples(processCount, _latency);
+			m_dspB.advanceSamples(processCount, _latency);
 
 			auto* buf = m_dspAtoBBuffer.data();
 
@@ -123,6 +123,23 @@ namespace n2x
 			});
 
 //			esaiB.processAudioInput(m_dspAtoBBuffer.data(), processCount * 2, 4, 0);
+
+			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
+
+			if(esaiB.getAudioOutputs().size() < requiredSize)
+			{
+				// reduce thread contention by waiting for output buffer to be full enough to let us grab the data without entering the read mutex too often
+
+				std::unique_lock uLock(m_requestedFramesAvailableMutex);
+				m_requestedFrames = requiredSize;
+				m_requestedFramesAvailableCv.wait(uLock, [&]()
+				{
+					if(esaiB.getAudioOutputs().size() < requiredSize)
+						return false;
+					m_requestedFrames = 0;
+					return true;
+				});
+			}
 
 			// read output of DSP B to regular audio output
 			esaiB.processAudioOutputInterleaved(outputs, processCount);

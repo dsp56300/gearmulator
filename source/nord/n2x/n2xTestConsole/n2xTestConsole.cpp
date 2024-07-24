@@ -50,7 +50,7 @@ int main()
 
 	while(true)
 	{
-		hw->processAudio(blockSize);
+		hw->processAudio(blockSize, blockSize);
 
 		auto& outs = hw->getAudioOutputs();
 
