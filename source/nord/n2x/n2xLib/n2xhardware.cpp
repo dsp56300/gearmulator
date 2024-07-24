@@ -2,8 +2,8 @@
 
 namespace n2x
 {
-	constexpr uint32_t g_syncEsaiFrameRate = 8;
-	constexpr uint32_t g_syncHaltDspEsaiThreshold = 16;
+	constexpr uint32_t g_syncEsaiFrameRate = 16;
+	constexpr uint32_t g_syncHaltDspEsaiThreshold = 32;
 
 	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
