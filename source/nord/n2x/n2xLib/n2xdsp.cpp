@@ -79,7 +79,7 @@ namespace n2x
 
 			clock.setSamplerate(samplerate * clockMultiplier);
 
-			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Instructions);	// TODO
+			clock.setClockSource(dsp56k::EsaiClock::ClockSource::Cycles);
 
 			if(m_index == 0)
 			{
