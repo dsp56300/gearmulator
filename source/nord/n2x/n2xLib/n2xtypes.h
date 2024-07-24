@@ -39,7 +39,7 @@ namespace n2x
 	static constexpr uint32_t g_frontPanelSize			= 0x800;
 	static constexpr uint32_t g_keyboardSize			= 0x800;
 
-	static constexpr uint32_t g_samplerate				= 96000;
+	static constexpr uint32_t g_samplerate				= 98200;
 
 	enum class ButtonType
 	{
