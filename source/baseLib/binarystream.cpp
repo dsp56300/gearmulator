@@ -1,6 +1,6 @@
 #include "binarystream.h"
 
-namespace synthLib
+namespace baseLib
 {
 	BinaryStream BinaryStream::readChunk()
 	{

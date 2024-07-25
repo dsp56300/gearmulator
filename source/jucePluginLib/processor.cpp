@@ -2,9 +2,10 @@
 #include "dummydevice.h"
 #include "types.h"
 
+#include "baseLib/binarystream.h"
+
 #include "synthLib/deviceException.h"
 #include "synthLib/os.h"
-#include "synthLib/binarystream.h"
 #include "synthLib/midiBufferParser.h"
 
 #include "dsp56kEmu/fastmath.h"
@@ -193,22 +194,22 @@ namespace pluginLib
 
 	void Processor::saveCustomData(std::vector<uint8_t>& _targetBuffer)
 	{
-		synthLib::BinaryStream s;
+		baseLib::BinaryStream s;
 		saveChunkData(s);
 		s.toVector(_targetBuffer, true);
 	}
 
-	void Processor::saveChunkData(synthLib::BinaryStream& s)
+	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
 		{
 			std::vector<uint8_t> buffer;
 			getPlugin().getState(buffer, synthLib::StateTypeGlobal);
 
-			synthLib::ChunkWriter cw(s, "MIDI", 1);
+			baseLib::ChunkWriter cw(s, "MIDI", 1);
 			s.write(buffer);
 		}
 		{
-			synthLib::ChunkWriter cw(s, "GAIN", 1);
+			baseLib::ChunkWriter cw(s, "GAIN", 1);
 			s.write<uint32_t>(1);	// version
 			s.write(m_inputGain);
 			s.write(m_outputGain);
@@ -216,13 +217,13 @@ namespace pluginLib
 
 		if(m_dspClockPercent != 100)
 		{
-			synthLib::ChunkWriter cw(s, "DSPC", 1);
+			baseLib::ChunkWriter cw(s, "DSPC", 1);
 			s.write(m_dspClockPercent);
 		}
 
 		if(m_preferredDeviceSamplerate > 0)
 		{
-			synthLib::ChunkWriter cw(s, "DSSR", 1);
+			baseLib::ChunkWriter cw(s, "DSSR", 1);
 			s.write(m_preferredDeviceSamplerate);
 		}
 	}
@@ -235,48 +236,48 @@ namespace pluginLib
 		// In Vavra, the only data we had was the gain parameters
 		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
 		{
-			synthLib::BinaryStream ss(_sourceBuffer);
+			baseLib::BinaryStream ss(_sourceBuffer);
 			readGain(ss);
 			return true;
 		}
 
-		synthLib::BinaryStream s(_sourceBuffer);
-		synthLib::ChunkReader cr(s);
+		baseLib::BinaryStream s(_sourceBuffer);
+		baseLib::ChunkReader cr(s);
 
 		loadChunkData(cr);
 
 		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 	}
 
-	void Processor::loadChunkData(synthLib::ChunkReader& _cr)
+	void Processor::loadChunkData(baseLib::ChunkReader& _cr)
 	{
-		_cr.add("MIDI", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		_cr.add("MIDI", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			std::vector<uint8_t> buffer;
 			_binaryStream.read(buffer);
 			getPlugin().setState(buffer);
 		});
 
-		_cr.add("GAIN", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		_cr.add("GAIN", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			readGain(_binaryStream);
 		});
 
-		_cr.add("DSPC", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		_cr.add("DSPC", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			auto p = _binaryStream.read<uint32_t>();
 			p = dsp56k::clamp<uint32_t>(p, 50, 200);
 			setDspClockPercent(p);
 		});
 
-		_cr.add("DSSR", 1, [this](synthLib::BinaryStream& _binaryStream, uint32_t _version)
+		_cr.add("DSSR", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
 		{
 			const auto sr = _binaryStream.read<float>();
 			setPreferredDeviceSamplerate(sr);
 		});
 	}
 
-	void Processor::readGain(synthLib::BinaryStream& _s)
+	void Processor::readGain(baseLib::BinaryStream& _s)
 	{
 		const auto version = _s.read<uint32_t>();
 		if (version != 1)

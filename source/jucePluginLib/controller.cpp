@@ -497,12 +497,12 @@ namespace pluginLib
         m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
 	}
 
-	void Controller::loadChunkData(synthLib::ChunkReader& _cr)
+	void Controller::loadChunkData(baseLib::ChunkReader& _cr)
 	{
 		m_parameterLinks.loadChunkData(_cr);
 	}
 
-	void Controller::saveChunkData(synthLib::BinaryStream& s)
+	void Controller::saveChunkData(baseLib::BinaryStream& s)
 	{
 		m_parameterLinks.saveChunkData(s);
 	}

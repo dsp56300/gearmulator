@@ -1,6 +1,7 @@
 #pragma once
 
-#include "md5.h"
+#include "baseLib/md5.h"
+
 #include "dsp56kEmu/types.h"
 
 namespace dsp56k
@@ -50,10 +51,10 @@ namespace synthLib
 
 	struct DspMemoryPatches
 	{
-		std::initializer_list<MD5> allowedTargets;
+		std::initializer_list<baseLib::MD5> allowedTargets;
 		std::initializer_list<DspMemoryPatch> patches;
 
-		bool apply(dsp56k::DSP& _dsp, const MD5& _md5) const;
+		bool apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const;
 
 	private:
 		static bool apply(dsp56k::DSP& _dsp, const std::initializer_list<DspMemoryPatch>& _patches);

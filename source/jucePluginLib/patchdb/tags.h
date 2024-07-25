@@ -6,7 +6,7 @@
 
 #include "patchdbtypes.h"
 
-namespace synthLib
+namespace baseLib
 {
 	class BinaryStream;
 }
@@ -77,8 +77,8 @@ namespace pluginLib::patchDB
 			return m_added.empty() && m_removed.empty();
 		}
 
-		void write(synthLib::BinaryStream& _s) const;
-		bool read(synthLib::BinaryStream& _stream);
+		void write(baseLib::BinaryStream& _s) const;
+		bool read(baseLib::BinaryStream& _stream);
 
 		bool operator == (const Tags& _t) const;
 
@@ -105,8 +105,8 @@ namespace pluginLib::patchDB
 		void deserialize(juce::DynamicObject* _obj);
 		bool operator == (const TypedTags& _tags) const;
 
-		void write(synthLib::BinaryStream& _s) const;
-		bool read(synthLib::BinaryStream& _stream);
+		void write(baseLib::BinaryStream& _s) const;
+		bool read(baseLib::BinaryStream& _stream);
 
 	private:
 		std::unordered_map<TagType, Tags> m_tags;

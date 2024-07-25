@@ -4,7 +4,7 @@
 #include <memory_resource>
 #include <array>
 
-namespace synthLib
+namespace baseLib
 {
 	template<typename T, size_t S> class BufferResource
 	{

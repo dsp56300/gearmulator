@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace synthLib
+namespace baseLib
 {
 	class MD5
 	{

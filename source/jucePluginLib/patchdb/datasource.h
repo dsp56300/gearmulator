@@ -4,7 +4,7 @@
 
 #include "patchdbtypes.h"
 
-namespace synthLib
+namespace baseLib
 {
 	class BinaryStream;
 }
@@ -115,8 +115,8 @@ namespace pluginLib::patchDB
 
 		std::string toString() const;
 
-		void write(synthLib::BinaryStream& _outStream) const;
-		bool read(synthLib::BinaryStream& _inStream);
+		void write(baseLib::BinaryStream& _outStream) const;
+		bool read(baseLib::BinaryStream& _inStream);
 	};
 
 	struct DataSourceNode final : DataSource, std::enable_shared_from_this<DataSourceNode>

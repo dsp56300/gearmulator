@@ -4,8 +4,9 @@
 
 #include "virusLib/romloader.h"
 
+#include "baseLib/binarystream.h"
+
 #include "synthLib/deviceException.h"
-#include "synthLib/binarystream.h"
 #include "synthLib/os.h"
 
 //==============================================================================
@@ -97,12 +98,12 @@ pluginLib::Controller* VirusProcessor::createController()
 	return new Virus::Controller(*this, m_defaultModel);
 }
 
-void VirusProcessor::saveChunkData(synthLib::BinaryStream& s)
+void VirusProcessor::saveChunkData(baseLib::BinaryStream& s)
 {
 	auto* rom = getSelectedRom();
 	if(rom)
 	{
-		synthLib::ChunkWriter cw(s, "ROM ", 2);
+		baseLib::ChunkWriter cw(s, "ROM ", 2);
 		const auto romName = synthLib::getFilenameWithoutPath(rom->getFilename());
 		s.write<uint8_t>(static_cast<uint8_t>(rom->getModel()));
 		s.write(romName);
@@ -110,9 +111,9 @@ void VirusProcessor::saveChunkData(synthLib::BinaryStream& s)
 	Processor::saveChunkData(s);
 }
 
-void VirusProcessor::loadChunkData(synthLib::ChunkReader& _cr)
+void VirusProcessor::loadChunkData(baseLib::ChunkReader& _cr)
 {
-	_cr.add("ROM ", 2, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+	_cr.add("ROM ", 2, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
 	{
 		auto model = virusLib::DeviceModel::ABC;
 

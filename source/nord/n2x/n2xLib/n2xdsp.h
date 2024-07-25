@@ -5,7 +5,8 @@
 
 #include "dsp56kEmu/dsp.h"
 #include "dsp56kEmu/dspthread.h"
-#include "synthLib/trigger.h"
+
+#include "baseLib/trigger.h"
 
 namespace mc68k
 {
@@ -79,7 +80,7 @@ namespace n2x
 		std::condition_variable m_haltDSPcv;
 		std::mutex m_haltDSPmutex;
 
-		synthLib::Trigger<> m_triggerInterruptDone;
+		baseLib::Trigger<> m_triggerInterruptDone;
 		uint32_t m_vbaInterruptDone = 0;
 	};
 }

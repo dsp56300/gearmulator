@@ -9,6 +9,6 @@ namespace virusLib
 	class DspMemoryPatches
 	{
 	public:
-		static void apply(const DspSingle* _dsp, const synthLib::MD5& _romChecksum);
+		static void apply(const DspSingle* _dsp, const baseLib::MD5& _romChecksum);
 	};
 }

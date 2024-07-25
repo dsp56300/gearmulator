@@ -7,7 +7,7 @@
 #include <vector>
 #include <cstring>
 
-namespace synthLib
+namespace baseLib
 {
 	class StreamBuffer
 	{

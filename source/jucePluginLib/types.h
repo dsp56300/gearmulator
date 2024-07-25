@@ -1,10 +1,10 @@
 #pragma once
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace pluginLib
 {
-	using PluginStream = synthLib::BinaryStream;
+	using PluginStream = baseLib::BinaryStream;
 
 	enum ParameterLinkType : uint32_t
 	{

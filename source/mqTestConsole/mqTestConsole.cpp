@@ -2,14 +2,14 @@
 #include <iostream>
 #include <memory>
 
+#include "baseLib/configFile.h"
+
 #include "synthLib/os.h"
 #include "synthLib/wavWriter.h"
 #include "synthLib/midiTypes.h"
-#include "synthLib/configFile.h"
 
 #include "mqLib/microq.h"
 #include "mqLib/mqhardware.h"
-#include "mqLib/rom.h"
 
 #include "dsp56kEmu/threadtools.h"
 
@@ -78,7 +78,7 @@ int main(int _argc, char* _argv[])
 
 	try
 	{
-		synthLib::ConfigFile cfg((synthLib::getModulePath() + "config.cfg").c_str());
+		baseLib::ConfigFile cfg((synthLib::getModulePath() + "config.cfg").c_str());
 		for (const auto& v : cfg.getValues())
 		{
 			if(v.first == "MidiIn")

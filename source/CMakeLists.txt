@@ -16,6 +16,7 @@ add_subdirectory(dsp56300/source)
 
 # ----------------- Common libraries used by all synths
 
+add_subdirectory(baseLib)
 add_subdirectory(synthLib)
 add_subdirectory(libresample)
 

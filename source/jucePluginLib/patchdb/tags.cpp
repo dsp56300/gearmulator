@@ -2,13 +2,13 @@
 
 #include "juce_core/juce_core.h"
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
-	void Tags::write(synthLib::BinaryStream& _s) const
+	void Tags::write(baseLib::BinaryStream& _s) const
 	{
-		synthLib::ChunkWriter cw(_s, chunks::g_tags, 1);
+		baseLib::ChunkWriter cw(_s, chunks::g_tags, 1);
 		_s.write(m_added.size());
 		for (const auto& added : m_added)
 			_s.write(added);
@@ -17,7 +17,7 @@ namespace pluginLib::patchDB
 			_s.write(removed);
 	}
 
-	bool Tags::read(synthLib::BinaryStream& _stream)
+	bool Tags::read(baseLib::BinaryStream& _stream)
 	{
 		auto in = _stream.tryReadChunk(chunks::g_tags, 1);
 		if(!in)
@@ -253,9 +253,9 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	void TypedTags::write(synthLib::BinaryStream& _s) const
+	void TypedTags::write(baseLib::BinaryStream& _s) const
 	{
-		synthLib::ChunkWriter cw(_s, chunks::g_typedTags, 1);
+		baseLib::ChunkWriter cw(_s, chunks::g_typedTags, 1);
 		_s.write(m_tags.size());
 
 		for (const auto& t : m_tags)
@@ -265,7 +265,7 @@ namespace pluginLib::patchDB
 		}
 	}
 
-	bool TypedTags::read(synthLib::BinaryStream& _stream)
+	bool TypedTags::read(baseLib::BinaryStream& _stream)
 	{
 		auto in = _stream.tryReadChunk(chunks::g_typedTags, 1);
 

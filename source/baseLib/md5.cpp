@@ -1,10 +1,12 @@
 #include "md5.h"
 
-#include "dsp56kEmu/logging.h"
-
 #include <cstring>	// memcpy
+#include <iomanip>
+#include <sstream>
 
-namespace synthLib
+#define HEXN(S, n)		std::hex << std::setfill('0') << std::setw(n) << (uint32_t)S
+
+namespace baseLib
 {
 	// leftrotate function definition
 	uint32_t leftrotate(const uint32_t x, const uint32_t c)

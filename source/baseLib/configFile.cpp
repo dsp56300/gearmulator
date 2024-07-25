@@ -2,9 +2,7 @@
 
 #include <fstream>
 
-#include "dsp56kEmu/logging.h"
-
-namespace synthLib
+namespace baseLib
 {
 	static bool needsTrim(char _c)
 	{

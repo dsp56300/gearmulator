@@ -23,9 +23,9 @@ namespace jucePluginEditorLib
 		virtual PluginEditorState* createEditorState() = 0;
 		void destroyEditorState();
 
-		void saveChunkData(synthLib::BinaryStream& s) override;
+		void saveChunkData(baseLib::BinaryStream& s) override;
 		bool loadCustomData(const std::vector<uint8_t>& _sourceBuffer) override;
-		void loadChunkData(synthLib::ChunkReader& _cr) override;
+		void loadChunkData(baseLib::ChunkReader& _cr) override;
 
 	private:
 		std::unique_ptr<PluginEditorState> m_editorState;

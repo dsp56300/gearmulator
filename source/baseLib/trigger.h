@@ -4,7 +4,7 @@
 #include <condition_variable>
 #include <cstdint>
 
-namespace synthLib
+namespace baseLib
 {
 	template<typename TCounter = uint32_t>
 	class Trigger

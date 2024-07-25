@@ -64,8 +64,8 @@ private:
 
     pluginLib::Controller* createController() override;
 
-    void saveChunkData(synthLib::BinaryStream& s) override;
-    void loadChunkData(synthLib::ChunkReader& _cr) override;
+    void saveChunkData(baseLib::BinaryStream& s) override;
+    void loadChunkData(baseLib::ChunkReader& _cr) override;
 
     //==============================================================================
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
