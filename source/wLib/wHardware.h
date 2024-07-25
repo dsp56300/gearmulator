@@ -8,6 +8,11 @@
 
 #include "synthLib/midiTypes.h"
 
+namespace hwLib
+{
+	class SciMidi;
+}
+
 namespace mc68k
 {
 	class Mc68k;
@@ -20,15 +25,13 @@ namespace dsp56k
 
 namespace wLib
 {
-	class Midi;
-
 	class Hardware
 	{
 	public:
 		Hardware(const double& _samplerate);
 		virtual ~Hardware() = default;
 
-		virtual Midi& getMidi() = 0;
+		virtual hwLib::SciMidi& getMidi() = 0;
 		virtual mc68k::Mc68k& getUc() = 0;
 
 		void haltDSP();

@@ -2,11 +2,12 @@
 
 #include "n2xfrontpanel.h"
 #include "n2xhdi08.h"
-#include "n2xi2cflash.h"
+#include "n2xflash.h"
 #include "n2xtypes.h"
-#include "mc68k/hdi08.h"
+
 #include "mc68k/mc68k.h"
-#include "wLib/wMidi.h"
+
+#include "hardwareLib/sciMidi.h"
 
 namespace n2x
 {
@@ -36,7 +37,7 @@ namespace n2x
 
 		std::array<uint8_t, g_romSize> m_rom;
 		std::array<uint8_t, g_ramSize> m_ram;
-		I2cFlash m_flash;
+		Flash m_flash;
 
 		Hdi08DspA m_hdi08A;
 		Hdi08DspB m_hdi08B;
@@ -45,7 +46,7 @@ namespace n2x
 		FrontPanel m_panel;
 
 		uint32_t m_prevPC;
-		wLib::Midi m_midi;
+		hwLib::SciMidi m_midi;
 		uint64_t m_totalCycles = 0;
 		bool m_hasSentMidi = false;
 	};

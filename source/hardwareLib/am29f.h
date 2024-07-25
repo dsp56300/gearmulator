@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <vector>
 
-namespace wLib
+namespace hwLib
 {
 	class Am29f
 	{

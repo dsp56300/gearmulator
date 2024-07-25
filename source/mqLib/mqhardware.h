@@ -10,9 +10,8 @@
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "synthLib/midiTypes.h"
+#include "hardwareLib/sciMidi.h"
 
-#include "wLib/wMidi.h"
 #include "wLib/wHardware.h"
 
 namespace mqLib
@@ -54,7 +53,7 @@ namespace mqLib
 
 		void initVoiceExpansion();
 
-		wLib::Midi& getMidi() override
+		hwLib::SciMidi& getMidi() override
 		{
 			return m_midi;
 		}
@@ -79,6 +78,6 @@ namespace mqLib
 		TAudioOutputs m_audioOutputs;
 		std::array<MqDsp,g_dspCount> m_dsps;
 
-		wLib::Midi m_midi;
+		hwLib::SciMidi m_midi;
 	};
 }

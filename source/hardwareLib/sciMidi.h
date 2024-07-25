@@ -10,12 +10,12 @@ namespace mc68k
 	class Qsm;
 }
 
-namespace wLib
+namespace hwLib
 {
-	class Midi
+	class SciMidi
 	{
 	public:
-		explicit Midi(mc68k::Qsm& _qsm);
+		explicit SciMidi(mc68k::Qsm& _qsm);
 
 		void process(uint32_t _numSamples);
 

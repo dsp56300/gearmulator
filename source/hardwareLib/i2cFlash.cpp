@@ -1,17 +1,16 @@
-#include "n2xi2cflash.h"
+#include "i2cFlash.h"
 
 #include <cassert>
 
 #include "dsp56kEmu/logging.h"
 
-namespace n2x
-{
-	template<> RomData<g_flashSize>::RomData();
+#include "synthLib/os.h"
 
-	I2cFlash::I2cFlash()
+namespace hwLib
+{
+	void I2cFlash::saveAs(const std::string& _filename) const
 	{
-		if(!isValid())
-			data().fill(0xff);
+		synthLib::writeFile(_filename, m_data);
 	}
 
 	void I2cFlash::onStartCondition()
@@ -77,7 +76,7 @@ namespace n2x
 	{
 		assert((m_deviceSelect & DeviceSelectMask::Area) == DeviceSelectValues::AreaMemory);
 		assert((m_deviceSelect & DeviceSelectMask::Rw) == DeviceSelectValues::Read);
-		const auto res = data()[m_address];
+		const auto res = m_data[m_address];
 
 		LOG("I2C op read from " << HEXN(m_address,4) << ", res " << HEXN(res,2));
 		advanceAddress();
@@ -89,7 +88,7 @@ namespace n2x
 		assert((m_deviceSelect & DeviceSelectMask::Area) == DeviceSelectValues::AreaMemory);
 		assert((m_deviceSelect & DeviceSelectMask::Rw) == DeviceSelectValues::Write);
 
-		data()[m_address] = _byte;
+		m_data[m_address] = _byte;
 
 		LOG("I2C op write to " << HEXN(m_address,4) << ", val " << HEXN(_byte,2));
 		advanceAddress();

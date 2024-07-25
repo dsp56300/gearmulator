@@ -4,7 +4,7 @@
 
 #include "n2xdsp.h"
 #include "n2xrom.h"
-#include "synthLib/midiTypes.h"
+
 #include "synthLib/os.h"
 
 namespace n2x

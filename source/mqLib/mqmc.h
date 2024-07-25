@@ -6,7 +6,8 @@
 #include "buttons.h"
 #include "lcd.h"
 #include "leds.h"
-#include "wLib/am29f.h"
+
+#include "hardwareLib/am29f.h"
 
 #include "mc68k/mc68k.h"
 #include "mc68k/hdi08periph.h"
@@ -66,7 +67,7 @@ namespace mqLib
 
 		const ROM& m_rom;
 		std::vector<uint8_t> m_romRuntimeData;
-		std::unique_ptr<wLib::Am29f> m_flash;
+		std::unique_ptr<hwLib::Am29f> m_flash;
 		LCD m_lcd;
 		Buttons m_buttons;
 		Leds m_leds;

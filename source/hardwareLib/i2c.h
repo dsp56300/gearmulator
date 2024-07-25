@@ -3,7 +3,7 @@
 #include <cstdint>
 #include <optional>
 
-namespace n2x
+namespace hwLib
 {
 	class I2c
 	{

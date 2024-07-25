@@ -5,7 +5,7 @@
 #include "mc68k/logging.h"
 #include "mc68k/mc68k.h"
 
-namespace wLib
+namespace hwLib
 {
 	Am29f::Am29f(uint8_t* _buffer, const size_t _size, bool _useWriteEnable, bool _bitreversedCmdAddr): m_buffer(_buffer), m_size(_size), m_useWriteEnable(_useWriteEnable), m_bitreverseCmdAddr(_bitreversedCmdAddr)
 	{
@@ -135,5 +135,4 @@ namespace wLib
 			break;
 		}
 	}
-
 }

@@ -4,7 +4,7 @@
 
 #include "dsp56kEmu/logging.h"
 
-namespace n2x
+namespace hwLib
 {
 	void I2c::masterWrite(const bool _sda, const bool _scl)
 	{

@@ -1,20 +1,20 @@
-#include "wMidi.h"
+#include "sciMidi.h"
 
 #include <deque>
 
 #include "mc68k/qsm.h"
 
-namespace wLib
+namespace hwLib
 {
 	// pause 0.1 seconds for a sysex size of 500, delay is calculated for other sysex sizes accordingly
 	static constexpr float g_sysexSendDelaySeconds = 0.1f;
 	static constexpr uint32_t g_sysexSendDelaySize = 500;
 
-	Midi::Midi(mc68k::Qsm& _qsm) : m_qsm(_qsm)
+	SciMidi::SciMidi(mc68k::Qsm& _qsm) : m_qsm(_qsm)
 	{
 	}
 
-	void Midi::process(const uint32_t _numSamples)
+	void SciMidi::process(const uint32_t _numSamples)
 	{
 		std::unique_lock lock(m_mutex);
 
@@ -47,7 +47,7 @@ namespace wLib
 		}
 	}
 
-	void Midi::writeMidi(const uint8_t _byte)
+	void SciMidi::writeMidi(const uint8_t _byte)
 	{
 		std::unique_lock lock(m_mutex);
 
@@ -76,7 +76,7 @@ namespace wLib
 		}
 	}
 
-	void Midi::readTransmitBuffer(std::vector<uint8_t>& _result)
+	void SciMidi::readTransmitBuffer(std::vector<uint8_t>& _result)
 	{
 		std::deque<uint16_t> midiData;
 		m_qsm.readSciTX(midiData);

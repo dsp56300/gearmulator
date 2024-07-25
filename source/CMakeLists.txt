@@ -42,12 +42,10 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 endif()
 
 # ----------------- dependencies
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA OR ${CMAKE_PROJECT_NAME}_SYNTH_N2X)
-	add_subdirectory(mc68k)
-	if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-		add_subdirectory(wLib)
-	endif()
-endif()
+
+add_subdirectory(mc68k EXCLUDE_FROM_ALL)
+add_subdirectory(hardwareLib EXCLUDE_FROM_ALL)
+add_subdirectory(wLib EXCLUDE_FROM_ALL)
 
 # ----------------- Synths Osirus/OsTIrus
 

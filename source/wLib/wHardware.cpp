@@ -1,9 +1,10 @@
 #include "wHardware.h"
 
-#include "wMidi.h"
 #include "dsp56kEmu/audio.h"
 
 #include "synthLib/midiBufferParser.h"
+
+#include "hardwareLib/sciMidi.h"
 
 #include "mc68k/mc68k.h"
 

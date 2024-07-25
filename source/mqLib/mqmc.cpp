@@ -33,7 +33,7 @@ namespace mqLib
 		m_romRuntimeData.resize(ROM::size());
 		memcpy(m_romRuntimeData.data(), m_rom.getData(), ROM::size());
 
-		m_flash.reset(new wLib::Am29f(m_romRuntimeData.data(), m_romRuntimeData.size(), false, true));
+		m_flash.reset(new hwLib::Am29f(m_romRuntimeData.data(), m_romRuntimeData.size(), false, true));
 
 		m_memory.resize(g_memorySize, 0);
 

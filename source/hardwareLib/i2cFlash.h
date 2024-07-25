@@ -1,17 +1,29 @@
 #pragma once
 
+#include <array>
 #include <optional>
+#include <string>
 
 #include "i2c.h"
-#include "n2xromdata.h"
-#include "n2xtypes.h"
 
-namespace n2x
+namespace hwLib
 {
-	class I2cFlash : public I2c, public RomData<g_flashSize>
+	// M24512 64kx 8 i2c flash chip emulation
+	class I2cFlash : public I2c
 	{
 	public:
-		I2cFlash();
+		using Data = std::array<uint8_t, 0x10000>;
+
+		I2cFlash()
+		{
+			m_data.fill(0xff);
+		}
+
+		explicit I2cFlash(const Data& _data) : m_data(_data)
+		{
+		}
+
+		void saveAs(const std::string& _filename) const;
 
 	private:
 		enum class State
@@ -48,5 +60,7 @@ namespace n2x
 		State m_state = State::ReadDeviceSelect;
 		uint8_t m_deviceSelect = 0;
 		uint64_t m_address = 0;
+
+		Data m_data;
 	};
 }
