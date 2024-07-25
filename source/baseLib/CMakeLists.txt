@@ -8,7 +8,7 @@ set(SOURCES
 	configFile.cpp configFile.h
 	hybridcontainer.h
 	md5.cpp md5.h
-	trigger.cpp trigger.h
+	semaphore.h
 )
 
 target_sources(baseLib PRIVATE ${SOURCES})
