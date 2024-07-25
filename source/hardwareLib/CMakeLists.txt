@@ -5,9 +5,11 @@ add_library(hardwareLib STATIC)
 
 set(SOURCES
 	am29f.cpp am29f.h
+	haltDSP.cpp haltDSP.h
 	i2c.cpp i2c.h
 	i2cFlash.cpp i2cFlash.h
 	sciMidi.cpp sciMidi.h
+	syncUCtoDSP.h
 )
 
 target_sources(hardwareLib PRIVATE ${SOURCES})

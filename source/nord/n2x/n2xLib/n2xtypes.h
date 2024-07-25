@@ -40,6 +40,7 @@ namespace n2x
 	static constexpr uint32_t g_keyboardSize			= 0x800;
 
 	static constexpr uint32_t g_samplerate				= 98200;
+	static constexpr uint32_t g_ucFreqHz				= 25165824;		// Fext=32768Hz, SYNCR=$d700, W=1, X=1, Y=17
 
 	enum class ButtonType
 	{
