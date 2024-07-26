@@ -1,6 +1,8 @@
 #pragma once
 
 #include <cstdint>
+#include <functional>
+#include <unordered_map>
 
 #include "baseLib/semaphore.h"
 
@@ -16,8 +18,14 @@ namespace hwLib
 	public:
 		explicit HaltDSP(dsp56k::DSP& _dsp);
 
-		void haltDSP();
+		void haltDSP(bool _wait = false);
 		bool resumeDSP();
+
+		bool halted() const {return m_halted > 0; }
+
+		dsp56k::DSP& getDSP() const { return m_dsp; }
+
+		void wakeUp(std::function<void()>&& _func);
 
 	private:
 		void onInterrupt();
@@ -26,7 +34,18 @@ namespace hwLib
 
 		uint32_t m_halted = 0;
 		uint32_t m_irq;
-		baseLib::Semaphore m_semaphore;
+		baseLib::Semaphore m_blockSem;
+
+		std::mutex m_mutex;
+		std::condition_variable m_cvHalted;
+
+		uint32_t m_irqServedCount = 0;
+		uint32_t m_irqRequestCount = 0;
+
+		uint32_t m_wakeUpId = 0;
+		uint32_t m_wakeUpCount = 0;
+
+		std::unordered_map<uint32_t, std::function<void()>> m_wakeUps;
 	};
 
 	class ScopedResumeDSP

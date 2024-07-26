@@ -23,25 +23,16 @@ namespace n2x
 
 		void processAudio(uint32_t _frames, uint32_t _latency);
 
-		void resumeDSPsForFunc(const std::function<void()>& _callback)
-		{
-			const auto halted = m_haltDSP;
-			if(halted)
-				resumeDSP();
-			_callback();
-			if(halted)
-				haltDSP();
-		}
-
 		auto& getDSPA() { return m_dspA; }
 		auto& getDSPB() { return m_dspB; }
+
+		void haltDSPs();
+		void resumeDSPs();
 
 	private:
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallback();
 		void syncUCtoDSP();
-		void haltDSP();
-		void resumeDSP();
 
 		Rom m_rom;
 		Microcontroller m_uc;
@@ -65,8 +56,6 @@ namespace n2x
 		std::mutex m_requestedFramesAvailableMutex;
 		std::condition_variable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
-		bool m_haltDSP = false;
-		std::condition_variable m_haltDSPcv;
-		std::mutex m_haltDSPmutex;
+		bool m_dspHalted = false;
 	};
 }

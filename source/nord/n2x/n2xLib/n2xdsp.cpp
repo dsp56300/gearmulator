@@ -64,6 +64,7 @@ namespace n2x
 	, m_name(_index ? "DSP B" : "DSP A")
 	, m_memory(g_memValidator, g_pMemSize, g_xyMemSize, g_externalMemAddr)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
+	, m_haltDSP(m_dsp)
 	{
 		if(!_hw.isValid())
 			return;
@@ -177,7 +178,7 @@ namespace n2x
 
 		m_thread->setLogToStdout(false);
 
-		m_vbaInterruptDone = dsp().registerInterruptFunc([this]
+		m_irqInterruptDone = dsp().registerInterruptFunc([this]
 		{
 			m_triggerInterruptDone.notify();
 		});
@@ -215,14 +216,33 @@ namespace n2x
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
-//		waitDspRxEmpty();
-		dsp().injectExternalInterrupt(_irq);
-
-		dsp().injectExternalInterrupt(m_vbaInterruptDone);
-		m_hardware.resumeDSPsForFunc([&]
+		// If applicable, we wait for the halt on our DSP after resuming it
+		/*if(m_haltDSP.halted())
 		{
+			bool done = false;
+			std::mutex mutex;
+			std::condition_variable wait;
+			m_haltDSP.wakeUp([this, _irq, &mutex, &done, &wait]
+			{
+				dsp().execInterrupt(_irq);
+				{
+					std::unique_lock lock(mutex);
+					done = true;
+				}
+				wait.notify_one();
+			});
+			std::unique_lock lock(mutex);
+			wait.wait(lock, [&done]{return done;});
+			assert(done);
+		}
+		else*/
+		{
+			dsp().injectExternalInterrupt(_irq);
+			dsp().injectExternalInterrupt(m_irqInterruptDone);
+
+			hwLib::ScopedResumeDSP r(m_hardware.getDSPB().getHaltDSP());
 			m_triggerInterruptDone.wait();
-		});
+		}
 
 		hdiTransferDSPtoUC();
 	}
@@ -264,15 +284,5 @@ namespace n2x
 			return true;
 		}
 		return false;
-	}
-
-	void DSP::waitDspRxEmpty()
-	{
-		m_hardware.ucYieldLoop([&]()
-		{
-			return (hdi08().hasRXData() && hdi08().rxInterruptEnabled()) || dsp().hasPendingInterrupts();
-		});
-//		assert(!hdi08().hasRXData());
-//		LOG("writeRX wait over");
 	}
 }

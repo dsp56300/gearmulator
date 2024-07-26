@@ -7,6 +7,7 @@
 #include "dsp56kEmu/dspthread.h"
 
 #include "baseLib/semaphore.h"
+#include "hardwareLib/haltDSP.h"
 
 namespace mc68k
 {
@@ -44,7 +45,8 @@ namespace n2x
 
 		void advanceSamples(uint32_t _samples, uint32_t _latency);
 
-		dsp56k::DSPThread& getDSPThread() const { return *m_thread.get(); }
+		dsp56k::DSPThread& getDSPThread() const { return *m_thread; }
+		auto& getHaltDSP() { return m_haltDSP; }
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -53,7 +55,6 @@ namespace n2x
 		uint8_t hdiUcReadIsr(uint8_t _isr);
 		void onEsaiCallback();
 		bool hdiTransferDSPtoUC();
-		void waitDspRxEmpty();
 
 		Hardware& m_hardware;
 		mc68k::Hdi08& m_hdiUC;
@@ -81,6 +82,8 @@ namespace n2x
 		std::mutex m_haltDSPmutex;
 
 		baseLib::Semaphore m_triggerInterruptDone;
-		uint32_t m_vbaInterruptDone = 0;
+		uint32_t m_irqInterruptDone = 0;
+
+		hwLib::HaltDSP m_haltDSP;
 	};
 }
