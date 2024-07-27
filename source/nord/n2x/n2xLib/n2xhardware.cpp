@@ -13,14 +13,13 @@ namespace n2x
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)
 		, m_samplerateInv(1.0 / g_samplerate)
+		, m_semDspAtoB(1)
 	{
 		if(!m_rom.isValid())
 			return;
 
-		m_dspB.setEsaiCallback([this]()
-		{
-			onEsaiCallback();
-		});
+		m_dspA.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackA(); }, 0);
+		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*) { onEsaiCallbackB(); }, 0);
 	}
 
 	bool Hardware::isValid() const
@@ -40,7 +39,6 @@ namespace n2x
 
 	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
 	{
-		hwLib::ScopedResumeDSP rA(m_dspA.getHaltDSP());
 		hwLib::ScopedResumeDSP rB(m_dspB.getHaltDSP());
 
 		while(_continue())
@@ -79,7 +77,6 @@ namespace n2x
 		outputs[10] = m_dummyOutput.data();
 		outputs[11] = m_dummyOutput.data();
 
-		auto& esaiA = m_dspA.getPeriph().getEsai();
 		auto& esaiB = m_dspB.getPeriph().getEsai();
 
 //		LOG("B out " << esaiB.getAudioOutputs().size() << ", A out " << esaiA.getAudioOutputs().size() << ", B in " << esaiB.getAudioInputs().size());
@@ -88,35 +85,6 @@ namespace n2x
 		{
 			const auto processCount = std::min(_frames, static_cast<uint32_t>(64));
 			_frames -= processCount;
-
-			m_dspA.advanceSamples(processCount, _latency);
-			m_dspB.advanceSamples(processCount, _latency);
-
-			auto* buf = m_dspAtoBBuffer.data();
-
-			// read data from DSP A...
-			esaiA.processAudioOutput<dsp56k::TWord>(processCount, [&](size_t _index, dsp56k::Audio::TxFrame& _frame)
-			{
-				*buf++ = _frame[0][0];
-				*buf++ = _frame[1][0];
-				*buf++ = _frame[2][0];
-				*buf++ = _frame[3][0];
-			});
-
-			buf = m_dspAtoBBuffer.data();
-
-			// ...and forward it to DSP B
-			esaiB.processAudioInput<dsp56k::TWord>(processCount, 0, [&](size_t _s, dsp56k::Audio::RxFrame& _f)
-			{
-				_f.resize(4);
-				_f[0] = dsp56k::Audio::RxSlot{0};
-				_f[1] = dsp56k::Audio::RxSlot{0};
-				_f[2] = dsp56k::Audio::RxSlot{0};
-				_f[3] = dsp56k::Audio::RxSlot{0};
-				buf += 4;
-			});
-
-//			esaiB.processAudioInput(m_dspAtoBBuffer.data(), processCount * 2, 4, 0);
 
 			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
 
@@ -137,15 +105,6 @@ namespace n2x
 
 			// read output of DSP B to regular audio output
 			esaiB.processAudioOutputInterleaved(outputs, processCount);
-
-			for(uint32_t i=0; i<processCount; ++i)
-			{
-				const auto i4 = i<<2;
-				outputs[0][i] += m_dspAtoBBuffer[i4+2];
-				outputs[1][i] += m_dspAtoBBuffer[i4+3];
-				outputs[2][i] += m_dspAtoBBuffer[i4+0];
-				outputs[3][i] += m_dspAtoBBuffer[i4+1];
-			}
 
 			outputs[0] += processCount;
 			outputs[1] += processCount;
@@ -168,8 +127,28 @@ namespace n2x
 		m_dspAtoBBuffer.resize(_frames * 4);
 	}
 
-	void Hardware::onEsaiCallback()
+	void Hardware::onEsaiCallbackA()
 	{
+		// forward DSP A output to DSP B input
+		const auto out = m_dspA.getPeriph().getEsai().getAudioOutputs().pop_front();
+
+		dsp56k::Audio::RxFrame in;
+		in.resize(out.size());
+
+		in[0] = dsp56k::Audio::RxSlot{out[0][0]};
+		in[1] = dsp56k::Audio::RxSlot{out[1][0]};
+		in[2] = dsp56k::Audio::RxSlot{out[2][0]};
+		in[3] = dsp56k::Audio::RxSlot{out[3][0]};
+
+		m_dspB.getPeriph().getEsai().getAudioInputs().push_back(in);
+
+		m_semDspAtoB.wait();
+	}
+
+	void Hardware::onEsaiCallbackB()
+	{
+		m_semDspAtoB.notify();
+
 		++m_esaiFrameIndex;
 
 //		processMidiInput();
@@ -201,7 +180,6 @@ namespace n2x
 
 		if(m_esaiFrameIndex == m_lastEsaiFrameIndex)
 		{
-			m_dspHalted = false;
 			resumeDSPs();
 			std::unique_lock uLock(m_esaiFrameAddedMutex);
 			m_esaiFrameAddedCv.wait(uLock, [this]{return m_esaiFrameIndex > m_lastEsaiFrameIndex;});
@@ -226,31 +204,24 @@ namespace n2x
 		m_remainingUcCyclesD -= static_cast<double>(m_remainingUcCycles);
 
 		if(esaiDelta > g_syncHaltDspEsaiThreshold)
-		{
-			if(!m_dspHalted)
-			{
-				m_dspHalted = true;
-				haltDSPs();
-			}
-		}
-		else if(m_dspHalted)
-		{
-			m_dspHalted = false;
-			resumeDSPs();
-		}
+			haltDSPs();
 
 		m_lastEsaiFrameIndex = esaiFrameIndex;
 	}
 
 	void Hardware::haltDSPs()
 	{
-//		m_dspA.getHaltDSP().haltDSP();
+		if(m_dspHalted)
+			return;
+		m_dspHalted = true;
 		m_dspB.getHaltDSP().haltDSP();
 	}
 
 	void Hardware::resumeDSPs()
 	{
-//		m_dspA.getHaltDSP().resumeDSP();
+		if(!m_dspHalted)
+			return;
+		m_dspHalted = false;
 		m_dspB.getHaltDSP().resumeDSP();
 	}
 }

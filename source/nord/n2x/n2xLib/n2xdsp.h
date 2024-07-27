@@ -38,13 +38,6 @@ namespace n2x
 			return m_periphX;
 		}
 
-		void setEsaiCallback(std::function<void()>&& _func)
-		{
-			m_esaiCallback = std::move(_func);
-		}
-
-		void advanceSamples(uint32_t _samples, uint32_t _latency);
-
 		dsp56k::DSPThread& getDSPThread() const { return *m_thread; }
 		auto& getHaltDSP() { return m_haltDSP; }
 
@@ -53,7 +46,6 @@ namespace n2x
 		void hdiTransferUCtoDSP(uint32_t _word);
 		void hdiSendIrqToDSP(uint8_t _irq);
 		uint8_t hdiUcReadIsr(uint8_t _isr);
-		void onEsaiCallback();
 		bool hdiTransferDSPtoUC();
 
 		Hardware& m_hardware;
@@ -68,18 +60,6 @@ namespace n2x
 		dsp56k::DSP m_dsp;
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
-
-		bool m_receivedMagicEsaiPacket = false;
-		uint32_t m_hdiHF01 = 0;
-
-		uint64_t m_numEsaiCallbacks = 0;
-		uint64_t m_maxEsaiCallbacks = 0;
-		uint64_t m_esaiLatency = 0;
-
-		std::function<void()> m_esaiCallback = [] {};
-
-		std::condition_variable m_haltDSPcv;
-		std::mutex m_haltDSPmutex;
 
 		baseLib::Semaphore m_triggerInterruptDone;
 		uint32_t m_irqInterruptDone = 0;

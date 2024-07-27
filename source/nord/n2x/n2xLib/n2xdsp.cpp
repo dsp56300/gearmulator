@@ -96,11 +96,6 @@ namespace n2x
 				clock.setEsaiDivider(&esai, 1, 0);
 				clock.setEsaiCounter(&esai, -1, 0);
 			}
-
-			esai.setCallback([this](dsp56k::Audio*)
-			{
-				onEsaiCallback();
-			}, 0);
 		}
 
 		auto config = m_dsp.getJit().getConfig();
@@ -144,7 +139,7 @@ namespace n2x
 		hdi08().setRXRateLimit(0);
 //		hdi08().setTransmitDataAlwaysEmpty(false);
 
-		m_periphX.getEsai().writeEmptyAudioIn(2048);
+		m_periphX.getEsai().writeEmptyAudioIn(2);
 
 		m_hdiUC.setRxEmptyCallback([&](const bool _needMoreData)
 		{
@@ -184,17 +179,7 @@ namespace n2x
 		});
 	}
 
-	void DSP::advanceSamples(const uint32_t _samples, const uint32_t _latency)
-	{
-		{
-			std::lock_guard uLockHalt(m_haltDSPmutex);
-			m_maxEsaiCallbacks += _samples;
-			m_esaiLatency = _latency;
-		}
-		m_haltDSPcv.notify_one();
-	}
-
-	void DSP::onUCRxEmpty(bool _needMoreData)
+	void DSP::onUCRxEmpty(const bool _needMoreData)
 	{
 		if(_needMoreData)
 		{
@@ -203,8 +188,7 @@ namespace n2x
 				return dsp().hasPendingInterrupts();
 			});
 		}
-		const bool res = hdiTransferDSPtoUC();
-//		assert(!_needMoreData || res);
+		hdiTransferDSPtoUC();
 	}
 
 	void DSP::hdiTransferUCtoDSP(const uint32_t _word)
@@ -216,31 +200,11 @@ namespace n2x
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
-		// If applicable, we wait for the halt on our DSP after resuming it
-		/*if(m_haltDSP.halted())
-		{
-			bool done = false;
-			std::mutex mutex;
-			std::condition_variable wait;
-			m_haltDSP.wakeUp([this, _irq, &mutex, &done, &wait]
-			{
-				dsp().execInterrupt(_irq);
-				{
-					std::unique_lock lock(mutex);
-					done = true;
-				}
-				wait.notify_one();
-			});
-			std::unique_lock lock(mutex);
-			wait.wait(lock, [&done]{return done;});
-			assert(done);
-		}
-		else*/
 		{
 			dsp().injectExternalInterrupt(_irq);
 			dsp().injectExternalInterrupt(m_irqInterruptDone);
 
-			hwLib::ScopedResumeDSP r(m_hardware.getDSPB().getHaltDSP());
+			hwLib::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
 			m_triggerInterruptDone.wait();
 		}
 
@@ -260,21 +224,6 @@ namespace n2x
 		else if(_isr & mc68k::Hdi08::IsrBits::Txde)
 			_isr |= mc68k::Hdi08::IsrBits::Trdy;
 		return _isr;
-	}
-
-	void DSP::onEsaiCallback()
-	{
-		++m_numEsaiCallbacks;
-
-		if(m_numEsaiCallbacks >= m_maxEsaiCallbacks + m_esaiLatency)
-		{
-			std::unique_lock uLock(m_haltDSPmutex);
-			m_haltDSPcv.wait(uLock, [&]
-			{
-				return (m_maxEsaiCallbacks + m_esaiLatency) > m_numEsaiCallbacks;
-			});
-		}
-		m_esaiCallback();
 	}
 
 	bool DSP::hdiTransferDSPtoUC()

@@ -31,7 +31,8 @@ namespace n2x
 
 	private:
 		void ensureBufferSize(uint32_t _frames);
-		void onEsaiCallback();
+		void onEsaiCallbackA();
+		void onEsaiCallbackB();
 		void syncUCtoDSP();
 
 		Rom m_rom;
@@ -57,5 +58,7 @@ namespace n2x
 		std::condition_variable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
 		bool m_dspHalted = false;
+		dsp56k::SpscSemaphore m_semDspAtoB;
+		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
 	};
 }
