@@ -266,11 +266,14 @@ namespace n2x
 	{
 		++m_numEsaiCallbacks;
 
-		std::unique_lock uLock(m_haltDSPmutex);
-		m_haltDSPcv.wait(uLock, [&]
+		if(m_numEsaiCallbacks >= m_maxEsaiCallbacks + m_esaiLatency)
 		{
-			return (m_maxEsaiCallbacks + m_esaiLatency) > m_numEsaiCallbacks;
-		});
+			std::unique_lock uLock(m_haltDSPmutex);
+			m_haltDSPcv.wait(uLock, [&]
+			{
+				return (m_maxEsaiCallbacks + m_esaiLatency) > m_numEsaiCallbacks;
+			});
+		}
 		m_esaiCallback();
 	}
 
