@@ -358,8 +358,8 @@ namespace n2x
 #endif
 		const auto cycles = Mc68k::exec();
 
-		m_hdi08A.exec(cycles);
-		m_hdi08B.exec(cycles);
+//		m_hdi08A.exec(cycles);
+//		m_hdi08B.exec(cycles);
 
 /*
 		m_totalCycles += cycles;
