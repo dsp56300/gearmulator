@@ -162,7 +162,7 @@ namespace n2x
 	void FrontPanelCS6::printLCD()
 	{
 		++g_count;
-		if(g_count & 0x7f)
+		if(g_count & 0xff)
 			return;
 		/*
 		 --    --    --
