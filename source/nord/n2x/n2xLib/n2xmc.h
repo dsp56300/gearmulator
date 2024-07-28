@@ -47,7 +47,5 @@ namespace n2x
 
 		uint32_t m_prevPC;
 		hwLib::SciMidi m_midi;
-		uint64_t m_totalCycles = 0;
-		bool m_hasSentMidi = false;
 	};
 }
