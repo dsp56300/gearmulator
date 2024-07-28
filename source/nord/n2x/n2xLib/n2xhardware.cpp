@@ -90,6 +90,19 @@ namespace n2x
 			outputs[3] += processCount;
 		}
 	}
+	
+	void Hardware::processAudio(const synthLib::TAudioOutputs& _outputs, const uint32_t _frames, const uint32_t _latency)
+	{
+		processAudio(_frames, _latency);
+
+		for(size_t i=0; i<_frames; ++i)
+		{
+			_outputs[0][i] = dsp56k::dsp2sample<float>(m_audioOutputs[0][i]);
+			_outputs[1][i] = dsp56k::dsp2sample<float>(m_audioOutputs[1][i]);
+			_outputs[2][i] = dsp56k::dsp2sample<float>(m_audioOutputs[2][i]);
+			_outputs[3][i] = dsp56k::dsp2sample<float>(m_audioOutputs[3][i]);
+		}
+	}
 
 	void Hardware::ensureBufferSize(const uint32_t _frames)
 	{

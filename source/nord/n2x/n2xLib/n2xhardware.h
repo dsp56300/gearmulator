@@ -3,6 +3,7 @@
 #include "n2xdsp.h"
 #include "n2xmc.h"
 #include "n2xrom.h"
+#include "synthLib/audioTypes.h"
 
 namespace n2x
 {
@@ -30,6 +31,7 @@ namespace n2x
 
 		bool getButtonState(ButtonType _type) const;
 		void setButtonState(ButtonType _type, bool _pressed);
+		void processAudio(const synthLib::TAudioOutputs& _outputs, uint32_t _frames, uint32_t _latency);
 
 	private:
 		void ensureBufferSize(uint32_t _frames);
