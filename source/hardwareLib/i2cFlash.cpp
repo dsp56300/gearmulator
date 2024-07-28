@@ -13,6 +13,15 @@ namespace hwLib
 		synthLib::writeFile(_filename, m_data);
 	}
 
+	bool I2cFlash::setData(std::vector<uint8_t>& _data)
+	{
+		if(_data.size() != Size)
+			return false;
+
+		std::copy(_data.begin(), _data.end(), m_data.begin());
+		return true;
+	}
+
 	void I2cFlash::onStartCondition()
 	{
 		m_state = State::ReadDeviceSelect;

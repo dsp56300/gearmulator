@@ -3,6 +3,7 @@
 #include <array>
 #include <optional>
 #include <string>
+#include <vector>
 
 #include "i2c.h"
 
@@ -12,7 +13,8 @@ namespace hwLib
 	class I2cFlash : public I2c
 	{
 	public:
-		using Data = std::array<uint8_t, 0x10000>;
+		static constexpr uint32_t Size = 0x10000;
+		using Data = std::array<uint8_t, Size>;
 
 		I2cFlash()
 		{
@@ -24,6 +26,8 @@ namespace hwLib
 		}
 
 		void saveAs(const std::string& _filename) const;
+
+		bool setData(std::vector<uint8_t>& _data);
 
 	private:
 		enum class State
