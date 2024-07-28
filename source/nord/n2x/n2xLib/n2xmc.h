@@ -20,7 +20,7 @@ namespace n2x
 
 		auto& getHdi08A() { return m_hdi08A.getHdi08(); }
 		auto& getHdi08B() { return m_hdi08B.getHdi08(); }
-		auto& getMidi() const	{ return m_midi; }
+		auto& getMidi() { return m_midi; }
 
 		uint32_t exec() override;
 

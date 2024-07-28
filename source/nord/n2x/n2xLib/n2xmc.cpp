@@ -126,7 +126,7 @@ namespace n2x
 		}
 		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
 		{
-			const auto r = readW(m_ram.data(), _addr - g_ramAddress);;
+			const auto r = readW(m_ram.data(), _addr - g_ramAddress);
 //			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
 			return r;
 		}
@@ -362,17 +362,6 @@ namespace n2x
 //		m_hdi08A.exec(cycles);
 //		m_hdi08B.exec(cycles);
 
-/*
-		m_totalCycles += cycles;
-		if(m_totalCycles > 0x5000000 && !m_hasSentMidi)
-		{
-			m_totalCycles -= 0x5000000;
-//			m_hasSentMidi = true;
-			LOG("Sending MIDI Note On");
-			m_midi.writeMidi(synthLib::M_NOTEON);
-			m_midi.writeMidi((rand()%24) + synthLib::Note_C2);
-			m_midi.writeMidi(127);
-		}
-*/		return cycles;
+		return cycles;
 	}
 }

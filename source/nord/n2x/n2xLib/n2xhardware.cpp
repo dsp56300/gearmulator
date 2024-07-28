@@ -19,7 +19,7 @@ namespace n2x
 			return;
 
 		m_dspA.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackA(); }, 0);
-		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*) { onEsaiCallbackB(); }, 0);
+		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackB(); }, 0);
 	}
 
 	bool Hardware::isValid() const
