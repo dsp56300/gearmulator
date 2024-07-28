@@ -81,11 +81,14 @@ namespace n2x
 		Poly			= 0x06'20,
 		Portamento		= 0x06'40,
 		ModwheelDest	= 0x06'80,
+
+		Shift = ModwheelDest
 	};
 
 	enum class KnobType
 	{
-		Osc1Fm = 0x38,		Porta,		Lfo2Rate,	MasterVol,		Lfo1Rate,	ModEnvAmt,	ModEnvD,	ModEnvA,
+		Invalid = 0,
+		Osc1Fm = 0x38,		Porta,		Lfo2Rate,	Lfo1Rate,		MasterVol,	ModEnvAmt,	ModEnvD,	ModEnvA,
 		AmpEnvD = 0x58,		FilterFreq,	FilterEnvA,	AmpEnvA,		OscMix,		Osc2Fine,	Lfo1Amount,	OscPW,
 		AmpGain = 0x68,		FilterEnvR,	AmpEnvR,	FilterEnvAmt,	FilterEnvS,	AmpEnvS,	FilterReso,	FilterEnvD,
 		PitchBend = 0x70,	ModWheel,	ExpPedal,	Lfo2Amount,		Osc2Semi,
