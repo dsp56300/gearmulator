@@ -149,6 +149,7 @@ namespace hwLib
 			}
 			else if(m_nextBit == BitAck)
 			{
+				LOG("ACK by master=" << m_sda);
 				m_nextBit = 7;
 			}
 		}
