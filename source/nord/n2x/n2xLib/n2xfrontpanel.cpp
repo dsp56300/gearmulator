@@ -24,15 +24,16 @@ namespace n2x
 
 		switch (knobType)
 		{
-		case KnobType::PitchBend:
-		case KnobType::ModWheel:		return 0;	// pretend we're a rack unit
+		case KnobType::Invalid:			return 0;
+		case KnobType::PitchBend:		return 0;
+		case KnobType::ModWheel:		return 0;			// pretend we're a rack unit
 		case KnobType::MasterVol:		return 0xff;
 		case KnobType::AmpGain:			return 0xff;
 
-/*		case KnobType::Osc1Fm:			return 0;
+		case KnobType::Osc1Fm:			return 0;
 		case KnobType::Porta:			return 0;
-		case KnobType::Lfo2Rate:		return 0x20;
-		case KnobType::Lfo1Rate:		return 0x20;
+		case KnobType::Lfo2Rate:		return 0x0;
+		case KnobType::Lfo1Rate:		return 0x0;
 		case KnobType::ModEnvAmt:		return 0;
 		case KnobType::ModEnvD:			return 0;
 		case KnobType::ModEnvA:			return 0;
@@ -40,22 +41,22 @@ namespace n2x
 		case KnobType::FilterFreq:		return 0xff;
 		case KnobType::FilterEnvA:		return 0;
 		case KnobType::AmpEnvA:			return 0;
-		case KnobType::OscMix:			return 0x80;
-		case KnobType::Osc2Fine:		return 0x80;
-		case KnobType::Lfo1Amount:		return 0;
+		case KnobType::OscMix:			return 0x7f;
+		case KnobType::Osc2Fine:		return 0x7f;
+		case KnobType::Lfo1Amount:		return 0x0f;
 		case KnobType::OscPW:			return 0x40;
-		case KnobType::AmpGain:			return 0xff;
 		case KnobType::FilterEnvR:		return 0x30;
-		case KnobType::AmpEnvR:			return 0x30;
+		case KnobType::AmpEnvR:			return 0x90;
 		case KnobType::FilterEnvAmt:	return 0;
-		case KnobType::FilterEnvS:		return 0xff;
-		case KnobType::AmpEnvS:			return 0xff;
+		case KnobType::FilterEnvS:		return 0x7f;
+		case KnobType::AmpEnvS:			return 0x7f;
 		case KnobType::FilterReso:		return 0x10;
 		case KnobType::FilterEnvD:		return 0;
-		case KnobType::ExpPedal:		return 0;
+		case KnobType::ExpPedal:		return 0x0;
 		case KnobType::Lfo2Amount:		return 0;
-		case KnobType::Osc2Semi:		return 0x80;
-*/		default:
+		case KnobType::Osc2Semi:		return 0x7f;
+		default:
+			assert(false);
 			return 0x80;
 		}
 	}
@@ -75,15 +76,14 @@ namespace n2x
 				break;
 			case g_frontPanelAddressCS6 + 0xa:
 				m_ledLatch10 = _val;
+
+//				LOG("Read pot " << HEXN((_val & 0x7f), 2));
+				m_selectedKnob = static_cast<KnobType>(_val & 0x7f);
+
 				if(m_ledLatch10 & (1<<7))
 				{
 					m_lcds[2] = m_ledLatch8;
 					printLCD();
-				}
-				else
-				{
-//					LOG("Read pot " << HEXN(_val, 2));
-					m_selectedKnob = static_cast<KnobType>(_val);
 				}
 				break;
 			case g_frontPanelAddressCS6 + 0xc:
