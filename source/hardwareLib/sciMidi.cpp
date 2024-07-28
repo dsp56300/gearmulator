@@ -4,6 +4,8 @@
 
 #include "mc68k/qsm.h"
 
+#include "synthLib/midiBufferParser.h"
+
 namespace hwLib
 {
 	// pause 0.1 seconds for a sysex size of 500, delay is calculated for other sysex sizes accordingly
@@ -47,7 +49,7 @@ namespace hwLib
 		}
 	}
 
-	void SciMidi::writeMidi(const uint8_t _byte)
+	void SciMidi::write(const uint8_t _byte)
 	{
 		std::unique_lock lock(m_mutex);
 
@@ -76,7 +78,24 @@ namespace hwLib
 		}
 	}
 
-	void SciMidi::readTransmitBuffer(std::vector<uint8_t>& _result)
+	void SciMidi::write(const synthLib::SMidiEvent& _e)
+	{
+		if(!_e.sysex.empty())
+		{
+			write(_e.sysex);
+		}
+		else
+		{
+			write(_e.a);
+			const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_e.a);
+			if (len > 1)
+				write(_e.b);
+			if (len > 2)
+				write(_e.c);
+		}
+	}
+
+	void SciMidi::read(std::vector<uint8_t>& _result)
 	{
 		std::deque<uint16_t> midiData;
 		m_qsm.readSciTX(midiData);

@@ -71,7 +71,7 @@ namespace wLib
 
 	void Hardware::receiveMidi(std::vector<uint8_t>& _data)
 	{
-		getMidi().readTransmitBuffer(_data);
+		getMidi().read(_data);
 	}
 
 	void Hardware::onEsaiCallback(dsp56k::Audio& _audio)
@@ -158,20 +158,7 @@ namespace wLib
 			if(e.offset > m_midiOffsetCounter)
 				break;
 
-			if(!e.sysex.empty())
-			{
-				getMidi().writeMidi(e.sysex);
-			}
-			else
-			{
-				getMidi().writeMidi(e.a);
-				const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
-				if (len > 1)
-					getMidi().writeMidi(e.b);
-				if (len > 2)
-					getMidi().writeMidi(e.c);
-			}
-
+			getMidi().write(e);
 			m_midiIn.pop_front();
 		}
 	}

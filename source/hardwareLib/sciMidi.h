@@ -5,6 +5,11 @@
 #include <cstdint>
 #include <mutex>
 
+namespace synthLib
+{
+	struct SMidiEvent;
+}
+
 namespace mc68k
 {
 	class Qsm;
@@ -19,18 +24,21 @@ namespace hwLib
 
 		void process(uint32_t _numSamples);
 
-		void writeMidi(uint8_t _byte);
-		void writeMidi(const std::initializer_list<uint8_t>& _bytes)
+		void write(uint8_t _byte);
+		void write(const std::initializer_list<uint8_t>& _bytes)
 		{
 			for (const uint8_t byte : _bytes)
-				writeMidi(byte);
+				write(byte);
 		}
-		void writeMidi(const std::vector<uint8_t>& _bytes)
+		void write(const std::vector<uint8_t>& _bytes)
 		{
 			for (const uint8_t byte : _bytes)
-				writeMidi(byte);
+				write(byte);
 		}
-		void readTransmitBuffer(std::vector<uint8_t>& _result);
+		void write(const synthLib::SMidiEvent& _e);
+
+
+		void read(std::vector<uint8_t>& _result);
 
 	private:
 		mc68k::Qsm& m_qsm;
