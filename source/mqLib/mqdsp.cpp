@@ -8,7 +8,7 @@
 
 #include "mc68k/hdi08.h"
 
-#include "wLib/dspBootCode.h"
+#include "hardwareLib/dspBootCode.h"
 
 #include "dsp56kEmu/aar.h"
 
@@ -55,12 +55,12 @@ namespace mqLib
 		}
 
 		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
-		for(uint32_t i=0; i<std::size(wLib::g_dspBootCode); ++i)
+		for(uint32_t i=0; i<std::size(hwLib::g_dspBootCode56362); ++i)
 		{
-			uint32_t code = wLib::g_dspBootCode[i];
-			if((wLib::g_dspBootCode[i] & 0xffff00) == 0xff0000)
+			uint32_t code = hwLib::g_dspBootCode56362[i];
+			if((hwLib::g_dspBootCode56362[i] & 0xffff00) == 0xff0000)
 			{
-				code = g_bootCodeBase | (wLib::g_dspBootCode[i] & 0xff);
+				code = g_bootCodeBase | (hwLib::g_dspBootCode56362[i] & 0xff);
 			}
 
 			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);

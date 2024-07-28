@@ -17,7 +17,6 @@ namespace n2x
 		void processUC();
 
 		Microcontroller& getUC() {return m_uc; }
-		void ucYieldLoop(const std::function<bool()>& _continue);
 
 		const auto& getAudioOutputs() const { return m_audioOutputs; }
 

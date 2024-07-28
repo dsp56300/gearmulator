@@ -2,9 +2,9 @@
 
 #include <cstdint>
 
-namespace wLib
+namespace hwLib
 {
-	static constexpr uint32_t g_dspBootCode[] =
+	static constexpr uint32_t g_dspBootCode56362[] =
 	{
 		0x350013, 0x0afa23, 0xff0035, 0x0afa22,
 		0xff000e, 0x0afa01, 0xff0022, 0x0afa20,

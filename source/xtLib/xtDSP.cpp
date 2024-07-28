@@ -1,6 +1,6 @@
 #include "xtDSP.h"
 
-#include "wLib/dspBootCode.h"
+#include "hardwareLib/dspBootCode.h"
 #include "xtHardware.h"
 
 #if DSP56300_DEBUGGER
@@ -51,7 +51,7 @@ namespace xt
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
-		const auto& bootCode = wLib::g_dspBootCode56303;
+		const auto& bootCode = hwLib::g_dspBootCode56303;
 
 		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
 		for(uint32_t i=0; i<std::size(bootCode); ++i)

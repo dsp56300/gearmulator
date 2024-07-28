@@ -37,28 +37,6 @@ namespace n2x
 			m_remainingUcCycles -= static_cast<int64_t>(deltaCycles);
 	}
 
-	void Hardware::ucYieldLoop(const std::function<bool()>& _continue)
-	{
-		hwLib::ScopedResumeDSP rB(m_dspB.getHaltDSP());
-
-		while(_continue())
-		{
-//			if(m_processAudio)
-			{
-				std::this_thread::yield();
-			}
-/*			else
-			{
-				if(m_esaiFrameIndex)
-				{
-					std::unique_lock uLock(m_esaiFrameAddedMutex);
-					m_esaiFrameAddedCv.wait(uLock);
-				}
-			}
-			*/
-		}
-	}
-
 	void Hardware::processAudio(uint32_t _frames, const uint32_t _latency)
 	{
 		ensureBufferSize(_frames);
