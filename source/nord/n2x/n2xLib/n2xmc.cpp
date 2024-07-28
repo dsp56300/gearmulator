@@ -79,7 +79,7 @@ namespace n2x
 				{
 					auto r = v;
 					r &= ~(1 << g_bitSDA);
-					r |= *res ? g_bitSDA : 0;
+					r |= *res ? (1<<g_bitSDA) : 0;
 
 					getPortGP().writeRX(r);
 					LOG("PortGP return SDA=" << *res);
