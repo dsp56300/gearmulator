@@ -51,9 +51,30 @@ int main()
 
 	synthLib::AsyncWriter writer("n2xEmu_out.wav", n2x::g_samplerate, false);
 
+	uint32_t totalSamples = 0;
+
 	while(true)
 	{
 		hw->processAudio(blockSize, blockSize);
+
+		totalSamples += blockSize;
+
+		auto seconds = [&](uint32_t _seconds)
+		{
+			return _seconds * (n2x::g_samplerate / blockSize) * blockSize;
+		};
+
+		if(totalSamples == seconds(4))
+		{
+			hw->setButtonState(n2x::ButtonType::Shift, true);
+			hw->setButtonState(n2x::ButtonType::OscSync, true);
+		}
+
+		else if(totalSamples == seconds(5))
+		{
+			hw->setButtonState(n2x::ButtonType::Shift, false);
+			hw->setButtonState(n2x::ButtonType::OscSync, false);
+		}
 
 		auto& outs = hw->getAudioOutputs();
 

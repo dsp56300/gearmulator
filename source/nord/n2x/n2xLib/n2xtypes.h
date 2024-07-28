@@ -40,7 +40,6 @@ namespace n2x
 	static constexpr uint32_t g_keyboardSize			= 0x800;
 
 	static constexpr uint32_t g_samplerate				= 98200;
-	static constexpr uint32_t g_ucFreqHz				= 25165824;		// Fext=32768Hz, SYNCR=$d700, W=1, X=1, Y=17
 
 	enum class ButtonType
 	{
@@ -88,9 +87,9 @@ namespace n2x
 	enum class KnobType
 	{
 		Invalid = 0,
-		Osc1Fm = 0x38,		Porta,		Lfo2Rate,	Lfo1Rate,		MasterVol,	ModEnvAmt,	ModEnvD,	ModEnvA,
-		AmpEnvD = 0x58,		FilterFreq,	FilterEnvA,	AmpEnvA,		OscMix,		Osc2Fine,	Lfo1Amount,	OscPW,
-		AmpGain = 0x68,		FilterEnvR,	AmpEnvR,	FilterEnvAmt,	FilterEnvS,	AmpEnvS,	FilterReso,	FilterEnvD,
+		Osc1Fm    = 0x38,	Porta,		Lfo2Rate,	Lfo1Rate,		MasterVol,	ModEnvAmt,	ModEnvD,	ModEnvA,
+		AmpEnvD   = 0x58,	FilterFreq,	FilterEnvA,	AmpEnvA,		OscMix,		Osc2Fine,	Lfo1Amount,	OscPW,
+		AmpGain   = 0x68,	FilterEnvR,	AmpEnvR,	FilterEnvAmt,	FilterEnvS,	AmpEnvS,	FilterReso,	FilterEnvD,
 		PitchBend = 0x70,	ModWheel,	ExpPedal,	Lfo2Amount,		Osc2Semi,
 	};
 }

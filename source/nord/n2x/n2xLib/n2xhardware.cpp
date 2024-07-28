@@ -224,4 +224,14 @@ namespace n2x
 		m_dspHalted = false;
 		m_dspB.getHaltDSP().resumeDSP();
 	}
+
+	bool Hardware::getButtonState(const ButtonType _type) const
+	{
+		return m_uc.getFrontPanel().getButtonState(_type);
+	}
+
+	void Hardware::setButtonState(const ButtonType _type, const bool _pressed)
+	{
+		m_uc.getFrontPanel().setButtonState(_type, _pressed);
+	}
 }

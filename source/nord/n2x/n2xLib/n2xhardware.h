@@ -29,6 +29,9 @@ namespace n2x
 		void haltDSPs();
 		void resumeDSPs();
 
+		bool getButtonState(ButtonType _type) const;
+		void setButtonState(ButtonType _type, bool _pressed);
+
 	private:
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallbackA();

@@ -35,8 +35,11 @@ namespace n2x
 
 		auto getKnobType() const { return m_selectedKnob; }
 
+		void setButtonState(ButtonType _button, bool _pressed);
+		bool getButtonState(ButtonType _button) const;
+
 	private:
-		void printLCD();
+		void printLCD() const;
 
 		uint8_t m_ledLatch8 = 0;
 		uint8_t m_ledLatch10 = 0;
@@ -44,6 +47,8 @@ namespace n2x
 		std::array<uint8_t,3> m_lcds{0,0,0};
 		std::array<uint8_t,3> m_lcdsPrev{0,0,0};
 		KnobType m_selectedKnob = KnobType::PitchBend;
+
+		std::array<uint8_t, 4> m_buttonStates;
 	};
 
 	class FrontPanel
@@ -57,6 +62,16 @@ namespace n2x
 		bool isInRange(const mc68k::PeriphAddress _pa) const
 		{
 			return m_cs4.isInRange(_pa) || m_cs6.isInRange(_pa);
+		}
+
+		bool getButtonState(ButtonType _type) const
+		{
+			return m_cs6.getButtonState(_type);
+		}
+
+		void setButtonState(ButtonType _type, bool _pressed)
+		{
+			m_cs6.setButtonState(_type, _pressed);
 		}
 
 	private:

@@ -61,8 +61,9 @@ namespace n2x
 		}
 	}
 
-	FrontPanelCS6::FrontPanelCS6(FrontPanel& _fp) : FrontPanelCS(_fp)
+	FrontPanelCS6::FrontPanelCS6(FrontPanel& _fp) : FrontPanelCS(_fp), m_buttonStates({})
 	{
+		m_buttonStates.fill(0xff);
 	}
 
 	void FrontPanelCS6::write8(const mc68k::PeriphAddress _addr, const uint8_t _val)
@@ -111,58 +112,43 @@ namespace n2x
 		FrontPanelCS::write8(_addr, _val);
 	}
 
-	static uint32_t g_counter = 0;
-	constexpr uint32_t g_len = 4096;
-	constexpr uint32_t g_threshold = 512;
-	static bool wasPressed = false;
-	static bool wasReleased = false;
-
 	uint8_t FrontPanelCS6::read8(mc68k::PeriphAddress _addr)
 	{
-		++g_counter;
-		g_counter &= (g_len - 1);
-		auto press = g_counter >= (g_len - g_threshold);
-
-		if(press)
-			wasPressed = true;
-		else if(!press && wasPressed)
-			wasReleased = true;
-		if(wasReleased)
-			press = false;
-
 		const auto a = static_cast<uint32_t>(_addr);
 		switch (a)
 		{
-		case g_frontPanelAddressCS6:
-			return 0xff;
-		case g_frontPanelAddressCS6 + 2:
-			if(press)
-			{
-				constexpr auto bt = static_cast<uint8_t>(ButtonType::OscSync) & 0xff;
-				return 0xff ^ bt;
-			}
-			return 0xff;
-		case g_frontPanelAddressCS6 + 4:
-			return 0xff;
-		case g_frontPanelAddressCS6 + 6:
-			{
-				if(press)
-				{
-					constexpr auto bt = static_cast<uint8_t>(ButtonType::ModwheelDest) & 0xff;
-					return 0xff ^ bt;
-				}
-				return 0xff;
-			}
+		case g_frontPanelAddressCS6:		return m_buttonStates[0];
+		case g_frontPanelAddressCS6 + 2:	return m_buttonStates[1];
+		case g_frontPanelAddressCS6 + 4:	return m_buttonStates[2];
+		case g_frontPanelAddressCS6 + 6:	return m_buttonStates[3];
 		}
 		return FrontPanelCS::read8(_addr);
 	}
 
-	static uint32_t g_count = 0;
-
-	void FrontPanelCS6::printLCD()
+	void FrontPanelCS6::setButtonState(ButtonType _button, const bool _pressed)
 	{
-		++g_count;
-		if(g_count & 0xff)
+		const auto id = static_cast<uint32_t>(_button);
+		const auto index = id>>9;
+		const auto mask = id & 0xff;
+		if(_pressed)
+			m_buttonStates[index] |= mask;
+		else
+			m_buttonStates[index] &= ~mask;
+	}
+
+	bool FrontPanelCS6::getButtonState(ButtonType _button) const
+	{
+		const auto id = static_cast<uint32_t>(_button);
+		const auto index = id>>9;
+		const auto mask = id & 0xff;
+		return m_buttonStates[index] & mask ? false : true;
+	}
+
+	void FrontPanelCS6::printLCD() const
+	{
+		static uint32_t count = 0;
+		++count;
+		if(count & 0xff)
 			return;
 		/*
 		 --    --    --

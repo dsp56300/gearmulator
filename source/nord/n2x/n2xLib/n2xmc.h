@@ -26,6 +26,9 @@ namespace n2x
 
 		auto getPrevPC() const { return m_prevPC; }
 
+		auto& getFrontPanel() { return m_panel; }
+		const auto& getFrontPanel() const { return m_panel; }
+
 	private:
 		uint32_t read32(uint32_t _addr) override;
 		uint16_t readImm16(uint32_t _addr) override;
