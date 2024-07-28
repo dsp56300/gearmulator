@@ -11,6 +11,7 @@ namespace n2x
 {
 	// OC2 = PGP4 = SDA
 	// OC3 = PGP5 = SCL
+	// OC5 = PGP7 = sustain pedal
 
 	static constexpr uint32_t g_bitResetDSP = 3;
 	static constexpr uint32_t g_bitSDA = 4;
