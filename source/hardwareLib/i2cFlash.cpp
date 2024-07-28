@@ -88,7 +88,9 @@ namespace hwLib
 		const auto res = m_data[m_address];
 
 		LOG("I2C op read from " << HEXN(m_address,4) << ", res " << HEXN(res,2));
-		advanceAddress();
+		++m_address;
+		if(m_address >= m_data.size())
+			m_address = static_cast<uint32_t>(m_data.size()) - 1;
 		return res;
 	}
 
