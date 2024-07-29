@@ -5,6 +5,8 @@
 #include "n2xLib/n2xrom.h"
 #include "synthLib/wavWriter.h"
 
+static constexpr bool g_factoryDemo = true;
+
 namespace n2x
 {
 	class Hardware;
@@ -64,16 +66,20 @@ int main()
 			return _seconds * (n2x::g_samplerate / blockSize) * blockSize;
 		};
 
-		if(totalSamples == seconds(4))
+		if constexpr (g_factoryDemo)
 		{
-			hw->setButtonState(n2x::ButtonType::Shift, true);
-			hw->setButtonState(n2x::ButtonType::OscSync, true);
-		}
+			// Run factory demo, press shift + osc sync
+			if(totalSamples == seconds(4))
+			{
+				hw->setButtonState(n2x::ButtonType::Shift, true);
+				hw->setButtonState(n2x::ButtonType::OscSync, true);
+			}
 
-		else if(totalSamples == seconds(5))
-		{
-			hw->setButtonState(n2x::ButtonType::Shift, false);
-			hw->setButtonState(n2x::ButtonType::OscSync, false);
+			else if(totalSamples == seconds(5))
+			{
+				hw->setButtonState(n2x::ButtonType::Shift, false);
+				hw->setButtonState(n2x::ButtonType::OscSync, false);
+			}
 		}
 
 		auto& outs = hw->getAudioOutputs();
