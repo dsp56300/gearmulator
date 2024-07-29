@@ -7,6 +7,7 @@ set(SOURCES
 	createVersionDateTime.cmake
 	clipboard.cpp clipboard.h
 	controller.cpp controller.h
+	controllermap.cpp controllermap.h
 	dummydevice.cpp dummydevice.h
 	event.cpp event.h
 	midipacket.cpp midipacket.h

@@ -249,7 +249,7 @@ namespace pluginLib
         return sendSysEx(_packetName, params);
     }
 
-    bool Controller::sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+    bool Controller::sendSysEx(const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
     {
 	    std::vector<uint8_t> sysex;
 

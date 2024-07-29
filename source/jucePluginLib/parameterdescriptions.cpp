@@ -62,23 +62,6 @@ namespace pluginLib
 		return &it->second;
 	}
 
-	const std::vector<uint32_t>& ParameterDescriptions::getControlledParameters(const synthLib::SMidiEvent& _ev)
-	{
-		static std::vector<uint32_t> empty;
-
-		const uint8_t type = _ev.a & 0xf0;
-
-		const auto itType = m_controllerMap.find(type);
-		if(itType == m_controllerMap.end())
-			return empty;
-
-		const auto itValue = itType->second.find(_ev.b);
-		if(itValue == itType->second.end())
-			return empty;
-
-		return itValue->second;
-	}
-
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -842,9 +825,9 @@ namespace pluginLib
 		}
 
 		if(cc != Invalid)
-			m_controllerMap[synthLib::M_CONTROLCHANGE][cc].push_back(paramIndex);
+			m_controllerMap.add(synthLib::M_CONTROLCHANGE, cc, paramIndex);
 
 		if(pp != Invalid)
-			m_controllerMap[synthLib::M_POLYPRESSURE][pp].push_back(paramIndex);
+			m_controllerMap.add(synthLib::M_POLYPRESSURE, pp, paramIndex);
 	}
 }
