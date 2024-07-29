@@ -628,7 +628,7 @@ namespace pluginLib
 			else if(type == "null")				byte.type = MidiDataType::Null;
 			else
 			{
-				_errors << "Unknown midi packet data type " << type << ", midi packet " << _key << ", index " << i << std::endl;
+				_errors << "Unknown midi packet data type '" << type << "', midi packet " << _key << ", index " << i << std::endl;
 				return;
 			}
 

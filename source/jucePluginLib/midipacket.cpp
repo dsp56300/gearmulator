@@ -17,6 +17,8 @@ namespace pluginLib
 
 		std::set<uint32_t> usedParts;
 
+		std::string lastParam;
+
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
 			const auto& d = m_definitions[i];
@@ -24,14 +26,22 @@ namespace pluginLib
 			if(d.paramPart != AnyPart)
 				usedParts.insert(d.paramPart);
 
+			bool isNewParam = true;
+
 			if(d.type == MidiDataType::Parameter)
+			{
+				isNewParam = d.paramName != lastParam;
+				lastParam = d.paramName;
 				m_hasParameters = true;
+			}
 
 			const auto masked = static_cast<uint8_t>((0xff & d.paramMask) << d.paramShift);
 
-			if(usedMask & masked)
+			if((usedMask & masked) || !isNewParam)
 			{
-				// next byte starts if the current mask overlaps with an existing one
+				// next byte starts if the current mask overlaps with an existing one.
+				// next byte starts also if the parameter name is identical. In that case, multiple
+				// bytes form one parameter.
 				usedMask = 0;
 				++byteIndex;
 			}
