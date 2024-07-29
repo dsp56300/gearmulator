@@ -5,6 +5,7 @@
 #include "n2xrom.h"
 
 #include "synthLib/audioTypes.h"
+#include "synthLib/midiTypes.h"
 
 namespace n2x
 {
@@ -28,16 +29,20 @@ namespace n2x
 		auto& getDSPA() { return m_dspA; }
 		auto& getDSPB() { return m_dspB; }
 
+		auto& getMidi() { return m_uc.getMidi(); }
+
 		void haltDSPs();
 		void resumeDSPs();
 
 		bool getButtonState(ButtonType _type) const;
 		void setButtonState(ButtonType _type, bool _pressed);
 		void processAudio(const synthLib::TAudioOutputs& _outputs, uint32_t _frames, uint32_t _latency);
+		bool sendMidi(const synthLib::SMidiEvent& _ev);
 
 	private:
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallbackA();
+		void processMidiInput();
 		void onEsaiCallbackB();
 		void syncUCtoDSP();
 		void ucThreadFunc();
@@ -69,6 +74,7 @@ namespace n2x
 		dsp56k::SpscSemaphore m_semDspAtoB;
 		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
 		std::unique_ptr<std::thread> m_ucThread;
+		dsp56k::RingBuffer<synthLib::SMidiEvent, 256, true, true> m_midiIn;
 
 		// DSP slowdown
 		uint32_t m_maxEsaiCallbacks = 0;

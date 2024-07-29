@@ -61,6 +61,10 @@ namespace n2x
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
+		m_hardware->getMidi().read(m_midiOutBuffer);
+		m_midiParser.write(m_midiOutBuffer);
+		m_midiOutBuffer.clear();
+		m_midiParser.getEvents(_midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
@@ -70,6 +74,6 @@ namespace n2x
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		return false;
+		return m_hardware->sendMidi(_ev);
 	}
 }

@@ -115,6 +115,13 @@ namespace n2x
 		}
 	}
 
+	bool Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
+	{
+//		m_midiIn.push_back(_ev);
+		getMidi().write(_ev);
+		return true;
+	}
+
 	void Hardware::ensureBufferSize(const uint32_t _frames)
 	{
 		if(m_dummyInput.size() >= _frames)
@@ -147,13 +154,17 @@ namespace n2x
 		m_semDspAtoB.wait();
 	}
 
+	void Hardware::processMidiInput()
+	{
+	}
+
 	void Hardware::onEsaiCallbackB()
 	{
 		m_semDspAtoB.notify();
 
 		++m_esaiFrameIndex;
 
-//		processMidiInput();
+		processMidiInput();
 
 		if((m_esaiFrameIndex & (g_syncEsaiFrameRate-1)) == 0)
 			m_esaiFrameAddedCv.notify_one();

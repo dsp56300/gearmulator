@@ -30,5 +30,7 @@ namespace n2x
 
 	private:
 		std::unique_ptr<Hardware> m_hardware = nullptr;
+		std::vector<uint8_t> m_midiOutBuffer;
+		synthLib::MidiBufferParser m_midiParser;
 	};
 }
