@@ -73,6 +73,8 @@ namespace n2x
 			const auto processCount = std::min(_frames, static_cast<uint32_t>(64));
 			_frames -= processCount;
 
+			advanceSamples(processCount, _latency);
+
 			const auto requiredSize = processCount > 8 ? processCount - 8 : 0;
 
 			if(esaiB.getAudioOutputs().size() < requiredSize)
@@ -167,6 +169,15 @@ namespace n2x
 		{
 			m_requestedFramesAvailableMutex.unlock();
 		}
+
+		if(m_esaiFrameIndex >= m_maxEsaiCallbacks + m_esaiLatency)
+		{
+			std::unique_lock uLock(m_haltDSPmutex);
+			m_haltDSPcv.wait(uLock, [&]
+			{
+				return (m_maxEsaiCallbacks + m_esaiLatency) > m_esaiFrameIndex;
+			});
+		}
 	}
 
 	void Hardware::syncUCtoDSP()
@@ -225,6 +236,16 @@ namespace n2x
 			processUC();
 			processUC();
 		}
+	}
+
+	void Hardware::advanceSamples(const uint32_t _samples, const uint32_t _latency)
+	{
+		{
+			std::lock_guard uLockHalt(m_haltDSPmutex);
+			m_maxEsaiCallbacks += _samples;
+			m_esaiLatency = _latency;
+		}
+		m_haltDSPcv.notify_one();
 	}
 
 	void Hardware::haltDSPs()

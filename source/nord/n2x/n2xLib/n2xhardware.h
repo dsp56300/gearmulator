@@ -3,6 +3,7 @@
 #include "n2xdsp.h"
 #include "n2xmc.h"
 #include "n2xrom.h"
+
 #include "synthLib/audioTypes.h"
 
 namespace n2x
@@ -40,6 +41,7 @@ namespace n2x
 		void onEsaiCallbackB();
 		void syncUCtoDSP();
 		void ucThreadFunc();
+		void advanceSamples(uint32_t _samples, uint32_t _latency);
 
 		Rom m_rom;
 		Microcontroller m_uc;
@@ -67,5 +69,11 @@ namespace n2x
 		dsp56k::SpscSemaphore m_semDspAtoB;
 		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
 		std::unique_ptr<std::thread> m_ucThread;
+
+		// DSP slowdown
+		uint32_t m_maxEsaiCallbacks = 0;
+		uint32_t m_esaiLatency = 0;
+		std::mutex m_haltDSPmutex;
+		std::condition_variable m_haltDSPcv;
 	};
 }
