@@ -12,6 +12,7 @@ namespace n2x
 	public:
 		using AudioOutputs = std::array<std::vector<dsp56k::TWord>, 4>;
 		Hardware();
+		~Hardware();
 
 		bool isValid() const;
 
@@ -38,6 +39,7 @@ namespace n2x
 		void onEsaiCallbackA();
 		void onEsaiCallbackB();
 		void syncUCtoDSP();
+		void ucThreadFunc();
 
 		Rom m_rom;
 		Microcontroller m_uc;
@@ -64,5 +66,6 @@ namespace n2x
 		bool m_dspHalted = false;
 		dsp56k::SpscSemaphore m_semDspAtoB;
 		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
+		std::unique_ptr<std::thread> m_ucThread;
 	};
 }

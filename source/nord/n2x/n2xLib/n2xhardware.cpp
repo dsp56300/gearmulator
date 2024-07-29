@@ -1,5 +1,7 @@
 #include "n2xhardware.h"
 
+#include "dsp56kEmu/threadtools.h"
+
 namespace n2x
 {
 	constexpr uint32_t g_syncEsaiFrameRate = 16;
@@ -20,7 +22,14 @@ namespace n2x
 
 		m_dspA.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackA(); }, 0);
 		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackB(); }, 0);
+
+		m_ucThread.reset(new std::thread([this]
+		{
+			ucThreadFunc();
+		}));
 	}
+
+	Hardware::~Hardware() = default;
 
 	bool Hardware::isValid() const
 	{
@@ -198,6 +207,24 @@ namespace n2x
 			haltDSPs();
 
 		m_lastEsaiFrameIndex = esaiFrameIndex;
+	}
+
+	void Hardware::ucThreadFunc()
+	{
+		dsp56k::ThreadTools::setCurrentThreadName("MC68331");
+		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
+
+		while(true)
+		{
+			processUC();
+			processUC();
+			processUC();
+			processUC();
+			processUC();
+			processUC();
+			processUC();
+			processUC();
+		}
 	}
 
 	void Hardware::haltDSPs()
