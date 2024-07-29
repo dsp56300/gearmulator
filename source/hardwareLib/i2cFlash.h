@@ -63,7 +63,7 @@ namespace hwLib
 
 		State m_state = State::ReadDeviceSelect;
 		uint8_t m_deviceSelect = 0;
-		uint64_t m_address = 0;
+		uint32_t m_address = 0;
 
 		Data m_data;
 	};
