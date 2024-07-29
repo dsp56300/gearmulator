@@ -7,7 +7,6 @@ namespace n2x
 {
 	Flash::Flash()
 	{
-		return;
 		const auto filename = synthLib::findROM(g_flashSize, g_flashSize);
 
 		if(!filename.empty())
