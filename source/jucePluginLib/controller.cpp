@@ -232,7 +232,7 @@ namespace pluginLib
 
 			auto* p = getParameter(i, _parameter.getPart());
 			const auto v = p == &_parameter ? _value : getParameterValue(p);
-			_result |= it->getMaskedValue(v);
+			_result |= it->packValue(v);
 	    }
 
 		return true;

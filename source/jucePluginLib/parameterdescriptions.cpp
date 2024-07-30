@@ -546,7 +546,8 @@ namespace pluginLib
 				}
 
 				const auto hasMask = entry.hasProperty("mask");
-				const auto hasShift = entry.hasProperty("shift");
+				const auto hasRightShift = entry.hasProperty("shift");
+				const auto hasLeftShift = entry.hasProperty("shiftL");
 				const auto hasPart = entry.hasProperty("part");
 
 				if(hasMask)
@@ -560,15 +561,26 @@ namespace pluginLib
 					byte.paramMask = static_cast<uint8_t>(mask);
 				}
 
-				if(hasShift)
+				if(hasRightShift)
 				{
 					const int shift = entry["shift"];
 					if(shift < 0 || shift > 7)
 					{
-						_errors << "shift value needs to be between 0 and 7 but got " << shift << std::endl;
+						_errors << "right shift value needs to be between 0 and 7 but got " << shift << std::endl;
 						return;
 					}
-					byte.paramShift = static_cast<uint8_t>(shift);
+					byte.paramShiftRight = static_cast<uint8_t>(shift);
+				}
+
+				if(hasLeftShift)
+				{
+					const int shift = entry["shiftL"];
+					if(shift < 0 || shift > 7)
+					{
+						_errors << "left shift value needs to be between 0 and 7 but got " << shift << std::endl;
+						return;
+					}
+					byte.paramShiftLeft = static_cast<uint8_t>(shift);
 				}
 
 				if(hasPart)

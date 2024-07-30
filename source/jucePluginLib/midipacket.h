@@ -42,21 +42,27 @@ namespace pluginLib
 
 			std::string paramName;
 			uint8_t paramMask = 0xff;
-			uint8_t paramShift = 0;
+			uint8_t paramShiftRight = 0;	// right shift for unpacking from midi, left for packing
+			uint8_t paramShiftLeft = 0;		// left shift for unpacking from midi, right for packing
 			uint8_t paramPart = AnyPart;
 
 			uint32_t checksumFirstIndex = 0;
 			uint32_t checksumLastIndex = 0;
 			uint8_t checksumInitValue = 0;
 
-			uint8_t getMaskedValue(const uint8_t _unmasked) const
+			uint8_t packValue(const uint8_t _unmasked) const
 			{
-				 return static_cast<uint8_t>((_unmasked & paramMask) << paramShift);
+				 return static_cast<uint8_t>(((_unmasked & paramMask) << paramShiftRight) >> paramShiftLeft);
+			}
+
+			uint8_t unpackValue(const uint8_t _masked) const
+			{
+				return ((_masked << paramShiftLeft) >> paramShiftRight) & paramMask;
 			}
 
 			bool doMasksOverlap(const MidiDataDefinition& _d) const
 			{
-				return (getMaskedValue(0xff) & _d.getMaskedValue(0xff)) != 0;
+				return (packValue(0xff) & _d.packValue(0xff)) != 0;
 			}
 		};
 

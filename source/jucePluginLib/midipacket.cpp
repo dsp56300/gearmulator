@@ -35,7 +35,7 @@ namespace pluginLib
 				m_hasParameters = true;
 			}
 
-			const auto masked = static_cast<uint8_t>((0xff & d.paramMask) << d.paramShift);
+			const auto masked = d.packValue(0xff);
 
 			if((usedMask & masked) || !isNewParam)
 			{
@@ -94,7 +94,7 @@ namespace pluginLib
 							LOG("Failed to find value for parameter " << d.paramName << ", part " << d.paramPart);
 							return false;
 						}
-						_dst[i] |= d.getMaskedValue(it->second);
+						_dst[i] |= d.packValue(it->second);
 					}
 					break;
 				case MidiDataType::Checksum:
@@ -216,8 +216,8 @@ namespace pluginLib
 							LOG("Failed to find named parameter " << d.paramName << " while parsing midi packet, midi byte " << i);
 							return false;
 						}
-						const auto sMasked = (s >> d.paramShift) & d.paramMask;
-						_addParamValueCallback(std::make_pair(d.paramPart, idx), static_cast<uint8_t>(sMasked));
+						const auto sUnpacked = d.unpackValue(s);
+						_addParamValueCallback(std::make_pair(d.paramPart, idx), sUnpacked);
 					}
 					break;
 				default:
