@@ -44,7 +44,7 @@ namespace pluginLib
 
 		std::map<ParamIndex, int> knownParameterIndices;
 
-    	for (uint8_t part = 0; part < 16; part++)
+    	for (uint8_t part = 0; part < getPartCount(); part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
 
