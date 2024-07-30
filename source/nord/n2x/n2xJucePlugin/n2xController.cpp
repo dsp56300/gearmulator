@@ -148,4 +148,44 @@ namespace n2xJucePlugin
 
 		sendSysEx(MidiPacketType::RequestDump, params);
 	}
+
+	std::vector<uint8_t> Controller::createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const
+	{
+		pluginLib::MidiPacket::Data data;
+
+		data.insert(std::make_pair(pluginLib::MidiDataType::DeviceId, n2x::SysexByte::DefaultDeviceId));
+		data.insert(std::make_pair(pluginLib::MidiDataType::Bank, _bank));
+		data.insert(std::make_pair(pluginLib::MidiDataType::Program, _program));
+
+		std::vector<uint8_t> dst;
+
+		if (!createMidiDataFromPacket(dst, midiPacketName(MidiPacketType::SingleDump), data, _part))
+			return {};
+
+		return dst;
+	}
+
+	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part)
+	{
+		if(_part >= getPartCount())
+			return false;
+
+		const auto isSingle =_sysex.size() == n2x::g_singleDumpSize;
+		const auto isMulti = _sysex.size() == n2x::g_multiDumpSize;
+
+		if(!isSingle && !isMulti)
+			return false;
+
+		if(isMulti && _part != 0)
+			return false;
+
+		auto d = _sysex;
+
+		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
+		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(_part);
+
+		pluginLib::Controller::sendSysEx(d);
+
+		return true;
+	}
 }

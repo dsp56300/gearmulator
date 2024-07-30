@@ -21,7 +21,6 @@ namespace n2xJucePlugin
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
-	private:
 		static std::string loadParameterDescriptions();
 
 		void onStateLoaded() override
@@ -42,5 +41,8 @@ namespace n2xJucePlugin
 		bool sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
 		void requestDump(uint8_t _bank, uint8_t _patch) const;
+
+		std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const;
+		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part);
 	};
 }
