@@ -38,6 +38,7 @@ namespace n2x
 		void setButtonState(ButtonType _type, bool _pressed);
 		void processAudio(const synthLib::TAudioOutputs& _outputs, uint32_t _frames, uint32_t _latency);
 		bool sendMidi(const synthLib::SMidiEvent& _ev);
+		void notifyBootFinished();
 
 	private:
 		void ensureBufferSize(uint32_t _frames);
@@ -81,5 +82,7 @@ namespace n2x
 		uint32_t m_esaiLatency = 0;
 		std::mutex m_haltDSPmutex;
 		std::condition_variable m_haltDSPcv;
+
+		bool m_bootFinished = false;
 	};
 }

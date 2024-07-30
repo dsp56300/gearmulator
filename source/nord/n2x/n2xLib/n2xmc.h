@@ -16,7 +16,7 @@ namespace n2x
 	class Microcontroller : public mc68k::Mc68k
 	{
 	public:
-		explicit Microcontroller(const Rom& _rom);
+		explicit Microcontroller(Hardware& _hardware, const Rom& _rom);
 
 		auto& getHdi08A() { return m_hdi08A.getHdi08(); }
 		auto& getHdi08B() { return m_hdi08B.getHdi08(); }

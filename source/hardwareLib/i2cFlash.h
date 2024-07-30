@@ -29,6 +29,15 @@ namespace hwLib
 
 		bool setData(std::vector<uint8_t>& _data);
 
+		const auto& getAddress() const { return m_address; }
+
+	protected:
+		void onStartCondition() override;
+		void onStopCondition() override;
+		void onByteWritten() override;
+		std::optional<bool> onAck() override;
+		uint8_t onReadByte() override;
+
 	private:
 		enum class State
 		{
@@ -53,11 +62,6 @@ namespace hwLib
 			Write      = 0b0000'000'0,
 		};
 
-		void onStartCondition() override;
-		void onStopCondition() override;
-		void onByteWritten() override;
-		std::optional<bool> onAck() override;
-		uint8_t onReadByte() override;
 		void writeByte(uint8_t _byte);
 		void advanceAddress();
 

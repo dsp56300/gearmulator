@@ -11,7 +11,7 @@ namespace n2x
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
 
 	Hardware::Hardware()
-		: m_uc(m_rom)
+		: m_uc(*this, m_rom)
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)
 		, m_samplerateInv(1.0 / g_samplerate)
@@ -27,6 +27,9 @@ namespace n2x
 		{
 			ucThreadFunc();
 		}));
+
+		while(!m_bootFinished)
+			processAudio(8,8);
 	}
 
 	Hardware::~Hardware() = default;
@@ -120,6 +123,11 @@ namespace n2x
 //		m_midiIn.push_back(_ev);
 		getMidi().write(_ev);
 		return true;
+	}
+
+	void Hardware::notifyBootFinished()
+	{
+		m_bootFinished = true;
 	}
 
 	void Hardware::ensureBufferSize(const uint32_t _frames)
