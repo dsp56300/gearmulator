@@ -339,7 +339,7 @@
 			{"type": "null"},
 
 			{"type": "byte", "value": "f7"}
-		],
+		]
 	},
 	"controllerMap": [
 		{"cc": 7, "param": "Gain"},
