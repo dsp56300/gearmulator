@@ -156,7 +156,6 @@ namespace n2x
 	{
 //		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word) << ", ucPC=" << HEX(m_hardware.getUC().getPrevPC()));
 		hdi08().writeRX(&_word, 1);
-		m_hdiUC.isr(m_hdiUC.isr() & ~(mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy));
 	}
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
@@ -180,10 +179,8 @@ namespace n2x
 		const auto hf23 = hdi08().readControlRegister() & 0x18;
 		_isr &= ~0x18;
 		_isr |= hf23;
-		if(hdi08().hasRXData())
-			_isr &= ~mc68k::Hdi08::IsrBits::Txde;
-		else if(_isr & mc68k::Hdi08::IsrBits::Txde)
-			_isr |= mc68k::Hdi08::IsrBits::Trdy;
+		// always ready to receive more data
+		_isr |= mc68k::Hdi08::IsrBits::Trdy;
 		return _isr;
 	}
 
