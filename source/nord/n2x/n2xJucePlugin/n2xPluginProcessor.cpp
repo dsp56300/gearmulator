@@ -10,6 +10,8 @@
 
 #include "n2xLib/n2xdevice.h"
 
+#include "synthLib/deviceException.h"
+
 class Controller;
 
 namespace
@@ -49,7 +51,10 @@ jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorS
 
 synthLib::Device* AudioPluginAudioProcessor::createDevice()
 {
-	return new n2x::Device();
+	auto* d = new n2x::Device();
+	if(!d->isValid())
+		throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
+	return d;
 }
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()
