@@ -41,6 +41,8 @@ namespace n2x
 		dsp56k::DSPThread& getDSPThread() const { return *m_thread; }
 		auto& getHaltDSP() { return m_haltDSP; }
 
+		void terminate();
+
 	private:
 		void onUCRxEmpty(bool _needMoreData);
 		void hdiTransferUCtoDSP(uint32_t _word);

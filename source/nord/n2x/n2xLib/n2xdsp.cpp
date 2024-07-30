@@ -139,6 +139,14 @@ namespace n2x
 		});
 	}
 
+	void DSP::terminate()
+	{
+		for(uint32_t i=0; i<32768; ++i)
+			m_triggerInterruptDone.notify();
+
+		m_thread.reset();
+	}
+
 	void DSP::onUCRxEmpty(const bool _needMoreData)
 	{
 		if(_needMoreData)
