@@ -32,6 +32,8 @@ private:
 	}
 
 	bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
+	bool parseSingleDump(const pluginLib::SysEx& _msg);
+	bool parseMultiDump(const pluginLib::SysEx& _msg);
 	bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 	void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;

@@ -78,6 +78,40 @@ std::string Controller::loadParameterDescriptions()
 
 bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 {
+	if(_msg.size() == n2x::g_singleDumpSize)
+	{
+		return parseSingleDump(_msg);
+	}
+	if(_msg.size() == n2x::g_multiDumpSize)
+	{
+		return parseMultiDump(_msg);
+	}
+	return false;
+}
+
+bool Controller::parseSingleDump(const pluginLib::SysEx& _msg)
+{
+	pluginLib::MidiPacket::Data data;
+	pluginLib::MidiPacket::ParamValues params;
+
+	if(!parseMidiPacket(midiPacketName(MidiPacketType::SingleDump), data, params, _msg))
+		return false;
+
+	const auto bank = data[pluginLib::MidiDataType::Bank];
+	const auto program = data[pluginLib::MidiDataType::Program];
+
+	if(bank == n2x::SysexByte::SingleDumpBankEditBuffer && program < getPartCount())
+	{
+		applyPatchParameters(params, program);
+		return true;
+	}
+
+	assert(false && "receiving a single for a non-edit-buffer is unexpected");
+	return false;
+}
+
+bool Controller::parseMultiDump(const pluginLib::SysEx& _msg)
+{
 	return false;
 }
 
