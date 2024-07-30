@@ -89,6 +89,12 @@ bool Controller::parseControllerMessage(const synthLib::SMidiEvent&)
 
 void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
 {
+	const auto& controllerMap = getParameterDescriptions().getControllerMap();
+
+	const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getParameterIndex());
+	if(ccs.empty())
+		return;
+	sendMidiEvent(synthLib::M_CONTROLCHANGE, ccs.front(), _value);
 }
 
 bool Controller::sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
