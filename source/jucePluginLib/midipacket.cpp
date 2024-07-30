@@ -157,7 +157,11 @@ namespace pluginLib
 
 		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
 		{
-			_parameterValues.insert(std::make_pair(_paramIndex, _value));
+			const auto itExisting = _parameterValues.find(_paramIndex);
+			if(itExisting != _parameterValues.end())
+				itExisting->second |= _value;
+			else
+				_parameterValues.insert(std::make_pair(_paramIndex, _value));
 		}, _parameters, _src, _ignoreChecksumErrors);
 	}
 	
