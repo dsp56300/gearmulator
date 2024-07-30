@@ -32,7 +32,13 @@ namespace n2x
 			processAudio(8,8);
 	}
 
-	Hardware::~Hardware() = default;
+	Hardware::~Hardware()
+	{
+		m_destroy = true;
+		m_dspA.dsp().terminate();
+		m_dspB.dsp().terminate();
+		m_ucThread->join();
+	}
 
 	bool Hardware::isValid() const
 	{
@@ -257,7 +263,7 @@ namespace n2x
 		dsp56k::ThreadTools::setCurrentThreadName("MC68331");
 		dsp56k::ThreadTools::setCurrentThreadPriority(dsp56k::ThreadPriority::Highest);
 
-		while(true)
+		while(!m_destroy)
 		{
 			processUC();
 			processUC();

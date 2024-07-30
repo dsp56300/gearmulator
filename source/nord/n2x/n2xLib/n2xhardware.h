@@ -73,8 +73,14 @@ namespace n2x
 		size_t m_requestedFrames = 0;
 		bool m_dspHalted = false;
 		dsp56k::SpscSemaphore m_semDspAtoB;
+
 		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
+
 		std::unique_ptr<std::thread> m_ucThread;
+		bool m_destroy = false;
+
+
+		// Midi
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 256, true, true> m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
 
