@@ -2,8 +2,6 @@
 
 #include "jucePluginEditorLib/pluginEditor.h"
 
-class Controller;
-
 namespace jucePluginEditorLib
 {
 	class FocusedParameter;
@@ -18,6 +16,7 @@ namespace pluginLib
 namespace n2xJucePlugin
 {
 	class PatchManager;
+	class Controller;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{

@@ -56,7 +56,7 @@ synthLib::Device* AudioPluginAudioProcessor::createDevice()
 
 pluginLib::Controller* AudioPluginAudioProcessor::createController()
 {
-	return new Controller(*this);
+	return new n2xJucePlugin::Controller(*this);
 }
 
 juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
