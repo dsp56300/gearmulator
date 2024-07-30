@@ -147,7 +147,7 @@ namespace pluginLib
 			softKnobs.push_back(i);
 		}
 
-		for(size_t part = 0; part<m_paramsByParamType.size(); ++part)
+		for(size_t part = 0; part<getPartCount(); ++part)
 		{
 			for (const auto& softKnobParam : softKnobs)
 			{
