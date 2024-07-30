@@ -70,10 +70,21 @@ namespace n2x
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
 		m_hardware->processAudio(_outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
+		m_numSamplesProcessed += _samples;
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
 	{
-		return m_hardware->sendMidi(_ev);
+		if(_ev.sysex.empty())
+		{
+			auto e = _ev;
+			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
+			m_hardware->sendMidi(e);
+		}
+		else
+		{
+			m_hardware->sendMidi(_ev);
+		}
+		return true;
 	}
 }

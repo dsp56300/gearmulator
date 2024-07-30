@@ -76,6 +76,7 @@ namespace n2x
 		dsp56k::RingBuffer<dsp56k::Audio::RxFrame, 4, true> m_dspAtoBbuf;
 		std::unique_ptr<std::thread> m_ucThread;
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 256, true, true> m_midiIn;
+		uint32_t m_midiOffsetCounter = 0;
 
 		// DSP slowdown
 		uint32_t m_maxEsaiCallbacks = 0;

@@ -51,6 +51,8 @@ namespace n2x
 
 	void Hardware::processAudio(uint32_t _frames, const uint32_t _latency)
 	{
+		getMidi().process(_frames);
+
 		ensureBufferSize(_frames);
 
 		dsp56k::TWord* outputs[12]{nullptr};
@@ -120,8 +122,7 @@ namespace n2x
 
 	bool Hardware::sendMidi(const synthLib::SMidiEvent& _ev)
 	{
-//		m_midiIn.push_back(_ev);
-		getMidi().write(_ev);
+		m_midiIn.push_back(_ev);
 		return true;
 	}
 
@@ -164,6 +165,18 @@ namespace n2x
 
 	void Hardware::processMidiInput()
 	{
+		++m_midiOffsetCounter;
+
+		while(!m_midiIn.empty())
+		{
+			const auto& e = m_midiIn.front();
+
+			if(e.offset > m_midiOffsetCounter)
+				break;
+
+			getMidi().write(e);
+			m_midiIn.pop_front();
+		}
 	}
 
 	void Hardware::onEsaiCallbackB()
