@@ -238,6 +238,20 @@ namespace pluginLib
 		return true;
 	}
 
+	void Controller::applyPatchParameters(const MidiPacket::ParamValues& _params, const uint8_t _part) const
+	{
+		for (const auto& it : _params)
+		{
+			auto* p = getParameter(it.first.second, _part);
+			p->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
+
+			for (const auto& derivedParam : p->getDerivedParameters())
+				derivedParam->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
+		}
+
+		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+	}
+
 	void Controller::timerCallback()
 	{
 		processMidiMessages();
