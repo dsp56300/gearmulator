@@ -30,6 +30,7 @@ namespace n2x
 
 		while(!m_bootFinished)
 			processAudio(8,8);
+		m_midiOffsetCounter = 0;
 	}
 
 	Hardware::~Hardware()
