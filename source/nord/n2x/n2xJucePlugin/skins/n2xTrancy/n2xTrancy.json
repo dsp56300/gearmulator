@@ -1,0 +1,19 @@
+{
+	"name" : "Root",
+	"root" : { "x" : "0", "y" : "0", "width" : "2638", "height" : "1301", "scale" : "0.5"},
+	"children" :
+	[
+		{"name":"bg","image":{"x":"0","y":"0","width":"2638","height":"1301","texture":"background"}},
+
+		{        
+			"name" : "page_1_main",
+			"image" : { "x" : "571", "y" : "129", "width" : "1971", "height" : "1026", "texture" : "panel_1_easy_edit" },
+			"children" : [                                               
+				{ "name" : "OscLevel",          "parameterAttachment" : { "parameter" : "Gain" },      "rotary" : { }, "spritesheet" : { "x" : "149", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+				{ "name" : "SubLevel",          "parameterAttachment" : { "parameter" : "Mix" },       "rotary" : { }, "spritesheet" : { "x" : "397", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+				{ "name" : "Cutoff",            "parameterAttachment" : { "parameter" : "Cutoff" },    "rotary" : { }, "spritesheet" : { "x" : "974", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+				{ "name" : "Resonance",         "parameterAttachment" : { "parameter" : "Resonance" }, "rotary" : { }, "spritesheet" : { "x" : "1219", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
+			] 
+		}
+	]
+}

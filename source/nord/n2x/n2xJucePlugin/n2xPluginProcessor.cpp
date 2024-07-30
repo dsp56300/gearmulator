@@ -4,6 +4,7 @@
 #include <juce_audio_devices/juce_audio_devices.h>
 
 #include "n2xController.h"
+#include "n2xPluginEditorState.h"
 
 #include "jucePluginLib/processor.h"
 
@@ -43,7 +44,7 @@ AudioPluginAudioProcessor::~AudioPluginAudioProcessor()
 
 jucePluginEditorLib::PluginEditorState* AudioPluginAudioProcessor::createEditorState()
 {
-	return nullptr;
+	return new PluginEditorState(*this);
 }
 
 synthLib::Device* AudioPluginAudioProcessor::createDevice()
