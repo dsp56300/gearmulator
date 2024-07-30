@@ -81,13 +81,9 @@ namespace n2xJucePlugin
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
 	{
 		if(_msg.size() == n2x::g_singleDumpSize)
-		{
 			return parseSingleDump(_msg);
-		}
 		if(_msg.size() == n2x::g_multiDumpSize)
-		{
 			return parseMultiDump(_msg);
-		}
 		return false;
 	}
 
@@ -117,10 +113,23 @@ namespace n2xJucePlugin
 		return false;
 	}
 
-	bool Controller::parseControllerMessage(const synthLib::SMidiEvent&)
+	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
-		// TODO
-		return false;
+		const auto& cm = getParameterDescriptions().getControllerMap();
+		const auto paramIndices = cm.getControlledParameters(_e);
+
+		if(paramIndices.empty())
+			return false;
+
+		for (const auto paramIndex : paramIndices)
+		{
+			auto* param = getParameter(paramIndex);
+			assert(param && "parameter not found for control change");
+			// TODO: part
+			param->setValueFromSynth(_e.c, midiEventSourceToParameterOrigin(_e.source));
+		}
+
+		return true;
 	}
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)

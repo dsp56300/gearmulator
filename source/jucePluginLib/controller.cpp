@@ -157,10 +157,10 @@ namespace pluginLib
 		}
     }
 
-	void Controller::sendSysEx(const pluginLib::SysEx& msg) const
+	void Controller::sendSysEx(const pluginLib::SysEx& _msg) const
     {
         synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
-        ev.sysex = msg;
+        ev.sysex = _msg;
 		sendMidiEvent(ev);
     }
 
@@ -519,6 +519,27 @@ namespace pluginLib
 	void Controller::saveChunkData(baseLib::BinaryStream& s)
 	{
 		m_parameterLinks.saveChunkData(s);
+	}
+
+	Parameter::Origin Controller::midiEventSourceToParameterOrigin(const synthLib::MidiEventSource _source)
+	{
+		switch (_source)
+		{
+		case synthLib::MidiEventSource::Unknown:
+			return Parameter::Origin::Unknown;
+		case synthLib::MidiEventSource::Editor:
+			return Parameter::Origin::Ui;
+		case synthLib::MidiEventSource::Host:
+			return Parameter::Origin::HostAutomation;
+		case synthLib::MidiEventSource::PhysicalInput:
+		case synthLib::MidiEventSource::Plugin:
+			return Parameter::Origin::Midi;
+		case synthLib::MidiEventSource::Internal:
+			return Parameter::Origin::Unknown;
+		default:
+			assert(false && "implement new midi event source type");
+			return Parameter::Origin::Unknown;
+		}
 	}
 
 	void Controller::getMidiMessages(std::vector<synthLib::SMidiEvent>& _events)

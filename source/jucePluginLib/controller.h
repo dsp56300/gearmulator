@@ -75,6 +75,8 @@ namespace pluginLib
 		void loadChunkData(baseLib::ChunkReader& _cr);
 		void saveChunkData(baseLib::BinaryStream& s);
 
+		static Parameter::Origin midiEventSourceToParameterOrigin(synthLib::MidiEventSource _source);
+
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
 		void processMidiMessages();
