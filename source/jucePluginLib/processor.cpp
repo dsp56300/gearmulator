@@ -130,6 +130,8 @@ namespace pluginLib
 		try
 		{
 			m_device.reset(createDevice());
+			if(!m_device->isValid())
+				throw synthLib::DeviceException(synthLib::DeviceError::Unknown, "Device initialization failed");
 		}
 		catch(const synthLib::DeviceException& e)
 		{
