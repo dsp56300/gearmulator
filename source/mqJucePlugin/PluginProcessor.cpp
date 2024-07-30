@@ -1,9 +1,6 @@
 #include "PluginProcessor.h"
 #include "PluginEditorState.h"
 
-#include <juce_audio_processors/juce_audio_processors.h>
-#include <juce_audio_devices/juce_audio_devices.h>
-
 #include "mqController.h"
 
 #include "jucePluginLib/processor.h"
