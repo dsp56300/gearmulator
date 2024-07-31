@@ -20,7 +20,7 @@ namespace n2xJucePlugin
 		addMouseListener(this, true);
 		{
 			// Init Patch Manager
-			const auto container = findComponent("PatchManager");
+			const auto container = findComponent("ContainerPatchManager");
 			constexpr auto scale = 1.0f;
 			const float x = static_cast<float>(container->getX());
 			const float y = static_cast<float>(container->getY());
