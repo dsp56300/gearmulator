@@ -74,7 +74,7 @@ namespace n2x
 		0,		// ModEnvDest
 		0,		// Auto
 		0,		// FilterVelocity
-		0,		// OctaveShift
+		2,		// OctaveShift
 		0,		// Lfo2Dest
 	};
 
@@ -114,7 +114,7 @@ namespace n2x
 		multi[i++] = 0;		// Master Tune
 		multi[i++] = 0;		// Pedal Type
 		multi[i++] = 1;		// Local Control
-		multi[i++] = 0;		// Keyboard Octave Shift
+		multi[i++] = 2;		// Keyboard Octave Shift
 		multi[i++] = 0;		// Selected Channel
 		multi[i++] = 0;		// Arp Midi Out
 		set4(1,0,0,0);		// Channel Active
