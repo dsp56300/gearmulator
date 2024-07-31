@@ -18,9 +18,13 @@ namespace n2xJucePlugin
 	, m_editor(_editor)
 	, m_controller(_editor.getN2xController())
 	{
+		startLoaderThread();
 	}
 
-	PatchManager::~PatchManager() = default;
+	PatchManager::~PatchManager()
+	{
+		stopLoaderThread();
+	}
 
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part)
 	{
