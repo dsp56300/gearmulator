@@ -195,16 +195,23 @@ namespace pluginLib
 
 		const bool hasCustomValue = _control.getProperties().contains("parametervalue");
 		int paramValue = 1;
+		int paramValueOff = -1;
 		if(hasCustomValue)
-			paramValue = _control.getProperties()["value"];
+			paramValue = _control.getProperties()["parametervalue"];
+		if(_control.getProperties().contains("parametervalueoff"))
+			paramValueOff = _control.getProperties()["parametervalueoff"];
 
-		_control.onClick = [&_control, param, paramValue, hasCustomValue]
+		_control.onClick = [&_control, param, paramValue, hasCustomValue, paramValueOff]
 		{
 			const auto on = _control.getToggleState();
 			if(hasCustomValue)
 			{
 				if(on)
 					param->setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Ui);
+				else if(paramValueOff != -1)
+					param->setUnnormalizedValueNotifyingHost(paramValueOff, Parameter::Origin::Ui);
+				else
+					_control.setToggleState(true, juce::dontSendNotification);
 			}
 			else
 			{
