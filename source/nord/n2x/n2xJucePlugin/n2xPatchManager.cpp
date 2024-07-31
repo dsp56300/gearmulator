@@ -50,15 +50,22 @@ namespace n2xJucePlugin
 		const auto bank = _sysex[n2x::SysexIndex::IdxMsgType];
 		const auto program = _sysex[n2x::SysexIndex::IdxMsgSpec];
 
+		if(program >= n2x::g_programsPerBank)
+			return {};
+
 		char name[128]{0};
 
 		if(isSingle)
 		{
-			(void)snprintf(name, sizeof(name), "%c.%02d", bank == n2x::SingleDumpBankEditBuffer ? 'e' : ('1' + bank), program);
+			if(bank < n2x::SysexByte::SingleDumpBankEditBuffer || bank > (n2x::SysexByte::SingleDumpBankEditBuffer + n2x::g_singleBankCount))
+				return {};
+			(void)snprintf(name, sizeof(name), "%c.%02d", bank == n2x::SingleDumpBankEditBuffer ? 'e' : '0' + (bank - n2x::SysexByte::SingleDumpBankEditBuffer), program);
 		}
 		else
 		{
-			(void)snprintf(name, sizeof(name), "P%c.%02d", bank == n2x::MultiDumpBankEditBuffer ? 'e' : ('1' + bank), program);
+			if(bank < n2x::SysexByte::MultiDumpBankEditBuffer || bank > (n2x::SysexByte::MultiDumpBankEditBuffer + n2x::g_multiBankCount))
+				return {};
+			(void)snprintf(name, sizeof(name), "P%c.%02d", bank == n2x::MultiDumpBankEditBuffer ? 'e' : '0' + (bank - n2x::SysexByte::MultiDumpBankEditBuffer), program);
 		}
 
 		p->name = name;
