@@ -184,16 +184,43 @@ namespace pluginLib
 		bind(_btn, _param, CurrentPart);
 	}
 
-	void ParameterBinding::bind(juce::Button& _control, uint32_t _param, uint8_t _part)
+	void ParameterBinding::bind(juce::Button& _control, const uint32_t _param, const uint8_t _part)
 	{
-		const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
-		if (!v)
+		const auto param = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+		if (!param)
 		{
 			assert(false && "Failed to find parameter");
 			return;
 		}
-		_control.getToggleStateValue().referTo(v->getValueObject());
-		const BoundParameter p{v, &_control, _param, CurrentPart};
+
+		const bool hasCustomValue = _control.getProperties().contains("parametervalue");
+		int paramValue = 1;
+		if(hasCustomValue)
+			paramValue = _control.getProperties()["value"];
+
+		_control.onClick = [&_control, param, paramValue, hasCustomValue]
+		{
+			const auto on = _control.getToggleState();
+			if(hasCustomValue)
+			{
+				if(on)
+					param->setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Ui);
+			}
+			else
+			{
+				param->setUnnormalizedValueNotifyingHost(on ? 1 : 0, Parameter::Origin::Ui);
+			}
+		};
+
+		_control.setToggleState(param->getUnnormalizedValue() == paramValue, juce::dontSendNotification);
+
+		const auto listenerId = param->onValueChanged.addListener([this, &_control, paramValue](const Parameter* _p)
+		{
+			const auto value = _p->getUnnormalizedValue();
+			_control.setToggleState(value == paramValue, juce::dontSendNotification);
+		});
+
+		const BoundParameter p{param, &_control, _param, CurrentPart, listenerId};
 		addBinding(p);
 	}
 
@@ -285,7 +312,7 @@ namespace pluginLib
 
 		auto* button = dynamic_cast<juce::Button*>(_b.component);
 		if(button != nullptr)
-			button->getToggleStateValue().referTo(juce::Value());
+			button->onClick = nullptr;
 
 		if(_b.onChangeListenerId != ParameterListener::InvalidListenerId)
 		{
