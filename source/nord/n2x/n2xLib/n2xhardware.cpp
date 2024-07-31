@@ -36,25 +36,31 @@ namespace n2x
 	Hardware::~Hardware()
 	{
 		m_destroy = true;
-
-		// showdown DSP A first, it waits for space to push to DSP B
-		for(uint32_t i=0; i<dsp56k::Audio::RingBufferSize * 2; ++i)
-			m_semDspAtoB.notify();
 		m_dspA.terminate();
+		m_dspB.terminate();
 
-		// shutdown DSP B next, waits for ESAI rate limiting
+		constexpr auto notifyCount = dsp56k::Audio::RingBufferSize * 2;
+
+		// DSP A waits for space to push to DSP B
+		for(uint32_t i=0; i<notifyCount; ++i)
+			m_semDspAtoB.notify();
+
+		// DSP B waits for ESAI rate limiting
 		m_esaiFrameIndex = 0;
 		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
-		for(uint32_t i=0; i<dsp56k::Audio::RingBufferSize * 2; ++i)
+		for(uint32_t i=0; i<notifyCount; ++i)
 			m_haltDSPcv.notify_all();
-		m_dspB.terminate();
 
-		// Now shutdown UC, waits for ESAI to sync to DSPs
+		// UC waits for ESAI to sync to DSPs and on HDI to push data
 		m_esaiFrameIndex = 1;
 		m_lastEsaiFrameIndex = 0;
-		for(uint32_t i=0; i<dsp56k::Audio::RingBufferSize * 2; ++i)
+		for(uint32_t i=0; i<notifyCount; ++i)
 			m_esaiFrameAddedCv.notify_all();
+		while(m_dspA.getPeriph().getHDI08().hasTX())
+			m_dspA.getPeriph().getHDI08().readTX();
+		while(m_dspB.getPeriph().getHDI08().hasTX())
+			m_dspB.getPeriph().getHDI08().readTX();
 		m_ucThread->join();
 	}
 

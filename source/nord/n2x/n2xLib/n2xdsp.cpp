@@ -144,7 +144,7 @@ namespace n2x
 		for(uint32_t i=0; i<32768; ++i)
 			m_triggerInterruptDone.notify();
 
-		m_thread.reset();
+		m_thread->terminate();
 	}
 
 	void DSP::onUCRxEmpty(const bool _needMoreData)
