@@ -36,8 +36,6 @@ namespace n2x
 	Hardware::~Hardware()
 	{
 		m_destroy = true;
-		m_dspA.terminate();
-		m_dspB.terminate();
 
 		constexpr auto notifyCount = dsp56k::Audio::RingBufferSize * 2;
 
@@ -46,11 +44,12 @@ namespace n2x
 			m_semDspAtoB.notify();
 
 		// DSP B waits for ESAI rate limiting
+		for(uint32_t i=0; i<notifyCount; ++i)
+			m_haltDSPcv.notify_all();
+
 		m_esaiFrameIndex = 0;
 		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
-		for(uint32_t i=0; i<notifyCount; ++i)
-			m_haltDSPcv.notify_all();
 
 		m_dspA.join();
 		m_dspB.join();
