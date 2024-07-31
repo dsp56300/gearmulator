@@ -2,6 +2,9 @@
 
 #include <memory>
 
+#include "n2xhardware.h"
+#include "n2xstate.h"
+
 #include "wLib/wDevice.h"
 
 namespace n2x
@@ -29,7 +32,8 @@ namespace n2x
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 
 	private:
-		std::unique_ptr<Hardware> m_hardware = nullptr;
+		Hardware m_hardware;
+		State m_state;
 		std::vector<uint8_t> m_midiOutBuffer;
 		synthLib::MidiBufferParser m_midiParser;
 		uint32_t m_numSamplesProcessed = 0;

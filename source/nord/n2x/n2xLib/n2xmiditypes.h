@@ -33,4 +33,5 @@ namespace n2x
 
 	static constexpr uint32_t g_singleDumpSize = g_singleDataSize + g_sysexContainerSize;
 	static constexpr uint32_t g_multiDumpSize  = g_multiDataSize  + g_sysexContainerSize;
+	static constexpr uint32_t g_patchRequestSize = g_sysexContainerSize;
 }

@@ -5,9 +5,8 @@
 
 namespace n2x
 {
-	Device::Device()
+	Device::Device() : m_state(m_hardware)
 	{
-		m_hardware.reset(new Hardware());
 	}
 
 	float Device::getSamplerate() const
@@ -17,19 +16,17 @@ namespace n2x
 
 	bool Device::isValid() const
 	{
-		return m_hardware->isValid();
+		return m_hardware.isValid();
 	}
 
 	bool Device::getState(std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		// TODO
-		return false;
+		return m_state.getState(_state);
 	}
 
 	bool Device::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
-		// TODO
-		return false;
+		return m_state.setState(_state);
 	}
 
 	uint32_t Device::getChannelCountIn()
@@ -44,33 +41,36 @@ namespace n2x
 
 	bool Device::setDspClockPercent(const uint32_t _percent)
 	{
-		bool res = m_hardware->getDSPA().getPeriph().getEsaiClock().setSpeedPercent(_percent);
-		res &= m_hardware->getDSPB().getPeriph().getEsaiClock().setSpeedPercent(_percent);
+		bool res = m_hardware.getDSPA().getPeriph().getEsaiClock().setSpeedPercent(_percent);
+		res &= m_hardware.getDSPB().getPeriph().getEsaiClock().setSpeedPercent(_percent);
 		return res;
 	}
 
 	uint32_t Device::getDspClockPercent() const
 	{
-		return m_hardware->getDSPA().getPeriph().getEsaiClock().getSpeedPercent();
+		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedPercent();
 	}
 
 	uint64_t Device::getDspClockHz() const
 	{
-		return m_hardware->getDSPA().getPeriph().getEsaiClock().getSpeedInHz();
+		return const_cast<Hardware&>(m_hardware).getDSPA().getPeriph().getEsaiClock().getSpeedInHz();
 	}
 
 	void Device::readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut)
 	{
-		m_hardware->getMidi().read(m_midiOutBuffer);
+		m_hardware.getMidi().read(m_midiOutBuffer);
 		m_midiParser.write(m_midiOutBuffer);
 		m_midiOutBuffer.clear();
 		m_midiParser.getEvents(_midiOut);
+
+		for (const auto& midiOut : _midiOut)
+			m_state.receive(midiOut);
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
-		m_hardware->processAudio(_outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
-		m_numSamplesProcessed += _samples;
+		m_hardware.processAudio(_outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
+		m_numSamplesProcessed += static_cast<uint32_t>(_samples);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
@@ -79,11 +79,14 @@ namespace n2x
 		{
 			auto e = _ev;
 			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
-			m_hardware->sendMidi(e);
+			m_hardware.sendMidi(e);
 		}
 		else
 		{
-			m_hardware->sendMidi(_ev);
+			if(m_state.receive(_ev))
+				return true;
+
+			m_hardware.sendMidi(_ev);
 		}
 		return true;
 	}
