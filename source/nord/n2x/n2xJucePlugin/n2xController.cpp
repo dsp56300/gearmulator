@@ -197,4 +197,30 @@ namespace n2xJucePlugin
 
 		return true;
 	}
+
+	bool Controller::isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const
+	{
+		if(_base.getDescription().isNonPartSensitive() || _derived.getDescription().isNonPartSensitive())
+			return false;
+
+		if(_derived.getParameterIndex() != _base.getParameterIndex())
+			return false;
+
+		const auto& packetName = midiPacketName(MidiPacketType::SingleDump);
+		const auto* packet = getMidiPacket(packetName);
+
+		if (!packet)
+		{
+			LOG("Failed to find midi packet " << packetName);
+			return true;
+		}
+		
+		const auto* defA = packet->getDefinitionByParameterName(_derived.getDescription().name);
+		const auto* defB = packet->getDefinitionByParameterName(_base.getDescription().name);
+
+		if (!defA || !defB)
+			return true;
+
+		return defA->doMasksOverlap(*defB);
+	}
 }
