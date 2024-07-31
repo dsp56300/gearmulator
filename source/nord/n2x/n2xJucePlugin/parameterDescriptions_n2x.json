@@ -72,7 +72,7 @@
 		{"index":51, "name":"O2Waveform", "min":0, "max":3, "isDiscrete":true},
 		{"index":52, "name":"Sync", "min":0, "max":1, "isBool":true},
 		{"index":52, "name":"RingMod", "min":0, "max":1, "isBool":true},
-		{"index":52, "name":"Distortion", "min":0, "max":1, "isBool":true},
+		{"index":100, "name":"Distortion", "min":0, "max":1, "isBool":true},
 		{"index":53, "name":"FilterType", "min":0, "max":4, "isDiscrete":true},
 		{"index":54, "name":"O2Keytrack", "min":0, "max":1, "isBool":true},
 		{"index":55, "name":"FilterKeytrack", "min":0, "max":3, "isBool":true},
