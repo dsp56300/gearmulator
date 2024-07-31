@@ -14,6 +14,7 @@
 				{ "name" : "Cutoff",            "parameterAttachment" : { "parameter" : "Cutoff" },    "rotary" : { }, "spritesheet" : { "x" : "974", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
 				{ "name" : "Resonance",         "parameterAttachment" : { "parameter" : "Resonance" }, "rotary" : { }, "spritesheet" : { "x" : "1219", "y" : "244", "width" : "137", "height" : "137", "texture" : "knob_big", "tileSizeX" : "137", "tileSizeY" : "137" } },
 			] 
-		}
+		},
+		{"name":"PatchManager","component":{"x":"0","y":"0","width":"2638","height":"1301"}}
 	]
 }

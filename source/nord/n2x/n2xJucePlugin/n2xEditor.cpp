@@ -4,6 +4,7 @@
 #include "n2xPluginProcessor.h"
 
 #include "n2xController.h"
+#include "n2xPatchManager.h"
 
 #include "jucePluginLib/parameterbinding.h"
 
@@ -17,6 +18,23 @@ namespace n2xJucePlugin
 		create(_jsonFilename);
 
 		addMouseListener(this, true);
+		{
+			// Init Patch Manager
+			const auto container = findComponent("PatchManager");
+			constexpr auto scale = 1.0f;
+			const float x = static_cast<float>(container->getX());
+			const float y = static_cast<float>(container->getY());
+			const float w = static_cast<float>(container->getWidth());
+			const float h = static_cast<float>(container->getHeight());
+			container->setTransform(juce::AffineTransform::scale(scale, scale));
+			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
+			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
+
+			const auto configOptions = getProcessor().getConfigOptions();
+			const auto dir = configOptions.getDefaultFile().getParentDirectory();
+
+			setPatchManager(new PatchManager(*this, container, dir));
+		}
 	}
 
 	Editor::~Editor()
