@@ -147,6 +147,11 @@ namespace n2x
 		m_thread->terminate();
 	}
 
+	void DSP::join() const
+	{
+		m_thread->join();
+	}
+
 	void DSP::onUCRxEmpty(const bool _needMoreData)
 	{
 		if(_needMoreData)

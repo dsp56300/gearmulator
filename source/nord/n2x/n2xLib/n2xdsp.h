@@ -42,6 +42,7 @@ namespace n2x
 		auto& getHaltDSP() { return m_haltDSP; }
 
 		void terminate();
+		void join() const;
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
