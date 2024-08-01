@@ -272,7 +272,11 @@ namespace n2xJucePlugin
 		if(isSingle)
 			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
 		else
+		{
 			requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);
+			for(uint8_t i=0; i<getPartCount(); ++i)
+				requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, i);
+		}
 
 		return true;
 	}
