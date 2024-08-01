@@ -147,10 +147,9 @@ namespace n2x
 
 	bool State::getState(std::vector<uint8_t>& _state)
 	{
-		_state.reserve(sizeof(m_multi) + sizeof(m_singles));
-		_state.insert(_state.begin(), m_multi.begin(), m_multi.end());
+		_state.insert(_state.end(), m_multi.begin(), m_multi.end());
 		for (const auto& single : m_singles)
-			_state.insert(_state.begin(), single.begin(), single.end());
+			_state.insert(_state.end(), single.begin(), single.end());
 		return true;
 	}
 
