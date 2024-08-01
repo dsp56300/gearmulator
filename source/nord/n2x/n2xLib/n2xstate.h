@@ -17,16 +17,33 @@ namespace n2x
 		using SingleDump = std::array<uint8_t, g_singleDumpSize>;
 		using MultiDump = std::array<uint8_t, g_multiDumpSize>;
 
-		State(Hardware& _hardware);
+		explicit State(Hardware* _hardware);
 
 		bool getState(std::vector<uint8_t>& _state);
 		bool setState(const std::vector<uint8_t>& _state);
 
 		bool receive(const synthLib::SMidiEvent& _ev);
+		bool receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source);
+
 		bool receiveNonSysex(const synthLib::SMidiEvent& _ev);
+
+		bool changeSingleParameter(uint8_t _part, SingleParam _parameter, uint8_t _value);
+		bool changeMultiParameter(MultiParam _parameter, uint8_t _value);
+
+		void updateMultiFromSingles();
+
+		const auto& getMulti() const { return m_multi; }
+		const auto& getSingle(uint8_t _part) const { return m_singles[_part]; }
+
+		const auto& updateAndGetMulti()
+		{
+			updateMultiFromSingles();
+			return getMulti();
+		}
 
 		static void createDefaultSingle(SingleDump& _single, uint8_t _program, uint8_t _bank = n2x::SingleDumpBankEditBuffer);
 		static void copySingleToMulti(MultiDump& _multi, const SingleDump& _single, uint8_t _index);
+		static void extractSingleFromMulti(SingleDump& _single, const MultiDump& _multi, uint8_t _index);
 		static void createDefaultMulti(MultiDump& _multi, uint8_t _bank = SysexByte::MultiDumpBankEditBuffer);
 
 		template<size_t Size>
@@ -88,7 +105,7 @@ namespace n2x
 
 		void send(const synthLib::SMidiEvent& _e) const;
 
-		Hardware& m_hardware;
+		Hardware* m_hardware;
 		std::array<SingleDump, 4> m_singles;
 		MultiDump m_multi;
 	};

@@ -180,7 +180,7 @@ namespace n2x
 
 	static const MultiDefaultData g_multiDefault = createMultiDefaultData();
 
-	State::State(Hardware& _hardware) : m_hardware(_hardware)
+	State::State(Hardware* _hardware) : m_hardware(_hardware)
 	{
 		for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
 			createDefaultSingle(m_singles[i], i);
@@ -193,9 +193,8 @@ namespace n2x
 
 	bool State::getState(std::vector<uint8_t>& _state)
 	{
+		updateMultiFromSingles();
 		_state.insert(_state.end(), m_multi.begin(), m_multi.end());
-		for (const auto& single : m_singles)
-			_state.insert(_state.end(), single.begin(), single.end());
 		return true;
 	}
 
@@ -205,12 +204,7 @@ namespace n2x
 		synthLib::MidiToSysex::splitMultipleSysex(msgs, _state);
 
 		for (auto& msg : msgs)
-		{
-			synthLib::SMidiEvent e;
-			e.source = synthLib::MidiEventSource::Host;
-			e.sysex = std::move(msg);
-			receive(e);
-		}
+			receive(msg, synthLib::MidiEventSource::Host);
 
 		return false;
 	}
@@ -256,6 +250,14 @@ namespace n2x
 			return false;
 
 		return false;
+	}
+
+	bool State::receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source)
+	{
+		synthLib::SMidiEvent e;
+		e.sysex = _data;
+		e.source = _source;
+		return receive(e);
 	}
 
 	bool State::receiveNonSysex(const synthLib::SMidiEvent& _ev)
@@ -306,11 +308,41 @@ namespace n2x
 				default:
 					for (const auto part : parts)
 						packNibbles(m_singles[part], offset, _ev.c);
+					return true;
 				}
 			}
-			break;
+			return false;
+		default:
+			return false;
 		}
-		return false;
+	}
+
+	bool State::changeSingleParameter(const uint8_t _part, const SingleParam _parameter, uint8_t _value)
+	{
+		if(_part >= m_singles.size())
+			return false;
+		const auto off = getOffsetInSingleDump(_parameter);
+		const auto current = unpackNibbles(m_singles[_part], _parameter);
+		if(current == _value)
+			return false;
+		packNibbles(m_singles[_part], off, _value);
+		return true;
+	}
+
+	bool State::changeMultiParameter(const MultiParam _parameter, const uint8_t _value)
+	{
+		const auto off = getOffsetInMultiDump(_parameter);
+		const auto current = unpackNibbles(m_multi, _parameter);
+		if(current == _value)
+			return false;
+		packNibbles(m_multi, off, _value);
+		return true;
+	}
+
+	void State::updateMultiFromSingles()
+	{
+		for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
+			copySingleToMulti(m_multi, m_singles[i], i);
 	}
 
 	void State::createDefaultSingle(SingleDump& _single, const uint8_t _program, const uint8_t _bank/* = n2x::SingleDumpBankEditBuffer*/)
@@ -331,7 +363,14 @@ namespace n2x
 	{
 		uint32_t i = SysexIndex::IdxMsgSpec + 1;
 		i += g_singleDataSize * _index;
-		std::copy(_single.begin() + g_sysexHeaderSize, _single.end() - g_sysexFooterSize, _multi.begin() + i);
+		std::copy_n(_single.begin() + g_sysexHeaderSize, g_singleDataSize, _multi.begin() + i);
+	}
+
+	void State::extractSingleFromMulti(SingleDump& _single, const MultiDump& _multi, uint8_t _index)
+	{
+		uint32_t i = SysexIndex::IdxMsgSpec + 1;
+		i += g_singleDataSize * _index;
+		std::copy_n(_multi.begin() + i, g_singleDataSize, _single.begin() + g_sysexHeaderSize);
 	}
 
 	void State::createDefaultMulti(MultiDump& _multi, const uint8_t _bank/* = SysexByte::MultiDumpBankEditBuffer*/)
@@ -385,7 +424,8 @@ namespace n2x
 	{
 		if(_e.source == synthLib::MidiEventSource::Plugin)
 			return;
-		m_hardware.sendMidi(_e);
+		if(m_hardware)
+			m_hardware->sendMidi(_e);
 	}
 
 	template<size_t Size>

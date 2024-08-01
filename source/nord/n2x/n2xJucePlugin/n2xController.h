@@ -30,7 +30,7 @@ namespace n2xJucePlugin
 
 		uint8_t getPartCount() override
 		{
-			return static_cast<uint8_t>(m_singles.size());
+			return 4;
 		}
 
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
@@ -39,6 +39,7 @@ namespace n2xJucePlugin
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+		void sendPerformanceParameter(const pluginLib::Parameter& _parameter, uint8_t _value);
 		bool sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
 		void requestDump(uint8_t _bank, uint8_t _patch) const;
@@ -49,7 +50,6 @@ namespace n2xJucePlugin
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
 
 	private:
-		std::array<n2x::State::SingleDump, 4> m_singles;
-		n2x::State::MultiDump m_multi;
+		n2x::State m_state;
 	};
 }

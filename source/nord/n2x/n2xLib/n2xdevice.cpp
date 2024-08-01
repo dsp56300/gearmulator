@@ -5,7 +5,7 @@
 
 namespace n2x
 {
-	Device::Device() : m_state(m_hardware)
+	Device::Device() : m_state(&m_hardware)
 	{
 	}
 

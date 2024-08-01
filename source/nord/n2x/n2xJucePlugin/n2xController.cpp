@@ -29,7 +29,7 @@ namespace
 
 namespace n2xJucePlugin
 {
-	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, loadParameterDescriptions())
+	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, loadParameterDescriptions()), m_state(nullptr)
 	{
 	    registerParams(_p);
 
@@ -100,7 +100,7 @@ namespace n2xJucePlugin
 
 		if(bank == n2x::SysexByte::SingleDumpBankEditBuffer && program < getPartCount())
 		{
-			std::copy(_msg.begin(), _msg.end(), m_singles[program].begin());
+			m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
 			applyPatchParameters(params, program);
 			return true;
 		}
@@ -122,7 +122,7 @@ namespace n2xJucePlugin
 		if(bank != n2x::SysexByte::MultiDumpBankEditBuffer)
 			return false;
 
-		std::copy(_msg.begin(), _msg.end(), m_multi.begin());
+		m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
 
 		applyPatchParameters(params, 0);
 
@@ -139,24 +139,31 @@ namespace n2xJucePlugin
 
 		const auto origin = midiEventSourceToParameterOrigin(_e.source);
 
-		if(_e.b == n2x::ControlChange::CCSync)
+		m_state.receive(_e);
+
+		const auto parts = m_state.getPartsForMidiChannel(_e);
+
+		for (const uint8_t part : parts)
 		{
-			// this controls both Sync and RingMod
-			// Sync = bit 0
-			// RingMod = bit 1
-			auto* paramSync = getParameter("Sync", _e.a & 0xf);
-			auto* paramRingMod = getParameter("RingMod", _e.a & 0xf);
-			paramSync->setValueFromSynth(_e.c & 1, origin);
-			paramRingMod->setValueFromSynth((_e.c>>1) & 1, origin);
-		}
-		else
-		{
-			for (const auto paramIndex : paramIndices)
+			if(_e.b == n2x::ControlChange::CCSync)
 			{
-				auto* param = getParameter(paramIndex);
-				assert(param && "parameter not found for control change");
-				// TODO: part
-				param->setValueFromSynth(_e.c, origin);
+				// this controls both Sync and RingMod
+				// Sync = bit 0
+				// RingMod = bit 1
+				auto* paramSync = getParameter("Sync", part);
+				auto* paramRingMod = getParameter("RingMod", part);
+				paramSync->setValueFromSynth(_e.c & 1, origin);
+				paramRingMod->setValueFromSynth((_e.c>>1) & 1, origin);
+			}
+			else
+			{
+				for (const auto paramIndex : paramIndices)
+				{
+					auto* param = getParameter(paramIndex, part);
+					assert(param && "parameter not found for control change");
+					// TODO: part
+					param->setValueFromSynth(_e.c, origin);
+				}
 			}
 		}
 
@@ -165,6 +172,12 @@ namespace n2xJucePlugin
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
 	{
+		if(_parameter.getDescription().page >= 10)
+		{
+			sendPerformanceParameter(_parameter, _value);
+			return;
+		}
+
 		const auto& controllerMap = getParameterDescriptions().getControllerMap();
 
 		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getParameterIndex());
@@ -182,7 +195,20 @@ namespace n2xJucePlugin
 			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
 		}
 
+		m_state.receive(synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE, cc, _value});
 		sendMidiEvent(synthLib::M_CONTROLCHANGE, cc, _value);
+	}
+
+	void Controller::sendPerformanceParameter(const pluginLib::Parameter& _parameter, const uint8_t _value)
+	{
+		const auto& desc = _parameter.getDescription();
+
+		const auto mp = static_cast<n2x::MultiParam>(desc.index + (desc.page - 10) * 128);
+
+		if(!m_state.changeMultiParameter(mp, _value))
+			return;
+		const auto& multi = m_state.updateAndGetMulti();
+		pluginLib::Controller::sendSysEx(pluginLib::SysEx{multi.begin(), multi.end()});
 	}
 
 	bool Controller::sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
