@@ -37,32 +37,30 @@ namespace n2x
 	{
 		m_destroy = true;
 
+		while(m_destroy)
+			processAudio(8,64);
+
 		constexpr auto notifyCount = dsp56k::Audio::RingBufferSize * 2;
+
+		m_dspA.terminate();
+		m_dspB.terminate();
 
 		// DSP A waits for space to push to DSP B
 		for(uint32_t i=0; i<notifyCount; ++i)
 			m_semDspAtoB.notify();
 
 		// DSP B waits for ESAI rate limiting
-		for(uint32_t i=0; i<notifyCount; ++i)
-			m_haltDSPcv.notify_all();
-
 		m_esaiFrameIndex = 0;
 		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
 
-		m_dspA.join();
-		m_dspB.join();
-
-		// UC waits for ESAI to sync to DSPs and on HDI to read/write data
-		m_esaiFrameIndex = 1;
-		m_lastEsaiFrameIndex = 0;
 		for(uint32_t i=0; i<notifyCount; ++i)
-			m_esaiFrameAddedCv.notify_all();
-		while(m_dspA.getPeriph().getHDI08().hasTX())		m_dspA.getPeriph().getHDI08().readTX();
-		while(m_dspA.getPeriph().getHDI08().hasRXData())	m_dspA.getPeriph().getHDI08().readRX(dsp56k::Move_xx);
-		while(m_dspB.getPeriph().getHDI08().hasTX())		m_dspB.getPeriph().getHDI08().readTX();
-		while(m_dspB.getPeriph().getHDI08().hasRXData())	m_dspB.getPeriph().getHDI08().readRX(dsp56k::Move_xx);
+			m_haltDSPcv.notify_all();
+
+		m_dspB.terminate();
+		m_dspA.join();
+		m_dspB.terminate();
+		m_dspB.join();
 
 		m_ucThread->join();
 	}
@@ -301,6 +299,7 @@ namespace n2x
 			processUC();
 			processUC();
 		}
+		m_destroy = false;
 	}
 
 	void Hardware::advanceSamples(const uint32_t _samples, const uint32_t _latency)
