@@ -82,6 +82,52 @@ namespace n2x
 
 	using MultiDefaultData = std::array<uint8_t, ((g_multiDataSize - g_singleDataSize * 4)>>1)>;
 
+	const std::unordered_map<uint8_t, uint32_t> g_controllerMap =
+	{
+		{ 7, 17}, // Gain
+		{17, 64}, // OctaveShift
+		{18, 59}, // ModWheelDest
+		{16, 60}, // Unison
+		{15, 58}, // VoiceMode
+		{65, 62}, // Auto
+		{ 5, 16}, // Portamento
+		{19, 21}, // Lfo1Rate
+		{20, 56}, // Lfo1Waveform
+		{21, 57}, // Lfo1Dest
+		{22, 22}, // Lfo1Level
+		{23, 23}, // Lfo2Rate
+		{24, 65}, // Lfo2Dest
+		{25, 24}, // ArpRange
+		{26, 18}, // ModEnvA
+		{27, 19}, // ModEnvD
+		{28, 61}, // ModEnvDest
+		{29, 20}, // ModEnvLevel
+		{30, 50}, // O1Waveform
+		{31, 51}, // O2Waveform
+		{78,  0}, // O2Pitch
+		{33,  1}, // O2PitchFine
+		{70,  7}, // FmDepth
+		{34, 54}, // O2Keytrack
+		{79,  6}, // PW
+		{35, 52}, // Sync
+		{ 8,  2}, // Mix
+		{73, 12}, // AmpEnvA
+		{36, 13}, // AmpEnvD
+		{37, 14}, // AmpEnvS
+		{72, 15}, // AmpEnvR
+		{38,  8}, // FilterEnvA
+		{39,  9}, // FilterEnvD
+		{40, 10}, // FilterEnvS
+		{41, 11}, // FilterEnvR
+		{44, 53}, // FilterType
+		{74,  3}, // Cutoff
+		{42,  4}, // Resonance
+		{43,  5}, // FilterEnvAmount
+		{45, 63}, // FilterVelocity
+		{46, 55}, // FilterKeytrack
+		{80, 52}, // Distortion
+	};
+
 	MultiDefaultData createMultiDefaultData()
 	{
 		uint32_t i=0;
