@@ -16,7 +16,7 @@ namespace mqLib
 #else
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0)}
 #endif
-		, m_midi(m_uc.getQSM())
+		, m_midi(m_uc.getQSM(), 44100)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);

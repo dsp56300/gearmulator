@@ -12,7 +12,7 @@ namespace hwLib
 	static constexpr float g_sysexSendDelaySeconds = 0.1f;
 	static constexpr uint32_t g_sysexSendDelaySize = 500;
 
-	SciMidi::SciMidi(mc68k::Qsm& _qsm) : m_qsm(_qsm)
+	SciMidi::SciMidi(mc68k::Qsm& _qsm, const float _samplerate) : m_qsm(_qsm), m_samplerate(_samplerate), m_sysexDelaySeconds(g_sysexSendDelaySeconds), m_sysexDelaySize(g_sysexSendDelaySize)
 	{
 	}
 
@@ -43,7 +43,7 @@ namespace hwLib
 			for (const auto b : msg)
 				m_qsm.writeSciRX(b);
 
-			m_remainingSysexDelay = static_cast<uint32_t>(static_cast<float>(msg.size()) * 44100.0f * g_sysexSendDelaySeconds / static_cast<float>(g_sysexSendDelaySize));
+			m_remainingSysexDelay = static_cast<uint32_t>(static_cast<float>(msg.size()) * m_samplerate * m_sysexDelaySeconds / static_cast<float>(m_sysexDelaySize));
 
 			m_pendingSysexBuffers.pop_front();
 		}
@@ -116,5 +116,11 @@ namespace hwLib
 
 			_result.push_back(d);
 		}
+	}
+
+	void SciMidi::setSysexDelay(const float _seconds, const uint32_t _size)
+	{
+		m_sysexDelaySeconds = _seconds;
+		m_sysexDelaySize = _size;
 	}
 }

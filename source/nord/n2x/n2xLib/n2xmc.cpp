@@ -25,13 +25,15 @@ namespace n2x
 	: m_flash(_hardware)
 	, m_hdi08(m_hdi08A, m_hdi08B)
 	, m_panel(_hardware)
-	, m_midi(getQSM())
+	, m_midi(getQSM(), g_samplerate)
 	{
 		if(!_rom.isValid())
 			return;
 
 		m_rom = _rom.data();
 		m_ram.fill(0);
+
+		m_midi.setSysexDelay(0.0f, 1);
 
 //		dumpAssembly("n2x_68k.asm", g_romAddress, g_romSize);
 

@@ -20,7 +20,7 @@ namespace hwLib
 	class SciMidi
 	{
 	public:
-		explicit SciMidi(mc68k::Qsm& _qsm);
+		explicit SciMidi(mc68k::Qsm& _qsm, float _samplerate);
 
 		void process(uint32_t _numSamples);
 
@@ -40,8 +40,12 @@ namespace hwLib
 
 		void read(std::vector<uint8_t>& _result);
 
+		void setSysexDelay(const float _seconds, const uint32_t _size);
+
 	private:
 		mc68k::Qsm& m_qsm;
+
+		const float m_samplerate;
 
 		bool m_readingSysex = false;
 		bool m_writingSysex = false;
@@ -50,5 +54,7 @@ namespace hwLib
 		std::deque< std::vector<uint8_t> > m_pendingSysexBuffers;
 		std::vector<uint8_t> m_pendingSysexMessage;
 		std::mutex m_mutex;
+		float m_sysexDelaySeconds;
+		uint32_t m_sysexDelaySize;
 	};
 }
