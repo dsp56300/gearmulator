@@ -293,7 +293,7 @@ namespace n2x
 						for (const auto part : parts)
 						{
 							auto v = unpackNibbles(m_singles[part], offset);
-							v &= ~0x8;
+							v &= ~(1<<4);
 							v |= _ev.c << 4;
 							packNibbles(m_singles[part], offset, v);
 						}
