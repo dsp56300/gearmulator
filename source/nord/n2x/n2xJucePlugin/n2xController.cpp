@@ -195,6 +195,11 @@ namespace n2xJucePlugin
 
 		pluginLib::Controller::sendSysEx(d);
 
+		if(isSingle)
+			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
+		else
+			requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);
+
 		return true;
 	}
 
