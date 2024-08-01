@@ -182,7 +182,10 @@ namespace n2xJucePlugin
 
 		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getParameterIndex());
 		if(ccs.empty())
+		{
+			assert(false && "TODO: implement parameter sending for non-CC params");
 			return;
+		}
 
 		const auto cc = ccs.front();
 
