@@ -64,7 +64,13 @@ namespace n2x
 		m_midiParser.getEvents(_midiOut);
 
 		for (const auto& midiOut : _midiOut)
+		{
+			if(midiOut.sysex.empty())
+				LOG("TX " << HEXN(midiOut.a,2) << ' ' << HEXN(midiOut.b,2) << ' ' << HEXN(midiOut.c, 2));
+			else
+				LOG("TX Sysex of size " << midiOut.sysex.size());
 			m_state.receive(midiOut);
+		}
 	}
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
