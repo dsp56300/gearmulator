@@ -39,7 +39,7 @@ namespace n2xJucePlugin
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
-		void sendPerformanceParameter(const pluginLib::Parameter& _parameter, uint8_t _value);
+		void sendMultiParameter(const pluginLib::Parameter& _parameter, uint8_t _value);
 		bool sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
 		void requestDump(uint8_t _bank, uint8_t _patch) const;

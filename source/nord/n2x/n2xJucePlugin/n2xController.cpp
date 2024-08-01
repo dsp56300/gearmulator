@@ -25,6 +25,8 @@ namespace
 	{
 		return g_midiPacketNames[static_cast<uint32_t>(_type)];
 	}
+
+	constexpr uint32_t g_multiPage = 10;
 }
 
 namespace n2xJucePlugin
@@ -172,9 +174,9 @@ namespace n2xJucePlugin
 
 	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
 	{
-		if(_parameter.getDescription().page >= 10)
+		if(_parameter.getDescription().page >= g_multiPage)
 		{
-			sendPerformanceParameter(_parameter, _value);
+			sendMultiParameter(_parameter, _value);
 			return;
 		}
 
@@ -202,11 +204,11 @@ namespace n2xJucePlugin
 		sendMidiEvent(synthLib::M_CONTROLCHANGE, cc, _value);
 	}
 
-	void Controller::sendPerformanceParameter(const pluginLib::Parameter& _parameter, const uint8_t _value)
+	void Controller::sendMultiParameter(const pluginLib::Parameter& _parameter, const uint8_t _value)
 	{
 		const auto& desc = _parameter.getDescription();
 
-		const auto mp = static_cast<n2x::MultiParam>(desc.index + (desc.page - 10) * 128);
+		const auto mp = static_cast<n2x::MultiParam>(desc.index + (desc.page - g_multiPage) * 128);
 
 		if(!m_state.changeMultiParameter(mp, _value))
 			return;
