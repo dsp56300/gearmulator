@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cstring>	// memcpy
 
+#include "n2xhardware.h"
 #include "dsp56kEmu/logging.h"
 
 namespace n2x
@@ -84,7 +85,7 @@ namespace n2x
 				if(m_ledLatch10 & (1<<7))
 				{
 					m_lcds[2] = m_ledLatch8;
-					printLCD();
+					onLCDChanged();
 				}
 				break;
 			case g_frontPanelAddressCS6 + 0xc:
@@ -105,7 +106,7 @@ namespace n2x
 					}
 
 					if(gotLCDs)
-						printLCD();
+						onLCDChanged();
 				}
 				break;
 		}
@@ -216,7 +217,17 @@ namespace n2x
 		LOG("LCD:\n" << message);
 	}
 
-	FrontPanel::FrontPanel(): m_cs4(*this), m_cs6(*this)
+	void FrontPanelCS6::onLCDChanged()
+	{
+		// Check if the LCD display "  1", used as indication that device has finished booting
+		if(m_lcds[0] == 255 && m_lcds[1] == 254 && m_lcds[2] == 159)
+		{
+			m_panel.getHardware().notifyBootFinished();
+		}
+		printLCD();
+	}
+
+	FrontPanel::FrontPanel(Hardware& _hardware) : m_hardware(_hardware), m_cs4(*this), m_cs6(*this)
 	{
 	}
 }

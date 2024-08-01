@@ -11,11 +11,7 @@ namespace n2x
 	public:
 		Flash(Hardware& _hardware);
 
-	protected:
-		uint8_t onReadByte() override;
-
 	private:
 		Hardware& m_hardware;
-		uint32_t m_bootCounter = 2;
 	};
 }

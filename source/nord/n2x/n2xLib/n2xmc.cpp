@@ -21,7 +21,11 @@ namespace n2x
 	static constexpr uint32_t g_maskResetDSP = 1 << g_bitResetDSP;
 	static constexpr uint32_t g_maskResetDAC = 1 << g_bitResetDAC;
 
-	Microcontroller::Microcontroller(Hardware& _hardware, const Rom& _rom) : m_flash(_hardware), m_hdi08(m_hdi08A, m_hdi08B), m_midi(getQSM())
+	Microcontroller::Microcontroller(Hardware& _hardware, const Rom& _rom)
+	: m_flash(_hardware)
+	, m_hdi08(m_hdi08A, m_hdi08B)
+	, m_panel(_hardware)
+	, m_midi(getQSM())
 	{
 		if(!_rom.isValid())
 			return;

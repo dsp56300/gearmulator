@@ -19,12 +19,4 @@ namespace n2x
 			}
 		}
 	}
-
-	uint8_t Flash::onReadByte()
-	{
-		if(getAddress() == 0x31 && --m_bootCounter == 0)
-			m_hardware.notifyBootFinished();
-
-		return I2cFlash::onReadByte();
-	}
 }

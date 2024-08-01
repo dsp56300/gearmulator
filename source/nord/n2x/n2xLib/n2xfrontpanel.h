@@ -5,6 +5,7 @@
 
 namespace n2x
 {
+	class Hardware;
 	class FrontPanel;
 
 	template<uint32_t Base>
@@ -40,6 +41,7 @@ namespace n2x
 
 	private:
 		void printLCD() const;
+		void onLCDChanged();
 
 		uint8_t m_ledLatch8 = 0;
 		uint8_t m_ledLatch10 = 0;
@@ -54,7 +56,7 @@ namespace n2x
 	class FrontPanel
 	{
 	public:
-		FrontPanel();
+		FrontPanel(Hardware& _hardware);
 
 		auto& cs4() { return m_cs4; }
 		auto& cs6() { return m_cs6; }
@@ -74,7 +76,10 @@ namespace n2x
 			m_cs6.setButtonState(_type, _pressed);
 		}
 
+		Hardware& getHardware() const { return m_hardware; }
+
 	private:
+		Hardware& m_hardware;
 		FrontPanelCS4 m_cs4;
 		FrontPanelCS6 m_cs6;
 	};
