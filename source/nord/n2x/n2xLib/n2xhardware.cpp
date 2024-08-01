@@ -61,6 +61,9 @@ namespace n2x
 			// DSP A waits for space to push to DSP B
 			m_semDspAtoB.notify();
 
+			if(m_dspB.getPeriph().getEsai().getAudioInputs().full())
+				m_dspB.getPeriph().getEsai().getAudioInputs().pop_front();
+
 			// DSP B waits for ESAI rate limiting and for DSP A to provide audio data
 			m_haltDSPcv.notify_all();
 			if(m_dspA.getPeriph().getEsai().getAudioOutputs().empty())
