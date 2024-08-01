@@ -369,6 +369,7 @@
 		{"cc":34, "param": "O2Keytrack"},
 		{"cc":79, "param": "PW"},
 		{"cc":35, "param": "Sync"},
+		{"cc":35, "param": "RingMod"},
 		{"cc": 8, "param": "Mix"},
 		{"cc":73, "param": "AmpEnvA"},
 		{"cc":36, "param": "AmpEnvD"},
