@@ -45,22 +45,24 @@ namespace n2x
 		m_dspA.terminate();
 		m_dspB.terminate();
 
-		// DSP A waits for space to push to DSP B
 		for(uint32_t i=0; i<notifyCount; ++i)
-			m_semDspAtoB.notify();
 
-		// DSP B waits for ESAI rate limiting
 		m_esaiFrameIndex = 0;
 		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
 
 		for(uint32_t i=0; i<notifyCount; ++i)
-			m_haltDSPcv.notify_all();
 
-		m_dspB.terminate();
-		m_dspA.join();
-		m_dspB.terminate();
-		m_dspB.join();
+		while(!m_dspA.getDSPThread().runThread() || !m_dspB.getDSPThread().runThread())
+		{
+			// DSP A waits for space to push to DSP B
+			m_semDspAtoB.notify();
+
+			// DSP B waits for ESAI rate limiting and for DSP A to provide audio data
+			m_haltDSPcv.notify_all();
+			if(m_dspA.getPeriph().getEsai().getAudioOutputs().empty())
+				m_dspA.getPeriph().getEsai().getAudioOutputs().push_back({});
+		}
 
 		m_ucThread->join();
 	}
