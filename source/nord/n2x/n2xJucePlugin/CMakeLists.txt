@@ -3,8 +3,12 @@ cmake_minimum_required(VERSION 3.15)
 project(n2xJucePlugin VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	n2xArp.cpp n2xArp.h
 	n2xController.cpp n2xController.h
 	n2xEditor.cpp n2xEditor.h
+	n2xLcd.cpp n2xLcd.h
+	n2xPart.cpp n2xPart.h
+	n2xParts.cpp n2xParts.h
 	n2xPatchManager.cpp n2xPatchManager.h
 	n2xPluginEditorState.cpp n2xPluginEditorState.h
 	n2xPluginProcessor.cpp n2xPluginProcessor.h
