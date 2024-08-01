@@ -100,6 +100,7 @@ namespace n2xJucePlugin
 
 		if(bank == n2x::SysexByte::SingleDumpBankEditBuffer && program < getPartCount())
 		{
+			std::copy(_msg.begin(), _msg.end(), m_singles[program].begin());
 			applyPatchParameters(params, program);
 			return true;
 		}
@@ -110,7 +111,22 @@ namespace n2xJucePlugin
 
 	bool Controller::parseMultiDump(const pluginLib::SysEx& _msg)
 	{
-		return false;
+		pluginLib::MidiPacket::Data data;
+		pluginLib::MidiPacket::ParamValues params;
+
+		if(!parseMidiPacket(midiPacketName(MidiPacketType::MultiDump), data, params, _msg))
+			return false;
+
+		const auto bank = data[pluginLib::MidiDataType::Bank];
+
+		if(bank != n2x::SysexByte::MultiDumpBankEditBuffer)
+			return false;
+
+		std::copy(_msg.begin(), _msg.end(), m_multi.begin());
+
+		applyPatchParameters(params, 0);
+
+		return true;
 	}
 
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)

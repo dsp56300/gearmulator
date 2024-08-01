@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jucePluginLib/controller.h"
+#include "n2xLib/n2xstate.h"
 
 class AudioPluginAudioProcessor;
 
@@ -29,7 +30,7 @@ namespace n2xJucePlugin
 
 		uint8_t getPartCount() override
 		{
-			return 4;
+			return static_cast<uint8_t>(m_singles.size());
 		}
 
 		bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource) override;
@@ -46,5 +47,9 @@ namespace n2xJucePlugin
 		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part);
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
+
+	private:
+		std::array<n2x::State::SingleDump, 4> m_singles;
+		n2x::State::MultiDump m_multi;
 	};
 }
