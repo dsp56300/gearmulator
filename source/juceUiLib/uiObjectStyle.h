@@ -69,5 +69,7 @@ namespace genericUI
 		int m_offsetB = 0;
 
 		std::string m_url;
+
+		juce::Rectangle<int> m_hitAreaOffset;	// only supported for buttons atm
 	};
 }
