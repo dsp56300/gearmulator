@@ -17,6 +17,9 @@ namespace n2xJucePlugin
 {
 	class PatchManager;
 	class Controller;
+	class Lcd;
+	class Arp;
+	class Parts;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{
@@ -35,8 +38,13 @@ namespace n2xJucePlugin
 
 		Controller& getN2xController() const { return m_controller; }
 
+		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
 	private:
 		Controller& m_controller;
 		pluginLib::ParameterBinding& m_parameterBinding;
+
+		std::unique_ptr<Arp> m_arp;
+		std::unique_ptr<Lcd> m_lcd;
+		std::unique_ptr<Parts> m_parts;
 	};
 }

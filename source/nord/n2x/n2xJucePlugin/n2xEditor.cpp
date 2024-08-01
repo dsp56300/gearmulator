@@ -1,10 +1,14 @@
 #include "n2xEditor.h"
 
 #include "BinaryData.h"
-#include "n2xPluginProcessor.h"
 
+#include "n2xArp.h"
 #include "n2xController.h"
+#include "n2xLcd.h"
+#include "n2xPart.h"
+#include "n2xParts.h"
 #include "n2xPatchManager.h"
+#include "n2xPluginProcessor.h"
 
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
@@ -62,10 +66,17 @@ namespace n2xJucePlugin
 			romSelector->setSelectedId(1);
 			romSelector->setInterceptsMouseClicks(false, false);
 		}
+
+		m_arp.reset(new Arp(*this));
+		m_lcd.reset(new Lcd(*this));
+		m_parts.reset(new Parts(*this));
 	}
 
 	Editor::~Editor()
 	{
+		m_arp.reset();
+		m_lcd.reset();
+		m_parts.reset();
 	}
 
 	const char* Editor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
@@ -91,5 +102,13 @@ namespace n2xJucePlugin
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const
 	{
 		return {};
+	}
+
+	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name, const juce::DrawableButton::ButtonStyle _buttonStyle)
+	{
+		if(_name == "PerfMidiChannelA" || _name == "PerfMidiChannelB" || _name == "PerfMidiChannelC" || _name == "PerfMidiChannelD")
+			return new Part(*this, _name, _buttonStyle);
+
+		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
 	}
 }
