@@ -28,9 +28,9 @@ namespace n2x
 
 		bool receive(const synthLib::SMidiEvent& _ev);
 
-		static void createDefaultSingle(SingleDump& _single, uint8_t _program);
+		static void createDefaultSingle(SingleDump& _single, uint8_t _program, uint8_t _bank = n2x::SingleDumpBankEditBuffer);
 		static void copySingleToMulti(MultiDump& _multi, const SingleDump& _single, uint8_t _index);
-		static void createDefaultMulti(MultiDump& _multi);
+		static void createDefaultMulti(MultiDump& _multi, uint8_t _bank = SysexByte::MultiDumpBankEditBuffer);
 
 		template<size_t Size>
 		static void createHeader(std::array<uint8_t, Size>& _buffer, uint8_t _msgType, uint8_t _msgSpec);

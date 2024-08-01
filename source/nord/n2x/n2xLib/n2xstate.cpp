@@ -207,9 +207,9 @@ namespace n2x
 		return false;
 	}
 
-	void State::createDefaultSingle(SingleDump& _single, uint8_t _program)
+	void State::createDefaultSingle(SingleDump& _single, const uint8_t _program, const uint8_t _bank/* = n2x::SingleDumpBankEditBuffer*/)
 	{
-		createHeader(_single, SysexByte::SingleDumpBankEditBuffer, _program);
+		createHeader(_single, _bank, _program);
 
 		uint32_t o = IdxMsgSpec + 1;
 
@@ -228,9 +228,9 @@ namespace n2x
 		std::copy(_single.begin() + g_sysexHeaderSize, _single.end() - g_sysexFooterSize, _multi.begin() + i);
 	}
 
-	void State::createDefaultMulti(MultiDump& _multi)
+	void State::createDefaultMulti(MultiDump& _multi, const uint8_t _bank/* = SysexByte::MultiDumpBankEditBuffer*/)
 	{
-		createHeader(_multi, SysexByte::MultiDumpBankEditBuffer, 0);
+		createHeader(_multi, _bank, 0);
 
 		SingleDump single;
 		createDefaultSingle(single, 0);
