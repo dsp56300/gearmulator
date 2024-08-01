@@ -38,23 +38,14 @@ namespace n2x
 		m_destroy = true;
 
 		while(m_destroy)
-		{
-			resumeDSPs();
 			processAudio(8,64);
-		}
-
-		constexpr auto notifyCount = dsp56k::Audio::RingBufferSize * 2;
 
 		m_dspA.terminate();
 		m_dspB.terminate();
 
-		for(uint32_t i=0; i<notifyCount; ++i)
-
 		m_esaiFrameIndex = 0;
 		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
-
-		for(uint32_t i=0; i<notifyCount; ++i)
 
 		while(!m_dspA.getDSPThread().runThread() || !m_dspB.getDSPThread().runThread())
 		{
@@ -307,6 +298,7 @@ namespace n2x
 			processUC();
 			processUC();
 		}
+		resumeDSPs();
 		m_destroy = false;
 	}
 
