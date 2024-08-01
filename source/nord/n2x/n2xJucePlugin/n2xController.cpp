@@ -121,12 +121,27 @@ namespace n2xJucePlugin
 		if(paramIndices.empty())
 			return false;
 
-		for (const auto paramIndex : paramIndices)
+		const auto origin = midiEventSourceToParameterOrigin(_e.source);
+
+		if(_e.b == n2x::ControlChange::CCSync)
 		{
-			auto* param = getParameter(paramIndex);
-			assert(param && "parameter not found for control change");
-			// TODO: part
-			param->setValueFromSynth(_e.c, midiEventSourceToParameterOrigin(_e.source));
+			// this controls both Sync and RingMod
+			// Sync = bit 0
+			// RingMod = bit 1
+			auto* paramSync = getParameter("Sync", _e.a & 0xf);
+			auto* paramRingMod = getParameter("RingMod", _e.a & 0xf);
+			paramSync->setValueFromSynth(_e.c & 1, origin);
+			paramRingMod->setUnnormalizedValue((_e.c>>1) & 1, origin);
+		}
+		else
+		{
+			for (const auto paramIndex : paramIndices)
+			{
+				auto* param = getParameter(paramIndex);
+				assert(param && "parameter not found for control change");
+				// TODO: part
+				param->setValueFromSynth(_e.c, origin);
+			}
 		}
 
 		return true;
