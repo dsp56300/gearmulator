@@ -7,6 +7,9 @@
 #include "n2xPatchManager.h"
 
 #include "jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/pluginVersion.h"
+
+#include "n2xLib/n2xdevice.h"
 
 namespace n2xJucePlugin
 {
@@ -34,6 +37,30 @@ namespace n2xJucePlugin
 			const auto dir = configOptions.getDefaultFile().getParentDirectory();
 
 			setPatchManager(new PatchManager(*this, container, dir));
+		}
+
+		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))
+		{
+			versionNumber->setText(pluginLib::Version::getVersionString(), juce::dontSendNotification);
+		}
+
+		if(auto* romSelector = findComponentT<juce::ComboBox>("RomSelector"))
+		{
+			const auto* dev = dynamic_cast<const n2x::Device*>(getProcessor().getPlugin().getDevice());
+
+			if(dev != nullptr && getProcessor().isPluginValid())
+			{
+				constexpr int id = 1;
+
+				const auto name = juce::File(dev->getRomFilename()).getFileName();
+				romSelector->addItem(name, id);
+			}
+			else
+			{
+				romSelector->addItem("<No ROM found>", 1);
+			}
+			romSelector->setSelectedId(1);
+			romSelector->setInterceptsMouseClicks(false, false);
 		}
 	}
 

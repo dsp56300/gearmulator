@@ -1,7 +1,5 @@
 #pragma once
 
-#include <memory>
-
 #include "n2xhardware.h"
 #include "n2xstate.h"
 
@@ -15,6 +13,8 @@ namespace n2x
 	{
 	public:
 		Device();
+
+		const std::string& getRomFilename() const;
 
 		float getSamplerate() const override;
 		bool isValid() const override;

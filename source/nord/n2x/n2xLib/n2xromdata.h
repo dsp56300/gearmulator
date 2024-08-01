@@ -18,6 +18,8 @@ namespace n2x
 
 		void saveAs(const std::string& _filename);
 
+		const auto& getFilename() const { return m_filename; }
+
 	private:
 		std::array<uint8_t, Size> m_data;
 		std::string m_filename;

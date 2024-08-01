@@ -40,6 +40,8 @@ namespace n2x
 		bool sendMidi(const synthLib::SMidiEvent& _ev);
 		void notifyBootFinished();
 
+		const std::string& getRomFilename() const { return m_rom.getFilename(); }
+
 	private:
 		void ensureBufferSize(uint32_t _frames);
 		void onEsaiCallbackA();

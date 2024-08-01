@@ -9,6 +9,11 @@ namespace n2x
 	{
 	}
 
+	const std::string& Device::getRomFilename() const
+	{
+		return m_hardware.getRomFilename();
+	}
+
 	float Device::getSamplerate() const
 	{
 		return g_samplerate;
