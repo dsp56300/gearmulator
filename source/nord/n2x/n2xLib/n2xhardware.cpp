@@ -38,7 +38,10 @@ namespace n2x
 		m_destroy = true;
 
 		while(m_destroy)
+		{
+			resumeDSPs();
 			processAudio(8,64);
+		}
 
 		constexpr auto notifyCount = dsp56k::Audio::RingBufferSize * 2;
 
