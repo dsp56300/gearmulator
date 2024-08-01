@@ -297,6 +297,16 @@ namespace n2x
 		assert(i + g_sysexFooterSize == g_multiDumpSize);
 	}
 
+	uint32_t State::getOffsetInSingleDump(const SingleParam _param)
+	{
+		return g_sysexHeaderSize + (_param<<1);
+	}
+
+	uint32_t State::getOffsetInMultiDump(const MultiParam _param)
+	{
+		return g_sysexHeaderSize + g_singleDataSize * 4 + (_param<<1);
+	}
+
 	void State::send(const synthLib::SMidiEvent& _e) const
 	{
 		if(_e.source == synthLib::MidiEventSource::Plugin)

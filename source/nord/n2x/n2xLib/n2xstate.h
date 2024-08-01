@@ -35,6 +35,49 @@ namespace n2x
 		template<size_t Size>
 		static void createHeader(std::array<uint8_t, Size>& _buffer, uint8_t _msgType, uint8_t _msgSpec);
 
+		static uint32_t getOffsetInSingleDump(SingleParam _param);
+		static uint32_t getOffsetInMultiDump(MultiParam _param);
+
+		uint8_t getPartMidiChannel(const uint8_t _part) const
+		{
+			return getPartMidiChannel(m_multi, _part);
+		}
+
+		template<typename TDump> static uint8_t getPartMidiChannel(const TDump& _dump, const uint8_t _part)
+		{
+			return getMultiParam(_dump, SlotAMidiChannel, _part);
+		}
+
+		uint8_t getMultiParam(const MultiParam _param, const uint8_t _part) const
+		{
+			return getMultiParam(m_multi, _param, _part);
+		}
+
+		template<typename TDump> static uint8_t getMultiParam(const TDump& _dump, const MultiParam _param, const uint8_t _part)
+		{
+			const auto off = getOffsetInMultiDump(_param) + (_part << 2);
+
+			return unpackNibbles<TDump>(_dump, off);
+		}
+
+		template<typename TDump> static uint8_t getSingleParam(const TDump& _dump, const SingleParam _param, const uint8_t _part)
+		{
+			const auto off = getOffsetInSingleDump(_param) + (_part << 2);
+
+			return unpackNibbles<TDump>(_dump, off);
+		}
+
+		template<typename TDump> static uint8_t unpackNibbles(const TDump& _dump, uint32_t _off)
+		{
+			return static_cast<uint8_t>((_dump[_off] & 0xf) | (_dump[_off + 1] << 8));
+		}
+
+		template<typename TDump> static void packNibbles(TDump& _dump, uint32_t _off, const uint8_t _value)
+		{
+			_dump[_off  ] = _value & 0x0f;
+			_dump[_off+1] = _value >> 8;
+		}
+
 	private:
 		template<size_t Size> bool receive(const std::array<uint8_t, Size>& _data)
 		{
