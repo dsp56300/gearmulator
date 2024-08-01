@@ -11,6 +11,8 @@
 
 #include "parameterlinks.h"
 
+#include "event.h"
+
 namespace juce
 {
 	class AudioProcessor;
@@ -26,6 +28,8 @@ namespace pluginLib
 	{
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
+
+		Event<uint8_t> onCurrentPartChanged;
 
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
 		~Controller() override;
@@ -59,7 +63,7 @@ namespace pluginLib
 		const auto& getExposedParameters() const { return m_synthParams; }
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
-		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
+		virtual void setCurrentPart(uint8_t _part);
 		virtual uint8_t getPartCount() { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
