@@ -82,50 +82,50 @@ namespace n2x
 
 	using MultiDefaultData = std::array<uint8_t, ((g_multiDataSize - g_singleDataSize * 4)>>1)>;
 
-	const std::unordered_map<uint8_t, uint32_t> g_controllerMap =
+	const std::unordered_map<ControlChange, SingleParam> g_controllerMap =
 	{
-		{ 7, 17}, // Gain
-		{17, 64}, // OctaveShift
-		{18, 59}, // ModWheelDest
-		{16, 60}, // Unison
-		{15, 58}, // VoiceMode
-		{65, 62}, // Auto
-		{ 5, 16}, // Portamento
-		{19, 21}, // Lfo1Rate
-		{20, 56}, // Lfo1Waveform
-		{21, 57}, // Lfo1Dest
-		{22, 22}, // Lfo1Level
-		{23, 23}, // Lfo2Rate
-		{24, 65}, // Lfo2Dest
-		{25, 24}, // ArpRange
-		{26, 18}, // ModEnvA
-		{27, 19}, // ModEnvD
-		{28, 61}, // ModEnvDest
-		{29, 20}, // ModEnvLevel
-		{30, 50}, // O1Waveform
-		{31, 51}, // O2Waveform
-		{78,  0}, // O2Pitch
-		{33,  1}, // O2PitchFine
-		{70,  7}, // FmDepth
-		{34, 54}, // O2Keytrack
-		{79,  6}, // PW
-		{35, 52}, // Sync
-		{ 8,  2}, // Mix
-		{73, 12}, // AmpEnvA
-		{36, 13}, // AmpEnvD
-		{37, 14}, // AmpEnvS
-		{72, 15}, // AmpEnvR
-		{38,  8}, // FilterEnvA
-		{39,  9}, // FilterEnvD
-		{40, 10}, // FilterEnvS
-		{41, 11}, // FilterEnvR
-		{44, 53}, // FilterType
-		{74,  3}, // Cutoff
-		{42,  4}, // Resonance
-		{43,  5}, // FilterEnvAmount
-		{45, 63}, // FilterVelocity
-		{46, 55}, // FilterKeytrack
-		{80, 52}, // Distortion
+		{ControlChange::CCGain					, SingleParam::Gain				},
+		{ControlChange::CCOctaveShift			, SingleParam::OctaveShift		},
+		{ControlChange::CCModWheelDest			, SingleParam::ModWheelDest		},
+		{ControlChange::CCUnison				, SingleParam::Unison			},
+		{ControlChange::CCVoiceMode				, SingleParam::VoiceMode		},
+		{ControlChange::CCAuto					, SingleParam::Auto				},
+		{ControlChange::CCPortamento			, SingleParam::Portamento		},
+		{ControlChange::CCLfo1Rate				, SingleParam::Lfo1Rate			},
+		{ControlChange::CCLfo1Waveform			, SingleParam::Lfo1Waveform		},
+		{ControlChange::CCLfo1Dest				, SingleParam::Lfo1Dest			},
+		{ControlChange::CCLfo1Level				, SingleParam::Lfo1Level		},
+		{ControlChange::CCLfo2Rate				, SingleParam::Lfo2Rate			},
+		{ControlChange::CCLfo2Dest				, SingleParam::Lfo2Dest			},
+		{ControlChange::CCArpRange				, SingleParam::ArpRange			},
+		{ControlChange::CCModEnvA				, SingleParam::ModEnvA			},
+		{ControlChange::CCModEnvD				, SingleParam::ModEnvD			},
+		{ControlChange::CCModEnvDest			, SingleParam::ModEnvDest		},
+		{ControlChange::CCModEnvLevel			, SingleParam::ModEnvLevel		},
+		{ControlChange::CCO1Waveform			, SingleParam::O1Waveform		},
+		{ControlChange::CCO2Waveform			, SingleParam::O2Waveform		},
+		{ControlChange::CCO2Pitch				, SingleParam::O2Pitch			},
+		{ControlChange::CCO2PitchFine			, SingleParam::O2PitchFine		},
+		{ControlChange::CCFmDepth				, SingleParam::FmDepth			},
+		{ControlChange::CCO2Keytrack			, SingleParam::O2Keytrack		},
+		{ControlChange::CCPW					, SingleParam::PW				},
+		{ControlChange::CCSync					, SingleParam::Sync				},
+		{ControlChange::CCMix					, SingleParam::Mix				},
+		{ControlChange::CCAmpEnvA				, SingleParam::AmpEnvA			},
+		{ControlChange::CCAmpEnvD				, SingleParam::AmpEnvD			},
+		{ControlChange::CCAmpEnvS				, SingleParam::AmpEnvS			},
+		{ControlChange::CCAmpEnvR				, SingleParam::AmpEnvR			},
+		{ControlChange::CCFilterEnvA			, SingleParam::FilterEnvA		},
+		{ControlChange::CCFilterEnvD			, SingleParam::FilterEnvD		},
+		{ControlChange::CCFilterEnvS			, SingleParam::FilterEnvS		},
+		{ControlChange::CCFilterEnvR			, SingleParam::FilterEnvR		},
+		{ControlChange::CCFilterType			, SingleParam::FilterType		},
+		{ControlChange::CCCutoff				, SingleParam::Cutoff			},
+		{ControlChange::CCResonance				, SingleParam::Resonance		},
+		{ControlChange::CCFilterEnvAmount		, SingleParam::FilterEnvAmount	},
+		{ControlChange::CCFilterVelocity		, SingleParam::FilterVelocity	},
+		{ControlChange::CCFilterKeytrack		, SingleParam::FilterKeytrack	},
+		{ControlChange::CCDistortion			, SingleParam::Distortion		}
 	};
 
 	MultiDefaultData createMultiDefaultData()
