@@ -41,6 +41,11 @@ namespace n2xJucePlugin
 		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 3);
 
 		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
+
+		m_currentPartChanged.set(onCurrentPartChanged, [this](const uint8_t& _part)
+		{
+			setMultiParameter(n2x::SelectedChannel, _part);
+		});
 	}
 
 	Controller::~Controller() = default;
@@ -128,6 +133,9 @@ namespace n2xJucePlugin
 
 		applyPatchParameters(params, 0);
 
+		const auto part = m_state.getMultiParam(n2x::SelectedChannel, 0);
+		setCurrentPart(part);
+
 		return true;
 	}
 
@@ -182,7 +190,7 @@ namespace n2xJucePlugin
 
 		const auto& controllerMap = getParameterDescriptions().getControllerMap();
 
-		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getParameterIndex());
+		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getDescription().index);
 		if(ccs.empty())
 		{
 			assert(false && "TODO: implement parameter sending for non-CC params");
@@ -200,8 +208,19 @@ namespace n2xJucePlugin
 			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
 		}
 
-		m_state.receive(synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, synthLib::M_CONTROLCHANGE, cc, _value});
-		sendMidiEvent(synthLib::M_CONTROLCHANGE, cc, _value);
+		const auto ch = m_state.getPartMidiChannel(_parameter.getPart());
+		const auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + ch), cc, _value};
+
+		m_state.receive(ev);
+		sendMidiEvent(ev);
+	}
+
+	void Controller::setMultiParameter(n2x::MultiParam _mp, uint8_t _value)
+	{
+		if(!m_state.changeMultiParameter(_mp, _value))
+			return;
+		const auto& multi = m_state.updateAndGetMulti();
+		pluginLib::Controller::sendSysEx(pluginLib::SysEx{multi.begin(), multi.end()});
 	}
 
 	void Controller::sendMultiParameter(const pluginLib::Parameter& _parameter, const uint8_t _value)
@@ -210,10 +229,7 @@ namespace n2xJucePlugin
 
 		const auto mp = static_cast<n2x::MultiParam>(desc.index + (desc.page - g_multiPage) * 128);
 
-		if(!m_state.changeMultiParameter(mp, _value))
-			return;
-		const auto& multi = m_state.updateAndGetMulti();
-		pluginLib::Controller::sendSysEx(pluginLib::SysEx{multi.begin(), multi.end()});
+		setMultiParameter(mp, _value);
 	}
 
 	bool Controller::sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const

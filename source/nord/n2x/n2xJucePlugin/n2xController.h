@@ -39,6 +39,7 @@ namespace n2xJucePlugin
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+		void setMultiParameter(n2x::MultiParam _mp, uint8_t _value);
 		void sendMultiParameter(const pluginLib::Parameter& _parameter, uint8_t _value);
 		bool sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
 
@@ -51,5 +52,6 @@ namespace n2xJucePlugin
 
 	private:
 		n2x::State m_state;
+		pluginLib::EventListener<uint8_t> m_currentPartChanged;
 	};
 }

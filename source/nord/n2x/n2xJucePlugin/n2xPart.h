@@ -11,6 +11,8 @@ namespace n2xJucePlugin
 	public:
 		Part(Editor& _editor, const std::string& _name, ButtonStyle _buttonStyle);
 
+		void onClick() override;
+
 	private:
 		Editor& m_editor;
 	};

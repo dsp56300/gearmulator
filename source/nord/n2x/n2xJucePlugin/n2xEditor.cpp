@@ -70,6 +70,12 @@ namespace n2xJucePlugin
 		m_arp.reset(new Arp(*this));
 		m_lcd.reset(new Lcd(*this));
 		m_parts.reset(new Parts(*this));
+
+		onPartChanged.set(m_controller.onCurrentPartChanged, [this](const uint8_t& _part)
+		{
+			setCurrentPart(_part);
+			m_parameterBinding.setPart(_part);
+		});
 	}
 
 	Editor::~Editor()
