@@ -13,7 +13,7 @@ namespace n2xJucePlugin
 	Lcd::Lcd(Editor& _editor) : m_editor(_editor)
 	{
 		m_label = _editor.findComponentT<juce::Label>("PatchName");
-		setText("Hello World");
+		setText("  1");
 	}
 
 	void Lcd::setText(const std::string& _text)
