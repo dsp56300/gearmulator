@@ -61,7 +61,7 @@ namespace n2x
 
 		template<typename TDump> static uint8_t getPartMidiChannel(const TDump& _dump, const uint8_t _part)
 		{
-			return getMultiParam(_dump, SlotAMidiChannel, _part);
+			return getMultiParam(_dump, static_cast<MultiParam>(SlotAMidiChannel + _part), 0);
 		}
 
 		uint8_t getMultiParam(const MultiParam _param, const uint8_t _part) const
