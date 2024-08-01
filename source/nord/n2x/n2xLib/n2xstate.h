@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "n2xmiditypes.h"
+
 #include "synthLib/midiTypes.h"
 
 namespace n2x
@@ -13,11 +14,6 @@ namespace n2x
 	class State
 	{
 	public:
-		enum class ReceiveOrder
-		{
-			SingleA, SingleB, SingleC, SingleD, Multi, Count
-		};
-
 		using SingleDump = std::array<uint8_t, g_singleDumpSize>;
 		using MultiDump = std::array<uint8_t, g_multiDumpSize>;
 
@@ -89,11 +85,11 @@ namespace n2x
 			e.source = synthLib::MidiEventSource::Host;
 			return receive(e);
 		}
+
 		void send(const synthLib::SMidiEvent& _e) const;
 
 		Hardware& m_hardware;
 		std::array<SingleDump, 4> m_singles;
 		MultiDump m_multi;
-		std::vector<ReceiveOrder> m_receiveOrder;
 	};
 }
