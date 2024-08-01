@@ -6,6 +6,8 @@
 
 namespace n2xJucePlugin
 {
+	constexpr char g_performancePrefixes[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'L' };
+
 	static constexpr std::initializer_list<jucePluginEditorLib::patchManager::GroupType> g_groupTypes =
 	{
 		jucePluginEditorLib::patchManager::GroupType::Favourites,
@@ -65,10 +67,28 @@ namespace n2xJucePlugin
 
 		char name[128]{0};
 
+		auto getBankChar = [&]() -> char
+		{
+			if(isSingle)
+			{
+				if(bank == n2x::SingleDumpBankEditBuffer)
+					return 'e';
+				return static_cast<char>('0' + bank - n2x::SysexByte::SingleDumpBankA);
+			}
+			if(bank == n2x::MultiDumpBankEditBuffer)
+				return 'e';
+
+			return static_cast<char>('0' + bank - n2x::SysexByte::MultiDumpBankA);
+		};
+
 		if(isSingle)
-			(void)snprintf(name, sizeof(name), "%c.%02d", bank == n2x::SingleDumpBankEditBuffer ? 'e' : '0' + (bank - n2x::SysexByte::SingleDumpBankEditBuffer), program);
+		{
+			(void)snprintf(name, sizeof(name), "%c.%02d", getBankChar(), program);
+		}
 		else
-			(void)snprintf(name, sizeof(name), "P%c.%02d", bank == n2x::MultiDumpBankEditBuffer ? 'e' : '0' + (bank - n2x::SysexByte::MultiDumpBankEditBuffer), program);
+		{
+			(void)snprintf(name, sizeof(name), "%c.%c%01d", getBankChar(), g_performancePrefixes[(program/10)%std::size(g_performancePrefixes)], program % 10);
+		}
 
 		p->name = name;
 		p->sysex = std::move(_sysex);
