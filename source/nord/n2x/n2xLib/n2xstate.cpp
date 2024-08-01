@@ -217,6 +217,11 @@ namespace n2x
 
 	bool State::receive(const synthLib::SMidiEvent& _ev)
 	{
+		if(_ev.sysex.empty())
+		{
+			return receiveNonSysex(_ev);
+		}
+
 		auto& sysex = _ev.sysex;
 
 		if(sysex.size() <= SysexIndex::IdxMsgSpec)
@@ -250,6 +255,61 @@ namespace n2x
 		if(sysex.size() == g_patchRequestSize)
 			return false;
 
+		return false;
+	}
+
+	bool State::receiveNonSysex(const synthLib::SMidiEvent& _ev)
+	{
+		switch (_ev.a & 0xf0)
+		{
+		case synthLib::M_CONTROLCHANGE:
+			{
+				const auto parts = getPartsForMidiChannel(_ev);
+				if(parts.empty())
+					return false;
+
+				const auto cc = static_cast<ControlChange>(_ev.b);
+				const auto it = g_controllerMap.find(cc);
+				if(it == g_controllerMap.end())
+					return false;
+				const SingleParam param = it->second;
+				const auto offset = getOffsetInSingleDump(param);
+				switch (param)
+				{
+				case SingleParam::Sync:
+					// this can either be sync or distortion, they end up in the same midi byte
+					switch(cc)
+					{
+					case ControlChange::CCSync:
+						for (const auto part : parts)
+						{
+							auto v = unpackNibbles(m_singles[part], offset);
+							v &= ~0x3;
+							v |= _ev.c & 0x3;
+							packNibbles(m_singles[part], offset, v);
+						}
+						break;
+					case ControlChange::CCDistortion:
+						for (const auto part : parts)
+						{
+							auto v = unpackNibbles(m_singles[part], offset);
+							v &= ~0x8;
+							v |= _ev.c << 4;
+							packNibbles(m_singles[part], offset, v);
+						}
+						break;
+					default:
+						assert(false && "unexpected control change type");
+						return false;
+					}
+					break;
+				default:
+					for (const auto part : parts)
+						packNibbles(m_singles[part], offset, _ev.c);
+				}
+			}
+			break;
+		}
 		return false;
 	}
 
@@ -304,7 +364,21 @@ namespace n2x
 
 	uint32_t State::getOffsetInMultiDump(const MultiParam _param)
 	{
-		return g_sysexHeaderSize + g_singleDataSize * 4 + (_param<<1);
+		return g_sysexHeaderSize + (_param<<1);
+	}
+
+	std::vector<uint8_t> State::getPartsForMidiChannel(const synthLib::SMidiEvent& _ev) const
+	{
+		std::vector<uint8_t> res;
+
+		const auto ch = _ev.a & 0xf;
+
+		for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
+		{
+			if(getPartMidiChannel(i) == ch)
+				res.push_back(i);
+		}
+		return res;
 	}
 
 	void State::send(const synthLib::SMidiEvent& _e) const

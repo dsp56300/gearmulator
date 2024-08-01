@@ -83,6 +83,7 @@ namespace n2x
 	{
 		if(_ev.sysex.empty())
 		{
+			m_state.receive(_ev);
 			auto e = _ev;
 			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
 			m_hardware.sendMidi(e);

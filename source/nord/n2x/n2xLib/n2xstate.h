@@ -27,6 +27,7 @@ namespace n2x
 		bool setState(const std::vector<uint8_t>& _state);
 
 		bool receive(const synthLib::SMidiEvent& _ev);
+		bool receiveNonSysex(const synthLib::SMidiEvent& _ev);
 
 		static void createDefaultSingle(SingleDump& _single, uint8_t _program, uint8_t _bank = n2x::SingleDumpBankEditBuffer);
 		static void copySingleToMulti(MultiDump& _multi, const SingleDump& _single, uint8_t _index);
@@ -42,6 +43,8 @@ namespace n2x
 		{
 			return getPartMidiChannel(m_multi, _part);
 		}
+
+		std::vector<uint8_t> getPartsForMidiChannel(const synthLib::SMidiEvent& _ev) const;
 
 		template<typename TDump> static uint8_t getPartMidiChannel(const TDump& _dump, const uint8_t _part)
 		{
@@ -69,13 +72,13 @@ namespace n2x
 
 		template<typename TDump> static uint8_t unpackNibbles(const TDump& _dump, uint32_t _off)
 		{
-			return static_cast<uint8_t>((_dump[_off] & 0xf) | (_dump[_off + 1] << 8));
+			return static_cast<uint8_t>((_dump[_off] & 0xf) | (_dump[_off + 1] << 4));
 		}
 
 		template<typename TDump> static void packNibbles(TDump& _dump, uint32_t _off, const uint8_t _value)
 		{
 			_dump[_off  ] = _value & 0x0f;
-			_dump[_off+1] = _value >> 8;
+			_dump[_off+1] = _value >> 4;
 		}
 
 	private:
