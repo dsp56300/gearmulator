@@ -77,6 +77,8 @@ namespace n2x
 	{
 		m_hardware.processAudio(_outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());
 		m_numSamplesProcessed += static_cast<uint32_t>(_samples);
+
+//		m_hardware.setButtonState(ButtonType::OscSync, (m_numSamplesProcessed & 65535) > 2048);
 	}
 
 	bool Device::sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response)
