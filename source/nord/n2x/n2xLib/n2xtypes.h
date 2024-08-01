@@ -76,8 +76,8 @@ namespace n2x
 		SlotB			= 0x06'02,
 		SlotC			= 0x06'04,
 		SlotD			= 0x06'08,
-		Unison			= 0x06'10,
-		Poly			= 0x06'20,
+		Poly			= 0x06'10,
+		Unison			= 0x06'20,
 		Portamento		= 0x06'40,
 		ModwheelDest	= 0x06'80,
 
