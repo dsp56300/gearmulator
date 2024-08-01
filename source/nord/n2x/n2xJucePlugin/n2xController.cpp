@@ -131,7 +131,7 @@ namespace n2xJucePlugin
 			auto* paramSync = getParameter("Sync", _e.a & 0xf);
 			auto* paramRingMod = getParameter("RingMod", _e.a & 0xf);
 			paramSync->setValueFromSynth(_e.c & 1, origin);
-			paramRingMod->setUnnormalizedValue((_e.c>>1) & 1, origin);
+			paramRingMod->setValueFromSynth((_e.c>>1) & 1, origin);
 		}
 		else
 		{
@@ -147,14 +147,26 @@ namespace n2xJucePlugin
 		return true;
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
 	{
 		const auto& controllerMap = getParameterDescriptions().getControllerMap();
 
 		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, _parameter.getParameterIndex());
 		if(ccs.empty())
 			return;
-		sendMidiEvent(synthLib::M_CONTROLCHANGE, ccs.front(), _value);
+
+		const auto cc = ccs.front();
+
+		if(cc == n2x::ControlChange::CCSync)
+		{
+			// sync and ringmod have the same CC, combine them
+			const auto* paramSync = getParameter("Sync", _parameter.getPart());
+			const auto* paramRingMod = getParameter("RingMod", _parameter.getPart());
+
+			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
+		}
+
+		sendMidiEvent(synthLib::M_CONTROLCHANGE, cc, _value);
 	}
 
 	bool Controller::sendSysEx(MidiPacketType _packet, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
