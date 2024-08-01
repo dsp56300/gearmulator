@@ -49,7 +49,7 @@
 		{"name":"PresetPrev",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"230","y":"974","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
 		{"name":"PresetNext",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"230","y":"1021","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
 
-		{"name":"PatchName",              "label":{"text":"666", "color" : "FF0000FF", "textHeight":"42","alignH":"L","alignV":"C","fontFile":"DSEG7Classic-BoldItalic","fontName":"Register","x":"384","y":"993","width":"100","height":"62"}},
+		{"name":"PatchName",              "label":{"text":"666", "color" : "FF0000FF", "textHeight":"42","alignH":"L","alignV":"C","fontFile":"DSEG7Classic-BoldItalic","fontName":"Register","x":"384","y":"993","width":"150","height":"62"}},
 		
 		{        
 			"name" : "page_1_main",
