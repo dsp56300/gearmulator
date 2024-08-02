@@ -689,7 +689,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool PatchManager::activatePatch(const std::string& _filename, const uint32_t _part)
 	{
-		if(_part >= m_state.getPartCount())
+		if(_part >= m_state.getPartCount() || _part > m_editor.getProcessor().getController().getPartCount())
 			return false;
 
 		const auto patches = loadPatchesFromFiles(std::vector<std::string>{_filename});
@@ -741,7 +741,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		DB::onLoadFinished();
 
-		for(uint32_t i=0; i<m_state.getPartCount(); ++i)
+		for(uint32_t i=0; i<std::min(m_editor.getProcessor().getController().getPartCount(), static_cast<uint8_t>(m_state.getPartCount())); ++i)
 		{
 			const auto p = m_state.getPatch(i);
 
