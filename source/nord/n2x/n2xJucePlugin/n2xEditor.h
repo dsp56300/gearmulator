@@ -40,6 +40,8 @@ namespace n2xJucePlugin
 
 		genericUI::Button<juce::DrawableButton>* createJuceComponent(genericUI::Button<juce::DrawableButton>*, genericUI::UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) override;
 
+		std::string getCurrentPatchName() const;
+
 	private:
 		Controller& m_controller;
 		pluginLib::ParameterBinding& m_parameterBinding;

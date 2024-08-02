@@ -3,6 +3,7 @@
 #include <fstream>
 
 #include "BinaryData.h"
+#include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
 
 #include "synthLib/os.h"
@@ -109,6 +110,7 @@ namespace n2xJucePlugin
 		{
 			m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
 			applyPatchParameters(params, program);
+			onProgramChanged();
 			return true;
 		}
 
@@ -132,6 +134,8 @@ namespace n2xJucePlugin
 		m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
 
 		applyPatchParameters(params, 0);
+
+		onProgramChanged();
 
 		const auto part = m_state.getMultiParam(n2x::SelectedChannel, 0);
 		setCurrentPart(part);
@@ -325,5 +329,21 @@ namespace n2xJucePlugin
 			return true;
 
 		return defA->doMasksOverlap(*defB);
+	}
+
+	std::string Controller::getSingleName(const uint8_t _part) const
+	{
+		const auto& single = m_state.getSingle(_part);
+		return PatchManager::getPatchName({single.begin(), single.end()});
+	}
+
+	std::string Controller::getPatchName(const uint8_t _part) const
+	{
+		const auto& multi = m_state.getMulti();
+
+		const auto bank = multi[n2x::SysexIndex::IdxMsgType];
+		if(bank >= n2x::SysexByte::MultiDumpBankA)
+			return PatchManager::getPatchName({multi.begin(), multi.end()});
+		return getSingleName(_part);
 	}
 }

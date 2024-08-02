@@ -1,5 +1,6 @@
 #include "n2xLcd.h"
 
+#include "n2xController.h"
 #include "n2xEditor.h"
 
 namespace n2xJucePlugin
@@ -13,7 +14,17 @@ namespace n2xJucePlugin
 	Lcd::Lcd(Editor& _editor) : m_editor(_editor)
 	{
 		m_label = _editor.findComponentT<juce::Label>("PatchName");
-		setText("  1");
+		setText("---");
+
+		m_onProgramChanged.set(_editor.getN2xController().onProgramChanged, [this]
+		{
+			onProgramChanged();
+		});
+
+		m_onPartChanged.set(_editor.getN2xController().onCurrentPartChanged, [this](const uint8_t&)
+		{
+			onProgramChanged();
+		});
 	}
 
 	void Lcd::setText(const std::string& _text)
@@ -102,5 +113,10 @@ namespace n2xJucePlugin
 		{
 			stopTimer();
 		}
+	}
+
+	void Lcd::onProgramChanged()
+	{
+		setText(m_editor.getCurrentPatchName());
 	}
 }

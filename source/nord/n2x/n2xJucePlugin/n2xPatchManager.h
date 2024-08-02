@@ -23,6 +23,9 @@ namespace n2xJucePlugin
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data) override;
 
+		static std::string getPatchName(const pluginLib::patchDB::Data& _sysex);
+		static bool isValidPatchDump(const pluginLib::patchDB::Data& _sysex);
+
 	private:
 		Editor& m_editor;
 		Controller& m_controller;

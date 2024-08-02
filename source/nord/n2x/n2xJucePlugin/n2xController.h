@@ -19,6 +19,8 @@ namespace n2xJucePlugin
 			Count
 		};
 
+		pluginLib::Event<> onProgramChanged;
+
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
@@ -49,6 +51,9 @@ namespace n2xJucePlugin
 		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part);
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
+
+		std::string getSingleName(uint8_t _part) const;
+		std::string getPatchName(uint8_t _part) const;
 
 	private:
 		n2x::State m_state;

@@ -41,56 +41,15 @@ namespace n2xJucePlugin
 
 	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex)
 	{
-		const auto isSingle = _sysex.size() == n2x::g_singleDumpSize;
-		const auto isMulti = _sysex.size() == n2x::g_multiDumpSize;
-
-		if(!isSingle && !isMulti)
+		if(!isValidPatchDump(_sysex))
 			return {};
 
-		const auto deviceId = _sysex[n2x::SysexIndex::IdxDevice];
 		const auto bank = _sysex[n2x::SysexIndex::IdxMsgType];
 		const auto program = _sysex[n2x::SysexIndex::IdxMsgSpec];
 
-		if(deviceId > 15)
-			return {};
-
-		if(program >= n2x::g_programsPerBank)
-			return {};
-
-		if(isSingle && (bank < n2x::SysexByte::SingleDumpBankEditBuffer || bank > (n2x::SysexByte::SingleDumpBankEditBuffer + n2x::g_singleBankCount)))
-			return {};
-
-		if(isMulti && (bank < n2x::SysexByte::MultiDumpBankEditBuffer || bank > (n2x::SysexByte::MultiDumpBankEditBuffer + n2x::g_multiBankCount)))
-			return {};
-
 		auto p = std::make_shared<pluginLib::patchDB::Patch>();
 
-		char name[128]{0};
-
-		auto getBankChar = [&]() -> char
-		{
-			if(isSingle)
-			{
-				if(bank == n2x::SingleDumpBankEditBuffer)
-					return 'e';
-				return static_cast<char>('0' + bank - n2x::SysexByte::SingleDumpBankA);
-			}
-			if(bank == n2x::MultiDumpBankEditBuffer)
-				return 'e';
-
-			return static_cast<char>('0' + bank - n2x::SysexByte::MultiDumpBankA);
-		};
-
-		if(isSingle)
-		{
-			(void)snprintf(name, sizeof(name), "%c.%02d", getBankChar(), program);
-		}
-		else
-		{
-			(void)snprintf(name, sizeof(name), "%c.%c%01d", getBankChar(), g_performancePrefixes[(program/10)%std::size(g_performancePrefixes)], program % 10);
-		}
-
-		p->name = name;
+		p->name = getPatchName(_sysex);
 		p->sysex = std::move(_sysex);
 		p->program = program;
 		p->bank = bank;
@@ -126,5 +85,70 @@ namespace n2xJucePlugin
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
 	{
 		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
+	}
+
+	std::string PatchManager::getPatchName(const pluginLib::patchDB::Data& _sysex)
+	{
+		if(!isValidPatchDump(_sysex))
+			return {};
+
+		const auto isSingle = _sysex.size() == n2x::g_singleDumpSize;
+
+		const auto bank = _sysex[n2x::SysexIndex::IdxMsgType];
+		const auto program = _sysex[n2x::SysexIndex::IdxMsgSpec];
+
+		char name[128]{0};
+
+		auto getBankChar = [&]() -> char
+		{
+			if(isSingle)
+			{
+				if(bank == n2x::SingleDumpBankEditBuffer)
+					return 'e';
+				return static_cast<char>('0' + bank - n2x::SysexByte::SingleDumpBankA);
+			}
+			if(bank == n2x::MultiDumpBankEditBuffer)
+				return 'e';
+
+			return static_cast<char>('0' + bank - n2x::SysexByte::MultiDumpBankA);
+		};
+
+		if(isSingle)
+		{
+			(void)snprintf(name, sizeof(name), "%c.%02d", getBankChar(), program);
+		}
+		else
+		{
+			(void)snprintf(name, sizeof(name), "%c.%c%01d", getBankChar(), g_performancePrefixes[(program/10)%std::size(g_performancePrefixes)], program % 10);
+		}
+
+		return name;
+	}
+
+	bool PatchManager::isValidPatchDump(const pluginLib::patchDB::Data& _sysex)
+	{
+		const auto isSingle = _sysex.size() == n2x::g_singleDumpSize;
+		const auto isMulti = _sysex.size() == n2x::g_multiDumpSize;
+
+		if(!isSingle && !isMulti)
+			return false;
+
+		const auto deviceId = _sysex[n2x::SysexIndex::IdxDevice];
+		const auto bank = _sysex[n2x::SysexIndex::IdxMsgType];
+		const auto program = _sysex[n2x::SysexIndex::IdxMsgSpec];
+
+		if(deviceId > 15)
+			return false;
+
+		if(program > n2x::g_programsPerBank)
+			return false;
+
+		if(isSingle && (bank < n2x::SysexByte::SingleDumpBankEditBuffer || bank > (n2x::SysexByte::SingleDumpBankEditBuffer + n2x::g_singleBankCount)))
+			return false;
+
+		if(isMulti && (bank < n2x::SysexByte::MultiDumpBankEditBuffer || bank > (n2x::SysexByte::MultiDumpBankEditBuffer + n2x::g_multiBankCount)))
+			return false;
+
+		return true;
 	}
 }

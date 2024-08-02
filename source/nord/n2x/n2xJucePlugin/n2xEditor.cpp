@@ -117,4 +117,9 @@ namespace n2xJucePlugin
 
 		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);
 	}
+
+	std::string Editor::getCurrentPatchName() const
+	{
+		return m_controller.getPatchName(m_controller.getCurrentPart());
+	}
 }
