@@ -322,7 +322,7 @@ namespace n2x
 		if(_part >= m_singles.size())
 			return false;
 		const auto off = getOffsetInSingleDump(_parameter);
-		const auto current = unpackNibbles(m_singles[_part], _parameter);
+		const auto current = unpackNibbles(m_singles[_part], off);
 		if(current == _value)
 			return false;
 		packNibbles(m_singles[_part], off, _value);
