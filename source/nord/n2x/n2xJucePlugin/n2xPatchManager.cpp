@@ -2,6 +2,9 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+
+#include "juce_cryptography/hashing/juce_MD5.h"
+
 #include "n2xLib/n2xmiditypes.h"
 
 namespace n2xJucePlugin
@@ -53,6 +56,10 @@ namespace n2xJucePlugin
 		p->sysex = std::move(_sysex);
 		p->program = program;
 		p->bank = bank;
+
+		const juce::MD5 md5(p->sysex.data() + n2x::g_sysexHeaderSize, p->sysex.size() - n2x::g_sysexContainerSize);
+		static_assert(sizeof(juce::MD5) >= sizeof(pluginLib::patchDB::PatchHash));
+		memcpy(p->hash.data(), md5.getChecksumDataArray(), std::size(p->hash));
 
 		return p;
 	}
