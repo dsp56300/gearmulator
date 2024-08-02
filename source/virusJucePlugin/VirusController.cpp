@@ -570,7 +570,7 @@ namespace Virus
 		requestArrangement();
 	}
 
-    uint8_t Controller::getPartCount()
+    uint8_t Controller::getPartCount() const
     {
 	    return m_processor.getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
     }

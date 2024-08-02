@@ -28,7 +28,7 @@ namespace n2xJucePlugin
 		{
 		}
 
-		uint8_t getPartCount() override
+		uint8_t getPartCount() const override
 		{
 			return 4;
 		}

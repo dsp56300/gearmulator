@@ -128,7 +128,7 @@ namespace Virus
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
         void onStateLoaded() override;
 
-		uint8_t getPartCount() override;
+		uint8_t getPartCount() const override;
 
 		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};

@@ -64,7 +64,7 @@ namespace pluginLib
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
 		virtual void setCurrentPart(uint8_t _part);
-		virtual uint8_t getPartCount() { return 16; }
+		virtual uint8_t getPartCount() const { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
 		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;

@@ -166,7 +166,7 @@ void Controller::onStateLoaded()
 {
 }
 
-uint8_t Controller::getPartCount()
+uint8_t Controller::getPartCount() const
 {
 	return 8;
 }
