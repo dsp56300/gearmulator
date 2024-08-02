@@ -191,7 +191,7 @@ namespace mqJucePlugin
 	{
 		juce::PopupMenu menu;
 
-		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu, getPatchManager()->getCurrentPart());
+		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 		if(countAdded)
 			menu.addSeparator();
