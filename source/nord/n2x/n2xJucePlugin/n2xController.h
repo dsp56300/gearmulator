@@ -42,6 +42,7 @@ namespace n2xJucePlugin
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
 
+		void setSingleParameter(uint8_t _part, n2x::SingleParam _sp, uint8_t _value);
 		void setMultiParameter(n2x::MultiParam _mp, uint8_t _value);
 		uint8_t getMultiParameter(n2x::MultiParam _param) const;
 
@@ -51,7 +52,7 @@ namespace n2xJucePlugin
 		void requestDump(uint8_t _bank, uint8_t _patch) const;
 
 		std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const;
-		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part);
+		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part) const;
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
 

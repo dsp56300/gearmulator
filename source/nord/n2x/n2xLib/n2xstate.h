@@ -59,6 +59,7 @@ namespace n2x
 		}
 
 		std::vector<uint8_t> getPartsForMidiChannel(const synthLib::SMidiEvent& _ev) const;
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) const;
 
 		template<typename TDump> static uint8_t getPartMidiChannel(const TDump& _dump, const uint8_t _part)
 		{

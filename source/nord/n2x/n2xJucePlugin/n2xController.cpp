@@ -175,7 +175,6 @@ namespace n2xJucePlugin
 				{
 					auto* param = getParameter(paramIndex, part);
 					assert(param && "parameter not found for control change");
-					// TODO: part
 					param->setValueFromSynth(_e.c, origin);
 				}
 			}
@@ -192,16 +191,24 @@ namespace n2xJucePlugin
 			return;
 		}
 
+		constexpr uint32_t sysexRateLimitMs = 150;
+
+		pluginLib::Parameter& nonConstParam = const_cast<pluginLib::Parameter&>(_parameter);
+
+		const auto singleParam = static_cast<n2x::SingleParam>(_parameter.getDescription().index);
+		const uint8_t part = _parameter.getPart();
+
 		const auto& controllerMap = getParameterDescriptions().getControllerMap();
 
-		uint32_t paramIndex;
-		if(!getParameterDescriptions().getIndexByName(paramIndex, _parameter.getDescription().name))
+		uint32_t descIndex;
+		if(!getParameterDescriptions().getIndexByName(descIndex, _parameter.getDescription().name))
 			assert(false && "parameter not found");
 
-		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, paramIndex);
+		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, descIndex);
 		if(ccs.empty())
 		{
-			assert(false && "TODO: implement parameter sending for non-CC params");
+			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
+			setSingleParameter(part, singleParam, _value);
 			return;
 		}
 
@@ -210,17 +217,39 @@ namespace n2xJucePlugin
 		if(cc == n2x::ControlChange::CCSync)
 		{
 			// sync and ringmod have the same CC, combine them
-			const auto* paramSync = getParameter("Sync", _parameter.getPart());
-			const auto* paramRingMod = getParameter("RingMod", _parameter.getPart());
+			const auto* paramSync = getParameter("Sync", part);
+			const auto* paramRingMod = getParameter("RingMod", part);
 
 			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
 		}
 
-		const auto ch = m_state.getPartMidiChannel(_parameter.getPart());
+		const auto ch = m_state.getPartMidiChannel(part);
+
+		const auto parts = m_state.getPartsForMidiChannel(ch);
+
 		const auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + ch), cc, _value};
 
-		m_state.receive(ev);
-		sendMidiEvent(ev);
+		if(parts.size() > 1)
+		{
+			// this is problematic. We want to edit one part only but two parts receive on the same channel. We have to send a full dump
+			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
+			setSingleParameter(part, singleParam, _value);
+		}
+		else
+		{
+			nonConstParam.setRateLimitMilliseconds(0);
+			m_state.receive(ev);
+			sendMidiEvent(ev);
+		}
+	}
+
+	void Controller::setSingleParameter(uint8_t _part, n2x::SingleParam _sp, uint8_t _value)
+	{
+		if(!m_state.changeSingleParameter(_part, _sp, _value))
+			return;
+
+		const auto& single = m_state.getSingle(_part);
+		pluginLib::Controller::sendSysEx(pluginLib::SysEx{single.begin(), single.end()});
 	}
 
 	void Controller::setMultiParameter(n2x::MultiParam _mp, uint8_t _value)
@@ -277,7 +306,7 @@ namespace n2xJucePlugin
 		return dst;
 	}
 
-	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part)
+	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part) const
 	{
 		if(_part >= getPartCount())
 			return false;

@@ -408,13 +408,17 @@ namespace n2x
 
 	std::vector<uint8_t> State::getPartsForMidiChannel(const synthLib::SMidiEvent& _ev) const
 	{
-		std::vector<uint8_t> res;
-
 		const auto ch = _ev.a & 0xf;
+		return getPartsForMidiChannel(ch);
+	}
+
+	std::vector<uint8_t> State::getPartsForMidiChannel(const uint8_t _channel) const
+	{
+		std::vector<uint8_t> res;
 
 		for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
 		{
-			if(getPartMidiChannel(i) == ch)
+			if(getPartMidiChannel(i) == _channel)
 				res.push_back(i);
 		}
 		return res;
