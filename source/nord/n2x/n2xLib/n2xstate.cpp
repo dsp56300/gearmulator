@@ -317,26 +317,16 @@ namespace n2x
 		}
 	}
 
-	bool State::changeSingleParameter(const uint8_t _part, const SingleParam _parameter, uint8_t _value)
+	bool State::changeSingleParameter(const uint8_t _part, const SingleParam _parameter, const uint8_t _value)
 	{
 		if(_part >= m_singles.size())
 			return false;
-		const auto off = getOffsetInSingleDump(_parameter);
-		const auto current = unpackNibbles(m_singles[_part], off);
-		if(current == _value)
-			return false;
-		packNibbles(m_singles[_part], off, _value);
-		return true;
+		return changeDumpParameter(m_singles[_part], getOffsetInSingleDump(_parameter), _value);
 	}
 
 	bool State::changeMultiParameter(const MultiParam _parameter, const uint8_t _value)
 	{
-		const auto off = getOffsetInMultiDump(_parameter);
-		const auto current = unpackNibbles(m_multi, off);
-		if(current == _value)
-			return false;
-		packNibbles(m_multi, off, _value);
-		return true;
+		return changeDumpParameter(m_multi, getOffsetInMultiDump(_parameter), _value);
 	}
 
 	void State::updateMultiFromSingles()
