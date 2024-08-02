@@ -332,7 +332,7 @@ namespace n2x
 	bool State::changeMultiParameter(const MultiParam _parameter, const uint8_t _value)
 	{
 		const auto off = getOffsetInMultiDump(_parameter);
-		const auto current = unpackNibbles(m_multi, _parameter);
+		const auto current = unpackNibbles(m_multi, off);
 		if(current == _value)
 			return false;
 		packNibbles(m_multi, off, _value);
