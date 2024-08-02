@@ -85,9 +85,29 @@ namespace n2xJucePlugin
 		m_label->setText(t, juce::dontSendNotification);
 	}
 
+	std::string Lcd::substring(const std::string& _text, uint32_t _offset, uint32_t _len)
+	{
+		auto findIndex = [&_text](const uint32_t _off)
+		{
+			uint32_t o = _off;
+
+			for(uint32_t i=0; i<_text.size(); ++i)
+			{
+				if(_text[i] == '.' && i < o)
+					++o;
+			}
+			return o;
+		};
+
+		const auto start = findIndex(_offset);
+		const auto end = findIndex(_offset + _len);
+
+		return _text.substr(start, end - start);
+	}
+
 	bool Lcd::updateClippedText(const std::string& _text, const uint32_t _offset)
 	{
-		const auto str = _text.substr(_offset, 3);
+		const auto str = substring(_text, _offset, 3);
 		if(str.size() < 3)
 			return false;
 		setClippedText(str);
