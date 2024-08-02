@@ -52,6 +52,8 @@ namespace n2xJucePlugin
 		void requestDump(uint8_t _bank, uint8_t _patch) const;
 
 		std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const;
+		std::vector<uint8_t> createMultiDump(n2x::SysexByte _bank, uint8_t _program);
+
 		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part) const;
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;

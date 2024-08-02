@@ -33,9 +33,12 @@ namespace n2xJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part)
 	{
-		_data = m_controller.createSingleDump(n2x::SysexByte::SingleDumpBankA, 0, static_cast<uint8_t>(_part));
+		if(_part < m_controller.getPartCount())
+			_data = m_controller.createSingleDump(n2x::SysexByte::SingleDumpBankA, 0, static_cast<uint8_t>(_part));
+		else
+			_data = m_controller.createMultiDump(n2x::SysexByte::MultiDumpBankA, 0);
 		return !_data.empty();
 	}
 

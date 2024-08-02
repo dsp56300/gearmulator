@@ -306,6 +306,18 @@ namespace n2xJucePlugin
 		return dst;
 	}
 
+	std::vector<uint8_t> Controller::createMultiDump(const n2x::SysexByte _bank, const uint8_t _program)
+	{
+		const auto multi = m_state.updateAndGetMulti();
+
+		std::vector<uint8_t> result(multi.begin(), multi.end());
+
+		result[n2x::SysexIndex::IdxMsgType] = _bank;
+		result[n2x::SysexIndex::IdxMsgSpec] = _program;
+
+		return result;
+	}
+
 	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part) const
 	{
 		if(_part >= getPartCount())

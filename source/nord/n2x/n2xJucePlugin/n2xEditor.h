@@ -43,6 +43,8 @@ namespace n2xJucePlugin
 		std::string getCurrentPatchName() const;
 
 	private:
+		void onBtSave() const;
+
 		Controller& m_controller;
 		pluginLib::ParameterBinding& m_parameterBinding;
 

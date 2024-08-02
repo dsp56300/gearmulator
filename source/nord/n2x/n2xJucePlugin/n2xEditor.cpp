@@ -76,6 +76,14 @@ namespace n2xJucePlugin
 			setCurrentPart(_part);
 			m_parameterBinding.setPart(_part);
 		});
+
+		if(auto* btSave = findComponentT<juce::Button>("button_store"))
+		{
+			btSave->onClick = [this]
+			{
+				onBtSave();
+			};
+		}
 	}
 
 	Editor::~Editor()
@@ -121,5 +129,18 @@ namespace n2xJucePlugin
 	std::string Editor::getCurrentPatchName() const
 	{
 		return m_controller.getPatchName(m_controller.getCurrentPart());
+	}
+
+	void Editor::onBtSave() const
+	{
+		juce::PopupMenu menu;
+
+		const auto numAdded = getPatchManager()->createSaveMenuEntries(menu, "Program");
+		if(numAdded)
+			menu.addSeparator();
+
+		getPatchManager()->createSaveMenuEntries(menu, m_controller.getPartCount(), "Performance");
+
+		menu.showMenuAsync({});
 	}
 }
