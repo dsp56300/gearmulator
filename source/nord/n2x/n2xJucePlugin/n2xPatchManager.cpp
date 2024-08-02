@@ -60,6 +60,28 @@ namespace n2xJucePlugin
 
 		p->tags.add(pluginLib::patchDB::TagType::CustomA, isSingle ? "Program" : "Performance");
 
+		if(isSingle)
+		{
+			const auto distRmSync = n2x::State::getSingleParam(_sysex, n2x::SingleParam::Distortion, 0);
+			if(distRmSync & 1)
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Sync");
+			if(distRmSync & 2)
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "RingMod");
+			if(distRmSync & (1<<4))
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Distortion");
+
+			if(n2x::State::getSingleParam(_sysex, n2x::SingleParam::Unison, 0))
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Unison");
+
+			const auto voiceMode = n2x::State::getSingleParam(_sysex, n2x::SingleParam::VoiceMode, 0);
+			if(voiceMode == 2)
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Poly");
+			else if(voiceMode == 1)
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Legato");
+			else
+				p->tags.add(pluginLib::patchDB::TagType::Tag, "Mono");
+		}
+
 		p->name = getPatchName(_sysex);
 		p->sysex = std::move(_sysex);
 		p->program = program;
