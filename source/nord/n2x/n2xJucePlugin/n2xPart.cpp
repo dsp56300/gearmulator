@@ -24,21 +24,29 @@ namespace n2xJucePlugin
 
 		juce::PopupMenu menu;
 
-		juce::PopupMenu menuChannel;
-
 		auto& controller = m_editor.getN2xController();
 
-		const auto paramMidiChannel = static_cast<n2x::MultiParam>(n2x::MultiParam::SlotAMidiChannel + getPart());
-		const auto ch = controller.getMultiParameter(paramMidiChannel);
-		for(uint8_t c=0; c<16; ++c)
 		{
-			menuChannel.addItem((std::string("Channel ") + std::to_string(c+1)).c_str(), true, c == ch, [&controller, c, paramMidiChannel]
-			{
-				controller.setMultiParameter(paramMidiChannel, c);
-			});
-		}
+			juce::PopupMenu menuChannel;
 
-		menu.addSubMenu("Midi Channel", menuChannel);
+			const auto paramMidiChannel = static_cast<n2x::MultiParam>(n2x::MultiParam::SlotAMidiChannel + getPart());
+			const auto ch = controller.getMultiParameter(paramMidiChannel);
+			for(uint8_t c=0; c<16; ++c)
+			{
+				menuChannel.addItem((std::string("Channel ") + std::to_string(c+1)).c_str(), true, c == ch, [&controller, c, paramMidiChannel]
+				{
+					controller.setMultiParameter(paramMidiChannel, c);
+				});
+			}
+
+			menuChannel.addSeparator();
+			menuChannel.addItem("Off", true, ch == 16, [&controller, paramMidiChannel]
+			{
+				controller.setMultiParameter(paramMidiChannel, 16);
+			});
+
+			menu.addSubMenu("Midi Channel", menuChannel);
+		}
 
 		menu.showMenuAsync({});
 	}
