@@ -2,6 +2,7 @@
 
 #include <array>
 #include <vector>
+#include <cstddef>
 
 #include "n2xmiditypes.h"
 
