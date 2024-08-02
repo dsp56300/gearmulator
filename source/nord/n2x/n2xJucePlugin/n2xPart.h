@@ -13,6 +13,7 @@ namespace n2xJucePlugin
 
 		void onClick() override;
 
+		void mouseDown(const juce::MouseEvent& _e) override;
 	private:
 		Editor& m_editor;
 	};

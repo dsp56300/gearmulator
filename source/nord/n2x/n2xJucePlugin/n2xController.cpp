@@ -231,6 +231,11 @@ namespace n2xJucePlugin
 		pluginLib::Controller::sendSysEx(pluginLib::SysEx{multi.begin(), multi.end()});
 	}
 
+	uint8_t Controller::getMultiParameter(const n2x::MultiParam _param) const
+	{
+		return m_state.getMultiParam(_param, 0);
+	}
+
 	void Controller::sendMultiParameter(const pluginLib::Parameter& _parameter, const uint8_t _value)
 	{
 		const auto& desc = _parameter.getDescription();

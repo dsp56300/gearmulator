@@ -13,4 +13,33 @@ namespace n2xJucePlugin
 	{
 		m_editor.getN2xController().setCurrentPart(getPart());
 	}
+
+	void Part::mouseDown(const juce::MouseEvent& _e)
+	{
+		if(!_e.mods.isPopupMenu())
+		{
+			PartButton<DrawableButton>::mouseDown(_e);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		juce::PopupMenu menuChannel;
+
+		auto& controller = m_editor.getN2xController();
+
+		const auto paramMidiChannel = static_cast<n2x::MultiParam>(n2x::MultiParam::SlotAMidiChannel + getPart());
+		const auto ch = controller.getMultiParameter(paramMidiChannel);
+		for(uint8_t c=0; c<16; ++c)
+		{
+			menuChannel.addItem((std::string("Channel ") + std::to_string(c+1)).c_str(), true, c == ch, [&controller, c, paramMidiChannel]
+			{
+				controller.setMultiParameter(paramMidiChannel, c);
+			});
+		}
+
+		menu.addSubMenu("Midi Channel", menuChannel);
+
+		menu.showMenuAsync({});
+	}
 }
