@@ -23,7 +23,9 @@ namespace n2xJucePlugin
 	, m_editor(_editor)
 	, m_controller(_editor.getN2xController())
 	{
+		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Patch Type");
 		startLoaderThread();
+		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 	}
 
 	PatchManager::~PatchManager()
@@ -49,8 +51,11 @@ namespace n2xJucePlugin
 
 		const auto bank = _sysex[n2x::SysexIndex::IdxMsgType];
 		const auto program = _sysex[n2x::SysexIndex::IdxMsgSpec];
+		const auto isSingle = _sysex.size() == n2x::g_singleDumpSize;
 
 		auto p = std::make_shared<pluginLib::patchDB::Patch>();
+
+		p->tags.add(pluginLib::patchDB::TagType::CustomA, isSingle ? "Program" : "Performance");
 
 		p->name = getPatchName(_sysex);
 		p->sysex = std::move(_sysex);
