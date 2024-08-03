@@ -10,6 +10,13 @@
 
 #include "jucePluginLib/event.h"
 
+namespace baseLib
+{
+	class ChunkReader;
+	class BinaryStream;
+	class ChunkWriter;
+}
+
 namespace pluginLib
 {
 	class ParameterBinding;
@@ -62,6 +69,9 @@ namespace jucePluginEditorLib
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
 
+		virtual void saveChunkData(baseLib::BinaryStream& _s);
+		virtual void loadChunkData(baseLib::ChunkReader& _cr);
+
 		void setCurrentPart(uint8_t _part) override;
 
 		void showDisclaimer() const;
@@ -102,7 +112,7 @@ namespace jucePluginEditorLib
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
-		std::vector<uint8_t> m_instanceConfig;
+		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
 		ImagePool m_imagePool;
