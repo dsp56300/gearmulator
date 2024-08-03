@@ -68,6 +68,11 @@ namespace n2xJucePlugin
 		}
 	}
 
+	void Lcd::updatePatchName()
+	{
+		onProgramChanged();
+	}
+
 	void Lcd::setClippedText(const std::string& _text)
 	{
 		if(m_clippedText == _text)

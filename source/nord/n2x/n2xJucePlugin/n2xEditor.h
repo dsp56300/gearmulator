@@ -1,6 +1,7 @@
 #pragma once
 
 #include "jucePluginEditorLib/pluginEditor.h"
+#include "jucePluginLib/patchdb/patch.h"
 
 namespace jucePluginEditorLib
 {
@@ -42,8 +43,12 @@ namespace n2xJucePlugin
 
 		std::string getCurrentPatchName() const;
 
+		void onPatchActivated(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part);
+
 	private:
 		void onBtSave() const;
+		void setCurrentPatchName(uint8_t _part, const std::string& _name);
+		void onSelectedPatchChanged(uint8_t _part, const pluginLib::patchDB::PatchKey& _patchKey);
 
 		Controller& m_controller;
 		pluginLib::ParameterBinding& m_parameterBinding;
@@ -52,5 +57,9 @@ namespace n2xJucePlugin
 		std::unique_ptr<Lcd> m_lcd;
 		std::unique_ptr<Parts> m_parts;
 		pluginLib::EventListener<uint8_t> onPartChanged;
+
+		std::array<std::string, 4> m_activePatchNames;
+
+		pluginLib::EventListener<uint32_t, pluginLib::patchDB::PatchKey> m_onSelectedPatchChanged;
 	};
 }

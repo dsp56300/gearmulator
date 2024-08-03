@@ -31,6 +31,8 @@ namespace n2xJucePlugin
 
 		void timerCallback() override;
 
+		void updatePatchName();
+
 	private:
 		void setClippedText(const std::string& _text);
 		static std::string substring(const std::string& _text, uint32_t _offset, uint32_t _len);

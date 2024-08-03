@@ -84,6 +84,11 @@ namespace n2xJucePlugin
 				onBtSave();
 			};
 		}
+
+		m_onSelectedPatchChanged.set(getPatchManager()->onSelectedPatchChanged, [this](const uint32_t& _part, const pluginLib::patchDB::PatchKey& _patchKey)
+		{
+			onSelectedPatchChanged(static_cast<uint8_t>(_part), _patchKey);
+		});
 	}
 
 	Editor::~Editor()
@@ -128,19 +133,71 @@ namespace n2xJucePlugin
 
 	std::string Editor::getCurrentPatchName() const
 	{
-		return m_controller.getPatchName(m_controller.getCurrentPart());
+		const auto part = m_controller.getCurrentPart();
+		if(!m_activePatchNames[part].empty())
+			return m_activePatchNames[part];
+		return m_controller.getPatchName(part);
+	}
+
+	void Editor::onPatchActivated(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
+	{
+		const auto isMulti = _patch->sysex.size() == n2x::g_multiDumpSize;
+
+		const auto name = _patch->getName();
+
+		setCurrentPatchName(_part, name);
+
+		if(isMulti)
+		{
+			for (uint8_t p=0; p<m_activePatchNames.size(); ++p)
+			{
+				if(p == _part)
+					continue;
+
+				// set patch name for all parts if the source is a multi
+				setCurrentPatchName(p, name);
+
+				// set patch manager selection so that all parts have the multi selected
+				getPatchManager()->setSelectedPatch(p, _patch);
+			}
+		}
+
+		m_lcd->updatePatchName();
 	}
 
 	void Editor::onBtSave() const
 	{
 		juce::PopupMenu menu;
 
-		const auto numAdded = getPatchManager()->createSaveMenuEntries(menu, "Program");
-		if(numAdded)
+		if(getPatchManager()->createSaveMenuEntries(menu, "Program"))
 			menu.addSeparator();
 
 		getPatchManager()->createSaveMenuEntries(menu, m_controller.getPartCount(), "Performance");
 
 		menu.showMenuAsync({});
+	}
+
+	void Editor::setCurrentPatchName(uint8_t _part, const std::string& _name)
+	{
+		if(m_activePatchNames[_part] == _name)
+			return;
+
+		m_activePatchNames[_part] = _name;
+
+		if(m_controller.getCurrentPart() == _part)
+			m_lcd->updatePatchName();
+	}
+
+	void Editor::onSelectedPatchChanged(uint8_t _part, const pluginLib::patchDB::PatchKey& _patchKey)
+	{
+		auto source = _patchKey.source;
+		if(!source)
+			return;
+
+		if(source->patches.empty())
+			source = getPatchManager()->getDataSource(*source);
+
+		if(const auto patch = source->getPatch(_patchKey))
+			setCurrentPatchName(_part, patch->getName());
 	}
 }
