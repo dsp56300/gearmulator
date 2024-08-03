@@ -365,6 +365,8 @@ namespace jucePluginEditorLib::patchManager
 		if(getCurrentPart() == _part)
 			getListModel()->setSelectedPatches({_patch});
 
+		onSelectedPatchChanged(_part, _patch);
+
 		return true;
 	}
 
