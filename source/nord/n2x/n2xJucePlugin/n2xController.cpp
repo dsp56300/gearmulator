@@ -329,13 +329,10 @@ namespace n2xJucePlugin
 		if(!isSingle && !isMulti)
 			return false;
 
-		if(isMulti && _part != 0)
-			return false;
-
 		auto d = _sysex;
 
 		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
-		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(_part);
+		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
 
 		pluginLib::Controller::sendSysEx(d);
 
