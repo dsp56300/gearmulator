@@ -7,13 +7,20 @@ Framework:
 - [Imp] Patch Manager: Added grid layout, you can switch between list and 
         grid layout via context menu
 
+- [Fix] LV2 plugins were packaged incorrectly (#199)
+
 Vavra:
 
-- [Fix] Font when renaming a patch too large
+- [Fix] Font when renaming a patch was too large
+- [Fix] Microcontroller timing
 
 Xenia:
 
-- [Fix] Font when renaming a patch too large
+- [Imp] Added support for MW1 bank dumps, i.e. one sysex with 
+        multiple patches
+
+- [Fix] Font when renaming a patch was too large
+- [Fix] Microcontroller timing
 
 1.3.16 (2024.07.14)
 

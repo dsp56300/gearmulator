@@ -165,9 +165,14 @@ namespace xt
 
 	namespace Mw1
 	{
-		static constexpr uint32_t g_singleDumpLength = 187;
+		static constexpr uint32_t g_singleLength = 180;			// without sysex header
+		static constexpr uint32_t g_singleDumpLength = 187;		// with sysex header
 		static constexpr uint32_t g_singleNameLength = 16;
-		static constexpr uint32_t g_singleNamePosition = 153;
+		static constexpr uint32_t g_singleNamePosition = 153;	// in a dump including sysex header
+		static constexpr uint32_t g_sysexHeaderSize = 5;
+		static constexpr uint32_t g_sysexFooterSize = 2;
+		static constexpr uint32_t g_idmPresetBank = 0x50;
+		static constexpr uint32_t g_idmPreset = 0x42;
 	};
 
 	namespace Wave

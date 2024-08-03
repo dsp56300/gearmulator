@@ -125,9 +125,6 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(USE_CLAP)
 			install(TARGETS ${targetName}_CLAP DESTINATION . COMPONENT ${productName}-CLAP)
 		endif()
-		if(USE_LV2)
-			install(TARGETS ${targetName}_LV2 DESTINATION . COMPONENT ${productName}-LV2)
-		endif()
 	elseif(UNIX)
 		if(JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST LIBRARY DESTINATION lib/vst/ COMPONENT ${productName}-VST2)
@@ -135,11 +132,18 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(USE_CLAP)
 			install(TARGETS ${targetName}_CLAP LIBRARY DESTINATION lib/clap/ COMPONENT ${productName}-CLAP)
 		endif()
-		if(USE_LV2)
-			install(TARGETS ${targetName}_LV2 LIBRARY DESTINATION lib/lv2/ COMPONENT ${productName}-LV2)
-		endif()
 	endif()
 	
+	if(USE_LV2)
+		get_target_property(lv2OutputFolder ${targetName}_LV2 ARCHIVE_OUTPUT_DIRECTORY)
+		if(MSVC)
+			set(pattern "*.dll")
+		else()
+			set(pattern "*.so")
+		endif()
+		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION lib/lv2/ COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
+	endif()
+
 	if(APPLE AND ${isSynth})
 		add_test(NAME ${targetName}_AU_Validate COMMAND ${CMAKE_COMMAND} 
 			-DIDCOMPANY=TusP
