@@ -47,6 +47,8 @@ namespace n2xJucePlugin
 
 	private:
 		void onBtSave() const;
+		void onBtPrev() const;
+		void onBtNext() const;
 		void setCurrentPatchName(uint8_t _part, const std::string& _name);
 		void onSelectedPatchChanged(uint8_t _part, const pluginLib::patchDB::PatchKey& _patchKey);
 

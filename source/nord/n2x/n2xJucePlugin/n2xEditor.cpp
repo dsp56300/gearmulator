@@ -77,11 +77,27 @@ namespace n2xJucePlugin
 			m_parameterBinding.setPart(_part);
 		});
 
-		if(auto* btSave = findComponentT<juce::Button>("button_store"))
+		if(auto* bt = findComponentT<juce::Button>("button_store"))
 		{
-			btSave->onClick = [this]
+			bt->onClick = [this]
 			{
 				onBtSave();
+			};
+		}
+
+		if(auto* bt = findComponentT<juce::Button>("PresetPrev"))
+		{
+			bt->onClick = [this]
+			{
+				onBtPrev();
+			};
+		}
+
+		if(auto* bt = findComponentT<juce::Button>("PresetNext"))
+		{
+			bt->onClick = [this]
+			{
+				onBtNext();
 			};
 		}
 
@@ -175,6 +191,16 @@ namespace n2xJucePlugin
 		getPatchManager()->createSaveMenuEntries(menu, m_controller.getPartCount(), "Performance");
 
 		menu.showMenuAsync({});
+	}
+
+	void Editor::onBtPrev() const
+	{
+		getPatchManager()->selectPrevPreset(m_controller.getCurrentPart());
+	}
+
+	void Editor::onBtNext() const
+	{
+		getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 	}
 
 	void Editor::setCurrentPatchName(uint8_t _part, const std::string& _name)
