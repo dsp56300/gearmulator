@@ -203,14 +203,13 @@ namespace xt
 
 		auto setParam = [&](const GlobalParameter _param, const uint8_t _value)
 		{
-			setGlobalParameter(_param, _value);
+			sendGlobalParameter(_param, _value);
 		};
 
 		setParam(GlobalParameter::StartupSoundbank, 0);			// First bank
 		setParam(GlobalParameter::StartupSoundNum, 0);			// First sound
 		setParam(GlobalParameter::StartupMultiNumber, 0);		// First Multi
 
-		setParam(GlobalParameter::MidiChannel, 0);				// omni
 		setParam(GlobalParameter::ProgramChangeMode, 0);		// single
 		setParam(GlobalParameter::MasterTune, 64);				// 440 Hz
 		setParam(GlobalParameter::Transpose, 64);				// +/- 0
@@ -218,7 +217,7 @@ namespace xt
 		setParam(GlobalParameter::ParameterReceive, 1);			// on
 		setParam(GlobalParameter::ArpNoteOutChannel, 0);		// off
 		setParam(GlobalParameter::MidiClockOutput, 0);			// off
-		setParam(GlobalParameter::MidiChannel, 0);				// omni
+		setParam(GlobalParameter::MidiChannel, 1);				// omni
 		setParam(GlobalParameter::DeviceId, 0);					// 0
 		setParam(GlobalParameter::InputGain, 3);				// 4
 
