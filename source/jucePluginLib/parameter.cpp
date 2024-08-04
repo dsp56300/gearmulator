@@ -175,13 +175,7 @@ namespace pluginLib
 		m_value.setValue(clampValue(_newValue));
 
 		if(_origin != Origin::Derived)
-		{
 			sendToSynth();
-		}
-		else
-		{
-			m_value.setValue(_newValue);
-		}
 
 		forwardToDerived(_newValue);
     }
