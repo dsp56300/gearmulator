@@ -203,14 +203,13 @@ namespace xt
 
 		auto setParam = [&](const GlobalParameter _param, const uint8_t _value)
 		{
-			setGlobalParameter(_param, _value);
+			sendGlobalParameter(_param, _value);
 		};
 
 		setParam(GlobalParameter::StartupSoundbank, 0);			// First bank
 		setParam(GlobalParameter::StartupSoundNum, 0);			// First sound
 		setParam(GlobalParameter::StartupMultiNumber, 0);		// First Multi
 
-		setParam(GlobalParameter::MidiChannel, 0);				// omni
 		setParam(GlobalParameter::ProgramChangeMode, 0);		// single
 		setParam(GlobalParameter::MasterTune, 64);				// 440 Hz
 		setParam(GlobalParameter::Transpose, 64);				// +/- 0
@@ -218,7 +217,7 @@ namespace xt
 		setParam(GlobalParameter::ParameterReceive, 1);			// on
 		setParam(GlobalParameter::ArpNoteOutChannel, 0);		// off
 		setParam(GlobalParameter::MidiClockOutput, 0);			// off
-		setParam(GlobalParameter::MidiChannel, 0);				// omni
+		setParam(GlobalParameter::MidiChannel, 1);				// omni
 		setParam(GlobalParameter::DeviceId, 0);					// 0
 		setParam(GlobalParameter::InputGain, 3);				// 4
 
@@ -272,7 +271,10 @@ namespace xt
 
 	bool State::parseModeDump(const SysEx& _data)
 	{
-		return convertTo(m_mode, _data);
+		if(!convertTo(m_mode, _data))
+			return false;
+		onPlayModeChanged();
+		return true;
 	}
 
 	bool State::modifySingle(const SysEx& _data)
@@ -316,9 +318,7 @@ namespace xt
 
 		*p = _data[IdxModeParamValue];
 
-		// if the play mode is changed, request the edit buffer for the first single again, because on the xt, that edit buffer is shared between multi & single
-
-		requestSingle(isMultiMode() ? LocationH::SingleEditBufferMultiMode : LocationH::SingleEditBufferSingleMode, 0);
+		onPlayModeChanged();
 
 		return true;
 	}
@@ -689,5 +689,16 @@ namespace xt
 			setInstParam(i, MultiParameter::Inst0MidiRxFlags, 63);	// enable Pitchbend, Modwheel, Aftertouch, Sustain, Button 1/2, Program Change
 		}
 		*/
+	}
+
+	void State::onPlayModeChanged()
+	{
+		// if the play mode is changed, force a re-request of the edit buffer for the first single again, because on the device, that edit buffer is shared between multi & single
+		m_currentMultiSingles[0][0] = 0;
+		m_currentInstrumentSingles[0][0] = 0;
+
+		// also, as the multi is not valid if the machine is not in multi mode, invalidate the existing data to force a re-request from the device
+		if(isMultiMode())
+			m_currentMulti[0] = 0;
 	}
 }

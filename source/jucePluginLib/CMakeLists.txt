@@ -3,6 +3,9 @@ project(jucePluginLib VERSION ${CMAKE_PROJECT_VERSION})
 
 configure_file(${CMAKE_CURRENT_LIST_DIR}/version.h.in ${CMAKE_CURRENT_LIST_DIR}/version.h)
 
+file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/version.h.in)
+file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h.in)
+
 set(SOURCES
 	createVersionDateTime.cmake
 	clipboard.cpp clipboard.h
@@ -54,8 +57,10 @@ target_compile_definitions(jucePluginLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INC
 set_property(TARGET jucePluginLib PROPERTY FOLDER "Gearmulator")
 
 add_custom_command(
+	PRE_BUILD
 	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/_doesnotexist_versionDateTime.h	# fake, causes regeneration for every build, exactly what we want
 	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h	# valid
+	DEPENDS ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h.in
 	COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/createVersionDateTime.cmake"
 )
 
