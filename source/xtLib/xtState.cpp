@@ -271,7 +271,10 @@ namespace xt
 
 	bool State::parseModeDump(const SysEx& _data)
 	{
-		return convertTo(m_mode, _data);
+		if(!convertTo(m_mode, _data))
+			return false;
+		onPlayModeChanged();
+		return true;
 	}
 
 	bool State::modifySingle(const SysEx& _data)
@@ -315,9 +318,7 @@ namespace xt
 
 		*p = _data[IdxModeParamValue];
 
-		// if the play mode is changed, request the edit buffer for the first single again, because on the xt, that edit buffer is shared between multi & single
-
-		requestSingle(isMultiMode() ? LocationH::SingleEditBufferMultiMode : LocationH::SingleEditBufferSingleMode, 0);
+		onPlayModeChanged();
 
 		return true;
 	}
@@ -688,5 +689,16 @@ namespace xt
 			setInstParam(i, MultiParameter::Inst0MidiRxFlags, 63);	// enable Pitchbend, Modwheel, Aftertouch, Sustain, Button 1/2, Program Change
 		}
 		*/
+	}
+
+	void State::onPlayModeChanged()
+	{
+		// if the play mode is changed, force a re-request of the edit buffer for the first single again, because on the device, that edit buffer is shared between multi & single
+		m_currentMultiSingles[0][0] = 0;
+		m_currentInstrumentSingles[0][0] = 0;
+
+		// also, as the multi is not valid if the machine is not in multi mode, invalidate the existing data to force a re-request from the device
+		if(isMultiMode())
+			m_currentMulti[0] = 0;
 	}
 }

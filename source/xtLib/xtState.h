@@ -176,6 +176,8 @@ namespace xt
 		void sendSysex(const std::initializer_list<uint8_t>& _data) const;
 		void sendSysex(const SysEx& _data) const;
 
+		void onPlayModeChanged();
+
 		Xt& m_xt;
 
 		// ROM
