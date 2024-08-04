@@ -59,6 +59,7 @@ add_custom_command(
 	PRE_BUILD
 	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/_doesnotexist_versionDateTime.h	# fake, causes regeneration for every build, exactly what we want
 	OUTPUT ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h	# valid
+	DEPENDS ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h.in
 	COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_LIST_DIR}/createVersionDateTime.cmake"
 )
 
