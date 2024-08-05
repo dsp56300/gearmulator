@@ -3,22 +3,22 @@
 	"root" : { "x" : "0", "y" : "0", "width" : "2275", "height" : "1197", "scale" : "0.5"},
 	"tabgroup": {
 		"name": "pages",
-		"buttons": ["button_1_main", "button_2_browser", "button_3_extra"],
-		"pages": ["page_1_main", "page_2_browser", "page_3_extra"]
+		"buttons": ["button_1_main", "button_2_browser"],
+		"pages": ["page_1_main", "page_2_browser"]
 	},	
 	
 	"children" :
 	[
 		{"name":"bg","image":{"x":"0","y":"0","width":"2275","height":"1197","texture":"background"}},
 		
-		{"name":"button_1_main",            "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1668","y":"897","width":"184","height":"67.5","texture":"button_main","tileSizeX":"184","tileSizeY":"67.5",}},
-		{"name":"button_2_browser",         "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1847","y":"897","width":"184","height":"67.5","texture":"button_browser","tileSizeX":"184","tileSizeY":"67.5",}},
-		{"name":"button_3_extra",           "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2026","y":"897","width":"184","height":"67.5","texture":"button_extra","tileSizeX":"184","tileSizeY":"67.5",}},
-		
+		{"name":"button_1_main",            "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1847","y":"897","width":"184","height":"67.5","texture":"button_main","tileSizeX":"184","tileSizeY":"67.5",}},
+		{"name":"button_2_browser",         "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2026","y":"897","width":"184","height":"67.5","texture":"button_browser","tileSizeX":"184","tileSizeY":"67.5",}},
+	
 		{ "name" : "MasterVolume",       "rotary" : { }, "spritesheet" : { "x" : "74", "y" : "961", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 		{ "name" : "PerfUnisonDetune",   "parameterAttachment" : { "parameter" : "PerfUnisonDetune" },      "rotary" : { }, "spritesheet" : { "x" : "551", "y" : "961", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 		{ "name" : "Portamento",         "parameterAttachment" : { "parameter" : "Portamento" },      "rotary" : { }, "spritesheet" : { "x" : "715", "y" : "961", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 		{ "name" : "Auto_LED",           "parameterAttachment" : { "parameter" : "Auto"},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "685", "y" : "1071", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":120 } },                
+		{ "name" : "VMMAP",              "parameterAttachment" : { },                           "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "41", "y" : "1071", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":120 } },                
 
 		{ "name" : "Unison",             "parameterAttachment" : { "parameter" : "Unison"},                  "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "518", "y" : "881", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":120 } },                
 		{ "name" : "VoiceMode_1",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "857", "y" : "927", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":120 } },                
@@ -42,8 +42,6 @@
 		{ "name" : "ModWheelDest_4",     "parameterAttachment" : { "parameter" : "ModWheelDest", "value":3},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1222", "y" : "1049", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150 } },                
 		{ "name" : "ModWheelDest_5",     "parameterAttachment" : { "parameter" : "ModWheelDest", "value":1},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1222", "y" : "1087", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150 } },                
 
-
-		{"name":"button_perf",            "button":{"isToggle":"0","radioGroupId":"1","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"327","y":"911","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47",}},
 		{"name":"button_store",           "button":{"isToggle":"0","radioGroupId":"1","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"220","y":"911","width":"99","height":"47","texture":"button_red","tileSizeX":"99","tileSizeY":"47",}},
 
 		{"name":"PresetNext",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"230","y":"974","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
@@ -96,17 +94,18 @@
 				{ "name" : "FilterEnvR",        "parameterAttachment" : { "parameter" : "FilterEnvR" },    "rotary" : { }, "spritesheet" : { "x" : "1826", "y" : "377", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 				{ "name" : "FilterVelocity",           "parameterAttachment" : { "parameter" : "FilterVelocity"},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1627", "y" : "548", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
 
-				{ "name" : "FilterKeytrack_1",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "592", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
+				{ "name" : "FilterKeytrack_1",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":0},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "592", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
 				{ "name" : "FilterKeytrack_2",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":1},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "629", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
-				{ "name" : "FilterKeytrack_3",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":3},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "666", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
+				{ "name" : "FilterKeytrack_3",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "666", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
+				{ "name" : "FilterKeytrack_4",        "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":3},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1791", "y" : "705", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
 
-				{ "name" : "FilterType_1",        "parameterAttachment" : { "parameter" : "FilterType", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "369", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
+				{ "name" : "FilterType_1",        "parameterAttachment" : { "parameter" : "FilterType", "value":0},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "369", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
 				{ "name" : "FilterType_2",        "parameterAttachment" : { "parameter" : "FilterType", "value":1},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "406", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
-				{ "name" : "FilterType_3",        "parameterAttachment" : { "parameter" : "FilterType", "value":0},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "443", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
+				{ "name" : "FilterType_3",        "parameterAttachment" : { "parameter" : "FilterType", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "443", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
 				{ "name" : "FilterType_4",        "parameterAttachment" : { "parameter" : "FilterType", "value":3},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "480", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
 				{ "name" : "FilterType_5",        "parameterAttachment" : { "parameter" : "FilterType", "value":4},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "517", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":130 } },                
 
-				{ "name" : "Distortion",        "parameterAttachment" : { "parameter" : "Distortion"},                  "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "666", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
+				{ "name" : "Distortion",        "parameterAttachment" : { "parameter" : "Distortion"},                  "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1954", "y" : "705", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":150} },                
 
 
 
@@ -184,16 +183,12 @@
 			
 			]     
 		},
-		{        
-			"name" : "page_3_extra",
-			"image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_3_extra" },
-			"children" : []      
-		},			
+		
 
-        { "name" : "DonateInfo",    "hyperlinkbutton" : {"url" : "https://paypal.me/dsp56300",   "text" : "Donate", "textHeight" : "28", "color" : "FFFFFFFF", "x" : "1450", "y" : "910", "width" : "160", "height" : "40"} },
-        { "name" : "VersionNumber", "label" : {          "text" : "1.3.2.13",                    "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "440",  "y" : "1155", "width" : "1150", "height" : "32" }},
+        { "name" : "DonateInfo",    "hyperlinkbutton" : {"url" : "https://paypal.me/dsp56300",   "text" : "Donate", "textHeight" : "28", "color" : "FFFFFFFF", "x" : "1430", "y" : "1150", "width" : "160", "height" : "40"} },
+        { "name" : "VersionNumber", "label" : {          "text" : "1.3.2.13",                    "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "460",  "y" : "1155", "width" : "200", "height" : "32" }},
         { "name" : "DeviceModel",   "label" : {          "text" : "NL2x",                           "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "175", "y" : "1155", "width" : "100",   "height" : "32" }},
-        { "name" : "RomSelector",   "combobox" : {       "text" : "rom.bin",          "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "750", "y" : "1153", "width" : "400",  "height" : "32", "offsetR" : "-60", "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin" }},
+        { "name" : "RomSelector",   "combobox" : {       "text" : "rom.bin",          "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "730", "y" : "1154", "width" : "400",  "height" : "32", "offsetR" : "-60", "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin" }},
     		
 		
 	]
