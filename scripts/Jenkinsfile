@@ -162,7 +162,7 @@ def getSynths()
          "-Dgearmulator_SYNTH_OSIRUS=" + (params.SynthOsirus ? "on" : "off") +
         " -Dgearmulator_SYNTH_OSTIRUS=" + (params.SynthOsTIrus ? "on" : "off") +
         " -Dgearmulator_SYNTH_VAVRA=" + (params.SynthVavra ? "on" : "off") +
-        " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off")
+        " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off") +
         " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off")
     
     return synths
