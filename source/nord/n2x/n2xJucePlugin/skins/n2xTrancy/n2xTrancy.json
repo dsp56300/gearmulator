@@ -149,7 +149,7 @@
 					]
 				},				
 				
-		                { "name" : "Lfo2Dest",          "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":0, "valueOff":3},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "485", "y" : "254", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":90} },                
+		                { "name" : "ArpEnabled",       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "485", "y" : "254", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":90} },                
 
 				
 				{ "name" : "Lfo2Rate",          "parameterAttachment" : { "parameter" : "Lfo2Rate" },    "rotary" : { }, "spritesheet" : { "x" : "36", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
