@@ -220,7 +220,7 @@ namespace n2x
 	void FrontPanelCS6::onLCDChanged()
 	{
 		// Check if the LCD display "  1", used as indication that device has finished booting
-		if(m_lcds[0] == 255 && m_lcds[1] == 254 && m_lcds[2] == 159)
+		if(m_lcds[0] == 255 && m_lcds[1] >= 254 && m_lcds[2] == 159)
 		{
 			m_panel.getHardware().notifyBootFinished();
 		}
