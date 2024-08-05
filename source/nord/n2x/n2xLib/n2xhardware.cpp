@@ -337,4 +337,14 @@ namespace n2x
 	{
 		m_uc.getFrontPanel().setButtonState(_type, _pressed);
 	}
+
+	uint8_t Hardware::getKnobPosition(KnobType _knob) const
+	{
+		return m_uc.getFrontPanel().getKnobPosition(_knob);
+	}
+
+	void Hardware::setKnobPosition(KnobType _knob, uint8_t _value)
+	{
+		return m_uc.getFrontPanel().setKnobPosition(_knob, _value);
+	}
 }

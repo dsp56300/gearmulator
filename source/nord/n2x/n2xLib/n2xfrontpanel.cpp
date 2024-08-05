@@ -4,6 +4,7 @@
 #include <cstring>	// memcpy
 
 #include "n2xhardware.h"
+
 #include "dsp56kEmu/logging.h"
 
 namespace n2x
@@ -17,49 +18,58 @@ namespace n2x
 
 	FrontPanelCS4::FrontPanelCS4(FrontPanel& _fp) : FrontPanelCS(_fp)
 	{
+		setKnobPosition(KnobType::PitchBend,	0);			// pretend we're a rack unit
+		setKnobPosition(KnobType::ModWheel,		0);			// pretend we're a rack unit
+
+		setKnobPosition(KnobType::MasterVol,	0xff);
+		setKnobPosition(KnobType::AmpGain,		0xff);
+		setKnobPosition(KnobType::Osc1Fm,		0);
+		setKnobPosition(KnobType::Porta,		0);
+		setKnobPosition(KnobType::Lfo2Rate,		0x0);
+		setKnobPosition(KnobType::Lfo1Rate,		0x0);
+		setKnobPosition(KnobType::ModEnvAmt,	0);
+		setKnobPosition(KnobType::ModEnvD,		0);
+		setKnobPosition(KnobType::ModEnvA,		0);
+		setKnobPosition(KnobType::AmpEnvD,		0);
+		setKnobPosition(KnobType::FilterFreq,	0xff);
+		setKnobPosition(KnobType::FilterEnvA,	0);
+		setKnobPosition(KnobType::AmpEnvA,		0);
+		setKnobPosition(KnobType::OscMix,		0x7f);
+		setKnobPosition(KnobType::Osc2Fine,		0x7f);
+		setKnobPosition(KnobType::Lfo1Amount,	0x0f);
+		setKnobPosition(KnobType::OscPW,		0x40);
+		setKnobPosition(KnobType::FilterEnvR,	0x30);
+		setKnobPosition(KnobType::AmpEnvR,		0x90);
+		setKnobPosition(KnobType::FilterEnvAmt,	0);
+		setKnobPosition(KnobType::FilterEnvS,	0x7f);
+		setKnobPosition(KnobType::AmpEnvS,		0x7f);
+		setKnobPosition(KnobType::FilterReso,	0x10);
+		setKnobPosition(KnobType::FilterEnvD,	0);
+		setKnobPosition(KnobType::ExpPedal,		0x0);
+		setKnobPosition(KnobType::Lfo2Amount,	0);
+		setKnobPosition(KnobType::Osc2Semi,		0x7f);
 	}
 
 	uint8_t FrontPanelCS4::read8(mc68k::PeriphAddress _addr)
 	{
 		const auto knobType = m_panel.cs6().getKnobType();
 
-		switch (knobType)
-		{
-		case KnobType::Invalid:			return 0;
-		case KnobType::PitchBend:		return 0;
-		case KnobType::ModWheel:		return 0;			// pretend we're a rack unit
-		case KnobType::MasterVol:		return 0xff;
-		case KnobType::AmpGain:			return 0xff;
+		if(knobType == KnobType::Invalid)
+			return 0;
 
-		case KnobType::Osc1Fm:			return 0;
-		case KnobType::Porta:			return 0;
-		case KnobType::Lfo2Rate:		return 0x0;
-		case KnobType::Lfo1Rate:		return 0x0;
-		case KnobType::ModEnvAmt:		return 0;
-		case KnobType::ModEnvD:			return 0;
-		case KnobType::ModEnvA:			return 0;
-		case KnobType::AmpEnvD:			return 0;
-		case KnobType::FilterFreq:		return 0xff;
-		case KnobType::FilterEnvA:		return 0;
-		case KnobType::AmpEnvA:			return 0;
-		case KnobType::OscMix:			return 0x7f;
-		case KnobType::Osc2Fine:		return 0x7f;
-		case KnobType::Lfo1Amount:		return 0x0f;
-		case KnobType::OscPW:			return 0x40;
-		case KnobType::FilterEnvR:		return 0x30;
-		case KnobType::AmpEnvR:			return 0x90;
-		case KnobType::FilterEnvAmt:	return 0;
-		case KnobType::FilterEnvS:		return 0x7f;
-		case KnobType::AmpEnvS:			return 0x7f;
-		case KnobType::FilterReso:		return 0x10;
-		case KnobType::FilterEnvD:		return 0;
-		case KnobType::ExpPedal:		return 0x0;
-		case KnobType::Lfo2Amount:		return 0;
-		case KnobType::Osc2Semi:		return 0x7f;
-		default:
-			assert(false);
-			return 0x80;
-		}
+		return getKnobPosition(knobType);
+	}
+
+	uint8_t FrontPanelCS4::getKnobPosition(KnobType _knob) const
+	{
+		const auto i = static_cast<uint32_t>(_knob) - static_cast<uint32_t>(KnobType::First);
+		return m_knobPositions[i];
+	}
+
+	void FrontPanelCS4::setKnobPosition(KnobType _knob, const uint8_t _value)
+	{
+		const auto i = static_cast<uint32_t>(_knob) - static_cast<uint32_t>(KnobType::First);
+		m_knobPositions[i] = _value;
 	}
 
 	FrontPanelCS6::FrontPanelCS6(FrontPanel& _fp) : FrontPanelCS(_fp), m_buttonStates({})
@@ -219,7 +229,7 @@ namespace n2x
 
 	void FrontPanelCS6::onLCDChanged()
 	{
-		// Check if the LCD display "  1", used as indication that device has finished booting
+		// Check if the LCD displays "  1", used as indicator that device has finished booting
 		if(m_lcds[0] == 255 && m_lcds[1] >= 254 && m_lcds[2] == 159)
 		{
 			m_panel.getHardware().notifyBootFinished();

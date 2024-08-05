@@ -36,6 +36,10 @@ namespace n2x
 
 		bool getButtonState(ButtonType _type) const;
 		void setButtonState(ButtonType _type, bool _pressed);
+
+		uint8_t getKnobPosition(KnobType _knob) const;
+		void setKnobPosition(KnobType _knob, uint8_t _value);
+
 		void processAudio(const synthLib::TAudioOutputs& _outputs, uint32_t _frames, uint32_t _latency);
 		bool sendMidi(const synthLib::SMidiEvent& _ev);
 		void notifyBootFinished();

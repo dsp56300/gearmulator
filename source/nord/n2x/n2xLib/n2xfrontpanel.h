@@ -24,6 +24,10 @@ namespace n2x
 		explicit FrontPanelCS4(FrontPanel& _fp);
 
 		uint8_t read8(mc68k::PeriphAddress _addr) override;
+		uint8_t getKnobPosition(KnobType _knob) const;
+		void setKnobPosition(KnobType _knob, uint8_t _value);
+
+		std::array<uint8_t, static_cast<uint32_t>(KnobType::Last) - static_cast<uint32_t>(KnobType::First) + 1> m_knobPositions;
 	};
 
 	class FrontPanelCS6 : public FrontPanelCS<g_frontPanelAddressCS6>
@@ -77,6 +81,15 @@ namespace n2x
 		}
 
 		Hardware& getHardware() const { return m_hardware; }
+
+		uint8_t getKnobPosition(KnobType _knob) const
+		{
+			return m_cs4.getKnobPosition(_knob);
+		}
+		void setKnobPosition(KnobType _knob, uint8_t _value)
+		{
+			m_cs4.setKnobPosition(_knob, _value);
+		}
 
 	private:
 		Hardware& m_hardware;

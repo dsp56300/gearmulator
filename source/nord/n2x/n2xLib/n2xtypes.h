@@ -91,5 +91,8 @@ namespace n2x
 		AmpEnvD   = 0x58,	FilterFreq,	FilterEnvA,	AmpEnvA,		OscMix,		Osc2Fine,	Lfo1Amount,	OscPW,
 		AmpGain   = 0x68,	FilterEnvR,	AmpEnvR,	FilterEnvAmt,	FilterEnvS,	AmpEnvS,	FilterReso,	FilterEnvD,
 		PitchBend = 0x70,	ModWheel,	ExpPedal,	Lfo2Amount,		Osc2Semi,
+
+		First = Osc1Fm,
+		Last = Osc2Semi
 	};
 }
