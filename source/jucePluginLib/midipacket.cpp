@@ -165,7 +165,7 @@ namespace pluginLib
 		}, _parameters, _src, _ignoreChecksumErrors);
 	}
 	
-	bool MidiPacket::parse(Data& _data, const std::function<void(ParamIndex, uint8_t)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
+	bool MidiPacket::parse(Data& _data, const std::function<void(ParamIndex, ParamValue)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
 	{
 		if(_src.size() != size())
 			return false;

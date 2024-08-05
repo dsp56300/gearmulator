@@ -9,6 +9,7 @@
 #include "synthLib/buildconfig.h"
 
 #include "jucePluginLib/event.h"
+#include "jucePluginLib/types.h"
 
 namespace baseLib
 {
@@ -86,7 +87,7 @@ namespace jucePluginEditorLib
 
 		bool copyRegionToClipboard(const std::string& _regionId) const;
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
-		bool setParameters(const std::map<std::string, uint8_t>& _paramValues) const;
+		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
 		auto& getImagePool() { return m_imagePool; }
 

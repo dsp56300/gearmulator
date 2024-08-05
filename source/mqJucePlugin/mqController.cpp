@@ -447,7 +447,7 @@ void Controller::selectPreset(int _offset)
 */  }
 }
 
-void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const uint8_t _value)
+void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value)
 {
 	const auto &desc = _parameter.getDescription();
 

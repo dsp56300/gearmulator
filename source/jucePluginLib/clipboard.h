@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "types.h"
+
 namespace pluginLib
 {
 	class Processor;
@@ -14,7 +16,7 @@ namespace pluginLib
 	public:
 		struct Data
 		{
-			using ParameterValues = std::map<std::string,uint8_t>;
+			using ParameterValues = std::map<std::string, ParamValue>;
 
 			std::string pluginName;
 			std::string pluginVersionString;

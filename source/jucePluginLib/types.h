@@ -12,4 +12,6 @@ namespace pluginLib
 		Source = 1,
 		Target = 2
 	};
+
+	using ParamValue = int32_t;
 }

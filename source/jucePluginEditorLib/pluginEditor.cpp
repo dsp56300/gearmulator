@@ -473,7 +473,7 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
-	bool Editor::setParameters(const std::map<std::string, uint8_t>& _paramValues) const
+	bool Editor::setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const
 	{
 		if(_paramValues.empty())
 			return false;

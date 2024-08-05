@@ -188,16 +188,6 @@ namespace pluginLib
 			const auto maxValue = readPropertyInt("max");
 			const auto defaultValue = readPropertyIntWithDefault("default", Description::NoDefaultValue);
 
-			if (minValue < 0 || minValue > 127)
-			{
-				errors << name << ": min value for parameter desc " << name << " must be in range 0-127 but min is set to " << minValue << std::endl;
-				continue;
-			}
-			if(maxValue < 0 || maxValue > 127)
-			{
-				errors << name << ": max value for parameter desc " << name << " must be in range 0-127 but max is set to " << maxValue << std::endl;
-				continue;
-			}
 			if (maxValue < minValue)
 			{
 				errors << name << ": max value must be larger than min value but min is " << minValue << ", max is " << maxValue << std::endl;

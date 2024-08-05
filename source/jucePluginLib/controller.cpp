@@ -174,7 +174,7 @@ namespace pluginLib
         m_processor.addMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
 	}
 
-	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const
+	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, ParamValue _value) const
 	{
 		const auto &desc = _parameter.getDescription();
 
@@ -214,7 +214,7 @@ namespace pluginLib
 
 		if (definitions.size() == 1)
 		{
-			_result = _value;
+			_result = static_cast<uint8_t>(_value);
 			return true;
 		}
 
@@ -259,8 +259,7 @@ namespace pluginLib
 
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
-	    const std::map<pluginLib::MidiDataType, uint8_t> params;
-        return sendSysEx(_packetName, params);
+        return sendSysEx(_packetName, {});
     }
 
     bool Controller::sendSysEx(const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
@@ -346,7 +345,7 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
-	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
+	bool Controller::setParameters(const std::map<std::string, ParamValue>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
 	{
 		bool res = false;
 
@@ -465,7 +464,7 @@ namespace pluginLib
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
 	}
 
-	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, uint8_t)>& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, ParamValue)>& _parameterValues, const std::vector<uint8_t>& _src) const
 	{
 		_data.clear();
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
@@ -524,9 +523,9 @@ namespace pluginLib
 		m_parameterLinks.loadChunkData(_cr);
 	}
 
-	void Controller::saveChunkData(baseLib::BinaryStream& s)
+	void Controller::saveChunkData(baseLib::BinaryStream& _s) const
 	{
-		m_parameterLinks.saveChunkData(s);
+		m_parameterLinks.saveChunkData(_s);
 	}
 
 	Parameter::Origin Controller::midiEventSourceToParameterOrigin(const synthLib::MidiEventSource _source)

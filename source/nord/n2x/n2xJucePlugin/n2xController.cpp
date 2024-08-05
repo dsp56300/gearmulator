@@ -206,11 +206,11 @@ namespace n2xJucePlugin
 		return true;
 	}
 
-	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
+	void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value)
 	{
 		if(_parameter.getDescription().page >= g_multiPage)
 		{
-			sendMultiParameter(_parameter, _value);
+			sendMultiParameter(_parameter, static_cast<uint8_t>(_value));
 			return;
 		}
 
@@ -250,13 +250,13 @@ namespace n2xJucePlugin
 
 		const auto parts = m_state.getPartsForMidiChannel(ch);
 
-		const auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + ch), cc, _value};
+		const auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + ch), cc, static_cast<uint8_t>(_value)};
 
 		if(parts.size() > 1)
 		{
 			// this is problematic. We want to edit one part only but two parts receive on the same channel. We have to send a full dump
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-			setSingleParameter(part, singleParam, _value);
+			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
 		}
 		else
 		{
