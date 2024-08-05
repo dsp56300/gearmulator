@@ -1,6 +1,8 @@
 Release Notes 
 
-1.3.17
+1.3.18
+
+1.3.17 (2024.08.04)
 
 Framework:
 
@@ -21,6 +23,9 @@ Xenia:
 
 - [Fix] Font when renaming a patch was too large
 - [Fix] Microcontroller timing
+- [Fix] Multi parameters were not initialized correctly
+- [Fix] Global channel was not initialized to channel 1 which might have
+        caused issues depending on the used firmware
 
 1.3.16 (2024.07.14)
 
