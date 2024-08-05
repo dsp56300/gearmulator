@@ -30,7 +30,7 @@ namespace mqLib
 		if(!execute)
 			return false;
 
-		const auto res = wLib::LCD::exec(registerSelect, read, g);
+		const auto res = hwLib::LCD::exec(registerSelect, read, g);
 
 		if(res)
 			_portGp.writeRX(*res);

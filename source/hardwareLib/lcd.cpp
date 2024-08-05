@@ -6,7 +6,7 @@
 
 #define LOG MCLOG
 
-namespace wLib
+namespace hwLib
 {
 	LCD::LCD() = default;
 

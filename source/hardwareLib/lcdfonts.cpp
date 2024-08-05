@@ -3,7 +3,7 @@
 
 #include <array>
 
-namespace wLib
+namespace hwLib
 {
 	constexpr uint8_t g_fontTable0[] =
 	{

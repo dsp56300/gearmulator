@@ -1,10 +1,8 @@
 #include "mqLcd.h"
 
+#include "hardwareLib/lcdfonts.h"
+
 #include "jucePluginLib/pluginVersion.h"
-
-#include "wLib/lcdfonts.h"
-
-// EW20290GLW display simulation (20*2)
 
 MqLcd::MqLcd(Component& _parent) : Lcd(_parent, 20, 2)
 {
@@ -40,5 +38,5 @@ bool MqLcd::getOverrideText(std::vector<std::vector<uint8_t>>& _lines)
 
 const uint8_t* MqLcd::getCharacterData(uint8_t _character) const
 {
-	return wLib::getCharacterData(_character);
+	return hwLib::getCharacterData(_character);
 }

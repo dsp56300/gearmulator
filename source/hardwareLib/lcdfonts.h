@@ -2,7 +2,7 @@
 
 #include <cstdint>
 
-namespace wLib
+namespace hwLib
 {
 	const uint8_t* getCharacterData(uint8_t _character);
 }

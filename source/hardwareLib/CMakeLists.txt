@@ -9,6 +9,8 @@ set(SOURCES
 	haltDSP.cpp haltDSP.h
 	i2c.cpp i2c.h
 	i2cFlash.cpp i2cFlash.h
+	lcd.cpp lcd.h
+	lcdfonts.cpp lcdfonts.h
 	sciMidi.cpp sciMidi.h
 	syncUCtoDSP.h
 )

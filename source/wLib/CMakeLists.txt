@@ -5,8 +5,6 @@ project(wLib)
 add_library(wLib STATIC)
 
 set(SOURCES
-	lcd.cpp lcd.h
-	lcdfonts.cpp lcdfonts.h
 	wDevice.cpp wDevice.h
 	wDsp.cpp wDsp.h
 	wHardware.cpp wHardware.h

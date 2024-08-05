@@ -5,8 +5,11 @@
 #include <functional>
 #include <optional>
 
-namespace wLib
+namespace hwLib
 {
+	// 2*20 characters display simulation (20*2)
+	// EW20290GLW / NHD-0220DZW-AB5 and compatibles
+
 	class LCD
 	{
 	public:
