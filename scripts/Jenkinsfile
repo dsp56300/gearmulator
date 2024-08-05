@@ -18,6 +18,7 @@ pipeline {
 		booleanParam(name: 'SynthOsTIrus', defaultValue: true, description: '')
 		booleanParam(name: 'SynthVavra', defaultValue: true, description: '')
 		booleanParam(name: 'SynthXenia', defaultValue: false, description: '')
+		booleanParam(name: 'SynthNodalRed2x', defaultValue: false, description: '')
 	}
 	stages {
 		stage("Checkout") {
@@ -34,6 +35,7 @@ pipeline {
 					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
 					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
 					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
+					if(params.SynthNodalRed2x)			currentBuild.displayName += " Sn2x"
 				}
 				doCheckout()
 			}
@@ -161,6 +163,7 @@ def getSynths()
         " -Dgearmulator_SYNTH_OSTIRUS=" + (params.SynthOsTIrus ? "on" : "off") +
         " -Dgearmulator_SYNTH_VAVRA=" + (params.SynthVavra ? "on" : "off") +
         " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off")
+        " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off")
     
     return synths
 }

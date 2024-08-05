@@ -4,7 +4,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
-option(${CMAKE_PROJECT_NAME}_SYNTH_N2X "Build N2x" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 
 # ----------------- DSP56300 emulator
 

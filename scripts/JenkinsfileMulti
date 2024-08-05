@@ -16,6 +16,7 @@ pipeline {
 		booleanParam(name: 'SynthOsTIrus', defaultValue: true, description: '')
 		booleanParam(name: 'SynthVavra', defaultValue: true, description: '')
 		booleanParam(name: 'SynthXenia', defaultValue: true, description: '')
+		booleanParam(name: 'SynthNodalRed2x', defaultValue: false, description: '')
 	}
 	stages {
 		stage('Prepare') {
@@ -35,6 +36,7 @@ pipeline {
 					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
 					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
 					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
+					if(params.SynthNodalRed2x)		    currentBuild.displayName += " Sn2x"
 
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
 				}
@@ -94,5 +96,6 @@ def startBuildJob(label)
 		[$class: 'BooleanParameterValue', name: 'SynthOsTIrus', value: params.SynthOsTIrus],
 		[$class: 'BooleanParameterValue', name: 'SynthVavra', value: params.SynthVavra],
 		[$class: 'BooleanParameterValue', name: 'SynthXenia', value: params.SynthXenia],
+		[$class: 'BooleanParameterValue', name: 'SynthNodalRed2x', value: params.SynthNodalRed2x],
 	]
 }
