@@ -20,6 +20,10 @@ namespace n2x
 
 		const auto& getFilename() const { return m_filename; }
 
+		void invalidate()
+		{
+			m_filename.clear();
+		}
 	private:
 		std::array<uint8_t, Size> m_data;
 		std::string m_filename;

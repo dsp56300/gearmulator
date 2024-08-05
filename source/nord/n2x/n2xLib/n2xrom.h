@@ -5,5 +5,9 @@
 
 namespace n2x
 {
-	class Rom : public RomData<g_romSize>	{};
+	class Rom : public RomData<g_romSize>
+	{
+	public:
+		Rom();
+	};
 }
