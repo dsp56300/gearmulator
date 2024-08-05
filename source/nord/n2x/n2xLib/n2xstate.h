@@ -5,6 +5,7 @@
 #include <cstddef>
 
 #include "n2xmiditypes.h"
+#include "n2xtypes.h"
 
 #include "synthLib/midiTypes.h"
 
@@ -105,6 +106,9 @@ namespace n2x
 			_dump[_off  ] = _value & 0x0f;
 			_dump[_off+1] = _value >> 4;
 		}
+
+		static std::vector<uint8_t> createKnobSysex(KnobType _type, uint8_t _value);
+		static bool parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex);
 
 	private:
 		template<size_t Size> bool receive(const std::array<uint8_t, Size>& _data)

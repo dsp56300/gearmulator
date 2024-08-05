@@ -21,6 +21,7 @@ namespace n2xJucePlugin
 	class Lcd;
 	class Arp;
 	class Parts;
+	class MasterVolume;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{
@@ -57,6 +58,7 @@ namespace n2xJucePlugin
 
 		std::unique_ptr<Arp> m_arp;
 		std::unique_ptr<Lcd> m_lcd;
+		std::unique_ptr<MasterVolume> m_masterVolume;
 		std::unique_ptr<Parts> m_parts;
 		pluginLib::EventListener<uint8_t> onPartChanged;
 

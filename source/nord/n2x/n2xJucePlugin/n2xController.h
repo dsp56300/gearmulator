@@ -61,6 +61,8 @@ namespace n2xJucePlugin
 		std::string getSingleName(uint8_t _part) const;
 		std::string getPatchName(uint8_t _part) const;
 
+		using pluginLib::Controller::sendSysEx;
+
 	private:
 		n2x::State m_state;
 		pluginLib::EventListener<uint8_t> m_currentPartChanged;

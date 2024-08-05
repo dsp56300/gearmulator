@@ -249,6 +249,18 @@ namespace n2x
 		if(sysex.size() == g_patchRequestSize)
 			return false;
 
+		if(bank == n2x::SysexByte::EmuSetPotPosition)
+		{
+			KnobType knobType;
+			uint8_t knobValue;
+
+			if(parseKnobSysex(knobType, knobValue, sysex))
+			{
+				m_hardware->setKnobPosition(knobType, knobValue);
+				return true;
+			}
+		}
+
 		return false;
 	}
 
@@ -412,6 +424,30 @@ namespace n2x
 				res.push_back(i);
 		}
 		return res;
+	}
+
+	std::vector<uint8_t> State::createKnobSysex(KnobType _type, uint8_t _value)
+	{
+		return {0xf0, IdClavia, DefaultDeviceId, IdN2X,
+			EmuSetPotPosition,
+			static_cast<uint8_t>(_type),
+			static_cast<uint8_t>(_value >> 4),
+			static_cast<uint8_t>(_value & 0x0f),
+			0xf7
+		};
+	}
+
+	bool State::parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex)
+	{
+		if(_sysex.size() <= SysexIndex::IdxPotPosL)
+			return false;
+		if(_sysex[SysexIndex::IdxMsgType] != SysexByte::EmuSetPotPosition)
+			return false;
+
+		_type = static_cast<KnobType>(_sysex[SysexIndex::IdxMsgSpec]);
+		_value = static_cast<uint8_t>((_sysex[SysexIndex::IdxPotPosH] << 4) | _sysex[SysexIndex::IdxPotPosL]);
+
+		return true;
 	}
 
 	void State::send(const synthLib::SMidiEvent& _e) const
