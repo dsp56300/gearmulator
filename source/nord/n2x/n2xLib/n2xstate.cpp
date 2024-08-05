@@ -195,6 +195,11 @@ namespace n2x
 	{
 		updateMultiFromSingles();
 		_state.insert(_state.end(), m_multi.begin(), m_multi.end());
+		for (const auto it : m_knobStates)
+		{
+			auto knobSysex = createKnobSysex(it.first, it.second);
+			_state.insert(_state.end(), knobSysex.begin(), knobSysex.end());
+		}
 		return true;
 	}
 
@@ -209,7 +214,7 @@ namespace n2x
 		return false;
 	}
 
-	bool State::receive(const synthLib::SMidiEvent& _ev)
+	bool State::receive(std::vector<synthLib::SMidiEvent>& _responses, const synthLib::SMidiEvent& _ev)
 	{
 		if(_ev.sysex.empty())
 		{
@@ -246,9 +251,6 @@ namespace n2x
 			return true;
 		}
 
-		if(sysex.size() == g_patchRequestSize)
-			return false;
-
 		if(bank == n2x::SysexByte::EmuSetPotPosition)
 		{
 			KnobType knobType;
@@ -256,9 +258,20 @@ namespace n2x
 
 			if(parseKnobSysex(knobType, knobValue, sysex))
 			{
-				m_hardware->setKnobPosition(knobType, knobValue);
+				if(m_hardware)
+					m_hardware->setKnobPosition(knobType, knobValue);
+				m_knobStates[knobType] = knobValue;
 				return true;
 			}
+		}
+		else if(bank == SysexByte::EmuGetPotsPosition)
+		{
+			for (const auto it : m_knobStates)
+			{
+				_responses.emplace_back(synthLib::MidiEventSource::Internal);
+				_responses.back().sysex = createKnobSysex(it.first, it.second);
+			}
+			return true;
 		}
 
 		return false;
@@ -439,14 +452,23 @@ namespace n2x
 
 	bool State::parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex)
 	{
-		if(_sysex.size() <= SysexIndex::IdxPotPosL)
+		if(_sysex.size() <= SysexIndex::IdxKnobPosL)
 			return false;
 		if(_sysex[SysexIndex::IdxMsgType] != SysexByte::EmuSetPotPosition)
 			return false;
 
 		_type = static_cast<KnobType>(_sysex[SysexIndex::IdxMsgSpec]);
-		_value = static_cast<uint8_t>((_sysex[SysexIndex::IdxPotPosH] << 4) | _sysex[SysexIndex::IdxPotPosL]);
+		_value = static_cast<uint8_t>((_sysex[SysexIndex::IdxKnobPosH] << 4) | _sysex[SysexIndex::IdxKnobPosL]);
 
+		return true;
+	}
+
+	bool State::getKnobState(uint8_t& _result, const KnobType _type) const
+	{
+		const auto it = m_knobStates.find(_type);
+		if(it == m_knobStates.end())
+			return false;
+		_result = it->second;
 		return true;
 	}
 

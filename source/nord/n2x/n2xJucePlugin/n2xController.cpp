@@ -43,6 +43,8 @@ namespace n2xJucePlugin
 
 		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
 
+		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
+
 		m_currentPartChanged.set(onCurrentPartChanged, [this](const uint8_t& _part)
 		{
 			setMultiParameter(n2x::SelectedChannel, _part);
@@ -86,12 +88,33 @@ namespace n2xJucePlugin
 	    return {};
 	}
 
-	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
+	void Controller::onStateLoaded()
+	{
+		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
+	}
+
+	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
 		if(_msg.size() == n2x::g_singleDumpSize)
+		{
 			return parseSingleDump(_msg);
+		}
 		if(_msg.size() == n2x::g_multiDumpSize)
+		{
 			return parseMultiDump(_msg);
+		}
+
+		n2x::KnobType knobType;
+		uint8_t knobValue;
+
+		if(n2x::State::parseKnobSysex(knobType, knobValue, _msg))
+		{
+			if(m_state.receive(_msg, _source))
+			{
+				onKnobChanged(knobType, knobValue);
+				return true;
+			}
+		}
 		return false;
 	}
 
@@ -388,5 +411,10 @@ namespace n2xJucePlugin
 		if(bank >= n2x::SysexByte::MultiDumpBankA)
 			return PatchManager::getPatchName({multi.begin(), multi.end()});
 		return getSingleName(_part);
+	}
+
+	bool Controller::getKnobState(uint8_t& _result, const n2x::KnobType _type) const
+	{
+		return m_state.getKnobState(_result, _type);
 	}
 }

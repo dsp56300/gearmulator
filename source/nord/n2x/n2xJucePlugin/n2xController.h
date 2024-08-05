@@ -20,15 +20,14 @@ namespace n2xJucePlugin
 		};
 
 		pluginLib::Event<> onProgramChanged;
+		pluginLib::Event<n2x::KnobType, uint8_t> onKnobChanged;
 
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
 		static std::string loadParameterDescriptions();
 
-		void onStateLoaded() override
-		{
-		}
+		void onStateLoaded() override;
 
 		uint8_t getPartCount() const override
 		{
@@ -62,6 +61,8 @@ namespace n2xJucePlugin
 		std::string getPatchName(uint8_t _part) const;
 
 		using pluginLib::Controller::sendSysEx;
+
+		bool getKnobState(uint8_t& _result, n2x::KnobType _type) const;
 
 	private:
 		n2x::State m_state;

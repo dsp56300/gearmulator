@@ -90,14 +90,14 @@ namespace n2x
 	{
 		if(_ev.sysex.empty())
 		{
-			m_state.receive(_ev);
+			m_state.receive(_response, _ev);
 			auto e = _ev;
 			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
 			m_hardware.sendMidi(e);
 		}
 		else
 		{
-			if(m_state.receive(_ev))
+			if(m_state.receive(_response, _ev))
 				return true;
 
 			m_hardware.sendMidi(_ev);

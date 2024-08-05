@@ -3,6 +3,7 @@
 #include <array>
 #include <vector>
 #include <cstddef>
+#include <unordered_map>
 
 #include "n2xmiditypes.h"
 #include "n2xtypes.h"
@@ -24,7 +25,12 @@ namespace n2x
 		bool getState(std::vector<uint8_t>& _state);
 		bool setState(const std::vector<uint8_t>& _state);
 
-		bool receive(const synthLib::SMidiEvent& _ev);
+		bool receive(const synthLib::SMidiEvent& _ev)
+		{
+			std::vector<synthLib::SMidiEvent> responses;
+			return receive(responses, _ev);
+		}
+		bool receive(std::vector<synthLib::SMidiEvent>& _responses, const synthLib::SMidiEvent& _ev);
 		bool receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source);
 
 		bool receiveNonSysex(const synthLib::SMidiEvent& _ev);
@@ -110,6 +116,8 @@ namespace n2x
 		static std::vector<uint8_t> createKnobSysex(KnobType _type, uint8_t _value);
 		static bool parseKnobSysex(KnobType& _type, uint8_t& _value, const std::vector<uint8_t>& _sysex);
 
+		bool getKnobState(uint8_t& _result, KnobType _type) const;
+
 	private:
 		template<size_t Size> bool receive(const std::array<uint8_t, Size>& _data)
 		{
@@ -124,5 +132,6 @@ namespace n2x
 		Hardware* m_hardware;
 		std::array<SingleDump, 4> m_singles;
 		MultiDump m_multi;
+		std::unordered_map<KnobType, uint8_t> m_knobStates;
 	};
 }

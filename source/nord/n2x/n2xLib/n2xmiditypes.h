@@ -14,7 +14,8 @@ namespace n2x
 		MultiDumpBankEditBuffer    = 30, MultiDumpBankA,
 		MultiRequestBankEditBuffer = 40,
 
-		EmuSetPotPosition = 90,	// total dump is: f0, IdClavia, IdDevice, IdN2x, EmuSetPotPosition, KnobType / nibble high, nibble low / f7
+		EmuSetPotPosition = 90,		// total dump is: f0, IdClavia, IdDevice, IdN2x, EmuSetPotPosition, KnobType / nibble high, nibble low / f7
+		EmuGetPotsPosition = 91,
 	};
 
 	enum SysexIndex
@@ -24,8 +25,8 @@ namespace n2x
 		IdxN2x,
 		IdxMsgType,
 		IdxMsgSpec,
-		IdxPotPosH,
-		IdxPotPosL
+		IdxKnobPosH,
+		IdxKnobPosL
 	};
 
 	enum SingleParam
