@@ -24,4 +24,4 @@ include(skins/n2xTrancy/assets.cmake)
 
 juce_add_binary_data(n2xJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_n2xTrancy})
 
-createJucePlugin(n2xJucePlugin "NodalRed" TRUE "Tn2x" n2xJucePlugin_BinaryData n2xLib)
+createJucePlugin(n2xJucePlugin "NodalRed2x" TRUE "Tn2x" n2xJucePlugin_BinaryData n2xLib)
