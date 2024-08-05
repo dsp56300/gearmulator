@@ -7,6 +7,8 @@
 #include "dsp56kEmu/dspthread.h"
 
 #include "baseLib/semaphore.h"
+
+#include "hardwareLib/dspBootCode.h"
 #include "hardwareLib/haltDSP.h"
 
 namespace mc68k
@@ -43,6 +45,7 @@ namespace n2x
 
 		void terminate();
 		void join() const;
+		void onDspBootFinished();
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -68,5 +71,7 @@ namespace n2x
 		uint32_t m_irqInterruptDone = 0;
 
 		hwLib::HaltDSP m_haltDSP;
+
+		hwLib::DspBoot m_boot;
 	};
 }

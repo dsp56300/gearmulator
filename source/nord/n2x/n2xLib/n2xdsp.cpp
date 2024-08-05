@@ -3,8 +3,9 @@
 #include "n2xhardware.h"
 
 #include "dsp56kDebugger/debugger.h"
+
 #include "dsp56kEmu/dspthread.h"
-#include "hardwareLib/dspBootCode.h"
+
 #include "mc68k/hdi08.h"
 
 namespace n2x
@@ -12,7 +13,6 @@ namespace n2x
 	static constexpr dsp56k::TWord g_xyMemSize			= 0x010000;
 	static constexpr dsp56k::TWord g_externalMemAddr	= 0x008000;
 	static constexpr dsp56k::TWord g_pMemSize			= 0x004000;
-	static constexpr dsp56k::TWord g_bootCodeBase		= 0x003f00;
 
 	namespace
 	{
@@ -26,6 +26,7 @@ namespace n2x
 	, m_memory(g_memValidator, g_pMemSize, g_xyMemSize, g_externalMemAddr)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
 	, m_haltDSP(m_dsp)
+	, m_boot(m_dsp)
 	{
 		if(!_hw.isValid())
 			return;
@@ -80,23 +81,6 @@ namespace n2x
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
-		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
-		for(uint32_t i=0; i<std::size(hwLib::g_dspBootCode56362); ++i)
-		{
-			uint32_t code = hwLib::g_dspBootCode56362[i];
-			if((hwLib::g_dspBootCode56362[i] & 0xffff00) == 0xff0000)
-			{
-				code = g_bootCodeBase | (hwLib::g_dspBootCode56362[i] & 0xff);
-			}
-
-			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
-			m_dsp.getJit().notifyProgramMemWrite(i + g_bootCodeBase);
-		}
-
-		// set OMR pins so that bootcode wants program data via HDI08 RX
-		m_dsp.setPC(g_bootCodeBase);
-		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
-		
 		hdi08().setRXRateLimit(0);
 
 		m_periphX.getEsai().writeEmptyAudioIn(2);
@@ -105,9 +89,11 @@ namespace n2x
 		{
 			onUCRxEmpty(_needMoreData);
 		});
-		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+
+		m_hdiUC.setWriteTxCallback([this](const uint32_t _word)
 		{
-			hdiTransferUCtoDSP(_word);
+			if(m_boot.hdiWriteTX(_word))
+				onDspBootFinished();
 		});
 		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
 		{
@@ -123,15 +109,6 @@ namespace n2x
 			m_hdiUC.icr(m_hdiUC.icr() & 0x7f);
 			m_hdiUC.isr(m_hdiUC.isr() | mc68k::Hdi08::IsrBits::Txde | mc68k::Hdi08::IsrBits::Trdy);
 		});
-
-#if DSP56300_DEBUGGER
-		if(!m_index)
-			m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
-		else
-#endif
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
-
-		m_thread->setLogToStdout(false);
 
 		m_irqInterruptDone = dsp().registerInterruptFunc([this]
 		{
@@ -150,6 +127,23 @@ namespace n2x
 	void DSP::join() const
 	{
 		m_thread->join();
+	}
+
+	void DSP::onDspBootFinished()
+	{
+		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		{
+			hdiTransferUCtoDSP(_word);
+		});
+
+#if DSP56300_DEBUGGER
+		if(!m_index)
+			m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
+		else
+#endif
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
+
+		m_thread->setLogToStdout(false);
 	}
 
 	void DSP::onUCRxEmpty(const bool _needMoreData)

@@ -4,6 +4,8 @@
 #include "dsp56kEmu/dspthread.h"
 #include "dsp56kEmu/peripherals.h"
 
+#include "hardwareLib/dspBootCode.h"
+
 #include "wLib/wDsp.h"
 
 namespace mc68k
@@ -21,7 +23,6 @@ namespace xt
 		static constexpr dsp56k::TWord g_bridgedAddr	= 0x020000;	// start of external SRAM, mapped to X and Y
 		static constexpr dsp56k::TWord g_xyMemSize		= 0x800000;	// due to weird AAR mapping we just allocate enough so that everything fits into it
 		static constexpr dsp56k::TWord g_pMemSize		= 0x020000;	// DSP code does not use all of it, gives space for our boot code
-		static constexpr dsp56k::TWord g_bootCodeBase	= 0x010000;
 
 		DSP(Hardware& _hardware, mc68k::Hdi08& _hdiUC, uint32_t _index);
 		void exec();
@@ -50,6 +51,7 @@ namespace xt
 
 		dsp56k::DSPThread& thread() { return *m_thread; }
 		bool haveSentTXToDSP() const { return m_haveSentTXtoDSP; }
+		void onDspBooted();
 
 	private:
 		void onUCRxEmpty(bool _needMoreData);
@@ -72,5 +74,6 @@ namespace xt
 		uint32_t m_hdiHF01 = 0;	// uc => DSP
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
+		hwLib::DspBoot m_boot;
 	};
 }
