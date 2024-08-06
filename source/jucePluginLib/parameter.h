@@ -66,10 +66,10 @@ namespace pluginLib
 
 		float getDefaultValue() const override
 		{
-			return convertTo0to1((float)getDefault());
+			return convertTo0to1(static_cast<float>(getDefault()));
 		}
 
-		virtual uint8_t getDefault() const;
+		virtual ParamValue getDefault() const;
 
 		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
 		{
@@ -114,7 +114,7 @@ namespace pluginLib
 		void setDerivedValue(const int _value);
 		void sendToSynth();
 		static uint64_t milliseconds();
-		void sendParameterChangeDelayed(uint8_t, uint32_t _uniqueId);
+		void sendParameterChangeDelayed(ParamValue _value, uint32_t _uniqueId);
 		void forwardToDerived(const int _newValue);
 
 		int clampValue(int _value) const;
