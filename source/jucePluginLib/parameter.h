@@ -58,11 +58,7 @@ namespace pluginLib
 		bool isBoolean() const override { return m_desc.isBool; }
 		bool isBipolar() const { return m_desc.isBipolar; }
 
-		float getValueForText(const juce::String &text) const override
-		{
-			const auto res = m_desc.valueList.textToValue(std::string(text.getCharPointer()));
-			return convertTo0to1(static_cast<float>(res));
-		}
+		float getValueForText(const juce::String& _text) const override;
 
 		float getDefaultValue() const override
 		{
@@ -71,11 +67,7 @@ namespace pluginLib
 
 		virtual ParamValue getDefault() const;
 
-		juce::String getText(float normalisedValue, int /*maximumStringLength*/) const override
-		{
-			const auto v = convertFrom0to1(normalisedValue);
-			return m_desc.valueList.valueToText(juce::roundToInt(v));
-		}
+		juce::String getText(float _normalisedValue, int /*maximumStringLength*/) const override;
 
 		void setLocked(bool _locked);
 		bool isLocked() const { return m_isLocked; }

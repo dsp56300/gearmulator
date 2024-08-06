@@ -226,11 +226,25 @@ namespace pluginLib
 		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
 	}
 
+	float Parameter::getValueForText(const juce::String& _text) const
+	{
+		auto res = m_desc.valueList.textToValue(std::string(_text.getCharPointer()));
+		if(m_desc.range.getStart() < 0)
+			res += m_desc.range.getStart();
+		return convertTo0to1(static_cast<float>(res));
+	}
+
 	ParamValue Parameter::getDefault() const
 	{
 		if(m_desc.defaultValue != Description::NoDefaultValue)
 			return m_desc.defaultValue;
 		return 0;
+	}
+
+	juce::String Parameter::getText(const float _normalisedValue, int _i) const
+	{
+		const auto v = convertFrom0to1(_normalisedValue);
+		return m_desc.valueList.valueToText(juce::roundToInt(v) - std::min(0, m_desc.range.getStart()));
 	}
 
 	void Parameter::setLocked(const bool _locked)
