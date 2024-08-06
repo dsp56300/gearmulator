@@ -216,9 +216,11 @@ namespace virusLib
 
 				if(model == DeviceModel::Invalid)
 				{
-					assert(false && "retry model detection for debugging purposes below");
+					// disable load if model is not detected, because we now have other synths that have roms of the same size
+//					assert(false && "retry model detection for debugging purposes below");
 					detectModel(fd.data);
-					model = _model;	// Must be based on DSP 56362 or hell breaks loose
+					continue;
+//					model = _model;	// Must be based on DSP 56362 or hell breaks loose
 				}
 			}
 

@@ -7,9 +7,9 @@
 
 namespace mqLib
 {
-	Hardware::Hardware(const std::string& _romFilename)
+	Hardware::Hardware(const ROM& _rom)
 		: wLib::Hardware(44100)
-		, m_rom(_romFilename)
+		, m_rom(_rom)
 		, m_uc(m_rom)
 #if MQ_VOICE_EXPANSION
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1) , MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}

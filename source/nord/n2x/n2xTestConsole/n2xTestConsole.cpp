@@ -1,7 +1,6 @@
 #include <iostream>
 
 #include "n2xLib/n2xhardware.h"
-#include "n2xLib/n2xrom.h"
 
 #include "synthLib/wavWriter.h"
 
@@ -14,16 +13,14 @@ namespace n2x
 
 int main()
 {
-	const n2x::Rom rom;
+	std::unique_ptr<n2x::Hardware> hw;
+	hw.reset(new n2x::Hardware());
 
-	if(!rom.isValid())
+	if(!hw->isValid())
 	{
 		std::cout << "Failed to load rom file\n";
 		return -1;
 	}
-
-	std::unique_ptr<n2x::Hardware> hw;
-	hw.reset(new n2x::Hardware());
 
 	hw->getDSPA().getDSPThread().setLogToStdout(true);
 	hw->getDSPB().getDSPThread().setLogToStdout(true);

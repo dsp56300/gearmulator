@@ -15,6 +15,7 @@ set(SOURCES
 	n2xmiditypes.h
 	n2xrom.cpp n2xrom.h
 	n2xromdata.cpp n2xromdata.h
+	n2xromloader.cpp n2xromloader.h
 	n2xstate.cpp n2xstate.h
 	n2xtypes.h
 )

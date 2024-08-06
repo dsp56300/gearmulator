@@ -21,7 +21,7 @@ namespace mqLib
 		static constexpr uint32_t g_dspCount = g_useVoiceExpansion ? 3 : 1;
 
 	public:
-		explicit Hardware(const std::string& _romFilename);
+		explicit Hardware(const ROM& _rom);
 		~Hardware();
 
 		void process();

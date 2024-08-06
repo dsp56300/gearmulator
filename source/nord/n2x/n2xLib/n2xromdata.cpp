@@ -6,18 +6,21 @@
 
 namespace n2x
 {
-	template <uint32_t Size> RomData<Size>::RomData()
+	template <uint32_t Size> RomData<Size>::RomData() : RomData(synthLib::findROM(MySize, MySize))
 	{
-		const auto filename = synthLib::findROM(m_data.size(), m_data.size());
-		if(filename.empty())
+	}
+
+	template <uint32_t Size> RomData<Size>::RomData(const std::string& _filename)
+	{
+		if(_filename.empty())
 			return;
 		std::vector<uint8_t> data;
-		if(!synthLib::readFile(data, filename))
+		if(!synthLib::readFile(data, _filename))
 			return;
 		if(data.size() != m_data.size())
 			return;
 		std::copy(data.begin(), data.end(), m_data.begin());
-		m_filename = filename;
+		m_filename = _filename;
 	}
 
 	template <uint32_t Size> void RomData<Size>::saveAs(const std::string& _filename)

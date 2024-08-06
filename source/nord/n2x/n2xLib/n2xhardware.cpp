@@ -1,5 +1,6 @@
 #include "n2xhardware.h"
 
+#include "n2xromloader.h"
 #include "dsp56kEmu/threadtools.h"
 
 namespace n2x
@@ -11,7 +12,8 @@ namespace n2x
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
 
 	Hardware::Hardware()
-		: m_uc(*this, m_rom)
+		: m_rom(RomLoader::findROM())
+		, m_uc(*this, m_rom)
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)
 		, m_samplerateInv(1.0 / g_samplerate)

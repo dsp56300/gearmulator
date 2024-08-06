@@ -9,5 +9,8 @@ namespace n2x
 	{
 	public:
 		Rom();
+		Rom(const std::string& _filename);
+
+		static bool isValidRom(std::array<uint8_t, g_romSize>& _data);
 	};
 }
