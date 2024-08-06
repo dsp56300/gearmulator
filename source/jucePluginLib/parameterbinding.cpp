@@ -74,6 +74,9 @@ namespace pluginLib
 		if (v->isBipolar()) 
 			_slider.getProperties().set("bipolar", true);
 
+		// Juce bug: If the range changes but the value doesn't, Juce doesn't issue a repaint. Do it manually
+		_slider.repaint();
+
 		const BoundParameter p{v, &_slider, _param, _part};
 		addBinding(p);
 	}
