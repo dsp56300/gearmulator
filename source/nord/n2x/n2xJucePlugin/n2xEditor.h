@@ -22,6 +22,7 @@ namespace n2xJucePlugin
 	class Arp;
 	class Parts;
 	class MasterVolume;
+	class VmMap;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{
@@ -60,6 +61,8 @@ namespace n2xJucePlugin
 		std::unique_ptr<Lcd> m_lcd;
 		std::unique_ptr<MasterVolume> m_masterVolume;
 		std::unique_ptr<Parts> m_parts;
+		std::unique_ptr<VmMap> m_vmMap;
+
 		pluginLib::EventListener<uint8_t> onPartChanged;
 
 		std::array<std::string, 4> m_activePatchNames;

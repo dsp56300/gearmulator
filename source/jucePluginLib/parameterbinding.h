@@ -42,7 +42,7 @@ namespace pluginLib
 		{
 			Parameter* parameter = nullptr;
 			juce::Component* component = nullptr;
-			uint32_t type = 0xffffffff;
+			uint32_t paramIndex = 0xffffffff;
 			uint8_t part = CurrentPart;
 			size_t onChangeListenerId = ParameterListener::InvalidListenerId;
 		};
@@ -62,6 +62,8 @@ namespace pluginLib
 		void bind(juce::Button &_control, uint32_t _param);
 		void bind(juce::Button &_control, uint32_t _param, uint8_t _part);
 
+		bool bind(juce::Component& _component, uint32_t _param, uint8_t _part);
+
 		void clearBindings();
 		void clear();
 		void setPart(uint8_t _part);
@@ -72,6 +74,9 @@ namespace pluginLib
 		const auto& getBindings() const { return m_bindings; }
 		juce::Component* getBoundComponent(const pluginLib::Parameter* _parameter) const;
 		pluginLib::Parameter* getBoundParameter(const juce::Component* _component) const;
+
+		bool unbind(const Parameter* _param);
+		bool unbind(const juce::Component* _component);
 
 	private:
 		void removeMouseListener(juce::Slider& _slider);

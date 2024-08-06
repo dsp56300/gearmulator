@@ -231,6 +231,27 @@ namespace pluginLib
 		addBinding(p);
 	}
 
+	bool ParameterBinding::bind(juce::Component& _component, const uint32_t _param, const uint8_t _part)
+	{
+		if(auto* slider = dynamic_cast<juce::Slider*>(&_component))
+		{
+			bind(*slider, _param, _part);
+			return true;
+		}
+		if(auto* button = dynamic_cast<juce::DrawableButton*>(&_component))
+		{
+			bind(*button, _param, _part);
+			return true;
+		}
+		if(auto* comboBox = dynamic_cast<juce::ComboBox*>(&_component))
+		{
+			bind(*comboBox, _param, _part);
+			return true;
+		}
+		assert(false && "unknown component type");
+		return false;
+	}
+
 	juce::Component* ParameterBinding::getBoundComponent(const Parameter* _parameter) const
 	{
 		const auto it = m_boundParameters.find(_parameter);
@@ -245,6 +266,37 @@ namespace pluginLib
 		if(it == m_boundComponents.end())
 			return nullptr;
 		return it->second;
+	}
+
+	bool ParameterBinding::unbind(const Parameter* _param)
+	{
+		for (auto it= m_bindings.begin(); it != m_bindings.end(); ++it)
+		{
+			if(it->parameter != _param)
+				continue;
+
+			m_bindings.erase(it);
+
+			return true;
+		}
+		return false;
+	}
+
+	bool ParameterBinding::unbind(const juce::Component* _component)
+	{
+		for (auto it= m_bindings.begin(); it != m_bindings.end(); ++it)
+		{
+			if(it->component != _component)
+				continue;
+
+			disableBinding(*it);
+
+			m_disabledBindings.push_back(*it);
+			m_bindings.erase(it);
+
+			return true;
+		}
+		return false;
 	}
 
 	void ParameterBinding::removeMouseListener(juce::Slider& _slider)
@@ -262,27 +314,7 @@ namespace pluginLib
 	void ParameterBinding::bind(const std::vector<BoundParameter>& _bindings, const bool _currentPartOnly)
 	{
 		for (const auto& b : _bindings)
-		{
-			auto* slider = dynamic_cast<juce::Slider*>(b.component);
-			if(slider)
-			{
-				bind(*slider, b.type, b.part);
-				continue;
-			}
-			auto* button = dynamic_cast<juce::DrawableButton*>(b.component);
-			if(button)
-			{
-				bind(*button, b.type, b.part);
-				continue;
-			}
-			auto* comboBox = dynamic_cast<juce::ComboBox*>(b.component);
-			if(comboBox)
-			{
-				bind(*comboBox, b.type, b.part);
-				continue;
-			}
-			assert(false && "unknown component type");
-		}
+			bind(*b.component, b.paramIndex, b.part);
 	}
 
 	void ParameterBinding::addBinding(const BoundParameter& _boundParameter)

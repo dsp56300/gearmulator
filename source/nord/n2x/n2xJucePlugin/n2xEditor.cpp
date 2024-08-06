@@ -10,6 +10,7 @@
 #include "n2xParts.h"
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
+#include "n2xVmMap.h"
 
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
@@ -72,6 +73,7 @@ namespace n2xJucePlugin
 		m_lcd.reset(new Lcd(*this));
 		m_masterVolume.reset(new MasterVolume(*this));
 		m_parts.reset(new Parts(*this));
+		m_vmMap.reset(new VmMap(*this, m_parameterBinding));
 
 		onPartChanged.set(m_controller.onCurrentPartChanged, [this](const uint8_t& _part)
 		{
@@ -115,6 +117,7 @@ namespace n2xJucePlugin
 		m_lcd.reset();
 		m_masterVolume.reset();
 		m_parts.reset();
+		m_vmMap.reset();
 	}
 
 	const char* Editor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
