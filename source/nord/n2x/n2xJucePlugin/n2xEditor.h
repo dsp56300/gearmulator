@@ -16,6 +16,7 @@ namespace pluginLib
 
 namespace n2xJucePlugin
 {
+	class FocusedParameter;
 	class PatchManager;
 	class Controller;
 
@@ -49,6 +50,14 @@ namespace n2xJucePlugin
 
 		void onPatchActivated(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part);
 
+		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
+
+		Lcd& getLCD() const
+		{
+			assert(m_lcd);
+			return *m_lcd.get();
+		}
+
 	private:
 		void onBtSave() const;
 		void onBtPrev() const;
@@ -60,6 +69,7 @@ namespace n2xJucePlugin
 		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Arp> m_arp;
+		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<Lcd> m_lcd;
 		std::unique_ptr<MasterVolume> m_masterVolume;
 		std::unique_ptr<OctLed> m_octLed;

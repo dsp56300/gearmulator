@@ -4,6 +4,7 @@
 
 #include "n2xArp.h"
 #include "n2xController.h"
+#include "n2xFocusedParameter.h"
 #include "n2xLcd.h"
 #include "n2xMasterVolume.h"
 #include "n2xOctLed.h"
@@ -71,6 +72,7 @@ namespace n2xJucePlugin
 		}
 
 		m_arp.reset(new Arp(*this));
+		m_focusedParameter.reset(new FocusedParameter(*this));
 		m_lcd.reset(new Lcd(*this));
 		m_masterVolume.reset(new MasterVolume(*this));
 		m_octLed.reset(new OctLed(*this));
@@ -116,6 +118,7 @@ namespace n2xJucePlugin
 	Editor::~Editor()
 	{
 		m_arp.reset();
+		m_focusedParameter.reset();
 		m_lcd.reset();
 		m_masterVolume.reset();
 		m_octLed.reset();
