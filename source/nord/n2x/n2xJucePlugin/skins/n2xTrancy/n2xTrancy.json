@@ -70,7 +70,7 @@
 				
 				{ "name" : "O2PitchFine",       "parameterAttachment" : { "parameter" : "O2PitchFine" },       "rotary" : { }, "spritesheet" : { "x" : "923", "y" : "377", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 				{ "name" : "O2Pitch",           "parameterAttachment" : { "parameter" : "O2Pitch" },       "rotary" : { }, "spritesheet" : { "x" : "921", "y" : "107", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
-				{ "name" : "O2Pitch_LED",       "parameterAttachment" : { "parameter" : "O2Pitch", "value":60},       "button" : { "isToggle" : "0", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "942", "y" : "27", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" } },                
+				{ "name" : "O2Pitch_LED",       "button" : { "isToggle" : "0", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "942", "y" : "27", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" } },                
 				
 				
 				{ "name" : "O2Waveform_1",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":2},       "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "1101", "y" : "79",  "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70", "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":100 } },                

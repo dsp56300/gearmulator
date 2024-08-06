@@ -7,6 +7,7 @@ set(SOURCES
 	n2xController.cpp n2xController.h
 	n2xEditor.cpp n2xEditor.h
 	n2xMasterVolume.cpp n2xMasterVolume.h
+	n2xOctLed.cpp n2xOctLed.h
 	n2xLcd.cpp n2xLcd.h
 	n2xPart.cpp n2xPart.h
 	n2xParts.cpp n2xParts.h

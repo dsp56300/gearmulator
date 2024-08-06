@@ -18,10 +18,12 @@ namespace n2xJucePlugin
 {
 	class PatchManager;
 	class Controller;
-	class Lcd;
+
 	class Arp;
-	class Parts;
+	class Lcd;
 	class MasterVolume;
+	class OctLed;
+	class Parts;
 	class VmMap;
 
 	class Editor final : public jucePluginEditorLib::Editor
@@ -60,6 +62,7 @@ namespace n2xJucePlugin
 		std::unique_ptr<Arp> m_arp;
 		std::unique_ptr<Lcd> m_lcd;
 		std::unique_ptr<MasterVolume> m_masterVolume;
+		std::unique_ptr<OctLed> m_octLed;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<VmMap> m_vmMap;
 
