@@ -32,7 +32,9 @@ namespace n2xJucePlugin
 		if(m_text == _text)
 			return;
 		m_text = _text;
-		onTextChanged();
+
+		if(m_overrideText.empty())
+			onTextChanged();
 	}
 
 	void Lcd::timerCallback()
@@ -42,14 +44,14 @@ namespace n2xJucePlugin
 		switch(m_animState)
 		{
 		case AnimState::Start:
-			if(updateClippedText(m_text, ++m_currentOffset))
+			if(updateClippedText(getCurrentText(), ++m_currentOffset))
 			{
 				m_animState = AnimState::Scroll;
 				startTimer(g_animDelayScroll);
 			}
 			break;
 		case AnimState::Scroll:
-			if(!updateClippedText(m_text, ++m_currentOffset))
+			if(!updateClippedText(getCurrentText(), ++m_currentOffset))
 			{
 				m_animState = AnimState::End;
 				startTimer(g_animDelayEnd);
@@ -62,7 +64,7 @@ namespace n2xJucePlugin
 		case AnimState::End:
 			m_animState = AnimState::Start;
 			m_currentOffset = 0;
-			updateClippedText(m_text, m_currentOffset);
+			updateClippedText(getCurrentText(), m_currentOffset);
 			startTimer(g_animDelayStart);
 			break;
 		}
@@ -71,6 +73,21 @@ namespace n2xJucePlugin
 	void Lcd::updatePatchName()
 	{
 		onProgramChanged();
+	}
+
+	void Lcd::setOverrideText(const std::string& _text)
+	{
+		std::string t = _text;
+		if(!t.empty())
+		{
+			while(t.size() < 3)
+				t = ' ' + t;
+		}
+
+		if(t == m_overrideText)
+			return;
+		m_overrideText = t;
+		onTextChanged();
 	}
 
 	void Lcd::setClippedText(const std::string& _text)
@@ -128,9 +145,9 @@ namespace n2xJucePlugin
 
 	void Lcd::onTextChanged()
 	{
-		updateClippedText(m_text, 0);
+		updateClippedText(getCurrentText(), 0);
 
-		if(m_clippedText != m_text)
+		if(m_clippedText != getCurrentText())
 		{
 			startAnim();
 		}
@@ -143,5 +160,12 @@ namespace n2xJucePlugin
 	void Lcd::onProgramChanged()
 	{
 		setText(m_editor.getCurrentPatchName());
+	}
+
+	const std::string& Lcd::getCurrentText() const
+	{
+		if(m_overrideText.empty())
+			return m_text;
+		return m_overrideText;
 	}
 }
