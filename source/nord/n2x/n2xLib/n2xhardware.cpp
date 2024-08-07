@@ -17,7 +17,7 @@ namespace n2x
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)
 		, m_samplerateInv(1.0 / g_samplerate)
-		, m_semDspAtoB(1)
+		, m_semDspAtoB(2)
 	{
 		if(!m_rom.isValid())
 			return;
