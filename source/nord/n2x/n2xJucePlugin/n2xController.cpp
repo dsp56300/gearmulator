@@ -161,7 +161,11 @@ namespace n2xJucePlugin
 		onProgramChanged();
 
 		const auto part = m_state.getMultiParam(n2x::SelectedChannel, 0);
-		setCurrentPart(part);
+		if(part < getPartCount())	// if have seen dumps that have invalid stuff in here
+		{
+			// we ignore this for now, is annoying if the selected part changes whenever we load a multi
+//			setCurrentPart(part);
+		}
 
 		return true;
 	}
