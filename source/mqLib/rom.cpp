@@ -1,5 +1,7 @@
 #include "rom.h"
 
+#include <cstring>
+
 namespace mqLib
 {
 	ROM::ROM(const std::string& _filename) : wLib::ROM(_filename, g_romSize)
