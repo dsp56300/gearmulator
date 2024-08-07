@@ -145,47 +145,34 @@ namespace xtJucePlugin
 			return false;
 
 		// check if there are MW1 bank dumps. A bank dump is one sysex with multiple patches. Split them into individual preset dumps
-		static constexpr uint8_t DeviceNum = 0x00;
-		static constexpr uint8_t Mw1BankBegin[] = {0xf0, wLib::IdWaldorf, xt::IdMw1, DeviceNum, xt::Mw1::g_idmPresetBank};
-
 		const int resultCount = static_cast<int>(_results.size());
 
 		for(int r=0; r<resultCount; ++r)
 		{
-			if(_results[r].size() < std::size(Mw1BankBegin))
-				return true;
+			auto& res = _results[r];
 
-			if(0 != memcmp(_results[r].data(), Mw1BankBegin, std::size(Mw1BankBegin)))
-				return true;
+			if(res.size() < xt::Mw1::g_singleDumpLength)
+				continue;
 
-			// yes, MW1 bank dump
+			if(res[0] != 0xf0 || res[1] != wLib::IdWaldorf || res[2] != xt::IdMw1)
+				continue;
 
-			// remove bank from results
-			const auto source = std::move(_results[r]);
-			_results.erase(_results.begin() + r);
-			--r;
-
-			const auto rawDataSize = source.size() - xt::Mw1::g_sysexHeaderSize - xt::Mw1::g_sysexFooterSize;
-			const auto presetCount = rawDataSize / xt::Mw1::g_singleLength;
-
-			size_t readPos = xt::Mw1::g_sysexHeaderSize;
-
-			_results.reserve(presetCount);
-
-			for(size_t i=0; i<presetCount; ++i)
+			auto createPreset = [](pluginLib::patchDB::DataList& _res, const std::vector<uint8_t>& _source, size_t _readPos)
 			{
 				pluginLib::patchDB::Data data;
 
+				constexpr uint8_t deviceNum = 0;
+
 				// create single dump preset header
 				data.reserve(xt::Mw1::g_singleDumpLength);
-				data.assign({0xf0, wLib::IdWaldorf, xt::IdMw1, DeviceNum, xt::Mw1::g_idmPreset});
+				data.assign({0xf0, wLib::IdWaldorf, xt::IdMw1, deviceNum, xt::Mw1::g_idmPreset});
 
 				// add data
 				uint8_t checksum = 0;
 
-				for(size_t j=0; j<xt::Mw1::g_singleLength; ++j, ++readPos)
+				for(size_t j=0; j<xt::Mw1::g_singleLength; ++j, ++_readPos)
 				{
-					const auto d = source[readPos];
+					const auto d = _source[_readPos];
 					checksum += d;
 					data.push_back(d);
 				}
@@ -194,8 +181,39 @@ namespace xtJucePlugin
 				data.push_back(checksum & 0x7f);
 				data.push_back(0xf7);
 
-				_results.push_back(std::move(data));
-			}			
+				_res.push_back(std::move(data));
+				return _readPos;
+			};
+
+			if(res[4] == xt::Mw1::g_idmPresetBank)
+			{
+				// remove bank from results
+				const auto source = std::move(res);
+				_results.erase(_results.begin() + r);
+				--r;
+
+				const auto rawDataSize = source.size() - xt::Mw1::g_sysexHeaderSize - xt::Mw1::g_sysexFooterSize;
+				const auto presetCount = rawDataSize / xt::Mw1::g_singleLength;
+
+				size_t readPos = xt::Mw1::g_sysexHeaderSize;
+
+				_results.reserve(presetCount);
+
+				for(size_t i=0; i<presetCount; ++i)
+					readPos = createPreset(_results, source, readPos);
+			}
+			else if(res[4] == xt::Mw1::g_idmCartridgeBank)
+			{
+				// remove bank from results
+				const auto source = std::move(res);
+				_results.erase(_results.begin() + r);
+				--r;
+
+				size_t readPos = 5;
+				_results.reserve(64);
+				for(size_t p=0; p<64; ++p)
+					readPos = createPreset(_results, source, readPos);
+			}
 		}
 
 		return true;

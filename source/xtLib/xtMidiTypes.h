@@ -172,6 +172,7 @@ namespace xt
 		static constexpr uint32_t g_sysexHeaderSize = 5;
 		static constexpr uint32_t g_sysexFooterSize = 2;
 		static constexpr uint32_t g_idmPresetBank = 0x50;
+		static constexpr uint32_t g_idmCartridgeBank = 0x54;
 		static constexpr uint32_t g_idmPreset = 0x42;
 	};
 
