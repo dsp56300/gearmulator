@@ -2,6 +2,10 @@ Release Notes
 
 1.3.18
 
+Xenia:
+
+- [Fix] Physical midi in/out port selectors didn't work
+
 1.3.17 (2024.08.04)
 
 Framework:

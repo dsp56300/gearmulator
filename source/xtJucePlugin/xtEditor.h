@@ -11,6 +11,7 @@ class Controller;
 
 namespace jucePluginEditorLib
 {
+	class MidiPorts;
 	class FocusedParameter;
 	class Processor;
 }
@@ -62,6 +63,8 @@ namespace xtJucePlugin
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
+
 		WaveEditor* m_waveEditor = nullptr;
 
 		pluginLib::EventListener<bool> m_playModeChangeListener;

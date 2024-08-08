@@ -10,6 +10,8 @@
 #include "xtPatchManager.h"
 #include "xtWaveEditor.h"
 
+#include "jucePluginEditorLib/midiPorts.h"
+
 #include "jucePluginLib/parameterbinding.h"
 
 namespace xtJucePlugin
@@ -119,6 +121,8 @@ namespace xtJucePlugin
 		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
 		waveEditorButtonParent->setVisible(false);
 #endif
+
+		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
 	}
 
 	Editor::~Editor()
