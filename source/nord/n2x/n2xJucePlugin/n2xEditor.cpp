@@ -193,6 +193,11 @@ namespace n2xJucePlugin
 		m_lcd->updatePatchName();
 	}
 
+	void Editor::mouseEnter(const juce::MouseEvent& _ev)
+	{
+		m_focusedParameter->onMouseEnter(_ev);
+	}
+
 	void Editor::onBtSave() const
 	{
 		juce::PopupMenu menu;

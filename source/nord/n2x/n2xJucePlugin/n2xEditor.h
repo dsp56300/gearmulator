@@ -59,6 +59,7 @@ namespace n2xJucePlugin
 		}
 
 	private:
+		void mouseEnter(const juce::MouseEvent& _ev) override;
 		void onBtSave() const;
 		void onBtPrev() const;
 		void onBtNext() const;
