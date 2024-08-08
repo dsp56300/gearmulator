@@ -21,7 +21,7 @@ namespace pluginLib
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 2;
 
-	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties))
+	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties)), m_midiPorts(*this)
 	{
 	}
 
@@ -37,47 +37,14 @@ namespace pluginLib
 		getPlugin().addMidiEvent(ev);
 	}
 
-	juce::MidiOutput *Processor::getMidiOutput() const { return m_midiOutput.get(); }
-	juce::MidiInput *Processor::getMidiInput() const { return m_midiInput.get(); }
-
-	bool Processor::setMidiOutput(const juce::String& _out)
-	{
-		if (m_midiOutput != nullptr && m_midiOutput->isBackgroundThreadRunning())
-		{
-			m_midiOutput->stopBackgroundThread();
-		}
-		m_midiOutput = juce::MidiOutput::openDevice(_out);
-		if (m_midiOutput != nullptr)
-		{
-			m_midiOutput->startBackgroundThread();
-			return true;
-		}
-		return false;
-	}
-
-	bool Processor::setMidiInput(const juce::String& _in)
-	{
-		if (m_midiInput != nullptr)
-		{
-			m_midiInput->stop();
-		}
-		m_midiInput = juce::MidiInput::openDevice(_in, this);
-		if (m_midiInput != nullptr)
-		{
-			m_midiInput->start();
-			return true;
-		}
-		return false;
-	}
-
-	void Processor::handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message)
+	void Processor::handleIncomingMidiMessage(juce::MidiInput *_source, const juce::MidiMessage &_message)
 	{
 		synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
 
-		const auto* raw = message.getSysExData();
+		const auto* raw = _message.getSysExData();
 		if (raw)
 		{
-			const auto count = message.getSysExDataSize();
+			const auto count = _message.getSysExDataSize();
 			auto syx = pluginLib::SysEx();
 			syx.push_back(0xf0);
 			for (int i = 0; i < count; i++)
@@ -92,8 +59,8 @@ namespace pluginLib
 		}
 		else
 		{
-			const auto count = message.getRawDataSize();
-			const auto* rawData = message.getRawData();
+			const auto count = _message.getRawDataSize();
+			const auto* rawData = _message.getRawData();
 			if (count >= 1 && count <= 3)
 			{
 				sm.a = rawData[0];
@@ -225,6 +192,8 @@ namespace pluginLib
 			synthLib::ChunkWriter cw(s, "DSSR", 1);
 			s.write(m_preferredDeviceSamplerate);
 		}
+
+		m_midiPorts.saveChunkData(s);
 	}
 
 	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
@@ -274,6 +243,8 @@ namespace pluginLib
 			const auto sr = _binaryStream.read<float>();
 			setPreferredDeviceSamplerate(sr);
 		});
+
+		m_midiPorts.loadChunkData(_cr);
 	}
 
 	void Processor::readGain(synthLib::BinaryStream& _s)
@@ -582,8 +553,8 @@ namespace pluginLib
 				midiMessages.addEvent(message, 0);
 
 				// additionally send to the midi output we've selected in the editor
-				if (m_midiOutput)
-					m_midiOutput->sendMessageNow(message);
+				if (auto* out = m_midiPorts.getMidiOutput())
+					out->sendMessageNow(message);
 		    }
 		}
 	}

@@ -4,6 +4,7 @@
 #include <juce_audio_devices/juce_audio_devices.h>
 
 #include "controller.h"
+#include "midiports.h"
 
 #include "synthLib/plugin.h"
 
@@ -17,7 +18,7 @@ namespace synthLib
 
 namespace pluginLib
 {
-	class Processor : public juce::AudioProcessor, juce::MidiInputCallback
+	class Processor : public juce::AudioProcessor
 	{
 	public:
 		struct Properties
@@ -34,12 +35,7 @@ namespace pluginLib
 
 		void addMidiEvent(const synthLib::SMidiEvent& ev);
 
-		bool setMidiOutput(const juce::String& _out);
-		juce::MidiOutput* getMidiOutput() const;
-		bool setMidiInput(const juce::String& _in);
-		juce::MidiInput* getMidiInput() const;
-
-		void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
+		void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message);
 
 	    Controller& getController();
 		bool isPluginValid() { return getPlugin().isValid(); }
@@ -106,6 +102,8 @@ namespace pluginLib
 
 		bool rebootDevice();
 
+		auto& getMidiPorts() { return m_midiPorts; }
+
 	protected:
 		void destroyController();
 
@@ -149,9 +147,7 @@ namespace pluginLib
 		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
 		std::unique_ptr<synthLib::Device> m_device;
 		std::unique_ptr<synthLib::Plugin> m_plugin;
-		std::unique_ptr<juce::MidiOutput> m_midiOutput{};
-		std::unique_ptr<juce::MidiInput> m_midiInput{};
-		std::vector<synthLib::SMidiEvent> m_midiOut{};
+		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 	private:
 		const Properties m_properties;
@@ -160,5 +156,6 @@ namespace pluginLib
 		uint32_t m_dspClockPercent = 100;
 		float m_preferredDeviceSamplerate = 0.0f;
 		float m_hostSamplerate = 0.0f;
+		MidiPorts m_midiPorts;
 	};
 }
