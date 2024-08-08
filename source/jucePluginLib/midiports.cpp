@@ -1,6 +1,7 @@
 #include "midiports.h"
 
 #include "processor.h"
+
 #include "juce_audio_devices/juce_audio_devices.h"
 
 namespace pluginLib
@@ -27,9 +28,9 @@ namespace pluginLib
 		return m_midiInput.get();
 	}
 
-	void MidiPorts::saveChunkData(synthLib::BinaryStream& _binaryStream) const
+	void MidiPorts::saveChunkData(baseLib::BinaryStream& _binaryStream) const
 	{
-		synthLib::ChunkWriter cw(_binaryStream, "mpIO", 1);
+		baseLib::ChunkWriter cw(_binaryStream, "mpIO", 1);
 
 		if(m_midiInput)
 			_binaryStream.write(m_midiInput->getIdentifier().toStdString());
@@ -41,9 +42,9 @@ namespace pluginLib
 			_binaryStream.write(std::string());
 	}
 
-	void MidiPorts::loadChunkData(synthLib::ChunkReader& _cr)
+	void MidiPorts::loadChunkData(baseLib::ChunkReader& _cr)
 	{
-		_cr.add("mpIO", 1, [&](synthLib::BinaryStream& _data, uint32_t)
+		_cr.add("mpIO", 1, [&](baseLib::BinaryStream& _data, uint32_t)
 		{
 			const auto input = _data.readString();
 			const auto output = _data.readString();
