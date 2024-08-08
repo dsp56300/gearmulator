@@ -4,75 +4,53 @@
 
 #include "juceUiLib/editor.h"
 
+namespace
+{
+	void initComboBox(juce::ComboBox* _combo, const juce::Array<juce::MidiDeviceInfo>& _entries, const juce::String& _selectedEntry)
+	{
+		int inIndex = 0;
+
+		_combo->addItem("<none>", 1);
+
+		for (int i = 0; i < _entries.size(); i++)
+		{
+			const auto& input = _entries[i];
+
+			if (input.identifier == _selectedEntry)
+				inIndex = i + 1;
+
+			_combo->addItem(input.name, i+2);
+		}
+
+		_combo->setSelectedItemIndex(inIndex, juce::dontSendNotification);
+	}
+}
+
 namespace jucePluginEditorLib
 {
 	MidiPorts::MidiPorts(const genericUI::Editor& _editor, Processor& _processor) : m_processor(_processor)
 	{
-		const auto& properties = m_processor.getConfig();
+		m_midiIn = _editor.findComponentT<juce::ComboBox>("MidiIn", false);
+		m_midiOut = _editor.findComponentT<juce::ComboBox>("MidiOut", false);
 
-		const auto midiIn = properties.getValue("midi_input", "");
-		const auto midiOut = properties.getValue("midi_output", "");
-
-		if (!midiIn.isEmpty())
-			m_processor.setMidiInput(midiIn);
-
-		if (!midiOut.isEmpty())
-			m_processor.setMidiOutput(midiOut);
-
-		m_midiIn = _editor.findComponentT<juce::ComboBox>("MidiIn");
-		m_midiOut = _editor.findComponentT<juce::ComboBox>("MidiOut");
-
-	    m_midiIn->setTextWhenNoChoicesAvailable("-");
-
-		const auto midiInputs = juce::MidiInput::getAvailableDevices();
-
-		int inIndex = 0;
-
-		m_midiIn->addItem("<none>", 1);
-
-		for (int i = 0; i < midiInputs.size(); i++)
+		if(m_midiIn)
 		{
-			const auto input = midiInputs[i];
-
-			if (m_processor.getMidiInput() != nullptr && input.identifier == m_processor.getMidiInput()->getIdentifier())
-				inIndex = i + 1;
-
-			m_midiIn->addItem(input.name, i+2);
+			const auto* in = getMidiPorts().getMidiInput();
+			initComboBox(m_midiIn, juce::MidiInput::getAvailableDevices(), in != nullptr ? in->getIdentifier() : juce::String());
+			m_midiIn->onChange = [this]{ updateMidiInput(m_midiIn->getSelectedItemIndex()); };
 		}
 
-		m_midiIn->setSelectedItemIndex(inIndex, juce::dontSendNotification);
-
-		m_midiIn->onChange = [this]() { updateMidiInput(m_midiIn->getSelectedItemIndex()); };
-
-		m_midiOut->setTextWhenNoChoicesAvailable("-");
-
-		const auto midiOutputs = juce::MidiOutput::getAvailableDevices();
-
-		auto outIndex = 0;
-
-		m_midiOut->addItem("<none>", 1);
-
-		for (int i = 0; i < midiOutputs.size(); i++)
+		if(m_midiOut)
 		{
-			const auto output = midiOutputs[i];
-			if (m_processor.getMidiOutput() != nullptr &&
-				output.identifier == m_processor.getMidiOutput()->getIdentifier())
-			{
-				outIndex = i + 1;
-			}
-			m_midiOut->addItem(output.name, i+2);
+			const auto* out = getMidiPorts().getMidiOutput();
+			initComboBox(m_midiOut, juce::MidiOutput::getAvailableDevices(), out != nullptr ? out->getIdentifier() : juce::String());
+			m_midiOut->onChange = [this]{ updateMidiOutput(m_midiOut->getSelectedItemIndex()); };
 		}
-
-		m_midiOut->setSelectedItemIndex(outIndex, juce::dontSendNotification);
-
-		m_midiOut->onChange = [this]() { updateMidiOutput(m_midiOut->getSelectedItemIndex()); };
-
-		deviceManager = new juce::AudioDeviceManager();
    	}
 
-	MidiPorts::~MidiPorts()
+	pluginLib::MidiPorts& MidiPorts::getMidiPorts() const
 	{
-		delete deviceManager;
+		return m_processor.getMidiPorts();
 	}
 
 	void MidiPorts::showMidiPortFailedMessage(const char* _name) const
@@ -82,71 +60,49 @@ namespace jucePluginEditorLib
 			"Make sure that the device is not already in use by another program.", nullptr, juce::ModalCallbackFunction::create([](int){}));
 	}
 
-	void MidiPorts::updateMidiInput(int index)
+	void MidiPorts::updateMidiInput(int _index) const
 	{
 	    const auto list = juce::MidiInput::getAvailableDevices();
 
-		auto& properties = m_processor.getConfig();
-
-	    if (index <= 0)
+	    if (_index <= 0)
 	    {
-	        properties.setValue("midi_input", "");
-	        properties.save();
-			m_lastInputIndex = 0;
-	        m_midiIn->setSelectedItemIndex(index, juce::dontSendNotification);
+	        m_midiIn->setSelectedItemIndex(_index, juce::dontSendNotification);
 	        return;
 	    }
 
-		index--;
+		_index--;
 
-		const auto newInput = list[index];
+		const auto newInput = list[_index];
 
-	    if (!deviceManager->isMidiInputDeviceEnabled(newInput.identifier))
-	        deviceManager->setMidiInputDeviceEnabled(newInput.identifier, true);
-
-	    if (!m_processor.setMidiInput(newInput.identifier))
+	    if (!getMidiPorts().setMidiInput(newInput.identifier))
 	    {
 			showMidiPortFailedMessage("Input");
 	        m_midiIn->setSelectedItemIndex(0, juce::dontSendNotification);
-	        m_lastInputIndex = 0;
 	        return;
 	    }
 
-	    properties.setValue("midi_input", newInput.identifier);
-	    properties.save();
-
-	    m_midiIn->setSelectedItemIndex(index + 1, juce::dontSendNotification);
-	    m_lastInputIndex = index;
+	    m_midiIn->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
 	}
 
-	void MidiPorts::updateMidiOutput(int index)
+	void MidiPorts::updateMidiOutput(int _index) const
 	{
 	    const auto list = juce::MidiOutput::getAvailableDevices();
 
-		auto& properties = m_processor.getConfig();
-
-	    if (index == 0)
+	    if (_index == 0)
 	    {
-	        properties.setValue("midi_output", "");
-	        properties.save();
-	        m_midiOut->setSelectedItemIndex(index, juce::dontSendNotification);
-	        m_lastOutputIndex = index;
-	        m_processor.setMidiOutput("");
+	        m_midiOut->setSelectedItemIndex(_index, juce::dontSendNotification);
+	        getMidiPorts().setMidiOutput({});
 	        return;
 	    }
-	    index--;
-	    const auto newOutput = list[index];
-	    if (!m_processor.setMidiOutput(newOutput.identifier))
+	    _index--;
+	    const auto newOutput = list[_index];
+	    if (!getMidiPorts().setMidiOutput(newOutput.identifier))
 	    {
 			showMidiPortFailedMessage("Output");
 	        m_midiOut->setSelectedItemIndex(0, juce::dontSendNotification);
-	        m_lastOutputIndex = 0;
 	        return;
 	    }
-	    properties.setValue("midi_output", newOutput.identifier);
-	    properties.save();
-
-	    m_midiOut->setSelectedItemIndex(index + 1, juce::dontSendNotification);
-	    m_lastOutputIndex = index;
+	    
+	    m_midiOut->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
 	}
 }

@@ -14,6 +14,7 @@ set(SOURCES
 	dummydevice.cpp dummydevice.h
 	event.cpp event.h
 	midipacket.cpp midipacket.h
+	midiports.cpp midiports.h
 	parameter.cpp parameter.h
 	parameterbinding.cpp parameterbinding.h
 	parameterdescription.cpp parameterdescription.h
