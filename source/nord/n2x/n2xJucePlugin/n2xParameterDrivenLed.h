@@ -2,6 +2,8 @@
 
 #include "jucePluginLib/parameterlistener.h"
 
+#include <string>
+
 namespace juce
 {
 	class Button;
