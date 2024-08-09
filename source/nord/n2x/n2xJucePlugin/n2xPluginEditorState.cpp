@@ -34,35 +34,9 @@ namespace n2xJucePlugin
 		_menu.addSubMenu("Output Gain", gainMenu);
 	}
 
-	bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
+	bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, const bool _enabled)
 	{
-		jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
-
-		const auto percent = m_processor.getDspClockPercent();
-		const auto hz = m_processor.getDspClockHz();
-
-		juce::PopupMenu clockMenu;
-
-		auto makeEntry = [&](const int _percent)
-		{
-			const auto mhz = hz * _percent / 100 / 1000000;
-			std::stringstream ss;
-			ss << _percent << "% (" << mhz << " MHz)";
-			if(_percent == 100)
-				ss << " (Default)";
-			clockMenu.addItem(ss.str(), _enabled, percent == _percent, [this, _percent] { m_processor.setDspClockPercent(_percent); });
-		};
-
-		makeEntry(50);
-		makeEntry(75);
-		makeEntry(100);
-		makeEntry(125);
-		makeEntry(150);
-		makeEntry(200);
-
-		_menu.addSubMenu("DSP Clock", clockMenu);
-
-		return true;
+		return jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 	}
 
 	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const Skin& _skin)
