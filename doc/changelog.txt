@@ -8,6 +8,10 @@ Framework:
 
 - [Fix] Physical MIDI ports were not opened before GUI was opened
 
+Vavra:
+
+- [Imp] Physical MIDI in/out can now be selected via global context menu
+
 Xenia:
 
 - [Fix] Physical MIDI in/out port selectors didn't work

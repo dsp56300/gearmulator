@@ -3,6 +3,8 @@
 #include "mqEditor.h"
 #include "PluginProcessor.h"
 
+#include "jucePluginEditorLib/midiPorts.h"
+
 #include "synthLib/os.h"
 
 const std::vector<PluginEditorState::Skin> g_includedSkins =
@@ -31,6 +33,8 @@ void PluginEditorState::initContextMenu(juce::PopupMenu& _menu)
 	gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
 	_menu.addSubMenu("Output Gain", gainMenu);
+
+	jucePluginEditorLib::MidiPorts::createMidiPortsMenu(_menu, p.getMidiPorts());
 }
 
 bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled)
