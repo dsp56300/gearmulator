@@ -25,6 +25,7 @@ Xenia:
 
 - [Fix] Do not expose parameters for parts 9-16 as the machine only has 8
 - [Fix] Physical MIDI in/out port selectors didn't work
+- [Fix] LFO 2 rate knob in sync mode adjusting LFO 1 instead of LFO 2
 
 1.3.17 (2024.08.04)
 
