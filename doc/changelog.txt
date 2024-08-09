@@ -17,6 +17,10 @@ NodalRed2x:
 
 - [Fix] Do not attempt to boot a rom that is not for N2x
 
+Vavra:
+
+- [Imp] Physical MIDI in/out can now be selected via global context menu
+
 Xenia:
 
 - [Fix] Do not expose parameters for parts 9-16 as the machine only has 8

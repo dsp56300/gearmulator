@@ -31,10 +31,16 @@ namespace pluginLib
 		MidiPorts& operator = (const MidiPorts&) = delete;
 		MidiPorts& operator = (MidiPorts&&) = delete;
 
-		bool setMidiOutput(const juce::String& _out);
+		auto& getProcessor() const { return m_processor; }
+
 		juce::MidiOutput* getMidiOutput() const;
-		bool setMidiInput(const juce::String& _in);
 		juce::MidiInput* getMidiInput() const;
+
+		bool setMidiOutput(const juce::String& _out);
+		bool setMidiInput(const juce::String& _in);
+
+		juce::String getInputId() const;
+		juce::String getOutputId() const;
 
 		void saveChunkData(baseLib::BinaryStream& _binaryStream) const;
 		void loadChunkData(baseLib::ChunkReader& _cr);

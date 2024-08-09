@@ -28,6 +28,16 @@ namespace pluginLib
 		return m_midiInput.get();
 	}
 
+	juce::String MidiPorts::getInputId() const
+	{
+		return getMidiInput() != nullptr ? getMidiInput()->getIdentifier() : juce::String();
+	}
+
+	juce::String MidiPorts::getOutputId() const
+	{
+		return getMidiOutput() != nullptr ? getMidiOutput()->getIdentifier() : juce::String();
+	}
+
 	void MidiPorts::saveChunkData(baseLib::BinaryStream& _binaryStream) const
 	{
 		baseLib::ChunkWriter cw(_binaryStream, "mpIO", 1);

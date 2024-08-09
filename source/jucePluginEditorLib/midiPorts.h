@@ -2,6 +2,7 @@
 
 namespace pluginLib
 {
+	class Processor;
 	class MidiPorts;
 }
 
@@ -12,6 +13,7 @@ namespace genericUI
 
 namespace juce
 {
+	class PopupMenu;
 	struct MidiDeviceInfo;
 	class String;
 	class AudioDeviceManager;
@@ -27,10 +29,16 @@ namespace jucePluginEditorLib
 	public:
 		explicit MidiPorts(const genericUI::Editor& _editor, Processor& _processor);
 
+		static void createMidiInputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
+		static void createMidiOutputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
+		static void createMidiPortsMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
+
 	private:
 		pluginLib::MidiPorts& getMidiPorts() const;
 
 		void showMidiPortFailedMessage(const char* _name) const;
+		static void showMidiPortFailedMessage(const pluginLib::Processor& _processor, const char* _name);
+
 		void updateMidiInput(int _index) const;
 		void updateMidiOutput(int _index) const;
 
