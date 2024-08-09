@@ -195,8 +195,8 @@
  		{"index":164, "name":"Lfo1Humanize"},
 		 
  		{"index":166, "name":"Lfo2Rate", "default":64},
+ 		{"index":166, "name":"Lfo2RateSync", "step":4, "default":88, "toText":"lfoRateSync"},
  		{"index":167, "name":"Lfo2Shape", "min":0, "max":5, "isDiscrete":true, "toText":"lfoShape"},
- 		{"index":159, "name":"Lfo2RateSync", "step":4, "default":88, "toText":"lfoRateSync"},
 		{"index":168, "name":"Lfo2Delay", "toText":"lfoDelay"},
  		{"index":169, "name":"Lfo2Sync", "min":0 , "max":3, "isDiscrete":true, "toText":"lfoSync"},
  		{"index":170, "name":"Lfo2Symmetry", "isBipolar":true, "toText":"signed"},
