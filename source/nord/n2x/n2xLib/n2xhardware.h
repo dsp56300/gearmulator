@@ -85,9 +85,8 @@ namespace n2x
 		std::unique_ptr<std::thread> m_ucThread;
 		bool m_destroy = false;
 
-
 		// Midi
-		dsp56k::RingBuffer<synthLib::SMidiEvent, 256, true, true> m_midiIn;
+		dsp56k::RingBuffer<synthLib::SMidiEvent, 16384, true> m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
 
 		// DSP slowdown
