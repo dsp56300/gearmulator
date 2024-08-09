@@ -1,29 +1,16 @@
 #pragma once
 
-#include "jucePluginLib/parameterlistener.h"
-
-namespace juce
-{
-	class Button;
-}
+#include "n2xParameterDrivenLed.h"
 
 namespace n2xJucePlugin
 {
-	class Editor;
-
-	class Arp
+	class Arp : ParameterDrivenLed
 	{
 	public:
 		explicit Arp(Editor& _editor);
 
-	private:
-		void bind();
-		void updateStateFromParameter(const pluginLib::Parameter* _parameter) const;
-
-		Editor& m_editor;
-		juce::Button* m_btArpActive;
-		pluginLib::ParameterListener m_onParamChanged;
-		pluginLib::EventListener<uint8_t> m_onCurrentPartChanged;
-		pluginLib::Parameter* m_param = nullptr;
+	protected:
+		bool updateToggleState(const pluginLib::Parameter* _parameter) const override;
+		void onClick(pluginLib::Parameter* _targetParameter, bool _toggleState) override;
 	};
 }
