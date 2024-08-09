@@ -2,10 +2,9 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
-class Controller;
-
 namespace mqJucePlugin
 {
+	class Controller;
 	class Editor;
 
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager

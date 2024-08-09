@@ -12,7 +12,7 @@
 
 using MessageType = virusLib::SysexMessageType;
 
-namespace Virus
+namespace virus
 {
     constexpr const char* g_midiPacketNames[] =
     {

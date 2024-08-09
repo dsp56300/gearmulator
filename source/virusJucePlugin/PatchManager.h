@@ -5,7 +5,7 @@
 
 #include "virusLib/microcontrollerTypes.h"
 
-namespace Virus
+namespace virus
 {
 	class Controller;
 }
@@ -37,6 +37,6 @@ namespace genericVirusUI
 		void addRomPatches();
 		pluginLib::patchDB::DataSource createRomDataSource(uint32_t _bank) const;
 
-		Virus::Controller& m_controller;
+		virus::Controller& m_controller;
 	};
 }

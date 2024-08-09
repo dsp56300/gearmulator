@@ -3,10 +3,10 @@
 #include "jucePluginLib/controller.h"
 #include "n2xLib/n2xstate.h"
 
-class AudioPluginAudioProcessor;
-
 namespace n2xJucePlugin
 {
+	class AudioPluginAudioProcessor;
+
 	class Controller : public pluginLib::Controller
 	{
 	public:

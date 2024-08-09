@@ -2,11 +2,10 @@
 
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
-class Controller;
-
 namespace xtJucePlugin
 {
 	class Editor;
+	class Controller;
 
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{

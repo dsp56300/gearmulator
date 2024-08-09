@@ -7,12 +7,10 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
-#include "synthLib/plugin.h"
-
-class VirusProcessor;
-
-namespace Virus
+namespace virus
 {
+	class VirusProcessor;
+
     class Controller : public pluginLib::Controller
     {
     public:
