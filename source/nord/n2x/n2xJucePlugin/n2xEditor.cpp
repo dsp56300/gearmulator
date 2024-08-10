@@ -32,7 +32,7 @@ namespace n2xJucePlugin
 		{
 			// Init Patch Manager
 			const auto container = findComponent("ContainerPatchManager");
-			constexpr auto scale = 1.0f;
+			constexpr auto scale = 0.8f;
 			const float x = static_cast<float>(container->getX());
 			const float y = static_cast<float>(container->getY());
 			const float w = static_cast<float>(container->getWidth());
