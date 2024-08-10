@@ -190,6 +190,15 @@
         { "name" : "DeviceModel",   "label" : {          "text" : "NL2x",                           "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "175", "y" : "1155", "width" : "100",   "height" : "32" }},
         { "name" : "RomSelector",   "combobox" : {       "text" : "rom.bin",          "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "730", "y" : "1154", "width" : "400",  "height" : "32", "offsetR" : "-60", "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin" }},
     		
-		
+        {
+            "name" : "FocusedParameterTooltip",
+            "label" : {
+                "text" : "", "textHeight" : "30", "fontFile":"DSEG14Classic-BoldItalic","fontName":"Register",
+                "color" : "FF0000FF", "backgroundColor" : "220303ff",
+                "alignH" : "C", "alignV" : "C",
+                "x" : "1385", "y" : "1225", "width" : "80", "height" : "45"
+            },
+            "componentProperties" : {"offsetY" : "25"}
+        }	
 	]
 }
