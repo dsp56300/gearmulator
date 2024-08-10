@@ -12,6 +12,7 @@ set(SOURCES
 	n2xParameterDrivenLed.cpp n2xParameterDrivenLed.h
 	n2xLcd.cpp n2xLcd.h
 	n2xPart.cpp n2xPart.h
+	n2xPartLed.cpp n2xPartLed.h
 	n2xParts.cpp n2xParts.h
 	n2xPatchManager.cpp n2xPatchManager.h
 	n2xPluginEditorState.cpp n2xPluginEditorState.h
