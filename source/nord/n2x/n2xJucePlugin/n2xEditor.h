@@ -16,6 +16,7 @@ namespace pluginLib
 
 namespace n2xJucePlugin
 {
+	class Lfo;
 	class FocusedParameter;
 	class PatchManager;
 	class Controller;
@@ -72,6 +73,7 @@ namespace n2xJucePlugin
 		std::unique_ptr<Arp> m_arp;
 		std::unique_ptr<FocusedParameter> m_focusedParameter;
 		std::unique_ptr<Lcd> m_lcd;
+		std::array<std::unique_ptr<Lfo>, 2> m_lfos;
 		std::unique_ptr<MasterVolume> m_masterVolume;
 		std::unique_ptr<OctLed> m_octLed;
 		std::unique_ptr<Parts> m_parts;

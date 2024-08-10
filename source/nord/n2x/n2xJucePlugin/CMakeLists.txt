@@ -11,6 +11,7 @@ set(SOURCES
 	n2xOctLed.cpp n2xOctLed.h
 	n2xParameterDrivenLed.cpp n2xParameterDrivenLed.h
 	n2xLcd.cpp n2xLcd.h
+	n2xLfo.cpp n2xLfo.h
 	n2xPart.cpp n2xPart.h
 	n2xPartLed.cpp n2xPartLed.h
 	n2xParts.cpp n2xParts.h

@@ -2,6 +2,7 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+#include "n2xLfo.h"
 
 namespace n2xJucePlugin
 {
@@ -26,6 +27,7 @@ namespace n2xJucePlugin
 
 		auto& controller = m_editor.getN2xController();
 
+		// Midi Channel
 		{
 			juce::PopupMenu menuChannel;
 
@@ -50,6 +52,8 @@ namespace n2xJucePlugin
 
 			menu.addSubMenu("Midi Channel", menuChannel);
 		}
+
+		// Output Mode
 		{
 			juce::PopupMenu menuOut;
 
@@ -95,6 +99,42 @@ namespace n2xJucePlugin
 			}
 
 			menu.addSubMenu("Output Mode", menuOut);
+		}
+
+		// LFO Sync
+		{
+			juce::PopupMenu lfoA;
+			juce::PopupMenu lfoB;
+
+			auto createSyncMenu = [this](juce::PopupMenu& _menu, uint8_t _lfoIndex)
+			{
+				const auto paramName = Lfo::getSyncMultiParamName(getPart(), _lfoIndex);
+				auto* param = m_editor.getN2xController().getParameter(paramName, 0);
+				const auto v = param->getUnnormalizedValue();
+
+				auto createEntry = [&_menu, param, v](const char* _name, const uint8_t _v)
+				{
+					_menu.addItem(_name, true, _v == v, [param, _v]
+					{
+						param->setUnnormalizedValueNotifyingHost(_v, pluginLib::Parameter::Origin::Ui);
+					});
+				};
+
+				createEntry("Off", 0);
+				createEntry("2/1", 1);
+				createEntry("1/1", 2);
+				createEntry("1/2", 3);
+				createEntry("1/4", 4);
+				createEntry("1/8", 5);
+				createEntry("1/8.", 6);
+				createEntry("1/16", 7);
+			};
+
+			createSyncMenu(lfoA, 0);
+			createSyncMenu(lfoB, 1);
+
+			menu.addSubMenu("LFO 1 Sync", lfoA);
+			menu.addSubMenu("LFO 2 Sync", lfoB);
 		}
 
 		menu.showMenuAsync({});

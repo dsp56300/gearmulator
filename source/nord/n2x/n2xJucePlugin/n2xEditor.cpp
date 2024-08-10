@@ -6,6 +6,7 @@
 #include "n2xController.h"
 #include "n2xFocusedParameter.h"
 #include "n2xLcd.h"
+#include "n2xLfo.h"
 #include "n2xMasterVolume.h"
 #include "n2xOctLed.h"
 #include "n2xPart.h"
@@ -74,6 +75,8 @@ namespace n2xJucePlugin
 		m_arp.reset(new Arp(*this));
 		m_focusedParameter.reset(new FocusedParameter(*this));
 		m_lcd.reset(new Lcd(*this));
+		for(uint8_t i=0; i<m_lfos.size(); ++i)
+			m_lfos[i].reset(new Lfo(*this, i));
 		m_masterVolume.reset(new MasterVolume(*this));
 		m_octLed.reset(new OctLed(*this));
 		m_parts.reset(new Parts(*this));
@@ -120,6 +123,8 @@ namespace n2xJucePlugin
 		m_arp.reset();
 		m_focusedParameter.reset();
 		m_lcd.reset();
+		for (auto& lfo : m_lfos)
+			lfo.reset();
 		m_masterVolume.reset();
 		m_octLed.reset();
 		m_parts.reset();
