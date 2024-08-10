@@ -28,6 +28,11 @@ namespace n2xJucePlugin
 		};
 	}
 
+	void ParameterDrivenLed::updateState(juce::Button& _target, const pluginLib::Parameter* _source) const
+	{
+		_target.setToggleState(updateToggleState(_source), juce::dontSendNotification);
+	}
+
 	void ParameterDrivenLed::bind()
 	{
 		const auto& c = m_editor.getN2xController();
@@ -49,6 +54,6 @@ namespace n2xJucePlugin
 
 	void ParameterDrivenLed::updateStateFromParameter(const pluginLib::Parameter* _parameter) const
 	{
-		m_led->setToggleState(updateToggleState(_parameter), juce::dontSendNotification);
+		updateState(*m_led, _parameter);
 	}
 }

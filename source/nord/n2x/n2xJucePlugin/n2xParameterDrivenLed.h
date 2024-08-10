@@ -22,6 +22,7 @@ namespace n2xJucePlugin
 		virtual ~ParameterDrivenLed() = default;
 
 	protected:
+		virtual void updateState(juce::Button& _target, const pluginLib::Parameter* _source) const;
 		virtual bool updateToggleState(const pluginLib::Parameter* _parameter) const = 0;
 		virtual void onClick(pluginLib::Parameter* _targetParameter, bool _toggleState) {}
 

@@ -19,6 +19,13 @@ namespace n2xJucePlugin
 		disableClick();
 	}
 
+	void PartLed::updateState(juce::Button& _target, const pluginLib::Parameter* _source) const
+	{
+		ParameterDrivenLed::updateState(_target, _source);
+		const auto ch = _source->getUnnormalizedValue();
+		_target.setAlpha(ch > 0 && ch <= 15 ? 0.5f : 1.0f);
+	}
+
 	bool PartLed::updateToggleState(const pluginLib::Parameter* _parameter) const
 	{
 		return _parameter->getUnnormalizedValue() <= 15;
