@@ -30,19 +30,22 @@ namespace n2xJucePlugin
 			juce::PopupMenu menuChannel;
 
 			const auto mp = static_cast<n2x::MultiParam>(n2x::MultiParam::SlotAMidiChannel + getPart());
-			const auto ch = controller.getMultiParameter(mp);
+			const auto name = std::string("PerfMidiChannel") + static_cast<char>('A' + getPart());
+			auto* param = controller.getParameter(name, 0);
+			const auto ch = param->getUnnormalizedValue();
+
 			for(uint8_t c=0; c<16; ++c)
 			{
-				menuChannel.addItem((std::string("Channel ") + std::to_string(c+1)).c_str(), true, c == ch, [&controller, c, mp]
+				menuChannel.addItem((std::string("Channel ") + std::to_string(c+1)).c_str(), true, c == ch, [param, c]
 				{
-					controller.setMultiParameter(mp, c);
+					param->setUnnormalizedValueNotifyingHost(c, pluginLib::Parameter::Origin::Ui);
 				});
 			}
 
 			menuChannel.addSeparator();
-			menuChannel.addItem("Off", true, ch == 16, [&controller, mp]
+			menuChannel.addItem("Off", true, ch >= 16, [param]
 			{
-				controller.setMultiParameter(mp, 16);
+				param->setUnnormalizedValueNotifyingHost(16, pluginLib::Parameter::Origin::Ui);
 			});
 
 			menu.addSubMenu("Midi Channel", menuChannel);

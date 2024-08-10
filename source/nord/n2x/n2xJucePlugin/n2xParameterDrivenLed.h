@@ -16,7 +16,9 @@ namespace n2xJucePlugin
 	class ParameterDrivenLed
 	{
 	public:
-		explicit ParameterDrivenLed(Editor& _editor, const std::string& _component, const std::string& _parameter);
+		static constexpr uint8_t CurrentPart = 0xff;
+
+		explicit ParameterDrivenLed(Editor& _editor, const std::string& _component, std::string _parameter, uint8_t _part = CurrentPart);
 		virtual ~ParameterDrivenLed() = default;
 
 	protected:
@@ -32,6 +34,7 @@ namespace n2xJucePlugin
 		Editor& m_editor;
 		const std::string m_parameterName;
 		juce::Button* m_led;
+		const uint8_t m_part;
 
 		pluginLib::ParameterListener m_onParamChanged;
 		pluginLib::EventListener<uint8_t> m_onCurrentPartChanged;

@@ -88,10 +88,10 @@
 		{"index":65, "name":"Lfo2Dest", "min":0, "max":8, "isDiscrete":true},
 
 		// MULTI aka Performance
- 		{"class":"NonPartSensitive", "page":10, "index":264, "name":"PerfMidiChannelA", "min":0, "max":15, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":265, "name":"PerfMidiChannelB", "min":0, "max":15, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":266, "name":"PerfMidiChannelC", "min":0, "max":15, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":267, "name":"PerfMidiChannelD", "min":0, "max":15, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":264, "name":"PerfMidiChannelA", "min":0, "max":16, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":265, "name":"PerfMidiChannelB", "min":0, "max":16, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":266, "name":"PerfMidiChannelC", "min":0, "max":16, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":267, "name":"PerfMidiChannelD", "min":0, "max":16, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":268, "name":"PerfLfo1SyncA", "min":0, "max":7, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":269, "name":"PerfLfo1SyncB", "min":0, "max":7, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":270, "name":"PerfLfo1SyncC", "min":0, "max":7, "isDiscrete":true},

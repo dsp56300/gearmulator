@@ -153,7 +153,10 @@ namespace n2xJucePlugin
 
 	genericUI::Button<juce::DrawableButton>* Editor::createJuceComponent(genericUI::Button<juce::DrawableButton>* _button, genericUI::UiObject& _object, const std::string& _name, const juce::DrawableButton::ButtonStyle _buttonStyle)
 	{
-		if(_name == "PerfMidiChannelA" || _name == "PerfMidiChannelB" || _name == "PerfMidiChannelC" || _name == "PerfMidiChannelD")
+		if(	_name == "PerfSlotActiveA" || 
+			_name == "PerfSlotActiveB" || 
+			_name == "PerfSlotActiveC" || 
+			_name == "PerfSlotActiveD")
 			return new Part(*this, _name, _buttonStyle);
 
 		return jucePluginEditorLib::Editor::createJuceComponent(_button, _object, _name, _buttonStyle);

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "n2xPart.h"
+#include "n2xPartLed.h"
 
 #include "jucePluginLib/event.h"
 
@@ -19,6 +20,7 @@ namespace n2xJucePlugin
 		Editor& m_editor;
 
 		std::array<Part*,4> m_parts;
+		std::array<std::unique_ptr<PartLed>,4> m_partLeds;
 		pluginLib::EventListener<uint8_t> onCurrentPartChanged;
 
 	};
