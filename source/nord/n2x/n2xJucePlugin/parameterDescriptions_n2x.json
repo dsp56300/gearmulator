@@ -92,14 +92,14 @@
  		{"class":"NonPartSensitive", "page":10, "index":265, "name":"PerfMidiChannelB", "min":0, "max":16, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":266, "name":"PerfMidiChannelC", "min":0, "max":16, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":267, "name":"PerfMidiChannelD", "min":0, "max":16, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":268, "name":"PerfLfo1SyncA", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":269, "name":"PerfLfo1SyncB", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":270, "name":"PerfLfo1SyncC", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":271, "name":"PerfLfo1SyncD", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":272, "name":"PerfLfo2SyncA", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":273, "name":"PerfLfo2SyncB", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":274, "name":"PerfLfo2SyncC", "min":0, "max":7, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":275, "name":"PerfLfo2SyncD", "min":0, "max":7, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":268, "name":"PerfLfo1SyncA", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":269, "name":"PerfLfo1SyncB", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":270, "name":"PerfLfo1SyncC", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":271, "name":"PerfLfo1SyncD", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":272, "name":"PerfLfo2SyncA", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":273, "name":"PerfLfo2SyncB", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":274, "name":"PerfLfo2SyncC", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
+ 		{"class":"NonPartSensitive", "page":10, "index":275, "name":"PerfLfo2SyncD", "min":0, "max":7, "isDiscrete":true, "toText":"lfoSync"},
  		{"class":"NonPartSensitive", "page":10, "index":276, "name":"PerfFilterEnvTriggerA", "min":0, "max":1, "isBool":true},
  		{"class":"NonPartSensitive", "page":10, "index":277, "name":"PerfFilterEnvTriggerB", "min":0, "max":1, "isBool":true},
  		{"class":"NonPartSensitive", "page":10, "index":278, "name":"PerfFilterEnvTriggerC", "min":0, "max":1, "isBool":true},
@@ -260,6 +260,10 @@
 			"40",	"41",	"42",	"43",	"44",	"45",	"46",	"47",	"48",	"49",	"50",	"51",	"52",	"53",	"54",	"55",	"56",	"57",	"58",	"59",
 			"60",	"61",	"62",	"63",	"64",	"65",	"66",	"67",	"68",	"69",	"70",	"71",	"72",	"73",	"74",	"75",	"76",	"77",	"78",	"79",
 			"80",	"81",	"82",	"83",	"84",	"85",	"86",	"87",	"88",	"89",	"90",	"91",	"92",	"93",	"94",	"95",	"96",	"97",	"98",	"99"
+ 		],
+ 		"lfoSync":
+ 		[
+			"Off", "2/1", "1/1", "1/2", "1/4", "1/8", "1/8.", "1/16"
  		]
 	},
  	"midipackets":
