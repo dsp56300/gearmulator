@@ -10,5 +10,6 @@ namespace n2xJucePlugin
 		explicit OctLed(Editor& _editor);
 	protected:
 		bool updateToggleState(const pluginLib::Parameter* _parameter) const override;
+		void onClick(pluginLib::Parameter* _targetParameter, bool _toggleState) override;
 	};
 }
