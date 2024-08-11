@@ -150,6 +150,7 @@ namespace n2x
 	{
 		if(_needMoreData)
 		{
+			hwLib::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
 			hwLib::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
 
 			while(dsp().hasPendingInterrupts())
@@ -166,10 +167,28 @@ namespace n2x
 
 	void DSP::hdiSendIrqToDSP(const uint8_t _irq)
 	{
+		if(m_hardware.requestingHaltDSPs() && getHaltDSP().isHalting())
+		{
+			// this is a very hacky way to execute a DSP interrupt even though the DSP is halted. This case happens if the DSPs run too fast
+			// and are halted by the sync code, but the UC wants to inject an interrupt, which needs to be executed immediately.
+			// In this case, we execute the interrupt without altering the DSP state
+
+			const auto numOps = dsp().getInstructionCounter();
+			const auto numCycles = dsp().getCycles();
+
+			const auto pc = dsp().getPC();
+			dsp().getJit().exec(_irq);
+			dsp().setPC(pc);
+
+			const_cast<uint32_t&>(dsp().getInstructionCounter()) = numOps;
+			const_cast<uint32_t&>(dsp().getCycles()) = numCycles;
+		}
+		else
 		{
 			dsp().injectExternalInterrupt(_irq);
 			dsp().injectExternalInterrupt(m_irqInterruptDone);
 
+			hwLib::ScopedResumeDSP rA(m_hardware.getDSPA().getHaltDSP());
 			hwLib::ScopedResumeDSP rB(m_hardware.getDSPB().getHaltDSP());
 			m_triggerInterruptDone.wait();
 		}

@@ -33,6 +33,7 @@ namespace n2x
 
 		void haltDSPs();
 		void resumeDSPs();
+		bool requestingHaltDSPs() const { return m_dspHalted; }
 
 		bool getButtonState(ButtonType _type) const;
 		void setButtonState(ButtonType _type, bool _pressed);

@@ -65,6 +65,8 @@ namespace hwLib
 		}
 		m_cvHalted.notify_one();
 
+		m_halting = true;
+
 		// halt and wait for resume or a wakeup call
 		m_blockSem.wait();
 
@@ -88,5 +90,7 @@ namespace hwLib
 			func();
 			m_blockSem.wait();
 		}
+
+		m_halting = false;
 	}
 }

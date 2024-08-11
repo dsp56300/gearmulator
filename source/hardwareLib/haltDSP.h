@@ -21,7 +21,8 @@ namespace hwLib
 		void haltDSP(bool _wait = false);
 		bool resumeDSP();
 
-		bool halted() const {return m_halted > 0; }
+		// only returns true if the last halt request has been serviced
+		bool isHalting() const { return m_halting && m_irqRequestCount == m_irqServedCount; }
 
 		dsp56k::DSP& getDSP() const { return m_dsp; }
 
@@ -46,6 +47,8 @@ namespace hwLib
 		uint32_t m_wakeUpCount = 0;
 
 		std::unordered_map<uint32_t, std::function<void()>> m_wakeUps;
+
+		bool m_halting = false;
 	};
 
 	class ScopedResumeDSP

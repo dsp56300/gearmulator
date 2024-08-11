@@ -319,6 +319,8 @@ namespace n2x
 		if(m_dspHalted)
 			return;
 		m_dspHalted = true;
+//		LOG("Halt");
+		m_dspA.getHaltDSP().haltDSP();
 		m_dspB.getHaltDSP().haltDSP();
 	}
 
@@ -327,6 +329,8 @@ namespace n2x
 		if(!m_dspHalted)
 			return;
 		m_dspHalted = false;
+//		LOG("Resume");
+		m_dspA.getHaltDSP().resumeDSP();
 		m_dspB.getHaltDSP().resumeDSP();
 	}
 
