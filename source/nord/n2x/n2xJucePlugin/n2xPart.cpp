@@ -120,14 +120,11 @@ namespace n2xJucePlugin
 					});
 				};
 
-				createEntry("Off", 0);
-				createEntry("2/1", 1);
-				createEntry("1/1", 2);
-				createEntry("1/2", 3);
-				createEntry("1/4", 4);
-				createEntry("1/8", 5);
-				createEntry("1/8.", 6);
-				createEntry("1/16", 7);
+				const auto& desc = param->getDescription();
+				const auto& range = desc.range;
+
+				for(auto i=range.getStart(); i <= range.getEnd(); ++i)
+					createEntry(desc.valueList.valueToText(i).c_str(), i);
 			};
 
 			createSyncMenu(lfoA, 0);
