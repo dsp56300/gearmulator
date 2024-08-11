@@ -153,13 +153,14 @@ namespace n2x
 			return m_panel.cs6().read16(pa);
 		}
 
+#ifdef _DEBUG
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
 		{
 			assert(false && "keyboard access is unexpected");
 			LOG("Read Keyboard " << HEX(_addr));
 			return 0;
 		}
-
+#endif
 		return Mc68k::read16(_addr);
 	}
 
@@ -190,13 +191,14 @@ namespace n2x
 			return m_panel.cs6().read8(pa);
 		}
 
+#ifdef _DEBUG
 		if(_addr >= g_keyboardAddress && _addr < g_keyboardAddress + g_keyboardSize)
 		{
 			assert(false && "keyboard access is unexpected");
 			LOG("Read Keyboard " << HEX(_addr));
 			return 0;
 		}
-
+#endif
 		return Mc68k::read8(_addr);
 	}
 
