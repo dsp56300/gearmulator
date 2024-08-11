@@ -30,8 +30,8 @@ namespace n2x
 		if(!_rom.isValid())
 			return;
 
-		m_rom = _rom.data();
-		m_ram.fill(0);
+		m_romRam.fill(0);
+		std::copy(std::begin(_rom.data()), std::end(_rom.data()), std::begin(m_romRam));
 
 		m_midi.setSysexDelay(0.0f, 1);
 
@@ -124,41 +124,14 @@ namespace n2x
 
 	uint16_t Microcontroller::readImm16(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)
-		{
-			const auto r = readW(m_rom.data(), _addr);
-//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
-			return r;
-		}
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
-		{
-			const auto r = readW(m_ram.data(), _addr - g_ramAddress);
-//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
-			return r;
-		}
-
-		const auto pa = static_cast<mc68k::PeriphAddress>(_addr);
-
-		assert(!m_hdi08.isInRange(pa));
-		assert(!m_hdi08A.isInRange(pa));
-		assert(!m_hdi08B.isInRange(pa));
-		assert(!m_panel.isInRange(pa));
-
-		return 0;
+		return readW(m_romRam.data(), _addr & (m_romRam.size()-1));
 	}
 
 	uint16_t Microcontroller::read16(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)
+		if(_addr < m_romRam.size())
 		{
-			const auto r = readW(m_rom.data(), _addr);
-//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
-			return r;
-		}
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
-		{
-			const auto r = readW(m_ram.data(), _addr - g_ramAddress);
-//			LOG("read " << HEX(_addr) << "=" << HEXN(r,4));
+			const auto r = readW(m_romRam.data(), _addr);
 			return r;
 		}
 
@@ -192,15 +165,9 @@ namespace n2x
 
 	uint8_t Microcontroller::read8(const uint32_t _addr)
 	{
-		if(_addr < g_romSize)
+		if(_addr < m_romRam.size())
 		{
-			const auto r = m_rom[_addr];
-//			LOG("read " << HEX(_addr) << "=" << HEXN(r,2));
-			return r;
-		}
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
-		{
-			const auto r = m_ram[_addr - g_ramAddress];
+			const auto r = m_romRam[_addr];
 //			LOG("read " << HEX(_addr) << "=" << HEXN(r,2));
 			return r;
 		}
@@ -235,15 +202,10 @@ namespace n2x
 
 	void Microcontroller::write16(const uint32_t _addr, const uint16_t _val)
 	{
-		if(_addr < g_romSize)
+		if(_addr < m_romRam.size())
 		{
-			assert(false);
-			writeW(m_rom.data(), _addr, _val);
-			return;
-		}
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
-		{
-			writeW(m_ram.data(), _addr - g_ramAddress, _val);
+			assert(_addr >= g_ramAddress);
+			writeW(m_romRam.data(), _addr, _val);
 			return;
 		}
 
@@ -286,15 +248,10 @@ namespace n2x
 
 	void Microcontroller::write8(const uint32_t _addr, const uint8_t _val)
 	{
-		if(_addr < g_romSize)
+		if(_addr < m_romRam.size())
 		{
-			assert(false);
-			m_rom[_addr] = _val;
-			return;
-		}
-		if(_addr >= g_ramAddress && _addr < g_ramAddress + g_ramSize)
-		{
-			m_ram[_addr - g_ramAddress] = _val;
+			assert(_addr >= g_ramAddress);
+			m_romRam[_addr] = _val;
 			return;
 		}
 
@@ -360,7 +317,7 @@ namespace n2x
 		if(writeRam)
 		{
 			writeRam = false;
-			synthLib::writeFile("ram_runtime.bin", m_ram);
+			synthLib::writeFile("romRam_runtime.bin", m_romRam);
 		}
 #endif
 		const auto cycles = Mc68k::exec();

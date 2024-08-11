@@ -38,8 +38,9 @@ namespace n2x
 		void write16(uint32_t _addr, uint16_t _val) override;
 		void write8(uint32_t _addr, uint8_t _val) override;
 
-		std::array<uint8_t, g_romSize> m_rom;
-		std::array<uint8_t, g_ramSize> m_ram;
+		// rom at $000000, ram at $100000, dsps at $200000, we use one buffer for both rom and ram and a power of two sized buffer helps with faster access
+		std::array<uint8_t, g_dspBothAddress> m_romRam;
+
 		Flash m_flash;
 
 		Hdi08DspA m_hdi08A;
