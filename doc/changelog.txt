@@ -16,6 +16,10 @@ Xenia:
 
 - [Fix] UI not updating when loading DAW preset
 
+NodalRed2x:
+
+- [Imp] Added physical MIDI port selection to context menu
+
 1.3.18
 
 Framework:

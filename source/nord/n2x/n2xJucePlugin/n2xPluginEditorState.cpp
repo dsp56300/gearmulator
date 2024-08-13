@@ -3,6 +3,8 @@
 #include "n2xEditor.h"
 #include "n2xPluginProcessor.h"
 
+#include "jucePluginEditorLib/midiPorts.h"
+
 #include "synthLib/os.h"
 
 namespace n2xJucePlugin
@@ -32,6 +34,8 @@ namespace n2xJucePlugin
 		gainMenu.addItem("+12 dB", true, gain == 4, [&p] { p.setOutputGain(4); });
 
 		_menu.addSubMenu("Output Gain", gainMenu);
+
+		jucePluginEditorLib::MidiPorts::createMidiPortsMenu(_menu, p.getMidiPorts());
 	}
 
 	bool PluginEditorState::initAdvancedContextMenu(juce::PopupMenu& _menu, const bool _enabled)
