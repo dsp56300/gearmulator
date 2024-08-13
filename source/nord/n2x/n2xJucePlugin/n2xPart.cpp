@@ -50,7 +50,7 @@ namespace n2xJucePlugin
 				param->setUnnormalizedValueNotifyingHost(16, pluginLib::Parameter::Origin::Ui);
 			});
 
-			menu.addSubMenu("Midi Channel", menuChannel);
+			menu.addSubMenu("MIDI Channel", menuChannel);
 		}
 
 		// Output Mode
