@@ -29,6 +29,8 @@ At the moment, the following synthesizers are supported:
 * Osirus: Access Virus A,B,C
 * OsTIrus: Access Virus TI/TI2/Snow
 * Vavra: Waldorf microQ
+* Xenia: Waldorf Microwave II/XT
+* Nodal Red 2x: Clavia Nord Lead/Rack 2x
 
 ### Compiling
 
@@ -52,6 +54,8 @@ Additional options to select which devices to build:
 | gearmulator_SYNTH_OSIRUS | Build Osirus | on |
 | gearmulator_SYNTH_OSTIRUS | Build OsTIrus | on |
 | gearmulator_SYNTH_VAVRA | Build Vavra | on |
+| gearmulator_SYNTH_XENIA | Build Xenia | on |
+| gearmulator_SYNTH_NODALRED2X | Build Nodal Red 2x | on |
 
 ### Join us on Discord
 
