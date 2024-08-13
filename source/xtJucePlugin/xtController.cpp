@@ -166,6 +166,9 @@ namespace xtJucePlugin
 
 	void Controller::onStateLoaded()
 	{
+		sendSysEx(RequestGlobal);
+		sendSysEx(RequestMode);
+		requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 	}
 
 	uint8_t Controller::getPartCount() const
