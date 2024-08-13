@@ -10,7 +10,7 @@ namespace genericVirusUI
 
 	constexpr const char* g_lfoNames[3] = {"Lfo1LedOn", "Lfo2LedOn", "Lfo3LedOn"};
 
-	Leds::Leds(const genericUI::Editor& _editor, VirusProcessor& _processor) : m_processor(_processor), m_logoAnimationEnabled(_processor.getConfig().getBoolValue(g_logoAnimKey, true))
+	Leds::Leds(const genericUI::Editor& _editor, virus::VirusProcessor& _processor) : m_processor(_processor), m_logoAnimationEnabled(_processor.getConfig().getBoolValue(g_logoAnimKey, true))
 	{
 		for(size_t i=0; i<m_lfos.size(); ++i)
 		{

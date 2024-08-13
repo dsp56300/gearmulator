@@ -9,7 +9,7 @@ namespace genericVirusUI
 {
 	FxPage::FxPage(const VirusEditor& _editor)
 	{
-		const auto delayReverbMode = _editor.getController().getParameterIndexByName(Virus::g_paramDelayReverbMode);
+		const auto delayReverbMode = _editor.getController().getParameterIndexByName(virus::g_paramDelayReverbMode);
 		const auto p = _editor.getController().getParamValueObject(delayReverbMode, 0);
 
 		if(!p)

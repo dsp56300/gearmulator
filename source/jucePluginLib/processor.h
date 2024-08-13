@@ -8,10 +8,14 @@
 
 #include "synthLib/plugin.h"
 
-namespace synthLib
+namespace baseLib
 {
 	class BinaryStream;
 	class ChunkReader;
+}
+
+namespace synthLib
+{
 	class Plugin;
 	struct SMidiEvent;
 }
@@ -53,11 +57,11 @@ namespace pluginLib
 		virtual void updateLatencySamples();
 
 		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer);
-		virtual void saveChunkData(synthLib::BinaryStream& s);
+		virtual void saveChunkData(baseLib::BinaryStream& s);
 		virtual bool loadCustomData(const std::vector<uint8_t>& _sourceBuffer);
-		virtual void loadChunkData(synthLib::ChunkReader& _cr);
+		virtual void loadChunkData(baseLib::ChunkReader& _cr);
 
-		void readGain(synthLib::BinaryStream& _s);
+		void readGain(baseLib::BinaryStream& _s);
 
 		template<size_t N> void applyOutputGain(std::array<float*, N>& _buffers, const size_t _numSamples)
 		{
@@ -76,7 +80,7 @@ namespace pluginLib
 			{
 				if (buf)
 				{
-					for (int i = 0; i < _numSamples; ++i)
+					for (size_t i = 0; i < _numSamples; ++i)
 						buf[i] *= _gain;
 				}
 			}
@@ -98,7 +102,7 @@ namespace pluginLib
 
 		const Properties& getProperties() const { return m_properties; }
 
-		virtual void processBpm(float _bpm) {};
+		virtual void processBpm(float _bpm) {}
 
 		bool rebootDevice();
 

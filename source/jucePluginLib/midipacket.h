@@ -9,6 +9,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "types.h"
+
 namespace pluginLib
 {
 	class ParameterDescriptions;
@@ -42,21 +44,27 @@ namespace pluginLib
 
 			std::string paramName;
 			uint8_t paramMask = 0xff;
-			uint8_t paramShift = 0;
+			uint8_t paramShiftRight = 0;	// right shift for unpacking from midi, left for packing
+			uint8_t paramShiftLeft = 0;		// left shift for unpacking from midi, right for packing
 			uint8_t paramPart = AnyPart;
 
 			uint32_t checksumFirstIndex = 0;
 			uint32_t checksumLastIndex = 0;
 			uint8_t checksumInitValue = 0;
 
-			uint8_t getMaskedValue(const uint8_t _unmasked) const
+			uint8_t packValue(const ParamValue _unmasked) const
 			{
-				 return static_cast<uint8_t>((_unmasked & paramMask) << paramShift);
+				 return static_cast<uint8_t>(((_unmasked & paramMask) << paramShiftRight) >> paramShiftLeft);
+			}
+
+			ParamValue unpackValue(const uint8_t _masked) const
+			{
+				return ((_masked << paramShiftLeft) >> paramShiftRight) & paramMask;
 			}
 
 			bool doMasksOverlap(const MidiDataDefinition& _d) const
 			{
-				return (getMaskedValue(0xff) & _d.getMaskedValue(0xff)) != 0;
+				return (packValue(0xff) & _d.packValue(0xff)) != 0;
 			}
 		};
 
@@ -73,9 +81,9 @@ namespace pluginLib
 		};
 
 		using ParamIndices = std::set<ParamIndex>;
-		using ParamValues = std::unordered_map<ParamIndex, uint8_t, ParamIndexHash>;	// part, index => value
-		using AnyPartParamValues = std::vector<std::optional<uint8_t>>;					// index => value
-		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, uint8_t>;		// part, name => value
+		using ParamValues = std::unordered_map<ParamIndex, ParamValue, ParamIndexHash>;	// part, index => value
+		using AnyPartParamValues = std::vector<std::optional<ParamValue>>;				// index => value
+		using NamedParamValues = std::map<std::pair<uint8_t,std::string>, ParamValue>;	// part, name => value
 		using Sysex = std::vector<uint8_t>;
 
 		MidiPacket() = default;
@@ -88,7 +96,7 @@ namespace pluginLib
 		bool create(std::vector<uint8_t>& _dst, const Data& _data) const;
 		bool parse(Data& _data, AnyPartParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool parse(Data& _data, ParamValues& _parameterValues, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
-		bool parse(Data& _data, const std::function<void(ParamIndex, uint8_t)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
+		bool parse(Data& _data, const std::function<void(ParamIndex, ParamValue)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors = true) const;
 		bool getParameterIndices(ParamIndices& _indices, const ParameterDescriptions& _parameters) const;
 		bool getDefinitionsForByteIndex(std::vector<const MidiDataDefinition*>& _result, uint32_t _byteIndex) const;
 		bool getParameterIndicesForByteIndex(std::vector<ParamIndex>& _result, const ParameterDescriptions& _parameters, uint32_t _byteIndex) const;

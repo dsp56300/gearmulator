@@ -2,22 +2,21 @@
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
-//==============================================================================
-class AudioPluginAudioProcessor  : public jucePluginEditorLib::Processor
+namespace xtJucePlugin
 {
-public:
-    AudioPluginAudioProcessor();
-    ~AudioPluginAudioProcessor() override;
+	class AudioPluginAudioProcessor  : public jucePluginEditorLib::Processor
+	{
+	public:
+	    AudioPluginAudioProcessor();
+	    ~AudioPluginAudioProcessor() override;
 
-    jucePluginEditorLib::PluginEditorState* createEditorState() override;
-	// _____________
-	//
-    synthLib::Device* createDevice() override;
+	    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 
-    pluginLib::Controller* createController() override;
+		synthLib::Device* createDevice() override;
 
-private:
+	    pluginLib::Controller* createController() override;
 
-    //==============================================================================
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
-};
+	private:
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AudioPluginAudioProcessor)
+	};
+}

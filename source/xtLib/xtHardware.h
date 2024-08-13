@@ -1,14 +1,13 @@
 #pragma once
 
-#include <string>
-
 #include "xtDSP.h"
 #include "xtRom.h"
 #include "xtUc.h"
 
 #include "dsp56kEmu/dspthread.h"
 
-#include "wLib/wMidi.h"
+#include "hardwareLib/sciMidi.h"
+
 #include "wLib/wHardware.h"
 
 namespace xt
@@ -50,7 +49,7 @@ namespace xt
 
 		void initVoiceExpansion();
 
-		wLib::Midi& getMidi() override
+		hwLib::SciMidi& getMidi() override
 		{
 			return m_midi;
 		}
@@ -70,6 +69,6 @@ namespace xt
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;
 		std::array<DSP,g_dspCount> m_dsps;
-		wLib::Midi m_midi;
+		hwLib::SciMidi m_midi;
 	};
 }

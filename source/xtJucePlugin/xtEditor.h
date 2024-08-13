@@ -6,9 +6,6 @@
 
 #include "jucePluginLib/event.h"
 
-class XtLcd;
-class Controller;
-
 namespace jucePluginEditorLib
 {
 	class MidiPorts;
@@ -27,6 +24,8 @@ namespace xtJucePlugin
 	class FocusedParameter;
 	class FrontPanel;
 	class PatchManager;
+	class XtLcd;
+	class Controller;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{

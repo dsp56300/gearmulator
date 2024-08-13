@@ -6,7 +6,7 @@
 
 #include "dsp56kEmu/types.h"
 
-#include "synthLib/md5.h"
+#include "baseLib/md5.h"
 
 #include "deviceModel.h"
 
@@ -137,7 +137,7 @@ private:
 
 	std::string m_romFileName;
 	std::vector<uint8_t> m_romFileData;
-	synthLib::MD5 m_romDataHash;
+	baseLib::MD5 m_romDataHash;
 };
 
 }

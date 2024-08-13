@@ -16,7 +16,7 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
 		Editor(_processorRef, _binding, std::move(_skinFolder)),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
@@ -180,9 +180,9 @@ namespace genericVirusUI
 		getController().onProgramChange = nullptr;
 	}
 
-	Virus::Controller& VirusEditor::getController() const
+	virus::Controller& VirusEditor::getController() const
 	{
-		return static_cast<Virus::Controller&>(m_processor.getController());
+		return static_cast<virus::Controller&>(m_processor.getController());
 	}
 
 	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size) const
@@ -313,7 +313,7 @@ namespace genericVirusUI
 	{
 		juce::PopupMenu menu;
 
-		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu, getPatchManager()->getCurrentPart());
+		const auto countAdded = getPatchManager()->createSaveMenuEntries(menu);
 
 		if(countAdded)
 			menu.addSeparator();
@@ -393,7 +393,7 @@ namespace genericVirusUI
 
 	void VirusEditor::setPlayMode(uint8_t _playMode)
 	{
-		const auto playMode = getController().getParameterIndexByName(Virus::g_paramPlayMode);
+		const auto playMode = getController().getParameterIndexByName(virus::g_paramPlayMode);
 
 		auto* param = getController().getParameter(playMode);
 		param->setUnnormalizedValueNotifyingHost(_playMode, pluginLib::Parameter::Origin::Ui);

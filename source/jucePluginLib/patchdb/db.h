@@ -98,7 +98,10 @@ namespace pluginLib::patchDB
 		virtual PatchPtr initializePatch(Data&& _sysex) = 0;
 		virtual Data prepareSave(const PatchPtr& _patch) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
-		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const = 0;
+		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const
+		{
+			return _a == _b || _a->hash == _b->hash;
+		}
 		virtual void processDirty(const Dirty& _dirty) const = 0;
 
 	protected:

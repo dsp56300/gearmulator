@@ -2,10 +2,8 @@
 
 #include "virusJucePlugin/VirusEditorState.h"
 
-class VirusProcessor;
-
-class OsirusEditorState : public VirusEditorState
+class OsirusEditorState : public virus::VirusEditorState
 {
 public:
-	explicit OsirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller);
+	explicit OsirusEditorState(virus::VirusProcessor& _processor, pluginLib::Controller& _controller);
 };

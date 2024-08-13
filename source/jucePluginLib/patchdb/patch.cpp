@@ -9,7 +9,7 @@
 
 #include "juce_core/juce_core.h"
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
@@ -43,9 +43,9 @@ namespace pluginLib::patchDB
 		sysex = _patch.sysex;
 	}
 
-	void Patch::write(synthLib::BinaryStream& _s) const
+	void Patch::write(baseLib::BinaryStream& _s) const
 	{
-		synthLib::ChunkWriter chunkWriter(_s, chunks::g_patch, 2);
+		baseLib::ChunkWriter chunkWriter(_s, chunks::g_patch, 2);
 
 		_s.write(name);
 		_s.write(bank);
@@ -66,7 +66,7 @@ namespace pluginLib::patchDB
 		_s.write(sysex);
 	}
 
-	bool Patch::read(synthLib::BinaryStream& _in)
+	bool Patch::read(baseLib::BinaryStream& _in)
 	{
 		auto in = _in.tryReadChunk(chunks::g_patch, 2);
 		if(!in)

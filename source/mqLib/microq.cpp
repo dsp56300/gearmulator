@@ -7,6 +7,7 @@
 #include "dsp56kEmu/threadtools.h"
 
 #include "mqhardware.h"
+#include "romloader.h"
 
 #include "mc68k/logging.h"
 
@@ -14,14 +15,11 @@ namespace mqLib
 {
 	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/)
 	{
-		// create hardware, will use in-memory ROM if no ROM provided
-//		auto romFile = synthLib::findROM(512 * 1024);	// TODO: validate the found ROMs before use, check if it starts with "2.23". Otherwise, a Virus ROM might be found and booted
-//		if(romFile.empty())
-		const auto romFile = synthLib::findFile(".mid", 300 * 1024, 400 * 1024);
-		if(romFile.empty())
+		const auto romFile = RomLoader::findROM();
+		if(!romFile.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Failed to find device operating system file mq_2_23.mid.");
 
-		MCLOG("Boot using ROM " << romFile);
+		MCLOG("Boot using ROM " << romFile.getFilename());
 
 		m_hw.reset(new Hardware(romFile));
 

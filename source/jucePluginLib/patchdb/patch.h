@@ -9,7 +9,7 @@
 #include "tags.h"
 #include "patchdbtypes.h"
 
-namespace synthLib
+namespace baseLib
 {
 	class BinaryStream;
 }
@@ -33,8 +33,8 @@ namespace pluginLib::patchDB
 
 		void replaceData(const Patch& _patch);
 
-		void write(synthLib::BinaryStream& _s) const;
-		bool read(synthLib::BinaryStream& _in);
+		void write(baseLib::BinaryStream& _s) const;
+		bool read(baseLib::BinaryStream& _in);
 
 		bool operator == (const PatchKey& _key) const;
 		bool operator != (const PatchKey& _key) const

@@ -138,31 +138,62 @@ namespace jucePluginEditorLib
 	{
 		m_patchManager.reset(_patchManager);
 
-		if(_patchManager && !m_instanceConfig.empty())
-			m_patchManager->setPerInstanceConfig(m_instanceConfig);
+		if(_patchManager && !m_patchManagerConfig.empty())
+			m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
 	}
 
 	void Editor::setPerInstanceConfig(const std::vector<uint8_t>& _data)
 	{
-		m_instanceConfig = _data;
+		{
+			// test if its an old version that didn't use chunks yet
+			pluginLib::PluginStream oldStream(_data);
+			const auto version = oldStream.read<uint32_t>();
 
-		if(m_patchManager)
-			m_patchManager->setPerInstanceConfig(_data);
+			if(version == 1)
+			{
+				m_patchManagerConfig = _data;
+				if(m_patchManager)
+					m_patchManager->setPerInstanceConfig(_data);
+				return;
+			}
+		}
+
+		baseLib::BinaryStream s(_data);
+		baseLib::ChunkReader cr(s);
+		loadChunkData(cr);
+		cr.read();
+	}
+
+	void Editor::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("pmDt", 2, [this](baseLib::BinaryStream& _s, uint32_t/* _version*/)
+		{
+			m_patchManagerConfig.clear();
+			_s.read(m_patchManagerConfig);
+			if(m_patchManager)
+				m_patchManager->setPerInstanceConfig(m_patchManagerConfig);
+		});
 	}
 
 	void Editor::getPerInstanceConfig(std::vector<uint8_t>& _data)
 	{
-		if(m_patchManager)
-		{
-			m_instanceConfig.clear();
-			m_patchManager->getPerInstanceConfig(m_instanceConfig);
-		}
-
-		if(!m_instanceConfig.empty())
-			_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+		baseLib::BinaryStream s;
+		saveChunkData(s);
+		s.toVector(_data);
 	}
 
-	void Editor::setCurrentPart(uint8_t _part)
+	void Editor::saveChunkData(baseLib::BinaryStream& _s)
+	{
+		if(m_patchManager)
+		{
+			m_patchManagerConfig.clear();
+			m_patchManager->getPerInstanceConfig(m_patchManagerConfig);
+		}
+		baseLib::ChunkWriter cw(_s, "pmDt", 2);
+		_s.write(m_patchManagerConfig);
+	}
+
+	void Editor::setCurrentPart(const uint8_t _part)
 	{
 		genericUI::Editor::setCurrentPart(_part);
 
@@ -442,7 +473,7 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
-	bool Editor::setParameters(const std::map<std::string, uint8_t>& _paramValues) const
+	bool Editor::setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const
 	{
 		if(_paramValues.empty())
 			return false;

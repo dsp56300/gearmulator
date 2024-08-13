@@ -92,6 +92,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			CLAP_FEATURES ${clapFeatures}
 			CLAP_SUPPORT_URL "https://dsp56300.wordpress.com"
 			CLAP_MANUAL_URL "https://dsp56300.wordpress.com"
+			CLAP_USE_JUCE_PARAMETER_RANGES "DISCRETE"
 			)
 		set_property(TARGET ${targetName}_CLAP PROPERTY FOLDER ${targetName})
 		add_dependencies(${targetName}_All ${targetName}_CLAP)

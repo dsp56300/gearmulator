@@ -1,6 +1,6 @@
 #pragma once
 
-#include "wLib/lcd.h"
+#include "hardwareLib/lcd.h"
 
 namespace mc68k
 {
@@ -9,7 +9,7 @@ namespace mc68k
 
 namespace mqLib
 {
-	class LCD : public wLib::LCD
+	class LCD : public hwLib::LCD
 	{
 	public:
 		bool exec(mc68k::Port& _portGp, const mc68k::Port& _portF);

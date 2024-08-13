@@ -29,7 +29,10 @@ namespace pluginLib
 	class ParameterBinding;
 }
 
-class VirusProcessor;
+namespace virus
+{
+	class VirusProcessor;
+}
 
 namespace genericVirusUI
 {
@@ -45,14 +48,14 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder);
+		VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);
 
 		pluginLib::ParameterBinding& getParameterBinding() const { return m_parameterBinding; }
 
-		Virus::Controller& getController() const;
+		virus::Controller& getController() const;
 
 		const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size) const;
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
@@ -84,7 +87,7 @@ namespace genericVirusUI
 		void savePresets(SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0);
 		bool savePresets(const std::string& _pathName, SaveType _saveType, jucePluginEditorLib::FileType _fileType, uint8_t _bankNumber = 0) const;
 
-		VirusProcessor& m_processor;
+		virus::VirusProcessor& m_processor;
 		pluginLib::ParameterBinding& m_parameterBinding;
 
 		std::unique_ptr<Parts> m_parts;

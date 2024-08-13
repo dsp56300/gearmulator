@@ -57,9 +57,9 @@ namespace genericUI
 			juce::Justification a = 0;
 			switch (alignH[0])
 			{
-			case 'L':	a = juce::Justification::left;				break;
+			case 'L':	a = juce::Justification::left;					break;
 			case 'C':	a = juce::Justification::horizontallyCentred;	break;
-			case 'R':	a = juce::Justification::right;				break;
+			case 'R':	a = juce::Justification::right;					break;
 			}
 			m_align = a;
 		}
@@ -71,7 +71,7 @@ namespace genericUI
 			switch (alignV[0])
 			{
 			case 'T':	a = juce::Justification::top;					break;
-			case 'C':	a = juce::Justification::verticallyCentred;	break;
+			case 'C':	a = juce::Justification::verticallyCentred;		break;
 			case 'B':	a = juce::Justification::bottom;				break;
 			}
 			m_align = m_align.getFlags() | a.getFlags();
@@ -89,6 +89,11 @@ namespace genericUI
 		m_offsetT = _object.getPropertyInt("offsetT", 1);
 		m_offsetR = _object.getPropertyInt("offsetR", -30);
 		m_offsetB = _object.getPropertyInt("offsetB", -2);
+
+		m_hitAreaOffset.setX(_object.getPropertyInt("hitOffsetL", 0));
+		m_hitAreaOffset.setY(_object.getPropertyInt("hitOffsetT", 0));
+		m_hitAreaOffset.setWidth(_object.getPropertyInt("hitOffsetR", 0));
+		m_hitAreaOffset.setHeight(_object.getPropertyInt("hitOffsetB", 0));
 	}
 
 	std::optional<juce::Font> UiObjectStyle::getFont() const

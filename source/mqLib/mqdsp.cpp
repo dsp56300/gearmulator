@@ -8,8 +8,6 @@
 
 #include "mc68k/hdi08.h"
 
-#include "wLib/dspBootCode.h"
-
 #include "dsp56kEmu/aar.h"
 
 namespace mqLib
@@ -24,6 +22,7 @@ namespace mqLib
 	, m_periphX(nullptr)
 	, m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr, m_memoryBuffer)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
+	, m_boot(m_dsp)
 	{
 		if(!_hardware.isValid())
 			return;
@@ -54,25 +53,6 @@ namespace mqLib
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
-		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
-		for(uint32_t i=0; i<std::size(wLib::g_dspBootCode); ++i)
-		{
-			uint32_t code = wLib::g_dspBootCode[i];
-			if((wLib::g_dspBootCode[i] & 0xffff00) == 0xff0000)
-			{
-				code = g_bootCodeBase | (wLib::g_dspBootCode[i] & 0xff);
-			}
-
-			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
-			m_dsp.getJit().notifyProgramMemWrite(i + g_bootCodeBase);
-		}
-
-//		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(g_dspBootCode)), true, true, &m_periphX, nullptr);
-
-		// set OMR pins so that bootcode wants program data via HDI08 RX
-		m_dsp.setPC(g_bootCodeBase);
-		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
-
 		getPeriph().disableTimers(true);	// only used to test DSP load, we report 0 all the time for now
 
 		m_periphX.getEsai().writeEmptyAudioIn(8);
@@ -86,7 +66,8 @@ namespace mqLib
 		});
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
 		{
-			hdiTransferUCtoDSP(_word);
+			if(m_boot.hdiWriteTX(_word))
+				onDspBootFinished();
 		});
 		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
 		{
@@ -96,14 +77,6 @@ namespace mqLib
 		{
 			return hdiUcReadIsr(_isr);
 		});
-
-#if DSP56300_DEBUGGER
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
-#else
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
-#endif
-
-		m_thread->setLogToStdout(false);
 	}
 
 	void MqDsp::exec()
@@ -137,6 +110,22 @@ namespace mqLib
 			m_hdiHF01 = hf01;
 			hdi08().setPendingHostFlags01(hf01);
 		}
+	}
+
+	void MqDsp::onDspBootFinished()
+	{
+		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		{
+			hdiTransferUCtoDSP(_word);
+		});
+
+#if DSP56300_DEBUGGER
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
+#else
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
+#endif
+
+		m_thread->setLogToStdout(false);
 	}
 
 	void MqDsp::onUCRxEmpty(bool _needMoreData)

@@ -7,12 +7,10 @@
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
-#include "synthLib/plugin.h"
-
-class VirusProcessor;
-
-namespace Virus
+namespace virus
 {
+	class VirusProcessor;
+
     class Controller : public pluginLib::Controller
     {
     public:
@@ -128,7 +126,7 @@ namespace Virus
 		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
         void onStateLoaded() override;
 
-		uint8_t getPartCount() override;
+		uint8_t getPartCount() const override;
 
 		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
@@ -144,7 +142,7 @@ namespace Virus
     	bool requestArrangement() const;
 		void requestRomBanks();
         
-		void sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value) override;
+		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
 		bool sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const;
 
         using pluginLib::Controller::sendSysEx;

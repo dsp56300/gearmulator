@@ -44,7 +44,7 @@ namespace pluginLib
 
 		std::map<ParamIndex, int> knownParameterIndices;
 
-    	for (uint8_t part = 0; part < 16; part++)
+    	for (uint8_t part = 0; part < getPartCount(); part++)
 		{
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
 
@@ -147,7 +147,7 @@ namespace pluginLib
 			softKnobs.push_back(i);
 		}
 
-		for(size_t part = 0; part<m_paramsByParamType.size(); ++part)
+		for(size_t part = 0; part<getPartCount(); ++part)
 		{
 			for (const auto& softKnobParam : softKnobs)
 			{
@@ -157,10 +157,10 @@ namespace pluginLib
 		}
     }
 
-	void Controller::sendSysEx(const pluginLib::SysEx& msg) const
+	void Controller::sendSysEx(const pluginLib::SysEx& _msg) const
     {
         synthLib::SMidiEvent ev(synthLib::MidiEventSource::Editor);
-        ev.sysex = msg;
+        ev.sysex = _msg;
 		sendMidiEvent(ev);
     }
 
@@ -174,7 +174,7 @@ namespace pluginLib
         m_processor.addMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
 	}
 
-	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const
+	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, ParamValue _value) const
 	{
 		const auto &desc = _parameter.getDescription();
 
@@ -214,7 +214,7 @@ namespace pluginLib
 
 		if (definitions.size() == 1)
 		{
-			_result = _value;
+			_result = static_cast<uint8_t>(_value);
 			return true;
 		}
 
@@ -232,10 +232,24 @@ namespace pluginLib
 
 			auto* p = getParameter(i, _parameter.getPart());
 			const auto v = p == &_parameter ? _value : getParameterValue(p);
-			_result |= it->getMaskedValue(v);
+			_result |= it->packValue(v);
 	    }
 
 		return true;
+	}
+
+	void Controller::applyPatchParameters(const MidiPacket::ParamValues& _params, const uint8_t _part) const
+	{
+		for (const auto& it : _params)
+		{
+			auto* p = getParameter(it.first.second, _part);
+			p->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
+
+			for (const auto& derivedParam : p->getDerivedParameters())
+				derivedParam->setValueFromSynth(it.second, pluginLib::Parameter::Origin::PresetChange);
+		}
+
+		getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 	}
 
 	void Controller::timerCallback()
@@ -245,11 +259,10 @@ namespace pluginLib
 
 	bool Controller::sendSysEx(const std::string& _packetName) const
     {
-	    const std::map<pluginLib::MidiDataType, uint8_t> params;
-        return sendSysEx(_packetName, params);
+        return sendSysEx(_packetName, {});
     }
 
-    bool Controller::sendSysEx(const std::string& _packetName, const std::map<pluginLib::MidiDataType, uint8_t>& _params) const
+    bool Controller::sendSysEx(const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _params) const
     {
 	    std::vector<uint8_t> sysex;
 
@@ -332,7 +345,7 @@ namespace pluginLib
 		return m_descriptions.getIndexByName(index, _name) ? index : InvalidParameterIndex;
 	}
 
-	bool Controller::setParameters(const std::map<std::string, uint8_t>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
+	bool Controller::setParameters(const std::map<std::string, ParamValue>& _values, const uint8_t _part, const Parameter::Origin _changedBy) const
 	{
 		bool res = false;
 
@@ -451,7 +464,7 @@ namespace pluginLib
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
 	}
 
-	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, uint8_t)>& _parameterValues, const std::vector<uint8_t>& _src) const
+	bool Controller::parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, ParamValue)>& _parameterValues, const std::vector<uint8_t>& _src) const
 	{
 		_data.clear();
 		return _packet.parse(_data, _parameterValues, m_descriptions, _src);
@@ -481,6 +494,14 @@ namespace pluginLib
 		return false;
 	}
 
+	void Controller::setCurrentPart(const uint8_t _part)
+	{
+		if(_part == m_currentPart)
+			return;
+		m_currentPart = _part;
+		onCurrentPartChanged(m_currentPart);
+	}
+
 	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)
 	{
 		if(_e.sysex.empty())
@@ -497,14 +518,35 @@ namespace pluginLib
         m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
 	}
 
-	void Controller::loadChunkData(synthLib::ChunkReader& _cr)
+	void Controller::loadChunkData(baseLib::ChunkReader& _cr)
 	{
 		m_parameterLinks.loadChunkData(_cr);
 	}
 
-	void Controller::saveChunkData(synthLib::BinaryStream& s)
+	void Controller::saveChunkData(baseLib::BinaryStream& _s) const
 	{
-		m_parameterLinks.saveChunkData(s);
+		m_parameterLinks.saveChunkData(_s);
+	}
+
+	Parameter::Origin Controller::midiEventSourceToParameterOrigin(const synthLib::MidiEventSource _source)
+	{
+		switch (_source)
+		{
+		case synthLib::MidiEventSource::Unknown:
+			return Parameter::Origin::Unknown;
+		case synthLib::MidiEventSource::Editor:
+			return Parameter::Origin::Ui;
+		case synthLib::MidiEventSource::Host:
+			return Parameter::Origin::HostAutomation;
+		case synthLib::MidiEventSource::PhysicalInput:
+		case synthLib::MidiEventSource::Plugin:
+			return Parameter::Origin::Midi;
+		case synthLib::MidiEventSource::Internal:
+			return Parameter::Origin::Unknown;
+		default:
+			assert(false && "implement new midi event source type");
+			return Parameter::Origin::Unknown;
+		}
 	}
 
 	void Controller::getMidiMessages(std::vector<synthLib::SMidiEvent>& _events)

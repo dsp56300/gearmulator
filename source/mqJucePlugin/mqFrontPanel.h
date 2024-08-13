@@ -7,10 +7,9 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-class Controller;
-
 namespace mqJucePlugin
 {
+	class Controller;
 	class Editor;
 
 	class FrontPanel

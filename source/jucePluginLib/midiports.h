@@ -3,7 +3,12 @@
 #include <memory>
 
 #include "juce_audio_devices/juce_audio_devices.h"
-#include "synthLib/binarystream.h"
+
+namespace baseLib
+{
+	class ChunkReader;
+	class BinaryStream;
+}
 
 namespace juce
 {
@@ -37,8 +42,8 @@ namespace pluginLib
 		juce::String getInputId() const;
 		juce::String getOutputId() const;
 
-		void saveChunkData(synthLib::BinaryStream& _binaryStream) const;
-		void loadChunkData(synthLib::ChunkReader& _cr);
+		void saveChunkData(baseLib::BinaryStream& _binaryStream) const;
+		void loadChunkData(baseLib::ChunkReader& _cr);
 
 	private:
 	    void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message) override;

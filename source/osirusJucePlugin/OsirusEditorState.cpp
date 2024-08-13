@@ -8,6 +8,6 @@ const std::vector<jucePluginEditorLib::PluginEditorState::Skin> g_includedSkins 
 	{"Galaxpel", "VirusC_Galaxpel.json", ""}
 };
 
-OsirusEditorState::OsirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller) : VirusEditorState(_processor, _controller, g_includedSkins)
+OsirusEditorState::OsirusEditorState(virus::VirusProcessor& _processor, pluginLib::Controller& _controller) : VirusEditorState(_processor, _controller, g_includedSkins)
 {
 }

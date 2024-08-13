@@ -26,8 +26,8 @@ namespace pluginLib
 		bool unlinkRegion(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest);
 		bool isRegionLinked(const std::string& _regionId, uint8_t _partSource, uint8_t _partDest) const;
 
-		void saveChunkData(synthLib::BinaryStream& s) const;
-		void loadChunkData(synthLib::ChunkReader& _cr);
+		void saveChunkData(baseLib::BinaryStream& s) const;
+		void loadChunkData(baseLib::ChunkReader& _cr);
 
 	private:
 		struct RegionLink

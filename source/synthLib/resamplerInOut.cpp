@@ -171,25 +171,35 @@ namespace synthLib
 
 		auto feedOutput = [&](const TAudioOutputs& _outs, const uint32_t _numProcessedSamples)
 		{
-			m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, m_channelCountIn, _numProcessedSamples, false, feedInput);
+			if(m_channelCountIn)
+				m_scaledInputSize += m_in->process(m_scaledInput, m_scaledInputSize, m_channelCountIn, _numProcessedSamples, false, feedInput);
 
 			clampMidiEvents(m_processedMidiIn, m_midiIn, 0, _numProcessedSamples-1);
 			m_midiIn.clear();
 
 			TAudioInputs inputs;
-			if(_numProcessedSamples > m_scaledInputSize)
+
+			if(m_channelCountIn)
 			{
-				// resampler prewarming, wants more data than we have
-				const auto diff = _numProcessedSamples - m_scaledInputSize;
-				m_scaledInput.insertZeroes(diff);
-				m_scaledInputSize += diff;
-				m_outputLatency += static_cast<uint32_t>(diff);
-				LOG("Resampler output latency " << m_outputLatency << " samples");
+				if(_numProcessedSamples > m_scaledInputSize)
+				{
+					// resampler prewarming, wants more data than we have
+					const auto diff = _numProcessedSamples - m_scaledInputSize;
+					m_scaledInput.insertZeroes(diff);
+					m_scaledInputSize += diff;
+					m_outputLatency += static_cast<uint32_t>(diff);
+					LOG("Resampler output latency " << m_outputLatency << " samples");
+				}
+				m_scaledInput.fillPointers(inputs);
 			}
-			m_scaledInput.fillPointers(inputs);
+
 			_processFunc(inputs, _outs, _numProcessedSamples, m_processedMidiIn, m_midiOut);
-			m_scaledInput.remove(_numProcessedSamples);
-			m_scaledInputSize -= _numProcessedSamples;
+
+			if(m_channelCountIn)
+			{
+				m_scaledInput.remove(_numProcessedSamples);
+				m_scaledInputSize -= _numProcessedSamples;
+			}
 		};
 
 		const auto outputSize = m_out->process(_outputs, m_channelCountOut, _numSamples, false, feedOutput);

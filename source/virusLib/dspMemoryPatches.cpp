@@ -8,7 +8,7 @@ namespace virusLib
 	{
 	};
 
-	void DspMemoryPatches::apply(const DspSingle* _dsp, const synthLib::MD5& _romChecksum)
+	void DspMemoryPatches::apply(const DspSingle* _dsp, const baseLib::MD5& _romChecksum)
 	{
 		if(!_dsp)
 			return;

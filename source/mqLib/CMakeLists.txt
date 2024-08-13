@@ -24,6 +24,7 @@ set(SOURCES
 	lcd.cpp lcd.h
 	leds.cpp leds.h
 	rom.cpp rom.h
+	romloader.cpp romloader.h
 	microq.cpp microq.h
 	mqbuildconfig.h
 	mqdsp.cpp mqdsp.h

@@ -6,12 +6,17 @@ pipeline {
 		booleanParam(name: 'LinuxX86', defaultValue: true, description: '') 
 		booleanParam(name: 'Win', defaultValue: true, description: '') 
 		booleanParam(name: 'Mac', defaultValue: true, description: '')
-		choice(name: 'Branch', choices: ['osirus', 'ostirus', 'vavra'], description: '')
+		choice(name: 'Branch', choices: ['main'], description: '')
 		booleanParam(name: 'FXPlugins', defaultValue: true, description: '')
-		booleanParam(name: 'IntegrationTests', defaultValue: false, description: '')
+		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Deploy', defaultValue: false, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '')
-		choice(name: 'UploadFolder', choices: ['/internal', '', '/alpha', '/beta', '/donators', ''], description: '')
+		choice(name: 'UploadFolder', choices: ['internal', '', 'alpha', 'beta', 'donators', ''], description: '')
+		booleanParam(name: 'SynthOsirus', defaultValue: true, description: '')
+		booleanParam(name: 'SynthOsTIrus', defaultValue: true, description: '')
+		booleanParam(name: 'SynthVavra', defaultValue: true, description: '')
+		booleanParam(name: 'SynthXenia', defaultValue: true, description: '')
+		booleanParam(name: 'SynthNodalRed2x', defaultValue: false, description: '')
 	}
 	stages {
 		stage('Prepare') {
@@ -27,6 +32,11 @@ pipeline {
 					if(params.IntegrationTests)			currentBuild.displayName += " i"
 					if(params.Deploy)					currentBuild.displayName += " d"
 					if(params.Upload)					currentBuild.displayName += " u"
+					if(params.SynthOsirus)			    currentBuild.displayName += " Sabc"
+					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
+					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
+					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
+					if(params.SynthNodalRed2x)		    currentBuild.displayName += " Sn2x"
 
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}"
 				}
@@ -73,8 +83,7 @@ pipeline {
 
 def startBuildJob(label)
 {
-//	  build job: 'dsp56300', parameters: [[$class: 'LabelParameterValue', name: 'Agent', label: "win" ]]
-	build job: 'dsp56300', parameters:
+	build job: 'dsp56300_main', parameters:
 	[
 		[$class: 'StringParameterValue', name: 'AgentLabel', value: "${label}"], 
 		[$class: 'StringParameterValue', name: 'Branch', value: params.Branch], 
@@ -83,5 +92,10 @@ def startBuildJob(label)
 		[$class: 'BooleanParameterValue', name: 'IntegrationTests', value: params.IntegrationTests],
 		[$class: 'BooleanParameterValue', name: 'FXPlugins', value: params.FXPlugins],
 		[$class: 'StringParameterValue', name: 'UploadFolder', value: params.UploadFolder], 
+		[$class: 'BooleanParameterValue', name: 'SynthOsirus', value: params.SynthOsirus],
+		[$class: 'BooleanParameterValue', name: 'SynthOsTIrus', value: params.SynthOsTIrus],
+		[$class: 'BooleanParameterValue', name: 'SynthVavra', value: params.SynthVavra],
+		[$class: 'BooleanParameterValue', name: 'SynthXenia', value: params.SynthXenia],
+		[$class: 'BooleanParameterValue', name: 'SynthNodalRed2x', value: params.SynthNodalRed2x],
 	]
 }

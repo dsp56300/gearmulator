@@ -103,17 +103,6 @@ namespace xtJucePlugin
 		return m_controller.createSingleDump(static_cast<xt::LocationH>(static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank), static_cast<uint8_t>(program), parameterValues);
 	}
 
-	bool PatchManager::equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const
-	{
-		if(_a == _b)
-			return true;
-
-		if(_a->hash == _b->hash)
-			return true;
-
-		return false;
-	}
-
 	uint32_t PatchManager::getCurrentPart() const
 	{
 		return m_editor.getProcessor().getController().getCurrentPart();

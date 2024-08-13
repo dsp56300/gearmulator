@@ -7,16 +7,16 @@
 
 namespace mqLib
 {
-	Hardware::Hardware(const std::string& _romFilename)
+	Hardware::Hardware(const ROM& _rom)
 		: wLib::Hardware(44100)
-		, m_rom(_romFilename)
+		, m_rom(_rom)
 		, m_uc(m_rom)
 #if MQ_VOICE_EXPANSION
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0), MqDsp(*this, m_uc.getHdi08B().getHdi08(), 1) , MqDsp(*this, m_uc.getHdi08C().getHdi08(), 2)}
 #else
 		, m_dsps{MqDsp(*this, m_uc.getHdi08A().getHdi08(), 0)}
 #endif
-		, m_midi(m_uc.getQSM())
+		, m_midi(m_uc.getQSM(), 44100)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);
@@ -207,8 +207,8 @@ namespace mqLib
 
 	void Hardware::setGlobalDefaultParameters()
 	{
-		m_midi.writeMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
-		m_midi.writeMidi({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
+		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x07,0x02,0xf7});	// Control Send = SysEx
+		m_midi.write({0xf0,0x3e,0x10,0x7f,0x24,0x00,0x08,0x01,0xf7});	// Control Receive = on
 		m_bootCompleted = true;
 	}
 

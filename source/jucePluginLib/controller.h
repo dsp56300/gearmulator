@@ -11,6 +11,8 @@
 
 #include "parameterlinks.h"
 
+#include "event.h"
+
 namespace juce
 {
 	class AudioProcessor;
@@ -27,10 +29,12 @@ namespace pluginLib
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
+		Event<uint8_t> onCurrentPartChanged;
+
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
 		~Controller() override;
 
-		virtual void sendParameterChange(const Parameter& _parameter, uint8_t _value) = 0;
+		virtual void sendParameterChange(const Parameter& _parameter, ParamValue _value) = 0;
 		void sendLockedParameters(uint8_t _part);
 
         juce::Value* getParamValueObject(uint32_t _index, uint8_t _part) const;
@@ -40,27 +44,27 @@ namespace pluginLib
 		
         uint32_t getParameterIndexByName(const std::string& _name) const;
 
-		bool setParameters(const std::map<std::string, uint8_t>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
+		bool setParameters(const std::map<std::string, ParamValue>& _values, uint8_t _part, Parameter::Origin _changedBy) const;
 
 		const MidiPacket* getMidiPacket(const std::string& _name) const;
 
 		bool createNamedParamValues(MidiPacket::NamedParamValues& _params, const std::string& _packetName, uint8_t _part) const;
 		bool createNamedParamValues(MidiPacket::NamedParamValues& _dest, const MidiPacket::AnyPartParamValues& _source) const;
-		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const;
-		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const;
-		bool createMidiDataFromPacket(std::vector<uint8_t>& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const;
+		bool createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, uint8_t _part) const;
+		bool createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::NamedParamValues& _values) const;
+		bool createMidiDataFromPacket(SysEx& _sysex, const std::string& _packetName, const std::map<MidiDataType, uint8_t>& _data, const MidiPacket::AnyPartParamValues& _values) const;
 
-		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
-		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::AnyPartParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
-		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, uint8_t)>& _parameterValues, const std::vector<uint8_t>& _src) const;
-		bool parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
-		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const std::vector<uint8_t>& _src) const;
+		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const;
+		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, MidiPacket::AnyPartParamValues& _parameterValues, const SysEx& _src) const;
+		bool parseMidiPacket(const MidiPacket& _packet, MidiPacket::Data& _data, const std::function<void(MidiPacket::ParamIndex, ParamValue)>& _parameterValues, const SysEx& _src) const;
+		bool parseMidiPacket(const std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const;
+		bool parseMidiPacket(std::string& _name, MidiPacket::Data& _data, MidiPacket::ParamValues& _parameterValues, const SysEx& _src) const;
 
 		const auto& getExposedParameters() const { return m_synthParams; }
 
 		uint8_t getCurrentPart() const { return m_currentPart; }
-		void setCurrentPart(const uint8_t _part) { m_currentPart = _part; }
-		virtual uint8_t getPartCount() { return 16; }
+		virtual void setCurrentPart(uint8_t _part);
+		virtual uint8_t getPartCount() const { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
 		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;
@@ -72,8 +76,10 @@ namespace pluginLib
         // this is called by the plug-in on audio thread!
         void enqueueMidiMessages(const std::vector<synthLib::SMidiEvent>&);
 
-		void loadChunkData(synthLib::ChunkReader& _cr);
-		void saveChunkData(synthLib::BinaryStream& s);
+		void loadChunkData(baseLib::ChunkReader& _cr);
+		void saveChunkData(baseLib::BinaryStream& _s) const;
+
+		static Parameter::Origin midiEventSourceToParameterOrigin(synthLib::MidiEventSource _source);
 
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
@@ -106,7 +112,9 @@ namespace pluginLib
 		void sendMidiEvent(const synthLib::SMidiEvent& _ev) const;
 		void sendMidiEvent(uint8_t _a, uint8_t _b, uint8_t _c, uint32_t _offset = 0, synthLib::MidiEventSource _source = synthLib::MidiEventSource::Editor) const;
 
-		bool combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, uint8_t _value) const;
+		bool combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, ParamValue _value) const;
+
+		void applyPatchParameters(const MidiPacket::ParamValues& _params, uint8_t _part) const;
 
 		virtual bool isDerivedParameter(Parameter& _derived, Parameter& _base) const { return true; }
 

@@ -63,10 +63,28 @@ namespace genericUI
 			return m_allowRightClick;
 		}
 
+		bool hitTest (const int _x, const int _y) override
+		{
+			if(!T::hitTest(_x,_y))
+				return false;
+
+			if(_x < m_hitAreaOffset.getX() || _y < m_hitAreaOffset.getY())
+				return false;
+			if(_x > T::getWidth() - m_hitAreaOffset.getWidth() || _y > T::getHeight() - m_hitAreaOffset.getHeight())
+				return false;
+			return true;
+		}
+
+		void setHitAreaOffset(const juce::Rectangle<int>& _offset)
+		{
+			m_hitAreaOffset = _offset;
+		}
+
 		Callback onDown;
 		Callback onUp;
 
 	private:
 		bool m_allowRightClick = false;
+		juce::Rectangle<int> m_hitAreaOffset{0,0,0,0};
 	};
 }
