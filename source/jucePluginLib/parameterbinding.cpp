@@ -169,7 +169,10 @@ namespace pluginLib
 			{
 				v->setUnnormalizedValueNotifyingHost(id - 1, Parameter::Origin::Ui);
 			}
-			v->getValueObject().setValue(id - 1);
+			else
+			{
+				v->setUnnormalizedValue(id - 1, Parameter::Origin::Ui);
+			}
 		};
 
 		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
