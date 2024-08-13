@@ -6,6 +6,10 @@ Framework:
 
 - [Fix] CLAP: Ranges of discrete parameters were not reported properly
 
+Osirus:
+
+- [FIX] FX settings were not restored in Multi Mode
+
 1.3.18
 
 Framework:

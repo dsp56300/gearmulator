@@ -788,9 +788,14 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 					}
 				}
 
+				if(!m_rom.isTIFamily() && page == PAGE_A && m_globalSettings[PLAY_MODE] != PlayModeSingle)
+				{
+					applyToMultiEditBuffer(page, part, param, value);
+				}
+
 				if(page == PAGE_C || (page == PAGE_B && param == CLOCK_TEMPO))
 				{
-					applyToMultiEditBuffer(part, param, value);
+					applyToMultiEditBuffer(page, part, param, value);
 
 					const auto command = static_cast<ControlCommand>(param);
 
@@ -1281,14 +1286,36 @@ void Microcontroller::applyToSingleEditBuffer(TPreset& _single, const Page _page
 	_single[offset] = _value;
 }
 
-void Microcontroller::applyToMultiEditBuffer(const uint8_t _part, const uint8_t _param, const uint8_t _value)
+void Microcontroller::applyToMultiEditBuffer(const Page _page, const uint8_t _part, const uint8_t _param, const uint8_t _value)
 {
-	// remap page C parameters into the multi edit buffer
-	if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT) {
-		m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
-	}
-	else if (_param == CLOCK_TEMPO) {
-		m_multiEditBuffer[MD_CLOCK_TEMPO] = _value;
+	// multi edit buffer duplicates parameters of a single, apply them to the multi edit buffer
+	switch (_page)
+	{
+	case PAGE_A:
+		switch (_param)
+		{
+		case EFFECT_SEND:			m_multiEditBuffer[MD_PART_EFFECT_SEND + _part] = _value;		break;
+		case DELAY_REVERB_MODE:		m_multiEditBuffer[MD_DELAY_MODE] = _value;						break;
+		case DELAY_TIME:			m_multiEditBuffer[MD_DELAY_TIME] = _value;						break;
+		case DELAY_FEEDBACK:		m_multiEditBuffer[MD_DELAY_FEEDBACK] = _value;					break;
+		case DELAY_RATE:			m_multiEditBuffer[MD_DELAY_RATE] = _value;						break;
+		case DELAY_DEPTH:			m_multiEditBuffer[MD_DELAY_DEPTH] = _value;						break;
+		case DELAY_LFO_SHAPE:		m_multiEditBuffer[MD_DELAY_SHAPE] = _value;						break;
+		case DELAY_COLOR:			m_multiEditBuffer[MD_DELAY_COLOR] = _value;						break;
+		}
+		break;
+	case PAGE_B:
+		if (_param == CLOCK_TEMPO)
+		{
+			m_multiEditBuffer[MD_CLOCK_TEMPO] = _value;
+		}
+		break;
+	case PAGE_C:
+		if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT)
+		{
+			m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
+		}
+		break;
 	}
 }
 
