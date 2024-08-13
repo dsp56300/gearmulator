@@ -4,11 +4,13 @@ Release Notes
 
 Framework:
 
-- [Fix] CLAP: Ranges of discrete parameters were not reported properly
+- [Fix] CLAP: Ranges of discrete parameters were not reported properly, 
+        causing automation issues
 
 Osirus:
 
-- [FIX] FX settings were not restored in Multi Mode
+- [Fix] FX settings were not restored in Multi Mode
+- [Fix] Too many waveforms displayed for Oscillator 1/2
 
 1.3.18
 

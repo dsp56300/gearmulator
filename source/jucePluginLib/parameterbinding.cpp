@@ -108,6 +108,7 @@ namespace pluginLib
 
 		const auto& desc = v->getDescription();
 		const auto& valueList = desc.valueList;
+		const auto& range = desc.range;
 
 		if(valueList.order.empty())
 		{
@@ -115,7 +116,7 @@ namespace pluginLib
 			const auto& allValues = v->getAllValueStrings();
 			for (const auto& vs : allValues)
 			{
-				if(vs.isNotEmpty())
+				if(vs.isNotEmpty() && i >= range.getStart() && i <= range.getEnd())
 					sortedValues.emplace_back(i, vs.toStdString());
 				++i;
 			}
@@ -126,6 +127,8 @@ namespace pluginLib
 			{
 				const auto value = valueList.orderToValue(i);
 				if(value == ValueList::InvalidIndex)
+					continue;
+				if(i < range.getStart() || i > range.getEnd())
 					continue;
 				const auto text = valueList.valueToText(value);
 				if(text.empty())
