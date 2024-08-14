@@ -165,8 +165,11 @@ namespace n2x
 	static constexpr uint32_t g_singleDataSize = 66 * 2;											// 66 parameters in two nibbles
 	static constexpr uint32_t g_multiDataSize = 4 * g_singleDataSize + 90 * 2;						// 4 singles and 90 params in two nibbles
 
+	static constexpr uint32_t g_nameLength = 10;	// Aura editor custom format adds 10 bytes for the name
 	static constexpr uint32_t g_singleDumpSize = g_singleDataSize + g_sysexContainerSize;
+	static constexpr uint32_t g_singleDumpWithNameSize = g_singleDumpSize + g_nameLength;
 	static constexpr uint32_t g_multiDumpSize  = g_multiDataSize  + g_sysexContainerSize;
+	static constexpr uint32_t g_multiDumpWithNameSize = g_multiDumpSize + g_nameLength;
 	static constexpr uint32_t g_patchRequestSize = g_sysexContainerSize;
 
 	static constexpr uint32_t g_singleBankCount = 10;

@@ -95,11 +95,11 @@ namespace n2xJucePlugin
 
 	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
-		if(_msg.size() == n2x::g_singleDumpSize)
+		if(n2x::State::isSingleDump(_msg))
 		{
 			return parseSingleDump(_msg);
 		}
-		if(_msg.size() == n2x::g_multiDumpSize)
+		if(n2x::State::isMultiDump(_msg))
 		{
 			return parseMultiDump(_msg);
 		}
@@ -350,8 +350,8 @@ namespace n2xJucePlugin
 		if(_part >= getPartCount())
 			return false;
 
-		const auto isSingle =_sysex.size() == n2x::g_singleDumpSize;
-		const auto isMulti = _sysex.size() == n2x::g_multiDumpSize;
+		const auto isSingle = n2x::State::isSingleDump(_sysex);
+		const auto isMulti = n2x::State::isMultiDump(_sysex);
 
 		if(!isSingle && !isMulti)
 			return false;
