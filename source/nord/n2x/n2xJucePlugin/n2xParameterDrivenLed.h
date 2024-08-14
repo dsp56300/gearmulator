@@ -3,6 +3,7 @@
 #include "jucePluginLib/parameterlistener.h"
 
 #include <string>
+#include <cstdint>
 
 namespace juce
 {
