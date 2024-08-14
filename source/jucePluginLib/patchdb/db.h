@@ -141,9 +141,11 @@ namespace pluginLib::patchDB
 		bool saveJson(const DataSourceNodePtr& _ds);
 		bool saveJson(const juce::File& _target, juce::DynamicObject* _src);
 
+	public:
 		juce::File getJsonFile(const DataSource& _ds) const;
 		juce::File getLocalStorageFile(const DataSource& _ds) const;
 
+	private:
 		bool saveLocalStorage();
 
 		void pushError(std::string _string);

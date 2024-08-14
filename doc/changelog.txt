@@ -4,6 +4,9 @@ Release Notes
 
 Framework:
 
+- [Imp] Patch Manager: Added options to reveal a datasource in the default
+        File Browser of the OS
+
 - [Fix] CLAP: Ranges of discrete parameters were not reported properly, 
         causing automation issues
 - [Fix] Context menu for text edit fields was twice as large as intended
