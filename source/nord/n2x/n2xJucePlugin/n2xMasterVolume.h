@@ -2,6 +2,8 @@
 
 #include "jucePluginLib/event.h"
 
+#include <cstdint>
+
 namespace n2x
 {
 	enum class KnobType;
