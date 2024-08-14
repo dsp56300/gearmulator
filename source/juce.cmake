@@ -142,7 +142,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		else()
 			set(pattern "*.so")
 		endif()
-		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION lib/lv2/ COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
+		if(MSVC OR APPLE)
+			set(dest .)
+		else()
+			set(dest lib/lv2/)
+		endif()
+		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
 	endif()
 
 	if(APPLE AND ${isSynth})

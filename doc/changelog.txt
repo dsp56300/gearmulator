@@ -7,6 +7,7 @@ Framework:
 - [Fix] CLAP: Ranges of discrete parameters were not reported properly, 
         causing automation issues
 - [Fix] Context menu for text edit fields was twice as large as intended
+- [Fix] LV2 plugins were packaged into a a Unix like subfolder for Mac/Win
 
 Osirus:
 
