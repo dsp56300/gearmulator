@@ -1,6 +1,62 @@
 Release Notes 
 
-1.3.17
+1.3.19
+
+Framework:
+
+- [Imp] Patch Manager: Added options to reveal a datasource in the default
+        File Browser of the OS
+
+- [Fix] CLAP: Ranges of discrete parameters were not reported properly, 
+        causing automation issues
+- [Fix] Context menu for text edit fields was twice as large as intended
+- [Fix] LV2 plugins were packaged into a a Unix like subfolder for Mac/Win
+
+Osirus:
+
+- [Fix] FX settings were not restored in Multi Mode
+- [Fix] Too many waveforms displayed for Oscillator 1/2
+
+Xenia:
+
+- [Fix] UI not updating when loading DAW preset
+
+NodalRed2x:
+
+- [Imp] Added Performance & Global settings page
+- [Imp] Added support for physical MIDI ports
+- [Imp] Added support for .nl2 patch dump format that includes patch names
+
+- [Fix] MIDI Program Change messages caused corrupted audio
+
+1.3.18
+
+Framework:
+
+- [Imp] Physical MIDI port selection is now stored per instance
+
+- [Fix] Physical MIDI ports were not opened before GUI was opened
+
+NodalRed2x:
+
+- [Imp] Implement Morph parameters / VM Map button
+- [Imp] Implement Master Volume
+- [Imp] Implement Arp Toggle LED/Button
+- [Imp] Implement Octave LED
+
+- [Fix] Do not attempt to boot a rom that is not for N2x
+
+Vavra:
+
+- [Imp] Physical MIDI in/out can now be selected via global context menu
+
+Xenia:
+
+- [Fix] Do not expose parameters for parts 9-16 as the machine only has 8
+- [Fix] Physical MIDI in/out port selectors didn't work
+- [Fix] LFO 2 rate knob in sync mode adjusting LFO 1 instead of LFO 2
+
+1.3.17 (2024.08.04)
 
 Framework:
 
@@ -21,6 +77,9 @@ Xenia:
 
 - [Fix] Font when renaming a patch was too large
 - [Fix] Microcontroller timing
+- [Fix] Multi parameters were not initialized correctly
+- [Fix] Global channel was not initialized to channel 1 which might have
+        caused issues depending on the used firmware
 
 1.3.16 (2024.07.14)
 

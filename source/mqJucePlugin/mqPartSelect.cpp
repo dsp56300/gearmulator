@@ -4,71 +4,74 @@
 #include "mqEditor.h"
 #include "mqPartButton.h"
 
-mqPartSelect::mqPartSelect(mqJucePlugin::Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
-	: m_editor(_editor)
-	, m_controller(_controller)
-	, m_parameterBinding(_parameterBinding)
+namespace mqJucePlugin
 {
-	std::vector<mqPartButton*> buttons;
-	std::vector<juce::Button*> leds;
-
-	_editor.findComponents(buttons, "partSelectButton", 16);
-	_editor.findComponents(leds, "partSelectLED", 16);
-
-	for(size_t i=0; i<m_parts.size(); ++i)
+	mqPartSelect::mqPartSelect(Editor& _editor, Controller& _controller, pluginLib::ParameterBinding& _parameterBinding)
+		: m_editor(_editor)
+		, m_controller(_controller)
+		, m_parameterBinding(_parameterBinding)
 	{
-		auto& part = m_parts[i];
+		std::vector<mqPartButton*> buttons;
+		std::vector<juce::Button*> leds;
 
-		part.button = buttons[i];
-		part.led = leds[i];
+		_editor.findComponents(buttons, "partSelectButton", 16);
+		_editor.findComponents(leds, "partSelectLED", 16);
 
-		auto index = static_cast<uint8_t>(i);
+		for(size_t i=0; i<m_parts.size(); ++i)
+		{
+			auto& part = m_parts[i];
 
-		part.button->initalize(static_cast<uint8_t>(i));
+			part.button = buttons[i];
+			part.led = leds[i];
 
-		part.led->onClick = [this, index]	{ selectPart(index); };
+			auto index = static_cast<uint8_t>(i);
+
+			part.button->initalize(static_cast<uint8_t>(i));
+
+			part.led->onClick = [this, index]	{ selectPart(index); };
+		}
+
+		updateUiState();
 	}
 
-	updateUiState();
-}
-
-void mqPartSelect::onPlayModeChanged() const
-{
-	if(m_controller.getCurrentPart() > 0)
-		selectPart(0);
-	else
-		updateUiState();
-}
-
-void mqPartSelect::updateUiState() const
-{
-	const auto current = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(0);
-
-	for(size_t i=0; i<m_parts.size(); ++i)
+	void mqPartSelect::onPlayModeChanged() const
 	{
-		const auto& part = m_parts[i];
+		if(m_controller.getCurrentPart() > 0)
+			selectPart(0);
+		else
+			updateUiState();
+	}
 
-		part.button->setToggleState(i == current, juce::dontSendNotification);
-		part.led->setToggleState(i == current, juce::dontSendNotification);
+	void mqPartSelect::updateUiState() const
+	{
+		const auto current = m_controller.isMultiMode() ? m_controller.getCurrentPart() : static_cast<uint8_t>(0);
 
-		if(i > 0)
+		for(size_t i=0; i<m_parts.size(); ++i)
 		{
-			part.button->setVisible(m_controller.isMultiMode());
-			part.led->setVisible(m_controller.isMultiMode());
-			/*
-			part.button->setEnabled(m_controller.isMultiMode());
-			part.led->setEnabled(m_controller.isMultiMode());
+			const auto& part = m_parts[i];
 
-			part.button->setAlpha(1.0f);
-			part.led->setAlpha(1.0f);
-			*/
+			part.button->setToggleState(i == current, juce::dontSendNotification);
+			part.led->setToggleState(i == current, juce::dontSendNotification);
+
+			if(i > 0)
+			{
+				part.button->setVisible(m_controller.isMultiMode());
+				part.led->setVisible(m_controller.isMultiMode());
+				/*
+				part.button->setEnabled(m_controller.isMultiMode());
+				part.led->setEnabled(m_controller.isMultiMode());
+
+				part.button->setAlpha(1.0f);
+				part.led->setAlpha(1.0f);
+				*/
+			}
 		}
 	}
-}
 
-void mqPartSelect::selectPart(const uint8_t _index) const
-{
-	m_parameterBinding.setPart(_index);
-	m_editor.setCurrentPart(_index);
-	updateUiState();
+	void mqPartSelect::selectPart(const uint8_t _index) const
+	{
+		m_parameterBinding.setPart(_index);
+		m_editor.setCurrentPart(_index);
+		updateUiState();
+	}
 }

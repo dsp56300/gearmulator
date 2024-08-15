@@ -2,6 +2,11 @@
 
 namespace genericUI
 {
+	juce::Font LabelStyle::getPopupMenuFont()
+	{
+		return LookAndFeel_V4::getPopupMenuFont();  // NOLINT(bugprone-parent-virtual-call)
+	}
+
 	void LabelStyle::apply(juce::Label& _target) const
 	{
 		if(m_bgColor.getARGB())

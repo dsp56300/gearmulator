@@ -4,20 +4,25 @@
 #include <juce_audio_devices/juce_audio_devices.h>
 
 #include "controller.h"
+#include "midiports.h"
 
 #include "synthLib/plugin.h"
 
-namespace synthLib
+namespace baseLib
 {
 	class BinaryStream;
 	class ChunkReader;
+}
+
+namespace synthLib
+{
 	class Plugin;
 	struct SMidiEvent;
 }
 
 namespace pluginLib
 {
-	class Processor : public juce::AudioProcessor, juce::MidiInputCallback
+	class Processor : public juce::AudioProcessor
 	{
 	public:
 		struct Properties
@@ -34,12 +39,7 @@ namespace pluginLib
 
 		void addMidiEvent(const synthLib::SMidiEvent& ev);
 
-		bool setMidiOutput(const juce::String& _out);
-		juce::MidiOutput* getMidiOutput() const;
-		bool setMidiInput(const juce::String& _in);
-		juce::MidiInput* getMidiInput() const;
-
-		void handleIncomingMidiMessage(juce::MidiInput *source, const juce::MidiMessage &message) override;
+		void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message);
 
 	    Controller& getController();
 		bool isPluginValid() { return getPlugin().isValid(); }
@@ -57,11 +57,11 @@ namespace pluginLib
 		virtual void updateLatencySamples();
 
 		virtual void saveCustomData(std::vector<uint8_t>& _targetBuffer);
-		virtual void saveChunkData(synthLib::BinaryStream& s);
+		virtual void saveChunkData(baseLib::BinaryStream& s);
 		virtual bool loadCustomData(const std::vector<uint8_t>& _sourceBuffer);
-		virtual void loadChunkData(synthLib::ChunkReader& _cr);
+		virtual void loadChunkData(baseLib::ChunkReader& _cr);
 
-		void readGain(synthLib::BinaryStream& _s);
+		void readGain(baseLib::BinaryStream& _s);
 
 		template<size_t N> void applyOutputGain(std::array<float*, N>& _buffers, const size_t _numSamples)
 		{
@@ -80,7 +80,7 @@ namespace pluginLib
 			{
 				if (buf)
 				{
-					for (int i = 0; i < _numSamples; ++i)
+					for (size_t i = 0; i < _numSamples; ++i)
 						buf[i] *= _gain;
 				}
 			}
@@ -102,9 +102,11 @@ namespace pluginLib
 
 		const Properties& getProperties() const { return m_properties; }
 
-		virtual void processBpm(float _bpm) {};
+		virtual void processBpm(float _bpm) {}
 
 		bool rebootDevice();
+
+		auto& getMidiPorts() { return m_midiPorts; }
 
 	protected:
 		void destroyController();
@@ -149,9 +151,7 @@ namespace pluginLib
 		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
 		std::unique_ptr<synthLib::Device> m_device;
 		std::unique_ptr<synthLib::Plugin> m_plugin;
-		std::unique_ptr<juce::MidiOutput> m_midiOutput{};
-		std::unique_ptr<juce::MidiInput> m_midiInput{};
-		std::vector<synthLib::SMidiEvent> m_midiOut{};
+		std::vector<synthLib::SMidiEvent> m_midiOut;
 
 	private:
 		const Properties m_properties;
@@ -160,5 +160,6 @@ namespace pluginLib
 		uint32_t m_dspClockPercent = 100;
 		float m_preferredDeviceSamplerate = 0.0f;
 		float m_hostSamplerate = 0.0f;
+		MidiPorts m_midiPorts;
 	};
 }

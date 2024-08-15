@@ -8,8 +8,9 @@
 
 #include "synthLib/os.h"
 #include "synthLib/midiToSysex.h"
-#include "synthLib/hybridcontainer.h"
-#include "synthLib/binarystream.h"
+
+#include "baseLib/hybridcontainer.h"
+#include "baseLib/binarystream.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -1733,7 +1734,7 @@ namespace pluginLib::patchDB
 
 		try
 		{
-			synthLib::BinaryStream inStream(data);
+			baseLib::BinaryStream inStream(data);
 
 			auto stream = inStream.tryReadChunk(chunks::g_patchManager, 2);
 
@@ -1933,14 +1934,14 @@ namespace pluginLib::patchDB
 		if(!m_cacheFileName.hasWriteAccess())
 			return;
 
-		synthLib::BinaryStream outStream;
+		baseLib::BinaryStream outStream;
 		{
 			std::shared_lock lockDS(m_dataSourcesMutex);
 			std::shared_lock lockP(m_patchesMutex);
 
-			synthLib::ChunkWriter cw(outStream, chunks::g_patchManager, 2);
+			baseLib::ChunkWriter cw(outStream, chunks::g_patchManager, 2);
 			{
-				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
+				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
 
 				outStream.write<uint32_t>(static_cast<uint32_t>(m_dataSources.size()));
 
@@ -1985,7 +1986,7 @@ namespace pluginLib::patchDB
 
 			{
 				// write tags
-				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTags, 1);
+				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTags, 1);
 
 				outStream.write(static_cast<uint32_t>(m_tags.size()));
 
@@ -2004,7 +2005,7 @@ namespace pluginLib::patchDB
 
 			{
 				// write tag colors
-				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTagColors, 1);
+				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerTagColors, 1);
 
 				outStream.write(static_cast<uint32_t>(m_tagColors.size()));
 
@@ -2026,7 +2027,7 @@ namespace pluginLib::patchDB
 
 			{
 				// write patch modifications
-				synthLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerPatchModifications, 1);
+				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerPatchModifications, 1);
 
 				outStream.write(static_cast<uint32_t>(m_patchModifications.size()));
 

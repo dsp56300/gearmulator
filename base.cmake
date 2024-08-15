@@ -56,7 +56,7 @@ elseif(APPLE)
 	    "-framework OpenGL"
 	    "-framework QuartzCore"  	
 	)
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto")
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -funroll-loops -Ofast -flto -fno-stack-protector")
 else()
 	message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
@@ -64,10 +64,24 @@ else()
 	if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES arm AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES aarch64)
 		string(APPEND CMAKE_CXX_FLAGS " -msse")
 	endif()
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast")
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -Ofast -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -rdynamic")
 	execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
+
+	# Good atomics are important on aarch64, they exist on ARMv8.1a or higher
+	# Check some known common machines and tell compiler if present
+	execute_process(COMMAND uname -a COMMAND tr -d '\n' OUTPUT_VARIABLE UNAME_A)
+	if(
+		UNAME_A MATCHES rk3588 		# Orange Pi 5 variants
+		OR
+		UNAME_A MATCHES rock-5b		# Raxda Rock 5B
+		OR
+		UNAME_A MATCHES rpi-2712	# Raspberry Pi 5
+		)
+		string(APPEND CMAKE_CXX_FLAGS " -march=armv8.2-a")
+		string(APPEND CMAKE_C_FLAGS " -march=armv8.2-a")
+	endif()
 endif()
 
 message( STATUS "Architecture: ${ARCHITECTURE}" )

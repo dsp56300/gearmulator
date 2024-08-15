@@ -46,8 +46,8 @@ namespace genericVirusUI
 
 			m_presetName[i]->initalize(static_cast<uint8_t>(i));
 
-			const auto partVolume = _editor.getController().getParameterIndexByName(Virus::g_paramPartVolume);
-			const auto partPanorama = _editor.getController().getParameterIndexByName(Virus::g_paramPartPanorama);
+			const auto partVolume = _editor.getController().getParameterIndexByName(virus::g_paramPartVolume);
+			const auto partPanorama = _editor.getController().getParameterIndexByName(virus::g_paramPartPanorama);
 
 			_editor.getParameterBinding().bind(*m_partVolume[i], partVolume, static_cast<uint8_t>(i));
 			_editor.getParameterBinding().bind(*m_partPan[i], partPanorama, static_cast<uint8_t>(i));
@@ -170,7 +170,7 @@ namespace genericVirusUI
 	{
 	    const auto multiMode = m_editor.getController().isMultiMode();
 
-		const auto partCount = multiMode ? static_cast<VirusProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
+		const auto partCount = multiMode ? static_cast<virus::VirusProcessor&>(m_editor.getProcessor()).getPartCount() : 1;
 
 		for(size_t i=0; i<m_partSelect.size(); ++i)
 		{
@@ -189,7 +189,7 @@ namespace genericVirusUI
 			m_presetName[i]->setVisible(visible);
 		}
 
-		const auto volumeParam = m_editor.getController().getParameterIndexByName(multiMode ? Virus::g_paramPartVolume : Virus::g_paramPatchVolume);
+		const auto volumeParam = m_editor.getController().getParameterIndexByName(multiMode ? virus::g_paramPartVolume : virus::g_paramPatchVolume);
 		m_editor.getParameterBinding().bind(*m_partVolume[0], volumeParam, 0);
 		m_partVolume[0]->getProperties().set("parameter", static_cast<int>(volumeParam));
 	}

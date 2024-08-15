@@ -3,7 +3,7 @@
 #include "pluginEditorState.h"
 #include "pluginEditorWindow.h"
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace jucePluginEditorLib
 {
@@ -57,7 +57,7 @@ namespace jucePluginEditorLib
 		m_editorState.reset();
 	}
 
-	void Processor::saveChunkData(synthLib::BinaryStream& s)
+	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
 		pluginLib::Processor::saveChunkData(s);
 
@@ -69,7 +69,7 @@ namespace jucePluginEditorLib
 
 		if(!m_editorStateData.empty())
 		{
-			synthLib::ChunkWriter cw(s, "EDST", 1);
+			baseLib::ChunkWriter cw(s, "EDST", 1);
 			s.write(m_editorStateData);
 		}
 
@@ -88,11 +88,11 @@ namespace jucePluginEditorLib
 		return true;
 	}
 	
-	void Processor::loadChunkData(synthLib::ChunkReader& _cr)
+	void Processor::loadChunkData(baseLib::ChunkReader& _cr)
 	{
 		pluginLib::Processor::loadChunkData(_cr);
 
-		_cr.add("EDST", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		_cr.add("EDST", 1, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
 		{
 			_binaryStream.read(m_editorStateData);
 		});

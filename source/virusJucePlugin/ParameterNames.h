@@ -1,6 +1,6 @@
 #pragma once
 
-namespace Virus
+namespace virus
 {
 	static constexpr char g_paramDelayReverbMode[] = "Delay/Reverb Mode";
 	static constexpr char g_paramPartVolume[] = "Part Volume";

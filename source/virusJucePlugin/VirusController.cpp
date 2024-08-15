@@ -12,7 +12,7 @@
 
 using MessageType = virusLib::SysexMessageType;
 
-namespace Virus
+namespace virus
 {
     constexpr const char* g_midiPacketNames[] =
     {
@@ -570,7 +570,7 @@ namespace Virus
 		requestArrangement();
 	}
 
-    uint8_t Controller::getPartCount()
+    uint8_t Controller::getPartCount() const
     {
 	    return m_processor.getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
     }
@@ -651,11 +651,11 @@ namespace Virus
         return pluginLib::Controller::sendSysEx(midiPacketName(_type), _params);
     }
 
-    void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, uint8_t _value)
+    void Controller::sendParameterChange(const pluginLib::Parameter& _parameter, const pluginLib::ParamValue _value)
     {
         const auto& desc = _parameter.getDescription();
 
-        sendParameterChange(desc.page, _parameter.getPart(), desc.index, _value);
+        sendParameterChange(desc.page, _parameter.getPart(), desc.index, static_cast<uint8_t>(_value));
     }
 
     bool Controller::sendParameterChange(uint8_t _page, uint8_t _part, uint8_t _index, uint8_t _value) const

@@ -2,9 +2,6 @@
 
 #include "jucePluginEditorLib/pluginEditor.h"
 
-class mqPartSelect;
-class Controller;
-
 namespace jucePluginEditorLib
 {
 	class FocusedParameter;
@@ -18,6 +15,8 @@ namespace pluginLib
 
 namespace mqJucePlugin
 {
+	class mqPartSelect;
+	class Controller;
 	class FrontPanel;
 	class PatchManager;
 

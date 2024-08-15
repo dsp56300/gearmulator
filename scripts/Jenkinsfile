@@ -3,8 +3,6 @@ pipeline {
 	
 	environment {
 		GIT_URL = credentials('dsp56300_gitUrl')
-		BUILD_JUCE = needsJuce()
-		BUILD_FX_PLUGIN = buildFxPlugins()
 		CMAKE_BUILD_DIR = 'temp/cmake_jenkins'
 	}
 	parameters
@@ -16,6 +14,11 @@ pipeline {
 		booleanParam(name: 'IntegrationTests', defaultValue: true, description: '')
 		booleanParam(name: 'Upload', defaultValue: false, description: '') 
 		string(name: 'UploadFolder', defaultValue: "", description: '')
+		booleanParam(name: 'SynthOsirus', defaultValue: true, description: '')
+		booleanParam(name: 'SynthOsTIrus', defaultValue: true, description: '')
+		booleanParam(name: 'SynthVavra', defaultValue: true, description: '')
+		booleanParam(name: 'SynthXenia', defaultValue: false, description: '')
+		booleanParam(name: 'SynthNodalRed2x', defaultValue: false, description: '')
 	}
 	stages {
 		stage("Checkout") {
@@ -23,6 +26,16 @@ pipeline {
 				script {
 					currentBuild.displayName += " - ${params.AgentLabel} - ${params.Branch}"
 					currentBuild.description = "Integration Tests: ${params.IntegrationTests}\nDeploy: ${params.Deploy}\nUpload: ${params.Upload}"
+
+					if(params.FXPlugins)				currentBuild.displayName += " FX"
+					if(params.Deploy)					currentBuild.displayName += " d"
+					if(params.IntegrationTests)			currentBuild.displayName += " i"
+					if(params.Upload)					currentBuild.displayName += " u"
+					if(params.SynthOsirus)			    currentBuild.displayName += " Sabc"
+					if(params.SynthOsTIrus)			    currentBuild.displayName += " Sti"
+					if(params.SynthVavra)			    currentBuild.displayName += " SmQ"
+					if(params.SynthXenia)			    currentBuild.displayName += " Sxt"
+					if(params.SynthNodalRed2x)			currentBuild.displayName += " Sn2x"
 				}
 				doCheckout()
 			}
@@ -115,12 +128,11 @@ def deleteFile(name)
 
 def needsJuce()
 {
-    //return params.Deploy || params.Upload ? 'ON' : 'OFF'
-	return true
+	return "on"
 }
 def buildFxPlugins()
 {
-	return params.FXPlugins ? 'ON' : 'OFF'
+	return params.FXPlugins ? 'on' : 'off'
 }
 def cmakeBuildDir()
 {
@@ -144,27 +156,40 @@ def doCheckout()
 	)
 }
 
+def getSynths()
+{
+    def synths =
+         "-Dgearmulator_SYNTH_OSIRUS=" + (params.SynthOsirus ? "on" : "off") +
+        " -Dgearmulator_SYNTH_OSTIRUS=" + (params.SynthOsTIrus ? "on" : "off") +
+        " -Dgearmulator_SYNTH_VAVRA=" + (params.SynthVavra ? "on" : "off") +
+        " -Dgearmulator_SYNTH_XENIA=" + (params.SynthXenia ? "on" : "off") +
+        " -Dgearmulator_SYNTH_NODALRED2X=" + (params.SynthNodalRed2x ? "on" : "off")
+    
+    return synths
+}
+
 def cmakeBuild()
 {
-	def buildDir = cmakeBuildDir();
+    def buildDir = cmakeBuildDir()
+    def synths = getSynths()
+    def juce = needsJuce()
+    def fx = buildFxPlugins()
 
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
-	    if(hasLabel("mac")) {
-        	genericSh "cmake . -G Xcode -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
-	    } else {
-        	genericSh "cmake . -B ${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${BUILD_JUCE} -Dgearmulator_BUILD_FX_PLUGIN=${BUILD_FX_PLUGIN} -DCMAKE_BUILD_TYPE=Release"
-	    }
-
-    	dir(cmakeBuildDir()) {
-    	    if(hasLabel("m2")) {
-        		genericSh 'cmake --build . --config Release --parallel 6'
-    	    } else if(hasLabel("pi5")) {
-        		genericSh 'cmake --build . --config Release --parallel 2'
-    		} else {
-    		    genericSh 'cmake --build . --config Release --parallel 2'
-    		}
-    	}
+    	genericSh "cmake -Dgearmulator_SOURCE_DIR=../ -Dgearmulator_BINARY_DIR=../${buildDir} -Dgearmulator_BUILD_JUCEPLUGIN=${juce} -Dgearmulator_BUILD_FX_PLUGIN=${fx} -DCMAKE_BUILD_TYPE=Release ${synths} -P scripts/generate.cmake"
 	}
+
+    def parallel = 2;
+    
+    if(hasLabel("win")) {
+        parallel = 12;
+    } else if(hasLabel("m2")) {
+        parallel = 6;
+    } else if(hasLabel("pi5")) {
+		paraellel = 2;
+	}
+	
+	genericSh "cmake --build ${buildDir} --config Release --parallel ${parallel}"
 }
 
 def doIntegrationTests()
@@ -185,10 +210,11 @@ def doPack()
 
 def copyArtefacts(local, remote)
 {
+    def buildDir = cmakeBuildDir()
+    def synths = getSynths()
+    
 	withCredentials([file(credentialsId: 'rclone_dsp56300_conf', variable: 'RCLONE_CONF')]) {
-		dir(cmakeBuildDir()) {
-			genericSh "cmake -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.Branch}/${params.UploadFolder} -P ../../scripts/deploy.cmake"
-		}
+		genericSh "cmake -Dgearmulator_BINARY_DIR=${buildDir} -DUPLOAD_LOCAL=${local} -DUPLOAD_REMOTE=${remote} -DFOLDER=${params.UploadFolder} ${synths} -P scripts/deployAll.cmake"
 	}
 }
 

@@ -62,23 +62,6 @@ namespace pluginLib
 		return &it->second;
 	}
 
-	const std::vector<uint32_t>& ParameterDescriptions::getControlledParameters(const synthLib::SMidiEvent& _ev)
-	{
-		static std::vector<uint32_t> empty;
-
-		const uint8_t type = _ev.a & 0xf0;
-
-		const auto itType = m_controllerMap.find(type);
-		if(itType == m_controllerMap.end())
-			return empty;
-
-		const auto itValue = itType->second.find(_ev.b);
-		if(itValue == itType->second.end())
-			return empty;
-
-		return itValue->second;
-	}
-
 	std::string ParameterDescriptions::loadJson(const std::string& _jsonString)
 	{
 		// juce' JSON parser doesn't like JSON5-style comments
@@ -205,16 +188,6 @@ namespace pluginLib
 			const auto maxValue = readPropertyInt("max");
 			const auto defaultValue = readPropertyIntWithDefault("default", Description::NoDefaultValue);
 
-			if (minValue < 0 || minValue > 127)
-			{
-				errors << name << ": min value for parameter desc " << name << " must be in range 0-127 but min is set to " << minValue << std::endl;
-				continue;
-			}
-			if(maxValue < 0 || maxValue > 127)
-			{
-				errors << name << ": max value for parameter desc " << name << " must be in range 0-127 but max is set to " << maxValue << std::endl;
-				continue;
-			}
 			if (maxValue < minValue)
 			{
 				errors << name << ": max value must be larger than min value but min is " << minValue << ", max is " << maxValue << std::endl;
@@ -563,7 +536,8 @@ namespace pluginLib
 				}
 
 				const auto hasMask = entry.hasProperty("mask");
-				const auto hasShift = entry.hasProperty("shift");
+				const auto hasRightShift = entry.hasProperty("shift");
+				const auto hasLeftShift = entry.hasProperty("shiftL");
 				const auto hasPart = entry.hasProperty("part");
 
 				if(hasMask)
@@ -577,15 +551,26 @@ namespace pluginLib
 					byte.paramMask = static_cast<uint8_t>(mask);
 				}
 
-				if(hasShift)
+				if(hasRightShift)
 				{
 					const int shift = entry["shift"];
 					if(shift < 0 || shift > 7)
 					{
-						_errors << "shift value needs to be between 0 and 7 but got " << shift << std::endl;
+						_errors << "right shift value needs to be between 0 and 7 but got " << shift << std::endl;
 						return;
 					}
-					byte.paramShift = static_cast<uint8_t>(shift);
+					byte.paramShiftRight = static_cast<uint8_t>(shift);
+				}
+
+				if(hasLeftShift)
+				{
+					const int shift = entry["shiftL"];
+					if(shift < 0 || shift > 7)
+					{
+						_errors << "left shift value needs to be between 0 and 7 but got " << shift << std::endl;
+						return;
+					}
+					byte.paramShiftLeft = static_cast<uint8_t>(shift);
 				}
 
 				if(hasPart)
@@ -628,7 +613,7 @@ namespace pluginLib
 			else if(type == "null")				byte.type = MidiDataType::Null;
 			else
 			{
-				_errors << "Unknown midi packet data type " << type << ", midi packet " << _key << ", index " << i << std::endl;
+				_errors << "Unknown midi packet data type '" << type << "', midi packet " << _key << ", index " << i << std::endl;
 				return;
 			}
 
@@ -842,9 +827,9 @@ namespace pluginLib
 		}
 
 		if(cc != Invalid)
-			m_controllerMap[synthLib::M_CONTROLCHANGE][cc].push_back(paramIndex);
+			m_controllerMap.add(synthLib::M_CONTROLCHANGE, cc, paramIndex);
 
 		if(pp != Invalid)
-			m_controllerMap[synthLib::M_POLYPRESSURE][pp].push_back(paramIndex);
+			m_controllerMap.add(synthLib::M_POLYPRESSURE, pp, paramIndex);
 	}
 }

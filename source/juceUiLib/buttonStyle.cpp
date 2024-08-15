@@ -1,5 +1,6 @@
 #include "buttonStyle.h"
 
+#include "button.h"
 #include "uiObject.h"
 
 namespace genericUI
@@ -98,5 +99,30 @@ namespace genericUI
 			_button.setRadioGroupId(m_radioGroupId);
 
 		_button.setImages(m_normalImage, m_overImage, m_downImage, m_disabledImage, m_normalImageOn, m_overImageOn, m_downImageOn, m_disabledImageOn);
+
+		auto* button = dynamic_cast<Button<juce::DrawableButton>*>(&_button);
+
+		if(button)
+		{
+			auto hitRect = m_hitAreaOffset;
+
+			if(hitRect.getX() < 0)			hitRect.setX(0);
+			if(hitRect.getY() < 0)			hitRect.setY(0);
+			if(hitRect.getWidth() > 0)		hitRect.setWidth(0);
+			if(hitRect.getHeight() > 0)		hitRect.setHeight(0);
+
+			auto newW = button->getWidth();
+			auto newH = button->getHeight();
+
+			if(m_hitAreaOffset.getWidth() > 0)		newW += m_hitAreaOffset.getWidth();
+			if(m_hitAreaOffset.getHeight() > 0)		newH += m_hitAreaOffset.getHeight();
+
+			button->setSize(newW, newH);
+
+			hitRect.setWidth(-hitRect.getWidth());
+			hitRect.setHeight(-hitRect.getHeight());
+
+			button->setHitAreaOffset(hitRect);
+		}
 	}
 }

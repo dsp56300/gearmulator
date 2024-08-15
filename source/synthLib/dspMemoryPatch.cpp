@@ -65,7 +65,7 @@ namespace synthLib
 		return true;
 	}
 
-	bool DspMemoryPatches::apply(dsp56k::DSP& _dsp, const MD5& _md5) const
+	bool DspMemoryPatches::apply(dsp56k::DSP& _dsp, const baseLib::MD5& _md5) const
 	{
 		for (const auto& e : allowedTargets)
 		{

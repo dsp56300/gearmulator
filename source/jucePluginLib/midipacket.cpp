@@ -17,6 +17,8 @@ namespace pluginLib
 
 		std::set<uint32_t> usedParts;
 
+		std::string lastParam;
+
 		for(uint32_t i=0; i<m_definitions.size(); ++i)
 		{
 			const auto& d = m_definitions[i];
@@ -24,14 +26,22 @@ namespace pluginLib
 			if(d.paramPart != AnyPart)
 				usedParts.insert(d.paramPart);
 
+			bool isNewParam = true;
+
 			if(d.type == MidiDataType::Parameter)
-				m_hasParameters = true;
-
-			const auto masked = static_cast<uint8_t>((0xff & d.paramMask) << d.paramShift);
-
-			if(usedMask & masked)
 			{
-				// next byte starts if the current mask overlaps with an existing one
+				isNewParam = d.paramName != lastParam;
+				lastParam = d.paramName;
+				m_hasParameters = true;
+			}
+
+			const auto masked = d.packValue(0xff);
+
+			if((usedMask & masked) || !isNewParam)
+			{
+				// next byte starts if the current mask overlaps with an existing one.
+				// next byte starts also if the parameter name is identical. In that case, multiple
+				// bytes form one parameter.
 				usedMask = 0;
 				++byteIndex;
 			}
@@ -84,7 +94,7 @@ namespace pluginLib
 							LOG("Failed to find value for parameter " << d.paramName << ", part " << d.paramPart);
 							return false;
 						}
-						_dst[i] |= d.getMaskedValue(it->second);
+						_dst[i] |= d.packValue(it->second);
 					}
 					break;
 				case MidiDataType::Checksum:
@@ -147,11 +157,15 @@ namespace pluginLib
 
 		return parse(_data, [&](ParamIndex _paramIndex, uint8_t _value)
 		{
-			_parameterValues.insert(std::make_pair(_paramIndex, _value));
+			const auto itExisting = _parameterValues.find(_paramIndex);
+			if(itExisting != _parameterValues.end())
+				itExisting->second |= _value;
+			else
+				_parameterValues.insert(std::make_pair(_paramIndex, _value));
 		}, _parameters, _src, _ignoreChecksumErrors);
 	}
 	
-	bool MidiPacket::parse(Data& _data, const std::function<void(ParamIndex, uint8_t)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
+	bool MidiPacket::parse(Data& _data, const std::function<void(ParamIndex, ParamValue)>& _addParamValueCallback, const ParameterDescriptions& _parameters, const Sysex& _src, bool _ignoreChecksumErrors) const
 	{
 		if(_src.size() != size())
 			return false;
@@ -206,8 +220,8 @@ namespace pluginLib
 							LOG("Failed to find named parameter " << d.paramName << " while parsing midi packet, midi byte " << i);
 							return false;
 						}
-						const auto sMasked = (s >> d.paramShift) & d.paramMask;
-						_addParamValueCallback(std::make_pair(d.paramPart, idx), static_cast<uint8_t>(sMasked));
+						const auto sUnpacked = d.unpackValue(s);
+						_addParamValueCallback(std::make_pair(d.paramPart, idx), sUnpacked);
 					}
 					break;
 				default:

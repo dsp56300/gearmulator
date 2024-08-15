@@ -74,6 +74,9 @@ namespace pluginLib
 		if (v->isBipolar()) 
 			_slider.getProperties().set("bipolar", true);
 
+		// Juce bug: If the range changes but the value doesn't, Juce doesn't issue a repaint. Do it manually
+		_slider.repaint();
+
 		const BoundParameter p{v, &_slider, _param, _part};
 		addBinding(p);
 	}
@@ -105,6 +108,7 @@ namespace pluginLib
 
 		const auto& desc = v->getDescription();
 		const auto& valueList = desc.valueList;
+		const auto& range = desc.range;
 
 		if(valueList.order.empty())
 		{
@@ -112,7 +116,7 @@ namespace pluginLib
 			const auto& allValues = v->getAllValueStrings();
 			for (const auto& vs : allValues)
 			{
-				if(vs.isNotEmpty())
+				if(vs.isNotEmpty() && i >= range.getStart() && i <= range.getEnd())
 					sortedValues.emplace_back(i, vs.toStdString());
 				++i;
 			}
@@ -123,6 +127,8 @@ namespace pluginLib
 			{
 				const auto value = valueList.orderToValue(i);
 				if(value == ValueList::InvalidIndex)
+					continue;
+				if(i < range.getStart() || i > range.getEnd())
 					continue;
 				const auto text = valueList.valueToText(value);
 				if(text.empty())
@@ -166,7 +172,10 @@ namespace pluginLib
 			{
 				v->setUnnormalizedValueNotifyingHost(id - 1, Parameter::Origin::Ui);
 			}
-			v->getValueObject().setValue(id - 1);
+			else
+			{
+				v->setUnnormalizedValue(id - 1, Parameter::Origin::Ui);
+			}
 		};
 
 		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
@@ -184,17 +193,72 @@ namespace pluginLib
 		bind(_btn, _param, CurrentPart);
 	}
 
-	void ParameterBinding::bind(juce::Button& _control, uint32_t _param, uint8_t _part)
+	void ParameterBinding::bind(juce::Button& _control, const uint32_t _param, const uint8_t _part)
 	{
-		const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
-		if (!v)
+		const auto param = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+		if (!param)
 		{
 			assert(false && "Failed to find parameter");
 			return;
 		}
-		_control.getToggleStateValue().referTo(v->getValueObject());
-		const BoundParameter p{v, &_control, _param, CurrentPart};
+
+		const bool hasCustomValue = _control.getProperties().contains("parametervalue");
+		int paramValue = 1;
+		int paramValueOff = -1;
+		if(hasCustomValue)
+			paramValue = _control.getProperties()["parametervalue"];
+		if(_control.getProperties().contains("parametervalueoff"))
+			paramValueOff = _control.getProperties()["parametervalueoff"];
+
+		_control.onClick = [&_control, param, paramValue, hasCustomValue, paramValueOff]
+		{
+			const auto on = _control.getToggleState();
+			if(hasCustomValue)
+			{
+				if(on)
+					param->setUnnormalizedValueNotifyingHost(paramValue, Parameter::Origin::Ui);
+				else if(paramValueOff != -1)
+					param->setUnnormalizedValueNotifyingHost(paramValueOff, Parameter::Origin::Ui);
+				else
+					_control.setToggleState(true, juce::dontSendNotification);
+			}
+			else
+			{
+				param->setUnnormalizedValueNotifyingHost(on ? 1 : 0, Parameter::Origin::Ui);
+			}
+		};
+
+		_control.setToggleState(param->getUnnormalizedValue() == paramValue, juce::dontSendNotification);
+
+		const auto listenerId = param->onValueChanged.addListener([this, &_control, paramValue](const Parameter* _p)
+		{
+			const auto value = _p->getUnnormalizedValue();
+			_control.setToggleState(value == paramValue, juce::dontSendNotification);
+		});
+
+		const BoundParameter p{param, &_control, _param, CurrentPart, listenerId};
 		addBinding(p);
+	}
+
+	bool ParameterBinding::bind(juce::Component& _component, const uint32_t _param, const uint8_t _part)
+	{
+		if(auto* slider = dynamic_cast<juce::Slider*>(&_component))
+		{
+			bind(*slider, _param, _part);
+			return true;
+		}
+		if(auto* button = dynamic_cast<juce::DrawableButton*>(&_component))
+		{
+			bind(*button, _param, _part);
+			return true;
+		}
+		if(auto* comboBox = dynamic_cast<juce::ComboBox*>(&_component))
+		{
+			bind(*comboBox, _param, _part);
+			return true;
+		}
+		assert(false && "unknown component type");
+		return false;
 	}
 
 	juce::Component* ParameterBinding::getBoundComponent(const Parameter* _parameter) const
@@ -213,6 +277,37 @@ namespace pluginLib
 		return it->second;
 	}
 
+	bool ParameterBinding::unbind(const Parameter* _param)
+	{
+		for (auto it= m_bindings.begin(); it != m_bindings.end(); ++it)
+		{
+			if(it->parameter != _param)
+				continue;
+
+			m_bindings.erase(it);
+
+			return true;
+		}
+		return false;
+	}
+
+	bool ParameterBinding::unbind(const juce::Component* _component)
+	{
+		for (auto it= m_bindings.begin(); it != m_bindings.end(); ++it)
+		{
+			if(it->component != _component)
+				continue;
+
+			disableBinding(*it);
+
+			m_disabledBindings.push_back(*it);
+			m_bindings.erase(it);
+
+			return true;
+		}
+		return false;
+	}
+
 	void ParameterBinding::removeMouseListener(juce::Slider& _slider)
 	{
 		const auto it = m_sliderMouseListeners.find(&_slider);
@@ -228,27 +323,7 @@ namespace pluginLib
 	void ParameterBinding::bind(const std::vector<BoundParameter>& _bindings, const bool _currentPartOnly)
 	{
 		for (const auto& b : _bindings)
-		{
-			auto* slider = dynamic_cast<juce::Slider*>(b.component);
-			if(slider)
-			{
-				bind(*slider, b.type, b.part);
-				continue;
-			}
-			auto* button = dynamic_cast<juce::DrawableButton*>(b.component);
-			if(button)
-			{
-				bind(*button, b.type, b.part);
-				continue;
-			}
-			auto* comboBox = dynamic_cast<juce::ComboBox*>(b.component);
-			if(comboBox)
-			{
-				bind(*comboBox, b.type, b.part);
-				continue;
-			}
-			assert(false && "unknown component type");
-		}
+			bind(*b.component, b.paramIndex, b.part);
 	}
 
 	void ParameterBinding::addBinding(const BoundParameter& _boundParameter)
@@ -285,7 +360,7 @@ namespace pluginLib
 
 		auto* button = dynamic_cast<juce::Button*>(_b.component);
 		if(button != nullptr)
-			button->getToggleStateValue().referTo(juce::Value());
+			button->onClick = nullptr;
 
 		if(_b.onChangeListenerId != ParameterListener::InvalidListenerId)
 		{

@@ -27,7 +27,10 @@ namespace wLib
 				m_buffer.resize(_expectedSize, 0xff);
 		}
 
-		return m_buffer.size() == _expectedSize;
+		if(m_buffer.size() != _expectedSize)
+			return false;
+		m_filename = _filename;
+		return true;
 	}
 
 	bool ROM::loadFromMidi(std::vector<unsigned char>& _buffer, const std::string& _filename)

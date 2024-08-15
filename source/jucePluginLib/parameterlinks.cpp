@@ -130,12 +130,12 @@ namespace pluginLib
 		return m_linkedRegions.find(link) != m_linkedRegions.end();
 	}
 
-	void ParameterLinks::saveChunkData(synthLib::BinaryStream& s) const
+	void ParameterLinks::saveChunkData(baseLib::BinaryStream& s) const
 	{
 		if(m_linkedRegions.empty())
 			return;
 
-		synthLib::ChunkWriter cw(s, "PLNK", 1);
+		baseLib::ChunkWriter cw(s, "PLNK", 1);
 
 		s.write(static_cast<uint32_t>(m_linkedRegions.size()));
 
@@ -147,9 +147,9 @@ namespace pluginLib
 		}
 	}
 
-	void ParameterLinks::loadChunkData(synthLib::ChunkReader& _cr)
+	void ParameterLinks::loadChunkData(baseLib::ChunkReader& _cr)
 	{
-		_cr.add("PLNK", 1, [this](synthLib::BinaryStream& _binaryStream, unsigned _version)
+		_cr.add("PLNK", 1, [this](baseLib::BinaryStream& _binaryStream, unsigned _version)
 		{
 			const uint32_t count = _binaryStream.read<uint32_t>();
 

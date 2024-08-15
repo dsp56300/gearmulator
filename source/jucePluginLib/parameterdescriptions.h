@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 
+#include "controllermap.h"
 #include "midipacket.h"
 #include "parameterdescription.h"
 #include "parameterlink.h"
@@ -44,10 +45,10 @@ namespace pluginLib
 
 		const ValueList* getValueList(const std::string& _key) const;
 
-		const std::vector<uint32_t>& getControlledParameters(const synthLib::SMidiEvent& _ev);
-
 		const std::string& getErrors() const { return m_errors; }
 		bool isValid() const { return getErrors().empty(); }
+
+		const auto& getControllerMap() const { return m_controllerMap; }
 
 	private:
 		std::string loadJson(const std::string& _jsonString);
@@ -69,7 +70,7 @@ namespace pluginLib
 		std::unordered_map<std::string, MidiPacket> m_midiPackets;
 		std::vector<ParameterLink> m_parameterLinks;
 		std::unordered_map<std::string, ParameterRegion> m_regions;
-		std::unordered_map<uint8_t, std::unordered_map<uint8_t, std::vector<uint32_t>>> m_controllerMap;	// type (control change, poly pressure) => index (modwheel, main vol, ...) => parameter index
+		ControllerMap m_controllerMap;
 
 		std::string m_errors;
 	};

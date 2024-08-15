@@ -127,6 +127,17 @@ namespace jucePluginEditorLib::patchManager
 			{
 				getPatchManager().removeDataSource(*m_dataSource);
 			});
+			menu.addItem("Reveal in File Browser", [this]
+			{
+				if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
+				{
+					getPatchManager().getLocalStorageFile(*m_dataSource).revealToUser();
+				}
+				else
+				{
+					juce::File(m_dataSource->name).revealToUser();
+				}
+			});
 		}
 		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)
 		{

@@ -15,7 +15,7 @@
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 
-namespace Virus
+namespace virus
 {
 	class Controller;
 }
@@ -98,7 +98,7 @@ namespace genericVirusUI
 		if (_sysex.size() < 267)
 			return nullptr;
 
-		const auto& c = static_cast<const Virus::Controller&>(m_controller);
+		const auto& c = static_cast<const virus::Controller&>(m_controller);
 
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
@@ -196,7 +196,7 @@ namespace genericVirusUI
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
 
-		Virus::Controller::MidiPacketType usedPacketType;
+		virus::Controller::MidiPacketType usedPacketType;
 		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex, usedPacketType))
 			return _patch->sysex;
 

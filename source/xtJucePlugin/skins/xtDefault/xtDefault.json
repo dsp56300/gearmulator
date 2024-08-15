@@ -6298,7 +6298,7 @@
                     }
                 },
                 {
-                    "name" : "dropdown",
+                    "name" : "MidiIn",
                     "combobox" : {
                         "offsetL" : "15",
                         "offsetT" : "1",
@@ -6317,7 +6317,7 @@
                     }
                 },
                 {
-                    "name" : "dropdown",
+                    "name" : "MidiOut",
                     "combobox" : {
                         "offsetL" : "15",
                         "offsetT" : "1",

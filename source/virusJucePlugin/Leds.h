@@ -12,7 +12,10 @@ namespace juce
 	class MouseListener;
 }
 
-class VirusProcessor;
+namespace virus
+{
+	class VirusProcessor;
+}
 
 namespace genericUI
 {
@@ -41,7 +44,7 @@ namespace genericVirusUI
 			Leds& m_leds;
 		};
 
-		Leds(const genericUI::Editor& _editor, VirusProcessor& _processor);
+		Leds(const genericUI::Editor& _editor, virus::VirusProcessor& _processor);
 		~Leds();
 
 		void toggleLogoAnimation();
@@ -50,7 +53,7 @@ namespace genericVirusUI
 		bool isLogoAnimationEnabled() const { return m_logoAnimationEnabled; }
 
 	private:
-		VirusProcessor& m_processor;
+		virus::VirusProcessor& m_processor;
 		bool m_logoAnimationEnabled = true;
 
 		std::array<std::unique_ptr<jucePluginEditorLib::Led>, 3> m_lfos;

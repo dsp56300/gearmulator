@@ -1,6 +1,5 @@
 #include "xtDSP.h"
 
-#include "wLib/dspBootCode.h"
 #include "xtHardware.h"
 
 #if DSP56300_DEBUGGER
@@ -8,6 +7,7 @@
 #endif
 
 #include "mc68k/hdi08.h"
+
 #include "dsp56kEmu/aar.h"
 #include "dsp56kEmu/types.h"
 
@@ -22,6 +22,7 @@ namespace xt
 	, m_periphX()
 	, m_memory(g_memoryValidator, g_pMemSize, g_xyMemSize, g_bridgedAddr, m_memoryBuffer)
 	, m_dsp(m_memory, &m_periphX, &m_periphNop)
+	, m_boot(m_dsp)
 	{
 		if(!_hardware.isValid())
 			return;
@@ -51,28 +52,7 @@ namespace xt
 			m_dsp.getJit().notifyProgramMemWrite(i);
 		}
 
-		const auto& bootCode = wLib::g_dspBootCode56303;
-
-		// rewrite bootloader to work at address g_bootCodeBase instead of $ff0000
-		for(uint32_t i=0; i<std::size(bootCode); ++i)
-		{
-			uint32_t code = bootCode[i];
-			if((code & 0xffff00) == 0xff0000)
-			{
-				code = g_bootCodeBase | (bootCode[i] & 0xff);
-			}
-
-			m_memory.set(dsp56k::MemArea_P, i + g_bootCodeBase, code);
-			m_dsp.getJit().notifyProgramMemWrite(i + g_bootCodeBase);
-		}
-
-//		m_memory.saveAssembly("dspBootDisasm.asm", g_bootCodeBase, static_cast<uint32_t>(std::size(bootCode)), true, true, &m_periphX, nullptr);
-
-		// set OMR pins so that bootcode wants program data via HDI08 RX
-		m_dsp.setPC(g_bootCodeBase);
-		m_dsp.regs().omr.var |= OMR_MA | OMR_MB | OMR_MC | OMR_MD;
-
-//		getPeriph().disableTimers(true);	// only used to test DSP load, we report 0 all the time for now
+//		getPeriph().disableTimers(true);
 
 		m_periphX.getEssi0().writeEmptyAudioIn(8);
 
@@ -85,7 +65,8 @@ namespace xt
 		});
 		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
 		{
-			hdiTransferUCtoDSP(_word);
+			if(m_boot.hdiWriteTX(_word))
+				onDspBooted();
 		});
 		m_hdiUC.setWriteIrqCallback([&](const uint8_t _irq)
 		{
@@ -95,14 +76,6 @@ namespace xt
 		{
 			return hdiUcReadIsr(_isr);
 		});
-
-#if DSP56300_DEBUGGER
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
-#else
-		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
-#endif
-
-		m_thread->setLogToStdout(false);
 	}
 
 	void DSP::exec()
@@ -136,6 +109,22 @@ namespace xt
 			m_hdiHF01 = hf01;
 			hdi08().setPendingHostFlags01(hf01);
 		}
+	}
+
+	void DSP::onDspBooted()
+	{
+		m_hdiUC.setWriteTxCallback([&](const uint32_t _word)
+		{
+			hdiTransferUCtoDSP(_word);
+		});
+
+#if DSP56300_DEBUGGER
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str(), std::make_shared<dsp56kDebugger::Debugger>(m_dsp)));
+#else
+		m_thread.reset(new dsp56k::DSPThread(dsp(), m_name.c_str()));
+#endif
+
+		m_thread->setLogToStdout(false);
 	}
 
 	void DSP::onUCRxEmpty(bool _needMoreData)

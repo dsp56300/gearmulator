@@ -9,6 +9,14 @@
 #include "synthLib/buildconfig.h"
 
 #include "jucePluginLib/event.h"
+#include "jucePluginLib/types.h"
+
+namespace baseLib
+{
+	class ChunkReader;
+	class BinaryStream;
+	class ChunkWriter;
+}
 
 namespace pluginLib
 {
@@ -62,6 +70,9 @@ namespace jucePluginEditorLib
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data) override;
 		void getPerInstanceConfig(std::vector<uint8_t>& _data) override;
 
+		virtual void saveChunkData(baseLib::BinaryStream& _s);
+		virtual void loadChunkData(baseLib::ChunkReader& _cr);
+
 		void setCurrentPart(uint8_t _part) override;
 
 		void showDisclaimer() const;
@@ -76,7 +87,7 @@ namespace jucePluginEditorLib
 
 		bool copyRegionToClipboard(const std::string& _regionId) const;
 		bool copyParametersToClipboard(const std::vector<std::string>& _params, const std::string& _regionId = {}) const;
-		bool setParameters(const std::map<std::string, uint8_t>& _paramValues) const;
+		bool setParameters(const std::map<std::string, pluginLib::ParamValue>& _paramValues) const;
 
 		auto& getImagePool() { return m_imagePool; }
 
@@ -102,7 +113,7 @@ namespace jucePluginEditorLib
 
 		std::unique_ptr<juce::FileChooser> m_fileChooser;
 		std::unique_ptr<patchManager::PatchManager> m_patchManager;
-		std::vector<uint8_t> m_instanceConfig;
+		std::vector<uint8_t> m_patchManagerConfig;
 		std::vector<std::shared_ptr<juce::TemporaryFile>> m_dragAndDropTempFiles;
 		std::vector<juce::File> m_dragAndDropFiles;
 		ImagePool m_imagePool;

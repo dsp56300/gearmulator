@@ -3,6 +3,8 @@ project(xtJucePlugin VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	parameterDescriptions_xt.json
+	skins/xtDefault/xtDefault.json
+
 	PluginEditorState.cpp PluginEditorState.h
 	PluginProcessor.cpp PluginProcessor.h
 	weControlTree.cpp weControlTree.h

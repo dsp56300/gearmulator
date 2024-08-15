@@ -44,7 +44,6 @@ namespace pluginLib
 		const auto value = juce::roundToInt(floatValue);
 
 		jassert(m_range.getRange().contains(floatValue) || m_range.end == floatValue);
-		jassert(value >= 0 && value <= 127);
 
 		if (value == m_lastValue)
 			return;
@@ -54,12 +53,12 @@ namespace pluginLib
 		{
 			if(m_rateLimit)
 			{
-				sendParameterChangeDelayed(static_cast<uint8_t>(value), ++m_uniqueDelayCallbackId);
+				sendParameterChangeDelayed(value, ++m_uniqueDelayCallbackId);
 			}
 			else
 			{
 				m_lastSendTime = milliseconds();
-				m_controller.sendParameterChange(*this, static_cast<uint8_t>(value));
+				m_controller.sendParameterChange(*this, value);
 			}
 		}
 
@@ -72,7 +71,7 @@ namespace pluginLib
 		return t.count();
     }
 
-    void Parameter::sendParameterChangeDelayed(const uint8_t _value, uint32_t _uniqueId)
+    void Parameter::sendParameterChangeDelayed(const ParamValue _value, uint32_t _uniqueId)
     {
 		if(_uniqueId != m_uniqueDelayCallbackId)
 			return;
@@ -227,11 +226,25 @@ namespace pluginLib
 		return juce::String::formatted("%d_%d_%d", static_cast<int>(d.page), part, d.index);
 	}
 
-	uint8_t Parameter::getDefault() const
+	float Parameter::getValueForText(const juce::String& _text) const
 	{
-		if(m_desc.defaultValue  != Description::NoDefaultValue)
-			return static_cast<uint8_t>(m_desc.defaultValue);
+		auto res = m_desc.valueList.textToValue(std::string(_text.getCharPointer()));
+		if(m_desc.range.getStart() < 0)
+			res += m_desc.range.getStart();
+		return convertTo0to1(static_cast<float>(res));
+	}
+
+	ParamValue Parameter::getDefault() const
+	{
+		if(m_desc.defaultValue != Description::NoDefaultValue)
+			return m_desc.defaultValue;
 		return 0;
+	}
+
+	juce::String Parameter::getText(const float _normalisedValue, int _i) const
+	{
+		const auto v = convertFrom0to1(_normalisedValue);
+		return m_desc.valueList.valueToText(juce::roundToInt(v) - std::min(0, m_desc.range.getStart()));
 	}
 
 	void Parameter::setLocked(const bool _locked)

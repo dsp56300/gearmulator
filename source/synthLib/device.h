@@ -15,7 +15,14 @@ namespace synthLib
 	{
 	public:
 		Device();
+		Device(const Device&) = delete;
+		Device(Device&&) = delete;
+
 		virtual ~Device();
+
+		Device& operator = (const Device&) = delete;
+		Device& operator = (Device&&) = delete;
+
 		virtual void process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut);
 
 		void setExtraLatencySamples(uint32_t _size);

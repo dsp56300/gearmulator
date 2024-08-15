@@ -12,10 +12,10 @@
 #include "jucePluginLib/midipacket.h"
 #include "jucePluginLib/event.h"
 
-class Controller;
-
 namespace xtJucePlugin
 {
+	class Controller;
+
 	class WaveEditorData
 	{
 	public:

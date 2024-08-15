@@ -92,6 +92,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			CLAP_FEATURES ${clapFeatures}
 			CLAP_SUPPORT_URL "https://dsp56300.wordpress.com"
 			CLAP_MANUAL_URL "https://dsp56300.wordpress.com"
+			CLAP_USE_JUCE_PARAMETER_RANGES "DISCRETE"
 			)
 		set_property(TARGET ${targetName}_CLAP PROPERTY FOLDER ${targetName})
 		add_dependencies(${targetName}_All ${targetName}_CLAP)
@@ -141,7 +142,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		else()
 			set(pattern "*.so")
 		endif()
-		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION lib/lv2/ COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
+		if(MSVC OR APPLE)
+			set(dest .)
+		else()
+			set(dest lib/lv2/)
+		endif()
+		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
 	endif()
 
 	if(APPLE AND ${isSynth})

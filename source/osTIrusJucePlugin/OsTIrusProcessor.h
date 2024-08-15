@@ -2,7 +2,7 @@
 
 #include "virusJucePlugin/VirusProcessor.h"
 
-class OsTIrusProcessor : public VirusProcessor
+class OsTIrusProcessor : public virus::VirusProcessor
 {
 public:
     OsTIrusProcessor();

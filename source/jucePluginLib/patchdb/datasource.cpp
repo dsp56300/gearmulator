@@ -7,7 +7,7 @@
 #include "db.h"
 #include "patch.h"
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
@@ -157,9 +157,9 @@ namespace pluginLib::patchDB
 		return ss.str();
 	}
 
-	void DataSource::write(synthLib::BinaryStream& _outStream) const
+	void DataSource::write(baseLib::BinaryStream& _outStream) const
 	{
-		synthLib::ChunkWriter cw(_outStream, chunks::g_datasource, 1);
+		baseLib::ChunkWriter cw(_outStream, chunks::g_datasource, 1);
 
 		_outStream.write(static_cast<uint8_t>(type));
 		_outStream.write(static_cast<uint8_t>(origin));
@@ -172,7 +172,7 @@ namespace pluginLib::patchDB
 			patch->write(_outStream);
 	}
 
-	bool DataSource::read(synthLib::BinaryStream& _inStream)
+	bool DataSource::read(baseLib::BinaryStream& _inStream)
 	{
 		auto in = _inStream.tryReadChunk(chunks::g_datasource);
 		if(!in)

@@ -9,6 +9,7 @@ namespace genericUI
 	public:
 		explicit TextEditorStyle(Editor& _editor) : UiObjectStyle(_editor) {}
 
+		juce::Font getPopupMenuFont() override;
 	public:
 		void apply(juce::TextEditor& _target) const;
 	};

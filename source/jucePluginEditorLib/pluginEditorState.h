@@ -12,8 +12,6 @@ namespace juce
 	class Component;
 }
 
-class VirusProcessor;
-
 namespace jucePluginEditorLib
 {
 	class Editor;

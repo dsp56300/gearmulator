@@ -4,7 +4,7 @@
 
 #include "juce_core/juce_core.h"
 
-#include "synthLib/binarystream.h"
+#include "baseLib/binarystream.h"
 
 namespace pluginLib::patchDB
 {
@@ -109,14 +109,14 @@ namespace pluginLib::patchDB
 		return name.empty() && tags.empty();
 	}
 
-	void PatchModifications::write(synthLib::BinaryStream& _outStream) const
+	void PatchModifications::write(baseLib::BinaryStream& _outStream) const
 	{
-		synthLib::ChunkWriter cw(_outStream, chunks::g_patchModification, 1);
+		baseLib::ChunkWriter cw(_outStream, chunks::g_patchModification, 1);
 		_outStream.write(name);
 		tags.write(_outStream);
 	}
 
-	bool PatchModifications::read(synthLib::BinaryStream& _binaryStream)
+	bool PatchModifications::read(baseLib::BinaryStream& _binaryStream)
 	{
 		auto in = _binaryStream.tryReadChunk(chunks::g_patchModification, 1);
 		if(!in)

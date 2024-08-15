@@ -87,7 +87,7 @@ private:
 
 	void applyToSingleEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
 	static void applyToSingleEditBuffer(TPreset& _single, Page _page, uint8_t _param, uint8_t _value);
-	void applyToMultiEditBuffer(uint8_t _part, uint8_t _param, uint8_t _value);
+	void applyToMultiEditBuffer(Page _page, uint8_t _part, uint8_t _param, uint8_t _value);
 	Page globalSettingsPage() const;
 	bool isPageSupported(Page _page) const;
 	void processHdi08Tx(std::vector<synthLib::SMidiEvent>& _midiEvents);

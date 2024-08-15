@@ -365,6 +365,8 @@ namespace jucePluginEditorLib::patchManager
 		if(getCurrentPart() == _part)
 			getListModel()->setSelectedPatches({_patch});
 
+		onSelectedPatchChanged(_part, _patch);
+
 		return true;
 	}
 
@@ -382,7 +384,7 @@ namespace jucePluginEditorLib::patchManager
 		});
 	}
 
-	uint32_t PatchManager::createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part)
+	uint32_t PatchManager::createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name/* = "patch"*/)
 	{
 		const auto& state = getState();
 		const auto key = state.getPatch(_part);
@@ -401,7 +403,7 @@ namespace jucePluginEditorLib::patchManager
 					if(*p == key)
 					{
 						++countAdded;
-						_menu.addItem("Overwrite patch '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part]
+						_menu.addItem("Overwrite " + _name + " '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part]
 						{
 							const auto newPatch = requestPatchForPart(_part);
 							if(newPatch)
@@ -424,7 +426,7 @@ namespace jucePluginEditorLib::patchManager
 			for (const auto& ds : existingLocalDS)
 			{
 				++countAdded;
-				_menu.addItem("Add to user bank '" + ds->name + "'", true, false, [this, ds, _part]
+				_menu.addItem("Add " + _name + " to user bank '" + ds->name + "'", true, false, [this, ds, _part]
 				{
 					const auto newPatch = requestPatchForPart(_part);
 
@@ -438,7 +440,7 @@ namespace jucePluginEditorLib::patchManager
 		else
 		{
 			++countAdded;
-			_menu.addItem("Create new user bank and add patch", true, false, [this, _part]
+			_menu.addItem("Create new user bank and add " + _name, true, false, [this, _part]
 			{
 				const auto newPatch = requestPatchForPart(_part);
 
@@ -689,7 +691,7 @@ namespace jucePluginEditorLib::patchManager
 
 	bool PatchManager::activatePatch(const std::string& _filename, const uint32_t _part)
 	{
-		if(_part >= m_state.getPartCount())
+		if(_part >= m_state.getPartCount() || _part > m_editor.getProcessor().getController().getPartCount())
 			return false;
 
 		const auto patches = loadPatchesFromFiles(std::vector<std::string>{_filename});
@@ -741,7 +743,7 @@ namespace jucePluginEditorLib::patchManager
 	{
 		DB::onLoadFinished();
 
-		for(uint32_t i=0; i<m_state.getPartCount(); ++i)
+		for(uint32_t i=0; i<std::min(m_editor.getProcessor().getController().getPartCount(), static_cast<uint8_t>(m_state.getPartCount())); ++i)
 		{
 			const auto p = m_state.getPatch(i);
 

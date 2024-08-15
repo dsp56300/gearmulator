@@ -4,6 +4,7 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS "Build Osirus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS "Build OsTIrus" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
+option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 
 # ----------------- DSP56300 emulator
 
@@ -15,6 +16,7 @@ add_subdirectory(dsp56300/source)
 
 # ----------------- Common libraries used by all synths
 
+add_subdirectory(baseLib)
 add_subdirectory(synthLib)
 add_subdirectory(libresample)
 
@@ -31,29 +33,29 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
 		add_subdirectory(clap-juce-extensions)
 	endif()
-	add_subdirectory(jucePluginLib)
-	add_subdirectory(juceUiLib)
-	add_subdirectory(jucePluginEditorLib)
-	add_subdirectory(jucePluginData)
+	add_subdirectory(jucePluginLib EXCLUDE_FROM_ALL)
+	add_subdirectory(juceUiLib EXCLUDE_FROM_ALL)
+	add_subdirectory(jucePluginEditorLib EXCLUDE_FROM_ALL)
+	add_subdirectory(jucePluginData EXCLUDE_FROM_ALL)
 	
 	include(juce.cmake)
 endif()
 
 # ----------------- dependencies
-if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA OR ${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-	add_subdirectory(mc68k)
-	add_subdirectory(wLib)
-endif()
+
+add_subdirectory(mc68k EXCLUDE_FROM_ALL)
+add_subdirectory(hardwareLib EXCLUDE_FROM_ALL)
+add_subdirectory(wLib EXCLUDE_FROM_ALL)
 
 # ----------------- Synths Osirus/OsTIrus
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS OR ${CMAKE_PROJECT_NAME}_SYNTH_OSTIRUS)
-	add_subdirectory(virusLib)
-	add_subdirectory(virusConsoleLib)
+	add_subdirectory(virusLib EXCLUDE_FROM_ALL)
+	add_subdirectory(virusConsoleLib EXCLUDE_FROM_ALL)
 	add_subdirectory(virusTestConsole)
 	add_subdirectory(virusIntegrationTest)
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
-		add_subdirectory(virusJucePlugin)
+		add_subdirectory(virusJucePlugin EXCLUDE_FROM_ALL)
 		if(${CMAKE_PROJECT_NAME}_SYNTH_OSIRUS)
 			add_subdirectory(osirusJucePlugin)
 		endif()
@@ -66,22 +68,22 @@ endif()
 # ----------------- Synth Vavra
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA)
-	add_subdirectory(mqLib)
+	add_subdirectory(mqLib EXCLUDE_FROM_ALL)
 
 	# needed for test console
 	set(CPPTERMINAL_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 	set(CPPTERMINAL_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 	set(CPPTERMINAL_ENABLE_TESING OFF CACHE BOOL "" FORCE)
-	add_subdirectory(cpp-terminal)
+	add_subdirectory(cpp-terminal EXCLUDE_FROM_ALL)
 
 	if(NOT ANDROID)
-		add_subdirectory(portmidi)
+		add_subdirectory(portmidi EXCLUDE_FROM_ALL)
 	endif()
 
 	set(PA_USE_ASIO OFF CACHE BOOL "" FORCE)
-	add_subdirectory(portaudio)
+	add_subdirectory(portaudio EXCLUDE_FROM_ALL)
 
-	add_subdirectory(mqConsoleLib)
+	add_subdirectory(mqConsoleLib EXCLUDE_FROM_ALL)
 	add_subdirectory(mqTestConsole)
 	add_subdirectory(mqPerformanceTest)
 
@@ -93,10 +95,14 @@ endif()
 # ----------------- Synth Xenia
 
 if(${CMAKE_PROJECT_NAME}_SYNTH_XENIA)
-	add_subdirectory(xtLib)
+	add_subdirectory(xtLib EXCLUDE_FROM_ALL)
 	add_subdirectory(xtTestConsole)
 
 	if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		add_subdirectory(xtJucePlugin)
 	endif()
 endif()
+
+# ----------------- all nords
+
+add_subdirectory(nord)

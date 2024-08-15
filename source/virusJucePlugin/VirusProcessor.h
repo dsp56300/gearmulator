@@ -9,73 +9,75 @@
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
-//==============================================================================
-class VirusProcessor : public jucePluginEditorLib::Processor
+namespace virus
 {
-public:
-    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, virusLib::DeviceModel _defaultModel);
-    ~VirusProcessor() override;
-
-    void processBpm(float _bpm) override;
-
-	// _____________
-	//
-
-	std::string getRomName() const
-    {
-        const auto* rom = getSelectedRom();
-        if(!rom)
-			return "<invalid>";
-        return juce::File(juce::String(rom->getFilename())).getFileNameWithoutExtension().toStdString();
-    }
-
-    const virusLib::ROMFile* getSelectedRom() const
+	class VirusProcessor : public jucePluginEditorLib::Processor
 	{
-        if(m_selectedRom >= m_roms.size())
-            return {};
-        return &m_roms[m_selectedRom];
-	}
+	public:
+	    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, virusLib::DeviceModel _defaultModel);
+	    ~VirusProcessor() override;
 
-    virusLib::DeviceModel getModel() const
-    {
-        auto* rom = getSelectedRom();
-		return rom ? rom->getModel() : virusLib::DeviceModel::Invalid;
-    }
+	    void processBpm(float _bpm) override;
 
-    const auto& getRoms() const { return m_roms; }
+		// _____________
+		//
 
-    bool setSelectedRom(uint32_t _index);
-    uint32_t getSelectedRomIndex() const { return m_selectedRom; }
+		std::string getRomName() const
+	    {
+	        const auto* rom = getSelectedRom();
+	        if(!rom)
+				return "<invalid>";
+	        return juce::File(juce::String(rom->getFilename())).getFileNameWithoutExtension().toStdString();
+	    }
 
-    uint32_t getPartCount() const
-    {
-	    return getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
-    }
+	    const virusLib::ROMFile* getSelectedRom() const
+		{
+	        if(m_selectedRom >= m_roms.size())
+	            return {};
+	        return &m_roms[m_selectedRom];
+		}
 
-    virtual const char* findEmbeddedResource(const char* _name, uint32_t& _size) const = 0;
+	    virusLib::DeviceModel getModel() const
+	    {
+	        auto* rom = getSelectedRom();
+			return rom ? rom->getModel() : virusLib::DeviceModel::Invalid;
+	    }
 
-protected:
-    void postConstruct();
+	    const auto& getRoms() const { return m_roms; }
 
-    // _____________
-	//
-private:
-    synthLib::Device* createDevice() override;
+	    bool setSelectedRom(uint32_t _index);
+	    uint32_t getSelectedRomIndex() const { return m_selectedRom; }
 
-    pluginLib::Controller* createController() override;
+	    uint32_t getPartCount() const
+	    {
+		    return getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
+	    }
 
-    void saveChunkData(synthLib::BinaryStream& s) override;
-    void loadChunkData(synthLib::ChunkReader& _cr) override;
+	    virtual const char* findEmbeddedResource(const char* _name, uint32_t& _size) const = 0;
 
-    //==============================================================================
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
+	protected:
+	    void postConstruct();
 
-	std::vector<virusLib::ROMFile>      m_roms;
-    const virusLib::DeviceModel			m_defaultModel;
-    uint32_t                            m_selectedRom = 0;
+	    // _____________
+		//
+	private:
+	    synthLib::Device* createDevice() override;
 
-	uint32_t							m_clockTempoParam = 0xffffffff;
+	    pluginLib::Controller* createController() override;
 
-public:
-    pluginLib::Event<const virusLib::ROMFile*> evRomChanged;
-};
+	    void saveChunkData(baseLib::BinaryStream& s) override;
+	    void loadChunkData(baseLib::ChunkReader& _cr) override;
+
+	    //==============================================================================
+		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
+
+		std::vector<virusLib::ROMFile>      m_roms;
+	    const virusLib::DeviceModel			m_defaultModel;
+	    uint32_t                            m_selectedRom = 0;
+
+		uint32_t							m_clockTempoParam = 0xffffffff;
+
+	public:
+	    pluginLib::Event<const virusLib::ROMFile*> evRomChanged;
+	};
+}
