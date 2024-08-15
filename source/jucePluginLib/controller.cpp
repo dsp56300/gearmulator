@@ -494,12 +494,13 @@ namespace pluginLib
 		return false;
 	}
 
-	void Controller::setCurrentPart(const uint8_t _part)
+	bool Controller::setCurrentPart(const uint8_t _part)
 	{
 		if(_part == m_currentPart)
-			return;
+			return false;
 		m_currentPart = _part;
 		onCurrentPartChanged(m_currentPart);
+		return true;
 	}
 
 	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)

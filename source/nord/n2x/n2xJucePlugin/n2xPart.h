@@ -12,8 +12,6 @@ namespace n2xJucePlugin
 		Part(Editor& _editor, const std::string& _name, ButtonStyle _buttonStyle);
 
 		void onClick() override;
-
-		void mouseDown(const juce::MouseEvent& _e) override;
 	private:
 		Editor& m_editor;
 	};
