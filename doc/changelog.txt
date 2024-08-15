@@ -27,6 +27,8 @@ NodalRed2x:
 - [Imp] Added support for physical MIDI ports
 - [Imp] Added support for .nl2 patch dump format that includes patch names
 
+- [Fix] MIDI Program Change messages caused corrupted audio
+
 1.3.18
 
 Framework:

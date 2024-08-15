@@ -90,6 +90,10 @@ namespace n2x
 	{
 		if(_ev.sysex.empty())
 		{
+			// drop program change messages. We do not have any valid presets in the device, this will select garbage
+			if((_ev.a & 0xf0) == synthLib::M_PROGRAMCHANGE)
+				return true;
+
 			m_state.receive(_response, _ev);
 			auto e = _ev;
 			e.offset += m_numSamplesProcessed + getExtraLatencySamples();
