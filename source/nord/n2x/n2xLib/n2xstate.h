@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <unordered_map>
+#include <string>
 
 #include "n2xmiditypes.h"
 #include "n2xtypes.h"
