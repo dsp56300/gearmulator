@@ -142,7 +142,7 @@
  		{"class":"NonPartSensitive", "page":10, "index":315, "name":"PerfGlobalMidiChannel", "min":0, "max":15, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":316, "name":"PerfProgramChange", "min":0, "max":1, "isBool":true},
  		{"class":"NonPartSensitive", "page":10, "index":317, "name":"PerfMidiControl", "min":0, "max":1, "isBool":true},
- 		{"class":"NonPartSensitive", "page":10, "index":318, "name":"PerfMasterTune", "min":-99, "max":99, "toText":"masterTune"},
+ 		{"class":"NonPartSensitive", "page":10, "index":318, "name":"PerfMasterTune", "min":-99, "max":99, "toText":"masterTune", "default":0, "isBipolar":true},
  		{"class":"NonPartSensitive", "page":10, "index":319, "name":"PerfPedalType", "min":0, "max":2, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":320, "name":"PerfLocalControl", "min":0, "max":1, "isBool":true},
  		{"class":"NonPartSensitive", "page":10, "index":321, "name":"PerfKeyboardOctaveShift", "min":0, "max":4, "isDiscrete":true},
