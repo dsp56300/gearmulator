@@ -5,6 +5,7 @@
 
 namespace jucePluginEditorLib
 {
+	class MidiPorts;
 	class FocusedParameter;
 	class Processor;
 }
@@ -78,6 +79,7 @@ namespace n2xJucePlugin
 		std::unique_ptr<OctLed> m_octLed;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<VmMap> m_vmMap;
+		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
 
 		pluginLib::EventListener<uint8_t> onPartChanged;
 
