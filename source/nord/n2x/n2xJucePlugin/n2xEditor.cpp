@@ -9,6 +9,7 @@
 #include "n2xLfo.h"
 #include "n2xMasterVolume.h"
 #include "n2xOctLed.h"
+#include "n2xOutputMode.h"
 #include "n2xPart.h"
 #include "n2xParts.h"
 #include "n2xPatchManager.h"
@@ -81,6 +82,7 @@ namespace n2xJucePlugin
 			m_lfos[i].reset(new Lfo(*this, i));
 		m_masterVolume.reset(new MasterVolume(*this));
 		m_octLed.reset(new OctLed(*this));
+		m_outputMode.reset(new OutputMode(*this));
 		m_parts.reset(new Parts(*this));
 		m_vmMap.reset(new VmMap(*this, m_parameterBinding));
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
@@ -130,6 +132,7 @@ namespace n2xJucePlugin
 			lfo.reset();
 		m_masterVolume.reset();
 		m_octLed.reset();
+		m_outputMode.reset();
 		m_parts.reset();
 		m_vmMap.reset();
 		m_midiPorts.reset();

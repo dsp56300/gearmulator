@@ -17,6 +17,7 @@ namespace pluginLib
 
 namespace n2xJucePlugin
 {
+	class OutputMode;
 	class Lfo;
 	class FocusedParameter;
 	class PatchManager;
@@ -77,6 +78,7 @@ namespace n2xJucePlugin
 		std::array<std::unique_ptr<Lfo>, 2> m_lfos;
 		std::unique_ptr<MasterVolume> m_masterVolume;
 		std::unique_ptr<OctLed> m_octLed;
+		std::unique_ptr<OutputMode> m_outputMode;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<VmMap> m_vmMap;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;

@@ -138,7 +138,7 @@
  		{"class":"NonPartSensitive", "page":10, "index":311, "name":"PerfMorfTriggerNoteNumberD", "displayName":"MorfTrg Note D", "min":23, "max":127, "isDiscrete":true, "toText":"noteNumber"},
  		{"class":"NonPartSensitive", "page":10, "index":312, "name":"PerfBendRange", "min":0, "max":8, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":313, "name":"PerfUnisonDetune", "min":0, "max":8, "isDiscrete":true},
- 		{"class":"NonPartSensitive", "page":10, "index":314, "name":"PerfOutModeABCD", "min":0, "max":8, "isDiscrete":true},
+ 		{"class":"NonPartSensitive", "page":10, "index":314, "name":"PerfOutModeABCD", "min":0, "max":127, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":315, "name":"PerfGlobalMidiChannel", "min":0, "max":15, "isDiscrete":true},
  		{"class":"NonPartSensitive", "page":10, "index":316, "name":"PerfProgramChange", "min":0, "max":1, "isBool":true},
  		{"class":"NonPartSensitive", "page":10, "index":317, "name":"PerfMidiControl", "min":0, "max":1, "isBool":true},
