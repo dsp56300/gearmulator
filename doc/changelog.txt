@@ -23,8 +23,9 @@ Xenia:
 
 NodalRed2x:
 
-- [Imp] Added physical MIDI port selection to context menu
-- [Imp] Add support for .nl2 patch dump format that includes patch names
+- [Imp] Added Performance & Global settings page
+- [Imp] Added support for physical MIDI ports
+- [Imp] Added support for .nl2 patch dump format that includes patch names
 
 1.3.18
 
