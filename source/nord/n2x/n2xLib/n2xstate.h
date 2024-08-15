@@ -122,8 +122,10 @@ namespace n2x
 		static bool isMultiDump(const std::vector<uint8_t>& _dump);
 
 		static std::string extractPatchName(const std::vector<uint8_t>& _dump);
-		static bool hasPatchName(const std::vector<uint8_t>& _dump);
+		static bool isDumpWithPatchName(const std::vector<uint8_t>& _dump);
 		static std::vector<uint8_t> stripPatchName(const std::vector<uint8_t>& _dump);
+		static bool isValidPatchName(const std::vector<uint8_t>& _dump);
+		static std::vector<uint8_t> validateDump(const std::vector<uint8_t>& _dump);
 
 	private:
 		template<size_t Size> bool receive(const std::array<uint8_t, Size>& _data)

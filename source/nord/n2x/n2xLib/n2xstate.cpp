@@ -491,7 +491,7 @@ namespace n2x
 
 	std::string State::extractPatchName(const std::vector<uint8_t>& _dump)
 	{
-		if(!hasPatchName(_dump))
+		if(!isDumpWithPatchName(_dump))
 			return {};
 		auto* begin = &_dump[_dump.size() - g_nameLength - 1];
 		if(*begin == 0xf7)
@@ -500,19 +500,45 @@ namespace n2x
 		return name;
 	}
 
-	bool State::hasPatchName(const std::vector<uint8_t>& _dump)
+	bool State::isDumpWithPatchName(const std::vector<uint8_t>& _dump)
 	{
 		return _dump.size() == g_singleDumpWithNameSize || _dump.size() == g_multiDumpWithNameSize;
 	}
 
 	std::vector<uint8_t> State::stripPatchName(const std::vector<uint8_t>& _dump)
 	{
-		if(!hasPatchName(_dump))
+		if(!isDumpWithPatchName(_dump))
 			return _dump;
 		auto d = _dump;
 		d.erase(d.end() - g_nameLength - 1, d.end() - 1);
 		assert(d.size() == g_singleDumpSize || d.size() == g_multiDumpSize);
+		d.back() = 0xf7;
 		return d;
+	}
+
+	bool State::isValidPatchName(const std::vector<uint8_t>& _dump)
+	{
+		if(!isDumpWithPatchName(_dump))
+			return false;
+
+		if(_dump.back() != 0xf7)
+			return false;
+
+		const auto nameStart = _dump.size() - g_nameLength - 1;
+
+		for(size_t i=nameStart; i<nameStart+g_nameLength; ++i)
+		{
+			if(_dump[i] < 32 || _dump[i] >= 128)
+				return false;
+		}
+		return true;
+	}
+
+	std::vector<uint8_t> State::validateDump(const std::vector<uint8_t>& _dump)
+	{
+		if(!isValidPatchName(_dump))
+			return stripPatchName(_dump);
+		return _dump;
 	}
 
 	void State::send(const synthLib::SMidiEvent& _e) const
@@ -524,7 +550,7 @@ namespace n2x
 		{
 			const auto& sysex = _e.sysex;
 
-			if(hasPatchName(sysex))
+			if(isDumpWithPatchName(sysex))
 			{
 				auto e = _e;
 				e.sysex = stripPatchName(sysex);

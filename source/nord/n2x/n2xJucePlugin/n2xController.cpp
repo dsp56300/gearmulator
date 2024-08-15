@@ -276,7 +276,9 @@ namespace n2xJucePlugin
 			return;
 
 		const auto& single = m_state.getSingle(_part);
-		pluginLib::Controller::sendSysEx(pluginLib::SysEx{single.begin(), single.end()});
+		auto sysex = pluginLib::SysEx{single.begin(), single.end()};
+		sysex = n2x::State::validateDump(sysex);
+		pluginLib::Controller::sendSysEx(sysex);
 	}
 
 	void Controller::setMultiParameter(n2x::MultiParam _mp, uint8_t _value)
@@ -284,7 +286,9 @@ namespace n2xJucePlugin
 		if(!m_state.changeMultiParameter(_mp, _value))
 			return;
 		const auto& multi = m_state.updateAndGetMulti();
-		pluginLib::Controller::sendSysEx(pluginLib::SysEx{multi.begin(), multi.end()});
+		auto sysex = pluginLib::SysEx{multi.begin(), multi.end()};
+		sysex = n2x::State::validateDump(sysex);
+		pluginLib::Controller::sendSysEx(sysex);
 	}
 
 	uint8_t Controller::getMultiParameter(const n2x::MultiParam _param) const
