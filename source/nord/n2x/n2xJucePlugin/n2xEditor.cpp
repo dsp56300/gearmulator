@@ -136,6 +136,7 @@ namespace n2xJucePlugin
 		m_parts.reset();
 		m_vmMap.reset();
 		m_midiPorts.reset();
+		m_onSelectedPatchChanged.reset();
 	}
 
 	const char* Editor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
