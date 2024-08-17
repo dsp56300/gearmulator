@@ -20,6 +20,9 @@ Osirus:
 Xenia:
 
 - [Fix] UI not updating when loading DAW preset
+- [Fix] Play Parameters didn't show the bound parameter value while being 
+        adjusted
+- [Fix] Play Parameter knobs didn't adapt range of bound parameter
 
 NodalRed2x:
 
