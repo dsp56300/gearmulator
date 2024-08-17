@@ -48,7 +48,10 @@ namespace jucePluginEditorLib
 		void updateControlLabel(juce::Component* _component, Priority _prio);
 		void updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param);
 		void updateControlLabel(juce::Component* _component, const pluginLib::Parameter* _param, Priority _priority);
+
 		const pluginLib::Parameter* getParameterFromComponent(juce::Component* _component) const;
+
+		const pluginLib::Parameter* resolveSoftKnob(const pluginLib::Parameter* _sourceParam) const;
 
 		const pluginLib::ParameterBinding& m_parameterBinding;
 		const pluginLib::Controller& m_controller;
