@@ -87,6 +87,8 @@ namespace pluginLib
 			onTargetValueChanged();
 		});
 
+		onBind(m_targetParam);
+
 		onTargetValueChanged();
 	}
 
@@ -94,5 +96,6 @@ namespace pluginLib
 	{
 		m_targetParamListener.reset();
 		m_targetParam = nullptr;
+		onBind(nullptr);
 	}
 }
