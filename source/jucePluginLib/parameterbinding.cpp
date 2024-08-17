@@ -149,9 +149,9 @@ namespace pluginLib
 			for(uint32_t i=0; i<valueList.order.size(); ++i)
 			{
 				const auto value = valueList.orderToValue(i);
-				if(value == ValueList::InvalidIndex)
+				if(value == ValueList::InvalidValue)
 					continue;
-				if(i < range.getStart() || i > range.getEnd())
+				if(value < range.getStart() || value > range.getEnd())
 					continue;
 				const auto text = valueList.valueToText(value);
 				if(text.empty())
