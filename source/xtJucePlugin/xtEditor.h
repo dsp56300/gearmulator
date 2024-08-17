@@ -38,8 +38,6 @@ namespace xtJucePlugin
 		Editor& operator = (Editor&&) = delete;
 		Editor& operator = (const Editor&) = delete;
 
-		static const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size);
-		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		Controller& getXtController() const { return m_controller; }

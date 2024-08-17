@@ -2,7 +2,6 @@
 
 #include <fstream>
 
-#include "BinaryData.h"
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
 
@@ -32,7 +31,7 @@ namespace
 
 namespace n2xJucePlugin
 {
-	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, loadParameterDescriptions()), m_state(nullptr)
+	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_n2x.json"), m_state(nullptr)
 	{
 	    registerParams(_p);
 
@@ -52,41 +51,6 @@ namespace n2xJucePlugin
 	}
 
 	Controller::~Controller() = default;
-
-	const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size)
-	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_size = static_cast<uint32_t>(size);
-			return res;
-		}
-		return nullptr;
-	}
-
-	std::string Controller::loadParameterDescriptions()
-	{
-	    const auto name = "parameterDescriptions_n2x.json";
-	    const auto path = synthLib::getModulePath() +  name;
-
-	    const std::ifstream f(path.c_str(), std::ios::in);
-	    if(f.is_open())
-	    {
-			std::stringstream buf;
-			buf << f.rdbuf();
-	        return buf.str();
-	    }
-		
-	    uint32_t size;
-	    const auto res = findEmbeddedResource(name, size);
-	    if(res)
-	        return {res, size};
-	    return {};
-	}
 
 	void Controller::onStateLoaded()
 	{

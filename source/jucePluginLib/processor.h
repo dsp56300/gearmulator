@@ -25,6 +25,14 @@ namespace pluginLib
 	class Processor : public juce::AudioProcessor
 	{
 	public:
+		struct BinaryDataRef
+		{
+			uint32_t listSize = 0;
+			const char** originalFileNames = nullptr;
+			const char** namedResourceList = nullptr;
+			const char* (*getNamedResourceFunc)(const char*, int&) = nullptr;
+		};
+
 		struct Properties
 		{
 			const std::string name;
@@ -32,6 +40,7 @@ namespace pluginLib
 			const bool wantsMidiInput;
 			const bool producesMidiOut;
 			const bool isMidiEffect;
+			BinaryDataRef binaryData;
 		};
 
 		Processor(const BusesProperties& _busesProperties, Properties _properties);
@@ -108,6 +117,7 @@ namespace pluginLib
 
 		auto& getMidiPorts() { return m_midiPorts; }
 
+		std::optional<std::pair<const char*, uint32_t>> findResource(const std::string& _filename) const;
 	protected:
 		void destroyController();
 

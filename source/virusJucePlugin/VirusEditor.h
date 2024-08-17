@@ -57,9 +57,6 @@ namespace genericVirusUI
 
 		virus::Controller& getController() const;
 
-		const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size) const;
-		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) override;
-
 		std::pair<std::string, std::string> getDemoRestrictionText() const override;
 
 		genericUI::Button<juce::TextButton>* createJuceComponent(genericUI::Button<juce::TextButton>*, genericUI::UiObject& _object) override;

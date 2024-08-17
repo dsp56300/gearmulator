@@ -25,8 +25,6 @@ namespace n2xJucePlugin
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
-		static std::string loadParameterDescriptions();
-
 		void onStateLoaded() override;
 
 		uint8_t getPartCount() const override

@@ -3,6 +3,8 @@
 #include "PluginEditorState.h"
 #include "xtController.h"
 
+#include "BinaryData.h"
+
 #include "jucePluginLib/processor.h"
 #include "xtLib/xtDevice.h"
 
@@ -19,6 +21,17 @@ namespace
 		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorXenia";
 		return opts;
 	}
+
+	pluginLib::Processor::BinaryDataRef getBinaryData()
+	{
+		return
+		{
+			BinaryData::namedResourceListSize,
+			BinaryData::originalFilenames,
+			BinaryData::namedResourceList,
+			BinaryData::getNamedResource
+		};
+	}
 }
 
 namespace xtJucePlugin
@@ -30,7 +43,7 @@ namespace xtJucePlugin
 #if JucePlugin_IsSynth
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect})
+		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, getBinaryData()})
 	{
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));

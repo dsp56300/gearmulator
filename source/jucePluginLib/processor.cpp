@@ -312,6 +312,22 @@ namespace pluginLib
 		return m_device->getPreferredSamplerates();
 	}
 
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	{
+		const auto& bd = m_properties.binaryData;
+
+		for(uint32_t i=0; i<bd.listSize; ++i)
+		{
+			if (bd.originalFileNames[i] != _filename)
+				continue;
+
+			int size = 0;
+			const auto res = bd.getNamedResourceFunc(bd.namedResourceList[i], size);
+			return {std::make_pair(res, static_cast<uint32_t>(size))};
+		}
+		return {};
+	}
+
 	void Processor::destroyController()
 	{
 		m_controller.reset();

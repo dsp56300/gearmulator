@@ -53,8 +53,6 @@ namespace virus
 		    return getModel() == virusLib::DeviceModel::Snow ? 4 : 16;
 	    }
 
-	    virtual const char* findEmbeddedResource(const char* _name, uint32_t& _size) const = 0;
-
 	protected:
 	    void postConstruct();
 

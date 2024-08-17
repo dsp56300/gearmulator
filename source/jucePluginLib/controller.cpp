@@ -1,12 +1,16 @@
 #include "controller.h"
 
 #include <cassert>
+#include <fstream>
 
 #include "parameter.h"
 #include "processor.h"
+
 #include "dsp56kEmu/logging.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"	// juce::NativeMessageBox
+
+#include "synthLib/os.h"
 
 namespace pluginLib
 {
@@ -15,9 +19,9 @@ namespace pluginLib
 		return static_cast<uint8_t>(_p->getUnnormalizedValue());
 	}
 
-	Controller::Controller(Processor& _processor, const std::string& _parameterDescJson)
+	Controller::Controller(Processor& _processor, const std::string& _parameterDescJsonFilename)
 		: m_processor(_processor)
-		, m_descriptions(_parameterDescJson)
+		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename))
 		, m_locking(*this)
 		, m_parameterLinks(*this)
 	{
@@ -564,6 +568,24 @@ namespace pluginLib
 
 	    for (const auto& e : events)
 		    parseMidiMessage(e);
+	}
+
+	std::string Controller::loadParameterDescriptions(const std::string& _filename) const
+	{
+	    const auto path = synthLib::getModulePath() + _filename;
+
+	    const std::ifstream f(path.c_str(), std::ios::in);
+	    if(f.is_open())
+	    {
+			std::stringstream buf;
+			buf << f.rdbuf();
+	        return buf.str();
+	    }
+
+	    const auto res = m_processor.findResource(_filename);
+	    if(res)
+	        return {res->first, res->second};
+	    return {};
 	}
 
 	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const

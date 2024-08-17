@@ -31,7 +31,7 @@ namespace pluginLib
 
 		Event<uint8_t> onCurrentPartChanged;
 
-		explicit Controller(Processor& _processor, const std::string& _parameterDescJson);
+		explicit Controller(Processor& _processor, const std::string& _parameterDescJsonFilename);
 		~Controller() override;
 
 		virtual void sendParameterChange(const Parameter& _parameter, ParamValue _value) = 0;
@@ -84,6 +84,7 @@ namespace pluginLib
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
 		void processMidiMessages();
+		std::string loadParameterDescriptions(const std::string& _filename) const;
 
 	public:
 		ParameterLocking& getParameterLocking() { return m_locking; }

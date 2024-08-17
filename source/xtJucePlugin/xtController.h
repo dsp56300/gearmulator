@@ -94,8 +94,6 @@ namespace xtJucePlugin
 	private:
 		void selectPreset(int _offset);
 
-		static std::string loadParameterDescriptions();
-
 		void onStateLoaded() override;
 		uint8_t getPartCount() const override;
 

@@ -44,7 +44,7 @@ namespace mqJucePlugin
 		return g_midiPacketNames[static_cast<uint32_t>(_type)];
 	}
 
-	Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_deviceId(_deviceId)
+	Controller::Controller(AudioPluginAudioProcessor& p, unsigned char _deviceId) : pluginLib::Controller(p, "parameterDescriptions_mq.json"), m_deviceId(_deviceId)
 	{
 	    registerParams(p);
 
@@ -94,26 +94,6 @@ namespace mqJucePlugin
 
 		requestSingle(isMultiMode() ? mqLib::MidiBufferNum::SingleEditBufferMultiMode : mqLib::MidiBufferNum::SingleEditBufferSingleMode, 
 			isMultiMode() ? mqLib::MidiSoundLocation::EditBufferFirstMultiSingle : mqLib::MidiSoundLocation::EditBufferCurrentSingle);
-	}
-
-	std::string Controller::loadParameterDescriptions()
-	{
-	    const auto name = "parameterDescriptions_mq.json";
-	    const auto path = synthLib::getModulePath() +  name;
-
-	    const std::ifstream f(path.c_str(), std::ios::in);
-	    if(f.is_open())
-	    {
-			std::stringstream buf;
-			buf << f.rdbuf();
-	        return buf.str();
-	    }
-
-	    uint32_t size;
-	    const auto res = mqJucePlugin::Editor::findEmbeddedResource(name, size);
-	    if(res)
-	        return {res, size};
-	    return {};
 	}
 
 	void Controller::onStateLoaded()

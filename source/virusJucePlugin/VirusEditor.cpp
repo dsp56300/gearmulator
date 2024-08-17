@@ -185,16 +185,6 @@ namespace genericVirusUI
 		return static_cast<virus::Controller&>(m_processor.getController());
 	}
 
-	const char* VirusEditor::findEmbeddedResource(const std::string& _filename, uint32_t& _size) const
-	{
-		return m_processor.findEmbeddedResource(_filename.c_str(), _size);
-	}
-
-	const char* VirusEditor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
-	{
-		return findEmbeddedResource(_filename, _size);
-	}
-
 	std::pair<std::string, std::string> VirusEditor::getDemoRestrictionText() const
 	{
 		return {
