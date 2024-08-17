@@ -48,9 +48,9 @@ namespace pluginLib
 	}
 	void ParameterBinding::bind(juce::Slider &_slider, uint32_t _param, const uint8_t _part)
 	{
-		const auto v = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+		const auto param = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
 
-		if (!v)
+		if (!param)
 		{
 			assert(false && "Failed to find parameter");
 			return;
@@ -58,26 +58,49 @@ namespace pluginLib
 
 		removeMouseListener(_slider);
 
-		auto* listener = new MouseListener(v, _slider);
+		auto* listener = new MouseListener(param, _slider);
 		m_sliderMouseListeners.insert(std::make_pair(&_slider, listener));
 
 		_slider.addMouseListener(listener, false);
 
-		const auto& range = v->getNormalisableRange();
+		const auto& range = param->getNormalisableRange();
 
 		_slider.setRange(range.start, range.end, range.interval);
-		_slider.setDoubleClickReturnValue(true, v->convertFrom0to1(v->getDefaultValue()));
-		_slider.getValueObject().referTo(v->getValueObject());
+		_slider.setDoubleClickReturnValue(true, param->convertFrom0to1(param->getDefaultValue()));
+		_slider.getValueObject().referTo(param->getValueObject());
 		_slider.getProperties().set("type", "slider");
-		_slider.getProperties().set("name", juce::String(v->getDescription().name));
+		_slider.getProperties().set("name", juce::String(param->getDescription().name));
 
-		if (v->isBipolar()) 
+		if (param->isBipolar()) 
 			_slider.getProperties().set("bipolar", true);
 
 		// Juce bug: If the range changes but the value doesn't, Juce doesn't issue a repaint. Do it manually
 		_slider.repaint();
 
-		const BoundParameter p{v, &_slider, _param, _part};
+		BoundParameter p{param, &_slider, _param, _part};
+
+		if(param->getDescription().isSoftKnob())
+		{
+			auto* softknob = m_controller.getSoftknob(param);
+
+			if(softknob)
+			{
+				p.softknobTargetChangedListenerId = softknob->onBind.addListener([&_slider](Parameter* const& _parameter)
+				{
+					if(!_parameter)
+						return;
+					const auto& range = _parameter->getNormalisableRange();
+					_slider.setRange(range.start, range.end, range.interval);
+				});
+
+				if(const auto* target = softknob->getTargetParameter())
+				{
+					const auto& r = target->getNormalisableRange();
+					_slider.setRange(r.start, r.end, r.interval);
+				}
+			}
+		}
+
 		addBinding(p);
 	}
 
@@ -126,9 +149,9 @@ namespace pluginLib
 			for(uint32_t i=0; i<valueList.order.size(); ++i)
 			{
 				const auto value = valueList.orderToValue(i);
-				if(value == ValueList::InvalidIndex)
+				if(value == ValueList::InvalidValue)
 					continue;
-				if(i < range.getStart() || i > range.getEnd())
+				if(value < range.getStart() || value > range.getEnd())
 					continue;
 				const auto text = valueList.valueToText(value);
 				if(text.empty())
@@ -178,7 +201,7 @@ namespace pluginLib
 			}
 		};
 
-		const auto listenerId = v->onValueChanged.addListener([this, &_combo](pluginLib::Parameter* v)
+		const auto listenerId = v->onValueChanged.addListener([this, &_combo](const pluginLib::Parameter* v)
 		{
 			const auto value = v->getUnnormalizedValue();
 			_combo.setSelectedId(value + 1, juce::dontSendNotification);
@@ -366,6 +389,14 @@ namespace pluginLib
 		{
 			_b.parameter->onValueChanged.removeListener(_b.onChangeListenerId);
 			_b.onChangeListenerId = ParameterListener::InvalidListenerId;
+		}
+
+		if(_b.softknobTargetChangedListenerId != ParameterListener::InvalidListenerId)
+		{
+			auto* softknob = m_controller.getSoftknob(_b.parameter);
+			assert(softknob);
+			softknob->onBind.removeListener(_b.softknobTargetChangedListenerId);
+			_b.softknobTargetChangedListenerId = ParameterListener::InvalidListenerId;
 		}
 	}
 

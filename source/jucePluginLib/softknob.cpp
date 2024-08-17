@@ -6,15 +6,9 @@
 
 namespace pluginLib
 {
-	namespace
-	{
-		uint32_t g_softKnobListenerId = 0x50f750f7;
-	}
-
 	SoftKnob::SoftKnob(const Controller& _controller, const uint8_t _part, const uint32_t _parameterIndex)
 		: m_controller(_controller)
 		, m_part(_part)
-		, m_uniqueId(g_softKnobListenerId++)
 	{
 		m_sourceParam = _controller.getParameter(_parameterIndex, _part);
 		assert(m_sourceParam);
@@ -93,6 +87,8 @@ namespace pluginLib
 			onTargetValueChanged();
 		});
 
+		onBind(m_targetParam);
+
 		onTargetValueChanged();
 	}
 
@@ -100,5 +96,6 @@ namespace pluginLib
 	{
 		m_targetParamListener.reset();
 		m_targetParam = nullptr;
+		onBind(nullptr);
 	}
 }

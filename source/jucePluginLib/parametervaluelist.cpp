@@ -22,17 +22,17 @@ namespace pluginLib
 		return texts[_value];
 	}
 
-	uint32_t ValueList::orderToValue(const uint32_t _orderIndex) const
+	ParamValue ValueList::orderToValue(const uint32_t _orderIndex) const
 	{
 		if(_orderIndex >= order.size())
-			return InvalidIndex;
+			return InvalidValue;
 		return order[_orderIndex];
 	}
 
 	const std::string& ValueList::orderToText(const uint32_t _orderIndex) const
 	{
 		const auto value = orderToValue(_orderIndex);
-		if(value == InvalidIndex)
+		if(value == InvalidValue)
 			return g_empty;
 		return valueToText(value);
 	}

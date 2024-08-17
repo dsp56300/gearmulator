@@ -143,6 +143,8 @@ namespace jucePluginEditorLib
 
 		stopTimer();
 
+		_param = resolveSoftKnob(_param);
+
 		if(!_param || !_component)
 		{
 			m_currentPriority = Priority::None;
@@ -181,13 +183,17 @@ namespace jucePluginEditorLib
 
 		const auto* param = m_controller.getParameter(paramIdx, static_cast<uint8_t>(part));
 
-		// do not show soft knob parameter if the softknob is bound to another parameter
-		if(param && param->getDescription().isSoftKnob())
+		return param;
+	}
+
+	const pluginLib::Parameter* FocusedParameter::resolveSoftKnob(const pluginLib::Parameter* _sourceParam) const
+	{
+		if(_sourceParam && _sourceParam->getDescription().isSoftKnob())
 		{
-			const auto* softKnob = m_controller.getSoftknob(param);
+			const auto* softKnob = m_controller.getSoftknob(_sourceParam);
 			if(softKnob && softKnob->isBound())
 				return softKnob->getTargetParameter();
 		}
-		return param;
+		return _sourceParam;
 	}
 }

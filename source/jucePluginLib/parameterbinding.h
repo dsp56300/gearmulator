@@ -45,6 +45,7 @@ namespace pluginLib
 			uint32_t paramIndex = 0xffffffff;
 			uint8_t part = CurrentPart;
 			size_t onChangeListenerId = ParameterListener::InvalidListenerId;
+			size_t softknobTargetChangedListenerId = ParameterListener::InvalidListenerId;
 		};
 
 		Event<BoundParameter> onBind;
