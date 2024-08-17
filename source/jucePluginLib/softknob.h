@@ -35,7 +35,6 @@ namespace pluginLib
 
 		const Controller& m_controller;
 		const uint8_t m_part;
-		const uint32_t m_uniqueId;
 
 		Parameter* m_sourceParam = nullptr;
 		Parameter* m_targetSelect = nullptr;
