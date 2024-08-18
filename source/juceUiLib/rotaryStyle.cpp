@@ -34,9 +34,10 @@ namespace genericUI
 //      const auto stepX = juce::roundToInt(static_cast<float>(stepsX - 1) * sliderPosProportional);
 		const auto stepY = juce::roundToInt(static_cast<float>(stepsY - 1) * sliderPosProportional);
 
-		m_drawable->setOriginWithOriginalSize({0.0f, static_cast<float>(-m_tileSizeY * stepY)});
+		auto t = juce::AffineTransform();
 
-		auto t = juce::AffineTransform::translation (static_cast<float>(x), static_cast<float>(y));
+		t = t.translated(static_cast<float>(x), static_cast<float>(y));
+		t = t.translated(0.0f, static_cast<float>(-m_tileSizeY * stepY));
 
 		if(width != m_tileSizeX || height != m_tileSizeY)
 		{

@@ -67,10 +67,17 @@ namespace genericUI
 				{
 					m_createdDrawables.emplace_back(d->createCopy());
 					d = m_createdDrawables.back().get();
+
+					juce::AffineTransform t;
 					if(isVerticalTiling)
-						d->setOriginWithOriginalSize({0, static_cast<float>(-imageIndex * m_tileSizeY)});
+					{
+						t = d->getTransform().translated(0, static_cast<float>(-imageIndex * m_tileSizeY));
+					}
 					else
-						d->setOriginWithOriginalSize({static_cast<float>(-imageIndex * m_tileSizeX), 0.0f});
+					{
+						t = d->getTransform().translated(static_cast<float>(-imageIndex * m_tileSizeX), 0);
+					}
+					d->setTransform(t);
 				}
 
 				*imageDrawables[i] = d;
