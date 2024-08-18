@@ -37,6 +37,9 @@ namespace genericUI
 			if (!data)
 				throw std::runtime_error("Failed to find image named " + dataName);
 			auto drawable = juce::Drawable::createFromImageData(data, dataSize);
+#ifdef _DEBUG
+			drawable->setName(dataName);
+#endif
 			m_drawables.insert(std::make_pair(texture, std::move(drawable)));
 		}
 
