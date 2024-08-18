@@ -262,4 +262,30 @@ namespace genericUI
 			return {};
 		return it->second;
 	}
+
+	bool Editor::resizeDrawableImage(juce::DrawableImage& _drawable, const uint32_t _percent)
+	{
+		if(_percent == 100)
+			return true;
+		if(_percent < 1)
+			return false;
+
+		auto image = _drawable.getImage();
+		const auto x = image.getBounds().getX();
+		const auto y = image.getBounds().getY();
+		const auto w = image.getWidth();
+		const auto h = image.getHeight();
+
+		const int percent = static_cast<int>(_percent);
+
+		image = image.rescaled(w * percent / 100, h * percent / 100);
+
+		_drawable.setImage(image);
+		auto b = image.getBounds();
+		b.setSize(w, h);
+		b.setPosition(x, y);
+		_drawable.setBounds(b);
+		_drawable.setBoundingBox(b.toFloat());
+		return true;
+	}
 }
