@@ -4,8 +4,8 @@
 
 namespace pluginLib
 {
-	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId)
-		: juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), "Ch " + juce::String(_partNum + 1) + " " + _desc.displayName)
+	Parameter::Parameter(Controller& _controller, const Description& _desc, const uint8_t _partNum, const int _uniqueId, const PartFormatter& _partFormatter)
+		: juce::RangedAudioParameter(genId(_desc, _partNum, _uniqueId), _partFormatter(_partNum, _desc.isNonPartSensitive()) + " " + _desc.displayName)
 		, m_controller(_controller)
 		, m_desc(_desc)
 		, m_part(_partNum)

@@ -42,10 +42,17 @@ namespace pluginLib
 		m_softKnobs.clear();
 	}
 
-	void Controller::registerParams(juce::AudioProcessor& _processor)
+	void Controller::registerParams(juce::AudioProcessor& _processor, Parameter::PartFormatter _partFormatter/* = nullptr*/)
     {
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
 
+		if(!_partFormatter)
+		{
+			_partFormatter = [](const uint8_t& _part, bool)
+			{
+				return juce::String("Ch ") + juce::String(_part + 1);
+			};
+		}
 		std::map<ParamIndex, int> knownParameterIndices;
 
     	for (uint8_t part = 0; part < getPartCount(); part++)
@@ -53,7 +60,7 @@ namespace pluginLib
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
 
     		const auto partNumber = juce::String(part + 1);
-			auto group = std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
+			auto group = std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, _partFormatter(part, false), "|");
 
 			for (const auto& desc : m_descriptions.getDescriptions())
 			{
@@ -69,7 +76,7 @@ namespace pluginLib
 					uid = ++itKnownParamIdx->second;
 
 				std::unique_ptr<Parameter> p;
-				p.reset(createParameter(*this, desc, part, uid));
+				p.reset(createParameter(*this, desc, part, uid, _partFormatter));
 
 				if(uid > 0)
 				{
@@ -608,8 +615,8 @@ namespace pluginLib
 		return result;
 	}
 
-	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
+	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, const uint8_t _part, const int _uid, const Parameter::PartFormatter& _partFormatter)
 	{
-		return new Parameter(_controller, _desc, _part, _uid);
+		return new Parameter(_controller, _desc, _part, _uid, _partFormatter);
 	}
 }

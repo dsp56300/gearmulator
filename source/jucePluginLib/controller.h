@@ -110,8 +110,8 @@ namespace pluginLib
 		Processor& getProcessor() const { return m_processor; }
 
 	protected:
-		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid);
-		void registerParams(juce::AudioProcessor& _processor);
+		virtual Parameter* createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid, const Parameter::PartFormatter& _partFormatter);
+		void registerParams(juce::AudioProcessor& _processor, Parameter::PartFormatter _partFormatter = nullptr);
 
 		void sendSysEx(const pluginLib::SysEx &) const;
 		bool sendSysEx(const std::string& _packetName) const;
