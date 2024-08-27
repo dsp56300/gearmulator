@@ -201,7 +201,7 @@ namespace n2xJucePlugin
 		if(getPatchManager()->createSaveMenuEntries(menu, "Program"))
 			menu.addSeparator();
 
-		getPatchManager()->createSaveMenuEntries(menu, m_controller.getPartCount(), "Performance");
+		getPatchManager()->createSaveMenuEntries(menu, "Performance", 1);
 
 		menu.showMenuAsync({});
 	}

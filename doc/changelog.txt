@@ -13,6 +13,7 @@ NodalRed2x:
 - [Fix] Negative VM MAP values were displayed as maximum positive values after loading
         a patch or DAW state
 - [Fix] Performances saved via "Store" button couldn't be loaded
+- [Fix] Crash when storing a performance via "Store" button while slot A is selected
 
 1.3.19
 
