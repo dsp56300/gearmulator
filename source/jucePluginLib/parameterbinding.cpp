@@ -323,7 +323,6 @@ namespace pluginLib
 
 			disableBinding(*it);
 
-			m_disabledBindings.push_back(*it);
 			m_bindings.erase(it);
 
 			return true;
