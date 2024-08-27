@@ -622,6 +622,15 @@ namespace xt
 			static_cast<uint8_t>(p >> 7), static_cast<uint8_t>(p & 0x7f), _value, 0xf7});
 	}
 
+	void State::sendMultiParameter(const uint8_t _instrument, MultiParameter _param, const uint8_t _value)
+	{
+		const SysEx sysex{0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiParameterChange),
+			_instrument, static_cast<uint8_t>(static_cast<uint8_t>(_param) - static_cast<uint8_t>(MultiParameter::Inst0First)), _value, 0xf7};
+
+		Responses responses;
+		receive(responses, sysex, Origin::External);
+	}
+
 	void State::sendSysex(const std::initializer_list<uint8_t>& _data) const
 	{
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);

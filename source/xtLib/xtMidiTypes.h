@@ -208,5 +208,4 @@ namespace xt
 			return _index < g_tableCount;
 		}
 	}
-
 }

@@ -173,6 +173,7 @@ namespace xt
 		void requestMulti(LocationH _buf, uint8_t _location) const;
 		void sendMulti(const std::vector<uint8_t>& _multiData) const;
 		void sendGlobalParameter(GlobalParameter _param, uint8_t _value);
+		void sendMultiParameter(uint8_t _instrument, MultiParameter _param, uint8_t _value);
 		void sendSysex(const std::initializer_list<uint8_t>& _data) const;
 		void sendSysex(const SysEx& _data) const;
 
