@@ -343,6 +343,7 @@ namespace n2xJucePlugin
 
 		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
 		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
+		d[n2x::SysexIndex::IdxDevice] = n2x::DefaultDeviceId;
 
 		pluginLib::Controller::sendSysEx(n2x::State::validateDump(d));
 
