@@ -201,7 +201,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 				const auto pathEndPos = jsonName.find_last_of("/\\");
 				if(pathEndPos != std::string::npos)
 					jsonName = file.substr(pathEndPos+1);
-				const Skin skin{jsonName + " (" + relativePath + ")", jsonName, relativePath};
+				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, relativePath};
 				addSkinEntry(skin);
 			}
 		}
@@ -389,7 +389,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		{
 			if(!allowAdvanced)
 			{
-				if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning", 
+				if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning",
 					"Changing these settings may cause instability of the plugin.\n"
 					"\n"
 					"Please confirm to continue.")
