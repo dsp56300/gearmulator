@@ -352,8 +352,12 @@ namespace pluginLib
 	{
 		m_bindings.emplace_back(_boundParameter);
 
-		_boundParameter.component->getProperties().set("parameter", static_cast<int>(_boundParameter.paramIndex));
-		_boundParameter.component->getProperties().set("part", _boundParameter.part);
+		const auto paramIndex = _boundParameter.paramIndex;
+		_boundParameter.component->getProperties().set("parameter", static_cast<int>(paramIndex));
+		if(_boundParameter.part != CurrentPart)
+			_boundParameter.component->getProperties().set("part", _boundParameter.part);
+		else
+			_boundParameter.component->getProperties().remove("part");
 
 		m_boundComponents.erase(_boundParameter.component);
 		m_boundParameters.erase(_boundParameter.parameter);
