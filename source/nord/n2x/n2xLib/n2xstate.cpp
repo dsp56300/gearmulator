@@ -244,7 +244,7 @@ namespace n2x
 			return true;
 		}
 
-		if(sysex.size() == g_multiDumpSize)
+		if(isMultiDump(sysex))
 		{
 			if(bank != SysexByte::MultiDumpBankEditBuffer)
 				return false;

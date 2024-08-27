@@ -320,6 +320,7 @@ namespace n2xJucePlugin
 		const auto multi = m_state.updateAndGetMulti();
 
 		std::vector<uint8_t> result(multi.begin(), multi.end());
+		result = n2x::State::validateDump(result);
 
 		result[n2x::SysexIndex::IdxMsgType] = _bank;
 		result[n2x::SysexIndex::IdxMsgSpec] = _program;
@@ -343,7 +344,7 @@ namespace n2xJucePlugin
 		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
 		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
 
-		pluginLib::Controller::sendSysEx(d);
+		pluginLib::Controller::sendSysEx(n2x::State::validateDump(d));
 
 		if(isSingle)
 			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
