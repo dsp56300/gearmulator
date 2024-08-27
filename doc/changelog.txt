@@ -1,5 +1,12 @@
 Release Notes 
 
+1.3.20
+
+NodalRed2x:
+
+- [Fix] UI state not updated when loading preset via DAW
+- [Fix] Synth lost state of previously loaded DAW preset after switching the active part
+
 1.3.19
 
 Framework:

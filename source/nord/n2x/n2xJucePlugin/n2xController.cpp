@@ -35,14 +35,7 @@ namespace n2xJucePlugin
 	{
 	    registerParams(_p);
 
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 1);
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 2);
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 3);
-
-		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
-
-		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
+		Controller::onStateLoaded();
 
 		m_currentPartChanged.set(onCurrentPartChanged, [this](const uint8_t& _part)
 		{
@@ -54,6 +47,13 @@ namespace n2xJucePlugin
 
 	void Controller::onStateLoaded()
 	{
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 1);
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 2);
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 3);
+
+		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
+
 		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
 	}
 
