@@ -96,6 +96,10 @@ namespace n2xJucePlugin
 		if(!parseMidiPacket(midiPacketName(MidiPacketType::SingleDump), data, params, _msg))
 			return false;
 
+		// the read parameters are in range 0-255 but the synth has a range of -128 to 127 (signed byte)
+		for (auto& param : params)
+			param.second = static_cast<int8_t>(param.second);  // NOLINT(bugprone-signed-char-misuse)
+
 		const auto bank = data[pluginLib::MidiDataType::Bank];
 		const auto program = data[pluginLib::MidiDataType::Program];
 
@@ -118,6 +122,10 @@ namespace n2xJucePlugin
 
 		if(!parseMidiPacket(midiPacketName(MidiPacketType::MultiDump), data, params, _msg))
 			return false;
+
+		// the read parameters are in range 0-255 but the synth has a range of -128 to 127 (signed byte)
+		for (auto& param : params)
+			param.second = static_cast<int8_t>(param.second);  // NOLINT(bugprone-signed-char-misuse)
 
 		const auto bank = data[pluginLib::MidiDataType::Bank];
 
@@ -205,7 +213,7 @@ namespace n2xJucePlugin
 		if(ccs.empty())
 		{
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-			setSingleParameter(part, singleParam, _value);
+			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
 			return;
 		}
 
