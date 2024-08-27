@@ -1488,6 +1488,9 @@ namespace pluginLib::patchDB
 				// if we cannot save patch modifications to a separate file, add them to the global file
 				if(!saveJson(dataSource))
 				{
+#ifdef _DEBUG
+					assert(dataSource->type != SourceType::LocalStorage && "expected separate json for local storage, unable to write file");
+#endif
 					for (const auto& patch : dataSource->patches)
 					{
 						if(!patch->modifications || patch->modifications->empty())
