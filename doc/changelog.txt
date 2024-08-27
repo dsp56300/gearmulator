@@ -19,6 +19,8 @@ NodalRed2x:
 - [Fix] Performances saved via "Store" button couldn't be loaded
 - [Fix] Crash when storing a performance via "Store" button while slot A is selected
 - [Fix] Patches with a different device ID failed to load
+- [Fix] Parameter tooltips for VM map parameters displayed values for the non-VM 
+        versions when hovering
 
 Xenia:
 
