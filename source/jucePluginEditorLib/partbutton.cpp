@@ -33,7 +33,7 @@ namespace jucePluginEditorLib
 		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(_dragSourceDetails);
 
 		if(savePatchDesc)
-			return savePatchDesc->getPart() != getPart();
+			return !savePatchDesc->isPartValid() || savePatchDesc->getPart() != getPart();
 
 		const auto patch = getPatchFromDragSource(_dragSourceDetails);
 		return patch.first != nullptr;
@@ -99,9 +99,13 @@ namespace jucePluginEditorLib
 
 		if(savePatchDesc)
 		{
-			if(savePatchDesc->getPart() == m_part)
-				return;
-			pm->copyPart(m_part, static_cast<uint8_t>(savePatchDesc->getPart()));
+			// part is not valid if the drag source is the patch manager
+			if(savePatchDesc->isPartValid())
+			{
+				if(savePatchDesc->getPart() == getPart())
+					return;
+				pm->copyPart(m_part, static_cast<uint8_t>(savePatchDesc->getPart()));
+			}
 		}
 
 		const auto [patch, list] = getPatchFromDragSource(_dragSourceDetails);
