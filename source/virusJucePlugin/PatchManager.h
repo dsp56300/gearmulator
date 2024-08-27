@@ -25,7 +25,7 @@ namespace genericVirusUI
 		std::shared_ptr<pluginLib::patchDB::Patch> initializePatch(std::vector<uint8_t>&& _sysex) override;
 		pluginLib::patchDB::Data prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const override;
 		bool parseFileData(std::vector<std::vector<uint8_t>>& _results, const std::vector<uint8_t>& _data) override;
-		bool requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part) override;
+		bool requestPatchForPart(pluginLib::patchDB::Data& _data, uint32_t _part, uint64_t _userData) override;
 		uint32_t getCurrentPart() const override;
 		bool equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const override;
 

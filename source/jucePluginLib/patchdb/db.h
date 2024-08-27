@@ -72,8 +72,8 @@ namespace pluginLib::patchDB
 
 		static bool isValid(const PatchPtr& _patch);
 
-		PatchPtr requestPatchForPart(uint32_t _part);
-		virtual bool requestPatchForPart(Data& _data, uint32_t _part) = 0;
+		PatchPtr requestPatchForPart(uint32_t _part, uint64_t _userData = 0);
+		virtual bool requestPatchForPart(Data& _data, uint32_t _part, uint64_t _userData) = 0;
 
 		bool isLoading() const { return m_loading; }
 		bool isScanning() const { return !m_loader.empty(); }

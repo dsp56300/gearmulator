@@ -92,7 +92,7 @@ namespace jucePluginEditorLib::patchManager
 
 		void copyPatchesToLocalStorage(const pluginLib::patchDB::DataSourceNodePtr& _ds, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, int _part);
 
-		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name = "patch");
+		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name = "patch", uint64_t _userData = 0);
 		uint32_t createSaveMenuEntries(juce::PopupMenu& _menu, const std::string& _name = "patch")
 		{
 			return createSaveMenuEntries(_menu, getCurrentPart(), _name);

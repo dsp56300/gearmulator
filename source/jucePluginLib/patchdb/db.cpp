@@ -589,10 +589,10 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	PatchPtr DB::requestPatchForPart(const uint32_t _part)
+	PatchPtr DB::requestPatchForPart(const uint32_t _part, const uint64_t _userData)
 	{
 		Data data;
-		requestPatchForPart(data, _part);
+		requestPatchForPart(data, _part, _userData);
 		return initializePatch(std::move(data));
 	}
 
