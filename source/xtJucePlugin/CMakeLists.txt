@@ -24,6 +24,7 @@ set(SOURCES
 	weWaveform.cpp weWaveform.h
 	weWaveTree.cpp weWaveTree.h
 	weWaveTreeItem.cpp weWaveTreeItem.h
+	xtArp.cpp xtArp.h
 	xtController.cpp xtController.h
 	xtEditor.cpp xtEditor.h
 	xtFrontPanel.cpp xtFrontPanel.h

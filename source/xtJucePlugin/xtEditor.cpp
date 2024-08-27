@@ -2,6 +2,7 @@
 
 #include "BinaryData.h"
 #include "PluginProcessor.h"
+#include "xtArp.h"
 
 #include "xtController.h"
 #include "xtFocusedParameter.h"
@@ -123,10 +124,13 @@ namespace xtJucePlugin
 #endif
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
+
+		m_arp.reset(new Arp(*this));
 	}
 
 	Editor::~Editor()
 	{
+		m_arp.reset();
 		if(m_waveEditor)
 			m_waveEditor->destroy();
 		getXtController().setWaveEditor(nullptr);

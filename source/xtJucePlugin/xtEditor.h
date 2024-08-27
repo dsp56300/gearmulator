@@ -26,6 +26,7 @@ namespace xtJucePlugin
 	class PatchManager;
 	class XtLcd;
 	class Controller;
+	class Arp;
 
 	class Editor final : public jucePluginEditorLib::Editor
 	{
@@ -50,6 +51,9 @@ namespace xtJucePlugin
 		juce::Component* createJuceComponent(juce::Component*, genericUI::UiObject& _object) override;
 
 		void setCurrentPart(uint8_t _part) override;
+
+		auto& getParameterBinding() const { return m_parameterBinding; }
+
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
 		void changeWave(int _step) const;
@@ -61,6 +65,7 @@ namespace xtJucePlugin
 		std::unique_ptr<FrontPanel> m_frontPanel;
 		std::unique_ptr<Parts> m_parts;
 		std::unique_ptr<jucePluginEditorLib::MidiPorts> m_midiPorts;
+		std::unique_ptr<Arp> m_arp;
 
 		WaveEditor* m_waveEditor = nullptr;
 
