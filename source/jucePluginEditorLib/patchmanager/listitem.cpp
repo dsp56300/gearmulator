@@ -111,29 +111,31 @@ namespace jucePluginEditorLib::patchManager
 
 				const auto existingPatch = m_list.getPatch(m_row);
 
-				if(1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::QuestionIcon, 
-					"Replace Patch", 
-					"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart()+1) + "?"))
+				if(existingPatch)
 				{
-					pm.replacePatch(existingPatch, patches.front());
+					if(1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::QuestionIcon, 
+						"Replace Patch", 
+						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart()+1) + "?"))
+					{
+						pm.replacePatch(existingPatch, patches.front());
+					}
+					return;
 				}
 			}
-			else
-			{
-#if SYNTHLIB_DEMO_MODE
-				pm.getEditor().showDemoRestrictionMessageBox();
-#else
-				const auto part = savePatchDesc->getPart();
 
-				pm.copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+#if SYNTHLIB_DEMO_MODE
+			pm.getEditor().showDemoRestrictionMessageBox();
+#else
+			const auto part = savePatchDesc->getPart();
+
+			pm.copyPatchesTo(source, patches, row, [this, part](const std::vector<pluginLib::patchDB::PatchPtr>& _patches)
+			{
+				juce::MessageManager::callAsync([this, part, _patches]
 				{
-					juce::MessageManager::callAsync([this, part, _patches]
-					{
-						m_list.getPatchManager().setSelectedPatch(part, _patches.front());
-					});
+					m_list.getPatchManager().setSelectedPatch(part, _patches.front());
 				});
+			});
 #endif
-			}
 
 			repaint();
 		}

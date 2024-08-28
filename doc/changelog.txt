@@ -7,6 +7,7 @@ Framework:
 - [Imp] Strip path names from skin names in GUI Skin submenu (mkruselj)
 
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
+- [Fix] Crash when dragging a patch on empty area in grid view
 
 NodalRed2x:
 
