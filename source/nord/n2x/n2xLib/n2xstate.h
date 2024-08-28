@@ -39,8 +39,10 @@ namespace n2x
 		bool changeSingleParameter(uint8_t _part, SingleParam _parameter, uint8_t _value);
 		bool changeMultiParameter(MultiParam _parameter, uint8_t _value);
 
+		static bool changeSingleParameter(SingleDump& _dump, SingleParam _param, uint8_t _value);
+
 		template<typename TDump>
-		bool changeDumpParameter(TDump& _dump, uint32_t _offset, uint8_t _value)
+		static bool changeDumpParameter(TDump& _dump, uint32_t _offset, uint8_t _value)
 		{
 			const auto current = unpackNibbles(_dump, _offset);
 			if(current == _value)

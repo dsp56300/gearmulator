@@ -337,10 +337,12 @@ namespace n2xJucePlugin
 		return result;
 	}
 
-	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part) const
+	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part)
 	{
 		if(_part >= getPartCount())
 			return false;
+
+		const auto part = static_cast<uint8_t>(_part);
 
 		const auto isSingle = n2x::State::isSingleDump(_sysex);
 		const auto isMulti = n2x::State::isMultiDump(_sysex);
@@ -354,10 +356,63 @@ namespace n2xJucePlugin
 		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
 		d[n2x::SysexIndex::IdxDevice] = n2x::DefaultDeviceId;
 
+		auto applyLockedParamsToSingle = [&](n2x::State::SingleDump& _dump, const uint8_t _singlePart)
+		{
+			const auto& lockedParameters = getParameterLocking().getLockedParameters(_singlePart);
+
+			for (auto& lockedParam : lockedParameters)
+			{
+				const auto& name = lockedParam->getDescription().name;
+
+				if(name == "Sync" || name == "RingMod" || name == "Distortion")
+				{
+					const auto current = n2x::State::getSingleParam(_dump, n2x::Sync, 0);
+					const auto value = combineSyncRingModDistortion(_singlePart, current, true);
+					n2x::State::changeSingleParameter(_dump, n2x::Sync, value);
+				}
+				else
+				{
+					const auto singleParam = static_cast<n2x::SingleParam>(lockedParam->getDescription().index);
+					const auto val = lockedParam->getUnnormalizedValue();
+					n2x::State::changeSingleParameter(_dump, singleParam, static_cast<uint8_t>(val));
+				}
+			}
+		};
+
+		if(isSingle)
+		{
+			if(!getParameterLocking().getLockedParameters(part).empty())
+			{
+				n2x::State::SingleDump dump;
+				std::copy_n(d.begin(), d.size(), dump.begin());
+				applyLockedParamsToSingle(dump, part);
+				std::copy_n(dump.begin(), d.size(), d.begin());
+			}
+		}
+		else
+		{
+			n2x::State::MultiDump multi;
+			std::copy_n(d.begin(), d.size(), multi.begin());
+			for(uint8_t i=0; i<4; ++i)
+			{
+				n2x::State::SingleDump single;
+
+				for(uint8_t p=0; p<4; ++p)
+				{
+					n2x::State::extractSingleFromMulti(single, multi, p);
+					applyLockedParamsToSingle(single, p);
+					n2x::State::copySingleToMulti(multi, single, p);
+				}
+			}
+			std::copy_n(multi.begin(), d.size(), d.begin());
+		}
+
 		pluginLib::Controller::sendSysEx(n2x::State::validateDump(d));
 
 		if(isSingle)
+		{
 			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
+		}
 		else
 		{
 			requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);

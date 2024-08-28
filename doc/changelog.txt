@@ -6,6 +6,7 @@ Framework:
 
 - [Imp] Strip path names from skin names in GUI Skin submenu (mkruselj)
 
+- [Fix] Region Locking is now implemented
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
 - [Fix] Crash when dragging a patch on empty area in grid view
 - [Fix] Drag target slot rectangles displayed in grid view for areas without content
