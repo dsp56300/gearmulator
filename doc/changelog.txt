@@ -8,6 +8,7 @@ Framework:
 
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
 - [Fix] Crash when dragging a patch on empty area in grid view
+- [Fix] Drag target slot rectangles displayed in grid view for areas without content
 
 NodalRed2x:
 

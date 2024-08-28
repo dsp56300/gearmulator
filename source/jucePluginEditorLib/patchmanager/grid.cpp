@@ -68,7 +68,13 @@ namespace jucePluginEditorLib::patchManager
 	void Grid::setVisibleItemRange(const std::pair<uint32_t, uint32_t>& _range)
 	{
 		const auto& start = _range.first;
-		const auto& end = start + _range.second;
+
+		auto end = start + _range.second;
+
+		if(end > static_cast<uint32_t>(getNumRows()))
+		{
+			end = std::max(0, getNumRows());
+		}
 
 		// move items not in range back to pool first
 		for(auto it = m_items.begin(); it != m_items.end();)
@@ -77,6 +83,9 @@ namespace jucePluginEditorLib::patchManager
 
 			if(index < start || index >= end)
 			{
+				auto* comp = it->second->getItem();
+				if(comp)
+					comp->setVisible(false);
 				m_itemPool.emplace_back(std::move(it->second));
 				it = m_items.erase(it);
 			}
@@ -109,6 +118,8 @@ namespace jucePluginEditorLib::patchManager
 
 			if(item->getParentComponent() != &m_itemContainer)
 				m_itemContainer.addAndMakeVisible(item.get());
+			else
+				item->getItem()->setVisible(true);
 
 			m_items.insert({i, std::move(item)});
 		}
@@ -297,6 +308,7 @@ namespace jucePluginEditorLib::patchManager
 	void Grid::onModelChanged()
 	{
 		updateViewportSize();
+		setVisibleItemRange(m_viewport.getItemRangeFromArea(m_viewport.getViewArea()));
 		repaint();
 	}
 
