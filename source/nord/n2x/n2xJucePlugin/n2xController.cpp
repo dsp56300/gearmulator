@@ -222,10 +222,8 @@ namespace n2xJucePlugin
 		if(cc == n2x::ControlChange::CCSync)
 		{
 			// sync and ringmod have the same CC, combine them
-			const auto* paramSync = getParameter("Sync", part);
-			const auto* paramRingMod = getParameter("RingMod", part);
-
-			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
+			const auto v = combineSyncRingModDistortion(part, 0, false);
+			_value = v & 3;	// strip Distortion, it has its own CC
 		}
 
 		const auto ch = m_state.getPartMidiChannel(part);
@@ -238,7 +236,18 @@ namespace n2xJucePlugin
 		{
 			// this is problematic. We want to edit one part only but two parts receive on the same channel. We have to send a full dump
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
+
+			const auto& name = _parameter.getDescription().name;
+
+			if(name == "Sync" || name == "RingMod" || name == "Distortion")
+			{
+				const auto value = combineSyncRingModDistortion(part, 0, false);
+				setSingleParameter(part, n2x::Sync, value);
+			}
+			else
+			{
+				setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
+			}
 		}
 		else
 		{
@@ -404,5 +413,38 @@ namespace n2xJucePlugin
 	bool Controller::getKnobState(uint8_t& _result, const n2x::KnobType _type) const
 	{
 		return m_state.getKnobState(_result, _type);
+	}
+
+	uint8_t Controller::combineSyncRingModDistortion(const uint8_t _part, const uint8_t _currentCombinedValue, bool _lockedOnly)
+	{
+		// this controls both Sync and RingMod
+		// Sync = bit 0
+		// RingMod = bit 1
+		// Distortion = bit 4
+		const auto* paramSync = getParameter("Sync", _part);
+		const auto* paramRingMod = getParameter("RingMod", _part);
+		const auto* paramDistortion = getParameter("Distortion", _part);
+
+		auto v = _currentCombinedValue;
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "Sync"))
+		{
+			v &= ~0x01;
+			v |= paramSync->getUnnormalizedValue() & 1;
+		}
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "RingMod"))
+		{
+			v &= ~0x02;
+			v |= (paramRingMod->getUnnormalizedValue() & 1) << 1;
+		}
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "Distortion"))
+		{
+			v &= ~0x10;
+			v |= (paramDistortion->getUnnormalizedValue() & 1) << 4;
+		}
+
+		return v;
 	}
 }

@@ -9,6 +9,8 @@ Framework:
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
 - [Fix] Crash when dragging a patch on empty area in grid view
 - [Fix] Drag target slot rectangles displayed in grid view for areas without content
+- [Fix] Crash when toggling filter distortion on a part that shares the same MIDI
+        channel with another part
 
 NodalRed2x:
 

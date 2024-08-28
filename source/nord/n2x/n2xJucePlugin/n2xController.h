@@ -63,6 +63,8 @@ namespace n2xJucePlugin
 		bool getKnobState(uint8_t& _result, n2x::KnobType _type) const;
 
 	private:
+		uint8_t combineSyncRingModDistortion(uint8_t _part, uint8_t _currentCombinedValue, bool _lockedOnly);
+
 		n2x::State m_state;
 		pluginLib::EventListener<uint8_t> m_currentPartChanged;
 	};
