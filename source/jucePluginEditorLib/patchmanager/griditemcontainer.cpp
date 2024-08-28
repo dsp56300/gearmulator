@@ -31,6 +31,9 @@ namespace jucePluginEditorLib::patchManager
             }
 		}
 
+		if(imageArea.isEmpty())
+			return {};
+
 	    imageArea = imageArea.getIntersection (getLocalBounds());
 	    _x = imageArea.getX();
 	    _y = imageArea.getY();
@@ -88,10 +91,12 @@ namespace jucePluginEditorLib::patchManager
 			    {
 			        int x, y;
 			        const auto dragImage = createSnapshotOfRows(rows, x, y);
-
-			        const auto p = juce::Point<int> (x, y) - _e.getEventRelativeTo (this).position.toInt();
-			        dragContainer->startDragging (dragDescription, &m_grid, dragImage, true, &p, &_e.source);
-					m_isDragging = true;
+					if(dragImage.getImage().isValid())
+					{
+				        const auto p = juce::Point<int> (x, y) - _e.getEventRelativeTo (this).position.toInt();
+				        dragContainer->startDragging (dragDescription, &m_grid, dragImage, true, &p, &_e.source);
+						m_isDragging = true;
+					}
 			    }
 			}
 		}
