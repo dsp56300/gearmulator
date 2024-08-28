@@ -27,6 +27,10 @@ NodalRed2x:
 - [Fix] Parameter tooltips for VM map parameters displayed values for the non-VM 
         versions when hovering
 
+Vavra:
+
+- [Imp] Mixer balance knobs now reset to center instead of total left
+
 Xenia:
 
 - [Fix] Typos in play parameter names (mkruselj)
