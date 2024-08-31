@@ -49,9 +49,12 @@ namespace pluginLib::patchDB
 
 		{
 			std::unique_lock lock(m_mutexFuncs);
-			m_destroy = true;
-			m_funcs.emplace_back([]{});
+			m_funcs.emplace_back([this]
+			{
+				m_destroy = true;
+			});
 		}
+
 		m_cv.notify_all();
 
 		for (const auto& thread : m_threads)
