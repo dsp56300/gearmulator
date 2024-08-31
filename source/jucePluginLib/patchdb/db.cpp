@@ -216,6 +216,9 @@ namespace pluginLib::patchDB
 
 		runOnLoaderThread([this, _ds, _newName]
 		{
+			juce::File oldFile;
+			juce::File oldJsonFile;
+
 			{
 				std::unique_lock lockDs(m_dataSourcesMutex);
 				const auto it = m_dataSources.find(*_ds);
@@ -234,6 +237,9 @@ namespace pluginLib::patchDB
 						return;
 				}
 
+				oldFile = getLocalStorageFile(*ds);
+				oldJsonFile = getJsonFile(*ds);
+
 				ds->name = _newName;
 
 				m_dataSources.erase(it);
@@ -244,6 +250,11 @@ namespace pluginLib::patchDB
 			m_dirty.dataSources = true;
 
 			saveJson();
+
+			if(oldFile.existsAsFile())
+				(void)oldFile.deleteFile();
+			if(oldJsonFile.existsAsFile())
+				(void)oldJsonFile.deleteFile();
 		});
 	}
 
