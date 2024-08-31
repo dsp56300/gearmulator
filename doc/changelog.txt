@@ -11,8 +11,6 @@ Framework:
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
 - [Fix] Crash when dragging a patch on an empty area in grid view
 - [Fix] Drag target slot rectangles displayed in grid view for areas without content
-- [Fix] Crash when toggling filter distortion on a part that shares the same MIDI
-        channel with another part
 
 NodalRed2x:
 
@@ -28,6 +26,8 @@ NodalRed2x:
 - [Fix] Patches with a different device ID failed to load
 - [Fix] Parameter tooltips for VM map parameters displayed values for the non-VM 
         versions when hovering
+- [Fix] Crash when toggling filter distortion on a part that shares the same MIDI
+        channel with another part
 
 Vavra:
 
