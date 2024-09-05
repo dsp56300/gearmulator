@@ -196,7 +196,7 @@ namespace synthLib
 		return true;
 	}
 
-	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
+	void Plugin::processMidiClock(const float _bpm, const float _ppqPos, const bool _isPlaying, const size_t _sampleCount)
 	{
 		m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount);
 	}

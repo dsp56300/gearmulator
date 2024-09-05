@@ -6,6 +6,8 @@
 
 #include "plugin.h"
 
+#include "dsp56kEmu/logging.h"
+
 #if 0
 #define LOGMC(S)	LOG(S)
 #else
@@ -21,33 +23,22 @@ namespace synthLib
 		if(_bpm < 1.0f)
 			return;
 
-		if(_isPlaying && !m_isPlaying)
-		{
-			const double ppqPos = _ppqPos;
-			m_clockTickPos = (ppqPos - std::floor(ppqPos + 1.0)) * ClockTicksPerQuarter;
-			LOGMC("Start at ppqPos=" << ppqPos << ", clock tick offset " << m_clockTickPos);
-			m_isPlaying = true;
-			m_needsStart = true;
-		}
-		else if(m_isPlaying && !_isPlaying)
-		{
-			LOGMC("Stop at ppqPos=" << ppqPos);
-
-			m_isPlaying = false;
-
-			SMidiEvent evStop(MidiEventSource::Internal);
-			evStop.a = M_STOP;
-			m_plugin.insertMidiEvent(evStop);
-			m_clockTickPos = 0.0;
-		}
-
-		if(!m_isPlaying)
-			return;
-
 		const double quartersPerSecond = _bpm / 60.0;
 		const double clockTicksPerSecond = ClockTicksPerQuarter * quartersPerSecond;
 
-		const double clocksPerSample = clockTicksPerSecond * m_plugin.getHostSamplerateInv();
+		const double hostSamplerateInv = m_plugin.getHostSamplerateInv();
+
+		const double clocksPerSample = clockTicksPerSecond * hostSamplerateInv;
+
+		if(_isPlaying && !m_isPlaying)
+		{
+			start(_ppqPos);
+		}
+		else if(m_isPlaying && !_isPlaying)
+		{
+			LOGMC("Stop at ppqPos=" << _ppqPos);
+			stop();
+		}
 
 		for(uint32_t i=0; i<static_cast<uint32_t>(_sampleCount); ++i)
 		{
@@ -63,22 +54,38 @@ namespace synthLib
 			SMidiEvent evClock(MidiEventSource::Internal);
 			evClock.a = M_TIMINGCLOCK;
 			evClock.offset = i;
-
-			if(m_needsStart)
-			{
-				evClock.a = M_START;
-				m_plugin.insertMidiEvent(evClock);
-				evClock.a = M_TIMINGCLOCK;
-
-				m_needsStart = false;
-			}
-
 			m_plugin.insertMidiEvent(evClock);
 		}
 	}
 
 	void MidiClock::restart()
 	{
-		m_needsStart = true;
+		stop();
+	}
+
+	void MidiClock::start(const float _ppqPos)
+	{
+		const double ppqPos = _ppqPos;
+		const auto quarterPos = (ppqPos - std::floor(ppqPos + 1.0));
+
+		m_clockTickPos = quarterPos * (ClockTicksPerQuarter);
+
+		m_isPlaying = true;
+
+		LOGMC("Start at ppqPos=" << ppqPos << ", clock tick offset " << m_clockTickPos);
+
+		SMidiEvent evClock(MidiEventSource::Internal);
+		evClock.a = M_START;
+		evClock.offset = 0;
+		m_plugin.insertMidiEvent(evClock);
+	}
+
+	void MidiClock::stop()
+	{
+		m_isPlaying = false;
+
+		SMidiEvent evStop(MidiEventSource::Internal);
+		evStop.a = M_STOP;
+		m_plugin.insertMidiEvent(evStop);
 	}
 }

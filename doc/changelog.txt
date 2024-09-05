@@ -11,6 +11,7 @@ Framework:
 - [Fix] Crash when dragging a patch from Patch Manager to a part slot
 - [Fix] Crash when dragging a patch on an empty area in grid view
 - [Fix] Drag target slot rectangles displayed in grid view for areas without content
+- [Fix] Continue MIDI clock generation while DAW sequencer is stopped
 
 NodalRed2x:
 
@@ -28,15 +29,19 @@ NodalRed2x:
         versions when hovering
 - [Fix] Crash when toggling filter distortion on a part that shares the same MIDI
         channel with another part
+- [Fix] Arpeggiator stopped while DAW sequencer not running
 
 Vavra:
 
 - [Imp] Mixer balance knobs now reset to center instead of total left
 
+- [Fix] Arpeggiator stopped while DAW sequencer not running
+
 Xenia:
 
 - [Fix] Typos in play parameter names (mkruselj)
 - [Fix] Arp not working in Multi mode
+- [Fix] Arpeggiator stopped while DAW sequencer not running
 
 1.3.19
 
