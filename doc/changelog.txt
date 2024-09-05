@@ -62,6 +62,8 @@ Osirus:
 
 Xenia:
 
+- [Imp] MW1 card dumps are now supported in Patch Manager
+
 - [Fix] UI not updating when loading DAW preset
 - [Fix] Play Parameters didn't show the bound parameter value while being 
         adjusted
