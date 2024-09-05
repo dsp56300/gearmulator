@@ -71,11 +71,7 @@ namespace synthLib
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
-		if(!m_device->isValid())
-			return;
-
 		setFlushDenormalsToZero();
-
 
 		TAudioInputs inputs(_inputs);
 		TAudioOutputs outputs(_outputs);
@@ -87,6 +83,9 @@ namespace synthLib
 			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
 
 		std::lock_guard lock(m_lock);
+
+		if(!m_device->isValid())
+			return;
 
 		processMidiInEvents();
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
