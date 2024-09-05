@@ -156,8 +156,6 @@ namespace virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
     private:
-        std::string loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor);
-
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode
         std::array<SinglePatch, 16> m_singleEditBuffers;    // multi mode

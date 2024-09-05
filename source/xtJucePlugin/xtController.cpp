@@ -65,13 +65,12 @@ namespace
 
 namespace xtJucePlugin
 {
-	Controller::Controller(AudioPluginAudioProcessor& p, const unsigned char _deviceId) : pluginLib::Controller(p, loadParameterDescriptions()), m_deviceId(_deviceId)
+	Controller::Controller(AudioPluginAudioProcessor& p, const unsigned char _deviceId) : pluginLib::Controller(p, "parameterDescriptions_xt.json"), m_deviceId(_deviceId)
 	{
 	    registerParams(p);
 
 		sendSysEx(RequestGlobal);
 		sendSysEx(RequestMode);
-		requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 
 		onPlayModeChanged.addListener([this](bool multiMode)
 		{
@@ -129,46 +128,10 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size)
-	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_size = static_cast<uint32_t>(size);
-			return res;
-		}
-		return nullptr;
-	}
-
-	std::string Controller::loadParameterDescriptions()
-	{
-	    const auto name = "parameterDescriptions_xt.json";
-	    const auto path = synthLib::getModulePath() +  name;
-
-	    const std::ifstream f(path.c_str(), std::ios::in);
-	    if(f.is_open())
-	    {
-			std::stringstream buf;
-			buf << f.rdbuf();
-	        return buf.str();
-	    }
-		
-	    uint32_t size;
-	    const auto res = findEmbeddedResource(name, size);
-	    if(res)
-	        return {res, size};
-	    return {};
-	}
-
 	void Controller::onStateLoaded()
 	{
 		sendSysEx(RequestGlobal);
 		sendSysEx(RequestMode);
-		requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
 	}
 
 	uint8_t Controller::getPartCount() const

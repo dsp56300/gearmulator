@@ -384,7 +384,7 @@ namespace jucePluginEditorLib::patchManager
 		});
 	}
 
-	uint32_t PatchManager::createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name/* = "patch"*/)
+	uint32_t PatchManager::createSaveMenuEntries(juce::PopupMenu& _menu, uint32_t _part, const std::string& _name/* = "patch"*/, uint64_t _userData/* = 0*/)
 	{
 		const auto& state = getState();
 		const auto key = state.getPatch(_part);
@@ -403,9 +403,9 @@ namespace jucePluginEditorLib::patchManager
 					if(*p == key)
 					{
 						++countAdded;
-						_menu.addItem("Overwrite " + _name + " '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part]
+						_menu.addItem("Overwrite " + _name + " '" + p->getName() + "' in user bank '" + ds->name + "'", true, false, [this, p, _part, _userData]
 						{
-							const auto newPatch = requestPatchForPart(_part);
+							const auto newPatch = requestPatchForPart(_part, _userData);
 							if(newPatch)
 							{
 								replacePatch(p, newPatch);
@@ -426,9 +426,9 @@ namespace jucePluginEditorLib::patchManager
 			for (const auto& ds : existingLocalDS)
 			{
 				++countAdded;
-				_menu.addItem("Add " + _name + " to user bank '" + ds->name + "'", true, false, [this, ds, _part]
+				_menu.addItem("Add " + _name + " to user bank '" + ds->name + "'", true, false, [this, ds, _part, _userData]
 				{
-					const auto newPatch = requestPatchForPart(_part);
+					const auto newPatch = requestPatchForPart(_part, _userData);
 
 					if(!newPatch)
 						return;
@@ -440,9 +440,9 @@ namespace jucePluginEditorLib::patchManager
 		else
 		{
 			++countAdded;
-			_menu.addItem("Create new user bank and add " + _name, true, false, [this, _part]
+			_menu.addItem("Create new user bank and add " + _name, true, false, [this, _part, _userData]
 			{
-				const auto newPatch = requestPatchForPart(_part);
+				const auto newPatch = requestPatchForPart(_part, _userData);
 
 				if(!newPatch)
 					return;
@@ -793,7 +793,7 @@ namespace jucePluginEditorLib::patchManager
 			return;
 		return;
 		pluginLib::patchDB::Data data;
-		if(!requestPatchForPart(data, _part))
+		if(!requestPatchForPart(data, _part, 0))
 			return;
 		const auto patch = initializePatch(std::move(data));
 		if(!patch)

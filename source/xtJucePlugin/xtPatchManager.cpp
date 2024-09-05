@@ -30,7 +30,7 @@ namespace xtJucePlugin
 		stopLoaderThread();
 	}
 
-	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part)
+	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
 	{
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
 		return !_data.empty();

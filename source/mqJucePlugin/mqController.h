@@ -80,8 +80,6 @@ namespace mqJucePlugin
 	private:
 		void selectPreset(int _offset);
 
-	    static std::string loadParameterDescriptions();
-
 	    void onStateLoaded() override;
 
 	    void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);

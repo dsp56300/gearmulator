@@ -591,6 +591,7 @@ namespace genericUI
 			throw std::runtime_error("Parameter named " + param + " not found");
 
 		_target.getProperties().set("parameter", index);
+		_target.getProperties().set("parametername", juce::String(param));
 		
 		if constexpr(std::is_base_of_v<juce::Button, T>)
 		{

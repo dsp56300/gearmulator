@@ -29,6 +29,15 @@ namespace jucePluginEditorLib
 			file.deleteFile();
 	}
 
+	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
+	{
+		const auto res = m_processor.findResource(_filename);
+		if(!res)
+			return nullptr;
+		_size = res->second;
+		return res->first;
+	}
+
 	void Editor::loadPreset(const std::function<void(const juce::File&)>& _callback)
 	{
 		const auto path = m_processor.getConfig().getValue("load_path", "");

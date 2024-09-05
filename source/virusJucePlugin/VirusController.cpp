@@ -38,7 +38,7 @@ namespace virus
     }
 
     Controller::Controller(VirusProcessor& p, const virusLib::DeviceModel _defaultModel, unsigned char deviceId)
-		: pluginLib::Controller(p, loadParameterDescriptions(_defaultModel, p))
+		: pluginLib::Controller(p, virusLib::isTIFamily(_defaultModel) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json")
 		, m_processor(p)
 		, m_defaultModel(_defaultModel)
 		, m_deviceId(deviceId)
@@ -380,26 +380,6 @@ namespace virus
 
     	return parseMidiPacket(*m, _data, _parameterValues, _msg);
     }
-
-	std::string Controller::loadParameterDescriptions(virusLib::DeviceModel _model, const VirusProcessor& _processor)
-	{
-		const auto name = isTIFamily(_model) ? "parameterDescriptions_TI.json" : "parameterDescriptions_C.json";
-        const auto path = synthLib::getModulePath() +  name;
-
-        const std::ifstream f(path.c_str(), std::ios::in);
-        if(f.is_open())
-        {
-			std::stringstream buf;
-			buf << f.rdbuf();
-            return buf.str();
-        }
-
-        uint32_t size;
-        const auto res = _processor.findEmbeddedResource(name, size);
-        if(res)
-            return {res, size};
-        return {};
-	}
 
 	void Controller::parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues)
 	{

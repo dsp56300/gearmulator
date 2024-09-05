@@ -16,6 +16,8 @@ namespace pluginLib
 	class Parameter : juce::Value::Listener, public juce::RangedAudioParameter
 	{
     public:
+		using PartFormatter = std::function<juce::String(uint8_t, bool)>;	// part, non-part-exclusive
+
 		enum class Origin
 		{
 			Unknown,
@@ -30,7 +32,7 @@ namespace pluginLib
 		Event<Parameter*, ParameterLinkType> onLinkStateChanged;
 		Event<Parameter*> onValueChanged;
 
-		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId);
+		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId, const PartFormatter& _partFormatter);
 
         juce::Value& getValueObject() { return m_value; }
 

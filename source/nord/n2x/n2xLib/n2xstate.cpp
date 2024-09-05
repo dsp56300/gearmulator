@@ -244,7 +244,7 @@ namespace n2x
 			return true;
 		}
 
-		if(sysex.size() == g_multiDumpSize)
+		if(isMultiDump(sysex))
 		{
 			if(bank != SysexByte::MultiDumpBankEditBuffer)
 				return false;
@@ -351,12 +351,17 @@ namespace n2x
 	{
 		if(_part >= m_singles.size())
 			return false;
-		return changeDumpParameter(m_singles[_part], getOffsetInSingleDump(_parameter), _value);
+		return changeSingleParameter(m_singles[_part], _parameter, _value);
 	}
 
 	bool State::changeMultiParameter(const MultiParam _parameter, const uint8_t _value)
 	{
 		return changeDumpParameter(m_multi, getOffsetInMultiDump(_parameter), _value);
+	}
+
+	bool State::changeSingleParameter(SingleDump& _dump, const SingleParam _param, const uint8_t _value)
+	{
+		return changeDumpParameter(_dump, getOffsetInSingleDump(_param), _value);
 	}
 
 	void State::updateMultiFromSingles()

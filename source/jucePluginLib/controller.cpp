@@ -1,12 +1,16 @@
 #include "controller.h"
 
 #include <cassert>
+#include <fstream>
 
 #include "parameter.h"
 #include "processor.h"
+
 #include "dsp56kEmu/logging.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"	// juce::NativeMessageBox
+
+#include "synthLib/os.h"
 
 namespace pluginLib
 {
@@ -15,9 +19,9 @@ namespace pluginLib
 		return static_cast<uint8_t>(_p->getUnnormalizedValue());
 	}
 
-	Controller::Controller(Processor& _processor, const std::string& _parameterDescJson)
+	Controller::Controller(Processor& _processor, const std::string& _parameterDescJsonFilename)
 		: m_processor(_processor)
-		, m_descriptions(_parameterDescJson)
+		, m_descriptions(loadParameterDescriptions(_parameterDescJsonFilename))
 		, m_locking(*this)
 		, m_parameterLinks(*this)
 	{
@@ -38,10 +42,17 @@ namespace pluginLib
 		m_softKnobs.clear();
 	}
 
-	void Controller::registerParams(juce::AudioProcessor& _processor)
+	void Controller::registerParams(juce::AudioProcessor& _processor, Parameter::PartFormatter _partFormatter/* = nullptr*/)
     {
 		auto globalParams = std::make_unique<juce::AudioProcessorParameterGroup>("global", "Global", "|");
 
+		if(!_partFormatter)
+		{
+			_partFormatter = [](const uint8_t& _part, bool)
+			{
+				return juce::String("Ch ") + juce::String(_part + 1);
+			};
+		}
 		std::map<ParamIndex, int> knownParameterIndices;
 
     	for (uint8_t part = 0; part < getPartCount(); part++)
@@ -49,7 +60,7 @@ namespace pluginLib
 			m_paramsByParamType[part].reserve(m_descriptions.getDescriptions().size());
 
     		const auto partNumber = juce::String(part + 1);
-			auto group = std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, "Ch " + partNumber, "|");
+			auto group = std::make_unique<juce::AudioProcessorParameterGroup>("ch" + partNumber, _partFormatter(part, false), "|");
 
 			for (const auto& desc : m_descriptions.getDescriptions())
 			{
@@ -65,7 +76,7 @@ namespace pluginLib
 					uid = ++itKnownParamIdx->second;
 
 				std::unique_ptr<Parameter> p;
-				p.reset(createParameter(*this, desc, part, uid));
+				p.reset(createParameter(*this, desc, part, uid, _partFormatter));
 
 				if(uid > 0)
 				{
@@ -566,6 +577,24 @@ namespace pluginLib
 		    parseMidiMessage(e);
 	}
 
+	std::string Controller::loadParameterDescriptions(const std::string& _filename) const
+	{
+	    const auto path = synthLib::getModulePath() + _filename;
+
+	    const std::ifstream f(path.c_str(), std::ios::in);
+	    if(f.is_open())
+	    {
+			std::stringstream buf;
+			buf << f.rdbuf();
+	        return buf.str();
+	    }
+
+	    const auto res = m_processor.findResource(_filename);
+	    if(res)
+	        return {res->first, res->second};
+	    return {};
+	}
+
 	std::set<std::string> Controller::getRegionIdsForParameter(const Parameter* _param) const
 	{
 		if(!_param)
@@ -586,8 +615,8 @@ namespace pluginLib
 		return result;
 	}
 
-	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, uint8_t _part, int _uid)
+	Parameter* Controller::createParameter(Controller& _controller, const Description& _desc, const uint8_t _part, const int _uid, const Parameter::PartFormatter& _partFormatter)
 	{
-		return new Parameter(_controller, _desc, _part, _uid);
+		return new Parameter(_controller, _desc, _part, _uid, _partFormatter);
 	}
 }

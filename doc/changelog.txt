@@ -1,5 +1,48 @@
 Release Notes 
 
+1.3.20
+
+Framework:
+
+- [Imp] Strip path names from skin names in GUI Skin submenu (mkruselj)
+
+- [Fix] Patch Manager: Lost Favourites/Tags/User Banks if plugin closed before scan
+        finished
+- [Fix] Crash when dragging a patch from Patch Manager to a part slot
+- [Fix] Crash when dragging a patch on an empty area in grid view
+- [Fix] Drag target slot rectangles displayed in grid view for areas without content
+- [Fix] Continue MIDI clock generation while DAW sequencer is stopped
+
+NodalRed2x:
+
+- [Imp] Support performances from .nl2 patch dumps
+
+- [Fix] Region Locking is now implemented
+- [Fix] UI state not updated when loading preset via DAW
+- [Fix] Synth lost state of previously loaded DAW preset after switching the active part
+- [Fix] Negative VM MAP values were displayed as maximum positive values after loading
+        a patch or DAW state
+- [Fix] Performances saved via "Store" button couldn't be loaded
+- [Fix] Crash when storing a performance via "Store" button while slot A is selected
+- [Fix] Patches with a different device ID failed to load
+- [Fix] Parameter tooltips for VM map parameters displayed values for the non-VM 
+        versions when hovering
+- [Fix] Crash when toggling filter distortion on a part that shares the same MIDI
+        channel with another part
+- [Fix] Arpeggiator stopped while DAW sequencer not running
+
+Vavra:
+
+- [Imp] Mixer balance knobs now reset to center instead of total left
+
+- [Fix] Arpeggiator stopped while DAW sequencer not running
+
+Xenia:
+
+- [Fix] Typos in play parameter names (mkruselj)
+- [Fix] Arp not working in Multi mode
+- [Fix] Arpeggiator stopped while DAW sequencer not running
+
 1.3.19
 
 Framework:
@@ -18,6 +61,8 @@ Osirus:
 - [Fix] Too many waveforms displayed for Oscillator 1/2
 
 Xenia:
+
+- [Imp] MW1 card dumps are now supported in Patch Manager
 
 - [Fix] UI not updating when loading DAW preset
 - [Fix] Play Parameters didn't show the bound parameter value while being 

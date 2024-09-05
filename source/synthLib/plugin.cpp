@@ -5,12 +5,6 @@
 
 #include "os.h"
 
-#if 0
-#define LOGMC(S)	LOG(S)
-#else
-#define LOGMC(S)	do{}while(false)
-#endif
-
 using namespace synthLib;
 
 namespace synthLib
@@ -21,6 +15,7 @@ namespace synthLib
 	: m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut())
 	, m_device(_device)
 	, m_deviceSamplerate(_device->getSamplerate())
+	, m_midiClock(*this)
 	{
 	}
 
@@ -71,11 +66,7 @@ namespace synthLib
 
 	void Plugin::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _count, const float _bpm, const float _ppqPos, const bool _isPlaying)
 	{
-		if(!m_device->isValid())
-			return;
-
 		setFlushDenormalsToZero();
-
 
 		TAudioInputs inputs(_inputs);
 		TAudioOutputs outputs(_outputs);
@@ -87,6 +78,9 @@ namespace synthLib
 			outputs[i] = _outputs[i] ? _outputs[i] : getDummyBuffer(_count);
 
 		std::lock_guard lock(m_lock);
+
+		if(!m_device->isValid())
+			return;
 
 		processMidiInEvents();
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
@@ -129,7 +123,7 @@ namespace synthLib
 		setState(deviceState);
 
 		// MIDI clock has to send the start event again, some device find it confusing and do strange things if there isn't any
-		m_needsStart = true;
+		m_midiClock.restart();
 
 		updateDeviceLatency();
 	}
@@ -202,68 +196,9 @@ namespace synthLib
 		return true;
 	}
 
-	void Plugin::processMidiClock(float _bpm, float _ppqPos, bool _isPlaying, size_t _sampleCount)
+	void Plugin::processMidiClock(const float _bpm, const float _ppqPos, const bool _isPlaying, const size_t _sampleCount)
 	{
-		if(_bpm < 1.0f)
-			return;
-
-		const double ppqPos = _ppqPos;
-
-		constexpr double clockTicksPerQuarter = 24.0;
-
-		if(_isPlaying && !m_isPlaying)
-		{
-			m_clockTickPos = (ppqPos - std::floor(ppqPos + 1.0)) * clockTicksPerQuarter;
-			LOGMC("Start at ppqPos=" << ppqPos << ", clock tick offset " << m_clockTickPos);
-			m_isPlaying = true;
-			m_needsStart = true;
-		}
-		else if(m_isPlaying && !_isPlaying)
-		{
-			LOGMC("Stop at ppqPos=" << ppqPos);
-
-			m_isPlaying = false;
-
-			SMidiEvent evStop(MidiEventSource::Internal);
-			evStop.a = M_STOP;
-			m_midiIn.insert(m_midiIn.begin(), evStop);
-			m_clockTickPos = 0.0;
-		}
-
-		if(!m_isPlaying)
-			return;
-
-		const double quartersPerSecond = _bpm / 60.0;
-		const double clockTicksPerSecond = clockTicksPerQuarter * quartersPerSecond;
-
-		const double clocksPerSample = clockTicksPerSecond * m_hostSamplerateInv;
-
-		for(uint32_t i=0; i<static_cast<uint32_t>(_sampleCount); ++i)
-		{
-			m_clockTickPos += clocksPerSample;
-
-			if (m_clockTickPos < 0.0f)
-				continue;
-
-			m_clockTickPos -= 1.0;
-
-			LOGMC("insert tick at " << i);
-
-			SMidiEvent evClock(MidiEventSource::Internal);
-			evClock.a = M_TIMINGCLOCK;
-			evClock.offset = i;
-
-			if(m_needsStart)
-			{
-				evClock.a = M_START;
-				insertMidiEvent(evClock);
-				evClock.a = M_TIMINGCLOCK;
-
-				m_needsStart = false;
-			}
-
-			insertMidiEvent(evClock);
-		}
+		m_midiClock.process(_bpm, _ppqPos, _isPlaying, _sampleCount);
 	}
 
 	float* Plugin::getDummyBuffer(size_t _minimumSize)

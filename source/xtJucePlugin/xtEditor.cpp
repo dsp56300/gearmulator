@@ -2,6 +2,7 @@
 
 #include "BinaryData.h"
 #include "PluginProcessor.h"
+#include "xtArp.h"
 
 #include "xtController.h"
 #include "xtFocusedParameter.h"
@@ -123,34 +124,17 @@ namespace xtJucePlugin
 #endif
 
 		m_midiPorts.reset(new jucePluginEditorLib::MidiPorts(*this, getProcessor()));
+
+		m_arp.reset(new Arp(*this));
 	}
 
 	Editor::~Editor()
 	{
+		m_arp.reset();
 		if(m_waveEditor)
 			m_waveEditor->destroy();
 		getXtController().setWaveEditor(nullptr);
 		m_frontPanel.reset();
-	}
-
-	const char* Editor::findEmbeddedResource(const std::string& _filename, uint32_t& _size)
-	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_size = static_cast<uint32_t>(size);
-			return res;
-		}
-		return nullptr;
-	}
-
-	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size)
-	{
-		return findEmbeddedResource(_filename, _size);
 	}
 
 	std::pair<std::string, std::string> Editor::getDemoRestrictionText() const

@@ -9,6 +9,7 @@
 #include "dsp56kEmu/ringbuffer.h"
 
 #include "deviceTypes.h"
+#include "midiClock.h"
 
 namespace synthLib
 {
@@ -25,6 +26,7 @@ namespace synthLib
 
 		void setHostSamplerate(float _hostSamplerate, float _preferredDeviceSamplerate);
 		float getHostSamplerate() const { return m_hostSamplerate; }
+		float getHostSamplerateInv() const { return m_hostSamplerateInv; }
 
 		void setBlockSize(uint32_t _blockSize);
 
@@ -77,10 +79,8 @@ namespace synthLib
 		uint32_t m_deviceLatencyMidiToOutput = 0;
 		uint32_t m_deviceLatencyInputToOutput = 0;
 
-		// MIDI Clock
-		bool m_isPlaying = false;
-		bool m_needsStart = false;
-		double m_clockTickPos = 0.0;
+		MidiClock m_midiClock;
+
 		uint32_t m_extraLatencyBlocks = 1;
 
 		float m_deviceSamplerate = 0.0f;

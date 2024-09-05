@@ -37,6 +37,9 @@ namespace genericUI
 			if (!data)
 				throw std::runtime_error("Failed to find image named " + dataName);
 			auto drawable = juce::Drawable::createFromImageData(data, dataSize);
+#ifdef _DEBUG
+			drawable->setName(dataName);
+#endif
 			m_drawables.insert(std::make_pair(texture, std::move(drawable)));
 		}
 
@@ -157,6 +160,21 @@ namespace genericUI
 		{
 			m_componentsByName.insert(std::make_pair(_name, std::vector{_component}));
 		}
+
+		const auto param = _component->getProperties()["parametername"].toString().toStdString();
+		if(param.empty())
+			return;
+
+		const auto itParamExisting = m_componentsByParameter.find(param);
+
+		if(itParamExisting != m_componentsByParameter.end())
+		{
+			itParamExisting->second.push_back(_component);
+		}
+		else
+		{
+			m_componentsByParameter.insert(std::make_pair(param, std::vector{_component}));
+		}
 	}
 
 	void Editor::registerTabGroup(TabGroup* _group)
@@ -169,15 +187,15 @@ namespace genericUI
 		m_tabGroupsByName.insert(std::make_pair(n, _group));
 	}
 
-	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name, uint32_t _expectedCount/* = 0*/) const
+	const std::vector<juce::Component*>& Editor::findComponents(const std::map<std::string, std::vector<juce::Component*>>& _components, const std::string& _name, const uint32_t _expectedCount, const std::string& _typename)
 	{
-		const auto it = m_componentsByName.find(_name);
-		if(it != m_componentsByName.end())
+		const auto it = _components.find(_name);
+		if(it != _components.end())
 		{
 			if(_expectedCount && it->second.size() != _expectedCount)
 			{
 				std::stringstream ss;
-				ss << "Expected to find " << _expectedCount << " components named " << _name << " but found " << it->second.size();
+				ss << "Expected to find " << _expectedCount << " components with " << _typename << ' ' << _name << " but found " << it->second.size();
 				throw std::runtime_error(ss.str());
 			}
 			return it->second;
@@ -186,7 +204,7 @@ namespace genericUI
 		if(_expectedCount)
 		{
 			std::stringstream ss;
-			ss << "Unable to find component named " << _name << ", expected to find " << _expectedCount << " components";
+			ss << "Unable to find component with " << _typename << ' ' << _name << ", expected to find " << _expectedCount << " components";
 			throw std::runtime_error(ss.str());
 		}
 
@@ -194,13 +212,33 @@ namespace genericUI
 		return empty;
 	}
 
-	juce::Component* Editor::findComponent(const std::string& _name, bool _mustExist/* = true*/) const
+	const std::vector<juce::Component*>& Editor::findComponents(const std::string& _name, const uint32_t _expectedCount/* = 0*/) const
+	{
+		return findComponents(m_componentsByName, _name, _expectedCount, "name");
+	}
+
+	const std::vector<juce::Component*>& Editor::findComponentsByParam(const std::string& _name, const uint32_t _expectedCount) const
+	{
+		return findComponents(m_componentsByParameter, _name, _expectedCount, "parameter");
+	}
+
+	juce::Component* Editor::findComponent(const std::string& _name, const bool _mustExist/* = true*/) const
 	{
 		const auto comps = findComponents(_name);
 		if(comps.size() > 1)
 			throw std::runtime_error("Failed to find unique component named " + _name + ", found more than one object with that name");
 		if(_mustExist && comps.empty())
 			throw std::runtime_error("Failed to find component named " + _name);
+		return comps.empty() ? nullptr : comps.front();
+	}
+
+	juce::Component* Editor::findComponentByParam(const std::string& _param, const bool _mustExist) const
+	{
+		const auto comps = findComponentsByParam(_param);
+		if(comps.size() > 1)
+			throw std::runtime_error("Failed to find unique component with parameter " + _param + ", found more than one object with that parameter");
+		if(_mustExist && comps.empty())
+			throw std::runtime_error("Failed to find component with parameter " + _param);
 		return comps.empty() ? nullptr : comps.front();
 	}
 
@@ -258,5 +296,31 @@ namespace genericUI
 		if (it == m_templates.end())
 			return {};
 		return it->second;
+	}
+
+	bool Editor::resizeDrawableImage(juce::DrawableImage& _drawable, const uint32_t _percent)
+	{
+		if(_percent == 100)
+			return true;
+		if(_percent < 1)
+			return false;
+
+		auto image = _drawable.getImage();
+		const auto x = image.getBounds().getX();
+		const auto y = image.getBounds().getY();
+		const auto w = image.getWidth();
+		const auto h = image.getHeight();
+
+		const int percent = static_cast<int>(_percent);
+
+		image = image.rescaled(w * percent / 100, h * percent / 100);
+
+		_drawable.setImage(image);
+		auto b = image.getBounds();
+		b.setSize(w, h);
+		b.setPosition(x, y);
+		_drawable.setBounds(b);
+		_drawable.setBoundingBox(b.toFloat());
+		return true;
 	}
 }

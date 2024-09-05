@@ -33,7 +33,9 @@ namespace genericUI
 
 		EditorInterface& getInterface() const { return m_interface; }
 
+		static const std::vector<juce::Component*>& findComponents(const std::map<std::string, std::vector<juce::Component*>>& _components, const std::string& _name, uint32_t _expectedCount, const std::string& _typename);
 		const std::vector<juce::Component*>& findComponents(const std::string& _name, uint32_t _expectedCount = 0) const;
+		const std::vector<juce::Component*>& findComponentsByParam(const std::string& _name, uint32_t _expectedCount = 0) const;
 
 		template<typename T>
 		void findComponents(std::vector<T*>& _dst, const std::string& _name, uint32_t _expectedCount = 0) const
@@ -48,11 +50,19 @@ namespace genericUI
 		}
 
 		juce::Component* findComponent(const std::string& _name, bool _mustExist = true) const;
+		juce::Component* findComponentByParam(const std::string& _param, bool _mustExist = true) const;
 
 		template<typename T>
 		T* findComponentT(const std::string& _name, bool _mustExist = true) const
 		{
 			juce::Component* c = findComponent(_name, _mustExist);
+			return dynamic_cast<T*>(c);
+		}
+
+		template<typename T>
+		T* findComponentByParamT(const std::string& _name, const bool _mustExist = true) const
+		{
+			juce::Component* c = findComponentByParam(_name, _mustExist);
 			return dynamic_cast<T*>(c);
 		}
 
@@ -99,7 +109,9 @@ namespace genericUI
 		virtual Button<juce::DrawableButton>* createJuceComponent(Button<juce::DrawableButton>*, UiObject& _object, const std::string& _name, juce::DrawableButton::ButtonStyle) { return nullptr; }
 		virtual Button<juce::TextButton>* createJuceComponent(Button<juce::TextButton>*, UiObject& _object) { return nullptr; }
 
-		const UiObject& getRootObject() const { return *(m_rootObject.get()); }
+		const UiObject& getRootObject() const { return *m_rootObject; }
+
+		static bool resizeDrawableImage(juce::DrawableImage& _drawable, uint32_t _percent);
 
 	private:
 		EditorInterface& m_interface;
@@ -112,6 +124,7 @@ namespace genericUI
 		std::unique_ptr<UiObject> m_rootObject;
 
 		std::map<std::string, std::vector<juce::Component*>> m_componentsByName;
+		std::map<std::string, std::vector<juce::Component*>> m_componentsByParameter;
 		std::map<std::string, TabGroup*> m_tabGroupsByName;
 		std::map<std::string, std::shared_ptr<UiObject>> m_templates;
 

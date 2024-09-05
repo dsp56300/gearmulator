@@ -79,15 +79,15 @@
 		
 		// Mixer
  		{"index":61, "name":"O1Level"},
- 		{"index":62, "name":"O1Balance", "toText":"filterBalance"},
+ 		{"index":62, "name":"O1Balance", "toText":"filterBalance", "default":64},
  		{"index":63, "name":"O2Level"},
- 		{"index":64, "name":"O2Balance", "toText":"filterBalance"},
+ 		{"index":64, "name":"O2Balance", "toText":"filterBalance", "default":64},
  		{"index":65, "name":"O3Level"},
- 		{"index":66, "name":"O3Balance", "toText":"filterBalance"},
+ 		{"index":66, "name":"O3Balance", "toText":"filterBalance", "default":64},
  		{"index":67, "name":"NoiseLevel"},
- 		{"index":68, "name":"NoiseBalance", "toText":"filterBalance"},
+ 		{"index":68, "name":"NoiseBalance", "toText":"filterBalance", "default":64},
  		{"index":71, "name":"RingModLevel"},
- 		{"index":72, "name":"RingModBalance", "toText":"filterBalance"},
+ 		{"index":72, "name":"RingModBalance", "toText":"filterBalance", "default":64},
  		{"index":75, "name":"NoiseModeF1", "min":0 , "max":3, "isDiscrete":true, "toText":"noiseMode"},
  		{"index":76, "name":"NoiseModeF2", "min":0 , "max":3, "isDiscrete":true, "toText":"noiseMode"},
 		

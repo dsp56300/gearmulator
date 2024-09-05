@@ -2,7 +2,6 @@
 
 #include <fstream>
 
-#include "BinaryData.h"
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
 
@@ -32,18 +31,17 @@ namespace
 
 namespace n2xJucePlugin
 {
-	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, loadParameterDescriptions()), m_state(nullptr)
+	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_n2x.json"), m_state(nullptr)
 	{
-	    registerParams(_p);
+	    registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
+	    {
+			if(_isNonPartExclusive)
+				return juce::String();
+			char temp[2] = {static_cast<char>('A' + _part),0};
+		    return juce::String(temp);
+	    });
 
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 1);
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 2);
-		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 3);
-
-		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
-
-		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
+		Controller::onStateLoaded();
 
 		m_currentPartChanged.set(onCurrentPartChanged, [this](const uint8_t& _part)
 		{
@@ -53,43 +51,15 @@ namespace n2xJucePlugin
 
 	Controller::~Controller() = default;
 
-	const char* findEmbeddedResource(const std::string& _filename, uint32_t& _size)
-	{
-		for(size_t i=0; i<BinaryData::namedResourceListSize; ++i)
-		{
-			if (BinaryData::originalFilenames[i] != _filename)
-				continue;
-
-			int size = 0;
-			const auto res = BinaryData::getNamedResource(BinaryData::namedResourceList[i], size);
-			_size = static_cast<uint32_t>(size);
-			return res;
-		}
-		return nullptr;
-	}
-
-	std::string Controller::loadParameterDescriptions()
-	{
-	    const auto name = "parameterDescriptions_n2x.json";
-	    const auto path = synthLib::getModulePath() +  name;
-
-	    const std::ifstream f(path.c_str(), std::ios::in);
-	    if(f.is_open())
-	    {
-			std::stringstream buf;
-			buf << f.rdbuf();
-	        return buf.str();
-	    }
-		
-	    uint32_t size;
-	    const auto res = findEmbeddedResource(name, size);
-	    if(res)
-	        return {res, size};
-	    return {};
-	}
-
 	void Controller::onStateLoaded()
 	{
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 0);	// single edit buffers A-D
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 1);
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 2);
+		requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, 3);
+
+		requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);		// performance edit buffer
+
 		requestDump(n2x::SysexByte::EmuGetPotsPosition, 0);
 	}
 
@@ -126,6 +96,10 @@ namespace n2xJucePlugin
 		if(!parseMidiPacket(midiPacketName(MidiPacketType::SingleDump), data, params, _msg))
 			return false;
 
+		// the read parameters are in range 0-255 but the synth has a range of -128 to 127 (signed byte)
+		for (auto& param : params)
+			param.second = static_cast<int8_t>(param.second);  // NOLINT(bugprone-signed-char-misuse)
+
 		const auto bank = data[pluginLib::MidiDataType::Bank];
 		const auto program = data[pluginLib::MidiDataType::Program];
 
@@ -148,6 +122,10 @@ namespace n2xJucePlugin
 
 		if(!parseMidiPacket(midiPacketName(MidiPacketType::MultiDump), data, params, _msg))
 			return false;
+
+		// the read parameters are in range 0-255 but the synth has a range of -128 to 127 (signed byte)
+		for (auto& param : params)
+			param.second = static_cast<int8_t>(param.second);  // NOLINT(bugprone-signed-char-misuse)
 
 		const auto bank = data[pluginLib::MidiDataType::Bank];
 
@@ -235,7 +213,7 @@ namespace n2xJucePlugin
 		if(ccs.empty())
 		{
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-			setSingleParameter(part, singleParam, _value);
+			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
 			return;
 		}
 
@@ -244,10 +222,8 @@ namespace n2xJucePlugin
 		if(cc == n2x::ControlChange::CCSync)
 		{
 			// sync and ringmod have the same CC, combine them
-			const auto* paramSync = getParameter("Sync", part);
-			const auto* paramRingMod = getParameter("RingMod", part);
-
-			_value = static_cast<uint8_t>(paramSync->getUnnormalizedValue() | (paramRingMod->getUnnormalizedValue() << 1));
+			const auto v = combineSyncRingModDistortion(part, 0, false);
+			_value = v & 3;	// strip Distortion, it has its own CC
 		}
 
 		const auto ch = m_state.getPartMidiChannel(part);
@@ -260,7 +236,18 @@ namespace n2xJucePlugin
 		{
 			// this is problematic. We want to edit one part only but two parts receive on the same channel. We have to send a full dump
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-			setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
+
+			const auto& name = _parameter.getDescription().name;
+
+			if(name == "Sync" || name == "RingMod" || name == "Distortion")
+			{
+				const auto value = combineSyncRingModDistortion(part, 0, false);
+				setSingleParameter(part, n2x::Sync, value);
+			}
+			else
+			{
+				setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
+			}
 		}
 		else
 		{
@@ -342,6 +329,7 @@ namespace n2xJucePlugin
 		const auto multi = m_state.updateAndGetMulti();
 
 		std::vector<uint8_t> result(multi.begin(), multi.end());
+		result = n2x::State::validateDump(result);
 
 		result[n2x::SysexIndex::IdxMsgType] = _bank;
 		result[n2x::SysexIndex::IdxMsgSpec] = _program;
@@ -349,10 +337,12 @@ namespace n2xJucePlugin
 		return result;
 	}
 
-	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part) const
+	bool Controller::activatePatch(const std::vector<uint8_t>& _sysex, const uint32_t _part)
 	{
 		if(_part >= getPartCount())
 			return false;
+
+		const auto part = static_cast<uint8_t>(_part);
 
 		const auto isSingle = n2x::State::isSingleDump(_sysex);
 		const auto isMulti = n2x::State::isMultiDump(_sysex);
@@ -364,11 +354,65 @@ namespace n2xJucePlugin
 
 		d[n2x::SysexIndex::IdxMsgType] = isSingle ? n2x::SysexByte::SingleDumpBankEditBuffer : n2x::SysexByte::MultiDumpBankEditBuffer;
 		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(isMulti ? 0 : _part);
+		d[n2x::SysexIndex::IdxDevice] = n2x::DefaultDeviceId;
 
-		pluginLib::Controller::sendSysEx(d);
+		auto applyLockedParamsToSingle = [&](n2x::State::SingleDump& _dump, const uint8_t _singlePart)
+		{
+			const auto& lockedParameters = getParameterLocking().getLockedParameters(_singlePart);
+
+			for (auto& lockedParam : lockedParameters)
+			{
+				const auto& name = lockedParam->getDescription().name;
+
+				if(name == "Sync" || name == "RingMod" || name == "Distortion")
+				{
+					const auto current = n2x::State::getSingleParam(_dump, n2x::Sync, 0);
+					const auto value = combineSyncRingModDistortion(_singlePart, current, true);
+					n2x::State::changeSingleParameter(_dump, n2x::Sync, value);
+				}
+				else
+				{
+					const auto singleParam = static_cast<n2x::SingleParam>(lockedParam->getDescription().index);
+					const auto val = lockedParam->getUnnormalizedValue();
+					n2x::State::changeSingleParameter(_dump, singleParam, static_cast<uint8_t>(val));
+				}
+			}
+		};
 
 		if(isSingle)
+		{
+			if(!getParameterLocking().getLockedParameters(part).empty())
+			{
+				n2x::State::SingleDump dump;
+				std::copy_n(d.begin(), d.size(), dump.begin());
+				applyLockedParamsToSingle(dump, part);
+				std::copy_n(dump.begin(), d.size(), d.begin());
+			}
+		}
+		else
+		{
+			n2x::State::MultiDump multi;
+			std::copy_n(d.begin(), d.size(), multi.begin());
+			for(uint8_t i=0; i<4; ++i)
+			{
+				n2x::State::SingleDump single;
+
+				for(uint8_t p=0; p<4; ++p)
+				{
+					n2x::State::extractSingleFromMulti(single, multi, p);
+					applyLockedParamsToSingle(single, p);
+					n2x::State::copySingleToMulti(multi, single, p);
+				}
+			}
+			std::copy_n(multi.begin(), d.size(), d.begin());
+		}
+
+		pluginLib::Controller::sendSysEx(n2x::State::validateDump(d));
+
+		if(isSingle)
+		{
 			requestDump(n2x::SysexByte::SingleRequestBankEditBuffer, static_cast<uint8_t>(_part));
+		}
 		else
 		{
 			requestDump(n2x::SysexByte::MultiRequestBankEditBuffer, 0);
@@ -424,5 +468,38 @@ namespace n2xJucePlugin
 	bool Controller::getKnobState(uint8_t& _result, const n2x::KnobType _type) const
 	{
 		return m_state.getKnobState(_result, _type);
+	}
+
+	uint8_t Controller::combineSyncRingModDistortion(const uint8_t _part, const uint8_t _currentCombinedValue, bool _lockedOnly)
+	{
+		// this controls both Sync and RingMod
+		// Sync = bit 0
+		// RingMod = bit 1
+		// Distortion = bit 4
+		const auto* paramSync = getParameter("Sync", _part);
+		const auto* paramRingMod = getParameter("RingMod", _part);
+		const auto* paramDistortion = getParameter("Distortion", _part);
+
+		auto v = _currentCombinedValue;
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "Sync"))
+		{
+			v &= ~0x01;
+			v |= paramSync->getUnnormalizedValue() & 1;
+		}
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "RingMod"))
+		{
+			v &= ~0x02;
+			v |= (paramRingMod->getUnnormalizedValue() & 1) << 1;
+		}
+
+		if(!_lockedOnly || getParameterLocking().isParameterLocked(_part, "Distortion"))
+		{
+			v &= ~0x10;
+			v |= (paramDistortion->getUnnormalizedValue() & 1) << 4;
+		}
+
+		return v;
 	}
 }

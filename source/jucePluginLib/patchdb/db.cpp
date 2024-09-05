@@ -216,6 +216,9 @@ namespace pluginLib::patchDB
 
 		runOnLoaderThread([this, _ds, _newName]
 		{
+			juce::File oldFile;
+			juce::File oldJsonFile;
+
 			{
 				std::unique_lock lockDs(m_dataSourcesMutex);
 				const auto it = m_dataSources.find(*_ds);
@@ -234,6 +237,9 @@ namespace pluginLib::patchDB
 						return;
 				}
 
+				oldFile = getLocalStorageFile(*ds);
+				oldJsonFile = getJsonFile(*ds);
+
 				ds->name = _newName;
 
 				m_dataSources.erase(it);
@@ -244,6 +250,11 @@ namespace pluginLib::patchDB
 			m_dirty.dataSources = true;
 
 			saveJson();
+
+			if(oldFile.existsAsFile())
+				(void)oldFile.deleteFile();
+			if(oldJsonFile.existsAsFile())
+				(void)oldJsonFile.deleteFile();
 		});
 	}
 
@@ -589,10 +600,10 @@ namespace pluginLib::patchDB
 		return true;
 	}
 
-	PatchPtr DB::requestPatchForPart(const uint32_t _part)
+	PatchPtr DB::requestPatchForPart(const uint32_t _part, const uint64_t _userData)
 	{
 		Data data;
-		requestPatchForPart(data, _part);
+		requestPatchForPart(data, _part, _userData);
 		return initializePatch(std::move(data));
 	}
 
@@ -1488,6 +1499,9 @@ namespace pluginLib::patchDB
 				// if we cannot save patch modifications to a separate file, add them to the global file
 				if(!saveJson(dataSource))
 				{
+#ifdef _DEBUG
+					assert(dataSource->type != SourceType::LocalStorage && "expected separate json for local storage, unable to write file");
+#endif
 					for (const auto& patch : dataSource->patches)
 					{
 						if(!patch->modifications || patch->modifications->empty())

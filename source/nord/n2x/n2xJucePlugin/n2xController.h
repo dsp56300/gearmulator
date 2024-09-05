@@ -25,8 +25,6 @@ namespace n2xJucePlugin
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
 
-		static std::string loadParameterDescriptions();
-
 		void onStateLoaded() override;
 
 		uint8_t getPartCount() const override
@@ -53,7 +51,7 @@ namespace n2xJucePlugin
 		std::vector<uint8_t> createSingleDump(uint8_t _bank, uint8_t _program, uint8_t _part) const;
 		std::vector<uint8_t> createMultiDump(n2x::SysexByte _bank, uint8_t _program);
 
-		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part) const;
+		bool activatePatch(const std::vector<uint8_t>& _sysex, uint32_t _part);
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
 
@@ -65,6 +63,8 @@ namespace n2xJucePlugin
 		bool getKnobState(uint8_t& _result, n2x::KnobType _type) const;
 
 	private:
+		uint8_t combineSyncRingModDistortion(uint8_t _part, uint8_t _currentCombinedValue, bool _lockedOnly);
+
 		n2x::State m_state;
 		pluginLib::EventListener<uint8_t> m_currentPartChanged;
 	};

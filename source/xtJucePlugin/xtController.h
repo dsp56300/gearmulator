@@ -82,7 +82,6 @@ namespace xtJucePlugin
 		std::string getString(const pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len) const;
 
 		bool setSingleName(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
-		bool setCategory(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _value) const;
 		bool setString(pluginLib::MidiPacket::AnyPartParamValues& _values, const std::string& _prefix, size_t _len, const std::string& _value) const;
 
 		void setFrontPanel(xtJucePlugin::FrontPanel* _frontPanel);
@@ -93,8 +92,6 @@ namespace xtJucePlugin
 
 	private:
 		void selectPreset(int _offset);
-
-		static std::string loadParameterDescriptions();
 
 		void onStateLoaded() override;
 		uint8_t getPartCount() const override;

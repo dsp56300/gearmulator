@@ -45,7 +45,7 @@ namespace jucePluginEditorLib
 		Editor& operator = (const Editor&) = delete;
 		Editor& operator = (Editor&&) = delete;
 
-		virtual const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) = 0;
+		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const std::function<void(const juce::File&)>& _callback);

@@ -16,6 +16,7 @@ set(SOURCES
 	deviceTypes.h
 	dspMemoryPatch.cpp dspMemoryPatch.h
 	midiBufferParser.cpp midiBufferParser.h
+	midiClock.cpp midiClock.h
 	midiToSysex.cpp midiToSysex.h
 	midiTypes.h
 	os.cpp os.h
