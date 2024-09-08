@@ -10,37 +10,14 @@ if(NOT RCLONE_CONF)
 	endif()
 endif()
 
-set(postfix "_partial")
-
 macro(copyArtefacts TARGET FOLDER FILEFILTER)
 	set(RCLONE_RESULT 0)
-	file(GLOB files LIST_DIRECTORIES false "${ROOT_DIR}/*${FILEFILTER}*.zip" "${ROOT_DIR}/*${FILEFILTER}*.deb" "${ROOT_DIR}/*${FILEFILTER}*.rpm")
-	foreach(fileLocal ${files})
-		
-		file(SIZE ${fileLocal} fileSize)
-		if(${fileSize} GREATER 100)
-			file(RELATIVE_PATH remoteFile "${ROOT_DIR}" ${fileLocal})
+	execute_process(COMMAND rclone --transfers 16 -v --config ${RCLONE_CONF} copy --include "/*${FILEFILTER}*.{zip,deb,rpm}" --min-size 8k ${ROOT_DIR}/ "${TARGET}/${FOLDER}/"
+		COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT WORKING_DIRECTORY ${ROOT_DIR})
+	if(RCLONE_RESULT)
+		message(FATAL_ERROR "Failed to execute rclone: " ${CMD_RESULT})
+	endif()
 
-			file(RELATIVE_PATH remoteFile "${ROOT_DIR}" ${fileLocal})
-			set(remoteFileTemp "${remoteFile}${postfix}")
-
-			set(RCLONE_RESULT 0)
-			execute_process(COMMAND rclone -v --config ${RCLONE_CONF} copyto 
-				"${fileLocal}" "${TARGET}/${FOLDER}/${remoteFileTemp}"
-				COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT WORKING_DIRECTORY ${ROOT_DIR})
-			if(RCLONE_RESULT)
-				message(FATAL_ERROR "Failed to execute rclone: " ${CMD_RESULT})
-			endif()
-
-			set(RCLONE_RESULT 0)
-			execute_process(COMMAND rclone -v --config ${RCLONE_CONF} moveto 
-				"${TARGET}/${FOLDER}/${remoteFileTemp}" "${TARGET}/${FOLDER}/${remoteFile}"
-				COMMAND_ECHO STDOUT RESULT_VARIABLE RCLONE_RESULT WORKING_DIRECTORY ${ROOT_DIR})
-			if(RCLONE_RESULT)
-				message(FATAL_ERROR "Failed to execute rclone: " ${CMD_RESULT})
-			endif()
-		endif()
-	endforeach()
 endmacro()
 
 macro(copyDataFrom FROM TO)
