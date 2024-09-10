@@ -14,6 +14,7 @@ set(ASSETS_n2xTrancy
 	${CMAKE_CURRENT_LIST_DIR}/DSEG14Classic-BoldItalic.ttf
 	${CMAKE_CURRENT_LIST_DIR}/h_slider.png
 	${CMAKE_CURRENT_LIST_DIR}/knob_big.png
+	${CMAKE_CURRENT_LIST_DIR}/knob_big_sens.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_1_main.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_1_main_arpeggiator.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_1_main_lfo2.png

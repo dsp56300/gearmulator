@@ -5,6 +5,10 @@ Release Notes
 - [Imp] Added new entry to 'Skins' submenu to open the skins folder in the default
         file browser
 
+NodalRed2x:
+
+- [Imp] Added indicator around knobs to show the current VMMap parameter value
+
 1.3.20
 
 Framework:
