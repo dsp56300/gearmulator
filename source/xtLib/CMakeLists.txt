@@ -18,6 +18,7 @@ set(SOURCES
 	xtState.cpp xtState.h
 	xtSysexRemoteControl.cpp xtSysexRemoteControl.h
 	xtUc.cpp xtUc.h
+	xtWavePreview.cpp xtWavePreview.h
 )
 
 target_sources(xtLib PRIVATE ${SOURCES})

@@ -61,6 +61,22 @@ namespace xtJucePlugin
 		m_graphFreq->setColour(colourId, colour);
 		m_graphPhase->setColour(colourId, colour);
 		m_graphTime->setColour(colourId, colour);
+
+		m_btWavePreview = m_editor.findComponentT<juce::Button>("btWavePreview");
+		m_ledWavePreview = m_editor.findComponentT<juce::Button>("ledWavePreview");
+
+		m_btWavetablePreview = m_editor.findComponentT<juce::Button>("btWavetablePreview");
+		m_ledWavetablePreview = m_editor.findComponentT<juce::Button>("ledWavetablePreview");
+
+		m_btWavePreview->onClick = [this]
+		{
+			toggleWavePreview(m_btWavePreview->getToggleState());
+		};
+
+		m_btWavetablePreview->onClick = [this]
+		{
+			toggleWavetablePreview(m_btWavePreview->getToggleState());
+		};
 	}
 
 	void WaveEditor::destroy()
@@ -85,6 +101,24 @@ namespace xtJucePlugin
 	void WaveEditor::onFirstTimeVisible()
 	{
 		m_data.requestData();
+	}
+
+	void WaveEditor::toggleWavePreview(const bool _enabled)
+	{
+		if(_enabled)
+			toggleWavetablePreview(false);
+
+		m_btWavePreview->setToggleState(_enabled, juce::dontSendNotification);
+		m_ledWavePreview->setToggleState(_enabled, juce::dontSendNotification);
+	}
+
+	void WaveEditor::toggleWavetablePreview(const bool _enabled)
+	{
+		if(_enabled)
+			toggleWavePreview(false);
+
+		m_btWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
+		m_ledWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
 	}
 
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)

@@ -56,6 +56,9 @@ namespace xtJucePlugin
 		void checkFirstTimeVisible();
 		void onFirstTimeVisible();
 
+		void toggleWavePreview(bool _enabled);
+		void toggleWavetablePreview(bool _enabled);
+
 		Editor& m_editor;
 
 		std::unique_ptr<WaveTree> m_waveTree;
@@ -65,6 +68,12 @@ namespace xtJucePlugin
 		std::unique_ptr<GraphFreq> m_graphFreq;
 		std::unique_ptr<GraphPhase> m_graphPhase;
 		std::unique_ptr<GraphTime> m_graphTime;
+
+		juce::Button* m_btWavePreview = nullptr;
+		juce::Button* m_ledWavePreview = nullptr;
+
+		juce::Button* m_btWavetablePreview = nullptr;
+		juce::Button* m_ledWavetablePreview = nullptr;
 
 		WaveEditorData m_data;
 		GraphData m_graphData;

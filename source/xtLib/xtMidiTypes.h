@@ -26,6 +26,11 @@ namespace xt
 		ModeRequest       = 0x07, ModeDump      = 0x17, ModeParameterChange      = 0x27, ModeStore      = 0x37, ModeRecall      = 0x47, ModeCompare      = 0x57,
 		InfoRequest       = 0x08, InfoDump      = 0x18, InfoParameterChange      = 0x28, InfoStore      = 0x38, InfoRecall      = 0x48, InfoCompare      = 0x58,
 
+		// emu specific, these are to preview waves and wavetables, the dump format is identical to regular wave/wavetable dumps but we modify the DSP memory directly
+		WaveRequestP      = 0x09, WaveDumpP     = 0x19, WaveParameterChangeP     = 0x29, WaveStoreP     = 0x39, WaveRecallP     = 0x49, WaveCompareP     = 0x59,
+		WaveCtlRequestP	  = 0x0a, WaveCtlDumpP  = 0x1a, WaveCtlParameterChangeP  = 0x2a, WaveCtlStoreP  = 0x3a, WaveCtlRecallP  = 0x4a, WaveCtlCompareP  = 0x5a,
+
+		// emu remote control support
 		EmuLCD = 0x60,
 		EmuLEDs = 0x61,
 		EmuButtons = 0x62,
