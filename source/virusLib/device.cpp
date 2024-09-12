@@ -18,6 +18,8 @@ namespace virusLib
 		: m_rom(std::move(_rom))
 		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
+		m_frontpanelStateMidiEvent.source = synthLib::MidiEventSource::Internal;
+
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
@@ -163,12 +165,8 @@ namespace virusLib
 
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 
-		m_frontpanelStateGui.m_lfoPhases = m_frontpanelStateDSP.m_lfoPhases;
-		m_frontpanelStateGui.m_bpm = m_frontpanelStateDSP.m_bpm;
-		m_frontpanelStateGui.m_logo = m_frontpanelStateDSP.m_logo;
-
-		for(size_t i=0; i<m_frontpanelStateDSP.m_midiEventReceived.size(); ++i)
-			m_frontpanelStateGui.m_midiEventReceived[i] |= m_frontpanelStateDSP.m_midiEventReceived[i];
+		m_frontpanelStateDSP.toMidiEvent(m_frontpanelStateMidiEvent);
+		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
 
 #if !SYNTHLIB_DEMO_MODE

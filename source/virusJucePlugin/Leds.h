@@ -4,8 +4,9 @@
 #include <memory>
 
 #include "jucePluginEditorLib/led.h"
-
+#include "jucePluginLib/event.h"
 #include "juce_gui_basics/juce_gui_basics.h"
+#include "virusLib/frontpanelState.h"
 
 namespace juce
 {
@@ -24,6 +25,8 @@ namespace genericUI
 
 namespace genericVirusUI
 {
+	class VirusEditor;
+
 	class Leds
 	{
 	public:
@@ -44,7 +47,7 @@ namespace genericVirusUI
 			Leds& m_leds;
 		};
 
-		Leds(const genericUI::Editor& _editor, virus::VirusProcessor& _processor);
+		Leds(const VirusEditor& _editor, virus::VirusProcessor& _processor);
 		~Leds();
 
 		void toggleLogoAnimation();
@@ -53,6 +56,8 @@ namespace genericVirusUI
 		bool isLogoAnimationEnabled() const { return m_logoAnimationEnabled; }
 
 	private:
+		void onFrontPanelStateChanged(const virusLib::FrontpanelState& _frontpanelState) const;
+
 		virus::VirusProcessor& m_processor;
 		bool m_logoAnimationEnabled = true;
 
@@ -64,5 +69,7 @@ namespace genericVirusUI
 		juce::Component* m_logoAnim = nullptr;
 
 		std::unique_ptr<LogoMouseListener> m_logoClickListener;
+
+		pluginLib::EventListener<virusLib::FrontpanelState> m_onFrontPanelStateChanged;
 	};
 }

@@ -10,23 +10,18 @@ namespace genericVirusUI
 
 	constexpr const char* g_lfoNames[3] = {"Lfo1LedOn", "Lfo2LedOn", "Lfo3LedOn"};
 
-	Leds::Leds(const genericUI::Editor& _editor, virus::VirusProcessor& _processor) : m_processor(_processor), m_logoAnimationEnabled(_processor.getConfig().getBoolValue(g_logoAnimKey, true))
+	Leds::Leds(const VirusEditor& _editor, virus::VirusProcessor& _processor) : m_processor(_processor), m_logoAnimationEnabled(_processor.getConfig().getBoolValue(g_logoAnimKey, true))
 	{
+		m_onFrontPanelStateChanged.set(_editor.getController().onFrontPanelStateChanged, [this](const virusLib::FrontpanelState& _frontpanelState)
+		{
+			onFrontPanelStateChanged(_frontpanelState);
+		});
+
 		for(size_t i=0; i<m_lfos.size(); ++i)
 		{
 			if(auto* comp = _editor.findComponentT<juce::Component>(g_lfoNames[i], false))
 			{
 				m_lfos[i].reset(new jucePluginEditorLib::Led(comp));
-				m_lfos[i]->setSourceCallback([i, &_processor]
-				{
-					auto* d = dynamic_cast<virusLib::Device*>(_processor.getPlugin().getDevice());
-
-					if(!d)
-						return 0.0f;
-
-					const auto v = std::clamp(d->getFrontpanelState().m_lfoPhases[i], 0.0f, 1.0f);
-					return std::pow(1.0f - v, 0.2f);
-				});
 			}
 		}
 
@@ -35,22 +30,6 @@ namespace genericVirusUI
 			m_logoAnim = logoAnim;
 
 			m_logoLed.reset(new jucePluginEditorLib::Led(logoAnim));
-
-			m_logoLed->setSourceCallback([this, &_processor]
-			{
-				if(!m_logoAnimationEnabled)
-					return 0.0f;
-				auto* d = dynamic_cast<virusLib::Device*>(_processor.getPlugin().getDevice());
-
-				if(!d)
-					return 0.0f;
-
-				const auto& s = d->getFrontpanelState();
-				
-				const auto v = std::clamp(_processor.getModel() == virusLib::DeviceModel::Snow ? s.m_bpm : s.m_logo, 0.0f, 1.0f);
-
-				return std::pow(1.0f - v, 0.2f);
-			});
 
 			m_logoClickListener.reset(new LogoMouseListener(*this));
 
@@ -65,6 +44,8 @@ namespace genericVirusUI
 				m_logo->setInterceptsMouseClicks(true, true);
 			}
 		}
+
+		onFrontPanelStateChanged(_editor.getController().getFrontpanelState());
 	}
 
 	Leds::~Leds()
@@ -86,5 +67,30 @@ namespace genericVirusUI
 
 		m_processor.getConfig().setValue(g_logoAnimKey, m_logoAnimationEnabled);
 		m_processor.getConfig().saveIfNeeded();
+	}
+
+	void Leds::onFrontPanelStateChanged(const virusLib::FrontpanelState& _frontpanelState) const
+	{
+		for(size_t i=0; i<_frontpanelState.m_lfoPhases.size(); ++i)
+		{
+			const auto v = std::clamp(_frontpanelState.m_lfoPhases[i], 0.0f, 1.0f);
+			if(!m_lfos[i])
+				continue;
+			m_lfos[i]->setValue(std::pow(1.0f - v, 0.2f));
+		}
+
+		if(m_logoLed)
+		{
+			if(!m_logoAnimationEnabled)
+			{
+				m_logoLed->setValue(0.0f);
+			}
+			else
+			{
+				const auto v = std::clamp(m_processor.getModel() == virusLib::DeviceModel::Snow ? _frontpanelState.m_bpm : _frontpanelState.m_logo, 0.0f, 1.0f);
+
+				m_logoLed->setValue(std::pow(1.0f - v, 0.2f));
+			}
+		}
 	}
 }

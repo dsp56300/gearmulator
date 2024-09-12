@@ -6,6 +6,7 @@ namespace virusLib
 {
 	enum SysexMessageType : uint8_t
 	{
+		DUMP_EMU_SYNTHSTATE = 0x09,
 		DUMP_SINGLE = 0x10,
 		DUMP_MULTI = 0x11,
 		REQUEST_SINGLE = 0x30,
