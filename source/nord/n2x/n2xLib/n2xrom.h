@@ -11,6 +11,6 @@ namespace n2x
 		Rom();
 		Rom(const std::string& _filename);
 
-		static bool isValidRom(std::array<uint8_t, g_romSize>& _data);
+		static bool isValidRom(const std::vector<uint8_t>& _data);
 	};
 }

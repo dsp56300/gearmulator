@@ -1,8 +1,8 @@
 #pragma once
 
-#include <array>
 #include <cstdint>
 #include <string>
+#include <vector>
 
 namespace n2x
 {
@@ -18,7 +18,7 @@ namespace n2x
 		const auto& data() const { return m_data; }
 		auto& data() { return m_data; }
 
-		void saveAs(const std::string& _filename);
+		void saveAs(const std::string& _filename) const;
 
 		const auto& getFilename() const { return m_filename; }
 
@@ -27,7 +27,7 @@ namespace n2x
 			m_filename.clear();
 		}
 	private:
-		std::array<uint8_t, Size> m_data;
+		std::vector<uint8_t> m_data;
 		std::string m_filename;
 	};
 }

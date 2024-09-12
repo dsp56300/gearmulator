@@ -18,9 +18,12 @@ namespace n2x
 			invalidate();
 	}
 
-	bool Rom::isValidRom(std::array<unsigned char, 524288>& _data)
+	bool Rom::isValidRom(const std::vector<uint8_t>& _data)
 	{
 		constexpr uint8_t key[] = {'n', 'r', '2', 0, 'n', 'L', '2', 0};
+
+		if(_data.size() < std::size(key))
+			return false;
 
 		const auto it = std::search(_data.begin(), _data.end(), std::begin(key), std::end(key));
 		return it != _data.end();
