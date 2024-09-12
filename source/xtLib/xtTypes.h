@@ -16,4 +16,7 @@ namespace xt
 	template<size_t Count> using TAudioBuffer = std::array<std::vector<dsp56k::TWord>, Count>;
 	using TAudioOutputs = TAudioBuffer<4>;
 	using TAudioInputs = TAudioBuffer<2>;
+
+	using WaveData = std::array<int8_t, 128>;
+	using TableData = std::array<uint16_t, 64>;
 }

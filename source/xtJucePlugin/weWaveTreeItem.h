@@ -17,7 +17,7 @@ namespace xtJucePlugin
 
 		bool mightContainSubItems() override { return false; }
 
-		static void paintWave(const WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);
+		static void paintWave(const xt::WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);
 
 		static std::string getWaveName(uint32_t _waveIndex);
 		static WaveCategory getCategory(uint32_t _waveIndex);

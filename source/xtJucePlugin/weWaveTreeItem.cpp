@@ -18,7 +18,7 @@ namespace xtJucePlugin
 		setText(getWaveName(_waveIndex));
 	}
 
-	void WaveTreeItem::paintWave(const WaveData& _data, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height, const juce::Colour& _colour)
+	void WaveTreeItem::paintWave(const xt::WaveData& _data, juce::Graphics& _g, const int _x, const int _y, const int _width, const int _height, const juce::Colour& _colour)
 	{
 		_g.setColour(_colour);
 

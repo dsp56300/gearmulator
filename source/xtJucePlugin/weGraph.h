@@ -78,7 +78,7 @@ namespace xtJucePlugin
 		WaveEditor& m_editor;
 		GraphData& m_data;
 
-		pluginLib::EventListener<WaveData> m_onSourceChanged;
+		pluginLib::EventListener<xt::WaveData> m_onSourceChanged;
 
 		std::set<uint32_t> m_highlightedIndices;
 		uint32_t m_hoveredIndex = InvalidIndex;

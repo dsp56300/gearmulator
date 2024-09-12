@@ -1,13 +1,9 @@
 #pragma once
 
-#include <array>
-#include <cstdint>
+#include "xtLib/xtTypes.h"
 
 namespace xtJucePlugin
 {
-	using WaveData = std::array<int8_t, 128>;
-	using TableData = std::array<uint16_t,64>;
-
 	enum class WaveCategory
 	{
 		Invalid = -1,

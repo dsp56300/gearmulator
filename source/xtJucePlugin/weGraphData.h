@@ -12,11 +12,11 @@ namespace xtJucePlugin
 	class GraphData
 	{
 	public:
-		pluginLib::Event<WaveData> onSourceChanged;
+		pluginLib::Event<xt::WaveData> onSourceChanged;
 
 		GraphData();
 
-		void set(const WaveData& _data);
+		void set(const xt::WaveData& _data);
 
 		const auto& getData() const { return m_data; }
 		const auto& getFrequencies() const { return m_frequencies; }
@@ -30,14 +30,14 @@ namespace xtJucePlugin
 		void updateFrequenciesAndPhases();
 		void updateDataFromFrequenciesAndPhases();
 
-		WaveData m_source;
+		xt::WaveData m_source;
 
-		std::array<float, std::tuple_size_v<WaveData>> m_data;
-		std::array<float, std::tuple_size_v<WaveData>/2> m_frequencies;
-		std::array<float, std::tuple_size_v<WaveData>/2> m_phases;
+		std::array<float, std::tuple_size_v<xt::WaveData>> m_data;
+		std::array<float, std::tuple_size_v<xt::WaveData>/2> m_frequencies;
+		std::array<float, std::tuple_size_v<xt::WaveData>/2> m_phases;
 
-		std::array<juce::dsp::Complex<float>, std::tuple_size_v<WaveData>> m_fftInData; 
-		std::array<juce::dsp::Complex<float>, std::tuple_size_v<WaveData>> m_fftOutData;
+		std::array<juce::dsp::Complex<float>, std::tuple_size_v<xt::WaveData>> m_fftInData; 
+		std::array<juce::dsp::Complex<float>, std::tuple_size_v<xt::WaveData>> m_fftOutData;
 
 		const juce::dsp::FFT m_fft;
 	};

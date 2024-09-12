@@ -2,6 +2,7 @@
 
 #include "xtController.h"
 #include "dsp56kEmu/logging.h"
+#include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
@@ -50,33 +51,8 @@ namespace xtJucePlugin
 		if(!xt::Wave::isValidWaveIndex(index))
 			return;
 
-		/*
-			mw2_sysex.pdf:
-
-			"A Wave consists of 128 eight Bit samples, but only the first 64 of them are
-			stored/transmitted, the second half is same as first except the values are
-			negated and the order is reversed:
-
-			Wave[64+n] = -Wave[63-n] for n=0..63
-
-			Note that samples are not two's complement format, to get a signed byte,
-			the most significant bit must be flipped:
-
-			signed char s = Wave[n] ^ 0x80"
-		*/
-
-		WaveData data;
-
-		constexpr auto off = 7;
-
-		for(uint32_t i=0; i<data.size()>>1; ++i)
-		{
-			auto sample = (_msg[off + (i<<1)]) << 4 | _msg[off + (i<<1) + 1];
-			sample = sample ^ 0x80;
-
-			data[i] = static_cast<int8_t>(sample);
-			data[127-i] = static_cast<int8_t>(-sample);
-		}
+		xt::WaveData data;
+		xt::State::parseWaveData(data, _msg);
 
 		setWave(index, data);
 
@@ -94,21 +70,9 @@ namespace xtJucePlugin
 		if(!xt::Wave::isValidTableIndex(index))
 			return;
 
-		constexpr uint32_t off = 7;
+		xt::TableData table;
 
-		TableData table;
-
-		for(uint32_t i=0; i<64; ++i)
-		{
-			const auto i4 = i<<2;
-
-			auto waveIdx = _msg[i4+off] << 12;
-			waveIdx |= _msg[i4+off+1] << 8;
-			waveIdx |= _msg[i4+off+2] << 4;
-			waveIdx |= _msg[i4+off+3];
-
-			table[i] = static_cast<uint16_t>(waveIdx);
-		}
+		xt::State::parseTableData(table, _msg);
 
 		setTable(index, table);
 
@@ -119,7 +83,7 @@ namespace xtJucePlugin
 		}
 	}
 
-	std::optional<WaveData> WaveEditorData::getWave(uint32_t _waveIndex) const
+	std::optional<xt::WaveData> WaveEditorData::getWave(uint32_t _waveIndex) const
 	{
 		if(_waveIndex < m_romWaves.size())
 			return m_romWaves[_waveIndex];
@@ -140,7 +104,7 @@ namespace xtJucePlugin
 	{
 		if(_tableIndex >= m_tables.size())
 			return InvalidWaveIndex;
-		if(_indexInTable >= std::tuple_size<TableData>())
+		if(_indexInTable >= std::tuple_size<xt::TableData>())
 			return InvalidWaveIndex;
 		const auto table = m_tables[_tableIndex];
 		if(!table)
@@ -148,7 +112,7 @@ namespace xtJucePlugin
 		return (*table)[_indexInTable];
 	}
 
-	std::optional<WaveData> WaveEditorData::getWave(const uint32_t _tableIndex, const uint32_t _indexInTable) const
+	std::optional<xt::WaveData> WaveEditorData::getWave(const uint32_t _tableIndex, const uint32_t _indexInTable) const
 	{
 		return getWave(getWaveIndex(_tableIndex, _indexInTable));
 	}
@@ -183,7 +147,7 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool WaveEditorData::setWave(uint32_t _index, const WaveData& _data)
+	bool WaveEditorData::setWave(uint32_t _index, const xt::WaveData& _data)
 	{
 		if(_index < m_romWaves.size())
 		{
@@ -204,7 +168,7 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool WaveEditorData::setTable(uint32_t _index, const TableData& _data)
+	bool WaveEditorData::setTable(uint32_t _index, const xt::TableData& _data)
 	{
 		if(_index >= m_tables.size())
 			return false;

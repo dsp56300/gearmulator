@@ -6,6 +6,7 @@
 #include <cstdint>
 
 #include "xtMidiTypes.h"
+#include "xtTypes.h"
 
 #include "synthLib/deviceTypes.h"
 #include "synthLib/midiTypes.h"
@@ -81,6 +82,9 @@ namespace xt
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
+
+		static void parseWaveData(WaveData& _wave, const SysEx& _sysex);
+		static void parseTableData(TableData& _table, const SysEx& _sysex);
 
 	private:
 

@@ -700,6 +700,52 @@ namespace xt
 		*/
 	}
 
+	void State::parseWaveData(WaveData& _wave, const SysEx& _sysex)
+	{
+		/*
+			mw2_sysex.pdf:
+
+			"A Wave consists of 128 eight Bit samples, but only the first 64 of them are
+			stored/transmitted, the second half is same as first except the values are
+			negated and the order is reversed:
+
+			Wave[64+n] = -Wave[63-n] for n=0..63
+
+			Note that samples are not two's complement format, to get a signed byte,
+			the most significant bit must be flipped:
+
+			signed char s = Wave[n] ^ 0x80"
+		*/
+
+		constexpr auto off = 7;
+
+		for(uint32_t i=0; i<_wave.size()>>1; ++i)
+		{
+			auto sample = (_sysex[off + (i<<1)]) << 4 | _sysex[off + (i<<1) + 1];
+			sample = sample ^ 0x80;
+
+			_wave[i] = static_cast<int8_t>(sample);
+			_wave[127-i] = static_cast<int8_t>(-sample);
+		}
+	}
+
+	void State::parseTableData(TableData& _table, const SysEx& _sysex)
+	{
+		constexpr uint32_t off = 7;
+
+		for(uint32_t i=0; i<_table.size(); ++i)
+		{
+			const auto i4 = i<<2;
+
+			auto waveIdx = _sysex[i4+off] << 12;
+			waveIdx |= _sysex[i4+off+1] << 8;
+			waveIdx |= _sysex[i4+off+2] << 4;
+			waveIdx |= _sysex[i4+off+3];
+
+			_table[i] = static_cast<uint16_t>(waveIdx);
+		}
+	}
+
 	void State::onPlayModeChanged()
 	{
 		// if the play mode is changed, force a re-request of the edit buffer for the first single again, because on the device, that edit buffer is shared between multi & single

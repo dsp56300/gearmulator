@@ -34,9 +34,9 @@ namespace xtJucePlugin
 
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
-		std::optional<WaveData> getWave(uint32_t _waveIndex) const;
+		std::optional<xt::WaveData> getWave(uint32_t _waveIndex) const;
 		uint32_t getWaveIndex(uint32_t _tableIndex, uint32_t _indexInTable) const;
-		std::optional<WaveData> getWave(uint32_t _tableIndex, uint32_t _indexInTable) const;
+		std::optional<xt::WaveData> getWave(uint32_t _tableIndex, uint32_t _indexInTable) const;
 
 		static uint32_t toIndex(const pluginLib::MidiPacket::Data& _data);
 		static bool isAlgorithmicTable(uint32_t _index);
@@ -46,16 +46,16 @@ namespace xtJucePlugin
 		bool requestWave(uint32_t _index);
 		bool requestTable(uint32_t _index);
 
-		bool setWave(uint32_t _index, const WaveData& _data);
-		bool setTable(uint32_t _index, const TableData& _data);
+		bool setWave(uint32_t _index, const xt::WaveData& _data);
+		bool setTable(uint32_t _index, const xt::TableData& _data);
 
 		Controller& m_controller;
 
 		uint32_t m_currentWaveRequestIndex = InvalidWaveIndex;
 		uint32_t m_currentTableRequestIndex = InvalidWaveIndex;
 
-		std::array<std::optional<WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
-		std::array<std::optional<WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;
-		std::array<std::optional<TableData>, xt::Wave::g_tableCount> m_tables;
+		std::array<std::optional<xt::WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
+		std::array<std::optional<xt::WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;
+		std::array<std::optional<xt::TableData>, xt::Wave::g_tableCount> m_tables;
 	};
 }

@@ -6,7 +6,7 @@ namespace xtJucePlugin
 {
 	constexpr float g_pi = 3.1415926535f;
 
-	constexpr auto g_size = std::tuple_size_v<WaveData>;
+	constexpr auto g_size = std::tuple_size_v<xt::WaveData>;
 	constexpr uint32_t g_fftOrder = 7;
 	static_assert((1 << g_fftOrder) == g_size);
 
@@ -14,7 +14,7 @@ namespace xtJucePlugin
 	{
 	}
 
-	void GraphData::set(const WaveData& _data)
+	void GraphData::set(const xt::WaveData& _data)
 	{
 		if(_data == m_source)
 			return;
