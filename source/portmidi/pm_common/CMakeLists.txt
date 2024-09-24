@@ -22,9 +22,9 @@ endmacro(prepend_path)
 # first include the appropriate system-dependent file:
 if(UNIX)
   if(APPLE)
-    set(MACSRC pmmacosxcm pmmac readbinaryplist finddefault)
+    set(MACSRC pmmacosxcm.c pmmac.c readbinaryplist.c finddefault.c)
     prepend_path(LIBSRC ../pm_mac/ ${MACSRC})
-    list(APPEND LIBSRC ../porttime/ptmacosx_mach)
+    list(APPEND LIBSRC ../porttime/ptmacosx_mach.c)
 
     include_directories(${CMAKE_OSX_SYSROOT}/Developer/Headers/FlatCarbon)
     set(FRAMEWORK_PATH ${CMAKE_OSX_SYSROOT}/System/Library/Frameworks)
@@ -53,9 +53,9 @@ if(UNIX)
         # libjvm.so is found relative to JAVA_INCLUDE_PATH:
         set(JAVAVM_LIB ${JAVA_JVM_LIBRARY}/libjvm.so)
     endif()
-    set(LINUXSRC pmlinuxalsa pmlinux finddefault)
+    set(LINUXSRC pmlinuxalsa.c pmlinux.c finddefault.c)
     prepend_path(LIBSRC ../pm_linux/ ${LINUXSRC})
-    list(APPEND LIBSRC ../porttime/ptlinux)
+    list(APPEND LIBSRC ../porttime/ptlinux.c)
 
     if(NOT ANDROID)
       set(PM_NEEDED_LIBS pthread asound)
@@ -74,9 +74,9 @@ else(UNIX)
         # message(STATUS "JAVA_INCLUDE_PATHS: " ${JAVA_INCLUDE_PATHS})
     endif()
 
-    set(WINSRC pmwin pmwinmm)
+    set(WINSRC pmwin.c pmwinmm.c)
     prepend_path(LIBSRC ../pm_win/ ${WINSRC})
-    list(APPEND LIBSRC ../porttime/ptwinmm)
+    list(APPEND LIBSRC ../porttime/ptwinmm.c)
     set(PM_NEEDED_LIBS winmm.lib)
   endif(WIN32)
 endif(UNIX)
@@ -85,7 +85,7 @@ if(PMJAVA)
 endif()
 
 # this completes the list of library sources by adding shared code
-list(APPEND LIBSRC pmutil portmidi)
+list(APPEND LIBSRC pmutil.c portmidi.c)
 
 # now add the shared files to make the complete list of library sources
 add_library(portmidi-static ${LIBSRC})
