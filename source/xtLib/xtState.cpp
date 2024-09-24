@@ -4,6 +4,7 @@
 
 #include "xtMidiTypes.h"
 #include "xt.h"
+#include "xtWavePreview.h"
 
 #include "synthLib/os.h"
 #include "synthLib/midiToSysex.h"
@@ -15,7 +16,7 @@ namespace xt
 {
 	static_assert(std::size(State::Dumps) == static_cast<uint32_t>(State::DumpType::Count), "data definition missing");
 
-	State::State(Xt& _xt) : m_xt(_xt)
+	State::State(Xt& _xt, WavePreview& _preview) : m_xt(_xt), m_wavePreview(_preview)
 	{
 	}
 
@@ -159,6 +160,10 @@ namespace xt
 		case SysexCommand::MultiParameterChange:	return modifyDump(DumpType::Multi, _data);
 		case SysexCommand::GlobalParameterChange:	return modifyDump(DumpType::Global, _data);
 		case SysexCommand::ModeParameterChange:		return modifyDump(DumpType::Mode, _data);
+
+		case SysexCommand::WaveDumpP:				return m_wavePreview.receiveWave(_data);
+		case SysexCommand::WaveCtlDumpP:			return m_wavePreview.receiveWaveControlTable(_data);
+		case SysexCommand::WavePreviewMode:			return m_wavePreview.receiveWavePreviewMode(_data);
 
 /*		case SysexCommand::EmuLCD:
 		case SysexCommand::EmuLEDs:
@@ -721,12 +726,38 @@ namespace xt
 
 		for(uint32_t i=0; i<_wave.size()>>1; ++i)
 		{
-			auto sample = (_sysex[off + (i<<1)]) << 4 | _sysex[off + (i<<1) + 1];
+			const auto idx = off + (i<<1);
+			auto sample = (_sysex[idx]) << 4 | _sysex[idx+1];
 			sample = sample ^ 0x80;
 
 			_wave[i] = static_cast<int8_t>(sample);
 			_wave[127-i] = static_cast<int8_t>(-sample);
 		}
+	}
+
+	SysEx State::createWaveData(const WaveData& _wave, const uint16_t _waveIndex, const bool _preview)
+	{
+		const auto hh = static_cast<uint8_t>(_waveIndex >> 7);
+		const auto ll = static_cast<uint8_t>(_waveIndex & 0x7f);
+
+		const std::initializer_list<uint8_t> header{0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(_preview ? SysexCommand::WaveDumpP : SysexCommand::WaveDump), hh, ll};
+		SysEx sysex{header};
+		sysex.reserve(sysex.size() + _wave.size());
+
+		for(uint32_t i=0; i<_wave.size()>>1; ++i)
+		{
+			const auto sample = _wave[i] ^ 0x80;
+
+			sysex.push_back(static_cast<uint8_t>(sample >> 4));
+			sysex.push_back(static_cast<uint8_t>(sample & 0xf));
+		}
+
+		sysex.push_back(0);
+		sysex.push_back(0xf7);
+
+		updateChecksum(sysex, static_cast<uint32_t>(std::size(header)));
+
+		return sysex;
 	}
 
 	void State::parseTableData(TableData& _table, const SysEx& _sysex)
@@ -744,6 +775,34 @@ namespace xt
 
 			_table[i] = static_cast<uint16_t>(waveIdx);
 		}
+	}
+
+	SysEx State::createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview)
+	{
+		const auto hh = static_cast<uint8_t>(_tableIndex >> 7);
+		const auto ll = static_cast<uint8_t>(_tableIndex & 0x7f);
+
+		const std::initializer_list<uint8_t> header{0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(_preview ? SysexCommand::WaveCtlDumpP : SysexCommand::WaveCtlDump), hh, ll};
+		SysEx sysex{header};
+		sysex.reserve(sysex.size() + _table.size() * 4);
+
+		for(uint32_t i=0; i<_table.size(); ++i)
+		{
+			const auto i4 = i<<2;
+
+			const auto waveIndex = _table[i];
+			sysex.push_back((waveIndex >> 12) & 0xf);
+			sysex.push_back((waveIndex >> 8) & 0xf);
+			sysex.push_back((waveIndex >> 4) & 0xf);
+			sysex.push_back((waveIndex     ) & 0xf);
+		}
+
+		sysex.push_back(0);
+		sysex.push_back(0xf7);
+
+		updateChecksum(sysex, static_cast<uint32_t>(std::size(header)));
+
+		return sysex;
 	}
 
 	void State::onPlayModeChanged()

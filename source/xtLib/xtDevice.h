@@ -3,6 +3,7 @@
 #include "xt.h"
 #include "xtState.h"
 #include "xtSysexRemoteControl.h"
+#include "xtWavePreview.h"
 #include "wLib/wDevice.h"
 
 namespace dsp56k
@@ -33,6 +34,7 @@ namespace xt
 	private:
 
 		Xt m_xt;
+		WavePreview m_wavePreview;
 		State m_state;
 		SysexRemoteControl m_sysexRemote;
 	};

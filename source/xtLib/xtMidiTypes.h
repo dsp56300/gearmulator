@@ -30,6 +30,8 @@ namespace xt
 		WaveRequestP      = 0x09, WaveDumpP     = 0x19, WaveParameterChangeP     = 0x29, WaveStoreP     = 0x39, WaveRecallP     = 0x49, WaveCompareP     = 0x59,
 		WaveCtlRequestP	  = 0x0a, WaveCtlDumpP  = 0x1a, WaveCtlParameterChangeP  = 0x2a, WaveCtlStoreP  = 0x3a, WaveCtlRecallP  = 0x4a, WaveCtlCompareP  = 0x5a,
 
+		WavePreviewMode = WaveStoreP,
+
 		// emu remote control support
 		EmuLCD = 0x60,
 		EmuLEDs = 0x61,
@@ -76,7 +78,10 @@ namespace xt
 
 		IdxModeParamIndexH = wLib::IdxBuffer,
 		IdxModeParamIndexL = IdxModeParamIndexH,
-		IdxModeParamValue  = wLib::IdxBuffer
+		IdxModeParamValue  = wLib::IdxBuffer,
+
+		IdxWaveIndexH = wLib::IdxBuffer,
+		IdxWaveIndexL = IdxWaveIndexH + 1
 	};
 
 	enum class GlobalParameter

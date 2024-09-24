@@ -7,8 +7,10 @@
 #include "weGraphFreq.h"
 #include "weGraphPhase.h"
 #include "weGraphTime.h"
+#include "xtController.h"
 
 #include "xtEditor.h"
+#include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
@@ -22,6 +24,11 @@ namespace xtJucePlugin
 				return;
 
 			setSelectedWave(_waveIndex, true);
+		});
+
+		m_graphData.onIntegerChanged.addListener([this](const xt::WaveData& _data)
+		{
+			onWaveDataChanged(_data);
 		});
 	}
 
@@ -121,6 +128,15 @@ namespace xtJucePlugin
 		m_ledWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
 	}
 
+	void WaveEditor::onWaveDataChanged(const xt::WaveData& _data) const
+	{
+		if(m_btWavePreview->getToggleState())
+		{
+			const auto sysex = xt::State::createWaveData(_data, m_editor.getXtController().getCurrentPart(), true);
+			m_editor.getXtController().sendSysEx(sysex);
+		}
+	}
+
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
 		m_data.onReceiveWave(_data, _msg);
@@ -148,6 +164,9 @@ namespace xtJucePlugin
 		m_selectedWave = _waveIndex;
 
 		if(const auto wave = m_data.getWave(_waveIndex))
+		{
 			m_graphData.set(*wave);
+			onWaveDataChanged(*wave);
+		}
 	}
 }

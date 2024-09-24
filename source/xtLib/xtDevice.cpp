@@ -9,7 +9,7 @@ namespace mqLib
 
 namespace xt
 {
-	Device::Device() : m_state(m_xt), m_sysexRemote(m_xt)
+	Device::Device() : m_wavePreview(m_xt), m_state(m_xt, m_wavePreview), m_sysexRemote(m_xt)
 	{
 		while(!m_xt.isBootCompleted())
 			m_xt.process(8);

@@ -20,6 +20,7 @@ namespace synthLib
 
 namespace xt
 {
+	class WavePreview;
 	class Xt;
 
 	using SysEx = wLib::SysEx;
@@ -70,7 +71,7 @@ namespace xt
 		using Global = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Global)].dumpSize>;
 		using Mode = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Mode)].dumpSize>;
 
-		State(Xt& _xt);
+		State(Xt& _xt, WavePreview& _wavePreview);
 
 		bool loadState(const SysEx& _sysex);
 
@@ -84,7 +85,10 @@ namespace xt
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		static void parseWaveData(WaveData& _wave, const SysEx& _sysex);
+		static SysEx createWaveData(const WaveData& _wave, uint16_t _waveIndex, bool _preview);
+
 		static void parseTableData(TableData& _table, const SysEx& _sysex);
+		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 	private:
 
@@ -201,6 +205,9 @@ namespace xt
 		// current state, valid while receiving data
 		Origin m_sender = Origin::External;
 		bool m_isEditBuffer = false;
+
+		// Emulator specific: preview wave editing
+		WavePreview& m_wavePreview;
 
 		synthLib::SMidiEvent m_lastBankSelectMSB;
 		synthLib::SMidiEvent m_lastBankSelectLSB;

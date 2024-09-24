@@ -59,6 +59,8 @@ namespace xtJucePlugin
 		void toggleWavePreview(bool _enabled);
 		void toggleWavetablePreview(bool _enabled);
 
+		void onWaveDataChanged(const xt::WaveData& _data) const;
+
 		Editor& m_editor;
 
 		std::unique_ptr<WaveTree> m_waveTree;

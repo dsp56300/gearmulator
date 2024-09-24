@@ -12,7 +12,8 @@ namespace xtJucePlugin
 	class GraphData
 	{
 	public:
-		pluginLib::Event<xt::WaveData> onSourceChanged;
+		pluginLib::Event<> onChanged;
+		pluginLib::Event<xt::WaveData> onIntegerChanged;
 
 		GraphData();
 
@@ -21,6 +22,7 @@ namespace xtJucePlugin
 		const auto& getData() const { return m_data; }
 		const auto& getFrequencies() const { return m_frequencies; }
 		const auto& getPhases() const { return m_phases; }
+		const auto& getSource() const { return m_source; }
 
 		void setData(uint32_t _index, float _value);
 		void setFreq(uint32_t _index, float _value);
@@ -29,6 +31,8 @@ namespace xtJucePlugin
 	private:
 		void updateFrequenciesAndPhases();
 		void updateDataFromFrequenciesAndPhases();
+		bool updateSourceFromData();
+		void sendChangedEvents();
 
 		xt::WaveData m_source;
 
