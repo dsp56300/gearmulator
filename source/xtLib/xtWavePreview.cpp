@@ -65,8 +65,8 @@ namespace xt
 		{
 			for(uint32_t i=0; i<size; ++i)
 			{
-				const auto s = (waveData[readOffset+i] + waveData[readOffset+i+1]) >> 1;
-				waveData[writeOffset] = static_cast<int8_t>(s);
+				const auto s = (waveData[readOffset+(i<<1)] + waveData[readOffset+(i<<1)+1]) >> 1;
+				waveData[writeOffset+i] = static_cast<int8_t>(s);
 			}
 			readOffset += size<<1;
 			writeOffset += size;
