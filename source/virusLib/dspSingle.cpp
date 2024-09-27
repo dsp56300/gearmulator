@@ -75,6 +75,11 @@ namespace virusLib
 #endif
 
 		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger));
+
+#ifdef ZYNTHIAN
+		m_dspThread->setLogToDebug(false);
+		m_dspThread->setLogToStdout(false);
+#endif
 	}
 
 	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency, std::vector<T>& _dummyIn, std::vector<T>& _dummyOut)

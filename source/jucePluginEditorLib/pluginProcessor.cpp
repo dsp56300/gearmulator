@@ -5,13 +5,30 @@
 
 #include "baseLib/binarystream.h"
 
+#ifdef ZYNTHIAN
+#include "dsp56kEmu/logging.h"
+#endif
+
 namespace jucePluginEditorLib
 {
+	namespace 
+	{
+#ifdef ZYNTHIAN
+		void noLoggingFunc(const std::string&)
+		{
+			// https://discourse.zynthian.org/t/deadlock-when-attempting-to-log-to-stdout/10169
+		}
+#endif
+	}
+
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
 	: pluginLib::Processor(_busesProperties, _properties)
 	, m_configOptions(_configOptions)
 	, m_config(_configOptions)
 	{
+#ifdef ZYNTHIAN
+		Logging::setLogFunc(&noLoggingFunc);
+#endif
 	}
 
 	Processor::~Processor()
