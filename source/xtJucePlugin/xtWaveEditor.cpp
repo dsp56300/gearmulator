@@ -6,6 +6,7 @@
 #include "weGraphFreq.h"
 #include "weGraphPhase.h"
 #include "weGraphTime.h"
+#include "weWaveTreeItem.h"
 #include "xtController.h"
 
 #include "xtEditor.h"
@@ -70,9 +71,11 @@ namespace xtJucePlugin
 
 		m_btWavePreview = m_editor.findComponentT<juce::Button>("btWavePreview");
 		m_ledWavePreview = m_editor.findComponentT<juce::Button>("ledWavePreview");
+		m_btWaveSave = m_editor.findComponentT<juce::Button>("btWaveSave");
 
 		m_btWavetablePreview = m_editor.findComponentT<juce::Button>("btWavetablePreview");
 		m_ledWavetablePreview = m_editor.findComponentT<juce::Button>("ledWavetablePreview");
+		m_btWavetableSave = m_editor.findComponentT<juce::Button>("btWavetableSave");
 
 		m_btWavePreview->onClick = [this]
 		{
@@ -82,6 +85,16 @@ namespace xtJucePlugin
 		m_btWavetablePreview->onClick = [this]
 		{
 			toggleWavetablePreview(m_btWavePreview->getToggleState());
+		};
+
+		m_btWaveSave->onClick = [this]
+		{
+			saveWave();
+		};
+
+		m_btWavetableSave->onClick = [this]
+		{
+			saveWavetable();
 		};
 	}
 
@@ -136,6 +149,53 @@ namespace xtJucePlugin
 		}
 	}
 
+	void WaveEditor::saveWave()
+	{
+		if(WaveEditorData::isReadOnly(m_selectedWave))
+		{
+			// open menu and let user select one of the wave slots
+			juce::PopupMenu menu;
+
+
+			uint16_t count = 0;
+			for(uint16_t i=xt::Wave::g_firstRamWaveIndex; i<xt::Wave::g_firstRamWaveIndex+xt::Wave::g_ramWaveCount; ++i)
+			{
+				const auto id = xt::WaveId(i);
+				menu.addItem(WaveTreeItem::getWaveName(id), true, false, [this, id]
+				{
+					saveWaveTo(id);
+				});
+
+				++count;
+				if((count % 25) == 0)
+					menu.addColumnBreak();
+			}
+
+			menu.showMenuAsync({});
+		}
+		else
+		{
+			saveWaveTo(m_selectedWave);
+		}
+	}
+
+	bool WaveEditor::saveWaveTo(const xt::WaveId _target)
+	{
+		if(WaveEditorData::isReadOnly(_target))
+			return false;
+
+		m_data.setWave(_target, m_graphData.getSource());
+
+		if(_target != m_selectedWave)
+			setSelectedWave(_target);
+
+		return true;
+	}
+
+	void WaveEditor::saveWavetable()
+	{
+	}
+
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
 		m_data.onReceiveWave(_data, _msg);
@@ -161,6 +221,8 @@ namespace xtJucePlugin
 			return;
 
 		m_selectedWave = _waveIndex;
+
+		m_waveTree->setSelectedWave(m_selectedWave);
 
 		if(const auto wave = m_data.getWave(_waveIndex))
 		{

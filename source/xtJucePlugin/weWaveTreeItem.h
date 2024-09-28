@@ -15,6 +15,8 @@ namespace xtJucePlugin
 	public:
 		WaveTreeItem(WaveEditor& _editor, WaveCategory _category, xt::WaveId _waveIndex);
 
+		auto getWaveId() const { return m_waveIndex; }
+
 		bool mightContainSubItems() override { return false; }
 
 		static void paintWave(const xt::WaveData& _data, juce::Graphics& _g, int _x, int _y, int _width, int _height, const juce::Colour& _colour);

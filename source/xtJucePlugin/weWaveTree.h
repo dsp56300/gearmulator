@@ -12,6 +12,8 @@ namespace xtJucePlugin
 	public:
 		explicit WaveTree(WaveEditor& _editor);
 
+		bool setSelectedWave(xt::WaveId _id);
+
 	private:
 		void addCategory(WaveCategory _category);
 

@@ -12,6 +12,7 @@ namespace xtJucePlugin
 	public:
 		explicit WaveCategoryTreeItem(WaveEditor& _editor, WaveCategory _category);
 		bool mightContainSubItems() override { return true; }
+		bool setSelectedWave(xt::WaveId _id);
 
 		static std::string getCategoryName(WaveCategory _category);
 

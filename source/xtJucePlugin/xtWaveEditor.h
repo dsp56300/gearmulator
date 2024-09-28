@@ -61,6 +61,11 @@ namespace xtJucePlugin
 
 		void onWaveDataChanged(const xt::WaveData& _data) const;
 
+		void saveWave();
+		bool saveWaveTo(xt::WaveId _target);
+
+		void saveWavetable();
+
 		Editor& m_editor;
 
 		std::unique_ptr<WaveTree> m_waveTree;
@@ -76,6 +81,9 @@ namespace xtJucePlugin
 
 		juce::Button* m_btWavetablePreview = nullptr;
 		juce::Button* m_ledWavetablePreview = nullptr;
+
+		juce::Button* m_btWaveSave = nullptr;
+		juce::Button* m_btWavetableSave = nullptr;
 
 		WaveEditorData m_data;
 		GraphData m_graphData;
