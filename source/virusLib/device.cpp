@@ -7,6 +7,7 @@
 #include "dsp56kEmu/jit.h"
 
 #include "synthLib/deviceException.h"
+#include "synthLib/midiToSysex.h"
 
 #include <cstring>
 
@@ -183,8 +184,19 @@ namespace virusLib
 	bool Device::setStateFromUnknownCustomData(const std::vector<uint8_t>& _state)
 	{
 		std::vector<synthLib::SMidiEvent> messages;
-		if(!parseTIcontrolPreset(messages, _state))
+
+		if(parseTIcontrolPreset(messages, _state))
+			return m_mc->setState(messages);
+
+		std::vector<std::vector<uint8_t>> sysexMessages;
+		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, _state, false);
+
+		if(sysexMessages.empty())
 			return false;
+
+		for (const auto& sysexMessage : sysexMessages)
+			messages.emplace_back().sysex = sysexMessage;
+
 		return m_mc->setState(messages);
 	}
 #endif
