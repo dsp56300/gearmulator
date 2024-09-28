@@ -71,6 +71,30 @@ namespace xtJucePlugin
 		return desc;
 	}
 
+	bool WaveTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+	{
+		if(WaveEditorData::isReadOnly(m_waveIndex))
+			return false;
+		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+		if(!waveDesc)
+			return false;
+		if(!waveDesc->waveId.isValid())
+			return false;
+		return true;
+	}
+
+	void WaveTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+	{
+		TreeItem::itemDropped(dragSourceDetails, insertIndex);
+		if(WaveEditorData::isReadOnly(m_waveIndex))
+			return;
+		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+		if(!waveDesc)
+			return;
+		auto& data = m_editor.getData();
+		data.copyWave(m_waveIndex, waveDesc->waveId);
+	}
+
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const
 	{
 		if(_index != m_waveIndex)

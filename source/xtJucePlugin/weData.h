@@ -41,7 +41,9 @@ namespace xtJucePlugin
 		std::optional<xt::TableData> getTable(xt::TableId _tableIndex) const;
 		bool swapTableEntries(xt::TableId _table, xt::TableIndex _indexA, xt::TableIndex _indexB);
 		bool setTableWave(xt::TableId _table, xt::TableIndex _index, xt::WaveId _waveIndex);
+
 		bool copyTable(const xt::TableId _dest, const xt::TableId _source);
+		bool copyWave(const xt::WaveId _dest, const xt::WaveId _source);
 
 		static uint16_t toIndex(const pluginLib::MidiPacket::Data& _data);
 

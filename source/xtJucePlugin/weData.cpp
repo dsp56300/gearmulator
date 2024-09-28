@@ -177,6 +177,14 @@ namespace xtJucePlugin
 		return true;
 	}
 
+	bool WaveEditorData::copyWave(const xt::WaveId _dest, const xt::WaveId _source)
+	{
+		const auto sourceWave = getWave(_source);
+		if(!sourceWave)
+			return false;
+		return setWave(_dest, *sourceWave);
+	}
+
 	std::optional<xt::WaveData> WaveEditorData::getWave(const xt::TableId _tableIndex, const xt::TableIndex _indexInTable) const
 	{
 		return getWave(getWaveIndex(_tableIndex, _indexInTable));
