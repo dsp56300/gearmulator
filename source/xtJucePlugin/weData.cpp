@@ -265,11 +265,15 @@ namespace xtJucePlugin
 
 	bool WaveEditorData::isReadOnly(const xt::TableId _table)
 	{
+		if(!_table.isValid())
+			return true;
 		return _table.rawId() < xt::Wave::g_firstRamTableIndex;
 	}
 
 	bool WaveEditorData::isReadOnly(const xt::WaveId _waveId)
 	{
+		if(!_waveId.isValid())
+			return true;
 		return _waveId.rawId() < xt::Wave::g_firstRamWaveIndex;
 	}
 }
