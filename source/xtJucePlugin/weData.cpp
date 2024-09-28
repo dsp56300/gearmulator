@@ -238,4 +238,9 @@ namespace xtJucePlugin
 		}
 		return false;
 	}
+
+	bool WaveEditorData::isReadOnly(const xt::TableId _table)
+	{
+		return _table.rawId() < xt::Wave::g_firstRamTableIndex;
+	}
 }

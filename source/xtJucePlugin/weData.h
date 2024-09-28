@@ -44,6 +44,7 @@ namespace xtJucePlugin
 
 		static uint16_t toIndex(const pluginLib::MidiPacket::Data& _data);
 		static bool isAlgorithmicTable(xt::TableId _index);
+		static bool isReadOnly(xt::TableId _table);
 
 	private:
 

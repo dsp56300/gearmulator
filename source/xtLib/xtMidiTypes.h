@@ -194,6 +194,7 @@ namespace xt
 
 		static constexpr uint16_t g_tableCount = 128;
 		static constexpr uint16_t g_wavesPerTable = 64;
+		static constexpr uint16_t g_firstRamTableIndex = 96;
 
 		// these are either algorithmic or invalid, we cannot request them via MIDI
 		static constexpr uint32_t g_algorithmicWavetables[] = {28, 29,

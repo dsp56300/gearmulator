@@ -54,7 +54,7 @@ namespace xtJucePlugin
 
 	juce::var ControlTreeItem::getDragSourceDescription()
 	{
-		if(m_wave == g_invalidWaveIndex)
+		if(m_wave == g_invalidWaveIndex || WaveEditorData::isReadOnly(m_table))
 			return TreeViewItem::getDragSourceDescription();
 
 		auto* desc = new WaveDesc();
@@ -66,6 +66,8 @@ namespace xtJucePlugin
 
 	bool ControlTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
+		if(WaveEditorData::isReadOnly(m_table))
+			return false;
 		return WaveDesc::fromDragSource(_dragSourceDetails) != nullptr;
 	}
 
