@@ -188,9 +188,10 @@ namespace xt
 
 	namespace Wave
 	{
-		static constexpr uint16_t g_romWaveCount = 300;
+		static constexpr uint16_t g_romWaveCount = 506;
 		static constexpr uint16_t g_ramWaveCount = 250;
 		static constexpr uint16_t g_firstRamWaveIndex = 1000;
+
 		static constexpr uint16_t g_tableCount = 128;
 		static constexpr uint16_t g_wavesPerTable = 64;
 
