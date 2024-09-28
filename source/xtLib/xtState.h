@@ -86,6 +86,7 @@ namespace xt
 
 		static void parseWaveData(WaveData& _wave, const SysEx& _sysex);
 		static SysEx createWaveData(const WaveData& _wave, uint16_t _waveIndex, bool _preview);
+		static WaveData createinterpolatedTable(const WaveData& _a, const WaveData& _b, uint16_t _indexA, uint16_t _indexB, uint16_t _indexTarget);
 
 		static void parseTableData(TableData& _table, const SysEx& _sysex);
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);

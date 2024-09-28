@@ -760,6 +760,27 @@ namespace xt
 		return sysex;
 	}
 
+	WaveData State::createinterpolatedTable(const WaveData& _a, const WaveData& _b, uint16_t _indexA, uint16_t _indexB, uint16_t _indexTarget)
+	{
+		assert(_indexB > _indexA);
+		assert(_indexTarget >= _indexA && _indexTarget <= _indexB);
+
+		xt::WaveData result;
+
+		const auto indexDelta = _indexB - _indexA;
+		const auto targetDelta = _indexTarget - _indexA;
+
+		for(size_t i=0; i<_a.size(); ++i)
+		{
+			auto d = _b[i] - _a[i];
+			d *= targetDelta;
+			d /= indexDelta;
+			d += _a[i];
+			result[i] = static_cast<int8_t>(d);
+		}
+		return result;
+	}
+
 	void State::parseTableData(TableData& _table, const SysEx& _sysex)
 	{
 		constexpr uint32_t off = 7;
