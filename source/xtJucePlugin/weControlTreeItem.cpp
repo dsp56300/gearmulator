@@ -18,6 +18,10 @@ namespace xtJucePlugin
 
 		setPaintRootItemInBold(false);
 		setDrawsInLeftMargin(true);
+
+		// force initial update
+		m_wave = xt::WaveId(0);
+		setWave(xt::WaveId());
 	}
 
 	void ControlTreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
