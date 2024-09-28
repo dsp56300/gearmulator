@@ -19,6 +19,10 @@ namespace xtJucePlugin
 
 		void itemSelectionChanged(bool _isNowSelected) override;
 
+		juce::var getDragSourceDescription() override;
+		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
+		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
+
 	private:
 		void onTableChanged(xt::TableId _index);
 		void onTableChanged();

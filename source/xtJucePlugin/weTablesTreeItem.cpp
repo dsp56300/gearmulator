@@ -1,5 +1,6 @@
 #include "weTablesTreeItem.h"
 
+#include "weWaveDesc.h"
 #include "xtController.h"
 #include "xtEditor.h"
 #include "xtWaveEditor.h"
@@ -27,6 +28,41 @@ namespace xtJucePlugin
 	{
 		TreeItem::itemSelectionChanged(_isNowSelected);
 		m_editor.setSelectedTable(m_index);
+	}
+
+	juce::var TablesTreeItem::getDragSourceDescription()
+	{
+		auto* waveDesc = new WaveDesc();
+		waveDesc->tableId = m_index;
+		waveDesc->source = WaveDescSource::TablesList;
+		return waveDesc;
+	}
+
+	bool TablesTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
+	{
+		if(WaveEditorData::isReadOnly(m_index))
+			return false;
+		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)
+			return false;
+		return waveDesc->tableId != m_index;
+	}
+
+	void TablesTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
+	{
+		TreeItem::itemDropped(dragSourceDetails, insertIndex);
+
+		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
+
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableId == m_index)
+			return;
+
+		auto& data = m_editor.getData();
+		if(data.copyTable(m_index, waveDesc->tableId))
+		{
+			setSelected(true, true, juce::dontSendNotification);
+			m_editor.setSelectedTable(m_index);
+		}
 	}
 
 	void TablesTreeItem::onTableChanged(xt::TableId _index)

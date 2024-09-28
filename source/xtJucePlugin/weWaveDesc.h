@@ -9,8 +9,9 @@ namespace xtJucePlugin
 	enum class WaveDescSource
 	{
 		Invalid,
-		ControlList,
-		WaveList
+		ControlTableList,
+		WaveList,
+		TablesList
 	};
 
 	struct WaveDesc : juce::ReferenceCountedObject

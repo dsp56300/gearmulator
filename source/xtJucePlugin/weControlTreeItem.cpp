@@ -59,7 +59,7 @@ namespace xtJucePlugin
 
 		auto* desc = new WaveDesc();
 		desc->waveId = m_wave;
-		desc->source = WaveDescSource::ControlList;
+		desc->source = WaveDescSource::ControlTableList;
 		desc->tableIndex = m_index;
 		return desc;
 	}
@@ -80,7 +80,7 @@ namespace xtJucePlugin
 		auto& data = m_editor.getData();
 
 		// if the source is the control list, we swap two entries. if the source is the wave list, we add a new wave
-		if(waveDesc->source == WaveDescSource::ControlList)
+		if(waveDesc->source == WaveDescSource::ControlTableList)
 		{
 			data.swapTableEntries(m_table, m_index, waveDesc->tableIndex);
 			setSelected(true, true, juce::dontSendNotification);

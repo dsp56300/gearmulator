@@ -161,6 +161,22 @@ namespace xtJucePlugin
 		return true;
 	}
 
+	bool WaveEditorData::copyTable(const xt::TableId _dest, const xt::TableId _source)
+	{
+		const auto dst = _dest.rawId();
+		const auto src = _source.rawId();
+
+		if(dst >= m_tables.size() || src >= m_tables.size())
+			return false;
+
+		auto& srcTable = m_tables[src];
+		if(!srcTable)
+			return false;
+		m_tables[dst] = *srcTable;
+		onTableChanged(_dest);
+		return true;
+	}
+
 	std::optional<xt::WaveData> WaveEditorData::getWave(const xt::TableId _tableIndex, const xt::TableIndex _indexInTable) const
 	{
 		return getWave(getWaveIndex(_tableIndex, _indexInTable));
@@ -172,28 +188,6 @@ namespace xtJucePlugin
 		const uint32_t ll = _data.at(pluginLib::MidiDataType::Program);
 
 		return static_cast<uint16_t>((hh << 7) | ll);
-	}
-
-	bool WaveEditorData::requestWave(const xt::WaveId _index)
-	{
-		if(isWaitingForData())
-			return false;
-
-		if(!m_controller.requestWave(_index.rawId()))
-			return false;
-		m_currentWaveRequestIndex = _index;
-		return true;
-	}
-
-	bool WaveEditorData::requestTable(const xt::TableId _index)
-	{
-		if(isWaitingForData())
-			return false;
-
-		if(!m_controller.requestTable(_index.rawId()))
-			return false;
-		m_currentTableRequestIndex = _index;
-		return true;
 	}
 
 	bool WaveEditorData::setWave(xt::WaveId _id, const xt::WaveData& _data)
@@ -229,6 +223,28 @@ namespace xtJucePlugin
 		return true;
 	}
 
+	bool WaveEditorData::requestWave(const xt::WaveId _index)
+	{
+		if(isWaitingForData())
+			return false;
+
+		if(!m_controller.requestWave(_index.rawId()))
+			return false;
+		m_currentWaveRequestIndex = _index;
+		return true;
+	}
+
+	bool WaveEditorData::requestTable(const xt::TableId _index)
+	{
+		if(isWaitingForData())
+			return false;
+
+		if(!m_controller.requestTable(_index.rawId()))
+			return false;
+		m_currentTableRequestIndex = _index;
+		return true;
+	}
+
 	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)
 	{
 		for (const uint32_t i : xt::Wave::g_algorithmicWavetables)
@@ -242,5 +258,10 @@ namespace xtJucePlugin
 	bool WaveEditorData::isReadOnly(const xt::TableId _table)
 	{
 		return _table.rawId() < xt::Wave::g_firstRamTableIndex;
+	}
+
+	bool WaveEditorData::isReadOnly(const xt::WaveId _waveId)
+	{
+		return _waveId.rawId() < xt::Wave::g_firstRamWaveIndex;
 	}
 }

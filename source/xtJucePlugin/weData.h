@@ -41,18 +41,20 @@ namespace xtJucePlugin
 		std::optional<xt::TableData> getTable(xt::TableId _tableIndex) const;
 		bool swapTableEntries(xt::TableId _table, xt::TableIndex _indexA, xt::TableIndex _indexB);
 		bool setTableWave(xt::TableId _table, xt::TableIndex _index, xt::WaveId _waveIndex);
+		bool copyTable(const xt::TableId _dest, const xt::TableId _source);
 
 		static uint16_t toIndex(const pluginLib::MidiPacket::Data& _data);
+
 		static bool isAlgorithmicTable(xt::TableId _index);
 		static bool isReadOnly(xt::TableId _table);
-
-	private:
-
-		bool requestWave(xt::WaveId _index);
-		bool requestTable(xt::TableId _index);
+		static bool isReadOnly(xt::WaveId _waveId);
 
 		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
 		bool setTable(xt::TableId _index, const xt::TableData& _data);
+
+	private:
+		bool requestWave(xt::WaveId _index);
+		bool requestTable(xt::TableId _index);
 
 		Controller& m_controller;
 
