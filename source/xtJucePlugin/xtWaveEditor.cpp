@@ -71,7 +71,7 @@ namespace xtJucePlugin
 
 		m_btWavePreview = m_editor.findComponentT<juce::Button>("btWavePreview");
 		m_ledWavePreview = m_editor.findComponentT<juce::Button>("ledWavePreview");
-		m_btWaveSave = m_editor.findComponentT<juce::Button>("btWaveSave");
+		m_btWaveSave = m_editor.findComponentT<genericUI::Button<juce::DrawableButton>>("btWaveSave");
 
 		m_btWavetablePreview = m_editor.findComponentT<juce::Button>("btWavetablePreview");
 		m_ledWavetablePreview = m_editor.findComponentT<juce::Button>("ledWavetablePreview");
@@ -86,6 +86,8 @@ namespace xtJucePlugin
 		{
 			toggleWavetablePreview(m_btWavePreview->getToggleState());
 		};
+
+		m_btWaveSave->allowRightClick(true);
 
 		m_btWaveSave->onClick = [this]
 		{
@@ -151,11 +153,10 @@ namespace xtJucePlugin
 
 	void WaveEditor::saveWave()
 	{
-		if(WaveEditorData::isReadOnly(m_selectedWave))
+		if(WaveEditorData::isReadOnly(m_selectedWave) || m_btWaveSave->isRightClick())
 		{
 			// open menu and let user select one of the wave slots
 			juce::PopupMenu menu;
-
 
 			uint16_t count = 0;
 			for(uint16_t i=xt::Wave::g_firstRamWaveIndex; i<xt::Wave::g_firstRamWaveIndex+xt::Wave::g_ramWaveCount; ++i)

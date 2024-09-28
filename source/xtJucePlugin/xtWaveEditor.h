@@ -8,6 +8,8 @@
 
 #include "jucePluginLib/midipacket.h"
 
+#include "juceUiLib/button.h"
+
 namespace xtJucePlugin
 {
 	class GraphPhase;
@@ -82,7 +84,7 @@ namespace xtJucePlugin
 		juce::Button* m_btWavetablePreview = nullptr;
 		juce::Button* m_ledWavetablePreview = nullptr;
 
-		juce::Button* m_btWaveSave = nullptr;
+		genericUI::Button<juce::DrawableButton>* m_btWaveSave = nullptr;
 		juce::Button* m_btWavetableSave = nullptr;
 
 		WaveEditorData m_data;
