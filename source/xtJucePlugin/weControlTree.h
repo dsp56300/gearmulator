@@ -13,13 +13,13 @@ namespace xtJucePlugin
 	public:
 		ControlTree(WaveEditor& _editor);
 
-		void setTable(uint32_t _index);
+		void setTable(xt::TableId _index);
 
 	private:
-		void onTableChanged(bool _tableHasChanged);
+		void onTableChanged(bool _tableHasChanged) const;
 
-		pluginLib::EventListener<uint32_t> m_onTableChanged;
-		uint32_t m_table = ~0;
+		pluginLib::EventListener<xt::TableId> m_onTableChanged;
+		xt::TableId m_table;
 		std::array<ControlTreeItem*, xt::Wave::g_wavesPerTable> m_items;
 	};
 }

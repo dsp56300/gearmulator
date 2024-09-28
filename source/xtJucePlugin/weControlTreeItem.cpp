@@ -8,9 +8,9 @@ namespace xtJucePlugin
 {
 	class WaveEditor;
 
-	ControlTreeItem::ControlTreeItem(WaveEditor& _editor, const uint32_t _index) : m_editor(_editor), m_index(_index)
+	ControlTreeItem::ControlTreeItem(WaveEditor& _editor, const xt::TableIndex _index) : m_editor(_editor), m_index(_index)
 	{
-		m_onWaveChanged.set(_editor.getData().onWaveChanged, [this](const unsigned& _wave)
+		m_onWaveChanged.set(_editor.getData().onWaveChanged, [this](const xt::WaveId& _wave)
 		{
 			if(_wave == m_wave)
 				onWaveChanged();
@@ -28,19 +28,19 @@ namespace xtJucePlugin
 		TreeItem::paintItem(_g, _width, _height);
 	}
 
-	void ControlTreeItem::setWave(const uint32_t _wave)
+	void ControlTreeItem::setWave(const xt::WaveId _wave)
 	{
 		if(m_wave == _wave)
 			return;
 		m_wave = _wave;
 		const auto name = WaveTreeItem::getWaveName(m_wave);
 		char prefix[16] = {0};
-		snprintf(prefix, std::size(prefix), "%02d: ", m_index);
+		(void)snprintf(prefix, std::size(prefix), "%02d: ", m_index.rawId());
 		setText(prefix + (name.empty() ? "-" : name));
 		repaintItem();
 	}
 
-	void ControlTreeItem::setTable(const uint32_t _table, const bool _tableHasChanged)
+	void ControlTreeItem::setTable(const xt::TableId _table, const bool _tableHasChanged)
 	{
 		if(m_table == _table && !_tableHasChanged)
 			return;
@@ -54,9 +54,9 @@ namespace xtJucePlugin
 			return TreeViewItem::getDragSourceDescription();
 
 		auto* desc = new WaveDesc();
-		desc->waveIndex = m_wave;
+		desc->waveId = m_wave;
 		desc->source = WaveDescSource::ControlList;
-		desc->listIndex = m_index;
+		desc->tableIndex = m_index;
 		return desc;
 	}
 
@@ -76,12 +76,12 @@ namespace xtJucePlugin
 		// if the source is the control list, we swap two entries. if the source is the wave list, we add a new wave
 		if(waveDesc->source == WaveDescSource::ControlList)
 		{
-			data.swapTableEntries(m_table, m_index, waveDesc->listIndex);
+			data.swapTableEntries(m_table, m_index, waveDesc->tableIndex);
 			setSelected(true, true, juce::dontSendNotification);
 		}
 		else if(waveDesc->source == WaveDescSource::WaveList)
 		{
-			data.setTableWave(m_table, m_index, waveDesc->waveIndex);
+			data.setTableWave(m_table, m_index, waveDesc->waveId);
 		}
 	}
 

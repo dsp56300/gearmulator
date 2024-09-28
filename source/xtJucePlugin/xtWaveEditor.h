@@ -44,8 +44,8 @@ namespace xtJucePlugin
 		Editor& getEditor() const { return m_editor; }
 		GraphData& getGraphData() { return m_graphData; }
 
-		void setSelectedTable(uint32_t _index);
-		void setSelectedWave(uint32_t _waveIndex, bool _forceRefresh = false);
+		void setSelectedTable(xt::TableId _index);
+		void setSelectedWave(xt::WaveId _waveIndex, bool _forceRefresh = false);
 
 	private:
 		// ComponentMovementWatcher
@@ -82,8 +82,8 @@ namespace xtJucePlugin
 
 		bool m_wasVisible = false;
 
-		uint32_t m_selectedTable = ~0;
-		uint32_t m_selectedWave = ~0;
+		xt::TableId m_selectedTable;
+		xt::WaveId m_selectedWave;
 
 		WaveEditorStyle m_style;
 	};

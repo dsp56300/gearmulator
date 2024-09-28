@@ -773,7 +773,7 @@ namespace xt
 			waveIdx |= _sysex[i4+off+2] << 4;
 			waveIdx |= _sysex[i4+off+3];
 
-			_table[i] = static_cast<uint16_t>(waveIdx);
+			_table[i] = WaveId(static_cast<uint16_t>(waveIdx));
 		}
 	}
 
@@ -788,13 +788,12 @@ namespace xt
 
 		for(uint32_t i=0; i<_table.size(); ++i)
 		{
-			const auto i4 = i<<2;
+			const auto waveId = _table[i].rawId();
 
-			const auto waveIndex = _table[i];
-			sysex.push_back((waveIndex >> 12) & 0xf);
-			sysex.push_back((waveIndex >> 8) & 0xf);
-			sysex.push_back((waveIndex >> 4) & 0xf);
-			sysex.push_back((waveIndex     ) & 0xf);
+			sysex.push_back((waveId >> 12) & 0xf);
+			sysex.push_back((waveId >> 8) & 0xf);
+			sysex.push_back((waveId >> 4) & 0xf);
+			sysex.push_back((waveId     ) & 0xf);
 		}
 
 		sysex.push_back(0);

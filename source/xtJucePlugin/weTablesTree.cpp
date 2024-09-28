@@ -10,12 +10,12 @@ namespace xtJucePlugin
 {
 	TablesTree::TablesTree(WaveEditor& _editor) : Tree(_editor)
 	{
-		for(uint32_t i=0; i<xt::Wave::g_tableCount; ++i)
+		for(uint16_t i=0; i<xt::Wave::g_tableCount; ++i)
 		{
-			if(WaveEditorData::isAlgorithmicTable(i))
+			if(WaveEditorData::isAlgorithmicTable(xt::TableId(i)))
 				continue;
 
-			getRootItem()->addSubItem(new TablesTreeItem(_editor, i));
+			getRootItem()->addSubItem(new TablesTreeItem(_editor, xt::TableId(i)));
 		}
 		setIndentSize(5);
 	}

@@ -1,6 +1,5 @@
 #include "xtWaveEditor.h"
 
-#include "weTree.h"
 #include "weWaveTree.h"
 #include "weTablesTree.h"
 #include "weControlTree.h"
@@ -18,7 +17,7 @@ namespace xtJucePlugin
 	{
 		addComponentListener(this);
 
-		m_data.onWaveChanged.addListener([this](const uint32_t& _waveIndex)
+		m_data.onWaveChanged.addListener([this](const xt::WaveId& _waveIndex)
 		{
 			if(_waveIndex != m_selectedWave)
 				return;
@@ -147,7 +146,7 @@ namespace xtJucePlugin
 		m_data.onReceiveTable(_data, _msg);
 	}
 
-	void WaveEditor::setSelectedTable(uint32_t _index)
+	void WaveEditor::setSelectedTable(xt::TableId _index)
 	{
 		if(m_selectedTable == _index)
 			return;
@@ -156,7 +155,7 @@ namespace xtJucePlugin
 		m_controlTree->setTable(_index);
 	}
 
-	void WaveEditor::setSelectedWave(const uint32_t _waveIndex, bool _forceRefresh/* = false*/)
+	void WaveEditor::setSelectedWave(const xt::WaveId _waveIndex, bool _forceRefresh/* = false*/)
 	{
 		if(m_selectedWave == _waveIndex && !_forceRefresh)
 			return;

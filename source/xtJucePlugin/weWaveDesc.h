@@ -15,9 +15,9 @@ namespace xtJucePlugin
 
 	struct WaveDesc : juce::ReferenceCountedObject
 	{
-		uint32_t waveIndex = g_invalidWaveIndex;
-		uint32_t tableIndex = g_invalidIndex;
-		uint32_t listIndex = g_invalidIndex;
+		xt::WaveId waveId;
+		xt::TableId tableId;
+		xt::TableIndex tableIndex;
 		xt::WaveData data;
 		WaveDescSource source = WaveDescSource::Invalid;
 		static WaveDesc* fromDragSource(const juce::DragAndDropTarget::SourceDetails& _sourceDetails);

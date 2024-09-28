@@ -6,6 +6,8 @@
 
 #include "dsp56kEmu/types.h"
 
+#include "xtId.h"
+
 namespace xt
 {
 	static constexpr uint32_t g_ramSize  = 0x00020000;
@@ -18,5 +20,5 @@ namespace xt
 	using TAudioInputs = TAudioBuffer<2>;
 
 	using WaveData = std::array<int8_t, 128>;
-	using TableData = std::array<uint16_t, 64>;
+	using TableData = std::array<WaveId, 64>;
 }

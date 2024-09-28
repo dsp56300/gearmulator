@@ -4,6 +4,8 @@
 
 #include "jucePluginLib/event.h"
 
+#include "xtLib/xtId.h"
+
 namespace xtJucePlugin
 {
 	class WaveEditor;
@@ -11,18 +13,18 @@ namespace xtJucePlugin
 	class TablesTreeItem : public TreeItem
 	{
 	public:
-		TablesTreeItem(WaveEditor& _editor, uint32_t _tableIndex);
+		TablesTreeItem(WaveEditor& _editor, xt::TableId _tableIndex);
 
 		bool mightContainSubItems() override { return false; }
 
 		void itemSelectionChanged(bool _isNowSelected) override;
 
 	private:
-		void onTableChanged(uint32_t _index);
+		void onTableChanged(xt::TableId _index);
 		void onTableChanged();
 
 		WaveEditor& m_editor;
-		const uint32_t m_index;
-		pluginLib::EventListener<uint32_t> m_onTableChanged;
+		const xt::TableId m_index;
+		pluginLib::EventListener<xt::TableId> m_onTableChanged;
 	};
 }

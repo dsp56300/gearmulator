@@ -49,6 +49,6 @@ namespace xtJucePlugin
 
 	void WaveCategoryTreeItem::addItem(const uint32_t _index)
 	{
-		addSubItem(new WaveTreeItem(m_editor, m_category, _index));
+		addSubItem(new WaveTreeItem(m_editor, m_category, xt::WaveId(_index)));
 	}
 }

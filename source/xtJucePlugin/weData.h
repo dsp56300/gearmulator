@@ -19,44 +19,44 @@ namespace xtJucePlugin
 	class WaveEditorData
 	{
 	public:
-		pluginLib::Event<uint32_t> onWaveChanged;
-		pluginLib::Event<uint32_t> onTableChanged;
+		pluginLib::Event<xt::WaveId> onWaveChanged;
+		pluginLib::Event<xt::TableId> onTableChanged;
 
 		WaveEditorData(Controller& _controller);
 
 		void requestData();
 
 		bool isWaitingForWave() const { return m_currentWaveRequestIndex != g_invalidWaveIndex; }
-		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidWaveIndex; }
+		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidTableIndex; }
 		bool isWaitingForData() const { return isWaitingForWave() || isWaitingForTable(); }
 
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 
-		std::optional<xt::WaveData> getWave(uint32_t _waveIndex) const;
-		std::optional<xt::WaveData> getWave(uint32_t _tableIndex, uint32_t _indexInTable) const;
+		std::optional<xt::WaveData> getWave(xt::WaveId _waveIndex) const;
+		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
 
-		uint32_t getWaveIndex(uint32_t _tableIndex, uint32_t _indexInTable) const;
+		xt::WaveId getWaveIndex(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
 
-		std::optional<xt::TableData> getTable(uint32_t _tableIndex) const;
-		bool swapTableEntries(uint32_t _table, uint32_t _indexA, uint32_t _indexB);
-		bool setTableWave(uint32_t _table, uint32_t _index, uint32_t _waveIndex);
+		std::optional<xt::TableData> getTable(xt::TableId _tableIndex) const;
+		bool swapTableEntries(xt::TableId _table, xt::TableIndex _indexA, xt::TableIndex _indexB);
+		bool setTableWave(xt::TableId _table, xt::TableIndex _index, xt::WaveId _waveIndex);
 
-		static uint32_t toIndex(const pluginLib::MidiPacket::Data& _data);
-		static bool isAlgorithmicTable(uint32_t _index);
+		static uint16_t toIndex(const pluginLib::MidiPacket::Data& _data);
+		static bool isAlgorithmicTable(xt::TableId _index);
 
 	private:
 
-		bool requestWave(uint32_t _index);
-		bool requestTable(uint32_t _index);
+		bool requestWave(xt::WaveId _index);
+		bool requestTable(xt::TableId _index);
 
-		bool setWave(uint32_t _index, const xt::WaveData& _data);
-		bool setTable(uint32_t _index, const xt::TableData& _data);
+		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
+		bool setTable(xt::TableId _index, const xt::TableData& _data);
 
 		Controller& m_controller;
 
-		uint32_t m_currentWaveRequestIndex = g_invalidWaveIndex;
-		uint32_t m_currentTableRequestIndex = g_invalidWaveIndex;
+		xt::WaveId m_currentWaveRequestIndex = g_invalidWaveIndex;
+		xt::TableId m_currentTableRequestIndex = g_invalidTableIndex;
 
 		std::array<std::optional<xt::WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
 		std::array<std::optional<xt::WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;

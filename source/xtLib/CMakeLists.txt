@@ -9,6 +9,7 @@ set(SOURCES
 	xtDevice.cpp xtDevice.h
 	xtDSP.cpp xtDSP.h
 	xtHardware.cpp xtHardware.h
+	xtId.cpp xtId.h
 	xtLcd.cpp xtLcd.h
 	xtLeds.cpp xtLeds.h
 	xtMidiTypes.h
@@ -17,6 +18,7 @@ set(SOURCES
 	xtRomLoader.cpp xtRomLoader.h
 	xtState.cpp xtState.h
 	xtSysexRemoteControl.cpp xtSysexRemoteControl.h
+	xtTypes.h
 	xtUc.cpp xtUc.h
 	xtWavePreview.cpp xtWavePreview.h
 )
