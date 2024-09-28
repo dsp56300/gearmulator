@@ -1,6 +1,7 @@
 #include "weWaveTreeItem.h"
 
 #include "weWaveCategoryTreeItem.h"
+#include "weWaveDesc.h"
 #include "xtWaveEditor.h"
 
 namespace xtJucePlugin
@@ -60,6 +61,14 @@ namespace xtJucePlugin
 
 		if(isNowSelected)
 			m_editor.setSelectedWave(m_waveIndex);
+	}
+
+	juce::var WaveTreeItem::getDragSourceDescription()
+	{
+		auto* desc = new WaveDesc();
+		desc->waveIndex = m_waveIndex;
+		desc->source = WaveDescSource::WaveList;
+		return desc;
 	}
 
 	void WaveTreeItem::onWaveChanged(const uint32_t _index)

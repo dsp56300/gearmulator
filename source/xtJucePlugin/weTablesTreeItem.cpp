@@ -23,7 +23,7 @@ namespace xtJucePlugin
 		});
 	}
 
-	void TablesTreeItem::itemSelectionChanged(bool _isNowSelected)
+	void TablesTreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
 		TreeItem::itemSelectionChanged(_isNowSelected);
 		m_editor.setSelectedTable(m_index);

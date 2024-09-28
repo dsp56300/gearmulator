@@ -58,7 +58,7 @@ namespace xtJucePlugin
 
 		if(m_currentWaveRequestIndex == index)
 		{
-			m_currentWaveRequestIndex = InvalidWaveIndex;
+			m_currentWaveRequestIndex = g_invalidWaveIndex;
 			requestData();
 		}
 	}
@@ -78,7 +78,7 @@ namespace xtJucePlugin
 
 		if(m_currentTableRequestIndex == index)
 		{
-			m_currentTableRequestIndex = InvalidWaveIndex;
+			m_currentTableRequestIndex = g_invalidWaveIndex;
 			requestData();
 		}
 	}
@@ -103,13 +103,54 @@ namespace xtJucePlugin
 	uint32_t WaveEditorData::getWaveIndex(uint32_t _tableIndex, uint32_t _indexInTable) const
 	{
 		if(_tableIndex >= m_tables.size())
-			return InvalidWaveIndex;
+			return g_invalidWaveIndex;
 		if(_indexInTable >= std::tuple_size<xt::TableData>())
-			return InvalidWaveIndex;
+			return g_invalidWaveIndex;
 		const auto table = m_tables[_tableIndex];
 		if(!table)
-			return InvalidWaveIndex;
+			return g_invalidWaveIndex;
 		return (*table)[_indexInTable];
+	}
+
+	std::optional<xt::TableData> WaveEditorData::getTable(uint32_t _tableIndex) const
+	{
+		if(_tableIndex >= m_tables.size())
+			return {};
+		return m_tables[_tableIndex];
+	}
+
+	bool WaveEditorData::swapTableEntries(uint32_t _table, uint32_t _indexA, uint32_t _indexB)
+	{
+		if(_indexA == _indexB)
+			return false;
+		if(_table >= m_tables.size())
+			return false;
+		const auto& table = m_tables[_table];
+		if(!table)
+			return false;
+		auto t = *table;
+		std::swap(t[_indexA], t[_indexB]);
+		m_tables[_table] = t;
+		onTableChanged(_table);
+		return true;
+	}
+
+	bool WaveEditorData::setTableWave(uint32_t _table, uint32_t _index, uint32_t _waveIndex)
+	{
+		if(_table >= m_tables.size())
+			return false;
+		const auto& table = m_tables[_table];
+		if(!table)
+			return false;
+		auto t = *table;
+		if(_index >= t.size())
+			return false;
+		if(t[_index] == _waveIndex)
+			return false;
+		t[_index] = static_cast<uint16_t>(_waveIndex);
+		m_tables[_table] = t;
+		onTableChanged(_table);
+		return true;
 	}
 
 	std::optional<xt::WaveData> WaveEditorData::getWave(const uint32_t _tableIndex, const uint32_t _indexInTable) const

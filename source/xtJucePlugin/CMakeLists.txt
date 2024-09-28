@@ -21,6 +21,7 @@ set(SOURCES
 	weTreeItem.cpp weTreeItem.h
 	weTypes.h
 	weWaveCategoryTreeItem.cpp weWaveCategoryTreeItem.h
+	weWaveDesc.cpp weWaveDesc.h
 	weWaveform.cpp weWaveform.h
 	weWaveTree.cpp weWaveTree.h
 	weWaveTreeItem.cpp weWaveTreeItem.h

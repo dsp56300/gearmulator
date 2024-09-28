@@ -16,7 +16,7 @@ namespace xtJucePlugin
 		void setTable(uint32_t _index);
 
 	private:
-		void onTableChanged();
+		void onTableChanged(bool _tableHasChanged);
 
 		pluginLib::EventListener<uint32_t> m_onTableChanged;
 		uint32_t m_table = ~0;

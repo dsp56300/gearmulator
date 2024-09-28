@@ -23,6 +23,8 @@ namespace xtJucePlugin
 		static WaveCategory getCategory(uint32_t _waveIndex);
 
 		void itemSelectionChanged(bool isNowSelected) override;
+
+		juce::var getDragSourceDescription() override;
 	private:
 		void onWaveChanged(uint32_t _index);
 		void onWaveChanged();

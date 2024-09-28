@@ -10,7 +10,7 @@ namespace xtJucePlugin
 		m_onTableChanged.set(_editor.getData().onTableChanged, [this](const uint32_t& _index)
 		{
 			if(_index == m_table)
-				onTableChanged();
+				onTableChanged(true);
 		});
 
 		for(uint32_t i=0; i<m_items.size(); ++i)
@@ -26,12 +26,12 @@ namespace xtJucePlugin
 		if(_index == m_table)
 			return;
 		m_table = _index;
-		onTableChanged();
+		onTableChanged(false);
 	}
 
-	void ControlTree::onTableChanged()
+	void ControlTree::onTableChanged(bool _tableHasChanged)
 	{
 		for (auto* item : m_items)
-			item->setTable(m_table);
+			item->setTable(m_table, _tableHasChanged);
 	}
 }

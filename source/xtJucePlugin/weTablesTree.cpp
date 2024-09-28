@@ -8,7 +8,7 @@
 
 namespace xtJucePlugin
 {
-	TablesTree::TablesTree(WaveEditor& _editor): Tree(_editor)
+	TablesTree::TablesTree(WaveEditor& _editor) : Tree(_editor)
 	{
 		for(uint32_t i=0; i<xt::Wave::g_tableCount; ++i)
 		{

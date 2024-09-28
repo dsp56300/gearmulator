@@ -1,5 +1,6 @@
 #include "weControlTreeItem.h"
 
+#include "weWaveDesc.h"
 #include "weWaveTreeItem.h"
 #include "xtWaveEditor.h"
 
@@ -39,12 +40,49 @@ namespace xtJucePlugin
 		repaintItem();
 	}
 
-	void ControlTreeItem::setTable(const uint32_t _table)
+	void ControlTreeItem::setTable(const uint32_t _table, const bool _tableHasChanged)
 	{
-		if(m_table == _table)
+		if(m_table == _table && !_tableHasChanged)
 			return;
 		m_table = _table;
 		setWave(m_editor.getData().getWaveIndex(_table, m_index));
+	}
+
+	juce::var ControlTreeItem::getDragSourceDescription()
+	{
+		if(m_wave == g_invalidWaveIndex)
+			return TreeViewItem::getDragSourceDescription();
+
+		auto* desc = new WaveDesc();
+		desc->waveIndex = m_wave;
+		desc->source = WaveDescSource::ControlList;
+		desc->listIndex = m_index;
+		return desc;
+	}
+
+	bool ControlTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
+	{
+		return WaveDesc::fromDragSource(_dragSourceDetails) != nullptr;
+	}
+
+	void ControlTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails, int _insertIndex)
+	{
+		const auto* waveDesc = WaveDesc::fromDragSource(_dragSourceDetails);
+		if(!waveDesc)
+			return;
+
+		auto& data = m_editor.getData();
+
+		// if the source is the control list, we swap two entries. if the source is the wave list, we add a new wave
+		if(waveDesc->source == WaveDescSource::ControlList)
+		{
+			data.swapTableEntries(m_table, m_index, waveDesc->listIndex);
+			setSelected(true, true, juce::dontSendNotification);
+		}
+		else if(waveDesc->source == WaveDescSource::WaveList)
+		{
+			data.setTableWave(m_table, m_index, waveDesc->waveIndex);
+		}
 	}
 
 	void ControlTreeItem::onWaveChanged() const
