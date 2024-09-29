@@ -276,4 +276,9 @@ namespace xtJucePlugin
 			return true;
 		return _waveId.rawId() < xt::Wave::g_firstRamWaveIndex;
 	}
+
+	bool WaveEditorData::isReadOnly(const xt::TableIndex _index)
+	{
+		return _index.rawId() >= 61;	// always tri/square/saw
+	}
 }

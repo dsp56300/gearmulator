@@ -50,6 +50,7 @@ namespace xtJucePlugin
 		static bool isAlgorithmicTable(xt::TableId _index);
 		static bool isReadOnly(xt::TableId _table);
 		static bool isReadOnly(xt::WaveId _waveId);
+		static bool isReadOnly(xt::TableIndex _index);
 
 		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
 		bool setTable(xt::TableId _index, const xt::TableData& _data);

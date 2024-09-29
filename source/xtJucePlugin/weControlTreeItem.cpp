@@ -26,14 +26,20 @@ namespace xtJucePlugin
 
 	void ControlTreeItem::paintItem(juce::Graphics& _g, const int _width, const int _height)
 	{
-		if(const auto wave = m_editor.getData().getWave(m_table, m_index))
+		if(const auto wave = m_editor.getData().getWave(m_wave))
 			WaveTreeItem::paintWave(*wave, _g, _width>>1, 0, _width>>1, _height, juce::Colour(0xffffffff));
 
 		TreeItem::paintItem(_g, _width, _height);
 	}
 
-	void ControlTreeItem::setWave(const xt::WaveId _wave)
+	void ControlTreeItem::setWave(xt::WaveId _wave)
 	{
+		switch (m_index.rawId())
+		{
+		case 61:	_wave = xt::WaveId(101);		break;
+		case 62:	_wave = xt::WaveId(100);		break;
+		case 63:	_wave = xt::WaveId(104);		break;
+		}
 		if(m_wave == _wave)
 			return;
 		m_wave = _wave;
@@ -54,7 +60,7 @@ namespace xtJucePlugin
 
 	juce::var ControlTreeItem::getDragSourceDescription()
 	{
-		if(m_wave == g_invalidWaveIndex || WaveEditorData::isReadOnly(m_table))
+		if(m_wave == g_invalidWaveIndex || WaveEditorData::isReadOnly(m_table) || WaveEditorData::isReadOnly(m_index))
 			return TreeViewItem::getDragSourceDescription();
 
 		auto* desc = new WaveDesc();
@@ -66,7 +72,7 @@ namespace xtJucePlugin
 
 	bool ControlTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
-		if(WaveEditorData::isReadOnly(m_table))
+		if(WaveEditorData::isReadOnly(m_table) || WaveEditorData::isReadOnly(m_index))
 			return false;
 		return WaveDesc::fromDragSource(_dragSourceDetails) != nullptr;
 	}
