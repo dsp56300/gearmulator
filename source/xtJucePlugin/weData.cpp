@@ -2,14 +2,16 @@
 
 #include "xtController.h"
 
+#include "synthLib/midiToSysex.h"
 #include "synthLib/os.h"
 
 #include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
-	WaveEditorData::WaveEditorData(Controller& _controller, std::string _cacheDir) : m_controller(_controller), m_cacheDir(std::move(_cacheDir))
+	WaveEditorData::WaveEditorData(Controller& _controller, const std::string& _cacheDir) : m_controller(_controller), m_cacheDir(synthLib::validatePath(_cacheDir))
 	{
+		loadRomCache();
 	}
 
 	void WaveEditorData::requestData()
@@ -237,32 +239,7 @@ namespace xtJucePlugin
 
 	void WaveEditorData::onAllDataReceived() const
 	{
-		const auto romWaves = synthLib::validatePath(m_cacheDir) + "romWaves.syx";
-
-		std::vector<uint8_t> data;
-
-		for(uint16_t i=0; i<static_cast<uint16_t>(m_romWaves.size()); ++i)
-		{
-			auto& romWave = m_romWaves[i];
-			assert(romWave);
-			if(!romWave)
-				continue;
-			auto sysex = xt::State::createWaveData(*romWave, i, false);
-			data.insert(data.end(), sysex.begin(), sysex.end());
-		}
-
-		assert(xt::Wave::g_firstRamTableIndex < m_tables.size());
-
-		for(uint16_t i=0; i<xt::Wave::g_firstRamTableIndex; ++i)
-		{
-			auto& table = m_tables[i];
-			assert(table || isAlgorithmicTable(xt::TableId(i)));
-			if(!table)
-				continue;
-			auto sysex = xt::State::createTableData(*table, i, false);
-			data.insert(data.end(), sysex.begin(), sysex.end());
-		}
-		synthLib::writeFile(romWaves, data);
+		saveRomCache();
 	}
 
 	xt::SysexCommand WaveEditorData::toCommand(const std::vector<uint8_t>& _sysex)
@@ -324,6 +301,53 @@ namespace xtJucePlugin
 		default:
 			return false;
 		}
+	}
+
+	std::string WaveEditorData::getRomCacheFilename() const
+	{
+		return m_cacheDir + "romWaves.syx";
+	}
+
+	void WaveEditorData::saveRomCache() const
+	{
+		const auto romWaves = getRomCacheFilename();
+
+		std::vector<uint8_t> data;
+
+		for(uint16_t i=0; i<static_cast<uint16_t>(m_romWaves.size()); ++i)
+		{
+			auto& romWave = m_romWaves[i];
+			assert(romWave);
+			if(!romWave)
+				continue;
+			auto sysex = xt::State::createWaveData(*romWave, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+
+		assert(xt::Wave::g_firstRamTableIndex < m_tables.size());
+
+		for(uint16_t i=0; i<xt::Wave::g_firstRamTableIndex; ++i)
+		{
+			auto& table = m_tables[i];
+			assert(table || isAlgorithmicTable(xt::TableId(i)));
+			if(!table)
+				continue;
+			auto sysex = xt::State::createTableData(*table, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+		synthLib::writeFile(romWaves, data);
+	}
+
+	void WaveEditorData::loadRomCache()
+	{
+		std::vector<uint8_t> data;
+		if(!synthLib::readFile(data, getRomCacheFilename()))
+			return;
+
+		std::vector<std::vector<uint8_t>> sysexMessages;
+		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, data);
+		for (const auto& sysex : sysexMessages)
+			parseMidi(sysex);
 	}
 
 	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)

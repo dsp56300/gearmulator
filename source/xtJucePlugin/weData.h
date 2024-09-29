@@ -21,7 +21,7 @@ namespace xtJucePlugin
 		pluginLib::Event<xt::WaveId> onWaveChanged;
 		pluginLib::Event<xt::TableId> onTableChanged;
 
-		WaveEditorData(Controller& _controller, std::string _cacheDir);
+		WaveEditorData(Controller& _controller, const std::string& _cacheDir);
 
 		void requestData();
 
@@ -61,6 +61,10 @@ namespace xtJucePlugin
 		static xt::SysexCommand toCommand(const std::vector<uint8_t>& _sysex);
 		static uint16_t toIndex(const std::vector<uint8_t>& _sysex);
 		bool parseMidi(const std::vector<uint8_t>& _sysex);
+
+		std::string getRomCacheFilename() const;
+		void saveRomCache() const;
+		void loadRomCache();
 
 		Controller& m_controller;
 		const std::string m_cacheDir;
