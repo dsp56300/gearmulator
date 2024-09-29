@@ -49,43 +49,30 @@ namespace xtJucePlugin
 		onAllDataReceived();
 	}
 
-	void WaveEditorData::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveWave(const std::vector<uint8_t>& _msg)
 	{
-		const auto index = toIndex(_data);
-
-		if(!xt::Wave::isValidWaveIndex(index))
+		if(!parseMidi(_msg))
 			return;
 
-		const auto id = xt::WaveId(index);
-
-		xt::WaveData data;
-		xt::State::parseWaveData(data, _msg);
-
-		setWave(id, data);
-
-		if(m_currentWaveRequestIndex == id)
+		const auto command = toCommand(_msg);
+		const auto id = xt::WaveId(toIndex(_msg));
+		
+		if(command == xt::SysexCommand::WaveDump &&  m_currentWaveRequestIndex == id)
 		{
 			m_currentWaveRequestIndex = g_invalidWaveIndex;
 			requestData();
 		}
 	}
 
-	void WaveEditorData::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveTable(const std::vector<uint8_t>& _msg)
 	{
-		const auto index = toIndex(_data);
-
-		if(!xt::Wave::isValidTableIndex(index))
+		if(!parseMidi(_msg))
 			return;
 
-		const auto id = xt::TableId(index);
+		const auto command = toCommand(_msg);
+		const auto id = xt::TableId(toIndex(_msg));
 
-		xt::TableData table;
-
-		xt::State::parseTableData(table, _msg);
-
-		setTable(id, table);
-
-		if(m_currentTableRequestIndex == id)
+		if(command == xt::SysexCommand::WaveCtlDump && m_currentTableRequestIndex == id)
 		{
 			m_currentTableRequestIndex = g_invalidTableIndex;
 			requestData();
@@ -193,14 +180,6 @@ namespace xtJucePlugin
 		return getWave(getWaveIndex(_tableIndex, _indexInTable));
 	}
 
-	uint16_t WaveEditorData::toIndex(const pluginLib::MidiPacket::Data& _data)
-	{
-		const uint32_t hh = _data.at(pluginLib::MidiDataType::Bank);
-		const uint32_t ll = _data.at(pluginLib::MidiDataType::Program);
-
-		return static_cast<uint16_t>((hh << 7) | ll);
-	}
-
 	bool WaveEditorData::setWave(xt::WaveId _id, const xt::WaveData& _data)
 	{
 		auto i = _id.rawId();
@@ -284,7 +263,68 @@ namespace xtJucePlugin
 			data.insert(data.end(), sysex.begin(), sysex.end());
 		}
 		synthLib::writeFile(romWaves, data);
-	} 
+	}
+
+	xt::SysexCommand WaveEditorData::toCommand(const std::vector<uint8_t>& _sysex)
+	{
+		return static_cast<xt::SysexCommand>(_sysex[4]);
+	}
+
+	uint16_t WaveEditorData::toIndex(const std::vector<uint8_t>& _sysex)
+	{
+		const uint32_t hh = _sysex[5];
+		const uint32_t ll = _sysex[6];
+
+		const uint16_t index = static_cast<uint16_t>((hh << 7) | ll);
+
+		return index;
+	}
+
+	bool WaveEditorData::parseMidi(const std::vector<uint8_t>& _sysex)
+	{
+		if(_sysex.size() < 10 || _sysex.front() != 0xf0 || _sysex.back() != 0xf7)
+			return false;
+		if(_sysex[1] != wLib::IdWaldorf)
+			return false;
+		if(_sysex[2] != xt::IdMw2)
+			return false;
+
+		const auto cmd = toCommand(_sysex);
+		const auto index = toIndex(_sysex);
+
+		switch (cmd)  // NOLINT(clang-diagnostic-switch-enum)
+		{
+		case xt::SysexCommand::WaveDump:
+			{
+				if(!xt::Wave::isValidWaveIndex(index))
+					return false;
+
+				const auto id = xt::WaveId(index);
+
+				xt::WaveData data;
+				xt::State::parseWaveData(data, _sysex);
+
+				setWave(id, data);
+			}
+			return true;
+		case xt::SysexCommand::WaveCtlDump:
+			{
+				if(!xt::Wave::isValidTableIndex(index))
+					return false;
+
+				const auto id = xt::TableId(index);
+
+				xt::TableData table;
+
+				xt::State::parseTableData(table, _sysex);
+
+				setTable(id, table);
+			}
+			return true;
+		default:
+			return false;
+		}
+	}
 
 	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)
 	{

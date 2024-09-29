@@ -199,12 +199,12 @@ namespace xtJucePlugin
 
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
-		m_data.onReceiveWave(_data, _msg);
+		m_data.onReceiveWave(_msg);
 	}
 
 	void WaveEditor::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
-		m_data.onReceiveTable(_data, _msg);
+		m_data.onReceiveTable(_msg);
 	}
 
 	void WaveEditor::setSelectedTable(xt::TableId _index)

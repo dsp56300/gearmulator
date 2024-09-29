@@ -29,8 +29,8 @@ namespace xtJucePlugin
 		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidTableIndex; }
 		bool isWaitingForData() const { return isWaitingForWave() || isWaitingForTable(); }
 
-		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
-		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
+		void onReceiveWave(const std::vector<uint8_t>& _msg);
+		void onReceiveTable(const std::vector<uint8_t>& _msg);
 
 		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
 		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
@@ -41,10 +41,8 @@ namespace xtJucePlugin
 		bool swapTableEntries(xt::TableId _tableId, xt::TableIndex _indexA, xt::TableIndex _indexB);
 		bool setTableWave(xt::TableId _tableId, xt::TableIndex _tableIndex, xt::WaveId _waveId);
 
-		bool copyTable(const xt::TableId _dest, const xt::TableId _source);
-		bool copyWave(const xt::WaveId _dest, const xt::WaveId _source);
-
-		static uint16_t toIndex(const pluginLib::MidiPacket::Data& _data);
+		bool copyTable(xt::TableId _dest, xt::TableId _source);
+		bool copyWave(xt::WaveId _dest, xt::WaveId _source);
 
 		static bool isAlgorithmicTable(xt::TableId _index);
 		static bool isReadOnly(xt::TableId _table);
@@ -59,6 +57,10 @@ namespace xtJucePlugin
 		bool requestTable(xt::TableId _index);
 
 		void onAllDataReceived() const;
+
+		static xt::SysexCommand toCommand(const std::vector<uint8_t>& _sysex);
+		static uint16_t toIndex(const std::vector<uint8_t>& _sysex);
+		bool parseMidi(const std::vector<uint8_t>& _sysex);
 
 		Controller& m_controller;
 		const std::string m_cacheDir;
