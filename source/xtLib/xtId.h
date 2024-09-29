@@ -17,7 +17,7 @@ namespace xt
 	{
 	public:
 		using RawType = TId;
-		static constexpr IdType IdType = Type;
+		static constexpr IdType MyIdType = Type;
 
 		constexpr Id() : m_id(Invalid)
 		{
