@@ -807,9 +807,9 @@ namespace xt
 		SysEx sysex{header};
 		sysex.reserve(sysex.size() + _table.size() * 4);
 
-		for(uint32_t i=0; i<_table.size(); ++i)
+		for (const auto& e : _table)
 		{
-			const auto waveId = _table[i].rawId();
+			const auto waveId = e.rawId();
 
 			sysex.push_back((waveId >> 12) & 0xf);
 			sysex.push_back((waveId >> 8) & 0xf);
