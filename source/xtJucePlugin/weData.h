@@ -33,14 +33,14 @@ namespace xtJucePlugin
 		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
 
-		std::optional<xt::WaveData> getWave(xt::WaveId _waveIndex) const;
+		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
 		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
 
-		xt::WaveId getWaveIndex(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
+		xt::WaveId getWaveIndex(xt::TableId _tableId, xt::TableIndex _tableIndex) const;
 
-		std::optional<xt::TableData> getTable(xt::TableId _tableIndex) const;
-		bool swapTableEntries(xt::TableId _table, xt::TableIndex _indexA, xt::TableIndex _indexB);
-		bool setTableWave(xt::TableId _table, xt::TableIndex _index, xt::WaveId _waveIndex);
+		std::optional<xt::TableData> getTable(xt::TableId _tableId) const;
+		bool swapTableEntries(xt::TableId _tableId, xt::TableIndex _indexA, xt::TableIndex _indexB);
+		bool setTableWave(xt::TableId _tableId, xt::TableIndex _tableIndex, xt::WaveId _waveId);
 
 		bool copyTable(const xt::TableId _dest, const xt::TableId _source);
 		bool copyWave(const xt::WaveId _dest, const xt::WaveId _source);

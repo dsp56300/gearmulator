@@ -798,7 +798,7 @@ namespace xt
 		}
 	}
 
-	SysEx State::createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview)
+	SysEx State::createTableData(const TableData& _table, const uint32_t _tableIndex, const bool _preview)
 	{
 		const auto hh = static_cast<uint8_t>(_tableIndex >> 7);
 		const auto ll = static_cast<uint8_t>(_tableIndex & 0x7f);
