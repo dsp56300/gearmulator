@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <limits>
 #include <vector>
 
 #include "weTypes.h"
@@ -22,7 +21,7 @@ namespace xtJucePlugin
 		pluginLib::Event<xt::WaveId> onWaveChanged;
 		pluginLib::Event<xt::TableId> onTableChanged;
 
-		WaveEditorData(Controller& _controller);
+		WaveEditorData(Controller& _controller, std::string _cacheDir);
 
 		void requestData();
 
@@ -59,7 +58,10 @@ namespace xtJucePlugin
 		bool requestWave(xt::WaveId _index);
 		bool requestTable(xt::TableId _index);
 
+		void onAllDataReceived() const;
+
 		Controller& m_controller;
+		const std::string m_cacheDir;
 
 		xt::WaveId m_currentWaveRequestIndex = g_invalidWaveIndex;
 		xt::TableId m_currentTableRequestIndex = g_invalidTableIndex;

@@ -23,7 +23,7 @@ namespace xtJucePlugin
 	class WaveEditor : public juce::Component, juce::ComponentMovementWatcher
 	{
 	public:
-		explicit WaveEditor(Editor& _editor);
+		explicit WaveEditor(Editor& _editor, const juce::File& _cacheDir);
 		WaveEditor() = delete;
 		WaveEditor(const WaveEditor&) = delete;
 		WaveEditor(WaveEditor&&) = delete;

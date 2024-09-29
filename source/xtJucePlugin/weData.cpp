@@ -1,12 +1,14 @@
 #include "weData.h"
 
 #include "xtController.h"
-#include "dsp56kEmu/logging.h"
+
+#include "synthLib/os.h"
+
 #include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
-	WaveEditorData::WaveEditorData(Controller& _controller) : m_controller(_controller)
+	WaveEditorData::WaveEditorData(Controller& _controller, std::string _cacheDir) : m_controller(_controller), m_cacheDir(std::move(_cacheDir))
 	{
 	}
 
@@ -20,7 +22,6 @@ namespace xtJucePlugin
 			const auto id = xt::TableId(i);
 			if(!m_tables[i] && !isAlgorithmicTable(id))
 			{
-				LOG("Request table " << i);
 				requestTable(id);
 				return;
 			}
@@ -44,6 +45,8 @@ namespace xtJucePlugin
 				return;
 			}
 		}
+
+		onAllDataReceived();
 	}
 
 	void WaveEditorData::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
@@ -252,6 +255,36 @@ namespace xtJucePlugin
 		m_currentTableRequestIndex = _index;
 		return true;
 	}
+
+	void WaveEditorData::onAllDataReceived() const
+	{
+		const auto romWaves = synthLib::validatePath(m_cacheDir) + "romWaves.syx";
+
+		std::vector<uint8_t> data;
+
+		for(uint16_t i=0; i<static_cast<uint16_t>(m_romWaves.size()); ++i)
+		{
+			auto& romWave = m_romWaves[i];
+			assert(romWave);
+			if(!romWave)
+				continue;
+			auto sysex = xt::State::createWaveData(*romWave, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+
+		assert(xt::Wave::g_firstRamTableIndex < m_tables.size());
+
+		for(uint16_t i=0; i<xt::Wave::g_firstRamTableIndex; ++i)
+		{
+			auto& table = m_tables[i];
+			assert(table || isAlgorithmicTable(xt::TableId(i)));
+			if(!table)
+				continue;
+			auto sysex = xt::State::createTableData(*table, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+		synthLib::writeFile(romWaves, data);
+	} 
 
 	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)
 	{
