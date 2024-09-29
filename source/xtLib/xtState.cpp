@@ -746,7 +746,7 @@ namespace xt
 
 		for(uint32_t i=0; i<_wave.size()>>1; ++i)
 		{
-			const auto sample = _wave[i] ^ 0x80;
+			const int sample = static_cast<uint8_t>(_wave[i] ^ 0x80);
 
 			sysex.push_back(static_cast<uint8_t>(sample >> 4));
 			sysex.push_back(static_cast<uint8_t>(sample & 0xf));
