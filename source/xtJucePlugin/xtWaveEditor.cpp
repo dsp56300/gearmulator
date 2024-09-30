@@ -98,6 +98,8 @@ namespace xtJucePlugin
 		{
 			saveWavetable();
 		};
+
+		m_tablesTree->setSelectedEntryFromCurrentPreset();
 	}
 
 	void WaveEditor::destroy()
@@ -214,6 +216,7 @@ namespace xtJucePlugin
 
 		m_selectedTable = _index;
 		m_controlTree->setTable(_index);
+		m_tablesTree->setSelectedTable(_index);
 	}
 
 	void WaveEditor::setSelectedWave(const xt::WaveId _waveIndex, bool _forceRefresh/* = false*/)

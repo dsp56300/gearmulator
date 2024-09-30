@@ -3,6 +3,7 @@
 #include "weTypes.h"
 #include "weWaveCategoryTreeItem.h"
 #include "xtEditor.h"
+#include "xtWaveEditor.h"
 
 namespace xtJucePlugin
 {
