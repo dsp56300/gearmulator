@@ -27,7 +27,8 @@ namespace xtJucePlugin
 	void TablesTreeItem::itemSelectionChanged(const bool _isNowSelected)
 	{
 		TreeItem::itemSelectionChanged(_isNowSelected);
-		m_editor.setSelectedTable(m_index);
+		if(_isNowSelected)
+			m_editor.setSelectedTable(m_index);
 	}
 
 	juce::var TablesTreeItem::getDragSourceDescription()
