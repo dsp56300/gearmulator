@@ -805,16 +805,16 @@ namespace xt
 
 		const std::initializer_list<uint8_t> header{0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(_preview ? SysexCommand::WaveCtlDumpP : SysexCommand::WaveCtlDump), hh, ll};
 		SysEx sysex{header};
-		sysex.reserve(sysex.size() + _table.size() * 4);
+		sysex.reserve(sysex.size() + _table.size() * 4 + 2);
 
 		for (const auto& e : _table)
 		{
 			const auto waveId = e.rawId();
 
 			sysex.push_back((waveId >> 12) & 0xf);
-			sysex.push_back((waveId >> 8) & 0xf);
-			sysex.push_back((waveId >> 4) & 0xf);
-			sysex.push_back((waveId     ) & 0xf);
+			sysex.push_back((waveId >> 8 ) & 0xf);
+			sysex.push_back((waveId >> 4 ) & 0xf);
+			sysex.push_back((waveId      ) & 0xf);
 		}
 
 		sysex.push_back(0);
