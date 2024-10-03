@@ -137,6 +137,8 @@ void EditorWindow::mouseDown(const juce::MouseEvent& event)
 		return;
 	if(dynamic_cast<juce::Button*>(event.eventComponent))
 		return;
+	if(event.eventComponent->findParentComponentOfClass<juce::TreeView>())
+		return;
 
 	m_state.openMenu(&event);
 }
