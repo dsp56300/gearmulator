@@ -92,7 +92,12 @@ namespace xtJucePlugin
 		if(!waveDesc)
 			return;
 		auto& data = m_editor.getData();
-		data.copyWave(m_waveIndex, waveDesc->waveId);
+
+		if(data.copyWave(m_waveIndex, waveDesc->waveId))
+		{
+			setSelected(true, true, juce::dontSendNotification);
+			data.sendWaveToDevice(m_waveIndex);
+		}
 	}
 
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const

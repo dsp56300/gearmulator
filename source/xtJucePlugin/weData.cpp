@@ -215,6 +215,30 @@ namespace xtJucePlugin
 		return true;
 	}
 
+	bool WaveEditorData::sendTableToDevice(const xt::TableId _id) const
+	{
+		const auto index = _id.rawId();
+		if(index >= m_tables.size())
+			return false;
+		auto& table = m_tables[index];
+		if(!table)
+			return false;
+		auto& t = *table;
+		const auto sysex = xt::State::createTableData(t, index, false);
+		m_controller.sendSysEx(sysex);
+		return true;
+	}
+
+	bool WaveEditorData::sendWaveToDevice(const xt::WaveId _id) const
+	{
+		const auto wave = getWave(_id);
+		if(!wave)
+			return false;
+		const auto sysex = xt::State::createWaveData(*wave, _id.rawId(), false);
+		m_controller.sendSysEx(sysex);
+		return true;
+	}
+
 	bool WaveEditorData::requestWave(const xt::WaveId _index)
 	{
 		if(isWaitingForData())

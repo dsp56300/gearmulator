@@ -52,6 +52,9 @@ namespace xtJucePlugin
 		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
 		bool setTable(xt::TableId _index, const xt::TableData& _data);
 
+		bool sendTableToDevice(xt::TableId _id) const;
+		bool sendWaveToDevice(xt::WaveId _id) const;
+
 	private:
 		bool requestWave(xt::WaveId _index);
 		bool requestTable(xt::TableId _index);

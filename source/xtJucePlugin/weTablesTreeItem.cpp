@@ -63,6 +63,7 @@ namespace xtJucePlugin
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			m_editor.setSelectedTable(m_index);
+			data.sendTableToDevice(m_index);
 		}
 	}
 

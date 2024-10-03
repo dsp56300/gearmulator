@@ -88,12 +88,16 @@ namespace xtJucePlugin
 		// if the source is the control list, we swap two entries. if the source is the wave list, we add a new wave
 		if(waveDesc->source == WaveDescSource::ControlTableList)
 		{
-			data.swapTableEntries(m_table, m_index, waveDesc->tableIndex);
-			setSelected(true, true, juce::dontSendNotification);
+			if(data.swapTableEntries(m_table, m_index, waveDesc->tableIndex))
+			{
+				setSelected(true, true, juce::dontSendNotification);
+				data.sendTableToDevice(m_table);
+			}
 		}
 		else if(waveDesc->source == WaveDescSource::WaveList)
 		{
-			data.setTableWave(m_table, m_index, waveDesc->waveId);
+			if(data.setTableWave(m_table, m_index, waveDesc->waveId))
+				data.sendTableToDevice(m_table);
 		}
 	}
 
