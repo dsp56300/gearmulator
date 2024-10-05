@@ -180,8 +180,8 @@ namespace n2x
 			dsp().getJit().exec(_irq);
 			dsp().setPC(pc);
 
-			const_cast<uint32_t&>(dsp().getInstructionCounter()) = numOps;
-			const_cast<uint32_t&>(dsp().getCycles()) = numCycles;
+			const_cast<uint64_t&>(dsp().getInstructionCounter()) = numOps;
+			const_cast<uint64_t&>(dsp().getCycles()) = numCycles;
 		}
 		else
 		{
