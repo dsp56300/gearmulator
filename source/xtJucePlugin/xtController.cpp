@@ -254,6 +254,12 @@ namespace xtJucePlugin
 		if(bank == static_cast<uint8_t>(xt::LocationH::MultiDumpMultiEditBuffer))
 		{
 			applyPatchParameters(_params, 0);
+
+			if(isMultiMode())
+			{
+				// requst first single. The other singles 1-7 are requested one after the other after a single has been received
+				requestSingle(xt::LocationH::SingleEditBufferMultiMode, 0);
+			}
 		}
 	}
 
@@ -676,9 +682,6 @@ namespace xtJucePlugin
 		if (isMultiMode())
 		{
 			requestMulti(xt::LocationH::MultiDumpMultiEditBuffer, 0);
-
-			// the other singles 1-7 are requested one after the other after a single has been received
-			requestSingle(xt::LocationH::SingleEditBufferMultiMode, 0);
 		}
 		else
 		{
