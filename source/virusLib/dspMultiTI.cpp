@@ -1,7 +1,5 @@
 #include "dspMultiTI.h"
 
-#if VIRUS_SUPPORT_TI
-
 namespace virusLib
 {
 	constexpr uint32_t g_esai1TxBlockSize = 6 * 3 * 2;		// 6 = number of TX pins, 3 = number of slots per frame, 2 = double data rate
@@ -212,5 +210,3 @@ namespace virusLib
 		processAudioTI(*this, m_dsp2, m_bufferI, _inputs, _outputs, _samples, _latency);
 	}
 }
-
-#endif

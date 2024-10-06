@@ -1,9 +1,6 @@
 #pragma once
 
-#include "buildconfig.h"
 #include "deviceModel.h"
-
-#if VIRUS_SUPPORT_TI
 
 #include <vector>
 
@@ -46,5 +43,3 @@ namespace virusLib
 	};
 
 }
-
-#endif

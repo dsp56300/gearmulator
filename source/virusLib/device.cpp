@@ -455,7 +455,6 @@ namespace virusLib
 
 	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
-#if VIRUS_SUPPORT_TI
 		if(_rom.getModel() == DeviceModel::Snow)
 		{
 			_dspA = new DspSingleSnow();
@@ -467,7 +466,6 @@ namespace virusLib
 			_dspB = &dsp->getDSP2();
 		}
 		else
-#endif
 		{
 			_dspA = new DspSingle(_rom.isTIFamily() ? 0x100000 : 0x040000, _rom.isTIFamily(), nullptr, _rom.getModel() == DeviceModel::A);
 		}

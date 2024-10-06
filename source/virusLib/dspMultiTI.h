@@ -1,9 +1,5 @@
 #pragma once
 
-#include "buildconfig.h"
-
-#if VIRUS_SUPPORT_TI
-
 #include "dspSingle.h"
 
 #include "synthLib/audiobuffer.h"
@@ -60,5 +56,3 @@ namespace virusLib
 		EsaiBufs<dsp56k::TWord> m_bufferI;
 	};
 }
-
-#endif
