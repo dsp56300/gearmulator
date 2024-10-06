@@ -52,9 +52,16 @@
   ],
   "buildPresets": [
     {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64"
+    },
+    {
       "name": "zynthian",
-      "configurePreset": "zynthian",
-      "jobs": 2
+      "configurePreset": "zynthian"
     }
   ]
 }
