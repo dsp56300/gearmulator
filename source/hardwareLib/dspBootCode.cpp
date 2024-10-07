@@ -32,10 +32,12 @@ namespace hwLib
 		{
 		case State::Length:
 			m_remaining = _val;
+			m_length = _val;
 			m_state = State::Address;
 			return false;
 		case State::Address:
 			m_address = _val;
+			m_initialPC = _val;
 
 			LOG("DSP Boot: " << m_remaining << " words, initial PC " << HEX(m_address));
 
