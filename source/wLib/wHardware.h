@@ -57,8 +57,6 @@ namespace wLib
 		dsp56k::RingBuffer<synthLib::SMidiEvent, 16384, true> m_midiIn;
 		uint32_t m_midiOffsetCounter = 0;
 
-		std::vector<dsp56k::TWord> m_delayedAudioIn;
-
 		std::vector<dsp56k::TWord> m_dummyInput;
 		std::vector<dsp56k::TWord> m_dummyOutput;
 

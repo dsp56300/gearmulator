@@ -56,7 +56,7 @@ namespace n2x
 				// receives audio from DSP A at twice the sample rate
 				// sends its audio to the DACs at regular sample rate
 				clock.setEsaiDivider(&esai, 1, 0);
-				clock.setEsaiCounter(&esai, -1, 0);
+//				clock.setEsaiCounter(&esai, -1, 0);
 			}
 		}
 
