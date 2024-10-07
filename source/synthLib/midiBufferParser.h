@@ -11,6 +11,7 @@ namespace synthLib
 	{
 	public:
 		void write(const std::vector<uint8_t>& _data);
+		void write(uint8_t _data);
 		void getEvents(std::vector<synthLib::SMidiEvent>& _events);
 
 		static constexpr uint32_t lengthFromStatusByte(const uint8_t _sb)
