@@ -49,7 +49,9 @@ namespace hwLib
 			m_state = State::Data;
 			return false;
 		case State::Data:
-			m_dsp.memory().set(dsp56k::MemArea_P, m_address++, _val);
+			m_dsp.memory().set(dsp56k::MemArea_P, m_address, _val);
+			m_dsp.getJit().notifyProgramMemWrite(m_address);
+			++m_address;
 			if(0 == --m_remaining)
 			{
 				LOG("DSP Boot: finished");
