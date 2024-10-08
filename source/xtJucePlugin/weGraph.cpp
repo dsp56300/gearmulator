@@ -7,7 +7,7 @@ namespace xtJucePlugin
 {
 	Graph::Graph(WaveEditor& _editor) : m_editor(_editor), m_data(_editor.getGraphData())
 	{
-		m_onSourceChanged.set(m_data.onSourceChanged, [this](const WaveData&)
+		m_onDataChanged.set(m_data.onChanged, [this]()
 		{
 			onSourceChanged();
 		});
@@ -257,7 +257,7 @@ namespace xtJucePlugin
 			if(i < 0)
 				continue;
 
-			if(i >= getDataSize())
+			if(i >= static_cast<int32_t>(getDataSize()))
 				return;
 
 			modifyValue(i, v);

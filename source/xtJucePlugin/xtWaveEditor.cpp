@@ -1,27 +1,34 @@
 #include "xtWaveEditor.h"
 
-#include "weTree.h"
 #include "weWaveTree.h"
 #include "weTablesTree.h"
 #include "weControlTree.h"
 #include "weGraphFreq.h"
 #include "weGraphPhase.h"
 #include "weGraphTime.h"
+#include "weWaveTreeItem.h"
+#include "xtController.h"
 
 #include "xtEditor.h"
+#include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
-	WaveEditor::WaveEditor(Editor& _editor) : ComponentMovementWatcher(this), m_editor(_editor), m_data(_editor.getXtController())
+	WaveEditor::WaveEditor(Editor& _editor, const juce::File& _cacheDir) : ComponentMovementWatcher(this), m_editor(_editor), m_data(_editor.getXtController(), _cacheDir.getFullPathName().toStdString())
 	{
 		addComponentListener(this);
 
-		m_data.onWaveChanged.addListener([this](const uint32_t& _waveIndex)
+		m_data.onWaveChanged.addListener([this](const xt::WaveId& _waveIndex)
 		{
 			if(_waveIndex != m_selectedWave)
 				return;
 
 			setSelectedWave(_waveIndex, true);
+		});
+
+		m_graphData.onIntegerChanged.addListener([this](const xt::WaveData& _data)
+		{
+			onWaveDataChanged(_data);
 		});
 	}
 
@@ -61,6 +68,38 @@ namespace xtJucePlugin
 		m_graphFreq->setColour(colourId, colour);
 		m_graphPhase->setColour(colourId, colour);
 		m_graphTime->setColour(colourId, colour);
+
+		m_btWavePreview = m_editor.findComponentT<juce::Button>("btWavePreview");
+		m_ledWavePreview = m_editor.findComponentT<juce::Button>("ledWavePreview");
+		m_btWaveSave = m_editor.findComponentT<genericUI::Button<juce::DrawableButton>>("btWaveSave");
+
+		m_btWavetablePreview = m_editor.findComponentT<juce::Button>("btWavetablePreview");
+		m_ledWavetablePreview = m_editor.findComponentT<juce::Button>("ledWavetablePreview");
+		m_btWavetableSave = m_editor.findComponentT<juce::Button>("btWavetableSave");
+
+		m_btWavePreview->onClick = [this]
+		{
+			toggleWavePreview(m_btWavePreview->getToggleState());
+		};
+
+		m_btWavetablePreview->onClick = [this]
+		{
+			toggleWavetablePreview(m_btWavePreview->getToggleState());
+		};
+
+		m_btWaveSave->allowRightClick(true);
+
+		m_btWaveSave->onClick = [this]
+		{
+			saveWave();
+		};
+
+		m_btWavetableSave->onClick = [this]
+		{
+			saveWavetable();
+		};
+
+		m_tablesTree->setSelectedEntryFromCurrentPreset();
 	}
 
 	void WaveEditor::destroy()
@@ -87,33 +126,112 @@ namespace xtJucePlugin
 		m_data.requestData();
 	}
 
+	void WaveEditor::toggleWavePreview(const bool _enabled)
+	{
+		if(_enabled)
+			toggleWavetablePreview(false);
+
+		m_btWavePreview->setToggleState(_enabled, juce::dontSendNotification);
+		m_ledWavePreview->setToggleState(_enabled, juce::dontSendNotification);
+	}
+
+	void WaveEditor::toggleWavetablePreview(const bool _enabled)
+	{
+		if(_enabled)
+			toggleWavePreview(false);
+
+		m_btWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
+		m_ledWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
+	}
+
+	void WaveEditor::onWaveDataChanged(const xt::WaveData& _data) const
+	{
+		if(m_btWavePreview->getToggleState())
+		{
+			const auto sysex = xt::State::createWaveData(_data, m_editor.getXtController().getCurrentPart(), true);
+			m_editor.getXtController().sendSysEx(sysex);
+		}
+	}
+
+	void WaveEditor::saveWave()
+	{
+		if(WaveEditorData::isReadOnly(m_selectedWave) || m_btWaveSave->isRightClick())
+		{
+			// open menu and let user select one of the wave slots
+			juce::PopupMenu menu;
+
+			uint16_t count = 0;
+			for(uint16_t i=xt::Wave::g_firstRamWaveIndex; i<xt::Wave::g_firstRamWaveIndex+xt::Wave::g_ramWaveCount; ++i)
+			{
+				const auto id = xt::WaveId(i);
+				menu.addItem(WaveTreeItem::getWaveName(id), true, false, [this, id]
+				{
+					saveWaveTo(id);
+				});
+
+				++count;
+				if((count % 25) == 0)
+					menu.addColumnBreak();
+			}
+
+			menu.showMenuAsync({});
+		}
+		else
+		{
+			saveWaveTo(m_selectedWave);
+		}
+	}
+
+	bool WaveEditor::saveWaveTo(const xt::WaveId _target)
+	{
+		if(WaveEditorData::isReadOnly(_target))
+			return false;
+
+		m_data.setWave(_target, m_graphData.getSource());
+
+		if(_target != m_selectedWave)
+			setSelectedWave(_target);
+
+		return true;
+	}
+
+	void WaveEditor::saveWavetable()
+	{
+	}
+
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
-		m_data.onReceiveWave(_data, _msg);
+		m_data.onReceiveWave(_msg);
 	}
 
 	void WaveEditor::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
 	{
-		m_data.onReceiveTable(_data, _msg);
+		m_data.onReceiveTable(_msg);
 	}
 
-	void WaveEditor::setSelectedTable(uint32_t _index)
+	void WaveEditor::setSelectedTable(xt::TableId _index)
 	{
 		if(m_selectedTable == _index)
 			return;
 
 		m_selectedTable = _index;
 		m_controlTree->setTable(_index);
+		m_tablesTree->setSelectedTable(_index);
 	}
 
-	void WaveEditor::setSelectedWave(const uint32_t _waveIndex, bool _forceRefresh/* = false*/)
+	void WaveEditor::setSelectedWave(const xt::WaveId _waveIndex, bool _forceRefresh/* = false*/)
 	{
 		if(m_selectedWave == _waveIndex && !_forceRefresh)
 			return;
 
 		m_selectedWave = _waveIndex;
 
+		m_waveTree->setSelectedWave(m_selectedWave);
+
 		if(const auto wave = m_data.getWave(_waveIndex))
+		{
 			m_graphData.set(*wave);
+			onWaveDataChanged(*wave);
+		}
 	}
 }

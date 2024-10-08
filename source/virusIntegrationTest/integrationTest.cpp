@@ -13,7 +13,7 @@
 
 #include "synthLib/wavReader.h"
 #include "synthLib/os.h"
-#include "virusLib/buildconfig.h"
+
 #include "virusLib/romloader.h"
 
 namespace synthLib
@@ -118,25 +118,6 @@ int main(int _argc, char* _argv[])
 						std::cout << "Failed to find presets file in folder " << subfolder << std::endl;
 						return -1;
 					}
-
-#if !VIRUS_SUPPORT_TI
-					if(romFile.find("firmware") != std::string::npos)
-					{
-						auto* hFile = fopen(romFile.c_str(), "rb");
-						size_t size = 0;
-						if(hFile)
-						{
-							fseek(hFile, 0, SEEK_END);
-							size = ftell(hFile);
-							fclose(hFile);
-						}
-						if(size > virusLib::ROMFile::getRomSizeModelABC())
-						{
-							std::cout << "Ignoring TI verification tests, TI is not supported" << std::endl;
-							continue;
-						}
-					}
-#endif
 
 					std::vector<std::string> presets;
 
@@ -311,7 +292,7 @@ int IntegrationTest::runCompare()
 
 int IntegrationTest::runCreate(const int _lengthSeconds)
 {
-	const auto sampleCount = m_app.getRom().getSamplerate() * _lengthSeconds * 2;
+	const auto sampleCount = m_app.getRom().getSamplerate() * _lengthSeconds;
 
 	File file;
 	return createAudioFile(file, "", sampleCount);

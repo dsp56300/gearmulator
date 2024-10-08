@@ -58,8 +58,6 @@ namespace virusLib
 		static void applyDspMemoryPatches(const DspSingle* _dspA, const DspSingle* _dspB, const ROMFile& _rom);
 		void applyDspMemoryPatches() const;
 
-		FrontpanelState& getFrontpanelState() { return m_frontpanelStateGui; }
-
 	private:
 		bool sendMidi(const synthLib::SMidiEvent& _ev, std::vector<synthLib::SMidiEvent>& _response) override;
 		void readMidiOut(std::vector<synthLib::SMidiEvent>& _midiOut) override;
@@ -76,6 +74,6 @@ namespace virusLib
 		uint32_t m_numSamplesProcessed = 0;
 		float m_samplerate;
 		FrontpanelState m_frontpanelStateDSP;
-		FrontpanelState m_frontpanelStateGui;
+		synthLib::SMidiEvent m_frontpanelStateMidiEvent;
 	};
 }

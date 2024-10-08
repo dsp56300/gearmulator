@@ -15,7 +15,7 @@ namespace virusLib
 		, m_periphX362(_use56367Peripherals ? &m_periphY367 : nullptr)
 		, m_hdi08(_use56303Peripherals ? m_periphX303.getHI08() : m_periphX362.getHDI08())
 		, m_audio(_use56303Peripherals ? static_cast<dsp56k::Audio&>(m_periphX303.getEssi0()) : static_cast<dsp56k::Audio&>(m_periphX362.getEsai()))
-		, m_esxiClock(_use56303Peripherals ? m_periphX303.getEssiClock() : m_periphX362.getEsaiClock())
+		, m_esxiClock(_use56303Peripherals ? static_cast<dsp56k::EsxiClock&>(m_periphX303.getEssiClock()) : static_cast<dsp56k::EsxiClock&>(m_periphX362.getEsaiClock()))
 	{
 		const size_t requiredMemSize = 
 			dsp56k::alignedSize<dsp56k::DSP>() + 
@@ -75,6 +75,11 @@ namespace virusLib
 #endif
 
 		m_dspThread.reset(new dsp56k::DSPThread(*m_dsp, m_name.empty() ? nullptr : m_name.c_str(), debugger));
+
+#ifdef ZYNTHIAN
+		m_dspThread->setLogToDebug(false);
+		m_dspThread->setLogToStdout(false);
+#endif
 	}
 
 	template<typename T> void processAudio(DspSingle& _dsp, const synthLib::TAudioInputsT<T>& _inputs, const synthLib::TAudioOutputsT<T>& _outputs, const size_t _samples, uint32_t _latency, std::vector<T>& _dummyIn, std::vector<T>& _dummyOut)

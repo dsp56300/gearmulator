@@ -4,6 +4,7 @@
 #include "jucePluginLib/controller.h"
 #include "jucePluginLib/event.h"
 
+#include "virusLib/frontpanelState.h"
 #include "virusLib/microcontrollerTypes.h"
 #include "virusLib/romfile.h"
 
@@ -14,6 +15,8 @@ namespace virus
     class Controller : public pluginLib::Controller
     {
     public:
+		pluginLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
+
         struct Patch
         {
             std::string name;
@@ -155,6 +158,8 @@ namespace virus
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg) const;
         bool parseSingle(pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _parameterValues, const pluginLib::SysEx& _msg, MidiPacketType& usedPacketType) const;
 
+		const auto& getFrontpanelState() const { return m_frontpanelState; }
+
     private:
         Singles m_singles;
         SinglePatch m_singleEditBuffer;                     // single mode
@@ -177,5 +182,6 @@ namespace virus
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
 		pluginLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
+        virusLib::FrontpanelState m_frontpanelState;
     };
 }; // namespace Virus

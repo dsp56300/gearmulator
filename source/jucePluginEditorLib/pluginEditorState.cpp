@@ -216,7 +216,16 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		if(editor)
 		{
 			skinMenu.addSeparator();
-			skinMenu.addItem("Export current skin to '" + m_skinFolderName + "' folder on disk", true, false, [this]{exportCurrentSkin();});
+			skinMenu.addItem("Export current skin to folder '" + m_skinFolderName + "' on disk", true, false, [this]
+			{
+				exportCurrentSkin();
+			});
+			skinMenu.addItem("Open folder '" + m_skinFolderName + "' in File Browser", true, false, [this]
+			{
+				const auto dir = synthLib::getModulePath() + m_skinFolderName;
+				synthLib::createDirectory(dir);
+				juce::File(dir).revealToUser();
+			});
 		}
 	}
 

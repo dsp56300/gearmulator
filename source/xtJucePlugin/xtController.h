@@ -65,6 +65,7 @@ namespace xtJucePlugin
 
 		bool sendSysEx(MidiPacketType _type) const;
 		bool sendSysEx(MidiPacketType _type, std::map<pluginLib::MidiDataType, uint8_t>& _params) const;
+		using pluginLib::Controller::sendSysEx;
 
 		bool isMultiMode() const;
 		void setPlayMode(bool _multiMode);

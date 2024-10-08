@@ -38,7 +38,6 @@ namespace synthLib
 
 		bool isValid() const;
 
-		Device* getDevice() const { return m_device; }
 		void setDevice(Device* _device);
 
 #if !SYNTHLIB_DEMO_MODE

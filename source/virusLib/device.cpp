@@ -7,6 +7,7 @@
 #include "dsp56kEmu/jit.h"
 
 #include "synthLib/deviceException.h"
+#include "synthLib/midiToSysex.h"
 
 #include <cstring>
 
@@ -18,6 +19,8 @@ namespace virusLib
 		: m_rom(std::move(_rom))
 		, m_samplerate(getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate))
 	{
+		m_frontpanelStateMidiEvent.source = synthLib::MidiEventSource::Internal;
+
 		DspSingle* dsp1;
 		createDspInstances(dsp1, m_dsp2, m_rom, m_samplerate);
 		m_dsp.reset(dsp1);
@@ -163,12 +166,8 @@ namespace virusLib
 
 		m_numSamplesProcessed += static_cast<uint32_t>(_size);
 
-		m_frontpanelStateGui.m_lfoPhases = m_frontpanelStateDSP.m_lfoPhases;
-		m_frontpanelStateGui.m_bpm = m_frontpanelStateDSP.m_bpm;
-		m_frontpanelStateGui.m_logo = m_frontpanelStateDSP.m_logo;
-
-		for(size_t i=0; i<m_frontpanelStateDSP.m_midiEventReceived.size(); ++i)
-			m_frontpanelStateGui.m_midiEventReceived[i] |= m_frontpanelStateDSP.m_midiEventReceived[i];
+		m_frontpanelStateDSP.toMidiEvent(m_frontpanelStateMidiEvent);
+		_midiOut.push_back(m_frontpanelStateMidiEvent);
 	}
 
 #if !SYNTHLIB_DEMO_MODE
@@ -185,8 +184,19 @@ namespace virusLib
 	bool Device::setStateFromUnknownCustomData(const std::vector<uint8_t>& _state)
 	{
 		std::vector<synthLib::SMidiEvent> messages;
-		if(!parseTIcontrolPreset(messages, _state))
+
+		if(parseTIcontrolPreset(messages, _state))
+			return m_mc->setState(messages);
+
+		std::vector<std::vector<uint8_t>> sysexMessages;
+		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, _state, false);
+
+		if(sysexMessages.empty())
 			return false;
+
+		for (const auto& sysexMessage : sysexMessages)
+			messages.emplace_back().sysex = sysexMessage;
+
 		return m_mc->setState(messages);
 	}
 #endif
@@ -445,7 +455,6 @@ namespace virusLib
 
 	void Device::createDspInstances(DspSingle*& _dspA, DspSingle*& _dspB, const ROMFile& _rom, const float _samplerate)
 	{
-#if VIRUS_SUPPORT_TI
 		if(_rom.getModel() == DeviceModel::Snow)
 		{
 			_dspA = new DspSingleSnow();
@@ -457,7 +466,6 @@ namespace virusLib
 			_dspB = &dsp->getDSP2();
 		}
 		else
-#endif
 		{
 			_dspA = new DspSingle(_rom.isTIFamily() ? 0x100000 : 0x040000, _rom.isTIFamily(), nullptr, _rom.getModel() == DeviceModel::A);
 		}

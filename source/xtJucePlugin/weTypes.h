@@ -1,13 +1,9 @@
 #pragma once
 
-#include <array>
-#include <cstdint>
+#include "xtLib/xtTypes.h"
 
 namespace xtJucePlugin
 {
-	using WaveData = std::array<int8_t, 128>;
-	using TableData = std::array<uint16_t,64>;
-
 	enum class WaveCategory
 	{
 		Invalid = -1,
@@ -20,4 +16,8 @@ namespace xtJucePlugin
 	};
 
 	static constexpr float g_waveEditorScale = 2.0f * 1.3f;
+
+	static constexpr uint32_t g_invalidIndex = std::numeric_limits<uint32_t>::max();
+	static constexpr xt::WaveId g_invalidWaveIndex = xt::WaveId::invalid();
+	static constexpr xt::TableId g_invalidTableIndex = xt::TableId::invalid();
 }

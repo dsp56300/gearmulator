@@ -8,6 +8,8 @@
 
 #include "jucePluginLib/midipacket.h"
 
+#include "juceUiLib/button.h"
+
 namespace xtJucePlugin
 {
 	class GraphPhase;
@@ -21,7 +23,7 @@ namespace xtJucePlugin
 	class WaveEditor : public juce::Component, juce::ComponentMovementWatcher
 	{
 	public:
-		explicit WaveEditor(Editor& _editor);
+		explicit WaveEditor(Editor& _editor, const juce::File& _cacheDir);
 		WaveEditor() = delete;
 		WaveEditor(const WaveEditor&) = delete;
 		WaveEditor(WaveEditor&&) = delete;
@@ -44,8 +46,8 @@ namespace xtJucePlugin
 		Editor& getEditor() const { return m_editor; }
 		GraphData& getGraphData() { return m_graphData; }
 
-		void setSelectedTable(uint32_t _index);
-		void setSelectedWave(uint32_t _waveIndex, bool _forceRefresh = false);
+		void setSelectedTable(xt::TableId _index);
+		void setSelectedWave(xt::WaveId _waveIndex, bool _forceRefresh = false);
 
 	private:
 		// ComponentMovementWatcher
@@ -55,6 +57,16 @@ namespace xtJucePlugin
 
 		void checkFirstTimeVisible();
 		void onFirstTimeVisible();
+
+		void toggleWavePreview(bool _enabled);
+		void toggleWavetablePreview(bool _enabled);
+
+		void onWaveDataChanged(const xt::WaveData& _data) const;
+
+		void saveWave();
+		bool saveWaveTo(xt::WaveId _target);
+
+		void saveWavetable();
 
 		Editor& m_editor;
 
@@ -66,13 +78,22 @@ namespace xtJucePlugin
 		std::unique_ptr<GraphPhase> m_graphPhase;
 		std::unique_ptr<GraphTime> m_graphTime;
 
+		juce::Button* m_btWavePreview = nullptr;
+		juce::Button* m_ledWavePreview = nullptr;
+
+		juce::Button* m_btWavetablePreview = nullptr;
+		juce::Button* m_ledWavetablePreview = nullptr;
+
+		genericUI::Button<juce::DrawableButton>* m_btWaveSave = nullptr;
+		juce::Button* m_btWavetableSave = nullptr;
+
 		WaveEditorData m_data;
 		GraphData m_graphData;
 
 		bool m_wasVisible = false;
 
-		uint32_t m_selectedTable = ~0;
-		uint32_t m_selectedWave = ~0;
+		xt::TableId m_selectedTable;
+		xt::WaveId m_selectedWave;
 
 		WaveEditorStyle m_style;
 	};

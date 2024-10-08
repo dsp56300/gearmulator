@@ -32,10 +32,12 @@ namespace hwLib
 		{
 		case State::Length:
 			m_remaining = _val;
+			m_length = _val;
 			m_state = State::Address;
 			return false;
 		case State::Address:
 			m_address = _val;
+			m_initialPC = _val;
 
 			LOG("DSP Boot: " << m_remaining << " words, initial PC " << HEX(m_address));
 
@@ -49,7 +51,9 @@ namespace hwLib
 			m_state = State::Data;
 			return false;
 		case State::Data:
-			m_dsp.memory().set(dsp56k::MemArea_P, m_address++, _val);
+			m_dsp.memory().set(dsp56k::MemArea_P, m_address, _val);
+			m_dsp.getJit().notifyProgramMemWrite(m_address);
+			++m_address;
 			if(0 == --m_remaining)
 			{
 				LOG("DSP Boot: finished");

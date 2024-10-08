@@ -11,3 +11,4 @@
 /build/
 *atom*.sh
 *debug.sh
+CMakeUserPresets.json

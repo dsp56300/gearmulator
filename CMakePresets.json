@@ -1,0 +1,67 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "base",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/temp/cmake_${presetName}",
+      "installDir": "${sourceDir}/install/${presetName}",
+      "hidden": true
+    },
+    {
+      "name": "default",
+      "inherits": "base"
+    },
+    {
+      "name": "windows-x64",
+      "inherits": "default",
+      "displayName": "Windows default x64 configuration",
+      "architecture": "x64",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "zynthian",
+      "inherits": "default",
+      "displayName": "Build specifically for the Zynthian platform",
+      "generator": "Ninja",
+      "installDir": "/usr/local",
+      "cacheVariables": {
+        "gearmulator_BUILD_JUCEPLUGIN": "ON",
+        "gearmulator_BUILD_FX_PLUGIN": "OFF",
+
+        "CMAKE_CXX_FLAGS": "-march=armv8.2-a -DZYNTHIAN",
+        "CMAKE_C_FLAGS": "-march=armv8.2-a -DZYNTHIAN",
+
+        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_VST2": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_VST3": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_AU": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_LV2": "ON",
+
+        "gearmulator_SYNTH_NODALRED2X": "OFF",
+        "gearmulator_SYNTH_OSIRUS": "ON",
+        "gearmulator_SYNTH_OSTIRUS": "ON",
+        "gearmulator_SYNTH_VAVRA": "OFF",
+        "gearmulator_SYNTH_XENIA": "OFF"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "configurePreset": "default"
+    },
+    {
+      "name": "windows-x64",
+      "configurePreset": "windows-x64"
+    },
+    {
+      "name": "zynthian",
+      "configurePreset": "zynthian"
+    }
+  ]
+}

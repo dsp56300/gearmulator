@@ -40,8 +40,16 @@ namespace genericUI
 			if(onUp && onUp(_e))
 				return;
 
-	        if (!allowRightClick() && _e.mods.isPopupMenu())
-	            return;
+			if(_e.mods.isPopupMenu())
+			{
+				if(!allowRightClick())
+					return;
+				m_isRightClick = true;
+			}
+			else
+			{
+				m_isRightClick = false;
+			}
 
 			T::mouseUp(_e);
 	    }
@@ -80,11 +88,17 @@ namespace genericUI
 			m_hitAreaOffset = _offset;
 		}
 
+		bool isRightClick() const
+		{
+			return m_isRightClick;
+		}
+
 		Callback onDown;
 		Callback onUp;
 
 	private:
 		bool m_allowRightClick = false;
+		bool m_isRightClick = false;
 		juce::Rectangle<int> m_hitAreaOffset{0,0,0,0};
 	};
 }

@@ -2,6 +2,7 @@
 
 #include "n2xromloader.h"
 #include "dsp56kEmu/threadtools.h"
+#include "synthLib/deviceException.h"
 
 namespace n2x
 {
@@ -20,7 +21,7 @@ namespace n2x
 		, m_semDspAtoB(2)
 	{
 		if(!m_rom.isValid())
-			return;
+			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "No firmware found, expected firmware .bin with a size of " + std::to_string(Rom::MySize) + " bytes");
 
 		m_dspA.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackA(); }, 0);
 		m_dspB.getPeriph().getEsai().setCallback([this](dsp56k::Audio*){ onEsaiCallbackB(); }, 0);
@@ -88,10 +89,10 @@ namespace n2x
 		ensureBufferSize(_frames);
 
 		dsp56k::TWord* outputs[12]{nullptr};
-		outputs[0] = &m_audioOutputs[0].front();
-		outputs[1] = &m_audioOutputs[1].front();
-		outputs[2] = &m_audioOutputs[2].front();
-		outputs[3] = &m_audioOutputs[3].front();
+		outputs[1] = &m_audioOutputs[0].front();
+		outputs[0] = &m_audioOutputs[1].front();
+		outputs[3] = &m_audioOutputs[2].front();
+		outputs[2] = &m_audioOutputs[3].front();
 		outputs[4] = m_dummyOutput.data();
 		outputs[5] = m_dummyOutput.data();
 		outputs[6] = m_dummyOutput.data();

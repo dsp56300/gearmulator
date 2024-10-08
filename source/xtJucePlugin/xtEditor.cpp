@@ -182,7 +182,10 @@ namespace xtJucePlugin
 	{
 		if(_object.getName() == "waveEditorContainer")
 		{
-			m_waveEditor = new WaveEditor(*this);
+			const auto configOptions = getProcessor().getConfigOptions();
+			const auto dir = configOptions.getDefaultFile().getParentDirectory();
+
+			m_waveEditor = new WaveEditor(*this, dir);
 			getXtController().setWaveEditor(m_waveEditor);
 			return m_waveEditor;
 		}

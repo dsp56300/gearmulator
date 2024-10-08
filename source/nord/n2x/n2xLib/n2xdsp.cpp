@@ -56,7 +56,7 @@ namespace n2x
 				// receives audio from DSP A at twice the sample rate
 				// sends its audio to the DACs at regular sample rate
 				clock.setEsaiDivider(&esai, 1, 0);
-				clock.setEsaiCounter(&esai, -1, 0);
+//				clock.setEsaiCounter(&esai, -1, 0);
 			}
 		}
 
@@ -180,8 +180,8 @@ namespace n2x
 			dsp().getJit().exec(_irq);
 			dsp().setPC(pc);
 
-			const_cast<uint32_t&>(dsp().getInstructionCounter()) = numOps;
-			const_cast<uint32_t&>(dsp().getCycles()) = numCycles;
+			const_cast<uint64_t&>(dsp().getInstructionCounter()) = numOps;
+			const_cast<uint64_t&>(dsp().getCycles()) = numCycles;
 		}
 		else
 		{

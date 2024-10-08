@@ -9,6 +9,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#define LOGTX(S)
+
 namespace virusLib
 {
 	const std::vector<dsp56k::TWord> g_knownPatterns[] =
@@ -18,7 +20,7 @@ namespace virusLib
 
 	bool Hdi08TxParser::append(const dsp56k::TWord _data)
 	{
-//		LOG("HDI08 TX: " << HEX(_data));
+//		LOGTX("HDI08 TX: " << HEX(_data));
 
 		const auto byte = static_cast<uint8_t>(_data >> 16);
 
@@ -29,7 +31,7 @@ namespace virusLib
 			{
 				m_remainingPresetBytes = 0;
 				m_state = State::Default;
-				LOG("Finished receiving preset, no upgrade needed");
+				LOGTX("Finished receiving preset, no upgrade needed");
 			}
 			else if(_data == 0xf50000)
 			{
@@ -39,19 +41,19 @@ namespace virusLib
 			else if(_data == 0xf400f4)
 			{
 				m_state = State::Preset;
-				LOG("Begin receiving upgraded preset");
+				LOGTX("Begin receiving upgraded preset");
 
 				m_presetData.clear();
 
 				if(m_remainingPresetBytes == 0)
 				{
 					m_remainingPresetBytes = std::numeric_limits<uint32_t>::max();
-					LOG("No one requested a preset upgrade, assuming preset size based on first word (version number)");
+					LOGTX("No one requested a preset upgrade, assuming preset size based on first word (version number)");
 				}
 			}
 			else if((_data & 0xff0000) == 0xf00000)
 			{
-				LOG("Begin reading sysex");
+				LOGTX("Begin reading sysex");
 				m_state = State::Sysex;
 				m_sysexData.push_back(byte);
 				m_sysexReceiveIndex = 1;
@@ -74,14 +76,14 @@ namespace virusLib
 						++pos;
 						if(pos == std::size(pattern))
 						{
-//							LOG("Matched pattern " << i);
+//							LOGTX("Matched pattern " << i);
 							const auto p = static_cast<PatternType>(i);
 
 							switch (p)
 							{
 							case PatternType::DspBoot:
 								m_dspHasBooted = true;
-								LOG("DSP boot completed");
+								LOGTX("DSP boot completed");
 								break;
 							default:
 								m_matchedPatterns.push_back(p);
@@ -105,7 +107,7 @@ namespace virusLib
 /*					std::stringstream s;
 					for (const auto& w : m_nonPatternWords)
 						s << HEX(w) << ' ';
-					LOG("Unknown DSP words: " << s.str());
+					LOGTX("Unknown DSP words: " << s.str());
 */
 					m_nonPatternWords.clear();
 				}
@@ -115,7 +117,7 @@ namespace virusLib
 			{
 				if(_data & 0xffff)
 				{
-					LOG("Abort reading sysex, received invalid midi byte " << HEX(_data));
+					LOGTX("Abort reading sysex, received invalid midi byte " << HEX(_data));
 					m_state = State::Default;
 					m_midiData.clear();
 					return append(_data);
@@ -130,7 +132,7 @@ namespace virusLib
 
 				if(byte == 0xf7)
 				{
-					LOG("End reading sysex");
+					LOGTX("End reading sysex");
 
 					m_state = State::Default;
 
@@ -138,7 +140,7 @@ namespace virusLib
 					for (const auto b : m_sysexData)
 						s << HEXN(b, 2);
 
-					LOG("Received sysex: " << s.str());
+					LOGTX("Received sysex: " << s.str());
 
 					synthLib::SMidiEvent ev(synthLib::MidiEventSource::Plugin);
 					std::swap(ev.sysex, m_sysexData);
@@ -164,7 +166,7 @@ namespace virusLib
 						m_remainingPresetBytes = m_mc.getROM().getSinglePresetSize();
 						break;
 					}
-					LOG("Preset size for version code " << static_cast<int>(version) << " is " << m_remainingPresetBytes);
+					LOGTX("Preset size for version code " << static_cast<int>(version) << " is " << m_remainingPresetBytes);
 				}
 
 				uint32_t shift = 16;
@@ -179,7 +181,7 @@ namespace virusLib
 
 				if(m_remainingPresetBytes == 0)
 				{
-					LOG("Succesfully received preset");
+					LOGTX("Succesfully received preset");
 					m_state = State::Default;
 				}
 			}

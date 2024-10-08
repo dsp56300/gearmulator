@@ -3,6 +3,7 @@
 #include "weTypes.h"
 #include "weWaveCategoryTreeItem.h"
 #include "xtEditor.h"
+#include "xtWaveEditor.h"
 
 namespace xtJucePlugin
 {
@@ -10,6 +11,16 @@ namespace xtJucePlugin
 	{
 		addCategory(WaveCategory::Rom);
 		addCategory(WaveCategory::User);
+	}
+
+	bool WaveTree::setSelectedWave(const xt::WaveId _id)
+	{
+		for (const auto& [category, item] : m_items)
+		{
+			if(item->setSelectedWave(_id))
+				return true;
+		}
+		return false;
 	}
 
 	void WaveTree::addCategory(WaveCategory _category)

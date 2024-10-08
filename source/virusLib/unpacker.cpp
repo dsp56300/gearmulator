@@ -1,7 +1,5 @@
 #include "unpacker.h"
 
-#if VIRUS_SUPPORT_TI
-
 #include "utils.h"
 
 #include "dsp56kEmu/logging.h"
@@ -194,5 +192,3 @@ namespace virusLib
 		return content;
 	}
 }
-
-#endif

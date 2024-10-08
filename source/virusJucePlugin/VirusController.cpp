@@ -89,6 +89,14 @@ namespace virus
     	pluginLib::MidiPacket::Data data;
         pluginLib::MidiPacket::ParamValues parameterValues;
 
+		if(_msg.size() > 6 && _msg[6] == virusLib::DUMP_EMU_SYNTHSTATE)
+		{
+			if(!m_frontpanelState.fromMidiEvent(_msg))
+				return false;
+			onFrontPanelStateChanged(m_frontpanelState);
+			return true;
+		}
+
         if(parseMidiPacket(name,  data, parameterValues, _msg))
         {
             const auto deviceId = data[pluginLib::MidiDataType::DeviceId];

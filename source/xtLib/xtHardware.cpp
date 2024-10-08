@@ -110,11 +110,8 @@ namespace xt
 		const dsp56k::TWord* inputs[16]{nullptr};
 		dsp56k::TWord* outputs[16]{nullptr};
 
-		// TODO: Right audio input channel needs to be delayed by one frame
-		::memcpy(&m_delayedAudioIn[1], m_audioInputs[1].data(), sizeof(dsp56k::TWord) * _frames);
-
-		inputs[1] = &m_audioInputs[0].front();
-		inputs[0] = m_delayedAudioIn.data();
+		inputs[0] = &m_audioInputs[0].front();
+		inputs[1] = &m_audioInputs[1].front();
 		inputs[2] = m_dummyInput.data();
 		inputs[3] = m_dummyInput.data();
 		inputs[4] = m_dummyInput.data();
@@ -226,8 +223,6 @@ namespace xt
 			outputs[5] += processCount;
 		}
 
-		m_delayedAudioIn[0] = m_audioInputs[1][totalFrames-1];
-
 		m_processAudio = false;
 	}
 
@@ -238,9 +233,6 @@ namespace xt
 			for (auto& input : m_audioInputs)
 				input.resize(_frames);
 		}
-
-		if(m_delayedAudioIn.size() < _frames + 1)
-			m_delayedAudioIn.resize(_frames + 1);
 
 		if(m_audioOutputs.front().size() < _frames)
 		{

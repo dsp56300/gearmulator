@@ -36,7 +36,6 @@ bool ROMFile::initialize()
 {
 	std::unique_ptr<std::istream> dsp(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
 
-#if VIRUS_SUPPORT_TI
 	ROMUnpacker::Firmware fw;
 
 	// Check if we are dealing with a TI installer file, if so, unpack it first
@@ -52,7 +51,7 @@ bool ROMFile::initialize()
 		// Wrap into a stream so we can pass it into readChunks
 		dsp.reset(new imemstream(fw.DSP));
 	}
-#endif
+
 	const auto chunks = readChunks(*dsp);
 
 	if (chunks.empty())
@@ -81,7 +80,6 @@ bool ROMFile::initialize()
 	printf("Program BootROM offset = 0x%x\n", m_bootRom.offset);
 	printf("Program CommandStream size = 0x%x\n", static_cast<uint32_t>(m_commandStream.size()));
 
-#if VIRUS_SUPPORT_TI
 	if(isTIFamily())
 	{
 		if (!fw.Presets.empty())
@@ -166,7 +164,7 @@ bool ROMFile::initialize()
 		loadFirmwarePresets(DeviceModel::TI2);
 		loadFirmwarePresets(DeviceModel::Snow);
 	}
-#endif
+
 	return true;
 }
 

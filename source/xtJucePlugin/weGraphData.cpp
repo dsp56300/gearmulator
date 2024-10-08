@@ -4,9 +4,11 @@
 
 namespace xtJucePlugin
 {
+	// ReSharper disable CppClangTidyClangDiagnosticFloatEqual
+
 	constexpr float g_pi = 3.1415926535f;
 
-	constexpr auto g_size = std::tuple_size_v<WaveData>;
+	constexpr auto g_size = std::tuple_size_v<xt::WaveData>;
 	constexpr uint32_t g_fftOrder = 7;
 	static_assert((1 << g_fftOrder) == g_size);
 
@@ -14,7 +16,7 @@ namespace xtJucePlugin
 	{
 	}
 
-	void GraphData::set(const WaveData& _data)
+	void GraphData::set(const xt::WaveData& _data)
 	{
 		if(_data == m_source)
 			return;
@@ -30,7 +32,7 @@ namespace xtJucePlugin
 
 		updateFrequenciesAndPhases();
 
-		onSourceChanged(m_source);
+		sendChangedEvents();
 	}
 
 	void GraphData::setData(const uint32_t _index, const float _value)
@@ -40,7 +42,7 @@ namespace xtJucePlugin
 		m_data[_index] = _value;
 		m_data[m_data.size() - _index - 1] = -_value;
 		updateFrequenciesAndPhases();
-		onSourceChanged(m_source);
+		sendChangedEvents();
 	}
 
 	void GraphData::setFreq(const uint32_t _index, const float _value)
@@ -49,7 +51,7 @@ namespace xtJucePlugin
 			return;
 		m_frequencies[_index] = _value;
 		updateDataFromFrequenciesAndPhases();
-		onSourceChanged(m_source);
+		sendChangedEvents();
 	}
 
 	void GraphData::setPhase(const uint32_t _index, const float _value)
@@ -58,7 +60,7 @@ namespace xtJucePlugin
 			return;
 		m_phases[_index] = _value;
 		updateDataFromFrequenciesAndPhases();
-		onSourceChanged(m_source);
+		sendChangedEvents();
 	}
 
 	void GraphData::updateFrequenciesAndPhases()
@@ -109,8 +111,29 @@ namespace xtJucePlugin
 		m_fft.perform(m_fftInData.data(), m_fftOutData.data(), true);
 
 		for(uint32_t i=0; i<m_data.size(); ++i)
-		{
 			m_data[i] = m_fftOutData[i].real();
+	}
+
+	bool GraphData::updateSourceFromData()
+	{
+		bool changed = false;
+		for(size_t i=0; i<m_data.size(); ++i)
+		{
+			const auto d = static_cast<int8_t>(std::clamp<int32_t>(static_cast<int32_t>(std::round(m_data[i] * 128.0f)), -127, 127));
+
+			if(m_source[i] == d)
+				continue;
+			m_source[i] = d;
+			changed = true;
 		}
+		return changed;
+	}
+
+	void GraphData::sendChangedEvents()
+	{
+		onChanged();
+
+		if(updateSourceFromData())
+			onIntegerChanged(m_source);
 	}
 }

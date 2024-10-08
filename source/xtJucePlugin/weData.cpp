@@ -1,12 +1,17 @@
 #include "weData.h"
 
 #include "xtController.h"
-#include "dsp56kEmu/logging.h"
+
+#include "synthLib/midiToSysex.h"
+#include "synthLib/os.h"
+
+#include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
-	WaveEditorData::WaveEditorData(Controller& _controller) : m_controller(_controller)
+	WaveEditorData::WaveEditorData(Controller& _controller, const std::string& _cacheDir) : m_controller(_controller), m_cacheDir(synthLib::validatePath(_cacheDir))
 	{
+		loadRomCache();
 	}
 
 	void WaveEditorData::requestData()
@@ -14,21 +19,22 @@ namespace xtJucePlugin
 		if(isWaitingForData())
 			return;
 
-		for(uint32_t i=0; i<m_tables.size(); ++i)
+		for(uint16_t i=0; i<static_cast<uint16_t>(m_tables.size()); ++i)
 		{
-			if(!m_tables[i] && !isAlgorithmicTable(i))
+			const auto id = xt::TableId(i);
+			if(!m_tables[i] && !isAlgorithmicTable(id))
 			{
-				LOG("Request table " << i);
-				requestTable(i);
+				requestTable(id);
 				return;
 			}
 		}
 
-		for(uint32_t i=0; i<m_romWaves.size(); ++i)
+		for(uint16_t i=0; i<static_cast<uint16_t>(m_romWaves.size()); ++i)
 		{
+			const auto id = xt::WaveId(i);
 			if(!m_romWaves[i])
 			{
-				requestWave(i);
+				requestWave(id);
 				return;
 			}
 		}
@@ -37,190 +43,363 @@ namespace xtJucePlugin
 		{
 			if(!m_ramWaves[i])
 			{
-				requestWave(i + xt::Wave::g_firstRamWaveIndex);
+				requestWave(xt::WaveId(static_cast<uint16_t>(i + xt::Wave::g_firstRamWaveIndex)));
 				return;
 			}
 		}
+
+		onAllDataReceived();
 	}
 
-	void WaveEditorData::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveWave(const std::vector<uint8_t>& _msg)
 	{
-		const auto index = toIndex(_data);
-
-		if(!xt::Wave::isValidWaveIndex(index))
+		if(!parseMidi(_msg))
 			return;
 
-		/*
-			mw2_sysex.pdf:
-
-			"A Wave consists of 128 eight Bit samples, but only the first 64 of them are
-			stored/transmitted, the second half is same as first except the values are
-			negated and the order is reversed:
-
-			Wave[64+n] = -Wave[63-n] for n=0..63
-
-			Note that samples are not two's complement format, to get a signed byte,
-			the most significant bit must be flipped:
-
-			signed char s = Wave[n] ^ 0x80"
-		*/
-
-		WaveData data;
-
-		constexpr auto off = 7;
-
-		for(uint32_t i=0; i<data.size()>>1; ++i)
+		const auto command = toCommand(_msg);
+		const auto id = xt::WaveId(toIndex(_msg));
+		
+		if(command == xt::SysexCommand::WaveDump &&  m_currentWaveRequestIndex == id)
 		{
-			auto sample = (_msg[off + (i<<1)]) << 4 | _msg[off + (i<<1) + 1];
-			sample = sample ^ 0x80;
-
-			data[i] = static_cast<int8_t>(sample);
-			data[127-i] = static_cast<int8_t>(-sample);
-		}
-
-		setWave(index, data);
-
-		if(m_currentWaveRequestIndex == index)
-		{
-			m_currentWaveRequestIndex = InvalidWaveIndex;
+			m_currentWaveRequestIndex = g_invalidWaveIndex;
 			requestData();
 		}
 	}
 
-	void WaveEditorData::onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveTable(const std::vector<uint8_t>& _msg)
 	{
-		const auto index = toIndex(_data);
-
-		if(!xt::Wave::isValidTableIndex(index))
+		if(!parseMidi(_msg))
 			return;
 
-		constexpr uint32_t off = 7;
+		const auto command = toCommand(_msg);
+		const auto id = xt::TableId(toIndex(_msg));
 
-		TableData table;
-
-		for(uint32_t i=0; i<64; ++i)
+		if(command == xt::SysexCommand::WaveCtlDump && m_currentTableRequestIndex == id)
 		{
-			const auto i4 = i<<2;
-
-			auto waveIdx = _msg[i4+off] << 12;
-			waveIdx |= _msg[i4+off+1] << 8;
-			waveIdx |= _msg[i4+off+2] << 4;
-			waveIdx |= _msg[i4+off+3];
-
-			table[i] = static_cast<uint16_t>(waveIdx);
-		}
-
-		setTable(index, table);
-
-		if(m_currentTableRequestIndex == index)
-		{
-			m_currentTableRequestIndex = InvalidWaveIndex;
+			m_currentTableRequestIndex = g_invalidTableIndex;
 			requestData();
 		}
 	}
 
-	std::optional<WaveData> WaveEditorData::getWave(uint32_t _waveIndex) const
+	std::optional<xt::WaveData> WaveEditorData::getWave(const xt::WaveId _waveId) const
 	{
-		if(_waveIndex < m_romWaves.size())
-			return m_romWaves[_waveIndex];
+		auto i = _waveId.rawId();
 
-		if(_waveIndex < xt::Wave::g_firstRamWaveIndex)
+		if(i < m_romWaves.size())
+			return m_romWaves[i];
+
+		if(i < xt::Wave::g_firstRamWaveIndex)
 			return {};
-		_waveIndex -= xt::Wave::g_firstRamWaveIndex;
-		if(_waveIndex >= m_ramWaves.size())
+		i -= xt::Wave::g_firstRamWaveIndex;
+		if(i >= m_ramWaves.size())
 			return {};
 
-		if(!m_ramWaves[_waveIndex])
+		if(!m_ramWaves[i])
 			return {};
 
-		return m_ramWaves[_waveIndex];
+		return m_ramWaves[i];
 	}
 
-	uint32_t WaveEditorData::getWaveIndex(uint32_t _tableIndex, uint32_t _indexInTable) const
+	xt::WaveId WaveEditorData::getWaveIndex(const xt::TableId _tableId, const xt::TableIndex _tableIndex) const
 	{
-		if(_tableIndex >= m_tables.size())
-			return InvalidWaveIndex;
-		if(_indexInTable >= std::tuple_size<TableData>())
-			return InvalidWaveIndex;
-		const auto table = m_tables[_tableIndex];
+		if(_tableId.rawId() >= m_tables.size())
+			return g_invalidWaveIndex;
+		if(_tableIndex.rawId() >= std::tuple_size<xt::TableData>())
+			return g_invalidWaveIndex;
+		const auto table = m_tables[_tableId.rawId()];
 		if(!table)
-			return InvalidWaveIndex;
-		return (*table)[_indexInTable];
+			return g_invalidWaveIndex;
+		return (*table)[_tableIndex.rawId()];
 	}
 
-	std::optional<WaveData> WaveEditorData::getWave(const uint32_t _tableIndex, const uint32_t _indexInTable) const
+	std::optional<xt::TableData> WaveEditorData::getTable(const xt::TableId _tableId) const
+	{
+		if(_tableId.rawId() >= m_tables.size())
+			return {};
+		return m_tables[_tableId.rawId()];
+	}
+
+	bool WaveEditorData::swapTableEntries(const xt::TableId _tableId, const xt::TableIndex _indexA, const xt::TableIndex _indexB)
+	{
+		if(_indexA == _indexB)
+			return false;
+		if(_tableId.rawId() >= m_tables.size())
+			return false;
+		const auto& table = m_tables[_tableId.rawId()];
+		if(!table)
+			return false;
+		auto t = *table;
+		std::swap(t[_indexA.rawId()], t[_indexB.rawId()]);
+		m_tables[_tableId.rawId()] = t;
+		onTableChanged(_tableId);
+		return true;
+	}
+
+	bool WaveEditorData::setTableWave(const xt::TableId _tableId, const xt::TableIndex _tableIndex, const xt::WaveId _waveId)
+	{
+		if(_tableId.rawId() >= m_tables.size())
+			return false;
+		const auto& table = m_tables[_tableId.rawId()];
+		if(!table)
+			return false;
+		auto t = *table;
+		if(_tableIndex.rawId() >= t.size())
+			return false;
+		if(t[_tableIndex.rawId()] == _waveId)
+			return false;
+		t[_tableIndex.rawId()] = _waveId;
+		m_tables[_tableId.rawId()] = t;
+		onTableChanged(_tableId);
+		return true;
+	}
+
+	bool WaveEditorData::copyTable(const xt::TableId _dest, const xt::TableId _source)
+	{
+		const auto dst = _dest.rawId();
+		const auto src = _source.rawId();
+
+		if(dst >= m_tables.size() || src >= m_tables.size())
+			return false;
+
+		auto& srcTable = m_tables[src];
+		if(!srcTable)
+			return false;
+		m_tables[dst] = *srcTable;
+		onTableChanged(_dest);
+		return true;
+	}
+
+	bool WaveEditorData::copyWave(const xt::WaveId _dest, const xt::WaveId _source)
+	{
+		const auto sourceWave = getWave(_source);
+		if(!sourceWave)
+			return false;
+		return setWave(_dest, *sourceWave);
+	}
+
+	std::optional<xt::WaveData> WaveEditorData::getWave(const xt::TableId _tableIndex, const xt::TableIndex _indexInTable) const
 	{
 		return getWave(getWaveIndex(_tableIndex, _indexInTable));
 	}
 
-	uint32_t WaveEditorData::toIndex(const pluginLib::MidiPacket::Data& _data)
+	bool WaveEditorData::setWave(xt::WaveId _id, const xt::WaveData& _data)
 	{
-		const auto hh = _data.at(pluginLib::MidiDataType::Bank);
-		const auto ll = _data.at(pluginLib::MidiDataType::Program);
+		auto i = _id.rawId();
 
-		return (hh << 7) | ll;
+		if(i < m_romWaves.size())
+		{
+			m_romWaves[i] = _data;
+			onWaveChanged(_id);
+			return true;
+		}
+		if(i < xt::Wave::g_firstRamWaveIndex)
+			return false;
+
+		i -= xt::Wave::g_firstRamWaveIndex;
+
+		if(i >= m_ramWaves.size())
+			return false;
+
+		m_ramWaves[i] = _data;
+		onWaveChanged(_id);
+		return true;
 	}
 
-	bool WaveEditorData::requestWave(const uint32_t _index)
+	bool WaveEditorData::setTable(xt::TableId _index, const xt::TableData& _data)
+	{
+		if(_index.rawId() >= m_tables.size())
+			return false;
+
+		m_tables[_index.rawId()] = _data;
+		onTableChanged(_index);
+		return true;
+	}
+
+	bool WaveEditorData::sendTableToDevice(const xt::TableId _id) const
+	{
+		const auto index = _id.rawId();
+		if(index >= m_tables.size())
+			return false;
+		auto& table = m_tables[index];
+		if(!table)
+			return false;
+		auto& t = *table;
+		const auto sysex = xt::State::createTableData(t, index, false);
+		m_controller.sendSysEx(sysex);
+		return true;
+	}
+
+	bool WaveEditorData::sendWaveToDevice(const xt::WaveId _id) const
+	{
+		const auto wave = getWave(_id);
+		if(!wave)
+			return false;
+		const auto sysex = xt::State::createWaveData(*wave, _id.rawId(), false);
+		m_controller.sendSysEx(sysex);
+		return true;
+	}
+
+	bool WaveEditorData::requestWave(const xt::WaveId _index)
 	{
 		if(isWaitingForData())
 			return false;
 
-		if(!m_controller.requestWave(_index))
+		if(!m_controller.requestWave(_index.rawId()))
 			return false;
 		m_currentWaveRequestIndex = _index;
 		return true;
 	}
 
-	bool WaveEditorData::requestTable(const uint32_t _index)
+	bool WaveEditorData::requestTable(const xt::TableId _index)
 	{
 		if(isWaitingForData())
 			return false;
 
-		if(!m_controller.requestTable(_index))
+		if(!m_controller.requestTable(_index.rawId()))
 			return false;
 		m_currentTableRequestIndex = _index;
 		return true;
 	}
 
-	bool WaveEditorData::setWave(uint32_t _index, const WaveData& _data)
+	void WaveEditorData::onAllDataReceived() const
 	{
-		if(_index < m_romWaves.size())
+		saveRomCache();
+	}
+
+	xt::SysexCommand WaveEditorData::toCommand(const std::vector<uint8_t>& _sysex)
+	{
+		return static_cast<xt::SysexCommand>(_sysex[4]);
+	}
+
+	uint16_t WaveEditorData::toIndex(const std::vector<uint8_t>& _sysex)
+	{
+		const uint32_t hh = _sysex[5];
+		const uint32_t ll = _sysex[6];
+
+		const uint16_t index = static_cast<uint16_t>((hh << 7) | ll);
+
+		return index;
+	}
+
+	bool WaveEditorData::parseMidi(const std::vector<uint8_t>& _sysex)
+	{
+		if(_sysex.size() < 10 || _sysex.front() != 0xf0 || _sysex.back() != 0xf7)
+			return false;
+		if(_sysex[1] != wLib::IdWaldorf)
+			return false;
+		if(_sysex[2] != xt::IdMw2)
+			return false;
+
+		const auto cmd = toCommand(_sysex);
+		const auto index = toIndex(_sysex);
+
+		switch (cmd)  // NOLINT(clang-diagnostic-switch-enum)
 		{
-			m_romWaves[_index] = _data;
-			onWaveChanged(_index);
+		case xt::SysexCommand::WaveDump:
+			{
+				if(!xt::Wave::isValidWaveIndex(index))
+					return false;
+
+				const auto id = xt::WaveId(index);
+
+				xt::WaveData data;
+				xt::State::parseWaveData(data, _sysex);
+
+				setWave(id, data);
+			}
 			return true;
+		case xt::SysexCommand::WaveCtlDump:
+			{
+				if(!xt::Wave::isValidTableIndex(index))
+					return false;
+
+				const auto id = xt::TableId(index);
+
+				xt::TableData table;
+
+				xt::State::parseTableData(table, _sysex);
+
+				setTable(id, table);
+			}
+			return true;
+		default:
+			return false;
 		}
-		if(_index < xt::Wave::g_firstRamWaveIndex)
-			return false;
-
-		_index -= xt::Wave::g_firstRamWaveIndex;
-
-		if(_index >= m_ramWaves.size())
-			return false;
-
-		m_ramWaves[_index] = _data;
-		onWaveChanged(_index + xt::Wave::g_firstRamWaveIndex);
-		return true;
 	}
 
-	bool WaveEditorData::setTable(uint32_t _index, const TableData& _data)
+	std::string WaveEditorData::getRomCacheFilename() const
 	{
-		if(_index >= m_tables.size())
-			return false;
-
-		m_tables[_index] = _data;
-		onTableChanged(_index);
-		return true;
+		return m_cacheDir + "romWaves.syx";
 	}
 
-	bool WaveEditorData::isAlgorithmicTable(const uint32_t _index)
+	void WaveEditorData::saveRomCache() const
+	{
+		const auto romWaves = getRomCacheFilename();
+
+		std::vector<uint8_t> data;
+
+		for(uint16_t i=0; i<static_cast<uint16_t>(m_romWaves.size()); ++i)
+		{
+			auto& romWave = m_romWaves[i];
+			assert(romWave);
+			if(!romWave)
+				continue;
+			auto sysex = xt::State::createWaveData(*romWave, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+
+		assert(xt::Wave::g_firstRamTableIndex < m_tables.size());
+
+		for(uint16_t i=0; i<xt::Wave::g_firstRamTableIndex; ++i)
+		{
+			auto& table = m_tables[i];
+			assert(table || isAlgorithmicTable(xt::TableId(i)));
+			if(!table)
+				continue;
+			auto sysex = xt::State::createTableData(*table, i, false);
+			data.insert(data.end(), sysex.begin(), sysex.end());
+		}
+		synthLib::writeFile(romWaves, data);
+	}
+
+	void WaveEditorData::loadRomCache()
+	{
+		std::vector<uint8_t> data;
+		if(!synthLib::readFile(data, getRomCacheFilename()))
+			return;
+
+		std::vector<std::vector<uint8_t>> sysexMessages;
+		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, data);
+		for (const auto& sysex : sysexMessages)
+			parseMidi(sysex);
+	}
+
+	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)
 	{
 		for (const uint32_t i : xt::Wave::g_algorithmicWavetables)
 		{
-			if(_index == i)
+			if(_index.rawId() == i)
 				return true;
 		}
 		return false;
+	}
+
+	bool WaveEditorData::isReadOnly(const xt::TableId _table)
+	{
+		if(!_table.isValid())
+			return true;
+		return _table.rawId() < xt::Wave::g_firstRamTableIndex;
+	}
+
+	bool WaveEditorData::isReadOnly(const xt::WaveId _waveId)
+	{
+		if(!_waveId.isValid())
+			return true;
+		return _waveId.rawId() < xt::Wave::g_firstRamWaveIndex;
+	}
+
+	bool WaveEditorData::isReadOnly(const xt::TableIndex _index)
+	{
+		return _index.rawId() >= 61;	// always tri/square/saw
 	}
 }

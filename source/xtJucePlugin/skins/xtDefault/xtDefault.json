@@ -8568,7 +8568,7 @@
                             }
                         },
                         {
-                            "name" : "xtButton",
+                            "name" : "btWavetablePreview",
                             "button" : {
                                 "isToggle" : "1",
                                 "normalImage" : "0",
@@ -8587,7 +8587,7 @@
                             }
                         },
                         {
-                            "name" : "xtLed",
+                            "name" : "ledWavetablePreview",
                             "button" : {
                                 "normalImage" : "0",
                                 "overImage" : "0",
@@ -8608,7 +8608,7 @@
                             }
                         },
                         {
-                            "name" : "xtButton",
+                            "name" : "btWavetableSave",
                             "button" : {
                                 "normalImage" : "0",
                                 "overImage" : "0",
@@ -8644,7 +8644,7 @@
                             }
                         },
                         {
-                            "name" : "xtButton",
+                            "name" : "btWavePreview",
                             "button" : {
                                 "isToggle" : "1",
                                 "normalImage" : "0",
@@ -8663,7 +8663,7 @@
                             }
                         },
                         {
-                            "name" : "xtLed",
+                            "name" : "ledWavePreview",
                             "button" : {
                                 "normalImage" : "0",
                                 "overImage" : "0",
@@ -8684,7 +8684,7 @@
                             }
                         },
                         {
-                            "name" : "xtButton",
+                            "name" : "btWaveSave",
                             "button" : {
                                 "normalImage" : "0",
                                 "overImage" : "0",

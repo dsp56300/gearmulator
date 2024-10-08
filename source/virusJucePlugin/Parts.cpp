@@ -71,6 +71,12 @@ namespace genericVirusUI
 
 			startTimer(1000/20);
 		}
+
+		m_onFrontpanelStateChanged.set(_editor.getController().onFrontPanelStateChanged, [this](const virusLib::FrontpanelState& _frontpanelState)
+		{
+			for(size_t i=0; i<m_frontpanelState.m_midiEventReceived.size(); ++i)
+				m_frontpanelState.m_midiEventReceived[i] |= _frontpanelState.m_midiEventReceived[i];
+		});
 	}
 
 	Parts::~Parts() = default;
@@ -196,12 +202,7 @@ namespace genericVirusUI
 
 	void Parts::timerCallback()
 	{
-		auto* device = dynamic_cast<virusLib::Device*>(m_editor.getProcessor().getPlugin().getDevice());
-
-		if(!device)
-			return;
-
-		auto& fpState = device->getFrontpanelState();
+		auto& fpState = m_frontpanelState;
 
 		const uint32_t maxPart = m_editor.getController().isMultiMode() ? 16 : 1;
 

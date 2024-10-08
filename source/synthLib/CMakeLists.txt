@@ -15,6 +15,7 @@ set(SOURCES
 	deviceException.cpp deviceException.h
 	deviceTypes.h
 	dspMemoryPatch.cpp dspMemoryPatch.h
+	lv2PresetExport.cpp lv2PresetExport.h
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
 	midiToSysex.cpp midiToSysex.h

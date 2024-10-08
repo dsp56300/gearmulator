@@ -2,7 +2,6 @@
 
 #include <cstdint>
 #include <optional>
-#include <limits>
 #include <vector>
 
 #include "weTypes.h"
@@ -19,43 +18,65 @@ namespace xtJucePlugin
 	class WaveEditorData
 	{
 	public:
-		static constexpr uint32_t InvalidWaveIndex = std::numeric_limits<uint32_t>::max();
+		pluginLib::Event<xt::WaveId> onWaveChanged;
+		pluginLib::Event<xt::TableId> onTableChanged;
 
-		pluginLib::Event<uint32_t> onWaveChanged;
-		pluginLib::Event<uint32_t> onTableChanged;
-
-		WaveEditorData(Controller& _controller);
+		WaveEditorData(Controller& _controller, const std::string& _cacheDir);
 
 		void requestData();
 
-		bool isWaitingForWave() const { return m_currentWaveRequestIndex != InvalidWaveIndex; }
-		bool isWaitingForTable() const { return m_currentTableRequestIndex != InvalidWaveIndex; }
+		bool isWaitingForWave() const { return m_currentWaveRequestIndex != g_invalidWaveIndex; }
+		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidTableIndex; }
 		bool isWaitingForData() const { return isWaitingForWave() || isWaitingForTable(); }
 
-		void onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
-		void onReceiveTable(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg);
-		std::optional<WaveData> getWave(uint32_t _waveIndex) const;
-		uint32_t getWaveIndex(uint32_t _tableIndex, uint32_t _indexInTable) const;
-		std::optional<WaveData> getWave(uint32_t _tableIndex, uint32_t _indexInTable) const;
+		void onReceiveWave(const std::vector<uint8_t>& _msg);
+		void onReceiveTable(const std::vector<uint8_t>& _msg);
 
-		static uint32_t toIndex(const pluginLib::MidiPacket::Data& _data);
-		static bool isAlgorithmicTable(uint32_t _index);
+		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
+		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
+
+		xt::WaveId getWaveIndex(xt::TableId _tableId, xt::TableIndex _tableIndex) const;
+
+		std::optional<xt::TableData> getTable(xt::TableId _tableId) const;
+		bool swapTableEntries(xt::TableId _tableId, xt::TableIndex _indexA, xt::TableIndex _indexB);
+		bool setTableWave(xt::TableId _tableId, xt::TableIndex _tableIndex, xt::WaveId _waveId);
+
+		bool copyTable(xt::TableId _dest, xt::TableId _source);
+		bool copyWave(xt::WaveId _dest, xt::WaveId _source);
+
+		static bool isAlgorithmicTable(xt::TableId _index);
+		static bool isReadOnly(xt::TableId _table);
+		static bool isReadOnly(xt::WaveId _waveId);
+		static bool isReadOnly(xt::TableIndex _index);
+
+		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
+		bool setTable(xt::TableId _index, const xt::TableData& _data);
+
+		bool sendTableToDevice(xt::TableId _id) const;
+		bool sendWaveToDevice(xt::WaveId _id) const;
 
 	private:
+		bool requestWave(xt::WaveId _index);
+		bool requestTable(xt::TableId _index);
 
-		bool requestWave(uint32_t _index);
-		bool requestTable(uint32_t _index);
+		void onAllDataReceived() const;
 
-		bool setWave(uint32_t _index, const WaveData& _data);
-		bool setTable(uint32_t _index, const TableData& _data);
+		static xt::SysexCommand toCommand(const std::vector<uint8_t>& _sysex);
+		static uint16_t toIndex(const std::vector<uint8_t>& _sysex);
+		bool parseMidi(const std::vector<uint8_t>& _sysex);
+
+		std::string getRomCacheFilename() const;
+		void saveRomCache() const;
+		void loadRomCache();
 
 		Controller& m_controller;
+		const std::string m_cacheDir;
 
-		uint32_t m_currentWaveRequestIndex = InvalidWaveIndex;
-		uint32_t m_currentTableRequestIndex = InvalidWaveIndex;
+		xt::WaveId m_currentWaveRequestIndex = g_invalidWaveIndex;
+		xt::TableId m_currentTableRequestIndex = g_invalidTableIndex;
 
-		std::array<std::optional<WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
-		std::array<std::optional<WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;
-		std::array<std::optional<TableData>, xt::Wave::g_tableCount> m_tables;
+		std::array<std::optional<xt::WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
+		std::array<std::optional<xt::WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;
+		std::array<std::optional<xt::TableData>, xt::Wave::g_tableCount> m_tables;
 	};
 }

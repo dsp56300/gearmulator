@@ -1,7 +1,5 @@
 #include "n2xEditor.h"
 
-#include "BinaryData.h"
-
 #include "n2xArp.h"
 #include "n2xController.h"
 #include "n2xFocusedParameter.h"
@@ -22,6 +20,7 @@
 #include "jucePluginLib/pluginVersion.h"
 
 #include "n2xLib/n2xdevice.h"
+#include "n2xLib/n2xromloader.h"
 
 namespace n2xJucePlugin
 {
@@ -58,13 +57,13 @@ namespace n2xJucePlugin
 
 		if(auto* romSelector = findComponentT<juce::ComboBox>("RomSelector"))
 		{
-			const auto* dev = dynamic_cast<const n2x::Device*>(getProcessor().getPlugin().getDevice());
+			const auto rom = n2x::RomLoader::findROM();
 
-			if(dev != nullptr && getProcessor().isPluginValid())
+			if(rom.isValid())
 			{
 				constexpr int id = 1;
 
-				const auto name = juce::File(dev->getRomFilename()).getFileName();
+				const auto name = juce::File(rom.getFilename()).getFileName();
 				romSelector->addItem(name, id);
 			}
 			else

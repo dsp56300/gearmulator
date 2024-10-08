@@ -14,16 +14,14 @@ namespace n2x
 	{
 		if(_filename.empty())
 			return;
-		std::vector<uint8_t> data;
-		if(!synthLib::readFile(data, _filename))
+		if(!synthLib::readFile(m_data, _filename))
 			return;
-		if(data.size() != m_data.size())
+		if(m_data.size() != MySize)
 			return;
-		std::copy(data.begin(), data.end(), m_data.begin());
 		m_filename = _filename;
 	}
 
-	template <uint32_t Size> void RomData<Size>::saveAs(const std::string& _filename)
+	template <uint32_t Size> void RomData<Size>::saveAs(const std::string& _filename) const
 	{
 		synthLib::writeFile(_filename, m_data);
 	}

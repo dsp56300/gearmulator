@@ -1,17 +1,32 @@
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN "Build Juce plugins" on)
-option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugins" on)
-option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2 "Build LV2 version of Juce plugins" off)
 option(${CMAKE_PROJECT_NAME}_BUILD_FX_PLUGIN "Build FX plugin variants" off)
 
-set(USE_CLAP ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP)
-set(USE_LV2 ${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2 "Build VST2 version of Juce plugins" on)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3 "Build VST3 version of Juce plugins" on)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugins" on)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2 "Build LV2 version of Juce plugins" off)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU "Build AU version of Juce plugins" on)
+
+set(USE_CLAP ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP})
+set(USE_LV2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2})
+set(USE_VST2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2})
+set(USE_VST3 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3})
+set(USE_AU ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU})
 
 set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-set(juce_formats AU VST3)
+set(juce_formats "")
 
-if(JUCE_GLOBAL_VST2_SDK_PATH)
+if(USE_AU)
+	set(juce_formats AU)
+endif()
+
+if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
     list(APPEND juce_formats VST)
+endif()
+
+if(USE_VST3)
+    list(APPEND juce_formats VST3)
 endif()
 
 if(USE_LV2)
@@ -32,10 +47,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		COPY_PLUGIN_AFTER_BUILD FALSE                     # Should the plugin be installed to a default location after building?
 		PLUGIN_MANUFACTURER_CODE TusP                     # A four-character manufacturer id with at least one upper-case character
 		PLUGIN_CODE ${plugin4CC}                          # A unique four-character plugin id with exactly one upper-case character
-													      # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
+		                                                  # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 		FORMATS ${juce_formats}                           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3 LV2
 		PRODUCT_NAME ${productName}                       # The name of the final executable, which can differ from the target name
-		VST3_AUTO_MANIFEST TRUE					      # While generating a moduleinfo.json is nice, Juce does not properly package using cpack on Win/Linux
+		VST3_AUTO_MANIFEST TRUE                           # While generating a moduleinfo.json is nice, Juce does not properly package using cpack on Win/Linux
 		                                                  # and completely fails on Linux if we change the suffix to .vst3, so we skip that completely for now
 		BUNDLE_ID "com.theusualsuspects.${productName}"
 		LV2URI "http://theusualsuspects.lv2.${productName}"
@@ -102,32 +117,34 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		target_link_libraries(${targetName} PUBLIC -static-libgcc -static-libstdc++)
 	endif()
 	
-	if(APPLE)
-		install(TARGETS ${targetName}_VST3 DESTINATION . COMPONENT ${productName}-VST3)
-	else()
-		get_target_property(vst3OutputFolder ${targetName}_VST3 ARCHIVE_OUTPUT_DIRECTORY)
-		if(UNIX)
-			set(dest lib/vst3)
-			set(pattern "*.so")
+	if(USE_VST3)
+		if(APPLE)
+			install(TARGETS ${targetName}_VST3 DESTINATION . COMPONENT ${productName}-VST3)
 		else()
-			set(dest .)
-			set(pattern "*.vst3")
+			get_target_property(vst3OutputFolder ${targetName}_VST3 ARCHIVE_OUTPUT_DIRECTORY)
+			if(UNIX)
+				set(dest lib/vst3)
+				set(pattern "*.so")
+			else()
+				set(dest .)
+				set(pattern "*.vst3")
+			endif()
+			install(DIRECTORY ${vst3OutputFolder}/${productName}.vst3 DESTINATION ${dest} COMPONENT ${productName}-VST3 FILES_MATCHING PATTERN ${pattern} PATTERN "*.json")
 		endif()
-		install(DIRECTORY ${vst3OutputFolder}/${productName}.vst3 DESTINATION ${dest} COMPONENT ${productName}-VST3 FILES_MATCHING PATTERN ${pattern} PATTERN "*.json")
 	endif()
 
 	if(MSVC OR APPLE)
-		if(JUCE_GLOBAL_VST2_SDK_PATH)
+		if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST DESTINATION . COMPONENT ${productName}-VST2)
 		endif()
-		if(APPLE)
+		if(USE_AU AND APPLE)
 			install(TARGETS ${targetName}_AU DESTINATION . COMPONENT ${productName}-AU)
 		endif()
 		if(USE_CLAP)
 			install(TARGETS ${targetName}_CLAP DESTINATION . COMPONENT ${productName}-CLAP)
 		endif()
 	elseif(UNIX)
-		if(JUCE_GLOBAL_VST2_SDK_PATH)
+		if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST LIBRARY DESTINATION lib/vst/ COMPONENT ${productName}-VST2)
 		endif()
 		if(USE_CLAP)
@@ -150,7 +167,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
 	endif()
 
-	if(APPLE AND ${isSynth})
+	if(USE_AU AND APPLE AND ${isSynth})
 		add_test(NAME ${targetName}_AU_Validate COMMAND ${CMAKE_COMMAND} 
 			-DIDCOMPANY=TusP
 			-DIDPLUGIN=${plugin4CC}

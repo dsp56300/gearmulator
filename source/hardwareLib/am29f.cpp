@@ -41,6 +41,7 @@ namespace hwLib
 		bool anyMatch = false;
 
 		const auto d = _data & 0xff;
+		const auto a = _addr & 0xfff;
 		
 		for (size_t i=0; i<m_commands.size(); ++i)
 		{
@@ -50,7 +51,7 @@ namespace hwLib
 			{
 				const auto& c = cycles[m_currentBusCycle];
 
-				if(c.addr == _addr && c.data == d)
+				if(c.addr == a && c.data == d)
 				{
 					anyMatch = true;
 

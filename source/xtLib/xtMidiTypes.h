@@ -26,6 +26,13 @@ namespace xt
 		ModeRequest       = 0x07, ModeDump      = 0x17, ModeParameterChange      = 0x27, ModeStore      = 0x37, ModeRecall      = 0x47, ModeCompare      = 0x57,
 		InfoRequest       = 0x08, InfoDump      = 0x18, InfoParameterChange      = 0x28, InfoStore      = 0x38, InfoRecall      = 0x48, InfoCompare      = 0x58,
 
+		// emu specific, these are to preview waves and wavetables, the dump format is identical to regular wave/wavetable dumps but we modify the DSP memory directly
+		WaveRequestP      = 0x09, WaveDumpP     = 0x19, WaveParameterChangeP     = 0x29, WaveStoreP     = 0x39, WaveRecallP     = 0x49, WaveCompareP     = 0x59,
+		WaveCtlRequestP	  = 0x0a, WaveCtlDumpP  = 0x1a, WaveCtlParameterChangeP  = 0x2a, WaveCtlStoreP  = 0x3a, WaveCtlRecallP  = 0x4a, WaveCtlCompareP  = 0x5a,
+
+		WavePreviewMode = WaveStoreP,
+
+		// emu remote control support
 		EmuLCD = 0x60,
 		EmuLEDs = 0x61,
 		EmuButtons = 0x62,
@@ -71,7 +78,10 @@ namespace xt
 
 		IdxModeParamIndexH = wLib::IdxBuffer,
 		IdxModeParamIndexL = IdxModeParamIndexH,
-		IdxModeParamValue  = wLib::IdxBuffer
+		IdxModeParamValue  = wLib::IdxBuffer,
+
+		IdxWaveIndexH = wLib::IdxBuffer,
+		IdxWaveIndexL = IdxWaveIndexH + 1
 	};
 
 	enum class GlobalParameter
@@ -178,11 +188,13 @@ namespace xt
 
 	namespace Wave
 	{
-		static constexpr uint32_t g_romWaveCount = 300;
-		static constexpr uint32_t g_ramWaveCount = 250;
-		static constexpr uint32_t g_firstRamWaveIndex = 1000;
-		static constexpr uint32_t g_tableCount = 128;
-		static constexpr uint32_t g_wavesPerTable = 64;
+		static constexpr uint16_t g_romWaveCount = 506;
+		static constexpr uint16_t g_ramWaveCount = 250;
+		static constexpr uint16_t g_firstRamWaveIndex = 1000;
+
+		static constexpr uint16_t g_tableCount = 128;
+		static constexpr uint16_t g_wavesPerTable = 64;
+		static constexpr uint16_t g_firstRamTableIndex = 96;
 
 		// these are either algorithmic or invalid, we cannot request them via MIDI
 		static constexpr uint32_t g_algorithmicWavetables[] = {28, 29,

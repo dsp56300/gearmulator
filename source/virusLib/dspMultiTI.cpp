@@ -1,7 +1,5 @@
 #include "dspMultiTI.h"
 
-#if VIRUS_SUPPORT_TI
-
 namespace virusLib
 {
 	constexpr uint32_t g_esai1TxBlockSize = 6 * 3 * 2;		// 6 = number of TX pins, 3 = number of slots per frame, 2 = double data rate
@@ -89,28 +87,17 @@ namespace virusLib
 
 		uint32_t blockIdx = 0;
 
-		static constexpr uint32_t offset = 9;
+		static volatile uint32_t offset = 1;
 
-		{
-			uint32_t i=0;
-
-			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[0][i]);
-			at(blockIdx + offset                          ) = m_previousInput;
-
-			blockIdx += g_esai1RxBlockSize;
-		}
-
-		for(uint32_t i=1; i<_frames; ++i)
+		for(uint32_t i=0; i<_frames; ++i)
 		{
 			at(blockIdx + offset + (g_esai1RxBlockSize>>1)) = dsp56k::sample2dsp<T>(_inputs[0][i]);
-			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[1][i-1]);
+			at(blockIdx + offset                          ) = dsp56k::sample2dsp<T>(_inputs[1][i]);
 
 			blockIdx += g_esai1RxBlockSize;
 		}
 
 		_esai.processAudioInput(data(), _frames * 2, 3, _latency * 2);
-
-		m_previousInput = dsp56k::sample2dsp<T>(_inputs[1][_frames-1]);
 	}
 
 	DspMultiTI::DspMultiTI() : DspSingle(0x100000, true, "DSP A"), m_dsp2(0x100000, true, "DSP B")
@@ -212,5 +199,3 @@ namespace virusLib
 		processAudioTI(*this, m_dsp2, m_bufferI, _inputs, _outputs, _samples, _latency);
 	}
 }
-
-#endif

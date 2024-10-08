@@ -236,6 +236,8 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	auto& esai = m_dsp1->getAudio();
 	int32_t notifyTimeout = 0;
 
+	std::vector<synthLib::SMidiEvent> midiEvents;
+
 	esai.setCallback([&](dsp56k::Audio*)
 	{
 		// Reduce thread contention by waiting until we have nearly enough audio output data available.
@@ -256,7 +258,10 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 
 		callbackCount++;
 		if((callbackCount & 0x3) == 0)
+		{
+			m_uc->readMidiOut(midiEvents);
 			audioCallback(callbackCount>>2);
+		}
 	}, 0);
 
 	bootDSP(_createDebugger);
@@ -272,15 +277,12 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 		mem.saveAssembly((romFile + "_P.asm").c_str(), 0, mem.sizeP(), true, false, m_dsp1->getDSP().getPeriph(0), m_dsp1->getDSP().getPeriph(1));
 	}
 
-	std::vector<synthLib::SMidiEvent> midiEvents;
-
 	AudioProcessor proc(m_rom.getSamplerate(), _audioOutputFilename, m_demo != nullptr, _maxSampleCount, m_dsp1.get(), m_dsp2);
 
 	while(!proc.finished())
 	{
 		sem.wait();
 		proc.processBlock(blockSize);
-		m_uc->readMidiOut(midiEvents);
 		midiEvents.clear();
 	}
 
