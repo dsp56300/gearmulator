@@ -7,6 +7,7 @@
 #include "weTypes.h"
 
 #include "xtLib/xtMidiTypes.h"
+#include "xtLib/xtState.h"
 
 #include "jucePluginLib/midipacket.h"
 #include "jucePluginLib/event.h"
@@ -54,6 +55,8 @@ namespace xtJucePlugin
 
 		bool sendTableToDevice(xt::TableId _id) const;
 		bool sendWaveToDevice(xt::WaveId _id) const;
+
+		void getWaveDataForSingle(std::vector<xt::SysEx>& _results, const xt::SysEx& _single) const;
 
 	private:
 		bool requestWave(xt::WaveId _index);
