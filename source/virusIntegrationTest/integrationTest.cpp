@@ -292,7 +292,7 @@ int IntegrationTest::runCompare()
 
 int IntegrationTest::runCreate(const int _lengthSeconds)
 {
-	const auto sampleCount = m_app.getRom().getSamplerate() * _lengthSeconds * 2;
+	const auto sampleCount = m_app.getRom().getSamplerate() * _lengthSeconds;
 
 	File file;
 	return createAudioFile(file, "", sampleCount);
