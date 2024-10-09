@@ -70,6 +70,7 @@ else()
 
 	check_ipo_supported(RESULT result)
 	if(result)
+		message(WARNING "IPO is supported")
 		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 	else()
 		message(WARNING "IPO is not supported")
