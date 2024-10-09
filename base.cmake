@@ -1,7 +1,6 @@
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
 endif()
-
 if(MSVC)
 	# https://cmake.org/cmake/help/latest/variable/CMAKE_MSVC_RUNTIME_LIBRARY.html#variable:CMAKE_MSVC_RUNTIME_LIBRARY
 	cmake_policy(SET CMP0091 NEW)
@@ -61,12 +60,24 @@ elseif(APPLE)
 else()
 	message("CMAKE_SYSTEM_PROCESSOR: " ${CMAKE_SYSTEM_PROCESSOR})
 	message("CMAKE_HOST_SYSTEM_PROCESSOR: " ${CMAKE_HOST_SYSTEM_PROCESSOR})
+
 	if(NOT CMAKE_SYSTEM_PROCESSOR MATCHES arm AND NOT CMAKE_SYSTEM_PROCESSOR MATCHES aarch64)
 		string(APPEND CMAKE_CXX_FLAGS " -msse")
 	endif()
-	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast -fno-stack-protector -flto")
-	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -Ofast -fno-stack-protector -flto")
+
+	include(CheckIPOSupported)
+
+	check_ipo_supported(RESULT result OUTPUT output)
+	if(result)
+		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+	else()
+		message(WARNING "IPO is not supported: ${output}")
+	endif()
+	
+	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast -fno-stack-protector")
+	string(APPEND CMAKE_CXX_FLAGS_RELEASE " -Ofast -fno-stack-protector")
 	string(APPEND CMAKE_CXX_FLAGS_DEBUG " -rdynamic")
+
 	execute_process(COMMAND uname -m COMMAND tr -d '\n' OUTPUT_VARIABLE ARCHITECTURE)
 
 	# Good atomics are important on aarch64, they exist on ARMv8.1a or higher
