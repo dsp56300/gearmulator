@@ -125,6 +125,12 @@ namespace xt
 		Mode = 0	// 0 = Single, 1 = Multi
 	};
 
+	enum class SingleParameter
+	{
+		Version = 0,
+		Wavetable = 25
+	};
+
 	enum class MultiParameter
 	{
 		Volume,

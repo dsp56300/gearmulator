@@ -94,9 +94,6 @@ namespace xtJucePlugin
 		if(i >= m_ramWaves.size())
 			return {};
 
-		if(!m_ramWaves[i])
-			return {};
-
 		return m_ramWaves[i];
 	}
 
@@ -237,6 +234,45 @@ namespace xtJucePlugin
 		const auto sysex = xt::State::createWaveData(*wave, _id.rawId(), false);
 		m_controller.sendSysEx(sysex);
 		return true;
+	}
+
+	void WaveEditorData::getWaveDataForSingle(std::vector<xt::SysEx>& _results, const xt::SysEx& _single) const
+	{
+		constexpr auto wavetableIndex = xt::IdxSingleParamFirst + static_cast<uint32_t>(xt::SingleParameter::Wavetable);
+
+		if(wavetableIndex >= _single.size())
+			return;
+
+		const auto tableId = xt::TableId(_single[wavetableIndex]);
+
+		if(isReadOnly(tableId))
+			return;
+
+		const auto table = getTable(tableId);
+
+		if(!table)
+			return;
+
+		auto& t = *table;
+
+		for (const auto waveId : t)
+		{
+			if(!xt::Wave::isValidWaveIndex(waveId.rawId()))
+				continue;
+
+			if(isReadOnly(waveId))
+				continue;
+
+			const auto wave = getWave(waveId);
+			if(!wave)
+				continue;
+
+			const auto& w = *wave;
+
+			_results.emplace_back(xt::State::createWaveData(w, waveId.rawId(), false));
+		}
+
+		_results.emplace_back(xt::State::createTableData(t, tableId.rawId(), false));
 	}
 
 	bool WaveEditorData::requestWave(const xt::WaveId _index)
