@@ -65,11 +65,12 @@ else()
 		string(APPEND CMAKE_CXX_FLAGS " -msse")
 	endif()
 
+	cmake_policy(SET CMP0069 NEW)
 	include(CheckIPOSupported)
 
 	check_ipo_supported(RESULT result)
 	if(result)
-		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION ON)
+		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 	else()
 		message(WARNING "IPO is not supported")
 	endif()
