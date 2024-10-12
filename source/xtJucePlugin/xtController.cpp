@@ -110,6 +110,34 @@ namespace xtJucePlugin
 
 		auto data = _sysex;
 
+		if(_sysex.size() > std::tuple_size_v<xt::State::Single>)
+		{
+			// split a combined single into single, table, waves and send all of them
+			std::vector<xt::SysEx> splitResults;
+			xt::State::splitCombinedPatch(splitResults, _sysex);
+
+			if(!splitResults.empty())
+			{
+				const auto& single = splitResults.front();
+
+				if(m_waveEditor)
+				{
+					// send waves first, then table. otherwise the device doesn't refresh correctly
+					const auto& table = splitResults[1];
+
+					for(size_t i=2; i<splitResults.size(); ++i)
+					{
+						const auto& wave = splitResults[i];
+						m_waveEditor->getData().onReceiveWave(wave, true);
+					}
+
+					m_waveEditor->getData().onReceiveTable(table, true);
+				}
+
+				data = single;
+			}
+		}
+
 		data[wLib::IdxBuffer] = static_cast<uint8_t>(isMultiMode() ? xt::LocationH::SingleEditBufferMultiMode : xt::LocationH::SingleEditBufferSingleMode);
 		data[wLib::IdxLocation] = isMultiMode() ? _part : 0;
 		data[wLib::IdxDeviceId] = m_deviceId;

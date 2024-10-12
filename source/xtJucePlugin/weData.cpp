@@ -51,7 +51,7 @@ namespace xtJucePlugin
 		onAllDataReceived();
 	}
 
-	void WaveEditorData::onReceiveWave(const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveWave(const std::vector<uint8_t>& _msg, const bool _sendToDevice)
 	{
 		if(!parseMidi(_msg))
 			return;
@@ -64,9 +64,12 @@ namespace xtJucePlugin
 			m_currentWaveRequestIndex = g_invalidWaveIndex;
 			requestData();
 		}
+
+		if(_sendToDevice)
+			sendWaveToDevice(id);
 	}
 
-	void WaveEditorData::onReceiveTable(const std::vector<uint8_t>& _msg)
+	void WaveEditorData::onReceiveTable(const std::vector<uint8_t>& _msg, const bool _sendToDevice)
 	{
 		if(!parseMidi(_msg))
 			return;
@@ -79,6 +82,9 @@ namespace xtJucePlugin
 			m_currentTableRequestIndex = g_invalidTableIndex;
 			requestData();
 		}
+
+		if(_sendToDevice)
+			sendTableToDevice(id);
 	}
 
 	std::optional<xt::WaveData> WaveEditorData::getWave(const xt::WaveId _waveId) const

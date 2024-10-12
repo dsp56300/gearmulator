@@ -2,6 +2,7 @@
 
 #include "xtController.h"
 #include "xtEditor.h"
+#include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 #include "xtLib/xtMidiTypes.h"
@@ -33,6 +34,7 @@ namespace xtJucePlugin
 	bool PatchManager::requestPatchForPart(pluginLib::patchDB::Data& _data, const uint32_t _part, uint64_t)
 	{
 		_data = m_controller.createSingleDump(xt::LocationH::SingleBankA, 0, static_cast<uint8_t>(_part));
+		_data = createCombinedDump(_data);
 		return !_data.empty();
 	}
 
@@ -64,8 +66,29 @@ namespace xtJucePlugin
 
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameters;
-		if(!m_controller.parseSingle(data, parameters, _sysex))
+
+		bool hasUserTable = false;
+		bool hasUserWaves = false;
+
+		if(_sysex.size() > std::tuple_size_v<xt::State::Single>)
+		{
+			std::vector<xt::SysEx> dumps;
+			xt::State::splitCombinedPatch(dumps, _sysex);
+
+			if(dumps.empty())
+				return {};
+
+			if(!m_controller.parseSingle(data, parameters, dumps.front()))
+				return {};
+
+			if(dumps.size() > 2)
+				hasUserWaves = true;
+			hasUserTable = true;
+		}
+		else if(!m_controller.parseSingle(data, parameters, _sysex))
+		{
 			return {};
+		}
 
 		auto p = std::make_shared<pluginLib::patchDB::Patch>();
 
@@ -73,6 +96,12 @@ namespace xtJucePlugin
 		p->name = m_controller.getSingleName(parameters);
 
 		p->tags.add(pluginLib::patchDB::TagType::CustomA, "MW2");
+
+		if(hasUserTable)
+			p->tags.add(pluginLib::patchDB::TagType::Tag, "UserTable");
+
+		if(hasUserWaves)
+			p->tags.add(pluginLib::patchDB::TagType::Tag, "UserWave");
 
 		return p;
 	}
@@ -100,7 +129,8 @@ namespace xtJucePlugin
 			program -= bank * 128;
 		}
 
-		return m_controller.createSingleDump(static_cast<xt::LocationH>(static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank), static_cast<uint8_t>(program), parameterValues);
+		const auto sysex = m_controller.createSingleDump(static_cast<xt::LocationH>(static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank), static_cast<uint8_t>(program), parameterValues);
+		return createCombinedDump(sysex);
 	}
 
 	uint32_t PatchManager::getCurrentPart() const
@@ -206,5 +236,23 @@ namespace xtJucePlugin
 		}
 
 		return true;
+	}
+
+	pluginLib::patchDB::Data PatchManager::createCombinedDump(const pluginLib::patchDB::Data& _data) const
+	{
+		// combine single dump with user wave table and user waves if applicable
+		if(auto* waveEditor = m_editor.getWaveEditor())
+		{
+			std::vector<xt::SysEx> results;
+			waveEditor->getData().getWaveDataForSingle(results, _data);
+			if(!results.empty())
+			{
+				results.insert(results.begin(), _data);
+				auto result = xt::State::createCombinedPatch(results);
+				if(!result.empty())
+					return result;
+			}
+		}
+		return _data;
 	}
 }

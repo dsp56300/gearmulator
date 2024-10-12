@@ -835,10 +835,7 @@ namespace xt
 		constexpr auto waveSize = std::tuple_size_v<Wave>;
 
 		if(_combinedSingle.size() == singleSize)
-		{
-			_dumps.push_back(_combinedSingle);
 			return;
-		}
 
 		if(_combinedSingle.size() < singleSize + tableSize - 2)
 			return;

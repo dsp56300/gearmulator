@@ -24,6 +24,8 @@ namespace xtJucePlugin
 		bool parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data) override;
 
 	private:
+		pluginLib::patchDB::Data createCombinedDump(const pluginLib::patchDB::Data& _data) const;
+
 		Editor& m_editor;
 		Controller& m_controller;
 	};
