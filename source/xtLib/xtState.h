@@ -41,6 +41,8 @@ namespace xt
 			Multi,
 			Global,
 			Mode,
+			Wave,
+			Table,
 
 			Count
 		};
@@ -60,16 +62,20 @@ namespace xt
 
 		static constexpr Dump Dumps[] = 
 		{
-			{DumpType::Single, SysexCommand::SingleRequest, SysexCommand::SingleDump, SysexCommand::SingleParameterChange, IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 265},
-			{DumpType::Multi , SysexCommand::MultiRequest , SysexCommand::MultiDump , SysexCommand::MultiParameterChange , IdxMultiParamFirst , IdxMultiParamIndexH , IdxMultiParamIndexL , IdxMultiParamValue , 265},
-			{DumpType::Global, SysexCommand::GlobalRequest, SysexCommand::GlobalDump, SysexCommand::GlobalParameterChange, IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 39},
-			{DumpType::Mode  , SysexCommand::ModeRequest  , SysexCommand::ModeDump  , SysexCommand::ModeParameterChange  , IdxModeParamFirst  , IdxModeParamIndexH  , IdxModeParamIndexL  , IdxModeParamValue  , 7},
+			{DumpType::Single, SysexCommand::SingleRequest , SysexCommand::SingleDump , SysexCommand::SingleParameterChange , IdxSingleParamFirst, IdxSingleParamIndexH, IdxSingleParamIndexL, IdxSingleParamValue, 265},
+			{DumpType::Multi , SysexCommand::MultiRequest  , SysexCommand::MultiDump  , SysexCommand::MultiParameterChange  , IdxMultiParamFirst , IdxMultiParamIndexH , IdxMultiParamIndexL , IdxMultiParamValue , 265},
+			{DumpType::Global, SysexCommand::GlobalRequest , SysexCommand::GlobalDump , SysexCommand::GlobalParameterChange , IdxGlobalParamFirst, IdxGlobalParamIndexH, IdxGlobalParamIndexL, IdxGlobalParamValue, 39},
+			{DumpType::Mode  , SysexCommand::ModeRequest   , SysexCommand::ModeDump   , SysexCommand::ModeParameterChange   , IdxModeParamFirst  , IdxModeParamIndexH  , IdxModeParamIndexL  , IdxModeParamValue  , 7},
+			{DumpType::Wave  , SysexCommand::WaveRequest   , SysexCommand::WaveDump   , SysexCommand::WaveParameterChange   , wLib::IdxBuffer    , IdxWaveIndexH       , IdxWaveIndexL       , wLib::IdxBuffer    , 137},
+			{DumpType::Table , SysexCommand::WaveCtlRequest, SysexCommand::WaveCtlDump, SysexCommand::WaveCtlParameterChange, wLib::IdxBuffer    , IdxWaveIndexH       , IdxWaveIndexL       , wLib::IdxBuffer    , 265},
 		};
 
 		using Single = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Single)].dumpSize>;
-		using Multi = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Multi)].dumpSize>;
+		using Multi = std::array<uint8_t , Dumps[static_cast<uint32_t>(DumpType::Multi) ].dumpSize>;
 		using Global = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Global)].dumpSize>;
-		using Mode = std::array<uint8_t, Dumps[static_cast<uint32_t>(DumpType::Mode)].dumpSize>;
+		using Mode = std::array<uint8_t  , Dumps[static_cast<uint32_t>(DumpType::Mode)  ].dumpSize>;
+		using Wave = std::array<uint8_t  , Dumps[static_cast<uint32_t>(DumpType::Wave)  ].dumpSize>;
+		using Table = std::array<uint8_t , Dumps[static_cast<uint32_t>(DumpType::Table) ].dumpSize>;
 
 		State(Xt& _xt, WavePreview& _wavePreview);
 
@@ -90,6 +96,9 @@ namespace xt
 
 		static void parseTableData(TableData& _table, const SysEx& _sysex);
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
+
+		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);
+		static void splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle);
 
 	private:
 
