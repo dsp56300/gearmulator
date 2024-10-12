@@ -187,7 +187,10 @@ namespace xtJucePlugin
 		if(WaveEditorData::isReadOnly(_target))
 			return false;
 
-		m_data.setWave(_target, m_graphData.getSource());
+		if(!m_data.setWave(_target, m_graphData.getSource()))
+			return false;
+
+		m_data.sendWaveToDevice(_target);
 
 		if(_target != m_selectedWave)
 			setSelectedWave(_target);
