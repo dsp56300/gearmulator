@@ -16,7 +16,7 @@ namespace xt
 {
 	static_assert(std::size(State::Dumps) == static_cast<uint32_t>(State::DumpType::Count), "data definition missing");
 
-	State::State(Xt& _xt, WavePreview& _preview) : m_xt(_xt), m_wavePreview(_preview)
+	State::State(Xt& _xt, WavePreview& _wavePreview) : m_xt(_xt), m_wavePreview(_wavePreview)
 	{
 	}
 
@@ -823,6 +823,98 @@ namespace xt
 		updateChecksum(sysex, static_cast<uint32_t>(std::size(header)));
 
 		return sysex;
+	}
+
+	void State::splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle)
+	{
+		if(getCommand(_combinedSingle) != SysexCommand::SingleDump)
+			return;
+
+		constexpr auto singleSize = std::tuple_size_v<Single>;
+		constexpr auto tableSize = std::tuple_size_v<Table>;
+		constexpr auto waveSize = std::tuple_size_v<Wave>;
+
+		if(_combinedSingle.size() == singleSize)
+		{
+			_dumps.push_back(_combinedSingle);
+			return;
+		}
+
+		if(_combinedSingle.size() < singleSize + tableSize - 2)
+			return;
+
+		auto& single = _dumps.emplace_back();
+		size_t offBegin = 0;
+		size_t offEnd = offBegin + singleSize - 1;
+		single.assign(_combinedSingle.begin() + static_cast<ptrdiff_t>(offBegin), _combinedSingle.begin() + static_cast<ptrdiff_t>(offEnd));
+		single.push_back(0xf7);
+
+		auto& table = _dumps.emplace_back();
+
+		offBegin = offEnd;
+		offEnd += tableSize - 2;
+		table.push_back(0xf0);
+		table.insert(table.end(), _combinedSingle.begin() + static_cast<ptrdiff_t>(offBegin), _combinedSingle.begin() + static_cast<ptrdiff_t>(offEnd));
+		table.push_back(0xf7);
+
+		while(_combinedSingle.size() - offEnd >= waveSize - 2)
+		{
+			offBegin = offEnd;
+			offEnd += waveSize - 2;
+
+			auto& wave = _dumps.emplace_back();
+			wave.push_back(0xf0);
+			wave.insert(wave.end(), _combinedSingle.begin() + static_cast<ptrdiff_t>(offBegin), _combinedSingle.begin() + static_cast<ptrdiff_t>(offEnd));
+			wave.push_back(0xf7);
+		}
+	}
+
+	SysEx State::createCombinedPatch(const std::vector<SysEx>& _dumps)
+	{
+		uint32_t singleCount = 0;
+		uint32_t tableCount = 0;
+
+		std::vector<SysEx> waves;
+
+		SysEx single;
+		SysEx table;
+
+		for (auto& dump : _dumps)
+		{
+			switch(getCommand(dump))
+			{
+			case SysexCommand::SingleDump:
+				++singleCount;
+				single = dump;
+				break;
+			case SysexCommand::WaveCtlDump:
+				++tableCount;
+				table = dump;
+				break;
+			case SysexCommand::WaveDump:
+				waves.push_back(dump);
+				break;
+			default:;
+			}
+		}
+
+		if(!tableCount && waves.empty())
+			return single;
+
+		if(tableCount > 1)
+			return {};
+
+		// a combined single is a single dump + a table dump + an arbitrary number of wave dumps in one sysex, i.e. f0/f7 are stripped from the individual dumps
+		single.pop_back();
+
+		single.insert(single.end(), table.begin()+1, table.end());
+
+		for (const auto& wave : waves)
+			single.insert(single.end(), wave.begin()+1, wave.end()-1);
+
+		single.push_back(0xf7);
+
+		return single;
 	}
 
 	void State::onPlayModeChanged()
