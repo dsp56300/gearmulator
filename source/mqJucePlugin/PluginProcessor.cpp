@@ -44,7 +44,7 @@ namespace mqJucePlugin
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, getBinaryData()})
+		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()})
 	{
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));

@@ -66,6 +66,9 @@ namespace virus
 	    void saveChunkData(baseLib::BinaryStream& s) override;
 	    void loadChunkData(baseLib::ChunkReader& _cr) override;
 
+		void zynthianExportLv2Presets() const;
+		void exportLv2Presets(const virusLib::ROMFile& _rom, const std::string& _rootPath) const;
+
 	    //==============================================================================
 		JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(VirusProcessor)
 

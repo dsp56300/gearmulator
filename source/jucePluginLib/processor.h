@@ -40,6 +40,7 @@ namespace pluginLib
 			const bool wantsMidiInput;
 			const bool producesMidiOut;
 			const bool isMidiEffect;
+			const std::string lv2Uri;
 			BinaryDataRef binaryData;
 		};
 

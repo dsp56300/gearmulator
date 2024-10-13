@@ -30,8 +30,8 @@ namespace xtJucePlugin
 		bool isWaitingForTable() const { return m_currentTableRequestIndex != g_invalidTableIndex; }
 		bool isWaitingForData() const { return isWaitingForWave() || isWaitingForTable(); }
 
-		void onReceiveWave(const std::vector<uint8_t>& _msg);
-		void onReceiveTable(const std::vector<uint8_t>& _msg);
+		void onReceiveWave(const std::vector<uint8_t>& _msg, bool _sendToDevice = false);
+		void onReceiveTable(const std::vector<uint8_t>& _msg, bool _sendToDevice = false);
 
 		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
 		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;

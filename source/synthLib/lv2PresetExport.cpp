@@ -139,7 +139,7 @@ namespace synthLib
 
 		for (const auto& bank : _banks)
 		{
-			if(!exportPresets(path + toFilename(bank.name) + ".lv2/", _pluginId, bank))
+			if(!exportPresets(getBankPath(path, bank.name), _pluginId, bank))
 				return false;
 		}
 		return true;
@@ -149,7 +149,7 @@ namespace synthLib
 	{
 		const auto path = validatePath(_outputPath);
 		createDirectory(path);
-		std::ofstream manifest(path + "manifest.ttl");
+		std::ofstream manifest(getManifestFilename(path));
 		if(!manifest.is_open())
 			return false;
 
@@ -184,6 +184,32 @@ namespace synthLib
 			presetFile.close();
 		}
 
+		return true;
+	}
+
+	std::string Lv2PresetExport::getBankPath(const std::string& _outputPath, const std::string& _bankName)
+	{
+		return validatePath(_outputPath) + getBankFilename(_bankName) + ".lv2/";
+	}
+
+	std::string Lv2PresetExport::getManifestFilename(const std::string& _path)
+	{
+		return validatePath(_path) + "manifest.ttl";
+	}
+
+	std::string Lv2PresetExport::getBankFilename(const std::string& _bankName)
+	{
+		return toFilename(_bankName);
+	}
+
+	bool Lv2PresetExport::manifestFileExists(const std::string& _path)
+	{
+		const auto manifestFile = getManifestFilename(_path);
+
+		FILE* const hFile = fopen(manifestFile.c_str(), "rb");
+		if(!hFile)
+			return false;
+		(void)fclose(hFile);
 		return true;
 	}
 }

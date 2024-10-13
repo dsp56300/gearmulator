@@ -54,6 +54,8 @@ namespace xtJucePlugin
 
 		auto& getParameterBinding() const { return m_parameterBinding; }
 
+		const WaveEditor* getWaveEditor() const { return m_waveEditor; }
+
 	private:
 		void mouseEnter(const juce::MouseEvent& _event) override;
 		void changeWave(int _step) const;

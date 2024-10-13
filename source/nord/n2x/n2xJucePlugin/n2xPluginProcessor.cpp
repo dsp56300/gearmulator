@@ -43,7 +43,7 @@ namespace n2xJucePlugin
 	    Processor(BusesProperties()
 	                   .withOutput("Out AB", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out CD", juce::AudioChannelSet::stereo(), true)
-		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, getBinaryData()})
+		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()})
 	{
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));

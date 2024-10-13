@@ -25,5 +25,11 @@ namespace synthLib
 
 		static bool exportPresets(const std::string& _outputPath, const std::string& _pluginId, const std::vector<Bank>& _banks);
 		static bool exportPresets(const std::string& _outputPath, const std::string& _pluginId, const Bank& _bank);
+
+		static std::string getBankPath(const std::string& _outputPath, const std::string& _bankName);
+		static std::string getManifestFilename(const std::string& _path);
+
+		static std::string getBankFilename(const std::string& _bankName);
+		static bool manifestFileExists(const std::string& _path);
 	};
 }
