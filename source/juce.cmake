@@ -151,6 +151,8 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			install(TARGETS ${targetName}_CLAP LIBRARY DESTINATION lib/clap/ COMPONENT ${productName}-CLAP)
 		endif()
 	endif()
+
+	target_compile_definitions(${targetName} PUBLIC JucePlugin_Lv2Uri="$<TARGET_PROPERTY:${targetName},JUCE_LV2URI>")
 	
 	if(USE_LV2)
 		get_target_property(lv2OutputFolder ${targetName}_LV2 ARCHIVE_OUTPUT_DIRECTORY)
