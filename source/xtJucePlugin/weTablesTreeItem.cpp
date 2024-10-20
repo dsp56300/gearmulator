@@ -41,7 +41,7 @@ namespace xtJucePlugin
 
 	bool TablesTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 	{
-		if(WaveEditorData::isReadOnly(m_index))
+		if(xt::wave::isReadOnly(m_index))
 			return false;
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)

@@ -88,6 +88,8 @@ namespace xt
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
+		static TableId getWavetableFromSingleDump(const SysEx& _single);
+
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		static void parseWaveData(WaveData& _wave, const SysEx& _sysex);
@@ -107,7 +109,7 @@ namespace xt
 			if(!isValid(_src))
 				return false;
 			auto src = _src;
-			if(_checksumStartIndex != ~0)
+			if(_checksumStartIndex != ~0u)
 				wLib::State::updateChecksum(src, _checksumStartIndex);
 			_dst.insert(_dst.end(), src.begin(), src.end());
 			return true;

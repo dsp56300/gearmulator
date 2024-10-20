@@ -20,6 +20,6 @@ namespace xtJucePlugin
 
 		pluginLib::EventListener<xt::TableId> m_onTableChanged;
 		xt::TableId m_table;
-		std::array<ControlTreeItem*, xt::Wave::g_wavesPerTable> m_items;
+		std::array<ControlTreeItem*, xt::wave::g_wavesPerTable> m_items;
 	};
 }

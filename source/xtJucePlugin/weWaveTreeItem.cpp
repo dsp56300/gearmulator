@@ -40,7 +40,7 @@ namespace xtJucePlugin
 
 	std::string WaveTreeItem::getWaveName(const xt::WaveId _waveIndex)
 	{
-		if(!xt::Wave::isValidWaveIndex(_waveIndex.rawId()))
+		if(!xt::wave::isValidWaveIndex(_waveIndex.rawId()))
 			return {};
 		const auto category = getCategory(_waveIndex);
 		return WaveCategoryTreeItem::getCategoryName(category) + ' ' + std::to_string(_waveIndex.rawId());
@@ -48,9 +48,9 @@ namespace xtJucePlugin
 
 	WaveCategory WaveTreeItem::getCategory(const xt::WaveId _waveIndex)
 	{
-		if(_waveIndex.rawId() < xt::Wave::g_romWaveCount)
+		if(_waveIndex.rawId() < xt::wave::g_romWaveCount)
 			return WaveCategory::Rom;
-		if(_waveIndex.rawId() >= xt::Wave::g_firstRamWaveIndex && _waveIndex.rawId() < xt::Wave::g_firstRamWaveIndex + xt::Wave::g_ramWaveCount)
+		if(_waveIndex.rawId() >= xt::wave::g_firstRamWaveIndex && _waveIndex.rawId() < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount)
 			return WaveCategory::User;
 		return WaveCategory::Invalid;
 	}
@@ -73,7 +73,7 @@ namespace xtJucePlugin
 
 	bool WaveTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails)
 	{
-		if(WaveEditorData::isReadOnly(m_waveIndex))
+		if(xt::wave::isReadOnly(m_waveIndex))
 			return false;
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc)
@@ -86,7 +86,7 @@ namespace xtJucePlugin
 	void WaveTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
 	{
 		TreeItem::itemDropped(dragSourceDetails, insertIndex);
-		if(WaveEditorData::isReadOnly(m_waveIndex))
+		if(xt::wave::isReadOnly(m_waveIndex))
 			return;
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc)

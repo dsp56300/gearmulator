@@ -22,7 +22,7 @@ namespace xtJucePlugin
 		for(uint16_t i=0; i<static_cast<uint16_t>(m_tables.size()); ++i)
 		{
 			const auto id = xt::TableId(i);
-			if(!m_tables[i] && !isAlgorithmicTable(id))
+			if(!m_tables[i] && !xt::wave::isAlgorithmicTable(id))
 			{
 				requestTable(id);
 				return;
@@ -43,7 +43,7 @@ namespace xtJucePlugin
 		{
 			if(!m_ramWaves[i])
 			{
-				requestWave(xt::WaveId(static_cast<uint16_t>(i + xt::Wave::g_firstRamWaveIndex)));
+				requestWave(xt::WaveId(static_cast<uint16_t>(i + xt::wave::g_firstRamWaveIndex)));
 				return;
 			}
 		}
@@ -94,9 +94,9 @@ namespace xtJucePlugin
 		if(i < m_romWaves.size())
 			return m_romWaves[i];
 
-		if(i < xt::Wave::g_firstRamWaveIndex)
+		if(i < xt::wave::g_firstRamWaveIndex)
 			return {};
-		i -= xt::Wave::g_firstRamWaveIndex;
+		i -= xt::wave::g_firstRamWaveIndex;
 		if(i >= m_ramWaves.size())
 			return {};
 
@@ -195,10 +195,10 @@ namespace xtJucePlugin
 			onWaveChanged(_id);
 			return true;
 		}
-		if(i < xt::Wave::g_firstRamWaveIndex)
+		if(i < xt::wave::g_firstRamWaveIndex)
 			return false;
 
-		i -= xt::Wave::g_firstRamWaveIndex;
+		i -= xt::wave::g_firstRamWaveIndex;
 
 		if(i >= m_ramWaves.size())
 			return false;
@@ -244,14 +244,9 @@ namespace xtJucePlugin
 
 	void WaveEditorData::getWaveDataForSingle(std::vector<xt::SysEx>& _results, const xt::SysEx& _single) const
 	{
-		constexpr auto wavetableIndex = xt::IdxSingleParamFirst + static_cast<uint32_t>(xt::SingleParameter::Wavetable);
+		const auto tableId = xt::State::getWavetableFromSingleDump(_single);
 
-		if(wavetableIndex >= _single.size())
-			return;
-
-		const auto tableId = xt::TableId(_single[wavetableIndex]);
-
-		if(isReadOnly(tableId))
+		if(xt::wave::isReadOnly(tableId))
 			return;
 
 		const auto table = getTable(tableId);
@@ -263,10 +258,10 @@ namespace xtJucePlugin
 
 		for (const auto waveId : t)
 		{
-			if(!xt::Wave::isValidWaveIndex(waveId.rawId()))
+			if(!xt::wave::isValidWaveIndex(waveId.rawId()))
 				continue;
 
-			if(isReadOnly(waveId))
+			if(xt::wave::isReadOnly(waveId))
 				continue;
 
 			const auto wave = getWave(waveId);
@@ -339,7 +334,7 @@ namespace xtJucePlugin
 		{
 		case xt::SysexCommand::WaveDump:
 			{
-				if(!xt::Wave::isValidWaveIndex(index))
+				if(!xt::wave::isValidWaveIndex(index))
 					return false;
 
 				const auto id = xt::WaveId(index);
@@ -352,7 +347,7 @@ namespace xtJucePlugin
 			return true;
 		case xt::SysexCommand::WaveCtlDump:
 			{
-				if(!xt::Wave::isValidTableIndex(index))
+				if(!xt::wave::isValidTableIndex(index))
 					return false;
 
 				const auto id = xt::TableId(index);
@@ -390,12 +385,12 @@ namespace xtJucePlugin
 			data.insert(data.end(), sysex.begin(), sysex.end());
 		}
 
-		assert(xt::Wave::g_firstRamTableIndex < m_tables.size());
+		assert(xt::wave::g_firstRamTableIndex < m_tables.size());
 
-		for(uint16_t i=0; i<xt::Wave::g_firstRamTableIndex; ++i)
+		for(uint16_t i=0; i<xt::wave::g_firstRamTableIndex; ++i)
 		{
 			auto& table = m_tables[i];
-			assert(table || isAlgorithmicTable(xt::TableId(i)));
+			assert(table || xt::wave::isAlgorithmicTable(xt::TableId(i)));
 			if(!table)
 				continue;
 			auto sysex = xt::State::createTableData(*table, i, false);
@@ -414,34 +409,5 @@ namespace xtJucePlugin
 		synthLib::MidiToSysex::splitMultipleSysex(sysexMessages, data);
 		for (const auto& sysex : sysexMessages)
 			parseMidi(sysex);
-	}
-
-	bool WaveEditorData::isAlgorithmicTable(const xt::TableId _index)
-	{
-		for (const uint32_t i : xt::Wave::g_algorithmicWavetables)
-		{
-			if(_index.rawId() == i)
-				return true;
-		}
-		return false;
-	}
-
-	bool WaveEditorData::isReadOnly(const xt::TableId _table)
-	{
-		if(!_table.isValid())
-			return true;
-		return _table.rawId() < xt::Wave::g_firstRamTableIndex;
-	}
-
-	bool WaveEditorData::isReadOnly(const xt::WaveId _waveId)
-	{
-		if(!_waveId.isValid())
-			return true;
-		return _waveId.rawId() < xt::Wave::g_firstRamWaveIndex;
-	}
-
-	bool WaveEditorData::isReadOnly(const xt::TableIndex _index)
-	{
-		return _index.rawId() >= 61;	// always tri/square/saw
 	}
 }

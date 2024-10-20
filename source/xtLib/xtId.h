@@ -31,10 +31,10 @@ namespace xt
 		bool operator == (const Id& _id) const		{ return m_id == _id.m_id; }
 		bool operator != (const Id& _id) const		{ return m_id != _id.m_id; }
 
-		const auto& rawId() const { return m_id; }
+		constexpr auto& rawId() const { return m_id; }
 
 		constexpr static Id invalid() { return Id(Invalid); }
-		bool isValid() const { return m_id != Invalid; }
+		constexpr bool isValid() const { return m_id != Invalid; }
 		void invalidate() { m_id = Invalid; }
 
 	private:

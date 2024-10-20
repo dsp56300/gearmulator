@@ -45,11 +45,6 @@ namespace xtJucePlugin
 		bool copyTable(xt::TableId _dest, xt::TableId _source);
 		bool copyWave(xt::WaveId _dest, xt::WaveId _source);
 
-		static bool isAlgorithmicTable(xt::TableId _index);
-		static bool isReadOnly(xt::TableId _table);
-		static bool isReadOnly(xt::WaveId _waveId);
-		static bool isReadOnly(xt::TableIndex _index);
-
 		bool setWave(xt::WaveId _id, const xt::WaveData& _data);
 		bool setTable(xt::TableId _index, const xt::TableData& _data);
 
@@ -78,8 +73,8 @@ namespace xtJucePlugin
 		xt::WaveId m_currentWaveRequestIndex = g_invalidWaveIndex;
 		xt::TableId m_currentTableRequestIndex = g_invalidTableIndex;
 
-		std::array<std::optional<xt::WaveData>, xt::Wave::g_romWaveCount> m_romWaves;
-		std::array<std::optional<xt::WaveData>, xt::Wave::g_ramWaveCount> m_ramWaves;
-		std::array<std::optional<xt::TableData>, xt::Wave::g_tableCount> m_tables;
+		std::array<std::optional<xt::WaveData>, xt::wave::g_romWaveCount> m_romWaves;
+		std::array<std::optional<xt::WaveData>, xt::wave::g_ramWaveCount> m_ramWaves;
+		std::array<std::optional<xt::TableData>, xt::wave::g_tableCount> m_tables;
 	};
 }

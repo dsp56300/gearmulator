@@ -653,7 +653,7 @@ namespace xtJucePlugin
 
 	bool Controller::requestWave(const uint32_t _number) const
 	{
-		if(!xt::Wave::isValidWaveIndex(_number))
+		if(!xt::wave::isValidWaveIndex(_number))
 			return false;
 
 		std::map<pluginLib::MidiDataType, uint8_t> params;
@@ -666,7 +666,7 @@ namespace xtJucePlugin
 
 	bool Controller::requestTable(const uint32_t _number) const
 	{
-		if(!xt::Wave::isValidTableIndex(_number))
+		if(!xt::wave::isValidTableIndex(_number))
 			return false;
 
 		std::map<pluginLib::MidiDataType, uint8_t> params;

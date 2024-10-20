@@ -38,7 +38,7 @@ namespace xt
 
 	bool State::getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const
 	{
-		append(_state, m_mode, ~0);
+		append(_state, m_mode, ~0u);
 		append(_state, m_global, wLib::IdxCommand);
 
 		const auto multiMode = isMultiMode();
@@ -232,6 +232,16 @@ namespace xt
 	bool State::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
 		return loadState(_state);
+	}
+
+	TableId State::getWavetableFromSingleDump(const SysEx& _single)
+	{
+		constexpr auto wavetableIndex = IdxSingleParamFirst + static_cast<uint32_t>(SingleParameter::Wavetable);
+
+		if(wavetableIndex >= _single.size())
+			return TableId::invalid();
+
+		return TableId(_single[wavetableIndex]);
 	}
 
 	bool State::parseSingleDump(const SysEx& _data)
