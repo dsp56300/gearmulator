@@ -1,6 +1,7 @@
 #include "xtState.h"
 
 #include <cassert>
+#include <set>
 
 #include "xtMidiTypes.h"
 #include "xt.h"
@@ -40,6 +41,72 @@ namespace xt
 	{
 		append(_state, m_mode, ~0u);
 		append(_state, m_global, wLib::IdxCommand);
+
+		// add all waves and tables that are used by the singles
+		std::set<TableId> tableIds;
+
+		auto addTableId = [&](TableId id)
+		{
+			if(wave::isReadOnly(id))
+				return false;
+
+			const auto idx = id.rawId();
+			if(idx >= m_tables.size())
+				return false;
+
+			if(!isValid(m_tables[idx]))
+				return false;
+			tableIds.insert(id);
+			return true;
+		};
+
+		for (const auto& s  : m_currentInstrumentSingles)
+		{
+			const auto table = getWavetableFromSingleDump({s.begin(), s.end()});
+			addTableId(table);
+		}
+		for (const auto& s  : m_currentMultiSingles)
+		{
+			const auto table = getWavetableFromSingleDump({s.begin(), s.end()});
+			addTableId(table);
+		}
+
+		std::set<WaveId> waveIds;
+		for (const TableId id : tableIds)
+		{
+			if(wave::isReadOnly(id))
+				continue;
+
+			const auto idx = id.rawId();
+			if(idx >= m_tables.size())
+				continue;
+
+			const auto& t = m_tables[idx];
+			if(!isValid(t))
+				continue;
+
+			TableData table;
+			parseTableData(table, {t.begin(), t.end()});
+
+			for (const auto& waveId : table)
+			{
+				if(wave::isReadOnly(waveId))
+					continue;
+				const auto waveIdx = waveId.rawId();
+				if(waveIdx >= m_waves.size())
+					continue;
+				const auto& wave = m_waves[waveIdx];
+				if(!isValid(wave))
+					continue;
+				waveIds.insert(waveId);
+			}
+		}
+
+		for (const auto& waveId : waveIds)
+			append(_state, m_waves[waveId.rawId()], wLib::IdxCommand);
+
+		for (const auto& tableId : tableIds)
+			append(_state, m_tables[tableId.rawId()], wLib::IdxCommand);
 
 		const auto multiMode = isMultiMode();
 
@@ -155,6 +222,8 @@ namespace xt
 		case SysexCommand::MultiDump:				return parseDump(DumpType::Multi, _data);
 		case SysexCommand::GlobalDump:				return parseDump(DumpType::Global, _data);
 		case SysexCommand::ModeDump:				return parseDump(DumpType::Mode, _data);
+		case SysexCommand::WaveDump:				return parseDump(DumpType::Wave, _data);
+		case SysexCommand::WaveCtlDump:				return parseDump(DumpType::Table, _data);
 
 		case SysexCommand::SingleParameterChange:	return modifyDump(DumpType::Single, _data);
 		case SysexCommand::MultiParameterChange:	return modifyDump(DumpType::Multi, _data);
@@ -289,6 +358,32 @@ namespace xt
 		if(!convertTo(m_mode, _data))
 			return false;
 		onPlayModeChanged();
+		return true;
+	}
+
+	bool State::parseWaveDump(const SysEx& _data)
+	{
+		const auto idx = (static_cast<uint32_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint32_t>(_data[IdxWaveIndexL]);
+
+		if(idx >= m_waves.size())
+			return false;
+
+		if(!convertTo(m_waves[idx], _data))
+			return false;
+
+		return true;
+	}
+
+	bool State::parseTableDump(const SysEx& _data)
+	{
+		const auto idx = (static_cast<uint32_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint32_t>(_data[IdxWaveIndexL]);
+
+		if(idx >= m_tables.size())
+			return false;
+
+		if(!convertTo(m_tables[idx], _data))
+			return false;
+
 		return true;
 	}
 
@@ -531,6 +626,8 @@ namespace xt
 		case DumpType::Multi: res = parseMultiDump(_data); break;
 		case DumpType::Global: res = parseGlobalDump(_data); break;
 		case DumpType::Mode: res = parseModeDump(_data); break;
+		case DumpType::Wave: res = parseWaveDump(_data); break;
+		case DumpType::Table: res = parseTableDump(_data); break;
 		default:
 			return false;
 		}

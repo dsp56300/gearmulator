@@ -131,6 +131,8 @@ namespace xt
 		bool parseMultiDump(const SysEx& _data);
 		bool parseGlobalDump(const SysEx& _data);
 		bool parseModeDump(const SysEx& _data);
+		bool parseWaveDump(const SysEx& _data);
+		bool parseTableDump(const SysEx& _data);
 
 		bool modifySingle(const SysEx& _data);
 		bool modifyMulti(const SysEx& _data);
@@ -173,6 +175,11 @@ namespace xt
 			return _single.front() == 0xf0;
 		}
 
+		static bool isValid(const Wave& _single)
+		{
+			return _single.front() == 0xf0;
+		}
+
 		static bool isValid(const Global& _global)
 		{
 			return _global.back() == 0xf7;
@@ -204,6 +211,10 @@ namespace xt
 		// ROM
 		std::array<Single, 256> m_romSingles{Single{}};
 		std::array<Multi, 128> m_romMultis{Multi{}};
+
+		// User Waves and Tables
+		std::array<Wave, xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount> m_waves{Wave{}};
+		std::array<Table, xt::wave::g_tableCount> m_tables{Table{}};
 
 		// Edit Buffers
 		std::array<Single, 8> m_currentMultiSingles{Single{}};
