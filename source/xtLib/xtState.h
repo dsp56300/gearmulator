@@ -156,6 +156,12 @@ namespace xt
 		bool getMode(Responses& _responses);
 		Mode* getMode();
 
+		bool getWave(Responses& _responses, const SysEx& _data);
+		Wave* getWave(WaveId _id);
+
+		bool getTable(Responses& _responses, const SysEx& _data);
+		Table* getTable(TableId _id);
+
 		bool getDump(DumpType _type, Responses& _responses, const SysEx& _data);
 		bool parseDump(DumpType _type, const SysEx& _data);
 		bool modifyDump(DumpType _type, const SysEx& _data);

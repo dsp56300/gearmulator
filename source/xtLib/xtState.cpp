@@ -217,6 +217,8 @@ namespace xt
 		case SysexCommand::MultiRequest:			return getDump(DumpType::Multi,_responses, _data);
 		case SysexCommand::GlobalRequest:			return getDump(DumpType::Global, _responses, _data);
 		case SysexCommand::ModeRequest:				return getDump(DumpType::Mode, _responses, _data);
+		case SysexCommand::WaveRequest:				return getDump(DumpType::Wave, _responses, _data);
+		case SysexCommand::WaveCtlRequest:			return getDump(DumpType::Table, _responses, _data);
 
 		case SysexCommand::SingleDump:				return parseDump(DumpType::Single, _data);
 		case SysexCommand::MultiDump:				return parseDump(DumpType::Multi, _data);
@@ -598,7 +600,45 @@ namespace xt
 		return nullptr;
 	}
 
-	bool State::getDump(DumpType _type, Responses& _responses, const SysEx& _data)
+	bool State::getWave(Responses& _responses, const SysEx& _data)
+	{
+		const auto idx = static_cast<uint16_t>((static_cast<uint16_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint16_t>(_data[IdxWaveIndexL]));
+
+		auto* w = getWave(WaveId(idx));
+		if(!w || !isValid(*w))
+			return false;
+		_responses.emplace_back(w->begin(), w->end());
+		return true;
+	}
+
+	State::Wave* State::getWave(const WaveId _id)
+	{
+		const auto idx = _id.rawId();
+		if(idx >= m_waves.size())
+			return nullptr;
+		return &m_waves[idx];
+	}
+
+	bool State::getTable(Responses& _responses, const SysEx& _data)
+	{
+		const auto idx = static_cast<uint16_t>((static_cast<uint16_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint16_t>(_data[IdxWaveIndexL]));
+
+		auto* t = getTable(TableId(idx));
+		if(!t || !isValid(*t))
+			return false;
+		_responses.emplace_back(t->begin(), t->end());
+		return true;
+	}
+
+	State::Table* State::getTable(const TableId _id)
+	{
+		const auto idx = _id.rawId();
+		if(idx >= m_tables.size())
+			return nullptr;
+		return &m_tables[idx];
+	}
+
+	bool State::getDump(const DumpType _type, Responses& _responses, const SysEx& _data)
 	{
 		bool res;
 
@@ -608,6 +648,8 @@ namespace xt
 		case DumpType::Multi: res = getMulti(_responses, _data); break;
 		case DumpType::Global: res = getGlobal(_responses); break;
 		case DumpType::Mode: res = getMode(_responses); break;
+		case DumpType::Wave: res = getWave(_responses, _data); break;
+		case DumpType::Table: res = getTable(_responses, _data); break;
 		default:
 			return false;
 		}
