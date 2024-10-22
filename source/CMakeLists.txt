@@ -20,6 +20,8 @@ add_subdirectory(baseLib)
 add_subdirectory(synthLib)
 add_subdirectory(libresample)
 
+include(macsetup.cmake)
+
 # ----------------- Try to install VST2 SDK
 
 include(findvst2.cmake)

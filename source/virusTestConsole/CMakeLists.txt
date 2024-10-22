@@ -17,6 +17,8 @@ if(UNIX AND NOT APPLE)
 	target_link_libraries(virusTestConsole PUBLIC -static-libgcc -static-libstdc++)
 endif()
 
+createMacSetupScript("virusTestConsole")
+
 if(${gearmulator_SYNTH_OSIRUS})
 	install(TARGETS virusTestConsole DESTINATION . COMPONENT OsirusTestConsole)
 
@@ -24,6 +26,9 @@ if(${gearmulator_SYNTH_OSIRUS})
 		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsirusTestConsole)
 	else()
 		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsirusTestConsole)
+	endif()
+	if(NOT APPLE)
+		install(FILES ${macSetupFile} DESTINATION . COMPONENT OsirusTestConsole)
 	endif()
 endif()
 
@@ -34,6 +39,9 @@ if(${gearmulator_SYNTH_OSTIRUS})
 		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/win/ DESTINATION . COMPONENT OsTIrusTestConsole)
 	else()
 		install(DIRECTORY ${CMAKE_SOURCE_DIR}/deploy/linux/ DESTINATION . COMPONENT OsTIrusTestConsole)
+	endif()
+	if(NOT APPLE)
+		install(FILES ${macSetupFile} DESTINATION . COMPONENT OsTIrusTestConsole)
 	endif()
 endif()
 
