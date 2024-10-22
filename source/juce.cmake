@@ -86,9 +86,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		#juce::juce_recommended_warning_flags
 	)
 
-	set(MAC_SETUP_PRODUCT_NAME ${productName})
-	set(macSetupFile ${CMAKE_CURRENT_BINARY_DIR}/macsetup.command)
-	configure_file(${JUCE_CMAKE_DIR}/macsetup.command.in ${macSetupFile})
+	createMacSetupScript(${productName})
 
 	set(clapFeatures "")
 	if(${isSynth})

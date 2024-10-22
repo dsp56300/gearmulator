@@ -11,6 +11,8 @@ set(SOURCES
 target_sources(mqPerformanceTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
+createMacSetupScript("mqPerformanceTest")
+
 target_link_libraries(mqPerformanceTest PUBLIC mqConsoleLib)
 
 if(UNIX AND NOT APPLE)
@@ -18,4 +20,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 install(TARGETS mqPerformanceTest DESTINATION . COMPONENT VavraPerformanceTest)
+
+if(APPLE)
+	install(FILES ${macSetupFile} DESTINATION . COMPONENT VavraPerformanceTest)
+endif()
+
 set_property(TARGET mqPerformanceTest PROPERTY FOLDER "Vavra")
