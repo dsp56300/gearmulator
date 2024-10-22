@@ -91,11 +91,12 @@ namespace xtJucePlugin
 		bool requestWave(uint32_t _number) const;
 		bool requestTable(uint32_t _number) const;
 
+		uint8_t getPartCount() const override;
+
 	private:
 		void selectPreset(int _offset);
 
 		void onStateLoaded() override;
-		uint8_t getPartCount() const override;
 
 		void parseSingle(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params);
 		void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _params) const;

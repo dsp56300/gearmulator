@@ -239,6 +239,57 @@ namespace xtJucePlugin
 			return false;
 		const auto sysex = xt::State::createWaveData(*wave, _id.rawId(), false);
 		m_controller.sendSysEx(sysex);
+
+		// if a wave is edited that is part of the current wavetable of a patch, that table has to be sent again too because the device doesn't update otherwise
+		std::set<xt::TableId> dirtyTableIds;
+
+		auto checkTableForPart = [this, _id, &dirtyTableIds](uint8_t p)
+		{
+			const auto* param = m_controller.getParameter("Wave", p);
+			const auto tableId = xt::TableId(static_cast<uint16_t>(param->getUnnormalizedValue()));
+			const auto& table = getTable(tableId);
+			if(!table)
+				return;
+			const auto& t = *table;
+			for (auto waveId : t)
+			{
+				if(waveId == _id)
+				{
+					dirtyTableIds.insert(tableId);
+					break;
+				}
+			}
+		};
+
+		if(m_controller.isMultiMode())
+		{
+			for(uint8_t p=0; p<m_controller.getPartCount(); ++p)
+				checkTableForPart(p);
+		}
+		else
+		{
+			checkTableForPart(m_controller.getCurrentPart());
+		}
+
+		juce::Timer::callAfterDelay(1000, [this, dirtyTableIds]
+		{
+			for (const auto& id : dirtyTableIds)
+			{
+				// this is super annyoing. Some kind of dirty mechanism seems to prevent that the wavetable is rebuilt even if we send it again
+				// So far the only way to prevent that is to send the table twice, once with another starting wave and then again with the correct
+				// one
+				const auto waveId = getWaveIndex(id, xt::TableIndex(0));
+				const_cast<WaveEditorData*>(this)->setTableWave(id, xt::TableIndex(0), xt::WaveId(waveId.rawId() > 1000 ? 1000 : 1001));
+				sendTableToDevice(id);
+
+				juce::Timer::callAfterDelay(1000, [this, id, waveId]
+				{
+					const_cast<WaveEditorData*>(this)->setTableWave(id, xt::TableIndex(0), waveId);
+					sendTableToDevice(id);
+				});
+			}
+		});
+
 		return true;
 	}
 
