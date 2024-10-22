@@ -60,7 +60,7 @@ namespace xtJucePlugin
 
 	juce::var ControlTreeItem::getDragSourceDescription()
 	{
-		if(m_wave == g_invalidWaveIndex || WaveEditorData::isReadOnly(m_table) || WaveEditorData::isReadOnly(m_index))
+		if(m_wave == g_invalidWaveIndex || xt::wave::isReadOnly(m_table) || xt::wave::isReadOnly(m_index))
 			return TreeViewItem::getDragSourceDescription();
 
 		auto* desc = new WaveDesc();
@@ -72,7 +72,7 @@ namespace xtJucePlugin
 
 	bool ControlTreeItem::isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)
 	{
-		if(WaveEditorData::isReadOnly(m_table) || WaveEditorData::isReadOnly(m_index))
+		if(xt::wave::isReadOnly(m_table) || xt::wave::isReadOnly(m_index))
 			return false;
 		return WaveDesc::fromDragSource(_dragSourceDetails) != nullptr;
 	}

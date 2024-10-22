@@ -88,6 +88,8 @@ namespace xt
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
+		static TableId getWavetableFromSingleDump(const SysEx& _single);
+
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		static void parseWaveData(WaveData& _wave, const SysEx& _sysex);
@@ -107,7 +109,7 @@ namespace xt
 			if(!isValid(_src))
 				return false;
 			auto src = _src;
-			if(_checksumStartIndex != ~0)
+			if(_checksumStartIndex != ~0u)
 				wLib::State::updateChecksum(src, _checksumStartIndex);
 			_dst.insert(_dst.end(), src.begin(), src.end());
 			return true;
@@ -129,6 +131,8 @@ namespace xt
 		bool parseMultiDump(const SysEx& _data);
 		bool parseGlobalDump(const SysEx& _data);
 		bool parseModeDump(const SysEx& _data);
+		bool parseWaveDump(const SysEx& _data);
+		bool parseTableDump(const SysEx& _data);
 
 		bool modifySingle(const SysEx& _data);
 		bool modifyMulti(const SysEx& _data);
@@ -152,6 +156,12 @@ namespace xt
 		bool getMode(Responses& _responses);
 		Mode* getMode();
 
+		bool getWave(Responses& _responses, const SysEx& _data);
+		Wave* getWave(WaveId _id);
+
+		bool getTable(Responses& _responses, const SysEx& _data);
+		Table* getTable(TableId _id);
+
 		bool getDump(DumpType _type, Responses& _responses, const SysEx& _data);
 		bool parseDump(DumpType _type, const SysEx& _data);
 		bool modifyDump(DumpType _type, const SysEx& _data);
@@ -167,6 +177,11 @@ namespace xt
 		}
 
 		static bool isValid(const Single& _single)
+		{
+			return _single.front() == 0xf0;
+		}
+
+		static bool isValid(const Wave& _single)
 		{
 			return _single.front() == 0xf0;
 		}
@@ -202,6 +217,10 @@ namespace xt
 		// ROM
 		std::array<Single, 256> m_romSingles{Single{}};
 		std::array<Multi, 128> m_romMultis{Multi{}};
+
+		// User Waves and Tables
+		std::array<Wave, xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount> m_waves{Wave{}};
+		std::array<Table, xt::wave::g_tableCount> m_tables{Table{}};
 
 		// Edit Buffers
 		std::array<Single, 8> m_currentMultiSingles{Single{}};

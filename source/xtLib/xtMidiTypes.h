@@ -2,6 +2,8 @@
 
 #include <cstdint>
 
+#include "xtId.h"
+
 #include "wLib/wMidiTypes.h"
 
 namespace xt
@@ -192,7 +194,7 @@ namespace xt
 		static constexpr uint32_t g_idmPreset = 0x42;
 	};
 
-	namespace Wave
+	namespace wave
 	{
 		static constexpr uint16_t g_romWaveCount = 506;
 		static constexpr uint16_t g_ramWaveCount = 250;
@@ -212,7 +214,7 @@ namespace xt
 			80, 81, 82, 83, 84, 85, 86, 87, 88, 89,
 			90, 91, 92, 93, 94, 95};
 
-		inline bool isValidWaveIndex(const uint32_t _index)
+		constexpr bool isValidWaveIndex(const uint32_t _index)
 		{
 			if(_index >= g_firstRamWaveIndex + g_ramWaveCount)
 				return false;
@@ -221,9 +223,38 @@ namespace xt
 			return true;
 		}
 
-		inline bool isValidTableIndex(const uint32_t _index)
+		constexpr bool isValidTableIndex(const uint32_t _index)
 		{
 			return _index < g_tableCount;
+		}
+
+		constexpr bool isAlgorithmicTable(const xt::TableId _index)
+		{
+			for (const uint32_t i : g_algorithmicWavetables)
+			{
+				if(_index.rawId() == i)
+					return true;
+			}
+			return false;
+		}
+
+		constexpr bool isReadOnly(const TableId _table)
+		{
+			if(!_table.isValid())
+				return true;
+			return _table.rawId() < g_firstRamTableIndex;
+		}
+
+		constexpr bool isReadOnly(const WaveId _waveId)
+		{
+			if(!_waveId.isValid())
+				return true;
+			return _waveId.rawId() < g_firstRamWaveIndex;
+		}
+
+		constexpr bool isReadOnly(const TableIndex _index)
+		{
+			return _index.rawId() >= 61;	// always tri/square/saw
 		}
 	}
 }

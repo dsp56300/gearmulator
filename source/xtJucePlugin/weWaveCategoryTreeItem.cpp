@@ -21,10 +21,10 @@ namespace xtJucePlugin
 		switch (_category)
 		{
 		case WaveCategory::Rom:
-			addItems(0, xt::Wave::g_romWaveCount);
+			addItems(0, xt::wave::g_romWaveCount);
 			break;
 		case WaveCategory::User:
-			addItems(xt::Wave::g_firstRamWaveIndex, xt::Wave::g_ramWaveCount);
+			addItems(xt::wave::g_firstRamWaveIndex, xt::wave::g_ramWaveCount);
 			break;
 		case WaveCategory::Invalid:
 		case WaveCategory::Plugin:

@@ -155,13 +155,13 @@ namespace xtJucePlugin
 
 	void WaveEditor::saveWave()
 	{
-		if(WaveEditorData::isReadOnly(m_selectedWave) || m_btWaveSave->isRightClick())
+		if(xt::wave::isReadOnly(m_selectedWave) || m_btWaveSave->isRightClick())
 		{
 			// open menu and let user select one of the wave slots
 			juce::PopupMenu menu;
 
 			uint16_t count = 0;
-			for(uint16_t i=xt::Wave::g_firstRamWaveIndex; i<xt::Wave::g_firstRamWaveIndex+xt::Wave::g_ramWaveCount; ++i)
+			for(uint16_t i=xt::wave::g_firstRamWaveIndex; i<xt::wave::g_firstRamWaveIndex+xt::wave::g_ramWaveCount; ++i)
 			{
 				const auto id = xt::WaveId(i);
 				menu.addItem(WaveTreeItem::getWaveName(id), true, false, [this, id]
@@ -184,7 +184,7 @@ namespace xtJucePlugin
 
 	bool WaveEditor::saveWaveTo(const xt::WaveId _target)
 	{
-		if(WaveEditorData::isReadOnly(_target))
+		if(xt::wave::isReadOnly(_target))
 			return false;
 
 		if(!m_data.setWave(_target, m_graphData.getSource()))
