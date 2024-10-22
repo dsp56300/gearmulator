@@ -20,6 +20,9 @@ if(UNIX AND NOT APPLE)
 endif()
 
 install(TARGETS mqPerformanceTest DESTINATION . COMPONENT VavraPerformanceTest)
-install(FILES ${macSetupFile} DESTINATION . COMPONENT VavraPerformanceTest)
+
+if(APPLE)
+	install(FILES ${macSetupFile} DESTINATION . COMPONENT VavraPerformanceTest)
+endif()
 
 set_property(TARGET mqPerformanceTest PROPERTY FOLDER "Vavra")
