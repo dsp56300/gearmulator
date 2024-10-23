@@ -2,8 +2,9 @@
 
 #include "pluginProcessor.h"
 
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/clipboard.h"
+#include "jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/tools.h"
 
 #include "synthLib/os.h"
 #include "synthLib/sysexToMidi.h"
@@ -212,6 +213,9 @@ namespace jucePluginEditorLib
 
 	void Editor::showDisclaimer() const
 	{
+		if(pluginLib::Tools::isHeadless())
+			return;
+
 		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
 		{
 			const juce::MessageBoxOptions options = juce::MessageBoxOptions::makeOptionsOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name,

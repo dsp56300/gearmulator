@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "tools.h"
 #include "types.h"
 
 #include "baseLib/binarystream.h"
@@ -106,7 +107,7 @@ namespace pluginLib
 
 			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
 			const auto host = juce::PluginHostType::getHostPath();
-			if(!host.contains("juce_vst3_helper") && !host.contains("juce_lv2_helper"))
+			if(!Tools::isHeadless())
 			{
 				std::string msg = e.what();
 

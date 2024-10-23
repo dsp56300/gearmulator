@@ -28,6 +28,7 @@ set(SOURCES
 	pluginVersion.cpp pluginVersion.h
 	processor.cpp processor.h
 	softknob.cpp softknob.h
+	tools.cpp tools.h
 	types.h
 	version.h.in version.h
 	versionDateTime.h.in versionDateTime.h
