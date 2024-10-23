@@ -24,6 +24,17 @@
       }
     },
     {
+      "name": "macos",
+      "generator": "Xcode",
+      "inherits": "default",
+      "displayName": "MacOS default configuration",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Darwin"
+      }
+    },
+    {
       "name": "zynthian",
       "inherits": "default",
       "displayName": "Build specifically for the Zynthian platform",
@@ -58,6 +69,11 @@
     {
       "name": "windows-x64",
       "configurePreset": "windows-x64"
+    },
+    {
+      "name": "macos",
+      "inherits":"default",
+      "configurePreset": "macos"
     },
     {
       "name": "zynthian",
