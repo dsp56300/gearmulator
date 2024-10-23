@@ -64,10 +64,12 @@
   "buildPresets": [
     {
       "name": "default",
-      "configurePreset": "default"
+      "configurePreset": "default",
+      "configuration":"Release"
     },
     {
       "name": "windows-x64",
+      "inherits":"default",
       "configurePreset": "windows-x64"
     },
     {
@@ -77,6 +79,7 @@
     },
     {
       "name": "zynthian",
+      "inherits":"default",
       "configurePreset": "zynthian"
     }
   ]
