@@ -47,4 +47,12 @@ namespace synthLib
 	FILE* openFile(const std::string& _name, const char* _mode);
 
 	bool isRunningUnderRosetta();
+
+	enum class SpecialFolderType
+	{
+		UserDocuments,
+		PrivateAppData
+	};
+
+	std::string getSpecialFolderPath(SpecialFolderType _type);
 } // namespace synthLib

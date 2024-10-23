@@ -6,6 +6,8 @@
 // filesystem is only available on macOS Catalina 10.15+
 // filesystem causes linker errors in gcc-8 if linked statically
 #define USE_DIRENT
+#include <cstdlib>
+#include <cstring>
 #endif
 
 #ifdef USE_DIRENT
@@ -20,6 +22,7 @@
 #define NOMINMAX
 #define NOSERVICE
 #include <Windows.h>
+#include <shlobj_core.h>
 #else
 #include <dlfcn.h>
 #endif
@@ -411,5 +414,60 @@ namespace synthLib
 #else
 		return false;
 #endif
-    	}
+   	}
+
+    std::string getSpecialFolderPath(const SpecialFolderType _type)
+    {
+#ifdef _WIN32
+		std::array<char, MAX_PATH<<1> path;
+
+		int csidl;
+		switch (_type)
+		{
+		case SpecialFolderType::UserDocuments:
+			csidl = CSIDL_PERSONAL;
+			break;
+		case SpecialFolderType::PrivateAppData:
+			csidl = CSIDL_APPDATA;
+			break;
+		default:
+			return {};
+		}
+		if (SHGetSpecialFolderPathA (nullptr, path.data(), csidl, FALSE))
+			return validatePath(path.data());
+#elif defined(__APPLE__)
+		switch (_type)
+		{
+		case SpecialFolderType::UserDocuments:
+			return "~/Documents/"
+		case SpecialFolderType::PrivateAppData:
+			return "~/Library/Application Support/"
+			break;
+		default:
+			return {};
+		}
+#else
+		// https://specifications.freedesktop.org/basedir-spec/latest/
+		switch (_type)
+		{
+		case SpecialFolderType::UserDocuments:
+			{
+				const auto* docDir = std::getenv("XDG_DATA_HOME");
+				if(docDir && strlen(docDir) > 0)
+					return validatePath(docDir);
+				return "~/.local/share/";
+			}
+		case SpecialFolderType::PrivateAppData:
+			{
+				const auto* confDir = std::getenv("XDG_CONFIG_HOME");
+				if(confDir && strlen(confDir) > 0)
+					return validatePath(confDir);
+				return "~/.config/";
+			}
+		default:
+			return {};
+		}
+#endif
+		return {};
+    }
 } // namespace synthLib
