@@ -12,6 +12,14 @@ Framework:
         file browser
 
 - [Imp] All MacOS builds now included a script to remove quaratine attributes
+- [Imp] The default skin folder has changed. Custom skins are now supposed to be in:
+
+        c:\Users\<username>\Documents\<synthname>\skins (Win)
+		~/Documents/<synthname>/skins (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/<synthname>/skins (Linux)
+
+		Existing skins in the old location are still supported to ensure backwards
+		compatibility
 
 NodalRed2x:
 

@@ -564,7 +564,8 @@ namespace jucePluginEditorLib
 				return res;
 
 			const auto modulePath = synthLib::getModulePath();
-			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
+			const auto publicDataPath = pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name);
+			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 || m_skinFolder.find(publicDataPath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");

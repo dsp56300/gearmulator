@@ -10,11 +10,12 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include "jucePluginLib/tools.h"
+
 namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
-	, m_skinFolderName("skins_" + _processor.getProperties().name)
 {
 }
 
@@ -78,6 +79,11 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 	if(!m_instanceConfig.empty())
 		_data.insert(_data.end(), m_instanceConfig.begin(), m_instanceConfig.end());
+}
+
+std::string PluginEditorState::getSkinFolder() const
+{
+	return pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name) + "skins/";
 }
 
 void PluginEditorState::loadSkin(const Skin& _skin)
@@ -178,8 +184,14 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	// find more skins on disk
 	const auto modulePath = synthLib::getModulePath();
 
+	// new: user documents folder
 	std::vector<std::string> entries;
-	synthLib::getDirectoryEntries(entries, modulePath + m_skinFolderName);
+	synthLib::getDirectoryEntries(entries, getSkinFolder());
+
+	// old: next to plugin, kept for backwards compatibility
+	std::vector<std::string> entriesModulePath;
+	synthLib::getDirectoryEntries(entriesModulePath, modulePath + "skins_" + m_processor.getProperties().name);
+	entries.insert(entries.end(), entriesModulePath.begin(), entriesModulePath.end());
 
 	for (const auto& entry : entries)
 	{
@@ -196,12 +208,14 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 					skinMenu.addSeparator();
 				}
 
-				const auto relativePath = entry.substr(modulePath.size());
+				std::string skinPath = entry;
+				if(entry.find(modulePath) == 0)
+					skinPath = entry.substr(modulePath.size());
 				auto jsonName = file;
 				const auto pathEndPos = jsonName.find_last_of("/\\");
 				if(pathEndPos != std::string::npos)
 					jsonName = file.substr(pathEndPos+1);
-				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, relativePath};
+				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, skinPath};
 				addSkinEntry(skin);
 			}
 		}
@@ -210,24 +224,22 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	if(!loadedSkinIsPartOfList)
 		addSkinEntry(getCurrentSkin());
 
-	if(m_editor && m_currentSkin.folder.empty() || m_currentSkin.folder.find(m_skinFolderName) == std::string::npos)
+	skinMenu.addSeparator();
+
+	if(getEditor() && m_currentSkin.folder.empty() || m_currentSkin.folder.find(getSkinFolder()) != 0)
 	{
-		auto* editor = getEditor();
-		if(editor)
+		skinMenu.addItem("Export current skin to folder '" + getSkinFolder() + "' on disk", true, false, [this]
 		{
-			skinMenu.addSeparator();
-			skinMenu.addItem("Export current skin to folder '" + m_skinFolderName + "' on disk", true, false, [this]
-			{
-				exportCurrentSkin();
-			});
-			skinMenu.addItem("Open folder '" + m_skinFolderName + "' in File Browser", true, false, [this]
-			{
-				const auto dir = synthLib::getModulePath() + m_skinFolderName;
-				synthLib::createDirectory(dir);
-				juce::File(dir).revealToUser();
-			});
-		}
+			exportCurrentSkin();
+		});
 	}
+
+	skinMenu.addItem("Open folder '" + getSkinFolder() + "' in File Browser", true, false, [this]
+	{
+		const auto dir = getSkinFolder();
+		synthLib::createDirectory(dir);
+		juce::File(dir).revealToUser();
+	});
 
 	juce::PopupMenu scaleMenu;
 	scaleMenu.addItem("50%", true, scale == 50, [this] { setGuiScale(50); });
@@ -430,7 +442,7 @@ void PluginEditorState::exportCurrentSkin() const
 	if(!editor)
 		return;
 
-	const auto res = editor->exportToFolder(synthLib::getModulePath() + m_skinFolderName + '/');
+	const auto res = editor->exportToFolder(getSkinFolder());
 
 	if(!res.empty())
 	{
