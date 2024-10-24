@@ -439,10 +439,9 @@ namespace synthLib
 		switch (_type)
 		{
 		case SpecialFolderType::UserDocuments:
-			return "~/Documents/"
+			return "~/Documents/";
 		case SpecialFolderType::PrivateAppData:
-			return "~/Library/Application Support/"
-			break;
+			return "~/Library/Application Support/";
 		default:
 			return {};
 		}
