@@ -5,3 +5,7 @@ macro(createMacSetupScript productName)
 	set(macSetupFile ${CMAKE_CURRENT_BINARY_DIR}/macsetup.command)
 	configure_file(${MACSETUP_SOURCE_DIR}/macsetup.command.in ${macSetupFile})
 endmacro()
+
+macro(installMacSetupScript destination component)
+	install(FILES ${macSetupFile} DESTINATION ${destination} PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE COMPONENT ${component})
+endmacro()
