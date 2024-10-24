@@ -4,24 +4,24 @@
 
 namespace synthLib
 {
+	namespace
+	{
+		std::set<std::string> g_searchPaths;
+	}
 
 	std::vector<std::string> RomLoader::findFiles(const std::string& _extension, const size_t _minSize, const size_t _maxSize)
 	{
 		std::vector<std::string> results;
 
-        const auto path = getModulePath();
-		synthLib::findFiles(results, path, _extension, _minSize, _maxSize);
-
-    	const auto path2 = getModulePath(false);
-		if(path2 != path)
-			synthLib::findFiles(results, path2, _extension, _minSize, _maxSize);
-
-		if(results.empty())
+		if(g_searchPaths.empty())
 		{
-            const auto path3 = getCurrentDirectory();
-			if(path3 != path2 && path3 != path)
-				synthLib::findFiles(results, path, _extension, _minSize, _maxSize);
+			g_searchPaths.insert(getModulePath(true));
+			g_searchPaths.insert(getModulePath(false));
+			g_searchPaths.insert(getCurrentDirectory());
 		}
+
+		for (const auto& path : g_searchPaths)
+			synthLib::findFiles(results, path, _extension, _minSize, _maxSize);
 
 		return results;
 	}
@@ -34,5 +34,10 @@ namespace synthLib
 		std::vector<std::string> results;
 		synthLib::findFiles(results, _path, _extension, _minSize, _maxSize);
 		return results;
+	}
+
+	void RomLoader::addSearchPath(const std::string& _path)
+	{
+		g_searchPaths.insert(validatePath(_path));
 	}
 }

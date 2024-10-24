@@ -12,6 +12,7 @@
 #include "dsp56kEmu/fastmath.h"
 
 #include "dsp56kEmu/logging.h"
+#include "synthLib/romLoader.h"
 
 namespace synthLib
 {
@@ -25,6 +26,9 @@ namespace pluginLib
 
 	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties)), m_midiPorts(*this)
 	{
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
+		synthLib::RomLoader::addSearchPath(Tools::getPublicDataFolder(getProperties().name) + "roms/");
 	}
 
 	Processor::~Processor()

@@ -21,6 +21,15 @@ Framework:
 		Existing skins in the old location are still supported to ensure backwards
 		compatibility
 
+- [Imp] ROMs are now also searched for in the following directories
+
+        c:\Users\<username>\Documents\<synthname>\roms (Win)
+		~/Documents/<synthname>/roms (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/<synthname>/roms (Linux)
+
+		For backwards compatibility, it is also possible to copy ROMs next to the 
+		plugins as it was before
+
 NodalRed2x:
 
 - [Imp] Added indicator around knobs to show the current VMMap parameter value
