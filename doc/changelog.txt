@@ -2,12 +2,26 @@ Release Notes
 
 1.3.21
 
+DSP:
+
+- [Imp] Performance improvements
+
+Framework:
+
 - [Imp] Added new entry to 'Skins' submenu to open the skins folder in the default
         file browser
+
+- [Imp] All MacOS builds now included a script to remove quaratine attributes
 
 NodalRed2x:
 
 - [Imp] Added indicator around knobs to show the current VMMap parameter value
+
+- [Fix] Display a proper message if the plugin is loaded without ROM
+
+Xenia:
+
+- [Fix] Initial UI state might be incorrect, not showing the preset that was loaded
 
 1.3.20
 
