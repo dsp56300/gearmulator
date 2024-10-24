@@ -583,6 +583,37 @@ namespace pluginLib
 		}
 	}
 
+	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)
+	{
+		if(getProperties().isSynth || getTotalNumInputChannels() <= 0)
+		{
+			_buffer.clear(0, _buffer.getNumSamples());
+			return;
+		}
+
+		const auto sampleCount = static_cast<uint32_t>(_buffer.getNumSamples());
+		const auto outCount = static_cast<uint32_t>(getTotalNumOutputChannels());
+		const auto inCount = static_cast<uint32_t>(getTotalNumInputChannels());
+
+		uint32_t inCh = 0;
+
+		for(uint32_t outCh=0; outCh<outCount; ++outCh)
+		{
+			auto* input = _buffer.getReadPointer(static_cast<int>(inCh));
+			auto* output = _buffer.getWritePointer(static_cast<int>(outCh));
+
+			m_bypassBuffer.write(input, outCh, sampleCount, getLatencySamples());
+			m_bypassBuffer.read(output, outCh, sampleCount);
+
+			++inCh;
+
+			if(inCh >= inCount)
+				inCh = 0;
+		}
+
+//		AudioProcessor::processBlockBypassed(_buffer, _midiMessages);
+	}
+
 #if !SYNTHLIB_DEMO_MODE
 	void Processor::setState(const void* _data, const size_t _sizeInBytes)
 	{

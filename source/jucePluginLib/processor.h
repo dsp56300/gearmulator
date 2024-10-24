@@ -3,6 +3,7 @@
 #include <juce_audio_processors/juce_audio_processors.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 
+#include "bypassBuffer.h"
 #include "controller.h"
 #include "midiports.h"
 
@@ -137,6 +138,7 @@ namespace pluginLib
 		bool producesMidi() const override;
 		bool isMidiEffect() const override;
 		void processBlock(juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override;
+		void processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages) override;
 
 #if !SYNTHLIB_DEMO_MODE
 		void setState(const void *_data, size_t _sizeInBytes);
@@ -172,5 +174,6 @@ namespace pluginLib
 		float m_preferredDeviceSamplerate = 0.0f;
 		float m_hostSamplerate = 0.0f;
 		MidiPorts m_midiPorts;
+		BypassBuffer m_bypassBuffer;
 	};
 }
