@@ -120,6 +120,9 @@ namespace pluginLib
 		auto& getMidiPorts() { return m_midiPorts; }
 
 		std::optional<std::pair<const char*, uint32_t>> findResource(const std::string& _filename) const;
+
+		std::string getPublicRomFolder() const;
+
 	protected:
 		void destroyController();
 

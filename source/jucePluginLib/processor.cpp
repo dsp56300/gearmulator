@@ -28,7 +28,7 @@ namespace pluginLib
 	{
 		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
 		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
-		synthLib::RomLoader::addSearchPath(Tools::getPublicDataFolder(getProperties().name) + "roms/");
+		synthLib::RomLoader::addSearchPath(getPublicRomFolder());
 	}
 
 	Processor::~Processor()
@@ -120,19 +120,21 @@ namespace pluginLib
 				if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
 				{
 					msg += "\n\n";
-					msg += "The firmware file needs to be located next to the plugin.";
-					msg += "\n\n";
-					msg += "The plugin was loaded from path:\n\n";
-					msg += synthLib::getModulePath();
+					msg += "The firmware file needs to be copied to\n";
+					msg += getPublicRomFolder() + "\n";
+					msg += "\n";
+					msg += "The target folder is now being opened. Copy the firmware to this folder and reload the plugin.";
 #ifdef _DEBUG
-					msg += std::string("from host ") + host.toStdString();
+					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
-					msg += "\n\nCopy the requested file to this path and reload the plugin.";
 				}
 				juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
 					"Device Initialization failed", msg, nullptr, 
-					juce::ModalCallbackFunction::create([](int)
+					juce::ModalCallbackFunction::create([this](int)
 					{
+						const auto path = juce::File(getPublicRomFolder());
+						(void)path.createDirectory();
+						path.revealToUser();
 					})
 				);
 			}
@@ -331,6 +333,11 @@ namespace pluginLib
 			return {std::make_pair(res, static_cast<uint32_t>(size))};
 		}
 		return {};
+	}
+
+	std::string Processor::getPublicRomFolder() const
+	{
+		return Tools::getPublicDataFolder(getProperties().name) + "roms/";
 	}
 
 	void Processor::destroyController()
