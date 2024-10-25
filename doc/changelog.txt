@@ -10,7 +10,6 @@ Framework:
 
 - [Imp] Added new entry to 'Skins' submenu to open the skins folder in the default
         file browser
-
 - [Imp] All MacOS builds now included a script to remove quaratine attributes
 - [Imp] The default skin folder has changed. Custom skins are now supposed to be in:
 
@@ -32,6 +31,8 @@ Framework:
 
 - [Fix] FX plugins didn't apply latency when being processed as bypassed, causing the
         signal to appear early
+- [Fix] Tooltips didn't refresh correctly in some hosts / plugin formats
+
 
 NodalRed2x:
 

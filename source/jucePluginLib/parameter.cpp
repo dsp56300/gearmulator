@@ -102,21 +102,21 @@ namespace pluginLib
     {
 		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_value)), _origin);
-		sendValueChangedMessageToListeners(_value);
+		notifyHost(_value);
 	}
 
     void Parameter::setUnnormalizedValueNotifyingHost(const float _value, const Origin _origin)
     {
 		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(juce::roundToInt(_value), _origin);
-		sendValueChangedMessageToListeners(convertTo0to1(_value));
+		notifyHost(convertTo0to1(_value));
     }
 
     void Parameter::setUnnormalizedValueNotifyingHost(const int _value, const Origin _origin)
     {
 		ScopedChangeGesture g(*this);
 		setUnnormalizedValue(_value, _origin);
-		sendValueChangedMessageToListeners(convertTo0to1(static_cast<float>(_value)));
+		notifyHost(convertTo0to1(static_cast<float>(_value)));
     }
 
     void Parameter::setRateLimitMilliseconds(const uint32_t _ms)
@@ -162,6 +162,12 @@ namespace pluginLib
 
     void Parameter::setValue(const float _newValue)
 	{
+		// some plugin formats (VST3 for example) bounce back immediately, skip this, we don't
+		// want it and VST2 doesn't do it either so why does Juce for VST3?
+		// It's not the host, it's the Juce VST3 implementation
+		if(m_notifyingHost)
+			return;
+
 		setUnnormalizedValue(juce::roundToInt(convertFrom0to1(_newValue)), Origin::HostAutomation);
 	}
 
@@ -219,7 +225,14 @@ namespace pluginLib
 		m_changingDerivedValues = false;
     }
 
-	juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
+    void Parameter::notifyHost(const float _value)
+    {
+		m_notifyingHost = true;
+		sendValueChangedMessageToListeners(_value);
+		m_notifyingHost = false;
+    }
+
+    juce::String Parameter::genId(const Description& d, const int part, const int uniqueId)
 	{
 		if(uniqueId > 0)
 			return juce::String::formatted("%d_%d_%d_%d", static_cast<int>(d.page), part, d.index, uniqueId);
