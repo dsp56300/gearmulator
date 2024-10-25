@@ -47,6 +47,22 @@ namespace xt
 					++i;
 			}
 
+			if(filesHalf.size() > 2)
+			{
+				// remove possible duplicates
+				for(size_t i=0; i<filesHalf.size(); ++i)
+				{
+					for(size_t j=i+1; j<filesHalf.size(); ++j)
+					{
+						if(filesHalf[i].data == filesHalf[j].data)
+						{
+							filesHalf.erase(filesHalf.begin() + static_cast<ptrdiff_t>(j));
+							--j;
+						}
+					}
+				}
+			}
+
 			if(filesHalf.size() == 2)
 			{
 				File& a = filesHalf.front();
