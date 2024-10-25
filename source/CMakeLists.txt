@@ -6,6 +6,10 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_VAVRA "Build Vavra" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_XENIA "Build Xenia" on)
 option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 
+# ----------------- Add our cmake scripts to IDE
+
+add_custom_target(cmakeScripts SOURCES findvst2.cmake juce.cmake macsetup.cmake macsetup.command.in runAuValidation.cmake ../base.cmake)
+
 # ----------------- DSP56300 emulator
 
 set(ASMJIT_STATIC TRUE)
