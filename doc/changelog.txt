@@ -29,11 +29,13 @@ Framework:
 		For backwards compatibility, it is also possible to copy ROMs next to the 
 		plugins as it was before
 
+- [Imp] If a firmware is missing, the target folder is now being opened to prevent
+        that a user has to search for it manually
+
 - [Fix] FX plugins didn't apply latency when being processed as bypassed, causing the
         signal to appear early
 - [Fix] Tooltips didn't refresh correctly in some hosts / plugin formats
 - [Fix] Redraw issues in Bitwig on Windows if DPI is set to a value != 100%
-
 
 NodalRed2x:
 
