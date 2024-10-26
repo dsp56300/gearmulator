@@ -8,6 +8,7 @@
 #define USE_DIRENT
 #include <cstdlib>
 #include <cstring>
+#include <pwd.h>
 #endif
 
 #ifdef USE_DIRENT
@@ -441,6 +442,35 @@ namespace synthLib
 #endif
    	}
 
+    std::string getHomeDirectory()
+    {
+#ifdef _WIN32
+		std::array<char, MAX_PATH<<1> data;
+		if (SHGetSpecialFolderPathA (nullptr, data.data(), CSIDL_PROFILE, FALSE))
+			return validatePath(data.data());
+
+	    const auto* home = getenv("USERPROFILE");
+		if (home)
+			return home;
+
+		const auto* drive = getenv("HOMEDRIVE");
+		const auto* path = getenv("HOMEPATH");
+
+		if (drive && path)
+			return std::string(drive) + std::string(path);
+
+		return "C:\\Users\\Default";			// meh, what can we do?
+#else
+		const char* home = getenv("HOME");
+		if (home && strlen(home) > 0)
+			return home;
+        const auto* pw = getpwuid(getuid());
+		if(pw)
+			return std::string(pw->pw_dir);
+		return "/tmp";							// better ideas welcome
+#endif
+    }
+
     std::string getSpecialFolderPath(const SpecialFolderType _type)
     {
 #ifdef _WIN32
@@ -460,13 +490,17 @@ namespace synthLib
 		}
 		if (SHGetSpecialFolderPathA (nullptr, path.data(), csidl, FALSE))
 			return validatePath(path.data());
-#elif defined(__APPLE__)
+#else
+		const auto h = std::getenv("HOME");
+		const std::string home = validatePath(getHomeDirectory());
+
+#if defined(__APPLE__)
 		switch (_type)
 		{
 		case SpecialFolderType::UserDocuments:
-			return "~/Documents/";
+			return home + "/Documents/";
 		case SpecialFolderType::PrivateAppData:
-			return "~/Library/Application Support/";
+			return home + "/Library/Application Support/";
 		default:
 			return {};
 		}
@@ -479,18 +513,19 @@ namespace synthLib
 				const auto* docDir = std::getenv("XDG_DATA_HOME");
 				if(docDir && strlen(docDir) > 0)
 					return validatePath(docDir);
-				return "~/.local/share/";
+				return home + "/.local/share/";
 			}
 		case SpecialFolderType::PrivateAppData:
 			{
 				const auto* confDir = std::getenv("XDG_CONFIG_HOME");
 				if(confDir && strlen(confDir) > 0)
 					return validatePath(confDir);
-				return "~/.config/";
+				return home + "/.config/";
 			}
 		default:
 			return {};
 		}
+#endif
 #endif
 		return {};
     }

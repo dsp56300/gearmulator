@@ -54,5 +54,6 @@ namespace synthLib
 		PrivateAppData
 	};
 
+	std::string getHomeDirectory();
 	std::string getSpecialFolderPath(SpecialFolderType _type);
 } // namespace synthLib
