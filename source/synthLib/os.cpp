@@ -186,6 +186,7 @@ namespace synthLib
         }
         else
         {
+            LOG("Failed to open directory " << _folder << ", error " << errno);
             return false;
         }
 #else
