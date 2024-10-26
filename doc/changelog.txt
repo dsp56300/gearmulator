@@ -36,12 +36,20 @@ Framework:
         signal to appear early
 - [Fix] Tooltips didn't refresh correctly in some hosts / plugin formats
 - [Fix] Redraw issues in Bitwig on Windows if DPI is set to a value != 100%
+- [Fix] VST3: Hosts didn't pick up new parameter values when switching presets or 
+        loading state
 
 NodalRed2x:
 
 - [Imp] Added indicator around knobs to show the current VMMap parameter value
 
 - [Fix] Display a proper message if the plugin is loaded without ROM
+
+OsTIrus:
+
+- [Fix] Some parameters couldn't be automated in some hosts due to DSP echoing 
+        parameter changes back, causing some hosts to tread them as "edits", disabling
+		automation lanes (e.g. Ableton, Logic)
 
 Xenia:
 
