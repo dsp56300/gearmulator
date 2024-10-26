@@ -40,7 +40,14 @@
 
 namespace synthLib
 {
-    std::string getModulePath(bool _stripPluginComponentFolders/* = true*/)
+#ifdef _WIN32
+	constexpr char g_nativePathSeparator = '\\';
+#else
+	constexpr char g_nativePathSeparator = '/';
+#endif
+	constexpr char g_otherPathSeparator = g_nativePathSeparator == '\\' ? '/' : '\\';
+
+	std::string getModulePath(bool _stripPluginComponentFolders/* = true*/)
     {
         std::string path;
 #ifdef _WIN32
@@ -138,9 +145,17 @@ namespace synthLib
     {
         if(_path.empty())
             return _path;
-        if(_path.back() == '/' || _path.back() == '\\')
+
+        for (char& ch : _path)
+        {
+	        if(ch == g_otherPathSeparator)
+				ch = g_nativePathSeparator;
+        }
+
+		if(_path.back() == g_nativePathSeparator)
             return _path;
-        _path += '/';
+
+        _path += g_nativePathSeparator;
         return _path;
     }
 
