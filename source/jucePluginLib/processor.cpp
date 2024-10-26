@@ -128,15 +128,18 @@ namespace pluginLib
 					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
 				}
-				juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
-					"Device Initialization failed", msg, nullptr, 
-					juce::ModalCallbackFunction::create([this](int)
-					{
-						const auto path = juce::File(getPublicRomFolder());
-						(void)path.createDirectory();
-						path.revealToUser();
-					})
-				);
+				juce::Timer::callAfterDelay(2000, [msg]
+				{
+					juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+						"Device Initialization failed", msg, nullptr, 
+						juce::ModalCallbackFunction::create([this](int)
+						{
+							const auto path = juce::File(getPublicRomFolder());
+							(void)path.createDirectory();
+							path.revealToUser();
+						})
+					);
+				});
 			}
 		}
 
