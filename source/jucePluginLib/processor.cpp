@@ -128,7 +128,7 @@ namespace pluginLib
 					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
 				}
-				juce::Timer::callAfterDelay(2000, [msg]
+				juce::Timer::callAfterDelay(2000, [this, msg]
 				{
 					juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
 						"Device Initialization failed", msg, nullptr, 
