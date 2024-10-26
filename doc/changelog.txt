@@ -10,7 +10,7 @@ Framework:
 
 - [Imp] Added new entry to 'Skins' submenu to open the skins folder in the default
         file browser
-- [Imp] All MacOS builds now included a script to remove quaratine attributes
+- [Imp] All MacOS builds now include a script to remove quaratine attributes
 - [Imp] The default skin folder has changed. Custom skins are now supposed to be in:
 
         c:\Users\<username>\Documents\<synthname>\skins (Win)
