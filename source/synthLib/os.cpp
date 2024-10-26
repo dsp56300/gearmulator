@@ -119,7 +119,16 @@ namespace synthLib
     bool createDirectory(const std::string& _dir)
     {
 #ifdef USE_DIRENT
-        return mkdir(_dir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0;
+		constexpr auto dirAttribs = S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH;
+		for(size_t i=0; i<_dir.size(); ++i)
+		{
+			if(_dir[i] == '/' || _dir[i] == '\\')
+			{
+				const auto d = _dir.substr(0,i);
+		        mkdir(d.c_str(), dirAttribs);
+			}
+		}
+        return mkdir(_dir.c_str(), dirAttribs) == 0;
 #else
         return std::filesystem::create_directories(_dir);
 #endif
