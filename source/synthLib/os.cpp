@@ -498,9 +498,9 @@ namespace synthLib
 		switch (_type)
 		{
 		case SpecialFolderType::UserDocuments:
-			return home + "/Documents/";
+			return home + "Documents/";
 		case SpecialFolderType::PrivateAppData:
-			return home + "/Library/Application Support/";
+			return home + "Library/Application Support/";
 		default:
 			return {};
 		}
@@ -513,14 +513,14 @@ namespace synthLib
 				const auto* docDir = std::getenv("XDG_DATA_HOME");
 				if(docDir && strlen(docDir) > 0)
 					return validatePath(docDir);
-				return home + "/.local/share/";
+				return home + ".local/share/";
 			}
 		case SpecialFolderType::PrivateAppData:
 			{
 				const auto* confDir = std::getenv("XDG_CONFIG_HOME");
 				if(confDir && strlen(confDir) > 0)
 					return validatePath(confDir);
-				return home + "/.config/";
+				return home + ".config/";
 			}
 		default:
 			return {};
