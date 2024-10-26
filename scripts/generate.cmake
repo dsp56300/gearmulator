@@ -32,6 +32,12 @@ set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN=${gearmulator_BUILD_JUCEPLUGIN})
 set(args ${args} -Dgearmulator_BUILD_FX_PLUGIN=${gearmulator_BUILD_FX_PLUGIN})
 set(args ${args} -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
 
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_VST2=ON)
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_VST3=ON)
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_CLAP=ON)
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_LV2=ON)
+set(args ${args} -Dgearmulator_BUILD_JUCEPLUGIN_AU=ON)
+
 foreach(S IN LISTS synths)
 	set(args ${args} -D${S}=${${S}})
 endforeach()
