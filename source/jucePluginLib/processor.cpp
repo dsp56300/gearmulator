@@ -121,7 +121,7 @@ namespace pluginLib
 				{
 					msg += "\n\n";
 					msg += "The firmware file needs to be copied to\n";
-					msg += getPublicRomFolder() + "\n";
+					msg += synthLib::validatePath(getPublicRomFolder()) + "\n";
 					msg += "\n";
 					msg += "The target folder is now being opened. Copy the firmware to this folder and reload the plugin.";
 #ifdef _DEBUG
