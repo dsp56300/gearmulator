@@ -39,6 +39,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		# ICON_BIG ...                                    # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
 		# ICON_SMALL ...
 		COMPANY_NAME "The Usual Suspects"                 # Specify the name of the plugin's author
+		COMPANY_WEBSITE "https://dsp56300.wordpress.com"
 		IS_SYNTH ${isSynth}                               # Is this a synth or an effect?
 		NEEDS_MIDI_INPUT TRUE                             # Does the plugin need midi input?
 		NEEDS_MIDI_OUTPUT TRUE                            # Does the plugin need midi output?
