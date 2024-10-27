@@ -83,7 +83,7 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name) + "skins/";
+	return synthLib::validatePath(pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name) + "skins/");
 }
 
 void PluginEditorState::loadSkin(const Skin& _skin)
