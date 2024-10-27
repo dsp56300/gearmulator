@@ -23,6 +23,6 @@ namespace pluginLib
 
 	std::string Tools::getPublicDataFolder(const std::string& _productName)
 	{
-		return synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments) + _productName + '/';
+		return synthLib::validatePath(synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments) + _productName + '/');
 	}
 }
