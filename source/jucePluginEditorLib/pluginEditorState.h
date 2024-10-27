@@ -71,6 +71,8 @@ namespace jucePluginEditorLib
 		void setPerInstanceConfig(const std::vector<uint8_t>& _data);
 		void getPerInstanceConfig(std::vector<uint8_t>& _data);
 
+		std::string getSkinFolder() const;
+
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 
@@ -88,6 +90,5 @@ namespace jucePluginEditorLib
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
 		std::vector<uint8_t> m_instanceConfig;
-		std::string m_skinFolderName;
 	};
 }

@@ -10,7 +10,7 @@ namespace synthLib
 		{
 		case DeviceError::None: 			return "No Error, code " + std::to_string(static_cast<int32_t>(_error));
 		case DeviceError::Unknown: 			return "Unknown Error, code " + std::to_string(static_cast<int32_t>(_error));
-		case DeviceError::FirmwareMissing:	return "The firmware file for this device is missing. Copy the firmware next to the plugin and restart it.";
+		case DeviceError::FirmwareMissing:	return "The firmware file for this device is missing.";
 		default:;							return "Error code " + std::to_string(static_cast<int32_t>(_error));
 		}
 	}

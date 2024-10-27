@@ -7,6 +7,7 @@ file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/version.h.in)
 file(TOUCH_NOCREATE ${CMAKE_CURRENT_LIST_DIR}/versionDateTime.h.in)
 
 set(SOURCES
+	bypassBuffer.cpp bypassBuffer.h
 	createVersionDateTime.cmake
 	clipboard.cpp clipboard.h
 	controller.cpp controller.h
@@ -28,6 +29,7 @@ set(SOURCES
 	pluginVersion.cpp pluginVersion.h
 	processor.cpp processor.h
 	softknob.cpp softknob.h
+	tools.cpp tools.h
 	types.h
 	version.h.in version.h
 	versionDateTime.h.in versionDateTime.h

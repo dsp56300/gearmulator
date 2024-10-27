@@ -39,6 +39,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		# ICON_BIG ...                                    # ICON_* arguments specify a path to an image file to use as an icon for the Standalone
 		# ICON_SMALL ...
 		COMPANY_NAME "The Usual Suspects"                 # Specify the name of the plugin's author
+		COMPANY_WEBSITE "https://dsp56300.wordpress.com"
 		IS_SYNTH ${isSynth}                               # Is this a synth or an effect?
 		NEEDS_MIDI_INPUT TRUE                             # Does the plugin need midi input?
 		NEEDS_MIDI_OUTPUT TRUE                            # Does the plugin need midi output?
@@ -47,6 +48,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		COPY_PLUGIN_AFTER_BUILD FALSE                     # Should the plugin be installed to a default location after building?
 		PLUGIN_MANUFACTURER_CODE TusP                     # A four-character manufacturer id with at least one upper-case character
 		PLUGIN_CODE ${plugin4CC}                          # A unique four-character plugin id with exactly one upper-case character
+		PRODUCTS_FOLDER "${CMAKE_SOURCE_DIR}/bin/plugins/$<CONFIG>"
 		                                                  # GarageBand 10.3 requires the first letter to be upper-case, and the remaining letters to be lower-case
 		FORMATS ${juce_formats}                           # The formats to build. Other valid formats are: AAX Unity VST AU AUv3 LV2
 		PRODUCT_NAME ${productName}                       # The name of the final executable, which can differ from the target name
@@ -66,7 +68,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
 		JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
 		JUCE_VST3_CAN_REPLACE_VST2=0
-		JUCE_WIN_PER_MONITOR_DPI_AWARE=0
+		JUCE_WIN_PER_MONITOR_DPI_AWARE=1
 		JUCE_MODAL_LOOPS_PERMITTED=1
 		JUCE_USE_OGGVORBIS=0
 		JUCE_USE_MP3AUDIOFORMAT=0
@@ -86,7 +88,9 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		#juce::juce_recommended_warning_flags
 	)
 
-	createMacSetupScript(${productName})
+	if(${isSynth})
+		createMacSetupScript(${productName})
+	endif()
 
 	set(clapFeatures "")
 	if(${isSynth})
@@ -122,7 +126,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	if(USE_VST3)
 		if(APPLE)
 			install(TARGETS ${targetName}_VST3 DESTINATION . COMPONENT ${productName}-VST3)
-			install(FILES ${macSetupFile} DESTINATION . COMPONENT ${productName}-VST3)
+			installMacSetupScript(. ${productName}-VST3)
 		else()
 			get_target_property(vst3OutputFolder ${targetName}_VST3 ARCHIVE_OUTPUT_DIRECTORY)
 			if(UNIX)
@@ -140,17 +144,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
 			install(TARGETS ${targetName}_VST DESTINATION . COMPONENT ${productName}-VST2)
 			if(APPLE)
-				install(FILES ${macSetupFile} DESTINATION . COMPONENT ${productName}-VST2)
+				installMacSetupScript(. ${productName}-VST2)
 			endif()
 		endif()
 		if(USE_AU AND APPLE)
 			install(TARGETS ${targetName}_AU DESTINATION . COMPONENT ${productName}-AU)
-			install(FILES ${macSetupFile} DESTINATION . COMPONENT ${productName}-AU)
+			installMacSetupScript(. ${productName}-AU)
 		endif()
 		if(USE_CLAP)
 			install(TARGETS ${targetName}_CLAP DESTINATION . COMPONENT ${productName}-CLAP)
 			if(APPLE)
-				install(FILES ${macSetupFile} DESTINATION . COMPONENT ${productName}-CLAP)
+				installMacSetupScript(. ${productName}-CLAP)
 			endif()
 		endif()
 	elseif(UNIX)
@@ -178,7 +182,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		endif()
 		install(DIRECTORY ${lv2OutputFolder}/${productName}.lv2 DESTINATION ${dest} COMPONENT ${productName}-LV2 FILES_MATCHING PATTERN ${pattern} PATTERN "*.ttl")
 		if(APPLE)
-			install(FILES ${macSetupFile} DESTINATION ${dest} COMPONENT ${productName}-LV2)
+			installMacSetupScript(${dest} ${productName}-LV2)
 		endif()
 	endif()
 

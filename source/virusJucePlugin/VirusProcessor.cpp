@@ -12,12 +12,10 @@
 
 namespace virus
 {
-	VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, const virusLib::DeviceModel _defaultModel)
+	VirusProcessor::VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const virusLib::DeviceModel _defaultModel)
 		: Processor(_busesProperties, _configOptions, _properties)
-		, m_roms(_roms)
 		, m_defaultModel(_defaultModel)
 	{
-		zynthianExportLv2Presets();
 	}
 
 	VirusProcessor::~VirusProcessor()
@@ -72,14 +70,18 @@ namespace virus
 		}
 	}
 
-	void VirusProcessor::postConstruct()
+	void VirusProcessor::postConstruct(std::vector<virusLib::ROMFile>&& _roms)
 	{
+		m_roms = std::move(_roms);
+
 		evRomChanged.retain(getSelectedRom());
 
 		m_clockTempoParam = getController().getParameterIndexByName(virus::g_paramClockTempo);
 
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
 		Processor::setLatencyBlocks(latencyBlocks);
+
+		zynthianExportLv2Presets();
 	}
 
 	synthLib::Device* VirusProcessor::createDevice()

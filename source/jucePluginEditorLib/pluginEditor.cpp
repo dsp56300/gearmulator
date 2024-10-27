@@ -2,8 +2,9 @@
 
 #include "pluginProcessor.h"
 
-#include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/clipboard.h"
+#include "jucePluginLib/parameterbinding.h"
+#include "jucePluginLib/tools.h"
 
 #include "synthLib/os.h"
 #include "synthLib/sysexToMidi.h"
@@ -212,6 +213,9 @@ namespace jucePluginEditorLib
 
 	void Editor::showDisclaimer() const
 	{
+		if(pluginLib::Tools::isHeadless())
+			return;
+
 		if(!m_processor.getConfig().getBoolValue("disclaimerSeen", false))
 		{
 			const juce::MessageBoxOptions options = juce::MessageBoxOptions::makeOptionsOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name,
@@ -560,7 +564,8 @@ namespace jucePluginEditorLib
 				return res;
 
 			const auto modulePath = synthLib::getModulePath();
-			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
+			const auto publicDataPath = pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name);
+			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 || m_skinFolder.find(publicDataPath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");

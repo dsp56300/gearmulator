@@ -14,7 +14,7 @@ namespace virus
 	class VirusProcessor : public jucePluginEditorLib::Processor
 	{
 	public:
-	    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, const std::vector<virusLib::ROMFile>& _roms, virusLib::DeviceModel _defaultModel);
+	    VirusProcessor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties, virusLib::DeviceModel _defaultModel);
 	    ~VirusProcessor() override;
 
 	    void processBpm(float _bpm) override;
@@ -54,7 +54,7 @@ namespace virus
 	    }
 
 	protected:
-	    void postConstruct();
+	    void postConstruct(std::vector<virusLib::ROMFile>&& _roms);
 
 	    // _____________
 		//

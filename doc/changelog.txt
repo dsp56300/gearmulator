@@ -2,12 +2,58 @@ Release Notes
 
 1.3.21
 
+DSP:
+
+- [Imp] Performance improvements
+
+Framework:
+
 - [Imp] Added new entry to 'Skins' submenu to open the skins folder in the default
         file browser
+- [Imp] All MacOS builds now include a script to remove quaratine attributes
+- [Imp] The default skin folder has changed. Custom skins are now supposed to be in:
+
+        c:\Users\<username>\Documents\<synthname>\skins (Win)
+		~/Documents/<synthname>/skins (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/<synthname>/skins (Linux)
+
+		Existing skins in the old location are still supported to ensure backwards
+		compatibility
+
+- [Imp] ROMs are now also searched for in the following directories
+
+        c:\Users\<username>\Documents\<synthname>\roms (Win)
+		~/Documents/<synthname>/roms (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/<synthname>/roms (Linux)
+
+		For backwards compatibility, it is also possible to copy ROMs next to the 
+		plugins as it was before
+
+- [Imp] If a firmware is missing, the target folder is now being opened to prevent
+        that a user has to search for it manually
+
+- [Fix] FX plugins didn't apply latency when being processed as bypassed, causing the
+        signal to appear early
+- [Fix] Tooltips didn't refresh correctly in some hosts / plugin formats
+- [Fix] Redraw issues in Bitwig on Windows if DPI is set to a value != 100%
+- [Fix] VST3: Hosts didn't pick up new parameter values when switching presets or 
+        loading state
 
 NodalRed2x:
 
 - [Imp] Added indicator around knobs to show the current VMMap parameter value
+
+- [Fix] Display a proper message if the plugin is loaded without ROM
+
+OsTIrus:
+
+- [Fix] Some parameters couldn't be automated in some hosts due to DSP echoing 
+        parameter changes back, causing some hosts to tread them as "edits", disabling
+		automation lanes (e.g. Ableton, Logic)
+
+Xenia:
+
+- [Fix] Initial UI state might be incorrect, not showing the preset that was loaded
 
 1.3.20
 

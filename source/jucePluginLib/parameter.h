@@ -110,6 +110,7 @@ namespace pluginLib
 		static uint64_t milliseconds();
 		void sendParameterChangeDelayed(ParamValue _value, uint32_t _uniqueId);
 		void forwardToDerived(const int _newValue);
+		void notifyHost(float _value);
 
 		int clampValue(int _value) const;
 
@@ -132,5 +133,6 @@ namespace pluginLib
 		bool m_isLocked = false;
 		ParameterLinkType m_linkType = None;
 		uint32_t m_changeGestureCount = 0;
+		bool m_notifyingHost = false;
     };
 }

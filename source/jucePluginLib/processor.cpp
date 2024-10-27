@@ -1,5 +1,6 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "tools.h"
 #include "types.h"
 
 #include "baseLib/binarystream.h"
@@ -11,6 +12,7 @@
 #include "dsp56kEmu/fastmath.h"
 
 #include "dsp56kEmu/logging.h"
+#include "synthLib/romLoader.h"
 
 namespace synthLib
 {
@@ -24,6 +26,9 @@ namespace pluginLib
 
 	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties)), m_midiPorts(*this)
 	{
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
+		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
+		synthLib::RomLoader::addSearchPath(getPublicRomFolder());
 	}
 
 	Processor::~Processor()
@@ -106,7 +111,7 @@ namespace pluginLib
 
 			// Juce loads the LV2/VST3 versions of the plugin as part of the build process, if we open a message box in this case, the build process gets stuck
 			const auto host = juce::PluginHostType::getHostPath();
-			if(!host.contains("juce_vst3_helper") && !host.contains("juce_lv2_helper"))
+			if(!Tools::isHeadless())
 			{
 				std::string msg = e.what();
 
@@ -115,21 +120,26 @@ namespace pluginLib
 				if(e.errorCode() == synthLib::DeviceError::FirmwareMissing)
 				{
 					msg += "\n\n";
-					msg += "The firmware file needs to be located next to the plugin.";
-					msg += "\n\n";
-					msg += "The plugin was loaded from path:\n\n";
-					msg += synthLib::getModulePath();
+					msg += "The firmware file needs to be copied to\n";
+					msg += synthLib::validatePath(getPublicRomFolder()) + "\n";
+					msg += "\n";
+					msg += "The target folder will be opened once you click OK. Copy the firmware to this folder and reload the plugin.";
 #ifdef _DEBUG
-					msg += std::string("from host ") + host.toStdString();
+					msg += "\n\n" + std::string("[Debug] Host ") + host.toStdString() + "\n\n";
 #endif
-					msg += "\n\nCopy the requested file to this path and reload the plugin.";
 				}
-				juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
-					"Device Initialization failed", msg, nullptr, 
-					juce::ModalCallbackFunction::create([](int)
-					{
-					})
-				);
+				juce::Timer::callAfterDelay(2000, [this, msg]
+				{
+					juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
+						"Device Initialization failed", msg, nullptr, 
+						juce::ModalCallbackFunction::create([this](int)
+						{
+							const auto path = juce::File(getPublicRomFolder());
+							(void)path.createDirectory();
+							path.revealToUser();
+						})
+					);
+				});
 			}
 		}
 
@@ -326,6 +336,11 @@ namespace pluginLib
 			return {std::make_pair(res, static_cast<uint32_t>(size))};
 		}
 		return {};
+	}
+
+	std::string Processor::getPublicRomFolder() const
+	{
+		return Tools::getPublicDataFolder(getProperties().name) + "roms/";
 	}
 
 	void Processor::destroyController()
@@ -576,6 +591,37 @@ namespace pluginLib
 					out->sendMessageNow(message);
 		    }
 		}
+	}
+
+	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)
+	{
+		if(getProperties().isSynth || getTotalNumInputChannels() <= 0)
+		{
+			_buffer.clear(0, _buffer.getNumSamples());
+			return;
+		}
+
+		const auto sampleCount = static_cast<uint32_t>(_buffer.getNumSamples());
+		const auto outCount = static_cast<uint32_t>(getTotalNumOutputChannels());
+		const auto inCount = static_cast<uint32_t>(getTotalNumInputChannels());
+
+		uint32_t inCh = 0;
+
+		for(uint32_t outCh=0; outCh<outCount; ++outCh)
+		{
+			auto* input = _buffer.getReadPointer(static_cast<int>(inCh));
+			auto* output = _buffer.getWritePointer(static_cast<int>(outCh));
+
+			m_bypassBuffer.write(input, outCh, sampleCount, getLatencySamples());
+			m_bypassBuffer.read(output, outCh, sampleCount);
+
+			++inCh;
+
+			if(inCh >= inCount)
+				inCh = 0;
+		}
+
+//		AudioProcessor::processBlockBypassed(_buffer, _midiMessages);
 	}
 
 #if !SYNTHLIB_DEMO_MODE
