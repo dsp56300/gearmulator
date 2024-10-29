@@ -9,6 +9,6 @@ namespace pluginLib
 	public:
 		static bool isHeadless();
 
-		static std::string getPublicDataFolder(const std::string& _productName);
+		static std::string getPublicDataFolder(const std::string& _vendorName, const std::string& _productName);
 	};
 }

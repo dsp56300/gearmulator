@@ -37,6 +37,7 @@ namespace pluginLib
 		struct Properties
 		{
 			const std::string name;
+			const std::string vendor;
 			const bool isSynth;
 			const bool wantsMidiInput;
 			const bool producesMidiOut;

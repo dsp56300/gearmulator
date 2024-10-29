@@ -340,7 +340,7 @@ namespace pluginLib
 
 	std::string Processor::getPublicRomFolder() const
 	{
-		return Tools::getPublicDataFolder(getProperties().name) + "roms/";
+		return Tools::getPublicDataFolder(getProperties().vendor, getProperties().name) + "roms/";
 	}
 
 	void Processor::destroyController()

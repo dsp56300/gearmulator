@@ -21,8 +21,8 @@ namespace pluginLib
 		return host.contains("juce_vst3_helper") || host.contains("juce_lv2_helper");
 	}
 
-	std::string Tools::getPublicDataFolder(const std::string& _productName)
+	std::string Tools::getPublicDataFolder(const std::string& _vendorName, const std::string& _productName)
 	{
-		return synthLib::validatePath(synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments) + _productName + '/');
+		return synthLib::validatePath(synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments) + _vendorName + '/' + _productName + '/');
 	}
 }
