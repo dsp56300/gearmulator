@@ -564,7 +564,7 @@ namespace jucePluginEditorLib
 				return res;
 
 			const auto modulePath = synthLib::getModulePath();
-			const auto publicDataPath = pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().name);
+			const auto publicDataPath = pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().vendor, m_processor.getProperties().name);
 			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 || m_skinFolder.find(publicDataPath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
 
 			// try to load from disk first

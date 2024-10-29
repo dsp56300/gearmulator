@@ -37,7 +37,7 @@ OsirusProcessor::OsirusProcessor() :
                    .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()}
+	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_Manufacturer, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()}
 	, virusLib::DeviceModel::ABC)
 {
 	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::ABC));
