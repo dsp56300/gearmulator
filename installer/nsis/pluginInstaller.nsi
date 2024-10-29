@@ -28,41 +28,37 @@ Var DirLv2
 
 Function .onInit
 	SetShellVarContext current
+	SetRegView 64
 FunctionEnd
 
 # ____________________________
 # SECTIONS
 #
 
-SectionGroup /e "Plugin Formats"
-	Section "VST2" Sec_Vst2
-		SetOutPath $DirVst2
-		File /r /x *.so /x *.pdb "${DIR_PLUGINS}\VST\${NAME}.dll"
-	SectionEnd
-
-	Section "VST3" Sec_Vst3
-		SetOutPath $DirVst3
-		File /r /x *.so /x *.pdb "${DIR_PLUGINS}\VST3\${NAME}.vst3"
-	SectionEnd
-
-	Section "CLAP" Sec_Clap
-		SetOutPath $DirClap
-		File /r /x *.so /x *.pdb "${DIR_PLUGINS}\CLAP\${NAME}.clap"
-	SectionEnd
-
-	Section "LV2" Sec_Lv2
-		SetOutPath $DirLv2
-		File /r /x *.so /x *.pdb "${DIR_PLUGINS}\LV2\${NAME}.lv2"
-	SectionEnd
-SectionGroupEnd
-
 Section "Default Skins"
+	SectionIn RO
 	SetOutPath "$DOCUMENTS\${VENDOR}\${NAME}\skins"
 	File /r "${DIR_SKINS}"
 SectionEnd
 
+!macro SectionPlugin Format SectionVarName DirVarName FileExtension
+	Section "${Format}" ${SectionVarName}
+		SetOutPath $${DirVarName}
+		File /r /x *.so /x *.pdb "${DIR_PLUGINS}\${Format}\${NAME}.${FileExtension}"
+		WriteRegStr HKLM "Software\${VENDOR}\${NAME}" "InstallDir${Format}" $${DirVarName}
+	SectionEnd
+!macroend
+
+SectionGroup /e "Plugin Formats"
+	!insertmacro SectionPlugin "VST" Sec_Vst2 DirVst2 dll
+	!insertmacro SectionPlugin "VST3" Sec_Vst3 DirVst3 vst3
+	!insertmacro SectionPlugin "CLAP" Sec_Clap DirClap clap
+	!insertmacro SectionPlugin "LV2" Sec_Lv2 DirLv2 lv2
+SectionGroupEnd
+
 Section
-	SetOutPath "$PROGRAMFILES64\${VENDOR}\${NAME}"
+	SetOutPath "$INSTDIR"
+	WriteRegStr HKLM "Software\${VENDOR}\${NAME}" "InstallDir" "$INSTDIR"
 	WriteUninstaller "$INSTDIR\${NAME}Uninstaller.exe"
 	CreateShortcut "$SMPROGRAMS\Uninstall ${NAME}.lnk" "$INSTDIR\${NAME}Uninstaller.exe"
 SectionEnd
@@ -91,10 +87,10 @@ Page directory
 	FunctionEnd
 !macroend
 
-!insertmacro PagePlugin DirVst2 VST2 ${Sec_Vst2} "C:\Program Files\Common Files\VST2"
-!insertmacro PagePlugin DirVst3 VST3 ${Sec_Vst3} "C:\Program Files\Common Files\VST3"
-!insertmacro PagePlugin DirClap CLAP ${Sec_Clap} "C:\Program Files\Common Files\CLAP"
-!insertmacro PagePlugin DirLv2 LV2 ${Sec_Lv2} "C:\Program Files\Common Files\LV2"
+!insertmacro PagePlugin DirVst2 VST2 ${Sec_Vst2} "$COMMONFILES64\VST2"
+!insertmacro PagePlugin DirVst3 VST3 ${Sec_Vst3} "$COMMONFILES64\VST3"
+!insertmacro PagePlugin DirClap CLAP ${Sec_Clap} "$COMMONFILES64\CLAP"
+!insertmacro PagePlugin DirLv2 LV2 ${Sec_Lv2} "$COMMONFILES64\LV2"
 
 Page instfiles
 
