@@ -109,7 +109,15 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 
 	try
 	{
-		auto* editor = createEditor(_skin);
+		auto skin = _skin;
+
+		// if the embedded skin cannot be found, use skin folder as fallback
+		if(_skin.folder.empty() && !m_processor.findResource(_skin.jsonFilename))
+		{
+			skin.folder = synthLib::validatePath(getSkinFolder() + _skin.displayName);
+		}
+
+		auto* editor = createEditor(skin);
 		m_editor.reset(editor);
 
 		getEditor()->onOpenMenu.addListener([this](Editor*, const juce::MouseEvent* _e)
