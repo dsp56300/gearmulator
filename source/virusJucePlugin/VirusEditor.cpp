@@ -16,13 +16,13 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
-		Editor(_processorRef, _binding, std::move(_skinFolder)),
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
+		Editor(_processorRef, _binding, _skin),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
-		create(_jsonFilename);
+		create();
 
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, _processorRef));

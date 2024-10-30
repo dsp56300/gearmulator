@@ -68,6 +68,6 @@ namespace mqJucePlugin
 
 	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
-		return new mqJucePlugin::Editor(m_processor, m_parameterBinding, _skin.folder, _skin.jsonFilename);
+		return new mqJucePlugin::Editor(m_processor, m_parameterBinding, _skin);
 	}
 }

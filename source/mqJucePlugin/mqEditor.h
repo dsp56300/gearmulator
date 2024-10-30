@@ -23,7 +23,7 @@ namespace mqJucePlugin
 	class Editor final : public jucePluginEditorLib::Editor
 	{
 	public:
-		Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename);
+		Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin);
 		~Editor() override;
 
 		Editor(Editor&&) = delete;

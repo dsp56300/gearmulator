@@ -24,12 +24,12 @@
 
 namespace n2xJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	, m_parameterBinding(_binding)
 	{
-		create(_jsonFilename);
+		create();
 
 		addMouseListener(this, true);
 		{

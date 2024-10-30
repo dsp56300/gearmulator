@@ -1,6 +1,5 @@
 #include "mqEditor.h"
 
-#include "BinaryData.h"
 #include "PluginProcessor.h"
 
 #include "mqController.h"
@@ -17,11 +16,11 @@ namespace mqJucePlugin
 {
 	static constexpr uint32_t PlayModeListenerId = 1;
 
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
-		create(_jsonFilename);
+		create();
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 

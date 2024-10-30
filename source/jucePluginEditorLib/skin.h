@@ -6,9 +6,9 @@ namespace jucePluginEditorLib
 {
 	struct Skin
 	{
-		std::string displayName;
+		std::string displayName;	// == folder name on disk if not embedded into binary
 		std::string jsonFilename;
-		std::string folder;
+		std::string folder;			// empty if skin is embedded into binary
 
 		bool operator == (const Skin& _other) const
 		{

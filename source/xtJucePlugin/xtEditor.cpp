@@ -1,6 +1,5 @@
 #include "xtEditor.h"
 
-#include "BinaryData.h"
 #include "PluginProcessor.h"
 #include "xtArp.h"
 
@@ -17,13 +16,13 @@
 
 namespace xtJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	, m_parameterBinding(_binding)
 	, m_playModeChangeListener(m_controller.onPlayModeChanged)
 	{
-		create(_jsonFilename);
+		create();
 
 		m_focusedParameter.reset(new FocusedParameter(m_controller, _binding, *this));
 

@@ -1,6 +1,7 @@
 #include "pluginEditor.h"
 
 #include "pluginProcessor.h"
+#include "skin.h"
 
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/parameterbinding.h"
@@ -14,11 +15,11 @@
 
 namespace jucePluginEditorLib
 {
-	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder)
+	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin)
 		: genericUI::Editor(static_cast<EditorInterface&>(*this))
 		, m_processor(_processor)
 		, m_binding(_binding)
-		, m_skinFolder(std::move(_skinFolder))
+		, m_skin(std::move(_skin))
 		, m_overlays(*this, _binding)
 	{
 		showDisclaimer();
@@ -28,6 +29,11 @@ namespace jucePluginEditorLib
 	{
 		for (const auto& file : m_dragAndDropFiles)
 			file.deleteFile();
+	}
+
+	void Editor::create()
+	{
+		genericUI::Editor::create(m_skin.jsonFilename);
 	}
 
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
@@ -544,7 +550,7 @@ namespace jucePluginEditorLib
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)
 	{
-		if(!m_skinFolder.empty())
+		if(!m_skin.folder.empty())
 		{
 			auto readFromCache = [this, &_name, &_dataSize]()
 			{
@@ -565,7 +571,7 @@ namespace jucePluginEditorLib
 
 			const auto modulePath = synthLib::getModulePath();
 			const auto publicDataPath = pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().vendor, m_processor.getProperties().name);
-			const auto folder = synthLib::validatePath(m_skinFolder.find(modulePath) == 0 || m_skinFolder.find(publicDataPath) == 0 ? m_skinFolder : modulePath + m_skinFolder);
+			const auto folder = synthLib::validatePath(m_skin.folder.find(modulePath) == 0 || m_skin.folder.find(publicDataPath) == 0 ? m_skin.folder : modulePath + m_skin.folder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");
