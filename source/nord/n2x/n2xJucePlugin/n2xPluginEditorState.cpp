@@ -40,7 +40,7 @@ namespace n2xJucePlugin
 		return jucePluginEditorLib::PluginEditorState::initAdvancedContextMenu(_menu, _enabled);
 	}
 
-	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const Skin& _skin)
+	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
 		return new n2xJucePlugin::Editor(m_processor, m_parameterBinding, _skin.folder, _skin.jsonFilename);
 	}

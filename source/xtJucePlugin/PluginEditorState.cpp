@@ -63,7 +63,7 @@ namespace xtJucePlugin
 	}
 
 
-	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const Skin& _skin)
+	jucePluginEditorLib::Editor* PluginEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
 		return new xtJucePlugin::Editor(m_processor, m_parameterBinding, _skin.folder, _skin.jsonFilename);
 	}

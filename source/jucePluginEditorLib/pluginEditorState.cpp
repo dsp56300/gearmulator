@@ -29,7 +29,7 @@ int PluginEditorState::getHeight() const
 	return m_editor ? m_editor->getHeight() : 0;
 }
 
-const std::vector<PluginEditorState::Skin>& PluginEditorState::getIncludedSkins()
+const std::vector<Skin>& PluginEditorState::getIncludedSkins()
 {
 	return m_includedSkins;
 }
@@ -454,7 +454,7 @@ void PluginEditorState::exportCurrentSkin() const
 	}
 }
 
-PluginEditorState::Skin PluginEditorState::readSkinFromConfig() const
+Skin PluginEditorState::readSkinFromConfig() const
 {
 	const auto& config = m_processor.getConfig();
 

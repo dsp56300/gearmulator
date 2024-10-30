@@ -18,6 +18,6 @@ namespace mqJucePlugin
 		void initContextMenu(juce::PopupMenu& _menu) override;
 		bool initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled) override;
 	private:
-		jucePluginEditorLib::Editor* createEditor(const Skin& _skin) override;
+		jucePluginEditorLib::Editor* createEditor(const jucePluginEditorLib::Skin& _skin) override;
 	};
 }

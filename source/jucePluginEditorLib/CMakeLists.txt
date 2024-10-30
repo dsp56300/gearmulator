@@ -15,6 +15,7 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
+	skin.h
 	types.h
 )
 

@@ -15,6 +15,7 @@ add_custom_target(cmakeScripts SOURCES
 	macsetup.command.in 
 	runAuValidation.cmake 
 	skins.cmake
+	skins.h.in
 	../base.cmake)
 
 # ----------------- DSP56300 emulator

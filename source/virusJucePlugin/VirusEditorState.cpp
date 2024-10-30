@@ -8,13 +8,13 @@
 
 namespace virus
 {
-	VirusEditorState::VirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller, const std::vector<VirusEditorState::Skin>& _includedSkins)
+	VirusEditorState::VirusEditorState(VirusProcessor& _processor, pluginLib::Controller& _controller, const std::vector<jucePluginEditorLib::Skin>& _includedSkins)
 		: jucePluginEditorLib::PluginEditorState(_processor, _controller, _includedSkins)
 	{
 		loadDefaultSkin();
 	}
 
-	jucePluginEditorLib::Editor* VirusEditorState::createEditor(const Skin& _skin)
+	jucePluginEditorLib::Editor* VirusEditorState::createEditor(const jucePluginEditorLib::Skin& _skin)
 	{
 		return new genericVirusUI::VirusEditor(m_parameterBinding, static_cast<VirusProcessor&>(m_processor), _skin.jsonFilename, _skin.folder);
 	}
