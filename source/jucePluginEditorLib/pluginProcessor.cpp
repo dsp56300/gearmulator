@@ -66,7 +66,31 @@ namespace jucePluginEditorLib
 				m_editorState->setPerInstanceConfig(m_editorStateData);
 		}
 
-	    return new EditorWindow(*this, *m_editorState, getConfig());
+	    auto* window = new EditorWindow(*this, *m_editorState, getConfig());
+
+		if(window->getWidth() == 0 || window->getHeight() == 0)
+		{
+			constexpr int w = 600;
+			constexpr int h = 300;
+
+			window->setSize(w,h);
+
+			auto* l = new juce::Label({}, 
+				"No skins found, check your installation\n"
+				"\n"
+				"Skins need to be located at:\n"
+				"\n" +
+				m_editorState->getSkinFolder()
+			);
+
+			l->setSize(w,h);
+			l->setJustificationType(juce::Justification::centred);
+			l->setColour(juce::Label::ColourIds::textColourId, juce::Colour(0xffff0000));
+			l->setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(0xff111111));
+
+			window->addAndMakeVisible(l);
+		}
+		return window;
 	}
 
 	void Processor::destroyEditorState()
