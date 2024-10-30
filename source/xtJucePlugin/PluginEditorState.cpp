@@ -5,13 +5,10 @@
 
 #include "synthLib/os.h"
 
+#include "skins.h"
+
 namespace xtJucePlugin
 {
-	const std::vector<PluginEditorState::Skin> g_includedSkins =
-	{
-		{"XT", "xtDefault.json", ""},
-	};
-
 	PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : jucePluginEditorLib::PluginEditorState(_processor, _processor.getController(), g_includedSkins)
 	{
 		loadDefaultSkin();

@@ -1,0 +1,6 @@
+#pragma once
+
+const std::vector<jucePluginEditorLib::PluginEditorState::Skin> g_includedSkins =
+{
+	${SKIN_CPP_ENTRIES}
+};

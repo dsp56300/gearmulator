@@ -7,13 +7,10 @@
 
 #include "synthLib/os.h"
 
+#include "skins.h"
+
 namespace n2xJucePlugin
 {
-	const std::vector<PluginEditorState::Skin> g_includedSkins =
-	{
-		{"N2x", "n2xTrancy.json", ""},
-	};
-
 	PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : jucePluginEditorLib::PluginEditorState(_processor, _processor.getController(), g_includedSkins)
 	{
 		loadDefaultSkin();

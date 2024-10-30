@@ -7,14 +7,10 @@
 
 #include "synthLib/os.h"
 
+#include "skins.h"
+
 namespace mqJucePlugin
 {
-	const std::vector<PluginEditorState::Skin> g_includedSkins =
-	{
-		{"Editor", "mqDefault.json", ""},
-		{"Device", "mqFrontPanel.json", ""}
-	};
-
 	PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : jucePluginEditorLib::PluginEditorState(_processor, _processor.getController(), g_includedSkins)
 	{
 		loadDefaultSkin();
