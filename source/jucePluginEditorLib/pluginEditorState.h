@@ -72,7 +72,7 @@ namespace jucePluginEditorLib
 		Editor* getEditor() const;
 
 	private:
-		void loadSkin(const Skin& _skin);
+		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
 		void setGuiScale(int _scale) const;
 
 		std::unique_ptr<juce::Component> m_editor;

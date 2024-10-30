@@ -86,7 +86,7 @@ std::string PluginEditorState::getSkinFolder() const
 	return synthLib::validatePath(pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().vendor, m_processor.getProperties().name) + "skins/");
 }
 
-void PluginEditorState::loadSkin(const Skin& _skin)
+bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
 	m_currentSkin = _skin;
 	writeSkinToConfig(_skin);
@@ -126,6 +126,8 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
+
+		return true;
 	}
 	catch(const std::runtime_error& _err)
 	{
@@ -136,7 +138,10 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 		m_parameterBinding.clear();
 		m_editor.reset();
 
-		loadSkin(m_includedSkins[0]);
+		if(_fallbackIndex >= m_includedSkins.size())
+			return false;
+
+		return loadSkin(m_includedSkins[_fallbackIndex], _fallbackIndex + 1);
 	}
 }
 
