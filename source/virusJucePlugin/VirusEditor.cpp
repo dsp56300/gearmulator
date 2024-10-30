@@ -94,7 +94,7 @@ namespace genericVirusUI
 
 			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
 
-			m_romSelector->onChange = [this, roms]
+			m_romSelector->onChange = [this]
 			{
 				const auto oldIndex = m_processor.getSelectedRomIndex();
 				const auto newIndex = m_romSelector->getSelectedId() - 1;
