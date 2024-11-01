@@ -1,28 +1,27 @@
 !include LogicLib.nsh
 
-!define		NAME		Osirus
-!define		VENDOR		"The Usual Suspects"
+!define				NAME			Osirus
+!define				VENDOR			"The Usual Suspects"
+	
+!define				DIR_PLUGINS		"..\..\bin\plugins\Release"
+!define				DIR_SKINS		"..\..\source\osirusJucePlugin\skins\"
+!define				DIR_DATA		"$DOCUMENTS\${VENDOR}\${NAME}"
 
-!define		DIR_PLUGINS	"..\..\bin\plugins\Release"
-!define		DIR_SKINS	"..\..\source\osirusJucePlugin\skins\"
+Name				${NAME}
+	
+#!include			${NAME}.nsh
+	
+!define				REGKEYBASE		"Software\${VENDOR}\${NAME}"
+	
+OutFile				${NAME}Installer.exe
+	
+InstallColors		/windows
+XPStyle				on
 
-Name		${NAME}
+InstallDir 			"$PROGRAMFILES64\${VENDOR}\${NAME}"
+InstallDirRegKey	HKLM "${REGKEYBASE}" "InstallDir"
 
-#!include ${NAME}.nsh
-
-!define		REGKEYBASE	"Software\${VENDOR}\${NAME}"
-
-OutFile		${NAME}Installer.exe
-
-InstallColors	/windows
-XPStyle		on
-InstallDir 	"$PROGRAMFILES64\${VENDOR}\${NAME}"
-
-; Registry key to check for directory (so if you install again, it will overwrite the old one automatically)
-
-InstallDirRegKey HKLM "${REGKEYBASE}" "InstallDir"
-
-RequestExecutionLevel admin
+RequestExecutionLevel	admin
 
 # ____________________________
 #
@@ -37,6 +36,11 @@ Function .onInit
 	SetRegView 64
 FunctionEnd
 
+Function un.onInit
+	SetShellVarContext current
+	SetRegView 64
+FunctionEnd
+
 # ____________________________
 # SECTIONS
 #
@@ -44,7 +48,7 @@ FunctionEnd
 !ifdef DIR_SKINS
 Section "Default Skins (required)"
 	SectionIn RO
-	SetOutPath "$DOCUMENTS\${VENDOR}\${NAME}\skins"
+	SetOutPath "${DIR_DATA}\skins"
 	File /r "${DIR_SKINS}"
 SectionEnd
 !endif
@@ -93,23 +97,26 @@ Page components
 
 Page directory
 
-!macro PagePlugin Result PluginName SectionName DefaultPath
+!macro PagePlugin Result Format SectionName DefaultPath
 	PageEx directory
-		Caption " - Select ${PluginName} directory"
+		Caption " - Select ${Format} directory"
 		DirVar $${Result}
-		PageCallbacks DirPluginPre${PluginName} "" ""
+		PageCallbacks DirPluginPre${Format} "" ""
 	PageExEnd
 
-	Function DirPluginPre${PluginName}
+	Function DirPluginPre${Format}
 		${If} ${SectionIsSelected} ${SectionName}
-			StrCpy $${Result} "${DefaultPath}"
+			ReadRegStr $${Result} HKLM "${REGKEYBASE}" "InstallDir${Format}"
+			${If} $${Result} == ""
+				StrCpy $${Result} "${DefaultPath}"
+			${EndIf}
 		${Else}
 			Abort
 		${EndIf}
 	FunctionEnd
 !macroend
 
-!insertmacro PagePlugin DirVst2 VST2 ${Sec_Vst2} "$COMMONFILES64\VST2"
+!insertmacro PagePlugin DirVst2 VST ${Sec_Vst2} "$COMMONFILES64\VST2"
 !insertmacro PagePlugin DirVst3 VST3 ${Sec_Vst3} "$COMMONFILES64\VST3"
 !insertmacro PagePlugin DirClap CLAP ${Sec_Clap} "$COMMONFILES64\CLAP"
 !insertmacro PagePlugin DirLv2 LV2 ${Sec_Lv2} "$COMMONFILES64\LV2"
@@ -120,8 +127,35 @@ Page instfiles
 # UNINSTALLER
 # 
 
-Section "uninstall"
+Section "un.Remove Skins"
+	RMDir /r "${DIR_DATA}\skins"
+SectionEnd
+
+Section "un.Remove Firmware ROMs"
+	RMDir /r "${DIR_DATA}\roms"
+SectionEnd
+
+!macro RemovePlugin Format
+	ReadRegStr $0 HKLM "${REGKEYBASE}" "InstallDir${Format}"
+	${If} "$0" != ""
+		RMDir /r "$0\${NAME}.${Format}"
+		RMDir /r "$0\${NAME}FX.${Format}"
+		Delete "$0\${NAME}.dll"
+		Delete "$0\${NAME}FX.dll"
+	${EndIf}
+!macroend
+
+Section "un.Base Files (always removed)"
+	!insertmacro RemovePlugin VST
+	!insertmacro RemovePlugin VST3
+	!insertmacro RemovePlugin CLAP
+	!insertmacro RemovePlugin LV2
 	Delete "$SMPROGRAMS\Uninstall ${NAME}.lnk"
 	Delete "$INSTDIR\${NAME}Uninstaller.exe"
-	RMDir $INSTDIR
+	RMDir "$INSTDIR"
+	RMDir "${DIR_DATA}"
+	DeleteRegKey HKLM "${REGKEYBASE}"
 SectionEnd
+
+UninstPage components
+UninstPage instfiles
