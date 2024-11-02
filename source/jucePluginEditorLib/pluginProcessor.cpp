@@ -24,7 +24,7 @@ namespace jucePluginEditorLib
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
 	: pluginLib::Processor(_busesProperties, _properties)
 	, m_configOptions(_configOptions)
-	, m_config(_configOptions)
+	, m_config(initConfigFile(_configOptions), _configOptions)
 	{
 #ifdef ZYNTHIAN
 		Logging::setLogFunc(&noLoggingFunc);
@@ -139,5 +139,23 @@ namespace jucePluginEditorLib
 		});
 
 		getController().loadChunkData(_cr);
+	}
+
+	juce::File Processor::initConfigFile(const juce::PropertiesFile::Options& _o) const
+	{
+		// copy from old location to new if still exists
+		juce::File oldFile(_o.getDefaultFile());
+
+		juce::File newFile(getConfigFile(false));
+
+		if(oldFile.existsAsFile())
+		{
+			newFile.createDirectory();
+			if(!oldFile.copyFileTo(newFile))
+				return oldFile;
+			oldFile.deleteFile();
+			return newFile;
+		}
+		return newFile;
 	}
 }

@@ -28,6 +28,8 @@ namespace jucePluginEditorLib
 		void loadChunkData(baseLib::ChunkReader& _cr) override;
 
 	private:
+		juce::File initConfigFile(const juce::PropertiesFile::Options& _o) const;
+
 		std::unique_ptr<PluginEditorState> m_editorState;
 
 		juce::PropertiesFile::Options m_configOptions;
