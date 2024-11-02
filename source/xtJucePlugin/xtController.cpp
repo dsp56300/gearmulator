@@ -2,7 +2,6 @@
 
 #include <fstream>
 
-#include "BinaryData.h"
 #include "PluginProcessor.h"
 
 #include "xtLib/xtState.h"

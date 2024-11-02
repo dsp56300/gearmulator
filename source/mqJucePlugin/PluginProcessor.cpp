@@ -1,10 +1,11 @@
 #include "PluginProcessor.h"
 #include "PluginEditorState.h"
-#include "BinaryData.h"
 
 #include "mqController.h"
 
-#include "jucePluginLib/processor.h"
+// ReSharper disable once CppUnusedIncludeDirective
+#include "BinaryData.h"
+#include "jucePluginLib/processorPropertiesInit.h"
 
 #include "mqLib/device.h"
 
@@ -18,17 +19,6 @@ namespace
 		opts.folderName = "DSP56300EmulatorVavra";
 		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorVavra";
 		return opts;
-	}
-
-	pluginLib::Processor::BinaryDataRef getBinaryData()
-	{
-		return
-		{
-			BinaryData::namedResourceListSize,
-			BinaryData::originalFilenames,
-			BinaryData::namedResourceList,
-			BinaryData::getNamedResource
-		};
 	}
 }
 
@@ -44,7 +34,7 @@ namespace mqJucePlugin
 	                   .withOutput("Out 2", juce::AudioChannelSet::stereo(), true)
 	                   .withOutput("Out 3", juce::AudioChannelSet::stereo(), true)
 #endif
-		, getOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_Manufacturer, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()})
+		, getOptions(), pluginLib::initProcessorProperties())
 	{
 		getController();
 		const auto latencyBlocks = getConfig().getIntValue("latencyBlocks", static_cast<int>(getPlugin().getLatencyBlocks()));
