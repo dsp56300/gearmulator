@@ -18,8 +18,8 @@ namespace n2xJucePlugin
 		jucePluginEditorLib::patchManager::GroupType::DataSources,
 	};
 
-	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir)
-	: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _dir, g_groupTypes)
+	PatchManager::PatchManager(Editor& _editor, Component* _root)
+	: jucePluginEditorLib::patchManager::PatchManager(_editor, _root, g_groupTypes)
 	, m_editor(_editor)
 	, m_controller(_editor.getN2xController())
 	{

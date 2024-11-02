@@ -28,7 +28,14 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes) : DB(_dir), m_editor(_editor), m_state(*this)
+	juce::File initRootDirectory(const Editor& _editor)
+	{
+		const auto configOptions = _editor.getProcessor().getConfigOptions();
+		const auto dir = configOptions.getDefaultFile().getParentDirectory();
+		return dir;
+	}
+
+	PatchManager::PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes) : DB(initRootDirectory(_editor)), m_editor(_editor), m_state(*this)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::Category, "Category");
 		setTagTypeName(pluginLib::patchDB::TagType::Tag, "Tag");

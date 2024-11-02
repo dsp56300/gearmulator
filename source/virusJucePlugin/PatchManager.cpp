@@ -22,7 +22,7 @@ namespace virus
 
 namespace genericVirusUI
 {
-	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root, const juce::File& _dir) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root, _dir), m_controller(_editor.getController())
+	PatchManager::PatchManager(VirusEditor& _editor, juce::Component* _root) : jucePluginEditorLib::patchManager::PatchManager(_editor, _root), m_controller(_editor.getController())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "Virus Model");
 		setTagTypeName(pluginLib::patchDB::TagType::CustomB, "Virus Features");

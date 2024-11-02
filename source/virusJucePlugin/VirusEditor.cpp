@@ -41,16 +41,13 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
-		const auto configOptions = getProcessor().getConfigOptions();
-		const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
 		{
 			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
 				pmParent = findComponent("page_presets", false);
 			if(!pmParent)
 				pmParent = findComponent("page_2_browser");
-			setPatchManager(new PatchManager(*this, pmParent, dir));
+			setPatchManager(new PatchManager(*this, pmParent));
 		}
 
 		m_presetName = findComponentT<juce::Label>("PatchName");

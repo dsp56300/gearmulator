@@ -35,10 +35,7 @@ namespace mqJucePlugin
 			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
 			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
 
-			const auto configOptions = getProcessor().getConfigOptions();
-			const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
-			setPatchManager(new PatchManager(*this, container, dir));
+			setPatchManager(new PatchManager(*this, container));
 		}
 
 		auto disableButton = [](juce::Component* _comp)

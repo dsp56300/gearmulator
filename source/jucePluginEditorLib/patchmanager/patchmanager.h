@@ -45,7 +45,7 @@ namespace jucePluginEditorLib::patchManager
 
 		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 
-		explicit PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes = DefaultGroupTypes);
+		explicit PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes = DefaultGroupTypes);
 		~PatchManager() override;
 
 		void timerCallback() override;
