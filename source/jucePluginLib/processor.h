@@ -123,6 +123,7 @@ namespace pluginLib
 		std::optional<std::pair<const char*, uint32_t>> findResource(const std::string& _filename) const;
 
 		std::string getPublicRomFolder() const;
+		std::string getDataFolder(bool _useFxFolder = false) const;
 
 	protected:
 		void destroyController();

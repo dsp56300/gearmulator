@@ -89,7 +89,7 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return synthLib::validatePath(pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().vendor, m_processor.getProperties().name) + "skins/");
+	return synthLib::validatePath(m_processor.getDataFolder() + "skins/");
 }
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
