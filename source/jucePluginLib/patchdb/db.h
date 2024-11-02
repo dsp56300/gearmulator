@@ -152,11 +152,11 @@ namespace pluginLib::patchDB
 
 		bool loadCache();
 		void saveCache();
+		juce::File getCacheFile() const;
+		juce::File getJsonFile() const;
 
 		// IO
 		juce::File m_settingsDir;
-		juce::File m_jsonFileName;
-		juce::File m_cacheFileName;
 
 		// loader
 		JobQueue m_loader;
