@@ -812,14 +812,49 @@ namespace pluginLib::patchDB
 		return synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 	}
 
-	void DB::startLoaderThread()
+	void DB::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
 	{
 		m_loader.start();
 
-		runOnLoaderThread([this]
+		runOnLoaderThread([this, _migrateFromDir]
 		{
 			if(!g_cacheEnabled || !loadCache())
-				loadJson();
+			{
+				if(!loadJson())
+				{
+					if(_migrateFromDir.isDirectory())
+					{
+						m_settingsDir.createDirectory();
+
+						std::vector<std::string> files;
+						synthLib::getDirectoryEntries(files, _migrateFromDir.getFullPathName().toStdString());
+
+						std::vector<juce::File> toBeDeleted;
+
+						for (const auto& file : files)
+						{
+							if( !synthLib::hasExtension(file, ".json") &&
+								!synthLib::hasExtension(file, ".syx") &&
+								!synthLib::hasExtension(file, ".cache"))
+								continue;
+
+							juce::File fileFrom(file);
+							juce::File fileTo(m_settingsDir.getChildFile(fileFrom.getFileName()));
+
+							if(!fileFrom.copyFileTo(fileTo))
+								return;
+
+							toBeDeleted.push_back(fileFrom);
+						}
+
+						if(loadJson())
+						{
+							for (auto& f : toBeDeleted)
+								f.deleteFile();
+						}
+					}
+				}
+			}
 		});
 	}
 
@@ -1295,7 +1330,12 @@ namespace pluginLib::patchDB
 	{
 		bool success = true;
 
-		const auto json = juce::JSON::parse(getJsonFile());
+		const auto jsonFile = getJsonFile();
+
+		if(!jsonFile.existsAsFile())
+			return false;
+
+		const auto json = juce::JSON::parse(jsonFile);
 		const auto* datasources = json["datasources"].getArray();
 
 		if(datasources)
@@ -1478,6 +1518,8 @@ namespace pluginLib::patchDB
 
 		const auto cacheFile = getCacheFile();
 		const auto jsonFile = getJsonFile();
+
+		jsonFile.createDirectory();
 
 		cacheFile.deleteFile();
 

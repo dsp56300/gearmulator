@@ -353,6 +353,11 @@ namespace pluginLib
 		return synthLib::validatePath(getDataFolder(_useFxFolder) + "config/");
 	}
 
+	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
+	{
+		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanagerDb/");
+	}
+
 	std::string Processor::getConfigFile(const bool _useFxFolder) const
 	{
 		return getConfigFolder(_useFxFolder) + getProductName(_useFxFolder) + ".xml";

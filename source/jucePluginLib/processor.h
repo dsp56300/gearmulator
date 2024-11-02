@@ -125,6 +125,7 @@ namespace pluginLib
 		std::string getDataFolder(bool _useFxFolder = false) const;
 		std::string getPublicRomFolder() const;
 		std::string getConfigFolder(bool _useFxFolder = false) const;
+		std::string getPatchManagerDataFolder(bool _useFxFolder = false) const;
 		std::string getConfigFile(bool _useFxFolder = false) const;
 		std::string getProductName(bool _useFxName = false) const;
 

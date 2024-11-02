@@ -28,14 +28,10 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	juce::File initRootDirectory(const Editor& _editor)
-	{
-		const auto configOptions = _editor.getProcessor().getConfigOptions();
-		const auto dir = configOptions.getDefaultFile().getParentDirectory();
-		return dir;
-	}
-
-	PatchManager::PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes) : DB(initRootDirectory(_editor)), m_editor(_editor), m_state(*this)
+	PatchManager::PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes)
+	: DB(juce::File(_editor.getProcessor().getPatchManagerDataFolder(false)))
+	, m_editor(_editor)
+	, m_state(*this)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::Category, "Category");
 		setTagTypeName(pluginLib::patchDB::TagType::Tag, "Tag");
@@ -884,6 +880,17 @@ namespace jucePluginEditorLib::patchManager
 		if(m_layout == LayoutType::List)
 			return m_list;
 		return m_grid;
+	}
+
+	void PatchManager::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
+	{
+		if(_migrateFromDir.getFullPathName().isEmpty())
+		{
+			const auto& configOptions = m_editor.getProcessor().getConfigOptions();
+			DB::startLoaderThread(configOptions.getDefaultFile().getParentDirectory());
+			return;
+		}
+		DB::startLoaderThread(_migrateFromDir);
 	}
 
 	pluginLib::patchDB::SearchHandle PatchManager::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)

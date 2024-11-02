@@ -142,6 +142,8 @@ namespace jucePluginEditorLib::patchManager
 
 		ListModel* getListModel() const;
 
+		void startLoaderThread(const juce::File& _migrateFromDir = {}) override;
+
 	private:
 		pluginLib::patchDB::SearchHandle getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem);
 		void onSelectedItemsChanged();

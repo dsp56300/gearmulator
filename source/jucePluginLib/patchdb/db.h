@@ -107,7 +107,7 @@ namespace pluginLib::patchDB
 	protected:
 		virtual void onLoadFinished() {}
 
-		void startLoaderThread();
+		virtual void startLoaderThread(const juce::File& _migrateFromDir = {});
 		void stopLoaderThread();
 
 		void runOnLoaderThread(std::function<void()>&& _func);
