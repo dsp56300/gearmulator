@@ -367,8 +367,8 @@ namespace pluginLib
 	{
 		const auto& p = getProperties();
 		auto name = p.name;
-		if(!_useFxName && p.isSynth && name.substr(name.size()-2, 2) == "FX")
-			return name.substr(name.size() - 2);
+		if(!_useFxName && !p.isSynth && name.substr(name.size()-2, 2) == "FX")
+			return name.substr(0, name.size() - 2);
 		return name;
 	}
 
