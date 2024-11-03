@@ -1,5 +1,21 @@
 Release Notes 
 
+1.3.22
+
+Framework:
+
+- [Imp] Upgraded to Juce 8.0.3 which uses Direct2D on Windows for faster UI rendering
+- [Imp] Patch Manager now stores its database in the user documents folder, next
+        to skins and roms:
+        c:\Users\<username>\Documents\<synthname>\patchmanagerDb (Win)
+		~/Documents/<synthname>/patchmanagerDb (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/<synthname>/patchmanagerDb (Linux)
+		Any existing database in the old location is automatically migrated to
+		the new one.
+- [Imp] Config file location has been changed and is now located in a subfolder
+        "config" next to the other folders. Existing configurations in legacy
+		locations are migrated automatically.
+
 1.3.21
 
 DSP:
