@@ -20,7 +20,9 @@
 
 #include "dsp56kEmu/logging.h"
 
+#if JUCE_MAJOR_VERSION < 8	// they forgot this include but fixed it in version 8+
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
+#endif
 
 namespace jucePluginEditorLib::patchManager
 {
