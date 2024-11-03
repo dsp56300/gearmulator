@@ -16,10 +16,14 @@ namespace
 	juce::PropertiesFile::Options getOptions()
 	{
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorNodalRed";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorNodalRed";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorNodalRed";
+		opts.applicationName = "n2x";
+		opts.filenameSuffix = "settings";
+#ifdef JUCE_LINUX 
+  	opts.folderName = ".config/The Usual Suspects/NodalRed2x";
+#else
+  	opts.folderName = "The Usual Suspects/NodalRed2x";
+#endif
+		opts.osxLibrarySubFolder = "Application Support";
 		return opts;
 	}
 

@@ -9,10 +9,14 @@ namespace
 	juce::PropertiesFile::Options getConfigOptions()
 	{
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300 Emulator";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300 Emulator";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300 Emulator";
+		opts.applicationName = "osirus";
+		opts.filenameSuffix = "settings";
+#ifdef JUCE_LINUX 
+  	opts.folderName = ".config/The Usual Suspects/Osirus";
+#else
+  	opts.folderName = "The Usual Suspects/Osirus";
+#endif
+		opts.osxLibrarySubFolder = "Application Support";
 		return opts;
 	}
 

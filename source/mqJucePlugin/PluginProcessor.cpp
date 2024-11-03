@@ -13,10 +13,14 @@ namespace
 	juce::PropertiesFile::Options getOptions()
 	{
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorVavra";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorVavra";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorVavra";
+		opts.applicationName = "vavra";
+		opts.filenameSuffix = "settings";
+#ifdef JUCE_LINUX 
+  	opts.folderName = ".config/The Usual Suspects/Vavra";
+#else
+  	opts.folderName = "The Usual Suspects/Vavra";
+#endif
+		opts.osxLibrarySubFolder = "Application Support";
 		return opts;
 	}
 

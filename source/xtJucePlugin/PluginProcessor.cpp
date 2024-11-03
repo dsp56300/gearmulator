@@ -15,10 +15,14 @@ namespace
 	juce::PropertiesFile::Options getOptions()
 	{
 		juce::PropertiesFile::Options opts;
-		opts.applicationName = "DSP56300EmulatorXenia";
-		opts.filenameSuffix = ".settings";
-		opts.folderName = "DSP56300EmulatorXenia";
-		opts.osxLibrarySubFolder = "Application Support/DSP56300EmulatorXenia";
+		opts.applicationName = "xenia";
+		opts.filenameSuffix = "settings";
+#ifdef JUCE_LINUX 
+  	opts.folderName = ".config/The Usual Suspects/Xenia";
+#else
+  	opts.folderName = "The Usual Suspects/Xenia";
+#endif
+		opts.osxLibrarySubFolder = "Application Support";
 		return opts;
 	}
 
