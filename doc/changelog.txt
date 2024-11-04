@@ -18,6 +18,8 @@ Framework:
 
 OsTIrus:
 
+- [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
+
 - [Fix] Fix duplicated factory presets and lost favourites when switching between
         TI2 and Snow mode
 

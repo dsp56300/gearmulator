@@ -67,6 +67,7 @@
 		{"page":112, "index":40, "name":"Cutoff", "displayName":"Filter 1 Cutoff", "min":0, "max":127, "default":127, "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":40, "name":"Vocoder/Carrier Center Frequency", "displayName":"Vocoder Carrier Center Frequency", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":112, "index":41, "name":"Cutoff2", "displayName":"Filter 2 Cutoff", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false},
+		{"page":112, "index":41, "name":"Cutoff2 Offset", "displayName":"Filter 2 Offset", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false},
 		{"page":112, "index":41, "name":"Vocoder/Modulator Center Frequency", "displayName":"Vocoder Modulator Center Frequency", "min":0, "max":127, "default":64, "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":112, "index":41, "name":"Vocoder/Modulator Frequency Offset", "displayName":"Vocoder Modulator Frequency Offset", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
 		{"page":112, "index":41, "name":"Offset for FilterLink", "displayName":"Filter 2 Offset (For Filter Link)", "min":0, "max":127, "default":64, "toText":"signed", "isPublic":true, "isDiscrete":false, "isBool":false, "isBipolar":true},
