@@ -1804,7 +1804,7 @@ namespace pluginLib::patchDB
 		{
 			baseLib::BinaryStream inStream(data);
 
-			auto stream = inStream.tryReadChunk(chunks::g_patchManager, 2);
+			auto stream = inStream.tryReadChunk(chunks::g_patchManager, chunkVersions::g_patchManager);
 
 			if(!stream)
 				return false;
@@ -2009,7 +2009,7 @@ namespace pluginLib::patchDB
 			std::shared_lock lockDS(m_dataSourcesMutex);
 			std::shared_lock lockP(m_patchesMutex);
 
-			baseLib::ChunkWriter cw(outStream, chunks::g_patchManager, 2);
+			baseLib::ChunkWriter cw(outStream, chunks::g_patchManager, chunkVersions::g_patchManager);
 			{
 				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
 
