@@ -833,9 +833,14 @@ namespace pluginLib::patchDB
 
 						for (const auto& file : files)
 						{
-							if( !synthLib::hasExtension(file, ".json") &&
-								!synthLib::hasExtension(file, ".syx") &&
-								!synthLib::hasExtension(file, ".cache"))
+							if(synthLib::hasExtension(file, ".cache"))
+							{
+								juce::File f(file);
+								f.deleteFile();
+								continue;
+							}
+
+							if(!synthLib::hasExtension(file, ".json") && !synthLib::hasExtension(file, ".syx"))
 								continue;
 
 							juce::File fileFrom(file);
