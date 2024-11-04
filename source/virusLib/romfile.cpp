@@ -84,12 +84,6 @@ bool ROMFile::initialize()
 	{
 		if (!fw.Presets.empty())
 		{
-			for (auto& presetFile: fw.Presets)
-			{
-				imemstream stream(presetFile);
-				loadPresetFile(stream, m_model);
-			}
-
 			for (const auto & preset : fw.Presets)
 			{
 				m_demoData.insert(m_demoData.begin(), preset.begin(), preset.end());
@@ -143,11 +137,9 @@ bool ROMFile::initialize()
 			}
 		}
 
-		// try to load the presets from the other roms, too
+		//load presets in a fixed order, TI first, Snow last
 		auto loadFirmwarePresets = [this](const DeviceModel _model)
 		{
-			if(m_model == _model)
-				return;
 			const std::unique_ptr<imemstream> file(new imemstream(reinterpret_cast<std::vector<char>&>(m_romFileData)));
 			const auto firmware = ROMUnpacker::getFirmware(*file, _model);
 			if(!firmware.Presets.empty())

@@ -754,31 +754,12 @@ namespace virus
         {
             _index -= 2;
 
-            const auto countSnow    = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::Snow);
             const auto countTI      = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI);
             const auto countTI2     = virusLib::ROMFile::getRomBankCount(virusLib::DeviceModel::TI2);
 
-            switch(m_processor.getModel())
-            {
-            case virusLib::DeviceModel::Snow: 
-                if(_index < countSnow)                  sprintf(temp, "Snow Rom %c", 'A' + _index);
-                else if(_index < countTI + countSnow)	sprintf(temp, "TI Rom %c", 'A' + (_index - countSnow));
-                else			                 		sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI - countSnow));
-                break;
-            case virusLib::DeviceModel::TI:
-                if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
-                else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
-                else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countTI2));
-                break;
-            case virusLib::DeviceModel::TI2: 
-                if(_index < countTI2)	                sprintf(temp, "TI2 Rom %c", 'A' + _index);
-                else if(_index < countTI2 + countTI)	sprintf(temp, "TI Rom %c", 'A' + (_index - countTI2));
-                else			    	            	sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI2 - countTI));
-                break;
-            default:
-                assert(false);
-                break;
-            }
+            if(_index < countTI)	                sprintf(temp, "TI Rom %c", 'A' + _index);
+            else if(_index < countTI + countTI2)	sprintf(temp, "TI2 Rom %c", 'A' + (_index - countTI));
+            else			    		            sprintf(temp, "Snow Rom %c", 'A' + (_index - countTI - countTI2));
         }
         return temp;
     }
