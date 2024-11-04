@@ -16,6 +16,11 @@ Framework:
         "config" next to the other folders. Existing configurations in legacy
 		locations are migrated automatically.
 
+OsTIrus:
+
+- [Fix] Fix duplicated factory presets and lost favourites when switching between
+        TI2 and Snow mode
+
 1.3.21
 
 DSP:
