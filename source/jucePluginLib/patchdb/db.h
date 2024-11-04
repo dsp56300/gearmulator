@@ -156,7 +156,7 @@ namespace pluginLib::patchDB
 		juce::File getJsonFile() const;
 
 		// IO
-		juce::File m_settingsDir;
+		const juce::File m_settingsDir;
 
 		// loader
 		JobQueue m_loader;
