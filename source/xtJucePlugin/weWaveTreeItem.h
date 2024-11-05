@@ -35,6 +35,8 @@ namespace xtJucePlugin
 
 		static std::vector<std::vector<uint8_t>> getSysexFromFiles(const juce::StringArray& _files);
 
+		void itemClicked(const juce::MouseEvent&) override;
+
 	private:
 		void onWaveChanged(xt::WaveId _index) const;
 		void onWaveChanged() const;

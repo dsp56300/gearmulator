@@ -51,6 +51,8 @@ namespace xtJucePlugin
 
 		std::string getTableName(xt::TableId _id) const;
 
+		xt::TableId getSelectedTable() const { return m_selectedTable; }
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }

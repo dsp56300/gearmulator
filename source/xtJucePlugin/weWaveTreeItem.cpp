@@ -165,6 +165,39 @@ namespace xtJucePlugin
 		return sysex;
 	}
 
+	void WaveTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		const auto selectedTableId = m_editor.getSelectedTable();
+
+		if(selectedTableId.isValid())
+		{
+			juce::PopupMenu controlTableSlotsMenu;
+			for(uint16_t i=0; i<xt::wave::g_wavesPerTable; ++i)
+			{
+				const auto tableIndex = xt::TableIndex(i);
+
+				if(i && (i & 15) == 0)
+					controlTableSlotsMenu.addColumnBreak();
+
+				controlTableSlotsMenu.addItem("Slot " + std::to_string(i + 1), !xt::wave::isReadOnly(tableIndex), false, [this, tableIndex, selectedTableId]
+				{
+					m_editor.getData().setTableWave(selectedTableId, tableIndex, m_waveIndex);
+				});
+			}
+			menu.addSubMenu("Copy to current Control Table", controlTableSlotsMenu);
+		}
+
+		menu.showMenuAsync({});
+	}
+
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const
 	{
 		if(_index != m_waveIndex)
