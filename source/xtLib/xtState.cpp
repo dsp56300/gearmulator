@@ -854,8 +854,16 @@ namespace xt
 		*/
 	}
 
-	void State::parseWaveData(WaveData& _wave, const SysEx& _sysex)
+	bool State::parseWaveData(WaveData& _wave, const SysEx& _sysex)
 	{
+		if(_sysex.size() != std::tuple_size_v<Wave>)
+			return false;
+
+		if(_sysex.front() != 0xf0 || _sysex[1] != wLib::IdWaldorf || _sysex[2] != IdMw2)
+			return false;
+
+		if(_sysex[4] != static_cast<uint8_t>(SysexCommand::WaveDump) && _sysex[4] != static_cast<uint8_t>(SysexCommand::WaveDumpP))
+			return false;
 		/*
 			mw2_sysex.pdf:
 
@@ -882,6 +890,7 @@ namespace xt
 			_wave[i] = static_cast<int8_t>(sample);
 			_wave[127-i] = static_cast<int8_t>(-sample);
 		}
+		return true;
 	}
 
 	SysEx State::createWaveData(const WaveData& _wave, const uint16_t _waveIndex, const bool _preview)
@@ -930,8 +939,17 @@ namespace xt
 		return result;
 	}
 
-	void State::parseTableData(TableData& _table, const SysEx& _sysex)
+	bool State::parseTableData(TableData& _table, const SysEx& _sysex)
 	{
+		if(_sysex.size() != std::tuple_size_v<Table>)
+			return false;
+
+		if(_sysex[0] != 0xf0 || _sysex[1] != wLib::IdWaldorf || _sysex[2] != IdMw2)
+			return false;
+
+		if(_sysex[4] != static_cast<uint8_t>(SysexCommand::WaveCtlDump) && _sysex[4] != static_cast<uint8_t>(SysexCommand::WaveCtlDumpP))
+			return false;
+
 		constexpr uint32_t off = 7;
 
 		for(uint32_t i=0; i<_table.size(); ++i)
@@ -945,6 +963,7 @@ namespace xt
 
 			_table[i] = WaveId(static_cast<uint16_t>(waveIdx));
 		}
+		return true;
 	}
 
 	SysEx State::createTableData(const TableData& _table, const uint32_t _tableIndex, const bool _preview)

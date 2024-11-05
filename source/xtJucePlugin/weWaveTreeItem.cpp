@@ -4,6 +4,8 @@
 #include "weWaveDesc.h"
 #include "xtWaveEditor.h"
 
+#include "synthLib/midiToSysex.h"
+
 namespace xtJucePlugin
 {
 	WaveTreeItem::WaveTreeItem(WaveEditor& _editor, const WaveCategory _category, const xt::WaveId _waveIndex)
@@ -102,6 +104,59 @@ namespace xtJucePlugin
 			setSelected(true, true, juce::dontSendNotification);
 			data.sendWaveToDevice(m_waveIndex);
 		}
+	}
+
+	bool WaveTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
+	{
+		if(xt::wave::isReadOnly(m_waveIndex))
+			return false;
+
+		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[1].endsWithIgnoreCase(".syx"))
+			return true;
+
+		return TreeItem::isInterestedInFileDrag(files);
+	}
+
+	void WaveTreeItem::filesDropped(const juce::StringArray& files, int insertIndex)
+	{
+		if(xt::wave::isReadOnly(m_waveIndex))
+			return;
+
+		if(files.size() != 1 || (!files[0].endsWithIgnoreCase(".mid") && !files[0].endsWithIgnoreCase(".syx")))
+		{
+			TreeItem::filesDropped(files, insertIndex);
+			return;
+		}
+
+		std::vector<std::vector<uint8_t>> sysex;
+
+		synthLib::MidiToSysex::extractSysexFromFile(sysex, files[0].toStdString());
+
+		if(sysex.empty())
+			return;
+
+		std::vector<xt::WaveData> waves;
+
+		for (const auto& s : sysex)
+		{
+			xt::WaveData wave;
+			if(xt::State::parseWaveData(wave, sysex.front()))
+				waves.push_back(wave);
+		}
+
+		if(waves.empty())
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Error", "No wave data found in file.");
+			return;
+		}
+
+		if(waves.size() > 1)
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Error", "Multiple waves found in file.");
+			return;
+		}
+
+		m_editor.getData().setWave(m_waveIndex, waves.front());
 	}
 
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const
