@@ -65,9 +65,13 @@ namespace xtJucePlugin
 
 	juce::var WaveTreeItem::getDragSourceDescription()
 	{
-		auto* desc = new WaveDesc();
+		auto* desc = new WaveDesc(m_editor);
+
 		desc->waveId = m_waveIndex;
 		desc->source = WaveDescSource::WaveList;
+
+		desc->fillData(m_editor.getData());
+
 		return desc;
 	}
 

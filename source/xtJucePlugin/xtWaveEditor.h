@@ -49,6 +49,8 @@ namespace xtJucePlugin
 		void setSelectedTable(xt::TableId _index);
 		void setSelectedWave(xt::WaveId _waveIndex, bool _forceRefresh = false);
 
+		std::string getTableName(xt::TableId _id) const;
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }

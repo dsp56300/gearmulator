@@ -63,10 +63,14 @@ namespace xtJucePlugin
 		if(m_wave == g_invalidWaveIndex || xt::wave::isReadOnly(m_table) || xt::wave::isReadOnly(m_index))
 			return TreeViewItem::getDragSourceDescription();
 
-		auto* desc = new WaveDesc();
+		auto* desc = new WaveDesc(m_editor);
+
 		desc->waveId = m_wave;
 		desc->source = WaveDescSource::ControlTableList;
 		desc->tableIndex = m_index;
+
+		desc->fillData(m_editor.getData());
+
 		return desc;
 	}
 

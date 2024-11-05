@@ -12,9 +12,7 @@ namespace xtJucePlugin
 		setPaintRootItemInBold(false);
 		setDrawsInLeftMargin(true);
 
-		const auto& wavetableNames = _editor.getEditor().getXtController().getParameterDescriptions().getValueList("waveType");
-
-		const auto name = wavetableNames->valueToText(_tableIndex.rawId());
+		const auto name = _editor.getTableName(_tableIndex);
 
 		setText(name);
 
@@ -33,9 +31,13 @@ namespace xtJucePlugin
 
 	juce::var TablesTreeItem::getDragSourceDescription()
 	{
-		auto* waveDesc = new WaveDesc();
+		auto* waveDesc = new WaveDesc(m_editor);
+
 		waveDesc->tableId = m_index;
 		waveDesc->source = WaveDescSource::TablesList;
+
+		waveDesc->fillData(m_editor.getData());
+
 		return waveDesc;
 	}
 

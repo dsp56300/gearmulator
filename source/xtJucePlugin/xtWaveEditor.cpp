@@ -105,8 +105,8 @@ namespace xtJucePlugin
 	void WaveEditor::destroy()
 	{
 		m_waveTree.reset();
-		m_controlTree.reset();
 		m_tablesTree.reset();
+		m_controlTree.reset();
 		m_graphFreq.reset();
 		m_graphPhase.reset();
 		m_graphTime.reset();
@@ -236,5 +236,11 @@ namespace xtJucePlugin
 			m_graphData.set(*wave);
 			onWaveDataChanged(*wave);
 		}
+	}
+
+	std::string WaveEditor::getTableName(const xt::TableId _id) const
+	{
+		const auto& wavetableNames = getEditor().getXtController().getParameterDescriptions().getValueList("waveType");
+		return wavetableNames->valueToText(_id.rawId());
 	}
 }
