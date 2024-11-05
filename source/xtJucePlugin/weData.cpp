@@ -447,6 +447,8 @@ namespace xtJucePlugin
 			auto sysex = xt::State::createTableData(*table, i, false);
 			data.insert(data.end(), sysex.begin(), sysex.end());
 		}
+
+		synthLib::createDirectory(m_cacheDir);
 		synthLib::writeFile(romWaves, data);
 	}
 
