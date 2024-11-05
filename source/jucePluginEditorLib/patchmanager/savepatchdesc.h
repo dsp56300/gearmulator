@@ -1,20 +1,22 @@
 #pragma once
 
-#include "juce_core/juce_core.h"
-#include "juce_gui_basics/juce_gui_basics.h"
+#include "jucePluginEditorLib/dragAndDropObject.h"
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
+
+#include "juce_core/juce_core.h"
+#include "juce_gui_basics/juce_gui_basics.h"
 
 namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
 
-	class SavePatchDesc : public juce::ReferenceCountedObject
+	class SavePatchDesc : public jucePluginEditorLib::DragAndDropObject
 	{
 		static constexpr int InvalidPart = -1;
 
 	public:
-		SavePatchDesc(PatchManager& _pm, const int _part, std::string _name = {});
+		SavePatchDesc(PatchManager& _pm, int _part, std::string _name = {});
 
 		SavePatchDesc(PatchManager& _pm, std::map<uint32_t, pluginLib::patchDB::PatchPtr>&& _patches, std::string _name = {});
 
@@ -29,7 +31,9 @@ namespace jucePluginEditorLib::patchManager
 
 		const std::string& getName() const { return m_name; }
 
-		std::string getExportFileName(const std::string& _prefix) const;
+		std::string getExportFileName(const pluginLib::Processor& _processor) const override;
+		bool canDropExternally() const override { return hasPatches(); }
+		bool writeToFile(const juce::File& _file) const override;
 
 		static const SavePatchDesc* fromDragSource(const juce::DragAndDropTarget::SourceDetails& _source)
 		{

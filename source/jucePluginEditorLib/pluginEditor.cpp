@@ -248,13 +248,13 @@ namespace jucePluginEditorLib
 
 	bool Editor::shouldDropFilesWhenDraggedExternally(const juce::DragAndDropTarget::SourceDetails& sourceDetails, juce::StringArray& files, bool& canMoveFiles)
 	{
-		const auto* savePatchDesc = patchManager::SavePatchDesc::fromDragSource(sourceDetails);
+		const auto* ddObject = DragAndDropObject::fromDragSource(sourceDetails);
 
-		if(!savePatchDesc || !savePatchDesc->hasPatches())
+		if(!ddObject || !ddObject->canDropExternally())
 			return false;
 
 		// try to create human-readable filename first
-		const auto patchFileName = savePatchDesc->getExportFileName(m_processor.getProperties().name);
+		const auto patchFileName = ddObject->getExportFileName(m_processor);
 		const auto pathName = juce::File::getSpecialLocation(juce::File::tempDirectory).getFullPathName().toStdString() + "/" + patchFileName;
 
 		auto file = juce::File(pathName);
@@ -270,7 +270,7 @@ namespace jucePluginEditorLib
 			file = tempFile->getFile();
 		}
 
-		if(!savePatchDesc->writePatchesToFile(file))
+		if(!ddObject->writeToFile(file))
 			return false;
 
 		files.add(file.getFullPathName());
