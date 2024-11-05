@@ -24,6 +24,8 @@ namespace xtJucePlugin
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails) override;
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails, int _insertIndex) override;
 
+		void itemClicked(const juce::MouseEvent&) override;
+
 	private:
 		void onWaveChanged() const;
 

@@ -107,7 +107,7 @@ namespace pluginLib::patchDB
 	protected:
 		virtual void onLoadFinished() {}
 
-		void startLoaderThread();
+		virtual void startLoaderThread(const juce::File& _migrateFromDir = {});
 		void stopLoaderThread();
 
 		void runOnLoaderThread(std::function<void()>&& _func);
@@ -152,11 +152,11 @@ namespace pluginLib::patchDB
 
 		bool loadCache();
 		void saveCache();
+		juce::File getCacheFile() const;
+		juce::File getJsonFile() const;
 
 		// IO
-		juce::File m_settingsDir;
-		juce::File m_jsonFileName;
-		juce::File m_cacheFileName;
+		const juce::File m_settingsDir;
 
 		// loader
 		JobQueue m_loader;

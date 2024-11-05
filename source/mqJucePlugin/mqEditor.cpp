@@ -1,6 +1,5 @@
 #include "mqEditor.h"
 
-#include "BinaryData.h"
 #include "PluginProcessor.h"
 
 #include "mqController.h"
@@ -17,11 +16,11 @@ namespace mqJucePlugin
 {
 	static constexpr uint32_t PlayModeListenerId = 1;
 
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	{
-		create(_jsonFilename);
+		create();
 
 		m_frontPanel.reset(new FrontPanel(*this, m_controller));
 
@@ -36,10 +35,7 @@ namespace mqJucePlugin
 			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
 			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
 
-			const auto configOptions = getProcessor().getConfigOptions();
-			const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
-			setPatchManager(new PatchManager(*this, container, dir));
+			setPatchManager(new PatchManager(*this, container));
 		}
 
 		auto disableButton = [](juce::Component* _comp)

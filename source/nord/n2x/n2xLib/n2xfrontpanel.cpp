@@ -234,7 +234,9 @@ namespace n2x
 		{
 			m_panel.getHardware().notifyBootFinished();
 		}
+#ifdef _DEBUG
 		printLCD();
+#endif
 	}
 
 	FrontPanel::FrontPanel(Hardware& _hardware) : m_hardware(_hardware), m_cs4(*this), m_cs6(*this)

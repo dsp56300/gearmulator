@@ -2,7 +2,10 @@
 
 #include "weWaveCategoryTreeItem.h"
 #include "weWaveDesc.h"
+#include "xtEditor.h"
 #include "xtWaveEditor.h"
+
+#include "synthLib/midiToSysex.h"
 
 namespace xtJucePlugin
 {
@@ -65,9 +68,13 @@ namespace xtJucePlugin
 
 	juce::var WaveTreeItem::getDragSourceDescription()
 	{
-		auto* desc = new WaveDesc();
+		auto* desc = new WaveDesc(m_editor);
+
 		desc->waveId = m_waveIndex;
 		desc->source = WaveDescSource::WaveList;
+
+		desc->fillData(m_editor.getData());
+
 		return desc;
 	}
 
@@ -98,6 +105,85 @@ namespace xtJucePlugin
 			setSelected(true, true, juce::dontSendNotification);
 			data.sendWaveToDevice(m_waveIndex);
 		}
+	}
+
+	bool WaveTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
+	{
+		if(xt::wave::isReadOnly(m_waveIndex))
+			return false;
+
+		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[1].endsWithIgnoreCase(".syx"))
+			return true;
+
+		return TreeItem::isInterestedInFileDrag(files);
+	}
+
+	void WaveTreeItem::filesDropped(const juce::StringArray& files, int insertIndex)
+	{
+		if(xt::wave::isReadOnly(m_waveIndex))
+			return;
+
+		const auto sysex = getSysexFromFiles(files);
+
+		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
+
+		if(sysex.empty())
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, "No sysex data found in file");
+			return;
+		}
+
+		std::vector<xt::WaveData> waves;
+
+		for (const auto& s : sysex)
+		{
+			xt::WaveData wave;
+			if(xt::State::parseWaveData(wave, sysex.front()))
+				waves.push_back(wave);
+		}
+
+		if(waves.size() == 1)
+		{
+			m_editor.getData().setWave(m_waveIndex, waves.front());
+			return;
+		}
+
+		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, waves.empty() ? "No wave data found in file" : "Multiple waves found in file");
+	}
+
+	std::vector<std::vector<uint8_t>> WaveTreeItem::getSysexFromFiles(const juce::StringArray& _files)
+	{
+		std::vector<std::vector<uint8_t>> sysex;
+
+		for(const auto& file : _files)
+		{
+			std::vector<std::vector<uint8_t>> s;
+			synthLib::MidiToSysex::extractSysexFromFile(s, file.toStdString());
+			sysex.insert(sysex.end(), s.begin(), s.end());
+		}
+
+		return sysex;
+	}
+
+	void WaveTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		const auto selectedTableId = m_editor.getSelectedTable();
+
+		if(selectedTableId.isValid())
+		{
+			const auto subMenu = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
+			menu.addSubMenu("Copy to current Control Table", subMenu);
+		}
+
+		menu.showMenuAsync({});
 	}
 
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const

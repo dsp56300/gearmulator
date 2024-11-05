@@ -90,7 +90,7 @@ namespace jucePluginEditorLib::patchManager
 		return result;
 	}
 
-	std::string SavePatchDesc::getExportFileName(const std::string& _prefix) const
+	std::string SavePatchDesc::getExportFileName(const pluginLib::Processor& _p) const
 	{
 		const auto& patches = getPatches();
 
@@ -109,7 +109,12 @@ namespace jucePluginEditorLib::patchManager
 			name = std::to_string(patches.size()) + " patches";
 		}
 
-		return _prefix + " - " + createValidFilename(name) + ".mid";
+		return _p.getProperties().name + " - " + createValidFilename(name) + ".mid";
+	}
+
+	bool SavePatchDesc::writeToFile(const juce::File& _file) const
+	{
+		return writePatchesToFile(_file);
 	}
 
 	std::vector<pluginLib::patchDB::PatchPtr> SavePatchDesc::getPatchesFromDragSource(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails)

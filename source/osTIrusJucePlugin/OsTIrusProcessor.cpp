@@ -1,6 +1,9 @@
 #include "OsTIrusProcessor.h"
 #include "OsTIrusEditorState.h"
+
+// ReSharper disable once CppUnusedIncludeDirective
 #include "BinaryData.h"
+#include "jucePluginLib/processorPropertiesInit.h"
 
 #include "virusLib/romloader.h"
 
@@ -14,17 +17,6 @@ namespace
 		opts.folderName = "DSP56300Emulator_OsTIrus";
 		opts.osxLibrarySubFolder = "Application Support/DSP56300Emulator_OsTIrus";
 		return opts;
-	}
-
-	pluginLib::Processor::BinaryDataRef getBinaryData()
-	{
-		return
-		{
-			BinaryData::namedResourceListSize,
-			BinaryData::originalFilenames,
-			BinaryData::namedResourceList,
-			BinaryData::getNamedResource
-		};
 	}
 }
 
@@ -40,7 +32,7 @@ OsTIrusProcessor::OsTIrusProcessor() :
                    .withOutput("USB 2", juce::AudioChannelSet::stereo(), true)
                    .withOutput("USB 3", juce::AudioChannelSet::stereo(), true)
 #endif
-	, ::getConfigOptions(), pluginLib::Processor::Properties{JucePlugin_Name, JucePlugin_Manufacturer, JucePlugin_IsSynth, JucePlugin_WantsMidiInput, JucePlugin_ProducesMidiOutput, JucePlugin_IsMidiEffect, JucePlugin_Lv2Uri, getBinaryData()}
+	, ::getConfigOptions(), pluginLib::initProcessorProperties()
 	, virusLib::DeviceModel::TI2)
 {
 	postConstruct(virusLib::ROMLoader::findROMs(virusLib::DeviceModel::TI2, virusLib::DeviceModel::Snow));

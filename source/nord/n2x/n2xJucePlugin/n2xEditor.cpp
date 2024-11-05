@@ -24,12 +24,12 @@
 
 namespace n2xJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	, m_parameterBinding(_binding)
 	{
-		create(_jsonFilename);
+		create();
 
 		addMouseListener(this, true);
 		{
@@ -44,10 +44,7 @@ namespace n2xJucePlugin
 			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
 			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
 
-			const auto configOptions = getProcessor().getConfigOptions();
-			const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
-			setPatchManager(new PatchManager(*this, container, dir));
+			setPatchManager(new PatchManager(*this, container));
 		}
 
 		if(auto* versionNumber = findComponentT<juce::Label>("VersionNumber", false))

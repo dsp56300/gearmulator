@@ -20,7 +20,9 @@
 
 #include "dsp56kEmu/logging.h"
 
+#if JUCE_MAJOR_VERSION < 8	// they forgot this include but fixed it in version 8+
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
+#endif
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -28,7 +30,10 @@ namespace jucePluginEditorLib::patchManager
 	constexpr auto g_searchBarHeight = 32;
 	constexpr int g_padding = 4;
 
-	PatchManager::PatchManager(Editor& _editor, Component* _root, const juce::File& _dir, const std::initializer_list<GroupType>& _groupTypes) : DB(_dir), m_editor(_editor), m_state(*this)
+	PatchManager::PatchManager(Editor& _editor, Component* _root, const std::initializer_list<GroupType>& _groupTypes)
+	: DB(juce::File(_editor.getProcessor().getPatchManagerDataFolder(false)))
+	, m_editor(_editor)
+	, m_state(*this)
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::Category, "Category");
 		setTagTypeName(pluginLib::patchDB::TagType::Tag, "Tag");
@@ -877,6 +882,17 @@ namespace jucePluginEditorLib::patchManager
 		if(m_layout == LayoutType::List)
 			return m_list;
 		return m_grid;
+	}
+
+	void PatchManager::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
+	{
+		if(_migrateFromDir.getFullPathName().isEmpty())
+		{
+			const auto& configOptions = m_editor.getProcessor().getConfigOptions();
+			DB::startLoaderThread(configOptions.getDefaultFile().getParentDirectory());
+			return;
+		}
+		DB::startLoaderThread(_migrateFromDir);
 	}
 
 	pluginLib::patchDB::SearchHandle PatchManager::getSearchHandle(const pluginLib::patchDB::DataSource& _ds, bool _selectTreeItem)

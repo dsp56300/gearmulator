@@ -1,6 +1,5 @@
 #include "xtEditor.h"
 
-#include "BinaryData.h"
 #include "PluginProcessor.h"
 #include "xtArp.h"
 
@@ -17,13 +16,13 @@
 
 namespace xtJucePlugin
 {
-	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder, const std::string& _jsonFilename)
-	: jucePluginEditorLib::Editor(_processor, _binding, std::move(_skinFolder))
+	Editor::Editor(jucePluginEditorLib::Processor& _processor, pluginLib::ParameterBinding& _binding, const jucePluginEditorLib::Skin& _skin)
+	: jucePluginEditorLib::Editor(_processor, _binding, _skin)
 	, m_controller(dynamic_cast<Controller&>(_processor.getController()))
 	, m_parameterBinding(_binding)
 	, m_playModeChangeListener(m_controller.onPlayModeChanged)
 	{
-		create(_jsonFilename);
+		create();
 
 		m_focusedParameter.reset(new FocusedParameter(m_controller, _binding, *this));
 
@@ -45,10 +44,7 @@ namespace xtJucePlugin
 			container->setSize(static_cast<int>(w / scale),static_cast<int>(h / scale));
 			container->setTopLeftPosition(static_cast<int>(x / scale),static_cast<int>(y / scale));
 
-			const auto configOptions = getProcessor().getConfigOptions();
-			const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
-			setPatchManager(new PatchManager(*this, container, dir));
+			setPatchManager(new PatchManager(*this, container));
 		}
 
 		m_btMultiMode = findComponentT<juce::Button>("MultiModeButton");
@@ -182,10 +178,9 @@ namespace xtJucePlugin
 	{
 		if(_object.getName() == "waveEditorContainer")
 		{
-			const auto configOptions = getProcessor().getConfigOptions();
-			const auto dir = configOptions.getDefaultFile().getParentDirectory();
+			const auto dir = getProcessor().getDataFolder(false) + "wavetables/";
 
-			m_waveEditor = new WaveEditor(*this, dir);
+			m_waveEditor = new WaveEditor(*this, juce::File(dir));
 			getXtController().setWaveEditor(m_waveEditor);
 			return m_waveEditor;
 		}

@@ -16,12 +16,13 @@
 
 namespace pluginLib::patchDB
 {
+	constexpr const char* g_fileNameCache = "patchmanagerdb.cache";
+	constexpr const char* g_filenameJson  = "patchmanagerdb.json";
+
 	static constexpr bool g_cacheEnabled = true;
 
 	DB::DB(juce::File _dir)
 	: m_settingsDir(std::move(_dir))
-	, m_jsonFileName(m_settingsDir.getChildFile("patchmanagerdb.json"))
-	, m_cacheFileName(m_settingsDir.getChildFile("patchmanagerdb.cache"))
 	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
 	{
 	}
@@ -811,14 +812,54 @@ namespace pluginLib::patchDB
 		return synthLib::MidiToSysex::extractSysexFromData(_results, _data);
 	}
 
-	void DB::startLoaderThread()
+	void DB::startLoaderThread(const juce::File& _migrateFromDir/* = {}*/)
 	{
 		m_loader.start();
 
-		runOnLoaderThread([this]
+		runOnLoaderThread([this, _migrateFromDir]
 		{
 			if(!g_cacheEnabled || !loadCache())
-				loadJson();
+			{
+				if(!loadJson())
+				{
+					if(_migrateFromDir.isDirectory())
+					{
+						m_settingsDir.createDirectory();
+
+						std::vector<std::string> files;
+						synthLib::getDirectoryEntries(files, _migrateFromDir.getFullPathName().toStdString());
+
+						std::vector<juce::File> toBeDeleted;
+
+						for (const auto& file : files)
+						{
+							if(synthLib::hasExtension(file, ".cache"))
+							{
+								juce::File f(file);
+								f.deleteFile();
+								continue;
+							}
+
+							if(!synthLib::hasExtension(file, ".json") && !synthLib::hasExtension(file, ".syx"))
+								continue;
+
+							juce::File fileFrom(file);
+							juce::File fileTo(m_settingsDir.getChildFile(fileFrom.getFileName()));
+
+							if(!fileFrom.copyFileTo(fileTo))
+								return;
+
+							toBeDeleted.push_back(fileFrom);
+						}
+
+						if(loadJson())
+						{
+							for (auto& f : toBeDeleted)
+								f.deleteFile();
+						}
+					}
+				}
+			}
 		});
 	}
 
@@ -1294,7 +1335,12 @@ namespace pluginLib::patchDB
 	{
 		bool success = true;
 
-		const auto json = juce::JSON::parse(m_jsonFileName);
+		const auto jsonFile = getJsonFile();
+
+		if(!jsonFile.existsAsFile())
+			return false;
+
+		const auto json = juce::JSON::parse(jsonFile);
 		const auto* datasources = json["datasources"].getArray();
 
 		if(datasources)
@@ -1474,11 +1520,17 @@ namespace pluginLib::patchDB
 	bool DB::saveJson()
 	{
 		m_cacheDirty = true;
-		m_cacheFileName.deleteFile();
 
-		if (!m_jsonFileName.hasWriteAccess())
+		const auto cacheFile = getCacheFile();
+		const auto jsonFile = getJsonFile();
+
+		jsonFile.createDirectory();
+
+		cacheFile.deleteFile();
+
+		if (!jsonFile.hasWriteAccess())
 		{
-			pushError("No write access to file:\n" + m_jsonFileName.getFullPathName().toStdString());
+			pushError("No write access to file:\n" + jsonFile.getFullPathName().toStdString());
 			return false;
 		}
 
@@ -1583,7 +1635,7 @@ namespace pluginLib::patchDB
 			json->setProperty("patches", patchMods);
 		}
 
-		return saveJson(m_jsonFileName, json);
+		return saveJson(jsonFile, json);
 	}
 
 	juce::File DB::getJsonFile(const DataSource& _ds) const
@@ -1739,18 +1791,20 @@ namespace pluginLib::patchDB
 	{
 		m_cacheDirty = true;
 
-		if(!m_cacheFileName.existsAsFile())
+		const auto cacheFile = getCacheFile();
+
+		if(!cacheFile.existsAsFile())
 			return false;
 
 		std::vector<uint8_t> data;
-		if(!synthLib::readFile(data, m_cacheFileName.getFullPathName().toStdString()))
+		if(!synthLib::readFile(data, cacheFile.getFullPathName().toStdString()))
 			return false;
 
 		try
 		{
 			baseLib::BinaryStream inStream(data);
 
-			auto stream = inStream.tryReadChunk(chunks::g_patchManager, 2);
+			auto stream = inStream.tryReadChunk(chunks::g_patchManager, chunkVersions::g_patchManager);
 
 			if(!stream)
 				return false;
@@ -1945,7 +1999,9 @@ namespace pluginLib::patchDB
 
 	void DB::saveCache()
 	{
-		if(!m_cacheFileName.hasWriteAccess())
+		const auto cacheFile = getCacheFile();
+
+		if(!cacheFile.hasWriteAccess())
 			return;
 
 		baseLib::BinaryStream outStream;
@@ -1953,7 +2009,7 @@ namespace pluginLib::patchDB
 			std::shared_lock lockDS(m_dataSourcesMutex);
 			std::shared_lock lockP(m_patchesMutex);
 
-			baseLib::ChunkWriter cw(outStream, chunks::g_patchManager, 2);
+			baseLib::ChunkWriter cw(outStream, chunks::g_patchManager, chunkVersions::g_patchManager);
 			{
 				baseLib::ChunkWriter cwDS(outStream, chunks::g_patchManagerDataSources, 1);
 
@@ -2059,8 +2115,18 @@ namespace pluginLib::patchDB
 		std::vector<uint8_t> buffer;
 		outStream.toVector(buffer);
 
-		m_cacheFileName.replaceWithData(buffer.data(), buffer.size());
+		cacheFile.replaceWithData(buffer.data(), buffer.size());
 
 		m_cacheDirty = false;
+	}
+
+	juce::File DB::getCacheFile() const
+	{
+		return m_settingsDir.getChildFile(g_fileNameCache);
+	}
+
+	juce::File DB::getJsonFile() const
+	{
+		return m_settingsDir.getChildFile(g_filenameJson);
 	}
 }

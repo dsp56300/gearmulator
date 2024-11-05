@@ -1,6 +1,7 @@
 #include "weTablesTreeItem.h"
 
 #include "weWaveDesc.h"
+#include "weWaveTreeItem.h"
 #include "xtController.h"
 #include "xtEditor.h"
 #include "xtWaveEditor.h"
@@ -12,9 +13,7 @@ namespace xtJucePlugin
 		setPaintRootItemInBold(false);
 		setDrawsInLeftMargin(true);
 
-		const auto& wavetableNames = _editor.getEditor().getXtController().getParameterDescriptions().getValueList("waveType");
-
-		const auto name = wavetableNames->valueToText(_tableIndex.rawId());
+		const auto name = _editor.getTableName(_tableIndex);
 
 		setText(name);
 
@@ -33,9 +32,13 @@ namespace xtJucePlugin
 
 	juce::var TablesTreeItem::getDragSourceDescription()
 	{
-		auto* waveDesc = new WaveDesc();
+		auto* waveDesc = new WaveDesc(m_editor);
+
 		waveDesc->tableId = m_index;
 		waveDesc->source = WaveDescSource::TablesList;
+
+		waveDesc->fillData(m_editor.getData());
+
 		return waveDesc;
 	}
 
@@ -65,6 +68,79 @@ namespace xtJucePlugin
 			m_editor.setSelectedTable(m_index);
 			data.sendTableToDevice(m_index);
 		}
+	}
+
+	bool TablesTreeItem::isInterestedInFileDrag(const juce::StringArray& files)
+	{
+		if(xt::wave::isReadOnly(getTableId()))
+			return false;
+
+		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[1].endsWithIgnoreCase(".syx"))
+			return true;
+
+		return TreeItem::isInterestedInFileDrag(files);
+	}
+
+	void TablesTreeItem::filesDropped(const juce::StringArray& files, int insertIndex)
+	{
+		if(xt::wave::isReadOnly(getTableId()))
+			return;
+
+		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
+
+		const auto sysex = WaveTreeItem::getSysexFromFiles(files);
+
+		if(sysex.empty())
+		{
+			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, errorTitle, "No Sysex data found in file");
+			return;
+		}
+
+		std::vector<xt::TableData> tables;
+
+		for (const auto& s : sysex)
+		{
+			xt::TableData table;
+			if (xt::State::parseTableData(table, s))
+				tables.push_back(table);
+		}
+
+		if(tables.size() == 1)
+		{
+			m_editor.getData().setTable(m_index, tables.front());
+			return;
+		}
+
+		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, errorTitle, tables.empty() ? "No Control Table found in files" : "Multiple control tables found in file");
+	}
+
+	void TablesTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		juce::PopupMenu copyToTableSubMenu;
+
+		for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
+		{
+			if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
+				copyToTableSubMenu.addColumnBreak();
+
+			const auto id = xt::TableId(i);
+			copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+			{
+				m_editor.getData().copyTable(id, m_index);
+			});
+		}
+
+		menu.addSubMenu("Copy to", copyToTableSubMenu);
+
+		menu.showMenuAsync({});
 	}
 
 	void TablesTreeItem::onTableChanged(xt::TableId _index)

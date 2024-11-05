@@ -39,11 +39,11 @@ set(SOURCES
 	xtWaveEditorStyle.cpp xtWaveEditorStyle.h
 )
 
-# https://forum.juce.com/t/help-needed-using-binarydata-with-cmake-juce-6/40486
-# "This might be because the BinaryData files are generated during the build, so the IDE may not be able to find them until the build has been run once (and even then, some IDEs might need a bit of a nudge to re-index the binary directory…)"
 SET(ASSETS "parameterDescriptions_xt.json")
 
-include(skins/xtDefault/assets.cmake)
+addSkin("Xenia" "xtDefault" "skins/xtDefault" "xtDefault.json" "ASSETS_xtDefault")
+
+buildSkinHeader()
 
 juce_add_binary_data(xtJucePlugin_BinaryData SOURCES ${ASSETS} ${ASSETS_xtDefault})
 

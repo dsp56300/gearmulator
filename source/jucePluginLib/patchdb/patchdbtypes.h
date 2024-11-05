@@ -94,4 +94,9 @@ namespace pluginLib::patchDB
 		constexpr char g_typedTags[] = "TpTg";
 		constexpr char g_tags[] = "Tags";
 	}
+
+	namespace chunkVersions
+	{
+		constexpr uint32_t g_patchManager = 3;
+	}
 }

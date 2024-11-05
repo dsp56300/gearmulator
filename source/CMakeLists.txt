@@ -8,7 +8,15 @@ option(${CMAKE_PROJECT_NAME}_SYNTH_NODALRED2X "Build NodalRed2x" on)
 
 # ----------------- Add our cmake scripts to IDE
 
-add_custom_target(cmakeScripts SOURCES findvst2.cmake juce.cmake macsetup.cmake macsetup.command.in runAuValidation.cmake ../base.cmake)
+add_custom_target(cmakeScripts SOURCES 
+	findvst2.cmake 
+	juce.cmake 
+	macsetup.cmake 
+	macsetup.command.in 
+	runAuValidation.cmake 
+	skins.cmake
+	skins.h.in
+	../base.cmake)
 
 # ----------------- DSP56300 emulator
 
@@ -25,6 +33,7 @@ add_subdirectory(synthLib)
 add_subdirectory(libresample)
 
 include(macsetup.cmake)
+include(skins.cmake)
 
 # ----------------- Try to install VST2 SDK
 

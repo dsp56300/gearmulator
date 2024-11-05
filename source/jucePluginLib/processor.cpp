@@ -338,9 +338,38 @@ namespace pluginLib
 		return {};
 	}
 
+	std::string Processor::getDataFolder(const bool _useFxFolder) const
+	{
+		return Tools::getPublicDataFolder(getProperties().vendor, getProductName(_useFxFolder));
+	}
+
 	std::string Processor::getPublicRomFolder() const
 	{
-		return Tools::getPublicDataFolder(getProperties().vendor, getProperties().name) + "roms/";
+		return synthLib::validatePath(getDataFolder() + "roms/");
+	}
+
+	std::string Processor::getConfigFolder(const bool _useFxFolder) const
+	{
+		return synthLib::validatePath(getDataFolder(_useFxFolder) + "config/");
+	}
+
+	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
+	{
+		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanagerDb/");
+	}
+
+	std::string Processor::getConfigFile(const bool _useFxFolder) const
+	{
+		return getConfigFolder(_useFxFolder) + getProductName(_useFxFolder) + ".xml";
+	}
+
+	std::string Processor::getProductName(const bool _useFxName) const
+	{
+		const auto& p = getProperties();
+		auto name = p.name;
+		if(!_useFxName && !p.isSynth && name.substr(name.size()-2, 2) == "FX")
+			return name.substr(0, name.size() - 2);
+		return name;
 	}
 
 	void Processor::destroyController()

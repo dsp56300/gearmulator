@@ -16,13 +16,13 @@
 
 namespace genericVirusUI
 {
-	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder) :
-		Editor(_processorRef, _binding, std::move(_skinFolder)),
+	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
+		Editor(_processorRef, _binding, _skin),
 		m_processor(_processorRef),
 		m_parameterBinding(_binding),
 		m_romChangedListener(_processorRef.evRomChanged)
 	{
-		create(_jsonFilename);
+		create();
 
 		m_parts.reset(new Parts(*this));
 		m_leds.reset(new Leds(*this, _processorRef));
@@ -41,16 +41,13 @@ namespace genericVirusUI
 		if(!getConditionCountRecursive())
 			m_fxPage.reset(new FxPage(*this));
 
-		const auto configOptions = getProcessor().getConfigOptions();
-		const auto dir = configOptions.getDefaultFile().getParentDirectory();
-
 		{
 			auto pmParent = findComponent("ContainerPatchManager", false);
 			if(!pmParent)
 				pmParent = findComponent("page_presets", false);
 			if(!pmParent)
 				pmParent = findComponent("page_2_browser");
-			setPatchManager(new PatchManager(*this, pmParent, dir));
+			setPatchManager(new PatchManager(*this, pmParent));
 		}
 
 		m_presetName = findComponentT<juce::Label>("PatchName");
@@ -94,7 +91,7 @@ namespace genericVirusUI
 
 			m_romSelector->setSelectedId(static_cast<int>(m_processor.getSelectedRomIndex()) + 1, juce::dontSendNotification);
 
-			m_romSelector->onChange = [this, roms]
+			m_romSelector->onChange = [this]
 			{
 				const auto oldIndex = m_processor.getSelectedRomIndex();
 				const auto newIndex = m_romSelector->getSelectedId() - 1;

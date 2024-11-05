@@ -28,6 +28,7 @@ set(SOURCES
 	parametervaluelist.cpp parametervaluelist.h
 	pluginVersion.cpp pluginVersion.h
 	processor.cpp processor.h
+	processorPropertiesInit.h
 	softknob.cpp softknob.h
 	tools.cpp tools.h
 	types.h

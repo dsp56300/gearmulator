@@ -17,6 +17,12 @@ namespace jucePluginEditorLib
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
 {
+	// point embedded skins to public data folder if they're not embedded
+	for (auto& skin : m_includedSkins)
+	{
+		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
+			skin.folder = synthLib::validatePath(getSkinFolder() + skin.displayName);
+	}
 }
 
 int PluginEditorState::getWidth() const
@@ -29,7 +35,7 @@ int PluginEditorState::getHeight() const
 	return m_editor ? m_editor->getHeight() : 0;
 }
 
-const std::vector<PluginEditorState::Skin>& PluginEditorState::getIncludedSkins()
+const std::vector<Skin>& PluginEditorState::getIncludedSkins()
 {
 	return m_includedSkins;
 }
@@ -83,10 +89,10 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return synthLib::validatePath(pluginLib::Tools::getPublicDataFolder(m_processor.getProperties().vendor, m_processor.getProperties().name) + "skins/");
+	return synthLib::validatePath(m_processor.getDataFolder() + "skins/");
 }
 
-void PluginEditorState::loadSkin(const Skin& _skin)
+bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
 	m_currentSkin = _skin;
 	writeSkinToConfig(_skin);
@@ -109,7 +115,15 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 	try
 	{
-		auto* editor = createEditor(_skin);
+		auto skin = _skin;
+
+		// if the embedded skin cannot be found, use skin folder as fallback
+		if(_skin.folder.empty() && !m_processor.findResource(_skin.jsonFilename))
+		{
+			skin.folder = synthLib::validatePath(getSkinFolder() + _skin.displayName);
+		}
+
+		auto* editor = createEditor(skin);
 		m_editor.reset(editor);
 
 		getEditor()->onOpenMenu.addListener([this](Editor*, const juce::MouseEvent* _e)
@@ -126,6 +140,8 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 
 		if(!m_instanceConfig.empty())
 			getEditor()->setPerInstanceConfig(m_instanceConfig);
+
+		return true;
 	}
 	catch(const std::runtime_error& _err)
 	{
@@ -136,7 +152,10 @@ void PluginEditorState::loadSkin(const Skin& _skin)
 		m_parameterBinding.clear();
 		m_editor.reset();
 
-		loadSkin(m_includedSkins[0]);
+		if(_fallbackIndex >= m_includedSkins.size())
+			return false;
+
+		return loadSkin(m_includedSkins[_fallbackIndex], _fallbackIndex + 1);
 	}
 }
 
@@ -168,11 +187,19 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	bool loadedSkinIsPartOfList = false;
 
-	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList](const Skin& _skin)
+	std::set<std::string> knownSkinFolders;
+
+	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkinFolders](const Skin& _skin)
 	{
+		// remove dupes by folder
+		if(!_skin.folder.empty() && !knownSkinFolders.insert(_skin.folder).second)
+			return;
+
 		const auto isCurrent = _skin == getCurrentSkin();
+
 		if(isCurrent)
 			loadedSkinIsPartOfList = true;
+
 		skinMenu.addItem(_skin.displayName, true, isCurrent,[this, _skin] {loadSkin(_skin);});
 	};
 
@@ -211,11 +238,15 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 				std::string skinPath = entry;
 				if(entry.find(modulePath) == 0)
 					skinPath = entry.substr(modulePath.size());
+				skinPath = synthLib::validatePath(skinPath);
+
 				auto jsonName = file;
 				const auto pathEndPos = jsonName.find_last_of("/\\");
 				if(pathEndPos != std::string::npos)
 					jsonName = file.substr(pathEndPos+1);
+
 				const Skin skin{jsonName.substr(0, jsonName.length() - 5), jsonName, skinPath};
+
 				addSkinEntry(skin);
 			}
 		}
@@ -454,7 +485,7 @@ void PluginEditorState::exportCurrentSkin() const
 	}
 }
 
-PluginEditorState::Skin PluginEditorState::readSkinFromConfig() const
+Skin PluginEditorState::readSkinFromConfig() const
 {
 	const auto& config = m_processor.getConfig();
 

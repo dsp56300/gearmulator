@@ -2,6 +2,7 @@
 
 #include "imagePool.h"
 #include "parameterOverlays.h"
+#include "skin.h"
 #include "types.h"
 
 #include "juceUiLib/editor.h"
@@ -37,13 +38,15 @@ namespace jucePluginEditorLib
 	public:
 		pluginLib::Event<Editor*, juce::MouseEvent*> onOpenMenu;
 
-		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, std::string _skinFolder);
+		Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin);
 		~Editor() override;
 
 		Editor(const Editor&) = delete;
 		Editor(Editor&&) = delete;
 		Editor& operator = (const Editor&) = delete;
 		Editor& operator = (Editor&&) = delete;
+		
+		void create();
 
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
@@ -107,7 +110,7 @@ namespace jucePluginEditorLib
 		Processor& m_processor;
 		pluginLib::ParameterBinding& m_binding;
 
-		const std::string m_skinFolder;
+		const Skin m_skin;
 
 		std::map<std::string, std::vector<char>> m_fileCache;
 

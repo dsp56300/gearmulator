@@ -24,7 +24,7 @@ namespace jucePluginEditorLib
 	Processor::Processor(const BusesProperties& _busesProperties, const juce::PropertiesFile::Options& _configOptions, const pluginLib::Processor::Properties& _properties)
 	: pluginLib::Processor(_busesProperties, _properties)
 	, m_configOptions(_configOptions)
-	, m_config(_configOptions)
+	, m_config(initConfigFile(_configOptions), _configOptions)
 	{
 #ifdef ZYNTHIAN
 		Logging::setLogFunc(&noLoggingFunc);
@@ -66,7 +66,31 @@ namespace jucePluginEditorLib
 				m_editorState->setPerInstanceConfig(m_editorStateData);
 		}
 
-	    return new EditorWindow(*this, *m_editorState, getConfig());
+	    auto* window = new EditorWindow(*this, *m_editorState, getConfig());
+
+		if(window->getWidth() == 0 || window->getHeight() == 0)
+		{
+			constexpr int w = 600;
+			constexpr int h = 300;
+
+			window->setSize(w,h);
+
+			auto* l = new juce::Label({}, 
+				"No skins found, check your installation\n"
+				"\n"
+				"Skins need to be located at:\n"
+				"\n" +
+				m_editorState->getSkinFolder()
+			);
+
+			l->setSize(w,h);
+			l->setJustificationType(juce::Justification::centred);
+			l->setColour(juce::Label::ColourIds::textColourId, juce::Colour(0xffff0000));
+			l->setColour(juce::Label::ColourIds::backgroundColourId, juce::Colour(0xff111111));
+
+			window->addAndMakeVisible(l);
+		}
+		return window;
 	}
 
 	void Processor::destroyEditorState()
@@ -115,5 +139,23 @@ namespace jucePluginEditorLib
 		});
 
 		getController().loadChunkData(_cr);
+	}
+
+	juce::File Processor::initConfigFile(const juce::PropertiesFile::Options& _o) const
+	{
+		// copy from old location to new if still exists
+		juce::File oldFile(_o.getDefaultFile());
+
+		juce::File newFile(getConfigFile(false));
+
+		if(oldFile.existsAsFile())
+		{
+			newFile.createDirectory();
+			if(!oldFile.copyFileTo(newFile))
+				return oldFile;
+			oldFile.deleteFile();
+			return newFile;
+		}
+		return newFile;
 	}
 }

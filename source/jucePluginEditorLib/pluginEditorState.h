@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "skin.h"
+
 #include "jucePluginLib/parameterbinding.h"
 
 namespace juce
@@ -20,18 +22,6 @@ namespace jucePluginEditorLib
 	class PluginEditorState
 	{
 	public:
-		struct Skin
-		{
-			std::string displayName;
-			std::string jsonFilename;
-			std::string folder;
-
-			bool operator == (const Skin& _other) const
-			{
-				return displayName == _other.displayName && jsonFilename == _other.jsonFilename && folder == _other.folder;
-			}
-		};
-
 		explicit PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins);
 		virtual ~PluginEditorState() = default;
 
@@ -82,7 +72,7 @@ namespace jucePluginEditorLib
 		Editor* getEditor() const;
 
 	private:
-		void loadSkin(const Skin& _skin);
+		bool loadSkin(const Skin& _skin, uint32_t _fallbackIndex = 0);
 		void setGuiScale(int _scale) const;
 
 		std::unique_ptr<juce::Component> m_editor;

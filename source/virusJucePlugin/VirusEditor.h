@@ -48,7 +48,7 @@ namespace genericVirusUI
 			Arrangement
 		};
 
-		VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const std::string& _jsonFilename, std::string _skinFolder);
+		VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin);
 		~VirusEditor() override;
 
 		void setPart(size_t _part);

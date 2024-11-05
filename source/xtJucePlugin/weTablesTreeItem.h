@@ -23,6 +23,11 @@ namespace xtJucePlugin
 		bool isInterestedInDragSource(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails) override;
 		void itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex) override;
 
+		bool isInterestedInFileDrag(const juce::StringArray& files) override;
+		void filesDropped(const juce::StringArray& files, int insertIndex) override;
+
+		void itemClicked(const juce::MouseEvent&) override;
+
 		const auto& getTableId() const { return m_index; }
 
 	private:

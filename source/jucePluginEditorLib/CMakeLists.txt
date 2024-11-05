@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
+	dragAndDropObject.cpp dragAndDropObject.h
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
 	imagePool.cpp imagePool.h
@@ -15,6 +16,7 @@ set(SOURCES
 	pluginEditorWindow.cpp pluginEditorWindow.h
 	pluginEditorState.cpp pluginEditorState.h
 	pluginProcessor.cpp pluginProcessor.h
+	skin.h
 	types.h
 )
 

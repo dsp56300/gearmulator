@@ -10,7 +10,7 @@ namespace n2xJucePlugin
 	class PatchManager : public jucePluginEditorLib::patchManager::PatchManager
 	{
 	public:
-		PatchManager(Editor& _editor, Component* _root, const juce::File& _dir);
+		PatchManager(Editor& _editor, Component* _root);
 		~PatchManager() override;
 
 		// PatchManager overrides
