@@ -96,12 +96,14 @@ namespace genericUI
 
 			if(!hFile)
 			{
-				errors << "Failed to create file " << folder << _name << std::endl;
+				errors << "Failed to create file " << folder << _name << '\n';
 			}
 			else
 			{
-				fwrite(data, dataSize, 1, hFile);
-				fclose(hFile);
+				const auto writtenCount = fwrite(data, 1, dataSize, hFile);
+				(void)fclose(hFile);
+				if(writtenCount != dataSize)
+					errors << "Failed to write " << dataSize << " bytes to " << folder << _name << '\n';
 			}
 		};
 
