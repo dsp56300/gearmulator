@@ -53,6 +53,8 @@ namespace xtJucePlugin
 
 		xt::TableId getSelectedTable() const { return m_selectedTable; }
 
+		juce::PopupMenu createCopyToSelectedTableMenu(xt::WaveId _id);
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }

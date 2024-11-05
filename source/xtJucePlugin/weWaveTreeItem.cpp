@@ -179,20 +179,8 @@ namespace xtJucePlugin
 
 		if(selectedTableId.isValid())
 		{
-			juce::PopupMenu controlTableSlotsMenu;
-			for(uint16_t i=0; i<xt::wave::g_wavesPerTable; ++i)
-			{
-				const auto tableIndex = xt::TableIndex(i);
-
-				if(i && (i & 15) == 0)
-					controlTableSlotsMenu.addColumnBreak();
-
-				controlTableSlotsMenu.addItem("Slot " + std::to_string(i + 1), !xt::wave::isReadOnly(tableIndex), false, [this, tableIndex, selectedTableId]
-				{
-					m_editor.getData().setTableWave(selectedTableId, tableIndex, m_waveIndex);
-				});
-			}
-			menu.addSubMenu("Copy to current Control Table", controlTableSlotsMenu);
+			const auto subMenu = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
+			menu.addSubMenu("Copy to current Control Table", subMenu);
 		}
 
 		menu.showMenuAsync({});

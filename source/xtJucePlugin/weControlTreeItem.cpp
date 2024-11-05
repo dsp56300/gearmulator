@@ -105,6 +105,29 @@ namespace xtJucePlugin
 		}
 	}
 
+	void ControlTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		menu.addItem("Remove", [this]
+		{
+			m_editor.getData().setTableWave(m_table, m_index, g_invalidWaveIndex);
+		});
+		menu.addItem("Select Wave", [this]
+		{
+			m_editor.setSelectedWave(m_wave);
+		});
+		menu.addSubMenu("Copy to", m_editor.createCopyToSelectedTableMenu(m_wave));
+
+		menu.showMenuAsync({});
+	}
+
 	void ControlTreeItem::onWaveChanged() const
 	{
 		repaintItem();

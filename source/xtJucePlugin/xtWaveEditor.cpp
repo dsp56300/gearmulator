@@ -243,4 +243,22 @@ namespace xtJucePlugin
 		const auto& wavetableNames = getEditor().getXtController().getParameterDescriptions().getValueList("waveType");
 		return wavetableNames->valueToText(_id.rawId());
 	}
+
+	juce::PopupMenu WaveEditor::createCopyToSelectedTableMenu(xt::WaveId _id)
+	{
+		juce::PopupMenu controlTableSlotsMenu;
+		for(uint16_t i=0; i<xt::wave::g_wavesPerTable; ++i)
+		{
+			const auto tableIndex = xt::TableIndex(i);
+
+			if(i && (i & 15) == 0)
+				controlTableSlotsMenu.addColumnBreak();
+
+			controlTableSlotsMenu.addItem("Slot " + std::to_string(i), !xt::wave::isReadOnly(tableIndex), false, [this, tableIndex, _id]
+			{
+				getData().setTableWave(getSelectedTable(), tableIndex, _id);
+			});
+		}
+		return controlTableSlotsMenu;
+	}
 }
