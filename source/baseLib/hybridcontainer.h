@@ -1,29 +1,172 @@
 #pragma once
-/*
+
 #include <vector>
-#include <memory_resource>
 #include <array>
 
 namespace baseLib
 {
-	template<typename T, size_t S> class BufferResource
+	template <typename T, size_t MaxFixedSize>
+	class HybridContainer
 	{
 	public:
-		auto& getPool() { return m_pool; }
-	protected:
-		std::array<T, S> m_buffer;
-		std::pmr::monotonic_buffer_resource m_pool{ std::data(m_buffer), std::size(m_buffer) };
-	};
+		HybridContainer() {}
 
-	template<typename T, size_t S>
-	class HybridVector final : public BufferResource<T,S>, public std::pmr::vector<T>
-	{
-	public:
-		using Base = std::pmr::vector<T>;
+		HybridContainer(HybridContainer&& _source) noexcept
+		: m_array(std::move(_source.m_array))
+		, m_size(_source.m_size)
+		, m_useArray(_source.m_useArray)
+		, m_vector(std::move(_source.m_vector))
+		{
+			_source.clear();
+		}
 
-		HybridVector() : BufferResource<T, S>(), Base(&static_cast<BufferResource<T, S>&>(*this).getPool())
+		HybridContainer(const HybridContainer& _source) noexcept
+		: m_array(_source.m_array)
+		, m_size(_source.m_size)
+		, m_useArray(_source.m_useArray)
+		, m_vector(_source.m_vector)
 		{
 		}
+
+		~HybridContainer() = default;
+
+		template<typename U>
+		void push_back(U&& _value)
+		{
+			if (m_useArray)
+			{
+				if (m_size < MaxFixedSize)
+				{
+					m_array[m_size++] = std::forward<U>(_value);
+					return;
+				}
+
+				switchToVector();
+			}
+
+			m_vector.push_back(std::forward<U>(_value));
+			++m_size;
+		}
+
+		template<typename U> void emplace_back(U&& _value)
+		{
+			push_back<U>(std::forward<U>(_value));
+		}
+
+		T& operator[](const size_t _index)
+		{
+			if (m_useArray)
+			{
+				if (_index >= m_size)
+				{
+					throw std::out_of_range("Index out of range");
+				}
+				return m_array[_index];
+			}
+
+			return m_vector[_index];
+		}
+
+		const T& operator[](const size_t _index) const
+		{
+			return const_cast<HybridContainer*>(this)->operator[](_index);
+		}
+
+		size_t size() const
+		{
+			return m_size;
+		}
+
+		void clear()
+		{
+			m_size = 0;
+			m_useArray = true;
+		}
+
+		auto begin() const
+		{
+			if (m_useArray)
+				return m_array.begin();
+
+			return m_vector.begin();
+		}
+
+		auto end() const
+		{
+			if (m_useArray)
+				return m_array.begin() + m_size;
+			return m_vector.end();
+		}
+
+		HybridContainer& operator=(const HybridContainer& _source)
+		{
+			if (this == &_source)
+				return *this;
+
+			m_size = _source.m_size;
+			m_useArray = _source.m_useArray;
+
+			if (m_useArray)
+				m_array = _source.m_array;
+			else
+				m_vector = _source.m_vector;
+
+			return *this;
+		}
+
+		HybridContainer& operator=(HybridContainer&& _source) noexcept
+		{
+			if (this == &_source)
+				return *this;
+
+			m_size = _source.m_size;
+			m_useArray = _source.m_useArray;
+
+			if (m_useArray)
+				m_array = std::move(_source.m_array);
+			else
+				m_vector = std::move(_source.m_vector);
+
+			return *this;
+		}
+
+		HybridContainer& operator=(std::vector<T>&& _source)
+		{
+			m_vector = std::move(_source);
+			m_size = m_vector.size();
+			m_useArray = false;
+
+			return *this;
+		}
+
+		HybridContainer& operator=(const std::vector<T>& _source)
+		{
+			if(_source.size() <= MaxFixedSize)
+			{
+				m_size = _source.size();
+				m_useArray = true;
+				m_vector.clear();
+				std::copy(_source.begin(), _source.end(), m_array.begin());
+			}
+			else
+			{
+				m_vector = _source;
+				m_size = m_vector.size();
+				m_useArray = false;
+			}
+			return *this;
+		}
+
+	private:
+		void switchToVector()
+		{
+			m_useArray = false;
+			m_vector.assign(m_array.begin(), m_array.begin() + m_size);
+		}
+
+		std::array<T, MaxFixedSize> m_array;
+		size_t m_size = 0;
+		bool m_useArray = true;
+		std::vector<T> m_vector;
 	};
 }
-*/
