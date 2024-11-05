@@ -2,6 +2,7 @@
 
 #include "weWaveCategoryTreeItem.h"
 #include "weWaveDesc.h"
+#include "xtEditor.h"
 #include "xtWaveEditor.h"
 
 #include "synthLib/midiToSysex.h"
@@ -122,18 +123,15 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return;
 
-		if(files.size() != 1 || (!files[0].endsWithIgnoreCase(".mid") && !files[0].endsWithIgnoreCase(".syx")))
-		{
-			TreeItem::filesDropped(files, insertIndex);
-			return;
-		}
+		const auto sysex = getSysexFromFiles(files);
 
-		std::vector<std::vector<uint8_t>> sysex;
-
-		synthLib::MidiToSysex::extractSysexFromFile(sysex, files[0].toStdString());
+		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
 
 		if(sysex.empty())
+		{
+			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, "No sysex data found in file");
 			return;
+		}
 
 		std::vector<xt::WaveData> waves;
 
@@ -144,19 +142,27 @@ namespace xtJucePlugin
 				waves.push_back(wave);
 		}
 
-		if(waves.empty())
+		if(waves.size() == 1)
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Error", "No wave data found in file.");
+			m_editor.getData().setWave(m_waveIndex, waves.front());
 			return;
 		}
 
-		if(waves.size() > 1)
+		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, waves.empty() ? "No wave data found in file" : "Multiple waves found in file");
+	}
+
+	std::vector<std::vector<uint8_t>> WaveTreeItem::getSysexFromFiles(const juce::StringArray& _files)
+	{
+		std::vector<std::vector<uint8_t>> sysex;
+
+		for(const auto& file : _files)
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, "Error", "Multiple waves found in file.");
-			return;
+			std::vector<std::vector<uint8_t>> s;
+			synthLib::MidiToSysex::extractSysexFromFile(s, file.toStdString());
+			sysex.insert(sysex.end(), s.begin(), s.end());
 		}
 
-		m_editor.getData().setWave(m_waveIndex, waves.front());
+		return sysex;
 	}
 
 	void WaveTreeItem::onWaveChanged(const xt::WaveId _index) const

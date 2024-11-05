@@ -33,6 +33,8 @@ namespace xtJucePlugin
 		bool isInterestedInFileDrag(const juce::StringArray& files) override;
 		void filesDropped(const juce::StringArray& files, int insertIndex) override;
 
+		static std::vector<std::vector<uint8_t>> getSysexFromFiles(const juce::StringArray& _files);
+
 	private:
 		void onWaveChanged(xt::WaveId _index) const;
 		void onWaveChanged() const;
