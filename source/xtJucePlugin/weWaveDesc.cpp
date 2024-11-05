@@ -1,5 +1,8 @@
 #include "weWaveDesc.h"
 
+#include "weWaveTreeItem.h"
+#include "xtWaveEditor.h"
+
 #include "synthLib/sysexToMidi.h"
 
 namespace xtJucePlugin
