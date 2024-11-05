@@ -114,6 +114,35 @@ namespace xtJucePlugin
 		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, errorTitle, tables.empty() ? "No Control Table found in files" : "Multiple control tables found in file");
 	}
 
+	void TablesTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if(!_mouseEvent.mods.isPopupMenu())
+		{
+			TreeItem::itemClicked(_mouseEvent);
+			return;
+		}
+
+		juce::PopupMenu menu;
+
+		juce::PopupMenu copyToTableSubMenu;
+
+		for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
+		{
+			if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
+				copyToTableSubMenu.addColumnBreak();
+
+			const auto id = xt::TableId(i);
+			copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+			{
+				m_editor.getData().copyTable(id, m_index);
+			});
+		}
+
+		menu.addSubMenu("Copy to", copyToTableSubMenu);
+
+		menu.showMenuAsync({});
+	}
+
 	void TablesTreeItem::onTableChanged(xt::TableId _index)
 	{
 		if(_index != m_index)
