@@ -412,6 +412,8 @@ namespace genericVirusUI
 								c.modifySingleDump(single, virusLib::BankNumber::EditBuffer, i);
 								c.activatePatch(single, i);
 							}
+
+							c.requestArrangement();
 						}
 						return;
 					}

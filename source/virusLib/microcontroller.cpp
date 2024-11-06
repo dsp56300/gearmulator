@@ -1313,7 +1313,8 @@ void Microcontroller::applyToMultiEditBuffer(const Page _page, const uint8_t _pa
 	case PAGE_C:
 		if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT)
 		{
-			m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
+			const auto idx = MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part;
+			m_multiEditBuffer[idx] = _value;
 		}
 		break;
 	}
