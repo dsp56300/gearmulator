@@ -53,6 +53,44 @@ namespace baseLib
 			push_back<U>(std::forward<U>(_value));
 		}
 
+		void pop_back()
+		{
+			if (m_useArray)
+			{
+				if (m_size == 0)
+					throw std::out_of_range("Container is empty");
+				--m_size;
+				return;
+			}
+
+			m_vector.pop_back();
+			--m_size;
+		}
+
+		const T& front() const
+		{
+			if (m_useArray)
+			{
+				if (m_size == 0)
+					throw std::out_of_range("Container is empty");
+				return m_array.front();
+			}
+
+			return m_vector.front();
+		}
+
+		const T& back()	const
+		{
+			if (m_useArray)
+			{
+				if (m_size == 0)
+					throw std::out_of_range("Container is empty");
+				return m_array[m_size - 1];
+			}
+
+			return m_vector.back();
+		}
+
 		T& operator[](const size_t _index)
 		{
 			if (m_useArray)
@@ -70,6 +108,11 @@ namespace baseLib
 		const T& operator[](const size_t _index) const
 		{
 			return const_cast<HybridContainer*>(this)->operator[](_index);
+		}
+
+		bool empty() const
+		{
+			return m_size == 0;
 		}
 
 		size_t size() const
@@ -126,6 +169,62 @@ namespace baseLib
 				m_array = std::move(_source.m_array);
 			else
 				m_vector = std::move(_source.m_vector);
+
+			return *this;
+		}
+
+		template<size_t OtherFixedSize> HybridContainer& operator=(const HybridContainer<T, OtherFixedSize>& _source)
+		{
+			m_size = _source.size();
+
+			if(_source.empty())
+			{
+				m_useArray = true;
+				return *this;
+			}
+
+			if(m_size <= MaxFixedSize)
+			{
+				std::copy(_source.begin(), _source.end(), m_array.begin());
+				m_useArray = true;
+			}
+			else
+			{
+				m_vector.assign(_source.begin(), _source.end());
+				m_useArray = false;
+			}
+
+			return *this;
+		}
+
+		template<size_t OtherFixedSize> HybridContainer& operator=(HybridContainer<T, OtherFixedSize>&& _source)
+		{
+			m_size = _source.size();
+
+			if(!m_size)
+			{
+				m_useArray = true;
+				_source.clear();
+				return *this;
+			}
+
+			if(m_size <= MaxFixedSize)
+			{
+				std::move(_source.begin(), _source.end(), m_array.begin());
+				m_useArray = true;
+			}
+			else if(!_source.m_useArray)
+			{
+				m_vector = std::move(_source.m_vector);
+				m_useArray = false;
+			}
+			else
+			{
+				m_vector.assign(_source.begin(), _source.end());
+				m_useArray = false;
+			}
+
+			_source.clear();
 
 			return *this;
 		}
