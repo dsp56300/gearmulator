@@ -8,6 +8,8 @@ namespace baseLib
 	template <typename T, size_t MaxFixedSize>
 	class HybridContainer
 	{
+		static_assert(MaxFixedSize > 0, "MaxFixedSize must be greater than 0");
+
 	public:
 		HybridContainer() {}
 
@@ -26,6 +28,14 @@ namespace baseLib
 		, m_useArray(_source.m_useArray)
 		, m_vector(_source.m_vector)
 		{
+		}
+
+		HybridContainer(std::initializer_list<T> _list) : m_size(_list.size()), m_useArray(_list.size() <= MaxFixedSize)
+		{
+			if(m_useArray)
+				std::copy(_list.begin(), _list.end(), m_array.begin());
+			else
+				m_vector.assign(_list);
 		}
 
 		~HybridContainer() = default;
@@ -129,16 +139,14 @@ namespace baseLib
 		auto begin() const
 		{
 			if (m_useArray)
-				return m_array.begin();
+				return &m_array[0];
 
-			return m_vector.begin();
+			return &m_vector[0];
 		}
 
 		auto end() const
 		{
-			if (m_useArray)
-				return m_array.begin() + m_size;
-			return m_vector.end();
+			return begin() + m_size;
 		}
 
 		HybridContainer& operator=(const HybridContainer& _source)
