@@ -26,6 +26,11 @@ OsTIrus:
 Osirus/OsTIrus:
 
 - [Fix] Add support to load Arrangement Dumps that contain 16 Singles and one Multi
+- [Fix] Bank Selects in Multi Mode selected Bank - 1
+- [Fix] Program Changes in Multi Mode not executed without previous Bank Select > 0
+- [Fix] Bank Selects and Program Changes in Multi Mode treated MIDI channel as part 
+        number even if parts were mapped to a different MIDI channel
+- [Fix] UI didn't react to MIDI Program Changes
 
 1.3.21
 
