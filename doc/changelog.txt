@@ -23,6 +23,10 @@ OsTIrus:
 - [Fix] Fix duplicated factory presets and lost favourites when switching between
         TI2 and Snow mode
 
+Osirus/OsTIrus:
+
+- [Fix] Add support to load Arrangement Dumps that contain 16 Singles and one Multi
+
 1.3.21
 
 DSP:

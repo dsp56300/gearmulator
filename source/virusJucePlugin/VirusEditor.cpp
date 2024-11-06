@@ -370,6 +370,52 @@ namespace genericVirusUI
 			}
 			else if(results.size() > 1)
 			{
+				// check if this is one multi and 16 singles and load them as arrangement dump. Ask user for confirmation first
+				if(results.size() == 17)
+				{
+					uint32_t multiCount = 0;
+
+					pluginLib::patchDB::DataList singles;
+					pluginLib::patchDB::Data multi;
+
+					for (const auto& result : results)
+					{
+						if(result.size() < 256)
+							continue;
+
+						const auto cmd = result[6];
+
+						if(cmd == virusLib::SysexMessageType::DUMP_MULTI)
+						{
+							multi = result;
+							++multiCount;
+						}
+						else if(cmd == virusLib::SysexMessageType::DUMP_SINGLE)
+						{
+							singles.push_back(result);
+						}
+					}
+
+					if(multiCount == 1 && singles.size() == 16)
+					{
+						const auto title = m_processor.getProductName(true) + " - Load Arrangement Dump?";
+						const auto message = "This file contains an arrangement dump, i.e. one Multi and 16 Singles.\nDo you want to replace the current state by this dump?";
+
+						if(1 == juce::NativeMessageBox::showYesNoBox(juce::MessageBoxIconType::QuestionIcon, title, message, nullptr))
+						{
+							setPlayMode(virusLib::PlayMode::PlayModeMulti);
+							c.sendSysEx(multi);
+
+							for(uint8_t i=0; i<static_cast<uint8_t>(singles.size()); ++i)
+							{
+								const auto& single = singles[i];
+								c.modifySingleDump(single, virusLib::BankNumber::EditBuffer, i);
+								c.activatePatch(single, i);
+							}
+						}
+						return;
+					}
+				}
 				juce::NativeMessageBox::showMessageBox(juce::AlertWindow::InfoIcon, "Information", 
 					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
