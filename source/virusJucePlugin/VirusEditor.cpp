@@ -480,15 +480,23 @@ namespace genericVirusUI
 			break;
 		case SaveType::Arrangement:
 			{
-				messages.push_back(getController().getMultiEditBuffer().data);
-
-				for(uint8_t i=0; i<16; ++i)
+				getController().onMultiReceived = [this, _fileType, _pathName]
 				{
-					const auto dump = getController().createSingleDump(i, toMidiByte(virusLib::BankNumber::EditBuffer), i);
-					messages.push_back(dump);
-				}
+					std::vector< std::vector<uint8_t> > messages;
+					messages.push_back(getController().getMultiEditBuffer().data);
+
+					for(uint8_t i=0; i<16; ++i)
+					{
+						const auto dump = getController().createSingleDump(i, toMidiByte(virusLib::BankNumber::EditBuffer), i);
+						messages.push_back(dump);
+						Editor::savePresets(_fileType, _pathName, messages);
+					}
+
+					getController().onMultiReceived = {};
+				};
+				getController().requestMulti(0, 0);
 			}
-			break;
+			return true;
 		default:
 			return false;
 		}

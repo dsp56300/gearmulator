@@ -133,7 +133,8 @@ namespace virus
 
 		std::function<void(int)> onProgramChange = {};
 		std::function<void()> onMsgDone = {};
-		std::function<void(virusLib::BankNumber _bank, uint32_t _program)> onRomPatchReceived = {};
+		std::function<void(virusLib::BankNumber, uint32_t)> onRomPatchReceived = {};
+		std::function<void()> onMultiReceived = {};
 
 		bool requestProgram(uint8_t _bank, uint8_t _program, bool _multi) const;
 		bool requestSingle(uint8_t _bank, uint8_t _program) const;

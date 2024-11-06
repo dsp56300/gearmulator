@@ -514,6 +514,9 @@ namespace virus
 			}
 
 			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+
+			if(onMultiReceived)
+				onMultiReceived();
 		}
     }
 
