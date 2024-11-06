@@ -422,19 +422,33 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 	switch (status)
 	{
 	case M_PROGRAMCHANGE:
+		if(singleMode)
+			return partProgramChange(SINGLE, _ev.b);
+
+		for(uint32_t p=0; p<getPartCount(); ++p)
 		{
-			if(singleMode)
-				return partProgramChange(SINGLE, _ev.b);
-			return partProgramChange(channel, _ev.b);
+			if(channel == getPartMidiChannel(static_cast<uint8_t>(p)))
+				partProgramChange(static_cast<uint8_t>(p), _ev.b);
 		}
+		return true;
 	case M_CONTROLCHANGE:
 		switch(_ev.b)
 		{
 		case MC_BANKSELECTLSB:
-			if(singleMode)
-				partBankSelect(SINGLE, _ev.c, false);
-			else
-				partBankSelect(channel, _ev.c, false);
+			{
+				if(singleMode)
+				{
+					partBankSelect(SINGLE, _ev.c, false);
+				}
+				else
+				{
+					for(uint32_t p=0; p<getPartCount(); ++p)
+					{
+						if(channel == getPartMidiChannel(static_cast<uint8_t>(p)))
+							partBankSelect(static_cast<uint8_t>(p), _ev.c, false);
+					}
+				}
+			}
 			return true;
 		default:
 			if(g_pageA.find(_ev.b) != g_pageA.end())
