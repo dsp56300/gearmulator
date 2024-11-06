@@ -32,6 +32,10 @@ Osirus/OsTIrus:
         number even if parts were mapped to a different MIDI channel
 - [Fix] UI didn't react to MIDI Program Changes
 
+Vavra:
+
+- [Imp] Display LFO speed values as bars/beats if in clocked mode
+
 1.3.21
 
 DSP:
