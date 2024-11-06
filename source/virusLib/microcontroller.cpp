@@ -1013,7 +1013,7 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 		return false;
 	}
 
-	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
+	const auto bank = fromArrayIndex(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
 	if(getSingle(bank, _value, single))
 	{
