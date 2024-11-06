@@ -543,7 +543,7 @@ namespace pluginLib
 
 				const auto status = ev.a & 0xf0;
 
-				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE)
+				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE || status == synthLib::M_PROGRAMCHANGE)
 				{
 					// forward to UI to react to control input changes that should move knobs
 					getController().enqueueMidiMessages({ev});
