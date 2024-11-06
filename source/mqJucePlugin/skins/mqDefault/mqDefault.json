@@ -3113,7 +3113,7 @@
                     }
                 },
                 {
-                    "name" : "knob",
+                    "name" : "notClocked",
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3127,6 +3127,31 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo1Speed"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo1Clocked",
+                        "enableOnValues" : "0"
+                    }
+                },
+                {
+                    "name" : "clocked",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8336",
+                        "y" : "294.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo1SpeedClocked"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo1Clocked",
+                        "enableOnValues" : "1"
                     }
                 },
                 {
@@ -3320,7 +3345,7 @@
                     }
                 },
                 {
-                    "name" : "knob",
+                    "name" : "notClocked",
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3334,6 +3359,31 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo2Speed"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo2Clocked",
+                        "enableOnValues" : "0"
+                    }
+                },
+                {
+                    "name" : "clocked",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8336",
+                        "y" : "809.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo2SpeedClocked"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo2Clocked",
+                        "enableOnValues" : "1"
                     }
                 },
                 {
@@ -3527,7 +3577,7 @@
                     }
                 },
                 {
-                    "name" : "knob",
+                    "name" : "notClocked",
                     "rotary" : {
                     },
                     "spritesheet" : {
@@ -3541,6 +3591,31 @@
                     },
                     "parameterAttachment" : {
                         "parameter" : "Lfo3Speed"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo3Clocked",
+                        "enableOnValues" : "0"
+                    }
+                },
+                {
+                    "name" : "clocked",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "215.8336",
+                        "y" : "1324.48",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "Lfo3SpeedClocked"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "Lfo3Clocked",
+                        "enableOnValues" : "1"
                     }
                 },
                 {
