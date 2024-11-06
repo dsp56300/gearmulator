@@ -7,9 +7,9 @@ Framework:
 - [Imp] Upgraded to Juce 8.0.3 which uses Direct2D on Windows for faster UI rendering
 - [Imp] Patch Manager now stores its database in the user documents folder, next
         to skins and roms:
-        c:\Users\<username>\Documents\<synthname>\patchmanagerDb (Win)
-		~/Documents/<synthname>/patchmanagerDb (Mac)
-		[XDG_DATA_HOME or ~/.local/share]/<synthname>/patchmanagerDb (Linux)
+        c:\Users\<username>\Documents\The Usual Suspects\<synthname>\patchmanagerDb (Win)
+		~/Documents/The Usual Suspects/<synthname>/patchmanagerDb (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/The Usual Suspects/<synthname>/patchmanagerDb (Linux)
 		Any existing database in the old location is automatically migrated to
 		the new one.
 - [Imp] Config file location has been changed and is now located in a subfolder
@@ -45,18 +45,18 @@ Framework:
 - [Imp] All MacOS builds now include a script to remove quaratine attributes
 - [Imp] The default skin folder has changed. Custom skins are now supposed to be in:
 
-        c:\Users\<username>\Documents\<synthname>\skins (Win)
-		~/Documents/<synthname>/skins (Mac)
-		[XDG_DATA_HOME or ~/.local/share]/<synthname>/skins (Linux)
+        c:\Users\<username>\Documents\The Usual Suspects\<synthname>\skins (Win)
+		~/Documents/The Usual Suspects/<synthname>/skins (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/The Usual Suspects/<synthname>/skins (Linux)
 
 		Existing skins in the old location are still supported to ensure backwards
 		compatibility
 
 - [Imp] ROMs are now also searched for in the following directories
 
-        c:\Users\<username>\Documents\<synthname>\roms (Win)
-		~/Documents/<synthname>/roms (Mac)
-		[XDG_DATA_HOME or ~/.local/share]/<synthname>/roms (Linux)
+        c:\Users\<username>\Documents\The Usual Suspects\<synthname>\roms (Win)
+		~/Documents/The Usual Suspects/<synthname>/roms (Mac)
+		[XDG_DATA_HOME or ~/.local/share]/The Usual Suspects/<synthname>/roms (Linux)
 
 		For backwards compatibility, it is also possible to copy ROMs next to the 
 		plugins as it was before
