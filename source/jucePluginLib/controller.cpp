@@ -32,8 +32,6 @@ namespace pluginLib
 				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors(), 
 				nullptr, juce::ModalCallbackFunction::create([](int){}));
 		}
-
-		startTimer(10);
 	}
 
 	Controller::~Controller()
@@ -528,6 +526,8 @@ namespace pluginLib
 
         const std::lock_guard l(m_midiMessagesLock);
         m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
+		if(!isTimerRunning())
+			startTimer(1);
 	}
 
 	void Controller::loadChunkData(baseLib::ChunkReader& _cr)
@@ -566,6 +566,7 @@ namespace pluginLib
 		const std::lock_guard l(m_midiMessagesLock);
         std::swap(m_midiMessages, _events);
 		m_midiMessages.clear();
+		stopTimer();
 	}
 
 	void Controller::processMidiMessages()

@@ -123,7 +123,7 @@ namespace pluginLib
 		_combo.setScrollWheelEnabled(true);
 
 		_combo.onChange = nullptr;
-		_combo.clear();
+		_combo.clear(juce::dontSendNotification);
 
 		using Entry = std::pair<uint8_t, std::string>;
 

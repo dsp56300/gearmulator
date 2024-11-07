@@ -514,6 +514,9 @@ namespace virus
 			}
 
 			getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
+
+			if(onMultiReceived)
+				onMultiReceived();
 		}
     }
 
@@ -525,7 +528,9 @@ namespace virus
 		uint8_t page;
 
 		if (status == synthLib::M_CONTROLCHANGE)
+		{
 			page = virusLib::PAGE_A;
+		}
 		else if (status == synthLib::M_POLYPRESSURE)
 		{
 			// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
@@ -533,8 +538,31 @@ namespace virus
 				return false;
 			page = virusLib::PAGE_B;
 		}
+		else if(status == synthLib::M_PROGRAMCHANGE)
+		{
+			if(isMultiMode())
+			{
+				for(uint8_t p=0; p<getPartCount(); ++p)
+				{
+					const auto idx = getParameterIndexByName("Part Midi Channel");
+					if(idx == pluginLib::Controller::InvalidParameterIndex)
+						continue;
+
+					const auto v = getParameter(idx, p);
+					if(v->getUnnormalizedValue() == part)
+						requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), p);
+				}
+			}
+			else
+			{
+				requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), virusLib::SINGLE);
+			}
+			return true;
+		}
 		else
+		{
 			return false;
+		}
 
 		const auto& params = findSynthParam(part, page, m.b);
 		for (const auto & p : params)

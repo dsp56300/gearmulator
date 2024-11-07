@@ -422,19 +422,33 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 	switch (status)
 	{
 	case M_PROGRAMCHANGE:
+		if(singleMode)
+			return partProgramChange(SINGLE, _ev.b);
+
+		for(uint32_t p=0; p<getPartCount(); ++p)
 		{
-			if(singleMode)
-				return partProgramChange(SINGLE, _ev.b);
-			return partProgramChange(channel, _ev.b);
+			if(channel == getPartMidiChannel(static_cast<uint8_t>(p)))
+				partProgramChange(static_cast<uint8_t>(p), _ev.b);
 		}
+		return true;
 	case M_CONTROLCHANGE:
 		switch(_ev.b)
 		{
 		case MC_BANKSELECTLSB:
-			if(singleMode)
-				partBankSelect(SINGLE, _ev.c, false);
-			else
-				partBankSelect(channel, _ev.c, false);
+			{
+				if(singleMode)
+				{
+					partBankSelect(SINGLE, _ev.c, false);
+				}
+				else
+				{
+					for(uint32_t p=0; p<getPartCount(); ++p)
+					{
+						if(channel == getPartMidiChannel(static_cast<uint8_t>(p)))
+							partBankSelect(static_cast<uint8_t>(p), _ev.c, false);
+					}
+				}
+			}
 			return true;
 		default:
 			if(g_pageA.find(_ev.b) != g_pageA.end())
@@ -1013,7 +1027,7 @@ bool Microcontroller::partProgramChange(const uint8_t _part, const uint8_t _valu
 		return false;
 	}
 
-	const auto bank = fromMidiByte(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
+	const auto bank = fromArrayIndex(m_multiEditBuffer[MD_PART_BANK_NUMBER + _part]);
 
 	if(getSingle(bank, _value, single))
 	{
@@ -1313,7 +1327,8 @@ void Microcontroller::applyToMultiEditBuffer(const Page _page, const uint8_t _pa
 	case PAGE_C:
 		if (_param >= PART_MIDI_CHANNEL && _param <= PART_OUTPUT_SELECT)
 		{
-			m_multiEditBuffer[MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part] = _value;
+			const auto idx = MD_PART_MIDI_CHANNEL + ((_param-PART_MIDI_CHANNEL)*16) + _part;
+			m_multiEditBuffer[idx] = _value;
 		}
 		break;
 	}

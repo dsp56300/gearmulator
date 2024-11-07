@@ -267,7 +267,7 @@
 		// LFO 1
  		{"index":160, "name":"Lfo1Shape", "min":0, "max":5, "toText":"lfoWaves", "isDiscrete":true},
  		{"index":161, "name":"Lfo1Speed", "default":64},
- 		{"index":161, "name":"Lfo1SpeedClocked"},
+ 		{"index":161, "name":"Lfo1SpeedClocked", "default":94, "toText": "lfoSpeedClocked"},
  		{"index":163, "name":"Lfo1Sync", "min":0 , "max":1, "isBool":true},
  		{"index":164, "name":"Lfo1Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":165, "name":"Lfo1StartPhase"},
@@ -278,7 +278,7 @@
 		// LFO 2
  		{"index":172, "name":"Lfo2Shape", "min":0, "max":5, "toText":"lfoWaves", "isDiscrete":true},
  		{"index":173, "name":"Lfo2Speed", "default":64},
- 		{"index":173, "name":"Lfo2SpeedClocked"},
+ 		{"index":173, "name":"Lfo2SpeedClocked", "default":94 "toText": "lfoSpeedClocked"},
  		{"index":175, "name":"Lfo2Sync", "min":0 , "max":1, "isBool":true},
  		{"index":176, "name":"Lfo2Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":177, "name":"Lfo2StartPhase"},
@@ -289,7 +289,7 @@
 		// LFO 3
  		{"index":184, "name":"Lfo3Shape", "min":0, "max":5, "toText":"lfoWaves", "isDiscrete":true},
  		{"index":185, "name":"Lfo3Speed", "default":64},
- 		{"index":185, "name":"Lfo3SpeedClocked"},
+ 		{"index":185, "name":"Lfo3SpeedClocked", "default":94 "toText": "lfoSpeedClocked"},
  		{"index":187, "name":"Lfo3Sync", "min":0 , "max":1, "isBool":true},
  		{"index":188, "name":"Lfo3Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":189, "name":"Lfo3StartPhase"},
@@ -1161,6 +1161,17 @@
  		"lfoWaves":
 		[
 			"Sine", "Triangle", "Square", "Saw", "Random", "S&H"
+		],
+		"lfoSpeedClocked":
+		[
+			"256 Bars", "256 Bars", "192 Bars",  "192 Bars",  "160 Bars", "160 Bars", "144 Bars",  "144 Bars",  "128 Bars", "128 Bars", "120 Bars", "120 Bars", "96 Bars",   "96 Bars",   "80 Bars",  "80 Bars",  
+			"72 Bars",  "72 Bars",  "64 Bars",   "64 Bars",   "48 Bars",  "48 Bars",  "40 Bars",   "40 Bars",   "36 Bars",  "36 Bars",  "32 Bars",  "32 Bars",  "24 Bars",   "24 Bars",   "20 Bars",  "20 Bars",  
+			"18 Bars",  "18 Bars",  "16 Bars",   "16 Bars",   "15 Bars",  "15 Bars",  "14 Bars",   "14 Bars",   "12 Bars",  "12 Bars",  "10 Bars",  "10 Bars",  "9 Bars",    "9 Bars",    "8 Bars",   "8 Bars",   
+			"7 Bars",   "7 Bars",   "6 Bars",    "6 Bars",    "5 Bars",   "5 Bars",   "4 Bars",    "4 Bars",    "3.5 Bars", "3.5 Bars", "3 Bars",   "3 Bars",   "2.66 Bars", "2.66 Bars", "2.4 Bars", "2.4 Bars", 
+			"2 Bars",   "2 Bars",   "1.75 Bars", "1.75 Bars", "1.5 Bars", "1.5 Bars", "1.33 Bars", "1.33 Bars", "1.2 Bars", "1.2 Bars", "1 Bar",    "1 Bar",    "7/8",       "7/8",       "1/2.",     "1/2.", 
+			"1/2T",     "1/2T",     "5/8",       "5/8",       "1/2",      "1/2",      "7/16",      "7/16",      "1/4.",     "1/4.",     "1/4T",     "1/4T",     "5/16",      "5/16",      "1/4",      "1/4",  
+			"7/32",     "7/32",     "1/8.",      "1/8.",      "1/8T",     "1/8T",     "5/32",      "5/32",      "1/8",      "1/8",      "7/64",     "7/64",     "1/16.",     "1/16.",     "1/16T",    "1/16T",    
+			"5/64",     "5/64",     "1/16",      "1/16",      "1/32.",    "1/32.",    "1/32T",     "1/32T",     "1/32",     "1/32",     "1/64T",    "1/64T",    "1/64",      "1/64",      "1/96",     "1/96"
 		],
  		"oscWaves":
 		[
