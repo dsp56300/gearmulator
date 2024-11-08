@@ -16,6 +16,10 @@ Framework:
         "config" next to the other folders. Existing configurations in legacy
 		locations are migrated automatically.
 
+NodalRed2x:
+
+- [Fix] LFO2 rate & range didn't have red VM map overlay dots
+
 OsTIrus:
 
 - [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
