@@ -35,39 +35,46 @@ namespace n2xJucePlugin
 		if(m_enabled == _enabled)
 			return;
 
+		const auto wasEnabled = m_enabled;
+
 		m_enabled = _enabled;
 
 		const auto& controller = m_editor.getN2xController();
 
-		const auto part = controller.getCurrentPart();
+		// initial setup, collect all default-bound components. Only executed once and delayed
+		// because in our constructor the components might not be bound yet
+		if(m_boundComponents.empty())
+		{
+			for(const auto& name : m_paramNames)
+			{
+				const auto paramIdxDefault = controller.getParameterIndexByName(name);
+				const auto paramDefault = controller.getParameter(paramIdxDefault);
+
+				auto* comp = m_binding.getBoundComponent(paramDefault);
+
+				if(comp)
+					m_boundComponents.insert({name, comp});
+			}
+		}
 
 		for (const auto& paramName : m_paramNames)
 		{
 			const auto paramIdxDefault = controller.getParameterIndexByName(paramName);
 			const auto paramIdxVm = controller.getParameterIndexByName(paramName + g_postfix);
 
-			const auto* paramDefault = controller.getParameter(paramName, part);
-			const auto* paramVm = controller.getParameter(paramName + g_postfix, part);
+			auto it = m_boundComponents.find(paramName);
 
-			auto* comp = m_binding.getBoundComponent(paramDefault);
+			if(it == m_boundComponents.end())
+				continue;
 
-			if(comp == nullptr)
-				comp = m_binding.getBoundComponent(paramVm);
+			auto* comp = it->second;
 
-			if(comp != nullptr)
-			{
-				m_binding.unbind(comp);
-			}
-			else
-			{
-				assert(false && "bound component not found");
-				return;
-			}
-
-			m_binding.unbind(paramDefault);
-			m_binding.unbind(paramVm);
+			m_binding.unbind(comp);
+			m_boundComponents.erase(it);
 
 			m_binding.bind(*comp, _enabled ? paramIdxVm : paramIdxDefault, pluginLib::ParameterBinding::CurrentPart);
+
+			m_boundComponents.insert({paramName, comp});
 
 			comp->setAlpha(_enabled ? g_enabledAlpha : 1.0f);
 		}

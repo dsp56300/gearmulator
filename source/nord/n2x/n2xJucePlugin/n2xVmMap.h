@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <set>
 
@@ -10,6 +11,7 @@ namespace pluginLib
 
 namespace juce
 {
+	class Component;
 	class Button;
 }
 
@@ -29,6 +31,7 @@ namespace n2xJucePlugin
 		pluginLib::ParameterBinding& m_binding;
 
 		std::set<std::string> m_paramNames;
+		std::map<std::string, juce::Component*> m_boundComponents;
 		juce::Button* m_btVmMap;
 		bool m_enabled = false;
 	};

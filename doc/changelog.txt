@@ -19,6 +19,7 @@ Framework:
 NodalRed2x:
 
 - [Fix] LFO2 rate & range didn't have red VM map overlay dots
+- [Fix] VM Map overlay dots always displayed values for slot A
 
 OsTIrus:
 
