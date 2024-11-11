@@ -278,7 +278,7 @@
 		// LFO 2
  		{"index":172, "name":"Lfo2Shape", "min":0, "max":5, "toText":"lfoWaves", "isDiscrete":true},
  		{"index":173, "name":"Lfo2Speed", "default":64},
- 		{"index":173, "name":"Lfo2SpeedClocked", "default":94 "toText": "lfoSpeedClocked"},
+ 		{"index":173, "name":"Lfo2SpeedClocked", "default":94, "toText": "lfoSpeedClocked"},
  		{"index":175, "name":"Lfo2Sync", "min":0 , "max":1, "isBool":true},
  		{"index":176, "name":"Lfo2Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":177, "name":"Lfo2StartPhase"},
@@ -289,7 +289,7 @@
 		// LFO 3
  		{"index":184, "name":"Lfo3Shape", "min":0, "max":5, "toText":"lfoWaves", "isDiscrete":true},
  		{"index":185, "name":"Lfo3Speed", "default":64},
- 		{"index":185, "name":"Lfo3SpeedClocked", "default":94 "toText": "lfoSpeedClocked"},
+ 		{"index":185, "name":"Lfo3SpeedClocked", "default":94, "toText": "lfoSpeedClocked"},
  		{"index":187, "name":"Lfo3Sync", "min":0 , "max":1, "isBool":true},
  		{"index":188, "name":"Lfo3Clocked", "min":0 , "max":1, "isBool":true},
  		{"index":189, "name":"Lfo3StartPhase"},
