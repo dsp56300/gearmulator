@@ -26,6 +26,7 @@ set(SOURCES
 	resamplerInOut.cpp resamplerInOut.h
 	romLoader.cpp romLoader.h
 	sysexToMidi.cpp sysexToMidi.h
+	vstpreset.cpp vstpreset.h
 	wavReader.cpp wavReader.h
 	wavTypes.h
 	wavWriter.cpp wavWriter.h
