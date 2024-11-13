@@ -37,6 +37,10 @@ Osirus/OsTIrus:
         number even if parts were mapped to a different MIDI channel
 - [Fix] UI didn't react to MIDI Program Changes
 
+OsTIrus:
+
+- [Fix] .vtibackup files may have been imported incompletely
+
 Vavra:
 
 - [Imp] Display LFO speed values as bars/beats if in clocked mode
