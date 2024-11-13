@@ -63,6 +63,10 @@ namespace jucePluginEditorLib
 
 		std::string getSkinFolder() const;
 
+		bool hasSkin() const
+		{
+			return m_currentSkin.isValid();
+		}
 	protected:
 		virtual Editor* createEditor(const Skin& _skin) = 0;
 

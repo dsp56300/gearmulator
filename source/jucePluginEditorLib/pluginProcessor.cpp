@@ -68,7 +68,7 @@ namespace jucePluginEditorLib
 
 	    auto* window = new EditorWindow(*this, *m_editorState, getConfig());
 
-		if(window->getWidth() == 0 || window->getHeight() == 0)
+		if(!m_editorState->hasSkin())
 		{
 			constexpr int w = 600;
 			constexpr int h = 300;

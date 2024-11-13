@@ -10,8 +10,6 @@
 
 #include "dsp56kEmu/logging.h"
 
-#include "jucePluginLib/tools.h"
-
 namespace jucePluginEditorLib
 {
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
@@ -94,9 +92,6 @@ std::string PluginEditorState::getSkinFolder() const
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
 {
-	m_currentSkin = _skin;
-	writeSkinToConfig(_skin);
-
 	if (m_editor)
 	{
 		m_instanceConfig.clear();
@@ -134,6 +129,9 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		m_rootScale = editor->getScale();
 
 		m_editor->setTopLeftPosition(0, 0);
+
+		m_currentSkin = _skin;
+		writeSkinToConfig(_skin);
 
 		if(evSkinLoaded)
 			evSkinLoaded(m_editor.get());
