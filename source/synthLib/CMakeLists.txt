@@ -11,6 +11,7 @@ set(SOURCES
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
 	buildconfig.h buildconfig.h.in
+	dac.cpp dac.h
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
