@@ -398,7 +398,7 @@ namespace virusLib
 
 			const auto name = ROMFile::getSingleName(preset);
 
-			if(name.size() != 10)
+			if(name.empty())
 				break;
 
 			auto& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{
