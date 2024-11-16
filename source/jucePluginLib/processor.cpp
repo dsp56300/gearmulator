@@ -357,7 +357,7 @@ namespace pluginLib
 
 	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
 	{
-		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanagerDb/");
+		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanager/");
 	}
 
 	std::string Processor::getConfigFile(const bool _useFxFolder) const
