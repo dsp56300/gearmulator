@@ -1,6 +1,6 @@
 Release Notes 
 
-1.3.22
+1.4.0
 
 Framework:
 
@@ -25,8 +25,9 @@ OsTIrus:
 
 - [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
 
-- [Fix] Fix duplicated factory presets and lost favourites when switching between
+- [Fix] Duplicated factory presets and lost favourites when switching between
         TI2 and Snow mode
+- [Fix] DSP crashed when loading a patch while parameters are locked
 
 Osirus/OsTIrus:
 
