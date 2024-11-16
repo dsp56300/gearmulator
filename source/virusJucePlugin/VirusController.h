@@ -173,7 +173,7 @@ namespace virus
     	void parseMulti(const pluginLib::SysEx& _msg, const pluginLib::MidiPacket::Data& _data, const pluginLib::MidiPacket::ParamValues& _parameterValues);
 
         void parseParamChange(const pluginLib::MidiPacket::Data& _data);
-        bool parseControllerDump(const synthLib::SMidiEvent&);
+        bool parseControllerDump(const synthLib::SMidiEvent&) const;
 
         VirusProcessor& m_processor;
         virusLib::DeviceModel m_defaultModel;

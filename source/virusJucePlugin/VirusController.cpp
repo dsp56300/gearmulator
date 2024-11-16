@@ -424,13 +424,29 @@ namespace virus
 
             const auto locked = m_locking.getLockedParameterNames(ch);
 
-            for(auto it = _parameterValues.begin(); it != _parameterValues.end(); ++it)
-            {
-	            auto* p = getParameter(it->first.second, ch);
+			// if there are locked parameters and the current values in the received preset do not match
+			// the values of the parameters that are locked, create a new preset that contains all
+			// locked parameter values and send it back to the device
+			std::unordered_set<const pluginLib::Parameter*> lockedParamsToApply;
 
+            for (const auto& parameterValue : _parameterValues)
+            {
+	            auto* p = getParameter(parameterValue.first.second, ch);
+
+				// if a parameter is not locked, apply it
                 if(locked.find(p->getDescription().name) == locked.end())
-					p->setValueFromSynth(it->second, pluginLib::Parameter::Origin::PresetChange);
+					p->setValueFromSynth(parameterValue.second, pluginLib::Parameter::Origin::PresetChange);
+				// otherwise, remember the locked parameter if the locked value doesn't match the preset value
+				else if (parameterValue.second != p->getUnnormalizedValue())
+					lockedParamsToApply.insert(p);
             }
+
+			// if we have any locked parameters that need to be applied, create a new preset and send it to the device
+			if (!lockedParamsToApply.empty())
+			{
+				auto newDump = createSingleDump(patch.progNumber == virusLib::SINGLE ? 0 : patch.progNumber, virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), patch.progNumber);
+				sendSysEx(newDump);
+			}
 
             getProcessor().updateHostDisplay(juce::AudioProcessorListener::ChangeDetails().withProgramChanged(true));
 
@@ -520,7 +536,7 @@ namespace virus
 		}
     }
 
-	bool Controller::parseControllerDump(const synthLib::SMidiEvent& m)
+	bool Controller::parseControllerDump(const synthLib::SMidiEvent& m) const
 	{
 		const uint8_t status = m.a & 0xf0;
     	const uint8_t part = m.a & 0x0f;
@@ -822,10 +838,6 @@ namespace virus
 			return false;
 
 		sendSysEx(msg);
-
-        // if we have locked parameters, get them, send the preset and then send each locked parameter value afterward.
-        // Modifying the preset directly does not work because a preset might be an old version that we do not know
-		sendLockedParameters(static_cast<uint8_t>(_part == virusLib::SINGLE ? 0 : _part));
 
 		requestSingle(toMidiByte(virusLib::BankNumber::EditBuffer), program);
 
