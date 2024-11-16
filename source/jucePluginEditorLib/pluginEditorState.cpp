@@ -15,6 +15,8 @@ namespace jucePluginEditorLib
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
 {
+	juce::File(getSkinFolder()).createDirectory();
+
 	// point embedded skins to public data folder if they're not embedded
 	for (auto& skin : m_includedSkins)
 	{
