@@ -187,12 +187,12 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	bool loadedSkinIsPartOfList = false;
 
-	std::set<std::string> knownSkinFolders;
+	std::set<std::pair<std::string, std::string>> knownSkins;	// folder, jsonFilename
 
-	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkinFolders](const Skin& _skin)
+	auto addSkinEntry = [this, &skinMenu, &loadedSkinIsPartOfList, &knownSkins](const Skin& _skin)
 	{
 		// remove dupes by folder
-		if(!_skin.folder.empty() && !knownSkinFolders.insert(_skin.folder).second)
+		if(!_skin.folder.empty() && !knownSkins.insert({_skin.folder, _skin.jsonFilename}).second)
 			return;
 
 		const auto isCurrent = _skin == getCurrentSkin();
