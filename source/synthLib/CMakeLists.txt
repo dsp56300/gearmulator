@@ -11,6 +11,7 @@ set(SOURCES
 	audiobuffer.cpp audiobuffer.h
 	audioTypes.h
 	buildconfig.h buildconfig.h.in
+	dac.cpp dac.h
 	device.cpp device.h
 	deviceException.cpp deviceException.h
 	deviceTypes.h
@@ -26,6 +27,7 @@ set(SOURCES
 	resamplerInOut.cpp resamplerInOut.h
 	romLoader.cpp romLoader.h
 	sysexToMidi.cpp sysexToMidi.h
+	vstpreset.cpp vstpreset.h
 	wavReader.cpp wavReader.h
 	wavTypes.h
 	wavWriter.cpp wavWriter.h

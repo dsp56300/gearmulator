@@ -5,6 +5,8 @@
 
 #include "dsp56kEmu/types.h"
 
+#include "synthLib/midiBufferParser.h"
+
 namespace virusLib
 {
 	Hdi08MidiQueue::Hdi08MidiQueue(DspSingle& _dsp, Hdi08Queue& _output, const bool _useEsaiBasedTiming, const bool _isTI) : m_output(_output), m_esai(_dsp.getAudio()), m_useEsaiBasedTiming(_useEsaiBasedTiming), m_isTI(_isTI)
@@ -53,21 +55,13 @@ namespace virusLib
 			m_output.writeRX(&word, 1);
 		};
 
-		const auto command = (_a & 0xf0);
-
-		if(command == 0xf0)
-		{
-			// single-byte status message
+		const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_a);
+		if (len >= 1)
 			sendMIDItoDSP(_a);
-		}
-		else
-		{
-			sendMIDItoDSP(_a);
+		if (len >= 2)
 			sendMIDItoDSP(_b);
-
-			if(command != synthLib::M_AFTERTOUCH)
-				sendMIDItoDSP(_c);
-		}
+		if (len >= 3)
+			sendMIDItoDSP(_c);
 	}
 
 	void Hdi08MidiQueue::onAudioWritten()

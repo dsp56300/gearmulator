@@ -26,6 +26,8 @@ namespace pluginLib
 
 	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties)), m_midiPorts(*this)
 	{
+		juce::File(getPublicRomFolder()).createDirectory();
+
 		synthLib::RomLoader::addSearchPath(getPublicRomFolder());
 		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(true));
 		synthLib::RomLoader::addSearchPath(synthLib::getModulePath(false));
@@ -355,7 +357,7 @@ namespace pluginLib
 
 	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
 	{
-		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanagerDb/");
+		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanager/");
 	}
 
 	std::string Processor::getConfigFile(const bool _useFxFolder) const

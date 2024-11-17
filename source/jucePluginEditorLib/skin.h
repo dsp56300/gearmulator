@@ -14,5 +14,10 @@ namespace jucePluginEditorLib
 		{
 			return displayName == _other.displayName && jsonFilename == _other.jsonFilename && folder == _other.folder;
 		}
+
+		bool isValid() const
+		{
+			return !jsonFilename.empty();
+		}
 	};
 }

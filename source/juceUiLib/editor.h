@@ -113,6 +113,8 @@ namespace genericUI
 
 		static bool resizeDrawableImage(juce::DrawableImage& _drawable, uint32_t _percent);
 
+		void paint(juce::Graphics& g) override;
+
 	private:
 		EditorInterface& m_interface;
 

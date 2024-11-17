@@ -70,6 +70,22 @@ namespace synthLib
 			return _name;
 		}
 
+		std::string escapeValue(const std::string& _value)
+		{
+			std::string escaped;
+			escaped.reserve(_value.size());
+			for (const auto c : _value)
+			{
+				switch (c)
+				{
+					case '"':	escaped.append("\\\""); break;
+					case '\\':	escaped.append("\\\\"); break;
+					default:	escaped.push_back(c); break;
+				}
+			}
+			return escaped;
+		}
+
 		std::string replaceVariables(std::string _string, const std::map<std::string, std::string>& _variables)
 		{
 			for (const auto& [key, value] : _variables)
@@ -80,7 +96,7 @@ namespace synthLib
 					if(pos == std::string::npos)
 						break;
 					_string.erase(pos, key.size());
-					_string.insert(pos, value);
+					_string.insert(pos, escapeValue(value));
 				}
 			}
 			return _string;

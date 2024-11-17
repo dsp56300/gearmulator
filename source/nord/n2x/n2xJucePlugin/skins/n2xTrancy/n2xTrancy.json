@@ -87,8 +87,6 @@
 				{ "name" : "ModEnvLevelSens",       "parameterAttachment" : { "parameter" : "ModEnvLevelSens" },    "rotary" : { }, "spritesheet" : { "x" : "508", "y" : "619", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },
 				{ "name" : "Lfo1RateSens",            "parameterAttachment" : { "parameter" : "Lfo1RateSens" },      "rotary" : { }, "spritesheet" : { "x" : "36", "y" : "88", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },
 				{ "name" : "Lfo1LevelSens",           "parameterAttachment" : { "parameter" : "Lfo1LevelSens" },     "rotary" : { }, "spritesheet" : { "x" : "508", "y" : "88", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },
-				{ "name" : "Lfo2RatSense",          "parameterAttachment" : { "parameter" : "Lfo2RateSens" },    "rotary" : { }, "spritesheet" : { "x" : "36", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },
-				{ "name" : "ArpRangeSens",          "parameterAttachment" : { "parameter" : "ArpRangeSens" },    "rotary" : { }, "spritesheet" : { "x" : "508", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },					
 
 				
 				{ "name" : "Gain",           "parameterAttachment" : { "parameter" : "Gain" },      "rotary" : { }, "spritesheet" : { "x" : "1987", "y" : "88", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
@@ -184,6 +182,9 @@
 				{ "name" : "PerfLfo2SyncA",     "parameterAttachment" : { "parameter" : "PerfLfo2SyncA" },                    "rotary" : { "style" : "LinearHorizontal"}, "spritesheet" : { "x" : "352", "y" : "269", "width" : "140", "height" : "40", "texture" : "h_slider", "tileSizeX" : "300", "tileSizeY" : "70" } },
 		                { "name" : "ArpEnabled",        "button" : { "isToggle" : "1", "normalImage" : "0", "overImage" : "0", "downImage" : "0", "normalImageOn" : "1", "overImageOn" : "1", "downImageOn" : "1", "x" : "485", "y" : "254", "width" : "70", "height" : "70", "texture" : "button_round", "tileSizeX" : "70", "tileSizeY" : "70" , "hitOffsetT":20, "hitOffsetB":-20, "hitOffsetR":90} },                
 			
+				{ "name" : "Lfo2RateSense",          "parameterAttachment" : { "parameter" : "Lfo2RateSens" },    "rotary" : { }, "spritesheet" : { "x" : "36", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },
+				{ "name" : "ArpRangeSens",          "parameterAttachment" : { "parameter" : "ArpRangeSens" },    "rotary" : { }, "spritesheet" : { "x" : "508", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big_sens", "tileSizeX" : "113", "tileSizeY" : "113" } },					
+
 				{ "name" : "Lfo2Rate",          "parameterAttachment" : { "parameter" : "Lfo2Rate" },    "rotary" : { }, "spritesheet" : { "x" : "36", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },
 				{ "name" : "ArpRange",          "parameterAttachment" : { "parameter" : "ArpRange" },    "rotary" : { }, "spritesheet" : { "x" : "508", "y" : "350", "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113" } },					
 

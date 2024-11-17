@@ -25,6 +25,7 @@ namespace pluginLib::patchDB
 	: m_settingsDir(std::move(_dir))
 	, m_loader("PatchLoader", false, dsp56k::ThreadPriority::Lowest)
 	{
+		m_settingsDir.createDirectory();
 	}
 
 	DB::~DB()

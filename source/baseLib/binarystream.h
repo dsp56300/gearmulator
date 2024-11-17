@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cassert>
 #include <cstdint>
 #include <functional>
@@ -217,6 +218,13 @@ namespace baseLib
 			Base::write(reinterpret_cast<const uint8_t*>(&_value), sizeof(_value));
 		}
 
+		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const T* _data, const size_t _size)
+		{
+			if(!_size)
+				return;
+			Base::write(reinterpret_cast<const uint8_t*>(_data), sizeof(T) * _size);
+		}
+
 		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void write(const std::vector<T>& _vector)
 		{
 			const auto size = static_cast<SizeType>(_vector.size());
@@ -259,6 +267,19 @@ namespace baseLib
 			return v;
 		}
 
+		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> T& read(T& _dst)
+		{
+			Base::read(reinterpret_cast<uint8_t*>(&_dst), sizeof(_dst));
+			checkFail();
+			return _dst;
+		}
+
+		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void read(T* _out, const size_t _size)
+		{
+			if(_size)
+				Base::read(reinterpret_cast<uint8_t*>(_out), sizeof(T) * _size);
+		}
+
 		template<typename T, typename = std::enable_if_t<std::is_trivially_copyable_v<T>>> void read(std::vector<T>& _vector)
 		{
 			const auto size = read<SizeType>();
@@ -290,6 +311,16 @@ namespace baseLib
 			read4CC(res);
 
 			return strcmp(res, _str) == 0;
+		}
+
+		void read4CC(std::array<char, 5>& _fourCC)
+		{
+			_fourCC.fill(0);
+
+			_fourCC[0] = read<char>();
+			_fourCC[1] = read<char>();
+			_fourCC[2] = read<char>();
+			_fourCC[3] = read<char>();
 		}
 
 		template<size_t N, std::enable_if_t<N == 5, void*> = nullptr>
