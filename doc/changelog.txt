@@ -8,26 +8,18 @@ Framework:
 - [Imp] Patch Manager now stores its database in the user documents folder, next
         to skins and roms:
         c:\Users\<username>\Documents\The Usual Suspects\<synthname>\patchmanager (Win)
-		~/Documents/The Usual Suspects/<synthname>/patchmanager (Mac)
-		[XDG_DATA_HOME or ~/.local/share]/The Usual Suspects/<synthname>/patchmanager (Linux)
-		Any existing database in the old location is automatically migrated to
-		the new one.
+        ~/Documents/The Usual Suspects/<synthname>/patchmanager (Mac)
+        [XDG_DATA_HOME or ~/.local/share]/The Usual Suspects/<synthname>/patchmanager (Linux)
+        Any existing database in the old location is automatically migrated to
+        the new one.
 - [Imp] Config file location has been changed and is now located in a subfolder
         "config" next to the other folders. Existing configurations in legacy
-		locations are migrated automatically.
+        locations are migrated automatically.
 
 NodalRed2x:
 
 - [Fix] LFO2 rate & range didn't have red VM map overlay dots
 - [Fix] VM Map overlay dots always displayed values for slot A
-
-OsTIrus:
-
-- [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
-
-- [Fix] Duplicated factory presets and lost favourites when switching between
-        TI2 and Snow mode
-- [Fix] DSP crashed when loading a patch while parameters are locked
 
 Osirus/OsTIrus:
 
@@ -40,6 +32,11 @@ Osirus/OsTIrus:
 
 OsTIrus:
 
+- [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
+
+- [Fix] Duplicated factory presets and lost favourites when switching between
+        TI2 and Snow mode
+- [Fix] DSP crashed when loading a patch while parameters are locked
 - [Fix] .vtibackup files may have been imported incompletely
 
 Vavra:
