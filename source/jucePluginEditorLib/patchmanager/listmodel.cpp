@@ -5,6 +5,7 @@
 #include "patchmanager.h"
 #include "savepatchdesc.h"
 #include "search.h"
+#include "treeitem.h"
 
 #include "../pluginEditor.h"
 
@@ -660,5 +661,37 @@ namespace jucePluginEditorLib::patchManager
 		const auto name = _patch->getName();
 		const auto t = Search::lowercase(name);
 		return t.find(m_filter) != std::string::npos;
+	}
+
+	bool ListModel::isInterestedInDragSource(const SourceDetails& dragSourceDetails)
+	{
+		auto ds = getPatchManager().getSelectedDataSourceTreeItem();
+		if (!ds)
+			return false;
+		return ds->isInterestedInDragSource(dragSourceDetails);
+	}
+
+	void ListModel::itemDropped(const SourceDetails& dragSourceDetails)
+	{
+		auto ds = getPatchManager().getSelectedDataSourceTreeItem();
+		if (!ds)
+			return;
+		return ds->itemDropped(dragSourceDetails, std::numeric_limits<int>::max());
+	}
+
+	bool ListModel::isInterestedInFileDrag(const juce::StringArray& files)
+	{
+		auto ds = getPatchManager().getSelectedDataSourceTreeItem();
+		if (!ds)
+			return false;
+		return ds->isInterestedInFileDrag(files);
+	}
+
+	void ListModel::filesDropped(const juce::StringArray& files, int x, int y)
+	{
+		auto ds = getPatchManager().getSelectedDataSourceTreeItem();
+		if (!ds)
+			return;
+		ds->filesDropped(files, std::numeric_limits<int>::max());
 	}
 }

@@ -84,6 +84,7 @@ namespace jucePluginEditorLib::patchManager
 
 		bool setSelectedDataSource(const pluginLib::patchDB::DataSourceNodePtr& _ds) const;
 		pluginLib::patchDB::DataSourceNodePtr getSelectedDataSource() const;
+		TreeItem* getSelectedDataSourceTreeItem() const;
 
 		const State& getState() const { return m_state; }
 
