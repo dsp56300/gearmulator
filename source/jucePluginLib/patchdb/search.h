@@ -20,6 +20,7 @@ namespace pluginLib::patchDB
 		SourceType sourceType = SourceType::Invalid;
 		std::set<TagType> anyTagOfType;
 		std::set<TagType> noTagOfType;
+		std::function<bool(const Patch&)> customCompareFunc;
 
 		bool match(const Patch& _patch) const;
 		bool isValid() const;

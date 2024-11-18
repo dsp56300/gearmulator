@@ -124,7 +124,9 @@ namespace pluginLib::patchDB
 				return false;
 		}
 
-		return true;
+		if (!customCompareFunc)
+			return true;
+		return customCompareFunc(_patch);
 	}
 
 	bool SearchRequest::isValid() const
