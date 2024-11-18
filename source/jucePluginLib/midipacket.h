@@ -103,7 +103,10 @@ namespace pluginLib
 
 		uint32_t getByteIndexForType(MidiDataType _type) const;
 		uint32_t getByteIndexForParameterName(const std::string& _name) const;
+		std::vector<uint32_t> getDefinitionIndicesForParameterName(const std::string& _name) const;
 		const MidiDataDefinition *getDefinitionByParameterName(const std::string& _name) const;
+
+		ParamValue getParameterValue(const Sysex& _sysex, const std::vector<uint32_t>& _definitionIndices) const;
 
 		bool updateChecksums(Sysex& _data) const;
 

@@ -324,6 +324,26 @@ namespace pluginLib
 		return InvalidIndex;
 	}
 
+	std::vector<uint32_t> MidiPacket::getDefinitionIndicesForParameterName(const std::string& _name) const
+	{
+		std::vector<uint32_t> res;
+
+		for(uint32_t i=0; i<m_definitions.size(); ++i)
+		{
+			const auto& d = m_definitions[i];
+
+			if(d.type != MidiDataType::Parameter)
+				continue;
+
+			if(d.paramName != _name)
+				continue;
+
+			res.push_back(i);
+		}
+
+		return res;
+	}
+
 	const MidiPacket::MidiDataDefinition* MidiPacket::getDefinitionByParameterName(const std::string& _name) const
 	{
 		for (const auto& definition : m_definitions)
@@ -333,6 +353,28 @@ namespace pluginLib
 		}
 
 		return nullptr;
+	}
+
+	ParamValue MidiPacket::getParameterValue(const Sysex& _sysex, const std::vector<uint32_t>& _definitionIndices) const
+	{
+		ParamValue res = 0;
+
+		bool valid = false;
+
+		for (uint32_t defIndex : _definitionIndices)
+		{
+			const auto& d = m_definitions[defIndex];
+
+			if (d.type != MidiDataType::Parameter)
+				continue;
+
+			const auto byteIndex = m_definitionToByteIndex.find(defIndex)->second;
+
+			res |= d.unpackValue(_sysex[byteIndex]);
+			valid = true;
+		}
+
+		return valid ? res : -1;
 	}
 
 	bool MidiPacket::updateChecksums(Sysex& _data) const
