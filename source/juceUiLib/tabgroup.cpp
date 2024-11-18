@@ -25,6 +25,19 @@ namespace genericUI
 		setPage(0);
 	}
 
+	bool TabGroup::selectTabWithComponent(const juce::Component* _component) const
+	{
+		for (size_t i=0; i<m_tabs.size(); ++i)
+		{
+			if (m_tabs[i] == _component || m_tabs[i]->isParentOf(_component))
+			{
+				setPage(i);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	void TabGroup::setPage(const size_t _page) const
 	{
 		for(size_t i=0; i<m_tabs.size(); ++i)

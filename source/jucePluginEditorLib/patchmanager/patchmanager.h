@@ -113,6 +113,8 @@ namespace jucePluginEditorLib::patchManager
 
 		bool setGridLayout128();
 
+		void bringToFront() const;
+
 	private:
 		bool selectPatch(uint32_t _part, int _offset);
 

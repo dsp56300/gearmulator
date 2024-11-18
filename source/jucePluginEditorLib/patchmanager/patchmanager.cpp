@@ -290,6 +290,12 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+
+	void PatchManager::bringToFront() const
+	{
+		m_editor.selectTabWithComponent(this);
+	}
+
 	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
 	{
 		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
