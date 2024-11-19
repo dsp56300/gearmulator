@@ -1,0 +1,79 @@
+name: Nightly
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-13, windows-2019 ]
+      fail-fast: true
+    name:  ${{ matrix.os }} build
+    steps:
+    - name: Install Dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: "recursive"
+
+    - name: Set up MSVC compiler
+      if: matrix.os == 'windows-2019'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 3
+
+    - name: Pack
+      working-directory: ${{github.workspace}}/build
+      run: cmake -P ${{github.workspace}}/scripts/pack.cmake
+
+    - name: Read Changelog on Linux/MacOS
+      if: runner.os != 'Windows'
+      id: read-changelog
+      run: |
+        cat doc/changelog.txt
+      shell: bash
+      continue-on-error: false
+
+    - name: Read Changelog on Windows
+      if: runner.os == 'Windows'
+      id: read-changelog
+      run: |
+        type doc\changelog.txt
+      shell: cmd
+      continue-on-error: false
+
+    - name: Create GitHub Release
+      id: create-release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref_name }}
+        release_name: Release ${{ github.ref_name }}
+        body: ${{ steps.read-changelog.outputs.stdout }}
+        draft: true
+        prerelease: false
+
+    - name: Upload Release Assets to GitHub Release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create-release.outputs.upload_url }}
+        asset_path: build/*${{ github.ref_name }}*.{zip,deb,rpm}
+        asset_name: ${{ github.ref_name }}-asset
+        asset_content_type: application/octet-stream
