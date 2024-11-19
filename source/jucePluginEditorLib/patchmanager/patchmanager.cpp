@@ -290,6 +290,13 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	void PatchManager::setCustomSearch(const pluginLib::patchDB::SearchHandle _sh) const
+	{
+		m_treeDS->clearSelectedItems();
+		m_treeTags->clearSelectedItems();
+
+		getListModel()->setContent(_sh);
+	}
 
 	void PatchManager::bringToFront() const
 	{

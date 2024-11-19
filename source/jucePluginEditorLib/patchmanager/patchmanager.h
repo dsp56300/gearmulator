@@ -112,6 +112,7 @@ namespace jucePluginEditorLib::patchManager
 		void setLayout(LayoutType _layout);
 
 		bool setGridLayout128();
+		void setCustomSearch(pluginLib::patchDB::SearchHandle _sh) const;
 
 		void bringToFront() const;
 
