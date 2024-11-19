@@ -83,10 +83,13 @@ namespace jucePluginEditorLib
 
 	void FocusedParameter::onMouseEnter(const juce::MouseEvent& _event)
 	{
-		auto* component = _event.eventComponent;
+		updateByComponent(_event.eventComponent);
+	}
 
-		if(component && component->getProperties().contains("parameter"))
-			updateControlLabel(component, Priority::High);
+	void FocusedParameter::updateByComponent(juce::Component* _comp)
+	{
+		if(_comp && _comp->getProperties().contains("parameter"))
+			updateControlLabel(_comp, Priority::High);
 	}
 
 	void FocusedParameter::updateParameter(const std::string& _name, const std::string& _value)

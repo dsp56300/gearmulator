@@ -59,6 +59,12 @@ namespace n2xJucePlugin
 			return *m_lcd.get();
 		}
 
+		FocusedParameter& getFocusedParameter() const
+		{
+			assert(m_focusedParameter);
+			return *m_focusedParameter;
+		}
+
 	private:
 		void mouseEnter(const juce::MouseEvent& _ev) override;
 		void onBtSave() const;

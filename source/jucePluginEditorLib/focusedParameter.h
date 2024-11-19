@@ -41,6 +41,8 @@ namespace jucePluginEditorLib
 
 		void onMouseEnter(const juce::MouseEvent& _event);
 
+		void updateByComponent(juce::Component* _comp);
+
 		virtual void updateParameter(const std::string& _name, const std::string& _value);
 
 	private:
