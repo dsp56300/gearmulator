@@ -48,8 +48,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ env.VERSION }}
-        release_name: Release ${{ env.VERSION }}
+        tag_name: ${{ github.event.inputs.version }}
+        release_name: Release ${{ github.event.inputs.version }}
         body_path: ${{github.workspace}}/doc/changelog.txt
         draft: true
         prerelease: false
@@ -60,6 +60,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: build/*${{ env.VERSION }}*.{zip,deb,rpm}
-        asset_name: ${{ env.VERSION }}-asset
+        asset_path: build/*${{ github.event.inputs.version }}*.{zip,deb,rpm}
+        asset_name: ${{ github.event.inputs.version }}-asset
         asset_content_type: application/octet-stream
