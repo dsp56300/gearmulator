@@ -2,9 +2,10 @@ name: Release
 
 on:
   workflow_dispatch:
-  push:
-    tags:
-      - '[0-9]+.[0-9]+.[0-9]+'
+    inputs:
+      version:
+        description: "Version number (e.g. 1.4.0)"
+        required: true
 
 env:
   BUILD_TYPE: Release
@@ -63,8 +64,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref_name }}
-        release_name: Release ${{ github.ref_name }}
+        tag_name: ${{ env.VERSION }}
+        release_name: Release ${{ env.VERSION }}
         body: ${{ steps.read-changelog.outputs.stdout }}
         draft: true
         prerelease: false
@@ -75,6 +76,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: build/*${{ github.ref_name }}*.{zip,deb,rpm}
-        asset_name: ${{ github.ref_name }}-asset
+        asset_path: build/*${{ env.VERSION }}*.{zip,deb,rpm}
+        asset_name: ${{ env.VERSION }}-asset
         asset_content_type: application/octet-stream
