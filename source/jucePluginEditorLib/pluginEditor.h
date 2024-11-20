@@ -95,9 +95,11 @@ namespace jucePluginEditorLib
 		auto& getImagePool() { return m_imagePool; }
 
 		void parentHierarchyChanged() override;
-	private:
+
+	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 
+	private:
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
