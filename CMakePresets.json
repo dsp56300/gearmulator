@@ -124,6 +124,16 @@
       "name": "github-Windows",
       "inherits": "default",
       "configurePreset": "github-Windows"
+    },
+    {
+      "name": "github-macOS",
+      "inherits": "default",
+      "configurePreset": "github-macOS"
+    },
+    {
+      "name": "github-Linux",
+      "inherits": "default",
+      "configurePreset": "github-Linux"
     }
   ],
   "packagePresets":
