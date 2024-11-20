@@ -33,14 +33,14 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
 
     - name: Configure CMake
-      run: cmake -B ${{github.workspace}}/build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+      run: cmake --preset github-${{ runner.os }} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
 
     - name: Build
-      run: cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}} --parallel 3
+      run: cmake --build --preset github-${{ runner.os }} --parallel 6
 
     - name: Pack
       working-directory: ${{github.workspace}}/build
-      run: cmake -P ${{github.workspace}}/scripts/pack.cmake
+      run: cpack --preset github-${{ runner.os }}
 
     - name: Release
       uses: softprops/action-gh-release@v2
@@ -55,3 +55,4 @@ jobs:
           ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.zip
           ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.rpm
           ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.deb
+          ${{github.workspace}}/doc/changelog.txt
