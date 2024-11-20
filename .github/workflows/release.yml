@@ -42,24 +42,16 @@ jobs:
       working-directory: ${{github.workspace}}/build
       run: cmake -P ${{github.workspace}}/scripts/pack.cmake
 
-    - name: Create GitHub Release
-      id: create-release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    - name: Release
+      uses: softprops/action-gh-release@v2
       with:
-        tag_name: ${{ github.event.inputs.version }}
-        release_name: Release ${{ github.event.inputs.version }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         body_path: ${{github.workspace}}/doc/changelog.txt
         draft: true
         prerelease: false
-
-    - name: Upload Release Assets to GitHub Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create-release.outputs.upload_url }}
-        asset_path: ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.{zip,deb,rpm}
-        asset_name: ${{ github.event.inputs.version }}-asset
-        asset_content_type: application/octet-stream
+        name: ${{ github.event.inputs.version }}
+        tag_name: ${{ github.event.inputs.version }}
+        files: |
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.zip
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.rpm
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.deb
