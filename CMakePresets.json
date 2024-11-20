@@ -96,7 +96,7 @@
     {
       "name": "github-Linux",
       "inherits": "github-base",
-	  "generator": "Linux"
+	  "generator": "Ninja"
     }
   ],
   "buildPresets": [
