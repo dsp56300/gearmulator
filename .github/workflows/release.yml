@@ -39,7 +39,6 @@ jobs:
       run: cmake --build --preset github-${{ runner.os }} --parallel 6
 
     - name: Pack
-      working-directory: ${{github.workspace}}/build
       run: cpack --preset github-${{ runner.os }}
 
     - name: Release
