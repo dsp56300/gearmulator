@@ -1,7 +1,16 @@
 #include "treeViewStyle.h"
 
+#include "uiObject.h"
+
 namespace genericUI
 {
+	void TreeViewStyle::apply(Editor& _editor, const UiObject& _object)
+	{
+		UiObjectStyle::apply(_editor, _object);
+
+		m_boldRootItems = _object.getPropertyInt("boldRootItems", 1);
+	}
+
 	void TreeViewStyle::apply(juce::TreeView& _target) const
 	{
 		applyColorIfNotZero(_target, juce::TreeView::backgroundColourId, juce::Colour(m_bgColor));
