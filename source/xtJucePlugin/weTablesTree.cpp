@@ -14,10 +14,12 @@ namespace xtJucePlugin
 	{
 		for(uint16_t i=0; i<xt::wave::g_tableCount; ++i)
 		{
-			if(xt::wave::isAlgorithmicTable(xt::TableId(i)))
+			const xt::TableId tableId(i);
+
+			if(xt::wave::isAlgorithmicTable(tableId) && _editor.getTableName(tableId).empty())
 				continue;
 
-			getRootItem()->addSubItem(new TablesTreeItem(_editor, xt::TableId(i)));
+			getRootItem()->addSubItem(new TablesTreeItem(_editor, tableId));
 		}
 
 		setIndentSize(5);
