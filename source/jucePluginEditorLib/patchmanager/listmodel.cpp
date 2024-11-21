@@ -313,10 +313,10 @@ namespace jucePluginEditorLib::patchManager
 
 	void ListModel::paintListBoxItem(const int _rowNumber, juce::Graphics& _g, const int _width, const int _height, const bool _rowIsSelected)
 	{
-		const auto* style = dynamic_cast<const genericUI::UiObjectStyle*>(&getStyle());
-
 		if (_rowNumber >= getNumRows())
 			return;	// Juce what are you up to?
+
+		const auto* style = dynamic_cast<const genericUI::UiObjectStyle*>(&getStyle());
 
 		const auto& patch = getPatch(_rowNumber);
 
@@ -333,6 +333,7 @@ namespace jucePluginEditorLib::patchManager
 
 		if (style)
 		{
+			_g.setImageResamplingQuality(style->getAntialiasing() ? juce::Graphics::highResamplingQuality : juce::Graphics::lowResamplingQuality);
 			if (const auto f = style->getFont())
 				_g.setFont(*f);
 		}
