@@ -19,7 +19,7 @@ namespace jucePluginEditorLib::patchManager
 {
 	class PatchManager;
 
-	class ListModel : public juce::ListBoxModel, Editable
+	class ListModel : public juce::ListBoxModel, Editable, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
 	{
 	public:
 		using Patch = pluginLib::patchDB::PatchPtr;
@@ -128,6 +128,12 @@ namespace jucePluginEditorLib::patchManager
 		virtual void deselectAll() = 0;
 		virtual void setSelectedEntries(const juce::SparseSet<int>&) = 0;
 		virtual juce::Rectangle<int> getEntryPosition(int _row, bool _relativeToComponentTopLeft) = 0;
+
+		// drag & drop support
+		bool isInterestedInDragSource(const SourceDetails& dragSourceDetails) override;
+		void itemDropped(const SourceDetails& dragSourceDetails) override;
+		bool isInterestedInFileDrag(const juce::StringArray& files) override;
+		void filesDropped(const juce::StringArray& files, int x, int y) override;
 
 	private:
 		void sortPatches();

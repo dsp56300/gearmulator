@@ -28,6 +28,8 @@ namespace genericUI
 
 		const std::string& getName() const { return m_name; }
 
+		bool selectTabWithComponent(const juce::Component* _component) const;
+
 	private:
 		void setPage(const size_t _page) const;
 

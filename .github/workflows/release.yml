@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number (e.g. 1.4.0)"
+        required: true
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, macos-13, windows-2019 ]
+      fail-fast: true
+    name:  ${{ matrix.os }} build
+    steps:
+    - name: Install Dependencies
+      if: matrix.os == 'ubuntu-latest'
+      run: sudo apt update && sudo apt install -y libgl1-mesa-dev xorg-dev libasound2-dev
+
+    - uses: actions/checkout@v4
+      with:
+        submodules: "recursive"
+
+    - name: Set up MSVC compiler
+      if: matrix.os == 'windows-2019'
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Configure CMake
+      run: cmake --preset github-${{ runner.os }} -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}}
+
+    - name: Build
+      run: cmake --build --preset github-${{ runner.os }} --parallel 6
+
+    - name: Pack
+      run: cpack --preset github-${{ runner.os }}
+
+    - name: Release
+      uses: softprops/action-gh-release@v2
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+        body_path: ${{github.workspace}}/doc/changelog.txt
+        draft: true
+        prerelease: false
+        name: ${{ github.event.inputs.version }}
+        tag_name: ${{ github.event.inputs.version }}
+        files: |
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.zip
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.rpm
+          ${{github.workspace}}/build/*${{ github.event.inputs.version }}*.deb
+          ${{github.workspace}}/doc/changelog.txt

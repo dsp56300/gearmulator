@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 6,
   "configurePresets": [
     {
       "name": "base",
@@ -59,28 +59,110 @@
         "gearmulator_SYNTH_VAVRA": "OFF",
         "gearmulator_SYNTH_XENIA": "OFF"
       }
+    },
+    {
+      "name": "github-base",
+      "displayName": "Executed by github actions",
+      "binaryDir": "${sourceDir}/build",
+      "installDir": "${sourceDir}/install",
+      "cacheVariables": {
+        "gearmulator_BUILD_JUCEPLUGIN": "ON",
+        "gearmulator_BUILD_FX_PLUGIN": "ON",
+
+        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_VST2": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_VST3": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_AU": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_LV2": "ON",
+
+        "gearmulator_SYNTH_NODALRED2X": "OFF",
+        "gearmulator_SYNTH_OSIRUS": "ON",
+        "gearmulator_SYNTH_OSTIRUS": "ON",
+        "gearmulator_SYNTH_VAVRA": "ON",
+        "gearmulator_SYNTH_XENIA": "OFF"
+      }
+    },
+    {
+      "name": "github-Windows",
+      "inherits": "github-base",
+      "architecture": "x64",
+	  "generator": ""
+    },
+    {
+      "name": "github-macOS",
+      "inherits": "github-base",
+	  "generator": "Xcode"
+    },
+    {
+      "name": "github-Linux",
+      "inherits": "github-base",
+	  "generator": ""
     }
   ],
   "buildPresets": [
     {
       "name": "default",
       "configurePreset": "default",
-      "configuration":"Release"
+      "configuration": "Release"
     },
     {
       "name": "windows-x64",
-      "inherits":"default",
+      "inherits": "default",
       "configurePreset": "windows-x64"
     },
     {
       "name": "macos",
-      "inherits":"default",
+      "inherits": "default",
       "configurePreset": "macos"
     },
     {
       "name": "zynthian",
-      "inherits":"default",
+      "inherits": "default",
       "configurePreset": "zynthian"
+    },
+    {
+      "name": "github-Windows",
+      "inherits": "default",
+      "configurePreset": "github-Windows"
+    },
+    {
+      "name": "github-macOS",
+      "inherits": "default",
+      "configurePreset": "github-macOS"
+    },
+    {
+      "name": "github-Linux",
+      "inherits": "default",
+      "configurePreset": "github-Linux"
+    }
+  ],
+  "packagePresets":
+  [
+    {
+      "name": "github-Windows",
+      "configurePreset": "github-Windows",
+      "generators":
+	  [
+        "ZIP"
+      ]
+    },
+    {
+      "name": "github-macOS",
+      "configurePreset": "github-macOS",
+      "generators":
+	  [
+        "ZIP"
+      ]
+    },
+    {
+      "name": "github-Linux",
+      "configurePreset": "github-Linux",
+      "generators":
+	  [
+        "ZIP",
+        "DEB",
+        "RPM"
+      ]
     }
   ]
 }

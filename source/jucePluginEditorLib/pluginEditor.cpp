@@ -455,6 +455,50 @@ namespace jucePluginEditorLib
 
 		menu.addSubMenu("Parameter Links", linkMenu);
 
+		auto& midiPackets = m_processor.getController().getParameterDescriptions().getMidiPackets();
+		for (const auto& mp : midiPackets)
+		{
+			auto defIndices = mp.second.getDefinitionIndicesForParameterName(param->getDescription().name);
+			if (defIndices.empty())
+				continue;
+
+			const auto expectedValue = param->getUnnormalizedValue();
+
+			menu.addSeparator();
+
+			auto findSimilar = [this, defIndices, packet = &mp.second, expectedValue](const int _offsetMin, const int _offsetMax)
+			{
+				pluginLib::patchDB::SearchRequest sr;
+
+				sr.customCompareFunc = [packet, expectedValue, defIndices, _offsetMin, _offsetMax](const pluginLib::patchDB::Patch& _patch) -> bool
+				{
+					if (_patch.sysex.empty())
+						return false;
+					const auto v = packet->getParameterValue(_patch.sysex, defIndices);
+					if (v >= expectedValue + _offsetMin && v <= expectedValue + _offsetMax)
+						return true;
+					return false;
+				};
+
+				const auto sh = getPatchManager()->search(std::move(sr));
+
+				if (sh != pluginLib::patchDB::g_invalidSearchHandle)
+				{
+					getPatchManager()->setCustomSearch(sh);
+					getPatchManager()->bringToFront();
+				}
+			};
+
+			juce::PopupMenu subMenu;
+			subMenu.addItem("Exact Match (Value " + param->getCurrentValueAsText() + ")", [this, findSimilar]{ findSimilar(0, 0); });
+			subMenu.addItem("-/+ 4", [this, findSimilar]{ findSimilar(-4, 4); });
+			subMenu.addItem("-/+ 12", [this, findSimilar]{ findSimilar(-12, 12); });
+			subMenu.addItem("-/+ 24", [this, findSimilar]{ findSimilar(-24, 24); });
+
+			menu.addSubMenu("Find similar Patches for parameter " + param->getDescription().displayName, subMenu);
+
+			break;
+		}
 		menu.showMenuAsync({});
 
 		return true;

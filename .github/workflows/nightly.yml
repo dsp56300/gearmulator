@@ -13,7 +13,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ ubuntu-latest, macos-12, windows-2019 ]
+        os: [ ubuntu-latest, macos-13, windows-2019 ]
       fail-fast: true
     name:  ${{ matrix.os }} build
     steps:

@@ -26,7 +26,12 @@ namespace genericUI
 
 		std::optional<juce::Font> getFont() const;
 
+		bool getAntialiasing() const { return m_antialiasing; }
+
 		static bool parseColor(juce::Colour& _color, const std::string& _colorString);
+
+		void drawLabel(juce::Graphics&, juce::Label&) override;
+		void drawButtonText(juce::Graphics&, juce::TextButton&, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown) override;
 
 	protected:
 		juce::Font getComboBoxFont(juce::ComboBox&) override;
@@ -51,6 +56,7 @@ namespace genericUI
 		std::string m_fontName;
 		int m_textHeight = 0;
 		std::string m_text;
+		bool m_antialiasing = true;
 
 		juce::Colour m_color = juce::Colour(0xffffffff);
 		juce::Colour m_bgColor = juce::Colour(0);

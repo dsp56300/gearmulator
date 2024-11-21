@@ -290,6 +290,19 @@ namespace jucePluginEditorLib::patchManager
 		return true;
 	}
 
+	void PatchManager::setCustomSearch(const pluginLib::patchDB::SearchHandle _sh) const
+	{
+		m_treeDS->clearSelectedItems();
+		m_treeTags->clearSelectedItems();
+
+		getListModel()->setContent(_sh);
+	}
+
+	void PatchManager::bringToFront() const
+	{
+		m_editor.selectTabWithComponent(this);
+	}
+
 	bool PatchManager::selectPatch(const uint32_t _part, const int _offset)
 	{
 		auto [patch, _] = m_state.getNeighbourPreset(_part, _offset);
@@ -335,6 +348,16 @@ namespace jucePluginEditorLib::patchManager
 		if(!item)
 			return {};
 		return item->getDataSource();
+	}
+
+	TreeItem* PatchManager::getSelectedDataSourceTreeItem() const
+	{
+		if (!m_treeDS)
+			return nullptr;
+		auto ds = getSelectedDataSource();
+		if (!ds)
+			return nullptr;
+		return m_treeDS->getItem(*ds);
 	}
 
 	bool PatchManager::setSelectedPatch(const uint32_t _part, const pluginLib::patchDB::PatchPtr& _patch)

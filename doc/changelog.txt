@@ -21,15 +21,6 @@ NodalRed2x:
 - [Fix] LFO2 rate & range didn't have red VM map overlay dots
 - [Fix] VM Map overlay dots always displayed values for slot A
 
-OsTIrus:
-
-- [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
-
-- [Fix] Duplicated factory presets and lost favourites when switching between
-        TI2 and Snow mode
-- [Fix] DSP crashed when loading a patch while parameters are locked
-- [Fix] .vtibackup files may have been imported incompletely
-
 Osirus/OsTIrus:
 
 - [Fix] Add support to load Arrangement Dumps that contain 16 Singles and one Multi
@@ -38,6 +29,15 @@ Osirus/OsTIrus:
 - [Fix] Bank Selects and Program Changes in Multi Mode treated MIDI channel as part 
         number even if parts were mapped to a different MIDI channel
 - [Fix] UI didn't react to MIDI Program Changes
+
+OsTIrus:
+
+- [Imp] Cutoff 2 is not displayed as an offset to Cutoff 1 if Cutoff Link is active
+
+- [Fix] Duplicated factory presets and lost favourites when switching between
+        TI2 and Snow mode
+- [Fix] DSP crashed when loading a patch while parameters are locked
+- [Fix] .vtibackup files may have been imported incompletely
 
 Vavra:
 

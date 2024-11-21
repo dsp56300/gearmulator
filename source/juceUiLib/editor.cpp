@@ -334,4 +334,15 @@ namespace genericUI
 #endif
 		Component::paint(g);
 	}
+
+	bool Editor::selectTabWithComponent(const juce::Component* _component) const
+	{
+		for (const auto& it : m_tabGroupsByName)
+		{
+			auto* tabGroup = it.second;
+			if (tabGroup->selectTabWithComponent(_component))
+				return true;
+		}
+		return false;
+	}
 }

@@ -82,6 +82,7 @@ namespace genericUI
 
 		m_bold = _object.getPropertyInt("bold") != 0;
 		m_italic = _object.getPropertyInt("italic") != 0;
+		m_antialiasing = _object.getPropertyInt("antialiasing", 1) != 0;
 
 		m_url = _object.getProperty("url");
 
@@ -126,6 +127,18 @@ namespace genericUI
 
 		_color = juce::Colour(static_cast<uint8_t>(r), static_cast<uint8_t>(g), static_cast<uint8_t>(b), static_cast<uint8_t>(a));
 		return true;
+	}
+
+	void UiObjectStyle::drawLabel(juce::Graphics& _graphics, juce::Label& _label)
+	{
+		_graphics.setImageResamplingQuality(m_antialiasing ? juce::Graphics::highResamplingQuality : juce::Graphics::lowResamplingQuality);
+		LookAndFeel_V4::drawLabel(_graphics, _label);
+	}
+
+	void UiObjectStyle::drawButtonText(juce::Graphics& _graphics, juce::TextButton& _textButton, bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+	{
+		_graphics.setImageResamplingQuality(m_antialiasing ? juce::Graphics::highResamplingQuality : juce::Graphics::lowResamplingQuality);
+		LookAndFeel_V4::drawButtonText(_graphics, _textButton, shouldDrawButtonAsHighlighted, shouldDrawButtonAsDown);
 	}
 
 	juce::Font UiObjectStyle::getComboBoxFont(juce::ComboBox& _comboBox)
