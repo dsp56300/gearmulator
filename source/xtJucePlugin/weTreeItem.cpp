@@ -17,7 +17,7 @@ namespace xtJucePlugin
 	{
 		const auto* style = dynamic_cast<const genericUI::TreeViewStyle*>(&getOwnerView()->getLookAndFeel());
 
-		_g.setColour(style ? style->getColor() : juce::Colour(0xffffffff));
+		_g.setColour(getTextColor(style ? style->getColor() : juce::Colour(0xffffffff)));
 
 		bool haveFont = false;
 		if(style)

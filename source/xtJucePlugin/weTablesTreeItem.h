@@ -30,6 +30,7 @@ namespace xtJucePlugin
 
 		const auto& getTableId() const { return m_index; }
 
+		juce::Colour getTextColor(const juce::Colour _colour) override;
 	private:
 		void onTableChanged(xt::TableId _index);
 		void onTableChanged();

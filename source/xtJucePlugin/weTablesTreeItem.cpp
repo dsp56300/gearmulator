@@ -143,6 +143,13 @@ namespace xtJucePlugin
 		menu.showMenuAsync({});
 	}
 
+	juce::Colour TablesTreeItem::getTextColor(const juce::Colour _colour)
+	{
+		if (xt::wave::isAlgorithmicTable(m_index))
+			return _colour.withAlpha(0.7f);
+		return TreeItem::getTextColor(_colour);
+	}
+
 	void TablesTreeItem::onTableChanged(xt::TableId _index)
 	{
 		if(_index != m_index)

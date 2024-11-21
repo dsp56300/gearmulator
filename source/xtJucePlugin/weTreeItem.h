@@ -10,6 +10,8 @@ namespace xtJucePlugin
 		void setText(const std::string& _text);
 
 	protected:
+		virtual juce::Colour getTextColor(const juce::Colour _colour) { return _colour; }
+
 		void paintItem(juce::Graphics& _g, int _width, int _height) override;
 
 		bool paintInBold() const;
