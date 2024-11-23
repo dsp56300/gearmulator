@@ -17,8 +17,9 @@
 
 namespace virusLib
 {
-	constexpr auto g_timeScale_C = 57;	// C OS 6.6
-	constexpr auto g_timeScale_A = 54;	// A OS 2.8
+	constexpr auto g_timeScale_A = 54.0f;	// A OS 2.8
+	constexpr auto g_timeScale_B = 52.5f;	// B OS 4.9
+	constexpr auto g_timeScale_C = 57.0f;	// C OS 6.6
 
 	bool DemoPlayback::loadFile(const std::string& _filename)
 	{
@@ -137,6 +138,9 @@ namespace virusLib
 				case 0xeaed:
 					m_timeScale = g_timeScale_A;
 					break;
+				case 0x90ee:
+					m_timeScale = g_timeScale_B;
+					break;
 				default:
 					m_timeScale = g_timeScale_C;
 					break;
@@ -165,11 +169,11 @@ namespace virusLib
 			memcpy(&e.data.front(), _data, _count);
 
 #if 0	// demo presets extraction
-			if(_count - 6 >= ROMFile::getSinglePresetSize())
+			if(_count - 6 >= ROMFile::getSinglePresetSize(DeviceModel::ABC))
 			{
 				int foo=0;
 				ROMFile::TPreset data;
-				memcpy(&data[0], &e.data[6], ROMFile::getSinglePresetSize());
+				memcpy(data.data(), &e.data[6], ROMFile::getSinglePresetSize(DeviceModel::ABC));
 
 				const auto isMulti = _data[3] == 0x11;
 				const uint8_t program = _data[4];
@@ -189,7 +193,7 @@ namespace virusLib
 				}
 
 				auto& s = responses.front().sysex;
-				memcpy(&s[9], &data[0], data.size());
+				memcpy(&s[9], data.data(), data.size());
 
 				// checksum needs to be updated
 				s.pop_back();
