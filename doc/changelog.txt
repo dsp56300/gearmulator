@@ -1,5 +1,32 @@
 Release Notes 
 
+1.4.1
+
+Framework:
+
+- [Imp] Allow to find patches with similar parameter setting by right clicking on 
+        a knob and selecting "Find similar..."
+- [Imp] Allow to add a patch to a user bank by dragging it onto the free space of
+        the patch list
+
+- [Imp] [Skins] Add new option "boldRootItems" to tree view style to disable that root
+        items are displayed in bold font (default 1 = enabled)
+- [Imp] [Skins] Add new option "antialiasing" for label style to disable antialiased
+        font rendering (default 1 = enabled)
+
+Osirus:
+
+- [Imp] test console: Add support for Virus B demo song
+
+NodalRed2x:
+
+- [Imp] VM Map indicators are now displayed relative to the current parameter value
+- [Imp] VM Map indicators are now hidden if the parameter is zero
+- [Imp] VM Map mode can now be toggled via shift key
+
+- [Fix] Parameter automation was not smooth if multiple slots were mapped to the same
+        MIDI channel
+
 1.4.0
 
 Framework:

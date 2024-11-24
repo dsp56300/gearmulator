@@ -16,6 +16,7 @@ namespace n2x
 
 		EmuSetPotPosition = 90,		// total dump is: f0, IdClavia, IdDevice, IdN2x, EmuSetPotPosition, KnobType / nibble high, nibble low / f7
 		EmuGetPotsPosition = 91,
+		EmuSetPartCC = 92,
 	};
 
 	enum SysexIndex

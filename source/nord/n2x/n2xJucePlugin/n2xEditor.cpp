@@ -12,6 +12,7 @@
 #include "n2xParts.h"
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
+#include "n2xSlider.h"
 #include "n2xVmMap.h"
 
 #include "jucePluginEditorLib/midiPorts.h"
@@ -183,6 +184,18 @@ namespace n2xJucePlugin
 		}
 
 		m_lcd->updatePatchName();
+	}
+
+	genericUI::Slider* Editor::createJuceComponent(genericUI::Slider* _slider, genericUI::UiObject& _object)
+	{
+		return new Slider(*this);
+	}
+
+	void Editor::modifierKeysChanged(const juce::ModifierKeys& modifiers)
+	{
+		jucePluginEditorLib::Editor::modifierKeysChanged(modifiers);
+
+		m_vmMap->setEnabled(modifiers.isShiftDown());
 	}
 
 	void Editor::mouseEnter(const juce::MouseEvent& _ev)

@@ -117,7 +117,8 @@ namespace xtJucePlugin
 
 		menu.addItem("Remove", [this]
 		{
-			m_editor.getData().setTableWave(m_table, m_index, g_invalidWaveIndex);
+			if (m_editor.getData().setTableWave(m_table, m_index, g_invalidWaveIndex))
+				m_editor.getData().sendTableToDevice(m_table);
 		});
 		menu.addItem("Select Wave", [this]
 		{

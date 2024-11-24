@@ -1072,7 +1072,7 @@ namespace xt
 		// a combined single is a single dump + a table dump + an arbitrary number of wave dumps in one sysex, i.e. f0/f7 are stripped from the individual dumps
 		single.pop_back();
 
-		single.insert(single.end(), table.begin()+1, table.end());
+		single.insert(single.end(), table.begin()+1, table.end()-1);
 
 		for (const auto& wave : waves)
 			single.insert(single.end(), wave.begin()+1, wave.end()-1);

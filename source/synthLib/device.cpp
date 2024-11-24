@@ -30,7 +30,14 @@ namespace synthLib
 	void Device::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
 		for (const auto& ev : _midiIn)
-			sendMidi(ev, _midiOut);
+		{
+			m_translatorOut.clear();
+
+			m_midiTranslator.process(m_translatorOut, ev);
+
+			for(auto & e : m_translatorOut)
+				sendMidi(e, _midiOut);
+		}
 
 		processAudio(_inputs, _outputs, _size);
 

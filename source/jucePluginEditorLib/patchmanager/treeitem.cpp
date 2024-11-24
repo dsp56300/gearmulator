@@ -198,23 +198,30 @@ namespace jucePluginEditorLib::patchManager
 		_g.setColour(color != pluginLib::patchDB::g_invalidColor ? juce::Colour(color) : style ? style->getColor() : juce::Colour(0xffffffff));
 
 		bool haveFont = false;
+		bool antialias = true;
+
 		if(style)
 		{
 			if (auto f = style->getFont())
 			{
-				f->setBold(getParentItem() == getTree()->getRootItem());
+				if (style->boldRootItems() && getParentItem() == getTree()->getRootItem())
+					f = f->boldened();
 				_g.setFont(*f);
 				haveFont = true;
 			}
+			antialias = style->getAntialiasing();
 		}
+
 		if(!haveFont)
 		{
 			auto fnt = _g.getCurrentFont();
-			fnt.setBold(getParentItem() == getTree()->getRootItem());
+			if (getParentItem() == getTree()->getRootItem())
+				fnt = fnt.boldened();
 			_g.setFont(fnt);
 		}
 
-		
+		_g.setImageResamplingQuality(antialias ? juce::Graphics::highResamplingQuality : juce::Graphics::lowResamplingQuality);
+
 		const juce::String t = juce::String::fromUTF8(m_text.c_str());
 		_g.drawText(t, 0, 0, _width, _height, style ? style->getAlign() : juce::Justification(juce::Justification::centredLeft));
 		TreeViewItem::paintItem(_g, _width, _height);

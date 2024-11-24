@@ -56,6 +56,7 @@ namespace virusLib
 		case 0x55:	// Virus B Demo
 		case 0x57:	// Virus C
 		case 0x58:	// Virus Rack XL (C)
+		case 0x59:	// Virus Classic Demo
 			{
 				const auto msb = _packet[6];	// packet number MSB
 				const auto lsb = _packet[7];	// packet number LSB
