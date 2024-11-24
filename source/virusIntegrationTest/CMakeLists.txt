@@ -4,11 +4,7 @@ project(virusIntegrationTest)
 
 add_executable(virusIntegrationTest)
 
-set(SOURCES
-	integrationTest.cpp integrationTest.h
-	../dsp56300/source/disassemble/commandline.cpp
-	../dsp56300/source/disassemble/commandline.h
-)
+set(SOURCES integrationTest.cpp integrationTest.h)
 
 target_sources(virusIntegrationTest PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})

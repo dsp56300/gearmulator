@@ -5,6 +5,7 @@ add_library(baseLib STATIC)
 
 set(SOURCES
 	binarystream.cpp binarystream.h
+	commandline.cpp commandline.h
 	configFile.cpp configFile.h
 	hybridcontainer.h
 	md5.cpp md5.h

@@ -9,7 +9,7 @@
 
 #include "dsp56kEmu/jitunittests.h"
 
-#include "../dsp56300/source/disassemble/commandline.h"
+#include "baseLib/commandline.h"
 
 #include "synthLib/wavReader.h"
 #include "synthLib/os.h"
@@ -45,7 +45,7 @@ int main(int _argc, char* _argv[])
 
 		while(forever)
 		{
-			const CommandLine cmd(_argc, _argv);
+			const baseLib::CommandLine cmd(_argc, _argv);
 
 			forever = cmd.contains("forever");
 
@@ -176,7 +176,7 @@ int main(int _argc, char* _argv[])
 	}
 }
 
-IntegrationTest::IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, const virusLib::DeviceModel _tiModel)
+IntegrationTest::IntegrationTest(const baseLib::CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, const virusLib::DeviceModel _tiModel)
 	: m_cmd(_commandLine)
 	, m_romFile(std::move(_romFile))
 	, m_presetName(std::move(_presetName))

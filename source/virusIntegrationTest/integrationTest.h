@@ -4,12 +4,15 @@
 
 #include "synthLib/wavReader.h"
 
-class CommandLine;
+namespace baseLib
+{
+	class CommandLine;
+}
 
 class IntegrationTest
 {
 public:
-	explicit IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, virusLib::DeviceModel _tiModel);
+	explicit IntegrationTest(const baseLib::CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, virusLib::DeviceModel _tiModel);
 
 	int run();
 
@@ -25,7 +28,7 @@ private:
 	int runCreate(int _lengthSeconds);
 	int createAudioFile(File& _dst, const std::string& _prefix, uint32_t _sampleCount);
 
-	const CommandLine& m_cmd;
+	const baseLib::CommandLine& m_cmd;
 	const std::string m_romFile;
 	const std::string m_presetName;
 	const std::string m_outputFolder;
