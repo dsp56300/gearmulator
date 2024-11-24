@@ -179,7 +179,11 @@ namespace n2xJucePlugin
 
 		const auto baseValue = _vmParam.paramBase->getUnnormalizedValue();
 
-		_vmParam.compVm->setValue(baseValue + _vmParam.paramVm->getUnnormalizedValue(), juce::dontSendNotification);
+		const auto offset = _vmParam.paramVm->getUnnormalizedValue();
+
+		_vmParam.compVm->setValue(baseValue + offset, juce::dontSendNotification);
 		_vmParam.compVm->setDoubleClickReturnValue(true, baseValue);
+
+		_vmParam.compVm->setAlpha(offset != 0 ? 1.0f : 0.0f);
 	}
 }
