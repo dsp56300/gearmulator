@@ -56,7 +56,7 @@ namespace n2xJucePlugin
 		Lcd& getLCD() const
 		{
 			assert(m_lcd);
-			return *m_lcd.get();
+			return *m_lcd;
 		}
 
 		FocusedParameter& getFocusedParameter() const
@@ -64,6 +64,16 @@ namespace n2xJucePlugin
 			assert(m_focusedParameter);
 			return *m_focusedParameter;
 		}
+
+		VmMap& getVmMap() const
+		{
+			assert(m_vmMap);
+			return *m_vmMap;
+		}
+
+		genericUI::Slider* createJuceComponent(genericUI::Slider*, genericUI::UiObject& _object) override;
+
+		void modifierKeysChanged(const juce::ModifierKeys& modifiers) override;
 
 	private:
 		void mouseEnter(const juce::MouseEvent& _ev) override;
