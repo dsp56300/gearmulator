@@ -4,6 +4,7 @@
 
 #include "n2xhardware.h"
 #include "synthLib/midiToSysex.h"
+#include "synthLib/midiTranslator.h"
 #include "synthLib/midiTypes.h"
 
 namespace n2x
@@ -180,7 +181,7 @@ namespace n2x
 
 	static const MultiDefaultData g_multiDefault = createMultiDefaultData();
 
-	State::State(Hardware* _hardware) : m_hardware(_hardware)
+	State::State(Hardware* _hardware, synthLib::MidiTranslator* _midiTranslator) : m_hardware(_hardware), m_midiTranslator(_midiTranslator)
 	{
 		for(uint8_t i=0; i<static_cast<uint8_t>(m_singles.size()); ++i)
 			createDefaultSingle(m_singles[i], i);
@@ -252,7 +253,41 @@ namespace n2x
 				return false;
 			m_multi.fill(0);
 			std::copy(sysex.begin(), sysex.end(), m_multi.begin());
-			send(_ev);
+
+			if (m_midiTranslator)
+			{
+				// As we need support for individual midi channels for the editor to adjus each part separately but
+				// knobs can only be modified via midi CC, we tell the device that parts 0-3 are on midi channels 0-3 even if
+				// they are not. The midi translator will translate regular midi messages and the editor uses messages that are
+				// not translated
+
+				m_midiTranslator->clear();
+
+				MultiDump dump = m_multi;
+				for (uint8_t i = 0; i < 4; ++i)
+				{
+					const auto ch = getPartMidiChannel(dump, i);
+					setPartMidiChannel(dump, i, i);
+					m_midiTranslator->addTargetChannel(ch, i);
+				}
+
+				synthLib::SMidiEvent e;
+				e.sysex.assign(dump.begin(), dump.end());
+				send(e);
+			}
+			else
+			{
+				send(_ev);
+			}
+
+			return true;
+		}
+
+		if (bank == SysexByte::MultiRequestBankEditBuffer)
+		{
+			_responses.emplace_back(synthLib::MidiEventSource::Internal);
+			_responses.back().sysex.assign(m_multi.begin(), m_multi.end());
+			_responses.back().sysex = validateDump(_responses.back().sysex);
 			return true;
 		}
 
@@ -278,6 +313,17 @@ namespace n2x
 			}
 			return true;
 		}
+		else if (bank == SysexByte::EmuSetPartCC)
+		{
+			synthLib::SMidiEvent e;
+			auto part = sysex[5];
+			e.a = sysex[6];
+			e.b = sysex[7];
+			e.c = sysex[8];
+			e.source = _ev.source;
+			e.offset = _ev.offset;
+			changeSingleParameter(part, e);
+		}
 
 		return false;
 	}
@@ -299,51 +345,56 @@ namespace n2x
 				const auto parts = getPartsForMidiChannel(_ev);
 				if(parts.empty())
 					return false;
-
-				const auto cc = static_cast<ControlChange>(_ev.b);
-				const auto it = g_controllerMap.find(cc);
-				if(it == g_controllerMap.end())
-					return false;
-				const SingleParam param = it->second;
-				const auto offset = getOffsetInSingleDump(param);
-				switch (param)
+				for (const auto part : parts)
 				{
-				case SingleParam::Sync:
-					// this can either be sync or distortion, they end up in the same midi byte
-					switch(cc)
-					{
-					case ControlChange::CCSync:
-						for (const auto part : parts)
-						{
-							auto v = unpackNibbles(m_singles[part], offset);
-							v &= ~0x3;
-							v |= _ev.c & 0x3;
-							packNibbles(m_singles[part], offset, v);
-						}
-						break;
-					case ControlChange::CCDistortion:
-						for (const auto part : parts)
-						{
-							auto v = unpackNibbles(m_singles[part], offset);
-							v &= ~(1<<4);
-							v |= _ev.c << 4;
-							packNibbles(m_singles[part], offset, v);
-						}
-						break;
-					default:
-						assert(false && "unexpected control change type");
+					if (!changeSingleParameter(part, _ev))
 						return false;
-					}
-					break;
-				default:
-					for (const auto part : parts)
-						packNibbles(m_singles[part], offset, _ev.c);
-					return true;
 				}
+				return true;
 			}
-			return false;
 		default:
 			return false;
+		}
+	}
+
+	bool State::changeSingleParameter(const uint8_t _part, const synthLib::SMidiEvent& _ev)
+	{
+		const auto cc = static_cast<ControlChange>(_ev.b);
+		const auto it = g_controllerMap.find(cc);
+		if(it == g_controllerMap.end())
+			return false;
+		const SingleParam param = it->second;
+		const auto offset = getOffsetInSingleDump(param);
+		switch (param)
+		{
+		case SingleParam::Sync:
+			// this can either be sync or distortion, they end up in the same midi byte
+			switch(cc)
+			{
+			case ControlChange::CCSync:
+				{
+					auto v = unpackNibbles(m_singles[_part], offset);
+					v &= ~0x3;
+					v |= _ev.c & 0x3;
+					packNibbles(m_singles[_part], offset, v);
+				}
+				return true;
+			case ControlChange::CCDistortion:
+				{
+					auto v = unpackNibbles(m_singles[_part], offset);
+					v &= ~(1<<4);
+					v |= _ev.c << 4;
+					packNibbles(m_singles[_part], offset, v);
+				}
+				return true;
+			default:
+				assert(false && "unexpected control change type");
+				return false;
+			}
+			break;
+		default:
+			packNibbles(m_singles[_part], offset, _ev.c);
+			return true;
 		}
 	}
 
@@ -544,6 +595,19 @@ namespace n2x
 		if(!isValidPatchName(_dump))
 			return stripPatchName(_dump);
 		return _dump;
+	}
+
+	synthLib::SMidiEvent& State::createPartCC(uint8_t _part, synthLib::SMidiEvent& _ccEvent)
+	{
+		_ccEvent.sysex = { 0xf0, IdClavia, SysexByte::DefaultDeviceId, IdN2X,
+			SysexByte::EmuSetPartCC,
+			_part,
+			_ccEvent.a,
+			_ccEvent.b,
+			_ccEvent.c,
+			0xf7
+		};
+		return _ccEvent;
 	}
 
 	void State::send(const synthLib::SMidiEvent& _e) const

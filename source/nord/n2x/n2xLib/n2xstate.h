@@ -11,6 +11,11 @@
 
 #include "synthLib/midiTypes.h"
 
+namespace synthLib
+{
+	class MidiTranslator;
+}
+
 namespace n2x
 {
 	class Hardware;
@@ -21,7 +26,7 @@ namespace n2x
 		using SingleDump = std::array<uint8_t, g_singleDumpWithNameSize>;
 		using MultiDump = std::array<uint8_t, g_multiDumpWithNameSize>;
 
-		explicit State(Hardware* _hardware);
+		explicit State(Hardware* _hardware, synthLib::MidiTranslator* _midiTranslator);
 
 		bool getState(std::vector<uint8_t>& _state);
 		bool setState(const std::vector<uint8_t>& _state);
@@ -35,6 +40,8 @@ namespace n2x
 		bool receive(const std::vector<uint8_t>& _data, synthLib::MidiEventSource _source);
 
 		bool receiveNonSysex(const synthLib::SMidiEvent& _ev);
+
+		bool changeSingleParameter(uint8_t _part, const synthLib::SMidiEvent& _ev);
 
 		bool changeSingleParameter(uint8_t _part, SingleParam _parameter, uint8_t _value);
 		bool changeMultiParameter(MultiParam _parameter, uint8_t _value);
@@ -86,6 +93,11 @@ namespace n2x
 			return getMultiParam(_dump, static_cast<MultiParam>(SlotAMidiChannel + _part), 0);
 		}
 
+		template<typename TDump> static void setPartMidiChannel(TDump& _dump, const uint8_t _part, const uint8_t _channel)
+		{
+			setMultiParam(_dump, static_cast<MultiParam>(SlotAMidiChannel + _part), 0, _channel);
+		}
+
 		uint8_t getMultiParam(const MultiParam _param, const uint8_t _part) const
 		{
 			return getMultiParam(m_multi, _param, _part);
@@ -96,6 +108,13 @@ namespace n2x
 			const auto off = getOffsetInMultiDump(_param) + (_part << 2);
 
 			return unpackNibbles<TDump>(_dump, off);
+		}
+
+		template<typename TDump> static void setMultiParam(TDump& _dump, const MultiParam _param, const uint8_t _part, const uint8_t _value)
+		{
+			const auto off = getOffsetInMultiDump(_param) + (_part << 2);
+
+			packNibbles(_dump, off, _value);
 		}
 
 		template<typename TDump> static uint8_t getSingleParam(const TDump& _dump, const SingleParam _param, const uint8_t _part)
@@ -130,6 +149,8 @@ namespace n2x
 		static bool isValidPatchName(const std::vector<uint8_t>& _dump);
 		static std::vector<uint8_t> validateDump(const std::vector<uint8_t>& _dump);
 
+		static synthLib::SMidiEvent& createPartCC(uint8_t _part, synthLib::SMidiEvent& _ccEvent);
+
 	private:
 		template<size_t Size> bool receive(const std::array<uint8_t, Size>& _data)
 		{
@@ -142,6 +163,7 @@ namespace n2x
 		void send(const synthLib::SMidiEvent& _e) const;
 
 		Hardware* m_hardware;
+		synthLib::MidiTranslator* m_midiTranslator;
 		std::array<SingleDump, 4> m_singles;
 		MultiDump m_multi;
 		std::unordered_map<KnobType, uint8_t> m_knobStates;

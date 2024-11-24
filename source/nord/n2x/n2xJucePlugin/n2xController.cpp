@@ -9,6 +9,7 @@
 
 #include "dsp56kEmu/logging.h"
 #include "n2xLib/n2xmiditypes.h"
+#include "synthLib/midiTranslator.h"
 
 namespace
 {
@@ -31,7 +32,7 @@ namespace
 
 namespace n2xJucePlugin
 {
-	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_n2x.json"), m_state(nullptr)
+	Controller::Controller(AudioPluginAudioProcessor& _p) : pluginLib::Controller(_p, "parameterDescriptions_n2x.json"), m_state(nullptr, nullptr)
 	{
 	    registerParams(_p, [](const uint8_t _part, const bool _isNonPartExclusive)
 	    {
@@ -230,31 +231,11 @@ namespace n2xJucePlugin
 
 		const auto parts = m_state.getPartsForMidiChannel(ch);
 
-		const auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + ch), cc, static_cast<uint8_t>(_value)};
+		auto ev = synthLib::SMidiEvent{synthLib::MidiEventSource::Editor, static_cast<uint8_t>(synthLib::M_CONTROLCHANGE + part), cc, static_cast<uint8_t>(_value)};
 
-		if(parts.size() > 1)
-		{
-			// this is problematic. We want to edit one part only but two parts receive on the same channel. We have to send a full dump
-			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
-
-			const auto& name = _parameter.getDescription().name;
-
-			if(name == "Sync" || name == "RingMod" || name == "Distortion")
-			{
-				const auto value = combineSyncRingModDistortion(part, 0, false);
-				setSingleParameter(part, n2x::Sync, value);
-			}
-			else
-			{
-				setSingleParameter(part, singleParam, static_cast<uint8_t>(_value));
-			}
-		}
-		else
-		{
-			nonConstParam.setRateLimitMilliseconds(0);
-			m_state.receive(ev);
-			sendMidiEvent(ev);
-		}
+		nonConstParam.setRateLimitMilliseconds(0);
+		m_state.changeSingleParameter(part, ev);
+		sendMidiEvent(n2x::State::createPartCC(part, ev));
 	}
 
 	void Controller::setSingleParameter(uint8_t _part, n2x::SingleParam _sp, uint8_t _value)
