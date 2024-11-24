@@ -20,6 +20,7 @@ set(SOURCES
 	midiBufferParser.cpp midiBufferParser.h
 	midiClock.cpp midiClock.h
 	midiToSysex.cpp midiToSysex.h
+	midiTranslator.cpp midiTranslator.h
 	midiTypes.h
 	os.cpp os.h
 	plugin.cpp plugin.h

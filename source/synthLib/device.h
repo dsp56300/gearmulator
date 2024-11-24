@@ -8,6 +8,7 @@
 
 #include "midiTypes.h"
 #include "buildconfig.h"
+#include "midiTranslator.h"
 
 namespace synthLib
 {
@@ -63,6 +64,8 @@ namespace synthLib
 		virtual uint32_t getDspClockPercent() const = 0;
 		virtual uint64_t getDspClockHz() const = 0;
 
+		auto& getMidiTranslator() { return m_midiTranslator; }
+
 	protected:
 		virtual void readMidiOut(std::vector<SMidiEvent>& _midiOut) = 0;
 		virtual void processAudio(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, size_t _samples) = 0;
@@ -72,6 +75,10 @@ namespace synthLib
 	
 	private:
 		std::vector<SMidiEvent> m_midiIn;
+
 		uint32_t m_extraLatency = 0;
+
+		MidiTranslator m_midiTranslator;
+		std::vector<SMidiEvent> m_translatorOut;
 	};
 }
