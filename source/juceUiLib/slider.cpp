@@ -2,16 +2,21 @@
 
 namespace genericUI
 {
+	// Juce default is about 32 steps for the mouse wheel to go from min to max
+	constexpr int g_minStepsForDefaultWheel = 32;
+
 	void Slider::mouseWheelMove(const juce::MouseEvent& event, const juce::MouseWheelDetails& wheel)
 	{
-		// we use the default behaviour if ctrl/cmd is not pressed. If it is, we want to inc/dec single steps
-		if(!event.mods.isCommandDown() || !isEnabled())
+		const auto range = getNormalisableRange();
+
+		// we use the default behaviour if ctrl/cmd is not pressed and the range is large enough
+		if((range.end - range.start) > g_minStepsForDefaultWheel && (!event.mods.isCommandDown() || !isEnabled()))
 		{
 			juce::Slider::mouseWheelMove(event, wheel);
 			return;
 		}
 
-		const auto range = getNormalisableRange();
+		// Otherwise inc/dec single steps
 
 		if(range.end <= range.start)
 			return;
