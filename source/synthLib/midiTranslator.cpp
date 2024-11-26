@@ -2,6 +2,8 @@
 
 #include "midiTypes.h"
 
+#include <cstddef>
+
 namespace synthLib
 {
 	MidiTranslator::MidiTranslator()
