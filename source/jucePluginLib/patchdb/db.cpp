@@ -253,10 +253,8 @@ namespace pluginLib::patchDB
 
 			saveJson();
 
-			if(oldFile.existsAsFile())
-				(void)oldFile.deleteFile();
-			if(oldJsonFile.existsAsFile())
-				(void)oldJsonFile.deleteFile();
+			deleteFile(oldFile);
+			deleteFile(oldJsonFile);
 		});
 	}
 
@@ -1518,6 +1516,17 @@ namespace pluginLib::patchDB
 		return success;
 	}
 
+	bool DB::deleteFile(const juce::File& _file)
+	{
+		if (!_file.existsAsFile())
+			return true;
+		if (_file.deleteFile())
+			return true;
+
+		pushError("Failed to delete file:\n" + _file.getFullPathName().toStdString());
+		return false;
+	}
+
 	bool DB::saveJson()
 	{
 		m_cacheDirty = true;
@@ -1527,7 +1536,7 @@ namespace pluginLib::patchDB
 
 		jsonFile.createDirectory();
 
-		cacheFile.deleteFile();
+		deleteFile(cacheFile);
 
 		if (!jsonFile.hasWriteAccess())
 		{
@@ -1661,12 +1670,6 @@ namespace pluginLib::patchDB
 		if(!juce::File::isAbsolutePath(filename.getFullPathName()))
 			filename = m_settingsDir.getChildFile(filename.getFullPathName());
 
-		if(!filename.hasWriteAccess())
-		{
-			pushError("No write access to file:\n" + filename.getFullPathName().toStdString());
-			return false;
-		}
-
 		if(_ds->patches.empty())
 		{
 			filename.deleteFile();
@@ -1729,7 +1732,7 @@ namespace pluginLib::patchDB
 			pushError("Failed to copy\n" + tempFile.getFullPathName().toStdString() + "\nto\n" + _target.getFullPathName().toStdString());
 			return false;
 		}
-		tempFile.deleteFile();
+		deleteFile(tempFile);
 		return true;
 	}
 
@@ -1769,7 +1772,7 @@ namespace pluginLib::patchDB
 
 			if(patches.empty())
 			{
-				file.deleteFile();
+				deleteFile(file);
 			}
 			else
 			{

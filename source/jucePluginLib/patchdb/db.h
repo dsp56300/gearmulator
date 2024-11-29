@@ -137,6 +137,8 @@ namespace pluginLib::patchDB
 		bool loadPatchModifications(const DataSourceNodePtr& _ds, const std::vector<PatchPtr>& _patches);
 		static bool loadPatchModifications(std::map<PatchKey, PatchModificationsPtr>& _patchModifications, const juce::var& _parentNode, const DataSourceNodePtr& _dataSource = nullptr);
 
+		bool deleteFile(const juce::File& _file);
+
 		bool saveJson();
 		bool saveJson(const DataSourceNodePtr& _ds);
 		bool saveJson(const juce::File& _target, juce::DynamicObject* _src);
