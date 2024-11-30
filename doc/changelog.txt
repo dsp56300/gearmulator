@@ -14,10 +14,11 @@ Framework:
 - [Imp] [Skins] Add new option "antialiasing" for label style to disable antialiased
         font rendering (default 1 = enabled)
 
+- [Fix] Patch Manager might report file access errors that are not relevant
+
 Osirus:
 
 - [Imp] test console: Add support for Virus B demo song
-
 
 NodalRed2x:
 
