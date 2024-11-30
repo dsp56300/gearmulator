@@ -79,6 +79,8 @@ namespace xt
 
 	void Device::processAudio(const synthLib::TAudioInputs& _inputs, const synthLib::TAudioOutputs& _outputs, size_t _samples)
 	{
+		m_state.process(static_cast<uint32_t>(_samples));
+
 		const float* inputs[2] = {_inputs[0], _inputs[1]};
 		float* outputs[4] = {_outputs[0], _outputs[1], _outputs[2], _outputs[3]};
 		m_xt.process(inputs, outputs, static_cast<uint32_t>(_samples), getExtraLatencySamples());

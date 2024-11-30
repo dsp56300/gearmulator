@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 
 #include "xtMidiTypes.h"
 #include "xtTypes.h"
@@ -87,6 +88,8 @@ namespace xt
 
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
+
+		void process(uint32_t _numSamples);
 
 		static TableId getWavetableFromSingleDump(const SysEx& _single);
 
@@ -198,7 +201,7 @@ namespace xt
 
 		static SysexCommand getCommand(const SysEx& _data);
 
-		void forwardToDevice(const SysEx& _data) const;
+		void forwardToDevice(const SysEx& _data);
 
 		void requestGlobal() const;
 		void requestMode() const;
@@ -240,5 +243,7 @@ namespace xt
 
 		synthLib::SMidiEvent m_lastBankSelectMSB;
 		synthLib::SMidiEvent m_lastBankSelectLSB;
+
+		std::vector<std::pair<int32_t, std::function<void()>>> m_delayedCalls;	// number of samples, function to call
 	};
 }

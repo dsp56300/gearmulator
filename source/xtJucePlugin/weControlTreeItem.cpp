@@ -55,7 +55,7 @@ namespace xtJucePlugin
 		if(m_table == _table && !_tableHasChanged)
 			return;
 		m_table = _table;
-		setWave(m_editor.getData().getWaveIndex(_table, m_index));
+		setWave(m_editor.getData().getWaveId(_table, m_index));
 	}
 
 	juce::var ControlTreeItem::getDragSourceDescription()
