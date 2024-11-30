@@ -754,9 +754,7 @@ namespace xt
 
 		sendSysex(_data);
 
-		const auto cmd = getCommand(_data);
-
-		switch (cmd)
+		switch (getCommand(_data))
 		{
 			case SysexCommand::WaveDump:
 				// there is an annoying bug in the XT
@@ -819,16 +817,18 @@ namespace xt
 						}
 
 						// send the modified table to the device
-						const auto modifiedTableSysex = createTableData(table, tableId.rawId(), false);
+						auto modifiedTableSysex = createTableData(table, tableId.rawId(), false);
 
-						sendSysex(modifiedTableSysex);
+						sendSysex(std::move(modifiedTableSysex));
 
-						// after 1 second, send the original table again
-						constexpr auto delaySamples = 40000;
+						// after a delay, send the original table again
+						constexpr auto delaySamples = static_cast<uint32_t>(40000 * 0.8f);
 
-						m_delayedCalls.emplace_back(delaySamples, [this, w = std::move(originalTableSysex)]
+						m_delayedCalls.emplace_back(delaySamples, [this, tableId]
 						{
-							sendSysex(w);
+							const auto& t = m_tables[tableId.rawId()];
+							SysEx s = SysEx(t.begin(), t.end());
+							sendSysex(std::move(s));
 						});
 					}
 				}
@@ -867,7 +867,7 @@ namespace xt
 			checksum += data[i];
 		data.push_back(checksum & 0x7f);
 		data.push_back(0xf7);
-		sendSysex(data);
+		sendSysex(std::move(data));
 	}
 
 	void State::sendGlobalParameter(GlobalParameter _param, uint8_t _value)
@@ -900,6 +900,13 @@ namespace xt
 	{
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
+		m_xt.sendMidiEvent(e);
+	}
+
+	void State::sendSysex(SysEx&& _data) const
+	{
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
+		e.sysex = std::move(_data);
 		m_xt.sendMidiEvent(e);
 	}
 

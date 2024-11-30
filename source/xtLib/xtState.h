@@ -212,6 +212,7 @@ namespace xt
 		void sendMultiParameter(uint8_t _instrument, MultiParameter _param, uint8_t _value);
 		void sendSysex(const std::initializer_list<uint8_t>& _data) const;
 		void sendSysex(const SysEx& _data) const;
+		void sendSysex(SysEx&& _data) const;
 
 		void onPlayModeChanged();
 
