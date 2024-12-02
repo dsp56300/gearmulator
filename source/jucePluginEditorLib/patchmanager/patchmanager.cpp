@@ -615,7 +615,7 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::Data> patchData;
 		for (const auto& patch : _patches)
 		{
-			const auto patchSysex = prepareSave(patch);
+			const auto patchSysex = applyModifications(patch);
 
 			if(!patchSysex.empty())
 				patchData.push_back(patchSysex);
@@ -1064,7 +1064,7 @@ namespace jucePluginEditorLib::patchManager
 		if(!_patch)
 			return {};
 
-		const auto data = prepareSave(_patch);
+		const auto data = applyModifications(_patch);
 
 		return pluginLib::Clipboard::createJsonString(m_editor.getProcessor(), {}, {}, data);
 	}

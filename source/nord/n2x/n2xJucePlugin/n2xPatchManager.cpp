@@ -94,7 +94,7 @@ namespace n2xJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
 		auto d = n2x::State::stripPatchName(_patch->sysex);
 
