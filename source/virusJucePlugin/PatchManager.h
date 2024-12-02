@@ -30,7 +30,6 @@ namespace genericVirusUI
 		bool equals(const pluginLib::patchDB::PatchPtr& _a, const pluginLib::patchDB::PatchPtr& _b) const override;
 
 		// PatchManager impl
-		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) override;
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 
 	private:

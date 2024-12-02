@@ -120,11 +120,6 @@ namespace n2xJucePlugin
 		return m_controller.getCurrentPart();
 	}
 
-	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch)
-	{
-		return activatePatch(_patch, getCurrentPart());
-	}
-
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
 		if(!m_controller.activatePatch(_patch->sysex, _part))

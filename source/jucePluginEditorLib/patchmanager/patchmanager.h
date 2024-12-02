@@ -124,7 +124,6 @@ namespace jucePluginEditorLib::patchManager
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
 
 		virtual uint32_t getCurrentPart() const = 0;
-		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) = 0;
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
 		virtual bool activatePatch(const std::string& _filename, uint32_t _part);

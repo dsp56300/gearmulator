@@ -19,7 +19,6 @@ namespace mqJucePlugin
 		pluginLib::patchDB::PatchPtr initializePatch(pluginLib::patchDB::Data&& _sysex) override;
 		pluginLib::patchDB::Data prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const override;
 		uint32_t getCurrentPart() const override;
-		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) override;
 		bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) override;
 
 	private:
