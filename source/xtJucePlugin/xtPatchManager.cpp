@@ -22,7 +22,7 @@ namespace xtJucePlugin
 		, m_controller(_editor.getXtController())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
-		startLoaderThread();
+		jucePluginEditorLib::patchManager::PatchManager::startLoaderThread();
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 	}
 
