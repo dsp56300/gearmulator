@@ -3,7 +3,6 @@
 #include "imagePool.h"
 #include "parameterOverlays.h"
 #include "skin.h"
-#include "types.h"
 
 #include "juceUiLib/editor.h"
 
@@ -26,6 +25,8 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	class FileType;
+
 	namespace patchManager
 	{
 		class PatchManager;
@@ -53,7 +54,7 @@ namespace jucePluginEditorLib
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const std::function<void(const juce::File&)>& _callback);
 #if !SYNTHLIB_DEMO_MODE
-		static bool savePresets(FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
+		static bool savePresets(const FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
 #endif
 		static std::string createValidFilename(FileType& _type, const juce::File& _file);
 

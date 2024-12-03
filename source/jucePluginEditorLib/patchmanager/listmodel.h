@@ -6,7 +6,10 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "../types.h"
+namespace jucePluginEditorLib
+{
+	class FileType;
+}
 
 namespace pluginLib::patchDB
 {
@@ -141,7 +144,7 @@ namespace jucePluginEditorLib::patchManager
 		void filterPatches();
 		bool match(const Patch& _patch) const;
 		void setContent(const std::shared_ptr<pluginLib::patchDB::Search>& _search);
-		bool exportPresets(bool _selectedOnly, FileType _fileType) const;
+		bool exportPresets(bool _selectedOnly, const FileType& _fileType) const;
 		bool onClicked(const juce::MouseEvent&);
 		void cancelSearch();
 

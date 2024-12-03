@@ -1,5 +1,6 @@
 #include "pluginEditor.h"
 
+#include "filetype.h"
 #include "pluginProcessor.h"
 #include "skin.h"
 
@@ -102,7 +103,7 @@ namespace jucePluginEditorLib
 	}
 
 #if !SYNTHLIB_DEMO_MODE
-	bool Editor::savePresets(const FileType _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets)
+	bool Editor::savePresets(const FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets)
 	{
 		if (_presets.empty())
 			return false;
