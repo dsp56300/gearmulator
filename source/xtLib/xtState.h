@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <string>
 
 #include "xtMidiTypes.h"
 #include "xtTypes.h"
@@ -91,6 +92,8 @@ namespace xt
 
 		void process(uint32_t _numSamples);
 
+		static bool setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name);
+
 		static TableId getWavetableFromSingleDump(const SysEx& _single);
 
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
@@ -103,7 +106,9 @@ namespace xt
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);
-		static void splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle);
+		static bool splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle);
+
+		static SysexCommand getCommand(const SysEx& _data);
 
 	private:
 
@@ -198,8 +203,6 @@ namespace xt
 		{
 			return _mode.front() == 0xf0;
 		}
-
-		static SysexCommand getCommand(const SysEx& _data);
 
 		void forwardToDevice(const SysEx& _data);
 

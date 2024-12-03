@@ -235,6 +235,46 @@ namespace mqLib
 		return loadState(_state);
 	}
 
+	bool State::setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name)
+	{
+		if (getCommand(_sysex) != SysexCommand::SingleDump)
+			return false;
+
+		if (_sysex.size() == std::tuple_size_v<Single>)
+		{
+			for (size_t i=0; i<mq::g_singleNameLength; ++i)
+				_sysex[i + mq::g_singleNameOffset] = i >= _name.size() ? ' ' : _name[i];
+			return true;
+		}
+		if (_sysex.size() == std::tuple_size_v<SingleQ>)
+		{
+			for (size_t i=0; i<q::g_singleNameLength; ++i)
+				_sysex[i + q::g_singleNameOffset] = i >= _name.size() ? ' ' : _name[i];
+			return true;
+		}
+		return false;
+	}
+
+	bool State::setCategory(std::vector<uint8_t>& _sysex, const std::string& _name)
+	{
+		if (getCommand(_sysex) != SysexCommand::SingleDump)
+			return false;
+
+		if (_sysex.size() == std::tuple_size_v<Single>)
+		{
+			for (size_t i=0; i<mq::g_categoryLength; ++i)
+				_sysex[i + mq::g_categoryOffset] = i >= _name.size() ? ' ' : _name[i];
+			return true;
+		}
+		if (_sysex.size() == std::tuple_size_v<SingleQ>)
+		{
+			for (size_t i=0; i<q::g_categoryLength; ++i)
+				_sysex[i + q::g_categoryOffset] = i >= _name.size() ? ' ' : _name[i];
+			return true;
+		}
+		return false;
+	}
+
 	bool State::parseSingleDump(const SysEx& _data)
 	{
 		Single single;

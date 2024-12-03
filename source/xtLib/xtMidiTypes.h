@@ -59,6 +59,8 @@ namespace xt
 	enum SysexIndex
 	{
 		// first parameter of a dump
+		IdxSingleBank = 5,
+		IdxSingleProgram = 6,
 		IdxSingleParamFirst = 7,
 		IdxSingleChecksumStart = IdxSingleParamFirst,
 		IdxMultiParamFirst  = IdxSingleParamFirst,
@@ -193,6 +195,12 @@ namespace xt
 		static constexpr uint32_t g_idmCartridgeBank = 0x54;
 		static constexpr uint32_t g_idmPreset = 0x42;
 	};
+
+	namespace mw2
+	{
+		static constexpr uint32_t g_singleNameLength = 16;
+		static constexpr uint32_t g_singleNamePosition = 247;	// in a dump including sysex header
+	}
 
 	namespace wave
 	{

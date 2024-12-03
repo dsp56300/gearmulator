@@ -327,6 +327,19 @@ namespace xt
 		}
 	}
 
+	bool State::setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name)
+	{
+		if (_sysex.size() != std::tuple_size_v<Single>)
+			return false;
+
+		if (getCommand(_sysex) != SysexCommand::SingleDump)
+			return false;
+
+		for (size_t i=0; i<mw2::g_singleNameLength; ++i)
+			_sysex[i + mw2::g_singleNamePosition] = i >= _name.size() ? ' ' : _name[i];
+		return true;
+	}
+
 	TableId State::getWavetableFromSingleDump(const SysEx& _single)
 	{
 		constexpr auto wavetableIndex = IdxSingleParamFirst + static_cast<uint32_t>(SingleParameter::Wavetable);
@@ -1104,20 +1117,20 @@ namespace xt
 		return sysex;
 	}
 
-	void State::splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle)
+	bool State::splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle)
 	{
 		if(getCommand(_combinedSingle) != SysexCommand::SingleDump)
-			return;
+			return false;
 
 		constexpr auto singleSize = std::tuple_size_v<Single>;
 		constexpr auto tableSize = std::tuple_size_v<Table>;
 		constexpr auto waveSize = std::tuple_size_v<Wave>;
 
 		if(_combinedSingle.size() == singleSize)
-			return;
+			return false;
 
 		if(_combinedSingle.size() < singleSize + tableSize - 2)
-			return;
+			return false;
 
 		auto& single = _dumps.emplace_back();
 		size_t offBegin = 0;
@@ -1143,6 +1156,8 @@ namespace xt
 			wave.insert(wave.end(), _combinedSingle.begin() + static_cast<ptrdiff_t>(offBegin), _combinedSingle.begin() + static_cast<ptrdiff_t>(offEnd));
 			wave.push_back(0xf7);
 		}
+
+		return true;
 	}
 
 	SysEx State::createCombinedPatch(const std::vector<SysEx>& _dumps)

@@ -3,6 +3,7 @@
 #include "mqController.h"
 #include "mqEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
+#include "mqLib/mqstate.h"
 
 namespace mqJucePlugin
 {
@@ -64,15 +65,25 @@ namespace mqJucePlugin
 
 	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
-		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
+		auto result = _patch->sysex;
 
-		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
-			return _patch->sysex;
+		if (_patch->sysex.size() != std::tuple_size_v<mqLib::State::Single> && 
+			_patch->sysex.size() != std::tuple_size_v<mqLib::State::SingleQ>)
+			return result;
 
-		// apply name
 		if (!_patch->getName().empty())
-			m_controller.setSingleName(parameterValues, _patch->getName());
+			mqLib::State::setSingleName(result, _patch->getName());
+
+		// first set tag is category
+		const auto& tags = _patch->getTags(pluginLib::patchDB::TagType::Category).getAdded();
+
+		std::string category;
+
+		if(!tags.empty())
+			category = *tags.begin();
+
+		if (!category.empty())
+			mqLib::State::setCategory(result, category);
 
 		// apply program
 		uint32_t program = 0;
@@ -85,16 +96,10 @@ namespace mqJucePlugin
 			program -= bank * 100;
 		}
 
-		// apply category
-		const auto& tags = _patch->getTags(pluginLib::patchDB::TagType::Category).getAdded();
+		result[mqLib::IdxSingleBank] = static_cast<uint8_t>(bank);
+		result[mqLib::IdxSingleProgram] = static_cast<uint8_t>(program);
 
-		if(!tags.empty())
-			m_controller.setCategory(parameterValues, *tags.begin());
-
-		return m_controller.createSingleDump(
-			static_cast<mqLib::MidiBufferNum>(static_cast<uint8_t>(mqLib::MidiBufferNum::DeprecatedSingleBankA) + bank), 
-			static_cast<mqLib::MidiSoundLocation>(static_cast<uint8_t>(mqLib::MidiSoundLocation::AllSinglesBankA) + bank),
-			static_cast<uint8_t>(program), parameterValues);
+		return result;
 	}
 
 	uint32_t PatchManager::getCurrentPart() const
