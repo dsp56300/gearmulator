@@ -109,7 +109,7 @@ namespace mqJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
-		m_controller.sendSingle(_patch->sysex, static_cast<uint8_t>(_part));
+		m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part));
 		return true;
 	}
 }

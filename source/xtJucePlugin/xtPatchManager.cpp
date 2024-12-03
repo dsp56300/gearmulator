@@ -165,7 +165,7 @@ namespace xtJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		if(!m_controller.sendSingle(_patch->sysex, static_cast<uint8_t>(_part)))
+		if(!m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part)))
 		{
 			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
 				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
