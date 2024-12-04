@@ -95,8 +95,6 @@ namespace mqLib
 
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
-	private:
-
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src)
 		{
 			if(!isValid(_src))
@@ -127,6 +125,8 @@ namespace mqLib
 			c &= 0x7f;
 			return true;
 		}
+
+	private:
 
 		bool parseSingleDump(const SysEx& _data);
 		bool parseMultiDump(const SysEx& _data);

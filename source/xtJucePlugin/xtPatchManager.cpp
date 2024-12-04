@@ -136,6 +136,8 @@ namespace xtJucePlugin
 			_result[xt::SysexIndex::IdxSingleBank   ] = static_cast<uint8_t>(bank);
 			_result[xt::SysexIndex::IdxSingleProgram] = static_cast<uint8_t>(program);
 
+			xt::State::updateChecksum(_result, wLib::IdxCommand);
+
 			return true;
 		};
 

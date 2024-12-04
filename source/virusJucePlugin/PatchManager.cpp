@@ -252,6 +252,11 @@ namespace genericVirusUI
 		result[249 + 11] = val0;
 		result[249 + 12] = val1;
 
+		result[265] = virusLib::Microcontroller::calcChecksum(result, 267 - 2);
+
+		if (result.size() > 267)
+			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+
 		return result;
 	}
 

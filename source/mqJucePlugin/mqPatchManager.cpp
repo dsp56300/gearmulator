@@ -99,6 +99,8 @@ namespace mqJucePlugin
 		result[mqLib::IdxSingleBank] = static_cast<uint8_t>(bank);
 		result[mqLib::IdxSingleProgram] = static_cast<uint8_t>(program);
 
+		mqLib::State::updateChecksum(result);
+
 		return result;
 	}
 

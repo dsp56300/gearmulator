@@ -110,8 +110,6 @@ namespace xt
 
 		static SysexCommand getCommand(const SysEx& _data);
 
-	private:
-
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{
 			if(!isValid(_src))
@@ -134,6 +132,8 @@ namespace xt
 			c &= 0x7f;
 			return true;
 		}
+
+	private:
 
 		bool parseSingleDump(const SysEx& _data);
 		bool parseMultiDump(const SysEx& _data);
