@@ -337,7 +337,7 @@ namespace genericVirusUI
 									{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10, static_cast<uint8_t>(0x01 + (i >> 7)), static_cast<uint8_t>(i & 0x7f)}
 								);
 								sysex.insert(sysex.end(), data.begin() + i * 0x100 + startAddr, data.begin() + i * 0x100 + 0x100 + startAddr);
-								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex, 5));
+								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex));
 								sysex.push_back(0xf7);
 							}
 						}

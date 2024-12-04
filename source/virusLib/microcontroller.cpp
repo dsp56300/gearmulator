@@ -542,7 +542,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			response.push_back(_dump[i]);
 
 		// checksum for ABC models comes after 256 bytes of preset data
-		response.push_back(calcChecksum(response, 5));
+		response.push_back(calcChecksum(response));
 
 		if (size > modelABCsize)
 		{
@@ -550,7 +550,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				response.push_back(_dump[i]);
 
 			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
-			response.push_back(calcChecksum(response, 5));
+			response.push_back(calcChecksum(response));
 		}
 
 		response.push_back(M_ENDOFSYSEX);

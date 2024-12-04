@@ -56,7 +56,7 @@ public:
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
-	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset);
+	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, size_t _offset = 5);
 
 	bool dspHasBooted() const;
 

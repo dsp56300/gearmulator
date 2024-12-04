@@ -191,7 +191,7 @@ namespace virus
 
 				lv2Preset.data = {0xf0, 0x00, 0x20, 0x33, 01, virusLib::OMNI_DEVICE_ID, virusLib::DUMP_SINGLE, virusLib::toMidiByte(virusLib::BankNumber::EditBuffer), virusLib::SINGLE};
 				lv2Preset.data.insert(lv2Preset.data.end(), preset.begin(), preset.begin() + virusLib::ROMFile::getSinglePresetSize(_rom.getModel()));
-				lv2Preset.data.push_back(virusLib::Microcontroller::calcChecksum(lv2Preset.data, 5));
+				lv2Preset.data.push_back(virusLib::Microcontroller::calcChecksum(lv2Preset.data));
 				lv2Preset.data.push_back(0xf7);
 
 				lv2Preset.name = virusLib::ROMFile::getSingleName(preset);
