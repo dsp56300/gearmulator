@@ -104,22 +104,16 @@ namespace jucePluginEditorLib::patchManager
 		if(!_mouseEvent.mods.isPopupMenu())
 			return false;
 
-		auto fileTypeMenu = [this](const std::function<void(FileType)>& _func)
-		{
-			juce::PopupMenu menu;
-			menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
-			menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
-			return menu;
-		};
-
 		auto selectedPatches = getSelectedPatches();
 
 		const auto hasSelectedPatches = !selectedPatches.empty();
 
+		const auto& editor = getPatchManager().getEditor();
+
 		juce::PopupMenu menu;
 		if(hasSelectedPatches)
-			menu.addSubMenu("Export selected...", fileTypeMenu([this](const FileType& _fileType) { exportPresets(true, _fileType); }));
-		menu.addSubMenu("Export all...", fileTypeMenu([this](const FileType& _fileType) { exportPresets(false, _fileType); }));
+			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const FileType& _fileType) { exportPresets(true, _fileType); }));
+		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const FileType& _fileType) { exportPresets(false, _fileType); }));
 
 		if(hasSelectedPatches)
 		{

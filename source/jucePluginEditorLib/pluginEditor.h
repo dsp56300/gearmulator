@@ -97,6 +97,8 @@ namespace jucePluginEditorLib
 
 		void parentHierarchyChanged() override;
 
+		juce::PopupMenu createExportFileTypeMenu(const std::function<void(FileType)>& _func) const;
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 

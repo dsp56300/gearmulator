@@ -553,6 +553,14 @@ namespace jucePluginEditorLib
 			m_overlays.refreshAll();
 	}
 
+	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(FileType)>& _func) const
+	{
+		juce::PopupMenu menu;
+		menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
+		menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
+		return menu;
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())
