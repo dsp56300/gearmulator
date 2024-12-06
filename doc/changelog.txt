@@ -15,6 +15,7 @@ Framework:
         font rendering (default 1 = enabled)
 
 - [Fix] Patch Manager might report file access errors that are not relevant
+- [Fix] Renamed patches might be displayed with previous name when loaded
 
 Osirus:
 
