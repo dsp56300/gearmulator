@@ -11,7 +11,7 @@
 
 namespace jucePluginEditorLib
 {
-	enum class FileType;
+	class FileType;
 	class Editor;
 }
 
@@ -71,8 +71,8 @@ namespace jucePluginEditorLib::patchManager
 
 		void paint(juce::Graphics& g) override;
 
-		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, FileType _fileType) const;
-		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, FileType _fileType) const;
+		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType& _fileType) const;
+		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const FileType& _fileType) const;
 
 		void resized() override;
 
@@ -124,7 +124,6 @@ namespace jucePluginEditorLib::patchManager
 		std::shared_ptr<genericUI::UiObject> getTemplate(const std::string& _name) const;
 
 		virtual uint32_t getCurrentPart() const = 0;
-		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch) = 0;
 		virtual bool activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part) = 0;
 
 		virtual bool activatePatch(const std::string& _filename, uint32_t _part);

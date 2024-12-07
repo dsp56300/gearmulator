@@ -8,6 +8,7 @@
 
 #include <list>
 #include <mutex>
+#include <limits>
 
 #include "hdi08List.h"
 #include "hdi08MidiQueue.h"
@@ -56,7 +57,7 @@ public:
 	static PresetVersion getPresetVersion(const TPreset& _preset);
 	static PresetVersion getPresetVersion(uint8_t _versionCode);
 
-	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset);
+	static uint8_t calcChecksum(const std::vector<uint8_t>& _data, size_t _offset = 5, size_t _count = std::numeric_limits<size_t>::max());
 
 	bool dspHasBooted() const;
 

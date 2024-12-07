@@ -22,7 +22,7 @@ namespace xtJucePlugin
 		, m_controller(_editor.getXtController())
 	{
 		setTagTypeName(pluginLib::patchDB::TagType::CustomA, "MW Model");
-		startLoaderThread();
+		jucePluginEditorLib::patchManager::PatchManager::startLoaderThread();
 		addGroupTreeItemForTag(pluginLib::patchDB::TagType::CustomA);
 	}
 
@@ -106,31 +106,58 @@ namespace xtJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
-		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
-
-		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex))
-			return _patch->sysex;
-
-		// apply name
-		if (!_patch->getName().empty())
-			m_controller.setSingleName(parameterValues, _patch->getName());
-
-		// apply program
-		uint32_t program = 0;
-		uint32_t bank = 0;
-		if(_patch->program != pluginLib::patchDB::g_invalidProgram)
+		auto applyModifications = [&_patch](pluginLib::patchDB::Data& _result) -> bool
 		{
-			program = std::clamp(_patch->program, 0u, 299u);
+			if (xt::State::getCommand(_patch->sysex) != xt::SysexCommand::SingleDump)
+				return false;
 
-			bank = program / 128;
-			program -= bank * 128;
+			const auto dumpSize = _patch->sysex.size();
+
+			if (dumpSize != std::tuple_size_v<xt::State::Single>)
+				return false;
+
+			// apply name
+			if (!_patch->getName().empty())
+				xt::State::setSingleName(_result, _patch->getName());
+
+			// apply program
+			uint32_t program = 0;
+			uint32_t bank = 0;
+			if(_patch->program != pluginLib::patchDB::g_invalidProgram)
+			{
+				program = std::clamp(_patch->program, 0u, 299u);
+
+				bank = program / 128;
+				program -= bank * 128;
+			}
+
+			_result[xt::SysexIndex::IdxSingleBank   ] = static_cast<uint8_t>(bank);
+			_result[xt::SysexIndex::IdxSingleProgram] = static_cast<uint8_t>(program);
+
+			xt::State::updateChecksum(_result, wLib::IdxCommand);
+
+			return true;
+		};
+
+		if (xt::State::getCommand(_patch->sysex) == xt::SysexCommand::SingleDump)
+		{
+			auto result = _patch->sysex;
+
+			if (applyModifications(result))
+				return result;
+
+			std::vector<xt::SysEx> dumps;
+
+			if (xt::State::splitCombinedPatch(dumps, _patch->sysex))
+			{
+				if (applyModifications(dumps[0]))
+					return xt::State::createCombinedPatch(dumps);
+			}
 		}
 
-		const auto sysex = m_controller.createSingleDump(static_cast<xt::LocationH>(static_cast<uint8_t>(xt::LocationH::SingleBankA) + bank), static_cast<uint8_t>(program), parameterValues);
-		return createCombinedDump(sysex);
+		return _patch->sysex;
 	}
 
 	uint32_t PatchManager::getCurrentPart() const
@@ -138,15 +165,9 @@ namespace xtJucePlugin
 		return m_editor.getProcessor().getController().getCurrentPart();
 	}
 
-	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch)
-	{
-		m_controller.sendSingle(_patch->sysex);
-		return true;
-	}
-
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		if(!m_controller.sendSingle(_patch->sysex, static_cast<uint8_t>(_part)))
+		if(!m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part)))
 		{
 			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
 				m_editor.getProcessor().getProperties().name + " - Unable to load patch",

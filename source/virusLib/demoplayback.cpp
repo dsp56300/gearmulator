@@ -197,7 +197,7 @@ namespace virusLib
 
 				// checksum needs to be updated
 				s.pop_back();
-				Microcontroller::calcChecksum(s, 5);
+				Microcontroller::calcChecksum(s);
 				s.push_back(0xf7);
 
 				std::stringstream ss;

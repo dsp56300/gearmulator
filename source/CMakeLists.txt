@@ -18,6 +18,10 @@ add_custom_target(cmakeScripts SOURCES
 	skins.h.in
 	../base.cmake)
 
+# ----------------- Tools
+
+add_subdirectory(commandlineGenerator)
+
 # ----------------- DSP56300 emulator
 
 set(ASMJIT_STATIC TRUE)

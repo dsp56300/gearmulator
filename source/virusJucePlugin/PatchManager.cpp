@@ -191,23 +191,27 @@ namespace genericVirusUI
 		return patch;
 	}
 
-	pluginLib::patchDB::Data PatchManager::prepareSave(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
 	{
-		pluginLib::MidiPacket::Data data;
-		pluginLib::MidiPacket::AnyPartParamValues parameterValues;
-
-		virus::Controller::MidiPacketType usedPacketType;
-		if (!m_controller.parseSingle(data, parameterValues, _patch->sysex, usedPacketType))
+		if (_patch->sysex.size() < 267)
 			return _patch->sysex;
+
+		if (_patch->sysex[6] != virusLib::SysexMessageType::DUMP_SINGLE)
+			return _patch->sysex;
+
+		auto result = _patch->sysex;
 
 		// apply name
 		if (!_patch->getName().empty())
-			m_controller.setSinglePresetName(parameterValues, _patch->getName());
+		{
+			for (size_t i=0; i<10; ++i)
+				result[i + 249] = i >= _patch->getName().size() ? ' ' : _patch->getName()[i];
+		}
+
+		auto& bank = result[7];
+		auto& program = result[8];
 
 		// apply program
-		auto bank = toMidiByte(virusLib::BankNumber::A);
-		auto program = data[pluginLib::MidiDataType::Program];
-
 		if (_patch->program != pluginLib::patchDB::g_invalidProgram)
 		{
 			const auto bankOffset = _patch->program / 128;
@@ -245,10 +249,15 @@ namespace genericVirusUI
 			}
 		}
 
-		parameterValues[indicesCategory[0]] = val0;
-		parameterValues[indicesCategory[1]] = val1;
+		result[249 + 11] = val0;
+		result[249 + 12] = val1;
 
-		return m_controller.createSingleDump(usedPacketType, bank, program, parameterValues);
+		result[265] = virusLib::Microcontroller::calcChecksum(result, 267 - 2);
+
+		if (result.size() > 267)
+			result[result.size() - 2] = virusLib::Microcontroller::calcChecksum(result, result.size() - 2);
+
+		return result;
 	}
 
 	bool PatchManager::parseFileData(pluginLib::patchDB::DataList& _results, const pluginLib::patchDB::Data& _data)
@@ -337,7 +346,7 @@ namespace genericVirusUI
 									{0xf0, 0x00, 0x20, 0x33, 0x01, virusLib::OMNI_DEVICE_ID, 0x10, static_cast<uint8_t>(0x01 + (i >> 7)), static_cast<uint8_t>(i & 0x7f)}
 								);
 								sysex.insert(sysex.end(), data.begin() + i * 0x100 + startAddr, data.begin() + i * 0x100 + 0x100 + startAddr);
-								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex, 5));
+								sysex.push_back(virusLib::Microcontroller::calcChecksum(sysex));
 								sysex.push_back(0xf7);
 							}
 						}
@@ -410,14 +419,9 @@ namespace genericVirusUI
 		return true;
 	}
 
-	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch)
-	{
-		return m_controller.activatePatch(_patch->sysex);
-	}
-
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		return m_controller.activatePatch(_patch->sysex, _part);
+		return m_controller.activatePatch(applyModifications(_patch), _part);
 	}
 
 	void PatchManager::addRomPatches()

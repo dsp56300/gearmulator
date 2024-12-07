@@ -121,16 +121,14 @@ namespace xtJucePlugin
 
 				if(m_waveEditor)
 				{
-					// send waves first, then table. otherwise the device doesn't refresh correctly
 					const auto& table = splitResults[1];
+					m_waveEditor->getData().onReceiveTable(table, true);
 
 					for(size_t i=2; i<splitResults.size(); ++i)
 					{
 						const auto& wave = splitResults[i];
 						m_waveEditor->getData().onReceiveWave(wave, true);
 					}
-
-					m_waveEditor->getData().onReceiveTable(table, true);
 				}
 
 				data = single;
@@ -265,6 +263,20 @@ namespace xtJucePlugin
 			if(prog + 1 < m_singleEditBuffers.size())
 				requestSingle(xt::LocationH::SingleEditBufferMultiMode, prog + 1);
 	    }
+		else
+			return;
+
+		// if the single that was received contains a user table, request it from the device as it might not match what we have in the editor
+		if (m_waveEditor)
+		{
+			const auto tableId = xt::TableId(xt::State::getWavetableFromSingleDump(patch.data));
+
+			if (!xt::wave::isReadOnly(tableId))
+			{
+				if (requestTable(tableId.rawId()))
+					m_requestWavesForTables.insert(tableId);
+			}
+		}
 
 		onProgramChanged(prog);
 	}
@@ -381,6 +393,23 @@ namespace xtJucePlugin
 		{
 			if(m_waveEditor)
 				m_waveEditor->onReceiveTable(data, _msg);
+
+			const auto tableId = xt::TableId(static_cast<uint16_t>(_msg[xt::SysexIndex::IdxWaveIndexH] << 7 | _msg[xt::SysexIndex::IdxWaveIndexL]));
+
+			if (m_requestWavesForTables.find(tableId) != m_requestWavesForTables.end())
+			{
+				xt::TableData table;
+
+				if (xt::State::parseTableData(table, _msg))
+				{
+					for (const auto& wave : table)
+					{
+						if (!xt::wave::isReadOnly(wave))
+							requestWave(wave.rawId());
+					}
+				}
+				m_requestWavesForTables.erase(tableId);
+			}
 		}
 	    else
 	    {

@@ -542,7 +542,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 			response.push_back(_dump[i]);
 
 		// checksum for ABC models comes after 256 bytes of preset data
-		response.push_back(calcChecksum(response, 5));
+		response.push_back(calcChecksum(response));
 
 		if (size > modelABCsize)
 		{
@@ -550,7 +550,7 @@ bool Microcontroller::sendSysex(const std::vector<uint8_t>& _data, std::vector<S
 				response.push_back(_dump[i]);
 
 			// Second checksum for D model: That checksum is to be calculated over the whole preset data, including the ABC checksum
-			response.push_back(calcChecksum(response, 5));
+			response.push_back(calcChecksum(response));
 		}
 
 		response.push_back(M_ENDOFSYSEX);
@@ -1244,11 +1244,11 @@ PresetVersion Microcontroller::getPresetVersion(const uint8_t v)
 	return A;
 }
 
-uint8_t Microcontroller::calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset)
+uint8_t Microcontroller::calcChecksum(const std::vector<uint8_t>& _data, const size_t _offset, const size_t _count/* = std::numeric_limits<size_t>::max()*/)
 {
 	uint8_t cs = 0;
 
-	for (size_t i = _offset; i < _data.size(); ++i)
+	for (size_t i = _offset; i < std::min(_data.size(), _count); ++i)
 		cs += _data[i];
 
 	return cs & 0x7f;

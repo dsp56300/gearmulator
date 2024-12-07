@@ -4,6 +4,8 @@
 #include <vector>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
+#include <string>
 
 #include "xtMidiTypes.h"
 #include "xtTypes.h"
@@ -88,6 +90,10 @@ namespace xt
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
+		void process(uint32_t _numSamples);
+
+		static bool setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name);
+
 		static TableId getWavetableFromSingleDump(const SysEx& _single);
 
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
@@ -100,9 +106,9 @@ namespace xt
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);
-		static void splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle);
+		static bool splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle);
 
-	private:
+		static SysexCommand getCommand(const SysEx& _data);
 
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{
@@ -126,6 +132,8 @@ namespace xt
 			c &= 0x7f;
 			return true;
 		}
+
+	private:
 
 		bool parseSingleDump(const SysEx& _data);
 		bool parseMultiDump(const SysEx& _data);
@@ -196,9 +204,7 @@ namespace xt
 			return _mode.front() == 0xf0;
 		}
 
-		static SysexCommand getCommand(const SysEx& _data);
-
-		void forwardToDevice(const SysEx& _data) const;
+		void forwardToDevice(const SysEx& _data);
 
 		void requestGlobal() const;
 		void requestMode() const;
@@ -209,6 +215,7 @@ namespace xt
 		void sendMultiParameter(uint8_t _instrument, MultiParameter _param, uint8_t _value);
 		void sendSysex(const std::initializer_list<uint8_t>& _data) const;
 		void sendSysex(const SysEx& _data) const;
+		void sendSysex(SysEx&& _data) const;
 
 		void onPlayModeChanged();
 
@@ -240,5 +247,7 @@ namespace xt
 
 		synthLib::SMidiEvent m_lastBankSelectMSB;
 		synthLib::SMidiEvent m_lastBankSelectLSB;
+
+		std::vector<std::pair<int32_t, std::function<void()>>> m_delayedCalls;	// number of samples, function to call
 	};
 }

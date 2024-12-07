@@ -36,7 +36,7 @@ namespace xtJucePlugin
 		std::optional<xt::WaveData> getWave(xt::WaveId _waveId) const;
 		std::optional<xt::WaveData> getWave(xt::TableId _tableIndex, xt::TableIndex _indexInTable) const;
 
-		xt::WaveId getWaveIndex(xt::TableId _tableId, xt::TableIndex _tableIndex) const;
+		xt::WaveId getWaveId(xt::TableId _tableId, xt::TableIndex _tableIndex) const;
 
 		std::optional<xt::TableData> getTable(xt::TableId _tableId) const;
 		bool swapTableEntries(xt::TableId _tableId, xt::TableIndex _indexA, xt::TableIndex _indexB);

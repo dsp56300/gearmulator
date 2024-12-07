@@ -69,7 +69,25 @@ namespace mqLib
 		EditBufferFirstSingleLayer = 0x00,
 		EditBufferFirstDrumMapInstrument = 0x10,
 	};
-	
+
+	namespace mq
+	{
+		constexpr uint32_t g_singleNameLength = 16;
+		constexpr uint32_t g_singleNameOffset = 370;
+
+		constexpr uint32_t g_categoryLength = 4;
+		constexpr uint32_t g_categoryOffset = 386;
+	};
+
+	namespace q
+	{
+		constexpr uint32_t g_singleNameLength = 16;
+		constexpr uint32_t g_singleNameOffset = 371;
+
+		constexpr uint32_t g_categoryLength = 4;
+		constexpr uint32_t g_categoryOffset = 387;
+	};
+
 	enum class GlobalParameter : uint8_t
 	{
 		// Global data
@@ -175,6 +193,8 @@ namespace mqLib
 	enum SysexIndex
 	{
 		// first parameter of a dump
+		IdxSingleBank = 5,
+		IdxSingleProgram = 6,
 		IdxSingleParamFirst = 7,
 		IdxMultiParamFirst  = IdxSingleParamFirst,
 		IdxDrumParamFirst   = IdxSingleParamFirst,

@@ -9,7 +9,7 @@
 
 #include "dsp56kEmu/jitunittests.h"
 
-#include "../dsp56300/source/disassemble/commandline.h"
+#include "baseLib/commandline.h"
 
 #include "synthLib/wavReader.h"
 #include "synthLib/os.h"
@@ -34,7 +34,7 @@ int main(int _argc, char* _argv[])
 		}
 		catch (const std::string& _err)
 		{
-			std::cout << "Unit test failed: " << _err << std::endl;
+			std::cout << "Unit test failed: " << _err << '\n';
 			return -1;
 		}
 	}
@@ -45,7 +45,7 @@ int main(int _argc, char* _argv[])
 
 		while(forever)
 		{
-			const CommandLine cmd(_argc, _argv);
+			const baseLib::CommandLine cmd(_argc, _argv);
 
 			forever = cmd.contains("forever");
 
@@ -71,7 +71,7 @@ int main(int _argc, char* _argv[])
 
 				if(subfolders.empty())
 				{
-					std::cout << "Nothing found for testing in folder " << cmd.get("folder") << std::endl;
+					std::cout << "Nothing found for testing in folder " << cmd.get("folder") << '\n';
 					return -1;
 				}
 
@@ -90,7 +90,7 @@ int main(int _argc, char* _argv[])
 
 					if(files.empty())
 					{
-						std::cout << "Directory " << subfolder << " doesn't contain any files" << std::endl;
+						std::cout << "Directory " << subfolder << " doesn't contain any files" << '\n';
 						return -1;
 					}
 
@@ -110,12 +110,12 @@ int main(int _argc, char* _argv[])
 
 					if(romFile.empty())
 					{
-						std::cout << "Failed to find ROM in folder " << subfolder << std::endl;
+						std::cout << "Failed to find ROM in folder " << subfolder << '\n';
 						return -1;
 					}
 					if(presetsFile.empty())
 					{
-						std::cout << "Failed to find presets file in folder " << subfolder << std::endl;
+						std::cout << "Failed to find presets file in folder " << subfolder << '\n';
 						return -1;
 					}
 
@@ -126,7 +126,7 @@ int main(int _argc, char* _argv[])
 
 					if(!ss.is_open())
 					{
-						std::cout << "Failed to open presets file " << presetsFile << std::endl;
+						std::cout << "Failed to open presets file " << presetsFile << '\n';
 						return -1;
 					}
 
@@ -144,7 +144,7 @@ int main(int _argc, char* _argv[])
 
 					if(presets.empty())
 					{
-						std::cout << "Presets file " << presetsFile << "  is empty" << std::endl;
+						std::cout << "Presets file " << presetsFile << "  is empty" << '\n';
 						return -1;
 					}
 
@@ -166,17 +166,17 @@ int main(int _argc, char* _argv[])
 				}
 			}
 		}
-		std::cout << "invalid command line arguments" << std::endl;
+		std::cout << "invalid command line arguments" << '\n';
 		return -1;
 	}
 	catch(const std::runtime_error& _err)
 	{
-		std::cout << _err.what() << std::endl;
+		std::cout << _err.what() << '\n';
 		return -1;
 	}
 }
 
-IntegrationTest::IntegrationTest(const CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, const virusLib::DeviceModel _tiModel)
+IntegrationTest::IntegrationTest(const baseLib::CommandLine& _commandLine, std::string _romFile, std::string _presetName, std::string _outputFolder, const virusLib::DeviceModel _tiModel)
 	: m_cmd(_commandLine)
 	, m_romFile(std::move(_romFile))
 	, m_presetName(std::move(_presetName))
@@ -189,13 +189,13 @@ int IntegrationTest::run()
 {
 	if (!m_app.isValid())
 	{
-		std::cout << "Failed to load ROM " << m_romFile << ", make sure that the ROM file is valid" << std::endl;
+		std::cout << "Failed to load ROM " << m_romFile << ", make sure that the ROM file is valid" << '\n';
 		return -1;
 	}
 
 	if (!m_app.loadSingle(m_presetName))
 	{
-		std::cout << "Failed to find preset '" << m_presetName << "', make sure to use a ROM that contains it" << std::endl;
+		std::cout << "Failed to find preset '" << m_presetName << "', make sure to use a ROM that contains it" << '\n';
 		return -1;
 	}
 
@@ -219,7 +219,7 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 	const auto hFile = fopen(_filename.c_str(), "rb");
 	if (!hFile)
 	{
-		std::cout << "Failed to load wav file " << _filename << " for comparison" << std::endl;
+		std::cout << "Failed to load wav file " << _filename << " for comparison" << '\n';
 		return false;
 	}
 	fseek(hFile, 0, SEEK_END);
@@ -228,7 +228,7 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 	fseek(hFile, 0, SEEK_SET);
 	if (fread(&_dst.file.front(), 1, size, hFile) != size)
 	{
-		std::cout << "Failed to read data from file " << _filename << std::endl;
+		std::cout << "Failed to read data from file " << _filename << '\n';
 		fclose(hFile);
 		return false;
 	}
@@ -238,19 +238,19 @@ bool IntegrationTest::loadAudioFile(File& _dst, const std::string& _filename) co
 
 	if (!synthLib::WavReader::load(_dst.data, nullptr, &_dst.file.front(), _dst.file.size()))
 	{
-		std::cout << "Failed to interpret file " << _filename << " as wave data, make sure that the file is a valid 24 bit stereo wav file" << std::endl;
+		std::cout << "Failed to interpret file " << _filename << " as wave data, make sure that the file is a valid 24 bit stereo wav file" << '\n';
 		return false;
 	}
 
 	if(_dst.data.samplerate != m_app.getRom().getSamplerate())
 	{
-		std::cout << "Wave file " << _filename << " does not have the correct samplerate, expected " << m_app.getRom().getSamplerate() << " but got " << _dst.data.samplerate << " instead" << std::endl;
+		std::cout << "Wave file " << _filename << " does not have the correct samplerate, expected " << m_app.getRom().getSamplerate() << " but got " << _dst.data.samplerate << " instead" << '\n';
 		return false;
 	}
 
 	if (_dst.data.bitsPerSample != 24 || _dst.data.channels != 2 || _dst.data.isFloat)
 	{
-		std::cout << "Wave file " << _filename << " has an invalid format, expected 24 bit / 2 channels but got " << _dst.data.bitsPerSample << " bit / " << _dst.data.channels << " channels" << std::endl;
+		std::cout << "Wave file " << _filename << " has an invalid format, expected 24 bit / 2 channels but got " << _dst.data.bitsPerSample << " bit / " << _dst.data.channels << " channels" << '\n';
 		return false;
 	}
 	return true;
@@ -278,7 +278,7 @@ int IntegrationTest::runCompare()
 
 		if(b != a)
 		{
-			std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << (i>>1) << ", ROM " << m_romFile << ", preset " << m_presetName << std::endl;
+			std::cout << "Test failed, audio output is not identical to reference file, difference starting at frame " << (i>>1) << ", ROM " << m_romFile << ", preset " << m_presetName << '\n';
 			return -2;
 		}
 
@@ -286,7 +286,7 @@ int IntegrationTest::runCompare()
 		ptrB += 3;
 	}
 
-	std::cout << "Test succeeded, compared " << sampleCount << " samples, ROM " << m_romFile << ", preset " << m_presetName << std::endl;
+	std::cout << "Test succeeded, compared " << sampleCount << " samples, ROM " << m_romFile << ", preset " << m_presetName << '\n';
 	return 0;
 }
 
@@ -306,7 +306,7 @@ int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, con
 
 	if(!hFile)
 	{
-		std::cout << "Failed to create output file " << filename << std::endl;
+		std::cout << "Failed to create output file " << filename << '\n';
 		return -1;
 	}
 
@@ -316,7 +316,7 @@ int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, con
 
 	if(!loadAudioFile(_dst, filename))
 	{
-		std::cout << "Failed to open written file " << filename << " for verification" << std::endl;
+		std::cout << "Failed to open written file " << filename << " for verification" << '\n';
 		return -1;
 	}
 
@@ -324,7 +324,7 @@ int IntegrationTest::createAudioFile(File& _dst, const std::string& _prefix, con
 
 	if(sampleCount != _sampleCount)
 	{
-		std::cout << "Verification of written file failed, expected " << _sampleCount << " samples but file only has " << sampleCount << " samples" << std::endl;
+		std::cout << "Verification of written file failed, expected " << _sampleCount << " samples but file only has " << sampleCount << " samples" << '\n';
 		return -1;
 	}
 	return 0;

@@ -10,6 +10,7 @@
 
 #include "mqLib/mqbuildconfig.h"
 
+#include "jucePluginEditorLib/filetype.h"
 #include "jucePluginEditorLib/focusedParameter.h"
 
 namespace mqJucePlugin
@@ -146,11 +147,11 @@ namespace mqJucePlugin
 		m_focusedParameter->onMouseEnter(_event);
 	}
 
-	void Editor::savePreset(const jucePluginEditorLib::FileType _type)
+	void Editor::savePreset(const jucePluginEditorLib::FileType& _type)
 	{
 		jucePluginEditorLib::Editor::savePreset([&](const juce::File& _file)
 		{
-			jucePluginEditorLib::FileType type = _type;
+			auto type = _type;
 			const auto file = createValidFilename(type, _file);
 
 			const auto part = m_controller.getCurrentPart();

@@ -355,7 +355,7 @@ namespace virusLib
 				// pack into sysex
 				std::vector<uint8_t>& sysex = _sysexPresets.emplace_back(std::vector<uint8_t>{0xf0, 0x00, 0x20, 0x33, 0x01, OMNI_DEVICE_ID, 0x10, 0x01, programIndex});
 				sysex.insert(sysex.end(), _data.begin() + pos, _data.begin() + pos + presetSize);
-				sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+				sysex.push_back(Microcontroller::calcChecksum(sysex));
 				sysex.push_back(0xf7);
 
 				++numFound;
@@ -410,10 +410,10 @@ namespace virusLib
 
 			for(size_t j=0; j<256; ++j)
 				sysex.push_back(preset[j]);
-			sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+			sysex.push_back(Microcontroller::calcChecksum(sysex));
 			for(size_t j=256; j<512; ++j)
 				sysex.push_back(preset[j]);
-			sysex.push_back(Microcontroller::calcChecksum(sysex, 5));
+			sysex.push_back(Microcontroller::calcChecksum(sysex));
 			sysex.push_back(0xf7);
 
 			++presetIdx;

@@ -4,6 +4,7 @@
 #include <vector>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "mqmiditypes.h"
 
@@ -89,9 +90,10 @@ namespace mqLib
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) const;
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type);
 
-		static void createSequencerMultiData(std::vector<uint8_t>& _data);
+		static bool setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name);
+		static bool setCategory(std::vector<uint8_t>& _sysex, const std::string& _name);
 
-	private:
+		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src)
 		{
@@ -123,6 +125,8 @@ namespace mqLib
 			c &= 0x7f;
 			return true;
 		}
+
+	private:
 
 		bool parseSingleDump(const SysEx& _data);
 		bool parseMultiDump(const SysEx& _data);

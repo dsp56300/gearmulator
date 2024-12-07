@@ -1,6 +1,7 @@
 #include "xtState.h"
 
 #include <cassert>
+#include <map>
 #include <set>
 
 #include "xtMidiTypes.h"
@@ -303,6 +304,40 @@ namespace xt
 	bool State::setState(const std::vector<uint8_t>& _state, synthLib::StateType _type)
 	{
 		return loadState(_state);
+	}
+
+	void State::process(const uint32_t _numSamples)
+	{
+		for (auto it = m_delayedCalls.begin(); it != m_delayedCalls.end();)
+		{
+			auto& delay = it->first;
+			auto& call = it->second;
+
+			delay -= static_cast<int32_t>(_numSamples);
+
+			if (delay <= 0)
+			{
+				call();
+				it = m_delayedCalls.erase(it);
+			}
+			else
+			{
+				++it;
+			}
+		}
+	}
+
+	bool State::setSingleName(std::vector<uint8_t>& _sysex, const std::string& _name)
+	{
+		if (_sysex.size() != std::tuple_size_v<Single>)
+			return false;
+
+		if (getCommand(_sysex) != SysexCommand::SingleDump)
+			return false;
+
+		for (size_t i=0; i<mw2::g_singleNameLength; ++i)
+			_sysex[i + mw2::g_singleNamePosition] = i >= _name.size() ? ' ' : _name[i];
+		return true;
 	}
 
 	TableId State::getWavetableFromSingleDump(const SysEx& _single)
@@ -725,12 +760,94 @@ namespace xt
 		return static_cast<SysexCommand>(_data[wLib::IdxCommand]);
 	}
 
-	void State::forwardToDevice(const SysEx& _data) const
+	void State::forwardToDevice(const SysEx& _data)
 	{
 		if(m_sender != Origin::External)
 			return;
 
 		sendSysex(_data);
+
+		switch (getCommand(_data))
+		{
+			case SysexCommand::WaveDump:
+				// there is an annoying bug in the XT
+				// A wave that is edited that is part of a table that is used in one of the current singles is not updated
+				// The workaround is to send a table dump with different waves and then the one with the correct waves
+				{
+					const auto waveId = WaveId(static_cast<uint16_t>((_data[IdxWaveIndexH] << 7) | _data[IdxWaveIndexL]));
+
+					std::set<TableId> dirtyTables;
+
+					auto checkTable = [&](const TableId _id)
+					{
+						if (wave::isReadOnly(_id))
+							return false;
+						const auto idx = _id.rawId();
+						if (idx >= m_tables.size())
+							return false;
+						if (dirtyTables.find(_id) != dirtyTables.end())
+							return true;
+						const auto& t = m_tables[idx];
+						if (!isValid(t))
+							return false;
+						TableData table;
+						if (!parseTableData(table, { t.begin(), t.end() }))
+							return false;
+						auto it = std::find(table.begin(), table.end(), waveId);
+						if (it == table.end())
+							return false;
+						dirtyTables.insert(_id);
+						return true;
+					};
+
+					if (isMultiMode())
+					{
+						for (auto& s : m_currentMultiSingles)
+						{
+							const auto tableId = getWavetableFromSingleDump({ s.begin(), s.end() });
+							checkTable(tableId);
+						}
+					}
+					else
+					{
+						const auto tableId = getWavetableFromSingleDump({m_currentInstrumentSingles.front().begin(), m_currentInstrumentSingles.front().end()});
+						checkTable(tableId);
+					}
+
+					for (const auto& tableId : dirtyTables)
+					{
+						const auto& originalTable = m_tables[tableId.rawId()];
+						SysEx originalTableSysex = SysEx(originalTable.begin(), originalTable.end());
+
+						TableData table;
+						parseTableData(table, originalTableSysex);
+
+						// modify table to use a different wave
+						for (auto& idx : table)
+						{
+							if (idx == waveId)
+								idx = WaveId(waveId.rawId() > 1000 ? 1000 : 1001);
+						}
+
+						// send the modified table to the device
+						auto modifiedTableSysex = createTableData(table, tableId.rawId(), false);
+
+						sendSysex(std::move(modifiedTableSysex));
+
+						// after a delay, send the original table again
+						constexpr auto delaySamples = static_cast<uint32_t>(40000 * 0.8f);
+
+						m_delayedCalls.emplace_back(delaySamples, [this, tableId]
+						{
+							const auto& t = m_tables[tableId.rawId()];
+							SysEx s = SysEx(t.begin(), t.end());
+							sendSysex(std::move(s));
+						});
+					}
+				}
+				break;
+		default:;
+		}
 	}
 
 	void State::requestGlobal() const
@@ -763,7 +880,7 @@ namespace xt
 			checksum += data[i];
 		data.push_back(checksum & 0x7f);
 		data.push_back(0xf7);
-		sendSysex(data);
+		sendSysex(std::move(data));
 	}
 
 	void State::sendGlobalParameter(GlobalParameter _param, uint8_t _value)
@@ -796,6 +913,13 @@ namespace xt
 	{
 		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
 		e.sysex = _data;
+		m_xt.sendMidiEvent(e);
+	}
+
+	void State::sendSysex(SysEx&& _data) const
+	{
+		synthLib::SMidiEvent e(synthLib::MidiEventSource::Internal);
+		e.sysex = std::move(_data);
 		m_xt.sendMidiEvent(e);
 	}
 
@@ -993,20 +1117,20 @@ namespace xt
 		return sysex;
 	}
 
-	void State::splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle)
+	bool State::splitCombinedPatch(std::vector<SysEx>& _dumps, const SysEx& _combinedSingle)
 	{
 		if(getCommand(_combinedSingle) != SysexCommand::SingleDump)
-			return;
+			return false;
 
 		constexpr auto singleSize = std::tuple_size_v<Single>;
 		constexpr auto tableSize = std::tuple_size_v<Table>;
 		constexpr auto waveSize = std::tuple_size_v<Wave>;
 
 		if(_combinedSingle.size() == singleSize)
-			return;
+			return false;
 
 		if(_combinedSingle.size() < singleSize + tableSize - 2)
-			return;
+			return false;
 
 		auto& single = _dumps.emplace_back();
 		size_t offBegin = 0;
@@ -1032,6 +1156,8 @@ namespace xt
 			wave.insert(wave.end(), _combinedSingle.begin() + static_cast<ptrdiff_t>(offBegin), _combinedSingle.begin() + static_cast<ptrdiff_t>(offEnd));
 			wave.push_back(0xf7);
 		}
+
+		return true;
 	}
 
 	SysEx State::createCombinedPatch(const std::vector<SysEx>& _dumps)

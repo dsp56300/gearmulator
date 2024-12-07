@@ -7,6 +7,8 @@
 
 #include "../pluginEditor.h"
 
+#include "jucePluginEditorLib/filetype.h"
+
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
 
@@ -156,15 +158,7 @@ namespace jucePluginEditorLib::patchManager
 				beginEdit();
 			});
 
-			auto fileTypeMenu = [this](const std::function<void(FileType)>& _func)
-			{
-				juce::PopupMenu menu;
-				menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
-				menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
-				return menu;
-			};
-
-			menu.addSubMenu("Export...", fileTypeMenu([this](const FileType _fileType)
+			menu.addSubMenu("Export...", getPatchManager().getEditor().createExportFileTypeMenu([this](const FileType& _fileType)
 			{
 				const auto s = getPatchManager().getSearch(getSearchHandle());
 				if(s)

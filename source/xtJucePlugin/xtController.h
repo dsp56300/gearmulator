@@ -1,8 +1,9 @@
 #pragma once
 
 #include "jucePluginLib/controller.h"
-
 #include "jucePluginLib/event.h"
+
+#include "xtLib/xtId.h"
 
 namespace xt
 {
@@ -129,5 +130,6 @@ namespace xtJucePlugin
 		uint32_t m_currentSingle = 0;
 		xtJucePlugin::FrontPanel* m_frontPanel = nullptr;
 		xtJucePlugin::WaveEditor* m_waveEditor = nullptr;
+		std::set<xt::TableId> m_requestWavesForTables;
 	};
 }
