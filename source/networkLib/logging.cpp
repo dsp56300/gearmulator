@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <cstdint>
+
 namespace networkLib
 {
 	constexpr const char* g_logLevelNames[] =
