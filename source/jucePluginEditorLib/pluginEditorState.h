@@ -5,6 +5,8 @@
 #include <string>
 #include <vector>
 
+#include "client/serverList.h"
+
 #include "skin.h"
 
 #include "jucePluginLib/parameterbinding.h"
@@ -84,5 +86,7 @@ namespace jucePluginEditorLib
 		float m_rootScale = 1.0f;
 		std::vector<Skin> m_includedSkins;
 		std::vector<uint8_t> m_instanceConfig;
+		std::string m_skinFolderName;
+		bridgeClient::ServerList m_remoteServerList;
 	};
 }

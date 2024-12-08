@@ -11,9 +11,18 @@
 #include "dsp56kEmu/logging.h"
 
 namespace jucePluginEditorLib
+
 {
+bridgeLib::PluginDesc getPluginDesc(const pluginLib::Processor& _p)
+{
+	bridgeLib::PluginDesc pd;
+	_p.getPluginDesc(pd);
+	return pd;
+}
+
 PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controller& _controller, std::vector<Skin> _includedSkins)
 	: m_processor(_processor), m_parameterBinding(_controller), m_includedSkins(std::move(_includedSkins))
+	, m_remoteServerList(getPluginDesc(_processor))
 {
 	juce::File(getSkinFolder()).createDirectory();
 
@@ -302,9 +311,46 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	latencyMenu.addItem("4", true, latency == 4, [this, adjustLatency] { adjustLatency(4); });
 	latencyMenu.addItem("8", true, latency == 8, [this, adjustLatency] { adjustLatency(8); });
 
+	auto servers = m_remoteServerList.getEntries();
+
+	juce::PopupMenu deviceTypeMenu;
+	deviceTypeMenu.addItem("Local (default)", true, m_processor.getDeviceType() == pluginLib::DeviceType::Local, [this] { m_processor.setDeviceType(pluginLib::DeviceType::Local); });
+
+	if(servers.empty())
+	{
+		deviceTypeMenu.addItem("- no servers found -", false, false, [this] {});
+	}
+	else
+	{
+		for (const auto & server : servers)
+		{
+			if(server.err.code == bridgeLib::ErrorCode::Ok)
+			{
+				std::string name = server.host + ':' + std::to_string(server.serverInfo.portTcp);
+
+				const auto isSelected = m_processor.getDeviceType() == pluginLib::DeviceType::Remote && 
+					m_processor.getRemoteDeviceHost() == server.host && 
+					m_processor.getRemoteDevicePort() == server.serverInfo.portTcp;
+
+				deviceTypeMenu.addItem(name, true, isSelected, [this, server]
+				{
+					m_processor.setRemoteDevice(server.host, server.serverInfo.portTcp);
+				});
+			}
+			else
+			{
+				std::string name = server.host + " (error " + std::to_string(static_cast<uint32_t>(server.err.code)) + ", " + server.err.msg + ')';
+				deviceTypeMenu.addItem(name, false, false, [this] {});
+			}
+		}
+	}
+
 	menu.addSubMenu("GUI Skin", skinMenu);
 	menu.addSubMenu("GUI Scale", scaleMenu);
 	menu.addSubMenu("Latency (blocks)", latencyMenu);
+
+	if (m_processor.getConfig().getBoolValue("supportDspBridge", false))
+		menu.addSubMenu("Device Type", deviceTypeMenu);
 
 	menu.addSeparator();
 

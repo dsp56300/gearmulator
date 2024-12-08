@@ -8,6 +8,7 @@
 #include "jucePluginLib/processorPropertiesInit.h"
 
 #include "mqLib/device.h"
+#include "mqLib/romloader.h"
 
 namespace
 {
@@ -52,7 +53,20 @@ namespace mqJucePlugin
 	}
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		return new mqLib::Device();
+		return new mqLib::Device({});
+	}
+
+	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		Processor::getRemoteDeviceParams(_params);
+
+		const auto rom = mqLib::RomLoader::findROM();
+
+		if(rom.isValid())
+		{
+			_params.romData = rom.getData();
+			_params.romName = rom.getFilename();
+		}
 	}
 
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()

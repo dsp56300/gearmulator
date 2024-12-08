@@ -21,6 +21,14 @@ namespace n2x
 		m_filename = _filename;
 	}
 
+	template <uint32_t Size> RomData<Size>::RomData(const std::vector<uint8_t>& _data, const std::string& _filename)
+	{
+		if(_data.size() != MySize)
+			return;
+		m_data = _data;
+		m_filename = _filename;
+	}
+
 	template <uint32_t Size> void RomData<Size>::saveAs(const std::string& _filename) const
 	{
 		synthLib::writeFile(_filename, m_data);

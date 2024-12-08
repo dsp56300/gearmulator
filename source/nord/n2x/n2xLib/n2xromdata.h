@@ -13,6 +13,7 @@ namespace n2x
 		static constexpr uint32_t MySize = Size;
 		RomData();
 		RomData(const std::string& _filename);
+		RomData(const std::vector<uint8_t>& _data, const std::string& _filename);
 
 		bool isValid() const { return !m_filename.empty(); }
 		const auto& data() const { return m_data; }

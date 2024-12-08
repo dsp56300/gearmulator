@@ -13,9 +13,20 @@
 
 namespace mqLib
 {
-	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/)
+	ROM initRom(const std::vector<uint8_t>& _romData, const std::string& _romName)
 	{
-		const auto romFile = RomLoader::findROM();
+		if(_romData.empty())
+			return RomLoader::findROM();
+		ROM rom(_romData, _romName);
+		if(rom.isValid())
+			return rom;
+		return RomLoader::findROM();
+	}
+
+	MicroQ::MicroQ(BootMode _bootMode/* = BootMode::Default*/, const std::vector<uint8_t>& _romData, const std::string& _romName)
+	{
+		const ROM romFile = initRom(_romData, _romName);
+
 		if(!romFile.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "Failed to find device operating system file mq_2_23.mid.");
 

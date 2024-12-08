@@ -121,14 +121,15 @@ namespace baseLib
 			_h3 += d;
 
 		}
-
-		// cleanup
-	//    free(msg); 
 	}
 
-	MD5::MD5(const std::vector<uint8_t>& _data)
+	MD5::MD5(const std::vector<uint8_t>& _data) : MD5(_data.data(), static_cast<uint32_t>(_data.size()))
 	{
-		md5(m_h[0], m_h[1], m_h[2], m_h[3], _data.data(), static_cast<uint32_t>(_data.size()));
+	}
+
+	MD5::MD5(const uint8_t* _data, const uint32_t _size)
+	{
+		md5(m_h[0], m_h[1], m_h[2], m_h[3], _data, _size);
 	}
 
 	std::string MD5::toString() const

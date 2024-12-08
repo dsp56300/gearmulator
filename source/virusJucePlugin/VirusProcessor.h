@@ -5,8 +5,6 @@
 
 #include "jucePluginLib/event.h"
 
-#include "VirusController.h"
-
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 namespace virus
@@ -60,6 +58,7 @@ namespace virus
 		//
 	private:
 	    synthLib::Device* createDevice() override;
+		void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const override;
 
 	    pluginLib::Controller* createController() override;
 

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <mutex>
+#include <functional>
 
 #include "midiTypes.h"
 #include "resamplerInOut.h"
@@ -18,7 +19,9 @@ namespace synthLib
 	class Plugin
 	{
 	public:
-		Plugin(Device* _device);
+		using CallbackDeviceInvalid = std::function<Device*(Device*)>;
+
+		Plugin(Device* _device, CallbackDeviceInvalid _callbackDeviceInvalid);
 
 		void addMidiEvent(const SMidiEvent& _ev);
 
@@ -42,7 +45,7 @@ namespace synthLib
 
 #if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, StateType _type) const;
-		bool setState(const std::vector<uint8_t>& _state);
+		bool setState(const std::vector<uint8_t>& _state) const;
 #endif
 		void insertMidiEvent(const SMidiEvent& _ev);
 
@@ -63,7 +66,7 @@ namespace synthLib
 		SMidiEvent m_pendingSysexInput;
 
 		ResamplerInOut m_resampler;
-		mutable std::mutex m_lock;
+		mutable std::recursive_mutex m_lock;
 		mutable std::mutex m_lockAddMidiEvent;
 
 		Device* m_device;
@@ -83,5 +86,6 @@ namespace synthLib
 		uint32_t m_extraLatencyBlocks = 1;
 
 		float m_deviceSamplerate = 0.0f;
+		CallbackDeviceInvalid m_callbackDeviceInvalid;
 	};
 }

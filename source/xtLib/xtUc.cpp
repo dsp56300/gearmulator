@@ -17,7 +17,7 @@ namespace xt
 		if(!_rom.isValid())
 			return;
 
-		memcpy(m_romRuntimeData.data(), _rom.getData(), g_romSize);
+		memcpy(m_romRuntimeData.data(), _rom.getData().data(), g_romSize);
 		m_memory.fill(0);
 
 //		dumpAssembly("xt_68k.asm", g_romAddr, g_romSize);

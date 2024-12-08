@@ -5,13 +5,11 @@
 
 namespace n2x
 {
-	Device::Device() : m_state(&m_hardware, &getMidiTranslator())
+	Device::Device(const synthLib::DeviceCreateParams& _params)
+		: synthLib::Device(_params)
+		, m_hardware(_params.romData, _params.romName)
+		, m_state(&m_hardware, &getMidiTranslator())
 	{
-	}
-
-	const std::string& Device::getRomFilename() const
-	{
-		return m_hardware.getRomFilename();
 	}
 
 	float Device::getSamplerate() const

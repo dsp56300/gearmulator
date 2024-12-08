@@ -11,11 +11,12 @@ namespace synthLib
 {
 	constexpr uint8_t g_stateVersion = 1;
 
-	Plugin::Plugin(Device* _device)
+	Plugin::Plugin(Device* _device, CallbackDeviceInvalid _callbackDeviceInvalid)
 	: m_resampler(_device->getChannelCountIn(), _device->getChannelCountOut())
 	, m_device(_device)
-	, m_deviceSamplerate(_device->getSamplerate())
 	, m_midiClock(*this)
+	, m_deviceSamplerate(_device->getSamplerate())
+	, m_callbackDeviceInvalid(std::move(_callbackDeviceInvalid))
 	{
 	}
 
@@ -37,7 +38,7 @@ namespace synthLib
 
 		const auto sr = m_device->getDeviceSamplerate(_samplerate, m_hostSamplerate);
 
-		if(sr == m_deviceSamplerate)
+		if(sr == m_deviceSamplerate)  // NOLINT(clang-diagnostic-float-equal)
 			return true;
 
 		if(!m_device->setSamplerate(sr))
@@ -50,16 +51,16 @@ namespace synthLib
 		return true;
 	}
 
-	void Plugin::setHostSamplerate(const float _samplerate, float _preferredDeviceSamplerate)
+	void Plugin::setHostSamplerate(const float _hostSamplerate, const float _preferredDeviceSamplerate)
 	{
 		std::lock_guard lock(m_lock);
 
-		m_deviceSamplerate = m_device->getDeviceSamplerate(_preferredDeviceSamplerate, _samplerate);
+		m_deviceSamplerate = m_device->getDeviceSamplerate(_preferredDeviceSamplerate, _hostSamplerate);
 		m_device->setSamplerate(m_deviceSamplerate);
-		m_resampler.setSamplerates(_samplerate, m_deviceSamplerate);
+		m_resampler.setSamplerates(_hostSamplerate, m_deviceSamplerate);
 
-		m_hostSamplerate = _samplerate;
-		m_hostSamplerateInv = _samplerate > 0 ? 1.0f / _samplerate : 0.0f;
+		m_hostSamplerate = _hostSamplerate;
+		m_hostSamplerateInv = _hostSamplerate > 0 ? 1.0f / _hostSamplerate : 0.0f;
 
 		updateDeviceLatency();
 	}
@@ -80,7 +81,12 @@ namespace synthLib
 		std::lock_guard lock(m_lock);
 
 		if(!m_device->isValid())
-			return;
+		{
+			m_device = m_callbackDeviceInvalid(m_device);
+
+			if(!m_device || !m_device->isValid())
+				return;
+		}
 
 		processMidiInEvents();
 		processMidiClock(_bpm, _ppqPos, _isPlaying, _count);
@@ -120,7 +126,8 @@ namespace synthLib
 		m_device = _device;
 
 		m_device->setSamplerate(m_deviceSamplerate);
-		setState(deviceState);
+		if(!deviceState.empty())
+			setState(deviceState);
 
 		// MIDI clock has to send the start event again, some device find it confusing and do strange things if there isn't any
 		m_midiClock.restart();
@@ -140,7 +147,7 @@ namespace synthLib
 		return m_device->getState(_state, _type);
 	}
 
-	bool Plugin::setState(const std::vector<uint8_t>& _state)
+	bool Plugin::setState(const std::vector<uint8_t>& _state) const
 	{
 		if(!m_device)
 			return false;

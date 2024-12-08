@@ -12,6 +12,8 @@ namespace wLib
 {
 	class Device : public synthLib::Device
 	{
+	public:
+		explicit Device(const synthLib::DeviceCreateParams& _params);
 		bool setDspClockPercent(uint32_t _percent) override;
 		uint32_t getDspClockPercent() const override;
 		uint64_t getDspClockHz() const override;

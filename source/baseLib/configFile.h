@@ -1,20 +1,13 @@
 #pragma once
 
-#include <string>
-#include <vector>
+#include "propertyMap.h"
 
 namespace baseLib
 {
-	class ConfigFile
+	class ConfigFile : public PropertyMap
 	{
 	public:
 		explicit ConfigFile(const char* _filename);
-
-		const std::vector<std::pair<std::string, std::string>>& getValues() const
-		{
-			return m_values;
-		}
-	private:
-		std::vector<std::pair<std::string, std::string>> m_values;
+		explicit ConfigFile(const std::string& _filename);
 	};
 }

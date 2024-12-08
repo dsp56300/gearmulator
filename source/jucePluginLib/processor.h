@@ -7,7 +7,19 @@
 #include "controller.h"
 #include "midiports.h"
 
+#include "bridgeLib/types.h"
+
 #include "synthLib/plugin.h"
+
+namespace bridgeClient
+{
+	class RemoteDevice;
+}
+
+namespace bridgeLib
+{
+	struct PluginDesc;
+}
 
 namespace baseLib
 {
@@ -17,6 +29,7 @@ namespace baseLib
 
 namespace synthLib
 {
+	struct DeviceCreateParams;
 	class Plugin;
 	struct SMidiEvent;
 }
@@ -42,6 +55,7 @@ namespace pluginLib
 			const bool wantsMidiInput;
 			const bool producesMidiOut;
 			const bool isMidiEffect;
+			const std::string plugin4CC;
 			const std::string lv2Uri;
 			BinaryDataRef binaryData;
 		};
@@ -59,6 +73,10 @@ namespace pluginLib
 		synthLib::Plugin& getPlugin();
 
 		virtual synthLib::Device* createDevice() = 0;
+		virtual bridgeClient::RemoteDevice* createRemoteDevice(const synthLib::DeviceCreateParams& _params);
+		virtual void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const;
+		virtual bridgeClient::RemoteDevice* createRemoteDevice();
+		synthLib::Device* createDevice(DeviceType _type);
 
 		bool hasController() const
 		{
@@ -129,6 +147,15 @@ namespace pluginLib
 		std::string getConfigFile(bool _useFxFolder = false) const;
 		std::string getProductName(bool _useFxName = false) const;
 
+		void getPluginDesc(bridgeLib::PluginDesc& _desc) const;
+
+		void setDeviceType(DeviceType _type, bool _forceChange = false);
+		void setRemoteDevice(const std::string& _host, uint32_t _port);
+		const auto& getRemoteDeviceHost() const { return m_remoteHost; }
+		const auto& getRemoteDevicePort() const { return m_remotePort; }
+
+		auto getDeviceType() const { return m_deviceType; }
+
 	protected:
 		void destroyController();
 
@@ -169,6 +196,8 @@ namespace pluginLib
 
 		synthLib::DeviceError getDeviceError() const { return m_deviceError; }
 
+		synthLib::Device* onDeviceInvalid(synthLib::Device* _device);
+
 	protected:
 		synthLib::DeviceError m_deviceError = synthLib::DeviceError::None;
 		std::unique_ptr<synthLib::Device> m_device;
@@ -184,5 +213,9 @@ namespace pluginLib
 		float m_hostSamplerate = 0.0f;
 		MidiPorts m_midiPorts;
 		BypassBuffer m_bypassBuffer;
+		DeviceType m_deviceType = DeviceType::Local;
+		std::string m_remoteHost;
+		uint32_t m_remotePort = 0;
+		bridgeLib::SessionId m_remoteSessionId;
 	};
 }

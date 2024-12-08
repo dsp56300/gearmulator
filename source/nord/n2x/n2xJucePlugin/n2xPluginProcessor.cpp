@@ -8,6 +8,7 @@
 #include "jucePluginLib/processorPropertiesInit.h"
 
 #include "n2xLib/n2xdevice.h"
+#include "n2xLib/n2xromloader.h"
 
 #include "synthLib/deviceException.h"
 
@@ -51,10 +52,23 @@ namespace n2xJucePlugin
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		auto* d = new n2x::Device();
+		auto* d = new n2x::Device({});
 		if(!d->isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A firmware rom (512k .bin) is required, but was not found.");
 		return d;
+	}
+
+	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		Processor::getRemoteDeviceParams(_params);
+
+		auto rom = n2x::RomLoader::findROM();
+
+		if(rom.isValid())
+		{
+			_params.romData.assign(rom.data().begin(), rom.data().end());
+			_params.romName = rom.getFilename();
+		}
 	}
 
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()

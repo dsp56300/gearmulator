@@ -1,8 +1,7 @@
 #include "VirusProcessor.h"
 #include "VirusEditorState.h"
 #include "ParameterNames.h"
-
-#include "virusLib/romloader.h"
+#include "VirusController.h"
 
 #include "baseLib/binarystream.h"
 
@@ -48,7 +47,7 @@ namespace virus
 
 		try
 		{
-			synthLib::Device* device = createDevice();
+			synthLib::Device* device = pluginLib::Processor::createDevice(getDeviceType());
 			getPlugin().setDevice(device);
 			(void)m_device.release();
 			m_device.reset(device);
@@ -86,6 +85,15 @@ namespace virus
 
 	synthLib::Device* VirusProcessor::createDevice()
 	{
+		synthLib::DeviceCreateParams p;
+		getRemoteDeviceParams(p);
+		return new virusLib::Device(p, true);
+	}
+
+	void VirusProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		pluginLib::Processor::getRemoteDeviceParams(_params);
+
 		const auto* rom = getSelectedRom();
 
 		if(!rom || !rom->isValid())
@@ -94,7 +102,10 @@ namespace virus
 				throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A Virus TI firmware (.bin) is required, but was not found.");
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing, "A Virus A/B/C operating system (.bin or .mid) is required, but was not found.");
 		}
-		return new virusLib::Device(*rom, getPreferredDeviceSamplerate(), getHostSamplerate(), true);
+
+		_params.romName = rom->getFilename();
+		_params.romData = rom->getRomFileData();
+		_params.customData = static_cast<uint32_t>(rom->getModel());
 	}
 
 	pluginLib::Controller* VirusProcessor::createController()

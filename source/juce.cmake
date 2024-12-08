@@ -33,6 +33,9 @@ if(USE_LV2)
     list(APPEND juce_formats LV2)
 endif()
 
+add_custom_target(ServerPlugins)
+set_property(TARGET ServerPlugins PROPERTY FOLDER CustomTargets)
+
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject synthLibProject)
 	juce_add_plugin(${targetName}
 		# VERSION ...                                     # Set this if the plugin version is different to the project version
@@ -58,7 +61,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		LV2URI "http://theusualsuspects.lv2.${productName}"
 	)
 
-	target_sources(${targetName} PRIVATE ${SOURCES})
+	target_sources(${targetName} PRIVATE ${SOURCES} serverPlugin.cpp)
 
 	source_group("source" FILES ${SOURCES})
 
@@ -74,6 +77,12 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		JUCE_USE_MP3AUDIOFORMAT=0
 		JUCE_USE_FLAC=0
 		JUCE_USE_WINDOWS_MEDIA_FORMAT=0
+		
+		PluginName="${productName}"
+		PluginVersionMajor=${CMAKE_PROJECT_VERSION_MAJOR}
+		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
+		PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
+		Plugin4CC="${plugin4CC}"
 	)
 
 	target_link_libraries(${targetName}
@@ -196,6 +205,50 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			-P ${JUCE_CMAKE_DIR}/runAuValidation.cmake)
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
 	endif()
+
+	# --------- Server Plugin ---------
+
+	set(serverTarget ${productName}ServerPlugin)
+
+	add_library(${serverTarget} SHARED)
+
+	target_compile_definitions(${serverTarget} PUBLIC 
+		PluginName="${productName}"
+		PluginVersionMajor=${CMAKE_PROJECT_VERSION_MAJOR}
+		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
+		PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
+		Plugin4CC="${plugin4CC}"
+	)
+	target_sources(${serverTarget} PRIVATE serverPlugin.cpp)
+	target_link_libraries(${serverTarget} ${synthLibProject} bridgeClient)
+	set_property(TARGET ${serverTarget} PROPERTY FOLDER ${targetName})
+
+	# build plugins to the "plugins" dir of the server binary output dir
+	get_target_property(serverOutputDir bridgeServer BINARY_DIR)
+
+	if(NOT serverOutputDir)
+		get_target_property(serverOutputDir bridgeServer RUNTIME_OUTPUT_DIRECTORY)
+	endif()
+	
+	if(serverOutputDir)
+		set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
+		set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY "${serverOutputDir}/plugins")
+
+		get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+		
+		if(isMultiConfig)
+			set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
+			set_property(TARGET ${serverTarget} PROPERTY RUNTIME_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
+			set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_DEBUG "${serverOutputDir}/Debug/plugins")
+			set_property(TARGET ${serverTarget} PROPERTY LIBRARY_OUTPUT_DIRECTORY_RELEASE "${serverOutputDir}/Release/plugins")
+		endif()
+	endif()
+
+	install(TARGETS ${serverTarget} 
+		RUNTIME DESTINATION plugins/ COMPONENT DSPBridgeServer 
+		LIBRARY DESTINATION plugins/ COMPONENT DSPBridgeServer)
+
+	add_dependencies(ServerPlugins ${serverTarget})
 endmacro()
 
 macro(createJucePluginWithFX targetName productName plugin4CCSynth plugin4CCFX binaryDataProject synthLibProject)

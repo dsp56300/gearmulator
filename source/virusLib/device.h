@@ -19,11 +19,11 @@ namespace virusLib
 	class Device final : public synthLib::Device
 	{
 	public:
-		Device(ROMFile _rom, float _preferredDeviceSamplerate, float _hostSamplerate, bool _createDebugger = false);
+		Device(const synthLib::DeviceCreateParams& _params, bool _createDebugger = false);
 		~Device() override;
 
-		std::vector<float> getSupportedSamplerates() const override;
-		std::vector<float> getPreferredSamplerates() const override;
+		void getSupportedSamplerates(std::vector<float>& _dst) const override;
+		void getPreferredSamplerates(std::vector<float>& _dst) const override;
 		float getSamplerate() const override;
 		bool setSamplerate(float _samplerate) override;
 

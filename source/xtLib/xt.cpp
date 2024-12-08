@@ -11,9 +11,9 @@
 
 namespace xt
 {
-	Xt::Xt()
+	Xt::Xt(const std::vector<uint8_t>& _romData, const std::string& _romName)
 	{
-		m_hw.reset(new Hardware());
+		m_hw.reset(new Hardware(_romData, _romName));
 
 		if(!isValid())
 			return;

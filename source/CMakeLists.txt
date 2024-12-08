@@ -39,6 +39,12 @@ add_subdirectory(libresample)
 include(macsetup.cmake)
 include(skins.cmake)
 
+# ----------------- network bridge
+
+add_subdirectory(ptypes EXCLUDE_FROM_ALL)
+add_subdirectory(networkLib EXCLUDE_FROM_ALL)
+add_subdirectory(bridge)
+
 # ----------------- Try to install VST2 SDK
 
 include(findvst2.cmake)

@@ -12,7 +12,7 @@ int main()
 {
 //	dsp56k::JitUnittests tests;
 
-	const std::unique_ptr uc(std::make_unique<xt::Xt>());
+	const std::unique_ptr uc(std::make_unique<xt::Xt>(std::vector<uint8_t>(), std::string()));
 
 	constexpr uint32_t blockSize = 64;
 	std::vector<dsp56k::TWord> stereoOutput;

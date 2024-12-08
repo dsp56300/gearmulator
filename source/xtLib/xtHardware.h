@@ -19,8 +19,8 @@ namespace xt
 		static constexpr uint32_t g_dspCount = 1;
 
 	public:
-		explicit Hardware();
-		virtual ~Hardware();
+		explicit Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName);
+		~Hardware() override;
 
 		void process();
 

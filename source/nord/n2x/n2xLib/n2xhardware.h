@@ -13,7 +13,7 @@ namespace n2x
 	{
 	public:
 		using AudioOutputs = std::array<std::vector<dsp56k::TWord>, 4>;
-		Hardware();
+		Hardware(const std::vector<uint8_t>& _romData = {}, const std::string& _romName = {});
 		~Hardware();
 
 		bool isValid() const;

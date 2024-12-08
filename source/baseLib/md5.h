@@ -47,6 +47,7 @@ namespace baseLib
 		}
 
 		explicit MD5(const std::vector<uint8_t>& _data);
+		explicit MD5(const uint8_t* _data, uint32_t _size);
 
 		MD5() : m_h({0,0,0,0}) {}
 

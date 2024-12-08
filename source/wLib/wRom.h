@@ -10,14 +10,14 @@ namespace wLib
 	{
 	public:
 		ROM() = default;
-		explicit ROM(const std::string& _filename, const uint32_t _expectedSize, std::vector<uint8_t> _data = {}) : m_buffer(std::move(_data))
+		explicit ROM(const std::string& _filename, const uint32_t _expectedSize, std::vector<uint8_t> _data = {}) : m_buffer(std::move(_data)), m_filename(_filename)
 		{
 			if (m_buffer.size() != _expectedSize)
 				loadFromFile(_filename, _expectedSize);
 		}
 		virtual ~ROM() = default;
 
-		const uint8_t* getData() const { return m_buffer.data(); }
+		const auto& getData() const { return m_buffer; }
 		bool isValid() const { return !m_buffer.empty(); }
 		virtual uint32_t getSize() const = 0;
 

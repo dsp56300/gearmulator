@@ -4,27 +4,30 @@
 
 namespace baseLib
 {
-	static bool needsTrim(char _c)
+	namespace
 	{
-		switch (_c)
+		bool needsTrim(const char _c)
 		{
-		case ' ':
-		case '\r':
-		case '\n':
-		case '\t':
-			return true;
-		default:
-			return false;
+			switch (_c)
+			{
+			case ' ':
+			case '\r':
+			case '\n':
+			case '\t':
+				return true;
+			default:
+				return false;
+			}
 		}
-	}
 
-	static std::string trim(std::string _s)
-	{
-		while (!_s.empty() && needsTrim(_s.front()))
-			_s = _s.substr(1);
-		while (!_s.empty() && needsTrim(_s.back()))
-			_s = _s.substr(0, _s.size() - 1);
-		return _s;
+		std::string trim(std::string _s)
+		{
+			while (!_s.empty() && needsTrim(_s.front()))
+				_s = _s.substr(1);
+			while (!_s.empty() && needsTrim(_s.back()))
+				_s = _s.substr(0, _s.size() - 1);
+			return _s;
+		}
 	}
 
 	ConfigFile::ConfigFile(const char* _filename)
@@ -32,7 +35,7 @@ namespace baseLib
 		std::ifstream file(_filename, std::ios::in);
 
 		if (!file.is_open())
-			throw std::runtime_error("Failed to open config file " + std::string(_filename));
+			return;
 
 		std::string line;
 
@@ -53,7 +56,11 @@ namespace baseLib
 			const auto key = trim(line.substr(0, posEq));
 			const auto val = trim(line.substr(posEq + 1));
 
-			m_values.emplace_back(key, val);
+			add(key, val);
 		}
+	}
+
+	ConfigFile::ConfigFile(const std::string& _filename) : ConfigFile(_filename.c_str())
+	{
 	}
 }

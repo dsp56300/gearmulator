@@ -23,7 +23,7 @@ namespace mqLib
 	class MicroQ
 	{
 	public:
-		MicroQ(BootMode _bootMode = BootMode::Default);
+		MicroQ(BootMode _bootMode = BootMode::Default, const std::vector<uint8_t>& _romData = {}, const std::string& _romName = {});
 		~MicroQ();
 
 		// returns true if the instance is valid, false if the initialization failed

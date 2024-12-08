@@ -12,7 +12,9 @@ namespace synthLib
 	{
 		Invalid = -1,
 		None = 0,
-		Unknown = 1,
-		FirmwareMissing = 2,
+		Unknown,
+		FirmwareMissing,
+		RemoteUdpConnectFailed,
+		RemoteTcpConnectFailed,
 	};
 }

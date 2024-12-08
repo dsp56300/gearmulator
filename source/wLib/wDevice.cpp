@@ -4,7 +4,11 @@
 
 namespace wLib
 {
-	bool Device::setDspClockPercent(uint32_t _percent)
+	Device::Device(const synthLib::DeviceCreateParams& _params): synthLib::Device(_params)
+	{
+	}
+
+	bool Device::setDspClockPercent(const uint32_t _percent)
 	{
 		auto* c = getDspEsxiClock();
 		if(!c)

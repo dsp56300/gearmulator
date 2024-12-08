@@ -103,6 +103,8 @@ namespace baseLib
 			return !eof();
 		}
 
+		auto& getVector() { return m_vector; }
+
 	private:
 		size_t size() const					{ return m_fixedSize ? m_size : m_vector.size(); }
 
@@ -146,6 +148,10 @@ namespace baseLib
 		using StreamBuffer::operator bool;
 
 		explicit BinaryStream(BinaryStream& _parent, SizeType _length) : StreamBuffer(_parent, _length)
+		{
+		}
+
+		explicit BinaryStream(const size_t _capacity) : StreamBuffer(_capacity)
 		{
 		}
 
@@ -208,6 +214,8 @@ namespace baseLib
 
 		void setWritePos(const uint32_t _pos)	{ seekp(_pos); }
 		void setReadPos(const uint32_t _pos)	{ seekg(_pos); }
+		
+		using StreamBuffer::getVector;
 
 		// ___________________________________
 		// write
