@@ -76,22 +76,16 @@ int main(int _argc, char* _argv[])
 	std::string devNameMidiOut;
 	std::string devNameAudioOut;
 
-	try
+	baseLib::ConfigFile cfg((synthLib::getModulePath() + "config.cfg").c_str());
+
+	for (const auto& v : cfg.getArgsWithValues())
 	{
-		baseLib::ConfigFile cfg((synthLib::getModulePath() + "config.cfg").c_str());
-		for (const auto& v : cfg.getValues())
-		{
-			if(v.first == "MidiIn")
-				devNameMidiIn = v.second;
-			else if(v.first == "MidiOut")
-				devNameMidiOut = v.second;
-			else if(v.first == "AudioOut")
-				devNameAudioOut = v.second;
-		}
-	}
-	catch(const std::runtime_error&)
-	{
-		// no config file available
+		if(v.first == "MidiIn")
+			devNameMidiIn = v.second;
+		else if(v.first == "MidiOut")
+			devNameMidiOut = v.second;
+		else if(v.first == "AudioOut")
+			devNameAudioOut = v.second;
 	}
 
 	bool settingsChanged = false;

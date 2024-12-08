@@ -16,7 +16,7 @@ namespace xt
 	class Device : public wLib::Device
 	{
 	public:
-		Device();
+		Device(const synthLib::DeviceCreateParams& _params);
 
 		float getSamplerate() const override;
 		bool isValid() const override;

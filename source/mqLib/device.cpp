@@ -7,7 +7,11 @@
 
 namespace mqLib
 {
-	Device::Device() : m_mq(BootMode::Default), m_state(m_mq), m_sysexRemote(m_mq)
+	Device::Device(const synthLib::DeviceCreateParams& _params)
+		: wLib::Device(_params)
+		, m_mq(BootMode::Default, _params.romData, _params.romName)
+		, m_state(m_mq)
+		, m_sysexRemote(m_mq)
 	{
 		// we need to hit the play button to resume boot if the used rom is an OS update. mQ will complain about an uninitialized ROM area in this case
 		m_mq.setButton(Buttons::ButtonType::Play, true);

@@ -22,6 +22,8 @@
 
 #include "dsp56kEmu/logging.h"
 
+#include "synthLib/os.h"
+
 #if JUCE_MAJOR_VERSION < 8	// they forgot this include but fixed it in version 8+
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
 #endif
@@ -760,9 +762,11 @@ namespace jucePluginEditorLib::patchManager
 			if(!loadFile(results, file) || results.empty())
 				continue;
 
+			const auto defaultName = results.size() == 1 ? synthLib::stripExtension(synthLib::getFilenameWithoutPath(file)) : "";
+
 			for (auto& result : results)
 			{
-				if(const auto patch = initializePatch(std::move(result)))
+				if(const auto patch = initializePatch(std::move(result), defaultName))
 					patches.push_back(patch);
 			}
 		}
@@ -825,7 +829,7 @@ namespace jucePluginEditorLib::patchManager
 		pluginLib::patchDB::Data data;
 		if(!requestPatchForPart(data, _part, 0))
 			return;
-		const auto patch = initializePatch(std::move(data));
+		const auto patch = initializePatch(std::move(data), {});
 		if(!patch)
 			return;
 		updateStateAsync(_part, patch);
@@ -1034,7 +1038,7 @@ namespace jucePluginEditorLib::patchManager
 
 		for (auto& result : data.sysex)
 		{
-			if(const auto patch = initializePatch(std::move(result)))
+			if(const auto patch = initializePatch(std::move(result), {}))
 				patches.push_back(patch);
 		}
 

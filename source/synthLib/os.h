@@ -25,6 +25,7 @@ namespace synthLib
 	std::string findROM(size_t _expectedSize = 524288);
 
 	std::string getExtension(const std::string& _name);
+	std::string stripExtension(const std::string& _name);
 	std::string getFilenameWithoutPath(const std::string& _name);
 	std::string getPath(const std::string& _filename);
 

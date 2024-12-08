@@ -1,5 +1,6 @@
 #include "Leds.h"
 
+#include "VirusController.h"
 #include "VirusEditor.h"
 
 #include "VirusProcessor.h"

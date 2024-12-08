@@ -12,8 +12,18 @@ namespace n2x
 	static_assert((g_syncEsaiFrameRate & (g_syncEsaiFrameRate - 1)) == 0, "esai frame sync rate must be power of two");
 	static_assert(g_syncHaltDspEsaiThreshold >= g_syncEsaiFrameRate * 2, "esai DSP halt threshold must be greater than two times the sync rate");
 
-	Hardware::Hardware()
-		: m_rom(RomLoader::findROM())
+	Rom initRom(const std::vector<uint8_t>& _romData, const std::string& _romName)
+	{
+		if(_romData.empty())
+			return RomLoader::findROM();
+		Rom rom(_romData, _romName);
+		if(rom.isValid())
+			return rom;
+		return RomLoader::findROM();
+	}
+
+	Hardware::Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName)
+		: m_rom(initRom(_romData, _romName))
 		, m_uc(*this, m_rom)
 		, m_dspA(*this, m_uc.getHdi08A(), 0)
 		, m_dspB(*this, m_uc.getHdi08B(), 1)

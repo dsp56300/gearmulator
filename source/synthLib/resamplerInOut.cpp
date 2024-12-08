@@ -192,6 +192,10 @@ namespace synthLib
 				}
 				m_scaledInput.fillPointers(inputs);
 			}
+			else
+			{
+				inputs.fill(nullptr);
+			}
 
 			_processFunc(inputs, _outs, _numProcessedSamples, m_processedMidiIn, m_midiOut);
 

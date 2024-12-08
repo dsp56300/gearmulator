@@ -43,7 +43,7 @@ namespace xtJucePlugin
 		return false;
 	}
 
-	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex)
+	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
 		if(_sysex.size() == xt::Mw1::g_singleDumpLength)
 		{

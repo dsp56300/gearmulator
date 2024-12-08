@@ -12,6 +12,8 @@ namespace n2xJucePlugin
 
 	    jucePluginEditorLib::PluginEditorState* createEditorState() override;
 	    synthLib::Device* createDevice() override;
+		void getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const override;
+
 	    pluginLib::Controller* createController() override;
 
 	private:

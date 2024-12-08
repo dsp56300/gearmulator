@@ -14,4 +14,11 @@ namespace pluginLib
 	};
 
 	using ParamValue = int32_t;
+
+	enum class DeviceType
+	{
+		Local,
+		Remote,
+		Dummy
+	};
 }

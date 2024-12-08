@@ -12,9 +12,7 @@ namespace n2x
 	class Device : public synthLib::Device
 	{
 	public:
-		Device();
-
-		const std::string& getRomFilename() const;
+		Device(const synthLib::DeviceCreateParams& _params);
 
 		float getSamplerate() const override;
 		bool isValid() const override;

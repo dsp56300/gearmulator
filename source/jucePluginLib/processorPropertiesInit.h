@@ -14,6 +14,7 @@ namespace pluginLib
 			JucePlugin_WantsMidiInput,
 			JucePlugin_ProducesMidiOutput,
 			JucePlugin_IsMidiEffect,
+			Plugin4CC,
 			JucePlugin_Lv2Uri,
 			{
 				BinaryData::namedResourceListSize,

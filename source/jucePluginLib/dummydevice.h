@@ -7,6 +7,8 @@ namespace pluginLib
 	class DummyDevice : public synthLib::Device
 	{
 	public:
+		explicit DummyDevice(const synthLib::DeviceCreateParams& _params);
+
 		float getSamplerate() const override { return 44100.0f; }
 		bool isValid() const override { return false; }
 #if !SYNTHLIB_DEMO_MODE

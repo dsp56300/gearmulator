@@ -10,8 +10,15 @@ using namespace dsp56k;
 
 namespace synthLib
 {
-	Device::Device() = default;
+	Device::Device(const DeviceCreateParams& _params) : m_createParams(_params)  // NOLINT(modernize-pass-by-value) dll transition, do not mess with the input data
+	{
+	}
 	Device::~Device() = default;
+
+	ASMJIT_NOINLINE void Device::release(std::vector<SMidiEvent>& _events)
+	{
+		_events.clear();
+	}
 
 	void Device::dummyProcess(const uint32_t _numSamples)
 	{
@@ -29,6 +36,8 @@ namespace synthLib
 
 	void Device::process(const TAudioInputs& _inputs, const TAudioOutputs& _outputs, const size_t _size, const std::vector<SMidiEvent>& _midiIn, std::vector<SMidiEvent>& _midiOut)
 	{
+		_midiOut.clear();
+
 		for (const auto& ev : _midiIn)
 		{
 			m_translatorOut.clear();
@@ -60,7 +69,9 @@ namespace synthLib
 
 	bool Device::isSamplerateSupported(const float& _samplerate) const
 	{
-		for (const auto& sr : getSupportedSamplerates())
+		std::vector<float> srs;
+		getSupportedSamplerates(srs);
+		for (const auto& sr : srs)
 		{
 			if(std::fabs(sr - _samplerate) < 1.0f)
 				return true;
@@ -82,7 +93,8 @@ namespace synthLib
 
 	float Device::getDeviceSamplerateForHostSamplerate(const float _hostSamplerate) const
 	{
-		const auto preferred = getPreferredSamplerates();
+		std::vector<float> preferred;
+		getPreferredSamplerates(preferred);
 
 		// if there is no choice we need to use the only one that is supported
 		if(preferred.size() == 1)

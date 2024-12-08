@@ -16,7 +16,7 @@ namespace mqLib
 	class Device : public wLib::Device
 	{
 	public:
-		Device();
+		Device(const synthLib::DeviceCreateParams& _params);
 		~Device() override;
 		uint32_t getInternalLatencyMidiToOutput() const override;
 		uint32_t getInternalLatencyInputToOutput() const override;

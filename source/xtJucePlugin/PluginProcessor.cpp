@@ -9,6 +9,8 @@
 
 #include "xtLib/xtDevice.h"
 
+#include "xtLib/xtRomLoader.h"
+
 class Controller;
 
 namespace
@@ -52,7 +54,22 @@ namespace xtJucePlugin
 
 	synthLib::Device* AudioPluginAudioProcessor::createDevice()
 	{
-		return new xt::Device();
+		synthLib::DeviceCreateParams p;
+		getRemoteDeviceParams(p);
+		return new xt::Device(p);
+	}
+
+	void AudioPluginAudioProcessor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		Processor::getRemoteDeviceParams(_params);
+
+		const auto rom = xt::RomLoader::findROM();
+
+		if(rom.isValid())
+		{
+			_params.romData = rom.getData();
+			_params.romName = rom.getFilename();
+		}
 	}
 
 	pluginLib::Controller* AudioPluginAudioProcessor::createController()

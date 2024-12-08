@@ -13,7 +13,7 @@ namespace xt
 	public:
 		static constexpr uint32_t Size = g_romSize;
 
-		Rom(std::vector<uint8_t> _data) : ROM({}, Size, std::move(_data))
+		Rom(const std::string& _filename, std::vector<uint8_t> _data) : ROM(_filename, Size, std::move(_data))
 		{
 		}
 
@@ -24,7 +24,7 @@ namespace xt
 
 		static Rom invalid()
 		{
-			return {{}};
+			return {{}, {}};
 		}
 	};
 }

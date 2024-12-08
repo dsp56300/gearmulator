@@ -119,6 +119,8 @@ public:
 
 	const auto& getHash() const { return m_romDataHash; }
 
+	const auto& getRomFileData() const { return m_romFileData; }
+
 private:
 	std::vector<Chunk> readChunks(std::istream& _file) const;
 	bool loadPresetFiles();

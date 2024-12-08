@@ -9,9 +9,16 @@
 
 namespace xt
 {
-	Hardware::Hardware()
+	Rom initializeRom(const std::vector<uint8_t>& _romData, const std::string& _romName)
+	{
+		if(_romData.empty())
+			return RomLoader::findROM();
+		return Rom{_romName, _romData};
+	}
+
+	Hardware::Hardware(const std::vector<uint8_t>& _romData, const std::string& _romName)
 		: wLib::Hardware(40000)
-		, m_rom(RomLoader::findROM())
+		, m_rom(initializeRom(_romData, _romName))
 		, m_uc(m_rom)
 		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
 		, m_midi(m_uc.getQSM(), 40000)

@@ -9,6 +9,7 @@ set(SOURCES
 	configFile.cpp configFile.h
 	hybridcontainer.h
 	md5.cpp md5.h
+	propertyMap.cpp propertyMap.h
 	semaphore.h
 )
 

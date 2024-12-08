@@ -38,7 +38,7 @@ namespace mqJucePlugin
 		return false;
 	}
 
-	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex)
+	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
 		pluginLib::MidiPacket::Data data;
 		pluginLib::MidiPacket::AnyPartParamValues parameters;

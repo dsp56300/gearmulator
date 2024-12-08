@@ -153,7 +153,7 @@ namespace xt
 			best.name += "_upgraded_" + bestMidi.name;
 		}
 
-		return {best.data};
+		return {best.name, best.data};
 	}
 
 	std::vector<RomLoader::File> RomLoader::findFiles(const std::string& _extension, const size_t _sizeMin, const size_t _sizeMax)

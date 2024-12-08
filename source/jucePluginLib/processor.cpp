@@ -1,16 +1,20 @@
 #include "processor.h"
 #include "dummydevice.h"
+#include "pluginVersion.h"
 #include "tools.h"
 #include "types.h"
 
 #include "baseLib/binarystream.h"
+
+#include "bridgeLib/commands.h"
+
+#include "client/remoteDevice.h"
 
 #include "synthLib/deviceException.h"
 #include "synthLib/os.h"
 #include "synthLib/midiBufferParser.h"
 
 #include "dsp56kEmu/fastmath.h"
-
 #include "dsp56kEmu/logging.h"
 #include "synthLib/romLoader.h"
 
@@ -24,7 +28,16 @@ namespace pluginLib
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 2;
 
-	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties) : juce::AudioProcessor(_busesProperties), m_properties(std::move(_properties)), m_midiPorts(*this)
+	bridgeLib::SessionId generateRemoteSessionId()
+	{
+		return std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+	}
+
+	Processor::Processor(const BusesProperties& _busesProperties, Properties _properties)
+		: juce::AudioProcessor(_busesProperties)
+		, m_properties(std::move(_properties))
+		, m_midiPorts(*this)
+		, m_remoteSessionId(generateRemoteSessionId())
 	{
 		juce::File(getPublicRomFolder()).createDirectory();
 
@@ -147,14 +160,48 @@ namespace pluginLib
 
 		if(!m_device)
 		{
-			m_device.reset(new DummyDevice());
+			m_device.reset(new DummyDevice({}));
 		}
 
 		m_device->setDspClockPercent(m_dspClockPercent);
 
-		m_plugin.reset(new synthLib::Plugin(m_device.get()));
+		m_plugin.reset(new synthLib::Plugin(m_device.get(), [this](synthLib::Device* _device)
+		{
+			return onDeviceInvalid(_device);
+		}));
 
 		return *m_plugin;
+	}
+
+	bridgeClient::RemoteDevice* Processor::createRemoteDevice(const synthLib::DeviceCreateParams& _params)
+	{
+		bridgeLib::PluginDesc desc;
+		getPluginDesc(desc);
+		return new bridgeClient::RemoteDevice(_params, std::move(desc), m_remoteHost, m_remotePort);
+	}
+
+	void Processor::getRemoteDeviceParams(synthLib::DeviceCreateParams& _params) const
+	{
+		_params.preferredSamplerate = getPreferredDeviceSamplerate();
+		_params.hostSamplerate = getHostSamplerate();
+	}
+
+	bridgeClient::RemoteDevice* Processor::createRemoteDevice()
+	{
+		synthLib::DeviceCreateParams params;
+		getRemoteDeviceParams(params);
+		return createRemoteDevice(params);
+	}
+
+	synthLib::Device* Processor::createDevice(const DeviceType _type)
+	{
+		switch (_type)
+		{
+		case DeviceType::Local:		return createDevice();
+		case DeviceType::Remote:	return createRemoteDevice();
+		case DeviceType::Dummy:		return new DummyDevice({});
+		}
+		return nullptr;
 	}
 
 	bool Processor::setLatencyBlocks(uint32_t _blocks)
@@ -314,14 +361,18 @@ namespace pluginLib
 	{
 		if(!m_device)
 			return {};
-		return m_device->getSupportedSamplerates();
+		std::vector<float> result;
+		m_device->getSupportedSamplerates(result);
+		return result;
 	}
 
 	std::vector<float> Processor::getDevicePreferredSamplerates() const
 	{
 		if(!m_device)
 			return {};
-		return m_device->getPreferredSamplerates();
+		std::vector<float> result;
+		m_device->getPreferredSamplerates(result);
+		return result;
 	}
 
 	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
@@ -372,6 +423,51 @@ namespace pluginLib
 		if(!_useFxName && !p.isSynth && name.substr(name.size()-2, 2) == "FX")
 			return name.substr(0, name.size() - 2);
 		return name;
+	}
+
+	void Processor::getPluginDesc(bridgeLib::PluginDesc& _desc) const
+	{
+		_desc.plugin4CC = getProperties().plugin4CC;
+		_desc.pluginName = getProperties().name;
+		_desc.pluginVersion = Version::getVersionNumber();
+		_desc.sessionId = m_remoteSessionId;
+	}
+
+	void Processor::setDeviceType(const DeviceType _type, const bool _forceChange/* = false*/)
+	{
+		if(m_deviceType == _type && !_forceChange)
+			return;
+
+		try
+		{
+			if(auto* dev = createDevice(_type))
+			{
+				getPlugin().setDevice(dev);
+				(void)m_device.release();
+				m_device.reset(dev);
+				m_deviceType = _type;
+			}
+		}
+		catch(synthLib::DeviceException& e)
+		{
+			juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+				getName() + " - Failed to switch device type",
+				std::string("Failed to create device:\n\n") + 
+				e.what() + "\n\n");
+		}
+
+		if(_type != DeviceType::Remote)
+			m_remoteSessionId = generateRemoteSessionId();
+	}
+
+	void Processor::setRemoteDevice(const std::string& _host, const uint32_t _port)
+	{
+		if(m_remotePort == _port && m_remoteHost == _host && m_deviceType == DeviceType::Remote)
+			return;
+
+		m_remoteHost = _host;
+		m_remotePort = _port;
+		setDeviceType(DeviceType::Remote, true);
 	}
 
 	void Processor::destroyController()
@@ -750,6 +846,42 @@ namespace pluginLib
 	double Processor::getTailLengthSeconds() const
 	{
 		return 0.0f;
+	}
+
+	synthLib::Device* Processor::onDeviceInvalid(synthLib::Device* _device)
+	{
+		if(dynamic_cast<bridgeClient::RemoteDevice*>(_device))
+		{
+			try
+			{
+				// attempt one reconnect
+				auto* newDevice = createRemoteDevice();
+				if(newDevice && newDevice->isValid())
+				{
+					m_device.reset(newDevice);
+					return newDevice;
+				}
+			}
+			catch (synthLib::DeviceException& e)
+			{
+				juce::MessageManager::callAsync([e]
+				{
+					juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+						"Device creation failed:",
+						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
+						e.what() + "\n\n");
+				});
+			}
+		}
+
+		setDeviceType(DeviceType::Local);
+
+		juce::MessageManager::callAsync([this]
+		{
+			getController().onStateLoaded();
+		});
+
+		return m_device.get();
 	}
 
 	bool Processor::rebootDevice()
