@@ -47,7 +47,7 @@ namespace n2xJucePlugin
 		return false;
 	}
 
-	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex)
+	pluginLib::patchDB::PatchPtr PatchManager::initializePatch(pluginLib::patchDB::Data&& _sysex, const std::string& _defaultPatchName)
 	{
 		if(!isValidPatchDump(_sysex))
 			return {};
@@ -82,7 +82,7 @@ namespace n2xJucePlugin
 				p->tags.add(pluginLib::patchDB::TagType::Tag, "Mono");
 		}
 
-		p->name = getPatchName(_sysex);
+		p->name = getPatchName(_sysex, _defaultPatchName);
 		p->sysex = std::move(_sysex);
 		p->program = program;
 		p->bank = bank;
@@ -134,16 +134,19 @@ namespace n2xJucePlugin
 		return jucePluginEditorLib::patchManager::PatchManager::parseFileData(_results, _data);
 	}
 
-	std::string PatchManager::getPatchName(const pluginLib::patchDB::Data& _sysex)
+	std::string PatchManager::getPatchName(const pluginLib::patchDB::Data& _sysex, const std::string& _defaultPatchName/* = {}*/)
 	{
 		if(!isValidPatchDump(_sysex))
-			return {};
+			return _defaultPatchName;
 
 		{
 			const auto nameFromDump = n2x::State::extractPatchName(_sysex);
 			if(!nameFromDump.empty())
 				return nameFromDump;
 		}
+
+		if (!_defaultPatchName.empty())
+			return _defaultPatchName;
 
 		const auto isSingle = n2x::State::isSingleDump(_sysex);
 

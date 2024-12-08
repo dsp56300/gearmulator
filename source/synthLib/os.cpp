@@ -233,6 +233,14 @@ namespace synthLib
         return {};
     }
 
+    std::string stripExtension(const std::string& _name)
+    {
+		const auto pos = _name.find_last_of('.');
+		if (pos != std::string::npos)
+			return _name.substr(0, pos);
+		return _name;
+    }
+
     std::string getFilenameWithoutPath(const std::string& _name)
     {
         const auto pos = _name.find_last_of("/\\");
