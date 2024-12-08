@@ -26,6 +26,8 @@ NodalRed2x:
 - [Imp] VM Map indicators are now displayed relative to the current parameter value
 - [Imp] VM Map indicators are now hidden if the parameter is zero
 - [Imp] VM Map mode can now be toggled via shift key
+- [Imp] Patches now use the name of the source file as patch name if the file contains
+        exactly one patch (requires refreshing the data source via context menu)
 
 - [Fix] Parameter automation was not smooth if multiple slots were mapped to the same
         MIDI channel
