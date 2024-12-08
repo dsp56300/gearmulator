@@ -3,6 +3,7 @@
 #include <cassert>
 #include <map>
 #include <set>
+#include <algorithm>
 
 #include "xtMidiTypes.h"
 #include "xt.h"
