@@ -42,7 +42,7 @@ jobs:
       run: cpack --preset github-${{ runner.os }}
 
     - name: Create Changelog
-      run: ${{github.workspace}}/bin/tools/commandlineGenerator -i ${{github.workspace}}/doc/changelog.txt -o ${{github.workspace}}/doc/changelog_split
+      run: ${{github.workspace}}/bin/tools/changelogGenerator -i ${{github.workspace}}/doc/changelog.txt -o ${{github.workspace}}/doc/changelog_split
 
     - name: Release
       uses: softprops/action-gh-release@v2

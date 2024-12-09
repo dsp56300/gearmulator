@@ -20,7 +20,7 @@ add_custom_target(cmakeScripts SOURCES
 
 # ----------------- Tools
 
-add_subdirectory(commandlineGenerator)
+add_subdirectory(changelogGenerator)
 
 # ----------------- DSP56300 emulator
 
