@@ -11,6 +11,12 @@ using LinesPerKey = std::map<std::string, Lines>;
 
 namespace
 {
+	enum class Format
+	{
+		Txt,
+		Discord
+	};
+
 	std::string& trim(std::string& _line)
 	{
 		auto needsTrim = [](const char _c) -> bool
@@ -156,10 +162,13 @@ namespace
 		}
 		return out;
 	}
-	bool writeProduct(std::ofstream& _out, const std::string& _product, const Lines& _lines)
+	bool writeProduct(std::ofstream& _out, const std::string& _product, const Lines& _lines, const bool _needsSpace)
 	{
 		if (_lines.empty())
 			return false;
+
+		if (_needsSpace)
+			_out << '\n';
 
 		if (!_product.empty())
 		{
@@ -196,6 +205,23 @@ int main(const int _argc, char* _argv[])
 
 	if (outPath.back() != '/' && outPath.back() != '\\')
 		outPath.push_back('/');
+
+	auto f = cmdLine.get("f");
+
+	auto format = Format::Txt;
+
+	if (!f.empty())
+	{
+		if (f == "discord")
+		{
+			format = Format::Discord;
+		}
+		else
+		{
+			std::cout << "Unknown format '" << f << "'\n";
+			return -1;
+		}
+	}
 
 	std::ifstream file(inFile);
 
@@ -276,6 +302,15 @@ int main(const int _argc, char* _argv[])
 	std::set<std::string> globalProducts = { "DSP", "Framework", "Patch Manager" };
 	std::set<std::string> localProducts = { "Osirus", "OsTIrus", "Xenia", "Vavra", "NodalRed2x" };
 
+	auto formatHeader = [format](const std::string & _header)
+	{
+		if (format == Format::Discord)
+		{
+			return "**" + _header + "**";
+		}
+		return _header;
+	};
+
 	for (auto& itVersion : productPerVersion)
 	{
 		const auto& version = itVersion.first;
@@ -320,18 +355,23 @@ int main(const int _argc, char* _argv[])
 				}
 
 				if (!product.empty())
-					outFile << product << ' ';
-
-				outFile << "Version " << version << '\n';
+					outFile << formatHeader(product + " Version " + version) << '\n';
+				else	
+					outFile << formatHeader("Version " + version) << '\n';
 				outFile << '\n';
 
-				for (const auto& global : globals)
-				{
-					if (writeProduct(outFile, global.first, global.second))
-						outFile << '\n';
-				}
+				if (format == Format::Discord)
+					outFile << "```\n";
 
-				writeProduct(outFile, product, itProduct.second);
+				bool needsSpace = false;
+
+				for (const auto& global : globals)
+					needsSpace |= writeProduct(outFile, global.first, global.second, needsSpace);
+
+				writeProduct(outFile, product, itProduct.second, needsSpace);
+
+				if (format == Format::Discord)
+					outFile << "```\n";
 			}
 		}
 
@@ -344,23 +384,22 @@ int main(const int _argc, char* _argv[])
 			std::cout << "Failed to create output file '" << outName << '\n';
 			return -1;
 		}
-		outFile << "Version " << version << '\n';
+		outFile << formatHeader("Version " + version) << '\n';
 		outFile << '\n';
-		for (const auto& global : globals)
-		{
-			if (writeProduct(outFile, global.first, global.second))
-				outFile << '\n';
-		}
+
+		if (format == Format::Discord)
+			outFile << "```\n";
 
 		bool needsSpace = false;
 
-		for (const auto& local : locals)
-		{
-			if (needsSpace)
-				outFile << '\n';
+		for (const auto& global : globals)
+			needsSpace |= writeProduct(outFile, global.first, global.second, needsSpace);
 
-			needsSpace = writeProduct(outFile, local.first, local.second);
-		}
+		for (const auto& local : locals)
+			needsSpace |= writeProduct(outFile, local.first, local.second, needsSpace);
+
+		if (format == Format::Discord)
+			outFile << "```\n";
 	}
 	return 0;
 }
