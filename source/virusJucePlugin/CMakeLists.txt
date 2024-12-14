@@ -41,6 +41,13 @@ target_include_directories(virusJucePlugin PUBLIC ../JUCE/modules)
 target_compile_definitions(virusJucePlugin PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 target_compile_definitions(virusJucePlugin PUBLIC JUCE_MODAL_LOOPS_PERMITTED=1)
 
+if(UNIX AND NOT APPLE AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+	# strange GCC bug, a DeviceException that we throw is not caught in the catch block if LTO is enabled. 
+	# Disabling LTO just for this file is sufficient to fix the issue.
+	set_source_files_properties(VirusProcessor.cpp PROPERTIES COMPILE_OPTIONS "-fno-lto")
+	set_source_files_properties(VirusProcessor.h PROPERTIES COMPILE_OPTIONS "-fno-lto")
+endif()
+
 set_property(TARGET virusJucePlugin PROPERTY FOLDER "Virus")
 
 target_include_directories(virusJucePlugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
