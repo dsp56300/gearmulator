@@ -123,7 +123,8 @@ namespace baseLib::filesystem
         }
         else
         {
-            LOG("Failed to open directory " << _folder << ", error " << errno);
+//          LOG("Failed to open directory " << _folder << ", error " << errno);
+			std::cerr << "Failed to open directory " << _folder << ", error " << errno << '\n';
             return false;
         }
 #else
