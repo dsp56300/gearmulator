@@ -68,8 +68,8 @@ else()
 	endif()
 
 	# GCC <= 11 has LTO issues
-	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 11.4)
-		message(WARNING "LTO disabled due to GCC version <= 11.4.0 causing issues")
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 11.4 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 13.2.0))
+		message(WARNING "LTO disabled due to GCC versions <= 11.4.0 and 13.2.0 causing issues")
 	else()
 		cmake_policy(SET CMP0069 NEW)
 		include(CheckIPOSupported)
