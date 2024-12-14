@@ -11,7 +11,6 @@
 #include "virusLib/midiFileToRomData.h"
 
 #include "synthLib/midiToSysex.h"
-#include "synthLib/os.h"
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 

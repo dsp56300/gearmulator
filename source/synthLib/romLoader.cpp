@@ -2,6 +2,8 @@
 
 #include "os.h"
 
+#include "baseLib/filesystem.h"
+
 namespace synthLib
 {
 	namespace
@@ -17,11 +19,11 @@ namespace synthLib
 		{
 			g_searchPaths.insert(getModulePath(true));
 			g_searchPaths.insert(getModulePath(false));
-			g_searchPaths.insert(getCurrentDirectory());
+			g_searchPaths.insert(baseLib::filesystem::getCurrentDirectory());
 		}
 
 		for (const auto& path : g_searchPaths)
-			synthLib::findFiles(results, path, _extension, _minSize, _maxSize);
+			baseLib::filesystem::findFiles(results, path, _extension, _minSize, _maxSize);
 
 		return results;
 	}
@@ -32,12 +34,12 @@ namespace synthLib
 			return findFiles(_extension, _minSize, _maxSize);
 
 		std::vector<std::string> results;
-		synthLib::findFiles(results, _path, _extension, _minSize, _maxSize);
+		baseLib::filesystem::findFiles(results, _path, _extension, _minSize, _maxSize);
 		return results;
 	}
 
 	void RomLoader::addSearchPath(const std::string& _path)
 	{
-		g_searchPaths.insert(validatePath(_path));
+		g_searchPaths.insert(baseLib::filesystem::validatePath(_path));
 	}
 }

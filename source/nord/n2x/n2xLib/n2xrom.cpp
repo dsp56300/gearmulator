@@ -2,8 +2,6 @@
 
 #include <algorithm>
 
-#include "synthLib/os.h"
-
 namespace n2x
 {
 	Rom::Rom()

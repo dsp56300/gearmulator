@@ -58,10 +58,12 @@ namespace pluginLib
 
 		void bind(juce::Slider& _control, uint32_t _param);
 		void bind(juce::Slider& _control, uint32_t _param, uint8_t _part);
-		void bind(juce::ComboBox &_control, uint32_t _param);
-		void bind(juce::ComboBox &_control, uint32_t _param, uint8_t _part);
-		void bind(juce::Button &_control, uint32_t _param);
-		void bind(juce::Button &_control, uint32_t _param, uint8_t _part);
+		void bind(juce::ComboBox& _control, uint32_t _param);
+		void bind(juce::ComboBox& _control, uint32_t _param, uint8_t _part);
+		void bind(juce::Button& _control, uint32_t _param);
+		void bind(juce::Button& _control, uint32_t _param, uint8_t _part);
+		void bind(juce::Label& _control, uint32_t _param);
+		void bind(juce::Label& _control, uint32_t _param, uint8_t _part);
 
 		bool bind(juce::Component& _component, uint32_t _param, uint8_t _part);
 

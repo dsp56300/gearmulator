@@ -13,8 +13,6 @@
 #include "jucePluginEditorLib/filetype.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
-#include "synthLib/os.h"
-
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :

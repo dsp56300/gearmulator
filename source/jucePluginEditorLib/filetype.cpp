@@ -1,6 +1,6 @@
 #include "filetype.h"
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace jucePluginEditorLib
 {
@@ -9,7 +9,7 @@ namespace jucePluginEditorLib
 
 	bool FileType::operator==(const FileType& _other) const
 	{
-		return synthLib::lowercase(type) == synthLib::lowercase(_other.type);
+		return baseLib::filesystem::lowercase(type) == baseLib::filesystem::lowercase(_other.type);
 	}
 
 	bool FileType::operator!=(const FileType& _other) const

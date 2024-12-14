@@ -9,7 +9,6 @@
 #include "xt.h"
 #include "xtWavePreview.h"
 
-#include "synthLib/os.h"
 #include "synthLib/midiToSysex.h"
 #include "synthLib/midiBufferParser.h"
 

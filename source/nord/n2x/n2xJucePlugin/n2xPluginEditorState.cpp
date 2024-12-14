@@ -5,8 +5,6 @@
 
 #include "jucePluginEditorLib/midiPorts.h"
 
-#include "synthLib/os.h"
-
 #include "skins.h"
 
 namespace n2xJucePlugin

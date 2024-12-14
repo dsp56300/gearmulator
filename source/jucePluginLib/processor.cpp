@@ -5,6 +5,7 @@
 #include "types.h"
 
 #include "baseLib/binarystream.h"
+#include "baseLib/filesystem.h"
 
 #include "bridgeLib/commands.h"
 
@@ -13,10 +14,10 @@
 #include "synthLib/deviceException.h"
 #include "synthLib/os.h"
 #include "synthLib/midiBufferParser.h"
+#include "synthLib/romLoader.h"
 
 #include "dsp56kEmu/fastmath.h"
 #include "dsp56kEmu/logging.h"
-#include "synthLib/romLoader.h"
 
 namespace synthLib
 {
@@ -136,7 +137,7 @@ namespace pluginLib
 				{
 					msg += "\n\n";
 					msg += "The firmware file needs to be copied to\n";
-					msg += synthLib::validatePath(getPublicRomFolder()) + "\n";
+					msg += baseLib::filesystem::validatePath(getPublicRomFolder()) + "\n";
 					msg += "\n";
 					msg += "The target folder will be opened once you click OK. Copy the firmware to this folder and reload the plugin.";
 #ifdef _DEBUG
@@ -398,17 +399,17 @@ namespace pluginLib
 
 	std::string Processor::getPublicRomFolder() const
 	{
-		return synthLib::validatePath(getDataFolder() + "roms/");
+		return baseLib::filesystem::validatePath(getDataFolder() + "roms/");
 	}
 
 	std::string Processor::getConfigFolder(const bool _useFxFolder) const
 	{
-		return synthLib::validatePath(getDataFolder(_useFxFolder) + "config/");
+		return baseLib::filesystem::validatePath(getDataFolder(_useFxFolder) + "config/");
 	}
 
 	std::string Processor::getPatchManagerDataFolder(bool _useFxFolder) const
 	{
-		return synthLib::validatePath(getDataFolder(_useFxFolder) + "patchmanager/");
+		return baseLib::filesystem::validatePath(getDataFolder(_useFxFolder) + "patchmanager/");
 	}
 
 	std::string Processor::getConfigFile(const bool _useFxFolder) const

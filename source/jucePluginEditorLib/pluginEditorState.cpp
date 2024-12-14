@@ -3,12 +3,15 @@
 #include "pluginEditor.h"
 #include "pluginProcessor.h"
 
+#include "baseLib/filesystem.h"
+
 #include "patchmanager/patchmanager.h"
 
-#include "synthLib/os.h"
 #include "juceUiLib/editor.h"
 
 #include "dsp56kEmu/logging.h"
+
+#include "synthLib/os.h"
 
 namespace jucePluginEditorLib
 
@@ -30,7 +33,7 @@ PluginEditorState::PluginEditorState(Processor& _processor, pluginLib::Controlle
 	for (auto& skin : m_includedSkins)
 	{
 		if(skin.folder.empty() && !m_processor.findResource(skin.jsonFilename))
-			skin.folder = synthLib::validatePath(getSkinFolder() + skin.displayName);
+			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + skin.displayName);
 	}
 }
 
@@ -98,7 +101,7 @@ void PluginEditorState::getPerInstanceConfig(std::vector<uint8_t>& _data)
 
 std::string PluginEditorState::getSkinFolder() const
 {
-	return synthLib::validatePath(m_processor.getDataFolder() + "skins/");
+	return baseLib::filesystem::validatePath(m_processor.getDataFolder() + "skins/");
 }
 
 bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackIndex/* = 0*/)
@@ -126,7 +129,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 		// if the embedded skin cannot be found, use skin folder as fallback
 		if(_skin.folder.empty() && !m_processor.findResource(_skin.jsonFilename))
 		{
-			skin.folder = synthLib::validatePath(getSkinFolder() + _skin.displayName);
+			skin.folder = baseLib::filesystem::validatePath(getSkinFolder() + _skin.displayName);
 		}
 
 		auto* editor = createEditor(skin);
@@ -222,21 +225,21 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 
 	// new: user documents folder
 	std::vector<std::string> entries;
-	synthLib::getDirectoryEntries(entries, getSkinFolder());
+	baseLib::filesystem::getDirectoryEntries(entries, getSkinFolder());
 
 	// old: next to plugin, kept for backwards compatibility
 	std::vector<std::string> entriesModulePath;
-	synthLib::getDirectoryEntries(entriesModulePath, modulePath + "skins_" + m_processor.getProperties().name);
+	baseLib::filesystem::getDirectoryEntries(entriesModulePath, modulePath + "skins_" + m_processor.getProperties().name);
 	entries.insert(entries.end(), entriesModulePath.begin(), entriesModulePath.end());
 
 	for (const auto& entry : entries)
 	{
 		std::vector<std::string> files;
-		synthLib::getDirectoryEntries(files, entry);
+		baseLib::filesystem::getDirectoryEntries(files, entry);
 
 		for (const auto& file : files)
 		{
-			if(synthLib::hasExtension(file, ".json"))
+			if(baseLib::filesystem::hasExtension(file, ".json"))
 			{
 				if(!haveSkinsOnDisk)
 				{
@@ -247,7 +250,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 				std::string skinPath = entry;
 				if(entry.find(modulePath) == 0)
 					skinPath = entry.substr(modulePath.size());
-				skinPath = synthLib::validatePath(skinPath);
+				skinPath = baseLib::filesystem::validatePath(skinPath);
 
 				auto jsonName = file;
 				const auto pathEndPos = jsonName.find_last_of("/\\");
@@ -277,7 +280,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	skinMenu.addItem("Open folder '" + getSkinFolder() + "' in File Browser", true, false, [this]
 	{
 		const auto dir = getSkinFolder();
-		synthLib::createDirectory(dir);
+		baseLib::filesystem::createDirectory(dir);
 		juce::File(dir).revealToUser();
 	});
 

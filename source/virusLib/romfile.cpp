@@ -9,8 +9,6 @@
 #include "dsp56kEmu/dsp.h"
 #include "dsp56kEmu/logging.h"
 
-#include "synthLib/os.h"
-
 #include <cstring>	// memcpy
 
 #include "demoplaybackTI.h"

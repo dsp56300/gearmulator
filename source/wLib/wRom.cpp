@@ -2,7 +2,8 @@
 
 #include <cstdint>
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
+
 #include "synthLib/midiToSysex.h"
 
 namespace wLib
@@ -14,7 +15,7 @@ namespace wLib
 		if(_filename.empty())
 			return false;
 
-		if(!synthLib::readFile(m_buffer, _filename))
+		if(!baseLib::filesystem::readFile(m_buffer, _filename))
 			return false;
 
 		if(m_buffer.size() != _expectedSize)
@@ -54,7 +55,7 @@ namespace wLib
 		_buffer.clear();
 
 		std::vector<uint8_t> buf;
-		if (!synthLib::readFile(buf, _filename))
+		if (!baseLib::filesystem::readFile(buf, _filename))
 			return false;
 		return loadFromSysExBuffer(_buffer, buf);
 	}

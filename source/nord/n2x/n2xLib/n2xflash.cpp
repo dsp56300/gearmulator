@@ -2,6 +2,9 @@
 
 #include "n2xhardware.h"
 #include "n2xtypes.h"
+
+#include "baseLib/filesystem.h"
+
 #include "synthLib/os.h"
 
 namespace n2x
@@ -13,7 +16,7 @@ namespace n2x
 		if(!filename.empty())
 		{
 			std::vector<uint8_t> d;
-			if(synthLib::readFile(d, filename))
+			if(baseLib::filesystem::readFile(d, filename))
 			{
 				setData(d);
 			}

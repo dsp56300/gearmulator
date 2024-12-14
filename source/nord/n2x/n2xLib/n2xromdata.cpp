@@ -2,6 +2,8 @@
 
 #include "n2xtypes.h"
 
+#include "baseLib/filesystem.h"
+
 #include "synthLib/os.h"
 
 namespace n2x
@@ -14,7 +16,7 @@ namespace n2x
 	{
 		if(_filename.empty())
 			return;
-		if(!synthLib::readFile(m_data, _filename))
+		if(!baseLib::filesystem::readFile(m_data, _filename))
 			return;
 		if(m_data.size() != MySize)
 			return;
@@ -31,7 +33,7 @@ namespace n2x
 
 	template <uint32_t Size> void RomData<Size>::saveAs(const std::string& _filename) const
 	{
-		synthLib::writeFile(_filename, m_data);
+		baseLib::filesystem::writeFile(_filename, m_data);
 	}
 
 	template class RomData<g_flashSize>;

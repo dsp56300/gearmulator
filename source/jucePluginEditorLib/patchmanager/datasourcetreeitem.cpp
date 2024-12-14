@@ -7,13 +7,14 @@
 
 #include "../pluginEditor.h"
 
+#include "baseLib/filesystem.h"
+
 #include "jucePluginEditorLib/filetype.h"
 
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
 
 #include "synthLib/buildconfig.h"
-#include "synthLib/os.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -253,6 +254,6 @@ namespace jucePluginEditorLib::patchManager
 		for (const auto& patch : patchesVec)
 			patchesMap.insert({i++, patch});
 
-		return new SavePatchDesc(getPatchManager(), std::move(patchesMap), synthLib::getFilenameWithoutPath(m_dataSource->name));
+		return new SavePatchDesc(getPatchManager(), std::move(patchesMap), baseLib::filesystem::getFilenameWithoutPath(m_dataSource->name));
 	}
 }

@@ -1,10 +1,10 @@
 #include "config.h"
 
 #include "server.h"
+
 #include "baseLib/commandline.h"
 #include "baseLib/configFile.h"
-
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace bridgeServer
 {
@@ -32,12 +32,12 @@ namespace bridgeServer
 		pluginsPath = config.get("pluginsPath", pluginsPath);
 		romsPath = config.get("romsPath", romsPath);
 
-		synthLib::createDirectory(pluginsPath);
-		synthLib::createDirectory(romsPath);
+		baseLib::filesystem::createDirectory(pluginsPath);
+		baseLib::filesystem::createDirectory(romsPath);
 	}
 
 	std::string Config::getDefaultDataPath()
 	{
-		return synthLib::validatePath(synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments)) + "The Usual Suspects/dspBridgeServer/";
+		return baseLib::filesystem::validatePath(baseLib::filesystem::getSpecialFolderPath(baseLib::filesystem::SpecialFolderType::UserDocuments)) + "The Usual Suspects/dspBridgeServer/";
 	}
 }

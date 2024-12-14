@@ -15,14 +15,14 @@
 #include "../pluginEditor.h"
 #include "../pluginProcessor.h"
 
+#include "baseLib/filesystem.h"
+
 #include "jucePluginLib/types.h"
 #include "jucePluginLib/clipboard.h"
 
 #include "jucePluginEditorLib/filetype.h"
 
 #include "dsp56kEmu/logging.h"
-
-#include "synthLib/os.h"
 
 #if JUCE_MAJOR_VERSION < 8	// they forgot this include but fixed it in version 8+
 #include "juce_gui_extra/misc/juce_ColourSelector.h"
@@ -762,7 +762,7 @@ namespace jucePluginEditorLib::patchManager
 			if(!loadFile(results, file) || results.empty())
 				continue;
 
-			const auto defaultName = results.size() == 1 ? synthLib::stripExtension(synthLib::getFilenameWithoutPath(file)) : "";
+			const auto defaultName = results.size() == 1 ? baseLib::filesystem::stripExtension(baseLib::filesystem::getFilenameWithoutPath(file)) : "";
 
 			for (auto& result : results)
 			{

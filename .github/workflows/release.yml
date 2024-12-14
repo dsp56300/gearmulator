@@ -41,11 +41,14 @@ jobs:
     - name: Pack
       run: cpack --preset github-${{ runner.os }}
 
+    - name: Create Changelog
+      run: ${{github.workspace}}/bin/tools/changelogGenerator -i ${{github.workspace}}/doc/changelog.txt -o ${{github.workspace}}/doc/changelog_split
+
     - name: Release
       uses: softprops/action-gh-release@v2
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
-        body_path: ${{github.workspace}}/doc/changelog.txt
+        body_path: ${{github.workspace}}/doc/changelog_split/${{ github.event.inputs.version }}.txt
         draft: true
         prerelease: false
         name: ${{ github.event.inputs.version }}

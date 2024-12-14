@@ -2,7 +2,6 @@
 
 #include "dsp56kEmu/logging.h"
 
-#include "synthLib/os.h"
 #include "synthLib/midiToSysex.h"
 
 namespace virusLib

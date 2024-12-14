@@ -2,12 +2,10 @@
 
 #include "pluginEditor.h"
 #include "pluginProcessor.h"
-#include "patchmanager/list.h"
+
 #include "patchmanager/patchmanager.h"
 #include "patchmanager/savepatchdesc.h"
 #include "patchmanager/listmodel.h"
-
-#include "synthLib/os.h"
 
 namespace jucePluginEditorLib
 {

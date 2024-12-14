@@ -5,7 +5,7 @@
 
 #include "dsp56kEmu/logging.h"
 
-#include "os.h"
+#include "baseLib/filesystem.h"
 
 #ifdef _MSC_VER
 #include <Windows.h>
@@ -210,7 +210,7 @@ namespace synthLib
 	{
 		std::vector<uint8_t> data;
 
-		if(!synthLib::readFile(data, _filename))
+		if(!baseLib::filesystem::readFile(data, _filename))
 			return false;
 
 		return extractSysexFromData(_messages, data);

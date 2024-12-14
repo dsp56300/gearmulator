@@ -1,9 +1,9 @@
 #include "tools.h"
 
+#include "baseLib/filesystem.h"
+
 #include "juce_audio_processors/juce_audio_processors.h"
 #include "juce_gui_basics/juce_gui_basics.h"
-
-#include "synthLib/os.h"
 
 namespace pluginLib
 {
@@ -23,6 +23,6 @@ namespace pluginLib
 
 	std::string Tools::getPublicDataFolder(const std::string& _vendorName, const std::string& _productName)
 	{
-		return synthLib::validatePath(synthLib::getSpecialFolderPath(synthLib::SpecialFolderType::UserDocuments) + _vendorName + '/' + _productName + '/');
+		return baseLib::filesystem::validatePath(baseLib::filesystem::getSpecialFolderPath(baseLib::filesystem::SpecialFolderType::UserDocuments) + _vendorName + '/' + _productName + '/');
 	}
 }

@@ -7,6 +7,7 @@ set(SOURCES
 	binarystream.cpp binarystream.h
 	commandline.cpp commandline.h
 	configFile.cpp configFile.h
+	filesystem.cpp filesystem.h
 	hybridcontainer.h
 	md5.cpp md5.h
 	propertyMap.cpp propertyMap.h

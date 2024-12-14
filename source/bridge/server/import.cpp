@@ -1,7 +1,11 @@
 #include "import.h"
 
 #include "config.h"
+
+#include "baseLib/filesystem.h"
+
 #include "networkLib/logging.h"
+
 #include "synthLib/deviceException.h"
 #include "synthLib/os.h"
 
@@ -105,7 +109,7 @@ namespace bridgeServer
 	{
 		const auto path = synthLib::getModulePath() + "plugins/";
 		std::vector<std::string> files;
-		synthLib::findFiles(files, path, _extension, 0, std::numeric_limits<uint32_t>::max());
+		baseLib::filesystem::findFiles(files, path, _extension, 0, std::numeric_limits<uint32_t>::max());
 
 		for (const auto& file : files)
 			loadPlugin(file);
