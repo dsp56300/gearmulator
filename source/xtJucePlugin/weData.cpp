@@ -2,14 +2,15 @@
 
 #include "xtController.h"
 
+#include "baseLib/filesystem.h"
+
 #include "synthLib/midiToSysex.h"
-#include "synthLib/os.h"
 
 #include "xtLib/xtState.h"
 
 namespace xtJucePlugin
 {
-	WaveEditorData::WaveEditorData(Controller& _controller, const std::string& _cacheDir) : m_controller(_controller), m_cacheDir(synthLib::validatePath(_cacheDir))
+	WaveEditorData::WaveEditorData(Controller& _controller, const std::string& _cacheDir) : m_controller(_controller), m_cacheDir(baseLib::filesystem::validatePath(_cacheDir))
 	{
 		loadRomCache();
 		loadUserData();
@@ -404,14 +405,14 @@ namespace xtJucePlugin
 			data.insert(data.end(), sysex.begin(), sysex.end());
 		}
 
-		synthLib::createDirectory(m_cacheDir);
-		synthLib::writeFile(romWaves, data);
+		baseLib::filesystem::createDirectory(m_cacheDir);
+		baseLib::filesystem::writeFile(romWaves, data);
 	}
 
 	void WaveEditorData::loadRomCache()
 	{
 		std::vector<uint8_t> data;
-		if(!synthLib::readFile(data, getRomCacheFilename()))
+		if(!baseLib::filesystem::readFile(data, getRomCacheFilename()))
 			return;
 
 		std::vector<std::vector<uint8_t>> sysexMessages;
@@ -431,7 +432,7 @@ namespace xtJucePlugin
 
 		const auto filename = toFilename(_id);
 		const auto data = xt::State::createTableData(*table, _id.rawId(), true);
-		synthLib::writeFile(m_cacheDir + filename, data);
+		baseLib::filesystem::writeFile(m_cacheDir + filename, data);
 	}
 
 	void WaveEditorData::saveWave(const xt::WaveId _id) const
@@ -445,7 +446,7 @@ namespace xtJucePlugin
 
 		const auto filename = toFilename(_id);
 		const auto data = xt::State::createWaveData(*wave, _id.rawId(), true);
-		synthLib::writeFile(m_cacheDir + filename, data);
+		baseLib::filesystem::writeFile(m_cacheDir + filename, data);
 	}
 
 	void WaveEditorData::loadUserData()
@@ -455,7 +456,7 @@ namespace xtJucePlugin
 			const auto id = xt::WaveId(i + xt::wave::g_firstRamWaveIndex);
 			const auto filename = toFilename(id);
 			std::vector<uint8_t> data;
-			if (!synthLib::readFile(data, m_cacheDir + filename))
+			if (!baseLib::filesystem::readFile(data, m_cacheDir + filename))
 				continue;
 			xt::WaveData wave;
 			if (xt::State::parseWaveData(wave, data))
@@ -467,7 +468,7 @@ namespace xtJucePlugin
 			const auto id = xt::TableId(i);
 			const auto filename = toFilename(id);
 			std::vector<uint8_t> data;
-			if (!synthLib::readFile(data, m_cacheDir + filename))
+			if (!baseLib::filesystem::readFile(data, m_cacheDir + filename))
 				continue;
 			xt::TableData table;
 			if (xt::State::parseTableData(table, data))

@@ -3,8 +3,6 @@
 #include "xtEditor.h"
 #include "PluginProcessor.h"
 
-#include "synthLib/os.h"
-
 #include "skins.h"
 
 namespace xtJucePlugin

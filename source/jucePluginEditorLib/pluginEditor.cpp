@@ -4,6 +4,8 @@
 #include "pluginProcessor.h"
 #include "skin.h"
 
+#include "baseLib/filesystem.h"
+
 #include "jucePluginLib/clipboard.h"
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
@@ -624,7 +626,7 @@ namespace jucePluginEditorLib
 
 			const auto modulePath = synthLib::getModulePath();
 			const auto publicDataPath = m_processor.getDataFolder();
-			const auto folder = synthLib::validatePath(m_skin.folder.find(modulePath) == 0 || m_skin.folder.find(publicDataPath) == 0 ? m_skin.folder : modulePath + m_skin.folder);
+			const auto folder = baseLib::filesystem::validatePath(m_skin.folder.find(modulePath) == 0 || m_skin.folder.find(publicDataPath) == 0 ? m_skin.folder : modulePath + m_skin.folder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");

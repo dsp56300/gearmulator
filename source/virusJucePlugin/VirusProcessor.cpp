@@ -4,10 +4,10 @@
 #include "VirusController.h"
 
 #include "baseLib/binarystream.h"
+#include "baseLib/filesystem.h"
 
 #include "synthLib/deviceException.h"
 #include "synthLib/lv2PresetExport.h"
-#include "synthLib/os.h"
 
 namespace virus
 {
@@ -122,7 +122,7 @@ namespace virus
 		if(rom)
 		{
 			baseLib::ChunkWriter cw(s, "ROM ", 2);
-			const auto romName = synthLib::getFilenameWithoutPath(rom->getFilename());
+			const auto romName = baseLib::filesystem::getFilenameWithoutPath(rom->getFilename());
 			s.write<uint8_t>(static_cast<uint8_t>(rom->getModel()));
 			s.write(romName);
 		}
@@ -144,7 +144,7 @@ namespace virus
 			for(uint32_t i=0; i<static_cast<uint32_t>(roms.size()); ++i)
 			{
 				const auto& rom = roms[i];
-				if(rom.getModel() == model && synthLib::getFilenameWithoutPath(rom.getFilename()) == romName)
+				if(rom.getModel() == model && baseLib::filesystem::getFilenameWithoutPath(rom.getFilename()) == romName)
 					setSelectedRom(i);
 			}
 		});
@@ -186,7 +186,7 @@ namespace virus
 			case virusLib::DeviceModel::Invalid:		bank.name = std::string("Unknown " ) + static_cast<char>('A' + b);	assert(false); break;
 			}
 
-			const auto path = synthLib::validatePath(_rootPath) + getProperties().name + '_' + synthLib::Lv2PresetExport::getBankFilename(bank.name) + ".lv2/";
+			const auto path = baseLib::filesystem::validatePath(_rootPath) + getProperties().name + '_' + synthLib::Lv2PresetExport::getBankFilename(bank.name) + ".lv2/";
 
 			if(synthLib::Lv2PresetExport::manifestFileExists(path))
 				continue;

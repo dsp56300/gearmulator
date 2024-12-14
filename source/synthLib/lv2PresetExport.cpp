@@ -3,7 +3,7 @@
 #include <fstream>
 #include <map>
 
-#include "os.h"
+#include "baseLib/filesystem.h"
 
 namespace synthLib
 {
@@ -150,8 +150,8 @@ namespace synthLib
 
 	bool Lv2PresetExport::exportPresets(const std::string& _outputPath, const std::string& _pluginId, const std::vector<Bank>& _banks)
 	{
-		const auto path = validatePath(_outputPath);
-		createDirectory(path);
+		const auto path = baseLib::filesystem::validatePath(_outputPath);
+		baseLib::filesystem::createDirectory(path);
 
 		for (const auto& bank : _banks)
 		{
@@ -163,8 +163,8 @@ namespace synthLib
 
 	bool Lv2PresetExport::exportPresets(const std::string& _outputPath, const std::string& _pluginId, const Bank& _bank)
 	{
-		const auto path = validatePath(_outputPath);
-		createDirectory(path);
+		const auto path = baseLib::filesystem::validatePath(_outputPath);
+		baseLib::filesystem::createDirectory(path);
 		std::ofstream manifest(getManifestFilename(path));
 		if(!manifest.is_open())
 			return false;
@@ -205,12 +205,12 @@ namespace synthLib
 
 	std::string Lv2PresetExport::getBankPath(const std::string& _outputPath, const std::string& _bankName)
 	{
-		return validatePath(_outputPath) + getBankFilename(_bankName) + ".lv2/";
+		return baseLib::filesystem::validatePath(_outputPath) + getBankFilename(_bankName) + ".lv2/";
 	}
 
 	std::string Lv2PresetExport::getManifestFilename(const std::string& _path)
 	{
-		return validatePath(_path) + "manifest.ttl";
+		return baseLib::filesystem::validatePath(_path) + "manifest.ttl";
 	}
 
 	std::string Lv2PresetExport::getBankFilename(const std::string& _bankName)

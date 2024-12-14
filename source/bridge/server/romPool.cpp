@@ -1,9 +1,11 @@
 #include "romPool.h"
 
 #include "config.h"
+
+#include "baseLib/filesystem.h"
 #include "baseLib/md5.h"
+
 #include "networkLib/logging.h"
-#include "synthLib/os.h"
 
 namespace bridgeServer
 {
@@ -34,7 +36,7 @@ namespace bridgeServer
 		if(m_roms.find(hash) != m_roms.end())
 			return;
 
-		if(synthLib::writeFile(getRootPath() + _name + '_' + hash.toString() + ".bin", _data))
+		if(baseLib::filesystem::writeFile(getRootPath() + _name + '_' + hash.toString() + ".bin", _data))
 			m_roms.insert({hash, _data});
 	}
 
@@ -46,13 +48,13 @@ namespace bridgeServer
 	void RomPool::findRoms()
 	{
 		std::vector<std::string> files;
-		synthLib::findFiles(files, getRootPath(), {}, 0, 16 * 1024 * 1024);
+		baseLib::filesystem::findFiles(files, getRootPath(), {}, 0, 16 * 1024 * 1024);
 
 		for (const auto& file : files)
 		{
 			std::vector<uint8_t> romData;
 
-			if(!synthLib::readFile(romData, file))
+			if(!baseLib::filesystem::readFile(romData, file))
 			{
 				LOGNET(networkLib::LogLevel::Error, "Failed to load file " << file);
 				continue;
@@ -64,7 +66,7 @@ namespace bridgeServer
 				continue;
 
 			m_roms.insert({hash, std::move(romData)});
-			LOGNET(networkLib::LogLevel::Info, "Loaded ROM " << synthLib::getFilenameWithoutPath(file));
+			LOGNET(networkLib::LogLevel::Info, "Loaded ROM " << baseLib::filesystem::getFilenameWithoutPath(file));
 		}
 	}
 }

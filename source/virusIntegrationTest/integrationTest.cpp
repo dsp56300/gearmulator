@@ -10,9 +10,9 @@
 #include "dsp56kEmu/jitunittests.h"
 
 #include "baseLib/commandline.h"
+#include "baseLib/filesystem.h"
 
 #include "synthLib/wavReader.h"
-#include "synthLib/os.h"
 
 #include "virusLib/romloader.h"
 
@@ -61,13 +61,13 @@ int main(int _argc, char* _argv[])
 
 				const auto res = test.run();
 				if(0 == res)
-					std::cout << "test successful, ROM " << synthLib::getFilenameWithoutPath(romFile) << ", preset " << preset << '\n';
+					std::cout << "test successful, ROM " << baseLib::filesystem::getFilenameWithoutPath(romFile) << ", preset " << preset << '\n';
 				return res;
 			}
 			if(cmd.contains("folder"))
 			{
 				std::vector<std::string> subfolders;
-				synthLib::getDirectoryEntries(subfolders, cmd.get("folder"));
+				baseLib::filesystem::getDirectoryEntries(subfolders, cmd.get("folder"));
 
 				if(subfolders.empty())
 				{
@@ -83,7 +83,7 @@ int main(int _argc, char* _argv[])
 						continue;
 
 					std::vector<std::string> files;
-					synthLib::getDirectoryEntries(files, subfolder);
+					baseLib::filesystem::getDirectoryEntries(files, subfolder);
 
 					std::string romFile;
 					std::string presetsFile;
@@ -96,11 +96,11 @@ int main(int _argc, char* _argv[])
 
 					for (auto& file : files)
 					{
-						if(synthLib::hasExtension(file, ".txt"))
+						if(baseLib::filesystem::hasExtension(file, ".txt"))
 							presetsFile = file;
-						else if(synthLib::hasExtension(file, ".bin"))
+						else if(baseLib::filesystem::hasExtension(file, ".bin"))
 							romFile = file;
-						else if(synthLib::hasExtension(file, ".mid"))
+						else if(baseLib::filesystem::hasExtension(file, ".mid"))
 						{
 							const auto rom = virusLib::ROMLoader::findROM(file);
 							if(rom.isValid())
@@ -161,7 +161,7 @@ int main(int _argc, char* _argv[])
 				{
 					std::cout << "All " << finishedTests.size() << " tests finished successfully:" << '\n';
 					for (const auto& [rom,preset] : finishedTests)
-						std::cout << "ROM " << synthLib::getFilenameWithoutPath(rom) << ", preset " << preset << '\n';
+						std::cout << "ROM " << baseLib::filesystem::getFilenameWithoutPath(rom) << ", preset " << preset << '\n';
 					return 0;
 				}
 			}

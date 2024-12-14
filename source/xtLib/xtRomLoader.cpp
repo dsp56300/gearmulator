@@ -5,7 +5,8 @@
 #include <algorithm>
 #include <cstring>
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
+
 #include "wLib/wRom.h"
 
 namespace xt
@@ -165,10 +166,10 @@ namespace xt
 		for (const auto& name : fileNames)
 		{
 			File f;
-			if(!synthLib::readFile(f.data, name))
+			if(!baseLib::filesystem::readFile(f.data, name))
 				continue;
 
-			f.name = synthLib::getFilenameWithoutPath(name);
+			f.name = baseLib::filesystem::getFilenameWithoutPath(name);
 			files.emplace_back(std::move(f));
 		}
 		return files;

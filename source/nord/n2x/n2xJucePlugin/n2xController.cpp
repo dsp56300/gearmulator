@@ -5,10 +5,10 @@
 #include "n2xPatchManager.h"
 #include "n2xPluginProcessor.h"
 
-#include "synthLib/os.h"
-
 #include "dsp56kEmu/logging.h"
+
 #include "n2xLib/n2xmiditypes.h"
+
 #include "synthLib/midiTranslator.h"
 
 namespace

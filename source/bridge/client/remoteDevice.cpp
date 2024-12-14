@@ -15,10 +15,10 @@
 
 #include <condition_variable>
 
+#include "baseLib/filesystem.h"
+
 #include "networkLib/exception.h"
 #include "networkLib/logging.h"
-
-#include "synthLib/os.h"
 
 namespace bridgeClient
 {
@@ -28,7 +28,7 @@ namespace bridgeClient
 	RemoteDevice::RemoteDevice(const synthLib::DeviceCreateParams& _params, bridgeLib::PluginDesc&& _desc, const std::string& _host/* = {}*/, uint32_t _port/* = 0*/) : Device(_params), m_pluginDesc(std::move(_desc))
 	{
 		getDeviceCreateParams().romHash = baseLib::MD5(getDeviceCreateParams().romData);
-		getDeviceCreateParams().romName = synthLib::getFilenameWithoutPath(getDeviceCreateParams().romName);
+		getDeviceCreateParams().romName = baseLib::filesystem::getFilenameWithoutPath(getDeviceCreateParams().romName);
 
 		m_pluginDesc.protocolVersion = bridgeLib::g_protocolVersion;
 		createConnection(_host, _port);

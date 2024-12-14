@@ -6,7 +6,6 @@
 #include "VirusProcessor.h"
 
 #include "virusLib/microcontrollerTypes.h"
-#include "synthLib/os.h"
 
 #include "VirusEditor.h"
 

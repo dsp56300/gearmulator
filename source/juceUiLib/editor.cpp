@@ -2,7 +2,7 @@
 
 #include "uiObject.h"
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace genericUI
 {
@@ -71,7 +71,7 @@ namespace genericUI
 		if(!m_rootObject)
 			return "Nothing to export";
 
-		synthLib::createDirectory(_folder);
+		baseLib::filesystem::createDirectory(_folder);
 
 		std::string subfolder = m_jsonFilename;
 		const auto dotIndex = m_jsonFilename.rfind('.');
@@ -83,7 +83,7 @@ namespace genericUI
 
 		const auto folder = _folder + subfolder + '/';
 
-		synthLib::createDirectory(folder);
+		baseLib::filesystem::createDirectory(folder);
 
 		std::stringstream errors;
 

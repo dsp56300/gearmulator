@@ -1,11 +1,11 @@
 #include <iostream>
 
+#include "baseLib/filesystem.h"
+
 #include "virusConsoleLib/consoleApp.h"
 
 #include "dsp56kEmu/jitunittests.h"
 #include "dsp56kEmu/interpreterunittests.h"
-
-#include "synthLib/os.h"
 
 constexpr bool g_createDebugger = false;
 constexpr bool g_dumpAssembly = false;
@@ -46,7 +46,7 @@ int main(int _argc, char* _argv[])
 	if(_argc > 1)
 	{
 		const std::string name = _argv[1];
-		if(hasExtension(name, ".mid") || hasExtension(name, ".bin"))
+		if(baseLib::filesystem::hasExtension(name, ".mid") || baseLib::filesystem::hasExtension(name, ".bin"))
 		{
 			if(!app->loadDemo(name))
 			{

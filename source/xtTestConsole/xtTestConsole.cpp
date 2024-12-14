@@ -6,8 +6,6 @@
 
 #include "dsp56kEmu/jitunittests.h"
 
-//#include "synthLib/os.h"
-
 int main()
 {
 //	dsp56k::JitUnittests tests;

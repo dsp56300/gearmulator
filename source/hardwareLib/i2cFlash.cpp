@@ -2,15 +2,15 @@
 
 #include <cassert>
 
-#include "dsp56kEmu/logging.h"
+#include "baseLib/filesystem.h"
 
-#include "synthLib/os.h"
+#include "dsp56kEmu/logging.h"
 
 namespace hwLib
 {
 	void I2cFlash::saveAs(const std::string& _filename) const
 	{
-		synthLib::writeFile(_filename, m_data);
+		baseLib::filesystem::writeFile(_filename, m_data);
 	}
 
 	bool I2cFlash::setData(std::vector<uint8_t>& _data)

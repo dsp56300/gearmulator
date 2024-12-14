@@ -1,12 +1,14 @@
 #include "clipboard.h"
 
 #include "synthLib/midiToSysex.h"
-#include "synthLib/os.h"
 
 #include <sstream>
 
 #include "pluginVersion.h"
 #include "processor.h"
+
+#include "baseLib/filesystem.h"
+
 #include "dsp56kEmu/logging.h"
 
 #include "juce_core/juce_core.h"
@@ -40,7 +42,7 @@ namespace pluginLib
 		if(_text.empty())
 			return {};
 
-		auto text = synthLib::lowercase(_text);
+		auto text = baseLib::filesystem::lowercase(_text);
 
 		while(true)
 		{

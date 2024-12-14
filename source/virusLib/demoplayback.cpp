@@ -7,13 +7,14 @@
 
 #include "synthLib/midiToSysex.h"
 #include "synthLib/midiTypes.h"
-#include "synthLib/os.h"
 
 #include "dsp56kEmu/logging.h"
 
 #include <cstring> // memcpy
 
 #include "midiFileToRomData.h"
+
+#include "baseLib/filesystem.h"
 
 namespace virusLib
 {
@@ -23,7 +24,7 @@ namespace virusLib
 
 	bool DemoPlayback::loadFile(const std::string& _filename)
 	{
-		if(synthLib::hasExtension(_filename, ".bin"))
+		if(baseLib::filesystem::hasExtension(_filename, ".bin"))
 		{
 			std::vector<uint8_t> data;
 			auto* hFile = fopen(_filename.c_str(), "rb");

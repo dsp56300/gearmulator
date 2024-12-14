@@ -1,7 +1,5 @@
 #include "romloader.h"
 
-#include "synthLib/os.h"
-
 namespace mqLib
 {
 	ROM RomLoader::findROM()

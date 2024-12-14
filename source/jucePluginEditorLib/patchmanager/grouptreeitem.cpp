@@ -5,7 +5,7 @@
 #include "search.h"
 #include "tagtreeitem.h"
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace jucePluginEditorLib::patchManager
 {
@@ -363,7 +363,7 @@ namespace jucePluginEditorLib::patchManager
 					continue;
 
 				pluginLib::patchDB::DataSource ds;
-				ds.name = synthLib::getFilenameWithoutPath(file.toStdString());
+				ds.name = baseLib::filesystem::getFilenameWithoutPath(file.toStdString());
 				ds.type = pluginLib::patchDB::SourceType::LocalStorage;
 				ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 

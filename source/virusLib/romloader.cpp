@@ -4,7 +4,7 @@
 
 #include "midiFileToRomData.h"
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace virusLib
 {
@@ -60,21 +60,21 @@ namespace virusLib
 		if(_filename.empty())
 			return findROM(_model);
 
-		const auto path = synthLib::getPath(_filename);
+		const auto path = baseLib::filesystem::getPath(_filename);
 
 		const std::vector<ROMFile> results = findROMs(path, _model);
 
 		if(results.empty())
 			return ROMFile::invalid();
 
-		const auto requestedName = synthLib::lowercase(_filename);
+		const auto requestedName = baseLib::filesystem::lowercase(_filename);
 
 		for (const auto& result : results)
 		{
-			const auto name = synthLib::lowercase(result.getFilename());
+			const auto name = baseLib::filesystem::lowercase(result.getFilename());
 			if(name == requestedName)
 				return result;
-			if(synthLib::getFilenameWithoutPath(name) == requestedName)
+			if(baseLib::filesystem::getFilenameWithoutPath(name) == requestedName)
 				return result;
 		}
 		return ROMFile::invalid();
@@ -85,16 +85,16 @@ namespace virusLib
 		FileData data;
 		data.filename = _name;
 
-		if(!synthLib::readFile(data.data, _name))
+		if(!baseLib::filesystem::readFile(data.data, _name))
 			return {};
 
-		if(synthLib::hasExtension(_name, ".bin"))
+		if(baseLib::filesystem::hasExtension(_name, ".bin"))
 		{
 			data.type = BinaryRom;
 			return data;
 		}
 
-		if(!synthLib::hasExtension(_name, ".mid"))
+		if(!baseLib::filesystem::hasExtension(_name, ".mid"))
 			return {};
 
 		MidiFileToRomData midiLoader;
@@ -145,7 +145,7 @@ namespace virusLib
 		if(bracketClose == _data.end())
 			return DeviceModel::Invalid;
 
-		const auto versionString = synthLib::lowercase(std::string(bracketOpen+1, bracketClose-1));
+		const auto versionString = baseLib::filesystem::lowercase(std::string(bracketOpen+1, bracketClose-1));
 
 		const auto test = [&versionString](const char* _key)
 		{

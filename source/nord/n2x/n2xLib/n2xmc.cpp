@@ -5,7 +5,7 @@
 #include "n2xdsp.h"
 #include "n2xrom.h"
 
-#include "synthLib/os.h"
+#include "baseLib/filesystem.h"
 
 namespace n2x
 {
@@ -319,7 +319,7 @@ namespace n2x
 		if(writeRam)
 		{
 			writeRam = false;
-			synthLib::writeFile("romRam_runtime.bin", m_romRam);
+			baseLib::filesystem::writeFile("romRam_runtime.bin", m_romRam);
 		}
 #endif
 		const auto cycles = Mc68k::exec();
