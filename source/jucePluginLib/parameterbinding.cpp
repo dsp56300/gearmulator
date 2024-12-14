@@ -263,6 +263,28 @@ namespace pluginLib
 		addBinding(p);
 	}
 
+	void ParameterBinding::bind(juce::Label& _label, const uint32_t _param)
+	{
+		bind(_label, _param, CurrentPart);
+	}
+
+	void ParameterBinding::bind(juce::Label& _control, const uint32_t _param, const uint8_t _part)
+	{
+		const auto param = m_controller.getParameter(_param, _part == CurrentPart ? m_controller.getCurrentPart() : _part);
+		if (!param)
+		{
+			assert(false && "Failed to find parameter");
+			return;
+		}
+		const auto listenerId = param->onValueChanged.addListener([this, &_control](const Parameter* _p)
+		{
+			_control.setText(_p->getCurrentValueAsText(), juce::dontSendNotification);
+		});
+		_control.setText(param->getCurrentValueAsText(), juce::dontSendNotification);
+		const BoundParameter p{ param, &_control, _param, _part, listenerId};
+		addBinding(p);
+	}
+
 	bool ParameterBinding::bind(juce::Component& _component, const uint32_t _param, const uint8_t _part)
 	{
 		if(auto* slider = dynamic_cast<juce::Slider*>(&_component))
@@ -278,6 +300,11 @@ namespace pluginLib
 		if(auto* comboBox = dynamic_cast<juce::ComboBox*>(&_component))
 		{
 			bind(*comboBox, _param, _part);
+			return true;
+		}
+		if(auto* label = dynamic_cast<juce::Label*>(&_component))
+		{
+			bind(*label, _param, _part);
 			return true;
 		}
 		assert(false && "unknown component type");

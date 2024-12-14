@@ -682,6 +682,12 @@ namespace jucePluginEditorLib
 		return true;
 	}
 
+	bool Editor::bindParameter(juce::Label& _target, int _parameterIndex)
+	{
+		m_binding.bind(_target, _parameterIndex);
+		return true;
+	}
+
 	juce::Value* Editor::getParameterValue(int _parameterIndex, uint8_t _part)
 	{
 		return m_processor.getController().getParamValueObject(_parameterIndex, _part);

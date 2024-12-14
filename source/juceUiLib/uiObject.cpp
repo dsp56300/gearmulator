@@ -165,6 +165,7 @@ namespace genericUI
 	void UiObject::apply(Editor& _editor, juce::Label& _target)
 	{
 		applyT<juce::Label, LabelStyle>(_editor, _target);
+		bindParameter(_editor, _target);
 	}
 
 	void UiObject::apply(Editor& _editor, juce::ScrollBar& _target)

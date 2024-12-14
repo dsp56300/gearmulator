@@ -15,5 +15,6 @@ namespace genericUI
 		virtual bool bindParameter(juce::Slider& _target, int _parameterIndex) = 0;
 		virtual bool bindParameter(juce::Button& _target, int _parameterIndex) = 0;
 		virtual bool bindParameter(juce::ComboBox& _target, int _parameterIndex) = 0;
+		virtual bool bindParameter(juce::Label& _target, int _parameterIndex) = 0;
 	};
 }
