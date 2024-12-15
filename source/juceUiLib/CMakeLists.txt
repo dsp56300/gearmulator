@@ -29,7 +29,7 @@ add_library(juceUiLib STATIC)
 target_sources(juceUiLib PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceUiLib PUBLIC synthLib)
+target_link_libraries(juceUiLib PUBLIC baseLib)
 
 target_include_directories(juceUiLib PUBLIC ../JUCE/modules)
 target_compile_definitions(juceUiLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
