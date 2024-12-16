@@ -26,6 +26,11 @@ namespace bridgeClient
 		start();
 	}
 
+	UdpClient::~UdpClient()
+	{
+		stop();
+	}
+
 	bool UdpClient::validateResponse(const std::string& _host, const std::vector<uint8_t>& _message)
 	{
 		bool ok = false;
