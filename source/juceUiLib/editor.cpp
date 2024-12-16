@@ -19,7 +19,7 @@ namespace genericUI
 		const auto error = juce::JSON::parse(juce::String(std::string(jsonData, jsonSize)), json);
 
 		if (error.failed())
-			throw std::runtime_error("Failed to load json");
+			throw std::runtime_error("Failed to load json, " + error.getErrorMessage().toStdString());
 
 		m_jsonFilename = _jsonFilename;
 
