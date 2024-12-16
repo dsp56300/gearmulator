@@ -23,7 +23,7 @@ namespace genericUI
 
 		m_jsonFilename = _jsonFilename;
 
-		m_rootObject.reset(new UiObject(json));
+		m_rootObject.reset(new UiObject(nullptr, json));
 
 		std::set<std::string> textures;
 		m_rootObject->collectVariants(textures, "texture");

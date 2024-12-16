@@ -22,7 +22,7 @@
 
 namespace genericUI
 {
-	UiObject::UiObject(const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate)
+	UiObject::UiObject(UiObject* _parent, const juce::var& _json, const bool _isTemplate/* = false*/) : m_isTemplate(_isTemplate), m_parent(_parent)
 	{
 		auto* obj = _json.getDynamicObject();
 
@@ -407,17 +407,78 @@ namespace genericUI
 		}
 	}
 
+	juce::DynamicObject& UiObject::applyStyle(juce::DynamicObject& _obj, const std::string& _styleName)
+	{
+		if (m_parent)
+			m_parent->applyStyle(_obj, _styleName);
+
+		const auto it = m_styles.find(_styleName);
+		if (it == m_styles.end())
+			return _obj;
+
+		const auto& s = it->second;
+		const auto sourceObj = s.getDynamicObject();
+
+		if (sourceObj)
+			copyPropertiesRecursive(_obj, *sourceObj);
+
+		return _obj;
+	}
+
+	bool UiObject::copyPropertiesRecursive(juce::DynamicObject& _target, const juce::DynamicObject& _source)
+	{
+		bool result = false;
+
+		for (const auto& sourceProp : _source.getProperties())
+		{
+			const auto& key = sourceProp.name;
+			const auto& val = sourceProp.value;
+
+			if (!_target.hasProperty(key))
+			{
+				_target.setProperty(key, val);
+				result = true;
+			}
+			else
+			{
+				auto& targetProperty = _target.getProperty(key);
+
+				if (targetProperty.isObject())
+				{
+					auto targetObj = targetProperty.getDynamicObject();
+					if (targetObj)
+					{
+						auto sourceObj = val.getDynamicObject();
+						if (sourceObj)
+							copyPropertiesRecursive(*targetObj, *sourceObj);
+					}
+				}
+			}
+		}
+		return true;
+	}
+
 	bool UiObject::parse(juce::DynamicObject* _obj)
 	{
 		if (!_obj)
 			return false;
 
-		const auto& props = _obj->getProperties();
+		auto props = _obj->getProperties();
+
+		auto styleName = props["style"].toString().toStdString();
+
+		std::unique_ptr<juce::DynamicObject> newObj;
+
+		if (!styleName.empty())
+		{
+			newObj = _obj->clone();
+			props = applyStyle(*newObj, styleName).getProperties();
+		}
 
 		for (int i = 0; i < props.size(); ++i)
 		{
 			const auto key = std::string(props.getName(i).toString().toUTF8());
-			const auto value = props.getValueAt(i);
+			const auto& value = props.getValueAt(i);
 
 			if (key == "name")
 			{
@@ -429,10 +490,10 @@ namespace genericUI
 
 				if (children)
 				{
-					for(int c=0; c<children->size(); ++c)
+					for (auto&& c : *children)
 					{
 						std::unique_ptr<UiObject> child;
-						child.reset(new UiObject((*children)[c]));
+						child.reset(new UiObject(this, c));
 						m_children.emplace_back(std::move(child));
 					}
 				}
@@ -442,7 +503,27 @@ namespace genericUI
 				if (const auto children = value.getArray())
 				{
 					for (const auto& c : *children)
-						m_templates.emplace_back(std::make_shared<UiObject>(c, true));
+						m_templates.emplace_back(std::make_shared<UiObject>(this, c, true));
+				}
+			}
+			else if (key == "styles")
+			{
+				auto obj = value.getDynamicObject();
+				if (!obj)
+					throw std::runtime_error("styles must be an object");
+
+				auto p = obj->getProperties();
+
+				for (const auto& s : p)
+				{
+					const auto name = s.name.toString().toStdString();
+
+					if (name.empty())
+						throw std::runtime_error("style needs to have a name");
+					if (m_styles.find(name) != m_styles.end())
+						throw std::runtime_error("style with name " + name + " already exists");
+
+					m_styles.insert({name, s.value});
 				}
 			}
 			else if(key == "tabgroup")
