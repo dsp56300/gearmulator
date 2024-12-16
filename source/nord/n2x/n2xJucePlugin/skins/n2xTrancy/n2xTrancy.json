@@ -1,308 +1,308 @@
 {
-	"name" : "Root",
-	"root" : { "x" : "0", "y" : "0", "width" : "2275", "height" : "1197", "scale" : "0.5"},
-	"styles": {
-		"button": {"button": {"isToggle": "1", "normalImage": "0", "overImage": "0", "downImage": "0", "normalImageOn": "1", "overImageOn": "1", "downImageOn": "1"}},
-		
-		"button_round": {"style": "button", "button": {"width": "70", "height": "70", "texture": "button_round", "tileSizeX": "70", "tileSizeY": "70"}},
+    "name" : "Root",
+    "root" : { "x" : "0", "y" : "0", "width" : "2275", "height" : "1197", "scale" : "0.5"},
+    "styles": {
+        "button": {"button": {"isToggle": "1", "normalImage": "0", "overImage": "0", "downImage": "0", "normalImageOn": "1", "overImageOn": "1", "downImageOn": "1"}},
+        
+        "button_round": {"style": "button", "button": {"width": "70", "height": "70", "texture": "button_round", "tileSizeX": "70", "tileSizeY": "70"}},
 
-		"button_round_90":  {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 90}},
-		"button_round_100": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 100}},
-		"button_round_120": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 120}},
-		"button_round_130": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 130}},
-		"button_round_150": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 150}},
-		"button_round_280": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 280}},
-		"button_round_350": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 350}},
+        "button_round_90":  {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 90}},
+        "button_round_100": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 100}},
+        "button_round_120": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 120}},
+        "button_round_130": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 130}},
+        "button_round_150": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 150}},
+        "button_round_280": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 280}},
+        "button_round_350": {"style": "button_round", "button": {"hitOffsetT": 20, "hitOffsetB": -20, "hitOffsetR": 350}},
 
-		"button_perfslot": {"style": "button", "button" : { "width" : "74", "height" : "56", "texture" : "button_a", "tileSizeX" : "74", "tileSizeY" : "56"}},
+        "button_perfslot": {"style": "button", "button" : { "width" : "74", "height" : "56", "texture" : "button_a", "tileSizeX" : "74", "tileSizeY" : "56"}},
 
-		"knob_big":       {"rotary" : {}, "spritesheet" : { "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113"}},
-		"knob_big_sens": {"style":"knob_big", "spritesheet" : { "texture" : "knob_big_sens"}},
-		
-		"h_slider": {"rotary" : { "style" : "LinearHorizontal"}, "spritesheet" : { "width" : "140", "height" : "40", "texture" : "h_slider", "tileSizeX" : "300", "tileSizeY" : "70" }},
-		
-		"combo_150": {"combobox" : { "text" : "MIDI", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "width" : "150", "height" : "35", "offsetR" : "-60" }},
-		"combo_300": {"style":"combo_150", "combobox" : { "width" : "300"}},
-		"combo_320": {"style":"combo_150", "combobox" : { "width" : "320"}}
-	},
-	"tabgroup": {
-		"name": "pages",
-		"buttons": ["button_1_main", "button_2_browser", "button_3_perf"],
-		"pages": ["page_1_main", "page_2_browser", "page_3_perf"]
-	},	
-	
-	"children" :
-	[
-		{"name":"bg","image":{"x":"0","y":"0","width":"2275","height":"1197","texture":"background"}},
-		
-		{"name":"button_1_main",    "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1658","y":"897","width":"184","height":"67.5","texture":"button_main","tileSizeX":"184","tileSizeY":"67.5",}},
-		{"name":"button_2_browser", "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1839","y":"897","width":"184","height":"67.5","texture":"button_browser","tileSizeX":"184","tileSizeY":"67.5",}},
-		{"name":"button_3_perf",    "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2020","y":"897","width":"184","height":"67.5","texture":"button_perf","tileSizeX":"184","tileSizeY":"67.5",}},
-	
-		{ "name" : "PortamentoSens",     "parameterAttachment" : { "parameter" : "PortamentoSens" },      "spritesheet" : { "x" : "715", "y" : "960"}, "style":"knob_big_sens" },
+        "knob_big":       {"rotary" : {}, "spritesheet" : { "width" : "113", "height" : "113", "texture" : "knob_big", "tileSizeX" : "113", "tileSizeY" : "113"}},
+        "knob_big_sens": {"style":"knob_big", "spritesheet" : { "texture" : "knob_big_sens"}},
+        
+        "h_slider": {"rotary" : { "style" : "LinearHorizontal"}, "spritesheet" : { "width" : "140", "height" : "40", "texture" : "h_slider", "tileSizeX" : "300", "tileSizeY" : "70" }},
+        
+        "combo_150": {"combobox" : { "text" : "MIDI", "textHeight" : "32", "alignH" : "L", "alignV" : "C", "width" : "150", "height" : "35", "offsetR" : "-60" }},
+        "combo_300": {"style":"combo_150", "combobox" : { "width" : "300"}},
+        "combo_320": {"style":"combo_150", "combobox" : { "width" : "320"}}
+    },
+    "tabgroup": {
+        "name": "pages",
+        "buttons": ["button_1_main", "button_2_browser", "button_3_perf"],
+        "pages": ["page_1_main", "page_2_browser", "page_3_perf"]
+    },  
+    
+    "children" :
+    [
+        {"name":"bg","image":{"x":"0","y":"0","width":"2275","height":"1197","texture":"background"}},
+        
+        {"name":"button_1_main",    "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1658","y":"897","width":"184","height":"67.5","texture":"button_main","tileSizeX":"184","tileSizeY":"67.5",}},
+        {"name":"button_2_browser", "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"1839","y":"897","width":"184","height":"67.5","texture":"button_browser","tileSizeX":"184","tileSizeY":"67.5",}},
+        {"name":"button_3_perf",    "button":{"isToggle":"1","radioGroupId":"42","normalImage":"0","overImage":"1","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"2020","y":"897","width":"184","height":"67.5","texture":"button_perf","tileSizeX":"184","tileSizeY":"67.5",}},
+    
+        { "name" : "PortamentoSens",     "parameterAttachment" : { "parameter" : "PortamentoSens" },      "spritesheet" : { "x" : "715", "y" : "960"}, "style":"knob_big_sens" },
 
-		{ "name" : "MasterVolume",                                                                        "spritesheet" : { "x" : "74" , "y" : "961" }, "style":"knob_big" },
-		{ "name" : "PerfUnisonDetune",   "parameterAttachment" : { "parameter" : "PerfUnisonDetune" },    "spritesheet" : { "x" : "892", "y" : "960" }, "style":"knob_big" },
-		{ "name" : "Portamento",         "parameterAttachment" : { "parameter" : "Portamento" },          "spritesheet" : { "x" : "715", "y" : "960" }, "style":"knob_big" },
-		
-		{ "name" : "Auto_LED",           "parameterAttachment" : { "parameter" : "Auto"},                 "button" : {"x" : "685", "y" : "1071"}, "style":"button_round_120" },
-		{ "name" : "VMMAP",              "parameterAttachment" : { },                                     "button" : {"x" : "41" , "y" : "1071"}, "style":"button_round_120" },
+        { "name" : "MasterVolume",                                                                        "spritesheet" : { "x" : "74" , "y" : "961" }, "style":"knob_big" },
+        { "name" : "PerfUnisonDetune",   "parameterAttachment" : { "parameter" : "PerfUnisonDetune" },    "spritesheet" : { "x" : "892", "y" : "960" }, "style":"knob_big" },
+        { "name" : "Portamento",         "parameterAttachment" : { "parameter" : "Portamento" },          "spritesheet" : { "x" : "715", "y" : "960" }, "style":"knob_big" },
+        
+        { "name" : "Auto_LED",           "parameterAttachment" : { "parameter" : "Auto"},                 "button" : {"x" : "685", "y" : "1071"}, "style":"button_round_120" },
+        { "name" : "VMMAP",              "parameterAttachment" : { },                                     "button" : {"x" : "41" , "y" : "1071"}, "style":"button_round_120" },
 
-		{ "name" : "Unison",             "parameterAttachment" : { "parameter" : "Unison"},               "button" : {"x" : "857", "y" : "881" }, "style":"button_round_120" },
-		{ "name" : "VoiceMode_1",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":2}, "button" : {"x" : "518", "y" : "927" }, "style":"button_round_120" },
-		{ "name" : "VoiceMode_2",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":1}, "button" : {"x" : "518", "y" : "964" }, "style":"button_round_120" },
-		{ "name" : "VoiceMode_3",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":0}, "button" : {"x" : "518", "y" : "1001"}, "style":"button_round_120" },
+        { "name" : "Unison",             "parameterAttachment" : { "parameter" : "Unison"},               "button" : {"x" : "857", "y" : "881" }, "style":"button_round_120" },
+        { "name" : "VoiceMode_1",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":2}, "button" : {"x" : "518", "y" : "927" }, "style":"button_round_120" },
+        { "name" : "VoiceMode_2",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":1}, "button" : {"x" : "518", "y" : "964" }, "style":"button_round_120" },
+        { "name" : "VoiceMode_3",        "parameterAttachment" : { "parameter" : "VoiceMode", "value":0}, "button" : {"x" : "518", "y" : "1001"}, "style":"button_round_120" },
 
-		{ "name" : "PerfMidiChannelA",                                                                    "button" : {"x" : "203", "y" : "1063"}, "style":"button_round" },                
-		{ "name" : "PerfMidiChannelB",                                                                    "button" : {"x" : "276", "y" : "1063"}, "style":"button_round" },                
-		{ "name" : "PerfMidiChannelC",                                                                    "button" : {"x" : "349", "y" : "1063"}, "style":"button_round" },                
-		{ "name" : "PerfMidiChannelD",                                                                    "button" : {"x" : "422", "y" : "1063"}, "style":"button_round" },                
+        { "name" : "PerfMidiChannelA",                                                                    "button" : {"x" : "203", "y" : "1063"}, "style":"button_round" },                
+        { "name" : "PerfMidiChannelB",                                                                    "button" : {"x" : "276", "y" : "1063"}, "style":"button_round" },                
+        { "name" : "PerfMidiChannelC",                                                                    "button" : {"x" : "349", "y" : "1063"}, "style":"button_round" },                
+        { "name" : "PerfMidiChannelD",                                                                    "button" : {"x" : "422", "y" : "1063"}, "style":"button_round" },                
 
-		{ "name" : "PerfSlotActiveA",                                                                     "button" : { "x" : "218", "y" : "1023", "texture" : "button_a"}, "style":"button_perfslot" },                
-		{ "name" : "PerfSlotActiveB",                                                                     "button" : { "x" : "291", "y" : "1023", "texture" : "button_b"}, "style":"button_perfslot" },                
-		{ "name" : "PerfSlotActiveC",                                                                     "button" : { "x" : "364", "y" : "1023", "texture" : "button_c"}, "style":"button_perfslot" },                
-		{ "name" : "PerfSlotActiveD",                                                                     "button" : { "x" : "437", "y" : "1023", "texture" : "button_d"}, "style":"button_perfslot" },                
-		
-		{ "name" : "OctaveShift_1",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":0},  "button" : { "x" : "1053", "y" : "938"  }, "style":"button_round_150" },                
-		{ "name" : "OctaveShift_2",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":1},  "button" : { "x" : "1053", "y" : "975"  }, "style":"button_round_150" },                
-		{ "name" : "OctaveShift_3",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":2},  "button" : { "x" : "1053", "y" : "1012" }, "style":"button_round_150" },                
-		{ "name" : "OctaveShift_4",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":3},  "button" : { "x" : "1053", "y" : "1049" }, "style":"button_round_150" },                
-		{ "name" : "OctaveShift_5",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":4},  "button" : { "x" : "1053", "y" : "1087" }, "style":"button_round_150" },                
-																											 
-		{ "name" : "ModWheelDest_1",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":4}, "button" : { "x" : "1222", "y" : "938"  }, "style":"button_round_150" },                
-		{ "name" : "ModWheelDest_2",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":2}, "button" : { "x" : "1222", "y" : "975"  }, "style":"button_round_150" },                
-		{ "name" : "ModWheelDest_3",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":0}, "button" : { "x" : "1222", "y" : "1012" }, "style":"button_round_150" },                
-		{ "name" : "ModWheelDest_4",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":3}, "button" : { "x" : "1222", "y" : "1049" }, "style":"button_round_150" },                
-		{ "name" : "ModWheelDest_5",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":1}, "button" : { "x" : "1222", "y" : "1087" }, "style":"button_round_150" },                
+        { "name" : "PerfSlotActiveA",                                                                     "button" : { "x" : "218", "y" : "1023", "texture" : "button_a"}, "style":"button_perfslot" },                
+        { "name" : "PerfSlotActiveB",                                                                     "button" : { "x" : "291", "y" : "1023", "texture" : "button_b"}, "style":"button_perfslot" },                
+        { "name" : "PerfSlotActiveC",                                                                     "button" : { "x" : "364", "y" : "1023", "texture" : "button_c"}, "style":"button_perfslot" },                
+        { "name" : "PerfSlotActiveD",                                                                     "button" : { "x" : "437", "y" : "1023", "texture" : "button_d"}, "style":"button_perfslot" },                
+        
+        { "name" : "OctaveShift_1",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":0},  "button" : { "x" : "1053", "y" : "938"  }, "style":"button_round_150" },                
+        { "name" : "OctaveShift_2",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":1},  "button" : { "x" : "1053", "y" : "975"  }, "style":"button_round_150" },                
+        { "name" : "OctaveShift_3",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":2},  "button" : { "x" : "1053", "y" : "1012" }, "style":"button_round_150" },                
+        { "name" : "OctaveShift_4",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":3},  "button" : { "x" : "1053", "y" : "1049" }, "style":"button_round_150" },                
+        { "name" : "OctaveShift_5",      "parameterAttachment" : {"parameter" : "OctaveShift", "value":4},  "button" : { "x" : "1053", "y" : "1087" }, "style":"button_round_150" },                
+                                                                                                             
+        { "name" : "ModWheelDest_1",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":4}, "button" : { "x" : "1222", "y" : "938"  }, "style":"button_round_150" },                
+        { "name" : "ModWheelDest_2",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":2}, "button" : { "x" : "1222", "y" : "975"  }, "style":"button_round_150" },                
+        { "name" : "ModWheelDest_3",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":0}, "button" : { "x" : "1222", "y" : "1012" }, "style":"button_round_150" },                
+        { "name" : "ModWheelDest_4",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":3}, "button" : { "x" : "1222", "y" : "1049" }, "style":"button_round_150" },                
+        { "name" : "ModWheelDest_5",     "parameterAttachment" : {"parameter" : "ModWheelDest", "value":1}, "button" : { "x" : "1222", "y" : "1087" }, "style":"button_round_150" },                
 
-		{"name":"button_store",           "button":{"isToggle":"0","radioGroupId":"1","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"560","y":"1065","width":"99","height":"47","texture":"button_red","tileSizeX":"99","tileSizeY":"47",}},
+        {"name":"button_store",           "button":{"isToggle":"0","radioGroupId":"1","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"560","y":"1065","width":"99","height":"47","texture":"button_red","tileSizeX":"99","tileSizeY":"47",}},
 
-		{"name":"PresetNext",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"225","y":"910","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
-		{"name":"PresetPrev",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"225","y":"957","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
+        {"name":"PresetNext",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"225","y":"910","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
+        {"name":"PresetPrev",             "button":{"normalImage":"0","overImage":"0","downImage":"1","disabledImage":"0","normalImageOn":"0","overImageOn":"0","downImageOn":"0","disabledImageOn":"0","x":"225","y":"957","width":"99","height":"47","texture":"button_black","tileSizeX":"99","tileSizeY":"47"}},
 
-		{"name":"PatchName",              "label":{"text":"666", "color" : "FF0000FF", "textHeight":"42","alignH":"L","alignV":"C","fontFile":"DSEG7Classic-BoldItalic","fontName":"Register","x":"380","y":"925","width":"150","height":"62"}},
+        {"name":"PatchName",              "label":{"text":"666", "color" : "FF0000FF", "textHeight":"42","alignH":"L","alignV":"C","fontFile":"DSEG7Classic-BoldItalic","fontName":"Register","x":"380","y":"925","width":"150","height":"62"}},
 
-		{"name":"FocusedParameterValue",    "label":{"text":"-42", "color" : "FF0000FF","textHeight":"23","alignH":"R","alignV":"C","fontFile":"DSEG14Classic-BoldItalic","fontName":"Register","x":"260","y":"1145","width":"256.7","height":"52"}},
-		{"name":"FocusedParameterName",     "label":{"text":"Osc", "color" : "FF0000FF","textHeight":"23","alignH":"L","alignV":"C","fontFile":"DSEG14Classic-BoldItalic","fontName":"Register","x":"40","y":"1145","width":"600","height":"52"}},
+        {"name":"FocusedParameterValue",    "label":{"text":"-42", "color" : "FF0000FF","textHeight":"23","alignH":"R","alignV":"C","fontFile":"DSEG14Classic-BoldItalic","fontName":"Register","x":"260","y":"1145","width":"256.7","height":"52"}},
+        {"name":"FocusedParameterName",     "label":{"text":"Osc", "color" : "FF0000FF","textHeight":"23","alignH":"L","alignV":"C","fontFile":"DSEG14Classic-BoldItalic","fontName":"Register","x":"40","y":"1145","width":"600","height":"52"}},
 
-		{        
-			"name" : "page_1_main",
-			"image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_1_main" },
-			"children" : [                                               
+        {        
+            "name" : "page_1_main",
+            "image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_1_main" },
+            "children" : [                                               
 
-				{ "name" : "O2PitchSens",         "parameterAttachment" : { "parameter" : "O2PitchSens" },              "spritesheet" : { "x" : "921", "y" : "107" }, "style":"knob_big_sens" },
-				{ "name" : "O2PitchFineSens",     "parameterAttachment" : { "parameter" : "O2PitchFineSens" },          "spritesheet" : { "x" : "923", "y" : "377" }, "style":"knob_big_sens" },
-				{ "name" : "MixSens",             "parameterAttachment" : { "parameter" : "MixSens" },                  "spritesheet" : { "x" : "1102", "y" : "619"}, "style":"knob_big_sens" },
-				{ "name" : "CutoffSens",          "parameterAttachment" : { "parameter" : "CutoffSens" },               "spritesheet" : { "x" : "1344", "y" : "619"}, "style":"knob_big_sens" },
-				{ "name" : "ResonanceSens",       "parameterAttachment" : { "parameter" : "ResonanceSens" },            "spritesheet" : { "x" : "1504", "y" : "619"}, "style":"knob_big_sens" },
-				{ "name" : "FilterEnvAmountSens", "parameterAttachment" : { "parameter" : "FilterEnvAmountSens" },      "spritesheet" : { "x" : "1664", "y" : "619"}, "style":"knob_big_sens" },
-				{ "name" : "FmDepthSens",         "parameterAttachment" : { "parameter" : "FmDepthSens" },              "spritesheet" : { "x" : "719", "y" : "377" }, "style":"knob_big_sens" },
-				{ "name" : "PWSens",              "parameterAttachment" : { "parameter" : "PWSens" },                   "spritesheet" : { "x" : "719", "y" : "619" }, "style":"knob_big_sens" },
-				{ "name" : "FilterEnvASens",      "parameterAttachment" : { "parameter" : "FilterEnvASens" },           "spritesheet" : { "x" : "1344", "y" : "377"}, "style":"knob_big_sens" },
-				{ "name" : "FilterEnvDSens",      "parameterAttachment" : { "parameter" : "FilterEnvDSens" },           "spritesheet" : { "x" : "1505", "y" : "377"}, "style":"knob_big_sens" },
-				{ "name" : "FilterEnvSSens",      "parameterAttachment" : { "parameter" : "FilterEnvSSens" },           "spritesheet" : { "x" : "1666", "y" : "377"}, "style":"knob_big_sens" },
-				{ "name" : "FilterEnvRSens",      "parameterAttachment" : { "parameter" : "FilterEnvRSens" },           "spritesheet" : { "x" : "1826", "y" : "377"}, "style":"knob_big_sens" },
-				{ "name" : "AmpEnvASens",         "parameterAttachment" : { "parameter" : "AmpEnvASens" },              "spritesheet" : { "x" : "1344", "y" : "88" }, "style":"knob_big_sens" },
-				{ "name" : "AmpEnvDSens",         "parameterAttachment" : { "parameter" : "AmpEnvDSens" },              "spritesheet" : { "x" : "1504", "y" : "88" }, "style":"knob_big_sens" },
-				{ "name" : "AmpEnvSSens",         "parameterAttachment" : { "parameter" : "AmpEnvSSens" },              "spritesheet" : { "x" : "1664", "y" : "88" }, "style":"knob_big_sens" },
-				{ "name" : "AmpEnvRSens",         "parameterAttachment" : { "parameter" : "AmpEnvRSens" },              "spritesheet" : { "x" : "1824", "y" : "88" }, "style":"knob_big_sens" },
-				{ "name" : "GainSens",            "parameterAttachment" : { "parameter" : "GainSens" },                 "spritesheet" : { "x" : "1987", "y" : "88" }, "style":"knob_big_sens" },
-				{ "name" : "ModEnvASens",         "parameterAttachment" : { "parameter" : "ModEnvASens" },              "spritesheet" : { "x" : "36", "y" : "619"  }, "style":"knob_big_sens" },
-				{ "name" : "ModEnvDSens",         "parameterAttachment" : { "parameter" : "ModEnvDSens" },              "spritesheet" : { "x" : "196", "y" : "619" }, "style":"knob_big_sens" },
-				{ "name" : "ModEnvLevelSens",     "parameterAttachment" : { "parameter" : "ModEnvLevelSens" },          "spritesheet" : { "x" : "508", "y" : "619" }, "style":"knob_big_sens" },
-				{ "name" : "Lfo1RateSens",        "parameterAttachment" : { "parameter" : "Lfo1RateSens" },             "spritesheet" : { "x" : "36", "y" : "88"   }, "style":"knob_big_sens" },
-				{ "name" : "Lfo1LevelSens",       "parameterAttachment" : { "parameter" : "Lfo1LevelSens" },            "spritesheet" : { "x" : "508", "y" : "88"  }, "style":"knob_big_sens" },
-                                                                                                                	     			
-				{ "name" : "Gain",                "parameterAttachment" : { "parameter" : "Gain"    },                  "spritesheet" : { "x" : "1987", "y" : "88"}, "style":"knob_big" },
-				{ "name" : "AmpEnvA",             "parameterAttachment" : { "parameter" : "AmpEnvA" },                  "spritesheet" : { "x" : "1344", "y" : "88"}, "style":"knob_big" },
-				{ "name" : "AmpEnvD",             "parameterAttachment" : { "parameter" : "AmpEnvD" },                  "spritesheet" : { "x" : "1504", "y" : "88"}, "style":"knob_big" },
-				{ "name" : "AmpEnvS",             "parameterAttachment" : { "parameter" : "AmpEnvS" },                  "spritesheet" : { "x" : "1664", "y" : "88"}, "style":"knob_big" },
-				{ "name" : "AmpEnvR",             "parameterAttachment" : { "parameter" : "AmpEnvR" },                  "spritesheet" : { "x" : "1824", "y" : "88"}, "style":"knob_big" },
-																												        
-				{ "name" : "FmDepth",             "parameterAttachment" : { "parameter" : "FmDepth" },                  "spritesheet" : { "x" : "719", "y" : "377"}, "style":"knob_big" },
-				{ "name" : "O1Waveform_1",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":3},     "button"      : { "x" : "684", "y" : "79"  }, "style":"button_round_100" },
-				{ "name" : "O1Waveform_2",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":2},     "button"      : { "x" : "684", "y" : "116" }, "style":"button_round_100" },
-				{ "name" : "O1Waveform_3",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":1},     "button"      : { "x" : "684", "y" : "153" }, "style":"button_round_100" },
-				{ "name" : "O1Waveform_4",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":0},     "button"      : { "x" : "684", "y" : "190" }, "style":"button_round_100" },
-																													    
-				{ "name" : "O2PitchFine",         "parameterAttachment" : { "parameter" : "O2PitchFine" },              "spritesheet" : { "x" : "923", "y" : "377"}, "style":"knob_big" },
-				{ "name" : "O2Pitch",             "parameterAttachment" : { "parameter" : "O2Pitch" },                  "spritesheet" : { "x" : "921", "y" : "107"}, "style":"knob_big" },
-				{ "name" : "O2Pitch_LED",                                                                               "button"      : { "x" : "942", "y" : "27" }, "style":"button_round" },                
-																													    
-				{ "name" : "O2Waveform_1",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":2},     "button"      : { "x" : "1101", "y" : "79", }, "style":"button_round_100" },
-				{ "name" : "O2Waveform_2",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":1},     "button"      : { "x" : "1101", "y" : "116" }, "style":"button_round_100" },
-				{ "name" : "O2Waveform_3",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":0},     "button"      : { "x" : "1101", "y" : "153" }, "style":"button_round_100" },
-				{ "name" : "O2Waveform_4",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":3},     "button"      : { "x" : "1101", "y" : "190" }, "style":"button_round_100" },
-				{ "name" : "O2Keytrack",          "parameterAttachment" : { "parameter" : "O2Keytrack"},                "button"      : { "x" : "1082", "y" : "398" }, "style":"button_round_120" },
-																													    
-				{ "name" : "Mix",                 "parameterAttachment" : { "parameter" : "Mix" },                      "spritesheet" : { "x" : "1102", "y" : "619" }, "style":"knob_big" },
-				{ "name" : "PW",                  "parameterAttachment" : { "parameter" : "PW" },                       "spritesheet" : { "x" : "719" , "y" : "619" }, "style":"knob_big" },
-																													  
-				{ "name" : "Sync",                "parameterAttachment" : { "parameter" : "Sync"},                      "button"      : { "x" : "888", "y" : "602"}, "style":"button_round_150" },
-				{ "name" : "RingMod",             "parameterAttachment" : { "parameter" : "RingMod"},                   "button"      : { "x" : "888", "y" : "565"}, "style":"button_round_150" },
-												  																	  
-				{ "name" : "Cutoff",              "parameterAttachment" : { "parameter" : "Cutoff" },                   "spritesheet" : { "x" : "1344", "y" : "619"}, "style":"knob_big" },
-				{ "name" : "Resonance",           "parameterAttachment" : { "parameter" : "Resonance" },                "spritesheet" : { "x" : "1504", "y" : "619"}, "style":"knob_big" },
-				{ "name" : "FilterEnvAmount",     "parameterAttachment" : { "parameter" : "FilterEnvAmount" },          "spritesheet" : { "x" : "1664", "y" : "619"}, "style":"knob_big" },
-				{ "name" : "FilterEnvA",          "parameterAttachment" : { "parameter" : "FilterEnvA" },               "spritesheet" : { "x" : "1344", "y" : "377"}, "style":"knob_big" },
-				{ "name" : "FilterEnvD",          "parameterAttachment" : { "parameter" : "FilterEnvD" },               "spritesheet" : { "x" : "1505", "y" : "377"}, "style":"knob_big" },
-				{ "name" : "FilterEnvS",          "parameterAttachment" : { "parameter" : "FilterEnvS" },               "spritesheet" : { "x" : "1666", "y" : "377"}, "style":"knob_big" },
-				{ "name" : "FilterEnvR",          "parameterAttachment" : { "parameter" : "FilterEnvR" },               "spritesheet" : { "x" : "1826", "y" : "377"}, "style":"knob_big" },
-												  																	  
-				{ "name" : "FilterVelocity",      "parameterAttachment" : { "parameter" : "FilterVelocity"},            "button"      : { "x" : "1627", "y" : "548"}, "style":"button_round_150" },
-												  
-				{ "name" : "FilterKeytrack_1",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":0}, "button"      : { "x" : "1791", "y" : "592"}, "style":"button_round_150" },
-				{ "name" : "FilterKeytrack_2",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":1}, "button"      : { "x" : "1791", "y" : "629"}, "style":"button_round_150" },
-				{ "name" : "FilterKeytrack_3",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":2}, "button"      : { "x" : "1791", "y" : "666"}, "style":"button_round_150" },
-				{ "name" : "FilterKeytrack_4",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":3}, "button"      : { "x" : "1791", "y" : "705"}, "style":"button_round_150" },
-												  																			        
-				{ "name" : "FilterType_1",        "parameterAttachment" : { "parameter" : "FilterType", "value":2},     "button"      : { "x" : "1954", "y" : "369"}, "style":"button_round_130" },
-				{ "name" : "FilterType_2",        "parameterAttachment" : { "parameter" : "FilterType", "value":1},     "button"      : { "x" : "1954", "y" : "406"}, "style":"button_round_130" },
-				{ "name" : "FilterType_3",        "parameterAttachment" : { "parameter" : "FilterType", "value":0},     "button"      : { "x" : "1954", "y" : "443"}, "style":"button_round_130" },
-				{ "name" : "FilterType_4",        "parameterAttachment" : { "parameter" : "FilterType", "value":3},     "button"      : { "x" : "1954", "y" : "480"}, "style":"button_round_130" },
-				{ "name" : "FilterType_5",        "parameterAttachment" : { "parameter" : "FilterType", "value":4},     "button"      : { "x" : "1954", "y" : "517"}, "style":"button_round_130" },
-												  																			        
-				{ "name" : "Distortion",          "parameterAttachment" : { "parameter" : "Distortion"},                "button"      : { "x" : "1954", "y" : "705"}, "style":"button_round_150" },
-												  
-				{ "name" : "PerfLfo1SyncA",       "parameterAttachment" : { "parameter" : "PerfLfo1SyncA" },            "spritesheet" : { "x" : "500", "y" : "2" }, "style":"h_slider" },
-												  
-				{ "name" : "Lfo1Rate",            "parameterAttachment" : { "parameter" : "Lfo1Rate" },                 "spritesheet" : { "x" : "36" , "y" : "88"}, "style":"knob_big" },
-				{ "name" : "Lfo1Level",           "parameterAttachment" : { "parameter" : "Lfo1Level" },                "spritesheet" : { "x" : "508", "y" : "88"}, "style":"knob_big" },
-		                                              
-				{ "name" : "Lfo1Waveform_1",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":4},   "button"      : { "x" : "162", "y" : "50" }, "style":"button_round_100" },
-				{ "name" : "Lfo1Waveform_2",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":2},   "button"      : { "x" : "162", "y" : "87" }, "style":"button_round_100" },
-				{ "name" : "Lfo1Waveform_3",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":0},   "button"      : { "x" : "162", "y" : "124"}, "style":"button_round_100" },
-				{ "name" : "Lfo1Waveform_4",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":3},   "button"      : { "x" : "162", "y" : "161"}, "style":"button_round_100" },
-				{ "name" : "Lfo1Waveform_5",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":1},   "button"      : { "x" : "162", "y" : "198"}, "style":"button_round_100" },
-												  																			        
-				{ "name" : "Lfo1Dest_1",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":4},       "button"      : { "x" : "313", "y" : "50",}, "style":"button_round_100" },
-				{ "name" : "Lfo1Dest_2",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":2},       "button"      : { "x" : "313", "y" : "87",}, "style":"button_round_100" },
-				{ "name" : "Lfo1Dest_3",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":0},       "button"      : { "x" : "313", "y" : "124"}, "style":"button_round_100" },
-				{ "name" : "Lfo1Dest_4",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":3},       "button"      : { "x" : "313", "y" : "161"}, "style":"button_round_100" },
-				{ "name" : "Lfo1Dest_5",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":1},       "button"      : { "x" : "313", "y" : "198"}, "style":"button_round_100" },
-				
-				{
-				    "name" : "LFO2",
-				    "image" : { "x" : "0", "y" : "267", "width" : "661", "height" : "268", "texture" : "panel_1_main_lfo2" }, 
-				    "condition": { "enableOnParameter": "Lfo2Dest", "enableOnValues": "3,4,7" },
-					"children" : [
-						{ "name" : "Lfo2Dest_LFO2_OSC1+2",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":4}, "button" : { "x" : "162", "y" : "45" }, "style":"button_round_100" },                
-						{ "name" : "Lfo2Dest_LFO2_AMP",        "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":3}, "button" : { "x" : "162", "y" : "82" }, "style":"button_round_100" },                
-						{ "name" : "Lfo2Dest_LFO2_FILTER",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":7}, "button" : { "x" : "162", "y" : "119"}, "style":"button_round_100" },                
-					]
-				},	
-				
-				{
-				    "name" : "ARP",
-				    "image" : { "x" : "0", "y" : "267", "width" : "661", "height" : "268", "texture" : "panel_1_main_arpeggiator" }, 
-				    "condition": { "enableOnParameter": "Lfo2Dest", "enableOnValues": "0,1,2,5,6,8" },
-					"children" : [
-						{ "name" : "Lfo2Dest_LFO2_ECHO",       "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":6}, "button" : { "x" : "162", "y" : "45" }, "style":"button_round_130" },                
-						{ "name" : "Lfo2Dest_LFO2_UP",         "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":1}, "button" : { "x" : "162", "y" : "82" }, "style":"button_round_130" },                
-						{ "name" : "Lfo2Dest_LFO2_DOWN",       "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":0}, "button" : { "x" : "162", "y" : "119"}, "style":"button_round_130" },                
-						{ "name" : "Lfo2Dest_LFO2_UP_DOWN",    "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":2}, "button" : { "x" : "162", "y" : "156"}, "style":"button_round_130" },                
-						{ "name" : "Lfo2Dest_LFO2_RANDOM",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":5}, "button" : { "x" : "162", "y" : "193"}, "style":"button_round_130" },                
-					]
-				},				
-				
-				{ "name" : "PerfLfo2SyncA",     "parameterAttachment" : { "parameter" : "PerfLfo2SyncA" },        "spritesheet" : { "x" : "352", "y" : "269"}, "style":"h_slider" },
+                { "name" : "O2PitchSens",         "parameterAttachment" : { "parameter" : "O2PitchSens" },              "spritesheet" : { "x" : "921", "y" : "107" }, "style":"knob_big_sens" },
+                { "name" : "O2PitchFineSens",     "parameterAttachment" : { "parameter" : "O2PitchFineSens" },          "spritesheet" : { "x" : "923", "y" : "377" }, "style":"knob_big_sens" },
+                { "name" : "MixSens",             "parameterAttachment" : { "parameter" : "MixSens" },                  "spritesheet" : { "x" : "1102", "y" : "619"}, "style":"knob_big_sens" },
+                { "name" : "CutoffSens",          "parameterAttachment" : { "parameter" : "CutoffSens" },               "spritesheet" : { "x" : "1344", "y" : "619"}, "style":"knob_big_sens" },
+                { "name" : "ResonanceSens",       "parameterAttachment" : { "parameter" : "ResonanceSens" },            "spritesheet" : { "x" : "1504", "y" : "619"}, "style":"knob_big_sens" },
+                { "name" : "FilterEnvAmountSens", "parameterAttachment" : { "parameter" : "FilterEnvAmountSens" },      "spritesheet" : { "x" : "1664", "y" : "619"}, "style":"knob_big_sens" },
+                { "name" : "FmDepthSens",         "parameterAttachment" : { "parameter" : "FmDepthSens" },              "spritesheet" : { "x" : "719", "y" : "377" }, "style":"knob_big_sens" },
+                { "name" : "PWSens",              "parameterAttachment" : { "parameter" : "PWSens" },                   "spritesheet" : { "x" : "719", "y" : "619" }, "style":"knob_big_sens" },
+                { "name" : "FilterEnvASens",      "parameterAttachment" : { "parameter" : "FilterEnvASens" },           "spritesheet" : { "x" : "1344", "y" : "377"}, "style":"knob_big_sens" },
+                { "name" : "FilterEnvDSens",      "parameterAttachment" : { "parameter" : "FilterEnvDSens" },           "spritesheet" : { "x" : "1505", "y" : "377"}, "style":"knob_big_sens" },
+                { "name" : "FilterEnvSSens",      "parameterAttachment" : { "parameter" : "FilterEnvSSens" },           "spritesheet" : { "x" : "1666", "y" : "377"}, "style":"knob_big_sens" },
+                { "name" : "FilterEnvRSens",      "parameterAttachment" : { "parameter" : "FilterEnvRSens" },           "spritesheet" : { "x" : "1826", "y" : "377"}, "style":"knob_big_sens" },
+                { "name" : "AmpEnvASens",         "parameterAttachment" : { "parameter" : "AmpEnvASens" },              "spritesheet" : { "x" : "1344", "y" : "88" }, "style":"knob_big_sens" },
+                { "name" : "AmpEnvDSens",         "parameterAttachment" : { "parameter" : "AmpEnvDSens" },              "spritesheet" : { "x" : "1504", "y" : "88" }, "style":"knob_big_sens" },
+                { "name" : "AmpEnvSSens",         "parameterAttachment" : { "parameter" : "AmpEnvSSens" },              "spritesheet" : { "x" : "1664", "y" : "88" }, "style":"knob_big_sens" },
+                { "name" : "AmpEnvRSens",         "parameterAttachment" : { "parameter" : "AmpEnvRSens" },              "spritesheet" : { "x" : "1824", "y" : "88" }, "style":"knob_big_sens" },
+                { "name" : "GainSens",            "parameterAttachment" : { "parameter" : "GainSens" },                 "spritesheet" : { "x" : "1987", "y" : "88" }, "style":"knob_big_sens" },
+                { "name" : "ModEnvASens",         "parameterAttachment" : { "parameter" : "ModEnvASens" },              "spritesheet" : { "x" : "36", "y" : "619"  }, "style":"knob_big_sens" },
+                { "name" : "ModEnvDSens",         "parameterAttachment" : { "parameter" : "ModEnvDSens" },              "spritesheet" : { "x" : "196", "y" : "619" }, "style":"knob_big_sens" },
+                { "name" : "ModEnvLevelSens",     "parameterAttachment" : { "parameter" : "ModEnvLevelSens" },          "spritesheet" : { "x" : "508", "y" : "619" }, "style":"knob_big_sens" },
+                { "name" : "Lfo1RateSens",        "parameterAttachment" : { "parameter" : "Lfo1RateSens" },             "spritesheet" : { "x" : "36", "y" : "88"   }, "style":"knob_big_sens" },
+                { "name" : "Lfo1LevelSens",       "parameterAttachment" : { "parameter" : "Lfo1LevelSens" },            "spritesheet" : { "x" : "508", "y" : "88"  }, "style":"knob_big_sens" },
+                                                                                                                                    
+                { "name" : "Gain",                "parameterAttachment" : { "parameter" : "Gain"    },                  "spritesheet" : { "x" : "1987", "y" : "88"}, "style":"knob_big" },
+                { "name" : "AmpEnvA",             "parameterAttachment" : { "parameter" : "AmpEnvA" },                  "spritesheet" : { "x" : "1344", "y" : "88"}, "style":"knob_big" },
+                { "name" : "AmpEnvD",             "parameterAttachment" : { "parameter" : "AmpEnvD" },                  "spritesheet" : { "x" : "1504", "y" : "88"}, "style":"knob_big" },
+                { "name" : "AmpEnvS",             "parameterAttachment" : { "parameter" : "AmpEnvS" },                  "spritesheet" : { "x" : "1664", "y" : "88"}, "style":"knob_big" },
+                { "name" : "AmpEnvR",             "parameterAttachment" : { "parameter" : "AmpEnvR" },                  "spritesheet" : { "x" : "1824", "y" : "88"}, "style":"knob_big" },
+                                                                                                                        
+                { "name" : "FmDepth",             "parameterAttachment" : { "parameter" : "FmDepth" },                  "spritesheet" : { "x" : "719", "y" : "377"}, "style":"knob_big" },
+                { "name" : "O1Waveform_1",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":3},     "button"      : { "x" : "684", "y" : "79"  }, "style":"button_round_100" },
+                { "name" : "O1Waveform_2",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":2},     "button"      : { "x" : "684", "y" : "116" }, "style":"button_round_100" },
+                { "name" : "O1Waveform_3",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":1},     "button"      : { "x" : "684", "y" : "153" }, "style":"button_round_100" },
+                { "name" : "O1Waveform_4",        "parameterAttachment" : { "parameter" : "O1Waveform", "value":0},     "button"      : { "x" : "684", "y" : "190" }, "style":"button_round_100" },
+                                                                                                                        
+                { "name" : "O2PitchFine",         "parameterAttachment" : { "parameter" : "O2PitchFine" },              "spritesheet" : { "x" : "923", "y" : "377"}, "style":"knob_big" },
+                { "name" : "O2Pitch",             "parameterAttachment" : { "parameter" : "O2Pitch" },                  "spritesheet" : { "x" : "921", "y" : "107"}, "style":"knob_big" },
+                { "name" : "O2Pitch_LED",                                                                               "button"      : { "x" : "942", "y" : "27" }, "style":"button_round" },                
+                                                                                                                        
+                { "name" : "O2Waveform_1",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":2},     "button"      : { "x" : "1101", "y" : "79", }, "style":"button_round_100" },
+                { "name" : "O2Waveform_2",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":1},     "button"      : { "x" : "1101", "y" : "116" }, "style":"button_round_100" },
+                { "name" : "O2Waveform_3",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":0},     "button"      : { "x" : "1101", "y" : "153" }, "style":"button_round_100" },
+                { "name" : "O2Waveform_4",        "parameterAttachment" : { "parameter" : "O2Waveform", "value":3},     "button"      : { "x" : "1101", "y" : "190" }, "style":"button_round_100" },
+                { "name" : "O2Keytrack",          "parameterAttachment" : { "parameter" : "O2Keytrack"},                "button"      : { "x" : "1082", "y" : "398" }, "style":"button_round_120" },
+                                                                                                                        
+                { "name" : "Mix",                 "parameterAttachment" : { "parameter" : "Mix" },                      "spritesheet" : { "x" : "1102", "y" : "619" }, "style":"knob_big" },
+                { "name" : "PW",                  "parameterAttachment" : { "parameter" : "PW" },                       "spritesheet" : { "x" : "719" , "y" : "619" }, "style":"knob_big" },
+                                                                                                                      
+                { "name" : "Sync",                "parameterAttachment" : { "parameter" : "Sync"},                      "button"      : { "x" : "888", "y" : "602"}, "style":"button_round_150" },
+                { "name" : "RingMod",             "parameterAttachment" : { "parameter" : "RingMod"},                   "button"      : { "x" : "888", "y" : "565"}, "style":"button_round_150" },
+                                                                                                                      
+                { "name" : "Cutoff",              "parameterAttachment" : { "parameter" : "Cutoff" },                   "spritesheet" : { "x" : "1344", "y" : "619"}, "style":"knob_big" },
+                { "name" : "Resonance",           "parameterAttachment" : { "parameter" : "Resonance" },                "spritesheet" : { "x" : "1504", "y" : "619"}, "style":"knob_big" },
+                { "name" : "FilterEnvAmount",     "parameterAttachment" : { "parameter" : "FilterEnvAmount" },          "spritesheet" : { "x" : "1664", "y" : "619"}, "style":"knob_big" },
+                { "name" : "FilterEnvA",          "parameterAttachment" : { "parameter" : "FilterEnvA" },               "spritesheet" : { "x" : "1344", "y" : "377"}, "style":"knob_big" },
+                { "name" : "FilterEnvD",          "parameterAttachment" : { "parameter" : "FilterEnvD" },               "spritesheet" : { "x" : "1505", "y" : "377"}, "style":"knob_big" },
+                { "name" : "FilterEnvS",          "parameterAttachment" : { "parameter" : "FilterEnvS" },               "spritesheet" : { "x" : "1666", "y" : "377"}, "style":"knob_big" },
+                { "name" : "FilterEnvR",          "parameterAttachment" : { "parameter" : "FilterEnvR" },               "spritesheet" : { "x" : "1826", "y" : "377"}, "style":"knob_big" },
+                                                                                                                      
+                { "name" : "FilterVelocity",      "parameterAttachment" : { "parameter" : "FilterVelocity"},            "button"      : { "x" : "1627", "y" : "548"}, "style":"button_round_150" },
+                                                  
+                { "name" : "FilterKeytrack_1",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":0}, "button"      : { "x" : "1791", "y" : "592"}, "style":"button_round_150" },
+                { "name" : "FilterKeytrack_2",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":1}, "button"      : { "x" : "1791", "y" : "629"}, "style":"button_round_150" },
+                { "name" : "FilterKeytrack_3",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":2}, "button"      : { "x" : "1791", "y" : "666"}, "style":"button_round_150" },
+                { "name" : "FilterKeytrack_4",    "parameterAttachment" : { "parameter" : "FilterKeytrack", "value":3}, "button"      : { "x" : "1791", "y" : "705"}, "style":"button_round_150" },
+                                                                                                                                    
+                { "name" : "FilterType_1",        "parameterAttachment" : { "parameter" : "FilterType", "value":2},     "button"      : { "x" : "1954", "y" : "369"}, "style":"button_round_130" },
+                { "name" : "FilterType_2",        "parameterAttachment" : { "parameter" : "FilterType", "value":1},     "button"      : { "x" : "1954", "y" : "406"}, "style":"button_round_130" },
+                { "name" : "FilterType_3",        "parameterAttachment" : { "parameter" : "FilterType", "value":0},     "button"      : { "x" : "1954", "y" : "443"}, "style":"button_round_130" },
+                { "name" : "FilterType_4",        "parameterAttachment" : { "parameter" : "FilterType", "value":3},     "button"      : { "x" : "1954", "y" : "480"}, "style":"button_round_130" },
+                { "name" : "FilterType_5",        "parameterAttachment" : { "parameter" : "FilterType", "value":4},     "button"      : { "x" : "1954", "y" : "517"}, "style":"button_round_130" },
+                                                                                                                                    
+                { "name" : "Distortion",          "parameterAttachment" : { "parameter" : "Distortion"},                "button"      : { "x" : "1954", "y" : "705"}, "style":"button_round_150" },
+                                                  
+                { "name" : "PerfLfo1SyncA",       "parameterAttachment" : { "parameter" : "PerfLfo1SyncA" },            "spritesheet" : { "x" : "500", "y" : "2" }, "style":"h_slider" },
+                                                  
+                { "name" : "Lfo1Rate",            "parameterAttachment" : { "parameter" : "Lfo1Rate" },                 "spritesheet" : { "x" : "36" , "y" : "88"}, "style":"knob_big" },
+                { "name" : "Lfo1Level",           "parameterAttachment" : { "parameter" : "Lfo1Level" },                "spritesheet" : { "x" : "508", "y" : "88"}, "style":"knob_big" },
+                                                      
+                { "name" : "Lfo1Waveform_1",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":4},   "button"      : { "x" : "162", "y" : "50" }, "style":"button_round_100" },
+                { "name" : "Lfo1Waveform_2",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":2},   "button"      : { "x" : "162", "y" : "87" }, "style":"button_round_100" },
+                { "name" : "Lfo1Waveform_3",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":0},   "button"      : { "x" : "162", "y" : "124"}, "style":"button_round_100" },
+                { "name" : "Lfo1Waveform_4",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":3},   "button"      : { "x" : "162", "y" : "161"}, "style":"button_round_100" },
+                { "name" : "Lfo1Waveform_5",      "parameterAttachment" : { "parameter" : "Lfo1Waveform", "value":1},   "button"      : { "x" : "162", "y" : "198"}, "style":"button_round_100" },
+                                                                                                                                    
+                { "name" : "Lfo1Dest_1",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":4},       "button"      : { "x" : "313", "y" : "50",}, "style":"button_round_100" },
+                { "name" : "Lfo1Dest_2",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":2},       "button"      : { "x" : "313", "y" : "87",}, "style":"button_round_100" },
+                { "name" : "Lfo1Dest_3",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":0},       "button"      : { "x" : "313", "y" : "124"}, "style":"button_round_100" },
+                { "name" : "Lfo1Dest_4",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":3},       "button"      : { "x" : "313", "y" : "161"}, "style":"button_round_100" },
+                { "name" : "Lfo1Dest_5",          "parameterAttachment" : { "parameter" : "Lfo1Dest", "value":1},       "button"      : { "x" : "313", "y" : "198"}, "style":"button_round_100" },
+                
+                {
+                    "name" : "LFO2",
+                    "image" : { "x" : "0", "y" : "267", "width" : "661", "height" : "268", "texture" : "panel_1_main_lfo2" }, 
+                    "condition": { "enableOnParameter": "Lfo2Dest", "enableOnValues": "3,4,7" },
+                    "children" : [
+                        { "name" : "Lfo2Dest_LFO2_OSC1+2",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":4}, "button" : { "x" : "162", "y" : "45" }, "style":"button_round_100" },                
+                        { "name" : "Lfo2Dest_LFO2_AMP",        "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":3}, "button" : { "x" : "162", "y" : "82" }, "style":"button_round_100" },                
+                        { "name" : "Lfo2Dest_LFO2_FILTER",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":7}, "button" : { "x" : "162", "y" : "119"}, "style":"button_round_100" },                
+                    ]
+                },  
+                
+                {
+                    "name" : "ARP",
+                    "image" : { "x" : "0", "y" : "267", "width" : "661", "height" : "268", "texture" : "panel_1_main_arpeggiator" }, 
+                    "condition": { "enableOnParameter": "Lfo2Dest", "enableOnValues": "0,1,2,5,6,8" },
+                    "children" : [
+                        { "name" : "Lfo2Dest_LFO2_ECHO",       "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":6}, "button" : { "x" : "162", "y" : "45" }, "style":"button_round_130" },                
+                        { "name" : "Lfo2Dest_LFO2_UP",         "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":1}, "button" : { "x" : "162", "y" : "82" }, "style":"button_round_130" },                
+                        { "name" : "Lfo2Dest_LFO2_DOWN",       "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":0}, "button" : { "x" : "162", "y" : "119"}, "style":"button_round_130" },                
+                        { "name" : "Lfo2Dest_LFO2_UP_DOWN",    "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":2}, "button" : { "x" : "162", "y" : "156"}, "style":"button_round_130" },                
+                        { "name" : "Lfo2Dest_LFO2_RANDOM",     "parameterAttachment" : { "parameter" : "Lfo2Dest", "value":5}, "button" : { "x" : "162", "y" : "193"}, "style":"button_round_130" },                
+                    ]
+                },              
+                
+                { "name" : "PerfLfo2SyncA",     "parameterAttachment" : { "parameter" : "PerfLfo2SyncA" },        "spritesheet" : { "x" : "352", "y" : "269"}, "style":"h_slider" },
 
-		        { "name" : "ArpEnabled",                                                                          "button"      : { "x" : "485", "y" : "254"}, "style":"button_round_90" },
-			
-				{ "name" : "Lfo2RateSense",     "parameterAttachment" : { "parameter" : "Lfo2RateSens" },         "spritesheet" : { "x" : "36" , "y" : "350"}, "style":"knob_big_sens" },
-				{ "name" : "ArpRangeSens",      "parameterAttachment" : { "parameter" : "ArpRangeSens" },         "spritesheet" : { "x" : "508", "y" : "350"}, "style":"knob_big_sens" },					
-																											            
-				{ "name" : "Lfo2Rate",          "parameterAttachment" : { "parameter" : "Lfo2Rate" },             "spritesheet" : { "x" : "36" , "y" : "350"}, "style":"knob_big" },
-				{ "name" : "ArpRange",          "parameterAttachment" : { "parameter" : "ArpRange" },             "spritesheet" : { "x" : "508", "y" : "350"}, "style":"knob_big" },					
-																											      
-				{ "name" : "ModEnvA",           "parameterAttachment" : { "parameter" : "ModEnvA" },              "spritesheet" : { "x" : "36" , "y" : "619"}, "style":"knob_big" },
-				{ "name" : "ModEnvD",           "parameterAttachment" : { "parameter" : "ModEnvD" },              "spritesheet" : { "x" : "196", "y" : "619"}, "style":"knob_big" },
-				{ "name" : "ModEnvLevel",       "parameterAttachment" : { "parameter" : "ModEnvLevel" },          "spritesheet" : { "x" : "508", "y" : "619"}, "style":"knob_big" },
-																												  
-				{ "name" : "ModEnvDest_1",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":1}, "button"      : { "x" : "323", "y" : "611"}, "style":"button_round_130" },                
-				{ "name" : "ModEnvDest_2",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":2}, "button"      : { "x" : "323", "y" : "648"}, "style":"button_round_130" },                
-				{ "name" : "ModEnvDest_3",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":0}, "button"      : { "x" : "323", "y" : "685"}, "style":"button_round_130" },                
-			] 
-		},
-		{        
-			"name" : "page_2_browser",
-			"image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_2_browser" },
-			"children" : [
-			{
-			    "name" : "ContainerPatchManager",
-			    "component" : {
-				"x" : "15",
-				"y" : "45",
-				"width" : "2128",
-				"height" : "745"
-			    }
-			},		
-			]     
-		},
-		{        
-			"name" : "page_3_perf",
-			"image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_3_perf" },
-			"children" : [
+                { "name" : "ArpEnabled",                                                                          "button"      : { "x" : "485", "y" : "254"}, "style":"button_round_90" },
+            
+                { "name" : "Lfo2RateSense",     "parameterAttachment" : { "parameter" : "Lfo2RateSens" },         "spritesheet" : { "x" : "36" , "y" : "350"}, "style":"knob_big_sens" },
+                { "name" : "ArpRangeSens",      "parameterAttachment" : { "parameter" : "ArpRangeSens" },         "spritesheet" : { "x" : "508", "y" : "350"}, "style":"knob_big_sens" },                   
+                                                                                                                        
+                { "name" : "Lfo2Rate",          "parameterAttachment" : { "parameter" : "Lfo2Rate" },             "spritesheet" : { "x" : "36" , "y" : "350"}, "style":"knob_big" },
+                { "name" : "ArpRange",          "parameterAttachment" : { "parameter" : "ArpRange" },             "spritesheet" : { "x" : "508", "y" : "350"}, "style":"knob_big" },                    
+                                                                                                                  
+                { "name" : "ModEnvA",           "parameterAttachment" : { "parameter" : "ModEnvA" },              "spritesheet" : { "x" : "36" , "y" : "619"}, "style":"knob_big" },
+                { "name" : "ModEnvD",           "parameterAttachment" : { "parameter" : "ModEnvD" },              "spritesheet" : { "x" : "196", "y" : "619"}, "style":"knob_big" },
+                { "name" : "ModEnvLevel",       "parameterAttachment" : { "parameter" : "ModEnvLevel" },          "spritesheet" : { "x" : "508", "y" : "619"}, "style":"knob_big" },
+                                                                                                                  
+                { "name" : "ModEnvDest_1",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":1}, "button"      : { "x" : "323", "y" : "611"}, "style":"button_round_130" },                
+                { "name" : "ModEnvDest_2",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":2}, "button"      : { "x" : "323", "y" : "648"}, "style":"button_round_130" },                
+                { "name" : "ModEnvDest_3",      "parameterAttachment" : { "parameter" : "ModEnvDest", "value":0}, "button"      : { "x" : "323", "y" : "685"}, "style":"button_round_130" },                
+            ] 
+        },
+        {        
+            "name" : "page_2_browser",
+            "image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_2_browser" },
+            "children" : [
+            {
+                "name" : "ContainerPatchManager",
+                "component" : {
+                "x" : "15",
+                "y" : "45",
+                "width" : "2128",
+                "height" : "745"
+                }
+            },      
+            ]     
+        },
+        {        
+            "name" : "page_3_perf",
+            "image" : { "x" : "60", "y" : "60", "width" : "2153", "height" : "803", "texture" : "panel_3_perf" },
+            "children" : [
                 { "name": "PerfMidiChannelA_CMB",                 "parameterAttachment" : { "parameter": "PerfMidiChannelA" },                 "combobox" : {"x": "40",   "y": "88"}, "style":"combo_300" },
                 { "name": "PerfMidiChannelB_CMB",                 "parameterAttachment" : { "parameter": "PerfMidiChannelB" },                 "combobox" : {"x": "450",  "y": "88"}, "style":"combo_300" },
                 { "name": "PerfMidiChannelC_CMB",                 "parameterAttachment" : { "parameter": "PerfMidiChannelC" },                 "combobox" : {"x": "864",  "y": "88"}, "style":"combo_300" },
                 { "name": "PerfMidiChannelD_CMB",                 "parameterAttachment" : { "parameter": "PerfMidiChannelD" },                 "combobox" : {"x": "1280", "y": "88"}, "style":"combo_300" },
                           
- 			    { "name": "PerfLfo1SyncA_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo1SyncA" },                    "combobox" : {"x": "40",   "y": "159"}, "style":"combo_150" },
+                { "name": "PerfLfo1SyncA_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo1SyncA" },                    "combobox" : {"x": "40",   "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo1SyncB_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo1SyncB" },                    "combobox" : {"x": "450",  "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo1SyncC_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo1SyncC" },                    "combobox" : {"x": "864",  "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo1SyncD_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo1SyncD" },                    "combobox" : {"x": "1280", "y": "159"}, "style":"combo_150" },
-																																		           
- 			    { "name": "PerfLfo2SyncA_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo2SyncA" },                    "combobox" : {"x": "205",  "y": "159"}, "style":"combo_150" },
+                                                                                                                                                   
+                { "name": "PerfLfo2SyncA_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo2SyncA" },                    "combobox" : {"x": "205",  "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo2SyncB_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo2SyncB" },                    "combobox" : {"x": "615",  "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo2SyncC_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo2SyncC" },                    "combobox" : {"x": "1029", "y": "159"}, "style":"combo_150" },
                 { "name": "PerfLfo2SyncD_CMB",                    "parameterAttachment" : { "parameter": "PerfLfo2SyncD" },                    "combobox" : {"x": "1445", "y": "159"}, "style":"combo_150" },
-  			   
-			    { "name": "PerfFilterEnvTriggerA",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerA"},             "button"   : {"x": "9",    "y": "188"}, "style":"button_round_280" },                
-			    { "name": "PerfFilterEnvTriggerB",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerB"},             "button"   : {"x": "424",  "y": "188"}, "style":"button_round_280" },                
-			    { "name": "PerfFilterEnvTriggerC",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerC"},             "button"   : {"x": "839",  "y": "188"}, "style":"button_round_280" },                
-			    { "name": "PerfFilterEnvTriggerD",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerD"},             "button"   : {"x": "1254", "y": "188"}, "style":"button_round_280" },                
-			   
- 			    { "name": "PerfFilterEnvTriggerMidiChannelA_CMB", "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerMidiChannelA" }, "combobox" : {"x": "40",   "y": "264"}, "style":"combo_150" },
+               
+                { "name": "PerfFilterEnvTriggerA",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerA"},             "button"   : {"x": "9",    "y": "188"}, "style":"button_round_280" },                
+                { "name": "PerfFilterEnvTriggerB",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerB"},             "button"   : {"x": "424",  "y": "188"}, "style":"button_round_280" },                
+                { "name": "PerfFilterEnvTriggerC",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerC"},             "button"   : {"x": "839",  "y": "188"}, "style":"button_round_280" },                
+                { "name": "PerfFilterEnvTriggerD",                "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerD"},             "button"   : {"x": "1254", "y": "188"}, "style":"button_round_280" },                
+               
+                { "name": "PerfFilterEnvTriggerMidiChannelA_CMB", "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerMidiChannelA" }, "combobox" : {"x": "40",   "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerMidiChannelB_CMB", "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerMidiChannelB" }, "combobox" : {"x": "450",  "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerMidiChannelC_CMB", "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerMidiChannelC" }, "combobox" : {"x": "864",  "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerMidiChannelD_CMB", "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerMidiChannelD" }, "combobox" : {"x": "1280", "y": "264"}, "style":"combo_150" },
 
- 			    { "name": "PerfFilterEnvTriggerNoteNumberA_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberA" },  "combobox" : {"x": "205",  "y": "264"}, "style":"combo_150" },
+                { "name": "PerfFilterEnvTriggerNoteNumberA_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberA" },  "combobox" : {"x": "205",  "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberB_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberB" },  "combobox" : {"x": "615",  "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberC_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberC" },  "combobox" : {"x": "1029", "y": "264"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberD_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberD" },  "combobox" : {"x": "1445", "y": "264"}, "style":"combo_150" },
-  			    
-			    { "name": "PerfAmpEnvTriggerA",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerA"},                "button"   : {"x": "9"   , "y": "297"}, "style":"button_round_280" },                
-			    { "name": "PerfAmpEnvTriggerB",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerB"},                "button"   : {"x": "424" , "y": "297"}, "style":"button_round_280" },                
-			    { "name": "PerfAmpEnvTriggerC",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerC"},                "button"   : {"x": "839" , "y": "297"}, "style":"button_round_280" },                
-			    { "name": "PerfAmpEnvTriggerD",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerD"},                "button"   : {"x": "1254", "y": "297"}, "style":"button_round_280" },                
+                
+                { "name": "PerfAmpEnvTriggerA",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerA"},                "button"   : {"x": "9"   , "y": "297"}, "style":"button_round_280" },                
+                { "name": "PerfAmpEnvTriggerB",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerB"},                "button"   : {"x": "424" , "y": "297"}, "style":"button_round_280" },                
+                { "name": "PerfAmpEnvTriggerC",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerC"},                "button"   : {"x": "839" , "y": "297"}, "style":"button_round_280" },                
+                { "name": "PerfAmpEnvTriggerD",                   "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerD"},                "button"   : {"x": "1254", "y": "297"}, "style":"button_round_280" },                
 
- 			    { "name": "PerfAmpEnvTriggerMidiChannelA_CMB",    "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerMidiChannelA" },    "combobox" : {"x": "40",   "y": "375"}, "style":"combo_150" },
+                { "name": "PerfAmpEnvTriggerMidiChannelA_CMB",    "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerMidiChannelA" },    "combobox" : {"x": "40",   "y": "375"}, "style":"combo_150" },
                 { "name": "PerfAmpEnvTriggerMidiChannelB_CMB",    "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerMidiChannelB" },    "combobox" : {"x": "450",  "y": "375"}, "style":"combo_150" },
                 { "name": "PerfAmpEnvTriggerMidiChannelC_CMB",    "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerMidiChannelC" },    "combobox" : {"x": "864",  "y": "375"}, "style":"combo_150" },
                 { "name": "PerfAmpEnvTriggerMidiChannelD_CMB",    "parameterAttachment" : { "parameter": "PerfAmpEnvTriggerMidiChannelD" },    "combobox" : {"x": "1280", "y": "375"}, "style":"combo_150" },
 
- 			    { "name": "PerfFilterEnvTriggerNoteNumberA_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberA" },  "combobox" : {"x": "205",  "y": "375"}, "style":"combo_150" },
+                { "name": "PerfFilterEnvTriggerNoteNumberA_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberA" },  "combobox" : {"x": "205",  "y": "375"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberB_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberB" },  "combobox" : {"x": "615",  "y": "375"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberC_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberC" },  "combobox" : {"x": "1029", "y": "375"}, "style":"combo_150" },
                 { "name": "PerfFilterEnvTriggerNoteNumberD_CMB",  "parameterAttachment" : { "parameter": "PerfFilterEnvTriggerNoteNumberD" },  "combobox" : {"x": "1445", "y": "375"}, "style":"combo_150" },
-  			    
-			    { "name": "PerfMorfTriggerA",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerA"},                  "button"   : {"x": "9"   , "y": "406"}, "style":"button_round_280" },                
-			    { "name": "PerfMorfTriggerB",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerB"},                  "button"   : {"x": "424" , "y": "406"}, "style":"button_round_280" },                
-			    { "name": "PerfMorfTriggerC",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerC"},                  "button"   : {"x": "839" , "y": "406"}, "style":"button_round_280" },                
-			    { "name": "PerfMorfTriggerD",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerD"},                  "button"   : {"x": "1254", "y": "406"}, "style":"button_round_280" },                    
-			    
- 			    { "name": "PerfMorfTriggerMidiChannelA_CMB",      "parameterAttachment" : { "parameter": "PerfMorfTriggerMidiChannelA" },      "combobox" : {"x": "40",   "y": "482"}, "style":"combo_150" },
+                
+                { "name": "PerfMorfTriggerA",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerA"},                  "button"   : {"x": "9"   , "y": "406"}, "style":"button_round_280" },                
+                { "name": "PerfMorfTriggerB",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerB"},                  "button"   : {"x": "424" , "y": "406"}, "style":"button_round_280" },                
+                { "name": "PerfMorfTriggerC",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerC"},                  "button"   : {"x": "839" , "y": "406"}, "style":"button_round_280" },                
+                { "name": "PerfMorfTriggerD",                     "parameterAttachment" : { "parameter": "PerfMorfTriggerD"},                  "button"   : {"x": "1254", "y": "406"}, "style":"button_round_280" },                    
+                
+                { "name": "PerfMorfTriggerMidiChannelA_CMB",      "parameterAttachment" : { "parameter": "PerfMorfTriggerMidiChannelA" },      "combobox" : {"x": "40",   "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerMidiChannelB_CMB",      "parameterAttachment" : { "parameter": "PerfMorfTriggerMidiChannelB" },      "combobox" : {"x": "450",  "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerMidiChannelC_CMB",      "parameterAttachment" : { "parameter": "PerfMorfTriggerMidiChannelC" },      "combobox" : {"x": "864",  "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerMidiChannelD_CMB",      "parameterAttachment" : { "parameter": "PerfMorfTriggerMidiChannelD" },      "combobox" : {"x": "1280", "y": "482"}, "style":"combo_150" },
 
- 			    { "name": "PerfMorfTriggerNoteNumberA_CMB",       "parameterAttachment" : { "parameter": "PerfMorfTriggerNoteNumberA" },       "combobox" : {"x": "205",  "y": "482"}, "style":"combo_150" },
+                { "name": "PerfMorfTriggerNoteNumberA_CMB",       "parameterAttachment" : { "parameter": "PerfMorfTriggerNoteNumberA" },       "combobox" : {"x": "205",  "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerNoteNumberB_CMB",       "parameterAttachment" : { "parameter": "PerfMorfTriggerNoteNumberB" },       "combobox" : {"x": "615",  "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerNoteNumberC_CMB",       "parameterAttachment" : { "parameter": "PerfMorfTriggerNoteNumberC" },       "combobox" : {"x": "1029", "y": "482"}, "style":"combo_150" },
                 { "name": "PerfMorfTriggerNoteNumberD_CMB",       "parameterAttachment" : { "parameter": "PerfMorfTriggerNoteNumberD" },       "combobox" : {"x": "1445", "y": "482"}, "style":"combo_150" },
-  			   	
+                
 
                 { "name": "PerfChannelPressureAmountA_CMB",       "parameterAttachment" : { "parameter": "PerfChannelPressureAmountA" },       "combobox" : {"x": "40",   "y": "553"}, "style":"combo_300" },
                 { "name": "PerfChannelPressureAmountB_CMB",       "parameterAttachment" : { "parameter": "PerfChannelPressureAmountB" },       "combobox" : {"x": "450",  "y": "553"}, "style":"combo_300" },
@@ -324,24 +324,24 @@
                 { "name": "PerfExpressionPedalDestC_CMB",         "parameterAttachment" : { "parameter": "PerfExpressionPedalDestC" },         "combobox" : {"x": "864",  "y": "746"}, "style":"combo_300" },
                 { "name": "PerfExpressionPedalDestD_CMB",         "parameterAttachment" : { "parameter": "PerfExpressionPedalDestD" },         "combobox" : {"x": "1280", "y": "746"}, "style":"combo_300" },
                             
-			    { "name": "PerfMasterTune",                       "parameterAttachment" : { "parameter": "PerfMasterTune" },                   "spritesheet" : { "x" : "1754", "y" : "80"}, "style":"knob_big" },
-			    { "name": "PerfBendRange",                        "parameterAttachment" : { "parameter": "PerfBendRange" },                    "spritesheet" : { "x" : "1931", "y" : "80"}, "style":"knob_big" },
-												                   
-			    { "name": "PerfKeyboardSplit",                    "parameterAttachment" : { "parameter": "PerfKeyboardSplit"},                 "button" : { "x" : "1668", "y" : "254"}, "style":"button_round_350" },
+                { "name": "PerfMasterTune",                       "parameterAttachment" : { "parameter": "PerfMasterTune" },                   "spritesheet" : { "x" : "1754", "y" : "80"}, "style":"knob_big" },
+                { "name": "PerfBendRange",                        "parameterAttachment" : { "parameter": "PerfBendRange" },                    "spritesheet" : { "x" : "1931", "y" : "80"}, "style":"knob_big" },
+                                                                   
+                { "name": "PerfKeyboardSplit",                    "parameterAttachment" : { "parameter": "PerfKeyboardSplit"},                 "button" : { "x" : "1668", "y" : "254"}, "style":"button_round_350" },
                 { "name": "PerfSplitPoint",                       "parameterAttachment" : { "parameter": "PerfSplitPoint" },                   "combobox" : {"x" : "1700", "y" : "346"}, "style":"combo_320" },
-																													                               
+                                                                                                                                                   
                 { "name": "PerfOutModeAB",                                                                                                     "combobox" : {"x" : "1700", "y" : "423"}, "style":"combo_320" },
                 { "name": "PerfOutModeCD",                                                                                                     "combobox" : {"x" : "1700", "y" : "483"}, "style":"combo_320" },
-																													                              
-			    { "name": "MidiIn",                                                                                                            "combobox" : {"x" : "1700", "y" : "552"}, "style":"combo_320" },                
-			    { "name": "MidiOut",                                                                                                           "combobox" : {"x" : "1700", "y" : "613"}, "style":"combo_320" } 
-			]     
-		},		
-		
+                                                                                                                                                  
+                { "name": "MidiIn",                                                                                                            "combobox" : {"x" : "1700", "y" : "552"}, "style":"combo_320" },                
+                { "name": "MidiOut",                                                                                                           "combobox" : {"x" : "1700", "y" : "613"}, "style":"combo_320" } 
+            ]     
+        },      
+        
         { "name" : "DonateInfo",    "hyperlinkbutton" : {"url" : "https://paypal.me/dsp56300",   "text" : "Donate", "textHeight" : "28", "color" : "FFFFFFFF", "x" : "1630", "y" : "1150", "width" : "160", "height" : "40"} },
         { "name" : "VersionNumber", "label" : {          "text" : "1.3.2.13",                    "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "725",  "y" : "1155", "width" : "200", "height" : "32" }},       
         { "name" : "RomSelector",   "combobox" : {       "text" : "rom.bin",                     "textHeight" : "28", "color" : "FFFFFFFF", "alignH" : "L", "alignV" : "C", "x" : "995", "y" : "1154", "width" : "400",  "height" : "32", "offsetR" : "-60", "tooltip" : "Copy a valid ROM file with file extension .bin next to this plugin" }},
-    		
+            
         {
             "name" : "FocusedParameterTooltip",
             "label" : {
@@ -352,5 +352,5 @@
             },
             "componentProperties" : {"offsetY" : "25"}
         }
-	]
+    ]
 }
