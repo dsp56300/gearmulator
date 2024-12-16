@@ -525,6 +525,19 @@ namespace genericUI
 
 					m_styles.insert({name, s.value});
 				}
+
+				for (const auto& [name,s] : m_styles)
+				{
+					if (auto* styleObj = s.getDynamicObject())
+					{
+						auto parentStyleName = styleObj->getProperty("style").toString().toStdString();
+
+						if (!parentStyleName.empty())
+						{
+							applyStyle(*styleObj, parentStyleName);
+						}
+					}
+				}
 			}
 			else if(key == "tabgroup")
 			{
