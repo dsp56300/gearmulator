@@ -3,7 +3,8 @@
 #include "weControlTreeItem.h"
 #include "weTree.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
+
 #include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
@@ -18,7 +19,7 @@ namespace xtJucePlugin
 	private:
 		void onTableChanged(bool _tableHasChanged) const;
 
-		pluginLib::EventListener<xt::TableId> m_onTableChanged;
+		baseLib::EventListener<xt::TableId> m_onTableChanged;
 		xt::TableId m_table;
 		std::array<ControlTreeItem*, xt::wave::g_wavesPerTable> m_items;
 	};

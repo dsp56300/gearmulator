@@ -3,8 +3,8 @@
 #include <array>
 #include <memory>
 
+#include "baseLib/event.h"
 #include "jucePluginEditorLib/led.h"
-#include "jucePluginLib/event.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 #include "virusLib/frontpanelState.h"
 
@@ -70,6 +70,6 @@ namespace genericVirusUI
 
 		std::unique_ptr<LogoMouseListener> m_logoClickListener;
 
-		pluginLib::EventListener<virusLib::FrontpanelState> m_onFrontPanelStateChanged;
+		baseLib::EventListener<virusLib::FrontpanelState> m_onFrontPanelStateChanged;
 	};
 }

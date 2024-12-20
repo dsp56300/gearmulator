@@ -1,5 +1,5 @@
 #include "event.h"
 
-namespace pluginLib
+namespace baseLib
 {
 }

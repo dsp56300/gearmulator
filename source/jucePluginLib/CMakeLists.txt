@@ -13,7 +13,6 @@ set(SOURCES
 	controller.cpp controller.h
 	controllermap.cpp controllermap.h
 	dummydevice.cpp dummydevice.h
-	event.cpp event.h
 	midipacket.cpp midipacket.h
 	midiports.cpp midiports.h
 	parameter.cpp parameter.h

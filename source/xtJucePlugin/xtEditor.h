@@ -4,7 +4,7 @@
 
 #include "jucePluginEditorLib/pluginEditor.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace jucePluginEditorLib
 {
@@ -71,7 +71,7 @@ namespace xtJucePlugin
 
 		WaveEditor* m_waveEditor = nullptr;
 
-		pluginLib::EventListener<bool> m_playModeChangeListener;
+		baseLib::EventListener<bool> m_playModeChangeListener;
 
 		juce::Button* m_btMultiMode = nullptr;
 		juce::Button* m_ledMultiMode = nullptr;

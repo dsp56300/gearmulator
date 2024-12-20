@@ -1,11 +1,11 @@
 #pragma once
 
-#include <map>
 #include <string>
 #include <vector>
 
 #include "n2xFocusedParameter.h"
-#include "jucePluginLib/event.h"
+
+#include "baseLib/event.h"
 
 namespace pluginLib
 {
@@ -68,6 +68,6 @@ namespace n2xJucePlugin
 		std::vector<std::unique_ptr<VmParam>> m_vmParams;
 		juce::Button* m_btVmMap;
 		bool m_enabled = false;
-		pluginLib::EventListener<uint8_t> m_onCurrentPartChanged;
+		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 	};
 }

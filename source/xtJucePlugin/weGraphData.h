@@ -3,7 +3,7 @@
 #include "weTypes.h"
 #include <tuple>
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include "juce_dsp/juce_dsp.h"
 
@@ -12,8 +12,8 @@ namespace xtJucePlugin
 	class GraphData
 	{
 	public:
-		pluginLib::Event<> onChanged;
-		pluginLib::Event<xt::WaveData> onIntegerChanged;
+		baseLib::Event<> onChanged;
+		baseLib::Event<xt::WaveData> onIntegerChanged;
 
 		GraphData();
 

@@ -11,7 +11,7 @@ namespace pluginLib
 	class SoftKnob
 	{
 	public:
-		Event<Parameter*> onBind;
+		baseLib::Event<Parameter*> onBind;
 
 		SoftKnob(const Controller& _controller, uint8_t _part, uint32_t _parameterIndex);
 		~SoftKnob();

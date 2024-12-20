@@ -23,6 +23,6 @@ namespace xtJucePlugin
 		pluginLib::Parameter* getWaveParameter() const;
 
 		pluginLib::ParameterListener m_waveParamListener;
-		pluginLib::EventListener<uint8_t> m_partChangedListener;
+		baseLib::EventListener<uint8_t> m_partChangedListener;
 	};
 }

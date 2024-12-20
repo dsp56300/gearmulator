@@ -1,7 +1,8 @@
 #pragma once
 
 #include "jucePluginLib/controller.h"
-#include "jucePluginLib/event.h"
+
+#include "baseLib/event.h"
 
 #include "xtLib/xtId.h"
 
@@ -55,8 +56,8 @@ namespace xtJucePlugin
 			std::vector<uint8_t> data;
 		};
 
-		pluginLib::Event<bool> onPlayModeChanged;
-		pluginLib::Event<uint8_t> onProgramChanged;
+		baseLib::Event<bool> onPlayModeChanged;
+		baseLib::Event<uint8_t> onProgramChanged;
 
 		Controller(AudioPluginAudioProcessor &, unsigned char _deviceId = 0);
 		~Controller() override;

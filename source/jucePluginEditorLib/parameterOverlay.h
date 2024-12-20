@@ -15,7 +15,7 @@ namespace jucePluginEditorLib
 	class ParameterOverlay
 	{
 	public:
-		static constexpr size_t InvalidListenerId = pluginLib::Event<int>::InvalidListenerId;
+		static constexpr size_t InvalidListenerId = baseLib::Event<int>::InvalidListenerId;
 		static constexpr uint32_t OverlayCount = static_cast<uint32_t>(ImagePool::Type::Count);
 
 		explicit ParameterOverlay(ParameterOverlays& _overlays, juce::Component* _component);
@@ -34,7 +34,7 @@ namespace jucePluginEditorLib
 		{
 			juce::Colour color = juce::Colour(0xffffffff);
 			float scale = 0.2f;
-			juce::Point<float> position = juce::Point<float>(0,0);;
+			juce::Point<float> position = juce::Point<float>(0,0);
 		};
 
 		OverlayProperties getOverlayProperties() const;

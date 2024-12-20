@@ -1,6 +1,6 @@
 #pragma once
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include <vector>
 #include <cstdint>
@@ -37,7 +37,7 @@ namespace xtJucePlugin
 		juce::Slider* m_arpRange;
 		std::vector<juce::Button*> m_arpReset;
 
-		pluginLib::EventListener<bool> m_onPlayModeChanged;
-		pluginLib::EventListener<uint8_t> m_onPartChanged;
+		baseLib::EventListener<bool> m_onPlayModeChanged;
+		baseLib::EventListener<uint8_t> m_onPartChanged;
 	};
 }

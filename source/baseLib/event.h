@@ -5,7 +5,7 @@
 #include <cassert>
 #include <optional>
 
-namespace pluginLib
+namespace baseLib
 {
 	template<typename ...Ts>
 	class Event

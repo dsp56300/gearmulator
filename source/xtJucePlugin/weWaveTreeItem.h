@@ -3,7 +3,7 @@
 #include "weTreeItem.h"
 #include "weTypes.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace xtJucePlugin
 {
@@ -46,6 +46,6 @@ namespace xtJucePlugin
 		WaveEditor& m_editor;
 		WaveCategory m_category;
 		const xt::WaveId m_waveIndex;
-		pluginLib::EventListener<xt::WaveId> m_onWaveChanged;
+		baseLib::EventListener<xt::WaveId> m_onWaveChanged;
 	};
 }

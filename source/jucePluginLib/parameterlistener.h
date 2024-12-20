@@ -1,12 +1,12 @@
 #pragma once
 
-#include "event.h"
+#include "baseLib/event.h"
 
 namespace pluginLib
 {
 	class Parameter;
 
-	class ParameterListener : public EventListener<Parameter*>
+	class ParameterListener : public baseLib::EventListener<Parameter*>
 	{
 	public:
 		using Base = EventListener<Parameter*>;

@@ -3,7 +3,7 @@
 #include "synthLib/plugin.h"
 #include "virusLib/device.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
@@ -78,6 +78,6 @@ namespace virus
 		uint32_t							m_clockTempoParam = 0xffffffff;
 
 	public:
-	    pluginLib::Event<const virusLib::ROMFile*> evRomChanged;
+	    baseLib::Event<const virusLib::ROMFile*> evRomChanged;
 	};
 }

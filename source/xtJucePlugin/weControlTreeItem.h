@@ -3,7 +3,7 @@
 #include "weTreeItem.h"
 #include "weTypes.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace xtJucePlugin
 {
@@ -35,6 +35,6 @@ namespace xtJucePlugin
 		xt::WaveId m_wave = g_invalidWaveIndex;
 		xt::TableId m_table = g_invalidTableIndex;
 
-		pluginLib::EventListener<xt::WaveId> m_onWaveChanged;
+		baseLib::EventListener<xt::WaveId> m_onWaveChanged;
 	};
 }

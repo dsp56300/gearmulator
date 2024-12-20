@@ -2,7 +2,7 @@
 
 #include <vector>
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 #include "juceUiLib/button.h"
 #include "virusLib/frontpanelState.h"
 
@@ -64,6 +64,6 @@ namespace genericVirusUI
 		std::vector<PartButton*> m_presetName;
 
 		virusLib::FrontpanelState m_frontpanelState;
-		pluginLib::EventListener<virusLib::FrontpanelState> m_onFrontpanelStateChanged;
+		baseLib::EventListener<virusLib::FrontpanelState> m_onFrontpanelStateChanged;
 	};
 }
