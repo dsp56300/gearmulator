@@ -2,7 +2,7 @@
 
 #include "weTreeItem.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include "xtLib/xtId.h"
 
@@ -37,6 +37,6 @@ namespace xtJucePlugin
 
 		WaveEditor& m_editor;
 		const xt::TableId m_index;
-		pluginLib::EventListener<xt::TableId> m_onTableChanged;
+		baseLib::EventListener<xt::TableId> m_onTableChanged;
 	};
 }

@@ -2,7 +2,8 @@
 
 #include "jucePluginLib/parameterdescriptions.h"
 #include "jucePluginLib/controller.h"
-#include "jucePluginLib/event.h"
+
+#include "baseLib/event.h"
 
 #include "virusLib/frontpanelState.h"
 #include "virusLib/microcontrollerTypes.h"
@@ -15,7 +16,7 @@ namespace virus
     class Controller : public pluginLib::Controller
     {
     public:
-		pluginLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
+		baseLib::Event<virusLib::FrontpanelState> onFrontPanelStateChanged;
 
         struct Patch
         {
@@ -182,7 +183,7 @@ namespace virus
         virusLib::BankNumber m_currentBank[16]{};
         uint8_t m_currentProgram[16]{};
         PresetSource m_currentPresetSource[16]{PresetSource::Unknown};
-		pluginLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
+		baseLib::EventListener<const virusLib::ROMFile*> m_onRomChanged;
         virusLib::FrontpanelState m_frontpanelState;
     };
 }; // namespace Virus

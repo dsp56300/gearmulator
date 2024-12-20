@@ -33,7 +33,7 @@ namespace genericUI
 	class UiObject
 	{
 	public:
-		explicit UiObject(const juce::var& _json, bool _isTemplate = false);
+		explicit UiObject(UiObject* _parent, const juce::var& _json, bool _isTemplate = false);
 		~UiObject();
 
 		void createJuceTree(Editor& _editor);
@@ -81,6 +81,10 @@ namespace genericUI
 		template<typename T> T* createJuceObject(Editor& _editor, T* _object);
 		void createCondition(const Editor& _editor, juce::Component& _target);
 
+		juce::DynamicObject& applyStyle(juce::DynamicObject& _obj, const std::string& _styleName);
+
+		static bool copyPropertiesRecursive(juce::DynamicObject& _target, const juce::DynamicObject& _source);
+
 		bool parse(juce::DynamicObject* _obj);
 
 		template<typename T> void bindParameter(const Editor& _editor, T& _target) const;
@@ -94,11 +98,14 @@ namespace genericUI
 		std::string m_name;
 		std::map<std::string, std::map<std::string, std::string>> m_components;
 		std::vector<std::unique_ptr<UiObject>> m_children;
+		UiObject* m_parent = nullptr;
 
 		std::vector<std::shared_ptr<UiObject>> m_templates;
 
 		std::vector<std::unique_ptr<juce::Component>> m_juceObjects;
 		std::unique_ptr<UiObjectStyle> m_style;
+
+		std::map<std::string, juce::var> m_styles;
 
 		std::unique_ptr<Condition> m_condition;
 

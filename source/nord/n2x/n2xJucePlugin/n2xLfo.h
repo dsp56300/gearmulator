@@ -24,6 +24,6 @@ namespace n2xJucePlugin
 		const uint8_t m_index;
 		juce::Slider* m_slider;
 
-		pluginLib::EventListener<uint8_t> m_onCurrentPartChanged;
+		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 	};
 }

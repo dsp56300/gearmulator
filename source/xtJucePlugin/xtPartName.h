@@ -2,7 +2,7 @@
 
 #include "jucePluginEditorLib/partbutton.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace xtJucePlugin
 {
@@ -20,7 +20,7 @@ namespace xtJucePlugin
 		void updatePartName();
 
 		Editor& m_editor;
-		pluginLib::EventListener<uint8_t> m_onProgramChanged;
-		pluginLib::EventListener<bool> m_onPlayModeChanged;
+		baseLib::EventListener<uint8_t> m_onProgramChanged;
+		baseLib::EventListener<bool> m_onPlayModeChanged;
 	};
 }

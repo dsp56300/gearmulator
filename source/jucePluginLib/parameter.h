@@ -6,8 +6,9 @@
 
 #include "juce_audio_processors/juce_audio_processors.h"
 
-#include "event.h"
 #include "types.h"
+
+#include "baseLib/event.h"
 
 namespace pluginLib
 {
@@ -28,9 +29,9 @@ namespace pluginLib
 			Derived
 		};
 
-		Event<Parameter*, bool> onLockedChanged;
-		Event<Parameter*, ParameterLinkType> onLinkStateChanged;
-		Event<Parameter*> onValueChanged;
+		baseLib::Event<Parameter*, bool> onLockedChanged;
+		baseLib::Event<Parameter*, ParameterLinkType> onLinkStateChanged;
+		baseLib::Event<Parameter*> onValueChanged;
 
 		Parameter(Controller& _controller, const Description& _desc, uint8_t _partNum, int _uniqueId, const PartFormatter& _partFormatter);
 

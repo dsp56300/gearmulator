@@ -39,7 +39,7 @@ namespace n2xJucePlugin
 		const uint8_t m_part;
 
 		pluginLib::ParameterListener m_onParamChanged;
-		pluginLib::EventListener<uint8_t> m_onCurrentPartChanged;
+		baseLib::EventListener<uint8_t> m_onCurrentPartChanged;
 		pluginLib::Parameter* m_param = nullptr;
 	};
 }

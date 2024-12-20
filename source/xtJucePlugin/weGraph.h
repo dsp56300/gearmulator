@@ -3,7 +3,7 @@
 #include "weTypes.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace xtJucePlugin
 {
@@ -78,7 +78,7 @@ namespace xtJucePlugin
 		WaveEditor& m_editor;
 		GraphData& m_data;
 
-		pluginLib::EventListener<> m_onDataChanged;
+		baseLib::EventListener<> m_onDataChanged;
 
 		std::set<uint32_t> m_highlightedIndices;
 		uint32_t m_hoveredIndex = InvalidIndex;

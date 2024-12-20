@@ -2,7 +2,6 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
-#include "event.h"
 #include "parameterlistener.h"
 
 namespace juce
@@ -48,8 +47,8 @@ namespace pluginLib
 			size_t softknobTargetChangedListenerId = ParameterListener::InvalidListenerId;
 		};
 
-		Event<BoundParameter> onBind;
-		Event<BoundParameter> onUnbind;
+		baseLib::Event<BoundParameter> onBind;
+		baseLib::Event<BoundParameter> onUnbind;
 
 		ParameterBinding(Controller& _controller) : m_controller(_controller)
 		{

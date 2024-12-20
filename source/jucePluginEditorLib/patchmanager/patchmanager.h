@@ -4,7 +4,8 @@
 #include "state.h"
 #include "types.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
+
 #include "jucePluginLib/patchdb/db.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
@@ -41,7 +42,7 @@ namespace jucePluginEditorLib::patchManager
 			Grid
 		};
 
-		pluginLib::Event<uint32_t, pluginLib::patchDB::PatchKey> onSelectedPatchChanged;
+		baseLib::Event<uint32_t, pluginLib::patchDB::PatchKey> onSelectedPatchChanged;
 
 		static constexpr std::initializer_list<GroupType> DefaultGroupTypes{GroupType::Favourites, GroupType::LocalStorage, GroupType::Factory, GroupType::DataSources};
 

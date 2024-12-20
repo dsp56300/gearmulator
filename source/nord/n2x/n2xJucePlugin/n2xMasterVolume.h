@@ -1,6 +1,6 @@
 #pragma once
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include <cstdint>
 
@@ -28,6 +28,6 @@ namespace n2xJucePlugin
 
 		juce::Slider* m_volume;
 
-		pluginLib::EventListener<n2x::KnobType, uint8_t> m_onKnobChanged;
+		baseLib::EventListener<n2x::KnobType, uint8_t> m_onKnobChanged;
 	};
 }

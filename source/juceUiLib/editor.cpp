@@ -19,11 +19,11 @@ namespace genericUI
 		const auto error = juce::JSON::parse(juce::String(std::string(jsonData, jsonSize)), json);
 
 		if (error.failed())
-			throw std::runtime_error("Failed to load json");
+			throw std::runtime_error("Failed to load json, " + error.getErrorMessage().toStdString());
 
 		m_jsonFilename = _jsonFilename;
 
-		m_rootObject.reset(new UiObject(json));
+		m_rootObject.reset(new UiObject(nullptr, json));
 
 		std::set<std::string> textures;
 		m_rootObject->collectVariants(textures, "texture");

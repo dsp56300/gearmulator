@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include "juce_events/juce_events.h"
 
@@ -53,7 +53,7 @@ namespace n2xJucePlugin
 
 		std::string m_overrideText;
 
-		pluginLib::EventListener<> m_onProgramChanged;
-		pluginLib::EventListener<uint8_t> m_onPartChanged;
+		baseLib::EventListener<> m_onProgramChanged;
+		baseLib::EventListener<uint8_t> m_onPartChanged;
 	};
 }

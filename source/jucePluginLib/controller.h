@@ -11,8 +11,6 @@
 
 #include "parameterlinks.h"
 
-#include "event.h"
-
 namespace juce
 {
 	class AudioProcessor;
@@ -29,7 +27,7 @@ namespace pluginLib
 	public:
 		static constexpr uint32_t InvalidParameterIndex = 0xffffffff;
 
-		Event<uint8_t> onCurrentPartChanged;
+		baseLib::Event<uint8_t> onCurrentPartChanged;
 
 		explicit Controller(Processor& _processor, const std::string& _parameterDescJsonFilename);
 		~Controller() override;

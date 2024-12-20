@@ -10,7 +10,8 @@
 #include "xtLib/xtState.h"
 
 #include "jucePluginLib/midipacket.h"
-#include "jucePluginLib/event.h"
+
+#include "baseLib/event.h"
 
 namespace xtJucePlugin
 {
@@ -19,8 +20,8 @@ namespace xtJucePlugin
 	class WaveEditorData
 	{
 	public:
-		pluginLib::Event<xt::WaveId> onWaveChanged;
-		pluginLib::Event<xt::TableId> onTableChanged;
+		baseLib::Event<xt::WaveId> onWaveChanged;
+		baseLib::Event<xt::TableId> onTableChanged;
 
 		WaveEditorData(Controller& _controller, const std::string& _cacheDir);
 

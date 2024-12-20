@@ -4,7 +4,7 @@
 #include "jucePluginEditorLib/pluginEditor.h"
 #include "jucePluginEditorLib/focusedParameter.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 #include "Parts.h"
 #include "Tabs.h"
@@ -109,6 +109,6 @@ namespace genericVirusUI
 
 		ArpUserPattern* m_arpUserPattern = nullptr;
 
-		pluginLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
+		baseLib::EventListener<const virusLib::ROMFile*> m_romChangedListener;
 	};
 }

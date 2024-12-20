@@ -12,6 +12,7 @@ namespace bridgeClient
 		using ServerFoundCallback = std::function<void(const std::string&, const bridgeLib::ServerInfo&, const bridgeLib::Error&)>;
 
 		UdpClient(const bridgeLib::PluginDesc& _desc, ServerFoundCallback&& _callback);
+		~UdpClient() override;
 
 	private:
 		bool validateResponse(const std::string& _host, const std::vector<uint8_t>& _message) override;

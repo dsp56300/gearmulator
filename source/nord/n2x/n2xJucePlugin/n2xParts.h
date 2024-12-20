@@ -3,7 +3,7 @@
 #include "n2xPart.h"
 #include "n2xPartLed.h"
 
-#include "jucePluginLib/event.h"
+#include "baseLib/event.h"
 
 namespace n2xJucePlugin
 {
@@ -21,7 +21,7 @@ namespace n2xJucePlugin
 
 		std::array<Part*,4> m_parts;
 		std::array<std::unique_ptr<PartLed>,4> m_partLeds;
-		pluginLib::EventListener<uint8_t> onCurrentPartChanged;
+		baseLib::EventListener<uint8_t> onCurrentPartChanged;
 
 	};
 }

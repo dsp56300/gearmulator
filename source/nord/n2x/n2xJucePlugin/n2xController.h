@@ -19,8 +19,8 @@ namespace n2xJucePlugin
 			Count
 		};
 
-		pluginLib::Event<> onProgramChanged;
-		pluginLib::Event<n2x::KnobType, uint8_t> onKnobChanged;
+		baseLib::Event<> onProgramChanged;
+		baseLib::Event<n2x::KnobType, uint8_t> onKnobChanged;
 
 		Controller(AudioPluginAudioProcessor&);
 		~Controller() override;
@@ -66,6 +66,6 @@ namespace n2xJucePlugin
 		uint8_t combineSyncRingModDistortion(uint8_t _part, uint8_t _currentCombinedValue, bool _lockedOnly);
 
 		n2x::State m_state;
-		pluginLib::EventListener<uint8_t> m_currentPartChanged;
+		baseLib::EventListener<uint8_t> m_currentPartChanged;
 	};
 }
