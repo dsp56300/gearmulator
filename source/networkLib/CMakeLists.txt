@@ -34,5 +34,10 @@ if(MSVC)
 	target_link_libraries(networkLib PUBLIC ws2_32)
 endif()
 
+if(UNIX AND NOT APPLE)
+	find_package(Threads REQUIRED)
+	target_link_libraries(networkLib PRIVATE Threads::Threads)
+endif()
+
 target_include_directories(networkLib PUBLIC ../)
 set_property(TARGET networkLib PROPERTY FOLDER "Networking")
