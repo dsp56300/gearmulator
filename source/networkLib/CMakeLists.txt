@@ -35,6 +35,7 @@ if(MSVC)
 endif()
 
 if(UNIX AND NOT APPLE)
+	set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 	find_package(Threads REQUIRED)
 	target_link_libraries(networkLib PRIVATE Threads::Threads)
 endif()
