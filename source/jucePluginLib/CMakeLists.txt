@@ -68,3 +68,8 @@ add_custom_command(
 )
 
 target_include_directories(jucePluginLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+if(UNIX AND NOT APPLE)
+	find_package(Threads REQUIRED)
+	target_link_libraries(jucePluginLib PRIVATE Threads::Threads)
+endif()
