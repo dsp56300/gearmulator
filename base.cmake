@@ -68,15 +68,19 @@ else()
 	endif()
 
 	# GCC <= 11 has LTO issues
-	cmake_policy(SET CMP0069 NEW)
-	include(CheckIPOSupported)
-
-	check_ipo_supported(RESULT result)
-	if(result)
-		message(STATUS "IPO is supported")
-		set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+	if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND (CMAKE_CXX_COMPILER_VERSION VERSION_LESS_EQUAL 11.4 OR CMAKE_CXX_COMPILER_VERSION VERSION_EQUAL 13.2.0))
+		message(WARNING "LTO disabled due to detected GCC version causing issues")
 	else()
-		message(WARNING "IPO is not supported")
+		cmake_policy(SET CMP0069 NEW)
+		include(CheckIPOSupported)
+
+		check_ipo_supported(RESULT result)
+		if(result)
+			message(STATUS "IPO is supported")
+			set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
+		else()
+			message(WARNING "IPO is not supported")
+		endif()
 	endif()
 
 	string(APPEND CMAKE_C_FLAGS_RELEASE " -Ofast -fno-stack-protector")
