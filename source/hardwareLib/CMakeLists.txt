@@ -23,3 +23,6 @@ target_link_libraries(hardwareLib PUBLIC 68kEmu dsp56kEmu synthLib)
 set_property(TARGET hardwareLib PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(hardwareLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+#target_compile_options(hardwareLib PRIVATE -fsanitize=thread)
+#target_link_options(hardwareLib PUBLIC -fsanitize=thread)

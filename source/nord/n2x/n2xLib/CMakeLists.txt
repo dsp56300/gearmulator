@@ -32,3 +32,6 @@ endif()
 set_property(TARGET n2xLib PROPERTY FOLDER "N2x")
 
 target_include_directories(n2xLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
+
+#target_compile_options(n2xLib PRIVATE -fsanitize=thread)
+#target_link_options(n2xLib PUBLIC -fsanitize=thread)
