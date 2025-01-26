@@ -231,7 +231,7 @@ void ConsoleApp::run(const std::string& _audioOutputFilename, uint32_t _maxSampl
 	const uint32_t notifyThreshold = blockSize > 4 ? blockSize - 4 : 0;
 
 	uint32_t callbackCount = 0;
-	dsp56k::Semaphore sem(1);
+	dsp56k::SpscSemaphore sem(1);
 
 	auto& esai = m_dsp1->getAudio();
 	int32_t notifyTimeout = 0;
