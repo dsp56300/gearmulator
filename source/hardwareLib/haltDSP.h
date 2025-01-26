@@ -3,8 +3,9 @@
 #include <cstdint>
 #include <functional>
 #include <unordered_map>
+#include <atomic>
 
-#include "baseLib/semaphore.h"
+#include "dsp56kEmu/semaphore.h"
 
 namespace dsp56k
 {
@@ -35,12 +36,12 @@ namespace hwLib
 
 		uint32_t m_halted = 0;
 		uint32_t m_irq;
-		baseLib::Semaphore m_blockSem;
+		dsp56k::SpscSemaphore m_blockSem;
 
 		std::mutex m_mutex;
 		std::condition_variable m_cvHalted;
 
-		uint32_t m_irqServedCount = 0;
+		std::atomic<uint32_t> m_irqServedCount = 0;
 		uint32_t m_irqRequestCount = 0;
 
 		uint32_t m_wakeUpId = 0;
@@ -48,7 +49,7 @@ namespace hwLib
 
 		std::unordered_map<uint32_t, std::function<void()>> m_wakeUps;
 
-		bool m_halting = false;
+		std::atomic<bool> m_halting = false;
 	};
 
 	class ScopedResumeDSP
