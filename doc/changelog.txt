@@ -1,5 +1,25 @@
 Release Notes 
 
+1.4.2
+
+Framework:
+
+- [Imp] Skinning System: Added ability to add parameter bindings to labels
+- [Imp] Skinning System: Added roughly CSS-based styling system. This allows to
+        move properties that are common to all buttons/knobs/etc to a single style
+		to prevent that they need to be repeated for each element.
+		Export the latest NodalRed2x skin to see the new format
+
+- [Imp] Downgraded to Juce 7 to regain compatibility with Windows 7 & fix font
+        rendering issues on macOS      
+
+NodalRed2x:
+
+- [Imp] Fix possible race condition in UC/DSP synchronization that may have been the
+        reason for a deadlock, causing the plugin to hang the DAW. Note that we cannot 
+		reproduce the issue on our test systems, please report back if the issue has 
+		been resolved
+
 1.4.1
 
 Framework:
