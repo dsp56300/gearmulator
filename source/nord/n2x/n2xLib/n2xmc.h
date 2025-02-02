@@ -13,7 +13,7 @@ namespace n2x
 {
 	class Rom;
 
-	class Microcontroller : public mc68k::Mc68k
+	class Microcontroller final : public mc68k::Mc68k
 	{
 	public:
 		explicit Microcontroller(Hardware& _hardware, const Rom& _rom);
