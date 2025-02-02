@@ -29,15 +29,17 @@ namespace n2x
 		auto& getFrontPanel() { return m_panel; }
 		const auto& getFrontPanel() const { return m_panel; }
 
-	private:
-		uint32_t read32(uint32_t _addr) override;
-		uint16_t readImm16(uint32_t _addr) override;
+		uint16_t readImm16(const uint32_t _addr) override
+		{
+			return readW(m_romRam.data(), _addr & (m_romRam.size()-1));
+		}
 		uint16_t read16(uint32_t _addr) override;
 		uint8_t read8(uint32_t _addr) override;
 
 		void write16(uint32_t _addr, uint16_t _val) override;
 		void write8(uint32_t _addr, uint8_t _val) override;
 
+	private:
 		// rom at $000000, ram at $100000, dsps at $200000, we use one buffer for both rom and ram and a power of two sized buffer helps with faster access
 		std::array<uint8_t, g_dspBothAddress> m_romRam;
 

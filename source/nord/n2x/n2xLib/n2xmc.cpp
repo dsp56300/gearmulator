@@ -117,16 +117,6 @@ namespace n2x
 		});
 	}
 
-	uint32_t Microcontroller::read32(uint32_t _addr)
-	{
-		return Mc68k::read32(_addr);
-	}
-
-	uint16_t Microcontroller::readImm16(const uint32_t _addr)
-	{
-		return readW(m_romRam.data(), _addr & (m_romRam.size()-1));
-	}
-
 	uint16_t Microcontroller::read16(const uint32_t _addr)
 	{
 		if(_addr < m_romRam.size())
