@@ -10,6 +10,9 @@
 #include "mqbuildconfig.h"
 #include "mc68k/logging.h"
 
+#define MC68K_CLASS mqLib::MqMc
+#include "mc68k/musashiEntry.h"
+
 namespace mqLib
 {
 	constexpr uint32_t g_romAddress = 0x80000;

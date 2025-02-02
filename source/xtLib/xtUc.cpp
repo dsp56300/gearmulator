@@ -6,6 +6,10 @@
 #include "xtRom.h"
 
 #include "mc68k/logging.h"
+
+#define MC68K_CLASS xt::XtUc
+#include "mc68k/musashiEntry.h"
+
 #include "dsp56kEmu/utils.h"
 
 namespace xt

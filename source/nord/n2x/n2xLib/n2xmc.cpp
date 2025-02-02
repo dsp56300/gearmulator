@@ -7,6 +7,9 @@
 
 #include "baseLib/filesystem.h"
 
+#define MC68K_CLASS n2x::Microcontroller
+#include "mc68k/musashiEntry.h"
+
 namespace n2x
 {
 	// OC2 = PGP4 = SDA
