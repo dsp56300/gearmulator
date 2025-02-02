@@ -93,7 +93,7 @@ namespace hwLib
 		double m_targetUcCycles = 0.0;
 		double m_totalUcCycles = 0.0;
 		uint32_t m_totalSampleCount = 0;
-		std::condition_variable m_cvSampleAdded;
+		dsp56k::ConditionVariable m_cvSampleAdded;
 		std::mutex m_lockSampleAdded;
 	};
 }
