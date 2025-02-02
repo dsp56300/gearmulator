@@ -84,7 +84,8 @@ namespace n2x
 
 	void Hardware::processUC()
 	{
-		syncUCtoDSP();
+		if(m_remainingUcCycles <= 0)
+			syncUCtoDSP();
 
 		const auto deltaCycles = m_uc.exec();
 
@@ -257,8 +258,7 @@ namespace n2x
 
 	void Hardware::syncUCtoDSP()
 	{
-		if(m_remainingUcCycles > 0)
-			return;
+		assert(m_remainingUcCycles <= 0);
 
 		// we can only use ESAI to clock the uc once it has been enabled
 		if(m_esaiFrameIndex <= 0)
