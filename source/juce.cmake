@@ -19,18 +19,31 @@ set(juce_formats "")
 
 if(USE_AU)
 	set(juce_formats AU)
+	add_custom_target(PluginFormat_AU)
+	set_property(TARGET PluginFormat_AU PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_VST2 AND JUCE_GLOBAL_VST2_SDK_PATH)
     list(APPEND juce_formats VST)
+	add_custom_target(PluginFormat_VST2)
+	set_property(TARGET PluginFormat_VST2 PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_VST3)
     list(APPEND juce_formats VST3)
+	add_custom_target(PluginFormat_VST3)
+	set_property(TARGET PluginFormat_VST3 PROPERTY FOLDER CustomTargets)
 endif()
 
 if(USE_LV2)
     list(APPEND juce_formats LV2)
+	add_custom_target(PluginFormat_LV2)
+	set_property(TARGET PluginFormat_LV2 PROPERTY FOLDER CustomTargets)
+endif()
+
+if(USE_CLAP)
+	add_custom_target(PluginFormat_CLAP)
+	set_property(TARGET PluginFormat_CLAP PROPERTY FOLDER CustomTargets)
 endif()
 
 add_custom_target(ServerPlugins)
@@ -126,12 +139,17 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			)
 		set_property(TARGET ${targetName}_CLAP PROPERTY FOLDER ${targetName})
 		add_dependencies(${targetName}_All ${targetName}_CLAP)
+		add_dependencies(PluginFormat_CLAP ${targetName}_CLAP)
 	endif()
 
 	if(UNIX AND NOT APPLE)
 		target_link_libraries(${targetName} PUBLIC -static-libgcc -static-libstdc++)
 	endif()
 	
+	if(USE_VST2)
+		add_dependencies(PluginFormat_VST2 ${targetName}_VST)
+	endif()
+
 	if(USE_VST3)
 		if(APPLE)
 			install(TARGETS ${targetName}_VST3 DESTINATION . COMPONENT ${productName}-VST3)
@@ -147,6 +165,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			endif()
 			install(DIRECTORY ${vst3OutputFolder}/${productName}.vst3 DESTINATION ${dest} COMPONENT ${productName}-VST3 FILES_MATCHING PATTERN ${pattern} PATTERN "*.json")
 		endif()
+		add_dependencies(PluginFormat_VST3 ${targetName}_VST3)
 	endif()
 
 	if(MSVC OR APPLE)
@@ -193,6 +212,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		if(APPLE)
 			installMacSetupScript(${dest} ${productName}-LV2)
 		endif()
+		add_dependencies(PluginFormat_LV2 ${targetName}_LV2)
 	endif()
 
 	if(USE_AU AND APPLE AND ${isSynth})
