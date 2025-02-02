@@ -136,13 +136,13 @@ namespace n2x
 
 		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS4 " << HEX(_addr));
+//			LOG("Read Frontpanel CS4 " << HEX(_addr));
 			return m_panel.cs4().read16(pa);
 		}
 
 		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS6 " << HEX(_addr));
+//			LOG("Read Frontpanel CS6 " << HEX(_addr));
 			return m_panel.cs6().read16(pa);
 		}
 
