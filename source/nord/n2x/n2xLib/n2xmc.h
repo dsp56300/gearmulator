@@ -31,7 +31,11 @@ namespace n2x
 
 		uint16_t readImm16(const uint32_t _addr) override
 		{
-			return readW(m_romRam.data(), _addr & (m_romRam.size()-1));
+			return mc68k::memoryOps::readU16(m_romRam.data(), _addr & (m_romRam.size()-1));
+		}
+		uint32_t readImm32(const uint32_t _addr) const
+		{
+			return mc68k::memoryOps::readU32(m_romRam.data(), _addr & (m_romRam.size()-1));
 		}
 		uint16_t read16(uint32_t _addr) override;
 		uint8_t read8(uint32_t _addr) override;

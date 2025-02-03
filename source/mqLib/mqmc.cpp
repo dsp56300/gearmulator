@@ -116,12 +116,12 @@ namespace mqLib
 	{
 		if(addr < g_memorySize)
 		{
-			return readW(m_memory, addr);
+			return mc68k::memoryOps::readU16(m_memory, addr);
 		}
 
 		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
-			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
+			const auto r = mc68k::memoryOps::readU16(m_romRuntimeData, addr - g_romAddress);
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
@@ -133,12 +133,12 @@ namespace mqLib
 	{
 		if(addr < g_memorySize)
 		{
-			return readW(m_memory, addr);
+			return mc68k::memoryOps::readU16(m_memory, addr);
 		}
 
 		if(addr >= g_romAddress && addr < g_romAddress + ROM::size())
 		{
-			const auto r = readW(m_romRuntimeData, addr - g_romAddress);
+			const auto r = mc68k::memoryOps::readU16(m_romRuntimeData, addr - g_romAddress);
 //			LOG("read16 from ROM addr=" << HEXN(addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
@@ -197,7 +197,7 @@ namespace mqLib
 
 		if(addr < g_memorySize)
 		{
-			writeW(m_memory, addr, val);
+			mc68k::memoryOps::writeU16(m_memory, addr, val);
 			return;
 		}
 

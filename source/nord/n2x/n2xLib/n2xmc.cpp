@@ -124,7 +124,7 @@ namespace n2x
 	{
 		if(_addr < m_romRam.size())
 		{
-			const auto r = readW(m_romRam.data(), _addr);
+			const auto r = mc68k::memoryOps::readU16(m_romRam.data(), _addr);
 			return r;
 		}
 
@@ -200,7 +200,7 @@ namespace n2x
 		if(_addr < m_romRam.size())
 		{
 			assert(_addr >= g_ramAddress);
-			writeW(m_romRam.data(), _addr, _val);
+			mc68k::memoryOps::writeU16(m_romRam.data(), _addr, _val);
 			return;
 		}
 
