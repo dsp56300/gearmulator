@@ -61,14 +61,14 @@ namespace wLib
 		std::vector<dsp56k::TWord> m_dummyOutput;
 
 		std::mutex m_esaiFrameAddedMutex;
-		std::condition_variable m_esaiFrameAddedCv;
+		dsp56k::ConditionVariable m_esaiFrameAddedCv;
 
 		std::mutex m_requestedFramesAvailableMutex;
-		std::condition_variable m_requestedFramesAvailableCv;
+		dsp56k::ConditionVariable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
 
 		bool m_haltDSP = false;
-		std::condition_variable m_haltDSPcv;
+		dsp56k::ConditionVariable m_haltDSPcv;
 		std::mutex m_haltDSPmutex;
 		bool m_processAudio = false;
 		bool m_bootCompleted = false;

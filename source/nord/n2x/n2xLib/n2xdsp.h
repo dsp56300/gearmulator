@@ -67,7 +67,7 @@ namespace n2x
 
 		std::unique_ptr<dsp56k::DSPThread> m_thread;
 
-		baseLib::Semaphore m_triggerInterruptDone;
+		dsp56k::SpscSemaphore m_triggerInterruptDone;
 		uint32_t m_irqInterruptDone = 0;
 
 		hwLib::HaltDSP m_haltDSP;

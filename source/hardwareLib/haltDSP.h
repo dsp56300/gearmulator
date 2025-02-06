@@ -39,7 +39,7 @@ namespace hwLib
 		dsp56k::SpscSemaphore m_blockSem;
 
 		std::mutex m_mutex;
-		std::condition_variable m_cvHalted;
+		dsp56k::ConditionVariable m_cvHalted;
 
 		std::atomic<uint32_t> m_irqServedCount = 0;
 		uint32_t m_irqRequestCount = 0;

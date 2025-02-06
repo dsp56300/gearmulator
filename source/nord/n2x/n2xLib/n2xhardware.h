@@ -74,9 +74,9 @@ namespace n2x
 		int64_t m_remainingUcCycles = 0;
 		double m_remainingUcCyclesD = 0;
 		std::mutex m_esaiFrameAddedMutex;
-		std::condition_variable m_esaiFrameAddedCv;
+		dsp56k::ConditionVariable m_esaiFrameAddedCv;
 		std::mutex m_requestedFramesAvailableMutex;
-		std::condition_variable m_requestedFramesAvailableCv;
+		dsp56k::ConditionVariable m_requestedFramesAvailableCv;
 		size_t m_requestedFrames = 0;
 		bool m_dspHalted = false;
 		dsp56k::SpscSemaphore m_semDspAtoB;
@@ -91,10 +91,9 @@ namespace n2x
 		uint32_t m_midiOffsetCounter = 0;
 
 		// DSP slowdown
-		uint32_t m_maxEsaiCallbacks = 0;
 		uint32_t m_esaiLatency = 0;
-		std::mutex m_haltDSPmutex;
-		std::condition_variable m_haltDSPcv;
+		int32_t m_dspNotifyCorrection = 0;
+		dsp56k::SpscSemaphoreWithCount m_haltDSPSem;
 
 		bool m_bootFinished = false;
 	};

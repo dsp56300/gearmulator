@@ -6,6 +6,10 @@
 #include "xtRom.h"
 
 #include "mc68k/logging.h"
+
+#define MC68K_CLASS xt::XtUc
+#include "mc68k/musashiEntry.h"
+
 #include "dsp56kEmu/utils.h"
 
 namespace xt
@@ -65,12 +69,12 @@ namespace xt
 
 		if(addr < g_ramSize)
 		{
-			return readW(m_memory.data(), addr);
+			return mc68k::memoryOps::readU16(m_memory.data(), addr);
 		}
 
 		if(addr >= g_romAddr && addr < g_romAddr + Rom::Size)
 		{
-			const auto r = readW(m_romRuntimeData.data(), addr - g_romAddr);
+			const auto r = mc68k::memoryOps::readU16(m_romRuntimeData.data(), addr - g_romAddr);
 //			LOG("read16 from ROM addr=" << HEXN(_addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
@@ -86,12 +90,12 @@ namespace xt
 
 		if(addr < g_ramSize)
 		{
-			return readW(m_memory.data(), addr);
+			return mc68k::memoryOps::readU16(m_memory.data(), addr);
 		}
 
 		if(addr >= g_romAddr && addr < g_romAddr + Rom::Size)
 		{
-			const auto r = readW(m_romRuntimeData.data(), addr - g_romAddr);
+			const auto r = mc68k::memoryOps::readU16(m_romRuntimeData.data(), addr - g_romAddr);
 //			LOG("read16 from ROM addr=" << HEXN(_addr, 8) << " val=" << HEXN(r, 4));
 			return r;
 		}
@@ -132,7 +136,7 @@ namespace xt
 
 		if(addr < g_ramSize)
 		{
-			writeW(m_memory.data(), addr, val);
+			mc68k::memoryOps::writeU16(m_memory.data(), addr, val);
 			return;
 		}
 

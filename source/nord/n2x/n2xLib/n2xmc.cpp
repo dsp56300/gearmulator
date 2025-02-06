@@ -7,6 +7,9 @@
 
 #include "baseLib/filesystem.h"
 
+#define MC68K_CLASS n2x::Microcontroller
+#include "mc68k/musashiEntry.h"
+
 namespace n2x
 {
 	// OC2 = PGP4 = SDA
@@ -117,21 +120,11 @@ namespace n2x
 		});
 	}
 
-	uint32_t Microcontroller::read32(uint32_t _addr)
-	{
-		return Mc68k::read32(_addr);
-	}
-
-	uint16_t Microcontroller::readImm16(const uint32_t _addr)
-	{
-		return readW(m_romRam.data(), _addr & (m_romRam.size()-1));
-	}
-
 	uint16_t Microcontroller::read16(const uint32_t _addr)
 	{
 		if(_addr < m_romRam.size())
 		{
-			const auto r = readW(m_romRam.data(), _addr);
+			const auto r = mc68k::memoryOps::readU16(m_romRam.data(), _addr);
 			return r;
 		}
 
@@ -143,13 +136,13 @@ namespace n2x
 
 		if(m_panel.cs4().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS4 " << HEX(_addr));
+//			LOG("Read Frontpanel CS4 " << HEX(_addr));
 			return m_panel.cs4().read16(pa);
 		}
 
 		if(m_panel.cs6().isInRange(pa))
 		{
-			LOG("Read Frontpanel CS6 " << HEX(_addr));
+//			LOG("Read Frontpanel CS6 " << HEX(_addr));
 			return m_panel.cs6().read16(pa);
 		}
 
@@ -207,7 +200,7 @@ namespace n2x
 		if(_addr < m_romRam.size())
 		{
 			assert(_addr >= g_ramAddress);
-			writeW(m_romRam.data(), _addr, _val);
+			mc68k::memoryOps::writeU16(m_romRam.data(), _addr, _val);
 			return;
 		}
 

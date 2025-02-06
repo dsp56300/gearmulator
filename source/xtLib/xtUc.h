@@ -17,7 +17,7 @@ namespace xt
 
 	using xtHdi08A = mc68k::Hdi08Periph<0xfe000>;
 
-	class XtUc : public mc68k::Mc68k
+	class XtUc final : public mc68k::Mc68k
 	{
 	public:
 		XtUc(const Rom& _rom);

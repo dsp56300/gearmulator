@@ -123,10 +123,10 @@ namespace hwLib
 				if(_addr >= m_size)
 					return;
 				MCLOG("Programming word at " << MCHEX(_addr) << ", value " << MCHEXN(_data, 4));
-				const auto old = mc68k::Mc68k::readW(m_buffer, _addr);
+				const auto old = mc68k::memoryOps::readU16(m_buffer, _addr);
 				// "A bit cannot be programmed from a 0 back to a 1"
 				const auto v = _data & old;
-				mc68k::Mc68k::writeW(m_buffer, _addr, v);
+				mc68k::memoryOps::writeU16(m_buffer, _addr, v);
 	//			assert(v == _data);
 				break;
 			}
