@@ -38,15 +38,17 @@ int main(const int _argc, char* _argv[])
 	{
 	    ConsoleApplication app;
 
-		const String pluginPathName = cmdLine.get("plugin");
+		std::string pluginPathName = cmdLine.get("plugin");
 
-		if (pluginPathName.isEmpty())
+		if (pluginPathName.empty())
 		{
 			return error("No plugin specified");
 		}
 
-		const String pluginPath = baseLib::filesystem::getPath(_argv[1]);
-		const String pluginFilename = baseLib::filesystem::getFilenameWithoutPath(_argv[1]);
+		// juce wants the folder for a LV2 plugin instead of the actual file
+		auto path = baseLib::filesystem::getPath(pluginPathName);
+		if (baseLib::filesystem::hasExtension(path, ".lv2"))
+			pluginPathName = path;
 
 		JuceAppLifetimeObjects jalto;
 
