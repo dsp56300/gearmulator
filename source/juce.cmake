@@ -226,6 +226,24 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
 	endif()
 
+	if(USE_VST2)
+		addPluginTest(${targetName}_VST)
+	endif()
+	if(USE_VST3)
+		addPluginTest(${targetName}_VST3)
+	endif()
+	if(USE_AU AND APPLE)
+		addPluginTest(${targetName}_AU)
+	endif()
+	if(USE_LV2)
+		addPluginTest(${targetName}_LV2)
+	endif()
+
+	# CLAP hosting is not currently supported by the clap-juce-extensions
+#	if(USE_CLAP)
+#		addPluginTest(${targetName}_CLAP)
+#	endif()
+
 	# --------- Server Plugin ---------
 
 	set(serverTarget ${productName}ServerPlugin)

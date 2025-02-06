@@ -37,3 +37,10 @@ target_compile_definitions(pluginTester PRIVATE
 )
 
 set_property(TARGET pluginTester PROPERTY FOLDER "Gearmulator")
+
+macro(addPluginTest targetName)
+	add_test(NAME test_${targetName}
+		COMMAND $<TARGET_FILE:pluginTester> -blocks 16 -plugin $<TARGET_FILE:${targetName}>
+	)
+	set_tests_properties(test_${targetName} PROPERTIES LABELS "PluginTest")
+endmacro()
