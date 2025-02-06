@@ -127,7 +127,7 @@ int main(const int _argc, char* _argv[])
 					const auto t2 = Clock::now();
 					const auto duration = std::chrono::duration_cast<std::chrono::seconds>(t2 - tBegin).count();
 
-					const auto speed = static_cast<double>(duration) / static_cast<double>(totalSeconds);
+					const auto speed = static_cast<double>(duration) * 100.0 / static_cast<double>(totalSeconds);
 
 					char temp[64];
 					(void)snprintf(temp, sizeof(temp), "Executed %02uh %02um %02us, Speed %2.2f%%", static_cast<uint32_t>(hours), static_cast<uint32_t>(minutes), static_cast<uint32_t>(seconds), speed);
@@ -150,8 +150,26 @@ int main(const int _argc, char* _argv[])
 				blocks = 1;
 		}
 
-		for (size_t i=0; i<blocks; ++i)
+		int lastPercent = -1;
+
+		char temp[64];
+
+		for (int i=0; i<blocks; ++i)
+		{
 			audioDevice.processAudio();
+
+			const auto percent = i * 100 / blocks;
+
+			if (percent == lastPercent)
+				continue;
+			lastPercent = percent;
+
+			(void)snprintf(temp, sizeof(temp), "Progress: %d%% (%d/%d blocks)", percent, i, blocks);
+			Logger::writeToLog(temp);
+		}
+
+		(void)snprintf(temp, sizeof(temp), "Progress: %d%% (%d/%d blocks)", 100, blocks, blocks);
+		Logger::writeToLog(temp);
 
 	    return 0;
 	}
