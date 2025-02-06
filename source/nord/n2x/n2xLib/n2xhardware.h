@@ -91,10 +91,9 @@ namespace n2x
 		uint32_t m_midiOffsetCounter = 0;
 
 		// DSP slowdown
-		uint32_t m_maxEsaiCallbacks = 0;
 		uint32_t m_esaiLatency = 0;
-		std::mutex m_haltDSPmutex;
-		dsp56k::ConditionVariable m_haltDSPcv;
+		int32_t m_dspNotifyCorrection = 0;
+		dsp56k::SpscSemaphoreWithCount m_haltDSPSem;
 
 		bool m_bootFinished = false;
 	};

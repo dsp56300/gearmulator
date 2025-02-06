@@ -57,7 +57,6 @@ namespace n2x
 		m_dspB.terminate();
 
 		m_esaiFrameIndex = 0;
-		m_maxEsaiCallbacks = std::numeric_limits<uint32_t>::max();
 		m_esaiLatency = 0;
 
 		while(!m_dspA.getDSPThread().runThread() || !m_dspB.getDSPThread().runThread())
@@ -69,7 +68,7 @@ namespace n2x
 				m_dspB.getPeriph().getEsai().getAudioInputs().pop_front();
 
 			// DSP B waits for ESAI rate limiting and for DSP A to provide audio data
-			m_haltDSPcv.notify_all();
+			m_haltDSPSem.notify(999999);
 			if(m_dspA.getPeriph().getEsai().getAudioOutputs().empty())
 				m_dspA.getPeriph().getEsai().getAudioOutputs().push_back({});
 		}
@@ -246,14 +245,7 @@ namespace n2x
 			m_requestedFramesAvailableMutex.unlock();
 		}
 
-		if(m_esaiFrameIndex >= m_maxEsaiCallbacks + m_esaiLatency)
-		{
-			std::unique_lock uLock(m_haltDSPmutex);
-			m_haltDSPcv.wait(uLock, [&]
-			{
-				return (m_maxEsaiCallbacks + m_esaiLatency) > m_esaiFrameIndex;
-			});
-		}
+		m_haltDSPSem.wait(1);
 	}
 
 	void Hardware::syncUCtoDSP()
@@ -317,12 +309,23 @@ namespace n2x
 
 	void Hardware::advanceSamples(const uint32_t _samples, const uint32_t _latency)
 	{
+		// if the latency was higher first but now is lower, we might report < 0 samples. In this case we
+		// cannot notify but have to wait for another sample block until we can notify again
+
+		const auto latencyDiff = static_cast<int>(_latency) - static_cast<int>(m_esaiLatency);
+		m_esaiLatency = _latency;
+
+		const auto notifyCount = static_cast<int>(_samples) + latencyDiff + m_dspNotifyCorrection;
+
+		if (notifyCount > 0)
 		{
-			std::lock_guard uLockHalt(m_haltDSPmutex);
-			m_maxEsaiCallbacks += _samples;
-			m_esaiLatency = _latency;
+			m_haltDSPSem.notify(notifyCount);
+			m_dspNotifyCorrection = 0;
 		}
-		m_haltDSPcv.notify_one();
+		else
+		{
+			m_dspNotifyCorrection = notifyCount;
+		}
 	}
 
 	void Hardware::haltDSPs()
