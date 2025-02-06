@@ -35,10 +35,17 @@ String FakeAudioIODevice::open(const BigInteger& _inputChannels, const BigIntege
 
 void FakeAudioIODevice::start(AudioIODeviceCallback* _callback)
 {
+	if (!m_isOpenFlag)
+		return;
+
 	m_callback = _callback;
 	m_isPlayingFlag = true;
-	if (m_callback)
-		m_callback->audioDeviceAboutToStart(this);
+	if (!m_callback)
+		return;
+
+	m_callback->audioDeviceAboutToStart(this);
+
+	m_buffer = AudioBuffer<float>(static_cast<int>(std::max(m_numInputChannels, m_numOutputChannels)), m_bufferSizeSamples);
 }
 
 void FakeAudioIODevice::stop()
@@ -46,20 +53,4 @@ void FakeAudioIODevice::stop()
 	m_isPlayingFlag = false;
 	if (m_callback)
 		m_callback->audioDeviceStopped();
-}
-
-void FakeAudioIODevice::processAudio() const
-{
-	if (!m_callback || !m_isPlayingFlag || !m_isOpenFlag)
-		return;
-
-	AudioBuffer<float> buffer(std::max(m_numInputChannels, m_numOutputChannels), m_bufferSizeSamples);
-	buffer.clear();
-
-	m_callback->audioDeviceIOCallbackWithContext(buffer.getArrayOfReadPointers(),
-	                                             m_numInputChannels ? static_cast<int>(m_numInputChannels) : 2,
-	                                             buffer.getArrayOfWritePointers(),
-	                                             static_cast<int>(m_numOutputChannels),
-	                                             buffer.getNumSamples(),
-	                                             AudioIODeviceCallbackContext());
 }

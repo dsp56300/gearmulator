@@ -62,7 +62,17 @@ private:
     int getXRunCount() const noexcept override { return 0; }
 
 public:
-    void processAudio() const;
+	void prepareProcess();
+
+    void processAudio()
+    {
+		m_callback->audioDeviceIOCallbackWithContext(m_buffer.getArrayOfReadPointers(),
+		                                             m_numInputChannels ? static_cast<int>(m_numInputChannels) : 2,
+		                                             m_buffer.getArrayOfWritePointers(),
+		                                             static_cast<int>(m_numOutputChannels),
+		                                             m_buffer.getNumSamples(),
+		                                             AudioIODeviceCallbackContext());
+    }
 
 private:
     double m_sampleRate;
@@ -74,4 +84,5 @@ private:
 	uint32_t m_numOutputChannels = 2;
     BigInteger m_activeInputChannels{0b11};
     BigInteger m_activeOutputChannels{0b11};
+	AudioBuffer<float> m_buffer;
 };
