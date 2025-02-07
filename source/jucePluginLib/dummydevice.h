@@ -10,7 +10,7 @@ namespace pluginLib
 		explicit DummyDevice(const synthLib::DeviceCreateParams& _params);
 
 		float getSamplerate() const override { return 44100.0f; }
-		bool isValid() const override { return false; }
+		bool isValid() const override { return true; }
 #if !SYNTHLIB_DEMO_MODE
 		bool getState(std::vector<uint8_t>& _state, synthLib::StateType _type) override { return false; }
 		bool setState(const std::vector<uint8_t>& _state, synthLib::StateType _type) override { return false; }
