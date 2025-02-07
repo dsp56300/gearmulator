@@ -103,6 +103,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		${binaryDataProject}
 		jucePluginEditorLib
 		${synthLibProject}
+	PRIVATE
 		juce::juce_audio_utils
 		juce::juce_cryptography
 		#juce::juce_recommended_config_flags
