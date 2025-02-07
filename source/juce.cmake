@@ -49,6 +49,28 @@ endif()
 add_custom_target(ServerPlugins)
 set_property(TARGET ServerPlugins PROPERTY FOLDER CustomTargets)
 
+add_library(juce_plugin_modules STATIC)
+
+target_link_libraries(juce_plugin_modules PRIVATE
+    juce::juce_audio_utils
+    juce::juce_audio_devices
+	juce::juce_cryptography
+)
+
+target_compile_definitions(juce_plugin_modules PUBLIC
+	JUCE_WEB_BROWSER=0
+	JUCE_USE_CURL=0
+	JUCE_VST3_CAN_REPLACE_VST2=0
+	JUCE_WIN_PER_MONITOR_DPI_AWARE=1
+	JUCE_MODAL_LOOPS_PERMITTED=1
+	JUCE_USE_OGGVORBIS=0
+	JUCE_USE_MP3AUDIOFORMAT=0
+	JUCE_USE_FLAC=0
+	JUCE_USE_WINDOWS_MEDIA_FORMAT=0
+)
+
+_juce_fixup_module_source_groups()
+
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject synthLibProject)
 	juce_add_plugin(${targetName}
 		# VERSION ...                                     # Set this if the plugin version is different to the project version
@@ -99,15 +121,11 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	)
 
 	target_link_libraries(${targetName}
-	PUBLIC
+	PRIVATE
 		${binaryDataProject}
-		jucePluginEditorLib
 		${synthLibProject}
-		juce::juce_audio_utils
-		juce::juce_cryptography
-		#juce::juce_recommended_config_flags
-		#juce::juce_recommended_lto_flags
-		#juce::juce_recommended_warning_flags
+		jucePluginEditorLib
+		juce_plugin_modules
 	)
 
 	if(${isSynth})
