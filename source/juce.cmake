@@ -68,6 +68,10 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_USE_WINDOWS_MEDIA_FORMAT=0
 )
 
+if(ANDROID)
+	target_compile_definitions(juce_plugin_modules PUBLIC JUCE_MODULE_AVAILABLE_juce_audio_devices=1)
+endif()
+
 _juce_fixup_module_source_groups()
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject synthLibProject)
