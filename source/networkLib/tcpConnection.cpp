@@ -9,6 +9,7 @@
 
 #ifndef _WIN32
 #	include <netinet/tcp.h>	// TCP_NODELAY
+#	include <netinet/in.h>	// IPPROTO_TCP
 #endif
 
 namespace networkLib

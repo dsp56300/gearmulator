@@ -2,7 +2,7 @@
 
 #include "server.h"
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(ANDROID)
 #include <cstdio>
 #include <execinfo.h>
 #include <signal.h>
@@ -23,7 +23,7 @@ void segFaultHandler(int sig)
 
 int main(int _argc, char** _argv)
 {
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(ANDROID)
 	signal(SIGSEGV, segFaultHandler);
 #endif
 
