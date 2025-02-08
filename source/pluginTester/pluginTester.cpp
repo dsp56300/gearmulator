@@ -51,9 +51,11 @@ int main(const int _argc, char* _argv[])
 
 		    auto start = lowercase.find(".vst3");
 		    if (start == std::string::npos)
-			    start = lowercase.find(".lv2");
+				start = lowercase.find(".lv2");
 		    if (start == std::string::npos)
 			    start = lowercase.find(".component");
+		    if (start == std::string::npos)
+			    start = lowercase.find(".vst");
 
 		    if (start != std::string::npos)
 		    {
