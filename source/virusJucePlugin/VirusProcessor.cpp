@@ -6,6 +6,8 @@
 #include "baseLib/binarystream.h"
 #include "baseLib/filesystem.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "synthLib/deviceException.h"
 #include "synthLib/lv2PresetExport.h"
 
@@ -60,7 +62,7 @@ namespace virus
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n"

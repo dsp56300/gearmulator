@@ -5,6 +5,8 @@
 #include "xtEditor.h"
 #include "xtWaveEditor.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "synthLib/midiToSysex.h"
 
 namespace xtJucePlugin
@@ -129,7 +131,7 @@ namespace xtJucePlugin
 
 		if(sysex.empty())
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, "No sysex data found in file");
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "No sysex data found in file");
 			return;
 		}
 
@@ -148,7 +150,7 @@ namespace xtJucePlugin
 			return;
 		}
 
-		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, errorTitle, waves.empty() ? "No wave data found in file" : "Multiple waves found in file");
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, waves.empty() ? "No wave data found in file" : "Multiple waves found in file");
 	}
 
 	std::vector<std::vector<uint8_t>> WaveTreeItem::getSysexFromFiles(const juce::StringArray& _files)

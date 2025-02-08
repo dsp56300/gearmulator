@@ -8,6 +8,7 @@
 #include "patchmanager/patchmanager.h"
 
 #include "juceUiLib/editor.h"
+#include "juceUiLib/messageBox.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -159,7 +160,7 @@ bool PluginEditorState::loadSkin(const Skin& _skin, const uint32_t _fallbackInde
 	{
 		LOG("ERROR: Failed to create editor: " << _err.what());
 
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what(), nullptr, juce::ModalCallbackFunction::create([](int){}));
+		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, m_processor.getProperties().name + " - Skin load failed", _err.what());
 
 		m_parameterBinding.clear();
 		m_editor.reset();
@@ -301,7 +302,7 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 	{
 		m_processor.setLatencyBlocks(_blocks);
 
-		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Warning",
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Warning",
 			"Most hosts cannot handle if a plugin changes its latency while being in use.\n"
 			"It is advised to save, close & reopen the project to prevent synchronization issues.");
 	};
@@ -490,12 +491,15 @@ void PluginEditorState::openMenu(const juce::MouseEvent* _event)
 		{
 			if(!allowAdvanced)
 			{
-				if(juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, "Warning",
-					"Changing these settings may cause instability of the plugin.\n"
-					"\n"
-					"Please confirm to continue.")
-					)
-					m_processor.getConfig().setValue("allow_advanced_options", true);
+				genericUI::MessageBox::showOkCancel(
+					juce::MessageBoxIconType::WarningIcon, 
+					"Warning", 
+					"Changing these settings may cause instability of the plugin.\n\nPlease confirm to continue.", 
+					[this](const genericUI::MessageBox::Result _result)
+				{
+					if (_result == genericUI::MessageBox::Result::Ok)
+						m_processor.getConfig().setValue("allow_advanced_options", true);
+				});
 			}
 			else
 			{
@@ -526,11 +530,11 @@ void PluginEditorState::exportCurrentSkin() const
 
 	if(!res.empty())
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, editor, juce::ModalCallbackFunction::create([](int){}));
+		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, "Export failed", "Failed to export skin:\n\n" + res, editor);
 	}
 	else
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", editor, juce::ModalCallbackFunction::create([](int){}));
+		genericUI::MessageBox::showOk(juce::MessageBoxIconType::InfoIcon, "Export finished", "Skin successfully exported", editor);
 	}
 }
 

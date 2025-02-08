@@ -13,6 +13,8 @@
 #include "jucePluginEditorLib/filetype.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
+#include "juceUiLib/messageBox.h"
+
 namespace genericVirusUI
 {
 	VirusEditor::VirusEditor(pluginLib::ParameterBinding& _binding, virus::VirusProcessor& _processorRef, const jucePluginEditorLib::Skin& _skin) :
@@ -400,8 +402,13 @@ namespace genericVirusUI
 						const auto title = m_processor.getProductName(true) + " - Load Arrangement Dump?";
 						const auto message = "This file contains an arrangement dump, i.e. one Multi and 16 Singles.\nDo you want to replace the current state by this dump?";
 
-						if(1 == juce::NativeMessageBox::showYesNoBox(juce::MessageBoxIconType::QuestionIcon, title, message, nullptr))
+						genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon, title, message, [this, multi, singles](const genericUI::MessageBox::Result _result)
 						{
+							if (_result != genericUI::MessageBox::Result::Yes)
+								return;
+
+							auto& c = getController();
+
 							setPlayMode(virusLib::PlayMode::PlayModeMulti);
 							c.sendSysEx(multi);
 
@@ -413,11 +420,12 @@ namespace genericVirusUI
 							}
 
 							c.requestArrangement();
-						}
+						});
+
 						return;
 					}
 				}
-				juce::NativeMessageBox::showMessageBox(juce::AlertWindow::InfoIcon, "Information", 
+				genericUI::MessageBox::showOk(juce::AlertWindow::InfoIcon, "Information", 
 					"The selected file contains more than one patch. Please add this file as a data source in the Patch Manager instead.\n\n"
 					"Go to the Patch Manager, right click the 'Data Sources' node and select 'Add File...' to import it."
 				);

@@ -5,6 +5,9 @@
 #include "xtWaveEditor.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
+
+#include "juceUiLib/messageBox.h"
+
 #include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
@@ -169,12 +172,11 @@ namespace xtJucePlugin
 	{
 		if(!m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part)))
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
 				m_editor.getProcessor().getProperties().name + " - Unable to load patch",
 				"MW1 patches can only be loaded to the first part.\n"
 				"\n"
-				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank."
-				, nullptr, juce::ModalCallbackFunction::create([](int){}));
+				"If you want to load a MW1 patch to another part, first convert it by loading it to part 1, then save the loaded patch to a user bank.");
 		}
 		return true;
 	}

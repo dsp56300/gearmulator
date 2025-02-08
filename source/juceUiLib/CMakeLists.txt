@@ -13,6 +13,7 @@ set(SOURCES
 	comboboxStyle.cpp comboboxStyle.h
 	buttonStyle.cpp buttonStyle.h
 	labelStyle.cpp labelStyle.h
+	messageBox.cpp messageBox.h
 	scrollbarStyle.cpp scrollbarStyle.h
 	slider.cpp slider.h
 	textbuttonStyle.cpp textbuttonStyle.h
@@ -33,7 +34,6 @@ target_link_libraries(juceUiLib PUBLIC baseLib)
 
 target_include_directories(juceUiLib PUBLIC ../JUCE/modules)
 target_compile_definitions(juceUiLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
-target_compile_definitions(juceUiLib PUBLIC JUCE_MODAL_LOOPS_PERMITTED=1)
 set_property(TARGET juceUiLib PROPERTY FOLDER "Gearmulator")
 
 target_include_directories(juceUiLib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)

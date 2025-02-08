@@ -67,11 +67,11 @@ namespace jucePluginEditorLib
 
 		if(!pm->activatePatch(_files.begin()->toStdString(), getPart()))
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
 				m_editor.getProcessor().getProperties().name, 
 				"Failed to load patch. Make sure that the format is supported and that the file only contains one patch.\n"
 				"\n"
-				"Drag files with multiple patches onto the Patch Manager instead to import them", nullptr, juce::ModalCallbackFunction::create([](int){}));
+				"Drag files with multiple patches onto the Patch Manager instead to import them");
 		}
 	}
 

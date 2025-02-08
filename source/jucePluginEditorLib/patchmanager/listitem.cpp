@@ -113,12 +113,16 @@ namespace jucePluginEditorLib::patchManager
 
 				if(existingPatch)
 				{
-					if(1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::QuestionIcon, 
+					genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::QuestionIcon,
 						"Replace Patch", 
-						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart()+1) + "?"))
-					{
-						pm.replacePatch(existingPatch, patches.front());
-					}
+						"Do you want to replace the existing patch '" + existingPatch->name + "' with contents of part " + std::to_string(savePatchDesc->getPart() + 1) + "?", 
+						[this, existingPatch, patches](genericUI::MessageBox::Result _result)
+						{
+							if (_result == genericUI::MessageBox::Result::Yes)
+							{
+								m_list.getPatchManager().replacePatch(existingPatch, patches.front());
+							}
+						});
 					return;
 				}
 			}

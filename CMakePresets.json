@@ -82,6 +82,26 @@
         "gearmulator_SYNTH_XENIA": "ON"
       }
     },
+	{
+      "name": "android",
+      "inherits": "default",
+      "displayName": "Android ARM64",
+      "generator": "Unix Makefiles",
+      "cacheVariables": {
+        "CMAKE_TOOLCHAIN_FILE": "$env{ANDROID_NDK_ROOT}/build/cmake/android.toolchain.cmake",
+        "ANDROID_ABI": "arm64-v8a",
+        "ANDROID_PLATFORM": "android-21",
+
+        "gearmulator_BUILD_JUCEPLUGIN": "ON",
+        "gearmulator_BUILD_FX_PLUGIN": "OFF",
+
+        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_VST2": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_VST3": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_AU": "OFF",
+        "gearmulator_BUILD_JUCEPLUGIN_LV2": "OFF"
+      }
+    },
     {
       "name": "github-Windows",
       "inherits": "github-base",
@@ -119,6 +139,11 @@
       "name": "zynthian",
       "inherits": "default",
       "configurePreset": "zynthian"
+    },
+    {
+      "name": "android",
+      "inherits": "default",
+      "configurePreset": "android"
     },
     {
       "name": "github-Windows",

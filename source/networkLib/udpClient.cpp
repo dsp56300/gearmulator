@@ -10,7 +10,7 @@
 #include <iphlpapi.h>
 #include <ws2tcpip.h>
 #pragma comment(lib, "Iphlpapi.lib")
-#else
+#elif !defined(ANDROID)
 #include <ifaddrs.h>
 #endif
 
@@ -53,6 +53,9 @@ namespace networkLib
 
 			_addresses.push_back(broadcastAddr);
 		}
+
+#elif defined(ANDROID)
+		_addresses.push_back(0xff'ff'ff'ff);
 #else
 		ifaddrs* ifap = nullptr;
 		if (getifaddrs(&ifap) == 0 && ifap)

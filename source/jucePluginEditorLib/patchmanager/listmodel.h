@@ -4,6 +4,8 @@
 
 #include "jucePluginLib/patchdb/patchdbtypes.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 namespace jucePluginEditorLib
@@ -85,7 +87,7 @@ namespace jucePluginEditorLib::patchManager
 		void listBoxItemClicked(int _row, const juce::MouseEvent&) override;
 		void backgroundClicked(const juce::MouseEvent&) override;
 
-		static bool showDeleteConfirmationMessageBox();
+		static void showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback);
 		pluginLib::patchDB::SourceType getSourceType() const;
 		bool canReorderPatches() const;
 		bool hasTagFilters() const;

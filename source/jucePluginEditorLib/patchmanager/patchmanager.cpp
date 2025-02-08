@@ -205,7 +205,7 @@ namespace jucePluginEditorLib::patchManager
 					msg += "\n";
 			}
 
-			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Patch Manager Error", msg);
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Patch Manager Error", msg);
 		}
 	}
 
@@ -626,26 +626,42 @@ namespace jucePluginEditorLib::patchManager
 		}
 
 		if(!Editor::savePresets(type, name, patchData))
-			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, "Save failed", "Failed to write data to " + _file.getFullPathName().toStdString());
 #endif
 	}
 
 	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const FileType& _fileType) const
 	{
-		if(_patches.size() > 128)
+		const auto patchCount = _patches.size();
+
+		auto exportPatches = [p = std::move(_patches), this, _fileType]
 		{
-			if(1 != juce::NativeMessageBox::showOkCancelBox(juce::AlertWindow::WarningIcon, 
-				"Patch Manager",
-				"You are trying to export more than 128 presets into a single file. Note that this dump exceeds the size of one bank and may not be compatible with your hardware"))
-				return true;
+			auto patches = p;
+			ListModel::sortPatches(patches, pluginLib::patchDB::SourceType::LocalStorage);
+			getEditor().savePreset([this, p = std::move(patches), _fileType](const juce::File& _file)
+			{
+				exportPresets(_file, p, _fileType);
+			});
+		};
+
+		if(patchCount > 128)
+		{
+			genericUI::MessageBox::showOkCancel(
+				juce::MessageBoxIconType::WarningIcon,
+				"Patch Manager", 
+				"You are trying to export more than 128 presets into a single file. Note that this dump exceeds the size of one bank and may not be compatible with your hardware",
+				[this, exportPatches](const genericUI::MessageBox::Result _result)
+				{
+					if (_result != genericUI::MessageBox::Result::Ok)
+						return;
+
+					exportPatches();
+				});
 		}
-
-		ListModel::sortPatches(_patches, pluginLib::patchDB::SourceType::LocalStorage);
-
-		getEditor().savePreset([this, p = std::move(_patches), _fileType](const juce::File& _file)
+		else
 		{
-			exportPresets(_file, p, _fileType);
-		});
+			exportPatches();
+		}
 
 		return true;
 	}
