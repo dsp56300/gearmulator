@@ -58,8 +58,8 @@ target_link_libraries(juce_plugin_modules PRIVATE
 )
 
 target_compile_definitions(juce_plugin_modules PUBLIC
-	JUCE_WEB_BROWSER=0
-	JUCE_USE_CURL=0
+	JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
+	JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
 	JUCE_VST3_CAN_REPLACE_VST2=0
 	JUCE_WIN_PER_MONITOR_DPI_AWARE=1
 	JUCE_MODAL_LOOPS_PERMITTED=1
@@ -102,17 +102,6 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	target_compile_definitions(${targetName} 
 	PUBLIC
-		# JUCE_WEB_BROWSER and JUCE_USE_CURL would be on by default, but you might not need them.
-		JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
-		JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
-		JUCE_VST3_CAN_REPLACE_VST2=0
-		JUCE_WIN_PER_MONITOR_DPI_AWARE=1
-		JUCE_MODAL_LOOPS_PERMITTED=1
-		JUCE_USE_OGGVORBIS=0
-		JUCE_USE_MP3AUDIOFORMAT=0
-		JUCE_USE_FLAC=0
-		JUCE_USE_WINDOWS_MEDIA_FORMAT=0
-		
 		PluginName="${productName}"
 		PluginVersionMajor=${CMAKE_PROJECT_VERSION_MAJOR}
 		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
