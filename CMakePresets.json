@@ -95,7 +95,8 @@
         "gearmulator_BUILD_JUCEPLUGIN": "ON",
         "gearmulator_BUILD_FX_PLUGIN": "OFF",
 
-        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_Standalone": "ON",
+        "gearmulator_BUILD_JUCEPLUGIN_CLAP": "OFF",
         "gearmulator_BUILD_JUCEPLUGIN_VST2": "OFF",
         "gearmulator_BUILD_JUCEPLUGIN_VST3": "OFF",
         "gearmulator_BUILD_JUCEPLUGIN_AU": "OFF",
