@@ -8,7 +8,7 @@
 
 #include "dsp56kEmu/logging.h"
 
-#include "juce_gui_basics/juce_gui_basics.h"	// juce::NativeMessageBox
+#include "juceUiLib/messageBox.h"
 
 #include "synthLib/os.h"
 
@@ -27,10 +27,9 @@ namespace pluginLib
 	{
 		if(!m_descriptions.isValid())
 		{
-			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, 
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
 				_processor.getProperties().name + " - Failed to parse Parameter Descriptions json", 
-				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors(), 
-				nullptr, juce::ModalCallbackFunction::create([](int){}));
+				"Encountered errors while parsing parameter descriptions:\n\n" + m_descriptions.getErrors());
 		}
 	}
 

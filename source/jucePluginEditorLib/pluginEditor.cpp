@@ -10,6 +10,8 @@
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "synthLib/os.h"
 #include "synthLib/sysexToMidi.h"
 
@@ -93,9 +95,18 @@ namespace jucePluginEditorLib
 			const auto result = _chooser.getResult();
 			m_processor.getConfig().setValue("save_path", result.getParentDirectory().getFullPathName());
 
-			if (!result.existsAsFile() || juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "File exists", "Do you want to overwrite the existing file?") == 1)
+			if (!result.existsAsFile())
 			{
 				_callback(result);
+			}
+			else
+			{
+				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?", 
+					[this, _callback, result](const genericUI::MessageBox::Result _result)
+				{
+					if (_result == genericUI::MessageBox::Result::Yes)
+						_callback(result);
+				});
 			}
 		};
 		m_fileChooser->launchAsync(flags, onFileChosen);
@@ -150,7 +161,7 @@ namespace jucePluginEditorLib
 	void Editor::showDemoRestrictionMessageBox() const
 	{
 		const auto &[title, msg] = getDemoRestrictionText();
-		juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon, title, msg);
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title, msg);
 	}
 
 	void Editor::setPatchManager(patchManager::PatchManager* _patchManager)
@@ -592,15 +603,11 @@ namespace jucePluginEditorLib
 
 		const auto& name = m_processor.getProperties().name;
 
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon,
+		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
 			name + " - Rosetta detected", 
 			name + " appears to be running in Rosetta mode.\n"
 			"\n"
-			"The DSP emulation core will perform much worse when being executed under Rosetta. We strongly recommend to run your DAW as a native Apple Silicon application", 
-			nullptr, juce::ModalCallbackFunction::create([this](int)
-			{
-				m_processor.getConfig().setValue("disclaimerSeen", true);
-			}));
+			"The DSP emulation core will perform much worse when being executed under Rosetta. We strongly recommend to run your DAW as a native Apple Silicon application");
 	}
 
 	const char* Editor::getResourceByFilename(const std::string& _name, uint32_t& _dataSize)

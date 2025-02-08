@@ -6,6 +6,8 @@
 #include "xtEditor.h"
 #include "xtWaveEditor.h"
 
+#include "juceUiLib/messageBox.h"
+
 namespace xtJucePlugin
 {
 	TablesTreeItem::TablesTreeItem(WaveEditor& _editor, const xt::TableId _tableIndex) : m_editor(_editor), m_index(_tableIndex)
@@ -92,7 +94,7 @@ namespace xtJucePlugin
 
 		if(sysex.empty())
 		{
-			juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, errorTitle, "No Sysex data found in file");
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "No Sysex data found in file");
 			return;
 		}
 
@@ -111,7 +113,7 @@ namespace xtJucePlugin
 			return;
 		}
 
-		juce::NativeMessageBox::showMessageBox(juce::AlertWindow::WarningIcon, errorTitle, tables.empty() ? "No Control Table found in files" : "Multiple control tables found in file");
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, tables.empty() ? "No Control Table found in files" : "Multiple control tables found in file");
 	}
 
 	void TablesTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

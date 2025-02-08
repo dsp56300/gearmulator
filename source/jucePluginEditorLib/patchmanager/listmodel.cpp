@@ -173,11 +173,14 @@ namespace jucePluginEditorLib::patchManager
 			{
 				menu.addItem("Delete selected", [this, s = selectedPatches]
 				{
-					if(showDeleteConfirmationMessageBox())
+					showDeleteConfirmationMessageBox([this, s](genericUI::MessageBox::Result _result)
 					{
-						const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
-						m_patchManager.removePatches(m_search->request.sourceNode, patches);
-					}
+						if (_result == genericUI::MessageBox::Result::Yes)
+						{
+							const std::vector<pluginLib::patchDB::PatchPtr> patches(s.begin(), s.end());
+							m_patchManager.removePatches(m_search->request.sourceNode, patches);
+						}
+					});
 				});
 			}
 
@@ -565,9 +568,9 @@ namespace jucePluginEditorLib::patchManager
 			ListBoxModel::backgroundClicked(_mouseEvent);
 	}
 
-	bool ListModel::showDeleteConfirmationMessageBox()
+	void ListModel::showDeleteConfirmationMessageBox(genericUI::MessageBox::Callback _callback)
 	{
-		return 1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, "Confirmation needed", "Delete selected patches from bank?");
+		genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "Confirmation needed", "Delete selected patches from bank?", std::move(_callback));
 	}
 
 	pluginLib::patchDB::SourceType ListModel::getSourceType() const

@@ -14,6 +14,8 @@
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
 
+#include "juceUiLib/messageBox.h"
+
 #include "synthLib/buildconfig.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -92,8 +94,13 @@ namespace jucePluginEditorLib::patchManager
 
 		if (juce::ModifierKeys::currentModifiers.isShiftDown())
 		{
-			if(ListModel::showDeleteConfirmationMessageBox())
-				getPatchManager().removePatches(m_dataSource, _patches);
+			ListModel::showDeleteConfirmationMessageBox([this, _patches](const genericUI::MessageBox::Result _result)
+			{
+				if (_result == genericUI::MessageBox::Result::Yes)
+				{
+					getPatchManager().removePatches(m_dataSource, _patches);
+				}
+			});
 		}
 		else
 		{
@@ -146,10 +153,16 @@ namespace jucePluginEditorLib::patchManager
 		{
 			menu.addItem("Delete", [this]
 			{
-				if(1 == juce::NativeMessageBox::showYesNoBox(juce::AlertWindow::WarningIcon, 
+				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, 
 					"Patch Manager", 
-					"Are you sure that you want to delete your user bank named '" + getDataSource()->name + "'?"))
-					getPatchManager().removeDataSource(*m_dataSource);
+					"Are you sure that you want to delete your user bank named '" + getDataSource()->name + "'?",
+					[this](const genericUI::MessageBox::Result _result)
+					{
+						if (_result == genericUI::MessageBox::Result::Yes)
+						{
+							getPatchManager().removeDataSource(*m_dataSource);
+						}
+					});
 			});
 		}
 		if(m_dataSource->type == pluginLib::patchDB::SourceType::LocalStorage)

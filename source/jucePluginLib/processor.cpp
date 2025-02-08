@@ -19,6 +19,8 @@
 #include "dsp56kEmu/fastmath.h"
 #include "dsp56kEmu/logging.h"
 
+#include "juceUiLib/messageBox.h"
+
 namespace synthLib
 {
 	class DeviceException;
@@ -146,14 +148,14 @@ namespace pluginLib
 				}
 				juce::Timer::callAfterDelay(2000, [this, msg]
 				{
-					juce::NativeMessageBox::showMessageBoxAsync(juce::AlertWindow::WarningIcon,
-						"Device Initialization failed", msg, nullptr, 
-						juce::ModalCallbackFunction::create([this](int)
+					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+						"Device Initialization failed", msg, 
+						[this]
 						{
 							const auto path = juce::File(getPublicRomFolder());
 							(void)path.createDirectory();
 							path.revealToUser();
-						})
+						}
 					);
 				});
 			}
@@ -451,8 +453,8 @@ namespace pluginLib
 		}
 		catch(synthLib::DeviceException& e)
 		{
-			juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
-				getName() + " - Failed to switch device type",
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
+				getName().toStdString() + " - Failed to switch device type",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");
 		}
@@ -867,7 +869,7 @@ namespace pluginLib
 			{
 				juce::MessageManager::callAsync([e]
 				{
-					juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+					genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
 						"Device creation failed:",
 						std::string("The connection to the remote server has been lost and a reconnect failed. Processing mode has been switched to local processing\n\n") + 
 						e.what() + "\n\n");
@@ -898,7 +900,7 @@ namespace pluginLib
 		}
 		catch(const synthLib::DeviceException& e)
 		{
-			juce::NativeMessageBox::showMessageBox(juce::MessageBoxIconType::WarningIcon,
+			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon,
 				"Device creation failed:",
 				std::string("Failed to create device:\n\n") + 
 				e.what() + "\n\n");

@@ -62,7 +62,6 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
 	JUCE_VST3_CAN_REPLACE_VST2=0
 	JUCE_WIN_PER_MONITOR_DPI_AWARE=1
-	JUCE_MODAL_LOOPS_PERMITTED=1
 	JUCE_USE_OGGVORBIS=0
 	JUCE_USE_MP3AUDIOFORMAT=0
 	JUCE_USE_FLAC=0

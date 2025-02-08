@@ -140,13 +140,13 @@ namespace jucePluginEditorLib::patchManager
 			{
 				juce::FileChooser fc("Select Folders");
 
-				if(fc.showDialog(
+				fc.launchAsync(
 					juce::FileBrowserComponent::openMode | 
 					juce::FileBrowserComponent::canSelectDirectories | 
 					juce::FileBrowserComponent::canSelectMultipleItems
-					, nullptr))
+					, [this](const juce::FileChooser& _fileChooser)
 				{
-					for (const auto& r : fc.getResults())
+					for (const auto& r : _fileChooser.getResults())
 					{
 						const auto result = r.getFullPathName().toStdString();
 						pluginLib::patchDB::DataSource ds;
@@ -155,19 +155,19 @@ namespace jucePluginEditorLib::patchManager
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
-				}
+				});
 			});
 
 			menu.addItem("Add files...", [this]
 			{
 				juce::FileChooser fc("Select Files");
-				if(fc.showDialog(
+				fc.launchAsync(
 					juce::FileBrowserComponent::openMode |
 					juce::FileBrowserComponent::canSelectFiles |
 					juce::FileBrowserComponent::canSelectMultipleItems,
-					nullptr))
+					[this](const juce::FileChooser& _fileChooser)
 				{
-					for (const auto&r : fc.getResults())
+					for (const auto&r : _fileChooser.getResults())
 					{
 						const auto result = r.getFullPathName().toStdString();
 						pluginLib::patchDB::DataSource ds;
@@ -176,7 +176,7 @@ namespace jucePluginEditorLib::patchManager
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
-				}
+				});
 			});
 		}
 		else if(m_type == GroupType::LocalStorage)

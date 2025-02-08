@@ -27,14 +27,14 @@ namespace genericUI
 		juce::NativeMessageBox::showOkCancelBox(_icon, _header.c_str(), _message.c_str(), nullptr, addCallback(std::move(_callback)));
 	}
 
-	void MessageBox::showOk(const juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message)
+	void MessageBox::showOk(const juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent/* = nullptr*/)
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(_icon, _header.c_str(), _message.c_str());
+		juce::NativeMessageBox::showMessageBoxAsync(_icon, _header.c_str(), _message.c_str(), _associatedComponent);
 	}
 
-	void MessageBox::showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _owner, std::function<void()> _callback)
+	void MessageBox::showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent, std::function<void()> _callback)
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(_icon, _header.c_str(), _message.c_str(), _owner, 
+		juce::NativeMessageBox::showMessageBoxAsync(_icon, _header.c_str(), _message.c_str(), _associatedComponent, 
 			juce::ModalCallbackFunction::create([_callback = std::move(_callback)](int)
 			{
 				_callback();

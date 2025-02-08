@@ -27,8 +27,8 @@ namespace genericUI
 
 		static void showYesNo(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, Callback _callback);
 		static void showOkCancel(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, Callback _callback);
-		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message);
-		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _owner, std::function<void()> _callback);
+		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent = nullptr);
+		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, juce::Component* _associatedComponent, std::function<void()> _callback);
 		static void showOk(juce::MessageBoxIconType _icon, const std::string& _header, const std::string& _message, std::function<void()> _callback);
 	};
 }

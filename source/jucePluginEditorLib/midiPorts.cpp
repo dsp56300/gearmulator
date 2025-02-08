@@ -3,6 +3,7 @@
 #include "pluginProcessor.h"
 
 #include "juceUiLib/editor.h"
+#include "juceUiLib/messageBox.h"
 
 namespace
 {
@@ -108,9 +109,9 @@ namespace jucePluginEditorLib
 
 	void MidiPorts::showMidiPortFailedMessage(const pluginLib::Processor& _processor, const char* _name)
 	{
-		juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, _processor.getProperties().name, 
+		genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, _processor.getProperties().name, 
 			std::string("Failed to open Midi ") + _name + ".\n\n"
-			"Make sure that the device is not already in use by another program.", nullptr, juce::ModalCallbackFunction::create([](int){}));
+			"Make sure that the device is not already in use by another program.");
 	}
 
 	void MidiPorts::updateMidiInput(int _index) const
