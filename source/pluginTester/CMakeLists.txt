@@ -15,6 +15,7 @@ juce_add_console_app(pluginTester
 	COMPANY_WEBSITE "https://dsp56300.com"
 	FORMATS VST VST3 AU LV2 CLAP                      # The formats to build. Other valid formats are: AAX Unity VST AU AUv3 LV2
 	PRODUCT_NAME "pluginTester"                       # The name of the final executable, which can differ from the target name
+	BUNDLE_ID "com.theusualsuspects.plugintester"
 )
 
 juce_generate_juce_header(pluginTester)
