@@ -6,12 +6,14 @@ option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3 "Build VST3 version of Juce p
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2 "Build LV2 version of Juce plugins" off)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU "Build AU version of Juce plugins" on)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_Standalone "Build Standalone version of Juce plugins" off)
 
 set(USE_CLAP ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP})
 set(USE_LV2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2})
 set(USE_VST2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2})
 set(USE_VST3 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3})
 set(USE_AU ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU})
+set(USE_Standalone ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_Standalone})
 
 set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -44,6 +46,12 @@ endif()
 if(USE_CLAP)
 	add_custom_target(PluginFormat_CLAP)
 	set_property(TARGET PluginFormat_CLAP PROPERTY FOLDER CustomTargets)
+endif()
+
+if(USE_Standalone)
+    list(APPEND juce_formats Standalone)
+	add_custom_target(PluginFormat_Standalone)
+	set_property(TARGET PluginFormat_Standalone PROPERTY FOLDER CustomTargets)
 endif()
 
 add_custom_target(ServerPlugins)
@@ -234,6 +242,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			-DCPACK_FILE=${CPACK_PACKAGE_NAME}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}-${productName}-AU.zip
 			-P ${JUCE_CMAKE_DIR}/runAuValidation.cmake)
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
+	endif()
+
+	if(USE_Standalone)
+		add_dependencies(PluginFormat_Standalone ${targetName}_Standalone)
 	endif()
 
 	if(USE_VST2)
