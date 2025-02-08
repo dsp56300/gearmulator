@@ -45,12 +45,24 @@ int main(const int _argc, char* _argv[])
 			return error("No plugin specified");
 		}
 
-		// juce wants the folder for a LV2 plugin instead of the actual file
-		auto path = baseLib::filesystem::getPath(pluginPathName);
-		if (baseLib::filesystem::hasExtension(path, ".lv2"))
-			pluginPathName = path;
+	    {
+		    // juce wants the folder for a VST3/LV2 plugin instead of the actual file
+		    const auto lowercase = baseLib::filesystem::lowercase(pluginPathName);
 
-		JuceAppLifetimeObjects jalto;
+		    auto start = lowercase.find(".vst3");
+		    if (start == std::string::npos)
+			    start = lowercase.find(".lv2");
+
+		    if (start != std::string::npos)
+		    {
+			    auto slash = pluginPathName.find_first_of("\\/", start);
+
+			    if (slash != std::string::npos)
+				    pluginPathName = pluginPathName.substr(0, slash);
+		    }
+	    }
+
+	    JuceAppLifetimeObjects jalto;
 
 	    CommandLinePluginHost pluginHost;
 
@@ -64,6 +76,8 @@ int main(const int _argc, char* _argv[])
 
 			if (!format)
 				continue;
+
+			Logger::writeToLog("Attempt to load plugin as type " + format->getName());
 
 		    KnownPluginList plugins;
 
