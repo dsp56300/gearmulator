@@ -13,6 +13,7 @@ set(SOURCES
 	comboboxStyle.cpp comboboxStyle.h
 	buttonStyle.cpp buttonStyle.h
 	labelStyle.cpp labelStyle.h
+	messageBox.cpp messageBox.h
 	scrollbarStyle.cpp scrollbarStyle.h
 	slider.cpp slider.h
 	textbuttonStyle.cpp textbuttonStyle.h
