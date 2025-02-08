@@ -242,7 +242,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 	if(USE_VST3)
 		addPluginTest(${targetName}_VST3)
 	endif()
-	if(USE_AU AND APPLE)
+	if(USE_AU AND APPLE AND ${isSynth})	# Apparently FX AU plugins are not supported by juce audio plugin host
 		addPluginTest(${targetName}_AU)
 	endif()
 	if(USE_LV2)
