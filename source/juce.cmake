@@ -60,8 +60,11 @@ set_property(TARGET ServerPlugins PROPERTY FOLDER CustomTargets)
 add_library(juce_plugin_modules STATIC)
 
 target_link_libraries(juce_plugin_modules PRIVATE
+    juce::juce_core
+    juce::juce_audio_basics
     juce::juce_audio_utils
     juce::juce_audio_devices
+    juce::juce_audio_processors
 	juce::juce_cryptography
 )
 
@@ -74,13 +77,36 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_USE_MP3AUDIOFORMAT=0
 	JUCE_USE_FLAC=0
 	JUCE_USE_WINDOWS_MEDIA_FORMAT=0
+	JUCE_MODULE_AVAILABLE_juce_core=1
+	JUCE_MODULE_AVAILABLE_juce_audio_basics=1
+	JUCE_MODULE_AVAILABLE_juce_audio_utils=1
+	JUCE_MODULE_AVAILABLE_juce_audio_devices=1
+	JUCE_MODULE_AVAILABLE_juce_audio_processors=1
+	JUCE_MODULE_AVAILABLE_juce_cryptopgraphy=1
 )
 
-if(ANDROID)
-	target_compile_definitions(juce_plugin_modules PUBLIC JUCE_MODULE_AVAILABLE_juce_audio_devices=1)
-endif()
+target_include_directories(juce_plugin_modules
+    INTERFACE
+        $<TARGET_PROPERTY:juce_plugin_modules,INCLUDE_DIRECTORIES>)
 
 _juce_fixup_module_source_groups()
+
+# juce::juce_audio_plugin_client is the lib that every plugin links. However, this pulls in lots of juce modules that are 
+# all INTERFACE targets, causing all the sources to end up in every plugin we build. We remove this dependency as we already
+# link them via our rebuilt static lib that we created above. This causes all juce modules to only show up in our static
+# lib instead of every plugin
+
+macro(removeJuceDependencies targetName)
+	# Get the current link libraries before modifying
+
+	get_target_property(pluginLibs ${targetName} LINK_LIBRARIES)
+	list(REMOVE_ITEM pluginLibs juce::juce_dsp juce::juce_audio_processors juce::juce_audio_formats juce::juce_audio_basics juce::juce_audio_plugin_client $<LINK_ONLY:juce::juce_audio_plugin_client>)
+	set_target_properties(${targetName} PROPERTIES LINK_LIBRARIES "${pluginLibs}")
+
+	get_target_property(pluginLibs ${targetName} INTERFACE_LINK_LIBRARIES)
+	list(REMOVE_ITEM pluginLibs juce::juce_dsp juce::juce_audio_processors juce::juce_audio_formats juce::juce_audio_basics juce::juce_audio_plugin_client $<LINK_ONLY:juce::juce_audio_plugin_client>)
+	set_target_properties(${targetName} PROPERTIES INTERFACE_LINK_LIBRARIES "${pluginLibs}")
+endmacro()
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject synthLibProject)
 	juce_add_plugin(${targetName}
@@ -111,6 +137,8 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	source_group("source" FILES ${SOURCES})
 
+	removeJuceDependencies(${targetName})
+
 	target_compile_definitions(${targetName} 
 	PUBLIC
 		PluginName="${productName}"
@@ -118,6 +146,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
 		PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
 		Plugin4CC="${plugin4CC}"
+		JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
 	)
 
 	target_link_libraries(${targetName}
