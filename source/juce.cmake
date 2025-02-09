@@ -6,12 +6,14 @@ option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3 "Build VST3 version of Juce p
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP "Build CLAP version of Juce plugins" on)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2 "Build LV2 version of Juce plugins" off)
 option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU "Build AU version of Juce plugins" on)
+option(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_Standalone "Build Standalone version of Juce plugins" off)
 
 set(USE_CLAP ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_CLAP})
 set(USE_LV2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_LV2})
 set(USE_VST2 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST2})
 set(USE_VST3 ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_VST3})
 set(USE_AU ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_AU})
+set(USE_Standalone ${${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN_Standalone})
 
 set(JUCE_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
@@ -46,14 +48,23 @@ if(USE_CLAP)
 	set_property(TARGET PluginFormat_CLAP PROPERTY FOLDER CustomTargets)
 endif()
 
+if(USE_Standalone)
+    list(APPEND juce_formats Standalone)
+	add_custom_target(PluginFormat_Standalone)
+	set_property(TARGET PluginFormat_Standalone PROPERTY FOLDER CustomTargets)
+endif()
+
 add_custom_target(ServerPlugins)
 set_property(TARGET ServerPlugins PROPERTY FOLDER CustomTargets)
 
 add_library(juce_plugin_modules STATIC)
 
 target_link_libraries(juce_plugin_modules PRIVATE
+    juce::juce_core
+    juce::juce_audio_basics
     juce::juce_audio_utils
     juce::juce_audio_devices
+    juce::juce_audio_processors
 	juce::juce_cryptography
 )
 
@@ -66,13 +77,36 @@ target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_USE_MP3AUDIOFORMAT=0
 	JUCE_USE_FLAC=0
 	JUCE_USE_WINDOWS_MEDIA_FORMAT=0
+	JUCE_MODULE_AVAILABLE_juce_core=1
+	JUCE_MODULE_AVAILABLE_juce_audio_basics=1
+	JUCE_MODULE_AVAILABLE_juce_audio_utils=1
+	JUCE_MODULE_AVAILABLE_juce_audio_devices=1
+	JUCE_MODULE_AVAILABLE_juce_audio_processors=1
+	JUCE_MODULE_AVAILABLE_juce_cryptopgraphy=1
 )
 
-if(ANDROID)
-	target_compile_definitions(juce_plugin_modules PUBLIC JUCE_MODULE_AVAILABLE_juce_audio_devices=1)
-endif()
+target_include_directories(juce_plugin_modules
+    INTERFACE
+        $<TARGET_PROPERTY:juce_plugin_modules,INCLUDE_DIRECTORIES>)
 
 _juce_fixup_module_source_groups()
+
+# juce::juce_audio_plugin_client is the lib that every plugin links. However, this pulls in lots of juce modules that are 
+# all INTERFACE targets, causing all the sources to end up in every plugin we build. We remove this dependency as we already
+# link them via our rebuilt static lib that we created above. This causes all juce modules to only show up in our static
+# lib instead of every plugin
+
+macro(removeJuceDependencies targetName)
+	# Get the current link libraries before modifying
+
+	get_target_property(pluginLibs ${targetName} LINK_LIBRARIES)
+	list(REMOVE_ITEM pluginLibs juce::juce_dsp juce::juce_audio_processors juce::juce_audio_formats juce::juce_audio_basics juce::juce_audio_plugin_client $<LINK_ONLY:juce::juce_audio_plugin_client>)
+	set_target_properties(${targetName} PROPERTIES LINK_LIBRARIES "${pluginLibs}")
+
+	get_target_property(pluginLibs ${targetName} INTERFACE_LINK_LIBRARIES)
+	list(REMOVE_ITEM pluginLibs juce::juce_dsp juce::juce_audio_processors juce::juce_audio_formats juce::juce_audio_basics juce::juce_audio_plugin_client $<LINK_ONLY:juce::juce_audio_plugin_client>)
+	set_target_properties(${targetName} PROPERTIES INTERFACE_LINK_LIBRARIES "${pluginLibs}")
+endmacro()
 
 macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProject synthLibProject)
 	juce_add_plugin(${targetName}
@@ -103,6 +137,8 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 
 	source_group("source" FILES ${SOURCES})
 
+	removeJuceDependencies(${targetName})
+
 	target_compile_definitions(${targetName} 
 	PUBLIC
 		PluginName="${productName}"
@@ -110,6 +146,7 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 		PluginVersionMinor=${CMAKE_PROJECT_VERSION_MINOR}
 		PluginVersionPatch=${CMAKE_PROJECT_VERSION_PATCH}
 		Plugin4CC="${plugin4CC}"
+		JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1
 	)
 
 	target_link_libraries(${targetName}
@@ -234,6 +271,10 @@ macro(createJucePlugin targetName productName isSynth plugin4CC binaryDataProjec
 			-DCPACK_FILE=${CPACK_PACKAGE_NAME}-${CMAKE_PROJECT_VERSION}-${CPACK_SYSTEM_NAME}-${productName}-AU.zip
 			-P ${JUCE_CMAKE_DIR}/runAuValidation.cmake)
 		set_tests_properties(${targetName}_AU_Validate PROPERTIES LABELS "PluginTest")
+	endif()
+
+	if(USE_Standalone)
+		add_dependencies(PluginFormat_Standalone ${targetName}_Standalone)
 	endif()
 
 	if(USE_VST2)
