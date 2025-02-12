@@ -1,4 +1,7 @@
 #include "processor.h"
+
+#include <chrono>
+
 #include "dummydevice.h"
 #include "pluginVersion.h"
 #include "tools.h"

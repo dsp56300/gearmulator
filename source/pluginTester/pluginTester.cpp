@@ -1,3 +1,5 @@
+#include <chrono>
+
 #include "fakeAudioDevice.h"
 #include "pluginHost.h"
 #include "logger.h"
