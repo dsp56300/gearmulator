@@ -149,7 +149,7 @@ int main(const int _argc, char* _argv[])
 					const auto t2 = Clock::now();
 					const auto duration = std::chrono::duration_cast<std::chrono::seconds>(t2 - tBegin).count();
 
-					const auto speed = static_cast<double>(duration) * 100.0 / static_cast<double>(totalSeconds);
+					const auto speed = static_cast<double>(totalSeconds) * 100.0 / static_cast<double>(duration);
 
 					char temp[64];
 					(void)snprintf(temp, sizeof(temp), "Executed %02uh %02um %02us, Speed %2.2f%%", static_cast<uint32_t>(hours), static_cast<uint32_t>(minutes), static_cast<uint32_t>(seconds), speed);
