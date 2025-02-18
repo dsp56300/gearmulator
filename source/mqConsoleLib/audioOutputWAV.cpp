@@ -1,6 +1,7 @@
 #include "audioOutputWAV.h"
 
 #include <array>
+#include <chrono>
 
 namespace mqConsoleLib
 {
