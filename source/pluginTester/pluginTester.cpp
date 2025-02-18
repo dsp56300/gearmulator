@@ -138,11 +138,19 @@ int main(const int _argc, char* _argv[])
 				audioDevice.processAudio();
 				++blockCount;
 
-				auto totalSeconds = blockCount * blocksize / sr;
-				auto minutes = totalSeconds / 60;
-				auto hours = minutes / 60;
-				auto seconds = totalSeconds - minutes * 60;
-				minutes -= hours * 60;
+				auto formatDuration = [](const uint64_t _seconds) -> std::string
+				{
+					char temp[64];
+					const auto minutes = _seconds / 60;
+					const auto hours = minutes / 60;
+					const auto s = _seconds - minutes * 60;
+					const auto m = minutes - hours * 60;
+					(void)snprintf(temp, sizeof(temp), "%02uh %02um %02us", static_cast<uint32_t>(hours), static_cast<uint32_t>(m), static_cast<uint32_t>(s));
+					return temp;
+				};
+
+				const auto totalSeconds = blockCount * blocksize / sr;
+				const auto minutes = totalSeconds / 60;
 
 				if (minutes != lastMinutes)
 				{
@@ -152,7 +160,7 @@ int main(const int _argc, char* _argv[])
 					const auto speed = static_cast<double>(totalSeconds) * 100.0 / static_cast<double>(duration);
 
 					char temp[64];
-					(void)snprintf(temp, sizeof(temp), "Executed %02uh %02um %02us, Speed %2.2f%%", static_cast<uint32_t>(hours), static_cast<uint32_t>(minutes), static_cast<uint32_t>(seconds), speed);
+					(void)snprintf(temp, sizeof(temp), "Processed %s, elapsed %s, speed %2.2f%%", formatDuration(totalSeconds).c_str(), formatDuration(duration).c_str(), speed);
 					Logger::writeToLog(temp);
 					lastMinutes = minutes;
 				}
