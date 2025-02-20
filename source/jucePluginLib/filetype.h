@@ -2,13 +2,14 @@
 
 #include <string>
 
-namespace jucePluginEditorLib
+namespace pluginLib
 {
 	class FileType
 	{
 	public:
 		static const FileType Syx;
 		static const FileType Mid;
+		static const FileType Empty;
 
 		explicit FileType(std::string _type) : m_type(std::move(_type))
 		{

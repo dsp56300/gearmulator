@@ -147,7 +147,7 @@ namespace mqJucePlugin
 		m_focusedParameter->onMouseEnter(_event);
 	}
 
-	void Editor::savePreset(const jucePluginEditorLib::FileType& _type)
+	void Editor::savePreset(const pluginLib::FileType& _type)
 	{
 		jucePluginEditorLib::Editor::savePreset([&](const juce::File& _file)
 		{
@@ -173,17 +173,17 @@ namespace mqJucePlugin
 		if(countAdded)
 			menu.addSeparator();
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
+		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juce::PopupMenu subMenu;
 
-			subMenu.addItem(".syx", [_callback]() {_callback(jucePluginEditorLib::FileType::Syx); });
-			subMenu.addItem(".mid", [_callback]() {_callback(jucePluginEditorLib::FileType::Mid); });
+			subMenu.addItem(".syx", [_callback]() {_callback(pluginLib::FileType::Syx); });
+			subMenu.addItem(".mid", [_callback]() {_callback(pluginLib::FileType::Mid); });
 
 			_menu.addSubMenu(_name, subMenu);
 		};
 
-		addEntry(menu, "Current Single (Edit Buffer)", [this](jucePluginEditorLib::FileType _type)
+		addEntry(menu, "Current Single (Edit Buffer)", [this](pluginLib::FileType _type)
 		{
 			savePreset(_type);
 		});

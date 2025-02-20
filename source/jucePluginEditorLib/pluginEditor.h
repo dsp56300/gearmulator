@@ -21,13 +21,12 @@ namespace baseLib
 
 namespace pluginLib
 {
+	class FileType;
 	class ParameterBinding;
 }
 
 namespace jucePluginEditorLib
 {
-	class FileType;
-
 	namespace patchManager
 	{
 		class PatchManager;
@@ -55,9 +54,9 @@ namespace jucePluginEditorLib
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
 		void savePreset(const std::function<void(const juce::File&)>& _callback);
 #if !SYNTHLIB_DEMO_MODE
-		static bool savePresets(const FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
+		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
 #endif
-		static std::string createValidFilename(FileType& _type, const juce::File& _file);
+		static std::string createValidFilename(pluginLib::FileType& _type, const juce::File& _file);
 
 		virtual std::pair<std::string, std::string> getDemoRestrictionText() const = 0;
 
@@ -98,8 +97,8 @@ namespace jucePluginEditorLib
 
 		void parentHierarchyChanged() override;
 
-		juce::PopupMenu createExportFileTypeMenu(const std::function<void(FileType)>& _func) const;
-		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(FileType)>& _func) const;
+		juce::PopupMenu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
+		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;

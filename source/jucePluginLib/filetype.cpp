@@ -2,10 +2,11 @@
 
 #include "baseLib/filesystem.h"
 
-namespace jucePluginEditorLib
+namespace pluginLib
 {
 	const FileType FileType::Syx("syx");
 	const FileType FileType::Mid("mid");
+	const FileType FileType::Empty({});
 
 	bool FileType::operator==(const FileType& _other) const
 	{

@@ -3,7 +3,6 @@ project(jucePluginEditorLib VERSION ${CMAKE_PROJECT_VERSION})
 
 set(SOURCES
 	dragAndDropObject.cpp dragAndDropObject.h
-	filetype.cpp filetype.h
 	focusedParameter.cpp focusedParameter.h
 	focusedParameterTooltip.cpp focusedParameterTooltip.h
 	imagePool.cpp imagePool.h

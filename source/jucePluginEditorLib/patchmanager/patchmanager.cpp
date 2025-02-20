@@ -17,10 +17,9 @@
 
 #include "baseLib/filesystem.h"
 
-#include "jucePluginLib/types.h"
 #include "jucePluginLib/clipboard.h"
-
-#include "jucePluginEditorLib/filetype.h"
+#include "jucePluginLib/filetype.h"
+#include "jucePluginLib/types.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -608,12 +607,12 @@ namespace jucePluginEditorLib::patchManager
 		g.fillAll(juce::Colour(0,0,0));
 	}
 
-	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType& _fileType) const
+	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const
 	{
 #if SYNTHLIB_DEMO_MODE
 		getEditor().showDemoRestrictionMessageBox();
 #else
-		FileType type = _fileType;
+		pluginLib::FileType type = _fileType;
 		const auto name = Editor::createValidFilename(type, _file);
 
 		std::vector<pluginLib::patchDB::Data> patchData;
@@ -630,7 +629,7 @@ namespace jucePluginEditorLib::patchManager
 #endif
 	}
 
-	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const FileType& _fileType) const
+	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const
 	{
 		const auto patchCount = _patches.size();
 
