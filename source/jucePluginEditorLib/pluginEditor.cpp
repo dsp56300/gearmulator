@@ -569,9 +569,14 @@ namespace jucePluginEditorLib
 	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(FileType)>& _func) const
 	{
 		juce::PopupMenu menu;
-		menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
-		menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
+		createExportFileTypeMenu(menu, _func);
 		return menu;
+	}
+
+	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(FileType)>& _func) const
+	{
+		_menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
+		_menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)
