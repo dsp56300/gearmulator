@@ -4,8 +4,8 @@
 
 namespace jucePluginEditorLib
 {
-	FileType FileType::Syx("syx");
-	FileType FileType::Mid("mid");
+	const FileType FileType::Syx("syx");
+	const FileType FileType::Mid("mid");
 
 	bool FileType::operator==(const FileType& _other) const
 	{

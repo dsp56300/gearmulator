@@ -7,8 +7,8 @@ namespace jucePluginEditorLib
 	class FileType
 	{
 	public:
-		static FileType Syx;
-		static FileType Mid;
+		static const FileType Syx;
+		static const FileType Mid;
 
 		explicit FileType(std::string _type) : type(std::move(_type))
 		{
