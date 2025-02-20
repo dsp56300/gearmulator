@@ -10,8 +10,9 @@
 
 #include "mqLib/mqbuildconfig.h"
 
-#include "jucePluginEditorLib/filetype.h"
 #include "jucePluginEditorLib/focusedParameter.h"
+
+#include "jucePluginLib/filetype.h"
 
 namespace mqJucePlugin
 {

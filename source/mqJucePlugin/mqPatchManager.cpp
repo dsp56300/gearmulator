@@ -3,6 +3,7 @@
 #include "mqController.h"
 #include "mqEditor.h"
 #include "jucePluginEditorLib/pluginProcessor.h"
+#include "jucePluginLib/filetype.h"
 #include "mqLib/mqstate.h"
 
 namespace mqJucePlugin
@@ -63,7 +64,7 @@ namespace mqJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _targetType) const
 	{
 		auto result = _patch->sysex;
 
@@ -111,7 +112,7 @@ namespace mqJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
-		m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part));
+		m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty), static_cast<uint8_t>(_part));
 		return true;
 	}
 }

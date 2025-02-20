@@ -6,6 +6,8 @@
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
+#include "jucePluginLib/filetype.h"
+
 #include "juceUiLib/messageBox.h"
 
 #include "xtLib/xtMidiTypes.h"
@@ -109,7 +111,7 @@ namespace xtJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _targetType) const
 	{
 		auto applyModifications = [&_patch](pluginLib::patchDB::Data& _result) -> bool
 		{
@@ -170,7 +172,7 @@ namespace xtJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		if(!m_controller.sendSingle(applyModifications(_patch), static_cast<uint8_t>(_part)))
+		if(!m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty), static_cast<uint8_t>(_part)))
 		{
 			genericUI::MessageBox::showOk(juce::MessageBoxIconType::WarningIcon, 
 				m_editor.getProcessor().getProperties().name + " - Unable to load patch",

@@ -304,7 +304,7 @@ namespace jucePluginEditorLib
 		if(!p)
 			return;
 
-		const auto patchAsString = m_patchManager->toString(p);
+		const auto patchAsString = m_patchManager->toString(p, pluginLib::FileType::Empty);
 
 		if(!patchAsString.empty())
 			juce::SystemClipboard::copyTextToClipboard(patchAsString);
