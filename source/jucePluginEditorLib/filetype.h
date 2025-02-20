@@ -10,7 +10,7 @@ namespace jucePluginEditorLib
 		static const FileType Syx;
 		static const FileType Mid;
 
-		explicit FileType(std::string _type) : type(std::move(_type))
+		explicit FileType(std::string _type) : m_type(std::move(_type))
 		{
 		}
 
@@ -18,6 +18,6 @@ namespace jucePluginEditorLib
 		bool operator != (const FileType& _other) const;
 
 	private:
-		std::string type;
+		std::string m_type;
 	};
 }
