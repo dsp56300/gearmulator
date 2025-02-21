@@ -75,6 +75,8 @@ namespace n2xJucePlugin
 
 		void modifierKeysChanged(const juce::ModifierKeys& modifiers) override;
 
+		void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const override;
+
 	private:
 		void mouseEnter(const juce::MouseEvent& _ev) override;
 		void onBtSave() const;
