@@ -295,7 +295,7 @@ namespace pluginLib
 				}
 			}
 
-			m_descriptions.push_back(d);
+			m_descriptions.emplace_back(std::move(d));
 		}
 
 		for (size_t i=0; i<m_descriptions.size(); ++i)

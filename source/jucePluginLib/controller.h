@@ -152,7 +152,7 @@ namespace pluginLib
 
 	private:
 		Processor& m_processor;
-        ParameterDescriptions m_descriptions;
+        const ParameterDescriptions m_descriptions;
 
 		uint8_t m_currentPart = 0;
 
