@@ -89,11 +89,11 @@ namespace virusLib
 			auto presetFile = unpackFile(parts, presetFileId);
 			if (!presetFile.empty())
 			{
-				presets.emplace_back(presetFile);
+				presets.emplace_back(std::move(presetFile));
 			}
 		}
 
-		return Firmware{dsp, presets};
+		return Firmware{std::move(dsp), std::move(presets)};
 	}
 
 	std::string ROMUnpacker::getVtiFilename(const DeviceModel _model)
@@ -133,18 +133,19 @@ namespace virusLib
 			{
 				chunk.data.resize(chunk.size);
 				_file.read(chunk.data.data(), chunk.size);
-				result.emplace_back(chunk);
+				result.emplace_back(std::move(chunk));
 			}
 		}
 
 		return result;
 	}
 
-	std::vector<char> ROMUnpacker::unpackFile(std::vector<Chunk>& _chunks, const char _fileId)
+	std::vector<char> ROMUnpacker::unpackFile(const std::vector<Chunk>& _chunks, const char _fileId)
 	{
 		std::vector<char> content;
+		content.reserve(1 << 20);
 
-		for (auto& chunk: _chunks)
+		for (const auto& chunk : _chunks)
 		{
 			if (chunk.name[0] != _fileId)
 			{
@@ -159,7 +160,7 @@ namespace virusLib
 				// each chunk has 2 remaining bytes (checksum?)
 				for (size_t i = 0; i < chunk.size - 2; i += 35)
 				{
-					const auto idx = swap16(*reinterpret_cast<uint16_t*>(&chunk.data[i + 1]));
+					const auto idx = swap16(*reinterpret_cast<const uint16_t*>(&chunk.data[i + 1]));
 					assert (idx == ctr);
 					for (size_t j = 0; j < 32; ++j)
 					{
