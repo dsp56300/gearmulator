@@ -75,15 +75,15 @@ namespace jucePluginEditorLib
 		m_fileChooser->launchAsync(flags, onFileChosen);
 	}
 
-	void Editor::savePreset(const std::function<void(const juce::File&)>& _callback)
+	void Editor::savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback)
 	{
 #if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
 		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as syx or mid",
+			"Save preset(s) as " + _fileType.type(),
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid", true);
+			"*." + _fileType.type(), true);
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
@@ -148,13 +148,16 @@ namespace jucePluginEditorLib
 	{
 		const auto ext = _file.getFileExtension();
 		auto file = _file.getFullPathName().toStdString();
+
+		if (ext.endsWithIgnoreCase(_type.type()))
+			return file;
 		
 		if (ext.endsWithIgnoreCase("mid"))
 			_type = pluginLib::FileType::Mid;
 		else if (ext.endsWithIgnoreCase("syx"))
 			_type = pluginLib::FileType::Syx;
 		else
-			file += _type == pluginLib::FileType::Mid ? ".mid" : ".syx";
+			file += "." + _type.type();
 		return file;
 	}
 

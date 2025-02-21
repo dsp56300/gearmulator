@@ -52,7 +52,7 @@ namespace jucePluginEditorLib
 		const char* findResourceByFilename(const std::string& _filename, uint32_t& _size) const;
 
 		void loadPreset(const std::function<void(const juce::File&)>& _callback);
-		void savePreset(const std::function<void(const juce::File&)>& _callback);
+		void savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback);
 #if !SYNTHLIB_DEMO_MODE
 		static bool savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets);
 #endif

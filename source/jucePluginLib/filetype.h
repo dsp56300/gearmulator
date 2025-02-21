@@ -19,6 +19,8 @@ namespace pluginLib
 		bool operator == (const FileType& _other) const;
 		bool operator != (const FileType& _other) const;
 
+		const std::string& type() const { return m_type; }
+
 	private:
 		std::string m_type;
 	};

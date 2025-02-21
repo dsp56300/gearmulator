@@ -150,7 +150,7 @@ namespace mqJucePlugin
 
 	void Editor::savePreset(const pluginLib::FileType& _type)
 	{
-		jucePluginEditorLib::Editor::savePreset([&](const juce::File& _file)
+		jucePluginEditorLib::Editor::savePreset(_type, [&](const juce::File& _file)
 		{
 			auto type = _type;
 			const auto file = createValidFilename(type, _file);

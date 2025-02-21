@@ -453,7 +453,7 @@ namespace genericVirusUI
 
 	void VirusEditor::savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
+		Editor::savePreset(_fileType, [this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
 			pluginLib::FileType fileType = _fileType;
 			const auto file = createValidFilename(fileType, _result);
