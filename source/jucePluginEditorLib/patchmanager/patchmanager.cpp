@@ -618,7 +618,7 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::Data> patchData;
 		for (const auto& patch : _patches)
 		{
-			const auto patchSysex = applyModifications(patch, type);
+			const auto patchSysex = applyModifications(patch, type, pluginLib::ExportType::File);
 
 			if(!patchSysex.empty())
 				patchData.push_back(patchSysex);
@@ -1080,12 +1080,12 @@ namespace jucePluginEditorLib::patchManager
 		return activatePatchFromString(juce::SystemClipboard::getTextFromClipboard().toStdString());
 	}
 
-	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _type) const
+	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, const pluginLib::ExportType _exportType) const
 	{
 		if(!_patch)
 			return {};
 
-		const auto data = applyModifications(_patch, _type);
+		const auto data = applyModifications(_patch, _fileType, _exportType);
 
 		return pluginLib::Clipboard::createJsonString(m_editor.getProcessor(), {}, {}, data);
 	}

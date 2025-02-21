@@ -46,7 +46,7 @@ namespace jucePluginEditorLib::patchManager
 
 		for (auto& patch : patches)
 		{
-			auto data = m_patchManager.applyModifications(patch.second, pluginLib::FileType::Mid);
+			auto data = m_patchManager.applyModifications(patch.second, pluginLib::FileType::Mid, pluginLib::ExportType::DragAndDrop);
 			if(data.empty())
 				return false;
 			patchesData.emplace_back(std::move(data));

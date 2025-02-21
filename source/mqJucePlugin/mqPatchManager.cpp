@@ -64,7 +64,7 @@ namespace mqJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _targetType) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
 	{
 		auto result = _patch->sysex;
 
@@ -112,7 +112,7 @@ namespace mqJucePlugin
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, uint32_t _part)
 	{
-		m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty), static_cast<uint8_t>(_part));
+		m_controller.sendSingle(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), static_cast<uint8_t>(_part));
 		return true;
 	}
 }

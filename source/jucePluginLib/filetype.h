@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <cstdint>
 
 namespace pluginLib
 {
@@ -20,5 +21,13 @@ namespace pluginLib
 
 	private:
 		std::string m_type;
+	};
+
+	enum class ExportType : uint8_t
+	{
+		Clipboard,
+		DragAndDrop,
+		EmuHardware,
+		File
 	};
 }

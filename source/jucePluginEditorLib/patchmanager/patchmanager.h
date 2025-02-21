@@ -106,7 +106,7 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromClipboard();
 		bool activatePatchFromString(const std::string& _text);
 		bool activatePatchFromClipboard();
-		std::string toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _type) const;
+		std::string toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const;
 
 		LayoutType getLayout() const { return m_layout; }
 		void setLayout(LayoutType _layout);
