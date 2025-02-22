@@ -9,6 +9,8 @@
 
 #include "baseLib/filesystem.h"
 
+#include "jucePluginLib/filetype.h"
+
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
 
