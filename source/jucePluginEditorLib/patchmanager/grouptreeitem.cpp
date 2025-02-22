@@ -138,9 +138,9 @@ namespace jucePluginEditorLib::patchManager
 		{
 			menu.addItem("Add folders...", [this]
 			{
-				juce::FileChooser fc("Select Folders");
+				m_chooser.reset(new juce::FileChooser("Select Folders"));
 
-				fc.launchAsync(
+				m_chooser->launchAsync(
 					juce::FileBrowserComponent::openMode | 
 					juce::FileBrowserComponent::canSelectDirectories | 
 					juce::FileBrowserComponent::canSelectMultipleItems
@@ -155,13 +155,16 @@ namespace jucePluginEditorLib::patchManager
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
+
+					m_chooser.reset();
 				});
 			});
 
 			menu.addItem("Add files...", [this]
 			{
-				juce::FileChooser fc("Select Files");
-				fc.launchAsync(
+				m_chooser.reset(new juce::FileChooser("Select Files"));
+
+				m_chooser->launchAsync(
 					juce::FileBrowserComponent::openMode |
 					juce::FileBrowserComponent::canSelectFiles |
 					juce::FileBrowserComponent::canSelectMultipleItems,
@@ -176,6 +179,8 @@ namespace jucePluginEditorLib::patchManager
 						ds.origin = pluginLib::patchDB::DataSourceOrigin::Manual;
 						getPatchManager().addDataSource(ds);
 					}
+
+					m_chooser.reset();
 				});
 			});
 		}
