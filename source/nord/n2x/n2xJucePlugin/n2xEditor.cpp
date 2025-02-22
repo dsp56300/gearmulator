@@ -2,6 +2,7 @@
 
 #include "n2xArp.h"
 #include "n2xController.h"
+#include "n2xFileType.h"
 #include "n2xFocusedParameter.h"
 #include "n2xLcd.h"
 #include "n2xLfo.h"
@@ -196,6 +197,12 @@ namespace n2xJucePlugin
 		jucePluginEditorLib::Editor::modifierKeysChanged(modifiers);
 
 		m_vmMap->setEnabled(modifiers.isShiftDown());
+	}
+
+	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
+	{
+		_menu.addItem(".nl2", [this, _func]{_func(fileType::g_nl2);});
+		jucePluginEditorLib::Editor::createExportFileTypeMenu(_menu, _func);
 	}
 
 	void Editor::mouseEnter(const juce::MouseEvent& _ev)

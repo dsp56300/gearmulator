@@ -116,7 +116,7 @@ namespace pluginLib
 		int clampValue(int _value) const;
 
         Controller& m_controller;
-		const Description m_desc;
+		const Description& m_desc;
 		juce::NormalisableRange<float> m_range;
 		const uint8_t m_part;
 		const int m_uniqueId;	// 0 for all unique parameters, > 0 if multiple Parameter instances reference a single synth parameter

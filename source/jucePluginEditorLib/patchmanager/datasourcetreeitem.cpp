@@ -9,8 +9,6 @@
 
 #include "baseLib/filesystem.h"
 
-#include "jucePluginEditorLib/filetype.h"
-
 #include "jucePluginLib/patchdb/datasource.h"
 #include "jucePluginLib/patchdb/search.h"
 
@@ -172,7 +170,7 @@ namespace jucePluginEditorLib::patchManager
 				beginEdit();
 			});
 
-			menu.addSubMenu("Export...", getPatchManager().getEditor().createExportFileTypeMenu([this](const FileType& _fileType)
+			menu.addSubMenu("Export...", getPatchManager().getEditor().createExportFileTypeMenu([this](const pluginLib::FileType& _fileType)
 			{
 				const auto s = getPatchManager().getSearch(getSearchHandle());
 				if(s)

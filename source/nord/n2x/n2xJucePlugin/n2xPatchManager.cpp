@@ -2,6 +2,7 @@
 
 #include "n2xController.h"
 #include "n2xEditor.h"
+#include "n2xFileType.h"
 
 #include "juce_cryptography/hashing/juce_MD5.h"
 
@@ -94,23 +95,26 @@ namespace n2xJucePlugin
 		return p;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
 	{
 		auto d = n2x::State::stripPatchName(_patch->sysex);
 
 		d[n2x::SysexIndex::IdxMsgType] = static_cast<uint8_t>(_patch->bank);
 		d[n2x::SysexIndex::IdxMsgSpec] = static_cast<uint8_t>(_patch->program);
 
-		auto name = _patch->getName();
+		if (_fileType == fileType::g_nl2 || _exportType != pluginLib::ExportType::File)
+		{
+			auto name = _patch->getName();
 
-		if(name.size() > n2x::g_nameLength)
-			name = name.substr(0, n2x::g_nameLength);
-		while(name.size() < n2x::g_nameLength)
-			name.push_back(' ');
+			if(name.size() > n2x::g_nameLength)
+				name = name.substr(0, n2x::g_nameLength);
+			while(name.size() < n2x::g_nameLength)
+				name.push_back(' ');
 
-		d.pop_back();
-		d.insert(d.end(), name.begin(), name.end());
-		d.push_back(0xf7);
+			d.pop_back();
+			d.insert(d.end(), name.begin(), name.end());
+			d.push_back(0xf7);
+		}
 
 		return d;
 	}

@@ -1,12 +1,12 @@
 #include "pluginEditor.h"
 
-#include "filetype.h"
 #include "pluginProcessor.h"
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
 
 #include "jucePluginLib/clipboard.h"
+#include "jucePluginLib/filetype.h"
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
 
@@ -75,15 +75,15 @@ namespace jucePluginEditorLib
 		m_fileChooser->launchAsync(flags, onFileChosen);
 	}
 
-	void Editor::savePreset(const std::function<void(const juce::File&)>& _callback)
+	void Editor::savePreset(const pluginLib::FileType& _fileType, const std::function<void(const juce::File&)>& _callback)
 	{
 #if !SYNTHLIB_DEMO_MODE
 		const auto path = m_processor.getConfig().getValue("save_path", "");
 
 		m_fileChooser = std::make_unique<juce::FileChooser>(
-			"Save preset(s) as syx or mid",
+			"Save preset(s) as " + _fileType.type(),
 			path.isEmpty() ? juce::File::getSpecialLocation(juce::File::currentApplicationFile).getParentDirectory() : path,
-			"*.syx,*.mid", true);
+			"*." + _fileType.type(), true);
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
@@ -116,12 +116,12 @@ namespace jucePluginEditorLib
 	}
 
 #if !SYNTHLIB_DEMO_MODE
-	bool Editor::savePresets(const FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets)
+	bool Editor::savePresets(const pluginLib::FileType& _type, const std::string& _pathName, const std::vector<std::vector<uint8_t>>& _presets)
 	{
 		if (_presets.empty())
 			return false;
 
-		if (_type == FileType::Mid)
+		if (_type == pluginLib::FileType::Mid)
 			return synthLib::SysexToMidi::write(_pathName.c_str(), _presets);
 
 		FILE* hFile = fopen(_pathName.c_str(), "wb");
@@ -144,17 +144,20 @@ namespace jucePluginEditorLib
 	}
 #endif
 
-	std::string Editor::createValidFilename(FileType& _type, const juce::File& _file)
+	std::string Editor::createValidFilename(pluginLib::FileType& _type, const juce::File& _file)
 	{
 		const auto ext = _file.getFileExtension();
 		auto file = _file.getFullPathName().toStdString();
+
+		if (ext.endsWithIgnoreCase(_type.type()))
+			return file;
 		
 		if (ext.endsWithIgnoreCase("mid"))
-			_type = FileType::Mid;
+			_type = pluginLib::FileType::Mid;
 		else if (ext.endsWithIgnoreCase("syx"))
-			_type = FileType::Syx;
+			_type = pluginLib::FileType::Syx;
 		else
-			file += _type == FileType::Mid ? ".mid" : ".syx";
+			file += "." + _type.type();
 		return file;
 	}
 
@@ -304,7 +307,7 @@ namespace jucePluginEditorLib
 		if(!p)
 			return;
 
-		const auto patchAsString = m_patchManager->toString(p);
+		const auto patchAsString = m_patchManager->toString(p, pluginLib::FileType::Empty, pluginLib::ExportType::Clipboard);
 
 		if(!patchAsString.empty())
 			juce::SystemClipboard::copyTextToClipboard(patchAsString);
@@ -566,12 +569,17 @@ namespace jucePluginEditorLib
 			m_overlays.refreshAll();
 	}
 
-	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(FileType)>& _func) const
+	juce::PopupMenu Editor::createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const
 	{
 		juce::PopupMenu menu;
-		menu.addItem(".syx", [this, _func]{_func(FileType::Syx);});
-		menu.addItem(".mid", [this, _func]{_func(FileType::Mid);});
+		createExportFileTypeMenu(menu, _func);
 		return menu;
+	}
+
+	void Editor::createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const
+	{
+		_menu.addItem(".syx", [this, _func]{_func(pluginLib::FileType::Syx);});
+		_menu.addItem(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

@@ -9,8 +9,6 @@
 
 #include "../pluginEditor.h"
 
-#include "jucePluginEditorLib/filetype.h"
-
 #include "juceUiLib/uiObjectStyle.h"
 
 namespace jucePluginEditorLib::patchManager
@@ -77,7 +75,7 @@ namespace jucePluginEditorLib::patchManager
 		getPatchManager().setListStatus(static_cast<uint32_t>(selectedPatches.size()), static_cast<uint32_t>(getPatches().size()));
 	}
 
-	bool ListModel::exportPresets(const bool _selectedOnly, const FileType& _fileType) const
+	bool ListModel::exportPresets(const bool _selectedOnly, const pluginLib::FileType& _fileType) const
 	{
 		Patches patches;
 
@@ -112,8 +110,8 @@ namespace jucePluginEditorLib::patchManager
 
 		juce::PopupMenu menu;
 		if(hasSelectedPatches)
-			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const FileType& _fileType) { exportPresets(true, _fileType); }));
-		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const FileType& _fileType) { exportPresets(false, _fileType); }));
+			menu.addSubMenu("Export selected...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(true, _fileType); }));
+		menu.addSubMenu("Export all...", editor.createExportFileTypeMenu([this](const pluginLib::FileType& _fileType) { exportPresets(false, _fileType); }));
 
 		if(hasSelectedPatches)
 		{

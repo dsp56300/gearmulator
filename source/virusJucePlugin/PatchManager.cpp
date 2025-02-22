@@ -3,7 +3,9 @@
 #include "VirusEditor.h"
 #include "VirusController.h"
 
+#include "jucePluginLib/filetype.h"
 #include "jucePluginLib/patchdb/datasource.h"
+
 #include "jucePluginEditorLib/pluginEditor.h"
 
 #include "virusLib/microcontroller.h"
@@ -190,7 +192,7 @@ namespace genericVirusUI
 		return patch;
 	}
 
-	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch) const
+	pluginLib::patchDB::Data PatchManager::applyModifications(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const
 	{
 		if (_patch->sysex.size() < 267)
 			return _patch->sysex;
@@ -420,7 +422,7 @@ namespace genericVirusUI
 
 	bool PatchManager::activatePatch(const pluginLib::patchDB::PatchPtr& _patch, const uint32_t _part)
 	{
-		return m_controller.activatePatch(applyModifications(_patch), _part);
+		return m_controller.activatePatch(applyModifications(_patch, pluginLib::FileType::Empty, pluginLib::ExportType::EmuHardware), _part);
 	}
 
 	void PatchManager::addRomPatches()

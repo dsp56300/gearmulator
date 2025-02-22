@@ -7,10 +7,10 @@
 #include "VirusProcessor.h"
 #include "VirusController.h"
 
+#include "jucePluginLib/filetype.h"
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/pluginVersion.h"
 
-#include "jucePluginEditorLib/filetype.h"
 #include "jucePluginEditorLib/patchmanager/savepatchdesc.h"
 
 #include "juceUiLib/messageBox.h"
@@ -306,24 +306,24 @@ namespace genericVirusUI
 		if(countAdded)
 			menu.addSeparator();
 
-		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(jucePluginEditorLib::FileType)>& _callback)
+		auto addEntry = [&](juce::PopupMenu& _menu, const std::string& _name, const std::function<void(pluginLib::FileType)>& _callback)
 		{
 			juce::PopupMenu subMenu;
 
-			subMenu.addItem(".syx", [_callback](){_callback(jucePluginEditorLib::FileType::Syx); });
-			subMenu.addItem(".mid", [_callback](){_callback(jucePluginEditorLib::FileType::Mid); });
+			subMenu.addItem(".syx", [_callback](){_callback(pluginLib::FileType::Syx); });
+			subMenu.addItem(".mid", [_callback](){_callback(pluginLib::FileType::Mid); });
 
 			_menu.addSubMenu(_name, subMenu);
 		};
 
-		addEntry(menu, "Export Current Single (Edit Buffer)", [this](const jucePluginEditorLib::FileType& _type)
+		addEntry(menu, "Export Current Single (Edit Buffer)", [this](const pluginLib::FileType& _type)
 		{
 			savePresets(SaveType::CurrentSingle, _type);
 		});
 
 		if(getController().isMultiMode())
 		{
-			addEntry(menu, "Export Arrangement (Multi + 16 Singles)", [this](const jucePluginEditorLib::FileType& _type)
+			addEntry(menu, "Export Arrangement (Multi + 16 Singles)", [this](const pluginLib::FileType& _type)
 			{
 				savePresets(SaveType::Arrangement, _type);
 			});
@@ -332,7 +332,7 @@ namespace genericVirusUI
 		juce::PopupMenu banksMenu;
 		for(uint8_t b=0; b<static_cast<uint8_t>(getController().getBankCount()); ++b)
 		{
-			addEntry(banksMenu, getController().getBankName(b), [this, b](const jucePluginEditorLib::FileType& _type)
+			addEntry(banksMenu, getController().getBankName(b), [this, b](const pluginLib::FileType& _type)
 			{
 				savePresets(SaveType::Bank, _type, b);
 			});
@@ -451,17 +451,17 @@ namespace genericVirusUI
 		getController().requestArrangement();
 	}
 
-	void VirusEditor::savePresets(SaveType _saveType, const jucePluginEditorLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)
+	void VirusEditor::savePresets(SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/)
 	{
-		Editor::savePreset([this, _saveType, _bankNumber, _fileType](const juce::File& _result)
+		Editor::savePreset(_fileType, [this, _saveType, _bankNumber, _fileType](const juce::File& _result)
 		{
-			jucePluginEditorLib::FileType fileType = _fileType;
+			pluginLib::FileType fileType = _fileType;
 			const auto file = createValidFilename(fileType, _result);
 			savePresets(file, _saveType, fileType, _bankNumber);
 		});
 	}
 
-	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, const jucePluginEditorLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/) const
+	bool VirusEditor::savePresets(const std::string& _pathName, SaveType _saveType, const pluginLib::FileType& _fileType, uint8_t _bankNumber/* = 0*/) const
 	{
 #if SYNTHLIB_DEMO_MODE
 		return false;

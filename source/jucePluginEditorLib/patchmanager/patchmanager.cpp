@@ -17,10 +17,9 @@
 
 #include "baseLib/filesystem.h"
 
-#include "jucePluginLib/types.h"
 #include "jucePluginLib/clipboard.h"
-
-#include "jucePluginEditorLib/filetype.h"
+#include "jucePluginLib/filetype.h"
+#include "jucePluginLib/types.h"
 
 #include "dsp56kEmu/logging.h"
 
@@ -608,18 +607,18 @@ namespace jucePluginEditorLib::patchManager
 		g.fillAll(juce::Colour(0,0,0));
 	}
 
-	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType& _fileType) const
+	void PatchManager::exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const
 	{
 #if SYNTHLIB_DEMO_MODE
 		getEditor().showDemoRestrictionMessageBox();
 #else
-		FileType type = _fileType;
+		pluginLib::FileType type = _fileType;
 		const auto name = Editor::createValidFilename(type, _file);
 
 		std::vector<pluginLib::patchDB::Data> patchData;
 		for (const auto& patch : _patches)
 		{
-			const auto patchSysex = applyModifications(patch);
+			const auto patchSysex = applyModifications(patch, type, pluginLib::ExportType::File);
 
 			if(!patchSysex.empty())
 				patchData.push_back(patchSysex);
@@ -630,7 +629,7 @@ namespace jucePluginEditorLib::patchManager
 #endif
 	}
 
-	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const FileType& _fileType) const
+	bool PatchManager::exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const
 	{
 		const auto patchCount = _patches.size();
 
@@ -638,7 +637,7 @@ namespace jucePluginEditorLib::patchManager
 		{
 			auto patches = p;
 			ListModel::sortPatches(patches, pluginLib::patchDB::SourceType::LocalStorage);
-			getEditor().savePreset([this, p = std::move(patches), _fileType](const juce::File& _file)
+			getEditor().savePreset(_fileType, [this, p = std::move(patches), _fileType](const juce::File& _file)
 			{
 				exportPresets(_file, p, _fileType);
 			});
@@ -1081,12 +1080,12 @@ namespace jucePluginEditorLib::patchManager
 		return activatePatchFromString(juce::SystemClipboard::getTextFromClipboard().toStdString());
 	}
 
-	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch) const
+	std::string PatchManager::toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, const pluginLib::ExportType _exportType) const
 	{
 		if(!_patch)
 			return {};
 
-		const auto data = applyModifications(_patch);
+		const auto data = applyModifications(_patch, _fileType, _exportType);
 
 		return pluginLib::Clipboard::createJsonString(m_editor.getProcessor(), {}, {}, data);
 	}

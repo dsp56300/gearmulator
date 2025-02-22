@@ -12,7 +12,6 @@
 
 namespace jucePluginEditorLib
 {
-	class FileType;
 	class Editor;
 }
 
@@ -72,8 +71,8 @@ namespace jucePluginEditorLib::patchManager
 
 		void paint(juce::Graphics& g) override;
 
-		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const FileType& _fileType) const;
-		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const FileType& _fileType) const;
+		void exportPresets(const juce::File& _file, const std::vector<pluginLib::patchDB::PatchPtr>& _patches, const pluginLib::FileType& _fileType) const;
+		bool exportPresets(std::vector<pluginLib::patchDB::PatchPtr>&& _patches, const pluginLib::FileType& _fileType) const;
 
 		void resized() override;
 
@@ -107,7 +106,7 @@ namespace jucePluginEditorLib::patchManager
 		std::vector<pluginLib::patchDB::PatchPtr> getPatchesFromClipboard();
 		bool activatePatchFromString(const std::string& _text);
 		bool activatePatchFromClipboard();
-		std::string toString(const pluginLib::patchDB::PatchPtr& _patch) const;
+		std::string toString(const pluginLib::patchDB::PatchPtr& _patch, const pluginLib::FileType& _fileType, pluginLib::ExportType _exportType) const;
 
 		LayoutType getLayout() const { return m_layout; }
 		void setLayout(LayoutType _layout);

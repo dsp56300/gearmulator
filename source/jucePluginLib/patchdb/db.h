@@ -3,7 +3,6 @@
 #include <functional>
 #include <map>
 #include <list>
-#include <thread>
 #include <shared_mutex>
 
 #include "patch.h"
@@ -13,6 +12,12 @@
 #include "jobqueue.h"
 
 #include "juce_core/juce_core.h"
+
+namespace pluginLib
+{
+	enum class ExportType : uint8_t;
+	class FileType;
+}
 
 namespace pluginLib::patchDB
 {
@@ -96,7 +101,7 @@ namespace pluginLib::patchDB
 		virtual bool loadLocalStorage(DataList& _results, const DataSource& _ds);
 		virtual bool loadFolder(const DataSourceNodePtr& _folder);
 		virtual PatchPtr initializePatch(Data&& _sysex, const std::string& _defaultPatchName) = 0;
-		virtual Data applyModifications(const PatchPtr& _patch) const = 0;
+		virtual Data applyModifications(const PatchPtr& _patch, const FileType& _fileType, ExportType _exportType) const = 0;
 		virtual bool parseFileData(DataList& _results, const Data& _data);
 		virtual bool equals(const PatchPtr& _a, const PatchPtr& _b) const
 		{

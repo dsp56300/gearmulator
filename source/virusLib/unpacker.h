@@ -39,7 +39,7 @@ namespace virusLib
 
 		static std::vector<Chunk> getChunks(std::istream& _file);
 
-		static std::vector<char> unpackFile(std::vector<Chunk>& _chunks, char _fileId);
+		static std::vector<char> unpackFile(const std::vector<Chunk>& _chunks, char _fileId);
 	};
 
 }
