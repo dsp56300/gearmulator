@@ -61,5 +61,6 @@ namespace jucePluginEditorLib::patchManager
 		std::map<std::string, TagTreeItem*> m_itemsByTag;
 		std::map<pluginLib::patchDB::DataSourceNodePtr, DatasourceTreeItem*> m_itemsByDataSource;
 		std::string m_filter;
+		std::unique_ptr<juce::FileChooser> m_chooser;
 	};
 }
