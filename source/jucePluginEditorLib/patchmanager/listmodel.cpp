@@ -11,6 +11,8 @@
 
 #include "juceUiLib/uiObjectStyle.h"
 
+#include "jucePluginLib/filetype.h"
+
 namespace jucePluginEditorLib::patchManager
 {
 	ListModel::ListModel(PatchManager& _pm): m_patchManager(_pm)
