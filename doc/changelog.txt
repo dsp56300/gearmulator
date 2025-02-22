@@ -1,5 +1,16 @@
 Release Notes 
 
+1.4.3
+
+NodalRed2x:
+
+- [Imp] Added option to export patches from patch manager as .nl2 format, which 
+        includes patch names. This was previously always the case for .syx and .mid
+		exports but has now been restricted to .nl2 to ensure compatibility of .syx
+		and .mid exports with hardware devices
+
+- [Fix] Fix plugin getting stuck after 12 hours of use
+
 1.4.2
 
 Framework:
