@@ -6,6 +6,11 @@ NodalRed2x:
 
 - [Fix] It was no longer possible to add new files/folders to patch manager
 
+Xenia:
+
+- [Imp] Add support to load patches from files that include custom waves and
+        wavetables
+
 1.4.3
 
 NodalRed2x:
