@@ -110,6 +110,9 @@ namespace xt
 
 		static SysexCommand getCommand(const SysEx& _data);
 
+		static TableId getTableId(const SysEx& _data);
+		static WaveId getWaveId(const SysEx& _data);
+
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{
 			if(!isValid(_src))
