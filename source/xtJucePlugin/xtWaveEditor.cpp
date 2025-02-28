@@ -10,6 +10,11 @@
 #include "xtController.h"
 
 #include "xtEditor.h"
+
+#include "jucePluginEditorLib/pluginProcessor.h"
+
+#include "juceUiLib/messageBox.h"
+
 #include "xtLib/xtState.h"
 
 namespace xtJucePlugin
@@ -260,5 +265,86 @@ namespace xtJucePlugin
 			});
 		}
 		return controlTableSlotsMenu;
+	}
+
+	void WaveEditor::filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files)
+	{
+		_waves.clear();
+		_tables.clear();
+
+		const auto title = getEditor().getProcessor().getProperties().name + " - ";
+
+		const auto sysex = WaveTreeItem::getSysexFromFiles(_files);
+
+		if(sysex.empty())
+		{
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title + "Error", "No Sysex data found in file");
+			return;
+		}
+
+		for (const auto& s : sysex)
+		{
+			xt::TableData table;
+			xt::WaveData wave;
+			if (xt::State::parseTableData(table, s))
+			{
+				const auto tableId = xt::State::getTableId(s);
+				_tables.emplace(tableId, table);
+			}
+			else if (xt::State::parseWaveData(wave, s))
+			{
+				const auto waveId = xt::State::getWaveId(s);
+				_waves.emplace(waveId, wave);
+			}
+		}
+
+		if (_tables.size() + _waves.size() > 1)
+		{
+			std::stringstream ss;
+			ss << "The imported file contains\n\n";
+			if (!_tables.empty())
+			{
+				ss << "Control Tables:\n";
+				size_t c = 0;
+				for (const auto& it : _tables)
+				{
+					ss << getTableName(it.first);
+					if (++c < _tables.size())
+						ss << ", ";
+				}
+				ss << "\n\n";
+			}
+
+			if (!_waves.empty())
+			{
+				ss << "Waves:\n";
+				size_t c = 0;
+				for (const auto& it : _waves)
+				{
+					ss << WaveTreeItem::getWaveName(it.first);
+					if (++c < _waves.size())
+						ss << ", ";
+				}
+				ss << "\n\n";
+			}
+			ss << "Do you want to import all of them? This will replace existing data.";
+			genericUI::MessageBox::showYesNo(juce::AlertWindow::QuestionIcon, title + "Question", ss.str(), [this, t = std::move(_tables), w = std::move(_waves)](genericUI::MessageBox::Result _result)
+			{
+				if (_result != genericUI::MessageBox::Result::Yes)
+					return;
+
+				for (const auto& it : w)
+				{
+					m_data.setWave(it.first, it.second);
+					m_data.sendWaveToDevice(it.first);
+				}
+
+				for (const auto& it : t)
+				{
+					m_data.setTable(it.first, it.second);
+					m_data.sendTableToDevice(it.first);
+				}
+			});
+		}
 	}
 }

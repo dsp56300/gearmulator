@@ -55,6 +55,8 @@ namespace xtJucePlugin
 
 		juce::PopupMenu createCopyToSelectedTableMenu(xt::WaveId _id);
 
+		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files);
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }

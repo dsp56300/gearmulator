@@ -114,7 +114,7 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return false;
 
-		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[1].endsWithIgnoreCase(".syx"))
+		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[0].endsWithIgnoreCase(".syx"))
 			return true;
 
 		return TreeItem::isInterestedInFileDrag(files);
@@ -125,32 +125,21 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return;
 
-		const auto sysex = getSysexFromFiles(files);
-
 		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
 
-		if(sysex.empty())
+		std::map<xt::WaveId, xt::WaveData> waves;
+		std::map<xt::TableId, xt::TableData> tables;
+		m_editor.filesDropped(waves, tables, files);
+
+		if (waves.empty())
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "No sysex data found in file");
+			if (tables.size() == 1)
+				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "This file doesn't contain a Wave but a Control Table, please drop on a User Table slot.");
 			return;
 		}
 
-		std::vector<xt::WaveData> waves;
-
-		for (const auto& s : sysex)
-		{
-			xt::WaveData wave;
-			if(xt::State::parseWaveData(wave, sysex.front()))
-				waves.push_back(wave);
-		}
-
-		if(waves.size() == 1)
-		{
-			m_editor.getData().setWave(m_waveIndex, waves.front());
-			return;
-		}
-
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, waves.empty() ? "No wave data found in file" : "Multiple waves found in file");
+		m_editor.getData().setWave(m_waveIndex, waves.begin()->second);
+		m_editor.getData().sendWaveToDevice(m_waveIndex);
 	}
 
 	std::vector<std::vector<uint8_t>> WaveTreeItem::getSysexFromFiles(const juce::StringArray& _files)
