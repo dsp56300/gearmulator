@@ -158,7 +158,21 @@ namespace xtJucePlugin
 			if (xt::State::splitCombinedPatch(dumps, _patch->sysex))
 			{
 				if (applyModifications(dumps[0]))
+				{
+					if (_exportType == pluginLib::ExportType::File)
+					{
+						// hardware compatibility: multiple sysex
+						xt::SysEx r;
+
+						for (auto& dump : dumps)
+							r.insert(r.end(), dump.begin(), dump.end());
+
+						return r;
+					}
+
+					// emu compatibility: custom patch format, one sysex that includes everything
 					return xt::State::createCombinedPatch(dumps);
+				}
 			}
 		}
 
