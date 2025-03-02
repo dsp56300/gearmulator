@@ -115,10 +115,10 @@ namespace xtJucePlugin
 	{
 		auto applyModifications = [&_patch](pluginLib::patchDB::Data& _result) -> bool
 		{
-			if (xt::State::getCommand(_patch->sysex) != xt::SysexCommand::SingleDump)
+			if (xt::State::getCommand(_result) != xt::SysexCommand::SingleDump)
 				return false;
 
-			const auto dumpSize = _patch->sysex.size();
+			const auto dumpSize = _result.size();
 
 			if (dumpSize != std::tuple_size_v<xt::State::Single>)
 				return false;
