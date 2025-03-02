@@ -880,16 +880,13 @@ namespace xt
 		sendSysex({0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
 	}
 
-	inline void State::sendMulti(const std::vector<uint8_t>& _multiData) const
+	void State::sendMulti(const std::vector<uint8_t>& _multiData) const
 	{
 		std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(LocationH::MultiBankA), 0};
 		data.insert(data.end(), _multiData.begin(), _multiData.end());
-
-		uint8_t checksum = 0;
-		for(size_t i=4; i<data.size(); ++i)
-			checksum += data[i];
-		data.push_back(checksum & 0x7f);
+		data.push_back(0x00);
 		data.push_back(0xf7);
+		updateChecksum(data, IdxMultiChecksumStart);
 		sendSysex(std::move(data));
 	}
 

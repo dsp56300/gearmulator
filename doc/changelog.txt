@@ -11,6 +11,8 @@ Xenia:
 - [Imp] Add support to load patches from files that include custom waves and
         wavetables
 
+- [Fix] Checksum of exported patches was incorrect due to bug in documentation
+
 1.4.3
 
 NodalRed2x:
