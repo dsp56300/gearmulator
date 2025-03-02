@@ -37,7 +37,7 @@ namespace pluginLib
 		return ss.str();
 	}
 
-	std::vector<std::vector<uint8_t>> Clipboard::getSysexFromString(const std::string& _text)
+	std::vector<uint8_t> Clipboard::getSysexFromString(const std::string& _text)
 	{
 		if(_text.empty())
 			return {};
@@ -83,10 +83,7 @@ namespace pluginLib
 			data.push_back(static_cast<uint8_t>(c));
 		}
 
-		std::vector<std::vector<uint8_t>> results;
-		synthLib::MidiToSysex::extractSysexFromData(results, data);
-
-		return results;
+		return data;
 	}
 
 	std::string Clipboard::parametersToString(Processor& _processor, const std::vector<std::string>& _parameters, const std::string& _regionId)
