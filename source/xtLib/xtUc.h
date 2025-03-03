@@ -51,7 +51,7 @@ namespace xt
 		std::array<uint8_t, g_romSize> m_romRuntimeData;
 
 		xtHdi08A m_hdiA;
-		hwLib::Am29f m_flash;
+		hwLib::Am29f m_flash;	// Its a MX 29F400TTC-70 which is a 4MBit (512kx8) AM29 compatible flash with top boot block
 		Pic m_pic;
 		Lcd m_lcd;
 
