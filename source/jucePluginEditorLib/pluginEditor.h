@@ -27,6 +27,8 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	class Settings;
+
 	namespace patchManager
 	{
 		class PatchManager;
@@ -128,5 +130,7 @@ namespace jucePluginEditorLib
 		std::vector<juce::File> m_dragAndDropFiles;
 		ImagePool m_imagePool;
 		ParameterOverlays m_overlays;
+
+		std::unique_ptr<Settings> m_settings;
 	};
 }

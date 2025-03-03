@@ -1,6 +1,7 @@
 #include "pluginEditor.h"
 
 #include "pluginProcessor.h"
+#include "settings.h"
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
@@ -597,8 +598,28 @@ namespace jucePluginEditorLib
 				if(replaceCurrentPatchFromClipboard())
 					return true;
 				break;
+#ifdef _DEBUG
+			case 's':
+			case 'S':
+				if (!m_settings)
+				{
+					m_settings.reset(new Settings(*this));
+					addAndMakeVisible(m_settings.get());
+					m_settings->centreWithSize(getWidth() * 7 / 8, getHeight() * 7 / 8);
+					return true;
+				}
+				break;
+#endif
 			default:
 				return genericUI::Editor::keyPressed(_key);
+			}
+		}
+		if (_key.getKeyCode() == juce::KeyPress::escapeKey)
+		{
+			if (m_settings)
+			{
+				m_settings.reset();
+				return true;
 			}
 		}
 		return genericUI::Editor::keyPressed(_key);
