@@ -8,6 +8,7 @@ set(SOURCES
 	xtButtons.cpp xtButtons.h
 	xtDevice.cpp xtDevice.h
 	xtDSP.cpp xtDSP.h
+	xtFlash.cpp xtFlash.h
 	xtHardware.cpp xtHardware.h
 	xtId.cpp xtId.h
 	xtLcd.cpp xtLcd.h
