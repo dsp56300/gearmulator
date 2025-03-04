@@ -1,19 +1,26 @@
 #include "settingsCategory.h"
 
+#include "settings.h"
+#include "settingsPlugin.h"
+
 namespace jucePluginEditorLib
 {
-	SettingsCategory::SettingsCategory(Settings& _settings) : m_settings(_settings)
+	SettingsCategory::SettingsCategory(Settings& _settings, SettingsPlugin* _plugin) : m_plugin(_plugin), m_settings(_settings)
 	{
 		addAndMakeVisible(m_button);
 
-		m_button.setButtonText("Test");
+		m_button.setButtonText(m_plugin->getCategoryName());
 		m_button.setLookAndFeel(this);
+		m_button.onClick = [this]
+		{
+			m_settings.setSelectedCategory(this);
+		};
+
+		m_buttonColor = m_button.findColour(juce::TextButton::buttonColourId);
 
 		SettingsCategory::resized();
 	}
-	SettingsCategory::~SettingsCategory()
-	{
-	}
+	SettingsCategory::~SettingsCategory() = default;
 
 	void SettingsCategory::paint(juce::Graphics& g)
 	{
@@ -25,8 +32,13 @@ namespace jucePluginEditorLib
 		m_button.centreWithSize(getWidth() - 20, getHeight() - 20);
 	}
 
-	juce::Font SettingsCategory::getTextButtonFont(juce::TextButton& _textButton, int buttonHeight)
+	juce::Font SettingsCategory::getTextButtonFont(juce::TextButton& _textButton, const int _buttonHeight)
 	{
-	    return { static_cast<float>(buttonHeight) * 0.7f };
+	    return { static_cast<float>(_buttonHeight) * 0.7f };
+	}
+
+	void SettingsCategory::setSelected(const bool _selected)
+	{
+		m_button.setColour(juce::TextButton::buttonColourId, _selected ? m_buttonColor.brighter(0.2f) : m_buttonColor);
 	}
 }

@@ -19,7 +19,9 @@ set(SOURCES
 	settings.cpp settings.h
 	settingsCategories.cpp settingsCategories.h
 	settingsCategory.cpp settingsCategory.h
+	settingsMidi.cpp settingsMidi.h
 	settingsPage.cpp settingsPage.h
+	settingsPlugin.cpp settingsPlugin.h
 	skin.h
 )
 

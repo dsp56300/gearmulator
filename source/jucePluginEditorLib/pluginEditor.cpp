@@ -2,6 +2,7 @@
 
 #include "pluginProcessor.h"
 #include "settings.h"
+#include "settingsMidi.h"
 #include "skin.h"
 
 #include "baseLib/filesystem.h"
@@ -583,6 +584,11 @@ namespace jucePluginEditorLib
 		_menu.addItem(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
 	}
 
+	void Editor::registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins)
+	{
+		_plugins.push_back(std::make_unique<SettingsMidi>());
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())
@@ -598,30 +604,25 @@ namespace jucePluginEditorLib
 				if(replaceCurrentPatchFromClipboard())
 					return true;
 				break;
-#ifdef _DEBUG
-			case 's':
-			case 'S':
-				if (!m_settings)
-				{
-					m_settings.reset(new Settings(*this));
-					addAndMakeVisible(m_settings.get());
-					m_settings->centreWithSize(getWidth() * 7 / 8, getHeight() * 7 / 8);
-					return true;
-				}
-				break;
-#endif
 			default:
 				return genericUI::Editor::keyPressed(_key);
 			}
 		}
-		if (_key.getKeyCode() == juce::KeyPress::escapeKey)
+#ifdef _DEBUG
+		else if (_key.getKeyCode() == juce::KeyPress::escapeKey)
 		{
 			if (m_settings)
 			{
 				m_settings.reset();
 				return true;
 			}
+
+			m_settings.reset(new Settings(*this));
+			addAndMakeVisible(m_settings.get());
+			m_settings->centreWithSize(getWidth() * 7 / 8, getHeight() * 7 / 8);
+			return true;
 		}
+#endif
 		return genericUI::Editor::keyPressed(_key);
 	}
 

@@ -4,21 +4,27 @@
 
 namespace jucePluginEditorLib
 {
+	class SettingsPlugin;
 	class Settings;
 
 	class SettingsCategory final : public juce::Component, public juce::LookAndFeel_V4
 	{
 	public:
-		explicit SettingsCategory(Settings& _settings);
+		explicit SettingsCategory(Settings& _settings, SettingsPlugin* _plugin);
 		~SettingsCategory() override;
 		void paint(juce::Graphics& g) override;
 		void resized() override;
 
-		juce::Font getTextButtonFont(juce::TextButton&, int buttonHeight) override;
+		juce::Font getTextButtonFont(juce::TextButton&, int _buttonHeight) override;
+
+		void setSelected(bool _selected);
+		SettingsPlugin* getPlugin() const { return m_plugin; }
 
 	private:
+		SettingsPlugin* const m_plugin;
 		Settings& m_settings;
 
 		juce::TextButton m_button;
+		juce::Colour m_buttonColor;
 	};
 }

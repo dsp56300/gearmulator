@@ -27,6 +27,7 @@ namespace pluginLib
 
 namespace jucePluginEditorLib
 {
+	class SettingsPlugin;
 	class Settings;
 
 	namespace patchManager
@@ -101,6 +102,8 @@ namespace jucePluginEditorLib
 
 		juce::PopupMenu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
+
+		virtual void registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins);
 
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;

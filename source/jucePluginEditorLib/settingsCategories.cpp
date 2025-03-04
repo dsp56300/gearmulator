@@ -1,17 +1,17 @@
 #include "settingsCategories.h"
 
+#include "pluginEditor.h"
+#include "settings.h"
 #include "settingsCategory.h"
 
 namespace jucePluginEditorLib
 {
 	SettingsCategories::SettingsCategories(Settings& _settings) : m_settings(_settings)
 	{
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
-		m_categories.push_back(std::make_unique<SettingsCategory>(_settings));
+		_settings.getEditor().registerSettings(m_plugins);
+
+		for (auto& p : m_plugins)
+			m_categories.push_back(std::make_unique<SettingsCategory>(_settings, p.get()));
 
 		for (auto& settingsCategory : m_categories)
 			addAndMakeVisible(settingsCategory.get());
@@ -21,6 +21,7 @@ namespace jucePluginEditorLib
 	SettingsCategories::~SettingsCategories()
 	{
 		m_categories.clear();
+		m_plugins.clear();
 	}
 	void SettingsCategories::paint(juce::Graphics& g)
 	{
@@ -30,6 +31,14 @@ namespace jucePluginEditorLib
 	void SettingsCategories::resized()
 	{
 		doLayout();
+	}
+
+	void SettingsCategories::setSelectedCategory(const SettingsCategory* _settingsCategory)
+	{
+		for (auto & settingsCategory : m_categories)
+		{
+			settingsCategory->setSelected(settingsCategory.get() == _settingsCategory);
+		}
 	}
 
 	void SettingsCategories::doLayout()

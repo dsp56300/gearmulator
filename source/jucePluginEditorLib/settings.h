@@ -16,6 +16,9 @@ namespace jucePluginEditorLib
 		~Settings() override;
 		void paint(juce::Graphics& g) override;
 		void resized() override;
+		Editor& getEditor() const { return m_editor; }
+
+		void setSelectedCategory(const SettingsCategory* _settingsCategory);
 
 	private:
 		void doLayout();

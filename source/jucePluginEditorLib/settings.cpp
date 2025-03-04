@@ -1,5 +1,7 @@
 #include "settings.h"
 
+#include "settingsCategory.h"
+
 namespace jucePluginEditorLib
 {
 	Settings::Settings(Editor& _editor) : m_editor(_editor), m_categories(*this), m_page(*this)
@@ -24,6 +26,13 @@ namespace jucePluginEditorLib
 	{
 		doLayout();
 		Component::resized();
+	}
+
+	void Settings::setSelectedCategory(const SettingsCategory* _settingsCategory)
+	{
+		m_categories.setSelectedCategory(_settingsCategory);
+
+		m_page.setPage(_settingsCategory->getPlugin()->getPage());
 	}
 
 	void Settings::doLayout()
