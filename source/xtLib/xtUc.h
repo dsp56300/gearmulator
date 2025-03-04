@@ -1,6 +1,7 @@
 #pragma once
 
 #include "xtButtons.h"
+#include "xtFlash.h"
 #include "xtLcd.h"
 #include "xtLeds.h"
 #include "xtPic.h"
@@ -8,8 +9,6 @@
 
 #include "mc68k/mc68k.h"
 #include "mc68k/hdi08periph.h"
-
-#include "hardwareLib/am29f.h"
 
 namespace xt
 {
@@ -51,7 +50,7 @@ namespace xt
 		std::array<uint8_t, g_romSize> m_romRuntimeData;
 
 		xtHdi08A m_hdiA;
-		hwLib::Am29f m_flash;
+		Flash m_flash;
 		Pic m_pic;
 		Lcd m_lcd;
 

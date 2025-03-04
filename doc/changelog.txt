@@ -12,6 +12,7 @@ Xenia:
         wavetables
 
 - [Fix] Checksum of exported patches was incorrect due to bug in documentation
+- [Fix] Emulator might get stuck while "Reorganising Memory"
 
 1.4.3
 

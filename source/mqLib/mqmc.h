@@ -67,7 +67,7 @@ namespace mqLib
 
 		const ROM& m_rom;
 		std::vector<uint8_t> m_romRuntimeData;
-		std::unique_ptr<hwLib::Am29f> m_flash;
+		std::unique_ptr<hwLib::Am29f> m_flash;	// Its a MX 29F400TTC-70 which is a 4MBit (512kx8) AM29 compatible flash with top boot block
 		LCD m_lcd;
 		Buttons m_buttons;
 		Leds m_leds;

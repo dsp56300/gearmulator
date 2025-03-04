@@ -7,7 +7,7 @@
 
 namespace hwLib
 {
-	Am29f::Am29f(uint8_t* _buffer, const size_t _size, bool _useWriteEnable, bool _bitreversedCmdAddr): m_buffer(_buffer), m_size(_size), m_useWriteEnable(_useWriteEnable), m_bitreverseCmdAddr(_bitreversedCmdAddr)
+	Am29f::Am29f(uint8_t* _buffer, const size_t _size, const bool _useWriteEnable, const bool _bitreversedCmdAddr) : m_buffer(_buffer), m_size(_size), m_useWriteEnable(_useWriteEnable), m_bitreverseCmdAddr(_bitreversedCmdAddr)
 	{
 		auto br = [&](uint16_t x)
 		{
@@ -78,7 +78,70 @@ namespace hwLib
 		}
 	}
 
-	void Am29f::execCommand(const CommandType _command, uint32_t _addr, const uint16_t _data)
+	bool Am29f::eraseSector(const uint32_t _addr, const size_t _sizeInKb) const
+	{
+		if (!_sizeInKb)
+			return false;
+
+		MCLOG("Erasing Sector at " << MCHEX(_addr) << ", size " << MCHEX(1024 * _sizeInKb));
+
+		for(size_t i = _addr; i< _addr + _sizeInKb * 1024; ++i)
+			m_buffer[i] = 0xff;
+
+		return true;
+	}
+
+	bool Am29f::eraseSector1Mbit(const uint32_t _addr) const
+	{
+		switch (_addr)
+		{
+			case 0x00000:
+			case 0x04000:
+			case 0x08000:
+			case 0x0C000:
+			case 0x10000:
+			case 0x14000:
+			case 0x18000:
+			case 0x1C000:	return eraseSector(_addr, 16);
+			default:		return false;
+		}
+	}
+
+	bool Am29f::eraseSector2MbitTopBoot(const uint32_t _addr) const
+	{
+		switch (_addr)
+		{
+			case 0x00000:
+			case 0x10000:
+			case 0x20000:	return eraseSector(_addr, 64);
+			case 0x30000:	return eraseSector(_addr, 32);
+			case 0x38000:
+			case 0x3a000:	return eraseSector(_addr, 8);
+			case 0x3c000:	return eraseSector(_addr, 16);
+			default:		return false;
+		}
+	}
+
+	bool Am29f::eraseSector4MbitTopBoot(const uint32_t _addr) const
+	{
+		switch (_addr)
+		{
+			case 0x00000:
+			case 0x10000:
+			case 0x20000:
+			case 0x30000:
+			case 0x40000:
+			case 0x50000:
+			case 0x60000:
+			case 0x70000:	return eraseSector(_addr, 64);
+			case 0x78000:
+			case 0x7a000:	return eraseSector(_addr, 8);
+			case 0x7c000:	return eraseSector(_addr, 16);
+			default:		return false;
+		}
+	}
+
+	void Am29f::execCommand(const CommandType _command, uint32_t _addr, const uint16_t _data) const
 	{
 		switch (_command)
 		{
@@ -87,35 +150,11 @@ namespace hwLib
 			break;
 		case CommandType::SectorErase:
 			{
-				size_t sectorSizekB = 0;
-				switch (_addr)
+				if (!eraseSector(_addr))
 				{
-					case 0x00000:	sectorSizekB = 16;	break;
-					case 0x04000:
-					case 0x06000:	sectorSizekB = 8;	break;
-					case 0x08000:	sectorSizekB = 32;	break;
-					case 0x10000:
-					case 0x20000:
-					case 0x30000:
-					case 0x40000:
-					case 0x50000:
-					case 0x60000:
-					case 0x70000:	sectorSizekB = 64;	break;
-					case 0x78000:	
-					case 0x7A000:	
-					case 0x7C000:
-						// mq sends erase commands for a flash with top boot block even though a chip with bottom boot block is installed
-						_addr = 0x70000;
-						sectorSizekB = 64;
-						break;
-				default:
-					MCLOG("Unable to erase sector at " << MCHEX(_addr) << ", out of bounds!");
-					return;
+					assert(false);
+					MCLOG("Unable to erase sector at " << MCHEX(_addr) << ", unable to determine sector size!");
 				}
-
-				MCLOG("Erasing Sector at " << MCHEX(_addr) << ", size " << MCHEX(1024 * sectorSizekB));
-				for(size_t i = _addr; i< _addr + sectorSizekB * 1024; ++i)
-					m_buffer[i] = 0xff;
 			}
 			break;
 		case CommandType::Program:
