@@ -619,7 +619,9 @@ namespace jucePluginEditorLib
 
 			m_settings.reset(new Settings(*this));
 			addAndMakeVisible(m_settings.get());
-			m_settings->centreWithSize(getWidth() * 7 / 8, getHeight() * 7 / 8);
+			m_settings->setTransform(juce::AffineTransform::scale(1.0f / getScale()));
+			m_settings->centreWithSize(getWidth() * 7 / 8 * getScale(), getHeight() * 7 / 8 * getScale());
+
 			return true;
 		}
 #endif

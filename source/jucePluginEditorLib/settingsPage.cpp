@@ -19,7 +19,6 @@ namespace jucePluginEditorLib
 	{
 		if (m_page)
 			removeChildComponent(m_page);
-		delete m_page;
 		m_page = _page;
 		if (m_page)
 		{

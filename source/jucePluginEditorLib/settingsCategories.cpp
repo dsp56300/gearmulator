@@ -49,7 +49,7 @@ namespace jucePluginEditorLib
 		b.flexWrap = juce::FlexBox::Wrap::noWrap;
 
 		for (auto& c : m_categories)
-			b.items.add(juce::FlexItem(*c).withHeight(100.f).withMargin(juce::FlexItem::Margin(10.0f)));
+			b.items.add(juce::FlexItem(*c).withHeight(50.0f).withMargin(juce::FlexItem::Margin(10.0f)));
 
 		b.performLayout(getLocalBounds().toFloat().reduced(10.0f));
 	}

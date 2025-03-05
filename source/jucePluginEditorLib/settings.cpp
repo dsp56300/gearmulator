@@ -32,7 +32,7 @@ namespace jucePluginEditorLib
 	{
 		m_categories.setSelectedCategory(_settingsCategory);
 
-		m_page.setPage(_settingsCategory->getPlugin()->getPage());
+		m_page.setPage(_settingsCategory->getPlugin());
 	}
 
 	void Settings::doLayout()

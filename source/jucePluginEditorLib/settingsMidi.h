@@ -7,10 +7,16 @@ namespace jucePluginEditorLib
 	class SettingsMidi : public SettingsPlugin
 	{
 	public:
-		SettingsMidi() = default;
+		SettingsMidi();
 
 		std::string getCategoryName() const override { return "MIDI"; }
 
-		juce::Component* getPage() override;
+		void resized() override;
+
+	private:
+		juce::Label* m_midiInLabel = nullptr;
+		juce::ComboBox* m_midiIn = nullptr;
+		juce::Label* m_midiOutLabel = nullptr;
+		juce::ComboBox* m_midiOut = nullptr;
 	};
 }
