@@ -113,7 +113,7 @@ namespace xtJucePlugin
 			toggleWavePreview(false);
 	}
 
-	void WaveEditor::onWaveDataChanged(const xt::WaveData& _data) const
+	void WaveEditor::onWaveDataChanged(const xt::WaveData&) const
 	{
 	}
 
@@ -131,31 +131,6 @@ namespace xtJucePlugin
 			setSelectedWave(_target);
 
 		return true;
-	}
-
-	void WaveEditor::saveWavetable()
-	{
-	}
-
-	juce::PopupMenu WaveEditor::createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback)
-	{
-		juce::PopupMenu subMenu;
-
-		uint16_t count = 0;
-		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; ++i)
-		{
-			const auto id = xt::WaveId(i);
-			subMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
-			{
-				_callback(id);
-			});
-
-			++count;
-			if ((count % 25) == 0)
-				subMenu.addColumnBreak();
-		}
-
-		return subMenu;
 	}
 
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
@@ -216,6 +191,27 @@ namespace xtJucePlugin
 			});
 		}
 		return controlTableSlotsMenu;
+	}
+
+	juce::PopupMenu WaveEditor::createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback)
+	{
+		juce::PopupMenu subMenu;
+
+		uint16_t count = 0;
+		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; ++i)
+		{
+			const auto id = xt::WaveId(i);
+			subMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
+				{
+					_callback(id);
+				});
+
+				++count;
+				if ((count % 25) == 0)
+					subMenu.addColumnBreak();
+		}
+
+		return subMenu;
 	}
 
 	void WaveEditor::filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files)

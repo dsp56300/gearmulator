@@ -170,10 +170,19 @@ namespace xtJucePlugin
 
 		if(selectedTableId.isValid())
 		{
-			const auto subMenu = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
-			menu.addSubMenu("Copy to current Control Table", subMenu);
+			const auto subMenuCT = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
+			menu.addSubMenu("Copy to current Control Table...", subMenuCT);
 		}
 
+		const auto subMenuUW = WaveEditor::createRamWavesPopupMenu([this](const xt::WaveId _dest)
+		{
+			if (m_editor.getData().copyWave(_dest, m_waveIndex))
+			{
+				m_editor.getData().sendWaveToDevice(_dest);
+				m_editor.setSelectedWave(_dest);
+			}
+		});
+		menu.addSubMenu("Copy to User Wave...", subMenuUW);
 		menu.showMenuAsync({});
 	}
 

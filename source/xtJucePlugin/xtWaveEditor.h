@@ -55,6 +55,7 @@ namespace xtJucePlugin
 		xt::TableId getSelectedTable() const { return m_selectedTable; }
 
 		juce::PopupMenu createCopyToSelectedTableMenu(xt::WaveId _id);
+		static juce::PopupMenu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
 
 		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files);
 
@@ -75,10 +76,6 @@ namespace xtJucePlugin
 		void onWaveDataChanged(const xt::WaveData& _data) const;
 
 		bool saveWaveTo(xt::WaveId _target);
-
-		void saveWavetable();
-
-		static juce::PopupMenu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
 
 		Editor& m_editor;
 
