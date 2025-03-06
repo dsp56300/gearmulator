@@ -87,6 +87,10 @@ namespace xtJucePlugin
 	void Graph::mouseDown(const juce::MouseEvent& _e)
 	{
 		Component::mouseDown(_e);
+
+		if (_e.mods.isPopupMenu())
+			return;
+
 		setLastMouseEvent(_e);
 		const auto i = mouseToIndex(_e);
 		if(isValidIndex(i))
@@ -96,6 +100,10 @@ namespace xtJucePlugin
 	void Graph::mouseMove(const juce::MouseEvent& _e)
 	{
 		Component::mouseMove(_e);
+
+		if (_e.mods.isPopupMenu())
+			return;
+
 		updateHoveredIndex(_e);
 	}
 
@@ -114,6 +122,9 @@ namespace xtJucePlugin
 	void Graph::mouseDrag(const juce::MouseEvent& _e)
 	{
 		Component::mouseDrag(_e);
+
+		if (_e.mods.isPopupMenu())
+			return;
 
 		if(!_e.mods.isShiftDown())
 		{
