@@ -1,6 +1,7 @@
 #pragma once
 
 #include "weData.h"
+#include "weGraph.h"
 #include "weGraphData.h"
 #include "xtWaveEditorStyle.h"
 
@@ -57,6 +58,8 @@ namespace xtJucePlugin
 
 		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files);
 
+		void openGraphPopupMenu(const Graph& _graph, const juce::MouseEvent& _event);
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }
@@ -71,10 +74,11 @@ namespace xtJucePlugin
 
 		void onWaveDataChanged(const xt::WaveData& _data) const;
 
-		void saveWave();
 		bool saveWaveTo(xt::WaveId _target);
 
 		void saveWavetable();
+
+		static juce::PopupMenu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
 
 		Editor& m_editor;
 

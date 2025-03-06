@@ -117,35 +117,6 @@ namespace xtJucePlugin
 	{
 	}
 
-	void WaveEditor::saveWave()
-	{
-		if(xt::wave::isReadOnly(m_selectedWave))
-		{
-			// open menu and let user select one of the wave slots
-			juce::PopupMenu menu;
-
-			uint16_t count = 0;
-			for(uint16_t i=xt::wave::g_firstRamWaveIndex; i<xt::wave::g_firstRamWaveIndex+xt::wave::g_ramWaveCount; ++i)
-			{
-				const auto id = xt::WaveId(i);
-				menu.addItem(WaveTreeItem::getWaveName(id), true, false, [this, id]
-				{
-					saveWaveTo(id);
-				});
-
-				++count;
-				if((count % 25) == 0)
-					menu.addColumnBreak();
-			}
-
-			menu.showMenuAsync({});
-		}
-		else
-		{
-			saveWaveTo(m_selectedWave);
-		}
-	}
-
 	bool WaveEditor::saveWaveTo(const xt::WaveId _target)
 	{
 		if(xt::wave::isReadOnly(_target))
@@ -164,6 +135,27 @@ namespace xtJucePlugin
 
 	void WaveEditor::saveWavetable()
 	{
+	}
+
+	juce::PopupMenu WaveEditor::createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback)
+	{
+		juce::PopupMenu subMenu;
+
+		uint16_t count = 0;
+		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; ++i)
+		{
+			const auto id = xt::WaveId(i);
+			subMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
+			{
+				_callback(id);
+			});
+
+			++count;
+			if ((count % 25) == 0)
+				subMenu.addColumnBreak();
+		}
+
+		return subMenu;
 	}
 
 	void WaveEditor::onReceiveWave(const pluginLib::MidiPacket::Data& _data, const std::vector<uint8_t>& _msg)
@@ -305,5 +297,28 @@ namespace xtJucePlugin
 				}
 			});
 		}
+	}
+
+	void WaveEditor::openGraphPopupMenu(const Graph&, const juce::MouseEvent&)
+	{
+		juce::PopupMenu menu;
+
+		if (!xt::wave::isReadOnly(m_selectedWave))
+		{
+			menu.addItem("Save (overwrite " + WaveTreeItem::getWaveName(m_selectedWave) + ')', true, false, [this]
+			{
+				saveWaveTo(m_selectedWave);
+			});
+		}
+
+		// open menu and let user select one of the wave slots
+		const auto subMenu = createRamWavesPopupMenu([this](const xt::WaveId _id)
+		{
+			saveWaveTo(_id);
+		});
+
+		menu.addSubMenu("Save as...", subMenu);
+
+		menu.showMenuAsync({});
 	}
 }

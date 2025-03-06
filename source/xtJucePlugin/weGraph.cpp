@@ -89,7 +89,10 @@ namespace xtJucePlugin
 		Component::mouseDown(_e);
 
 		if (_e.mods.isPopupMenu())
+		{
+			m_editor.openGraphPopupMenu(*this, _e);
 			return;
+		}
 
 		setLastMouseEvent(_e);
 		const auto i = mouseToIndex(_e);
