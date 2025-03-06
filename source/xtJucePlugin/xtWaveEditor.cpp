@@ -74,36 +74,6 @@ namespace xtJucePlugin
 		m_graphPhase->setColour(colourId, colour);
 		m_graphTime->setColour(colourId, colour);
 
-		m_btWavePreview = m_editor.findComponentT<juce::Button>("btWavePreview");
-		m_ledWavePreview = m_editor.findComponentT<juce::Button>("ledWavePreview");
-		m_btWaveSave = m_editor.findComponentT<genericUI::Button<juce::DrawableButton>>("btWaveSave");
-
-		m_btWavetablePreview = m_editor.findComponentT<juce::Button>("btWavetablePreview");
-		m_ledWavetablePreview = m_editor.findComponentT<juce::Button>("ledWavetablePreview");
-		m_btWavetableSave = m_editor.findComponentT<juce::Button>("btWavetableSave");
-
-		m_btWavePreview->onClick = [this]
-		{
-			toggleWavePreview(m_btWavePreview->getToggleState());
-		};
-
-		m_btWavetablePreview->onClick = [this]
-		{
-			toggleWavetablePreview(m_btWavePreview->getToggleState());
-		};
-
-		m_btWaveSave->allowRightClick(true);
-
-		m_btWaveSave->onClick = [this]
-		{
-			saveWave();
-		};
-
-		m_btWavetableSave->onClick = [this]
-		{
-			saveWavetable();
-		};
-
 		m_tablesTree->setSelectedEntryFromCurrentPreset();
 	}
 
@@ -135,32 +105,21 @@ namespace xtJucePlugin
 	{
 		if(_enabled)
 			toggleWavetablePreview(false);
-
-		m_btWavePreview->setToggleState(_enabled, juce::dontSendNotification);
-		m_ledWavePreview->setToggleState(_enabled, juce::dontSendNotification);
 	}
 
 	void WaveEditor::toggleWavetablePreview(const bool _enabled)
 	{
 		if(_enabled)
 			toggleWavePreview(false);
-
-		m_btWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
-		m_ledWavetablePreview->setToggleState(_enabled, juce::dontSendNotification);
 	}
 
 	void WaveEditor::onWaveDataChanged(const xt::WaveData& _data) const
 	{
-		if(m_btWavePreview->getToggleState())
-		{
-			const auto sysex = xt::State::createWaveData(_data, m_editor.getXtController().getCurrentPart(), true);
-			m_editor.getXtController().sendSysEx(sysex);
-		}
 	}
 
 	void WaveEditor::saveWave()
 	{
-		if(xt::wave::isReadOnly(m_selectedWave) || m_btWaveSave->isRightClick())
+		if(xt::wave::isReadOnly(m_selectedWave))
 		{
 			// open menu and let user select one of the wave slots
 			juce::PopupMenu menu;

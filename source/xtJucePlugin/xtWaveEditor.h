@@ -86,15 +86,6 @@ namespace xtJucePlugin
 		std::unique_ptr<GraphPhase> m_graphPhase;
 		std::unique_ptr<GraphTime> m_graphTime;
 
-		juce::Button* m_btWavePreview = nullptr;
-		juce::Button* m_ledWavePreview = nullptr;
-
-		juce::Button* m_btWavetablePreview = nullptr;
-		juce::Button* m_ledWavetablePreview = nullptr;
-
-		genericUI::Button<juce::DrawableButton>* m_btWaveSave = nullptr;
-		juce::Button* m_btWavetableSave = nullptr;
-
 		WaveEditorData m_data;
 		GraphData m_graphData;
 
