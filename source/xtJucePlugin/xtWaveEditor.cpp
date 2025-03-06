@@ -11,6 +11,8 @@
 
 #include "xtEditor.h"
 
+#include "dsp56kEmu/fastmath.h"
+
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceUiLib/messageBox.h"
@@ -298,6 +300,66 @@ namespace xtJucePlugin
 	void WaveEditor::openGraphPopupMenu(const Graph&, const juce::MouseEvent&)
 	{
 		juce::PopupMenu menu;
+		menu.addItem("Init Square", [this]
+		{
+			xt::WaveData data;
+			for (size_t  i = 0; i < data.size(); ++i)
+				data[i] = i < data.size() / 2 ? 127 : -128;
+			m_graphData.set(data);
+		});
+		menu.addItem("Init Triangle", [this]
+		{
+			xt::WaveData data;
+			for (size_t  i = 0; i < data.size(); ++i)
+				data[i] = static_cast<char>((i < data.size() / 2 ? i * 4 : 255 - i * 4) - 128);
+			m_graphData.set(data);
+		});
+		menu.addItem("Init Saw", [this]
+		{
+			xt::WaveData data;
+			for (size_t  i = 0; i < data.size(); ++i)
+				data[i] = static_cast<char>(((i+1) << 1) - 129);
+			m_graphData.set(data);
+		});
+		menu.addItem("Init Sine", [this]
+		{
+			xt::WaveData data;
+			for (size_t i = 0; i < data.size(); ++i)
+				data[i] = static_cast<char>(sin(3.1415926535f * 2.0f * static_cast<float>(i) / data.size()) * 127.0f);
+			m_graphData.set(data);
+		});
+
+		menu.addItem("Clear", [this]
+		{
+			xt::WaveData data;
+			data.fill(0);
+			m_graphData.set(data);
+		});
+
+		menu.addSeparator();
+
+		menu.addItem("Invert", [this]
+		{
+			xt::WaveData data = m_graphData.getSource();
+			for (size_t i = 0; i < data.size(); ++i)
+			{
+				int d = -data[i];
+				d = dsp56k::clamp(d, -128, 127);
+				data[i] = static_cast<char>(d);
+			}
+			m_graphData.set(data);
+		});
+
+		menu.addItem(juce::String::fromUTF8("Phase +180\xC2\xB0"), [this]
+		{
+			xt::WaveData data = m_graphData.getSource();
+
+			for (size_t i = 0; i < data.size()>>1; ++i)
+				std::swap(data[i] ,data[i+(data.size()>>1)]);
+			m_graphData.set(data);
+		});
+
+		menu.addSeparator();
 
 		if (!xt::wave::isReadOnly(m_selectedWave))
 		{
@@ -313,7 +375,7 @@ namespace xtJucePlugin
 			saveWaveTo(_id);
 		});
 
-		menu.addSubMenu("Save as...", subMenu);
+		menu.addSubMenu("Save to User Wave Slot...", subMenu);
 
 		menu.showMenuAsync({});
 	}
