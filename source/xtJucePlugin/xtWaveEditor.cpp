@@ -11,11 +11,15 @@
 
 #include "xtEditor.h"
 
+#include "baseLib/filesystem.h"
+
 #include "dsp56kEmu/fastmath.h"
 
 #include "jucePluginEditorLib/pluginProcessor.h"
 
 #include "juceUiLib/messageBox.h"
+
+#include "synthLib/wavWriter.h"
 
 #include "xtLib/xtState.h"
 
@@ -361,6 +365,11 @@ namespace xtJucePlugin
 
 		menu.addSeparator();
 
+		menu.addItem("Export as .wav", [this]
+		{
+			exportAsWav(m_graphData.getSource());
+		});
+
 		if (!xt::wave::isReadOnly(m_selectedWave))
 		{
 			menu.addItem("Save (overwrite " + WaveTreeItem::getWaveName(m_selectedWave) + ')', true, false, [this]
@@ -378,5 +387,60 @@ namespace xtJucePlugin
 		menu.addSubMenu("Save to User Wave Slot...", subMenu);
 
 		menu.showMenuAsync({});
+	}
+
+	void WaveEditor::exportAsWav(const xt::WaveData& _data)
+	{
+		const auto& config = m_editor.getProcessor().getConfig();
+
+		constexpr const char* configKey = "xt_wav_save_path";
+
+		const auto path = config.getValue(configKey, {});
+
+		m_fileChooser = std::make_unique<juce::FileChooser>("Save Wave as .wav", path, "*.wav", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		auto onFileChosen = [this, _data](const juce::FileChooser& _chooser)
+		{
+			if (_chooser.getResults().isEmpty())
+				return;
+
+			const auto result = _chooser.getResult();
+			getEditor().getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
+
+			if (!result.existsAsFile())
+			{
+				exportAsWav(result.getFullPathName().toStdString(), _data);
+			}
+			else
+			{
+				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?",
+					[this, _data, result](const genericUI::MessageBox::Result _result)
+					{
+						if (_result == genericUI::MessageBox::Result::Yes)
+						{
+							exportAsWav(result.getFullPathName().toStdString(), _data);
+						}
+					});
+			}
+		};
+		m_fileChooser->launchAsync(flags, onFileChosen);
+	}
+
+	void WaveEditor::exportAsWav(const std::string& _filename, const xt::WaveData& _data) const
+	{
+		synthLib::WavWriter w;
+
+		// 8 bit waves are unsigned
+		std::array<uint8_t, std::tuple_size_v<xt::WaveData>> data;
+		for (size_t i=0; i<_data.size(); ++i)
+			data[i] = static_cast<uint8_t>(_data[i] + 128);
+
+		if (!w.write(_filename, 8, false, 1, 32000, data.data(), sizeof(_data)))
+		{
+			const auto productName = getEditor().getProcessor().getProperties().name;
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
+		}
 	}
 }

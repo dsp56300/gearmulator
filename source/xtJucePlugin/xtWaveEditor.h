@@ -61,6 +61,9 @@ namespace xtJucePlugin
 
 		void openGraphPopupMenu(const Graph& _graph, const juce::MouseEvent& _event);
 
+		void exportAsWav(const xt::WaveData& _data);
+		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }
