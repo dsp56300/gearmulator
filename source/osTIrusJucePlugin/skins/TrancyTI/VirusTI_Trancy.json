@@ -553,7 +553,13 @@
 
                 { "name" : "button_env_filter", "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"606","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78", "hitOffsetB":-20, "hitOffsetR":120}},
                 { "name" : "button_env_3",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"661","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78", "hitOffsetB":-20, "hitOffsetR":120}},
-                { "name" : "button_env_4",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"716","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78", "hitOffsetB":-20, "hitOffsetR":120}},                              
+                { "name" : "button_env_4",      "button":{"isToggle":"1","radioGroupId":"77","normalImage":"0","overImage":"0","downImage":"1","normalImageOn":"1","overImageOn":"1","downImageOn":"1","x":"825","y":"716","width":"79","height":"78","texture":"button_1","tileSizeX":"79","tileSizeY":"78", "hitOffsetB":-20, "hitOffsetR":120},
+                        "tabgroup": {
+                                "name": "envelopeSelect",
+                                "buttons": ["button_env_filter", "button_env_3", "button_env_4"],
+                                "pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
+                        },
+                },
 
                 { "name" : "Attack",            "parameterAttachment" : { "parameter" : "Amp Env Attack" },             "rotary" : { }, "spritesheet" : { "x" : "50", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Decay",             "parameterAttachment" : { "parameter" : "Amp Env Decay" },              "rotary" : { }, "spritesheet" : { "x" : "208", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
@@ -561,11 +567,6 @@
                 { "name" : "Time",              "parameterAttachment" : { "parameter" : "Amp Env Sustain Time" },       "rotary" : { }, "spritesheet" : { "x" : "524", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } },
                 { "name" : "Release",           "parameterAttachment" : { "parameter" : "Amp Env Release" },            "rotary" : { }, "spritesheet" : { "x" : "682", "y" : "881", "width" : "98", "height" : "98", "texture" : "knob_mid", "tileSizeX" : "98", "tileSizeY" : "98" } }
             ],
-		"tabgroup": {
-			"name": "envelopeSelect",
-			"buttons": ["button_env_filter", "button_env_3", "button_env_4"],
-			"pages": ["4_filter_env_filter", "4_filter_env_3", "4_filter_env_4"]
-		},
 		"tabgroup": {
 			"name": "tgFilter1Mode",
 			"buttons": ["buttonFilter1Mode_CM", "buttonFilter1Mode_AM"],
