@@ -36,7 +36,7 @@ namespace xtJucePlugin
 	{
 		auto* waveDesc = new WaveDesc(m_editor);
 
-		waveDesc->tableId = m_index;
+		waveDesc->tableIds = {m_index};
 		waveDesc->source = WaveDescSource::TablesList;
 
 		waveDesc->fillData(m_editor.getData());
@@ -51,7 +51,9 @@ namespace xtJucePlugin
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)
 			return false;
-		return waveDesc->tableId != m_index;
+		if (waveDesc->tableIds.size() != -1)
+			return false;
+		return waveDesc->tableIds.front() != m_index;
 	}
 
 	void TablesTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
@@ -60,11 +62,11 @@ namespace xtJucePlugin
 
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 
-		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableId == m_index)
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableIds.size() != 1 || waveDesc->tableIds.front() == m_index)
 			return;
 
 		auto& data = m_editor.getData();
-		if(data.copyTable(m_index, waveDesc->tableId))
+		if(data.copyTable(m_index, waveDesc->tableIds.front()))
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			m_editor.setSelectedTable(m_index);

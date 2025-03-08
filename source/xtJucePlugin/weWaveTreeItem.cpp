@@ -72,7 +72,7 @@ namespace xtJucePlugin
 	{
 		auto* desc = new WaveDesc(m_editor);
 
-		desc->waveId = m_waveIndex;
+		desc->waveIds = {m_waveIndex};
 		desc->source = WaveDescSource::WaveList;
 
 		desc->fillData(m_editor.getData());
@@ -87,7 +87,7 @@ namespace xtJucePlugin
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc)
 			return false;
-		if(!waveDesc->waveId.isValid())
+		if(waveDesc->waveIds.size() != 1)
 			return false;
 		return true;
 	}
@@ -102,7 +102,7 @@ namespace xtJucePlugin
 			return;
 		auto& data = m_editor.getData();
 
-		if(data.copyWave(m_waveIndex, waveDesc->waveId))
+		if(data.copyWave(m_waveIndex, waveDesc->waveIds.front()))
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			data.sendWaveToDevice(m_waveIndex);

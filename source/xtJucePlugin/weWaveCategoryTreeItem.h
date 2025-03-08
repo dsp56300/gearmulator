@@ -26,6 +26,8 @@ namespace xtJucePlugin
 
 		void exportAll(bool _midi) const;
 
+		std::vector<xt::WaveId> getWaveIds() const;
+
 		WaveEditor& m_editor;
 		const WaveCategory m_category;
 	};

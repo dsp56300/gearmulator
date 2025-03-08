@@ -1,5 +1,6 @@
 #include "weWaveCategoryTreeItem.h"
 
+#include "weWaveDesc.h"
 #include "weWaveTreeItem.h"
 #include "xtWaveEditor.h"
 
@@ -59,7 +60,14 @@ namespace xtJucePlugin
 
 	juce::var WaveCategoryTreeItem::getDragSourceDescription()
 	{
-		return TreeItem::getDragSourceDescription();
+		auto* desc = new WaveDesc(m_editor);
+
+		desc->waveIds = getWaveIds();
+		desc->source = WaveDescSource::WaveList;
+
+		desc->fillData(m_editor.getData());
+
+		return desc;
 	}
 
 	void WaveCategoryTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
@@ -99,16 +107,20 @@ namespace xtJucePlugin
 
 	void WaveCategoryTreeItem::exportAll(const bool _midi) const
 	{
-		std::vector<xt::WaveId> waveIds;
-
-		waveIds.reserve(getNumSubItems());
-
-		for (int i = 0; i < getNumSubItems(); ++i)
-		{
-			if (auto* subItem = dynamic_cast<WaveTreeItem*>(getSubItem(i)))
-				waveIds.push_back(subItem->getWaveId());
-		}
+		auto waveIds = getWaveIds();
 
 		m_editor.exportAsSyxOrMid(waveIds, _midi);
+	}
+
+	std::vector<xt::WaveId> WaveCategoryTreeItem::getWaveIds() const
+	{
+		std::vector<xt::WaveId> waveIds;
+		waveIds.reserve(getNumSubItems());
+		for (int i = 0; i < getNumSubItems(); ++i)
+		{
+			if (const auto* subItem = dynamic_cast<WaveTreeItem*>(getSubItem(i)))
+				waveIds.push_back(subItem->getWaveId());
+		}
+		return waveIds;
 	}
 }
