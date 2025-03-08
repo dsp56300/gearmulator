@@ -111,9 +111,9 @@ namespace xtJucePlugin
 			getPatchManager()->selectNextPreset(m_controller.getCurrentPart());
 		};
 
-#if defined(_DEBUG) && defined(_WIN32)
-		assert(m_waveEditor);
-		m_waveEditor->initialize();
+#if 1
+		if(m_waveEditor)
+			m_waveEditor->initialize();
 #else
 		auto* waveEditorButtonParent = findComponent("waveEditorButtonParent");
 		waveEditorButtonParent->setVisible(false);
