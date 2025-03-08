@@ -346,11 +346,11 @@ namespace xtJucePlugin
 		menu.addItem("Invert", [this]
 		{
 			xt::WaveData data = m_graphData.getSource();
-			for (size_t i = 0; i < data.size(); ++i)
+			for (auto& i : data)
 			{
-				int d = -data[i];
+				int d = -i;
 				d = dsp56k::clamp(d, -128, 127);
-				data[i] = static_cast<char>(d);
+				i = static_cast<char>(d);
 			}
 			m_graphData.set(data);
 		});
