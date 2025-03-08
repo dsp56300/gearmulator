@@ -205,18 +205,28 @@ namespace xtJucePlugin
 	{
 		juce::PopupMenu subMenu;
 
-		uint16_t count = 0;
-		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; ++i)
+		constexpr auto totalCount = (xt::wave::g_ramWaveCount - xt::wave::g_firstRamWaveIndex);
+
+		constexpr auto divide = 25;
+		static_assert(totalCount / divide * divide == totalCount);
+
+		for (uint16_t i = xt::wave::g_firstRamWaveIndex; i < xt::wave::g_firstRamWaveIndex + xt::wave::g_ramWaveCount; i += divide)
 		{
-			const auto id = xt::WaveId(i);
-			subMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
+			juce::PopupMenu subSubMenu;
+
+			const auto idMin = xt::WaveId(i);
+			const auto idMax = xt::WaveId(i+divide-1);
+
+			for (uint16_t j=i; j<i+divide; ++j)
+			{
+				const auto id = xt::WaveId(j);
+				subSubMenu.addItem(WaveTreeItem::getWaveName(id), true, false, [id, _callback]
 				{
 					_callback(id);
 				});
+			}
 
-				++count;
-				if ((count % 25) == 0)
-					subMenu.addColumnBreak();
+			subMenu.addSubMenu(WaveTreeItem::getWaveName(idMin) + " - " + WaveTreeItem::getWaveName(idMax), subSubMenu);
 		}
 
 		return subMenu;
