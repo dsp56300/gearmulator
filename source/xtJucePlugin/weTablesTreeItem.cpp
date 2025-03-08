@@ -36,7 +36,7 @@ namespace xtJucePlugin
 	{
 		auto* waveDesc = new WaveDesc(m_editor);
 
-		waveDesc->tableId = m_index;
+		waveDesc->tableIds = {m_index};
 		waveDesc->source = WaveDescSource::TablesList;
 
 		waveDesc->fillData(m_editor.getData());
@@ -51,7 +51,9 @@ namespace xtJucePlugin
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)
 			return false;
-		return waveDesc->tableId != m_index;
+		if (waveDesc->tableIds.size() != -1)
+			return false;
+		return waveDesc->tableIds.front() != m_index;
 	}
 
 	void TablesTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
@@ -60,11 +62,11 @@ namespace xtJucePlugin
 
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 
-		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableId == m_index)
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableIds.size() != 1 || waveDesc->tableIds.front() == m_index)
 			return;
 
 		auto& data = m_editor.getData();
-		if(data.copyTable(m_index, waveDesc->tableId))
+		if(data.copyTable(m_index, waveDesc->tableIds.front()))
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			m_editor.setSelectedTable(m_index);
@@ -77,7 +79,7 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(getTableId()))
 			return false;
 
-		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[1].endsWithIgnoreCase(".syx"))
+		if(files.size() == 1 && (files[0].endsWithIgnoreCase(".mid") || files[0].endsWithIgnoreCase(".syx")))
 			return true;
 
 		return TreeItem::isInterestedInFileDrag(files);
@@ -90,30 +92,19 @@ namespace xtJucePlugin
 
 		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
 
-		const auto sysex = WaveTreeItem::getSysexFromFiles(files);
+		std::map<xt::WaveId, xt::WaveData> waves;
+		std::map<xt::TableId, xt::TableData> tables;
+		m_editor.filesDropped(waves, tables, files);
 
-		if(sysex.empty())
+		if (tables.empty())
 		{
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "No Sysex data found in file");
+			if (waves.size() == 1)
+				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "This file doesn't contain a Control Table but a Wave. Please drop on a User Wave slot.");
 			return;
 		}
 
-		std::vector<xt::TableData> tables;
-
-		for (const auto& s : sysex)
-		{
-			xt::TableData table;
-			if (xt::State::parseTableData(table, s))
-				tables.push_back(table);
-		}
-
-		if(tables.size() == 1)
-		{
-			m_editor.getData().setTable(m_index, tables.front());
-			return;
-		}
-
-		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, tables.empty() ? "No Control Table found in files" : "Multiple control tables found in file");
+		m_editor.getData().setTable(m_index, tables.begin()->second);
+		m_editor.getData().sendTableToDevice(m_index);
 	}
 
 	void TablesTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)

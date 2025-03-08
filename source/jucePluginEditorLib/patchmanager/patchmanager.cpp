@@ -1049,9 +1049,14 @@ namespace jucePluginEditorLib::patchManager
 		if(data.sysex.empty())
 			return {};
 
+		pluginLib::patchDB::DataList results;
+
+		if (!parseFileData(results, data.sysex))
+			return {};
+
 		std::vector<pluginLib::patchDB::PatchPtr> patches;
 
-		for (auto& result : data.sysex)
+		for (auto& result : results)
 		{
 			if(const auto patch = initializePatch(std::move(result), {}))
 				patches.push_back(patch);

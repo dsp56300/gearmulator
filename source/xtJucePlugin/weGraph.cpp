@@ -1,6 +1,7 @@
 #include "weGraph.h"
 
 #include "xtWaveEditor.h"
+
 #include "dsp56kEmu/fastmath.h"
 
 namespace xtJucePlugin
@@ -87,6 +88,13 @@ namespace xtJucePlugin
 	void Graph::mouseDown(const juce::MouseEvent& _e)
 	{
 		Component::mouseDown(_e);
+
+		if (_e.mods.isPopupMenu())
+		{
+			m_editor.openGraphPopupMenu(*this, _e);
+			return;
+		}
+
 		setLastMouseEvent(_e);
 		const auto i = mouseToIndex(_e);
 		if(isValidIndex(i))
@@ -96,6 +104,10 @@ namespace xtJucePlugin
 	void Graph::mouseMove(const juce::MouseEvent& _e)
 	{
 		Component::mouseMove(_e);
+
+		if (_e.mods.isPopupMenu())
+			return;
+
 		updateHoveredIndex(_e);
 	}
 
@@ -114,6 +126,9 @@ namespace xtJucePlugin
 	void Graph::mouseDrag(const juce::MouseEvent& _e)
 	{
 		Component::mouseDrag(_e);
+
+		if (_e.mods.isPopupMenu())
+			return;
 
 		if(!_e.mods.isShiftDown())
 		{
@@ -156,6 +171,30 @@ namespace xtJucePlugin
 	const juce::MouseEvent* Graph::lastMouseEvent() const
 	{
 		return m_lastMouseEvent.get();
+	}
+
+	bool Graph::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	{
+		return false;
+	}
+
+	void Graph::itemDropped(const SourceDetails& _dragSourceDetails)
+	{
+	}
+
+	bool Graph::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		if (_files.size() != 1)
+			return false;
+		return _files[0].endsWithIgnoreCase(".wav");
+	}
+
+	void Graph::filesDropped(const juce::StringArray& _files, int _x, int _y)
+	{
+		if (_files.size() != 1)
+			return;
+		if (auto res = m_editor.importWaveFile(_files[0].toStdString()))
+			m_editor.getGraphData().set(*res);
 	}
 
 	void Graph::onSourceChanged()

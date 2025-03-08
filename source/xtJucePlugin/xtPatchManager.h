@@ -1,5 +1,7 @@
 #pragma once
 
+#include "xtLib/xtId.h"
+
 #include "jucePluginEditorLib/patchmanager/patchmanager.h"
 
 namespace xtJucePlugin
@@ -24,8 +26,14 @@ namespace xtJucePlugin
 
 	private:
 		pluginLib::patchDB::Data createCombinedDump(const pluginLib::patchDB::Data& _data) const;
+		void createCombinedDumps(std::vector<pluginLib::patchDB::Data>& _messages);
+		void getWaveDataForSingle(std::vector<pluginLib::patchDB::Data>& _results, const pluginLib::patchDB::Data& _single) const;
 
 		Editor& m_editor;
 		Controller& m_controller;
+
+		std::vector<pluginLib::patchDB::Data> m_singles;
+		std::map<xt::WaveId, pluginLib::patchDB::Data> m_waves;
+		std::map<xt::TableId, pluginLib::patchDB::Data> m_tables;
 	};
 }

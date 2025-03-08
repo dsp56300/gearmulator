@@ -400,7 +400,7 @@ namespace xt
 
 	bool State::parseWaveDump(const SysEx& _data)
 	{
-		const auto idx = (static_cast<uint32_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint32_t>(_data[IdxWaveIndexL]);
+		const auto idx = getWaveId(_data).rawId();
 
 		if(idx >= m_waves.size())
 			return false;
@@ -413,7 +413,7 @@ namespace xt
 
 	bool State::parseTableDump(const SysEx& _data)
 	{
-		const auto idx = (static_cast<uint32_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint32_t>(_data[IdxWaveIndexL]);
+		const auto idx = getTableId(_data).rawId();
 
 		if(idx >= m_tables.size())
 			return false;
@@ -637,9 +637,9 @@ namespace xt
 
 	bool State::getWave(Responses& _responses, const SysEx& _data)
 	{
-		const auto idx = static_cast<uint16_t>((static_cast<uint16_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint16_t>(_data[IdxWaveIndexL]));
+		const auto idx = getWaveId(_data);
 
-		auto* w = getWave(WaveId(idx));
+		auto* w = getWave(idx);
 		if(!w || !isValid(*w))
 			return false;
 		_responses.emplace_back(w->begin(), w->end());
@@ -656,9 +656,9 @@ namespace xt
 
 	bool State::getTable(Responses& _responses, const SysEx& _data)
 	{
-		const auto idx = static_cast<uint16_t>((static_cast<uint16_t>(_data[IdxWaveIndexH]) << 7u) | static_cast<uint16_t>(_data[IdxWaveIndexL]));
+		const auto idx = getTableId(_data);
 
-		auto* t = getTable(TableId(idx));
+		auto* t = getTable(idx);
 		if(!t || !isValid(*t))
 			return false;
 		_responses.emplace_back(t->begin(), t->end());
@@ -760,6 +760,16 @@ namespace xt
 		return static_cast<SysexCommand>(_data[wLib::IdxCommand]);
 	}
 
+	TableId State::getTableId(const SysEx& _data)
+	{
+		return TableId(static_cast<uint16_t>((_data[IdxWaveIndexH] << 7) | _data[IdxWaveIndexL]));
+	}
+
+	WaveId State::getWaveId(const SysEx& _data)
+	{
+		return WaveId(static_cast<uint16_t>((_data[IdxWaveIndexH] << 7) | _data[IdxWaveIndexL]));
+	}
+
 	void State::forwardToDevice(const SysEx& _data)
 	{
 		if(m_sender != Origin::External)
@@ -774,7 +784,7 @@ namespace xt
 				// A wave that is edited that is part of a table that is used in one of the current singles is not updated
 				// The workaround is to send a table dump with different waves and then the one with the correct waves
 				{
-					const auto waveId = WaveId(static_cast<uint16_t>((_data[IdxWaveIndexH] << 7) | _data[IdxWaveIndexL]));
+					const auto waveId = getWaveId(_data);
 
 					std::set<TableId> dirtyTables;
 
@@ -870,16 +880,13 @@ namespace xt
 		sendSysex({0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiRequest), static_cast<uint8_t>(_buf), _location, 0xf7});
 	}
 
-	inline void State::sendMulti(const std::vector<uint8_t>& _multiData) const
+	void State::sendMulti(const std::vector<uint8_t>& _multiData) const
 	{
 		std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, IdMw2, wLib::IdDeviceOmni, static_cast<uint8_t>(SysexCommand::MultiDump), static_cast<uint8_t>(LocationH::MultiBankA), 0};
 		data.insert(data.end(), _multiData.begin(), _multiData.end());
-
-		uint8_t checksum = 0;
-		for(size_t i=4; i<data.size(); ++i)
-			checksum += data[i];
-		data.push_back(checksum & 0x7f);
+		data.push_back(0x00);
 		data.push_back(0xf7);
+		updateChecksum(data, IdxMultiChecksumStart);
 		sendSysex(std::move(data));
 	}
 

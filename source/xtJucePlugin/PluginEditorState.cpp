@@ -5,6 +5,8 @@
 
 #include "skins.h"
 
+#include "weGraph.h"
+
 namespace xtJucePlugin
 {
 	PluginEditorState::PluginEditorState(AudioPluginAudioProcessor& _processor) : jucePluginEditorLib::PluginEditorState(_processor, _processor.getController(), g_includedSkins)
@@ -58,6 +60,13 @@ namespace xtJucePlugin
 		_menu.addSubMenu("DSP Clock", clockMenu);
 
 		return true;
+	}
+
+	void PluginEditorState::openMenu(const juce::MouseEvent* _event)
+	{
+		if (dynamic_cast<Graph*>(_event->eventComponent))
+			return;
+		jucePluginEditorLib::PluginEditorState::openMenu(_event);
 	}
 
 

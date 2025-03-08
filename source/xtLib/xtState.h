@@ -110,6 +110,9 @@ namespace xt
 
 		static SysexCommand getCommand(const SysEx& _data);
 
+		static TableId getTableId(const SysEx& _data);
+		static WaveId getWaveId(const SysEx& _data);
+
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{
 			if(!isValid(_src))
@@ -121,13 +124,13 @@ namespace xt
 			return true;
 		}
 
-		static bool updateChecksum(SysEx& _src, uint32_t _startIndex)
+		static bool updateChecksum(SysEx& _src, const uint32_t _startIndex)
 		{
 			if(_src.size() < 3)
 				return false;
 			uint8_t& c = _src[_src.size() - 2];
 			c = 0;
-			for(size_t i= wLib::IdxCommand; i<_src.size()-2; ++i)
+			for(size_t i = _startIndex; i<_src.size()-2; ++i)
 				c += _src[i];
 			c &= 0x7f;
 			return true;

@@ -115,10 +115,10 @@ namespace xtJucePlugin
 	{
 		auto applyModifications = [&_patch](pluginLib::patchDB::Data& _result) -> bool
 		{
-			if (xt::State::getCommand(_patch->sysex) != xt::SysexCommand::SingleDump)
+			if (xt::State::getCommand(_result) != xt::SysexCommand::SingleDump)
 				return false;
 
-			const auto dumpSize = _patch->sysex.size();
+			const auto dumpSize = _result.size();
 
 			if (dumpSize != std::tuple_size_v<xt::State::Single>)
 				return false;
@@ -141,7 +141,7 @@ namespace xtJucePlugin
 			_result[xt::SysexIndex::IdxSingleBank   ] = static_cast<uint8_t>(bank);
 			_result[xt::SysexIndex::IdxSingleProgram] = static_cast<uint8_t>(program);
 
-			xt::State::updateChecksum(_result, wLib::IdxCommand);
+			xt::State::updateChecksum(_result, xt::SysexIndex::IdxSingleChecksumStart);
 
 			return true;
 		};
@@ -158,7 +158,21 @@ namespace xtJucePlugin
 			if (xt::State::splitCombinedPatch(dumps, _patch->sysex))
 			{
 				if (applyModifications(dumps[0]))
+				{
+					if (_exportType == pluginLib::ExportType::File)
+					{
+						// hardware compatibility: multiple sysex
+						xt::SysEx r;
+
+						for (auto& dump : dumps)
+							r.insert(r.end(), dump.begin(), dump.end());
+
+						return r;
+					}
+
+					// emu compatibility: custom patch format, one sysex that includes everything
 					return xt::State::createCombinedPatch(dumps);
+				}
 			}
 		}
 
@@ -260,6 +274,8 @@ namespace xtJucePlugin
 			}
 		}
 
+		createCombinedDumps(_results);
+
 		return true;
 	}
 
@@ -279,5 +295,105 @@ namespace xtJucePlugin
 			}
 		}
 		return _data;
+	}
+
+	void PatchManager::createCombinedDumps(std::vector<pluginLib::patchDB::Data>& _messages)
+	{
+		// grab single dumps, waves and control tables and combine them into our custom single format that includes waves & tables if applicable
+
+		m_waves.clear();
+		m_tables.clear();
+		m_singles.clear();
+
+		// grab waves & tables first, if there are none we can skip everything
+		for (auto& msg : _messages)
+		{
+			auto cmd = xt::State::getCommand(msg);
+			switch (cmd)
+			{
+			case xt::SysexCommand::WaveDump:
+				{
+					const auto id = xt::State::getWaveId(msg);
+					if (m_waves.find(id) == m_waves.end())
+					{
+						m_waves.emplace(id, std::move(msg));
+						msg.clear();
+					}
+				}
+				break;
+			case xt::SysexCommand::WaveCtlDump:
+				{
+					const auto id = xt::State::getTableId(msg);
+					if (m_tables.find(id) == m_tables.end())
+					{
+						m_tables.emplace(id, std::move(msg));
+						msg.clear();
+					}
+				}
+				break;
+			default:;
+			}
+		}
+
+		if (m_tables.empty())
+			return;
+
+		for (auto& msg : _messages)
+		{
+			auto cmd = xt::State::getCommand(msg);
+
+			if (cmd != xt::SysexCommand::SingleDump)
+				continue;
+
+			auto table = xt::State::getWavetableFromSingleDump(msg);
+
+			if (xt::wave::isReadOnly(table))
+				continue;
+
+			std::vector<xt::SysEx> results;
+			getWaveDataForSingle(results, msg);
+			if (results.empty())
+				continue;
+
+			results.insert(results.begin(), msg);
+			auto newSingle = xt::State::createCombinedPatch(results);
+			msg.assign(newSingle.begin(), newSingle.end());
+		}
+	}
+
+	void PatchManager::getWaveDataForSingle(std::vector<xt::SysEx>& _results, const xt::SysEx& _single) const
+	{
+		const auto tableId = xt::State::getWavetableFromSingleDump(_single);
+
+		if(xt::wave::isReadOnly(tableId))
+			return;
+
+		auto itTable = m_tables.find(tableId);
+		if (itTable == m_tables.end())
+			return;
+
+		xt::TableData table;
+
+		if (!xt::State::parseTableData(table, itTable->second))
+			return;
+
+		for (const auto waveId : table)
+		{
+			if(!xt::wave::isValidWaveIndex(waveId.rawId()))
+				continue;
+
+			if(xt::wave::isReadOnly(waveId))
+				continue;
+
+			const auto itWave = m_waves.find(waveId);
+			if (itWave == m_waves.end())
+				continue;
+
+			const auto wave = itWave->second;
+
+			_results.emplace_back(wave);
+		}
+
+		_results.emplace_back(itTable->second);
 	}
 }

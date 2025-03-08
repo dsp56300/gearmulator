@@ -1,6 +1,7 @@
 #pragma once
 
 #include "weData.h"
+#include "weGraph.h"
 #include "weGraphData.h"
 #include "xtWaveEditorStyle.h"
 
@@ -54,6 +55,22 @@ namespace xtJucePlugin
 		xt::TableId getSelectedTable() const { return m_selectedTable; }
 
 		juce::PopupMenu createCopyToSelectedTableMenu(xt::WaveId _id);
+		static juce::PopupMenu createRamWavesPopupMenu(const std::function<void(xt::WaveId)>& _callback);
+
+		void filesDropped(std::map<xt::WaveId, xt::WaveData>& _waves, std::map<xt::TableId, xt::TableData>& _tables, const juce::StringArray& _files);
+
+		void openGraphPopupMenu(const Graph& _graph, const juce::MouseEvent& _event);
+
+		void exportAsSyx(const xt::WaveId& _id, const xt::WaveData& _data);
+		void exportAsMid(const xt::WaveId& _id, const xt::WaveData& _data);
+		void exportAsSyxOrMid(const std::string& _filename, const xt::WaveId& _id, const xt::WaveData& _data, bool _midi) const;
+		void exportAsSyxOrMid(const std::vector<xt::WaveId>& _ids, bool _midi);
+		void exportAsWav(const xt::WaveData& _data);
+		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
+
+		void selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>&);
+
+		std::optional<xt::WaveData> importWaveFile(const std::string& _filename) const;
 
 	private:
 		// ComponentMovementWatcher
@@ -69,10 +86,7 @@ namespace xtJucePlugin
 
 		void onWaveDataChanged(const xt::WaveData& _data) const;
 
-		void saveWave();
 		bool saveWaveTo(xt::WaveId _target);
-
-		void saveWavetable();
 
 		Editor& m_editor;
 
@@ -84,15 +98,6 @@ namespace xtJucePlugin
 		std::unique_ptr<GraphPhase> m_graphPhase;
 		std::unique_ptr<GraphTime> m_graphTime;
 
-		juce::Button* m_btWavePreview = nullptr;
-		juce::Button* m_ledWavePreview = nullptr;
-
-		juce::Button* m_btWavetablePreview = nullptr;
-		juce::Button* m_ledWavetablePreview = nullptr;
-
-		genericUI::Button<juce::DrawableButton>* m_btWaveSave = nullptr;
-		juce::Button* m_btWavetableSave = nullptr;
-
 		WaveEditorData m_data;
 		GraphData m_graphData;
 
@@ -102,5 +107,7 @@ namespace xtJucePlugin
 		xt::WaveId m_selectedWave;
 
 		WaveEditorStyle m_style;
+
+		std::unique_ptr<juce::FileChooser> m_fileChooser;
 	};
 }
