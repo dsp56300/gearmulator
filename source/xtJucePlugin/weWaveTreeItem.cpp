@@ -114,7 +114,12 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return false;
 
-		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[0].endsWithIgnoreCase(".syx"))
+		if (files.size() != 1)
+			return false;
+
+		const auto& f = files[0];
+
+		if(f.endsWithIgnoreCase(".mid") || f.endsWithIgnoreCase(".syx") || f.endsWithIgnoreCase(".wav"))
 			return true;
 
 		return TreeItem::isInterestedInFileDrag(files);
@@ -124,6 +129,19 @@ namespace xtJucePlugin
 	{
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return;
+
+		if (files.isEmpty())
+			return;
+
+		if (files[0].endsWithIgnoreCase(".wav"))
+		{
+			if (auto wave = m_editor.importWaveFile(files[0].toStdString()))
+			{
+				m_editor.getData().setWave(m_waveIndex, *wave);
+				m_editor.getData().sendWaveToDevice(m_waveIndex);
+			}
+			return;
+		}
 
 		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
 
@@ -135,6 +153,7 @@ namespace xtJucePlugin
 		{
 			if (tables.size() == 1)
 				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "This file doesn't contain a Wave but a Control Table, please drop on a User Table slot.");
+
 			return;
 		}
 

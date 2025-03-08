@@ -1,6 +1,7 @@
 #include "weGraph.h"
 
 #include "xtWaveEditor.h"
+
 #include "dsp56kEmu/fastmath.h"
 
 namespace xtJucePlugin
@@ -170,6 +171,30 @@ namespace xtJucePlugin
 	const juce::MouseEvent* Graph::lastMouseEvent() const
 	{
 		return m_lastMouseEvent.get();
+	}
+
+	bool Graph::isInterestedInDragSource(const SourceDetails& _dragSourceDetails)
+	{
+		return false;
+	}
+
+	void Graph::itemDropped(const SourceDetails& _dragSourceDetails)
+	{
+	}
+
+	bool Graph::isInterestedInFileDrag(const juce::StringArray& _files)
+	{
+		if (_files.size() != 1)
+			return false;
+		return _files[0].endsWithIgnoreCase(".wav");
+	}
+
+	void Graph::filesDropped(const juce::StringArray& _files, int _x, int _y)
+	{
+		if (_files.size() != 1)
+			return;
+		if (auto res = m_editor.importWaveFile(_files[0].toStdString()))
+			m_editor.getGraphData().set(*res);
 	}
 
 	void Graph::onSourceChanged()

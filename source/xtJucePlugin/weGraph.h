@@ -10,7 +10,7 @@ namespace xtJucePlugin
 	class GraphData;
 	class WaveEditor;
 
-	class Graph : public juce::Component
+	class Graph : public juce::Component, public juce::DragAndDropTarget, public juce::FileDragAndDropTarget
 	{
 	public:
 		static constexpr uint32_t InvalidIndex = ~0;
@@ -56,6 +56,12 @@ namespace xtJucePlugin
 		{
 			m_updateHoveredPositionWhileDragging = _enable;
 		}
+
+		bool isInterestedInDragSource(const SourceDetails& _dragSourceDetails) override;
+		void itemDropped(const SourceDetails& _dragSourceDetails) override;
+
+		bool isInterestedInFileDrag(const juce::StringArray& _files) override;
+		void filesDropped(const juce::StringArray& _files, int _x, int _y) override;
 
 	protected:
 		virtual void onSourceChanged();

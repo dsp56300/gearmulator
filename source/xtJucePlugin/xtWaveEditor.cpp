@@ -19,6 +19,7 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "synthLib/wavReader.h"
 #include "synthLib/wavWriter.h"
 
 #include "xtLib/xtState.h"
@@ -442,5 +443,82 @@ namespace xtJucePlugin
 			const auto productName = getEditor().getProcessor().getProperties().name;
 			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 		}
+	}
+
+	std::optional<xt::WaveData> WaveEditor::importWaveFile(const std::string& _filename) const
+	{
+		const auto productName = getEditor().getProcessor().getProperties().name;
+
+		std::vector<uint8_t> fileData;
+
+		if (!baseLib::filesystem::readFile(fileData, _filename))
+		{
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to open file\n" + _filename + ".\n\nMake sure that the file exists and " + productName + " has read permissions.");
+			return {};
+		}
+
+		constexpr const char* formatDesc = "\n\nMake sure it is an 8 bit mono PCM file with a size of 64 (half-cycle wave) or 128 (full-cycle wave)";
+
+		synthLib::Data wavData;
+		if (!synthLib::WavReader::load(wavData, nullptr, fileData.data(), fileData.size()))
+		{
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to parse data from file\n" + _filename + "." + formatDesc);
+			return {};
+		}
+
+		std::vector<int8_t> data;
+
+		if (wavData.isFloat || wavData.bitsPerSample != 8 || wavData.channels != 1)
+		{
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported wav format in file\n" + _filename + "." + formatDesc);
+			return {};
+		}
+
+		data.resize(wavData.dataByteSize);
+		for (size_t i=0; i<wavData.dataByteSize; ++i)
+		{
+			data[i] = static_cast<int8_t>(static_cast<const uint8_t*>(wavData.data)[i] - 128);
+		}
+
+		if (data.size() == 64)
+		{
+			xt::WaveData d;
+			for (size_t i = 0; i < 64; ++i)
+			{
+				d[i] = data[i];
+				d[127 - i] = static_cast<int8_t>(dsp56k::clamp(-data[i], -128, 127));
+			}
+			return d;
+		}
+
+		if (data.size() == 128)
+		{
+			xt::WaveData d;
+			for (size_t i = 0; i < 128; ++i)
+				d[i] = data[i];
+
+			bool valid = true;
+
+			for (size_t i=0; i<64; ++i)
+			{
+				if (d[i] != -d[127 - i])
+				{
+					valid = false;
+					break;
+				}
+			}
+
+			if (valid)
+				return d;
+
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported file\n" + _filename + ".\n\n" +
+				"An imported file with a size of 128 samples needs to be a full-cycle wave, i.e. the second half of the file needs to be the first half reversed and inverted.\n" + 
+				"Correct the file or import a file of length 64 only (half-cycle wave). In the latter case, building a full cycle wave is done during import."
+				+ formatDesc);
+			return {};
+		}
+
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Unsupported size of file\n" + _filename + "." + formatDesc);
+		return {};
 	}
 }

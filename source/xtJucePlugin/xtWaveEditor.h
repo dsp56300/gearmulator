@@ -64,6 +64,8 @@ namespace xtJucePlugin
 		void exportAsWav(const xt::WaveData& _data);
 		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
 
+		std::optional<xt::WaveData> importWaveFile(const std::string& _filename) const;
+
 	private:
 		// ComponentMovementWatcher
 		void componentVisibilityChanged() override { checkFirstTimeVisible(); }
@@ -99,5 +101,7 @@ namespace xtJucePlugin
 		xt::WaveId m_selectedWave;
 
 		WaveEditorStyle m_style;
+
+		std::unique_ptr<juce::FileChooser> m_fileChooser;
 	};
 }
