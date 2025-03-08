@@ -142,7 +142,7 @@ namespace xt
 
 		if(addr >= g_romAddr && addr < g_romAddr + Rom::Size)
 		{
-			MCLOG("write16 TO ROM addr=" << MCHEXN(addr, 8) << ", value=" << MCHEXN(val,4) << ", pc=" << MCHEXN(getPC(), 8));
+//			MCLOG("write16 TO ROM addr=" << MCHEXN(addr, 8) << ", value=" << MCHEXN(val,4) << ", pc=" << MCHEXN(getPC(), 8));
 			m_flash.write(addr - g_romAddr, val);
 			return;
 		}
