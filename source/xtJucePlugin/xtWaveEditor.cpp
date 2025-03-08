@@ -19,6 +19,7 @@
 
 #include "juceUiLib/messageBox.h"
 
+#include "synthLib/sysexToMidi.h"
 #include "synthLib/wavReader.h"
 #include "synthLib/wavWriter.h"
 
@@ -390,43 +391,88 @@ namespace xtJucePlugin
 		menu.showMenuAsync({});
 	}
 
-	void WaveEditor::exportAsWav(const xt::WaveData& _data)
+	void WaveEditor::exportAsSyx(const xt::WaveId& _id, const xt::WaveData& _data)
 	{
-		const auto& config = m_editor.getProcessor().getConfig();
-
-		constexpr const char* configKey = "xt_wav_save_path";
-
-		const auto path = config.getValue(configKey, {});
-
-		m_fileChooser = std::make_unique<juce::FileChooser>("Save Wave as .wav", path, "*.wav", true);
-
-		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
-
-		auto onFileChosen = [this, _data](const juce::FileChooser& _chooser)
+		selectExportFileName("Save Wave as .syx", ".syx", [this, _id, _data](const std::string& _filename)
 		{
-			if (_chooser.getResults().isEmpty())
-				return;
+			exportAsSyxOrMid(_filename, _id, _data, false);
+		});
+	}
 
-			const auto result = _chooser.getResult();
-			getEditor().getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
+	void WaveEditor::exportAsMid(const xt::WaveId& _id, const xt::WaveData& _data)
+	{
+		selectExportFileName("Save Wave as .mid", ".mid", [this, _id, _data](const std::string& _filename)
+		{
+			exportAsSyxOrMid(_filename, _id, _data, true);
+		});
+	}
 
-			if (!result.existsAsFile())
+	void WaveEditor::exportAsSyxOrMid(const std::string& _filename, const xt::WaveId& _id, const xt::WaveData& _data, bool _midi) const
+	{
+		auto sysex = xt::State::createWaveData(_data, _id.rawId(), false);
+
+		bool success;
+		if (_midi)
+			success = synthLib::SysexToMidi::write(_filename.c_str(), {sysex});
+		else
+			success = baseLib::filesystem::writeFile(_filename, sysex);
+
+		if (!success)
+		{
+			const auto productName = getEditor().getProcessor().getProperties().name;
+			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
+		}
+	}
+
+	void WaveEditor::exportAsSyxOrMid(const std::vector<xt::WaveId>& _ids, bool _midi)
+	{
+		selectExportFileName(_midi ? "Save Waves as .mid" : "Save Waves as .syx", _midi ? ".mid" : ".syx", [this, _ids, _midi](const std::string& _filename)
+		{
+			std::vector<std::vector<uint8_t>> sysex;
+
+			sysex.reserve(_ids.size());
+
+			for (const auto& id : _ids)
 			{
-				exportAsWav(result.getFullPathName().toStdString(), _data);
+				auto wave = m_data.getWave(id);
+				if (!wave)
+				{
+					const auto productName = getEditor().getProcessor().getProperties().name;
+					genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to export wave " + WaveTreeItem::getWaveName(id) + ".\n\nThe wave is not available.");
+					continue;
+				}
+
+				sysex.push_back(xt::State::createWaveData(*wave, id.rawId(), false));
+			}
+
+			bool success;
+
+			if (_midi)
+			{
+				success = synthLib::SysexToMidi::write(_filename.c_str(), sysex);
 			}
 			else
 			{
-				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?",
-					[this, _data, result](const genericUI::MessageBox::Result _result)
-					{
-						if (_result == genericUI::MessageBox::Result::Yes)
-						{
-							exportAsWav(result.getFullPathName().toStdString(), _data);
-						}
-					});
+				std::vector<uint8_t> data;
+				for (const auto& s : sysex)
+					data.insert(data.end(), s.begin(), s.end());
+				success = baseLib::filesystem::writeFile(_filename, data);
 			}
-		};
-		m_fileChooser->launchAsync(flags, onFileChosen);
+
+			if (!success)
+			{
+				const auto productName = getEditor().getProcessor().getProperties().name;
+				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
+			}
+		});
+	}
+
+	void WaveEditor::exportAsWav(const xt::WaveData& _data)
+	{
+		selectExportFileName("Save Wave as .wav", ".wav", [this, _data](const std::string& _filename)
+		{
+			exportAsWav(_filename, _data);
+		});
 	}
 
 	void WaveEditor::exportAsWav(const std::string& _filename, const xt::WaveData& _data) const
@@ -443,6 +489,45 @@ namespace xtJucePlugin
 			const auto productName = getEditor().getProcessor().getProperties().name;
 			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 		}
+	}
+
+	void WaveEditor::selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>& _callback)
+	{
+		const auto& config = m_editor.getProcessor().getConfig();
+
+		constexpr const char* configKey = "xt_export_path";
+
+		const auto path = config.getValue(configKey, {});
+
+		m_fileChooser = std::make_unique<juce::FileChooser>(_title, path, '*' + _extension, true);
+
+		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		{
+			if (_chooser.getResults().isEmpty())
+				return;
+
+			const auto result = _chooser.getResult();
+			getEditor().getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
+
+			if (!result.existsAsFile())
+			{
+				_callback(result.getFullPathName().toStdString());
+			}
+			else
+			{
+				genericUI::MessageBox::showYesNo(juce::MessageBoxIconType::WarningIcon, "File exists", "Do you want to overwrite the existing file?",
+					[this, _callback, result](const genericUI::MessageBox::Result _result)
+					{
+						if (_result == genericUI::MessageBox::Result::Yes)
+						{
+							_callback(result.getFullPathName().toStdString());
+						}
+					});
+			}
+		};
+		m_fileChooser->launchAsync(flags, onFileChosen);
 	}
 
 	std::optional<xt::WaveData> WaveEditor::importWaveFile(const std::string& _filename) const

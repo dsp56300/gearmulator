@@ -1,6 +1,8 @@
 #include "weWaveCategoryTreeItem.h"
 
 #include "weWaveTreeItem.h"
+#include "xtWaveEditor.h"
+
 #include "xtLib/xtMidiTypes.h"
 
 namespace xtJucePlugin
@@ -55,16 +57,58 @@ namespace xtJucePlugin
 		return g_categoryNames[static_cast<uint32_t>(_category)];
 	}
 
-	void WaveCategoryTreeItem::addItems(uint32_t _first, uint32_t _count)
+	juce::var WaveCategoryTreeItem::getDragSourceDescription()
 	{
-		for(uint32_t i=0; i<_count; ++i)
-			addItem(i + _first);
+		return TreeItem::getDragSourceDescription();
+	}
+
+	void WaveCategoryTreeItem::itemClicked(const juce::MouseEvent& _mouseEvent)
+	{
+		if (_mouseEvent.mods.isPopupMenu())
+		{
+			if (m_category != WaveCategory::Rom)
+			{
+				juce::PopupMenu menu;
+				menu.addItem("Export all as .syx", [this]
+				{
+					exportAll(false);
+				});
+				menu.addItem("Export all as .mid", [this]
+				{
+					exportAll(true);
+				});
+				menu.showMenuAsync({});
+				return;
+			}
+		}
+		TreeItem::itemClicked(_mouseEvent);
+	}
+
+	void WaveCategoryTreeItem::addItems(const uint16_t _first, const uint16_t _count)
+	{
+		for(uint16_t i=_first; i<_first+_count; ++i)
+			addItem(i);
 
 		setOpen(true);
 	}
 
-	void WaveCategoryTreeItem::addItem(const uint32_t _index)
+	void WaveCategoryTreeItem::addItem(const uint16_t _index)
 	{
 		addSubItem(new WaveTreeItem(m_editor, m_category, xt::WaveId(_index)));
+	}
+
+	void WaveCategoryTreeItem::exportAll(const bool _midi) const
+	{
+		std::vector<xt::WaveId> waveIds;
+
+		waveIds.reserve(getNumSubItems());
+
+		for (int i = 0; i < getNumSubItems(); ++i)
+		{
+			if (auto* subItem = dynamic_cast<WaveTreeItem*>(getSubItem(i)))
+				waveIds.push_back(subItem->getWaveId());
+		}
+
+		m_editor.exportAsSyxOrMid(waveIds, _midi);
 	}
 }

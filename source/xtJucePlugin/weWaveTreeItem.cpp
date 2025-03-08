@@ -202,6 +202,45 @@ namespace xtJucePlugin
 			}
 		});
 		menu.addSubMenu("Copy to User Wave...", subMenuUW);
+		menu.addSeparator();
+
+		if (auto wave = m_editor.getData().getWave(m_waveIndex))
+		{
+			auto w = *wave;
+
+			juce::PopupMenu exportMenu;
+
+			if (xt::wave::isReadOnly(m_waveIndex))
+			{
+				// we cannot export a .mid or .syx that is a rom location as the hardware cannot import it
+				auto subMenuSyx = WaveEditor::createRamWavesPopupMenu([this, w](const xt::WaveId _id)
+				{
+					m_editor.exportAsSyx(_id, w);
+				});
+				exportMenu.addSubMenu(".syx", subMenuSyx);
+				auto subMenuMid = WaveEditor::createRamWavesPopupMenu([this, w](const xt::WaveId _id)
+				{
+					m_editor.exportAsMid(_id, w);
+				});
+				exportMenu.addSubMenu(".mid", subMenuMid);
+			}
+			else
+			{
+				exportMenu.addItem(".syx", [this, w]
+				{
+					m_editor.exportAsSyx(m_waveIndex, w);
+				});
+				exportMenu.addItem(".mid", [this, w]
+				{
+					m_editor.exportAsMid(m_waveIndex, w);
+				});
+			}
+			exportMenu.addItem(".wav", [this, w]
+			{
+				m_editor.exportAsWav(w);
+			});
+			menu.addSubMenu("Export as...", exportMenu);
+		}
 		menu.showMenuAsync({});
 	}
 

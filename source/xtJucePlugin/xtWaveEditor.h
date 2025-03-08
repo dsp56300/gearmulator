@@ -61,8 +61,14 @@ namespace xtJucePlugin
 
 		void openGraphPopupMenu(const Graph& _graph, const juce::MouseEvent& _event);
 
+		void exportAsSyx(const xt::WaveId& _id, const xt::WaveData& _data);
+		void exportAsMid(const xt::WaveId& _id, const xt::WaveData& _data);
+		void exportAsSyxOrMid(const std::string& _filename, const xt::WaveId& _id, const xt::WaveData& _data, bool _midi) const;
+		void exportAsSyxOrMid(const std::vector<xt::WaveId>& _ids, bool _midi);
 		void exportAsWav(const xt::WaveData& _data);
 		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
+
+		void selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>&);
 
 		std::optional<xt::WaveData> importWaveFile(const std::string& _filename) const;
 
