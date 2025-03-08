@@ -117,23 +117,42 @@ namespace xtJucePlugin
 
 		juce::PopupMenu menu;
 
-		juce::PopupMenu copyToTableSubMenu;
-
-		for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
+		if (!xt::wave::isAlgorithmicTable(m_index))
 		{
-			if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
-				copyToTableSubMenu.addColumnBreak();
+			juce::PopupMenu copyToTableSubMenu;
 
-			const auto id = xt::TableId(i);
-			copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+			for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
 			{
-				m_editor.getData().copyTable(id, m_index);
+				if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
+					copyToTableSubMenu.addColumnBreak();
+
+				const auto id = xt::TableId(i);
+				copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+				{
+					m_editor.getData().copyTable(id, m_index);
+				});
+			}
+
+			menu.addSubMenu("Copy to", copyToTableSubMenu);
+		}
+
+		if (!xt::wave::isReadOnly(m_index))
+		{
+			menu.addSeparator();
+
+			menu.addItem("Import .syx/.mid...", [this]
+			{
+				m_editor.selectImportFile([this](const juce::String& _filename)
+				{
+					juce::StringArray files;
+					files.add(_filename);
+					filesDropped(files, 0);
+				});
 			});
 		}
 
-		menu.addSubMenu("Copy to", copyToTableSubMenu);
-
-		menu.showMenuAsync({});
+		if (menu.getNumItems())
+			menu.showMenuAsync({});
 	}
 
 	juce::Colour TablesTreeItem::getTextColor(const juce::Colour _colour)

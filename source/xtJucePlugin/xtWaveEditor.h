@@ -68,6 +68,7 @@ namespace xtJucePlugin
 		void exportAsWav(const xt::WaveData& _data);
 		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
 
+		void selectImportFile(const std::function<void(const juce::String&)>& _callback);
 		void selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>&);
 
 		std::optional<xt::WaveData> importWaveFile(const std::string& _filename) const;
