@@ -158,6 +158,10 @@ namespace xt
 	{
 		m_haveSentTXtoDSP = true;
 //		LOG('[' << m_name << "] toDSP writeRX=" << HEX(_word));
+
+		// this can happen during "Reorganising Memory", DSP must resume to process incoming data
+		if (hdi08().dataRXFull())
+			m_hardware.resumeDSP();
 		hdi08().writeRX(&_word, 1);
 	}
 

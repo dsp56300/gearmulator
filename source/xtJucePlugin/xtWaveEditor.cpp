@@ -501,6 +501,36 @@ namespace xtJucePlugin
 		}
 	}
 
+	void WaveEditor::selectImportFile(const std::function<void(const juce::String&)>& _callback)
+	{
+		const auto& config = m_editor.getProcessor().getConfig();
+
+		constexpr const char* configKey = "xt_import_path";
+
+		auto path = config.getValue(configKey, {});
+
+		m_fileChooser = std::make_unique<juce::FileChooser>(
+			"Select .syx/.mid to import",
+			path,
+			"*.syx,*.mid,*.midi", true);
+
+		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
+
+		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		{
+			if (_chooser.getResults().isEmpty())
+				return;
+
+			const juce::File result = _chooser.getResult();
+
+			m_editor.getProcessor().getConfig().setValue(configKey, result.getParentDirectory().getFullPathName());
+
+			_callback(result.getFullPathName().toStdString());
+		};
+
+		m_fileChooser->launchAsync(flags, onFileChosen);
+	}
+
 	void WaveEditor::selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>& _callback)
 	{
 		const auto& config = m_editor.getProcessor().getConfig();

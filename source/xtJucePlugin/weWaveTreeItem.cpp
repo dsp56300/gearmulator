@@ -241,6 +241,21 @@ namespace xtJucePlugin
 			});
 			menu.addSubMenu("Export as...", exportMenu);
 		}
+
+		if (!xt::wave::isReadOnly(m_waveIndex))
+		{
+			menu.addSeparator();
+			menu.addItem("Import .syx/.mid...", [this]
+			{
+				m_editor.selectImportFile([this](const juce::String& _filename)
+				{
+					juce::StringArray files;
+					files.add(_filename);
+					filesDropped(files, 0);
+				});
+			});
+		}
+
 		menu.showMenuAsync({});
 	}
 
