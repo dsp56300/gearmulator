@@ -13,6 +13,7 @@ Xenia:
 
 - [Fix] Checksum of exported patches was incorrect due to bug in documentation
 - [Fix] Emulator might get stuck while "Reorganising Memory"
+- [Fix] UI didn't react to parameter changes via MIDI controller messages
 
 OsTIrus:
 
