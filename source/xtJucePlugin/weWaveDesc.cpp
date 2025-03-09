@@ -17,10 +17,13 @@ namespace xtJucePlugin
 	{
 		std::vector<xt::SysEx> sysex;
 
-		if(tableData)
-			sysex.emplace_back(xt::State::createTableData(*tableData, tableId.rawId(), false));
-		if(waveData)
-			sysex.emplace_back(xt::State::createWaveData(*waveData, waveId.rawId(), false));
+		sysex.reserve(tableIds.size() + waveIds.size());
+
+		for (size_t i = 0; i<tableIds.size(); ++i)
+			sysex.emplace_back(xt::State::createTableData(tableDatas[i], tableIds[i].rawId(), false));
+
+		for (size_t i = 0; i < waveIds.size(); ++i)
+			sysex.emplace_back(xt::State::createWaveData(waveDatas[i], waveIds[i].rawId(), false));
 
 		if(sysex.empty())
 			return false;
@@ -30,7 +33,7 @@ namespace xtJucePlugin
 
 	bool WaveDesc::canDropExternally() const
 	{
-		return waveData || tableData;
+		return !waveDatas.empty() || !tableDatas.empty();
 	}
 
 	std::string WaveDesc::getExportFileName(const pluginLib::Processor& _processor) const
@@ -38,10 +41,14 @@ namespace xtJucePlugin
 		std::stringstream name;
 		name << _processor.getProperties().name << " - ";
 
-		if(tableData)
-			name << "Table " << m_editor.getTableName(tableId);
-		else if(waveData)
-			name << "Wave " << WaveTreeItem::getWaveName(waveId);
+		if (tableIds.size() > 1)
+			name << "Table " << m_editor.getTableName(tableIds.front()) << " - " << m_editor.getTableName(tableIds.back());
+		else if (waveIds.size() > 1)
+			name << "Wave " << WaveTreeItem::getWaveName(waveIds.front()) << " - " << WaveTreeItem::getWaveName(waveIds.back());
+		else if(!tableDatas.empty())
+			name << "Table " << m_editor.getTableName(tableIds.front());
+		else if(!waveDatas.empty())
+			name << "Wave " << WaveTreeItem::getWaveName(waveIds.front());
 		else
 			return DragAndDropObject::getExportFileName(_processor);
 
@@ -52,7 +59,19 @@ namespace xtJucePlugin
 
 	void WaveDesc::fillData(const WaveEditorData& _data)
 	{
-		waveData = _data.getWave(waveId);
-		tableData = _data.getTable(tableId);
+		for (int32_t i=0; i<static_cast<int32_t>(waveIds.size()); ++i)
+		{
+			if (auto wave = _data.getWave(waveIds[i]))
+				waveDatas.push_back(*wave);
+			else
+				waveIds.erase(waveIds.begin() + i);
+		}
+		for (int32_t i = 0; i < static_cast<int32_t>(tableIds.size()); ++i)
+		{
+			if (auto table = _data.getTable(tableIds[i]))
+				tableDatas.push_back(*table);
+			else
+				tableIds.erase(tableIds.begin() + i);
+		}
 	}
 }

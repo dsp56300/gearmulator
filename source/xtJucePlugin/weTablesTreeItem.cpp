@@ -36,7 +36,7 @@ namespace xtJucePlugin
 	{
 		auto* waveDesc = new WaveDesc(m_editor);
 
-		waveDesc->tableId = m_index;
+		waveDesc->tableIds = {m_index};
 		waveDesc->source = WaveDescSource::TablesList;
 
 		waveDesc->fillData(m_editor.getData());
@@ -51,7 +51,9 @@ namespace xtJucePlugin
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList)
 			return false;
-		return waveDesc->tableId != m_index;
+		if (waveDesc->tableIds.size() != -1)
+			return false;
+		return waveDesc->tableIds.front() != m_index;
 	}
 
 	void TablesTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& dragSourceDetails, int insertIndex)
@@ -60,11 +62,11 @@ namespace xtJucePlugin
 
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 
-		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableId == m_index)
+		if(!waveDesc || waveDesc->source != WaveDescSource::TablesList || waveDesc->tableIds.size() != 1 || waveDesc->tableIds.front() == m_index)
 			return;
 
 		auto& data = m_editor.getData();
-		if(data.copyTable(m_index, waveDesc->tableId))
+		if(data.copyTable(m_index, waveDesc->tableIds.front()))
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			m_editor.setSelectedTable(m_index);
@@ -115,23 +117,42 @@ namespace xtJucePlugin
 
 		juce::PopupMenu menu;
 
-		juce::PopupMenu copyToTableSubMenu;
-
-		for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
+		if (!xt::wave::isAlgorithmicTable(m_index))
 		{
-			if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
-				copyToTableSubMenu.addColumnBreak();
+			juce::PopupMenu copyToTableSubMenu;
 
-			const auto id = xt::TableId(i);
-			copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+			for(auto i = xt::wave::g_firstRamTableIndex; i < xt::wave::g_tableCount; ++i)
 			{
-				m_editor.getData().copyTable(id, m_index);
+				if(i > xt::wave::g_firstRamTableIndex && (i&7) == 0)
+					copyToTableSubMenu.addColumnBreak();
+
+				const auto id = xt::TableId(i);
+				copyToTableSubMenu.addItem(m_editor.getTableName(id), [this, id]
+				{
+					m_editor.getData().copyTable(id, m_index);
+				});
+			}
+
+			menu.addSubMenu("Copy to", copyToTableSubMenu);
+		}
+
+		if (!xt::wave::isReadOnly(m_index))
+		{
+			menu.addSeparator();
+
+			menu.addItem("Import .syx/.mid...", [this]
+			{
+				m_editor.selectImportFile([this](const juce::String& _filename)
+				{
+					juce::StringArray files;
+					files.add(_filename);
+					filesDropped(files, 0);
+				});
 			});
 		}
 
-		menu.addSubMenu("Copy to", copyToTableSubMenu);
-
-		menu.showMenuAsync({});
+		if (menu.getNumItems())
+			menu.showMenuAsync({});
 	}
 
 	juce::Colour TablesTreeItem::getTextColor(const juce::Colour _colour)

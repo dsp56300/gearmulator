@@ -79,6 +79,13 @@ namespace pluginLib
 
 		static Parameter::Origin midiEventSourceToParameterOrigin(synthLib::MidiEventSource _source);
 
+		std::vector<uint8_t> getPartsForMidiEvent(const synthLib::SMidiEvent& _e)
+		{
+			return getPartsForMidiChannel(_e.a & 0x0f);
+		}
+
+		virtual  std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) { return {}; }
+
 	private:
 		void getMidiMessages(std::vector<synthLib::SMidiEvent>&);
 		void processMidiMessages();

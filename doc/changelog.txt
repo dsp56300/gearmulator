@@ -13,6 +13,13 @@ Xenia:
 
 - [Fix] Checksum of exported patches was incorrect due to bug in documentation
 - [Fix] Emulator might get stuck while "Reorganising Memory"
+- [Fix] UI didn't react to parameter changes via MIDI controller messages
+
+OsTIrus:
+
+- [Imp] UI has been reworked with larger filter knobs, better routing visualization,
+        selectors for the filter type and more changes to make the plugin 
+		more visually appealing
 
 1.4.3
 

@@ -8564,65 +8564,7 @@
                                 "x" : "540",
                                 "y" : "48",
                                 "width" : "500",
-                                "height" : "1284.952"
-                            }
-                        },
-                        {
-                            "name" : "btWavetablePreview",
-                            "button" : {
-                                "isToggle" : "1",
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "1",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "638",
-                                "y" : "1372.377",
-                                "width" : "64",
-                                "height" : "64",
-                                "texture" : "xtknob_small",
-                                "tileSizeX" : "64",
-                                "tileSizeY" : "64"
-                            }
-                        },
-                        {
-                            "name" : "ledWavetablePreview",
-                            "button" : {
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "0",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "654",
-                                "y" : "1340.377",
-                                "width" : "32",
-                                "height" : "32",
-                                "texture" : "led",
-                                "tileSizeX" : "128",
-                                "tileSizeY" : "128"
-                            },
-                            "parameterAttachment" : {
-                                "parameter" : "O2Link"
-                            }
-                        },
-                        {
-                            "name" : "btWavetableSave",
-                            "button" : {
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "1",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "878",
-                                "y" : "1372.377",
-                                "width" : "64",
-                                "height" : "64",
-                                "texture" : "xtknob_small",
-                                "tileSizeX" : "64",
-                                "tileSizeY" : "64"
+                                "height" : "1431.802"
                             }
                         },
                         {
@@ -8640,83 +8582,25 @@
                                 "x" : "1620",
                                 "y" : "48",
                                 "width" : "1700",
-                                "height" : "614.5936"
-                            }
-                        },
-                        {
-                            "name" : "btWavePreview",
-                            "button" : {
-                                "isToggle" : "1",
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "1",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "1662",
-                                "y" : "705.9009",
-                                "width" : "64",
-                                "height" : "64",
-                                "texture" : "xtknob_small",
-                                "tileSizeX" : "64",
-                                "tileSizeY" : "64"
-                            }
-                        },
-                        {
-                            "name" : "ledWavePreview",
-                            "button" : {
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "0",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "1678",
-                                "y" : "673.9009",
-                                "width" : "32",
-                                "height" : "32",
-                                "texture" : "led",
-                                "tileSizeX" : "128",
-                                "tileSizeY" : "128"
-                            },
-                            "parameterAttachment" : {
-                                "parameter" : "O2Link"
-                            }
-                        },
-                        {
-                            "name" : "btWaveSave",
-                            "button" : {
-                                "normalImage" : "0",
-                                "overImage" : "0",
-                                "downImage" : "1",
-                                "normalImageOn" : "1",
-                                "overImageOn" : "1",
-                                "downImageOn" : "1",
-                                "x" : "1815",
-                                "y" : "705.9009",
-                                "width" : "64",
-                                "height" : "64",
-                                "texture" : "xtknob_small",
-                                "tileSizeX" : "64",
-                                "tileSizeY" : "64"
+                                "height" : "776.4966"
                             }
                         },
                         {
                             "name" : "wecWaveFreq",
                             "component" : {
                                 "x" : "1620",
-                                "y" : "865.2081",
+                                "y" : "882.4966",
                                 "width" : "830",
-                                "height" : "614.5936"
+                                "height" : "597.3051"
                             }
                         },
                         {
                             "name" : "wecWavePhase",
                             "component" : {
                                 "x" : "2490",
-                                "y" : "865.2081",
+                                "y" : "882.4966",
                                 "width" : "830",
-                                "height" : "614.5936"
+                                "height" : "597.3051"
                             }
                         }
                     ]

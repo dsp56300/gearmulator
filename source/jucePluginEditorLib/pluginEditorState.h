@@ -45,7 +45,7 @@ namespace jucePluginEditorLib
 		const Skin& getCurrentSkin() { return m_currentSkin; }
 		const std::vector<Skin>& getIncludedSkins();
 
-		void openMenu(const juce::MouseEvent* _event);
+		virtual void openMenu(const juce::MouseEvent* _event);
 
 		std::function<void(int)> evSetGuiScale;
 		std::function<void(juce::Component*)> evSkinLoaded;

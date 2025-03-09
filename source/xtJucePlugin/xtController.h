@@ -95,6 +95,8 @@ namespace xtJucePlugin
 
 		uint8_t getPartCount() const override;
 
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
+
 	private:
 		void selectPreset(int _offset);
 

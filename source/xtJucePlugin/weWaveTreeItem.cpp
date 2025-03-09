@@ -72,7 +72,7 @@ namespace xtJucePlugin
 	{
 		auto* desc = new WaveDesc(m_editor);
 
-		desc->waveId = m_waveIndex;
+		desc->waveIds = {m_waveIndex};
 		desc->source = WaveDescSource::WaveList;
 
 		desc->fillData(m_editor.getData());
@@ -87,7 +87,7 @@ namespace xtJucePlugin
 		const auto* waveDesc = WaveDesc::fromDragSource(dragSourceDetails);
 		if(!waveDesc)
 			return false;
-		if(!waveDesc->waveId.isValid())
+		if(waveDesc->waveIds.size() != 1)
 			return false;
 		return true;
 	}
@@ -102,7 +102,7 @@ namespace xtJucePlugin
 			return;
 		auto& data = m_editor.getData();
 
-		if(data.copyWave(m_waveIndex, waveDesc->waveId))
+		if(data.copyWave(m_waveIndex, waveDesc->waveIds.front()))
 		{
 			setSelected(true, true, juce::dontSendNotification);
 			data.sendWaveToDevice(m_waveIndex);
@@ -114,7 +114,12 @@ namespace xtJucePlugin
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return false;
 
-		if(files.size() == 1 && files[0].endsWithIgnoreCase(".mid") || files[0].endsWithIgnoreCase(".syx"))
+		if (files.size() != 1)
+			return false;
+
+		const auto& f = files[0];
+
+		if(f.endsWithIgnoreCase(".mid") || f.endsWithIgnoreCase(".syx") || f.endsWithIgnoreCase(".wav"))
 			return true;
 
 		return TreeItem::isInterestedInFileDrag(files);
@@ -124,6 +129,19 @@ namespace xtJucePlugin
 	{
 		if(xt::wave::isReadOnly(m_waveIndex))
 			return;
+
+		if (files.isEmpty())
+			return;
+
+		if (files[0].endsWithIgnoreCase(".wav"))
+		{
+			if (auto wave = m_editor.importWaveFile(files[0].toStdString()))
+			{
+				m_editor.getData().setWave(m_waveIndex, *wave);
+				m_editor.getData().sendWaveToDevice(m_waveIndex);
+			}
+			return;
+		}
 
 		const auto errorTitle = m_editor.getEditor().getProcessor().getProperties().name + " - Error";
 
@@ -135,6 +153,7 @@ namespace xtJucePlugin
 		{
 			if (tables.size() == 1)
 				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, errorTitle, "This file doesn't contain a Wave but a Control Table, please drop on a User Table slot.");
+
 			return;
 		}
 
@@ -170,8 +189,71 @@ namespace xtJucePlugin
 
 		if(selectedTableId.isValid())
 		{
-			const auto subMenu = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
-			menu.addSubMenu("Copy to current Control Table", subMenu);
+			const auto subMenuCT = m_editor.createCopyToSelectedTableMenu(m_waveIndex);
+			menu.addSubMenu("Copy to current Control Table...", subMenuCT);
+		}
+
+		const auto subMenuUW = WaveEditor::createRamWavesPopupMenu([this](const xt::WaveId _dest)
+		{
+			if (m_editor.getData().copyWave(_dest, m_waveIndex))
+			{
+				m_editor.getData().sendWaveToDevice(_dest);
+				m_editor.setSelectedWave(_dest);
+			}
+		});
+		menu.addSubMenu("Copy to User Wave...", subMenuUW);
+		menu.addSeparator();
+
+		if (auto wave = m_editor.getData().getWave(m_waveIndex))
+		{
+			auto w = *wave;
+
+			juce::PopupMenu exportMenu;
+
+			if (xt::wave::isReadOnly(m_waveIndex))
+			{
+				// we cannot export a .mid or .syx that is a rom location as the hardware cannot import it
+				auto subMenuSyx = WaveEditor::createRamWavesPopupMenu([this, w](const xt::WaveId _id)
+				{
+					m_editor.exportAsSyx(_id, w);
+				});
+				exportMenu.addSubMenu(".syx", subMenuSyx);
+				auto subMenuMid = WaveEditor::createRamWavesPopupMenu([this, w](const xt::WaveId _id)
+				{
+					m_editor.exportAsMid(_id, w);
+				});
+				exportMenu.addSubMenu(".mid", subMenuMid);
+			}
+			else
+			{
+				exportMenu.addItem(".syx", [this, w]
+				{
+					m_editor.exportAsSyx(m_waveIndex, w);
+				});
+				exportMenu.addItem(".mid", [this, w]
+				{
+					m_editor.exportAsMid(m_waveIndex, w);
+				});
+			}
+			exportMenu.addItem(".wav", [this, w]
+			{
+				m_editor.exportAsWav(w);
+			});
+			menu.addSubMenu("Export as...", exportMenu);
+		}
+
+		if (!xt::wave::isReadOnly(m_waveIndex))
+		{
+			menu.addSeparator();
+			menu.addItem("Import .syx/.mid...", [this]
+			{
+				m_editor.selectImportFile([this](const juce::String& _filename)
+				{
+					juce::StringArray files;
+					files.add(_filename);
+					filesDropped(files, 0);
+				});
+			});
 		}
 
 		menu.showMenuAsync({});

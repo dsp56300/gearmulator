@@ -162,6 +162,26 @@ namespace xtJucePlugin
 		return 8;
 	}
 
+	std::vector<uint8_t> Controller::getPartsForMidiChannel(const uint8_t _channel)
+	{
+		if (!isMultiMode())
+			return {0};
+
+		std::vector<uint8_t> parts;
+
+		for (uint8_t p=0; p<getPartCount(); ++p)
+		{
+			char paramName[16];
+			(void)snprintf(paramName, std::size(paramName), "MI%dMidiChannel", static_cast<int>(p));
+			auto* param = getParameter(paramName, 0);
+			assert(param && "parameter not found");
+			const auto v = param->getUnnormalizedValue();
+			if (v < 2 || v - 2 == _channel)	// omni, global, 0, 1, ....
+				parts.push_back(p);
+		}
+		return parts;
+	}
+
 	std::string Controller::getSingleName(const pluginLib::MidiPacket::ParamValues& _values) const
 	{
 	    std::string name;
@@ -417,10 +437,32 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool Controller::parseControllerMessage(const synthLib::SMidiEvent&)
+	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
-		// TODO
-		return false;
+		const auto& cm = getParameterDescriptions().getControllerMap();
+		const auto paramIndices = cm.getControlledParameters(_e);
+
+		if(paramIndices.empty())
+			return false;
+
+		const auto origin = midiEventSourceToParameterOrigin(_e.source);
+
+		const auto parts = isMultiMode() ? getPartsForMidiEvent(_e) : std::vector<uint8_t>{0};
+
+		if (parts.empty())
+			return false;
+
+		for (const uint8_t part : parts)
+		{
+			for (const auto paramIndex : paramIndices)
+			{
+				auto* param = getParameter(paramIndex, part);
+				assert(param && "parameter not found for control change");
+				param->setValueFromSynth(_e.c, origin);
+			}
+		}
+
+		return true;
 	}
 
 	bool Controller::parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const

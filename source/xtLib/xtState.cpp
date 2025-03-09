@@ -104,10 +104,10 @@ namespace xt
 		}
 
 		for (const auto& waveId : waveIds)
-			append(_state, m_waves[waveId.rawId()], wLib::IdxCommand);
+			append(_state, m_waves[waveId.rawId()], 7);
 
 		for (const auto& tableId : tableIds)
-			append(_state, m_tables[tableId.rawId()], wLib::IdxCommand);
+			append(_state, m_tables[tableId.rawId()], 7);
 
 		const auto multiMode = isMultiMode();
 
@@ -405,8 +405,15 @@ namespace xt
 		if(idx >= m_waves.size())
 			return false;
 
+		const auto old = m_waves[idx];
+
 		if(!convertTo(m_waves[idx], _data))
 			return false;
+
+		if (m_waves[idx] == old)
+			return true;
+
+		forwardToDevice(_data);
 
 		return true;
 	}
@@ -709,7 +716,7 @@ namespace xt
 			return false;
 		}
 
-		if(res)
+		if(res && _type != DumpType::Wave)
 			forwardToDevice(_data);
 		return res;
 	}

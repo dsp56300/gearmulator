@@ -1,8 +1,9 @@
 set(ASSETS_VirusTI_Trancy
-	${CMAKE_CURRENT_LIST_DIR}/background_channels_4.png
+	${CMAKE_CURRENT_LIST_DIR}/background.png
 	${CMAKE_CURRENT_LIST_DIR}/background_channels_16.png
-	${CMAKE_CURRENT_LIST_DIR}/background_channels_disable_4.png
+	${CMAKE_CURRENT_LIST_DIR}/background_channels_4.png
 	${CMAKE_CURRENT_LIST_DIR}/background_channels_disable_16.png
+	${CMAKE_CURRENT_LIST_DIR}/background_channels_disable_4.png
 	${CMAKE_CURRENT_LIST_DIR}/button_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_1.png
 	${CMAKE_CURRENT_LIST_DIR}/button_arp_10.png
@@ -54,6 +55,14 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/button_channel_9.png
 	${CMAKE_CURRENT_LIST_DIR}/button_disable.png
 	${CMAKE_CURRENT_LIST_DIR}/button_disable_white.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_ap1.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_ap2.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_ap3.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_ap4.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_bp.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_bs.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_hp.png
+	${CMAKE_CURRENT_LIST_DIR}/button_filter_lp.png
 	${CMAKE_CURRENT_LIST_DIR}/button_load.png
 	${CMAKE_CURRENT_LIST_DIR}/button_menu.png
 	${CMAKE_CURRENT_LIST_DIR}/button_mono_poly.png
@@ -66,9 +75,19 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/button_sub.png
 	${CMAKE_CURRENT_LIST_DIR}/Digital.ttf
 	${CMAKE_CURRENT_LIST_DIR}/dummy.png
-	${CMAKE_CURRENT_LIST_DIR}/knob_big.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_par.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_routing_par.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_routing_ser4.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_routing_ser6.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_routing_split.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_ser4.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_ser6.png
+	${CMAKE_CURRENT_LIST_DIR}/filter_mode_split.png
+	${CMAKE_CURRENT_LIST_DIR}/knob_big_ring.png
 	${CMAKE_CURRENT_LIST_DIR}/knob_mid.png
 	${CMAKE_CURRENT_LIST_DIR}/knob_small.png
+	${CMAKE_CURRENT_LIST_DIR}/knob_small_ring.png
+	${CMAKE_CURRENT_LIST_DIR}/KoshgarianBold.ttf
 	${CMAKE_CURRENT_LIST_DIR}/led_on.png
 	${CMAKE_CURRENT_LIST_DIR}/logo.png
 	${CMAKE_CURRENT_LIST_DIR}/logo_light.png
@@ -95,13 +114,12 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_wave_pwm.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_3_osc_wavetable.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter.png
-	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_filter.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_3.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_4.png
+	${CMAKE_CURRENT_LIST_DIR}/panel_4_filter_env_filter.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_5_lfo.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_6_matrix.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_7_arp.png
-	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_0.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_1.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_2.png
@@ -130,7 +148,6 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_Input.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_Input_Off.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_8_fx1_Phaser.png
-	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_delay_classic.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_delay_tape.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_delay_tape_clocked.png
@@ -138,8 +155,8 @@ set(ASSETS_VirusTI_Trancy
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_vocoder.png
 	${CMAKE_CURRENT_LIST_DIR}/panel_9_fx2_vocoder_off.png
 	${CMAKE_CURRENT_LIST_DIR}/part_activity.png
-	${CMAKE_CURRENT_LIST_DIR}/snow.png
 	${CMAKE_CURRENT_LIST_DIR}/slider_knob.png
+	${CMAKE_CURRENT_LIST_DIR}/snow.png
 
 	${CMAKE_CURRENT_LIST_DIR}/VirusTI_Trancy.json
 )

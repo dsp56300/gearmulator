@@ -16,9 +16,17 @@ namespace xtJucePlugin
 
 		static std::string getCategoryName(WaveCategory _category);
 
+		juce::var getDragSourceDescription() override;
+
+		void itemClicked(const juce::MouseEvent&) override;
+
 	private:
-		void addItems(uint32_t _first, uint32_t _count);
-		void addItem(uint32_t _index);
+		void addItems(uint16_t _first, uint16_t _count);
+		void addItem(uint16_t _index);
+
+		void exportAll(bool _midi) const;
+
+		std::vector<xt::WaveId> getWaveIds() const;
 
 		WaveEditor& m_editor;
 		const WaveCategory m_category;

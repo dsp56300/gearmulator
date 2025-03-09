@@ -161,7 +161,7 @@ namespace n2xJucePlugin
 
 		m_state.receive(_e);
 
-		const auto parts = m_state.getPartsForMidiChannel(_e);
+		const auto parts = getPartsForMidiEvent(_e);
 
 		for (const uint8_t part : parts)
 		{
@@ -449,6 +449,11 @@ namespace n2xJucePlugin
 	bool Controller::getKnobState(uint8_t& _result, const n2x::KnobType _type) const
 	{
 		return m_state.getKnobState(_result, _type);
+	}
+
+	std::vector<uint8_t> Controller::getPartsForMidiChannel(const uint8_t _channel)
+	{
+		return m_state.getPartsForMidiChannel(_channel);
 	}
 
 	uint8_t Controller::combineSyncRingModDistortion(const uint8_t _part, const uint8_t _currentCombinedValue, bool _lockedOnly)

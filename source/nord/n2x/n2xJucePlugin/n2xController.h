@@ -62,6 +62,8 @@ namespace n2xJucePlugin
 
 		bool getKnobState(uint8_t& _result, n2x::KnobType _type) const;
 
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
+
 	private:
 		uint8_t combineSyncRingModDistortion(uint8_t _part, uint8_t _currentCombinedValue, bool _lockedOnly);
 

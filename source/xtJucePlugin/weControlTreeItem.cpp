@@ -65,7 +65,7 @@ namespace xtJucePlugin
 
 		auto* desc = new WaveDesc(m_editor);
 
-		desc->waveId = m_wave;
+		desc->waveIds = {m_wave};
 		desc->source = WaveDescSource::ControlTableList;
 		desc->tableIndex = m_index;
 
@@ -78,7 +78,14 @@ namespace xtJucePlugin
 	{
 		if(xt::wave::isReadOnly(m_table) || xt::wave::isReadOnly(m_index))
 			return false;
-		return WaveDesc::fromDragSource(_dragSourceDetails) != nullptr;
+		auto* desc = WaveDesc::fromDragSource(_dragSourceDetails);
+		if (desc == nullptr)
+			return false;
+		if (desc->source == WaveDescSource::WaveList && desc->waveIds.size() != 1)
+			return false;
+		if (desc->source == WaveDescSource::ControlTableList && desc->tableIndex == m_index)
+			return false;
+		return true;
 	}
 
 	void ControlTreeItem::itemDropped(const juce::DragAndDropTarget::SourceDetails& _dragSourceDetails, int _insertIndex)
@@ -98,9 +105,9 @@ namespace xtJucePlugin
 				data.sendTableToDevice(m_table);
 			}
 		}
-		else if(waveDesc->source == WaveDescSource::WaveList)
+		else if(waveDesc->source == WaveDescSource::WaveList && waveDesc->waveIds.size() == 1)
 		{
-			if(data.setTableWave(m_table, m_index, waveDesc->waveId))
+			if(data.setTableWave(m_table, m_index, waveDesc->waveIds.front()))
 				data.sendTableToDevice(m_table);
 		}
 	}

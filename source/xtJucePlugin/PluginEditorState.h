@@ -17,6 +17,8 @@ namespace xtJucePlugin
 		explicit PluginEditorState(AudioPluginAudioProcessor& _processor);
 		void initContextMenu(juce::PopupMenu& _menu) override;
 		bool initAdvancedContextMenu(juce::PopupMenu& _menu, bool _enabled) override;
+		void openMenu(const juce::MouseEvent* _event) override;
+
 	private:
 		jucePluginEditorLib::Editor* createEditor(const jucePluginEditorLib::Skin& _skin) override;
 	};

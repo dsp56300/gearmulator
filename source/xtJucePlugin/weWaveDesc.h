@@ -32,13 +32,13 @@ namespace xtJucePlugin
 
 		WaveEditor& m_editor;
 
-		xt::WaveId waveId;
-		xt::TableId tableId;
+		std::vector<xt::WaveId> waveIds;
+		std::vector<xt::TableId> tableIds;
 
 		xt::TableIndex tableIndex;
 
-		std::optional<xt::WaveData> waveData;
-		std::optional<xt::TableData> tableData;
+		std::vector<xt::WaveData> waveDatas;
+		std::vector<xt::TableData> tableDatas;
 
 		WaveDescSource source = WaveDescSource::Invalid;
 	};
