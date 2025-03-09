@@ -10,8 +10,10 @@ Xenia:
 
 - [Imp] Add support to load patches from files that include custom waves and
         wavetables
-- [Imp] Wave Editor has been added to create/import custom Waves and Control
-        Tables
+- [Imp] Wave Editor has been added to create/import/export custom Waves and
+        Control Tables
+- [Imp] Custom Waves/Control Tables are now exported with the Patch when
+        exporting via Patch Manager
 
 - [Fix] Checksum of exported patches was incorrect due to bug in documentation
 - [Fix] Emulator might get stuck while "Reorganising Memory"
