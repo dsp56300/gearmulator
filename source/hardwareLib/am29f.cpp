@@ -161,7 +161,9 @@ namespace hwLib
 			{
 				if(_addr >= m_size)
 					return;
-//				MCLOG("Programming word at " << MCHEX(_addr) << ", value " << MCHEXN(_data, 4));
+#if defined(_DEBUG) && defined(_WIN32)
+				MCLOG("Programming word at " << MCHEX(_addr) << ", value " << MCHEXN(_data, 4));
+#endif
 				const auto old = mc68k::memoryOps::readU16(m_buffer, _addr);
 				// "A bit cannot be programmed from a 0 back to a 1"
 				const auto v = _data & old;
