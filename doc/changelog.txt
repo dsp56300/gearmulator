@@ -5,6 +5,8 @@ Release Notes
 Xenia:
 
 - [Imp] Add support to load MW1 user waves & tables
+- [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
+        holding shift while dragging
 
 1.4.4
 

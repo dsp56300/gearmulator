@@ -3,6 +3,8 @@
 #include "weWaveTreeItem.h"
 #include "xtWaveEditor.h"
 
+#include "baseLib/filesystem.h"
+
 #include "synthLib/sysexToMidi.h"
 
 namespace xtJucePlugin
@@ -28,6 +30,13 @@ namespace xtJucePlugin
 		if(sysex.empty())
 			return false;
 
+		if (_file.getFullPathName().endsWithIgnoreCase(".syx"))
+		{
+			std::vector<uint8_t> data;
+			for (const auto& s : sysex)
+				data.insert(data.end(), s.begin(), s.end());
+			return baseLib::filesystem::writeFile(_file.getFullPathName().toStdString(), data);
+		}
 		return synthLib::SysexToMidi::write(_file.getFullPathName().toStdString().c_str(), sysex);
 	}
 
@@ -52,7 +61,10 @@ namespace xtJucePlugin
 		else
 			return DragAndDropObject::getExportFileName(_processor);
 
-		name << ".mid";
+		if (juce::ModifierKeys::getCurrentModifiers().isShiftDown())
+			name << ".syx";
+		else
+			name << ".mid";
 
 		return name.str();
 	}
