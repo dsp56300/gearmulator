@@ -107,6 +107,8 @@ namespace xt
 		static bool parseTableData(TableData& _table, const SysEx& _sysex);
 		static bool parseMw1TableData(TableData& _table, const SysEx& _sysex);
 
+		static std::vector<WaveId> getWavesForTable(const TableData& _table);
+
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);
@@ -116,6 +118,9 @@ namespace xt
 
 		static TableId getTableId(const SysEx& _data);
 		static WaveId getWaveId(const SysEx& _data);
+
+		static bool isSpeech(const TableData& _table);
+		static bool isUpaw(const TableData& _table);
 
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{

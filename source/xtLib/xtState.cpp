@@ -89,7 +89,9 @@ namespace xt
 			TableData table;
 			parseTableData(table, {t.begin(), t.end()});
 
-			for (const auto& waveId : table)
+			auto tableWaves = getWavesForTable(table);
+
+			for (const auto& waveId : tableWaves)
 			{
 				if(wave::isReadOnly(waveId))
 					continue;
@@ -789,6 +791,16 @@ namespace xt
 		return WaveId(static_cast<uint16_t>((_data[IdxWaveIndexH] << 7) | _data[IdxWaveIndexL]));
 	}
 
+	bool State::isSpeech(const TableData& _table)
+	{
+		return _table[0].rawId() == 0xdead && _table[1].rawId() == 0xbeef;
+	}
+
+	bool State::isUpaw(const TableData& _table)
+	{
+		return _table[0].rawId() == 0x12de && _table[1].rawId() == 0xc0de;
+	}
+
 	void State::forwardToDevice(const SysEx& _data)
 	{
 		if(m_sender != Origin::External)
@@ -822,8 +834,9 @@ namespace xt
 						TableData table;
 						if (!parseTableData(table, { t.begin(), t.end() }))
 							return false;
-						auto it = std::find(table.begin(), table.end(), waveId);
-						if (it == table.end())
+						auto waves = getWavesForTable(table);
+						const auto it = std::find(waves.begin(), waves.end(), waveId);
+						if (it == waves.end())
 							return false;
 						dirtyTables.insert(_id);
 						return true;
@@ -850,9 +863,10 @@ namespace xt
 
 						TableData table;
 						parseTableData(table, originalTableSysex);
+						auto waves = getWavesForTable(table);
 
 						// modify table to use a different wave
-						for (auto& idx : table)
+						for (auto& idx : waves)
 						{
 							if (idx == waveId)
 								idx = WaveId(waveId.rawId() > 1000 ? 1000 : 1001);
@@ -1163,18 +1177,42 @@ namespace xt
 
 		extractTableDataFromSysEx(_table, _sysex, 6);
 
-		if (_table[0].rawId() == 0xdead && _table[1].rawId() == 0xbeef)
+		if (isSpeech(_table))
 		{
 			_table[2] = WaveId(_table[2].rawId() + wave::g_firstRamWaveIndex - Mw1::g_firstRamWaveIndex);
 		}
 		else
 		{
 			for(auto & t : _table)
-			{
 				t = WaveId(t.rawId() + wave::g_firstRamWaveIndex - Mw1::g_firstRamWaveIndex);
-			}
 		}
 		return true;
+	}
+
+	std::vector<WaveId> State::getWavesForTable(const TableData& _table)
+	{
+		std::vector<WaveId> waves;
+
+		if (isSpeech(_table))
+		{
+			const auto startWaveId = _table[2];
+
+			waves.reserve(8);
+			for (uint16_t i=0; i<8; ++i)
+				waves.emplace_back(startWaveId.rawId() + i);
+		}
+		else if (isUpaw(_table))
+		{
+			assert(false && "add support");
+		}
+		else
+		{
+			waves.reserve(_table.size());
+			for (const auto& w : _table)
+				waves.push_back(w);
+		}
+
+		return waves;
 	}
 
 	SysEx State::createTableData(const TableData& _table, const uint32_t _tableIndex, const bool _preview)
