@@ -99,10 +99,14 @@ namespace xt
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		static bool parseWaveData(WaveData& _wave, const SysEx& _sysex);
+		static bool parseMw1WaveData(WaveData& _wave, const SysEx& _sysex);
+
 		static SysEx createWaveData(const WaveData& _wave, uint16_t _waveIndex, bool _preview);
 		static WaveData createinterpolatedTable(const WaveData& _a, const WaveData& _b, uint16_t _indexA, uint16_t _indexB, uint16_t _indexTarget);
 
 		static bool parseTableData(TableData& _table, const SysEx& _sysex);
+		static bool parseMw1TableData(TableData& _table, const SysEx& _sysex);
+
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);

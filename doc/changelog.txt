@@ -1,5 +1,11 @@
 Release Notes 
 
+1.4.5
+
+Xenia:
+
+- [Imp] Add support to load MW1 user waves & tables
+
 1.4.4
 
 NodalRed2x:

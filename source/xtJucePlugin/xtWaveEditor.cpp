@@ -239,12 +239,54 @@ namespace xtJucePlugin
 
 		const auto title = getEditor().getProcessor().getProperties().name + " - ";
 
-		const auto sysex = WaveTreeItem::getSysexFromFiles(_files);
+		auto sysex = WaveTreeItem::getSysexFromFiles(_files);
 
 		if(sysex.empty())
 		{
 			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title + "Error", "No Sysex data found in file");
 			return;
+		}
+
+		if (sysex.size() == 1)
+		{
+			auto s = sysex.front();
+
+			if (s.size() == xt::Mw1::g_allWavesAndTablesDumpLength && 
+				s.front() == 0xf0 &&
+				s[1] == wLib::IdWaldorf &&
+				s[2] == xt::IdMw1 &&
+				s[4] == xt::Mw1::g_idmAllWavesAndTables)
+			{
+				// contains 12 tables and 61 waves
+				static constexpr uint32_t tableSize = 64 * 4;
+				static constexpr uint32_t waveSize = 64 * 2;
+				static_assert(xt::Mw1::g_allWavesAndTablesDumpLength == 5 + 2 + tableSize * 12 + waveSize * 61);
+
+				int32_t off = 5;
+				for (size_t t=0; t<12; ++t, off += tableSize)
+				{
+					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmTable, static_cast<uint8_t>(xt::Mw1::g_firstRamTableIndex + t) };
+					data.insert(data.end(), s.begin() + off, s.begin() + off + tableSize);
+					data.push_back(0x00);
+					data.push_back(0xf7);
+					sysex.emplace_back(std::move(data));
+				}
+				for (size_t w=0; w<61; ++w, off += waveSize)
+				{
+					auto waveIndex = static_cast<uint16_t>(xt::Mw1::g_firstRamWaveIndex + w);
+
+					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmWave,
+						static_cast<uint8_t>(waveIndex >> 12),
+						static_cast<uint8_t>((waveIndex >> 8) & 0xf),
+						static_cast<uint8_t>((waveIndex >> 4) & 0xf),
+						static_cast<uint8_t>(waveIndex & 0xf) };
+					data.insert(data.end(), s.begin() + off, s.begin() + off + waveSize);
+					data.push_back(0x00);
+					data.push_back(0xf7);
+					sysex.emplace_back(std::move(data));
+				}
+				sysex.erase(sysex.begin());
+			}
 		}
 
 		for (const auto& s : sysex)
