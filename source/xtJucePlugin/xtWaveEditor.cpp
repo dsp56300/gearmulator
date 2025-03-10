@@ -305,6 +305,41 @@ namespace xtJucePlugin
 			}
 		}
 
+		if (_tables.size() == 1 && _waves.size() > 1)
+		{
+			auto& table = _tables.begin()->second;
+
+			if (xt::State::isSpeech(table))
+			{
+				// if we import speech, retarget all waves to be put into out special rom slots as speech requires continuous memory
+
+				const auto oldStart = table[2].rawId();
+				constexpr auto newStart = xt::wave::g_firstRwRomWaveIndex;
+
+				auto waves = xt::State::getWavesForTable(_tables.begin()->second);
+
+				for (auto wave : waves)
+				{
+					auto it = _waves.find(wave);
+					if (it == _waves.end())
+						continue;
+
+					const auto offset = it->first.rawId() - oldStart;
+					const auto newId = xt::WaveId(static_cast<uint16_t>(newStart + offset));
+
+					if (_waves.find(newId) != _waves.end())
+						continue;
+
+					auto data = it->second;
+					_waves.erase(it);
+					_waves.emplace(newId, data);
+				}
+
+				// table needs to point to new location
+				table[2] = xt::WaveId(newStart);
+			}
+		}
+
 		if (_tables.size() + _waves.size() > 1)
 		{
 			std::stringstream ss;
