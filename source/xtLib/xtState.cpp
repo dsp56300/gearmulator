@@ -1203,7 +1203,7 @@ namespace xt
 		}
 		else if (isUpaw(_table))
 		{
-			assert(false && "add support");
+			return {};
 		}
 		else
 		{
