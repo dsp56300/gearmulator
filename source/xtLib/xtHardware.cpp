@@ -21,7 +21,7 @@ namespace xt
 		, m_rom(initializeRom(_romData, _romName))
 		, m_uc(m_rom)
 		, m_dsps{DSP(*this, m_uc.getHdi08A().getHdi08(), 0)}
-		, m_midi(m_uc.getQSM(), 40000)
+		, m_midi(m_uc)
 	{
 		if(!m_rom.isValid())
 			throw synthLib::DeviceException(synthLib::DeviceError::FirmwareMissing);

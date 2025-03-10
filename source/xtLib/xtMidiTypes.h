@@ -219,6 +219,7 @@ namespace xt
 		static constexpr uint16_t g_romWaveCount = 506;
 		static constexpr uint16_t g_ramWaveCount = 250;
 		static constexpr uint16_t g_firstRamWaveIndex = 1000;
+		static constexpr uint16_t g_firstRwRomWaveIndex = 452;	// these are zeroed in the rom, we can write to them to make them useable
 
 		static constexpr uint16_t g_tableCount = 128;
 		static constexpr uint16_t g_wavesPerTable = 64;
@@ -269,6 +270,10 @@ namespace xt
 		{
 			if(!_waveId.isValid())
 				return true;
+			if (_waveId.rawId() < g_firstRwRomWaveIndex)
+				return true;
+			if (_waveId.rawId() < g_romWaveCount)
+				return false;
 			return _waveId.rawId() < g_firstRamWaveIndex;
 		}
 

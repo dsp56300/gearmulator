@@ -45,6 +45,8 @@ namespace xt
 		bool getLedState(LedType _led) const;
 		bool getButton(ButtonType _button) const;
 
+		auto& getRomRuntimeData() { return m_romRuntimeData; }
+
 	private:
 		std::array<uint8_t, g_ramSize> m_memory;
 		std::array<uint8_t, g_romSize> m_romRuntimeData;
