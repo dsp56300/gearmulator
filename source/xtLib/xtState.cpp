@@ -427,8 +427,15 @@ namespace xt
 		if(idx >= m_tables.size())
 			return false;
 
+		const auto old = m_tables[idx];
+
 		if(!convertTo(m_tables[idx], _data))
 			return false;
+
+		if (m_tables[idx] == old)
+			return true;
+
+		forwardToDevice(_data);
 
 		return true;
 	}
@@ -718,7 +725,7 @@ namespace xt
 			return false;
 		}
 
-		if(res && _type != DumpType::Wave)
+		if(res && _type != DumpType::Wave && _type != DumpType::Table)
 			forwardToDevice(_data);
 		return res;
 	}
