@@ -870,10 +870,12 @@ namespace xt
 
 						TableData table;
 						parseTableData(table, originalTableSysex);
-						auto waves = getWavesForTable(table);
+
+						if (isSpeech(table) || isUpaw(table))
+							continue;
 
 						// modify table to use a different wave
-						for (auto& idx : waves)
+						for (auto& idx : table)
 						{
 							if (idx == waveId)
 								idx = WaveId(waveId.rawId() > 1000 ? 1000 : 1001);
