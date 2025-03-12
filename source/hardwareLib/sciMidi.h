@@ -35,10 +35,9 @@ namespace hwLib
 			for (const uint8_t byte : _bytes)
 				write(byte);
 		}
-		void write(const synthLib::SMidiEvent& _e);
+		virtual void write(const synthLib::SMidiEvent& _e);
 
-
-		void read(std::vector<uint8_t>& _result);
+		virtual void read(std::vector<uint8_t>& _result);
 
 		void setSysexDelay(const float _seconds, const uint32_t _size);
 

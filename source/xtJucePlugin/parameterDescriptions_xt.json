@@ -83,6 +83,7 @@
  		{"index":67, "name":"F1EnvVelAmount", "toText":"signed", "isBipolar":true},
 
  		{"index":70, "name":"F1Extra"},
+ 		{"index":70, "name":"F1BPOffset", "displayName":"BP Offset", "toText":"signed", "isBipolar":true},
 
  		{"index":73, "name":"F2Cutoff", "default":127},
  		{"index":74, "name":"F2Type", "min":0, "max":1, "isDiscrete":true, "toText":"filter2Type"},

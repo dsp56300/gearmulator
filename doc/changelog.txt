@@ -1,5 +1,19 @@
 Release Notes 
 
+1.4.5
+
+Xenia:
+
+- [Imp] Add support to load MW1 user waves & tables
+- [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
+        holding shift while dragging
+
+- [Fix] User Tables might sound incorrect because it was not always transmitted
+        to device when being selected
+
+- [Fix] UI: BP Offset values were displayed as unsigned instead of signed 
+        for dual filter
+
 1.4.4
 
 NodalRed2x:
@@ -10,6 +24,10 @@ Xenia:
 
 - [Imp] Add support to load patches from files that include custom waves and
         wavetables
+- [Imp] Wave Editor has been added to create/import/export custom Waves and
+        Control Tables
+- [Imp] Custom Waves/Control Tables are now exported with the Patch when
+        exporting via Patch Manager
 
 - [Fix] Checksum of exported patches was incorrect due to bug in documentation
 - [Fix] Emulator might get stuck while "Reorganising Memory"

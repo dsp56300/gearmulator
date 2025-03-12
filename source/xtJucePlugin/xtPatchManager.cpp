@@ -377,7 +377,9 @@ namespace xtJucePlugin
 		if (!xt::State::parseTableData(table, itTable->second))
 			return;
 
-		for (const auto waveId : table)
+		const auto waves = xt::State::getWavesForTable(table);
+
+		for (const auto waveId : waves)
 		{
 			if(!xt::wave::isValidWaveIndex(waveId.rawId()))
 				continue;

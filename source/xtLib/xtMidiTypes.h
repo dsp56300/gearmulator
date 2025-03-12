@@ -186,14 +186,26 @@ namespace xt
 	namespace Mw1
 	{
 		static constexpr uint32_t g_singleLength = 180;			// without sysex header
+
 		static constexpr uint32_t g_singleDumpLength = 187;		// with sysex header
+		static constexpr uint32_t g_waveDumpLength = 139;
+		static constexpr uint32_t g_tableDumpLength = 264;
+		static constexpr uint32_t g_allWavesAndTablesDumpLength = 10887;
+
 		static constexpr uint32_t g_singleNameLength = 16;
 		static constexpr uint32_t g_singleNamePosition = 153;	// in a dump including sysex header
 		static constexpr uint32_t g_sysexHeaderSize = 5;
 		static constexpr uint32_t g_sysexFooterSize = 2;
 		static constexpr uint32_t g_idmPresetBank = 0x50;
 		static constexpr uint32_t g_idmCartridgeBank = 0x54;
+
 		static constexpr uint32_t g_idmPreset = 0x42;
+		static constexpr uint32_t g_idmWave = 0x44;
+		static constexpr uint32_t g_idmTable = 0x45;
+		static constexpr uint32_t g_idmAllWavesAndTables = 0x53;
+
+		static constexpr uint32_t g_firstRamWaveIndex = 246;
+		static constexpr uint32_t g_firstRamTableIndex = 32;
 	};
 
 	namespace mw2
@@ -207,6 +219,7 @@ namespace xt
 		static constexpr uint16_t g_romWaveCount = 506;
 		static constexpr uint16_t g_ramWaveCount = 250;
 		static constexpr uint16_t g_firstRamWaveIndex = 1000;
+		static constexpr uint16_t g_firstRwRomWaveIndex = 452;	// these are zeroed in the rom, we can write to them to make them useable
 
 		static constexpr uint16_t g_tableCount = 128;
 		static constexpr uint16_t g_wavesPerTable = 64;
@@ -257,6 +270,10 @@ namespace xt
 		{
 			if(!_waveId.isValid())
 				return true;
+			if (_waveId.rawId() < g_firstRwRomWaveIndex)
+				return true;
+			if (_waveId.rawId() < g_romWaveCount)
+				return false;
 			return _waveId.rawId() < g_firstRamWaveIndex;
 		}
 

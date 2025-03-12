@@ -13,10 +13,12 @@ set(SOURCES
 	xtId.cpp xtId.h
 	xtLcd.cpp xtLcd.h
 	xtLeds.cpp xtLeds.h
+	xtMidi.cpp xtMidi.h
 	xtMidiTypes.h
 	xtPic.cpp xtPic.h
 	xtRom.cpp xtRom.h
 	xtRomLoader.cpp xtRomLoader.h
+	xtRomWaves.cpp xtRomWaves.h
 	xtState.cpp xtState.h
 	xtSysexRemoteControl.cpp xtSysexRemoteControl.h
 	xtTypes.h

@@ -3,6 +3,7 @@
 #include "xtDSP.h"
 #include "xtRom.h"
 #include "xtUc.h"
+#include "xtMidi.h"
 
 #include "dsp56kEmu/dspthread.h"
 
@@ -69,6 +70,6 @@ namespace xt
 		TAudioInputs m_audioInputs;
 		TAudioOutputs m_audioOutputs;
 		std::array<DSP,g_dspCount> m_dsps;
-		hwLib::SciMidi m_midi;
+		SciMidi m_midi;
 	};
 }

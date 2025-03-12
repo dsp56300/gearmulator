@@ -420,7 +420,8 @@ namespace xtJucePlugin
 
 				if (xt::State::parseTableData(table, _msg))
 				{
-					for (const auto& wave : table)
+					auto waves = xt::State::getWavesForTable(table);
+					for (const auto& wave : waves)
 					{
 						if (!xt::wave::isReadOnly(wave))
 							requestWave(wave.rawId());

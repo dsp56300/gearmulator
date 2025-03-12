@@ -1993,7 +1993,28 @@
                     },
                     "condition" : {
                         "enableOnParameter" : "F1Type",
-                        "enableOnValues" : "6,7,8,9,12"
+                        "enableOnValues" : "6,8,9,12"
+                    }
+                },
+                {
+                    "name" : "xtKnobBpOffset",
+                    "rotary" : {
+                    },
+                    "spritesheet" : {
+                        "x" : "2695.837",
+                        "y" : "370.17",
+                        "width" : "128",
+                        "height" : "128",
+                        "texture" : "xt_encoder_ranged",
+                        "tileSizeX" : "128",
+                        "tileSizeY" : "128"
+                    },
+                    "parameterAttachment" : {
+                        "parameter" : "F1BPOffset"
+                    },
+                    "condition" : {
+                        "enableOnParameter" : "F1Type",
+                        "enableOnValues" : "7"
                     }
                 },
                 {
