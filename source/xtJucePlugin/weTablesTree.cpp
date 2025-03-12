@@ -57,7 +57,19 @@ namespace xtJucePlugin
 				subItem->setSelected(true, true, juce::dontSendNotification);
 				getRootItem()->getOwnerView()->scrollToKeepItemVisible(subItem);
 
+				const auto& data = getWaveEditor().getData();
+
+				if (const auto t = data.getTable(_id))
+				{
+					const auto waves = xt::State::getWavesForTable(*t);
+					for (auto wave : waves)
+						(void)data.sendWaveToDevice(wave);
+				}
+
+				(void)data.sendTableToDevice(_id);
+
 				auto* paramWave = getWaveParameter();
+
 				if(paramWave->getUnnormalizedValue() != _id.rawId())
 					paramWave->setUnnormalizedValueNotifyingHost(_id.rawId(), pluginLib::Parameter::Origin::Ui);
 

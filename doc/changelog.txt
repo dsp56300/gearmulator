@@ -8,6 +8,9 @@ Xenia:
 - [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
         holding shift while dragging
 
+- [Fix] User Tables might sound incorrect because it was not always transmitted
+        to device when being selected
+
 - [Fix] UI: BP Offset values were displayed as unsigned instead of signed 
         for dual filter
 
