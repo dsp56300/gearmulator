@@ -32,10 +32,8 @@ namespace xtJucePlugin
 		TreeItem::paintItem(_g, _width, _height);
 	}
 
-	void ControlTreeItem::setWave(xt::WaveId _wave)
+	void ControlTreeItem::setWave(const xt::WaveId _wave)
 	{
-		if(m_wave == _wave)
-			return;
 		m_wave = _wave;
 		const auto name = WaveTreeItem::getWaveName(m_wave);
 		char prefix[16] = {0};
