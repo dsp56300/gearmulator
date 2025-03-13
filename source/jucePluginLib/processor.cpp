@@ -66,7 +66,7 @@ namespace pluginLib
 
 	void Processor::handleIncomingMidiMessage(juce::MidiInput *_source, const juce::MidiMessage &_message)
 	{
-		synthLib::SMidiEvent sm(synthLib::MidiEventSource::PhysicalInput);
+		synthLib::SMidiEvent sm(synthLib::MidiEventSource::Physical);
 
 		const auto* raw = _message.getSysExData();
 		if (raw)

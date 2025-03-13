@@ -198,7 +198,7 @@ namespace synthLib
 		Device,			// sent from the device to the outside world, i.e. the device's midi output
 		Editor,			// sent from the editor
 		Host,			// sent from DAW/Host
-		PhysicalInput,	// sent from an additional physical input
+		Physical,		// sent from an additional physical input
 		Internal,		// not to be routed anywhere, internal communication only
 	};
 

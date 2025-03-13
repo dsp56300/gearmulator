@@ -549,7 +549,7 @@ namespace pluginLib
 			return Parameter::Origin::Ui;
 		case synthLib::MidiEventSource::Host:
 			return Parameter::Origin::HostAutomation;
-		case synthLib::MidiEventSource::PhysicalInput:
+		case synthLib::MidiEventSource::Physical:
 		case synthLib::MidiEventSource::Device:
 			return Parameter::Origin::Midi;
 		case synthLib::MidiEventSource::Internal:
