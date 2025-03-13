@@ -262,7 +262,7 @@ namespace mqJucePlugin
 		    auto& params = findSynthParam(part, page, index);
 
 		    for (auto& param : params)
-			    param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
+			    param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
 
 		    LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
 	    }
