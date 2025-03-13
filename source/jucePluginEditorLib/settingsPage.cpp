@@ -1,5 +1,7 @@
 #include "settingsPage.h"
 
+#include "settingsTypes.h"
+
 namespace jucePluginEditorLib
 {
 	SettingsPage::SettingsPage(Settings& _settings) : m_settings(_settings)
@@ -23,7 +25,7 @@ namespace jucePluginEditorLib
 		if (m_page)
 		{
 			addAndMakeVisible(m_page);
-			m_page->setBounds(getLocalBounds());
+			m_page->setBounds(getLocalBounds().reduced(settings::g_spacing, settings::g_spacing));
 		}
 		resized();
 	}

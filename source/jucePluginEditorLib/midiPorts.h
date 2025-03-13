@@ -33,10 +33,15 @@ namespace jucePluginEditorLib
 		static void createMidiOutputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
 		static void createMidiPortsMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts&);
 
+		static void initInputComboBox(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo);
+		static void initOutputComboBox(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo);
+
+		static void updateMidiInput(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo, int _index);
+		static void updateMidiOutput(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo, int _index);
+
 	private:
 		pluginLib::MidiPorts& getMidiPorts() const;
 
-		void showMidiPortFailedMessage(const char* _name) const;
 		static void showMidiPortFailedMessage(const pluginLib::Processor& _processor, const char* _name);
 
 		void updateMidiInput(int _index) const;

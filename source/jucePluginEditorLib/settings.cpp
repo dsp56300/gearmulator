@@ -10,9 +10,13 @@ namespace jucePluginEditorLib
 		addAndMakeVisible(m_page);
 
 		doLayout();
+
+		juce::MessageManager::callAsync([this]
+		{
+			m_categories.selectLastCategory();
+		});
 	}
-	Settings::~Settings()
-	= default;
+	Settings::~Settings() = default;
 
 	void Settings::paint(juce::Graphics& g)
 	{

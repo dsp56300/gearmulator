@@ -54,17 +54,11 @@ namespace jucePluginEditorLib
 		m_midiOut = _editor.findComponentT<juce::ComboBox>("MidiOut", false);
 
 		if(m_midiIn)
-		{
-			initComboBox(m_midiIn, juce::MidiInput::getAvailableDevices(), getMidiPorts().getInputId());
-			m_midiIn->onChange = [this]{ updateMidiInput(m_midiIn->getSelectedItemIndex()); };
-		}
+			initInputComboBox(getMidiPorts(), m_midiIn);
 
 		if(m_midiOut)
-		{
-			initComboBox(m_midiOut, juce::MidiOutput::getAvailableDevices(), getMidiPorts().getOutputId());
-			m_midiOut->onChange = [this]{ updateMidiOutput(m_midiOut->getSelectedItemIndex()); };
-		}
-   	}
+			initOutputComboBox(getMidiPorts(), m_midiOut);
+	}
 
 	void MidiPorts::createMidiInputMenu(juce::PopupMenu& _menu, pluginLib::MidiPorts& _ports)
 	{
@@ -97,14 +91,69 @@ namespace jucePluginEditorLib
 		_menu.addSubMenu("MIDI Ports", ports);
 	}
 
+	void MidiPorts::initInputComboBox(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo)
+	{
+		initComboBox(_combo, juce::MidiInput::getAvailableDevices(), _ports.getInputId());
+		_combo->onChange = [&_ports, _combo]{ updateMidiInput(_ports, _combo, _combo->getSelectedItemIndex()); };
+	}
+
+	void MidiPorts::initOutputComboBox(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo)
+	{
+		initComboBox(_combo, juce::MidiOutput::getAvailableDevices(), _ports.getOutputId());
+		_combo->onChange = [&_ports, _combo]{ updateMidiOutput(_ports, _combo, _combo->getSelectedItemIndex()); };
+	}
+
+	void MidiPorts::updateMidiInput(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo, int _index)
+	{
+	    const auto list = juce::MidiInput::getAvailableDevices();
+
+	    if (_index <= 0)
+	    {
+	        _combo->setSelectedItemIndex(_index, juce::dontSendNotification);
+	        return;
+	    }
+
+		_index--;
+
+		const auto newInput = list[_index];
+
+	    if (!_ports.setMidiInput(newInput.identifier))
+	    {
+			showMidiPortFailedMessage(_ports.getProcessor(), "Input");
+	        _combo->setSelectedItemIndex(0, juce::dontSendNotification);
+	        return;
+	    }
+
+	    _combo->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+	}
+
+	void MidiPorts::updateMidiOutput(pluginLib::MidiPorts& _ports, juce::ComboBox* _combo, int _index)
+	{
+	    const auto list = juce::MidiOutput::getAvailableDevices();
+
+	    if (_index == 0)
+	    {
+	        _combo->setSelectedItemIndex(_index, juce::dontSendNotification);
+	        _ports.setMidiOutput({});
+	        return;
+	    }
+
+	    _index--;
+
+		const auto newOutput = list[_index];
+	    if (!_ports.setMidiOutput(newOutput.identifier))
+	    {
+			showMidiPortFailedMessage(_ports.getProcessor(), "Output");
+	        _combo->setSelectedItemIndex(0, juce::dontSendNotification);
+	        return;
+	    }
+	    
+	    _combo->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+	}
+
 	pluginLib::MidiPorts& MidiPorts::getMidiPorts() const
 	{
 		return m_processor.getMidiPorts();
-	}
-
-	void MidiPorts::showMidiPortFailedMessage(const char* _name) const
-	{
-		showMidiPortFailedMessage(m_processor, _name);
 	}
 
 	void MidiPorts::showMidiPortFailedMessage(const pluginLib::Processor& _processor, const char* _name)
@@ -116,47 +165,11 @@ namespace jucePluginEditorLib
 
 	void MidiPorts::updateMidiInput(int _index) const
 	{
-	    const auto list = juce::MidiInput::getAvailableDevices();
-
-	    if (_index <= 0)
-	    {
-	        m_midiIn->setSelectedItemIndex(_index, juce::dontSendNotification);
-	        return;
-	    }
-
-		_index--;
-
-		const auto newInput = list[_index];
-
-	    if (!getMidiPorts().setMidiInput(newInput.identifier))
-	    {
-			showMidiPortFailedMessage("Input");
-	        m_midiIn->setSelectedItemIndex(0, juce::dontSendNotification);
-	        return;
-	    }
-
-	    m_midiIn->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+		updateMidiInput(getMidiPorts(), m_midiIn, _index);
 	}
 
 	void MidiPorts::updateMidiOutput(int _index) const
 	{
-	    const auto list = juce::MidiOutput::getAvailableDevices();
-
-	    if (_index == 0)
-	    {
-	        m_midiOut->setSelectedItemIndex(_index, juce::dontSendNotification);
-	        getMidiPorts().setMidiOutput({});
-	        return;
-	    }
-	    _index--;
-	    const auto newOutput = list[_index];
-	    if (!getMidiPorts().setMidiOutput(newOutput.identifier))
-	    {
-			showMidiPortFailedMessage("Output");
-	        m_midiOut->setSelectedItemIndex(0, juce::dontSendNotification);
-	        return;
-	    }
-	    
-	    m_midiOut->setSelectedItemIndex(_index + 1, juce::dontSendNotification);
+		updateMidiOutput(getMidiPorts(), m_midiOut, _index);
 	}
 }

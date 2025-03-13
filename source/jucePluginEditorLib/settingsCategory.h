@@ -7,15 +7,13 @@ namespace jucePluginEditorLib
 	class SettingsPlugin;
 	class Settings;
 
-	class SettingsCategory final : public juce::Component, public juce::LookAndFeel_V4
+	class SettingsCategory final : public juce::Component
 	{
 	public:
 		explicit SettingsCategory(Settings& _settings, SettingsPlugin* _plugin);
 		~SettingsCategory() override;
 		void paint(juce::Graphics& g) override;
 		void resized() override;
-
-		juce::Font getTextButtonFont(juce::TextButton&, int _buttonHeight) override;
 
 		void setSelected(bool _selected);
 		SettingsPlugin* getPlugin() const { return m_plugin; }

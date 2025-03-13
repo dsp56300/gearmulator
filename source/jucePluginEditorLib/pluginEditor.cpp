@@ -586,7 +586,7 @@ namespace jucePluginEditorLib
 
 	void Editor::registerSettings(std::vector<std::unique_ptr<SettingsPlugin>>& _plugins)
 	{
-		_plugins.push_back(std::make_unique<SettingsMidi>());
+		_plugins.push_back(std::make_unique<SettingsMidi>(getProcessor()));
 	}
 
 	bool Editor::keyPressed(const juce::KeyPress& _key)

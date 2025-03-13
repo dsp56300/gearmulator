@@ -2,6 +2,7 @@
 
 #include "settings.h"
 #include "settingsPlugin.h"
+#include "settingsStyles.h"
 
 namespace jucePluginEditorLib
 {
@@ -10,7 +11,7 @@ namespace jucePluginEditorLib
 		addAndMakeVisible(m_button);
 
 		m_button.setButtonText(m_plugin->getCategoryName());
-		m_button.setLookAndFeel(this);
+		m_button.setLookAndFeel(&settings::getStyle());
 		m_button.onClick = [this]
 		{
 			m_settings.setSelectedCategory(this);
@@ -29,12 +30,7 @@ namespace jucePluginEditorLib
 
 	void SettingsCategory::resized()
 	{
-		m_button.centreWithSize(getWidth() - 20, getHeight() - 20);
-	}
-
-	juce::Font SettingsCategory::getTextButtonFont(juce::TextButton& _textButton, const int _buttonHeight)
-	{
-	    return { static_cast<float>(_buttonHeight) * 0.7f };
+		m_button.centreWithSize(getWidth(), getHeight());
 	}
 
 	void SettingsCategory::setSelected(const bool _selected)

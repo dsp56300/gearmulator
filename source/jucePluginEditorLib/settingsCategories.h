@@ -24,6 +24,7 @@ namespace jucePluginEditorLib
 		void paint(juce::Graphics& g) override;
 		void resized() override;
 		void setSelectedCategory(const SettingsCategory* _settingsCategory);
+		void selectLastCategory();
 
 	private:
 		void doLayout();

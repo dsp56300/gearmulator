@@ -22,6 +22,8 @@ set(SOURCES
 	settingsMidi.cpp settingsMidi.h
 	settingsPage.cpp settingsPage.h
 	settingsPlugin.cpp settingsPlugin.h
+	settingsStyles.cpp settingsStyles.h
+	settingsTypes.h
 	skin.h
 )
 
