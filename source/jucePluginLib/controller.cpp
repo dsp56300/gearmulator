@@ -544,6 +544,7 @@ namespace pluginLib
 		switch (_source)
 		{
 		case synthLib::MidiEventSource::Unknown:
+			assert(false && "unknown midi event source type is unexpected");
 			return Parameter::Origin::Unknown;
 		case synthLib::MidiEventSource::Editor:
 			return Parameter::Origin::Ui;
