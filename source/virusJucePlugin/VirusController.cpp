@@ -112,7 +112,7 @@ namespace virus
 				// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
 				// host automation because the host thinks we "edit" the parameter
 				if(_source != synthLib::MidiEventSource::Device)
-	                parseParamChange(data);
+	                parseParamChange(data, _source);
             }
             else
             {
@@ -135,7 +135,7 @@ namespace virus
 		return parseControllerDump(e);
     }
 
-    void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data)
+    void Controller::parseParamChange(const pluginLib::MidiPacket::Data& _data, synthLib::MidiEventSource _source)
     {
     	const auto page  = _data.find(pluginLib::MidiDataType::Page)->second;
 		const auto part  = _data.find(pluginLib::MidiDataType::Part)->second;
@@ -162,10 +162,10 @@ namespace virus
 				}
             }
 			for (const auto& param : globalParams)
-				param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
+				param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
 		}
 		for (const auto& param : partParams)
-			param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
+			param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
 		// TODO:
         /**
          If a
@@ -535,10 +535,10 @@ namespace virus
 		}
     }
 
-	bool Controller::parseControllerDump(const synthLib::SMidiEvent& m) const
+	bool Controller::parseControllerDump(const synthLib::SMidiEvent& _e) const
 	{
-		const uint8_t status = m.a & 0xf0;
-    	const uint8_t part = m.a & 0x0f;
+		const uint8_t status = _e.a & 0xf0;
+    	const uint8_t part = _e.a & 0x0f;
 
 		uint8_t page;
 
@@ -549,7 +549,7 @@ namespace virus
 		else if (status == synthLib::M_POLYPRESSURE)
 		{
 			// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
-			if(m.source != synthLib::MidiEventSource::Device)
+			if(_e.source != synthLib::MidiEventSource::Device)
 				return false;
 			page = virusLib::PAGE_B;
 		}
@@ -579,9 +579,9 @@ namespace virus
 			return false;
 		}
 
-		const auto& params = findSynthParam(part, page, m.b);
+		const auto& params = findSynthParam(part, page, _e.b);
 		for (const auto & p : params)
-			p->setValueFromSynth(m.c, pluginLib::Parameter::Origin::Midi);
+			p->setValueFromSynth(_e.c, midiEventSourceToParameterOrigin(_e.source));
 
 		return true;
 	}
