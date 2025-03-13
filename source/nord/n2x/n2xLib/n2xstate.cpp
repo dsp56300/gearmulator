@@ -612,7 +612,7 @@ namespace n2x
 
 	void State::send(const synthLib::SMidiEvent& _e) const
 	{
-		if(_e.source == synthLib::MidiEventSource::Plugin)
+		if(_e.source == synthLib::MidiEventSource::Device)
 			return;
 
 		if(m_hardware)

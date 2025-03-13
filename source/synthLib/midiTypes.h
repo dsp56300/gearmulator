@@ -195,10 +195,10 @@ namespace synthLib
 	enum class MidiEventSource
 	{
 		Unknown,
-		Plugin,			// sent from the plugin to the outside world, i.e. the plugins midi output
-		Editor,			// sent from the editor to the plugins input
-		Host,			// sent from DAW/Host to plugin
-		PhysicalInput,	// sent from an additional physical input to the plugin and the editor
+		Device,			// sent from the device to the outside world, i.e. the device's midi output
+		Editor,			// sent from the editor
+		Host,			// sent from DAW/Host
+		PhysicalInput,	// sent from an additional physical input
 		Internal,		// not to be routed anywhere, internal communication only
 	};
 

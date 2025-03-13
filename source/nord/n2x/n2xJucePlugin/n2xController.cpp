@@ -106,7 +106,7 @@ namespace n2xJucePlugin
 
 		if(bank == n2x::SysexByte::SingleDumpBankEditBuffer && program < getPartCount())
 		{
-			m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
+			m_state.receive(_msg, synthLib::MidiEventSource::Device);
 			applyPatchParameters(params, program);
 			onProgramChanged();
 			return true;
@@ -133,7 +133,7 @@ namespace n2xJucePlugin
 		if(bank != n2x::SysexByte::MultiDumpBankEditBuffer)
 			return false;
 
-		m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
+		m_state.receive(_msg, synthLib::MidiEventSource::Device);
 
 		applyPatchParameters(params, 0);
 

@@ -111,7 +111,7 @@ namespace virus
             {
 				// TI DSP sends parameter changes back as sysex, unsure why. Ignore them as it stops
 				// host automation because the host thinks we "edit" the parameter
-				if(_source != synthLib::MidiEventSource::Plugin)
+				if(_source != synthLib::MidiEventSource::Device)
 	                parseParamChange(data);
             }
             else
@@ -549,7 +549,7 @@ namespace virus
 		else if (status == synthLib::M_POLYPRESSURE)
 		{
 			// device decides if PP is enabled and will echo any parameter change to us. Reject any other source
-			if(m.source != synthLib::MidiEventSource::Plugin)
+			if(m.source != synthLib::MidiEventSource::Device)
 				return false;
 			page = virusLib::PAGE_B;
 		}

@@ -35,7 +35,7 @@ namespace synthLib
 			if(d >= 0xf0)
 			{
 				// system realtime intercepting sysex
-				m_midiEvents.emplace_back(MidiEventSource::Plugin, d);
+				m_midiEvents.emplace_back(MidiEventSource::Device, d);
 				return;
 			}
 
@@ -68,7 +68,7 @@ namespace synthLib
 		if(m_sysexBuffer.empty())
 			return;
 
-		synthLib::SMidiEvent ev(MidiEventSource::Plugin);
+		synthLib::SMidiEvent ev(MidiEventSource::Device);
 		ev.sysex.swap(m_sysexBuffer);
 
 		if(ev.sysex.back() != synthLib::M_ENDOFSYSEX)
