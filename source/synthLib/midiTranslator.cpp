@@ -98,9 +98,9 @@ namespace synthLib
 		return _ev;
 	}
 
-	SMidiEvent MidiTranslator::createPacketSetTargetChannel(const uint8_t _sourceChannel, const uint8_t _targetChannel)
+	SMidiEvent MidiTranslator::createPacketSetTargetChannel(MidiEventSource _source, const uint8_t _sourceChannel, const uint8_t _targetChannel)
 	{
-		SMidiEvent e;
+		SMidiEvent e(_source);
 		e.sysex = { 0xf0, ManufacturerId, CmdAddTargetChannel, _sourceChannel, _targetChannel, 0xf7 };
 		return e;
 	}
