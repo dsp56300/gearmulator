@@ -25,9 +25,6 @@ namespace synthLib
 		setEnabled(MidiEventSource::Device, MidiEventSource::Editor, EventType::All, true);
 		setEnabled(MidiEventSource::Editor, MidiEventSource::Device, EventType::All, true);
 
-		// editor will send messages to itself
-		setEnabled(MidiEventSource::Editor, MidiEventSource::Editor, EventType::All, true);
-
 		// device sends internal messages for LCD updates and LFO phases, only the editor needs it
 		setEnabled(MidiEventSource::Internal, MidiEventSource::Editor, EventType::All, true);
 
