@@ -59,9 +59,14 @@ namespace pluginLib
 		m_device.reset();
 	}
 
-	void Processor::addMidiEvent(const synthLib::SMidiEvent& ev)
+	void Processor::addMidiEvent(const synthLib::SMidiEvent& _ev)
 	{
-		getPlugin().addMidiEvent(ev);
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Editor))
+			getController().enqueueMidiMessages({_ev});
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Device))
+			getPlugin().addMidiEvent(_ev);
+		if (m_midiRoutingMatrix.enabled(_ev, synthLib::MidiEventSource::Physical))
+			m_midiPorts.send(_ev);
 	}
 
 	void Processor::handleIncomingMidiMessage(juce::MidiInput *_source, const juce::MidiMessage &_message)
@@ -72,7 +77,7 @@ namespace pluginLib
 		if (raw)
 		{
 			const auto count = _message.getSysExDataSize();
-			auto syx = pluginLib::SysEx();
+			auto syx = SysEx();
 			syx.push_back(0xf0);
 			for (int i = 0; i < count; i++)
 			{
@@ -80,9 +85,6 @@ namespace pluginLib
 			}
 			syx.push_back(0xf7);
 			sm.sysex = std::move(syx);
-
-			getController().enqueueMidiMessages({sm});
-			addMidiEvent(sm);
 		}
 		else
 		{
@@ -101,10 +103,9 @@ namespace pluginLib
 					syx.push_back(rawData[i]);
 				sm.sysex = syx;
 			}
-
-			getController().enqueueMidiMessages({sm});
-			addMidiEvent(sm);
 		}
+
+		addMidiEvent(sm);
 	}
 
 	Controller& Processor::getController()
@@ -609,11 +610,11 @@ namespace pluginLib
 	    synthLib::TAudioInputs inputs{};
 	    synthLib::TAudioOutputs outputs{};
 
-	    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    		inputs[channel] = buffer.getReadPointer(channel);
+		for (int channel = 0; channel < totalNumInputChannels; ++channel)
+			inputs[channel] = buffer.getReadPointer(channel);
 
-	    for (int channel = 0; channel < totalNumOutputChannels; ++channel)
-    		outputs[channel] = buffer.getWritePointer(channel);
+		for (int channel = 0; channel < totalNumOutputChannels; ++channel)
+			outputs[channel] = buffer.getWritePointer(channel);
 
 		for(const auto metadata : midiMessages)
 		{
@@ -644,19 +645,11 @@ namespace pluginLib
 				ev.a = message.getRawData()[0];
 				ev.b = message.getRawDataSize() > 0 ? message.getRawData()[1] : 0;
 				ev.c = message.getRawDataSize() > 1 ? message.getRawData()[2] : 0;
-
-				const auto status = ev.a & 0xf0;
-
-				if(status == synthLib::M_CONTROLCHANGE || status == synthLib::M_POLYPRESSURE || status == synthLib::M_PROGRAMCHANGE)
-				{
-					// forward to UI to react to control input changes that should move knobs
-					getController().enqueueMidiMessages({ev});
-				}
 			}
 
 			ev.offset = metadata.samplePosition;
 
-			getPlugin().addMidiEvent(ev);
+			addMidiEvent(ev);
 		}
 
 		midiMessages.clear();
@@ -690,40 +683,8 @@ namespace pluginLib
 		m_midiOut.clear();
 		getPlugin().getMidiOut(m_midiOut);
 
-	    if (!m_midiOut.empty())
-		{
-			getController().enqueueMidiMessages(m_midiOut);
-
-		    for (auto& e : m_midiOut)
-		    {
-			    if (e.source == synthLib::MidiEventSource::Editor || e.source == synthLib::MidiEventSource::Internal)
-					continue;
-
-				auto toJuceMidiMessage = [&e]()
-				{
-					if(!e.sysex.empty())
-					{
-						assert(e.sysex.front() == 0xf0);
-						assert(e.sysex.back() == 0xf7);
-
-						return juce::MidiMessage(e.sysex.data(), static_cast<int>(e.sysex.size()), 0.0);
-					}
-					const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(e.a);
-					if(len == 1)
-						return juce::MidiMessage(e.a, 0.0);
-					if(len == 2)
-						return juce::MidiMessage(e.a, e.b, 0.0);
-					return juce::MidiMessage(e.a, e.b, e.c, 0.0);
-				};
-
-				const juce::MidiMessage message = toJuceMidiMessage();
-				midiMessages.addEvent(message, 0);
-
-				// additionally send to the midi output we've selected in the editor
-				if (auto* out = m_midiPorts.getMidiOutput())
-					out->sendMessageNow(message);
-		    }
-		}
+	    for (auto& e : m_midiOut)
+		    addMidiEvent(e);
 	}
 
 	void Processor::processBlockBypassed(juce::AudioBuffer<float>& _buffer, juce::MidiBuffer& _midiMessages)

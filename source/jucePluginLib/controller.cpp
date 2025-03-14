@@ -179,7 +179,7 @@ namespace pluginLib
 
 	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSource::Editor*/) const
 	{
-        m_processor.addMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
+        sendMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
 	}
 
 	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, ParamValue _value) const
@@ -523,9 +523,26 @@ namespace pluginLib
 		if(_events.empty())
 			return;
 
-        const std::lock_guard l(m_midiMessagesLock);
-        m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
-		if(!isTimerRunning())
+		const auto& matrix = m_processor.getMidiRoutingMatrix();
+
+		size_t numAdded = 0;
+
+		const std::lock_guard l(m_midiMessagesLock);
+
+		for (const auto& e : _events)
+		{
+			if (!matrix.enabled(e, synthLib::MidiEventSource::Editor))
+			{
+				if (!e.sysex.empty())
+					int foo=0;
+				continue;
+			}
+
+			m_midiMessages.push_back(e);
+			++numAdded;
+		}
+
+		if(numAdded && !isTimerRunning())
 			startTimer(1);
 	}
 
