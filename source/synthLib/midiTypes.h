@@ -193,7 +193,7 @@ namespace synthLib
 		Note_C8, Note_Cis8, Note_D8, Note_Dis8, Note_E8, Note_F8, Note_Fis8, Note_G8
 	};
 
-	enum class MidiEventSource
+	enum class MidiEventSource : uint8_t
 	{
 		Unknown,
 		Device,			// sent from the device to the outside world, i.e. the device's midi output
@@ -201,6 +201,8 @@ namespace synthLib
 		Host,			// sent from DAW/Host
 		Physical,		// sent from an additional physical input
 		Internal,		// not to be routed anywhere, internal communication only
+
+		Count
 	};
 
 	struct SMidiEvent
