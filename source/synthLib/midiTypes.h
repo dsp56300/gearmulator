@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <vector>
 #include <cstdint>
 
@@ -212,6 +213,47 @@ namespace synthLib
 		SMidiEvent(const MidiEventSource _source = MidiEventSource::Unknown, const uint8_t _a = 0, const uint8_t _b = 0, const uint8_t _c = 0, const uint32_t _offset = 0)
 			: a(_a), b(_b), c(_c), offset(_offset), source(_source)
 		{
+		}
+
+		SMidiEvent(const SMidiEvent& _e) : a(_e.a), b(_e.b), c(_e.c), sysex(_e.sysex), offset(_e.offset), source(_e.source)
+		{
+			assert(empty() || source != MidiEventSource::Unknown);
+		}
+
+		SMidiEvent(SMidiEvent&& _e) noexcept : a(_e.a), b(_e.b), c(_e.c), sysex(std::move(_e.sysex)), offset(_e.offset), source(_e.source)
+		{
+			assert(empty() || source != MidiEventSource::Unknown);
+		}
+
+		~SMidiEvent() = default;
+
+		SMidiEvent& operator = (const SMidiEvent& _e)
+		{
+			a = _e.a;
+			b = _e.b;
+			c = _e.c;
+			sysex = _e.sysex;
+			offset = _e.offset;
+			source = _e.source;
+			assert(empty() || source != MidiEventSource::Unknown);
+			return *this;
+		}
+
+		SMidiEvent& operator = (SMidiEvent&& _e) noexcept
+		{
+			a = _e.a;
+			b = _e.b;
+			c = _e.c;
+			sysex = std::move(_e.sysex);
+			offset = _e.offset;
+			source = _e.source;
+			assert(empty() || source != MidiEventSource::Unknown);
+			return *this;
+		}
+
+		bool empty() const
+		{
+			return a == 0 && sysex.empty();
 		}
 	};
 }
