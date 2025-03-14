@@ -271,7 +271,7 @@ namespace n2x
 					m_midiTranslator->addTargetChannel(ch, i);
 				}
 
-				synthLib::SMidiEvent e;
+				synthLib::SMidiEvent e(_ev.source);
 				e.sysex.assign(dump.begin(), dump.end());
 				send(e);
 			}
