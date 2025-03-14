@@ -141,7 +141,7 @@ namespace mqLib
 		requestGlobal();
 //		m_mq.sendMidi({0xf0, IdWaldorf, IdMicroQ, IdDeviceOmni, static_cast<uint8_t>(SysexCommand::ModeRequest), 0xf7});
 
-		synthLib::MidiBufferParser parser;
+		synthLib::MidiBufferParser parser(synthLib::MidiEventSource::Device);
 		Responses unused;
 		std::vector<uint8_t> midi;
 		std::vector<synthLib::SMidiEvent> events;
