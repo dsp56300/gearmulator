@@ -111,7 +111,7 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 				}
 
 				m_readSysex = false;
-				synthLib::SMidiEvent ev(synthLib::MidiEventSource::PhysicalInput);
+				synthLib::SMidiEvent ev(synthLib::MidiEventSource::Physical);
 				std::swap(m_sysexBuffer, ev.sysex);
 				m_sysexBuffer.clear();
 				_events.emplace_back(ev);
@@ -123,6 +123,6 @@ void MidiInput::process(std::vector<synthLib::SMidiEvent>& _events, uint32_t _me
 	}
 
 	if(!m_readSysex)
-		_events.emplace_back(synthLib::MidiEventSource::PhysicalInput, bytes[0], bytes[1], bytes[2]);
+		_events.emplace_back(synthLib::MidiEventSource::Physical, bytes[0], bytes[1], bytes[2]);
 }
 }

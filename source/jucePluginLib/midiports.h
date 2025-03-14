@@ -2,7 +2,14 @@
 
 #include <memory>
 
+#include "dsp56kEmu/ringbuffer.h"
+
 #include "juce_audio_devices/juce_audio_devices.h"
+
+namespace synthLib
+{
+	struct SMidiEvent;
+}
 
 namespace baseLib
 {
@@ -45,13 +52,36 @@ namespace pluginLib
 		void saveChunkData(baseLib::BinaryStream& _binaryStream) const;
 		void loadChunkData(baseLib::ChunkReader& _cr);
 
+		void send(juce::MidiMessage&& _message)
+		{
+			m_midiOutMessages.push_back(std::move(_message));
+		}
+
+		void send(const juce::MidiMessage& _message)
+		{
+			m_midiOutMessages.push_back(_message);
+		}
+
+		void send(const synthLib::SMidiEvent& _message)
+		{
+			return send(toJuceMidiMessage(_message));
+		}
+
+		static juce::MidiMessage toJuceMidiMessage(const synthLib::SMidiEvent& _e);
+
 	private:
 	    void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message) override;
+
+		void senderThread();
 
 		Processor& m_processor;
 
 		std::unique_ptr<juce::MidiOutput> m_midiOutput{};
 		std::unique_ptr<juce::MidiInput> m_midiInput{};
 		std::unique_ptr<juce::AudioDeviceManager> m_deviceManager;
+
+		dsp56k::RingBuffer<juce::MidiMessage, 128, true> m_midiOutMessages;
+		std::mutex m_mutexOutput;
+		std::unique_ptr<std::thread> m_threadOutput;
 	};
 }

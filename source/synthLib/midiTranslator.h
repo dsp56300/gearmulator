@@ -7,6 +7,7 @@
 
 namespace synthLib
 {
+	enum class MidiEventSource : uint8_t;
 	struct SMidiEvent;
 
 	// This class receives midi events and can transform the incoming midi channels to one or more target channels.
@@ -43,7 +44,7 @@ namespace synthLib
 		void clear();
 
 		static SMidiEvent& createPacketSkipTranslation(SMidiEvent& _ev);
-		static SMidiEvent createPacketSetTargetChannel(uint8_t _sourceChannel, uint8_t _targetChannel);
+		static SMidiEvent createPacketSetTargetChannel(MidiEventSource _source, uint8_t _sourceChannel, uint8_t _targetChannel);
 
 	private:
 		std::array<std::set<uint8_t>, 16> m_targetChannels;

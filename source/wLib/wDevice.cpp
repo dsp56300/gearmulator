@@ -4,7 +4,7 @@
 
 namespace wLib
 {
-	Device::Device(const synthLib::DeviceCreateParams& _params): synthLib::Device(_params)
+	Device::Device(const synthLib::DeviceCreateParams& _params): synthLib::Device(_params), m_midiOutParser(synthLib::MidiEventSource::Device)
 	{
 	}
 

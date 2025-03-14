@@ -9,6 +9,7 @@ namespace n2x
 		: synthLib::Device(_params)
 		, m_hardware(_params.romData, _params.romName)
 		, m_state(&m_hardware, &getMidiTranslator())
+		, m_midiParser(synthLib::MidiEventSource::Device)
 	{
 	}
 

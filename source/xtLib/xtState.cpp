@@ -255,7 +255,7 @@ namespace xt
 		requestGlobal();
 		requestMode();
 
-		synthLib::MidiBufferParser parser;
+		synthLib::MidiBufferParser parser(synthLib::MidiEventSource::Device);
 		Responses unused;
 		std::vector<uint8_t> midi;
 		std::vector<synthLib::SMidiEvent> events;

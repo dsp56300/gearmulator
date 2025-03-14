@@ -463,7 +463,7 @@ bool Microcontroller::sendMIDI(const SMidiEvent& _ev, FrontpanelState* _fpState/
 			{
 				applyToSingleEditBuffer(PAGE_B, singleMode ? SINGLE : channel, _ev.b, _ev.c);
 				auto e = _ev;
-				e.source = MidiEventSource::Plugin;
+				e.source = MidiEventSource::Device;
 				m_midiOutput.push_back(e);
 			}
 		}

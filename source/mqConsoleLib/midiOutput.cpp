@@ -9,7 +9,7 @@ extern PmTimestamp returnTimeProc(void*);
 
 namespace mqConsoleLib
 {
-MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName, true)
+MidiOutput::MidiOutput(const std::string& _deviceName) : MidiDevice(_deviceName, true), m_parser(synthLib::MidiEventSource::Device)
 {
 	Device::openDevice();
 }
