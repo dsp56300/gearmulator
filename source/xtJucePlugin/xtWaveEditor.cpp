@@ -593,7 +593,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		const std::function onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;
@@ -620,7 +620,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		auto onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;
