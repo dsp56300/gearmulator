@@ -6,7 +6,7 @@ namespace jucePluginEditorLib
 {
 	namespace settings
 	{
-		class Style final : public juce::LookAndFeel_V4
+		class Style : public juce::LookAndFeel_V4
 		{
 		public:
 			void apply(juce::Component* _component);
@@ -15,6 +15,19 @@ namespace jucePluginEditorLib
 			juce::Font getLabelFont(juce::Label&) override;
 		};
 
+		class StyleHeadline1 final : public Style
+		{
+			juce::Font getLabelFont(juce::Label&) override;
+			void drawLabel(juce::Graphics&, juce::Label&) override;
+		};
+
+		class StyleHeadline2 final : public Style
+		{
+			juce::Font getLabelFont(juce::Label&) override;
+		};
+
 		Style& getStyle();
+		Style& getStyleHeadline1();
+		Style& getStyleHeadline2();
 	}
 }

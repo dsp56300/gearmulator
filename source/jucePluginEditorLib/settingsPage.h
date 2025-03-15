@@ -18,5 +18,6 @@ namespace jucePluginEditorLib
 	private:
 		Settings& m_settings;
 		juce::Component* m_page = nullptr;
+		std::unique_ptr<juce::Viewport> m_viewport;
 	};
 }
