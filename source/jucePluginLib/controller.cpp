@@ -514,7 +514,7 @@ namespace pluginLib
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
 		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getControlledParameters(_e);
+		const auto paramIndices = cm.getParameters(_e);
 
 		if(paramIndices.empty())
 			return false;

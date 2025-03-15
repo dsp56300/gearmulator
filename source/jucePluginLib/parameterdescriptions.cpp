@@ -779,6 +779,7 @@ namespace pluginLib
 	{
 		const auto ccStr = _value["cc"].toString().toStdString();
 		const auto ppStr = _value["pp"].toString().toStdString();
+		const auto nrpnStr = _value["nrpn"].toString().toStdString();
 		const auto paramName = _value["param"].toString().toStdString();
 
 		if(ccStr.empty() && ppStr.empty())
@@ -787,10 +788,9 @@ namespace pluginLib
 			return;
 		}
 
-		static constexpr uint8_t Invalid = 0xff;
-
-		uint8_t cc = Invalid;
-		uint8_t pp = Invalid;
+		uint8_t cc = 0xff;
+		uint8_t pp = 0xff;
+		uint16_t nrpn = 0xffff;
 
 		if(!ccStr.empty())
 		{
@@ -812,6 +812,16 @@ namespace pluginLib
 			}
 		}
 
+		if(!nrpnStr.empty())
+		{
+			nrpn = static_cast<uint8_t>(::strtol(nrpnStr.c_str(), nullptr, 16));
+			if(nrpn < 0 || nrpn > 0x3fff)
+			{
+				_errors << "NRPN parameter needs to be in range $0-$3fff, param " << paramName << '\n';
+				return;
+			}
+		}
+
 		if(paramName.empty())
 		{
 			_errors << "Target parameter name 'param' must not be empty\n";
@@ -826,10 +836,13 @@ namespace pluginLib
 			return;
 		}
 
-		if(cc != Invalid)
+		if(cc != 0xff)
 			m_controllerMap.add(synthLib::M_CONTROLCHANGE, cc, paramIndex);
 
-		if(pp != Invalid)
+		if(pp != 0xff)
 			m_controllerMap.add(synthLib::M_POLYPRESSURE, pp, paramIndex);
+
+		if(nrpn != 0xffff)
+			m_controllerMap.add(ControllerMap::NrpnType, nrpn, paramIndex);
 	}
 }
