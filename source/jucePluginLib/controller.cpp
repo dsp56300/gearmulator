@@ -560,11 +560,7 @@ namespace pluginLib
 		for (const auto& e : _events)
 		{
 			if (!matrix.enabled(e, synthLib::MidiEventSource::Editor))
-			{
-				if (!e.sysex.empty())
-					int foo=0;
 				continue;
-			}
 
 			m_midiMessages.push_back(e);
 			++numAdded;
