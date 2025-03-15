@@ -263,6 +263,7 @@ namespace pluginLib
 		}
 
 		m_midiPorts.saveChunkData(s);
+		m_midiRoutingMatrix.saveChunkData(s);
 	}
 
 	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
@@ -314,6 +315,7 @@ namespace pluginLib
 		});
 
 		m_midiPorts.loadChunkData(_cr);
+		m_midiRoutingMatrix.loadChunkData(_cr);
 	}
 
 	void Processor::readGain(baseLib::BinaryStream& _s)

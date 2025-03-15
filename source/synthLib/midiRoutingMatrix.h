@@ -5,6 +5,8 @@
 
 #include "midiTypes.h"
 
+#include "baseLib/binarystream.h"
+
 namespace synthLib
 {
 	class MidiRoutingMatrix
@@ -33,6 +35,9 @@ namespace synthLib
 		friend constexpr EventType& operator |= (EventType& _a, const EventType _b) { _a = _a | _b; return _a; }
 		friend constexpr EventType& operator &= (EventType& _a, const EventType _b) { _a = _a & _b; return _a; }
 		friend constexpr EventType operator ~ (EventType& _a) { return static_cast<EventType>(~static_cast<uint8_t>(_a)); }
+
+		void saveChunkData(baseLib::BinaryStream& _binaryStream) const;
+		void loadChunkData(baseLib::ChunkReader& _cr);
 
 		MidiRoutingMatrix();
 

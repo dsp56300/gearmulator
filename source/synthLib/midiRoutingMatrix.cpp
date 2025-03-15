@@ -47,4 +47,27 @@ namespace synthLib
 	{
 		return g_sourceNames[static_cast<uint32_t>(_source)];
 	}
+
+	void MidiRoutingMatrix::saveChunkData(baseLib::BinaryStream& _binaryStream) const
+	{
+		baseLib::ChunkWriter cw(_binaryStream, "MiRM", 1);
+
+		for (const auto& e : m_matrix)
+		{
+			for (const auto& f : e)
+				_binaryStream.write(static_cast<uint8_t>(f));
+		}
+	}
+
+	void MidiRoutingMatrix::loadChunkData(baseLib::ChunkReader& _cr)
+	{
+		_cr.add("MiRM", 1, [&](baseLib::BinaryStream& _data, uint32_t)
+		{
+			for (auto& e : m_matrix)
+			{
+				for (auto& f : e)
+					f = static_cast<EventType>(_data.read<uint8_t>());
+			}
+		});
+	}
 }
