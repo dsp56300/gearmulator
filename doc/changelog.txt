@@ -19,6 +19,10 @@ Xenia:
 - [Fix] UI: BP Offset values were displayed as unsigned instead of signed 
         for dual filter
 
+Vavra:
+
+- [Fix] UI didn't react to parameter changes via MIDI controller messages
+
 1.4.4
 
 NodalRed2x:

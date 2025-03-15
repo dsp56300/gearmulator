@@ -511,6 +511,34 @@ namespace pluginLib
 		return true;
 	}
 
+	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
+	{
+		const auto& cm = getParameterDescriptions().getControllerMap();
+		const auto paramIndices = cm.getControlledParameters(_e);
+
+		if(paramIndices.empty())
+			return false;
+
+		const auto origin = midiEventSourceToParameterOrigin(_e.source);
+
+		const auto parts = getPartsForMidiEvent(_e);
+
+		if (parts.empty())
+			return false;
+
+		for (const uint8_t part : parts)
+		{
+			for (const auto paramIndex : paramIndices)
+			{
+				auto* param = getParameter(paramIndex, part);
+				assert(param && "parameter not found for control change");
+				param->setValueFromSynth(_e.c, origin);
+			}
+		}
+
+		return true;
+	}
+
 	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)
 	{
 		if(_e.sysex.empty())

@@ -88,7 +88,6 @@ namespace mqJucePlugin
 	    bool parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const;
 
 	    bool parseSysexMessage(const pluginLib::SysEx&, synthLib::MidiEventSource _source) override;
-		bool parseControllerMessage(const synthLib::SMidiEvent&) override;
 
 		void sendParameterChange(const pluginLib::Parameter& _parameter, pluginLib::ParamValue _value) override;
 	    bool sendGlobalParameterChange(mqLib::GlobalParameter _param, uint8_t _value);
@@ -98,6 +97,8 @@ namespace mqJucePlugin
 	    uint8_t getGlobalParam(mqLib::GlobalParameter _type) const;
 
 		bool isDerivedParameter(pluginLib::Parameter& _derived, pluginLib::Parameter& _base) const override;
+
+		std::vector<uint8_t> getPartsForMidiChannel(uint8_t _channel) override;
 
 		void requestAllPatches() const;
 

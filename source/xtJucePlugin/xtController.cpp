@@ -438,34 +438,6 @@ namespace xtJucePlugin
 		return true;
 	}
 
-	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
-	{
-		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getControlledParameters(_e);
-
-		if(paramIndices.empty())
-			return false;
-
-		const auto origin = midiEventSourceToParameterOrigin(_e.source);
-
-		const auto parts = isMultiMode() ? getPartsForMidiEvent(_e) : std::vector<uint8_t>{0};
-
-		if (parts.empty())
-			return false;
-
-		for (const uint8_t part : parts)
-		{
-			for (const auto paramIndex : paramIndices)
-			{
-				auto* param = getParameter(paramIndex, part);
-				assert(param && "parameter not found for control change");
-				param->setValueFromSynth(_e.c, origin);
-			}
-		}
-
-		return true;
-	}
-
 	bool Controller::parseMidiPacket(MidiPacketType _type, pluginLib::MidiPacket::Data& _data, pluginLib::MidiPacket::AnyPartParamValues& _params, const pluginLib::SysEx& _sysex) const
 	{
 		const auto* p = getMidiPacket(g_midiPacketNames[_type]);

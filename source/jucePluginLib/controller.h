@@ -65,7 +65,7 @@ namespace pluginLib
 		virtual uint8_t getPartCount() const { return 16; }
 
 		virtual bool parseSysexMessage(const SysEx&, synthLib::MidiEventSource) = 0;
-		virtual bool parseControllerMessage(const synthLib::SMidiEvent&) = 0;
+		virtual bool parseControllerMessage(const synthLib::SMidiEvent&);
 
 		virtual bool parseMidiMessage(const synthLib::SMidiEvent& _e);
 
