@@ -2,6 +2,11 @@ Release Notes
 
 1.4.5
 
+Framework:
+
+- [Fix] Physical MIDI input was not disabled when changing port from any
+        valid input to none
+
 Xenia:
 
 - [Imp] Add support to load MW1 user waves & tables
