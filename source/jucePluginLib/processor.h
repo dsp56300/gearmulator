@@ -158,6 +158,7 @@ namespace pluginLib
 		auto getDeviceType() const { return m_deviceType; }
 
 		const synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() const { return m_midiRoutingMatrix; }
+		synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() { return m_midiRoutingMatrix; }
 
 	protected:
 		void destroyController();

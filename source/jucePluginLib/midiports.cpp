@@ -119,6 +119,7 @@ namespace pluginLib
 		if (m_midiInput != nullptr)
 		{
 			m_midiInput->stop();
+			m_midiInput = nullptr;
 		}
 
 		if(_in.isEmpty())

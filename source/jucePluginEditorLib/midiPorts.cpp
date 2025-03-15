@@ -110,6 +110,7 @@ namespace jucePluginEditorLib
 	    if (_index <= 0)
 	    {
 	        _combo->setSelectedItemIndex(_index, juce::dontSendNotification);
+			_ports.setMidiInput({});
 	        return;
 	    }
 
