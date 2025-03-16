@@ -784,7 +784,7 @@ namespace pluginLib
 
 		if(ccStr.empty() && ppStr.empty())
 		{
-			_errors << "Controller needs to define control change (cc) or poly pressure (pp) parameter\n";
+			_errors << "Controller needs to define control change (cc), poly pressure (pp) or NRPN (nrpn) parameter\n";
 			return;
 		}
 
