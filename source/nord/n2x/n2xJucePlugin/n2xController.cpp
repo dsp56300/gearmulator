@@ -106,7 +106,7 @@ namespace n2xJucePlugin
 
 		if(bank == n2x::SysexByte::SingleDumpBankEditBuffer && program < getPartCount())
 		{
-			m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
+			m_state.receive(_msg, synthLib::MidiEventSource::Device);
 			applyPatchParameters(params, program);
 			onProgramChanged();
 			return true;
@@ -133,7 +133,7 @@ namespace n2xJucePlugin
 		if(bank != n2x::SysexByte::MultiDumpBankEditBuffer)
 			return false;
 
-		m_state.receive(_msg, synthLib::MidiEventSource::Plugin);
+		m_state.receive(_msg, synthLib::MidiEventSource::Device);
 
 		applyPatchParameters(params, 0);
 
@@ -152,7 +152,7 @@ namespace n2xJucePlugin
 	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
 	{
 		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getControlledParameters(_e);
+		const auto paramIndices = cm.getParameters(_e);
 
 		if(paramIndices.empty())
 			return false;
@@ -210,7 +210,7 @@ namespace n2xJucePlugin
 		if(!getParameterDescriptions().getIndexByName(descIndex, _parameter.getDescription().name))
 			assert(false && "parameter not found");
 
-		const auto& ccs = controllerMap.getControlChanges(synthLib::M_CONTROLCHANGE, descIndex);
+		const auto& ccs = controllerMap.getControlTypes(synthLib::M_CONTROLCHANGE, descIndex);
 		if(ccs.empty())
 		{
 			nonConstParam.setRateLimitMilliseconds(sysexRateLimitMs);
@@ -218,7 +218,7 @@ namespace n2xJucePlugin
 			return;
 		}
 
-		const auto cc = ccs.front();
+		const auto cc = static_cast<uint8_t>(ccs.front());
 
 		if(cc == n2x::ControlChange::CCSync)
 		{

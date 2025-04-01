@@ -99,10 +99,16 @@ namespace xt
 		static void createSequencerMultiData(std::vector<uint8_t>& _data);
 
 		static bool parseWaveData(WaveData& _wave, const SysEx& _sysex);
+		static bool parseMw1WaveData(WaveData& _wave, const SysEx& _sysex);
+
 		static SysEx createWaveData(const WaveData& _wave, uint16_t _waveIndex, bool _preview);
 		static WaveData createinterpolatedTable(const WaveData& _a, const WaveData& _b, uint16_t _indexA, uint16_t _indexB, uint16_t _indexTarget);
 
 		static bool parseTableData(TableData& _table, const SysEx& _sysex);
+		static bool parseMw1TableData(TableData& _table, const SysEx& _sysex);
+
+		static std::vector<WaveId> getWavesForTable(const TableData& _table);
+
 		static SysEx createTableData(const TableData& _table, uint32_t _tableIndex, bool _preview);
 
 		static SysEx createCombinedPatch(const std::vector<SysEx>& _dumps);
@@ -112,6 +118,9 @@ namespace xt
 
 		static TableId getTableId(const SysEx& _data);
 		static WaveId getWaveId(const SysEx& _data);
+
+		static bool isSpeech(const TableData& _table);
+		static bool isUpaw(const TableData& _table);
 
 		template<size_t Size> static bool append(SysEx& _dst, const std::array<uint8_t, Size>& _src, uint32_t _checksumStartIndex)
 		{

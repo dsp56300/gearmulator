@@ -239,12 +239,54 @@ namespace xtJucePlugin
 
 		const auto title = getEditor().getProcessor().getProperties().name + " - ";
 
-		const auto sysex = WaveTreeItem::getSysexFromFiles(_files);
+		auto sysex = WaveTreeItem::getSysexFromFiles(_files);
 
 		if(sysex.empty())
 		{
 			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, title + "Error", "No Sysex data found in file");
 			return;
+		}
+
+		if (sysex.size() == 1)
+		{
+			auto s = sysex.front();
+
+			if (s.size() == xt::Mw1::g_allWavesAndTablesDumpLength && 
+				s.front() == 0xf0 &&
+				s[1] == wLib::IdWaldorf &&
+				s[2] == xt::IdMw1 &&
+				s[4] == xt::Mw1::g_idmAllWavesAndTables)
+			{
+				// contains 12 tables and 61 waves
+				static constexpr uint32_t tableSize = 64 * 4;
+				static constexpr uint32_t waveSize = 64 * 2;
+				static_assert(xt::Mw1::g_allWavesAndTablesDumpLength == 5 + 2 + tableSize * 12 + waveSize * 61);
+
+				int32_t off = 5;
+				for (size_t t=0; t<12; ++t, off += tableSize)
+				{
+					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmTable, static_cast<uint8_t>(xt::Mw1::g_firstRamTableIndex + t) };
+					data.insert(data.end(), s.begin() + off, s.begin() + off + tableSize);
+					data.push_back(0x00);
+					data.push_back(0xf7);
+					sysex.emplace_back(std::move(data));
+				}
+				for (size_t w=0; w<61; ++w, off += waveSize)
+				{
+					auto waveIndex = static_cast<uint16_t>(xt::Mw1::g_firstRamWaveIndex + w);
+
+					std::vector<uint8_t> data = { 0xf0, wLib::IdWaldorf, xt::IdMw1, wLib::IdDeviceOmni, xt::Mw1::g_idmWave,
+						static_cast<uint8_t>(waveIndex >> 12),
+						static_cast<uint8_t>((waveIndex >> 8) & 0xf),
+						static_cast<uint8_t>((waveIndex >> 4) & 0xf),
+						static_cast<uint8_t>(waveIndex & 0xf) };
+					data.insert(data.end(), s.begin() + off, s.begin() + off + waveSize);
+					data.push_back(0x00);
+					data.push_back(0xf7);
+					sysex.emplace_back(std::move(data));
+				}
+				sysex.erase(sysex.begin());
+			}
 		}
 
 		for (const auto& s : sysex)
@@ -260,6 +302,41 @@ namespace xtJucePlugin
 			{
 				const auto waveId = xt::State::getWaveId(s);
 				_waves.emplace(waveId, wave);
+			}
+		}
+
+		if (_tables.size() == 1 && _waves.size() > 1)
+		{
+			auto& table = _tables.begin()->second;
+
+			if (xt::State::isSpeech(table))
+			{
+				// if we import speech, retarget all waves to be put into out special rom slots as speech requires continuous memory
+
+				const auto oldStart = table[2].rawId();
+				constexpr auto newStart = xt::wave::g_firstRwRomWaveIndex;
+
+				auto waves = xt::State::getWavesForTable(_tables.begin()->second);
+
+				for (auto wave : waves)
+				{
+					auto it = _waves.find(wave);
+					if (it == _waves.end())
+						continue;
+
+					const auto offset = it->first.rawId() - oldStart;
+					const auto newId = xt::WaveId(static_cast<uint16_t>(newStart + offset));
+
+					if (_waves.find(newId) != _waves.end())
+						continue;
+
+					auto data = it->second;
+					_waves.erase(it);
+					_waves.emplace(newId, data);
+				}
+
+				// table needs to point to new location
+				table[2] = xt::WaveId(newStart);
 			}
 		}
 
@@ -516,7 +593,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		const std::function onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		const std::function onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;
@@ -543,7 +620,7 @@ namespace xtJucePlugin
 
 		constexpr auto flags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::FileChooserFlags::canSelectFiles;
 
-		auto onFileChosen = [this, _callback](const juce::FileChooser& _chooser)
+		auto onFileChosen = [this, _callback, configKey](const juce::FileChooser& _chooser)
 		{
 			if (_chooser.getResults().isEmpty())
 				return;

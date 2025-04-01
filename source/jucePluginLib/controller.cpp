@@ -179,7 +179,7 @@ namespace pluginLib
 
 	void Controller::sendMidiEvent(const uint8_t _a, const uint8_t _b, const uint8_t _c, const uint32_t _offset/* = 0*/, const synthLib::MidiEventSource _source/* = synthLib::MidiEventSource::Editor*/) const
 	{
-        m_processor.addMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
+        sendMidiEvent(synthLib::SMidiEvent(_source, _a, _b, _c, _offset));
 	}
 
 	bool Controller::combineParameterChange(uint8_t& _result, const std::string& _midiPacket, const Parameter& _parameter, ParamValue _value) const
@@ -511,6 +511,34 @@ namespace pluginLib
 		return true;
 	}
 
+	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
+	{
+		const auto& cm = getParameterDescriptions().getControllerMap();
+		const auto paramIndices = cm.getParameters(_e);
+
+		if(paramIndices.empty())
+			return false;
+
+		const auto origin = midiEventSourceToParameterOrigin(_e.source);
+
+		const auto parts = getPartsForMidiEvent(_e);
+
+		if (parts.empty())
+			return false;
+
+		for (const uint8_t part : parts)
+		{
+			for (const auto paramIndex : paramIndices)
+			{
+				auto* param = getParameter(paramIndex, part);
+				assert(param && "parameter not found for control change");
+				param->setValueFromSynth(_e.c, origin);
+			}
+		}
+
+		return true;
+	}
+
 	bool Controller::parseMidiMessage(const synthLib::SMidiEvent& _e)
 	{
 		if(_e.sysex.empty())
@@ -523,9 +551,22 @@ namespace pluginLib
 		if(_events.empty())
 			return;
 
-        const std::lock_guard l(m_midiMessagesLock);
-        m_midiMessages.insert(m_midiMessages.end(), _events.begin(), _events.end());
-		if(!isTimerRunning())
+		const auto& matrix = m_processor.getMidiRoutingMatrix();
+
+		size_t numAdded = 0;
+
+		const std::lock_guard l(m_midiMessagesLock);
+
+		for (const auto& e : _events)
+		{
+			if (!matrix.enabled(e, synthLib::MidiEventSource::Editor))
+				continue;
+
+			m_midiMessages.push_back(e);
+			++numAdded;
+		}
+
+		if(numAdded && !isTimerRunning())
 			startTimer(1);
 	}
 
@@ -544,13 +585,14 @@ namespace pluginLib
 		switch (_source)
 		{
 		case synthLib::MidiEventSource::Unknown:
+			assert(false && "unknown midi event source type is unexpected");
 			return Parameter::Origin::Unknown;
 		case synthLib::MidiEventSource::Editor:
 			return Parameter::Origin::Ui;
 		case synthLib::MidiEventSource::Host:
 			return Parameter::Origin::HostAutomation;
-		case synthLib::MidiEventSource::PhysicalInput:
-		case synthLib::MidiEventSource::Plugin:
+		case synthLib::MidiEventSource::Physical:
+		case synthLib::MidiEventSource::Device:
 			return Parameter::Origin::Midi;
 		case synthLib::MidiEventSource::Internal:
 			return Parameter::Origin::Unknown;

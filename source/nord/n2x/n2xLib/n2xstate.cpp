@@ -271,7 +271,7 @@ namespace n2x
 					m_midiTranslator->addTargetChannel(ch, i);
 				}
 
-				synthLib::SMidiEvent e;
+				synthLib::SMidiEvent e(_ev.source);
 				e.sysex.assign(dump.begin(), dump.end());
 				send(e);
 			}
@@ -612,7 +612,7 @@ namespace n2x
 
 	void State::send(const synthLib::SMidiEvent& _e) const
 	{
-		if(_e.source == synthLib::MidiEventSource::Plugin)
+		if(_e.source == synthLib::MidiEventSource::Device)
 			return;
 
 		if(m_hardware)

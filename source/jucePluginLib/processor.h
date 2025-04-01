@@ -9,6 +9,7 @@
 
 #include "bridgeLib/types.h"
 
+#include "synthLib/midiRoutingMatrix.h"
 #include "synthLib/plugin.h"
 
 namespace bridgeClient
@@ -63,7 +64,7 @@ namespace pluginLib
 		Processor(const BusesProperties& _busesProperties, Properties _properties);
 		~Processor() override;
 
-		void addMidiEvent(const synthLib::SMidiEvent& ev);
+		void addMidiEvent(const synthLib::SMidiEvent& _ev);
 
 		void handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message);
 
@@ -156,6 +157,9 @@ namespace pluginLib
 
 		auto getDeviceType() const { return m_deviceType; }
 
+		const synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() const { return m_midiRoutingMatrix; }
+		synthLib::MidiRoutingMatrix& getMidiRoutingMatrix() { return m_midiRoutingMatrix; }
+
 	protected:
 		void destroyController();
 
@@ -217,5 +221,6 @@ namespace pluginLib
 		std::string m_remoteHost;
 		uint32_t m_remotePort = 0;
 		bridgeLib::SessionId m_remoteSessionId;
+		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
 	};
 }

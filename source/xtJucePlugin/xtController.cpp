@@ -327,7 +327,7 @@ namespace xtJucePlugin
 		applyPatchParameters(_params, 0);
 	}
 
-	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource)
+	bool Controller::parseSysexMessage(const pluginLib::SysEx& _msg, synthLib::MidiEventSource _source)
 	{
 	    if(_msg.size() >= 5)
 	    {
@@ -387,7 +387,7 @@ namespace xtJucePlugin
 		    auto& params = findSynthParam(part, page, index);
 
 		    for (auto& param : params)
-			    param->setValueFromSynth(value, pluginLib::Parameter::Origin::Midi);
+			    param->setValueFromSynth(value, midiEventSourceToParameterOrigin(_source));
 
 		    LOG("Single parameter " << static_cast<int>(index) << ", page " << static_cast<int>(page) << " for part " << static_cast<int>(part) << " changed to value " << static_cast<int>(value));
 	    }
@@ -420,7 +420,8 @@ namespace xtJucePlugin
 
 				if (xt::State::parseTableData(table, _msg))
 				{
-					for (const auto& wave : table)
+					auto waves = xt::State::getWavesForTable(table);
+					for (const auto& wave : waves)
 					{
 						if (!xt::wave::isReadOnly(wave))
 							requestWave(wave.rawId());
@@ -434,34 +435,6 @@ namespace xtJucePlugin
 		    LOG("Received unknown sysex of size " << _msg.size());
 			return false;
 	    }
-		return true;
-	}
-
-	bool Controller::parseControllerMessage(const synthLib::SMidiEvent& _e)
-	{
-		const auto& cm = getParameterDescriptions().getControllerMap();
-		const auto paramIndices = cm.getControlledParameters(_e);
-
-		if(paramIndices.empty())
-			return false;
-
-		const auto origin = midiEventSourceToParameterOrigin(_e.source);
-
-		const auto parts = isMultiMode() ? getPartsForMidiEvent(_e) : std::vector<uint8_t>{0};
-
-		if (parts.empty())
-			return false;
-
-		for (const uint8_t part : parts)
-		{
-			for (const auto paramIndex : paramIndices)
-			{
-				auto* param = getParameter(paramIndex, part);
-				assert(param && "parameter not found for control change");
-				param->setValueFromSynth(_e.c, origin);
-			}
-		}
-
 		return true;
 	}
 

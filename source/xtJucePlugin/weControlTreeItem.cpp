@@ -32,16 +32,8 @@ namespace xtJucePlugin
 		TreeItem::paintItem(_g, _width, _height);
 	}
 
-	void ControlTreeItem::setWave(xt::WaveId _wave)
+	void ControlTreeItem::setWave(const xt::WaveId _wave)
 	{
-		switch (m_index.rawId())
-		{
-		case 61:	_wave = xt::WaveId(101);		break;
-		case 62:	_wave = xt::WaveId(100);		break;
-		case 63:	_wave = xt::WaveId(104);		break;
-		}
-		if(m_wave == _wave)
-			return;
 		m_wave = _wave;
 		const auto name = WaveTreeItem::getWaveName(m_wave);
 		char prefix[16] = {0};
@@ -55,7 +47,35 @@ namespace xtJucePlugin
 		if(m_table == _table && !_tableHasChanged)
 			return;
 		m_table = _table;
-		setWave(m_editor.getData().getWaveId(_table, m_index));
+
+		auto table = m_editor.getData().getTable(m_table);
+
+		if (!table)
+			return;
+
+		if (xt::State::isSpeech(*table))
+		{
+			setText("Speech");
+			if (m_index.rawId() == 2)
+				setWave(m_editor.getData().getWaveId(_table, m_index));
+			else
+				m_wave.invalidate();
+		}
+		else if (xt::State::isUpaw(*table))
+		{
+			setText("UPAW");
+			m_wave.invalidate();
+		}
+		else
+		{
+			switch (m_index.rawId())
+			{
+			case 61: setWave(xt::WaveId(101)); break;
+			case 62: setWave(xt::WaveId(100)); break;
+			case 63: setWave(xt::WaveId(104)); break;
+			default: setWave(m_editor.getData().getWaveId(_table, m_index)); break;
+			}
+		}
 	}
 
 	juce::var ControlTreeItem::getDragSourceDescription()

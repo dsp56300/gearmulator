@@ -4,6 +4,11 @@
 
 namespace synthLib
 {
+	MidiBufferParser::MidiBufferParser(const MidiEventSource _source)
+	{
+		m_pendingEvent.source = _source;
+	}
+
 	void MidiBufferParser::write(const std::vector<uint8_t>& _data)
 	{
 		for (const auto d : _data)
@@ -35,7 +40,7 @@ namespace synthLib
 			if(d >= 0xf0)
 			{
 				// system realtime intercepting sysex
-				m_midiEvents.emplace_back(MidiEventSource::Plugin, d);
+				m_midiEvents.emplace_back(m_pendingEvent.source, d);
 				return;
 			}
 
@@ -68,7 +73,7 @@ namespace synthLib
 		if(m_sysexBuffer.empty())
 			return;
 
-		synthLib::SMidiEvent ev(MidiEventSource::Plugin);
+		synthLib::SMidiEvent ev(m_pendingEvent.source);
 		ev.sysex.swap(m_sysexBuffer);
 
 		if(ev.sysex.back() != synthLib::M_ENDOFSYSEX)

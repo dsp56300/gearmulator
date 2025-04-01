@@ -121,6 +121,7 @@ namespace jucePluginEditorLib
 	    if (_index <= 0)
 	    {
 	        m_midiIn->setSelectedItemIndex(_index, juce::dontSendNotification);
+			getMidiPorts().setMidiInput({});
 	        return;
 	    }
 

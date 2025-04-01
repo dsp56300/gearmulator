@@ -264,7 +264,9 @@ namespace xtJucePlugin
 
 		auto& t = *table;
 
-		for (const auto waveId : t)
+		auto waves = xt::State::getWavesForTable(t);
+
+		for (const auto waveId : waves)
 		{
 			if(!xt::wave::isValidWaveIndex(waveId.rawId()))
 				continue;

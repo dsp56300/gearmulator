@@ -1,5 +1,28 @@
 Release Notes 
 
+1.4.5
+
+Framework:
+
+- [Fix] Physical MIDI input was not disabled when changing port from any
+        valid input to none
+
+Xenia:
+
+- [Imp] Add support to load MW1 user waves & tables
+- [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
+        holding shift while dragging
+
+- [Fix] User Tables might sound incorrect because it was not always transmitted
+        to device when being selected
+
+- [Fix] UI: BP Offset values were displayed as unsigned instead of signed 
+        for dual filter
+
+Vavra:
+
+- [Fix] UI didn't react to parameter changes via MIDI controller messages
+
 1.4.4
 
 NodalRed2x:

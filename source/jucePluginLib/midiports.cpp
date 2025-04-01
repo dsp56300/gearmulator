@@ -2,7 +2,11 @@
 
 #include "processor.h"
 
+#include "dsp56kEmu/threadtools.h"
+
 #include "juce_audio_devices/juce_audio_devices.h"
+
+#include "synthLib/midiBufferParser.h"
 
 namespace pluginLib
 {
@@ -64,18 +68,53 @@ namespace pluginLib
 		});
 	}
 
+	juce::MidiMessage MidiPorts::toJuceMidiMessage(const synthLib::SMidiEvent& _e)
+	{
+	    if(!_e.sysex.empty())
+	    {
+		    assert(_e.sysex.front() == 0xf0);
+		    assert(_e.sysex.back() == 0xf7);
+
+		    return {_e.sysex.data(), static_cast<int>(_e.sysex.size()), 0.0};
+	    }
+	    const auto len = synthLib::MidiBufferParser::lengthFromStatusByte(_e.a);
+	    if(len == 1)
+		    return {_e.a, 0.0};
+	    if(len == 2)
+		    return {_e.a, _e.b, 0.0};
+	    return {_e.a, _e.b, _e.c, 0.0};
+	}
+
 	bool MidiPorts::setMidiOutput(const juce::String& _out)
 	{
-		if (m_midiOutput != nullptr && m_midiOutput->isBackgroundThreadRunning())
 		{
-			m_midiOutput->stopBackgroundThread();
+			std::lock_guard lock(m_mutexOutput);
+			if (m_midiOutput != nullptr)
+			{
+				if (m_midiOutput->isBackgroundThreadRunning())
+					m_midiOutput->stopBackgroundThread();
+			}
+			m_midiOutput = nullptr;
 		}
+
+		if (m_threadOutput)
+		{
+			// send dummy to wakeup thread
+			send(juce::MidiMessage());
+			m_threadOutput->join();
+			m_threadOutput.reset();
+		}
+
 		if(_out.isEmpty())
 			return false;
+
+		std::lock_guard lock(m_mutexOutput);
+
 		m_midiOutput = juce::MidiOutput::openDevice(_out);
 		if (m_midiOutput != nullptr)
 		{
 			m_midiOutput->startBackgroundThread();
+			m_threadOutput.reset(new std::thread([this] { senderThread(); }));
 			return true;
 		}
 		return false;
@@ -86,6 +125,7 @@ namespace pluginLib
 		if (m_midiInput != nullptr)
 		{
 			m_midiInput->stop();
+			m_midiInput = nullptr;
 		}
 
 		if(_in.isEmpty())
@@ -109,5 +149,27 @@ namespace pluginLib
 	void MidiPorts::handleIncomingMidiMessage(juce::MidiInput* _source, const juce::MidiMessage& _message)
 	{
 		m_processor.handleIncomingMidiMessage(_source, _message);
+	}
+
+	void MidiPorts::senderThread()
+	{
+		dsp56k::ThreadTools::setCurrentThreadName("MIdiOutputSender");
+
+		while (true)
+		{
+			auto msg = m_midiOutMessages.pop_front();
+
+			std::lock_guard lock(m_mutexOutput);
+
+			auto* out = m_midiOutput.get();
+			if (!out)
+			{
+				while (!m_midiOutMessages.empty())
+					m_midiOutMessages.pop_front();
+				break;
+			}
+
+			out->sendMessageNow(msg);
+		}
 	}
 }
