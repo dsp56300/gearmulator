@@ -33,6 +33,7 @@ namespace pluginLib
 {
 	constexpr char g_saveMagic[] = "DSP56300";
 	constexpr uint32_t g_saveVersion = 2;
+	constexpr const char* const g_defaultProgramName = "default";
 
 	bridgeLib::SessionId generateRemoteSessionId()
 	{
@@ -44,6 +45,7 @@ namespace pluginLib
 		, m_properties(std::move(_properties))
 		, m_midiPorts(*this)
 		, m_remoteSessionId(generateRemoteSessionId())
+		, m_programName(g_defaultProgramName)
 	{
 		juce::File(getPublicRomFolder()).createDirectory();
 
@@ -234,6 +236,27 @@ namespace pluginLib
 		s.toVector(_targetBuffer, true);
 	}
 
+	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
+	{
+		if(_sourceBuffer.empty())
+			return true;
+
+		// In Vavra, the only data we had was the gain parameters
+		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		{
+			baseLib::BinaryStream ss(_sourceBuffer);
+			readGain(ss);
+			return true;
+		}
+
+		baseLib::BinaryStream s(_sourceBuffer);
+		baseLib::ChunkReader cr(s);
+
+		loadChunkData(cr);
+
+		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
+	}
+
 	void Processor::saveChunkData(baseLib::BinaryStream& s)
 	{
 		{
@@ -264,27 +287,12 @@ namespace pluginLib
 
 		m_midiPorts.saveChunkData(s);
 		m_midiRoutingMatrix.saveChunkData(s);
-	}
 
-	bool Processor::loadCustomData(const std::vector<uint8_t>& _sourceBuffer)
-	{
-		if(_sourceBuffer.empty())
-			return true;
-
-		// In Vavra, the only data we had was the gain parameters
-		if(_sourceBuffer.size() == sizeof(float) * 2 + sizeof(uint32_t))
+		if (m_programName != g_defaultProgramName)
 		{
-			baseLib::BinaryStream ss(_sourceBuffer);
-			readGain(ss);
-			return true;
+			baseLib::ChunkWriter cw(s, "PROG", 1);
+			s.write(m_programName);
 		}
-
-		baseLib::BinaryStream s(_sourceBuffer);
-		baseLib::ChunkReader cr(s);
-
-		loadChunkData(cr);
-
-		return _sourceBuffer.empty() || (cr.tryRead() && cr.numRead() > 0);
 	}
 
 	void Processor::loadChunkData(baseLib::ChunkReader& _cr)
@@ -312,6 +320,11 @@ namespace pluginLib
 		{
 			const auto sr = _binaryStream.read<float>();
 			setPreferredDeviceSamplerate(sr);
+		});
+
+		_cr.add("PROG", 1, [this](baseLib::BinaryStream& _binaryStream, uint32_t _version)
+		{
+			m_programName = _binaryStream.readString();
 		});
 
 		m_midiPorts.loadChunkData(_cr);
@@ -804,12 +817,12 @@ namespace pluginLib
 	const juce::String Processor::getProgramName(int _index)
 	{
 		juce::ignoreUnused(_index);
-		return "default";
+		return m_programName;
 	}
 
 	void Processor::changeProgramName(int _index, const juce::String& _newName)
 	{
-		juce::ignoreUnused(_index, _newName);
+		m_programName = _newName.toStdString();
 	}
 
 	double Processor::getTailLengthSeconds() const
