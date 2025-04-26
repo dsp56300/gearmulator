@@ -134,6 +134,21 @@ namespace xtJucePlugin
 			}
 
 			menu.addSubMenu("Copy to", copyToTableSubMenu);
+
+			juce::PopupMenu exportMenu;
+			exportMenu.addItem(".syx", [this]
+			{
+				m_editor.exportAsSyxOrMid(getTableId(), false);
+			});
+			exportMenu.addItem(".mid", [this]
+			{
+				m_editor.exportAsSyxOrMid(getTableId(), true);
+			});
+			exportMenu.addItem(".wav", [this]
+			{
+				m_editor.exportAsWav(getTableId());
+			});
+			menu.addSubMenu("Export as...", exportMenu);
 		}
 
 		if (!xt::wave::isReadOnly(m_index))

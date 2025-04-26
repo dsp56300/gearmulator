@@ -68,6 +68,17 @@ namespace xtJucePlugin
 		void exportAsWav(const xt::WaveData& _data);
 		void exportAsWav(const std::string& _filename, const xt::WaveData& _data) const;
 
+		void exportAsSyxOrMid(const xt::TableId& _table, bool _midi);
+		void exportAsWav(const xt::TableId& _table);
+
+		void exportAsWav(const std::string& _filename, const std::vector<int8_t>& _data) const;
+
+		void exportToFile(const std::string& _filename, const std::vector<std::vector<uint8_t>>& _sysex, bool _midi) const;
+		void exportToFile(const std::string& _filename, const std::vector<uint8_t>& _sysex, bool _midi) const
+		{
+			return exportToFile(_filename, std::vector<std::vector<uint8_t>>{ _sysex }, _midi);
+		}
+
 		void selectImportFile(const std::function<void(const juce::String&)>& _callback);
 		void selectExportFileName(const std::string& _title, const std::string& _extension, const std::function<void(const std::string&)>&);
 

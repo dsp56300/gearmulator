@@ -15,6 +15,7 @@ Xenia:
 - [Imp] Add support to load MW1 user waves & tables
 - [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
         holding shift while dragging
+- [Imp] Add export of wave tables as .mid, .syx and .wav via context menu
 
 - [Fix] User Tables might sound incorrect because they were not always 
         transmitted to the device when being selected

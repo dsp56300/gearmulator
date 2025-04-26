@@ -497,18 +497,7 @@ namespace xtJucePlugin
 	void WaveEditor::exportAsSyxOrMid(const std::string& _filename, const xt::WaveId& _id, const xt::WaveData& _data, bool _midi) const
 	{
 		auto sysex = xt::State::createWaveData(_data, _id.rawId(), false);
-
-		bool success;
-		if (_midi)
-			success = synthLib::SysexToMidi::write(_filename.c_str(), {sysex});
-		else
-			success = baseLib::filesystem::writeFile(_filename, sysex);
-
-		if (!success)
-		{
-			const auto productName = getEditor().getProcessor().getProperties().name;
-			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
-		}
+		exportToFile(_filename, sysex, _midi);
 	}
 
 	void WaveEditor::exportAsSyxOrMid(const std::vector<xt::WaveId>& _ids, bool _midi)
@@ -532,25 +521,7 @@ namespace xtJucePlugin
 				sysex.push_back(xt::State::createWaveData(*wave, id.rawId(), false));
 			}
 
-			bool success;
-
-			if (_midi)
-			{
-				success = synthLib::SysexToMidi::write(_filename.c_str(), sysex);
-			}
-			else
-			{
-				std::vector<uint8_t> data;
-				for (const auto& s : sysex)
-					data.insert(data.end(), s.begin(), s.end());
-				success = baseLib::filesystem::writeFile(_filename, data);
-			}
-
-			if (!success)
-			{
-				const auto productName = getEditor().getProcessor().getProperties().name;
-				genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
-			}
+			exportToFile(_filename, sysex, _midi);
 		});
 	}
 
@@ -564,18 +535,121 @@ namespace xtJucePlugin
 
 	void WaveEditor::exportAsWav(const std::string& _filename, const xt::WaveData& _data) const
 	{
+		return exportAsWav(_filename, std::vector(_data.begin(), _data.end()));
+	}
+
+	void WaveEditor::exportAsSyxOrMid(const xt::TableId& _table, bool _midi)
+	{
+		auto table = m_data.getTable(_table);
+		if (!table)
+			return;
+
+		selectExportFileName(_midi ? "Save Table as .mid" : "Save Table as .syx", _midi ? ".mid" : ".syx", [this, _table, table, _midi](const std::string& _filename)
+		{
+			const auto sysex = xt::State::createTableData(*table, _table.rawId(), false);
+			exportToFile(_filename, sysex, _midi);
+		});
+	}
+
+	void WaveEditor::exportAsWav(const xt::TableId& _table)
+	{
+		selectExportFileName("Save Table as .wav", ".wav", [this, _table](const std::string& _filename)
+		{
+			auto t = m_data.getTable(_table);
+			if (!t)
+				return;
+			const auto& table = *t;
+
+			std::vector<int8_t> data;
+
+			bool first = true;
+
+			for (uint16_t a=0; a<table.size(); ++a)
+			{
+				const auto waveIdA = table[a];
+
+				auto waveA = m_data.getWave(waveIdA);
+
+				if (!waveA)
+					continue;
+
+				for (uint16_t b=a+1; b<table.size(); ++b)
+				{
+					const auto waveIdB = table[b];
+
+					auto waveB = m_data.getWave(waveIdB);
+
+					if (!waveB)
+						continue;
+
+					if (first)
+					{
+						data.insert(data.end(), waveA->begin(), waveA->end());
+						first = false;
+					}
+
+					for (uint16_t c=a+1; c<b; ++c)
+					{
+						auto d = xt::State::createinterpolatedTable(*waveA, *waveB, a, b, c);
+						data.insert(data.end(), d.begin(), d.end());
+					}
+
+					data.insert(data.end(), waveB->begin(), waveB->end());
+
+					a = b - 1;
+					break;
+				}
+			}
+
+			exportAsWav(_filename, data);
+		});
+	}
+
+	void WaveEditor::exportAsWav(const std::string& _filename, const std::vector<int8_t>& _data) const
+	{
 		synthLib::WavWriter w;
 
 		// 8 bit waves are unsigned
-		std::array<uint8_t, std::tuple_size_v<xt::WaveData>> data;
+		std::vector<uint8_t> data;
+		data.reserve(_data.size());
 		for (size_t i=0; i<_data.size(); ++i)
-			data[i] = static_cast<uint8_t>(_data[i] + 128);
+			data.push_back(static_cast<uint8_t>(_data[i] + 128));
 
-		if (!w.write(_filename, 8, false, 1, 32000, data.data(), sizeof(_data)))
+		if (!w.write(_filename, 8, false, 1, 32000, data.data(), _data.size()))
 		{
 			const auto productName = getEditor().getProcessor().getProperties().name;
 			genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 		}
+	}
+
+	void WaveEditor::exportToFile(const std::string& _filename, const std::vector<std::vector<uint8_t>>& _sysex, const bool _midi) const
+	{
+		bool success;
+
+		if (_midi)
+		{
+			success = synthLib::SysexToMidi::write(_filename.c_str(), _sysex);
+		}
+		else
+		{
+			if (_sysex.size() > 1)
+			{
+				std::vector<uint8_t> sysex;
+				for (const auto& s : _sysex)
+					sysex.insert(sysex.end(), s.begin(), s.end());
+				success = baseLib::filesystem::writeFile(_filename, sysex);
+			}
+			else
+			{
+				success = baseLib::filesystem::writeFile(_filename, _sysex.front());
+			}
+		}
+
+		if (success)
+			return;
+
+		const auto productName = getEditor().getProcessor().getProperties().name;
+		genericUI::MessageBox::showOk(juce::AlertWindow::WarningIcon, productName + " - Error", "Failed to create file\n" + _filename + ".\n\nMake sure that the file is not write protected or opened in another application");
 	}
 
 	void WaveEditor::selectImportFile(const std::function<void(const juce::String&)>& _callback)
