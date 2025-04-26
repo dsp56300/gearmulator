@@ -24,6 +24,12 @@
       }
     },
     {
+      "name": "windows-arm64",
+      "inherits": "windows-x64",
+      "displayName": "Windows default ARM64 configuration",
+      "architecture": "ARM64"
+    },
+    {
       "name": "macos",
       "generator": "Xcode",
       "inherits": "default",

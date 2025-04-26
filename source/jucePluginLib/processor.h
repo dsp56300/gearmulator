@@ -222,5 +222,6 @@ namespace pluginLib
 		uint32_t m_remotePort = 0;
 		bridgeLib::SessionId m_remoteSessionId;
 		synthLib::MidiRoutingMatrix m_midiRoutingMatrix;
+		std::string m_programName;
 	};
 }

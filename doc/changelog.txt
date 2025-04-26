@@ -6,15 +6,19 @@ Framework:
 
 - [Fix] Physical MIDI input was not disabled when changing port from any
         valid input to none
+- [Fix] The program name was always returned as "default" even if previously
+        modified via the host. This fixes incorrect host preset names after 
+		a rename in Logic, Reaper and possibly other hosts
 
 Xenia:
 
 - [Imp] Add support to load MW1 user waves & tables
 - [Imp] Add ability to export to .syx instead of .mid via drag & drop by 
         holding shift while dragging
+- [Imp] Add export of wave tables as .mid, .syx and .wav via context menu
 
-- [Fix] User Tables might sound incorrect because it was not always transmitted
-        to device when being selected
+- [Fix] User Tables might sound incorrect because they were not always 
+        transmitted to the device when being selected
 
 - [Fix] UI: BP Offset values were displayed as unsigned instead of signed 
         for dual filter
