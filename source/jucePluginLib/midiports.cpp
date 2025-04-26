@@ -95,12 +95,13 @@ namespace pluginLib
 					m_midiOutput->stopBackgroundThread();
 			}
 			m_midiOutput = nullptr;
+
+			// send dummy to wakeup thread
+			m_midiOutMessages.push_back(juce::MidiMessage());
 		}
 
 		if (m_threadOutput)
 		{
-			// send dummy to wakeup thread
-			send(juce::MidiMessage());
 			m_threadOutput->join();
 			m_threadOutput.reset();
 		}
