@@ -30,11 +30,25 @@ namespace juceRmlUi
 		void openGLContextClosing() override;
 		void resized() override;
 
+		void mouseDown(const juce::MouseEvent& _event) override;
+		void mouseUp(const juce::MouseEvent& _event) override;
+		void mouseMove(const juce::MouseEvent& _event) override;
+		void mouseDrag(const juce::MouseEvent& _event) override;
+		void mouseDoubleClick(const juce::MouseEvent& _event) override;
+		void mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel) override;
+		void mouseEnter(const juce::MouseEvent& _event) override;
+		void mouseExit(const juce::MouseEvent& _event) override;
+		bool keyPressed(const juce::KeyPress& _key) override;
+		bool keyStateChanged(bool _isKeyDown) override;
+
 	private:
+		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
+
 		genericUI::Editor& m_editor;
 		std::vector<std::vector<uint8_t>> m_fonts;
 		juce::OpenGLContext m_openGLContext;
 		RenderInterface* m_renderInterface = nullptr;
 		Rml::Context* m_rmlContext = nullptr;
+		std::vector<juce::KeyPress> m_pressedKeys;
 	};
 }
