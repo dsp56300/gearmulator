@@ -45,35 +45,35 @@ namespace juceRmlUi
 		return Rml::SystemInterface::GetElapsedTime();
 	}
 
-	int SystemInterface::TranslateString(Rml::String& translated, const Rml::String& input)
+	int SystemInterface::TranslateString(Rml::String& _translated, const Rml::String& _input)
 	{
-		return Rml::SystemInterface::TranslateString(translated, input);
+		return Rml::SystemInterface::TranslateString(_translated, _input);
 	}
 
-	void SystemInterface::JoinPath(Rml::String& translated_path, const Rml::String& document_path,
-		const Rml::String& path)
+	void SystemInterface::JoinPath(Rml::String& _translatedPath, const Rml::String& _documentPath,
+		const Rml::String& _path)
 	{
-		Rml::SystemInterface::JoinPath(translated_path, document_path, path);
+		Rml::SystemInterface::JoinPath(_translatedPath, _documentPath, _path);
 	}
 
-	void SystemInterface::SetMouseCursor(const Rml::String& cursor_name)
+	void SystemInterface::SetMouseCursor(const Rml::String& _cursorName)
 	{
-		Rml::SystemInterface::SetMouseCursor(cursor_name);
+		Rml::SystemInterface::SetMouseCursor(_cursorName);
 	}
 
-	void SystemInterface::SetClipboardText(const Rml::String& text)
+	void SystemInterface::SetClipboardText(const Rml::String& _text)
 	{
-		Rml::SystemInterface::SetClipboardText(text);
+		Rml::SystemInterface::SetClipboardText(_text);
 	}
 
-	void SystemInterface::GetClipboardText(Rml::String& text)
+	void SystemInterface::GetClipboardText(Rml::String& _text)
 	{
-		Rml::SystemInterface::GetClipboardText(text);
+		Rml::SystemInterface::GetClipboardText(_text);
 	}
 
-	void SystemInterface::ActivateKeyboard(Rml::Vector2f caret_position, float line_height)
+	void SystemInterface::ActivateKeyboard(const Rml::Vector2f _caretPosition, const float _lineHeight)
 	{
-		Rml::SystemInterface::ActivateKeyboard(caret_position, line_height);
+		Rml::SystemInterface::ActivateKeyboard(_caretPosition, _lineHeight);
 	}
 
 	void SystemInterface::DeactivateKeyboard()
