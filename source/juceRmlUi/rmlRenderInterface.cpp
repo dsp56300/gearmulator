@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "rmlHelper.h"
+
 #include "juce_opengl/juce_opengl.h"
 
 namespace juceRmlUi
@@ -27,12 +28,12 @@ namespace juceRmlUi
 
 		g->indexCount = _indices.size();
 
-		return toHandle<Rml::CompiledGeometryHandle>(g);
+		return helper::toHandle<Rml::CompiledGeometryHandle>(g);
 	}
 
 	void RenderInterface::RenderGeometry(const Rml::CompiledGeometryHandle _geometry, const Rml::Vector2f _translation, const Rml::TextureHandle _texture)
 	{
-	    auto* geom = fromHandle<CompiledGeometry>(_geometry);
+	    auto* geom = helper::fromHandle<CompiledGeometry>(_geometry);
 
 	    if (!geom) 
 			return;
@@ -73,7 +74,7 @@ namespace juceRmlUi
 
 	void RenderInterface::ReleaseGeometry(const Rml::CompiledGeometryHandle _geometry)
 	{
-	    auto* geom = fromHandle<CompiledGeometry>(_geometry);
+	    auto* geom = helper::fromHandle<CompiledGeometry>(_geometry);
 		assert(geom);
 		glDeleteBuffers(1, &geom->vertexBuffer);
 		glDeleteBuffers(1, &geom->indexBuffer);

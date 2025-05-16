@@ -16,6 +16,7 @@ namespace Rml
 
 namespace juceRmlUi
 {
+	struct RmlInterfaces;
 	class RenderInterface;
 	class JuceRmlUi;
 
@@ -28,7 +29,6 @@ namespace juceRmlUi
 		void newOpenGLContextCreated() override;
 		void renderOpenGL() override;
 		void openGLContextClosing() override;
-		void resized() override;
 
 		void mouseDown(const juce::MouseEvent& _event) override;
 		void mouseUp(const juce::MouseEvent& _event) override;
@@ -45,10 +45,13 @@ namespace juceRmlUi
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 
 		genericUI::Editor& m_editor;
-		std::vector<std::vector<uint8_t>> m_fonts;
+
 		juce::OpenGLContext m_openGLContext;
-		RenderInterface* m_renderInterface = nullptr;
+
+		std::unique_ptr<RmlInterfaces> m_rmlInterfaces;
+		std::unique_ptr<RenderInterface> m_renderInterface;
 		Rml::Context* m_rmlContext = nullptr;
+
 		std::vector<juce::KeyPress> m_pressedKeys;
 		float m_contentScale = 1.0f;
 

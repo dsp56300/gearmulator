@@ -3,9 +3,10 @@
 #include <cassert>
 
 #include "rmlDocuments.h"
-#include "rmlFileInterface.h"
+#include "rmlHelper.h"
+#include "rmlInterfaces.h"
 #include "rmlRenderInterface.h"
-#include "rmlSystemInterface.h"
+
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
@@ -21,7 +22,7 @@ namespace juceRmlUi
 		m_openGLContext.attachTo(*this);
 		m_openGLContext.setContinuousRepainting(true);
 //		m_openGLContext.setSwapInterval(1);
-//		m_openGLContext.setComponentPaintingEnabled(true);
+		m_openGLContext.setComponentPaintingEnabled(false);
 
 		setWantsKeyboardFocus(true);
 
@@ -30,30 +31,30 @@ namespace juceRmlUi
 		label->setJustificationType(juce::Justification::centred);
 		label->setBounds(200, 300, 500, 150);
 		addAndMakeVisible(label);
+
+		m_rmlInterfaces.reset(new RmlInterfaces(_editor.getInterface()));
+
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+
+		Rml::LoadFontFace("BEBASNEUE_BOLD-_1_.ttf", true);
+//		Rml::LoadFontFace("BEBASNEUE_REGULAR-_1_.ttf", true);
 	}
 
 	RmlComponent::~RmlComponent()
 	{
+		deleteAllChildren();
 		m_openGLContext.detach();
 	}
 
 	void RmlComponent::newOpenGLContextCreated()
 	{
-		SetSystemInterface(new SystemInterface());
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 
-		m_renderInterface = new RenderInterface();
+		m_renderInterface.reset(new RenderInterface());
 
-		SetFileInterface(new FileInterface(m_editor.getInterface()));
+		const auto size = getScreenBounds();
 
-		Rml::Initialise();
-
-		Rml::LoadFontFace("BEBASNEUE_BOLD-_1_.ttf", true);
-//		Rml::LoadFontFace("BEBASNEUE_REGULAR-_1_.ttf", true);
-
-		auto size = getLocalBounds();
-
-		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()},
-		                                           m_renderInterface, nullptr);
+		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderInterface.get(), nullptr);
 
         auto* document = m_rmlContext->LoadDocumentFromMemory(g_rmlDocMouseTest);
         if (document)
@@ -68,6 +69,10 @@ namespace juceRmlUi
 
 		using namespace juce::gl;
 
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		if (!m_rmlContext)
+			return;
+		
 		auto contextDims = m_rmlContext->GetDimensions();
 
 		int width = getScreenBounds().getWidth();
@@ -96,216 +101,71 @@ namespace juceRmlUi
 		glEnable(GL_BLEND);
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-		if (!m_rmlContext)
-			return;
 		m_rmlContext->Update();
 		m_rmlContext->Render();
-		/*
-		float verts[] = {
-		    100.f, 200.f,
-		    700.f, 100.f,
-		    700.f, 800.f,
-		    100.f, 800.f
-		};
-		uint32_t indices[] = { 0, 1, 2, 0, 2, 3 };
 
-		glDisableClientState(GL_COLOR_ARRAY);
-		glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		glEnableClientState(GL_VERTEX_ARRAY);
-		glColor4f(1,0,1,1);
-		glVertexPointer(2, GL_FLOAT, 0, verts);
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, indices);
-		*/
-    GLenum err = glGetError();
-    if (err != GL_NO_ERROR)
-        DBG("OpenGL error: " << juce::String::toHexString((int)err));
+		GLenum err = glGetError();
+		if (err != GL_NO_ERROR)
+			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 	}
 
 	void RmlComponent::openGLContextClosing()
 	{
-	}
-
-	void RmlComponent::resized()
-	{
-		Component::resized();
-
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (m_rmlContext)
-			m_rmlContext->SetDimensions({ getWidth(), getHeight() });
-	}
+		{
+			m_rmlContext->UnloadAllDocuments();
+			Rml::RemoveContext(m_rmlContext->GetName());
+			m_rmlContext = nullptr;
 
-	namespace
-	{
-		int toRmlModifiers(const juce::ModifierKeys _mods)
-		{
-			int rmlModifiers = 0;
-			if (_mods.isCtrlDown())
-				rmlModifiers |= Rml::Input::KeyModifier::KM_CTRL;
-			if (_mods.isShiftDown())
-				rmlModifiers |= Rml::Input::KeyModifier::KM_SHIFT;
-			if (_mods.isAltDown())
-				rmlModifiers |= Rml::Input::KeyModifier::KM_ALT;
-			if (_mods.isCommandDown())
-				rmlModifiers |= Rml::Input::KeyModifier::KM_META;
-			return rmlModifiers;
+			Rml::ReleaseRenderManagers();
 		}
-		int toRmlModifiers(const juce::MouseEvent& _e)
-		{
-			return toRmlModifiers(_e.mods);
-		}
-		int toRmlModifiers(const juce::KeyPress& _e)
-		{
-			return toRmlModifiers(_e.getModifiers());
-		}
-		int toRmlMouseButton(const juce::MouseEvent& _e)
-		{
-			if (_e.mods.isRightButtonDown())
-				return 1;
-			if (_e.mods.isMiddleButtonDown())
-				return 2;
-			return 0;
-		}
-		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key)
-		{
-			const auto keyCode = _key.getKeyCode();
-		    if (keyCode == juce::KeyPress::spaceKey) return Rml::Input::KI_SPACE;
-		    if (keyCode == juce::KeyPress::returnKey) return Rml::Input::KI_RETURN;
-		    if (keyCode == juce::KeyPress::escapeKey) return Rml::Input::KI_ESCAPE;
-		    if (keyCode == juce::KeyPress::backspaceKey) return Rml::Input::KI_BACK;
-		    if (keyCode == juce::KeyPress::deleteKey) return Rml::Input::KI_DELETE;
-		    if (keyCode == juce::KeyPress::insertKey) return Rml::Input::KI_INSERT;
-		    if (keyCode == juce::KeyPress::tabKey) return Rml::Input::KI_TAB;
-		    if (keyCode == juce::KeyPress::leftKey) return Rml::Input::KI_LEFT;
-		    if (keyCode == juce::KeyPress::rightKey) return Rml::Input::KI_RIGHT;
-		    if (keyCode == juce::KeyPress::upKey) return Rml::Input::KI_UP;
-		    if (keyCode == juce::KeyPress::downKey) return Rml::Input::KI_DOWN;
-		    if (keyCode == juce::KeyPress::homeKey) return Rml::Input::KI_HOME;
-		    if (keyCode == juce::KeyPress::endKey) return Rml::Input::KI_END;
-		    if (keyCode == juce::KeyPress::pageUpKey) return Rml::Input::KI_PRIOR;
-		    if (keyCode == juce::KeyPress::pageDownKey) return Rml::Input::KI_NEXT;
-		    if (keyCode == juce::KeyPress::F1Key) return Rml::Input::KI_F1;
-		    if (keyCode == juce::KeyPress::F2Key) return Rml::Input::KI_F2;
-		    if (keyCode == juce::KeyPress::F3Key) return Rml::Input::KI_F3;
-		    if (keyCode == juce::KeyPress::F4Key) return Rml::Input::KI_F4;
-		    if (keyCode == juce::KeyPress::F5Key) return Rml::Input::KI_F5;
-		    if (keyCode == juce::KeyPress::F6Key) return Rml::Input::KI_F6;
-		    if (keyCode == juce::KeyPress::F7Key) return Rml::Input::KI_F7;
-		    if (keyCode == juce::KeyPress::F8Key) return Rml::Input::KI_F8;
-		    if (keyCode == juce::KeyPress::F9Key) return Rml::Input::KI_F9;
-		    if (keyCode == juce::KeyPress::F10Key) return Rml::Input::KI_F10;
-		    if (keyCode == juce::KeyPress::F11Key) return Rml::Input::KI_F11;
-		    if (keyCode == juce::KeyPress::F12Key) return Rml::Input::KI_F12;
-		    if (keyCode == juce::KeyPress::F13Key) return Rml::Input::KI_F13;
-		    if (keyCode == juce::KeyPress::F14Key) return Rml::Input::KI_F14;
-		    if (keyCode == juce::KeyPress::F15Key) return Rml::Input::KI_F15;
-		    if (keyCode == juce::KeyPress::F16Key) return Rml::Input::KI_F16;
-		    if (keyCode == juce::KeyPress::F17Key) return Rml::Input::KI_F17;
-		    if (keyCode == juce::KeyPress::F18Key) return Rml::Input::KI_F18;
-		    if (keyCode == juce::KeyPress::F19Key) return Rml::Input::KI_F19;
-		    if (keyCode == juce::KeyPress::F20Key) return Rml::Input::KI_F20;
-		    if (keyCode == juce::KeyPress::F21Key) return Rml::Input::KI_F21;
-		    if (keyCode == juce::KeyPress::F22Key) return Rml::Input::KI_F22;
-		    if (keyCode == juce::KeyPress::F23Key) return Rml::Input::KI_F23;
-		    if (keyCode == juce::KeyPress::F24Key) return Rml::Input::KI_F24;
-		    if (keyCode == juce::KeyPress::numberPad0) return Rml::Input::KI_NUMPAD0;
-		    if (keyCode == juce::KeyPress::numberPad1) return Rml::Input::KI_NUMPAD1;
-		    if (keyCode == juce::KeyPress::numberPad2) return Rml::Input::KI_NUMPAD2;
-		    if (keyCode == juce::KeyPress::numberPad3) return Rml::Input::KI_NUMPAD3;
-		    if (keyCode == juce::KeyPress::numberPad4) return Rml::Input::KI_NUMPAD4;
-		    if (keyCode == juce::KeyPress::numberPad5) return Rml::Input::KI_NUMPAD5;
-		    if (keyCode == juce::KeyPress::numberPad6) return Rml::Input::KI_NUMPAD6;
-		    if (keyCode == juce::KeyPress::numberPad7) return Rml::Input::KI_NUMPAD7;
-		    if (keyCode == juce::KeyPress::numberPad8) return Rml::Input::KI_NUMPAD8;
-		    if (keyCode == juce::KeyPress::numberPad9) return Rml::Input::KI_NUMPAD9;
-		    if (keyCode == juce::KeyPress::numberPadAdd) return Rml::Input::KI_ADD;
-		    if (keyCode == juce::KeyPress::numberPadSubtract) return Rml::Input::KI_SUBTRACT;
-		    if (keyCode == juce::KeyPress::numberPadMultiply) return Rml::Input::KI_MULTIPLY;
-		    if (keyCode == juce::KeyPress::numberPadDivide) return Rml::Input::KI_DIVIDE;
-		    if (keyCode == juce::KeyPress::numberPadSeparator) return Rml::Input::KI_SEPARATOR;
-		    if (keyCode == juce::KeyPress::numberPadDecimalPoint) return Rml::Input::KI_DECIMAL;
-		    if (keyCode == juce::KeyPress::numberPadEquals) return Rml::Input::KI_OEM_NEC_EQUAL;
-		    if (keyCode == juce::KeyPress::numberPadDelete) return Rml::Input::KI_DELETE;
-		    if (keyCode == juce::KeyPress::playKey) return Rml::Input::KI_PLAY;
-		    if (keyCode == juce::KeyPress::stopKey) return Rml::Input::KI_MEDIA_STOP;
-		    if (keyCode == juce::KeyPress::fastForwardKey) return Rml::Input::KI_MEDIA_NEXT_TRACK;
-		    if (keyCode == juce::KeyPress::rewindKey) return Rml::Input::KI_MEDIA_PREV_TRACK;
-		    if (keyCode == '0') return Rml::Input::KI_0;
-		    if (keyCode == '1') return Rml::Input::KI_1;
-		    if (keyCode == '2') return Rml::Input::KI_2;
-		    if (keyCode == '3') return Rml::Input::KI_3;
-		    if (keyCode == '4') return Rml::Input::KI_4;
-		    if (keyCode == '5') return Rml::Input::KI_5;
-		    if (keyCode == '6') return Rml::Input::KI_6;
-		    if (keyCode == '7') return Rml::Input::KI_7;
-		    if (keyCode == '8') return Rml::Input::KI_8;
-		    if (keyCode == '9') return Rml::Input::KI_9;
-		    if (keyCode == 'a' || keyCode == 'A') return Rml::Input::KI_A;
-		    if (keyCode == 'b' || keyCode == 'B') return Rml::Input::KI_B;
-		    if (keyCode == 'c' || keyCode == 'C') return Rml::Input::KI_C;
-		    if (keyCode == 'd' || keyCode == 'D') return Rml::Input::KI_D;
-		    if (keyCode == 'e' || keyCode == 'E') return Rml::Input::KI_E;
-		    if (keyCode == 'f' || keyCode == 'F') return Rml::Input::KI_F;
-		    if (keyCode == 'g' || keyCode == 'G') return Rml::Input::KI_G;
-		    if (keyCode == 'h' || keyCode == 'H') return Rml::Input::KI_H;
-		    if (keyCode == 'i' || keyCode == 'I') return Rml::Input::KI_I;
-		    if (keyCode == 'j' || keyCode == 'J') return Rml::Input::KI_J;
-		    if (keyCode == 'k' || keyCode == 'K') return Rml::Input::KI_K;
-		    if (keyCode == 'l' || keyCode == 'L') return Rml::Input::KI_L;
-		    if (keyCode == 'm' || keyCode == 'M') return Rml::Input::KI_M;
-		    if (keyCode == 'n' || keyCode == 'N') return Rml::Input::KI_N;
-		    if (keyCode == 'o' || keyCode == 'O') return Rml::Input::KI_O;
-		    if (keyCode == 'p' || keyCode == 'P') return Rml::Input::KI_P;
-		    if (keyCode == 'q' || keyCode == 'Q') return Rml::Input::KI_Q;
-		    if (keyCode == 'r' || keyCode == 'R') return Rml::Input::KI_R;
-		    if (keyCode == 's' || keyCode == 'S') return Rml::Input::KI_S;
-		    if (keyCode == 't' || keyCode == 'T') return Rml::Input::KI_T;
-		    if (keyCode == 'u' || keyCode == 'U') return Rml::Input::KI_U;
-		    if (keyCode == 'v' || keyCode == 'V') return Rml::Input::KI_V;
-		    if (keyCode == 'w' || keyCode == 'W') return Rml::Input::KI_W;
-		    if (keyCode == 'x' || keyCode == 'X') return Rml::Input::KI_X;
-		    if (keyCode == 'y' || keyCode == 'Y') return Rml::Input::KI_Y;
-		    if (keyCode == 'z' || keyCode == 'Z') return Rml::Input::KI_Z;
-		    return Rml::Input::KI_UNKNOWN;
-		}
+		m_renderInterface.reset();
 	}
 
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
 	{
 		Component::mouseDown(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonDown(toRmlMouseButton(_event), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
 	{
 		Component::mouseUp(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonUp(toRmlMouseButton(_event), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
 	{
 		Component::mouseMove(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
 
 		const auto pos = toRmlPosition(_event);
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
 	{
 		Component::mouseDrag(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseExit(const juce::MouseEvent& _event)
 	{
 		Component::mouseExit(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
 	}
@@ -313,41 +173,49 @@ namespace juceRmlUi
 	void RmlComponent::mouseEnter(const juce::MouseEvent& _event)
 	{
 		Component::mouseEnter(_event);
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
-		m_rmlContext->ProcessMouseMove(pos.x, pos.y, toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseMove(pos.x, pos.y, helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseWheelMove(const juce::MouseEvent& _event, const juce::MouseWheelDetails& _wheel)
 	{
 		Component::mouseWheelMove(_event, _wheel);
+
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(_wheel.deltaX, _wheel.deltaY), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(_wheel.deltaX, _wheel.deltaY), helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
 	{
 		Component::mouseDoubleClick(_event);
+
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseButtonDown(toRmlMouseButton(_event), toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
 	}
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
 	{
+		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+
 		if (!m_rmlContext)
 			return Component::keyPressed(_key);
 
-		const Rml::Input::KeyIdentifier key = toRmlKey(_key);
+		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
 
 		if (key == Rml::Input::KI_UNKNOWN)
 			return Component::keyPressed(_key);
 
 		m_pressedKeys.push_back(_key);
 
-		return m_rmlContext->ProcessKeyDown(key, toRmlModifiers(_key));
+		return m_rmlContext->ProcessKeyDown(key, helper::toRmlModifiers(_key));
 	}
 
 	bool RmlComponent::keyStateChanged(const bool _isKeyDown)
@@ -358,17 +226,22 @@ namespace juceRmlUi
 
 		if (!_isKeyDown)
 		{
-			for (auto it = m_pressedKeys.begin(); it != m_pressedKeys.end();)
+			RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+
+			if (m_rmlContext)
 			{
-				if (!it->isCurrentlyDown())
+				for (auto it = m_pressedKeys.begin(); it != m_pressedKeys.end();)
 				{
-					const auto& key = *it;
-					res |= m_rmlContext->ProcessKeyUp(toRmlKey(key), toRmlModifiers(key));
-					it = m_pressedKeys.erase(it);
-				}
-				else
-				{
-					++it;
+					if (!it->isCurrentlyDown())
+					{
+						const auto& key = *it;
+						res |= m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), helper::toRmlModifiers(key));
+						it = m_pressedKeys.erase(it);
+					}
+					else
+					{
+						++it;
+					}
 				}
 			}
 		}

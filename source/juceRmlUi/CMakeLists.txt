@@ -7,6 +7,7 @@ set(SOURCES
 	rmlDocuments.h
 	rmlFileInterface.cpp rmlFileInterface.h
 	rmlHelper.cpp rmlHelper.h
+	rmlInterfaces.cpp rmlInterfaces.h
 	rmlRenderInterface.cpp rmlRenderInterface.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
 )

@@ -21,5 +21,8 @@ if(${CMAKE_PROJECT_NAME}_USE_RMLUI)
 	# finally...
 	add_subdirectory(RmlUi)
 
-	target_include_directories(rmlui_core PUBLIC ${CMAKE_CURRENT_LIST_DIR}/RmlUi/Include)
+	target_include_directories(rmlui_core PUBLIC 
+		${CMAKE_CURRENT_LIST_DIR}/RmlUi/Include
+		${CMAKE_CURRENT_LIST_DIR}/RmlUi/Source
+		)
 endif()

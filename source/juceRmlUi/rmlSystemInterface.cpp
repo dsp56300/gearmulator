@@ -6,6 +6,26 @@
 
 namespace juceRmlUi
 {
+
+	SystemInterface::~SystemInterface()
+	= default;
+
+	double SystemInterface::GetElapsedTime()
+	{
+		return Rml::SystemInterface::GetElapsedTime();
+	}
+
+	int SystemInterface::TranslateString(Rml::String& _translated, const Rml::String& _input)
+	{
+		return Rml::SystemInterface::TranslateString(_translated, _input);
+	}
+
+	void SystemInterface::JoinPath(Rml::String& _translatedPath, const Rml::String& _documentPath,
+		const Rml::String& _path)
+	{
+		Rml::SystemInterface::JoinPath(_translatedPath, _documentPath, _path);
+	}
+
 	bool SystemInterface::LogMessage(const Rml::Log::Type _type, const Rml::String& _message)
 	{
 		switch (_type)
@@ -35,25 +55,6 @@ namespace juceRmlUi
 			break;
 		}
 		return Rml::SystemInterface::LogMessage(_type, _message);
-	}
-
-	SystemInterface::~SystemInterface()
-	= default;
-
-	double SystemInterface::GetElapsedTime()
-	{
-		return Rml::SystemInterface::GetElapsedTime();
-	}
-
-	int SystemInterface::TranslateString(Rml::String& _translated, const Rml::String& _input)
-	{
-		return Rml::SystemInterface::TranslateString(_translated, _input);
-	}
-
-	void SystemInterface::JoinPath(Rml::String& _translatedPath, const Rml::String& _documentPath,
-		const Rml::String& _path)
-	{
-		Rml::SystemInterface::JoinPath(_translatedPath, _documentPath, _path);
 	}
 
 	void SystemInterface::SetMouseCursor(const Rml::String& _cursorName)

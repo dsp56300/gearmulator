@@ -22,14 +22,14 @@ namespace juceRmlUi
 		if (!data)
 			return 0;
 		auto* fileData = new FileInfo{ data, size, 0 };
-		return toHandle<Rml::FileHandle>(fileData);
+		return helper::toHandle<Rml::FileHandle>(fileData);
 	}
 
 	void FileInterface::Close(Rml::FileHandle _file)
 	{
 		if (_file == 0)
 			return;
-		auto* file = fromHandle<FileInfo>(_file);
+		auto* file = helper::fromHandle<FileInfo>(_file);
 		delete file;
 	}
 
@@ -37,7 +37,7 @@ namespace juceRmlUi
 	{
 		if (_file == 0)
 			return 0;
-		auto* file = fromHandle<FileInfo>(_file);
+		auto* file = helper::fromHandle<FileInfo>(_file);
 		if (file->readPos >= file->size)
 			return 0;
 		const auto bytesToRead = std::min(static_cast<uint32_t>(size), file->size - file->readPos);
@@ -50,7 +50,7 @@ namespace juceRmlUi
 	{
 		if (_file == 0)
 			return false;
-		auto* file = fromHandle<FileInfo>(_file);
+		auto* file = helper::fromHandle<FileInfo>(_file);
 		switch (_origin)
 		{
 		case SEEK_SET:
@@ -73,7 +73,7 @@ namespace juceRmlUi
 	{
 		if (_file == 0)
 			return 0;
-		auto* file = fromHandle<FileInfo>(_file);
+		auto* file = helper::fromHandle<FileInfo>(_file);
 		return file->readPos;
 	}
 
@@ -81,7 +81,7 @@ namespace juceRmlUi
 	{
 		if (_file == 0)
 			return 0;
-		auto* file = fromHandle<FileInfo>(_file);
+		auto* file = helper::fromHandle<FileInfo>(_file);
 		return file->size;
 	}
 }
