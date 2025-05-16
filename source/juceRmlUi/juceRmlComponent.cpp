@@ -67,16 +67,19 @@ namespace juceRmlUi
 		int width = getScreenBounds().getWidth();
 		int height = getScreenBounds().getHeight();
 
+		const float invContentScale = 1.0f / m_contentScale;
+
 		if (contextDims.x != width || contextDims.y != height)
 		{
-			m_rmlContext->SetDimensions({ width, height });
+			m_rmlContext->SetDimensions({ static_cast<int>(static_cast<float>(width) * invContentScale), static_cast<int>(static_cast<float>(height) * invContentScale)});
+			m_rmlContext->SetDensityIndependentPixelRatio(5.0f);
 		}
 
 		glViewport(0, 0, width, height);
 
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		glOrtho(0, width, height, 0, -1, 1);
+		glOrtho(0, static_cast<float>(width) * invContentScale, static_cast<float>(height) * invContentScale, 0, -1, 1);
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
@@ -371,8 +374,8 @@ namespace juceRmlUi
 	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
 	{
 		return {
-			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale()), 
-			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale())
+			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale() / m_contentScale), 
+			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale() / m_contentScale)
 		};
 	}
 }

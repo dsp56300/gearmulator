@@ -50,5 +50,6 @@ namespace juceRmlUi
 		RenderInterface* m_renderInterface = nullptr;
 		Rml::Context* m_rmlContext = nullptr;
 		std::vector<juce::KeyPress> m_pressedKeys;
+		float m_contentScale = 1.0f;
 	};
 }
