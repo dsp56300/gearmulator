@@ -15,9 +15,6 @@ namespace juceRmlUi
 	{
 	}
 
-	FileInterface::~FileInterface()
-	= default;
-
 	Rml::FileHandle FileInterface::Open(const Rml::String& _path)
 	{
 		uint32_t size;

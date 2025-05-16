@@ -13,7 +13,12 @@ namespace juceRmlUi
 	{
 	public:
 		explicit FileInterface(genericUI::EditorInterface& _editorInterface);
-		~FileInterface() override;
+		~FileInterface() override = default;
+		FileInterface(const FileInterface&) = delete;
+		FileInterface(FileInterface&&) = delete;
+
+		FileInterface& operator=(const FileInterface&) = delete;
+		FileInterface& operator=(FileInterface&&) = delete;
 
 		Rml::FileHandle Open(const Rml::String& _path) override;
 		void Close(Rml::FileHandle _file) override;
