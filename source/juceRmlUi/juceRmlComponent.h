@@ -19,10 +19,10 @@ namespace juceRmlUi
 	class RenderInterface;
 	class JuceRmlUi;
 
-	class RmlComponent : public juce::Component, juce::OpenGLRenderer
+	class RmlComponent final : public juce::Component, juce::OpenGLRenderer
 	{
 	public:
-		RmlComponent(genericUI::Editor& _editor);
+		explicit RmlComponent(genericUI::Editor& _editor);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -51,5 +51,8 @@ namespace juceRmlUi
 		Rml::Context* m_rmlContext = nullptr;
 		std::vector<juce::KeyPress> m_pressedKeys;
 		float m_contentScale = 1.0f;
+
+		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
+		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 	};
 }
