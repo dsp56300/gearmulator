@@ -36,6 +36,8 @@ add_subdirectory(baseLib)
 add_subdirectory(synthLib)
 add_subdirectory(libresample)
 
+add_subdirectory(3rdparty)
+
 include(macsetup.cmake)
 include(skins.cmake)
 
@@ -59,6 +61,9 @@ if(${CMAKE_PROJECT_NAME}_BUILD_JUCEPLUGIN)
 		add_subdirectory(clap-juce-extensions)
 	endif()
 	add_subdirectory(jucePluginLib EXCLUDE_FROM_ALL)
+	if(${CMAKE_PROJECT_NAME}_USE_RMLUI)
+		add_subdirectory(juceRmlUi)
+	endif()
 	add_subdirectory(juceUiLib EXCLUDE_FROM_ALL)
 	add_subdirectory(jucePluginEditorLib EXCLUDE_FROM_ALL)
 	add_subdirectory(jucePluginData EXCLUDE_FROM_ALL)

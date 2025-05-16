@@ -68,6 +68,10 @@ target_link_libraries(juce_plugin_modules PRIVATE
 	juce::juce_cryptography
 )
 
+if(${CMAKE_PROJECT_NAME}_USE_RMLUI)
+	target_link_libraries(juce_plugin_modules PRIVATE juce::juce_opengl)
+endif()
+
 target_compile_definitions(juce_plugin_modules PUBLIC
 	JUCE_WEB_BROWSER=0  # If you remove this, add `NEEDS_WEB_BROWSER TRUE` to the `juce_add_plugin` call
 	JUCE_USE_CURL=0     # If you remove this, add `NEEDS_CURL TRUE` to the `juce_add_plugin` call
