@@ -24,6 +24,12 @@ namespace juceRmlUi
 //		m_openGLContext.setComponentPaintingEnabled(true);
 
 		setWantsKeyboardFocus(true);
+
+		auto label = new juce::Label("JUCE LABEL", "JUCE LABEL");
+		label->setFont(juce::Font(20.0f));
+		label->setJustificationType(juce::Justification::centred);
+		label->setBounds(200, 300, 500, 150);
+		addAndMakeVisible(label);
 	}
 
 	RmlComponent::~RmlComponent()
