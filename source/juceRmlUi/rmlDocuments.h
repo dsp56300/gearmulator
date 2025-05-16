@@ -122,8 +122,7 @@ constexpr auto g_rmlDocMouseTest = R"(
             text-align: center;
             line-height: 60px;
             border-radius: 8px;
-            transition: background-color 0.2s ease;
-            user-select: none;
+            transition: background-color 0.5s elastic-out;
         }
 
         #button:hover {
