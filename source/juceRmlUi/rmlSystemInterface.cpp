@@ -1,13 +1,39 @@
 #include "rmlSystemInterface.h"
 
+#include <cassert>
+
 #include "dsp56300/source/dsp56kEmu/logging.h"
 
 namespace juceRmlUi
 {
 	bool SystemInterface::LogMessage(const Rml::Log::Type _type, const Rml::String& _message)
 	{
-		LOG("RML LOG: " << _type << ": " << _message.c_str());
-
+		switch (_type)
+		{
+		case Rml::Log::LT_ALWAYS:
+			LOG("RML LOG [always]: " << _message.c_str());
+			break;
+		case Rml::Log::LT_ERROR:
+			LOG("RML LOG [error]: " << _message.c_str());
+			assert(false && "RML error");
+			break;
+		case Rml::Log::LT_ASSERT:
+			LOG("RML LOG [assert]: " << _message.c_str());
+			assert(false && "RML assert");
+			break;
+		case Rml::Log::LT_WARNING:
+			LOG("RML LOG [warning]: " << _message.c_str());
+			break;
+		case Rml::Log::LT_INFO:
+			LOG("RML LOG [info]: " << _message.c_str());
+			break;
+		case Rml::Log::LT_DEBUG:
+			LOG("RML LOG [debug]: " << _message.c_str());
+			break;
+		case Rml::Log::LT_MAX:
+			LOG("RML LOG [MAX]: " << _message.c_str());
+			break;
+		}
 		return Rml::SystemInterface::LogMessage(_type, _message);
 	}
 
