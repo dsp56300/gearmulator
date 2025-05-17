@@ -272,8 +272,7 @@ namespace juceRmlUi
 	{
 		using Rml::ClipMaskOperation;
 
-		const bool clear_stencil = (_operation == ClipMaskOperation::Set || _operation == ClipMaskOperation::SetInverse);
-		if (clear_stencil)
+		if (_operation == ClipMaskOperation::Set || _operation == ClipMaskOperation::SetInverse)
 		{
 			// @performance Increment the reference value instead of clearing each time.
 			glClear(GL_STENCIL_BUFFER_BIT);
@@ -314,7 +313,7 @@ namespace juceRmlUi
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 		glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
 		glStencilFunc(GL_EQUAL, stencil_test_value, static_cast<GLuint>(-1));
-		}
+	}
 
 	void RenderInterface::SetTransform(const Rml::Matrix4f* _transform)
 	{
