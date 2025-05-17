@@ -27,7 +27,7 @@ namespace juceRmlUi
 			RmlInterfaces& m_rmlInterfaces;
 		};
 
-		RmlInterfaces(genericUI::EditorInterface& _editorInterface);
+		explicit RmlInterfaces(genericUI::EditorInterface& _editorInterface);
 		~RmlInterfaces();
 
 		void attach();
