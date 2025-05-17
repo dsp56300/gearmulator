@@ -50,7 +50,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 
-		m_renderInterface.reset(new RenderInterface());
+		m_renderInterface.reset(new RenderInterface(m_editor.getInterface()));
 
 		const auto size = getScreenBounds();
 
@@ -102,7 +102,10 @@ namespace juceRmlUi
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		m_rmlContext->Update();
+
+		m_renderInterface->beginFrame(width, height);
 		m_rmlContext->Render();
+		m_renderInterface->endFrame();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
