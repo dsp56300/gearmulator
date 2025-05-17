@@ -240,7 +240,7 @@ namespace juceRmlUi
 	{
 		assert(!m_layers.empty());
 
-		auto* layer = helper::fromHandle<LayerHandleData>(m_layers.top());
+		auto* layer = m_layers.top();
 
 		glDeleteFramebuffers(1, &layer->framebuffer);
 		glDeleteTextures(1, &layer->texture);
