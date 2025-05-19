@@ -2,23 +2,23 @@
 
 #include <algorithm>
 
+#include "rmlDataProvider.h"
 #include "rmlHelper.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "baseLib/filesystem.h"
-#include "juceUiLib/editorInterface.h"
 
 namespace juceRmlUi
 {
-	FileInterface::FileInterface(genericUI::EditorInterface& _editorInterface) : m_editorInterface(_editorInterface)
+	FileInterface::FileInterface(DataProvider& _dataProvider) : m_dataProvider(_dataProvider)
 	{
 	}
 
 	Rml::FileHandle FileInterface::Open(const Rml::String& _path)
 	{
 		uint32_t size;
-		auto* data = m_editorInterface.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_path), size);
+		auto* data = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_path), size);
 		if (!data)
 			return 0;
 		auto* fileData = new FileInfo{ data, size, 0 };
@@ -41,7 +41,7 @@ namespace juceRmlUi
 		if (file->readPos >= file->size)
 			return 0;
 		const auto bytesToRead = std::min(static_cast<uint32_t>(size), file->size - file->readPos);
-		std::memcpy(buffer, file->data + file->readPos, bytesToRead);
+		std::memcpy(buffer, static_cast<const uint8_t*>(file->data) + file->readPos, bytesToRead);
 		file->readPos += bytesToRead;
 		return bytesToRead;
 	}

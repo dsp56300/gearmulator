@@ -4,11 +4,6 @@
 
 #include "juce_opengl/juce_opengl.h"
 
-namespace genericUI
-{
-	class Editor;
-}
-
 namespace Rml
 {
 	class Context;
@@ -20,10 +15,12 @@ namespace juceRmlUi
 	class RenderInterface;
 	class JuceRmlUi;
 
+	class DataProvider;
+
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer
 	{
 	public:
-		explicit RmlComponent(genericUI::Editor& _editor);
+		explicit RmlComponent(DataProvider& _dataProvider, const std::string& _rootRmlFilename);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
@@ -44,7 +41,8 @@ namespace juceRmlUi
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 
-		genericUI::Editor& m_editor;
+		DataProvider& m_dataProvider;
+		const std::string m_rootRmlFilename;
 
 		juce::OpenGLContext m_openGLContext;
 

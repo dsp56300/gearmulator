@@ -12,8 +12,8 @@ namespace juceRmlUi
 		uint32_t g_instanceCount = 0;
 	}
 
-	RmlInterfaces::RmlInterfaces(genericUI::EditorInterface& _editorInterface)
-		: m_fileInterface(_editorInterface)
+	RmlInterfaces::RmlInterfaces(DataProvider& _dataProvider)
+		: m_fileInterface(_dataProvider)
 	{
 		ScopedAccess access(getScopedAccess());
 

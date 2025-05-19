@@ -2,20 +2,21 @@
 
 #include <cassert>
 
+#include "rmlDataProvider.h"
 #include "rmlDocuments.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
 #include "rmlRenderInterface.h"
 
+#include "baseLib/filesystem.h"
+
 #include "RmlUi/Core/Context.h"
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementDocument.h"
 
-#include "juceUiLib/editor.h"
-
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(genericUI::Editor& _editor) : m_editor(_editor)
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, const std::string& _rootRmlFilename) : m_dataProvider(_dataProvider), m_rootRmlFilename(_rootRmlFilename)
 	{
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);
@@ -32,12 +33,17 @@ namespace juceRmlUi
 		label->setBounds(200, 300, 500, 150);
 		addAndMakeVisible(label);
 
-		m_rmlInterfaces.reset(new RmlInterfaces(_editor.getInterface()));
+		m_rmlInterfaces.reset(new RmlInterfaces(m_dataProvider));
 
 		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 
-		Rml::LoadFontFace("BEBASNEUE_BOLD-_1_.ttf", true);
-//		Rml::LoadFontFace("BEBASNEUE_REGULAR-_1_.ttf", true);
+		const auto files = m_dataProvider.getAllFilenames();
+
+		for (const auto & file : files)
+		{
+			if (baseLib::filesystem::hasExtension(file, ".ttf"))
+				Rml::LoadFontFace(file, true);
+		}
 	}
 
 	RmlComponent::~RmlComponent()
@@ -50,13 +56,13 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
 
-		m_renderInterface.reset(new RenderInterface(m_editor.getInterface()));
+		m_renderInterface.reset(new RenderInterface(m_dataProvider));
 
 		const auto size = getScreenBounds();
 
 		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderInterface.get(), nullptr);
 
-        auto* document = m_rmlContext->LoadDocumentFromMemory(g_rmlDocMouseTest);
+        auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
         if (document)
 	        document->Show();
 		else

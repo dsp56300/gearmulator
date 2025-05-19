@@ -12,6 +12,10 @@
 
 #include "jucePluginLib/types.h"
 
+#if USE_RMLUI
+#include "juceRmlUi/rmlDataProvider.h"
+#endif
+
 namespace baseLib
 {
 	class ChunkReader;
@@ -35,6 +39,9 @@ namespace jucePluginEditorLib
 	class Processor;
 
 	class Editor : public genericUI::Editor, genericUI::EditorInterface
+#if USE_RMLUI
+		, juceRmlUi::DataProvider
+#endif
 	{
 	public:
 		baseLib::Event<Editor*, juce::MouseEvent*> onOpenMenu;
@@ -100,6 +107,8 @@ namespace jucePluginEditorLib
 		juce::PopupMenu createExportFileTypeMenu(const std::function<void(pluginLib::FileType)>& _func) const;
 		virtual void createExportFileTypeMenu(juce::PopupMenu& _menu, const std::function<void(pluginLib::FileType)>& _func) const;
 
+		juce::Component* createRmlUiComponent(const std::string& _rmlFile) override;
+
 	protected:
 		bool keyPressed(const juce::KeyPress& _key) override;
 
@@ -107,6 +116,11 @@ namespace jucePluginEditorLib
 		void onDisclaimerFinished() const;
 
 		const char* getResourceByFilename(const std::string& _name, uint32_t& _dataSize) override;
+#if USE_RMLUI
+		std::vector<std::string> getAllFilenames() override;
+#endif
+		std::string getAbsoluteSkinFolder(const std::string& _skinFolder) const;
+
 		int getParameterIndexByName(const std::string& _name) override;
 		bool bindParameter(juce::Button& _target, int _parameterIndex) override;
 		bool bindParameter(juce::ComboBox& _target, int _parameterIndex) override;

@@ -4,6 +4,7 @@ project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION})
 set(SOURCES
 	juceRmlUi.cpp juceRmlUi.h
 	juceRmlComponent.cpp juceRmlComponent.h
+	rmlDataProvider.h
 	rmlDocuments.h
 	rmlFileInterface.cpp rmlFileInterface.h
 	rmlHelper.cpp rmlHelper.h
@@ -17,7 +18,7 @@ add_library(juceRmlUi STATIC)
 target_sources(juceRmlUi PRIVATE ${SOURCES})
 source_group("source" FILES ${SOURCES})
 
-target_link_libraries(juceRmlUi PUBLIC juceUiLib rmlui_core)
+target_link_libraries(juceRmlUi PUBLIC baseLib rmlui_core)
 
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)

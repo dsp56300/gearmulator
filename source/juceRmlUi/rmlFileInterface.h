@@ -2,17 +2,14 @@
 
 #include "RmlUi/Core/FileInterface.h"
 
-namespace genericUI
-{
-	class EditorInterface;
-}
-
 namespace juceRmlUi
 {
+	class DataProvider;
+
 	class FileInterface final : public Rml::FileInterface
 	{
 	public:
-		explicit FileInterface(genericUI::EditorInterface& _editorInterface);
+		explicit FileInterface(DataProvider& _dataProvider);
 		~FileInterface() override = default;
 		FileInterface(const FileInterface&) = delete;
 		FileInterface(FileInterface&&) = delete;
@@ -28,11 +25,11 @@ namespace juceRmlUi
 		size_t Length(Rml::FileHandle _file) override;
 
 	private:
-		genericUI::EditorInterface& m_editorInterface;
+		DataProvider& m_dataProvider;
 
 		struct FileInfo
 		{
-			const char* data = nullptr;
+			const void* data = nullptr;
 			uint32_t size = 0;
 			uint32_t readPos = 0;
 		};

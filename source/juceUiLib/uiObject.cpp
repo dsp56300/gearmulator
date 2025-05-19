@@ -268,6 +268,12 @@ namespace genericUI
 		{
 			createJuceObject<juce::Component>(_editor);
 		}
+		else if(hasComponent("rmlui"))
+		{
+			juce::Component* comp = _editor.createRmlUiComponent(getProperty("rml"));
+			if (comp)
+				createJuceObject(_editor, comp);
+		}
 		else
 		{
 			throw std::runtime_error("Failed to determine object type for object named " + m_name);

@@ -2,17 +2,14 @@
 
 #include "RmlUi/Core/RenderInterface.h"
 
-namespace genericUI
-{
-	class EditorInterface;
-}
-
 namespace juceRmlUi
 {
+	class DataProvider;
+
 	class RenderInterface : public Rml::RenderInterface
 	{
 	public:
-		RenderInterface(genericUI::EditorInterface& _editorInterface);
+		RenderInterface(DataProvider& _dataProvider);
 
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
 		void RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
@@ -39,7 +36,7 @@ namespace juceRmlUi
 		void endFrame();
 
 	private:
-		genericUI::EditorInterface& m_editorInterface;
+		DataProvider& m_dataProvider;
 
 		struct CompiledGeometry
 		{

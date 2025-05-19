@@ -2,13 +2,12 @@
 
 #include <cassert>
 
+#include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "baseLib/filesystem.h"
 
 #include "juce_opengl/juce_opengl.h"
 #include "juce_gui_basics/juce_gui_basics.h"
-
-#include "juceUiLib/editorInterface.h"
 
 namespace juceRmlUi
 {
@@ -16,7 +15,7 @@ namespace juceRmlUi
 
 	static_assert(sizeof(Rml::CompiledGeometryHandle) == sizeof(void*), "handles must have size for a pointer");
 
-	RenderInterface::RenderInterface(genericUI::EditorInterface& _editorInterface) : m_editorInterface(_editorInterface)
+	RenderInterface::RenderInterface(DataProvider& _dataProvider) : m_dataProvider(_dataProvider)
 	{
 	}
 
@@ -84,7 +83,7 @@ namespace juceRmlUi
 	Rml::TextureHandle RenderInterface::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
 		uint32_t fileSize;
-		auto* ptr = m_editorInterface.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
+		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
 
 		if (!ptr)
 		{

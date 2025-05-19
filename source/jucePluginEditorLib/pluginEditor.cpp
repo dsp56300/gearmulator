@@ -10,6 +10,10 @@
 #include "jucePluginLib/parameterbinding.h"
 #include "jucePluginLib/tools.h"
 
+#if USE_RMLUI
+#include "juceRmlUi/juceRmlComponent.h"
+#endif
+
 #include "juceUiLib/messageBox.h"
 
 #include "synthLib/os.h"
@@ -582,6 +586,15 @@ namespace jucePluginEditorLib
 		_menu.addItem(".mid", [this, _func]{_func(pluginLib::FileType::Mid);});
 	}
 
+	juce::Component* Editor::createRmlUiComponent(const std::string& _rmlFile)
+	{
+#if USE_RMLUI
+		return new juceRmlUi::RmlComponent(*this, _rmlFile);
+#else
+		return genericUI::Editor::createRmlUiComponent(_rmlFile);
+#endif
+	}
+
 	bool Editor::keyPressed(const juce::KeyPress& _key)
 	{
 		if(_key.getModifiers().isCommandDown())
@@ -639,9 +652,7 @@ namespace jucePluginEditorLib
 			if(res)
 				return res;
 
-			const auto modulePath = synthLib::getModulePath();
-			const auto publicDataPath = m_processor.getDataFolder();
-			const auto folder = baseLib::filesystem::validatePath(m_skin.folder.find(modulePath) == 0 || m_skin.folder.find(publicDataPath) == 0 ? m_skin.folder : modulePath + m_skin.folder);
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
 
 			// try to load from disk first
 			FILE* hFile = fopen((folder + _name).c_str(), "rb");
@@ -672,6 +683,42 @@ namespace jucePluginEditorLib
 			throw std::runtime_error("Failed to find file named " + _name);
 		_dataSize = size;
 		return res;
+	}
+
+#if USE_RMLUI
+	std::vector<std::string> Editor::getAllFilenames()
+	{
+		std::vector<std::string> filenames;
+
+		if (!m_skin.folder.empty())
+		{
+			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
+
+			juce::File skinFolder(folder);
+			if (skinFolder.exists() && skinFolder.isDirectory())
+			{
+				auto files = skinFolder.findChildFiles(juce::File::findFiles, false, "*");
+				for (const auto& file : files)
+					filenames.push_back(file.getFileName().toStdString());
+			}
+		}
+		else
+		{
+			auto data = getProcessor().getProperties().binaryData;
+			for (size_t i=0; i<data.listSize; ++i)
+				filenames.emplace_back(data.originalFileNames[i]);
+		}
+
+		return filenames;
+	}
+#endif
+
+	std::string Editor::getAbsoluteSkinFolder(const std::string& _skinFolder) const
+	{
+		const auto modulePath = synthLib::getModulePath();
+		const auto publicDataPath = m_processor.getDataFolder();
+
+		return baseLib::filesystem::validatePath(_skinFolder.find(modulePath) == 0 || _skinFolder.find(publicDataPath) == 0 ? _skinFolder : modulePath + _skinFolder);
 	}
 
 	int Editor::getParameterIndexByName(const std::string& _name)

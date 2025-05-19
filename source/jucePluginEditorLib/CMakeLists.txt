@@ -57,6 +57,14 @@ source_group("source" FILES ${SOURCES})
 source_group("source\\patchmanager" FILES ${SOURCES_PM})
 
 target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData)
+
+if(TARGET juceRmlUi)
+	target_link_libraries(jucePluginEditorLib PUBLIC juceRmlUi)
+	target_compile_definitions(jucePluginEditorLib PUBLIC USE_RMLUI=1)
+else()
+	target_compile_definitions(jucePluginEditorLib PUBLIC USE_RMLUI=0)
+endif()
+
 target_include_directories(jucePluginEditorLib PUBLIC ../JUCE/modules)
 target_compile_definitions(jucePluginEditorLib PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET jucePluginEditorLib PROPERTY FOLDER "Gearmulator")

@@ -7,6 +7,8 @@
 
 namespace juceRmlUi
 {
+	class DataProvider;
+
 	struct RmlInterfaces
 	{
 	public:
@@ -19,15 +21,20 @@ namespace juceRmlUi
 			}
 			ScopedAccess(const ScopedAccess&) = delete;
 			ScopedAccess(ScopedAccess&&) = default;
+
 			~ScopedAccess()
 			{
 				m_rmlInterfaces.detach();
 			}
+
+			ScopedAccess& operator=(const ScopedAccess&) = delete;
+			ScopedAccess& operator=(ScopedAccess&&) = delete;
+
 		private:
 			RmlInterfaces& m_rmlInterfaces;
 		};
 
-		explicit RmlInterfaces(genericUI::EditorInterface& _editorInterface);
+		explicit RmlInterfaces(DataProvider& _dataProvider);
 		~RmlInterfaces();
 
 		void attach();
