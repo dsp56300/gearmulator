@@ -107,7 +107,20 @@ namespace juceRmlUi
 		glBindTexture(GL_TEXTURE_2D, textureId);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _textureDimensions.x, _textureDimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelData());
+		juce::Image::BitmapData bitmapData(image, 0, 0, image.getWidth(), image.getHeight(), juce::Image::BitmapData::readOnly);
+		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
+
+		switch(image.getFormat())
+		{
+		case juce::Image::ARGB:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _textureDimensions.x, _textureDimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelPtr);
+			break;
+		case juce::Image::RGB:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _textureDimensions.x, _textureDimensions.y, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
+			break;
+		default:
+			assert(false && "unsupported image format");
+		}
 		return textureId;
 	}
 
