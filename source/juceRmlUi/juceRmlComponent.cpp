@@ -109,6 +109,9 @@ namespace juceRmlUi
 
 		m_rmlContext->Update();
 
+		glDisable(GL_DEBUG_OUTPUT);
+        glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
+
 		m_renderInterface->beginFrame(width, height);
 		m_rmlContext->Render();
 		m_renderInterface->endFrame();
