@@ -16,7 +16,7 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, const std::string& _rootRmlFilename) : m_dataProvider(_dataProvider), m_rootRmlFilename(_rootRmlFilename)
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename) : m_dataProvider(_dataProvider), m_rootRmlFilename(std::move(_rootRmlFilename))
 	{
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);

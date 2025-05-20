@@ -20,7 +20,7 @@ namespace juceRmlUi
 	class RmlComponent final : public juce::Component, juce::OpenGLRenderer
 	{
 	public:
-		explicit RmlComponent(DataProvider& _dataProvider, const std::string& _rootRmlFilename);
+		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename);
 		~RmlComponent() override;
 
 		void newOpenGLContextCreated() override;
