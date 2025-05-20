@@ -113,7 +113,7 @@ namespace juceRmlUi
 		switch(image.getFormat())
 		{
 		case juce::Image::ARGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _textureDimensions.x, _textureDimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixelPtr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _textureDimensions.x, _textureDimensions.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
 			break;
 		case juce::Image::RGB:
 			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _textureDimensions.x, _textureDimensions.y, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
