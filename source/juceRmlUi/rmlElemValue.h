@@ -1,19 +1,19 @@
 #pragma once
 
-#include "RmlUi/Core/Element.h"
+#include "rmlElement.h"
 
 #include "baseLib/event.h"
 
 namespace juceRmlUi
 {
-	class ElemValue : public Rml::Element
+	class ElemValue : public Element
 	{
 	public:
 		baseLib::Event<float> onValueChanged;
 		baseLib::Event<float> onMinValueChanged;
 		baseLib::Event<float> onMaxValueChanged;
 
-		explicit ElemValue(const Rml::String& _tag) : Rml::Element(_tag) {}
+		explicit ElemValue(const Rml::String& _tag) : Element(_tag) {}
 
 		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
 

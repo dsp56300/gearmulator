@@ -25,35 +25,24 @@ namespace juceRmlUi
 		RemoveEventListener(Rml::EventId::Drag, this);
 	}
 
-	void ElemKnob::OnAttributeChange(const Rml::ElementAttributes& _changedAttributes)
+	void ElemKnob::onPropertyChanged(const std::string& _key)
 	{
-		auto it = _changedAttributes.find("spriteprefix");
-		if (it != _changedAttributes.end())
+		ElemValue::onPropertyChanged(_key);
+
+		if (_key == "spriteprefix")
 		{
-			m_spritesheetPrefix = GetAttribute<Rml::String>("spriteprefix", "");
+			m_spritesheetPrefix = getProperty<Rml::String>("spriteprefix", "");
 			m_spriteDirty = true;
 		}
-
-		it = _changedAttributes.find("speed");
-		if (it != _changedAttributes.end())
+		else if (_key == "speed")
 		{
-			m_speed = GetAttribute<float>("speed", m_speed);
+			m_speed = getProperty<float>("speed", m_speed);
+		}
+		else if (_key == "frames")
+		{
+			m_frames = getProperty<uint32_t>("frames", m_frames);
 			m_spriteDirty = true;
 		}
-
-		it = _changedAttributes.find("frames");
-		if (it != _changedAttributes.end())
-		{
-			m_frames = GetAttribute<uint32_t>("frames", m_frames);
-			m_spriteDirty = true;
-		}
-
-		ElemValue::OnAttributeChange(_changedAttributes);
-	}
-
-	void ElemKnob::OnPropertyChange(const Rml::PropertyIdSet& _changedProperties)
-	{
-		ElemValue::OnPropertyChange(_changedProperties);
 	}
 
 	void ElemKnob::OnUpdate()

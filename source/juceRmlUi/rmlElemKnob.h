@@ -13,8 +13,7 @@ namespace juceRmlUi
 		explicit ElemKnob(const Rml::String& _tag);
 		~ElemKnob() override;
 
-		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
-		void OnPropertyChange(const Rml::PropertyIdSet& _changedProperties) override;
+		void onPropertyChanged(const std::string& _key) override;
 
 		void OnUpdate() override;
 

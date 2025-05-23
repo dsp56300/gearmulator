@@ -6,6 +6,7 @@ set(SOURCES
 	juceRmlComponent.cpp juceRmlComponent.h
 	rmlDataProvider.h
 	rmlDocuments.h
+	rmlElement.cpp rmlElement.h
 	rmlElemKnob.cpp rmlElemKnob.h
 	rmlElemSlider.cpp rmlElemSlider.h
 	rmlElemValue.cpp rmlElemValue.h

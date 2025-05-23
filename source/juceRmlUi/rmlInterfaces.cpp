@@ -7,6 +7,8 @@
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementInstancer.h"
 #include "RmlUi/Core/Factory.h"
+#include "RmlUi/Core/PropertyDefinition.h"
+#include "RmlUi/Core/StyleSheetSpecification.h"
 
 namespace juceRmlUi
 {
@@ -25,6 +27,12 @@ namespace juceRmlUi
 		if (++g_instanceCount == 1)
 		{
 			Rml::Initialise();
+
+			// knob style elements
+			Rml::StyleSheetSpecification::RegisterProperty("frames", "128", false).AddParser("number");
+			Rml::StyleSheetSpecification::RegisterProperty("speed", "0.01", false).AddParser("number");
+			Rml::StyleSheetSpecification::RegisterProperty("spriteprefix", "frame", false).AddParser("string");
+
 			Rml::Factory::RegisterElementInstancer("knob", &g_elemInstancerKnob);
 		}
 	}
