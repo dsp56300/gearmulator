@@ -105,8 +105,14 @@ namespace juceRmlUi
 		GLuint textureId;
 		glGenTextures(1, &textureId);
 		glBindTexture(GL_TEXTURE_2D, textureId);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+		auto filterType = GL_LINEAR;
+		if (glGenerateMipmap)
+			filterType = GL_LINEAR_MIPMAP_LINEAR;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterType);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterType);
+
 		juce::Image::BitmapData bitmapData(image, 0, 0, image.getWidth(), image.getHeight(), juce::Image::BitmapData::readOnly);
 		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
 
@@ -121,6 +127,9 @@ namespace juceRmlUi
 		default:
 			assert(false && "unsupported image format");
 		}
+		if (glGenerateMipmap)
+			glGenerateMipmap(GL_TEXTURE_2D);
+
 		return textureId;
 	}
 
