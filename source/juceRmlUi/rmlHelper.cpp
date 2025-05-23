@@ -2,6 +2,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "RmlUi/Core/Event.h"
 #include "RmlUi/Core/Input.h"
 
 namespace juceRmlUi
@@ -138,6 +139,14 @@ namespace juceRmlUi
 		    if (keyCode == 'y' || keyCode == 'Y') return Rml::Input::KI_Y;
 		    if (keyCode == 'z' || keyCode == 'Z') return Rml::Input::KI_Z;
 		    return Rml::Input::KI_UNKNOWN;
-		}		
+		}
+
+		Rml::Vector2<float> getMousePos(const Rml::Event& _event)
+		{
+			const auto x = _event.GetParameter<float>("mouse_x", 0.0f);
+			const auto y = _event.GetParameter<float>("mouse_y", 0.0f);
+
+			return {x, y};
+		}
 	}
 }

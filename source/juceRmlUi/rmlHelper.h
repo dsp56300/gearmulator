@@ -3,6 +3,12 @@
 #include <cstdint>
 
 #include "RmlUi/Core/Input.h"
+#include "RmlUi/Core/Vector2.h"
+
+namespace Rml
+{
+	class Event;
+}
 
 namespace juce
 {
@@ -32,5 +38,7 @@ namespace juceRmlUi
 		int toRmlModifiers(const juce::KeyPress& _e);
 		int toRmlMouseButton(const juce::MouseEvent& _e);
 		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key);
+
+		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
 	}
 }

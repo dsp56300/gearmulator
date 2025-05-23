@@ -1,0 +1,37 @@
+#pragma once
+
+#include "rmlElemValue.h"
+
+#include "RmlUi/Core/ElementInstancer.h"
+#include "RmlUi/Core/EventListener.h"
+
+namespace juceRmlUi
+{
+	class ElemKnob : public ElemValue, public Rml::EventListener
+	{
+	public:
+		explicit ElemKnob(const Rml::String& _tag);
+		~ElemKnob() override;
+
+		void OnAttributeChange(const Rml::ElementAttributes& _changedAttributes) override;
+		void OnPropertyChange(const Rml::PropertyIdSet& _changedProperties) override;
+
+		void OnUpdate() override;
+
+		void ProcessEvent(Rml::Event& _event) override;
+
+	private:
+		void processMouseMove(const Rml::Vector2f& _delta);
+		void updateSprite();
+
+		Rml::Vector2<float> m_lastMousePos;
+		Rml::String m_spritesheetPrefix;
+		float m_speed = 1.0f;
+		uint32_t m_frames = 16;
+		bool m_spriteDirty = true;
+
+		baseLib::EventListener<float> m_onValueChanged;
+		baseLib::EventListener<float> m_onMinValueChanged;
+		baseLib::EventListener<float> m_onMaxValueChanged;
+	};
+}

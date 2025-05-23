@@ -2,7 +2,11 @@
 
 #include <mutex>
 
+#include "rmlElemKnob.h"
+
 #include "RmlUi/Core/Core.h"
+#include "RmlUi/Core/ElementInstancer.h"
+#include "RmlUi/Core/Factory.h"
 
 namespace juceRmlUi
 {
@@ -10,6 +14,7 @@ namespace juceRmlUi
 	{
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
+		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
 	}
 
 	RmlInterfaces::RmlInterfaces(DataProvider& _dataProvider)
@@ -18,7 +23,10 @@ namespace juceRmlUi
 		ScopedAccess access(getScopedAccess());
 
 		if (++g_instanceCount == 1)
+		{
 			Rml::Initialise();
+			Rml::Factory::RegisterElementInstancer("knob", &g_elemInstancerKnob);
+		}
 	}
 
 	RmlInterfaces::~RmlInterfaces()
