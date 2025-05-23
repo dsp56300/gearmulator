@@ -83,7 +83,7 @@ namespace juceRmlUi
 		const auto value = getValue();
 		const auto min = getMinValue();
 		const auto max = getMaxValue();
-		const auto percent = (value - min) / (max - min);
+		const auto percent = max > min ? (value - min) / (max - min) : 0;
 		const auto frame = static_cast<uint32_t>(percent * static_cast<float>(m_frames - 1));
 
 		char frameAsString[16];
