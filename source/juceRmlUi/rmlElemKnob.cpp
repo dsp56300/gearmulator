@@ -93,7 +93,7 @@ namespace juceRmlUi
 		const auto newSprite = m_spritesheetPrefix + frameAsString;
 
 //		if (newSprite != currentSprite)
-			SetProperty("decorator", "image(" + newSprite + ")");
+			SetProperty("decorator", "image(" + newSprite + " contain)");
 
 		m_spriteDirty = false;
 	}
