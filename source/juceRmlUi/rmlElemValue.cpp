@@ -13,20 +13,20 @@ namespace juceRmlUi
 	{
 		Element::OnAttributeChange(_changedAttributes);
 
-		auto checkAttribute = [this, &_changedAttributes](const char* _key, float& _property, const baseLib::Event<float>& _ev)
+		auto checkAttribute = [this, &_changedAttributes](const char* _key, const std::function<void(float)>& _setter)
 		{
 			const auto it = _changedAttributes.find(_key);
 
 			if (it != _changedAttributes.end())
 			{
 				auto v = GetAttribute<float>("value", 0.0f);
-				setProperty(_property, v, _ev);
+				_setter(v);
 			}
 		};
 
-		checkAttribute(g_attribValue, m_value, onValueChanged);
-		checkAttribute(g_attribMinValue, m_min, onMinValueChanged);
-		checkAttribute(g_attribMaxValue, m_max, onMaxValueChanged);
+		checkAttribute(g_attribValue, [&](const float _x) { setValue(_x); });
+		checkAttribute(g_attribMinValue, [&](const float _x) { setMinValue(_x); });
+		checkAttribute(g_attribMaxValue, [&](const float _x) { setMaxValue(_x); });
 	}
 
 	void ElemValue::setValue(const float _value)
