@@ -57,12 +57,12 @@ namespace juceRmlUi
 		if (_event.GetId() == Rml::EventId::Mousedown)
 		{
 			m_lastMousePos = helper::getMousePos(_event);
+			m_mouseDownValue = getValue();
 		}
 		else if (_event.GetId() == Rml::EventId::Drag)
 		{
 			auto mousePos = helper::getMousePos(_event);
 			processMouseMove(mousePos - m_lastMousePos);
-			m_lastMousePos = mousePos;
 		}
 	}
 
@@ -70,7 +70,7 @@ namespace juceRmlUi
 	{
 		const auto delta = (_delta.x - _delta.y) * m_speed;
 
-		const auto value = getValue() + delta;
+		const auto value = m_mouseDownValue + delta;
 
 		setValue(value);
 	}

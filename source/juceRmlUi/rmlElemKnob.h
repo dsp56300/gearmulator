@@ -28,6 +28,7 @@ namespace juceRmlUi
 		float m_speed = 1.0f;
 		uint32_t m_frames = 16;
 		bool m_spriteDirty = true;
+		float m_mouseDownValue = 0.0f;
 
 		baseLib::EventListener<float> m_onValueChanged;
 		baseLib::EventListener<float> m_onMinValueChanged;
