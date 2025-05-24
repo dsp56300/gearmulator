@@ -12,21 +12,6 @@
 
 namespace rmlPlugin
 {
-	namespace
-	{
-		std::string createVariableName(const std::string& _name)
-		{
-			std::string name = Rml::StringUtilities::ToLower(_name);
-
-			// replace all non-alphanumeric characters with underscores
-			for (auto& c : name)
-			{
-				if (!(c == '_' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')))
-					c = '_';
-			}
-			return name;
-		}
-	}
 	RmlParameterRef::RmlParameterRef(RmlParameterBinding& _binding, pluginLib::Parameter* _param, uint32_t _paramIdx, Rml::DataModelConstructor& _model)
 	: m_binding(_binding)
 	, m_parameter(_param)
@@ -91,6 +76,19 @@ namespace rmlPlugin
 		setParameter(_param);
 
 		_model.GetModelHandle().DirtyVariable(m_prefix + "_value");
+	}
+
+	std::string RmlParameterRef::createVariableName(const std::string& _name)
+	{
+		std::string name = Rml::StringUtilities::ToLower(_name);
+
+		// replace all non-alphanumeric characters with underscores
+		for (auto& c : name)
+		{
+			if (!(c == '_' || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9')))
+				c = '_';
+		}
+		return name;
 	}
 
 	void RmlParameterRef::setDirty()

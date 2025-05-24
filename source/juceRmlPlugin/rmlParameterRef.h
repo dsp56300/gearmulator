@@ -36,6 +36,8 @@ namespace rmlPlugin
 		RmlParameterRef& operator=(const RmlParameterRef&) = delete;
 		RmlParameterRef& operator=(RmlParameterRef&&) = delete;
 
+		static std::string createVariableName(const std::string& _name);
+
 	private:
 		void setDirty();
 		void onParameterValueChanged();

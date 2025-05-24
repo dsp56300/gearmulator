@@ -27,6 +27,7 @@ namespace rmlPlugin
 		// Rml::Plugin overrides
 		void OnContextCreate(Rml::Context* _context) override;
 		void OnContextDestroy(Rml::Context* _context) override;
+		void OnElementCreate(Rml::Element* _element) override;
 
 	private:
 		pluginLib::Controller& m_controller;

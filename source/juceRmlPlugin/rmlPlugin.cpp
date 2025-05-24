@@ -27,4 +27,21 @@ namespace rmlPlugin
 
 		Plugin::OnContextDestroy(_context);
 	}
+	
+	void RmlPlugin::OnElementCreate(Rml::Element* _element)
+	{
+		Plugin::OnElementCreate(_element);
+
+		auto* attrib = _element->GetAttribute("param");
+
+		if (!attrib)
+			return;
+
+		const auto param = RmlParameterRef::createVariableName(attrib->Get<Rml::String>());
+
+		_element->SetAttribute("data-attr-min", param + "_min");
+		_element->SetAttribute("data-attr-max", param + "_max");
+		_element->SetAttribute("data-value", param + "_value");
+	}
+
 }
