@@ -34,7 +34,10 @@ namespace juceRmlUi
 		const auto v = std::clamp(_value, m_min, m_max);
 
 		if (setProperty(m_value, v, onValueChanged))
+		{
 			SetAttribute(g_attribValue, v);
+			DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
+		}
 	}
 
 	void ElemValue::setMinValue(const float _value)
