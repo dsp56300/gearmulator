@@ -19,7 +19,7 @@ namespace juceRmlUi
 
 			if (it != _changedAttributes.end())
 			{
-				auto v = GetAttribute<float>("value", 0.0f);
+				auto v = GetAttribute<float>(_key, 0.0f);
 				_setter(v);
 			}
 		};
