@@ -2,6 +2,7 @@
 
 #include <mutex>
 
+#include "juceRmlComponent.h"
 #include "rmlElemKnob.h"
 
 #include "RmlUi/Core/Core.h"
@@ -17,12 +18,23 @@ namespace juceRmlUi
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
 		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
+		RmlComponent* g_currentComponent;
+	}
+
+	RmlInterfaces::ScopedAccess::ScopedAccess(RmlComponent& _component): m_rmlInterfaces(_component.getInterfaces())
+	{
+		m_rmlInterfaces.attach(&_component);
+	}
+
+	RmlInterfaces::ScopedAccess::ScopedAccess(RmlInterfaces& _interfaces) : m_rmlInterfaces(_interfaces)
+	{
+		m_rmlInterfaces.attach(nullptr);
 	}
 
 	RmlInterfaces::RmlInterfaces(DataProvider& _dataProvider)
 		: m_fileInterface(_dataProvider)
 	{
-		ScopedAccess access(getScopedAccess());
+		ScopedAccess access(*this);
 
 		if (++g_instanceCount == 1)
 		{
@@ -39,13 +51,13 @@ namespace juceRmlUi
 
 	RmlInterfaces::~RmlInterfaces()
 	{
-		ScopedAccess access(getScopedAccess());
+		ScopedAccess access(*this);
 
 		if (--g_instanceCount == 0)
 			Rml::Shutdown();
 	}
 
-	void RmlInterfaces::attach()
+	void RmlInterfaces::attach(RmlComponent* _component)
 	{
 		g_accessMutex.lock();
 
@@ -55,6 +67,8 @@ namespace juceRmlUi
 		Rml::SetSystemInterface(&m_systemInterface);
 		Rml::SetFontEngineInterface(&m_fontEngineInterface);
 		Rml::SetFileInterface(&m_fileInterface);
+
+		g_currentComponent = _component;
 
 		m_attached = true;
 	}
@@ -68,8 +82,16 @@ namespace juceRmlUi
 		Rml::SetFontEngineInterface(nullptr);
 		Rml::SetFileInterface(nullptr);
 
+		g_currentComponent = nullptr;
+
 		m_attached = false;
 
 		g_accessMutex.unlock();
+	}
+
+	juceRmlUi::RmlComponent& RmlInterfaces::getCurrentComponent()
+	{
+		assert(g_currentComponent != nullptr && "RmlInterfaces::getCurrentComponent: No current component set");
+		return *g_currentComponent;
 	}
 }

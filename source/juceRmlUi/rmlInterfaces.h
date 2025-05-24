@@ -7,6 +7,7 @@
 
 namespace juceRmlUi
 {
+	class RmlComponent;
 	class DataProvider;
 
 	struct RmlInterfaces
@@ -15,10 +16,8 @@ namespace juceRmlUi
 		class ScopedAccess
 		{
 		public:
-			ScopedAccess(RmlInterfaces& _rmlInterfaces) : m_rmlInterfaces(_rmlInterfaces)
-			{
-				m_rmlInterfaces.attach();
-			}
+			explicit ScopedAccess(RmlComponent& _component);
+			explicit ScopedAccess(RmlInterfaces& _interfaces);
 			ScopedAccess(const ScopedAccess&) = delete;
 			ScopedAccess(ScopedAccess&&) = default;
 
@@ -37,13 +36,10 @@ namespace juceRmlUi
 		explicit RmlInterfaces(DataProvider& _dataProvider);
 		~RmlInterfaces();
 
-		void attach();
+		void attach(RmlComponent* _component);
 		void detach();
 
-		ScopedAccess getScopedAccess()
-		{
-			return { *this };
-		}
+		static RmlComponent& getCurrentComponent();
 
 	private:
 		bool m_attached = false;

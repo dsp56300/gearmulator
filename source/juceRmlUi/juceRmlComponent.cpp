@@ -3,7 +3,6 @@
 #include <cassert>
 
 #include "rmlDataProvider.h"
-#include "rmlDocuments.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
 #include "rmlRenderInterface.h"
@@ -35,7 +34,7 @@ namespace juceRmlUi
 		*/
 		m_rmlInterfaces.reset(new RmlInterfaces(m_dataProvider));
 
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 
 		const auto files = m_dataProvider.getAllFilenames();
 
@@ -54,7 +53,7 @@ namespace juceRmlUi
 
 	void RmlComponent::newOpenGLContextCreated()
 	{
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 
 		m_renderInterface.reset(new RenderInterface(m_dataProvider));
 
@@ -75,7 +74,7 @@ namespace juceRmlUi
 
 		using namespace juce::gl;
 
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		
@@ -123,7 +122,7 @@ namespace juceRmlUi
 
 	void RmlComponent::openGLContextClosing()
 	{
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 		{
 			m_rmlContext->UnloadAllDocuments();
@@ -138,7 +137,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseDown(const juce::MouseEvent& _event)
 	{
 		Component::mouseDown(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
@@ -147,7 +146,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseUp(const juce::MouseEvent& _event)
 	{
 		Component::mouseUp(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		m_rmlContext->ProcessMouseButtonUp(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
@@ -156,7 +155,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseMove(const juce::MouseEvent& _event)
 	{
 		Component::mouseMove(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 
@@ -167,7 +166,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseDrag(const juce::MouseEvent& _event)
 	{
 		Component::mouseDrag(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
@@ -177,7 +176,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseExit(const juce::MouseEvent& _event)
 	{
 		Component::mouseExit(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
 			m_rmlContext->ProcessMouseLeave();
 	}
@@ -185,7 +184,7 @@ namespace juceRmlUi
 	void RmlComponent::mouseEnter(const juce::MouseEvent& _event)
 	{
 		Component::mouseEnter(_event);
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		const auto pos = toRmlPosition(_event);
@@ -196,7 +195,7 @@ namespace juceRmlUi
 	{
 		Component::mouseWheelMove(_event, _wheel);
 
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
 		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(_wheel.deltaX, _wheel.deltaY), helper::toRmlModifiers(_event));
@@ -206,7 +205,7 @@ namespace juceRmlUi
 	{
 		Component::mouseDoubleClick(_event);
 
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 
 		if (!m_rmlContext)
 			return;
@@ -215,7 +214,7 @@ namespace juceRmlUi
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
 	{
-		RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+		RmlInterfaces::ScopedAccess access(*this);
 
 		if (!m_rmlContext)
 			return Component::keyPressed(_key);
@@ -238,7 +237,7 @@ namespace juceRmlUi
 
 		if (!_isKeyDown)
 		{
-			RmlInterfaces::ScopedAccess access(*m_rmlInterfaces);
+			RmlInterfaces::ScopedAccess access(*this);
 
 			if (m_rmlContext)
 			{

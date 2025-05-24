@@ -1,5 +1,7 @@
 #pragma once
 
+#include "rmlInterfaces.h"
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "juce_opengl/juce_opengl.h"
@@ -37,6 +39,8 @@ namespace juceRmlUi
 		void mouseExit(const juce::MouseEvent& _event) override;
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
+
+		RmlInterfaces& getInterfaces() const { return *m_rmlInterfaces; }
 
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
