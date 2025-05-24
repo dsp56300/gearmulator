@@ -59,7 +59,7 @@ source_group("source\\patchmanager" FILES ${SOURCES_PM})
 target_link_libraries(jucePluginEditorLib PUBLIC jucePluginLib juceUiLib jucePluginData)
 
 if(TARGET juceRmlUi)
-	target_link_libraries(jucePluginEditorLib PUBLIC juceRmlUi)
+	target_link_libraries(jucePluginEditorLib PUBLIC juceRmlPlugin)
 	target_compile_definitions(jucePluginEditorLib PUBLIC USE_RMLUI=1)
 else()
 	target_compile_definitions(jucePluginEditorLib PUBLIC USE_RMLUI=0)

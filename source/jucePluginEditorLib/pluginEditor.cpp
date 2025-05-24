@@ -30,6 +30,9 @@ namespace jucePluginEditorLib
 		, m_binding(_binding)
 		, m_skin(std::move(_skin))
 		, m_overlays(*this, _binding)
+#if USE_RMLUI
+		, m_rmlPlugin(_processor.getController())
+#endif
 	{
 		showDisclaimer();
 	}

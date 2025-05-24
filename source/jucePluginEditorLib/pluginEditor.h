@@ -14,6 +14,8 @@
 
 #if USE_RMLUI
 #include "juceRmlUi/rmlDataProvider.h"
+
+#include "juceRmlPlugin/rmlPlugin.h"
 #endif
 
 namespace baseLib
@@ -142,5 +144,9 @@ namespace jucePluginEditorLib
 		std::vector<juce::File> m_dragAndDropFiles;
 		ImagePool m_imagePool;
 		ParameterOverlays m_overlays;
+
+#if USE_RMLUI
+		rmlPlugin::RmlPlugin m_rmlPlugin;
+#endif
 	};
 }
