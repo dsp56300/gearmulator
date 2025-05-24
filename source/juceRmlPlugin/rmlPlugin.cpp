@@ -1,7 +1,9 @@
 #include "rmlPlugin.h"
 
 #include "rmlParameterBinding.h"
+
 #include "RmlUi/Core/Core.h"
+#include "RmlUi/Core/Element.h"
 
 namespace rmlPlugin
 {
@@ -43,5 +45,4 @@ namespace rmlPlugin
 		_element->SetAttribute("data-attr-max", param + "_max");
 		_element->SetAttribute("data-value", param + "_value");
 	}
-
 }
