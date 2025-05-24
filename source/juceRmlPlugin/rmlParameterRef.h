@@ -37,6 +37,9 @@ namespace rmlPlugin
 		RmlParameterRef& operator=(RmlParameterRef&&) = delete;
 
 	private:
+		void setDirty();
+		void onParameterValueChanged();
+
 		void setParameter(pluginLib::Parameter* _param);
 
 		RmlParameterBinding& m_binding;

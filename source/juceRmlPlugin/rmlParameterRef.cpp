@@ -36,6 +36,12 @@ namespace rmlPlugin
 	{
 		assert(m_parameter != nullptr);
 
+		m_listener.set(m_parameter, [this](pluginLib::Parameter* _p)
+		{
+			juceRmlUi::RmlInterfaces::ScopedAccess access(m_binding.getRmlComponent());
+			onParameterValueChanged();
+		});
+
 		// unnormalized value
 		_model.BindFunc(m_prefix + "_value", [this](Rml::Variant& _dest)
 		{
@@ -87,6 +93,17 @@ namespace rmlPlugin
 		_model.GetModelHandle().DirtyVariable(m_prefix + "_value");
 	}
 
+	void RmlParameterRef::setDirty()
+	{
+		m_handle.DirtyVariable(m_prefix + "_value");
+		m_handle.DirtyVariable(m_prefix + "_text");
+	}
+
+	void RmlParameterRef::onParameterValueChanged()
+	{
+		setDirty();
+	}
+
 	void RmlParameterRef::setParameter(pluginLib::Parameter* _param)
 	{
 		assert(_param);
@@ -96,10 +113,9 @@ namespace rmlPlugin
 		m_parameter = _param;
 
 		if (dirty)
-		{
-			m_handle.DirtyVariable(m_prefix + "_value");
-			m_handle.DirtyVariable(m_prefix + "_text");
-		}
+			setDirty();
+
+		m_listener.set(m_parameter);
 	}
 
 	void RmlParameterRef::changePart(const pluginLib::Controller& _controller, const uint8_t _part)
