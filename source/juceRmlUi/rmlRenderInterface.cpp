@@ -249,7 +249,8 @@ namespace juceRmlUi
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisable(GL_TEXTURE_2D);
-		glDisable(GL_BLEND);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 	    glEnableClientState(GL_VERTEX_ARRAY);
 	    glEnableClientState(GL_COLOR_ARRAY);
@@ -391,6 +392,12 @@ namespace juceRmlUi
 	{
 		m_frameBufferWidth = _width;
 		m_frameBufferHeight = _height;
+
+		glDisable(GL_DEPTH_TEST);
+		glDisable(GL_LIGHTING);
+		glDisable(GL_CULL_FACE);
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 
 		glEnableClientState(GL_VERTEX_ARRAY);
 	    glEnableClientState(GL_COLOR_ARRAY);
