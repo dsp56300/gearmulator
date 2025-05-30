@@ -88,7 +88,7 @@ namespace juceRmlUi
 		if (contextDims.x != width || contextDims.y != height)
 		{
 			m_rmlContext->SetDimensions({ static_cast<int>(static_cast<float>(width) * invContentScale), static_cast<int>(static_cast<float>(height) * invContentScale)});
-			m_rmlContext->SetDensityIndependentPixelRatio(5.0f);
+			m_rmlContext->SetDensityIndependentPixelRatio(1.0f);
 		}
 
 		glViewport(0, 0, width, height);
