@@ -8,6 +8,8 @@
 #include <mutex>
 #include <thread>
 
+#include "baseLib/filesystem.h"
+
 #include "dsp56kEmu/threadtools.h"
 #include "dsp56kEmu/types.h"
 
@@ -15,7 +17,7 @@ namespace synthLib
 {
 	bool WavWriter::write(const std::string & _filename, const int _bitsPerSample, const bool _isFloat, const int _channelCount, const int _samplerate, const void* _data, const size_t _dataSize)
 	{
-		FILE* handle = fopen(_filename.c_str(), m_existingDataSize > 0 ? "rb+" : "wb");
+		FILE* handle = baseLib::filesystem::openFile(_filename, m_existingDataSize > 0 ? "rb+" : "wb");
 
 		if (!handle)
 		{

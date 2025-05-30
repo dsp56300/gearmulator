@@ -51,5 +51,10 @@ namespace baseLib
 
 		std::string getHomeDirectory();
 		std::string getSpecialFolderPath(SpecialFolderType _type);
+
+#ifdef _WIN32
+		std::wstring utf8ToWide(const std::string& _utf8String);
+		std::string wideToUtf8(const std::wstring& _wideString);
+#endif
 	};
 }
