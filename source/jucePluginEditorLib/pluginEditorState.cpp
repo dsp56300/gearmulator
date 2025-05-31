@@ -554,8 +554,8 @@ void PluginEditorState::writeSkinToConfig(const Skin& _skin) const
 	auto& config = m_processor.getConfig();
 
 	config.setValue("skinDisplayName", _skin.displayName.c_str());
-	config.setValue("skinFile", _skin.jsonFilename.c_str());
-	config.setValue("skinFolder", _skin.folder.c_str());
+	config.setValue("skinFile", juce::String::fromUTF8(_skin.jsonFilename.c_str()));
+	config.setValue("skinFolder", juce::String::fromUTF8(_skin.folder.c_str()));
 }
 
 }

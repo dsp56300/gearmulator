@@ -92,7 +92,7 @@ namespace genericUI
 			uint32_t dataSize;
 			const auto data = m_interface.getResourceByFilename(_name, dataSize);
 
-			FILE* hFile = fopen((folder + _name).c_str(), "wb");
+			FILE* hFile = baseLib::filesystem::openFile(folder + _name, "wb");
 
 			if(!hFile)
 			{

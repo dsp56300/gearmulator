@@ -131,7 +131,7 @@ namespace jucePluginEditorLib
 		if (_type == pluginLib::FileType::Mid)
 			return synthLib::SysexToMidi::write(_pathName.c_str(), _presets);
 
-		FILE* hFile = fopen(_pathName.c_str(), "wb");
+		FILE* hFile = baseLib::filesystem::openFile(_pathName, "wb");
 
 		if (!hFile)
 			return false;
@@ -658,7 +658,7 @@ namespace jucePluginEditorLib
 			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
 
 			// try to load from disk first
-			FILE* hFile = fopen((folder + _name).c_str(), "rb");
+			FILE* hFile = baseLib::filesystem::openFile(folder + _name, "rb");
 			if(hFile)
 			{
 				fseek(hFile, 0, SEEK_END);
