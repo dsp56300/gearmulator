@@ -11,6 +11,12 @@ namespace rmlPlugin
 	{
 		Rml::RegisterPlugin(this);
 	}
+
+	RmlPlugin::~RmlPlugin()
+	{
+		Rml::UnregisterPlugin(this);
+	}
+
 	void RmlPlugin::OnContextCreate(Rml::Context* _context)
 	{
 		juce::MessageManagerLock lock;

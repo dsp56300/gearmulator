@@ -19,7 +19,7 @@ namespace rmlPlugin
 		RmlPlugin(const RmlPlugin&) = delete;
 		RmlPlugin(RmlPlugin&&) = delete;
 
-		~RmlPlugin() override = default;
+		~RmlPlugin() override;
 
 		RmlPlugin& operator=(const RmlPlugin&) = delete;
 		RmlPlugin& operator=(RmlPlugin&&) = delete;
