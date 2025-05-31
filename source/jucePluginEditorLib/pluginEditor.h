@@ -146,7 +146,7 @@ namespace jucePluginEditorLib
 		ParameterOverlays m_overlays;
 
 #if USE_RMLUI
-		rmlPlugin::RmlPlugin m_rmlPlugin;
+		std::unique_ptr<rmlPlugin::RmlPlugin> m_rmlPlugin;
 #endif
 	};
 }
