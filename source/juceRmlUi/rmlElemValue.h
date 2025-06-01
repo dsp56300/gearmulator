@@ -32,7 +32,7 @@ namespace juceRmlUi
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
 	private:
-		float m_value = 0.0f;
+		float m_value = -1.0f;
 		float m_min = 0.0f;
 		float m_max = 1.0f;
 	};
