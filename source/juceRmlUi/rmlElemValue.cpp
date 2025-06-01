@@ -33,11 +33,12 @@ namespace juceRmlUi
 	{
 		const auto v = std::clamp(_value, m_min, m_max);
 
-		if (setProperty(m_value, v, onValueChanged))
-		{
-			SetAttribute(g_attribValue, v);
-			DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
-		}
+		if (!setProperty(m_value, v, onValueChanged))
+			return;
+
+		SetAttribute(g_attribValue, v);
+		DispatchEvent(Rml::EventId::Change, {{"value", Rml::Variant(v)}});
+		onChangeValue();
 	}
 
 	void ElemValue::setMinValue(const float _value)
@@ -45,6 +46,7 @@ namespace juceRmlUi
 		if (!setProperty(m_min, _value, onMinValueChanged))
 			return;
 		SetAttribute(g_attribMinValue, _value);
+		onChangeMinValue();
 		setValue(getValue());	// update value if it is out of range
 	}
 
@@ -53,6 +55,7 @@ namespace juceRmlUi
 		if (!setProperty(m_max, _value, onMaxValueChanged))
 			return;
 		SetAttribute(g_attribMaxValue, _value);
+		onChangeMaxValue();
 		setValue(getValue());	// update value if it is out of range
 	}
 

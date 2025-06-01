@@ -3,6 +3,8 @@
 #include <mutex>
 
 #include "juceRmlComponent.h"
+
+#include "rmlElemComboBox.h"
 #include "rmlElemKnob.h"
 
 #include "RmlUi/Core/Core.h"
@@ -17,6 +19,7 @@ namespace juceRmlUi
 	{
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
+		Rml::ElementInstancerGeneric<ElemComboBox> g_elemInstancerCombo;
 		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
 		RmlComponent* g_currentComponent;
 	}
@@ -44,8 +47,10 @@ namespace juceRmlUi
 			Rml::StyleSheetSpecification::RegisterProperty("frames", "128", false).AddParser("number");
 			Rml::StyleSheetSpecification::RegisterProperty("speed", "0.01", false).AddParser("number");
 			Rml::StyleSheetSpecification::RegisterProperty("spriteprefix", "frame", false).AddParser("string");
+			Rml::StyleSheetSpecification::RegisterProperty("items-per-column", "16", false).AddParser("number");
 
 			Rml::Factory::RegisterElementInstancer("knob", &g_elemInstancerKnob);
+			Rml::Factory::RegisterElementInstancer("combo", &g_elemInstancerCombo);
 		}
 	}
 

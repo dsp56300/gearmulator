@@ -25,6 +25,10 @@ namespace juceRmlUi
 		float getMinValue() const { return m_min; }
 		float getMaxValue() const { return m_max; }
 
+		virtual void onChangeValue() {}
+		virtual void onChangeMinValue() {}
+		virtual void onChangeMaxValue() {}
+
 		static bool setProperty(float& _prop, float _newValue, const baseLib::Event<float>& _event);
 
 	private:
