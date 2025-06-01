@@ -17,6 +17,8 @@ set(SOURCES
 	rmlInterfaces.cpp rmlInterfaces.h
 	rmlMenu.cpp rmlMenu.h
 	rmlRenderInterface.cpp rmlRenderInterface.h
+	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
+	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
 )
 
