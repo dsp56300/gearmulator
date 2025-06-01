@@ -1,5 +1,8 @@
 #pragma once
 
+#include "rmlRenderInterfaceFilters.h"
+#include "rmlRenderInterfaceShaders.h"
+
 #include "RmlUi/Core/RenderInterface.h"
 
 namespace juceRmlUi
@@ -20,7 +23,7 @@ namespace juceRmlUi
 		void EnableScissorRegion(bool _enable) override;
 		void SetScissorRegion(Rml::Rectanglei _region) override;
 		Rml::LayerHandle PushLayer() override;
-		void CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const unsigned long long> _filters) override;
+		void CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const Rml::CompiledFilterHandle> _filters) override;
 		void PopLayer() override;
 		void EnableClipMask(bool _enable) override;
 		void RenderToClipMask(Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation) override;
@@ -52,9 +55,17 @@ namespace juceRmlUi
 			uint32_t texture = 0;
 		};
 
+		struct CompiledShader
+		{
+			uint32_t program = 0;
+		};
+
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
 
 		std::stack<LayerHandleData*> m_layers;
+
+		RenderInterfaceShaders m_shaders;
+		RenderInterfaceFilters m_filters;
 	};
 }
