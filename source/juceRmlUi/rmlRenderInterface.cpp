@@ -262,7 +262,7 @@ namespace juceRmlUi
 	{
 		assert(!m_layers.empty());
 
-		auto* layer = m_layers.top();
+		const auto* layer = m_layers.top();
 
 		glDeleteFramebuffers(1, &layer->framebuffer);
 		glDeleteTextures(1, &layer->texture);
