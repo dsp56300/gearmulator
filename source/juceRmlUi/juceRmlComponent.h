@@ -19,7 +19,7 @@ namespace juceRmlUi
 
 	class DataProvider;
 
-	class RmlComponent final : public juce::Component, juce::OpenGLRenderer
+	class RmlComponent final : public juce::Component, juce::OpenGLRenderer, juce::Timer
 	{
 	public:
 		explicit RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename);
@@ -39,6 +39,8 @@ namespace juceRmlUi
 		void mouseExit(const juce::MouseEvent& _event) override;
 		bool keyPressed(const juce::KeyPress& _key) override;
 		bool keyStateChanged(bool _isKeyDown) override;
+
+		void timerCallback() override;
 
 		RmlInterfaces& getInterfaces() const { return *m_rmlInterfaces; }
 

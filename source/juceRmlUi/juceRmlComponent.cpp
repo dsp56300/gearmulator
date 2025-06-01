@@ -83,10 +83,7 @@ namespace juceRmlUi
 			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
 		}
 
-		juce::MessageManager::callAsync([this]
-		{
-			update();
-		});
+		startTimer(1);
 	}
 
 	void RmlComponent::renderOpenGL()
@@ -131,10 +128,7 @@ namespace juceRmlUi
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
-		juce::MessageManager::callAsync([this]
-		{
-			update();
-		});
+		startTimer(1);
 	}
 
 	void RmlComponent::openGLContextClosing()
@@ -276,6 +270,12 @@ namespace juceRmlUi
 		if (res)
 			return res;
 		return Component::keyStateChanged(_isKeyDown);
+	}
+
+	void RmlComponent::timerCallback()
+	{
+		stopTimer();
+		update();
 	}
 
 	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
