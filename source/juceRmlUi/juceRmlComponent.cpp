@@ -66,6 +66,11 @@ namespace juceRmlUi
 	        document->Show();
 		else
 			assert(false);
+
+		juce::MessageManager::callAsync([this]
+		{
+			update();
+		});
 	}
 
 	void RmlComponent::renderOpenGL()
@@ -100,8 +105,6 @@ namespace juceRmlUi
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
-		m_rmlContext->Update();
-
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
@@ -112,6 +115,11 @@ namespace juceRmlUi
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
+
+		juce::MessageManager::callAsync([this]
+		{
+			update();
+		});
 	}
 
 	void RmlComponent::openGLContextClosing()
@@ -261,5 +269,12 @@ namespace juceRmlUi
 			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale() / m_contentScale), 
 			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale() / m_contentScale)
 		};
+	}
+
+	void RmlComponent::update()
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+		if (m_rmlContext)
+			m_rmlContext->Update();
 	}
 }

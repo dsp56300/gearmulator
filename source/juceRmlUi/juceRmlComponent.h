@@ -44,6 +44,7 @@ namespace juceRmlUi
 
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
+		void update();
 
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
