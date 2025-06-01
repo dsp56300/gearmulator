@@ -54,6 +54,10 @@ namespace juceRmlUi
 			LOG("RML LOG [MAX]: " << _message.c_str());
 			break;
 		}
+
+		if (m_recordingLog)
+			m_logEntries.emplace_back(_type, _message);
+
 		return Rml::SystemInterface::LogMessage(_type, _message);
 	}
 
@@ -80,5 +84,44 @@ namespace juceRmlUi
 	void SystemInterface::DeactivateKeyboard()
 	{
 		Rml::SystemInterface::DeactivateKeyboard();
+	}
+
+	void SystemInterface::beginLogRecording()
+	{
+		m_logEntries.clear();
+		m_recordingLog = true;
+	}
+
+	void SystemInterface::endLogRecording()
+	{
+		m_recordingLog = false;
+	}
+
+	void SystemInterface::filterLogEntries(std::vector<LogEntry>& _entries, const std::set<Rml::Log::Type>& _types)
+	{
+		if (_types.empty())
+			return;
+		auto it = _entries.begin();
+		while (it != _entries.end())
+		{
+			if (_types.find(it->first) == _types.end())
+				it = _entries.erase(it);
+			else
+				++it;
+		}
+	}
+
+	std::string SystemInterface::logTypeToString(const Rml::Log::Type _type)
+	{
+		switch (_type)
+		{
+		case Rml::Log::LT_ALWAYS: return "always";
+		case Rml::Log::LT_ERROR: return "error";
+		case Rml::Log::LT_ASSERT: return "assert";
+		case Rml::Log::LT_WARNING: return "warning";
+		case Rml::Log::LT_INFO: return "info";
+		case Rml::Log::LT_DEBUG: return "debug";
+		default: return "unknown";
+		}
 	}
 }

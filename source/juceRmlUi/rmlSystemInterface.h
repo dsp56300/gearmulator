@@ -1,5 +1,7 @@
 #pragma once
 
+#include <set>
+
 #include "RmlUi/Core/SystemInterface.h"
 
 namespace juceRmlUi
@@ -7,6 +9,8 @@ namespace juceRmlUi
 	class SystemInterface : public Rml::SystemInterface
 	{
 	public:
+		using LogEntry = std::pair<Rml::Log::Type, Rml::String>;
+
 		explicit SystemInterface() = default;
 		SystemInterface(const SystemInterface&) = delete;
 		SystemInterface(SystemInterface&&) = delete;
@@ -24,5 +28,23 @@ namespace juceRmlUi
 		void GetClipboardText(Rml::String& _text) override;
 		void ActivateKeyboard(Rml::Vector2f _caretPosition, float _lineHeight) override;
 		void DeactivateKeyboard() override;
+
+		void beginLogRecording();
+		void endLogRecording();
+
+		std::vector<LogEntry> getRecordedLogEntries()
+		{
+			auto r = std::move(m_logEntries);
+			m_logEntries.clear();
+			return r;
+		}
+
+		static void filterLogEntries(std::vector<LogEntry>& _entries, const std::set<Rml::Log::Type>& _types);
+
+		static std::string logTypeToString(Rml::Log::Type _type);
+
+	private:
+		std::vector<LogEntry> m_logEntries;
+		bool m_recordingLog = false;
 	};
 }

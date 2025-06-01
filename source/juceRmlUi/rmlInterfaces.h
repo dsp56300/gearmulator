@@ -41,6 +41,8 @@ namespace juceRmlUi
 
 		static RmlComponent& getCurrentComponent();
 
+		SystemInterface& getSystemInterface() { return m_systemInterface; }
+
 	private:
 		bool m_attached = false;
 

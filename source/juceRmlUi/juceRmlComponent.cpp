@@ -61,11 +61,27 @@ namespace juceRmlUi
 
 		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderInterface.get(), nullptr);
 
+		auto& sys = m_rmlInterfaces->getSystemInterface();
+		sys.beginLogRecording();
+
         auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
         if (document)
 	        document->Show();
 		else
 			assert(false);
+
+		sys.endLogRecording();
+
+		const auto logs = sys.getRecordedLogEntries();
+
+		if (!logs.empty())
+		{
+			std::stringstream ss;
+			ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
+			for (const auto& log : logs)
+				ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
+		}
 
 		juce::MessageManager::callAsync([this]
 		{
