@@ -15,7 +15,7 @@ namespace juceRmlUi
 			attribute vec2 aTexCoord;
 			varying vec2 vTexCoord;
 			void main() {
-			    gl_Position = vec4(aPos, 1.0);
+			    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPos, 1.0);
 			    vTexCoord = aTexCoord;
 			})";
 

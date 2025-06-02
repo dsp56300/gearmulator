@@ -32,7 +32,17 @@ namespace juceRmlUi
 		}
 
 		#define CHECK_OPENGL_ERROR do { checkGLError (__FILE__, __LINE__); } while(0)
+
+		const Rml::Vertex g_fullScreenVertices[] = {
+			{{0,1}, {255,255}, {0,0}},
+			{{1,1}, {255,255}, {1,0}},
+			{{1,0}, {255,255}, {1,1}},
+			{{0,0}, {255,255}, {0,1}}
+		};
+
+		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
 	}
+
 	RenderInterface::RenderInterface(DataProvider& _dataProvider) : m_dataProvider(_dataProvider), m_filters(m_shaders)
 	{
 	}
@@ -352,15 +362,80 @@ namespace juceRmlUi
 		glBindTexture(GL_TEXTURE_2D, src->texture);
 		CHECK_OPENGL_ERROR;
 
-		const auto w = static_cast<float>(m_frameBufferWidth);
-		const auto h = static_cast<float>(m_frameBufferHeight);
+		if (!_filters.empty())
+		{
+			auto& filter = *_filters.begin();
+			auto* compiledFilter = helper::fromHandle<CompiledShader>(filter);
+			assert(compiledFilter && "invalid filter handle");
+			glUseProgram(compiledFilter->program);
 
-		glBegin(GL_QUADS);
-		glTexCoord2f(0, 0); glVertex2f(0, h);
-		glTexCoord2f(1, 0); glVertex2f(w, h);
-		glTexCoord2f(1, 1); glVertex2f(w, 0);
-		glTexCoord2f(0, 1); glVertex2f(0, 0);
-		glEnd();
+			auto locPos = glGetAttribLocation(compiledFilter->program, "aPos");
+			CHECK_OPENGL_ERROR;
+			auto locUV = glGetAttribLocation(compiledFilter->program, "aTexCoord");
+			CHECK_OPENGL_ERROR;
+
+			auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
+			assert(geom && "invalid full screen geometry handle");
+
+			glBindBuffer(GL_ARRAY_BUFFER, geom->vertexBuffer);
+			CHECK_OPENGL_ERROR;
+			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->indexBuffer);
+			CHECK_OPENGL_ERROR;
+
+			auto locTexture = glGetUniformLocation(compiledFilter->program, "uTexture");
+			CHECK_OPENGL_ERROR;
+			glUniform1i(locTexture, 0);
+			CHECK_OPENGL_ERROR;
+
+			glEnableVertexAttribArray(locPos);
+			CHECK_OPENGL_ERROR;
+			glEnableVertexAttribArray(locUV);
+			CHECK_OPENGL_ERROR;
+			
+			// Set attribute pointers
+			glVertexAttribPointer(
+			    locPos,                                                    // Attribute location
+			    2,                                                         // Number of components (x, y, z)
+			    GL_FLOAT,                                                  // Type
+			    GL_FALSE,                                                  // Normalize?
+			    sizeof(Rml::Vertex),                                       // Stride
+			    reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, position)) // Offset to position data
+			);
+			CHECK_OPENGL_ERROR;
+
+			glVertexAttribPointer(
+			    locUV,                                                      // Attribute location
+			    2,                                                          // Number of components (x, y)
+			    GL_FLOAT,                                                   // Type
+			    GL_FALSE,                                                   // Normalize?
+			    sizeof(Rml::Vertex),                                        // Stride
+			    reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, tex_coord)) // Offset to UV data
+			);
+			CHECK_OPENGL_ERROR;
+
+		    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(geom->indexCount), GL_UNSIGNED_INT, nullptr);
+			CHECK_OPENGL_ERROR;
+
+			glDisableVertexAttribArray(locPos);
+			CHECK_OPENGL_ERROR;
+			glDisableVertexAttribArray(locUV);
+			CHECK_OPENGL_ERROR;
+
+			glUseProgram(0);
+			CHECK_OPENGL_ERROR;
+		}
+		else
+		{
+			const auto w = static_cast<float>(m_frameBufferWidth);
+			const auto h = static_cast<float>(m_frameBufferHeight);
+
+			glBegin(GL_QUADS);
+			glTexCoord2f(0, 0); glVertex2f(0, h);
+			glTexCoord2f(1, 0); glVertex2f(w, h);
+			glTexCoord2f(1, 1); glVertex2f(w, 0);
+			glTexCoord2f(0, 1); glVertex2f(0, 0);
+			glEnd();
+		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
 		CHECK_OPENGL_ERROR;
@@ -533,8 +608,26 @@ namespace juceRmlUi
 
 	void RenderInterface::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
-		m_frameBufferWidth = _width;
-		m_frameBufferHeight = _height;
+		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
+		{
+			m_frameBufferWidth = _width;
+			m_frameBufferHeight = _height;
+
+			std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
+
+			for(auto & v : fullScreenVertices)
+			{
+				v.position.x *= static_cast<float>(_width);
+				v.position.y *= static_cast<float>(_height);
+			}
+
+			const std::vector fullScreenIndices(std::begin(g_fullScreenIndices), std::end(g_fullScreenIndices));
+
+			if (m_fullScreenGeometry)
+				ReleaseGeometry(m_fullScreenGeometry);
+
+			m_fullScreenGeometry = CompileGeometry(fullScreenVertices, fullScreenIndices);
+		}
 
 		glDisable(GL_DEPTH_TEST);
 		CHECK_OPENGL_ERROR;

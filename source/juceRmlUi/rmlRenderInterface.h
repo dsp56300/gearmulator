@@ -73,6 +73,8 @@ namespace juceRmlUi
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
 
+		Rml::CompiledGeometryHandle m_fullScreenGeometry = 0;
+
 		std::stack<LayerHandleData*> m_layers;
 
 		RenderInterfaceShaders m_shaders;
