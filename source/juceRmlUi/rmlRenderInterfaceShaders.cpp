@@ -2,40 +2,44 @@
 
 #include "juce_opengl/opengl/juce_gl.h"
 
+#include "rmlShaders.h"
+
 namespace juceRmlUi
 {
 	using namespace juce::gl;
 
 	namespace
 	{
-		const char* g_vertexShader = R"(
-			// vertex_shader.glsl
-			#version 110
-			attribute vec3 aPos;
-			attribute vec2 aTexCoord;
-			varying vec2 vTexCoord;
-			void main() {
-			    gl_Position = gl_ModelViewProjectionMatrix * vec4(aPos, 1.0);
-			    vTexCoord = aTexCoord;
-			})";
-
-		const char* g_fragmentShader = R"(
-			// fragment_shader.glsl
-			#version 110
-			uniform sampler2D uTexture;
-			varying vec2 vTexCoord;
-			void main() {
-			    vec4 color = texture2D(uTexture, vTexCoord);
-				float gray = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-			    color.rgb = vec3(gray, gray, gray);
-			    gl_FragColor = color;
-			})";		
-
-		GLuint compileShader(const GLenum _type, const char* _source)
+		struct ShaderSetup
 		{
+			std::vector<std::string> defines;
+		};
+
+		const ShaderSetup g_shaderSetups[] =
+		{
+			{{"USE_TEXTURE", "USE_TRANSFORMATION_MATRIX", "USE_VERTEX_COLOR"}},   // DefaultTextured
+			{{"USE_TRANSFORMATION_MATRIX", "USE_VERTEX_COLOR"}},                  // DefaultColored
+			{{"USE_COLOR_MATRIX"}}                                                // FullscreenColorMatrix
+		};
+
+		static_assert(std::size(g_shaderSetups) == static_cast<uint32_t>(RenderInterfaceShaders::ShaderType::Count));
+
+		const auto g_shaderHeader = "#version 110\n";
+
+		GLuint compileShader(const GLenum _type, const char* _source, const std::vector<std::string>& _defines)
+		{
+			auto source = std::string(g_shaderHeader);
+
+			for (const auto& define : _defines)
+				source += "#define " + define + '\n';
+
+			source += _source;
+
+			const char* sourcePtr = source.c_str();
+
 			// Compile shader and check for errors
 			GLuint shader = glCreateShader(_type);
-			glShaderSource(shader, 1, &_source, nullptr);
+			glShaderSource(shader, 1, &sourcePtr, nullptr);
 			glCompileShader(shader);
 			GLint success;
 			glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
@@ -47,10 +51,10 @@ namespace juceRmlUi
 			}
 			return shader;
 		};
-		GLuint createProgram(const char* _vertexSource, const char* _fragmentSource)
+		GLuint createProgram(const char* _vertexSource, const char* _fragmentSource, const std::vector<std::string>& _defines)
 		{
-		    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, _vertexSource);
-		    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, _fragmentSource);
+		    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, _vertexSource, _defines);
+		    GLuint fragmentShader = compileShader(GL_FRAGMENT_SHADER, _fragmentSource, _defines);
 		    GLuint program = glCreateProgram();
 		    glAttachShader(program, vertexShader);
 		    glAttachShader(program, fragmentShader);
@@ -63,7 +67,7 @@ namespace juceRmlUi
 
 	uint32_t RenderInterfaceShaders::create(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
-		const auto prog = createProgram(g_vertexShader, g_fragmentShader);
+		const auto prog = createProgram(g_vertexShader, g_fragmentShader ,{"USE_TEXTURE", "USE_TRANSFORMATION_MATRIX"});
 		return prog;
 	}
 }
