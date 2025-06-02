@@ -56,10 +56,11 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 
 		m_renderInterface.reset(new RenderInterface(m_dataProvider));
+		m_renderProxy.reset(new RendererProxy(*m_renderInterface));
 
 		const auto size = getScreenBounds();
 
-		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderInterface.get(), nullptr);
+		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
 
 		auto& sys = m_rmlInterfaces->getSystemInterface();
 		sys.beginLogRecording();
@@ -121,7 +122,7 @@ namespace juceRmlUi
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
 		m_renderInterface->beginFrame(width, height);
-		m_rmlContext->Render();
+		m_renderProxy->executeEnqueuedFunctions();
 		m_renderInterface->endFrame();
 
 		GLenum err = glGetError();
@@ -142,6 +143,8 @@ namespace juceRmlUi
 
 			Rml::ReleaseRenderManagers();
 		}
+
+		m_renderProxy.reset();
 		m_renderInterface.reset();
 	}
 
@@ -290,6 +293,9 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 		if (m_rmlContext)
+		{
 			m_rmlContext->Update();
+			m_rmlContext->Render();
+		}
 	}
 }

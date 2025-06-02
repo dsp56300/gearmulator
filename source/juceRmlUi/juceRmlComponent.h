@@ -1,6 +1,7 @@
 #pragma once
 
 #include "rmlInterfaces.h"
+#include "rmlRendererProxy.h"
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
@@ -54,7 +55,10 @@ namespace juceRmlUi
 		juce::OpenGLContext m_openGLContext;
 
 		std::unique_ptr<RmlInterfaces> m_rmlInterfaces;
+
 		std::unique_ptr<RenderInterface> m_renderInterface;
+		std::unique_ptr<RendererProxy> m_renderProxy;
+
 		Rml::Context* m_rmlContext = nullptr;
 
 		std::vector<juce::KeyPress> m_pressedKeys;

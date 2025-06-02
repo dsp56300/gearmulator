@@ -5,6 +5,11 @@
 
 #include "RmlUi/Core/RenderInterface.h"
 
+namespace juce
+{
+	class Image;
+}
+
 namespace juceRmlUi
 {
 	class DataProvider;
@@ -37,6 +42,11 @@ namespace juceRmlUi
 
 		void beginFrame(uint32_t _width, uint32_t _height);
 		void endFrame();
+
+		DataProvider& getDataProvider() const { return m_dataProvider; }
+		bool loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const;
+
+		static Rml::TextureHandle loadTexture(juce::Image& _image);
 
 	private:
 		DataProvider& m_dataProvider;

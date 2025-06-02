@@ -127,25 +127,41 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RenderInterface::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
+		juce::Image image;
+		if (!loadImage(image, _textureDimensions, _source))
+			return {};
+		return loadTexture(image);
+	}
+
+	bool RenderInterface::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
+	{
 		uint32_t fileSize;
 		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
 
 		if (!ptr)
 		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
 			assert(false && "file not found");
-			return {};
+			return false;
 		}
 
 		// Load the texture from the file
-		auto image = juce::ImageFileFormat::loadFrom(ptr, fileSize);
-		if (image.isNull())
+		_image = juce::ImageFileFormat::loadFrom(ptr, fileSize);
+		if (_image.isNull())
 		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
 			assert(false && "failed to load image");
-			return {};
+			return false;
 		}
-		// Get the texture dimensions
-		_textureDimensions.x = image.getWidth();
-		_textureDimensions.y = image.getHeight();
+
+		_textureDimensions.x = _image.getWidth();
+		_textureDimensions.y = _image.getHeight();
+
+		return true;
+	}
+
+	Rml::TextureHandle RenderInterface::loadTexture(juce::Image& _image)
+	{
 		// Create a new OpenGL texture
 		GLuint textureId;
 		glGenTextures(1, &textureId);
@@ -158,17 +174,20 @@ namespace juceRmlUi
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		CHECK_OPENGL_ERROR;
 
-		juce::Image::BitmapData bitmapData(image, 0, 0, image.getWidth(), image.getHeight(), juce::Image::BitmapData::readOnly);
+		const auto width = _image.getWidth();
+		const auto height = _image.getHeight();
+
+		juce::Image::BitmapData bitmapData(_image, 0, 0, width, height, juce::Image::BitmapData::readOnly);
 		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
 
-		switch(image.getFormat())
+		switch(_image.getFormat())
 		{
 		case juce::Image::ARGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _textureDimensions.x, _textureDimensions.y, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
 			CHECK_OPENGL_ERROR;
 			break;
 		case juce::Image::RGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _textureDimensions.x, _textureDimensions.y, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
 			CHECK_OPENGL_ERROR;
 			break;
 		default:
@@ -180,8 +199,6 @@ namespace juceRmlUi
 			glGenerateMipmap(GL_TEXTURE_2D);
 			CHECK_OPENGL_ERROR;
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			CHECK_OPENGL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			CHECK_OPENGL_ERROR;
 		}
 
@@ -228,16 +245,16 @@ namespace juceRmlUi
 
 	void RenderInterface::SetScissorRegion(Rml::Rectanglei _region)
 	{
-		_region.p0.y = static_cast<int>(m_frameBufferHeight) - _region.p1.y;
-		_region.p1.y = static_cast<int>(m_frameBufferHeight) - _region.p0.y;
+		_region.p0.y = static_cast<int>(m_frameBufferHeight) - _region.p0.y;
+		_region.p1.y = static_cast<int>(m_frameBufferHeight) - _region.p1.y;
 
-		const auto y0 = _region.Top();
-		const auto y1 = _region.Top() + _region.Height();
+		if (_region.p0.y > _region.p1.y)
+			std::swap(_region.p0.y, _region.p1.y);
 
 		auto x = _region.Left();
-		auto y = std::min(y0, y1);
+		auto y = _region.Top();
 		auto width = _region.Width();
-		auto height = std::max(y0, y1) - y;
+		auto height = _region.Height();
 		glScissor(x,y,width, height);
 		CHECK_OPENGL_ERROR;
 //		glEnable(GL_SCISSOR_TEST);
