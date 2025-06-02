@@ -40,7 +40,9 @@ namespace juceRmlUi
 		void RenderShader(Rml::CompiledShaderHandle _shader, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
 
-		void executeEnqueuedFunctions();
+		void executeRenderFunctions();
+
+		void finishFrame();
 
 	private:
 		void addRenderFunction(Func _func);
@@ -83,7 +85,10 @@ namespace juceRmlUi
 		Handle m_nextHandle = 1;
 		juceRmlUi::RenderInterface& m_renderer;
 		std::mutex m_mutex;
+		std::mutex m_mutexRender;
+		std::vector<Func> m_enqueuedFunctions;
 		std::vector<Func> m_renderFunctions;
+		std::vector<Func> m_renderFunctionsCopy;
 		std::unordered_map<Handle, Handle> m_handles;
 	};
 }

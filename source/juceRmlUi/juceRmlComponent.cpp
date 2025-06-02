@@ -122,7 +122,7 @@ namespace juceRmlUi
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
 		m_renderInterface->beginFrame(width, height);
-		m_renderProxy->executeEnqueuedFunctions();
+		m_renderProxy->executeRenderFunctions();
 		m_renderInterface->endFrame();
 
 		GLenum err = glGetError();
@@ -296,6 +296,7 @@ namespace juceRmlUi
 		{
 			m_rmlContext->Update();
 			m_rmlContext->Render();
+			m_renderProxy->finishFrame();
 		}
 	}
 }
