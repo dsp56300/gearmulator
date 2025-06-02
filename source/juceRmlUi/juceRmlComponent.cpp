@@ -5,7 +5,7 @@
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
-#include "rmlRenderInterface.h"
+#include "rmlRendererGL2.h"
 
 #include "baseLib/filesystem.h"
 
@@ -55,7 +55,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_renderInterface.reset(new RenderInterface(m_dataProvider));
+		m_renderInterface.reset(new RendererGL2(m_dataProvider));
 		m_renderProxy.reset(new RendererProxy(*m_renderInterface));
 
 		const auto size = getScreenBounds();

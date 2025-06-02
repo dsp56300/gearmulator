@@ -1,4 +1,4 @@
-#include "rmlRenderInterface.h"
+#include "rmlRendererGL2.h"
 
 #include <cassert>
 
@@ -43,11 +43,11 @@ namespace juceRmlUi
 		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
 	}
 
-	RenderInterface::RenderInterface(DataProvider& _dataProvider) : m_dataProvider(_dataProvider), m_filters(m_shaders)
+	RendererGL2::RendererGL2(DataProvider& _dataProvider) : m_dataProvider(_dataProvider), m_filters(m_shaders)
 	{
 	}
 
-	Rml::CompiledGeometryHandle RenderInterface::CompileGeometry(const Rml::Span<const Rml::Vertex> _vertices, const Rml::Span<const int> _indices)
+	Rml::CompiledGeometryHandle RendererGL2::CompileGeometry(const Rml::Span<const Rml::Vertex> _vertices, const Rml::Span<const int> _indices)
 	{
 		auto* g = new CompiledGeometry();
 
@@ -72,7 +72,7 @@ namespace juceRmlUi
 		return helper::toHandle<Rml::CompiledGeometryHandle>(g);
 	}
 
-	void RenderInterface::RenderGeometry(const Rml::CompiledGeometryHandle _geometry, const Rml::Vector2f _translation, const Rml::TextureHandle _texture)
+	void RendererGL2::RenderGeometry(const Rml::CompiledGeometryHandle _geometry, const Rml::Vector2f _translation, const Rml::TextureHandle _texture)
 	{
 		CHECK_OPENGL_ERROR;
 
@@ -120,7 +120,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::ReleaseGeometry(const Rml::CompiledGeometryHandle _geometry)
+	void RendererGL2::ReleaseGeometry(const Rml::CompiledGeometryHandle _geometry)
 	{
 	    auto* geom = helper::fromHandle<CompiledGeometry>(_geometry);
 		assert(geom);
@@ -135,7 +135,7 @@ namespace juceRmlUi
 		delete geom;
 	}
 
-	Rml::TextureHandle RenderInterface::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
+	Rml::TextureHandle RendererGL2::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
 		juce::Image image;
 		if (!loadImage(image, _textureDimensions, _source))
@@ -143,7 +143,7 @@ namespace juceRmlUi
 		return loadTexture(image);
 	}
 
-	bool RenderInterface::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
+	bool RendererGL2::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
 	{
 		uint32_t fileSize;
 		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
@@ -170,7 +170,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	Rml::TextureHandle RenderInterface::loadTexture(juce::Image& _image)
+	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
 	{
 		// Create a new OpenGL texture
 		GLuint textureId;
@@ -215,7 +215,7 @@ namespace juceRmlUi
 		return textureId;
 	}
 
-	Rml::TextureHandle RenderInterface::GenerateTexture(const Rml::Span<const unsigned char> _source, const Rml::Vector2i _sourceDimensions)
+	Rml::TextureHandle RendererGL2::GenerateTexture(const Rml::Span<const unsigned char> _source, const Rml::Vector2i _sourceDimensions)
 	{
 		GLuint textureId;
 		glGenTextures(1, &textureId);
@@ -231,7 +231,7 @@ namespace juceRmlUi
 		return textureId;
 	}
 
-	void RenderInterface::ReleaseTexture(Rml::TextureHandle _texture)
+	void RendererGL2::ReleaseTexture(Rml::TextureHandle _texture)
 	{
 		if (_texture)
 		{
@@ -244,7 +244,7 @@ namespace juceRmlUi
 		}
 	}
 
-	void RenderInterface::EnableScissorRegion(const bool _enable)
+	void RendererGL2::EnableScissorRegion(const bool _enable)
 	{
 		if (_enable)
 			glEnable(GL_SCISSOR_TEST);
@@ -253,7 +253,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::SetScissorRegion(Rml::Rectanglei _region)
+	void RendererGL2::SetScissorRegion(Rml::Rectanglei _region)
 	{
 		_region.p0.y = static_cast<int>(m_frameBufferHeight) - _region.p0.y;
 		_region.p1.y = static_cast<int>(m_frameBufferHeight) - _region.p1.y;
@@ -270,7 +270,7 @@ namespace juceRmlUi
 //		glEnable(GL_SCISSOR_TEST);
 	}
 
-	Rml::LayerHandle RenderInterface::PushLayer()
+	Rml::LayerHandle RendererGL2::PushLayer()
 	{
 		assert(m_frameBufferWidth && m_frameBufferHeight && "framebuffer size not set");
 
@@ -315,7 +315,7 @@ namespace juceRmlUi
 	    return helper::toHandle<Rml::LayerHandle>(layer);
 	}
 
-	void RenderInterface::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const Rml::CompiledFilterHandle> _filters)
+	void RendererGL2::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const Rml::CompiledFilterHandle> _filters)
 	{
 		CHECK_OPENGL_ERROR;
 
@@ -456,7 +456,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::PopLayer()
+	void RendererGL2::PopLayer()
 	{
 		assert(!m_layers.empty());
 
@@ -484,7 +484,7 @@ namespace juceRmlUi
 		Rml::RenderInterface::PopLayer();
 	}
 
-	void RenderInterface::EnableClipMask(bool _enable)
+	void RendererGL2::EnableClipMask(bool _enable)
 	{
 		if (_enable)
 			glEnable(GL_STENCIL_TEST);
@@ -493,7 +493,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::RenderToClipMask(Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation)
+	void RendererGL2::RenderToClipMask(Rml::ClipMaskOperation _operation, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation)
 	{
 		using Rml::ClipMaskOperation;
 
@@ -549,7 +549,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::SetTransform(const Rml::Matrix4f* _transform)
+	void RendererGL2::SetTransform(const Rml::Matrix4f* _transform)
 	{
 		if (_transform)
 		{
@@ -566,25 +566,25 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	Rml::TextureHandle RenderInterface::SaveLayerAsTexture()
+	Rml::TextureHandle RendererGL2::SaveLayerAsTexture()
 	{
 		assert(false && "save layer as texture not implemented");
 		return Rml::RenderInterface::SaveLayerAsTexture();
 	}
 
-	Rml::CompiledFilterHandle RenderInterface::SaveLayerAsMaskImage()
+	Rml::CompiledFilterHandle RendererGL2::SaveLayerAsMaskImage()
 	{
 		assert(false && "save layer as mask image not implemented");
 		return Rml::RenderInterface::SaveLayerAsMaskImage();
 	}
 
-	Rml::CompiledFilterHandle RenderInterface::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
+	Rml::CompiledFilterHandle RendererGL2::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto program = m_filters.create(_name, _parameters);
 		return helper::toHandle<Rml::CompiledFilterHandle>(new CompiledShader{program});
 	}
 
-	void RenderInterface::ReleaseFilter(Rml::CompiledFilterHandle _filter)
+	void RendererGL2::ReleaseFilter(Rml::CompiledFilterHandle _filter)
 	{
 		auto* filter = helper::fromHandle<CompiledShader>(_filter);
 		glDeleteProgram(filter->program);
@@ -592,13 +592,13 @@ namespace juceRmlUi
 		delete filter;
 	}
 
-	Rml::CompiledShaderHandle RenderInterface::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
+	Rml::CompiledShaderHandle RendererGL2::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto prog = m_shaders.create(_name, _parameters);
 		return helper::toHandle<Rml::CompiledShaderHandle>(new CompiledShader{prog});
 	}
 
-	void RenderInterface::ReleaseShader(Rml::CompiledShaderHandle _shader)
+	void RendererGL2::ReleaseShader(Rml::CompiledShaderHandle _shader)
 	{
 		auto* shader = helper::fromHandle<CompiledShader>(_shader);
 		glDeleteProgram(shader->program);
@@ -606,7 +606,7 @@ namespace juceRmlUi
 		delete shader;
 	}
 
-	void RenderInterface::beginFrame(const uint32_t _width, const uint32_t _height)
+	void RendererGL2::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
 		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
 		{
@@ -648,7 +648,7 @@ namespace juceRmlUi
 		CHECK_OPENGL_ERROR;
 	}
 
-	void RenderInterface::endFrame()
+	void RendererGL2::endFrame()
 	{
 	    glDisableClientState(GL_VERTEX_ARRAY);
 		CHECK_OPENGL_ERROR;

@@ -14,10 +14,10 @@ namespace juceRmlUi
 {
 	class DataProvider;
 
-	class RenderInterface : public Rml::RenderInterface
+	class RendererGL2 : public Rml::RenderInterface
 	{
 	public:
-		RenderInterface(DataProvider& _dataProvider);
+		RendererGL2(DataProvider& _dataProvider);
 
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
 		void RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;

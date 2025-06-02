@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
+
 project(juceRmlUi VERSION ${CMAKE_PROJECT_VERSION}) 
 
 set(SOURCES
@@ -17,7 +18,7 @@ set(SOURCES
 	rmlInterfaces.cpp rmlInterfaces.h
 	rmlMenu.cpp rmlMenu.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
-	rmlRenderInterface.cpp rmlRenderInterface.h
+	rmlRendererGL2.cpp rmlRendererGL2.h
 	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
 	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
 	rmlShader.cpp rmlShader.h

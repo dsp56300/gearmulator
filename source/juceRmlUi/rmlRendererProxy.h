@@ -6,7 +6,7 @@
 
 namespace juceRmlUi
 {
-	class RenderInterface;
+	class RendererGL2;
 
 	class RendererProxy : public Rml::RenderInterface
 	{
@@ -15,7 +15,7 @@ namespace juceRmlUi
 		using Handle = uintptr_t;
 		static constexpr Handle InvalidHandle = 0;
 
-		explicit RendererProxy(juceRmlUi::RenderInterface& _renderer);
+		explicit RendererProxy(juceRmlUi::RendererGL2& _renderer);
 		~RendererProxy() override;
 
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
@@ -83,7 +83,7 @@ namespace juceRmlUi
 		}
 
 		Handle m_nextHandle = 1;
-		juceRmlUi::RenderInterface& m_renderer;
+		juceRmlUi::RendererGL2& m_renderer;
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;

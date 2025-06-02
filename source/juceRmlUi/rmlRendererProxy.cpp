@@ -1,7 +1,8 @@
 #include "rmlRendererProxy.h"
 
 #include "juceRmlComponent.h"
-#include "rmlRenderInterface.h"
+#include "rmlRendererGL2.h"
+
 #include "baseLib/filesystem.h"
 
 #include "juce_graphics/juce_graphics.h"
@@ -11,7 +12,7 @@ namespace juceRmlUi
 	// ReSharper disable once CppCompileTimeConstantCanBeReplacedWithBooleanConstant
 	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in ifs");
 
-	RendererProxy::RendererProxy(juceRmlUi::RenderInterface& _renderer): m_renderer(_renderer)
+	RendererProxy::RendererProxy(juceRmlUi::RendererGL2& _renderer): m_renderer(_renderer)
 	{
 	}
 
@@ -70,7 +71,7 @@ namespace juceRmlUi
 		addRenderFunction([this, dummyHandle, image]
 		{
 			auto img = image;
-			const auto handle = juceRmlUi::RenderInterface::loadTexture(img);
+			const auto handle = juceRmlUi::RendererGL2::loadTexture(img);
 			addHandle(dummyHandle, handle);
 		});
 
