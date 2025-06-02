@@ -2,14 +2,13 @@
 
 #include <cassert>
 
-#include "rmlDataProvider.h"
 #include "rmlHelper.h"
+#include "rmlRendererGL2Types.h"
 #include "baseLib/filesystem.h"
 
 #include "juce_opengl/juce_opengl.h"
-#include "juce_gui_basics/juce_gui_basics.h"
 
-namespace juceRmlUi
+namespace juceRmlUi::gl2
 {
 	using namespace juce::gl;
 
@@ -17,22 +16,6 @@ namespace juceRmlUi
 
 	namespace
 	{
-		void checkGLError (const char* file, const int line)
-		{
-		    for (;;)
-		    {
-		        const GLenum e = glGetError();
-
-		        if (e == GL_NO_ERROR)
-		            break;
-
-		        Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u", e);
-		        assert(false);
-		    }
-		}
-
-		#define CHECK_OPENGL_ERROR do { checkGLError (__FILE__, __LINE__); } while(0)
-
 		const Rml::Vertex g_fullScreenVertices[] = {
 			{{0,1}, {255,255}, {0,0}},
 			{{1,1}, {255,255}, {1,0}},
@@ -43,7 +26,7 @@ namespace juceRmlUi
 		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
 	}
 
-	RendererGL2::RendererGL2(DataProvider& _dataProvider) : m_dataProvider(_dataProvider), m_filters(m_shaders)
+	RendererGL2::RendererGL2(DataProvider& _dataProvider) : Renderer(_dataProvider), m_filters(m_shaders)
 	{
 	}
 
@@ -86,35 +69,9 @@ namespace juceRmlUi
 	    glTranslatef(_translation.x, _translation.y, 0.0f);
 		CHECK_OPENGL_ERROR;
 
-	    glBindBuffer(GL_ARRAY_BUFFER, geom->vertexBuffer);
-		CHECK_OPENGL_ERROR;
+		auto& shader = m_shaders.getShader(_texture ? ShaderType::DefaultTextured : ShaderType::DefaultColored);
 
-		glVertexPointer(2, GL_FLOAT, sizeof(Rml::Vertex), reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, position)));  // NOLINT(performance-no-int-to-ptr)
-		CHECK_OPENGL_ERROR;
-	    glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Rml::Vertex), reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, colour)));  // NOLINT(performance-no-int-to-ptr)
-		CHECK_OPENGL_ERROR;
-	    glTexCoordPointer(2, GL_FLOAT, sizeof(Rml::Vertex), reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, tex_coord)));  // NOLINT(performance-no-int-to-ptr)
-		CHECK_OPENGL_ERROR;
-
-	    if (_texture)
-	    {
-		    glBindTexture(GL_TEXTURE_2D, static_cast<GLuint>(_texture));
-			CHECK_OPENGL_ERROR;
-			glEnable(GL_TEXTURE_2D);
-			CHECK_OPENGL_ERROR;
-	    }
-	    else
-	    {
-		    glBindTexture(GL_TEXTURE_2D, 0);
-			CHECK_OPENGL_ERROR;
-			glDisable(GL_TEXTURE_2D);
-			CHECK_OPENGL_ERROR;
-	    }
-
-	    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->indexBuffer);
-		CHECK_OPENGL_ERROR;
-	    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(geom->indexCount), GL_UNSIGNED_INT, nullptr);
-		CHECK_OPENGL_ERROR;
+		renderGeometry(*geom, shader, { static_cast<uint32_t>(_texture), Rml::Matrix4f::Identity() });
 
 	    glPopMatrix();
 		CHECK_OPENGL_ERROR;
@@ -141,33 +98,6 @@ namespace juceRmlUi
 		if (!loadImage(image, _textureDimensions, _source))
 			return {};
 		return loadTexture(image);
-	}
-
-	bool RendererGL2::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
-	{
-		uint32_t fileSize;
-		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
-
-		if (!ptr)
-		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
-			assert(false && "file not found");
-			return false;
-		}
-
-		// Load the texture from the file
-		_image = juce::ImageFileFormat::loadFrom(ptr, fileSize);
-		if (_image.isNull())
-		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
-			assert(false && "failed to load image");
-			return false;
-		}
-
-		_textureDimensions.x = _image.getWidth();
-		_textureDimensions.y = _image.getHeight();
-
-		return true;
 	}
 
 	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
@@ -213,6 +143,37 @@ namespace juceRmlUi
 		}
 
 		return textureId;
+	}
+
+	void RendererGL2::checkGLError(const char* _file, const int _line)
+	{
+		for (;;)
+		{
+			const GLenum e = glGetError();
+
+			if (e == GL_NO_ERROR)
+				break;
+
+			Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
+			assert(false);
+		}
+	}
+
+	void RendererGL2::renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, _geom.vertexBuffer);
+		CHECK_OPENGL_ERROR;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geom.indexBuffer);
+		CHECK_OPENGL_ERROR;
+
+		_shader.enableShader(_shaderParams);
+
+		_shader.setupVertexAttributes();
+
+	    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geom.indexCount), GL_UNSIGNED_INT, nullptr);
+		CHECK_OPENGL_ERROR;
+
+		_shader.disableShader();
 	}
 
 	Rml::TextureHandle RendererGL2::GenerateTexture(const Rml::Span<const unsigned char> _source, const Rml::Vector2i _sourceDimensions)
@@ -367,62 +328,11 @@ namespace juceRmlUi
 			auto& filter = *_filters.begin();
 			auto* compiledFilter = helper::fromHandle<CompiledShader>(filter);
 			assert(compiledFilter && "invalid filter handle");
-			glUseProgram(compiledFilter->program);
-
-			auto locPos = glGetAttribLocation(compiledFilter->program, "aPos");
-			CHECK_OPENGL_ERROR;
-			auto locUV = glGetAttribLocation(compiledFilter->program, "aTexCoord");
-			CHECK_OPENGL_ERROR;
 
 			auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
 			assert(geom && "invalid full screen geometry handle");
 
-			glBindBuffer(GL_ARRAY_BUFFER, geom->vertexBuffer);
-			CHECK_OPENGL_ERROR;
-			glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, geom->indexBuffer);
-			CHECK_OPENGL_ERROR;
-
-			auto locTexture = glGetUniformLocation(compiledFilter->program, "uTexture");
-			CHECK_OPENGL_ERROR;
-			glUniform1i(locTexture, 0);
-			CHECK_OPENGL_ERROR;
-
-			glEnableVertexAttribArray(locPos);
-			CHECK_OPENGL_ERROR;
-			glEnableVertexAttribArray(locUV);
-			CHECK_OPENGL_ERROR;
-			
-			// Set attribute pointers
-			glVertexAttribPointer(
-			    locPos,                                                    // Attribute location
-			    2,                                                         // Number of components (x, y, z)
-			    GL_FLOAT,                                                  // Type
-			    GL_FALSE,                                                  // Normalize?
-			    sizeof(Rml::Vertex),                                       // Stride
-			    reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, position)) // Offset to position data
-			);
-			CHECK_OPENGL_ERROR;
-
-			glVertexAttribPointer(
-			    locUV,                                                      // Attribute location
-			    2,                                                          // Number of components (x, y)
-			    GL_FLOAT,                                                   // Type
-			    GL_FALSE,                                                   // Normalize?
-			    sizeof(Rml::Vertex),                                        // Stride
-			    reinterpret_cast<GLvoid*>(offsetof(Rml::Vertex, tex_coord)) // Offset to UV data
-			);
-			CHECK_OPENGL_ERROR;
-
-		    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(geom->indexCount), GL_UNSIGNED_INT, nullptr);
-			CHECK_OPENGL_ERROR;
-
-			glDisableVertexAttribArray(locPos);
-			CHECK_OPENGL_ERROR;
-			glDisableVertexAttribArray(locUV);
-			CHECK_OPENGL_ERROR;
-
-			glUseProgram(0);
-			CHECK_OPENGL_ERROR;
+			renderGeometry(*geom, m_shaders.getShader(compiledFilter->type), compiledFilter->params);
 		}
 		else
 		{
@@ -481,7 +391,7 @@ namespace juceRmlUi
 			CHECK_OPENGL_ERROR;
 		}
 
-		Rml::RenderInterface::PopLayer();
+		RenderInterface::PopLayer();
 	}
 
 	void RendererGL2::EnableClipMask(bool _enable)
@@ -569,40 +479,36 @@ namespace juceRmlUi
 	Rml::TextureHandle RendererGL2::SaveLayerAsTexture()
 	{
 		assert(false && "save layer as texture not implemented");
-		return Rml::RenderInterface::SaveLayerAsTexture();
+		return RenderInterface::SaveLayerAsTexture();
 	}
 
 	Rml::CompiledFilterHandle RendererGL2::SaveLayerAsMaskImage()
 	{
 		assert(false && "save layer as mask image not implemented");
-		return Rml::RenderInterface::SaveLayerAsMaskImage();
+		return RenderInterface::SaveLayerAsMaskImage();
 	}
 
 	Rml::CompiledFilterHandle RendererGL2::CompileFilter(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto program = m_filters.create(_name, _parameters);
-		return helper::toHandle<Rml::CompiledFilterHandle>(new CompiledShader{program});
+		return helper::toHandle<Rml::CompiledFilterHandle>(program);
 	}
 
 	void RendererGL2::ReleaseFilter(Rml::CompiledFilterHandle _filter)
 	{
-		auto* filter = helper::fromHandle<CompiledShader>(_filter);
-		glDeleteProgram(filter->program);
-		CHECK_OPENGL_ERROR;
+		const auto* filter = helper::fromHandle<CompiledShader>(_filter);
 		delete filter;
 	}
 
 	Rml::CompiledShaderHandle RendererGL2::CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
 		auto prog = m_shaders.create(_name, _parameters);
-		return helper::toHandle<Rml::CompiledShaderHandle>(new CompiledShader{prog});
+		return helper::toHandle<Rml::CompiledShaderHandle>(prog);
 	}
 
 	void RendererGL2::ReleaseShader(Rml::CompiledShaderHandle _shader)
 	{
 		auto* shader = helper::fromHandle<CompiledShader>(_shader);
-		glDeleteProgram(shader->program);
-		CHECK_OPENGL_ERROR;
 		delete shader;
 	}
 

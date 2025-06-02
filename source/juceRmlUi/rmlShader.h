@@ -3,11 +3,12 @@
 #include <cstdint>
 #include <unordered_map>
 
-#include "juce_opengl/opengl/juce_gl.h"
 #include "RmlUi/Core/Types.h"
 
-namespace juceRmlUi
+namespace juceRmlUi::gl2
 {
+	struct ShaderParams;
+
 	class RmlShader
 	{
 	public:
@@ -22,13 +23,13 @@ namespace juceRmlUi
 			Count
 		};
 
-		struct ShaderParams
-		{
-			uint32_t texture = 0;
-			Rml::Matrix4f colorMatrix = Rml::Matrix4f::Identity();
-		};
-
 		explicit RmlShader(uint32_t _programId);
+
+		RmlShader(RmlShader&&) noexcept = default;
+		RmlShader(const RmlShader&) = delete;
+
+		RmlShader& operator=(RmlShader&&) noexcept = default;
+		RmlShader& operator=(const RmlShader&) = delete;
 
 		uint32_t getProgramId() const noexcept { return m_programId; }
 
@@ -37,11 +38,16 @@ namespace juceRmlUi
 
 		static void setUniformMatrix(int _location, const Rml::Matrix4f& _matrix);
 
-		void enableShader(const ShaderParams& _params);
+		void enableShader(const gl2::ShaderParams& _params);
 		void disableShader();
+
+		void setupVertexAttributes();
+
+		bool isValid() const noexcept { return m_programId != 0; }
 
 	private:
 		uint32_t m_programId;
+
 		std::unordered_map<AttribType, uint32_t> m_vertexAttribLocations;
 		std::unordered_map<AttribType, uint32_t> m_uniformLocations;
 	};

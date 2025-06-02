@@ -25,6 +25,10 @@ void main()
 #ifdef USE_TEXTURE
     vTexCoord = aTexCoord;
 #endif
+
+#ifdef USE_VERTEX_COLOR
+	vVertexColor = aVertexColor;
+#endif
 })";
 
 // ______________________
@@ -68,7 +72,7 @@ void main()
 	color *= vVertexColor;
 #endif
 
-	float gr = dot(color.rgb, vec3(0.299, 0.587, 0.114));
-    color.rgb = vec3(gr, gr, gr);
+//	float gr = dot(color.rgb, vec3(0.299, 0.587, 0.114));
+//  color.rgb = vec3(gr, gr, gr);
     gl_FragColor = color;
 })";

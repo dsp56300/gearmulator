@@ -3,8 +3,9 @@
 #include "juce_opengl/opengl/juce_gl.h"
 
 #include "rmlShaders.h"
+#include "RmlUi/Core/Log.h"
 
-namespace juceRmlUi
+namespace juceRmlUi::gl2
 {
 	using namespace juce::gl;
 
@@ -22,7 +23,7 @@ namespace juceRmlUi
 			{{"USE_COLOR_MATRIX"}}                                                // FullscreenColorMatrix
 		};
 
-		static_assert(std::size(g_shaderSetups) == static_cast<uint32_t>(RenderInterfaceShaders::ShaderType::Count));
+		static_assert(std::size(g_shaderSetups) == static_cast<uint32_t>(ShaderType::Count));
 
 		const auto g_shaderHeader = "#version 110\n";
 
@@ -50,7 +51,8 @@ namespace juceRmlUi
 				Rml::Log::Message(Rml::Log::LT_ERROR, "Shader compilation failed:\n%s", infoLog);
 			}
 			return shader;
-		};
+		}
+
 		GLuint createProgram(const char* _vertexSource, const char* _fragmentSource, const std::vector<std::string>& _defines)
 		{
 		    GLuint vertexShader = compileShader(GL_VERTEX_SHADER, _vertexSource, _defines);
@@ -62,12 +64,28 @@ namespace juceRmlUi
 		    glDeleteShader(vertexShader);
 		    glDeleteShader(fragmentShader);
 		    return program;
-		};
+		}
 	}
 
-	uint32_t RenderInterfaceShaders::create(const Rml::String& _name, const Rml::Dictionary& _parameters)
+	CompiledShader* RenderInterfaceShaders::create(const Rml::String& _name, const Rml::Dictionary& _parameters)
 	{
-		const auto prog = createProgram(g_vertexShader, g_fragmentShader ,{"USE_TEXTURE", "USE_TRANSFORMATION_MATRIX"});
-		return prog;
+//		const auto prog = createProgram(g_vertexShader, g_fragmentShader ,{"USE_TEXTURE", "USE_TRANSFORMATION_MATRIX"});
+//		return prog;
+		return nullptr;
+	}
+
+	RmlShader& RenderInterfaceShaders::getShader(ShaderType _type)
+	{
+		auto it = m_shaders.find(_type);
+		if (it != m_shaders.end())
+			return it->second;
+
+		const auto& setup = g_shaderSetups[static_cast<uint32_t>(_type)];
+
+		auto prog = createProgram(g_vertexShader, g_fragmentShader, setup.defines);
+
+		m_shaders.emplace(_type, RmlShader{prog});
+
+		return m_shaders.at(_type);
 	}
 }

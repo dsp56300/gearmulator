@@ -1,22 +1,18 @@
 #pragma once
 
-#include "RmlUi/Core/Variant.h"
+#include "rmlRendererGL2Types.h"
+#include "rmlShader.h"
 
-namespace juceRmlUi
+namespace juceRmlUi::gl2
 {
 	class RenderInterfaceShaders
 	{
 	public:
-		enum class ShaderType
-		{
-			DefaultTextured,
-			DefaultColored,
+		CompiledShader* create(const Rml::String& _name, const Rml::Dictionary& _parameters);
 
-			FullscreenColorMatrix,
+		RmlShader& getShader(ShaderType _type);
 
-			Count
-		};
-
-		uint32_t create(const Rml::String& _name, const Rml::Dictionary& _parameters);
+	private:
+		std::unordered_map<ShaderType, RmlShader> m_shaders;
 	};
 }

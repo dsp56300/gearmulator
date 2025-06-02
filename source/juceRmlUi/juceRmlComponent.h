@@ -14,8 +14,13 @@ namespace Rml
 
 namespace juceRmlUi
 {
+	namespace gl2
+	{
+		class RendererGL2;
+	}
+
 	struct RmlInterfaces;
-	class RendererGL2;
+	class Renderer;
 	class JuceRmlUi;
 
 	class DataProvider;
@@ -56,7 +61,7 @@ namespace juceRmlUi
 
 		std::unique_ptr<RmlInterfaces> m_rmlInterfaces;
 
-		std::unique_ptr<RendererGL2> m_renderInterface;
+		std::unique_ptr<gl2::RendererGL2> m_renderInterface;
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;

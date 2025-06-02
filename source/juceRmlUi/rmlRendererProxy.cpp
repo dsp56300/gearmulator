@@ -10,9 +10,9 @@
 namespace juceRmlUi
 {
 	// ReSharper disable once CppCompileTimeConstantCanBeReplacedWithBooleanConstant
-	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in ifs");
+	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in if expressions");
 
-	RendererProxy::RendererProxy(juceRmlUi::RendererGL2& _renderer): m_renderer(_renderer)
+	RendererProxy::RendererProxy(Renderer& _renderer) : Renderer(_renderer.getDataProvider()), m_renderer(_renderer)
 	{
 	}
 
@@ -66,16 +66,7 @@ namespace juceRmlUi
 		if (!m_renderer.loadImage(image, _textureDimensions, _source))
 			return {};
 
-		auto dummyHandle = createDummyHandle();
-
-		addRenderFunction([this, dummyHandle, image]
-		{
-			auto img = image;
-			const auto handle = juceRmlUi::RendererGL2::loadTexture(img);
-			addHandle(dummyHandle, handle);
-		});
-
-		return dummyHandle;
+		return loadTexture(image);
 	}
 
 	Rml::TextureHandle RendererProxy::GenerateTexture(const Rml::Span<const unsigned char> _source, Rml::Vector2i _sourceDimensions)
@@ -275,6 +266,20 @@ namespace juceRmlUi
 		m_enqueuedFunctions.push_back(std::move(_func));
 	}
 
+	Rml::TextureHandle RendererProxy::loadTexture(juce::Image& _image)
+	{
+		auto dummyHandle = createDummyHandle();
+
+		addRenderFunction([this, dummyHandle, _image]
+		{
+			auto img = _image;
+			const auto handle = m_renderer.loadTexture(img);
+			addHandle(dummyHandle, handle);
+		});
+
+		return dummyHandle;
+	}
+
 	void RendererProxy::executeRenderFunctions()
 	{
 		{
@@ -288,11 +293,9 @@ namespace juceRmlUi
 
 	void RendererProxy::finishFrame()
 	{
-		{
-			std::lock_guard lock(m_mutex);
-			std::lock_guard lock2(m_mutexRender);
-			m_enqueuedFunctions.swap(m_renderFunctions);
-			m_enqueuedFunctions.clear();
-		}
+		std::lock_guard lock(m_mutex);
+		std::lock_guard lock2(m_mutexRender);
+		m_enqueuedFunctions.swap(m_renderFunctions);
+		m_enqueuedFunctions.clear();
 	}
 }

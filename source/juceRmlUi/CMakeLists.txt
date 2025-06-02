@@ -18,7 +18,9 @@ set(SOURCES
 	rmlInterfaces.cpp rmlInterfaces.h
 	rmlMenu.cpp rmlMenu.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
+	rmlRenderer.cpp rmlRenderer.h
 	rmlRendererGL2.cpp rmlRendererGL2.h
+	rmlRendererGL2Types.h
 	rmlRenderInterfaceFilters.cpp rmlRenderInterfaceFilters.h
 	rmlRenderInterfaceShaders.cpp rmlRenderInterfaceShaders.h
 	rmlShader.cpp rmlShader.h

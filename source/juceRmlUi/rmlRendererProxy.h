@@ -2,20 +2,18 @@
 
 #include <mutex>
 
-#include "RmlUi/Core/RenderInterface.h"
+#include "rmlRenderer.h"
 
 namespace juceRmlUi
 {
-	class RendererGL2;
-
-	class RendererProxy : public Rml::RenderInterface
+	class RendererProxy : public Renderer
 	{
 	public:
 		using Func = std::function<void()>;
 		using Handle = uintptr_t;
 		static constexpr Handle InvalidHandle = 0;
 
-		explicit RendererProxy(juceRmlUi::RendererGL2& _renderer);
+		explicit RendererProxy(Renderer& _renderer);
 		~RendererProxy() override;
 
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
@@ -39,6 +37,8 @@ namespace juceRmlUi
 		Rml::CompiledShaderHandle CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters) override;
 		void RenderShader(Rml::CompiledShaderHandle _shader, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
+
+		Rml::TextureHandle loadTexture(juce::Image& _image) override;
 
 		void executeRenderFunctions();
 
@@ -83,7 +83,7 @@ namespace juceRmlUi
 		}
 
 		Handle m_nextHandle = 1;
-		juceRmlUi::RendererGL2& m_renderer;
+		Renderer& m_renderer;
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;

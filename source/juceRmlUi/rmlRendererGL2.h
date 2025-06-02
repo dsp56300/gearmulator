@@ -1,20 +1,22 @@
 #pragma once
 
+#include "rmlRenderer.h"
+
 #include "rmlRenderInterfaceFilters.h"
 #include "rmlRenderInterfaceShaders.h"
-
-#include "RmlUi/Core/RenderInterface.h"
 
 namespace juce
 {
 	class Image;
 }
 
-namespace juceRmlUi
+namespace juceRmlUi::gl2
 {
-	class DataProvider;
+	struct LayerHandleData;
+	struct CompiledGeometry;
+	struct ShaderParams;
 
-	class RendererGL2 : public Rml::RenderInterface
+	class RendererGL2 : public Renderer
 	{
 	public:
 		RendererGL2(DataProvider& _dataProvider);
@@ -43,33 +45,13 @@ namespace juceRmlUi
 		void beginFrame(uint32_t _width, uint32_t _height);
 		void endFrame();
 
-		DataProvider& getDataProvider() const { return m_dataProvider; }
-		bool loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const;
+		Rml::TextureHandle loadTexture(juce::Image& _image) override;
 
-		static Rml::TextureHandle loadTexture(juce::Image& _image);
+		static void checkGLError (const char* _file, int _line);
+
+		void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
 
 	private:
-		DataProvider& m_dataProvider;
-
-		struct CompiledGeometry
-		{
-			uint32_t vertexBuffer = 0;
-			uint32_t indexBuffer = 0;
-			size_t indexCount = 0;
-			Rml::TextureHandle texture = 0;
-		};
-
-		struct LayerHandleData
-		{
-			uint32_t framebuffer = 0;
-			uint32_t texture = 0;
-		};
-
-		struct CompiledShader
-		{
-			uint32_t program = 0;
-		};
-
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
 
@@ -80,4 +62,6 @@ namespace juceRmlUi
 		RenderInterfaceShaders m_shaders;
 		RenderInterfaceFilters m_filters;
 	};
+
+	#define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (__FILE__, __LINE__); } while(0)
 }

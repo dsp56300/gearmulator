@@ -55,7 +55,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_renderInterface.reset(new RendererGL2(m_dataProvider));
+		m_renderInterface.reset(new gl2::RendererGL2(m_dataProvider));
 		m_renderProxy.reset(new RendererProxy(*m_renderInterface));
 
 		const auto size = getScreenBounds();
