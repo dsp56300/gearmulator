@@ -292,12 +292,6 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glLoadIdentity();
 		CHECK_OPENGL_ERROR;
-	    glDisableClientState(GL_VERTEX_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glDisableClientState(GL_COLOR_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		CHECK_OPENGL_ERROR;
 
 		switch (_blendMode)
 		{
@@ -318,11 +312,6 @@ namespace juceRmlUi::gl2
 				break;
 		}
 
-		glEnable(GL_TEXTURE_2D);
-		CHECK_OPENGL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, src->texture);
-		CHECK_OPENGL_ERROR;
-
 		if (!_filters.empty())
 		{
 			auto& filter = *_filters.begin();
@@ -332,10 +321,17 @@ namespace juceRmlUi::gl2
 			auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
 			assert(geom && "invalid full screen geometry handle");
 
-			renderGeometry(*geom, m_shaders.getShader(compiledFilter->type), compiledFilter->params);
+			auto params = compiledFilter->params;
+			params.texture = src->texture;
+			renderGeometry(*geom, m_shaders.getShader(compiledFilter->type), params);
 		}
 		else
 		{
+			glEnable(GL_TEXTURE_2D);
+			CHECK_OPENGL_ERROR;
+			glBindTexture(GL_TEXTURE_2D, src->texture);
+			CHECK_OPENGL_ERROR;
+
 			const auto w = static_cast<float>(m_frameBufferWidth);
 			const auto h = static_cast<float>(m_frameBufferHeight);
 
@@ -356,12 +352,6 @@ namespace juceRmlUi::gl2
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		CHECK_OPENGL_ERROR;
 
-	    glEnableClientState(GL_VERTEX_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glEnableClientState(GL_COLOR_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		CHECK_OPENGL_ERROR;
 		glPopMatrix();
 		CHECK_OPENGL_ERROR;
 	}
@@ -545,22 +535,9 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		CHECK_OPENGL_ERROR;
-
-		glEnableClientState(GL_VERTEX_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glEnableClientState(GL_COLOR_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		CHECK_OPENGL_ERROR;
 	}
 
 	void RendererGL2::endFrame()
 	{
-	    glDisableClientState(GL_VERTEX_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glDisableClientState(GL_COLOR_ARRAY);
-		CHECK_OPENGL_ERROR;
-	    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		CHECK_OPENGL_ERROR;
 	}
 }
