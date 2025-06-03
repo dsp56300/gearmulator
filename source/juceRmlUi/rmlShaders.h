@@ -49,9 +49,23 @@ varying vec4 vVertexColor;
 uniform mat4 uColorMatrix;
 #endif
 
+#ifdef USE_BLUR
+uniform vec4 uTextureSize;	// w,h, 1/w, 1/h
+
+vec4 blur()
+{
+	vec4 sum = vec4(0,0,0,0);
+//	sum += texture2D(uTexture, vTexCoord + offset * uTextureSize.zw) * weight;
+	BLUR_CODE
+	return sum;
+}
+#endif
+
 void main()
 {
-#ifdef USE_TEXTURE
+#ifdef USE_BLUR
+	vec4 color = blur();
+#elif defined(USE_TEXTURE)
     vec4 color = texture2D(uTexture, vTexCoord);
 #else
     vec4 color = vec4(1,1,1,1);
