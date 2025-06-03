@@ -53,6 +53,7 @@ namespace juceRmlUi::gl2
 
 	private:
 		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
+		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target);
 
 		void onResize();
 
@@ -68,6 +69,7 @@ namespace juceRmlUi::gl2
 
 		std::vector<LayerHandleData*> m_layers;
 		std::vector<LayerHandleData> m_tempFrameBuffers;
+		std::vector<LayerHandleData> m_blurFrameBuffers;
 
 		RenderInterfaceShaders m_shaders;
 		RenderInterfaceFilters m_filters;

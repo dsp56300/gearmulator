@@ -12,10 +12,15 @@ namespace juceRmlUi::gl2
 
 		RmlShader& getShader(ShaderType _type);
 
+		RmlShader* getBlurShader(uint32_t& _passCount, float _sigma);
+
+		CompiledShader* createBlurShader(float _sigma);
+
 	private:
 		static std::vector<float> generateGaussianKernelWeights(float _sigma);
-		std::string generateBlurCode(float _sigma, const Rml::Vector2f& _offset);
+		static std::string generateBlurCode(float _sigma);
 
 		std::unordered_map<ShaderType, RmlShader> m_shaders;
+		std::unordered_map<int, std::unique_ptr<RmlShader>> m_blurShaders;
 	};
 }

@@ -4,7 +4,7 @@ const auto g_vertexShader = R"(
 
 attribute vec3 aPos;
 
-#ifdef USE_TEXTURE
+#if defined(USE_TEXTURE) || defined(USE_BLUR)
 attribute vec2 aTexCoord;
 varying vec2 vTexCoord;
 #endif
@@ -22,7 +22,7 @@ void main()
     gl_Position = vec4(aPos, 1.0);
 #endif
 
-#ifdef USE_TEXTURE
+#if defined(USE_TEXTURE) || defined(USE_BLUR)
     vTexCoord = aTexCoord;
 #endif
 
@@ -37,7 +37,7 @@ const auto g_fragmentShader = R"(
 
 uniform sampler2D uTexture;
 
-#ifdef USE_TEXTURE
+#if defined(USE_TEXTURE) || defined(USE_BLUR)
 varying vec2 vTexCoord;
 #endif
 
@@ -50,12 +50,12 @@ uniform mat4 uColorMatrix;
 #endif
 
 #ifdef USE_BLUR
-uniform vec4 uTextureSize;	// w,h, 1/w, 1/h
+uniform vec2 uBlurScale;
 
 vec4 blur()
 {
 	vec4 sum = vec4(0,0,0,0);
-//	sum += texture2D(uTexture, vTexCoord + offset * uTextureSize.zw) * weight;
+//	sum += texture2D(uTexture, vTexCoord + vec2(offset,offset) * uBlurScale) * weight;
 	BLUR_CODE
 	return sum;
 }

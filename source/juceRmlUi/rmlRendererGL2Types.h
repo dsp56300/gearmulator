@@ -6,6 +6,8 @@ namespace juceRmlUi
 {
 	namespace gl2
 	{
+		class RmlShader;
+
 		enum class ShaderType : uint8_t
 		{
 			DefaultTextured,
@@ -14,6 +16,8 @@ namespace juceRmlUi
 			FullscreenColorMatrix,
 			Fullscreen,
 
+			Blur,
+
 			Count
 		};
 
@@ -21,6 +25,8 @@ namespace juceRmlUi
 		{
 			uint32_t texture = 0;
 			Rml::Matrix4f colorMatrix = Rml::Matrix4f::Identity();
+			uint32_t blurPasses = 0;
+			Rml::Vector2f blurScale{0,0};
 		};
 
 		struct CompiledGeometry
@@ -40,6 +46,7 @@ namespace juceRmlUi
 		{
 			ShaderType type;
 			ShaderParams params;
+			RmlShader* shader = nullptr; // optional, only if 'type' is not sufficient
 		};
 	}
 }

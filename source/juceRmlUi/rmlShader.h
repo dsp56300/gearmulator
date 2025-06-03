@@ -19,6 +19,7 @@ namespace juceRmlUi::gl2
 			VertexColor,
 			Texture,
 			ColorMatrix,
+			BlurScale,
 
 			Count
 		};

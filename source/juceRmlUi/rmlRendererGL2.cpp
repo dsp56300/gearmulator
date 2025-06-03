@@ -233,9 +233,16 @@ namespace juceRmlUi::gl2
 					glClear(GL_COLOR_BUFFER_BIT);
 				}
 
-				auto params = filter->params;
-				params.texture = source->texture;
-				renderGeometry(*geom, m_shaders.getShader(filter->type), params);
+				if (filter->type == ShaderType::Blur)
+				{
+					renderBlur(*geom, filter, source, destFrameBuffer);
+				}
+				else
+				{
+					auto params = filter->params;
+					params.texture = source->texture;
+					renderGeometry(*geom, m_shaders.getShader(filter->type), params);
+				}
 
 				source = destFrameBuffer;
 			}
@@ -503,6 +510,72 @@ namespace juceRmlUi::gl2
 		_shader.disableShader();
 	}
 
+	void RendererGL2::renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target)
+	{
+		assert(_filter->shader && "blur filter needs custom shader");
+
+		auto params = _filter->params;
+
+		for (uint32_t p=0; p<_filter->params.blurPasses; ++p)
+		{
+			// horizontal blur pass into temp
+			if (m_blurFrameBuffers.empty())
+			{
+				m_blurFrameBuffers.resize(1);
+				createFrameBuffer(m_blurFrameBuffers[0]);
+			}
+
+			glBindFramebuffer(GL_FRAMEBUFFER, m_blurFrameBuffers[0].framebuffer);
+			CHECK_OPENGL_ERROR;
+			glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+			CHECK_OPENGL_ERROR;
+			glClear(GL_COLOR_BUFFER_BIT);
+			CHECK_OPENGL_ERROR;
+
+			params.texture = _source->texture;
+
+			params.blurScale.x = 1.0f / static_cast<float>(m_frameBufferWidth);
+			params.blurScale.y = 0.0f;
+			renderGeometry(_geom, *_filter->shader, params);
+
+			// vertical pass into _target if last, into second temp otherwise
+			const auto isLast = p == _filter->params.blurPasses - 1;
+			if (isLast)
+			{
+				glBindFramebuffer(GL_FRAMEBUFFER, _target ? _target->framebuffer : 0);
+				if (_target)
+				{
+					glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+					CHECK_OPENGL_ERROR;
+					glClear(GL_COLOR_BUFFER_BIT);
+					CHECK_OPENGL_ERROR;
+				}
+			}
+			else
+			{
+				if (m_blurFrameBuffers.size() < 2)
+				{
+					m_blurFrameBuffers.resize(2);
+					createFrameBuffer(m_blurFrameBuffers[1]);
+				}
+				glBindFramebuffer(GL_FRAMEBUFFER, m_blurFrameBuffers[1].framebuffer);
+				glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+				CHECK_OPENGL_ERROR;
+				glClear(GL_COLOR_BUFFER_BIT);
+				CHECK_OPENGL_ERROR;
+			}
+
+			params.texture = m_blurFrameBuffers[0].texture;
+
+			params.blurScale.x = 0.0f;
+			params.blurScale.y = 1.0f / static_cast<float>(m_frameBufferHeight);
+			renderGeometry(_geom, *_filter->shader, params);
+
+			if (m_blurFrameBuffers.size() > 1)
+				_source = &m_blurFrameBuffers[1]; // next pass will use the target as source
+		}
+	}
+
 	void RendererGL2::onResize()
 	{
 		std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
@@ -533,6 +606,11 @@ namespace juceRmlUi::gl2
 
 		for (size_t i=0; i<2; ++i)
 			createFrameBuffer(m_tempFrameBuffers[i]);
+
+		for (auto& f : m_blurFrameBuffers)
+			deleteFrameBuffer(f);
+		m_blurFrameBuffers.clear(); // recreated only when needed
+
 	}
 
 	LayerHandleData* RendererGL2::createFrameBuffer() const

@@ -23,7 +23,8 @@ namespace juceRmlUi::gl2
 		}
 		else if (_name == "blur")
 		{
-			return nullptr;
+			auto sigma = Rml::Get(_parameters, "sigma", 1.0f);
+			return m_shaders.createBlurShader(sigma);
 		}
 		else if (_name == "drop-shadow")
 		{
