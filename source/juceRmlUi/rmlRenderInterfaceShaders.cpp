@@ -3,6 +3,7 @@
 #include "juce_opengl/opengl/juce_gl.h"
 
 #include "rmlShaders.h"
+
 #include "RmlUi/Core/Log.h"
 
 namespace juceRmlUi::gl2
@@ -20,7 +21,7 @@ namespace juceRmlUi::gl2
 		{
 			{{"USE_TRANSFORMATION_MATRIX", "USE_VERTEX_COLOR", "USE_TEXTURE"}},   // DefaultTextured
 			{{"USE_TRANSFORMATION_MATRIX", "USE_VERTEX_COLOR"}},                  // DefaultColored
-			{{"USE_TRANSFORMATION_MATRIX", "USE_COLOR_MATRIX", "USE_TEXTURE"}}    // FullscreenColorMatrix
+			{{"USE_COLOR_MATRIX", "USE_TEXTURE"}}                                 // FullscreenColorMatrix
 		};
 
 		static_assert(std::size(g_shaderSetups) == static_cast<uint32_t>(ShaderType::Count));

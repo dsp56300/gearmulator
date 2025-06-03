@@ -17,10 +17,10 @@ namespace juceRmlUi::gl2
 	namespace
 	{
 		const Rml::Vertex g_fullScreenVertices[] = {
-			{{0,1}, {255,255}, {0,0}},
-			{{1,1}, {255,255}, {1,0}},
-			{{1,0}, {255,255}, {1,1}},
-			{{0,0}, {255,255}, {0,1}}
+			{{-1,1}, {255,255}, {0,1}},
+			{{1,1}, {255,255}, {1,1}},
+			{{1,-1}, {255,255}, {1,0}},
+			{{-1,-1}, {255,255}, {0,0}}
 		};
 
 		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
@@ -100,82 +100,6 @@ namespace juceRmlUi::gl2
 		return loadTexture(image);
 	}
 
-	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
-	{
-		// Create a new OpenGL texture
-		GLuint textureId;
-		glGenTextures(1, &textureId);
-		CHECK_OPENGL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		CHECK_OPENGL_ERROR;
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-
-		const auto width = _image.getWidth();
-		const auto height = _image.getHeight();
-
-		juce::Image::BitmapData bitmapData(_image, 0, 0, width, height, juce::Image::BitmapData::readOnly);
-		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
-
-		switch(_image.getFormat())
-		{
-		case juce::Image::ARGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
-			CHECK_OPENGL_ERROR;
-			break;
-		case juce::Image::RGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
-			CHECK_OPENGL_ERROR;
-			break;
-		default:
-			assert(false && "unsupported image format");
-		}
-
-		if (glGenerateMipmap)
-		{
-			glGenerateMipmap(GL_TEXTURE_2D);
-			CHECK_OPENGL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			CHECK_OPENGL_ERROR;
-		}
-
-		return textureId;
-	}
-
-	void RendererGL2::checkGLError(const char* _file, const int _line)
-	{
-		for (;;)
-		{
-			const GLenum e = glGetError();
-
-			if (e == GL_NO_ERROR)
-				break;
-
-			Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
-			assert(false);
-		}
-	}
-
-	void RendererGL2::renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)
-	{
-		glBindBuffer(GL_ARRAY_BUFFER, _geom.vertexBuffer);
-		CHECK_OPENGL_ERROR;
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geom.indexBuffer);
-		CHECK_OPENGL_ERROR;
-
-		_shader.enableShader(_shaderParams);
-
-		_shader.setupVertexAttributes();
-
-	    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geom.indexCount), GL_UNSIGNED_INT, nullptr);
-		CHECK_OPENGL_ERROR;
-
-		_shader.disableShader();
-	}
-
 	Rml::TextureHandle RendererGL2::GenerateTexture(const Rml::Span<const unsigned char> _source, const Rml::Vector2i _sourceDimensions)
 	{
 		GLuint textureId;
@@ -233,64 +157,25 @@ namespace juceRmlUi::gl2
 
 	Rml::LayerHandle RendererGL2::PushLayer()
 	{
-		assert(m_frameBufferWidth && m_frameBufferHeight && "framebuffer size not set");
-
-		GLuint fbo = 0;
-	    GLuint texture = 0;
-
-	    glGenFramebuffers(1, &fbo);
-		CHECK_OPENGL_ERROR;
-	    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
-		CHECK_OPENGL_ERROR;
-
-	    glGenTextures(1, &texture);
-		CHECK_OPENGL_ERROR;
-	    glBindTexture(GL_TEXTURE_2D, texture);
-		CHECK_OPENGL_ERROR;
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(m_frameBufferWidth), static_cast<GLsizei>(m_frameBufferHeight), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-		CHECK_OPENGL_ERROR;
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
-		CHECK_OPENGL_ERROR;
-
-	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-	    {
-			CHECK_OPENGL_ERROR;
-			assert(false && "failed to create framebuffer");
-	        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-			CHECK_OPENGL_ERROR;
-	        glDeleteFramebuffers(1, &fbo);
-			CHECK_OPENGL_ERROR;
-	        glDeleteTextures(1, &texture);
-			CHECK_OPENGL_ERROR;
-	        return {};
-	    }
-
-	    // Save the framebuffer and texture in a struct
-	    auto* layer = new LayerHandleData{ fbo, texture };
-		m_layers.push(layer);
+		auto layer = createFrameBuffer();
+		m_layers.push_back(layer);
 	    return helper::toHandle<Rml::LayerHandle>(layer);
 	}
 
-	void RendererGL2::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, Rml::Span<const Rml::CompiledFilterHandle> _filters)
+	void RendererGL2::CompositeLayers(Rml::LayerHandle _source, Rml::LayerHandle _destination, Rml::BlendMode _blendMode, const Rml::Span<const Rml::CompiledFilterHandle> _filters)
 	{
 		CHECK_OPENGL_ERROR;
 
 		const auto* src = helper::fromHandle<LayerHandleData>(_source);
 
-		if (auto* dst = helper::fromHandle<LayerHandleData>(_destination))
-			glBindFramebuffer(GL_FRAMEBUFFER, dst->framebuffer);
-		else
-			glBindFramebuffer(GL_FRAMEBUFFER, 0); // back to screen
-		CHECK_OPENGL_ERROR;
+		GLuint dest = 0;
 
-		glPushMatrix();
-		CHECK_OPENGL_ERROR;
-		glLoadIdentity();
+		// if this is not set, target is the screen
+		if (auto* dst = helper::fromHandle<LayerHandleData>(_destination))
+		{
+			dest = dst->framebuffer;
+		}
+
 		CHECK_OPENGL_ERROR;
 
 		switch (_blendMode)
@@ -312,35 +197,56 @@ namespace juceRmlUi::gl2
 				break;
 		}
 
+		auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
+		assert(geom && "invalid full screen geometry handle");
+
 		if (!_filters.empty())
 		{
-			auto& filter = *_filters.begin();
-			auto* compiledFilter = helper::fromHandle<CompiledShader>(filter);
-			assert(compiledFilter && "invalid filter handle");
+			// The first filter needs _source as input. The last filter needs 'dest' as output
+			// The filters inbetween render to temp framebuffers in ping-pong mode
+			const auto* source = src;
 
-			auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
-			assert(geom && "invalid full screen geometry handle");
+			uint32_t tempIndex = 0;
 
-			auto params = compiledFilter->params;
-			params.texture = src->texture;
-			renderGeometry(*geom, m_shaders.getShader(compiledFilter->type), params);
+			for (size_t i=0; i<_filters.size(); ++i)
+			{
+				auto& filterHandle = _filters[i];
+				auto* filter = helper::fromHandle<CompiledShader>(filterHandle);
+				assert(filter && "invalid filter handle");
+
+				const bool isLast = i == _filters.size() - 1;
+
+				const LayerHandleData* destFrameBuffer = nullptr;
+
+				if (isLast)
+				{
+					glBindFramebuffer(GL_FRAMEBUFFER, dest);
+				}
+				else
+				{
+					destFrameBuffer = &m_tempFrameBuffers[tempIndex];
+					++tempIndex;
+					if (tempIndex >= m_tempFrameBuffers.size())
+						tempIndex = 0;
+					glBindFramebuffer(GL_FRAMEBUFFER, destFrameBuffer->framebuffer);
+					glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+					glClear(GL_COLOR_BUFFER_BIT);
+				}
+
+				auto params = filter->params;
+				params.texture = source->texture;
+				renderGeometry(*geom, m_shaders.getShader(filter->type), params);
+
+				source = destFrameBuffer;
+			}
 		}
 		else
 		{
-			glEnable(GL_TEXTURE_2D);
-			CHECK_OPENGL_ERROR;
-			glBindTexture(GL_TEXTURE_2D, src->texture);
-			CHECK_OPENGL_ERROR;
+			glBindFramebuffer(GL_FRAMEBUFFER, dest);
 
-			const auto w = static_cast<float>(m_frameBufferWidth);
-			const auto h = static_cast<float>(m_frameBufferHeight);
+			auto& shader = m_shaders.getShader(ShaderType::FullscreenColorMatrix);	// FIXME: color matrix not needed
 
-			glBegin(GL_QUADS);
-			glTexCoord2f(0, 0); glVertex2f(0, h);
-			glTexCoord2f(1, 0); glVertex2f(w, h);
-			glTexCoord2f(1, 1); glVertex2f(w, 0);
-			glTexCoord2f(0, 1); glVertex2f(0, 0);
-			glEnd();
+			renderGeometry(*geom, shader, { src->texture, Rml::Matrix4f::Identity() });
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -351,23 +257,16 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		CHECK_OPENGL_ERROR;
-
-		glPopMatrix();
-		CHECK_OPENGL_ERROR;
 	}
 
 	void RendererGL2::PopLayer()
 	{
 		assert(!m_layers.empty());
 
-		const auto* layer = m_layers.top();
+		const auto* layer = m_layers.back();
+		m_layers.pop_back();
 
-		glDeleteFramebuffers(1, &layer->framebuffer);
-		CHECK_OPENGL_ERROR;
-		glDeleteTextures(1, &layer->texture);
-		CHECK_OPENGL_ERROR;
-
-		m_layers.pop();
+		deleteFrameBuffer(layer);
 
 		if (m_layers.empty())
 		{
@@ -376,7 +275,7 @@ namespace juceRmlUi::gl2
 		}
 		else
 		{
-			layer = m_layers.top();
+			layer = m_layers.back();
 			glBindFramebuffer(GL_FRAMEBUFFER, layer->framebuffer);
 			CHECK_OPENGL_ERROR;
 		}
@@ -502,6 +401,51 @@ namespace juceRmlUi::gl2
 		delete shader;
 	}
 
+	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
+	{
+		// Create a new OpenGL texture
+		GLuint textureId;
+		glGenTextures(1, &textureId);
+		CHECK_OPENGL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		CHECK_OPENGL_ERROR;
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+
+		const auto width = _image.getWidth();
+		const auto height = _image.getHeight();
+
+		juce::Image::BitmapData bitmapData(_image, 0, 0, width, height, juce::Image::BitmapData::readOnly);
+		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
+
+		switch(_image.getFormat())
+		{
+		case juce::Image::ARGB:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
+			CHECK_OPENGL_ERROR;
+			break;
+		case juce::Image::RGB:
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
+			CHECK_OPENGL_ERROR;
+			break;
+		default:
+			assert(false && "unsupported image format");
+		}
+
+		if (glGenerateMipmap)
+		{
+			glGenerateMipmap(GL_TEXTURE_2D);
+			CHECK_OPENGL_ERROR;
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			CHECK_OPENGL_ERROR;
+		}
+
+		return textureId;
+	}
+
 	void RendererGL2::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
 		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
@@ -509,20 +453,7 @@ namespace juceRmlUi::gl2
 			m_frameBufferWidth = _width;
 			m_frameBufferHeight = _height;
 
-			std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
-
-			for(auto & v : fullScreenVertices)
-			{
-				v.position.x *= static_cast<float>(_width);
-				v.position.y *= static_cast<float>(_height);
-			}
-
-			const std::vector fullScreenIndices(std::begin(g_fullScreenIndices), std::end(g_fullScreenIndices));
-
-			if (m_fullScreenGeometry)
-				ReleaseGeometry(m_fullScreenGeometry);
-
-			m_fullScreenGeometry = CompileGeometry(fullScreenVertices, fullScreenIndices);
+			onResize();
 		}
 
 		glDisable(GL_DEPTH_TEST);
@@ -539,5 +470,140 @@ namespace juceRmlUi::gl2
 
 	void RendererGL2::endFrame()
 	{
+	}
+
+	void RendererGL2::checkGLError(const char* _file, const int _line)
+	{
+		for (;;)
+		{
+			const GLenum e = glGetError();
+
+			if (e == GL_NO_ERROR)
+				break;
+
+			Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
+			assert(false);
+		}
+	}
+
+	void RendererGL2::renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, _geom.vertexBuffer);
+		CHECK_OPENGL_ERROR;
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _geom.indexBuffer);
+		CHECK_OPENGL_ERROR;
+
+		_shader.enableShader(_shaderParams);
+
+		_shader.setupVertexAttributes();
+
+	    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(_geom.indexCount), GL_UNSIGNED_INT, nullptr);
+		CHECK_OPENGL_ERROR;
+
+		_shader.disableShader();
+	}
+
+	void RendererGL2::onResize()
+	{
+		std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
+
+		for(auto & v : fullScreenVertices)
+		{
+//			v.position.x *= static_cast<float>(m_frameBufferWidth);
+//			v.position.y *= static_cast<float>(m_frameBufferHeight);
+		}
+
+		const std::vector fullScreenIndices(std::begin(g_fullScreenIndices), std::end(g_fullScreenIndices));
+
+		if (m_fullScreenGeometry)
+			ReleaseGeometry(m_fullScreenGeometry);
+
+		m_fullScreenGeometry = CompileGeometry(fullScreenVertices, fullScreenIndices);
+
+		for (const auto& layer : m_layers)
+		{
+			deleteFrameBuffer(*layer);
+			createFrameBuffer(*layer);
+		}
+
+		for (auto& tempFrameBuffer : m_tempFrameBuffers)
+			deleteFrameBuffer(tempFrameBuffer);
+
+		m_tempFrameBuffers.resize(2);
+
+		for (size_t i=0; i<2; ++i)
+			createFrameBuffer(m_tempFrameBuffers[i]);
+	}
+
+	LayerHandleData* RendererGL2::createFrameBuffer() const
+	{
+		auto* layer = new LayerHandleData();
+
+		if (!createFrameBuffer(*layer))
+		{
+			delete layer;
+			return nullptr;
+		}
+		return layer;
+	}
+
+	bool RendererGL2::createFrameBuffer(LayerHandleData& _layer) const
+	{
+		assert(m_frameBufferWidth && m_frameBufferHeight && "framebuffer size not set");
+
+		GLuint fbo = 0;
+	    GLuint texture = 0;
+
+	    glGenFramebuffers(1, &fbo);
+		CHECK_OPENGL_ERROR;
+	    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+		CHECK_OPENGL_ERROR;
+
+	    glGenTextures(1, &texture);
+		CHECK_OPENGL_ERROR;
+	    glBindTexture(GL_TEXTURE_2D, texture);
+		CHECK_OPENGL_ERROR;
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(m_frameBufferWidth), static_cast<GLsizei>(m_frameBufferHeight), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		CHECK_OPENGL_ERROR;
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+
+	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		CHECK_OPENGL_ERROR;
+
+	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+	    {
+			CHECK_OPENGL_ERROR;
+			assert(false && "failed to create framebuffer");
+	        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+			CHECK_OPENGL_ERROR;
+	        glDeleteFramebuffers(1, &fbo);
+			CHECK_OPENGL_ERROR;
+	        glDeleteTextures(1, &texture);
+			CHECK_OPENGL_ERROR;
+	        return false;
+	    }
+
+		_layer.framebuffer = fbo;
+		_layer.texture = texture;
+		return true;
+	}
+
+	void RendererGL2::deleteFrameBuffer(const LayerHandleData*& _layer)
+	{
+		if (!_layer)
+			return;
+		deleteFrameBuffer(*_layer);
+		delete _layer;
+		_layer = nullptr;
+	}
+	void RendererGL2::deleteFrameBuffer(const LayerHandleData& _layer)
+	{
+		glDeleteFramebuffers(1, &_layer.framebuffer);
+		CHECK_OPENGL_ERROR;
+		glDeleteTextures(1, &_layer.texture);
+		CHECK_OPENGL_ERROR;
 	}
 }

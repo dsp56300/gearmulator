@@ -21,6 +21,7 @@ namespace juceRmlUi::gl2
 	public:
 		RendererGL2(DataProvider& _dataProvider);
 
+		// Rml::RenderInterface overrides
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
 		void RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
 		void ReleaseGeometry(Rml::CompiledGeometryHandle _geometry) override;
@@ -42,22 +43,31 @@ namespace juceRmlUi::gl2
 		Rml::CompiledShaderHandle CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters) override;
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
 
+		// Renderer overrides
+		Rml::TextureHandle loadTexture(juce::Image& _image) override;
+
 		void beginFrame(uint32_t _width, uint32_t _height);
 		void endFrame();
 
-		Rml::TextureHandle loadTexture(juce::Image& _image) override;
-
 		static void checkGLError (const char* _file, int _line);
 
-		void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
-
 	private:
+		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
+
+		void onResize();
+
+		LayerHandleData* createFrameBuffer() const;
+		bool createFrameBuffer(LayerHandleData& _layer) const;
+		static void deleteFrameBuffer(const LayerHandleData*& _layer);
+		static void deleteFrameBuffer(const LayerHandleData& _layer);
+
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
 
 		Rml::CompiledGeometryHandle m_fullScreenGeometry = 0;
 
-		std::stack<LayerHandleData*> m_layers;
+		std::vector<LayerHandleData*> m_layers;
+		std::vector<LayerHandleData> m_tempFrameBuffers;
 
 		RenderInterfaceShaders m_shaders;
 		RenderInterfaceFilters m_filters;
