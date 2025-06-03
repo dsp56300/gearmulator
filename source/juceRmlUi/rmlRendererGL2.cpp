@@ -578,14 +578,7 @@ namespace juceRmlUi::gl2
 
 	void RendererGL2::onResize()
 	{
-		std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
-
-		for(auto & v : fullScreenVertices)
-		{
-//			v.position.x *= static_cast<float>(m_frameBufferWidth);
-//			v.position.y *= static_cast<float>(m_frameBufferHeight);
-		}
-
+		const std::vector fullScreenVertices(std::begin(g_fullScreenVertices), std::end(g_fullScreenVertices));
 		const std::vector fullScreenIndices(std::begin(g_fullScreenIndices), std::end(g_fullScreenIndices));
 
 		if (m_fullScreenGeometry)
