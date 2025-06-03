@@ -62,6 +62,8 @@ namespace juceRmlUi::gl2
 		static void deleteFrameBuffer(const LayerHandleData*& _layer);
 		static void deleteFrameBuffer(const LayerHandleData& _layer);
 
+		void copyFramebuffer(uint32_t _dest, uint32_t _source) const;
+
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
 

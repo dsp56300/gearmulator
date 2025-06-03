@@ -202,11 +202,19 @@ namespace juceRmlUi::gl2
 
 		if (!_filters.empty())
 		{
+			uint32_t tempIndex = 0;
+
+			if (!src)
+			{
+				// we don't have a texture handle for the main back buffer. We have to copy it to a temp buffer
+				copyFramebuffer(m_tempFrameBuffers.front().framebuffer, 0);
+				src = &m_tempFrameBuffers.front();
+				++tempIndex; // start with the second temp buffer
+			}
+
 			// The first filter needs _source as input. The last filter needs 'dest' as output
 			// The filters inbetween render to temp framebuffers in ping-pong mode
 			const auto* source = src;
-
-			uint32_t tempIndex = 0;
 
 			for (size_t i=0; i<_filters.size(); ++i)
 			{
@@ -249,11 +257,7 @@ namespace juceRmlUi::gl2
 		}
 		else
 		{
-			glBindFramebuffer(GL_FRAMEBUFFER, dest);
-
-			auto& shader = m_shaders.getShader(ShaderType::Fullscreen);
-
-			renderGeometry(*geom, shader, { src->texture, Rml::Matrix4f::Identity() });
+			copyFramebuffer(dest, src ? src->framebuffer : 0);
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -675,6 +679,18 @@ namespace juceRmlUi::gl2
 		glDeleteFramebuffers(1, &_layer.framebuffer);
 		CHECK_OPENGL_ERROR;
 		glDeleteTextures(1, &_layer.texture);
+		CHECK_OPENGL_ERROR;
+	}
+
+	void RendererGL2::copyFramebuffer(const uint32_t _dest, const uint32_t _source) const
+	{
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, _source);
+		CHECK_OPENGL_ERROR;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _dest);
+		CHECK_OPENGL_ERROR;
+		const auto w = static_cast<GLint>(m_frameBufferWidth);
+		const auto h = static_cast<GLint>(m_frameBufferHeight);
+		glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		CHECK_OPENGL_ERROR;
 	}
 }
