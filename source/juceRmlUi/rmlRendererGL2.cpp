@@ -269,6 +269,9 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		CHECK_OPENGL_ERROR;
+
+		if (dst != m_layers.back())
+			glBindFramebuffer(GL_FRAMEBUFFER, m_layers.back()->framebuffer);
 	}
 
 	void RendererGL2::PopLayer()
