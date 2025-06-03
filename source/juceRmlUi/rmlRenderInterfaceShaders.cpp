@@ -142,7 +142,6 @@ namespace juceRmlUi::gl2
 		if (pos != std::string::npos)
 		{
 			fsCode.replace(pos, strlen(key), blurCode);
-			LOG("Blur Shader:\n" << fsCode);
 		}
 		else
 		{
