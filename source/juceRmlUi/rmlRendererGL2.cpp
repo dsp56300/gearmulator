@@ -171,7 +171,8 @@ namespace juceRmlUi::gl2
 		GLuint dest = 0;
 
 		// if this is not set, target is the screen
-		if (auto* dst = helper::fromHandle<LayerHandleData>(_destination))
+		auto* dst = helper::fromHandle<LayerHandleData>(_destination);
+		if (dst)
 		{
 			dest = dst->framebuffer;
 		}
@@ -224,7 +225,7 @@ namespace juceRmlUi::gl2
 
 				const bool isLast = i == _filters.size() - 1;
 
-				const LayerHandleData* destFrameBuffer = nullptr;
+				const LayerHandleData* destFrameBuffer = dst;
 
 				if (isLast)
 				{
