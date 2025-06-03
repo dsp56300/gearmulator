@@ -142,10 +142,12 @@ namespace juceRmlUi
 	Rml::LayerHandle RendererProxy::PushLayer()
 	{
 		auto dummyHandle = createDummyHandle();
+
 		addRenderFunction([this, dummyHandle]
 		{
 			auto handle = m_renderer.PushLayer();
 			addHandle(dummyHandle, handle);
+			m_layerHandles.push(dummyHandle);
 		});
 		return dummyHandle;
 	}
@@ -175,6 +177,9 @@ namespace juceRmlUi
 		addRenderFunction([this]
 		{
 			m_renderer.PopLayer();
+			const auto dummy = m_layerHandles.top();
+			m_layerHandles.pop();
+			removeHandle(dummy);
 		});
 	}
 

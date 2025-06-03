@@ -90,5 +90,7 @@ namespace juceRmlUi
 		std::vector<Func> m_renderFunctions;
 		std::vector<Func> m_renderFunctionsCopy;
 		std::unordered_map<Handle, Handle> m_handles;
+
+		std::stack<Handle> m_layerHandles;
 	};
 }
