@@ -114,6 +114,7 @@ namespace juceRmlUi
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
 		glOrtho(0, static_cast<float>(width) * invContentScale, static_cast<float>(height) * invContentScale, 0, -1, 1);
+//		const auto ortho = Rml::Matrix4f::ProjectOrtho(0, static_cast<float>(width) * invContentScale, static_cast<float>(height) * invContentScale, 0, -1, 1);
 
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
