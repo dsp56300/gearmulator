@@ -230,6 +230,7 @@ namespace juceRmlUi::gl2
 				if (isLast)
 				{
 					glBindFramebuffer(GL_FRAMEBUFFER, dest);
+					CHECK_OPENGL_ERROR;
 				}
 				else
 				{
@@ -238,8 +239,11 @@ namespace juceRmlUi::gl2
 					if (tempIndex >= m_tempFrameBuffers.size())
 						tempIndex = 0;
 					glBindFramebuffer(GL_FRAMEBUFFER, destFrameBuffer->framebuffer);
+					CHECK_OPENGL_ERROR;
 					glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
+					CHECK_OPENGL_ERROR;
 					glClear(GL_COLOR_BUFFER_BIT);
+					CHECK_OPENGL_ERROR;
 				}
 
 				if (filter->type == ShaderType::Blur)
@@ -252,6 +256,8 @@ namespace juceRmlUi::gl2
 					params.texture = source->texture;
 					renderGeometry(*geom, m_shaders.getShader(filter->type), params);
 				}
+
+				CHECK_OPENGL_ERROR;
 
 				source = destFrameBuffer;
 			}
@@ -648,8 +654,12 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		CHECK_OPENGL_ERROR;
 
-	    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
 		CHECK_OPENGL_ERROR;
 
 	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
