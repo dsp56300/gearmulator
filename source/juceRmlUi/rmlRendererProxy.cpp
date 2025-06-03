@@ -157,18 +157,29 @@ namespace juceRmlUi
 		auto f = copySpan(_filters);
 		addRenderFunction([this, _source, _destination, _blendMode, filters = std::move(f)]
 		{
-			auto realSource = getRealHandle(_source);
-			auto realDestination = getRealHandle(_destination);
-			if (realSource/* && realDestination*/)	// destination can be invalid, then it's the main back buffer
+			auto realSource = _source;
+			if (realSource)
 			{
-				std::vector<Rml::CompiledFilterHandle> realFilters;
-				for (const auto& filter : filters)
-				{
-					if (const auto realFilter = getRealHandle(filter))
-						realFilters.push_back(realFilter);
-				}
-				m_renderer.CompositeLayers(realSource, realDestination, _blendMode, realFilters);
+				realSource = getRealHandle(_source);
+				if (!realSource)
+					return;
 			}
+
+			auto realDestination = _destination;
+			if (realDestination)
+			{
+				realDestination = getRealHandle(_destination);
+				if (!realDestination)
+					return;
+			}
+			
+			std::vector<Rml::CompiledFilterHandle> realFilters;
+			for (const auto& filter : filters)
+			{
+				if (const auto realFilter = getRealHandle(filter))
+					realFilters.push_back(realFilter);
+			}
+			m_renderer.CompositeLayers(realSource, realDestination, _blendMode, realFilters);
 		});
 	}
 
