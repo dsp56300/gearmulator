@@ -244,7 +244,7 @@ namespace juceRmlUi::gl2
 		{
 			glBindFramebuffer(GL_FRAMEBUFFER, dest);
 
-			auto& shader = m_shaders.getShader(ShaderType::FullscreenColorMatrix);	// FIXME: color matrix not needed
+			auto& shader = m_shaders.getShader(ShaderType::Fullscreen);
 
 			renderGeometry(*geom, shader, { src->texture, Rml::Matrix4f::Identity() });
 		}

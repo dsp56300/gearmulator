@@ -12,6 +12,7 @@ namespace juceRmlUi
 			DefaultColored,
 
 			FullscreenColorMatrix,
+			Fullscreen,
 
 			Count
 		};
