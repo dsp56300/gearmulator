@@ -116,7 +116,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, _enable]
 		{
-			RenderInterface::EnableClipMask(_enable);
+			m_renderer.EnableClipMask(_enable);
 		});
 	}
 
@@ -126,7 +126,7 @@ namespace juceRmlUi
 		{
 			if (const auto realGeometry = getRealHandle(_geometry))
 			{
-				RenderInterface::RenderToClipMask(_operation, realGeometry, _translation);
+				m_renderer.RenderToClipMask(_operation, realGeometry, _translation);
 			}
 		});
 	}
@@ -135,7 +135,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, matrix = *_transform]
 		{
-			RenderInterface::SetTransform(&matrix);
+			m_renderer.SetTransform(&matrix);
 		});
 	}
 
@@ -233,7 +233,7 @@ namespace juceRmlUi
 		{
 			if (const auto realFilter = getRealHandle(_filter))
 			{
-				RenderInterface::ReleaseFilter(realFilter);
+				m_renderer.ReleaseFilter(realFilter);
 				removeHandle(_filter);
 			}
 		});
@@ -270,7 +270,7 @@ namespace juceRmlUi
 		{
 			if (const auto realShader = getRealHandle(_shader))
 			{
-				RenderInterface::ReleaseShader(realShader);
+				m_renderer.ReleaseShader(realShader);
 				removeHandle(_shader);
 			}
 		});
