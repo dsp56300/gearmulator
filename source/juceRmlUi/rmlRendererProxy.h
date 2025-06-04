@@ -16,6 +16,7 @@ namespace juceRmlUi
 		explicit RendererProxy(Renderer& _renderer);
 		~RendererProxy() override;
 
+		// Rml::RenderInterface overrides
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
 		void RenderGeometry(Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
 		void ReleaseGeometry(Rml::CompiledGeometryHandle _geometry) override;
@@ -38,7 +39,10 @@ namespace juceRmlUi
 		void RenderShader(Rml::CompiledShaderHandle _shader, Rml::CompiledGeometryHandle _geometry, Rml::Vector2f _translation, Rml::TextureHandle _texture) override;
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
 
+		// Renderer overrides
 		Rml::TextureHandle loadTexture(juce::Image& _image) override;
+		void beginFrame(uint32_t _width, uint32_t _height) override;
+		void endFrame() override;
 
 		void executeRenderFunctions();
 

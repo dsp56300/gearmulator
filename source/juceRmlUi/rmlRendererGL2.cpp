@@ -140,11 +140,7 @@ namespace juceRmlUi::gl2
 
 	void RendererGL2::SetScissorRegion(Rml::Rectanglei _region)
 	{
-		_region.p0.y = static_cast<int>(m_frameBufferHeight) - _region.p0.y;
-		_region.p1.y = static_cast<int>(m_frameBufferHeight) - _region.p1.y;
-
-		if (_region.p0.y > _region.p1.y)
-			std::swap(_region.p0.y, _region.p1.y);
+		verticalFlip(_region);
 
 		auto x = _region.Left();
 		auto y = _region.Top();
@@ -460,13 +456,7 @@ namespace juceRmlUi::gl2
 
 	void RendererGL2::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
-		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
-		{
-			m_frameBufferWidth = _width;
-			m_frameBufferHeight = _height;
-
-			onResize();
-		}
+		Renderer::beginFrame(_width, _height);
 
 		glDisable(GL_DEPTH_TEST);
 		CHECK_OPENGL_ERROR;
@@ -535,7 +525,7 @@ namespace juceRmlUi::gl2
 
 			params.texture = _source->texture;
 
-			params.blurScale.x = 1.0f / static_cast<float>(m_frameBufferWidth);
+			params.blurScale.x = 1.0f / static_cast<float>(frameBufferWidth());
 			params.blurScale.y = 0.0f;
 			renderGeometry(_geom, *_filter->shader, params);
 
@@ -562,7 +552,7 @@ namespace juceRmlUi::gl2
 			params.texture = m_blurFrameBuffers[0].texture;
 
 			params.blurScale.x = 0.0f;
-			params.blurScale.y = 1.0f / static_cast<float>(m_frameBufferHeight);
+			params.blurScale.y = 1.0f / static_cast<float>(frameBufferHeight());
 			renderGeometry(_geom, *_filter->shader, params);
 
 			if (m_blurFrameBuffers.size() > 1)
@@ -614,7 +604,7 @@ namespace juceRmlUi::gl2
 
 	bool RendererGL2::createFrameBuffer(LayerHandleData& _layer) const
 	{
-		assert(m_frameBufferWidth && m_frameBufferHeight && "framebuffer size not set");
+		assert(frameBufferWidth() && frameBufferHeight() && "framebuffer size not set");
 
 		GLuint fbo = 0;
 	    GLuint texture = 0;
@@ -628,7 +618,7 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 	    glBindTexture(GL_TEXTURE_2D, texture);
 		CHECK_OPENGL_ERROR;
-	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(m_frameBufferWidth), static_cast<GLsizei>(m_frameBufferHeight), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(frameBufferWidth()), static_cast<GLsizei>(frameBufferHeight()), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		CHECK_OPENGL_ERROR;
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		CHECK_OPENGL_ERROR;
@@ -682,8 +672,8 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, _dest);
 		CHECK_OPENGL_ERROR;
-		const auto w = static_cast<GLint>(m_frameBufferWidth);
-		const auto h = static_cast<GLint>(m_frameBufferHeight);
+		const auto w = static_cast<GLint>(frameBufferWidth());
+		const auto h = static_cast<GLint>(frameBufferHeight());
 		glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		CHECK_OPENGL_ERROR;
 	}

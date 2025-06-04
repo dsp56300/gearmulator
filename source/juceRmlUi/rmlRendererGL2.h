@@ -45,9 +45,8 @@ namespace juceRmlUi::gl2
 
 		// Renderer overrides
 		Rml::TextureHandle loadTexture(juce::Image& _image) override;
-
-		void beginFrame(uint32_t _width, uint32_t _height);
-		void endFrame();
+		void beginFrame(uint32_t _width, uint32_t _height) override;
+		void endFrame() override;
 
 		static void checkGLError (const char* _file, int _line);
 
@@ -55,7 +54,7 @@ namespace juceRmlUi::gl2
 		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
 		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target, Rml::BlendMode _blendMode);
 
-		void onResize();
+		void onResize() override;
 
 		LayerHandleData* createFrameBuffer() const;
 		bool createFrameBuffer(LayerHandleData& _layer) const;
@@ -65,9 +64,6 @@ namespace juceRmlUi::gl2
 		void copyFramebuffer(uint32_t _dest, uint32_t _source) const;
 
 		static void setupBlending(Rml::BlendMode _blendMode);
-
-		uint32_t m_frameBufferWidth = 0;
-		uint32_t m_frameBufferHeight = 0;
 
 		Rml::CompiledGeometryHandle m_fullScreenGeometry = 0;
 

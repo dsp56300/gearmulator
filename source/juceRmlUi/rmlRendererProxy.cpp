@@ -296,6 +296,26 @@ namespace juceRmlUi
 		return dummyHandle;
 	}
 
+	void RendererProxy::beginFrame(uint32_t _width, uint32_t _height)
+	{
+		Renderer::beginFrame(_width, _height);
+
+		addRenderFunction([this, _width, _height]
+		{
+			m_renderer.beginFrame(_width, _height);
+		});
+	}
+
+	void RendererProxy::endFrame()
+	{
+		Renderer::endFrame();
+
+		addRenderFunction([this]
+		{
+			m_renderer.endFrame();
+		});
+	}
+
 	void RendererProxy::executeRenderFunctions()
 	{
 		{

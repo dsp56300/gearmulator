@@ -42,4 +42,30 @@ namespace juceRmlUi
 
 		return true;
 	}
+
+	void Renderer::verticalFlip(Rml::Rectanglei& _rect) const
+	{
+		_rect.p0.y = static_cast<int>(m_frameBufferHeight) - _rect.p0.y;
+		_rect.p1.y = static_cast<int>(m_frameBufferHeight) - _rect.p1.y;
+
+		if (_rect.p0.y > _rect.p1.y)
+			std::swap(_rect.p0.y, _rect.p1.y);
+
+	}
+
+	void Renderer::beginFrame(const uint32_t _width, const uint32_t _height)
+	{
+		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
+		{
+			m_frameBufferWidth = _width;
+			m_frameBufferHeight = _height;
+			onResize();
+		}
+
+		if (m_frameBufferWidth == 0 || m_frameBufferHeight == 0)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Invalid frame buffer size: %u x %u", m_frameBufferWidth, m_frameBufferHeight);
+			assert(false && "invalid frame buffer size");
+		}
+	}
 }
