@@ -179,27 +179,10 @@ namespace juceRmlUi::gl2
 
 		CHECK_OPENGL_ERROR;
 
-		switch (_blendMode)
-		{
-		    case Rml::BlendMode::Blend:
-				glEnable(GL_BLEND);
-				CHECK_OPENGL_ERROR;
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				CHECK_OPENGL_ERROR;
-			break;
-		    case Rml::BlendMode::Replace:
-				glDisable(GL_BLEND);
-				CHECK_OPENGL_ERROR;
-				glBlendFunc(GL_DST_COLOR, GL_ZERO);
-				CHECK_OPENGL_ERROR;
-				break;
-		    default:
-				assert(false && "unsupported blend mode");
-				break;
-		}
-
 		auto* geom = helper::fromHandle<CompiledGeometry>(m_fullScreenGeometry);
 		assert(geom && "invalid full screen geometry handle");
+
+		glDisable(GL_BLEND);
 
 		if (!_filters.empty())
 		{
@@ -227,31 +210,28 @@ namespace juceRmlUi::gl2
 
 				const LayerHandleData* destFrameBuffer = dst;
 
-				if (isLast)
-				{
-					glBindFramebuffer(GL_FRAMEBUFFER, dest);
-					CHECK_OPENGL_ERROR;
-				}
-				else
+				if (!isLast)
 				{
 					destFrameBuffer = &m_tempFrameBuffers[tempIndex];
 					++tempIndex;
 					if (tempIndex >= m_tempFrameBuffers.size())
 						tempIndex = 0;
 					glBindFramebuffer(GL_FRAMEBUFFER, destFrameBuffer->framebuffer);
-					CHECK_OPENGL_ERROR;
-					glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
-					CHECK_OPENGL_ERROR;
-					glClear(GL_COLOR_BUFFER_BIT);
-					CHECK_OPENGL_ERROR;
 				}
 
 				if (filter->type == ShaderType::Blur)
 				{
-					renderBlur(*geom, filter, source, destFrameBuffer);
+					renderBlur(*geom, filter, source, destFrameBuffer, _blendMode);
 				}
 				else
 				{
+					if (isLast)
+					{
+						glBindFramebuffer(GL_FRAMEBUFFER, dest);
+						CHECK_OPENGL_ERROR;
+						if (!dest)
+							setupBlending(_blendMode);
+					}
 					auto params = filter->params;
 					params.texture = source->texture;
 					renderGeometry(*geom, m_shaders.getShader(filter->type), params);
@@ -264,7 +244,18 @@ namespace juceRmlUi::gl2
 		}
 		else
 		{
-			copyFramebuffer(dest, src ? src->framebuffer : 0);
+			if (src)
+			{
+				if (!dest)
+					setupBlending(_blendMode);
+				glBindFramebuffer(GL_FRAMEBUFFER, dest);
+				CHECK_OPENGL_ERROR;
+				renderGeometry(*geom, m_shaders.getShader(ShaderType::Fullscreen), { src->texture, Rml::Matrix4f::Identity() });
+			}
+			else
+			{
+				copyFramebuffer(dest, src ? src->framebuffer : 0);
+			}
 		}
 
 		glBindTexture(GL_TEXTURE_2D, 0);
@@ -524,7 +515,7 @@ namespace juceRmlUi::gl2
 		_shader.disableShader();
 	}
 
-	void RendererGL2::renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target)
+	void RendererGL2::renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target, Rml::BlendMode _blendMode)
 	{
 		assert(_filter->shader && "blur filter needs custom shader");
 
@@ -541,10 +532,6 @@ namespace juceRmlUi::gl2
 
 			glBindFramebuffer(GL_FRAMEBUFFER, m_blurFrameBuffers[0].framebuffer);
 			CHECK_OPENGL_ERROR;
-			glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
-			CHECK_OPENGL_ERROR;
-			glClear(GL_COLOR_BUFFER_BIT);
-			CHECK_OPENGL_ERROR;
 
 			params.texture = _source->texture;
 
@@ -557,13 +544,9 @@ namespace juceRmlUi::gl2
 			if (isLast)
 			{
 				glBindFramebuffer(GL_FRAMEBUFFER, _target ? _target->framebuffer : 0);
-				if (_target)
-				{
-					glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
-					CHECK_OPENGL_ERROR;
-					glClear(GL_COLOR_BUFFER_BIT);
-					CHECK_OPENGL_ERROR;
-				}
+				CHECK_OPENGL_ERROR;
+				if (!_target)
+					setupBlending(_blendMode);
 			}
 			else
 			{
@@ -573,9 +556,6 @@ namespace juceRmlUi::gl2
 					createFrameBuffer(m_blurFrameBuffers[1]);
 				}
 				glBindFramebuffer(GL_FRAMEBUFFER, m_blurFrameBuffers[1].framebuffer);
-				glClearColor(0.5f, 0.5f, 0.5f, 0.0f);
-				CHECK_OPENGL_ERROR;
-				glClear(GL_COLOR_BUFFER_BIT);
 				CHECK_OPENGL_ERROR;
 			}
 
@@ -706,5 +686,27 @@ namespace juceRmlUi::gl2
 		const auto h = static_cast<GLint>(m_frameBufferHeight);
 		glBlitFramebuffer(0, 0, w, h, 0, 0, w, h, GL_COLOR_BUFFER_BIT, GL_NEAREST);
 		CHECK_OPENGL_ERROR;
+	}
+
+	void RendererGL2::setupBlending(Rml::BlendMode _blendMode)
+	{
+		switch (_blendMode)
+		{
+		    case Rml::BlendMode::Blend:
+				glEnable(GL_BLEND);
+				CHECK_OPENGL_ERROR;
+				glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+				CHECK_OPENGL_ERROR;
+			break;
+		    case Rml::BlendMode::Replace:
+				glDisable(GL_BLEND);
+				CHECK_OPENGL_ERROR;
+				glBlendFunc(GL_DST_COLOR, GL_ZERO);
+				CHECK_OPENGL_ERROR;
+				break;
+		    default:
+				assert(false && "unsupported blend mode");
+				break;
+		}
 	}
 }

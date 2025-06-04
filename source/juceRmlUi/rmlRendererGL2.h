@@ -53,7 +53,7 @@ namespace juceRmlUi::gl2
 
 	private:
 		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
-		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target);
+		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target, Rml::BlendMode _blendMode);
 
 		void onResize();
 
@@ -63,6 +63,8 @@ namespace juceRmlUi::gl2
 		static void deleteFrameBuffer(const LayerHandleData& _layer);
 
 		void copyFramebuffer(uint32_t _dest, uint32_t _source) const;
+
+		static void setupBlending(Rml::BlendMode _blendMode);
 
 		uint32_t m_frameBufferWidth = 0;
 		uint32_t m_frameBufferHeight = 0;
