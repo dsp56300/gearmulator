@@ -2,6 +2,7 @@
 
 #include <cassert>
 
+#include "juceRmlComponent.h"
 #include "rmlHelper.h"
 #include "rmlRendererGL2Types.h"
 #include "baseLib/filesystem.h"
@@ -66,7 +67,7 @@ namespace juceRmlUi::gl2
 
 	    glPushMatrix();
 		CHECK_OPENGL_ERROR;
-	    glTranslatef(_translation.x, _translation.y, 0.0f);
+		glTranslatef(_translation.x, _translation.y, 0.0f);
 		CHECK_OPENGL_ERROR;
 
 		auto& shader = m_shaders.getShader(_texture ? ShaderType::DefaultTextured : ShaderType::DefaultColored);
@@ -131,16 +132,20 @@ namespace juceRmlUi::gl2
 
 	void RendererGL2::EnableScissorRegion(const bool _enable)
 	{
+#if 1
 		if (_enable)
 			glEnable(GL_SCISSOR_TEST);
 		else
+#endif
 			glDisable(GL_SCISSOR_TEST);
+		m_scissorEnabled = _enable;
 		CHECK_OPENGL_ERROR;
 	}
 
 	void RendererGL2::SetScissorRegion(Rml::Rectanglei _region)
 	{
 		verticalFlip(_region);
+		m_scissorRegion = _region;
 
 		auto x = _region.Left();
 		auto y = _region.Top();
@@ -180,7 +185,7 @@ namespace juceRmlUi::gl2
 
 		glDisable(GL_BLEND);
 
-		if (!_filters.empty())
+		if (false && !_filters.empty())
 		{
 			uint32_t tempIndex = 0;
 
@@ -297,6 +302,7 @@ namespace juceRmlUi::gl2
 			glEnable(GL_STENCIL_TEST);
 		else
 			glDisable(GL_STENCIL_TEST);
+		m_stencilEnabled = _enable;
 		CHECK_OPENGL_ERROR;
 	}
 
@@ -375,8 +381,69 @@ namespace juceRmlUi::gl2
 
 	Rml::TextureHandle RendererGL2::SaveLayerAsTexture()
 	{
-		assert(false && "save layer as texture not implemented");
-		return RenderInterface::SaveLayerAsTexture();
+		if (m_layers.empty())
+		{
+			assert(false && "no layers available");
+			return {};
+		}
+
+		auto bounds = m_scissorRegion;
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_layers.back()->framebuffer);
+		CHECK_OPENGL_ERROR;
+		glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_tempFrameBuffers.front().framebuffer);
+		CHECK_OPENGL_ERROR;
+
+		if (m_scissorEnabled)
+			glDisable(GL_SCISSOR_TEST);
+		if (m_stencilEnabled)
+			glDisable(GL_STENCIL_TEST);
+
+		// Flip the image vertically, as that convention is used for textures, and move to origin.
+		glBlitFramebuffer(
+			bounds.Left(), bounds.Bottom(),
+			bounds.Right(), bounds.Top(),
+			0, 0,
+			bounds.Width(), bounds.Height(),
+			GL_COLOR_BUFFER_BIT, GL_NEAREST
+		);
+
+		if (m_scissorEnabled)
+			glEnable(GL_SCISSOR_TEST);
+		if (m_stencilEnabled)
+			glEnable(GL_STENCIL_TEST);
+
+		CHECK_OPENGL_ERROR;
+
+		GLuint textureId;
+
+		glGenTextures(1, &textureId);
+		CHECK_OPENGL_ERROR;
+		glBindTexture(GL_TEXTURE_2D, textureId);
+		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		CHECK_OPENGL_ERROR;
+
+		const auto imgWidth = bounds.Width();
+		const auto imgHeight = bounds.Height();
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imgWidth, imgHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
+		CHECK_OPENGL_ERROR;
+
+		glBindFramebuffer(GL_READ_FRAMEBUFFER, m_tempFrameBuffers.front().framebuffer);
+		CHECK_OPENGL_ERROR;
+		glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, imgWidth, imgHeight);
+		CHECK_OPENGL_ERROR;
+
+		writeFramebufferToFile("E:\\rmlui_savelayerastexture_" + std::to_string(textureId) + ".png");
+
+		generateMipmaps();
+
+		CHECK_OPENGL_ERROR;
+
+		return textureId;
 	}
 
 	Rml::CompiledFilterHandle RendererGL2::SaveLayerAsMaskImage()
@@ -411,7 +478,6 @@ namespace juceRmlUi::gl2
 
 	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
 	{
-		// Create a new OpenGL texture
 		GLuint textureId;
 		glGenTextures(1, &textureId);
 		CHECK_OPENGL_ERROR;
@@ -443,13 +509,7 @@ namespace juceRmlUi::gl2
 			assert(false && "unsupported image format");
 		}
 
-		if (glGenerateMipmap)
-		{
-			glGenerateMipmap(GL_TEXTURE_2D);
-			CHECK_OPENGL_ERROR;
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-			CHECK_OPENGL_ERROR;
-		}
+		generateMipmaps();
 
 		return textureId;
 	}
@@ -457,6 +517,9 @@ namespace juceRmlUi::gl2
 	void RendererGL2::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
 		Renderer::beginFrame(_width, _height);
+
+		m_scissorRegion.p0 = { 0, 0 };
+		m_scissorRegion.p1 = { 0, 0 };
 
 		glDisable(GL_DEPTH_TEST);
 		CHECK_OPENGL_ERROR;
@@ -468,6 +531,8 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 		CHECK_OPENGL_ERROR;
+
+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	}
 
 	void RendererGL2::endFrame()
@@ -608,6 +673,7 @@ namespace juceRmlUi::gl2
 
 		GLuint fbo = 0;
 	    GLuint texture = 0;
+		GLuint stencil = 0;
 
 	    glGenFramebuffers(1, &fbo);
 		CHECK_OPENGL_ERROR;
@@ -621,15 +687,21 @@ namespace juceRmlUi::gl2
 	    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, static_cast<GLsizei>(frameBufferWidth()), static_cast<GLsizei>(frameBufferHeight()), 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
 		CHECK_OPENGL_ERROR;
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
 	    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		CHECK_OPENGL_ERROR;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		CHECK_OPENGL_ERROR;
 
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture, 0);
+		CHECK_OPENGL_ERROR;
+
+		glGenRenderbuffers(1, &stencil);
+		CHECK_OPENGL_ERROR;
+		glBindRenderbuffer(GL_RENDERBUFFER, stencil);
+		CHECK_OPENGL_ERROR;
+		glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH24_STENCIL8, static_cast<GLsizei>(frameBufferWidth()), static_cast<GLsizei>(frameBufferHeight()));
+		CHECK_OPENGL_ERROR;
+		glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, stencil);
 		CHECK_OPENGL_ERROR;
 
 	    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -642,11 +714,14 @@ namespace juceRmlUi::gl2
 			CHECK_OPENGL_ERROR;
 	        glDeleteTextures(1, &texture);
 			CHECK_OPENGL_ERROR;
+			glDeleteRenderbuffers(1, &stencil);
+			CHECK_OPENGL_ERROR;
 	        return false;
 	    }
 
 		_layer.framebuffer = fbo;
 		_layer.texture = texture;
+		_layer.stencilBuffer = stencil;
 		return true;
 	}
 
@@ -664,8 +739,19 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glDeleteTextures(1, &_layer.texture);
 		CHECK_OPENGL_ERROR;
+		glDeleteRenderbuffers(1, &_layer.stencilBuffer);
+		CHECK_OPENGL_ERROR;
 	}
 
+	void RendererGL2::generateMipmaps()
+	{
+		if (!glGenerateMipmap)
+			return;
+		glGenerateMipmap(GL_TEXTURE_2D);
+		CHECK_OPENGL_ERROR;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		CHECK_OPENGL_ERROR;
+	}
 	void RendererGL2::copyFramebuffer(const uint32_t _dest, const uint32_t _source) const
 	{
 		glBindFramebuffer(GL_READ_FRAMEBUFFER, _source);
@@ -698,5 +784,28 @@ namespace juceRmlUi::gl2
 				assert(false && "unsupported blend mode");
 				break;
 		}
+	}
+
+	void RendererGL2::writeFramebufferToFile(const std::string& _name, const uint32_t _x, const uint32_t _y, const uint32_t _width, const uint32_t _height) const
+	{
+		const auto x = static_cast<int>(_x);
+		const auto y = static_cast<int>(_y);
+		const auto w = static_cast<int>(_width ? _width : frameBufferWidth());
+		const auto h = static_cast<int>(_height ? _height : frameBufferHeight());
+
+		juce::Image img(juce::Image::ARGB, w, h, false);
+		juce::Image::BitmapData bitmapData(img, 0, 0, w, h, juce::Image::BitmapData::writeOnly);
+
+		glReadPixels(x, y, w, h, GL_BGRA, GL_UNSIGNED_BYTE, bitmapData.data);
+		CHECK_OPENGL_ERROR;
+
+		juce::File file(_name);
+		file.deleteFile();
+		file.create();
+		juce::PNGImageFormat pngFormat;
+		auto filestream = file.createOutputStream();
+
+		pngFormat.writeImageToStream(img, *filestream);
+		filestream->flush();
 	}
 }

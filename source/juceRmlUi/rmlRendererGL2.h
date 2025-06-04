@@ -61,9 +61,13 @@ namespace juceRmlUi::gl2
 		static void deleteFrameBuffer(const LayerHandleData*& _layer);
 		static void deleteFrameBuffer(const LayerHandleData& _layer);
 
+		static void generateMipmaps();
+
 		void copyFramebuffer(uint32_t _dest, uint32_t _source) const;
 
 		static void setupBlending(Rml::BlendMode _blendMode);
+
+		void writeFramebufferToFile(const std::string& _name, uint32_t _x = 0, uint32_t _y = 0, uint32_t _width = 0, uint32_t _height = 0) const;
 
 		Rml::CompiledGeometryHandle m_fullScreenGeometry = 0;
 
@@ -73,7 +77,10 @@ namespace juceRmlUi::gl2
 
 		RenderInterfaceShaders m_shaders;
 		RenderInterfaceFilters m_filters;
+		Rml::Rectanglei m_scissorRegion;
+		bool m_scissorEnabled = false;
+		bool m_stencilEnabled = false;
 	};
 
-	#define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (__FILE__, __LINE__); } while(0)
+#define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (__FILE__, __LINE__); } while(0)
 }

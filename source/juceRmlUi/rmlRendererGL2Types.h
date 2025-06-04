@@ -40,6 +40,7 @@ namespace juceRmlUi
 		{
 			uint32_t framebuffer = 0;
 			uint32_t texture = 0;
+			uint32_t stencilBuffer = 0;
 		};
 
 		struct CompiledShader
