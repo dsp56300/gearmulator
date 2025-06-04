@@ -15,11 +15,10 @@ namespace juceRmlUi::gl2
 
 		if (_name == "opacity")
 		{
-			const auto opacity = Rml::Get(_parameters, "value", 1.0f);
+			const auto o = Rml::Get(_parameters, "value", 1.0f);
 
 			filter.type = ShaderType::FullscreenColorMatrix;
-			filter.params.colorMatrix = Rml::Matrix4f::Identity();
-			filter.params.colorMatrix[3][3] = opacity;
+			filter.params.colorMatrix = Rml::Matrix4f::Diag(o, o, o, o);
 		}
 		else if (_name == "blur")
 		{
