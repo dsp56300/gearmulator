@@ -234,14 +234,26 @@ namespace juceRmlUi
 		if (!m_rmlContext)
 			return Component::keyPressed(_key);
 
-		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
-
-		if (key == Rml::Input::KI_UNKNOWN)
-			return Component::keyPressed(_key);
-
 		m_pressedKeys.push_back(_key);
 
-		return m_rmlContext->ProcessKeyDown(key, helper::toRmlModifiers(_key));
+		bool res = false;
+
+		auto juceChar = _key.getTextCharacter();
+		if (juce::CharacterFunctions::isPrintable(juceChar) || juceChar == '\n')
+		{
+			auto string = juce::String::charToString(juceChar);
+			m_rmlContext->ProcessTextInput(string.toStdString());
+			res = true;
+		}
+
+		const Rml::Input::KeyIdentifier key = helper::toRmlKey(_key);
+
+		if (key != Rml::Input::KI_UNKNOWN)
+		{
+			m_rmlContext->ProcessKeyDown(key, helper::toRmlModifiers(_key));
+			res = true;
+		}
+		return res;
 	}
 
 	bool RmlComponent::keyStateChanged(const bool _isKeyDown)
@@ -261,7 +273,8 @@ namespace juceRmlUi
 					if (!it->isCurrentlyDown())
 					{
 						const auto& key = *it;
-						res |= m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), helper::toRmlModifiers(key));
+						m_rmlContext->ProcessKeyUp(helper::toRmlKey(key), helper::toRmlModifiers(key));
+						res = true;
 						it = m_pressedKeys.erase(it);
 					}
 					else
