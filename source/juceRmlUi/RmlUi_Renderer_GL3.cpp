@@ -734,6 +734,12 @@ static GLuint CreateTexture(Rml::Span<const Rml::byte> source_data, Rml::Vector2
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
+	if (glGenerateMipmap)
+	{
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	}
+
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	return texture_id;
