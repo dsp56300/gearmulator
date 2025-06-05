@@ -7,6 +7,9 @@ set(SOURCES
 	lock.png
 	check.png
 	chevron_right.png
+	arrow_drop_down.png
+	arrow_left.png
+	arrow_right.png
 	Roboto-VariableFont_wdth_wght.ttf
 	Roboto-Italic-VariableFont_wdth_wght.ttf
 )
