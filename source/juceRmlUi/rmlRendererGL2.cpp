@@ -494,6 +494,16 @@ namespace juceRmlUi::gl2
 			return;
 		}
 
+		glViewport(0, 0, static_cast<int>(_width), static_cast<int>(_height));
+
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(0, static_cast<float>(_width), static_cast<float>(_height), 0, -1, 1);
+//		const auto ortho = Rml::Matrix4f::ProjectOrtho(0, static_cast<float>(_width), static_cast<float>(_height), 0, -1, 1);
+
+		glMatrixMode(GL_MODELVIEW);
+		glLoadIdentity();
+
 		m_scissorRegion.p0 = { 0, 0 };
 		m_scissorRegion.p1 = { 0, 0 };
 

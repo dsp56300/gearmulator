@@ -108,17 +108,8 @@ namespace juceRmlUi
 		if (contextDims.x != width || contextDims.y != height)
 		{
 			m_rmlContext->SetDimensions({ static_cast<int>(static_cast<float>(width) * invContentScale), static_cast<int>(static_cast<float>(height) * invContentScale)});
+//			m_rmlContext->SetDensityIndependentPixelRatio(m_contentScale);
 		}
-
-		glViewport(0, 0, width, height);
-
-		glMatrixMode(GL_PROJECTION);
-		glLoadIdentity();
-		glOrtho(0, static_cast<float>(width) * invContentScale, static_cast<float>(height) * invContentScale, 0, -1, 1);
-//		const auto ortho = Rml::Matrix4f::ProjectOrtho(0, static_cast<float>(width) * invContentScale, static_cast<float>(height) * invContentScale, 0, -1, 1);
-
-		glMatrixMode(GL_MODELVIEW);
-		glLoadIdentity();
 
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
