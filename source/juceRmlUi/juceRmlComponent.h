@@ -7,6 +7,8 @@
 
 #include "juce_opengl/juce_opengl.h"
 
+class RenderInterface_GL3;
+
 namespace Rml
 {
 	class Context;
@@ -61,7 +63,7 @@ namespace juceRmlUi
 
 		std::unique_ptr<RmlInterfaces> m_rmlInterfaces;
 
-		std::unique_ptr<gl2::RendererGL2> m_renderInterface;
+		std::unique_ptr<RenderInterface_GL3> m_renderInterface;
 		std::unique_ptr<RendererProxy> m_renderProxy;
 
 		Rml::Context* m_rmlContext = nullptr;

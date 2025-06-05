@@ -5,7 +5,8 @@
 #include "rmlDataProvider.h"
 #include "rmlHelper.h"
 #include "rmlInterfaces.h"
-#include "rmlRendererGL2.h"
+
+#include "RmlUi_Renderer_GL3.h"
 
 #include "baseLib/filesystem.h"
 
@@ -55,7 +56,7 @@ namespace juceRmlUi
 	{
 		RmlInterfaces::ScopedAccess access(*this);
 
-		m_renderInterface.reset(new gl2::RendererGL2());
+		m_renderInterface.reset(new RenderInterface_GL3());
 		m_renderProxy.reset(new RendererProxy(m_dataProvider, *m_renderInterface));
 
 		const auto size = getScreenBounds();
@@ -122,9 +123,10 @@ namespace juceRmlUi
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 
-		m_renderInterface->beginFrame(width, height);
+		m_renderInterface->SetViewport(width, height);
+		m_renderInterface->BeginFrame();
 		m_renderProxy->executeRenderFunctions();
-		m_renderInterface->endFrame();
+		m_renderInterface->EndFrame();
 
 		GLenum err = glGetError();
 		if (err != GL_NO_ERROR)
