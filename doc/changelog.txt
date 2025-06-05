@@ -11,6 +11,10 @@ Framework:
 		a rename in Logic, Reaper and possibly other hosts
 - [Fix] Various issues if root path contains non-ASCII characters
 
+DSP Bridge:
+
+- [Fix] Plugin might crash if an invalid UDP packet is received
+
 Xenia:
 
 - [Imp] Add support to load MW1 user waves & tables
