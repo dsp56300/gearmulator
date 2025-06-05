@@ -58,12 +58,12 @@ namespace genericUI
 			m_fonts.insert(std::make_pair(fontFile, std::move(font)));
 		}
 
+		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
+
 		m_rootObject->createJuceTree(*this);
 		m_rootObject->createTabGroups(*this);
 		m_rootObject->createControllerLinks(*this);
 		m_rootObject->registerTemplates(*this);
-
-		m_scale = m_rootObject->getPropertyFloat("scale", 1.0f);
 	}
 
 	std::string Editor::exportToFolder(const std::string& _folder) const

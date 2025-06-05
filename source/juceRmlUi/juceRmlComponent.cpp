@@ -16,7 +16,10 @@
 
 namespace juceRmlUi
 {
-	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename) : m_dataProvider(_dataProvider), m_rootRmlFilename(std::move(_rootRmlFilename))
+	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename, const float _contentScale/* = 1.0f*/)
+		: m_dataProvider(_dataProvider)
+		, m_rootRmlFilename(std::move(_rootRmlFilename))
+		, m_contentScale(_contentScale)
 	{
 		m_renderProxy.reset(new RendererProxy(m_dataProvider));
 
@@ -243,8 +246,8 @@ namespace juceRmlUi
 	juce::Point<int> RmlComponent::toRmlPosition(const juce::MouseEvent& _e) const
 	{
 		return {
-			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale() / m_contentScale), 
-			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale() / m_contentScale)
+			juce::roundToInt(static_cast<float>(_e.x) * m_openGLContext.getRenderingScale()), 
+			juce::roundToInt(static_cast<float>(_e.y) * m_openGLContext.getRenderingScale())
 		};
 	}
 

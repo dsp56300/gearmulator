@@ -591,7 +591,7 @@ namespace jucePluginEditorLib
 #if USE_RMLUI
 		if (!m_rmlPlugin)
 			m_rmlPlugin.reset(new rmlPlugin::RmlPlugin(getProcessor().getController()));
-		return new juceRmlUi::RmlComponent(*this, _rmlFile);
+		return new juceRmlUi::RmlComponent(*this, _rmlFile, 1.0f / getScale());
 #else
 		return genericUI::Editor::createRmlUiComponent(_rmlFile);
 #endif
