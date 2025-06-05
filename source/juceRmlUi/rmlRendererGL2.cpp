@@ -27,7 +27,7 @@ namespace juceRmlUi::gl2
 		const int g_fullScreenIndices[] = {0,1,2,2,3,0};
 	}
 
-	RendererGL2::RendererGL2(DataProvider& _dataProvider) : Renderer(_dataProvider), m_filters(m_shaders)
+	RendererGL2::RendererGL2() : m_filters(m_shaders)
 	{
 	}
 
@@ -95,10 +95,8 @@ namespace juceRmlUi::gl2
 
 	Rml::TextureHandle RendererGL2::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
-		juce::Image image;
-		if (!loadImage(image, _textureDimensions, _source))
-			return {};
-		return loadTexture(image);
+		assert(false && "not supported, load texture externally and use GenerateTexture instead");
+		return {};
 	}
 
 	Rml::TextureHandle RendererGL2::GenerateTexture(const Rml::Span<const unsigned char> _source, const Rml::Vector2i _sourceDimensions)
@@ -112,7 +110,11 @@ namespace juceRmlUi::gl2
 		CHECK_OPENGL_ERROR;
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		CHECK_OPENGL_ERROR;
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _sourceDimensions.x, _sourceDimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, _source.data());
+		const size_t pixelCount = static_cast<size_t>(_sourceDimensions.x * _sourceDimensions.y);
+		if (_source.size() == pixelCount * 3)
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, _sourceDimensions.x, _sourceDimensions.y, 0, GL_RGB, GL_UNSIGNED_BYTE, _source.data());
+		else
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, _sourceDimensions.x, _sourceDimensions.y, 0, GL_RGBA, GL_UNSIGNED_BYTE, _source.data());
 		CHECK_OPENGL_ERROR;
 		return textureId;
 	}
@@ -185,7 +187,7 @@ namespace juceRmlUi::gl2
 
 		glDisable(GL_BLEND);
 
-		if (false && !_filters.empty())
+		if (!_filters.empty())
 		{
 			uint32_t tempIndex = 0;
 
@@ -476,47 +478,21 @@ namespace juceRmlUi::gl2
 		delete shader;
 	}
 
-	Rml::TextureHandle RendererGL2::loadTexture(juce::Image& _image)
-	{
-		GLuint textureId;
-		glGenTextures(1, &textureId);
-		CHECK_OPENGL_ERROR;
-		glBindTexture(GL_TEXTURE_2D, textureId);
-		CHECK_OPENGL_ERROR;
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		CHECK_OPENGL_ERROR;
-
-		const auto width = _image.getWidth();
-		const auto height = _image.getHeight();
-
-		juce::Image::BitmapData bitmapData(_image, 0, 0, width, height, juce::Image::BitmapData::readOnly);
-		const auto* pixelPtr = bitmapData.getPixelPointer(0,0);
-
-		switch(_image.getFormat())
-		{
-		case juce::Image::ARGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pixelPtr);
-			CHECK_OPENGL_ERROR;
-			break;
-		case juce::Image::RGB:
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB8, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, pixelPtr);
-			CHECK_OPENGL_ERROR;
-			break;
-		default:
-			assert(false && "unsupported image format");
-		}
-
-		generateMipmaps();
-
-		return textureId;
-	}
-
 	void RendererGL2::beginFrame(const uint32_t _width, const uint32_t _height)
 	{
-		Renderer::beginFrame(_width, _height);
+		if (_width != m_frameBufferWidth || _height != m_frameBufferHeight)
+		{
+			m_frameBufferWidth = _width;
+			m_frameBufferHeight = _height;
+			onResize();
+		}
+
+		if (m_frameBufferWidth == 0 || m_frameBufferHeight == 0)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Invalid frame buffer size: %u x %u", m_frameBufferWidth, m_frameBufferHeight);
+			assert(false && "invalid frame buffer size");
+			return;
+		}
 
 		m_scissorRegion.p0 = { 0, 0 };
 		m_scissorRegion.p1 = { 0, 0 };
@@ -551,6 +527,15 @@ namespace juceRmlUi::gl2
 			Rml::Log::Message (Rml::Log::LT_WARNING, "OpenGL ERROR %u in file %s, line %d", e, _file, _line);
 			assert(false);
 		}
+	}
+
+	void RendererGL2::verticalFlip(Rml::Rectanglei& _rect) const
+	{
+		_rect.p0.y = static_cast<int>(m_frameBufferHeight) - _rect.p0.y;
+		_rect.p1.y = static_cast<int>(m_frameBufferHeight) - _rect.p1.y;
+
+		if (_rect.p0.y > _rect.p1.y)
+			std::swap(_rect.p0.y, _rect.p1.y);
 	}
 
 	void RendererGL2::renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams)

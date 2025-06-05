@@ -1,9 +1,9 @@
 #pragma once
 
-#include "rmlRenderer.h"
-
 #include "rmlRenderInterfaceFilters.h"
 #include "rmlRenderInterfaceShaders.h"
+
+#include "RmlUi/Core/RenderInterface.h"
 
 namespace juce
 {
@@ -16,10 +16,10 @@ namespace juceRmlUi::gl2
 	struct CompiledGeometry;
 	struct ShaderParams;
 
-	class RendererGL2 : public Renderer
+	class RendererGL2 : public Rml::RenderInterface
 	{
 	public:
-		RendererGL2(DataProvider& _dataProvider);
+		RendererGL2();
 
 		// Rml::RenderInterface overrides
 		Rml::CompiledGeometryHandle CompileGeometry(Rml::Span<const Rml::Vertex> _vertices, Rml::Span<const int> _indices) override;
@@ -43,18 +43,21 @@ namespace juceRmlUi::gl2
 		Rml::CompiledShaderHandle CompileShader(const Rml::String& _name, const Rml::Dictionary& _parameters) override;
 		void ReleaseShader(Rml::CompiledShaderHandle _shader) override;
 
-		// Renderer overrides
-		Rml::TextureHandle loadTexture(juce::Image& _image) override;
-		void beginFrame(uint32_t _width, uint32_t _height) override;
-		void endFrame() override;
+		void beginFrame(uint32_t _width, uint32_t _height);
+		void endFrame();
 
 		static void checkGLError (const char* _file, int _line);
+		
+		uint32_t frameBufferWidth() const { return m_frameBufferWidth; }
+		uint32_t frameBufferHeight() const { return m_frameBufferHeight; }
 
 	private:
+		void verticalFlip(Rml::Rectanglei& _rect) const;
+
 		static void renderGeometry(const CompiledGeometry& _geom, RmlShader& _shader, const ShaderParams& _shaderParams);
 		void renderBlur(const CompiledGeometry& _geom, const CompiledShader* _filter, const LayerHandleData* _source, const LayerHandleData* _target, Rml::BlendMode _blendMode);
 
-		void onResize() override;
+		void onResize();
 
 		LayerHandleData* createFrameBuffer() const;
 		bool createFrameBuffer(LayerHandleData& _layer) const;
@@ -80,6 +83,9 @@ namespace juceRmlUi::gl2
 		Rml::Rectanglei m_scissorRegion;
 		bool m_scissorEnabled = false;
 		bool m_stencilEnabled = false;
+
+		uint32_t m_frameBufferWidth = 0;
+		uint32_t m_frameBufferHeight = 0;
 	};
 
 #define CHECK_OPENGL_ERROR do { RendererGL2::checkGLError (__FILE__, __LINE__); } while(0)

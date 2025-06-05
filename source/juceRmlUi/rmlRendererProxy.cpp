@@ -1,18 +1,22 @@
 #include "rmlRendererProxy.h"
 
-#include "juceRmlComponent.h"
-#include "rmlRendererGL2.h"
+#include <cassert>
+
+#include "rmlDataProvider.h"
 
 #include "baseLib/filesystem.h"
 
 #include "juce_graphics/juce_graphics.h"
+
+#include "RmlUi/Core/Log.h"
+#include "RmlUi/Core/Variant.h"
 
 namespace juceRmlUi
 {
 	// ReSharper disable once CppCompileTimeConstantCanBeReplacedWithBooleanConstant
 	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in if expressions");
 
-	RendererProxy::RendererProxy(Renderer& _renderer) : Renderer(_renderer.getDataProvider()), m_renderer(_renderer)
+	RendererProxy::RendererProxy(DataProvider& _dataProvider, Rml::RenderInterface& _renderer) : m_dataProvider(_dataProvider), m_renderer(_renderer)
 	{
 	}
 
@@ -63,7 +67,7 @@ namespace juceRmlUi
 	Rml::TextureHandle RendererProxy::LoadTexture(Rml::Vector2i& _textureDimensions, const Rml::String& _source)
 	{
 		juce::Image image;
-		if (!m_renderer.loadImage(image, _textureDimensions, _source))
+		if (!loadImage(image, _textureDimensions, _source))
 			return {};
 
 		return loadTexture(image);
@@ -284,36 +288,78 @@ namespace juceRmlUi
 
 	Rml::TextureHandle RendererProxy::loadTexture(juce::Image& _image)
 	{
+		const auto w = _image.getWidth();
+		const auto h = _image.getHeight();
+		const auto pixelCount = w * h;
+
+		std::vector<uint8_t> buffer;
+
+		juce::Image::BitmapData bitmapData(_image, 0, 0, w, h, juce::Image::BitmapData::readOnly);
+
+		uint32_t bufferIndex = 0;
+
+		switch(_image.getFormat())
+		{
+		case juce::Image::ARGB:
+			buffer.resize(pixelCount * 4);
+			for (int y=0; y<h; ++y)
+			{
+				for (int x=0; x<w; ++x)
+				{
+					// juce rturns an unpremultiplied color but we want a premultiplied pixel value
+					// the function getPixelColour casts the pixel pointer to PixelARGB* but this
+					// might change. Verify that its still the case and modify this assert accordingly
+					static_assert(JUCE_MAJOR_VERSION == 7 && JUCE_MINOR_VERSION == 0);
+					const auto pixel = reinterpret_cast<juce::PixelARGB*>(bitmapData.getPixelPointer(x, y));
+
+					buffer[bufferIndex++] = pixel->getRed();
+					buffer[bufferIndex++] = pixel->getGreen();
+					buffer[bufferIndex++] = pixel->getBlue();
+					buffer[bufferIndex++] = pixel->getAlpha();
+				}
+			}
+			break;
+		case juce::Image::RGB:
+			buffer.resize(pixelCount * 3);
+			for (int y=0; y<h; ++y)
+			{
+				for (int x=0; x<w; ++x)
+				{
+					auto pixel = bitmapData.getPixelColour(x,y);
+					buffer[bufferIndex++] = pixel.getRed();
+					buffer[bufferIndex++] = pixel.getGreen();
+					buffer[bufferIndex++] = pixel.getBlue();
+				}
+			}
+			break;
+		case juce::Image::SingleChannel:
+			{
+				buffer.resize(pixelCount * 3);
+
+				uint8_t* pixelPtr = bitmapData.data;
+				for (int i=0; i<pixelCount; ++i, ++pixelPtr)
+				{
+					buffer[bufferIndex++] = *pixelPtr;
+					buffer[bufferIndex++] = *pixelPtr;
+					buffer[bufferIndex++] = *pixelPtr;
+				}
+			}
+			break;
+		default:
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Unsupported image format: %d", static_cast<int>(_image.getFormat()));
+			assert(false && "unsupported image format");
+			return {};
+		}
+
 		auto dummyHandle = createDummyHandle();
 
-		addRenderFunction([this, dummyHandle, _image]
+		addRenderFunction([this, dummyHandle, b = std::move(buffer), w, h]
 		{
-			auto img = _image;
-			const auto handle = m_renderer.loadTexture(img);
+			const auto handle = m_renderer.GenerateTexture(b, Rml::Vector2i(w, h));
 			addHandle(dummyHandle, handle);
 		});
 
 		return dummyHandle;
-	}
-
-	void RendererProxy::beginFrame(uint32_t _width, uint32_t _height)
-	{
-		Renderer::beginFrame(_width, _height);
-
-		addRenderFunction([this, _width, _height]
-		{
-			m_renderer.beginFrame(_width, _height);
-		});
-	}
-
-	void RendererProxy::endFrame()
-	{
-		Renderer::endFrame();
-
-		addRenderFunction([this]
-		{
-			m_renderer.endFrame();
-		});
 	}
 
 	void RendererProxy::executeRenderFunctions()
@@ -333,5 +379,32 @@ namespace juceRmlUi
 		std::lock_guard lock2(m_mutexRender);
 		m_enqueuedFunctions.swap(m_renderFunctions);
 		m_enqueuedFunctions.clear();
+	}
+
+	bool RendererProxy::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const
+	{
+		uint32_t fileSize;
+		auto* ptr = m_dataProvider.getResourceByFilename(baseLib::filesystem::getFilenameWithoutPath(_source), fileSize);
+
+		if (!ptr)
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "image file not found: %s", _source.c_str());
+			assert(false && "file not found");
+			return false;
+		}
+
+		// Load the texture from the file
+		_image = juce::ImageFileFormat::loadFrom(ptr, fileSize);
+		if (_image.isNull())
+		{
+			Rml::Log::Message(Rml::Log::LT_ERROR, "Failed to load image from source %s", _source.c_str());
+			assert(false && "failed to load image");
+			return false;
+		}
+
+		_textureDimensions.x = _image.getWidth();
+		_textureDimensions.y = _image.getHeight();
+
+		return true;
 	}
 }
