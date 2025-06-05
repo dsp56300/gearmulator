@@ -6,6 +6,7 @@ set(SOURCES
 	link.png
 	lock.png
 	check.png
+	chevron_right.png
 	Roboto-VariableFont_wdth_wght.ttf
 	Roboto-Italic-VariableFont_wdth_wght.ttf
 )
