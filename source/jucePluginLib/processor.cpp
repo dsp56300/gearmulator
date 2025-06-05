@@ -397,20 +397,23 @@ namespace pluginLib
 		return result;
 	}
 
-	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const BinaryDataRef& _binaryData,	const std::string& _filename)
 	{
-		const auto& bd = m_properties.binaryData;
-
-		for(uint32_t i=0; i<bd.listSize; ++i)
+		for(uint32_t i=0; i<_binaryData.listSize; ++i)
 		{
-			if (bd.originalFileNames[i] != _filename)
+			if (_binaryData.originalFileNames[i] != _filename)
 				continue;
 
 			int size = 0;
-			const auto res = bd.getNamedResourceFunc(bd.namedResourceList[i], size);
+			const auto res = _binaryData.getNamedResourceFunc(_binaryData.namedResourceList[i], size);
 			return {std::make_pair(res, static_cast<uint32_t>(size))};
 		}
 		return {};
+	}
+
+	std::optional<std::pair<const char*, uint32_t>> Processor::findResource(const std::string& _filename) const
+	{
+		return findResource(m_properties.binaryData, _filename);
 	}
 
 	std::string Processor::getDataFolder(const bool _useFxFolder) const

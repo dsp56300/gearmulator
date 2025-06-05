@@ -14,6 +14,8 @@
 #include "juceRmlUi/juceRmlComponent.h"
 #endif
 
+#include "jucePluginData.h"
+
 #include "juceUiLib/messageBox.h"
 
 #include "synthLib/os.h"
@@ -24,6 +26,16 @@
 
 namespace jucePluginEditorLib
 {
+	namespace
+	{
+		constexpr Processor::BinaryDataRef g_binaryDefaultData
+		{
+			jucePluginData::namedResourceListSize,
+			jucePluginData::originalFilenames,
+			jucePluginData::namedResourceList,
+			jucePluginData::getNamedResource
+		};
+	}
 	Editor::Editor(Processor& _processor, pluginLib::ParameterBinding& _binding, Skin _skin)
 		: genericUI::Editor(static_cast<EditorInterface&>(*this))
 		, m_processor(_processor)
@@ -47,9 +59,13 @@ namespace jucePluginEditorLib
 
 	const char* Editor::findResourceByFilename(const std::string& _filename, uint32_t& _size) const
 	{
-		const auto res = m_processor.findResource(_filename);
+		auto res = m_processor.findResource(_filename);
 		if(!res)
-			return nullptr;
+		{
+			res = Processor::findResource(g_binaryDefaultData, _filename);
+			if (!res)
+				return nullptr;
+		}
 		_size = res->second;
 		return res->first;
 	}
@@ -692,6 +708,12 @@ namespace jucePluginEditorLib
 	{
 		std::vector<std::string> filenames;
 
+		auto addFile = [&filenames](const std::string& _file)
+		{
+			if (std::find(filenames.begin(), filenames.end(), _file) == filenames.end())
+				filenames.push_back(_file);
+		};
+
 		if (!m_skin.folder.empty())
 		{
 			const auto folder = getAbsoluteSkinFolder(m_skin.folder);
@@ -701,15 +723,19 @@ namespace jucePluginEditorLib
 			{
 				auto files = skinFolder.findChildFiles(juce::File::findFiles, false, "*");
 				for (const auto& file : files)
-					filenames.push_back(file.getFileName().toStdString());
+					addFile(file.getFileName().toStdString());
 			}
 		}
 		else
 		{
 			auto data = getProcessor().getProperties().binaryData;
 			for (size_t i=0; i<data.listSize; ++i)
-				filenames.emplace_back(data.originalFileNames[i]);
+				addFile(data.originalFileNames[i]);
 		}
+
+		auto data = g_binaryDefaultData;
+		for (size_t i=0; i<data.listSize; ++i)
+			addFile(data.originalFileNames[i]);
 
 		return filenames;
 	}
