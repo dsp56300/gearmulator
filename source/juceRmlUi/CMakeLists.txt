@@ -26,6 +26,8 @@ set(SOURCES
 	rmlShader.cpp rmlShader.h
 	rmlShaders.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
+
+	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
 )
 
 add_library(juceRmlUi STATIC)
@@ -38,5 +40,5 @@ target_link_libraries(juceRmlUi PUBLIC baseLib rmlui_core)
 target_include_directories(juceRmlUi PUBLIC ../JUCE/modules)
 target_compile_definitions(juceRmlUi PRIVATE JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 set_property(TARGET juceRmlUi PROPERTY FOLDER "Gearmulator")
-
+target_compile_definitions(juceRmlUi PUBLIC RMLUI_GL3_CUSTOM_LOADER="juce_opengl/juce_opengl.h")
 target_include_directories(juceRmlUi PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
