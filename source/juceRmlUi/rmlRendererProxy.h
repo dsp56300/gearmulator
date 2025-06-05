@@ -20,7 +20,7 @@ namespace juceRmlUi
 		using Handle = uintptr_t;
 		static constexpr Handle InvalidHandle = 0;
 
-		explicit RendererProxy(DataProvider& _dataProvider, Rml::RenderInterface& _renderer);
+		explicit RendererProxy(DataProvider& _dataProvider);
 		~RendererProxy() override;
 
 		// Rml::RenderInterface overrides
@@ -49,6 +49,8 @@ namespace juceRmlUi
 		void executeRenderFunctions();
 
 		void finishFrame();
+
+		void setRenderer(Rml::RenderInterface* _renderer);
 
 	private:
 		bool loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const;
@@ -96,12 +98,11 @@ namespace juceRmlUi
 		DataProvider& m_dataProvider;
 
 		Handle m_nextHandle = 1;
-		Rml::RenderInterface& m_renderer;
+		Rml::RenderInterface* m_renderer = nullptr;
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;
 		std::vector<Func> m_renderFunctions;
-		std::vector<Func> m_renderFunctionsCopy;
 		std::unordered_map<Handle, Handle> m_handles;
 
 		std::stack<Handle> m_layerHandles;

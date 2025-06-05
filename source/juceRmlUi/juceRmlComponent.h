@@ -52,9 +52,15 @@ namespace juceRmlUi
 
 		RmlInterfaces& getInterfaces() const { return *m_rmlInterfaces; }
 
+		void resized() override;
+		void parentSizeChanged() override;
+
 	private:
 		juce::Point<int> toRmlPosition(const juce::MouseEvent& _e) const;
 		void update();
+		void createRmlContext();
+		void destroyRmlContext();
+		void updateRmlContextDimensions();
 
 		DataProvider& m_dataProvider;
 		const std::string m_rootRmlFilename;
@@ -70,6 +76,7 @@ namespace juceRmlUi
 
 		std::vector<juce::KeyPress> m_pressedKeys;
 		float m_contentScale = 1.0f;
+		float m_currentRenderScale = 0.0f;
 
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)

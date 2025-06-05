@@ -16,7 +16,7 @@ namespace juceRmlUi
 	// ReSharper disable once CppCompileTimeConstantCanBeReplacedWithBooleanConstant
 	static_assert(!RendererProxy::InvalidHandle, "expression should return false, is used like that in if expressions");
 
-	RendererProxy::RendererProxy(DataProvider& _dataProvider, Rml::RenderInterface& _renderer) : m_dataProvider(_dataProvider), m_renderer(_renderer)
+	RendererProxy::RendererProxy(DataProvider& _dataProvider) : m_dataProvider(_dataProvider)
 	{
 	}
 
@@ -31,7 +31,7 @@ namespace juceRmlUi
 
 		addRenderFunction([this, dummyHandle, v = std::move(vertices), i = std::move(indices)]
 		{
-			auto handle = m_renderer.CompileGeometry(v, i);
+			auto handle = m_renderer->CompileGeometry(v, i);
 			addHandle(dummyHandle, handle);
 		});
 
@@ -45,9 +45,9 @@ namespace juceRmlUi
 			if (const auto realGeometry = getRealHandle(_geometry))
 			{
 				if (!_texture)
-					m_renderer.RenderGeometry(realGeometry, _translation, _texture);
+					m_renderer->RenderGeometry(realGeometry, _translation, _texture);
 				else if (const auto realTexture = getRealHandle(_texture))
-					m_renderer.RenderGeometry(realGeometry, _translation, realTexture);
+					m_renderer->RenderGeometry(realGeometry, _translation, realTexture);
 			}
 		});
 	}
@@ -58,7 +58,7 @@ namespace juceRmlUi
 		{
 			if (const auto realGeometry = getRealHandle(_geometry))
 			{
-				m_renderer.ReleaseGeometry(realGeometry);
+				m_renderer->ReleaseGeometry(realGeometry);
 				removeHandle(_geometry);
 			}
 		});
@@ -81,7 +81,7 @@ namespace juceRmlUi
 
 		addRenderFunction([this, dummyHandle, source = std::move(s), _sourceDimensions]
 		{
-			auto handle = m_renderer.GenerateTexture(source, _sourceDimensions);
+			auto handle = m_renderer->GenerateTexture(source, _sourceDimensions);
 			addHandle(dummyHandle, handle);
 		});
 
@@ -94,7 +94,7 @@ namespace juceRmlUi
 		{
 			if (const auto realTexture = getRealHandle(_texture))
 			{
-				m_renderer.ReleaseTexture(realTexture);
+				m_renderer->ReleaseTexture(realTexture);
 				removeHandle(_texture);
 			}
 		});
@@ -104,7 +104,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, _enable]
 		{
-			m_renderer.EnableScissorRegion(_enable);
+			m_renderer->EnableScissorRegion(_enable);
 		});
 	}
 
@@ -112,7 +112,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, _region]
 		{
-			m_renderer.SetScissorRegion(_region);
+			m_renderer->SetScissorRegion(_region);
 		});
 	}
 
@@ -120,7 +120,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, _enable]
 		{
-			m_renderer.EnableClipMask(_enable);
+			m_renderer->EnableClipMask(_enable);
 		});
 	}
 
@@ -130,7 +130,7 @@ namespace juceRmlUi
 		{
 			if (const auto realGeometry = getRealHandle(_geometry))
 			{
-				m_renderer.RenderToClipMask(_operation, realGeometry, _translation);
+				m_renderer->RenderToClipMask(_operation, realGeometry, _translation);
 			}
 		});
 	}
@@ -139,7 +139,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this, matrix = *_transform]
 		{
-			m_renderer.SetTransform(&matrix);
+			m_renderer->SetTransform(&matrix);
 		});
 	}
 
@@ -149,7 +149,7 @@ namespace juceRmlUi
 
 		addRenderFunction([this, dummyHandle]
 		{
-			auto handle = m_renderer.PushLayer();
+			auto handle = m_renderer->PushLayer();
 			addHandle(dummyHandle, handle);
 			m_layerHandles.push(dummyHandle);
 		});
@@ -183,7 +183,7 @@ namespace juceRmlUi
 				if (const auto realFilter = getRealHandle(filter))
 					realFilters.push_back(realFilter);
 			}
-			m_renderer.CompositeLayers(realSource, realDestination, _blendMode, realFilters);
+			m_renderer->CompositeLayers(realSource, realDestination, _blendMode, realFilters);
 		});
 	}
 
@@ -191,7 +191,7 @@ namespace juceRmlUi
 	{
 		addRenderFunction([this]
 		{
-			m_renderer.PopLayer();
+			m_renderer->PopLayer();
 			const auto dummy = m_layerHandles.top();
 			m_layerHandles.pop();
 			removeHandle(dummy);
@@ -203,7 +203,7 @@ namespace juceRmlUi
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction([this, dummyHandle]
 		{
-			auto handle = m_renderer.SaveLayerAsTexture();
+			auto handle = m_renderer->SaveLayerAsTexture();
 			addHandle(dummyHandle, handle);
 		});
 		return dummyHandle;
@@ -214,7 +214,7 @@ namespace juceRmlUi
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction([this, dummyHandle]
 		{
-			auto handle = m_renderer.SaveLayerAsMaskImage();
+			auto handle = m_renderer->SaveLayerAsMaskImage();
 			addHandle(dummyHandle, handle);
 		});
 		return dummyHandle;
@@ -225,7 +225,7 @@ namespace juceRmlUi
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction([this, dummyHandle, name = _name, parameters = _parameters]
 		{
-			auto handle = m_renderer.CompileFilter(name, parameters);
+			auto handle = m_renderer->CompileFilter(name, parameters);
 			addHandle(dummyHandle, handle);
 		});
 		return dummyHandle;
@@ -237,7 +237,7 @@ namespace juceRmlUi
 		{
 			if (const auto realFilter = getRealHandle(_filter))
 			{
-				m_renderer.ReleaseFilter(realFilter);
+				m_renderer->ReleaseFilter(realFilter);
 				removeHandle(_filter);
 			}
 		});
@@ -248,7 +248,7 @@ namespace juceRmlUi
 		auto dummyHandle = createDummyHandle();
 		addRenderFunction([this, dummyHandle, name = _name, parameters = _parameters]
 		{
-			auto handle = m_renderer.CompileShader(name, parameters);
+			auto handle = m_renderer->CompileShader(name, parameters);
 			addHandle(dummyHandle, handle);
 		});
 		return dummyHandle;
@@ -262,7 +262,7 @@ namespace juceRmlUi
 			{
 				if (const auto realGeometry = getRealHandle(_geometry))
 				{
-					m_renderer.RenderShader(realShader, realGeometry, _translation, _texture);
+					m_renderer->RenderShader(realShader, realGeometry, _translation, _texture);
 				}
 			}
 		});
@@ -274,7 +274,7 @@ namespace juceRmlUi
 		{
 			if (const auto realShader = getRealHandle(_shader))
 			{
-				m_renderer.ReleaseShader(realShader);
+				m_renderer->ReleaseShader(realShader);
 				removeHandle(_shader);
 			}
 		});
@@ -355,7 +355,7 @@ namespace juceRmlUi
 
 		addRenderFunction([this, dummyHandle, b = std::move(buffer), w, h]
 		{
-			const auto handle = m_renderer.GenerateTexture(b, Rml::Vector2i(w, h));
+			const auto handle = m_renderer->GenerateTexture(b, Rml::Vector2i(w, h));
 			addHandle(dummyHandle, handle);
 		});
 
@@ -364,21 +364,32 @@ namespace juceRmlUi
 
 	void RendererProxy::executeRenderFunctions()
 	{
+		std::lock_guard lock(m_mutexRender);
+
+		if (m_renderer)
 		{
-			std::lock_guard lock(m_mutexRender);
-			m_renderFunctionsCopy.assign(m_renderFunctions.begin(), m_renderFunctions.end());
+			for (auto& func : m_renderFunctions)
+				func();
+			m_renderFunctions.clear();
 		}
 
-		for (auto& func : m_renderFunctionsCopy)
-			func();
 	}
 
 	void RendererProxy::finishFrame()
 	{
+		std::lock_guard lockR(m_mutexRender);
 		std::lock_guard lock(m_mutex);
-		std::lock_guard lock2(m_mutexRender);
-		m_enqueuedFunctions.swap(m_renderFunctions);
+		if (m_renderFunctions.empty())
+			m_renderFunctions.swap(m_enqueuedFunctions);
+		else
+			m_renderFunctions.insert(m_renderFunctions.end(), std::make_move_iterator(m_enqueuedFunctions.begin()), std::make_move_iterator(m_enqueuedFunctions.end()));
 		m_enqueuedFunctions.clear();
+	}
+
+	void RendererProxy::setRenderer(Rml::RenderInterface* _renderer)
+	{
+		std::lock_guard lock(m_mutexRender);
+		m_renderer = _renderer;
 	}
 
 	bool RendererProxy::loadImage(juce::Image& _image, Rml::Vector2i& _textureDimensions, const Rml::String& _source) const

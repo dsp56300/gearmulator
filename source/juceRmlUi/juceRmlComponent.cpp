@@ -18,6 +18,8 @@ namespace juceRmlUi
 {
 	RmlComponent::RmlComponent(DataProvider& _dataProvider, std::string _rootRmlFilename) : m_dataProvider(_dataProvider), m_rootRmlFilename(std::move(_rootRmlFilename))
 	{
+		m_renderProxy.reset(new RendererProxy(m_dataProvider));
+
 		m_openGLContext.setMultisamplingEnabled(true);
 		m_openGLContext.setRenderer(this);
 		m_openGLContext.attachTo(*this);
@@ -48,8 +50,10 @@ namespace juceRmlUi
 
 	RmlComponent::~RmlComponent()
 	{
-		deleteAllChildren();
 		m_openGLContext.detach();
+		destroyRmlContext();
+
+		deleteAllChildren();
 	}
 
 	void RmlComponent::newOpenGLContextCreated()
@@ -57,59 +61,17 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 
 		m_renderInterface.reset(new RenderInterface_GL3());
-		m_renderProxy.reset(new RendererProxy(m_dataProvider, *m_renderInterface));
-
-		const auto size = getScreenBounds();
-
-		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
-
-		auto& sys = m_rmlInterfaces->getSystemInterface();
-		sys.beginLogRecording();
-
-        auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
-        if (document)
-	        document->Show();
-		else
-			assert(false);
-
-		sys.endLogRecording();
-
-		const auto logs = sys.getRecordedLogEntries();
-
-		if (!logs.empty())
-		{
-			std::stringstream ss;
-			ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
-			for (const auto& log : logs)
-				ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
-			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
-		}
+		m_renderProxy->setRenderer(m_renderInterface.get());
 
 		startTimer(1);
 	}
 
 	void RmlComponent::renderOpenGL()
 	{
-		juce::OpenGLHelpers::clear(juce::Colours::grey);
-
 		using namespace juce::gl;
-
-		RmlInterfaces::ScopedAccess access(*this);
-		if (!m_rmlContext)
-			return;
-		
-		auto contextDims = m_rmlContext->GetDimensions();
 
 		int width = getScreenBounds().getWidth();
 		int height = getScreenBounds().getHeight();
-
-		const float invContentScale = 1.0f / m_contentScale;
-
-		if (contextDims.x != width || contextDims.y != height)
-		{
-			m_rmlContext->SetDimensions({ static_cast<int>(static_cast<float>(width) * invContentScale), static_cast<int>(static_cast<float>(height) * invContentScale)});
-//			m_rmlContext->SetDensityIndependentPixelRatio(m_contentScale);
-		}
 
 		glDisable(GL_DEBUG_OUTPUT);
         glDisable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
@@ -128,17 +90,7 @@ namespace juceRmlUi
 
 	void RmlComponent::openGLContextClosing()
 	{
-		RmlInterfaces::ScopedAccess access(*this);
-		if (m_rmlContext)
-		{
-			m_rmlContext->UnloadAllDocuments();
-			Rml::RemoveContext(m_rmlContext->GetName());
-			m_rmlContext = nullptr;
-
-			Rml::ReleaseRenderManagers();
-		}
-
-		m_renderProxy.reset();
+		m_renderProxy->setRenderer(nullptr);
 		m_renderInterface.reset();
 	}
 
@@ -299,11 +251,100 @@ namespace juceRmlUi
 	void RmlComponent::update()
 	{
 		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext)
+			return;
+
+		updateRmlContextDimensions();
+
+		m_rmlContext->Update();
+		m_rmlContext->Render();
+		m_renderProxy->finishFrame();
+	}
+
+	void RmlComponent::createRmlContext()
+	{
+		const auto size = getScreenBounds();
+
+		if (size.isEmpty())
+			return;
+
+		RmlInterfaces::ScopedAccess access(*this);
+
 		if (m_rmlContext)
+			return;
+
+		m_rmlContext = CreateContext(getName().toStdString(), {size.getWidth(), size.getHeight()}, m_renderProxy.get(), nullptr);
+
+		m_rmlContext->SetDensityIndependentPixelRatio(static_cast<float>(m_openGLContext.getRenderingScale()) * m_contentScale);
+
+		auto& sys = m_rmlInterfaces->getSystemInterface();
+		sys.beginLogRecording();
+
+        auto* document = m_rmlContext->LoadDocument(m_rootRmlFilename);
+        if (document)
+	        document->Show();
+		else
+			assert(false);
+
+		sys.endLogRecording();
+
+		const auto logs = sys.getRecordedLogEntries();
+
+		if (!logs.empty())
 		{
-			m_rmlContext->Update();
-			m_rmlContext->Render();
-			m_renderProxy->finishFrame();
+			std::stringstream ss;
+			ss << "Errors while loading RMLUI document '" << m_rootRmlFilename << "':\n\n";
+			for (const auto& log : logs)
+				ss << '[' << SystemInterface::logTypeToString(log.first) << "]: " << log.second << '\n';
+			juce::NativeMessageBox::showMessageBoxAsync(juce::MessageBoxIconType::WarningIcon, "Error loading RMLUI document", ss.str(), this);
 		}
+	}
+
+	void RmlComponent::destroyRmlContext()
+	{
+		RmlInterfaces::ScopedAccess access(*this);
+
+		if (!m_rmlContext)
+			return;
+
+		m_rmlContext->UnloadAllDocuments();
+		Rml::RemoveContext(m_rmlContext->GetName());
+		m_rmlContext = nullptr;
+
+		Rml::ReleaseRenderManagers();
+	}
+
+	void RmlComponent::updateRmlContextDimensions()
+	{
+		auto contextDims = m_rmlContext->GetDimensions();
+
+		const float renderScale = static_cast<float>(m_openGLContext.getRenderingScale());
+
+		const int width = getScreenBounds().getWidth();
+		const int height = getScreenBounds().getHeight();
+
+		if (contextDims.x != width || contextDims.y != height || m_currentRenderScale != renderScale)
+		{
+			m_currentRenderScale = renderScale;
+			m_rmlContext->SetDensityIndependentPixelRatio(renderScale * m_contentScale);
+			m_rmlContext->SetDimensions({ width, height });
+		}
+	}
+
+	void RmlComponent::resized()
+	{
+		Component::resized();
+		createRmlContext();
+
+		RmlInterfaces::ScopedAccess access(*this);
+		updateRmlContextDimensions();
+	}
+
+	void RmlComponent::parentSizeChanged()
+	{
+		Component::parentSizeChanged();
+		RmlInterfaces::ScopedAccess access(*this);
+		updateRmlContextDimensions();
 	}
 }
