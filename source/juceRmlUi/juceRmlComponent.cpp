@@ -160,13 +160,14 @@ namespace juceRmlUi
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
 	{
 		Component::mouseDoubleClick(_event);
-
+		// this confuses rml as it has its own double click handling. This causes a double click plus another single click to be triggered
+/*
 		RmlInterfaces::ScopedAccess access(*this);
 
 		if (!m_rmlContext)
 			return;
 		m_rmlContext->ProcessMouseButtonDown(helper::toRmlMouseButton(_event), helper::toRmlModifiers(_event));
-	}
+*/	}
 
 	bool RmlComponent::keyPressed(const juce::KeyPress& _key)
 	{
