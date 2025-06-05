@@ -40,7 +40,7 @@ namespace juceRmlUi
 
 		auto menu = doc->CreateElement("div");
 
-		menu->SetClass("dropdownbox", true);
+		menu->SetClass("menubox", true);
 
 		uint32_t counter = 0;
 
@@ -51,7 +51,7 @@ namespace juceRmlUi
 			if (counter == 0)
 			{
 				auto c = doc->CreateElement("div");
-				c->SetClass("dropdowncolumn", true);
+				c->SetClass("menucolumn", true);
 				column = menu->AppendChild(std::move(c), true);
 			}
 			++counter;
@@ -60,7 +60,7 @@ namespace juceRmlUi
 
 			auto div = doc->CreateElement("div");
 
-			div->SetClass("dropdownoption", true);
+			div->SetClass("menuitem", true);
 
 			if (entry.checked)
 				div->SetPseudoClass("checked", true);
