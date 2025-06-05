@@ -51,6 +51,7 @@
 #elif defined RMLUI_GL3_CUSTOM_LOADER
 	#define RMLUI_SHADER_HEADER_VERSION "#version 330\n"
 	#include RMLUI_GL3_CUSTOM_LOADER
+	using namespace juce::gl;
 #else
 	#define RMLUI_SHADER_HEADER_VERSION "#version 330\n"
 	#define GLAD_GL_IMPLEMENTATION
