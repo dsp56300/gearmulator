@@ -27,7 +27,7 @@ namespace juceRmlUi
 		m_openGLContext.setRenderer(this);
 		m_openGLContext.attachTo(*this);
 		m_openGLContext.setContinuousRepainting(true);
-//		m_openGLContext.setSwapInterval(1);
+		m_openGLContext.setSwapInterval(1);
 
 		setWantsKeyboardFocus(true);
 
