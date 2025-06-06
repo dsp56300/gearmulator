@@ -58,7 +58,9 @@ namespace juceRmlUi
 		if (m_recordingLog)
 			m_logEntries.emplace_back(_type, _message);
 
-		return Rml::SystemInterface::LogMessage(_type, _message);
+		if (_type == Rml::Log::LT_ASSERT || _type == Rml::Log::LT_ERROR)
+			return Rml::SystemInterface::LogMessage(_type, _message);
+		return true;
 	}
 
 	void SystemInterface::SetMouseCursor(const Rml::String& _cursorName)
