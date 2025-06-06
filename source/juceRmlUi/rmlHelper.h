@@ -8,6 +8,7 @@
 namespace Rml
 {
 	class Event;
+	class Element;
 }
 
 namespace juce
@@ -40,5 +41,7 @@ namespace juceRmlUi
 		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key);
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
+
+		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child);
 	}
 }

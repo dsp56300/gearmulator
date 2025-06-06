@@ -21,6 +21,7 @@ namespace juceRmlUi
 
 		void addEntry(const std::string& _name, std::function<void()> _action);
 		void addEntry(const std::string& _name, const bool _checked, std::function<void()> _action);
+		void addSeparator();
 
 		void clear()
 		{
@@ -36,7 +37,8 @@ namespace juceRmlUi
 		struct Entry
 		{
 			std::string name;
-			bool checked;
+			bool checked = false;
+			bool separator = false;
 			std::function<void()> action;
 		};
 

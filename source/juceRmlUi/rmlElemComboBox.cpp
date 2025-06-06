@@ -1,6 +1,5 @@
 #include "rmlElemComboBox.h"
 
-#include "rmlHelper.h"
 #include "RmlUi/Core/ComputedValues.h"
 #include "RmlUi/Core/Context.h"
 

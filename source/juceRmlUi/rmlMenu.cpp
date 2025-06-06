@@ -30,7 +30,12 @@ namespace juceRmlUi
 
 	void Menu::addEntry(const std::string& _name, const bool _checked, std::function<void()> _action)
 	{
-		m_entries.push_back({ _name, _checked, std::move(_action) });
+		m_entries.push_back({ _name, _checked, false, std::move(_action) });
+	}
+
+	void Menu::addSeparator()
+	{
+		m_entries.push_back({ {}, false, true, {} });
 	}
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
@@ -64,10 +69,12 @@ namespace juceRmlUi
 
 			if (entry.checked)
 				div->SetPseudoClass("checked", true);
+			else if (entry.separator)
+				div->SetPseudoClass("separator", true);
 
 			div->SetInnerRML(Rml::StringUtilities::EncodeRml(entry.name));
 
-			if (entry.action)
+			if (!entry.separator && entry.action)
 			{
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Click, [this, action = entry.action](Rml::Event& _event)
 				{
@@ -109,6 +116,13 @@ namespace juceRmlUi
 
 	void Menu::ProcessEvent(Rml::Event& _event)
 	{
+		if (_event.GetId() != Rml::EventId::Click)
+			return;
+
+		const auto* target = _event.GetTargetElement();
+		if (target && helper::isChildOf(m_root, target))
+			return;
+		Rml::Log::Message(Rml::Log::LT_INFO, "somewhere else clicked, closing");
 		close();
 	}
 }

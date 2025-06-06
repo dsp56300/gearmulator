@@ -2,6 +2,7 @@
 
 #include "juce_gui_basics/juce_gui_basics.h"
 
+#include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/Event.h"
 #include "RmlUi/Core/Input.h"
 
@@ -147,6 +148,19 @@ namespace juceRmlUi
 			const auto y = _event.GetParameter<float>("mouse_y", 0.0f);
 
 			return {x, y};
+		}
+
+		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child)
+		{
+			if (!_parent || !_child)
+				return false;
+			while (_child)
+			{
+				if (_child == _parent)
+					return true;
+				_child = _child->GetParentNode();
+			}
+			return false;
 		}
 	}
 }
