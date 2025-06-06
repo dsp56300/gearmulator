@@ -26,5 +26,7 @@ namespace juceRmlUi
 
 		std::vector<Rml::String> m_options;
 		baseLib::EventListener<Rml::String> m_onOptionSelected;
+
+		std::shared_ptr<Menu> m_menu;
 	};
 }

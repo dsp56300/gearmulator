@@ -11,16 +11,7 @@ namespace juceRmlUi
 {
 	Menu::~Menu()
 	{
-		if (m_root)
-		{
-			m_root->GetParentNode()->RemoveChild(m_root);
-			m_root = nullptr;
-		}
-
-		if (m_document)
-		{
-			m_document->RemoveEventListener(Rml::EventId::Click, this);
-		}
+		close();
 	}
 
 	void Menu::addEntry(const std::string& _name, std::function<void()> _action)
@@ -30,12 +21,18 @@ namespace juceRmlUi
 
 	void Menu::addEntry(const std::string& _name, const bool _checked, std::function<void()> _action)
 	{
-		m_entries.push_back({ _name, _checked, false, std::move(_action) });
+		m_entries.push_back({ _name, _checked, false, std::move(_action), {} });
 	}
 
 	void Menu::addSeparator()
 	{
-		m_entries.push_back({ {}, false, true, {} });
+		m_entries.push_back({ {}, false, true, {}, {} });
+	}
+
+	void Menu::addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu)
+	{
+		if (_subMenu)
+			m_entries.push_back({ _name, false, false, {}, _subMenu });
 	}
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
@@ -67,26 +64,45 @@ namespace juceRmlUi
 
 			div->SetClass("menuitem", true);
 
+			if (entry.submenu)
+				div->SetPseudoClass("submenu", true);
 			if (entry.checked)
 				div->SetPseudoClass("checked", true);
 			else if (entry.separator)
 				div->SetPseudoClass("separator", true);
 
-			div->SetInnerRML(Rml::StringUtilities::EncodeRml(entry.name));
-
+			if (entry.submenu)
+			{
+				Rml::ObserverPtr<Rml::Element> parent = div->GetObserverPtr();
+				juceRmlUi::EventListener::Add(div, Rml::EventId::Mouseover, [this, parent, submenu = entry.submenu](Rml::Event& _event)
+				{
+					openSubmenu(parent, submenu);
+					_event.StopPropagation();
+				});
+			}
+			else
+			{
+				juceRmlUi::EventListener::Add(div, Rml::EventId::Mouseover, [this](Rml::Event& _event)
+				{
+					closeSubmenu();
+				});
+			}
 			if (!entry.separator && entry.action)
 			{
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Click, [this, action = entry.action](Rml::Event& _event)
 				{
 					action();
 					_event.StopPropagation();
-					close();
+					closeConfirm();
 				});
 			}
+
+			div->SetInnerRML(Rml::StringUtilities::EncodeRml(entry.name));
+
 			column->AppendChild(std::move(div), true);
 		}
 
-		// place at mouse position
+		// place at provided position
         menu->SetProperty("position", "absolute");
         menu->SetProperty("left", std::to_string(_position.x) + "px");
         menu->SetProperty("top", std::to_string(_position.y) + "px");
@@ -107,22 +123,86 @@ namespace juceRmlUi
 
 		m_document = _parent->GetOwnerDocument();
 		m_document->AddEventListener(Rml::EventId::Click, this);
+
+		m_root->AddEventListener(Rml::EventId::Mouseover, this);
 	}
 
 	void Menu::close()
 	{
-		delete this;
+		closeSubmenu();
+
+		if (m_root)
+		{
+			m_root->GetParentNode()->RemoveChild(m_root);
+			m_root->RemoveEventListener(Rml::EventId::Mouseover, this);
+			m_root = nullptr;
+		}
+
+		if (m_document)
+		{
+			m_document->RemoveEventListener(Rml::EventId::Click, this);
+		}
+
+		m_parentMenu = nullptr;
 	}
 
 	void Menu::ProcessEvent(Rml::Event& _event)
 	{
-		if (_event.GetId() != Rml::EventId::Click)
+		switch (_event.GetId())
+		{
+		case Rml::EventId::Click:
+			{
+				const auto* target = _event.GetTargetElement();
+				if (target && helper::isChildOf(m_root, target))
+					return;
+				Rml::Log::Message(Rml::Log::LT_INFO, "somewhere else clicked, closing");
+				close();
+			}
+			break;
+		default:
+			return;
+		}
+	}
+
+	void Menu::closeConfirm()
+	{
+		if (m_parentMenu)
+			m_parentMenu->closeConfirm();
+		close();
+	}
+
+	void Menu::setParentMenu(Menu* _menu)
+	{
+		m_parentMenu = _menu;
+	}
+
+	void Menu::openSubmenu(const Rml::ObserverPtr<Rml::Element>& _parentEntry, const std::shared_ptr<Menu>& _submenu)
+	{
+		if (m_subMenu == _submenu)
+			return;
+		closeSubmenu();
+		m_subMenu = _submenu;
+		m_subMenuParentEntry = _parentEntry;
+
+		if (!m_subMenu)
 			return;
 
-		const auto* target = _event.GetTargetElement();
-		if (target && helper::isChildOf(m_root, target))
-			return;
-		Rml::Log::Message(Rml::Log::LT_INFO, "somewhere else clicked, closing");
-		close();
+		m_subMenuParentEntry->SetPseudoClass("active", true);
+
+		auto pos = _parentEntry->GetAbsoluteOffset(Rml::BoxArea::Border);
+		const auto size = _parentEntry->GetBox().GetSize(Rml::BoxArea::Border);
+		pos += Rml::Vector2f(size.x, 0);
+		m_subMenu->open(_parentEntry.get(), pos, 16);
+		m_subMenu->setParentMenu(this);
+	}
+
+	void Menu::closeSubmenu()
+	{
+		if (m_subMenu)
+			m_subMenu->close();
+		m_subMenu.reset();
+		if (m_subMenuParentEntry)
+			m_subMenuParentEntry->SetPseudoClass("active", false);
+		m_subMenuParentEntry.reset();
 	}
 }

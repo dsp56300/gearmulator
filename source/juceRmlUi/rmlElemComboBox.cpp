@@ -34,12 +34,12 @@ namespace juceRmlUi
 		}
 	}
 
-	void ElemComboBox::onClick(const Rml::Event& _event)
+	void ElemComboBox::onClick(const Rml::Event&)
 	{
 		if (m_options.empty())
 			return;
 
-		auto* menu = new Menu();
+		m_menu.reset(new Menu());
 
 		const auto currentValue = static_cast<uint32_t>(getValue());
 
@@ -47,13 +47,13 @@ namespace juceRmlUi
 		{
 			auto& option = m_options[i];
 
-			menu->addEntry(option, i == currentValue, [this, i]
+			m_menu->addEntry(option, i == currentValue, [this, i]
 			{
 				setValue(static_cast<float>(i));
 			});
 		}
 
-		menu->open(this, GetAbsoluteOffset(Rml::BoxArea::Border), getProperty("items-per-column", 16));
+		m_menu->open(this, GetAbsoluteOffset(Rml::BoxArea::Border), getProperty("items-per-column", 16));
 	}
 
 	void ElemComboBox::updateValueText()
