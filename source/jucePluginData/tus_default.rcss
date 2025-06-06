@@ -47,7 +47,7 @@ thead, tbody, tfoot {
 	flex-direction: row;
 	padding: 5dp;
 	position: absolute;
-	/*z-index: 100;*/
+	z-index: 100;
 	gap: 4dp;
 	font-size: 16dp;
 	font-weight: 500;
@@ -64,10 +64,10 @@ thead, tbody, tfoot {
 	color: #fff;
 	padding: 5dp;
 	padding-left: 25dp;
-	padding-right: 25dp;
+	padding-right: 35dp;
 }
 
-.menuitem:hover {
+.menuitem:hover, .menuitem:active {
 	background-color: rgb(24,31,34);
 }
 
