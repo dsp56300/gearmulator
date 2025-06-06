@@ -1,0 +1,96 @@
+/* Root element, width and height should stay at 100% */
+
+body {
+    font-family: Roboto;
+    font-size: 16dp;
+    font-weight: 500;
+    background-color: #444;
+    color: white;
+    top: 0px;
+    right: 0px;
+    bottom: 0px;
+    left: 0px;
+}
+
+/* https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
+table {
+	box-sizing: border-box;
+	display: table;
+}
+tr {
+	box-sizing: border-box;
+	display: table-row;
+}
+td {
+	box-sizing: border-box;
+	display: table-cell;
+}
+col {
+	box-sizing: border-box;
+	display: table-column;
+}
+colgroup {
+	display: table-column-group;
+}
+thead, tbody, tfoot {
+	display: table-row-group;
+}
+
+/* All Menus and Drodown Boxes */
+
+.menubox {
+	box-shadow: #000a 0dp 0dp 8dp 3dp;
+	background-color: rgb(50,62,68);
+	border: 1dp rgb(172,176,179);
+	border-radius: 0dp;
+	display: flex;
+	flex-direction: row;
+	padding: 5dp;
+	position: absolute;
+	/*z-index: 100;*/
+	gap: 4dp;
+	font-size: 16dp;
+	font-weight: 500;
+}
+
+.menucolumn {
+	display: flex;
+	flex-direction: column;
+	gap: 1dp;
+}
+
+.menuitem {
+	height: 1em;
+	color: #fff;
+	padding: 5dp;
+	padding-left: 25dp;
+	padding-right: 25dp;
+}
+
+.menuitem:hover {
+	background-color: rgb(24,31,34);
+}
+
+.menuitem:checked {
+	decorator: image(check.png contain left);
+}
+
+.menuitem:submenu {
+	decorator: image(chevron_right.png contain right);
+}
+
+.menuitem:separator {
+	height: 2dp;
+	background-color: rgb(111,129,123);
+	padding: 0dp;
+	margin: 4dp 0dp 4dp 0dp;
+}
+
+combo {
+	items-per-column: 8;
+	background-color: rgb(50,62,68);
+	border: 1dp rgb(172,176,179);
+	width: 100dp;
+	padding: 5dp;
+	decorator: image(arrow_drop_down.png contain right);
+}
