@@ -115,7 +115,7 @@ namespace juceRmlUi
 
 		// make sure the dropdown is not outside the document bounds
 		const auto box = m_root->GetBox();
-		auto size = box.GetSize();
+		auto size = box.GetSize(Rml::BoxArea::Border);
 		if (_position.x + size.x > dims.x)
 			m_root->SetProperty("left", std::to_string(dims.x - size.x) + "px");
 		if (_position.y + size.y > dims.y)
