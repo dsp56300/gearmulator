@@ -154,7 +154,7 @@ namespace juceRmlUi
 		RmlInterfaces::ScopedAccess access(*this);
 		if (!m_rmlContext)
 			return;
-		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(_wheel.deltaX, _wheel.deltaY), helper::toRmlModifiers(_event));
+		m_rmlContext->ProcessMouseWheel(Rml::Vector2f(-_wheel.deltaX, -_wheel.deltaY), helper::toRmlModifiers(_event));
 	}
 
 	void RmlComponent::mouseDoubleClick(const juce::MouseEvent& _event)
