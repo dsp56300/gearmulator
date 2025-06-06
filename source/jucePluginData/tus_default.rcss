@@ -71,8 +71,15 @@ thead, tbody, tfoot {
 	background-color: rgb(24,31,34);
 }
 
+.menuitem:hover:disabled {
+	background-color: transparent;
+}
+
 .menuitem:checked {
 	decorator: image(check.png contain left);
+}
+.menuitem:disabled {
+	color: #888;
 }
 
 .menuitem:submenu {

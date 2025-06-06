@@ -21,18 +21,18 @@ namespace juceRmlUi
 
 	void Menu::addEntry(const std::string& _name, const bool _checked, std::function<void()> _action)
 	{
-		m_entries.push_back({ _name, _checked, false, std::move(_action), {} });
+		m_entries.push_back({ _name, _checked, false, true, std::move(_action), {} });
 	}
 
 	void Menu::addSeparator()
 	{
-		m_entries.push_back({ {}, false, true, {}, {} });
+		m_entries.push_back({ {}, false, true, true, {}, {} });
 	}
 
 	void Menu::addSubMenu(const std::string& _name, const std::shared_ptr<Menu>& _subMenu)
 	{
 		if (_subMenu)
-			m_entries.push_back({ _name, false, false, {}, _subMenu });
+			m_entries.push_back({ _name, false, false, true, {}, _subMenu });
 	}
 
 	void Menu::open(const Rml::Element* _parent, const Rml::Vector2f& _position, const uint32_t _itemsPerColumn)
@@ -70,6 +70,8 @@ namespace juceRmlUi
 				div->SetPseudoClass("checked", true);
 			else if (entry.separator)
 				div->SetPseudoClass("separator", true);
+			if (!entry.enabled)
+				div->SetPseudoClass("disabled", true);
 
 			if (entry.submenu)
 			{
@@ -87,7 +89,7 @@ namespace juceRmlUi
 					closeSubmenu();
 				});
 			}
-			if (!entry.separator && entry.action)
+			if (!entry.separator && entry.action && entry.enabled)
 			{
 				juceRmlUi::EventListener::Add(div, Rml::EventId::Click, [this, action = entry.action](Rml::Event& _event)
 				{

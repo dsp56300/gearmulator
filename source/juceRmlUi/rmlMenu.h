@@ -46,6 +46,7 @@ namespace juceRmlUi
 			std::string name;
 			bool checked = false;
 			bool separator = false;
+			bool enabled = true;
 			std::function<void()> action;
 			std::shared_ptr<Menu> submenu;
 		};
