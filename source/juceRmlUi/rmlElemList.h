@@ -30,7 +30,7 @@ namespace juceRmlUi
 		Rml::Element* m_spacerBottom = nullptr;
 		ElemListEntry* m_entryTemplate = nullptr;
 
-		std::map<size_t, ElemListEntry*> m_activeEntries;
+		std::map<size_t, Rml::Element*> m_activeEntries;
 		std::vector<Rml::ElementPtr> m_inactiveEntries;
 
 		bool m_layoutDirty = true;

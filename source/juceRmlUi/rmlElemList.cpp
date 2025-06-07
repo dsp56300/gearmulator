@@ -174,28 +174,19 @@ namespace juceRmlUi
 			else
 			{
 				e = m_entryTemplate->Clone();
+
+				e->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
 			}
 
 			auto entry = dynamic_cast<ElemListEntry*>(e.get());
-			assert(entry);
-
-			entry->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
-
-			entry->setListItem(m_list.getEntry(i));
-			entry->SetInnerRML("Entry " + std::to_string(i));
-
-			Rml::Element* insertBefore;
+			if (entry)
+				entry->setListItem(m_list.getEntry(i));
 
 			auto itNext = m_activeEntries.lower_bound(i + 1);
 
-			if (itNext != m_activeEntries.end())
-			{
-				insertBefore = itNext->second; // if there is a next entry, we insert before it
-			}
-			else
-			{
-				insertBefore = m_spacerBottom; // otherwise we insert before the bottom spacer
-			}
+			Rml::Element* insertBefore = (itNext != m_activeEntries.end())
+				? itNext->second  // if there is a next entry, we insert before it
+				: m_spacerBottom; // otherwise we insert before the bottom spacer
 
 			m_activeEntries.insert({ i, entry });
 

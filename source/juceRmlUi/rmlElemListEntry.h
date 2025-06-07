@@ -12,7 +12,7 @@ namespace juceRmlUi
 
 		void setListItem(const List::EntryPtr& _entry);
 
-		virtual void onEntryChanged() {}
+		virtual void onEntryChanged();
 
 	private:
 		List::EntryPtr m_entry;
