@@ -12,6 +12,7 @@ namespace juceRmlUi
 	void List::addEntry(std::shared_ptr<ListEntry>&& _entry)
 	{
 		_entry->setIndex(m_entries.size());
+		evEntryAdded(this, _entry);
 		m_entries.push_back(std::move(_entry));
 	}
 
@@ -26,6 +27,9 @@ namespace juceRmlUi
 			return false;
 
 		auto& e = m_entries[_index];
+
+		evEntryRemoved(this, e);
+
 		e->setIndex(InvalidIndex);
 
 		m_entries.erase(m_entries.begin() + static_cast<decltype(m_entries)::difference_type>(_index));
@@ -54,6 +58,7 @@ namespace juceRmlUi
 			if (index >= m_entries.size())
 				continue;
 			res = true;
+			evEntryRemoved(this, m_entries[index]);
 			m_entries[index]->setIndex(InvalidIndex);
 			m_entries.erase(m_entries.begin() + static_cast<decltype(m_entries)::difference_type>(index));
 		}
@@ -104,6 +109,9 @@ namespace juceRmlUi
 		m_entries.insert(m_entries.begin() + static_cast<decltype(m_entries)::difference_type>(_newIndex), entry);
 
 		updateIndices(std::min(_oldIndex, _newIndex), std::max(_oldIndex, _newIndex) + 1);
+
+		evEntriesMoved(this);
+
 		return true;
 	}
 
@@ -152,6 +160,8 @@ namespace juceRmlUi
 		}
 
 		updateIndices(minIndex, maxIndex + 1);
+
+		evEntriesMoved(this);
 
 		return true;
 	}

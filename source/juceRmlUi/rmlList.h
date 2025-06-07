@@ -3,6 +3,8 @@
 #include <memory>
 #include <vector>
 
+#include "baseLib/event.h"
+
 namespace juceRmlUi
 {
 	class ListEntry;
@@ -12,6 +14,10 @@ namespace juceRmlUi
 	public:
 		static constexpr size_t InvalidIndex = static_cast<size_t>(-1);
 		using EntryPtr = std::shared_ptr<ListEntry>;
+
+		baseLib::Event<List*, EntryPtr> evEntryAdded;
+		baseLib::Event<List*, EntryPtr> evEntryRemoved;
+		baseLib::Event<List*> evEntriesMoved;
 
 		List();
 		List(const List&) = delete;
