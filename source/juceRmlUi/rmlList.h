@@ -14,6 +14,13 @@ namespace juceRmlUi
 		using EntryPtr = std::shared_ptr<ListEntry>;
 
 		List();
+		List(const List&) = delete;
+		List(List&&) noexcept = default;
+		List& operator=(const List&) = delete;
+		List& operator=(List&&) noexcept = default;
+
+		virtual ~List() = default;
+
 		bool empty() const { return m_entries.empty(); }
 		size_t size() const { return m_entries.size(); }
 

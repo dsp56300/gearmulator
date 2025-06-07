@@ -19,6 +19,12 @@ namespace juceRmlUi
 		baseLib::Event<ListEntry*, bool> evSelected;
 
 		explicit ListEntry(List& _list);
+		ListEntry(const ListEntry&) = delete;
+		ListEntry(ListEntry&&)  noexcept = default;
+		ListEntry& operator=(const ListEntry&) = delete;
+		ListEntry& operator=(ListEntry&&) = delete;
+
+		virtual ~ListEntry() = default;
 
 		bool isSelected() const { return m_selected; }
 		void setSelected(bool _selected);
