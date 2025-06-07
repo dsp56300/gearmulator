@@ -6,6 +6,8 @@
 
 #include "rmlElemComboBox.h"
 #include "rmlElemKnob.h"
+#include "rmlElemList.h"
+#include "rmlElemListEntry.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementInstancer.h"
@@ -21,6 +23,8 @@ namespace juceRmlUi
 		uint32_t g_instanceCount = 0;
 		Rml::ElementInstancerGeneric<ElemComboBox> g_elemInstancerCombo;
 		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
+		Rml::ElementInstancerGeneric<ElemList> g_elemInstancerList;
+		Rml::ElementInstancerGeneric<ElemListEntry> g_elemInstancerListEntry;
 		RmlComponent* g_currentComponent;
 	}
 
@@ -51,6 +55,8 @@ namespace juceRmlUi
 
 			Rml::Factory::RegisterElementInstancer("knob", &g_elemInstancerKnob);
 			Rml::Factory::RegisterElementInstancer("combo", &g_elemInstancerCombo);
+			Rml::Factory::RegisterElementInstancer("list", &g_elemInstancerList);
+			Rml::Factory::RegisterElementInstancer("listentry", &g_elemInstancerListEntry);
 		}
 	}
 

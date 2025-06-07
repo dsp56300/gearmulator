@@ -10,6 +10,8 @@ set(SOURCES
 	rmlElemComboBox.cpp rmlElemComboBox.h
 	rmlElement.cpp rmlElement.h
 	rmlElemKnob.cpp rmlElemKnob.h
+	rmlElemList.cpp rmlElemList.h
+	rmlElemListEntry.cpp rmlElemListEntry.h
 	rmlElemSlider.cpp rmlElemSlider.h
 	rmlElemValue.cpp rmlElemValue.h
 	rmlEventListener.cpp rmlEventListener.h
