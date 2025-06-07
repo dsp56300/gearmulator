@@ -16,6 +16,8 @@ set(SOURCES
 	rmlFileInterface.cpp rmlFileInterface.h
 	rmlHelper.cpp rmlHelper.h
 	rmlInterfaces.cpp rmlInterfaces.h
+	rmlList.cpp rmlList.h
+	rmlListEntry.cpp rmlListEntry.h
 	rmlMenu.cpp rmlMenu.h
 	rmlRendererProxy.cpp rmlRendererProxy.h
 	rmlRendererGL2.cpp rmlRendererGL2.h
