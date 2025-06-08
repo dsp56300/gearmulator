@@ -3,9 +3,11 @@
 #include "rmlElemListEntry.h"
 #include "rmlListEntry.h"
 
+using namespace Rml;
+
 namespace juceRmlUi
 {
-	ElemList::ElemList(const Rml::String& _tag) : Element(_tag)
+	ElemList::ElemList(const String& _tag) : Element(_tag)
 	{
 		for (size_t i=0; i<100; ++i)
 		{
@@ -43,11 +45,11 @@ namespace juceRmlUi
 		m_layoutDirty = 2;	// the values are not yet updated in the next OnUpdate, delay further
 	}
 
-	void ElemList::ProcessEvent(Rml::Event& _event)
+	void ElemList::ProcessEvent(Event& _event)
 	{
 		switch (_event.GetId())
 		{
-		case Rml::EventId::Scroll:
+		case EventId::Scroll:
 			onScroll(_event);
 			break;
 		default:;
@@ -67,18 +69,18 @@ namespace juceRmlUi
 
 		if (m_entryTemplate == nullptr)
 		{
-			Rml::Log::Message(Rml::Log::LT_ERROR, "list item template needs to be of type 'listitem', got '%s' instead", entryTemplate->GetTagName().c_str());
+			Log::Message(Log::LT_ERROR, "list item template needs to be of type 'listitem', got '%s' instead", entryTemplate->GetTagName().c_str());
 			return;
 		}
 
-		AddEventListener(Rml::EventId::Scroll, this);
+		AddEventListener(EventId::Scroll, this);
 	}
 
-	Rml::Vector2f ElemList::updateElementSize()
+	Vector2f ElemList::updateElementSize()
 	{
 		if (!m_activeEntries.empty())
 		{
-			auto size = m_activeEntries.begin()->second->GetBox().GetSize(Rml::BoxArea::Margin);
+			auto size = m_activeEntries.begin()->second->GetBox().GetSize(BoxArea::Margin);
 
 			if (size.x > 0 && size.y > 0)
 			{
@@ -86,12 +88,12 @@ namespace juceRmlUi
 				return size;
 			}
 		}
-		if (m_elementSize.x <= 0.0f || m_elementSize.y <= 0 && m_entryTemplate->GetDisplay() != Rml::Style::Display::None)
+		if (m_elementSize.x <= 0.0f || m_elementSize.y <= 0 && m_entryTemplate->GetDisplay() != Style::Display::None)
 		{
-			m_elementSize = m_entryTemplate->GetBox().GetSize(Rml::BoxArea::Margin);
+			m_elementSize = m_entryTemplate->GetBox().GetSize(BoxArea::Margin);
 			if (m_elementSize.x > 0 && m_elementSize.y > 0)
 			{
-				m_entryTemplate->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+				m_entryTemplate->SetProperty(PropertyId::Display, Property(Style::Display::None));
 				return m_elementSize;
 			}
 		}
@@ -101,7 +103,7 @@ namespace juceRmlUi
 	bool ElemList::updateLayout()
 	{
 		const auto box = GetBox();
-		const auto size = box.GetSize(Rml::BoxArea::Content);
+		const auto size = box.GetSize(BoxArea::Content);
 		const auto scrollTop = GetScrollTop();
 
 		const auto elementHeight = updateElementSize().y;
@@ -116,22 +118,22 @@ namespace juceRmlUi
 
 		if (firstEntry > 0)
 		{
-			m_spacerTL->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(firstEntry) * elementHeight, Rml::Unit::PX));
-			m_spacerTL->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
+			m_spacerTL->SetProperty(PropertyId::Height, Property(static_cast<float>(firstEntry) * elementHeight, Unit::PX));
+			m_spacerTL->SetProperty(PropertyId::Display, Property(Style::Display::Block));
 		}
 		else
 		{
-			m_spacerTL->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+			m_spacerTL->SetProperty(PropertyId::Display, Property(Style::Display::None));
 		}
 
 		if (static_cast<size_t>(lastEntry) < m_list.size())
 		{
-			m_spacerBR->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(m_list.size() - lastEntry) * elementHeight, Rml::Unit::PX));
-			m_spacerBR->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
+			m_spacerBR->SetProperty(PropertyId::Height, Property(static_cast<float>(m_list.size() - lastEntry) * elementHeight, Unit::PX));
+			m_spacerBR->SetProperty(PropertyId::Display, Property(Style::Display::Block));
 		}
 		else
 		{
-			m_spacerBR->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+			m_spacerBR->SetProperty(PropertyId::Display, Property(Style::Display::None));
 		}
 
 		return true;
@@ -169,7 +171,7 @@ namespace juceRmlUi
 			if (m_activeEntries.find(i) != m_activeEntries.end())
 				continue;
 
-			Rml::ElementPtr e;
+			ElementPtr e;
 			if (!m_inactiveEntries.empty())
 			{
 				e = std::move(m_inactiveEntries.back());
@@ -179,7 +181,7 @@ namespace juceRmlUi
 			{
 				e = m_entryTemplate->Clone();
 
-				e->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
+				e->SetProperty(PropertyId::Display, Property(Style::Display::Block));
 			}
 
 			auto entry = dynamic_cast<ElemListEntry*>(e.get());
@@ -198,7 +200,7 @@ namespace juceRmlUi
 		}
 	}
 
-	void ElemList::onScroll(const Rml::Event& _event)
+	void ElemList::onScroll(const Event& _event)
 	{
 		m_layoutDirty = 1;
 	}
