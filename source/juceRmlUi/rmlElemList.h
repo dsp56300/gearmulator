@@ -35,6 +35,7 @@ namespace juceRmlUi
 		void setSpacerTL(float _size);
 		void setSpacerBR(float _size);
 		void setSpacer(Rml::Element* _spacer, float _size);
+		Rml::Element* createSpacer();
 
 		void onScroll(const Rml::Event& _event);
 

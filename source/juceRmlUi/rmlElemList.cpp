@@ -3,6 +3,8 @@
 #include "rmlElemListEntry.h"
 #include "rmlListEntry.h"
 
+#include "RmlUi/Core/ElementDocument.h"
+
 using namespace Rml;
 
 namespace juceRmlUi
@@ -58,20 +60,25 @@ namespace juceRmlUi
 
 	void ElemList::initialize()
 	{
-		if (GetNumChildren() < 3)
+		if (!GetNumChildren())
 			return;
 
-		m_spacerTL = GetChild(0);
-		m_spacerBR = GetChild(GetNumChildren() - 1);
-
-		const auto entryTemplate = GetChild(1);
-		m_entryTemplate = dynamic_cast<ElemListEntry*>(entryTemplate);
+		for (int i=0; i<GetNumChildren(); ++i)
+		{
+			const auto e = GetChild(i);
+			m_entryTemplate = dynamic_cast<ElemListEntry*>(e);
+			if (m_entryTemplate)
+				break;
+		}
 
 		if (m_entryTemplate == nullptr)
 		{
-			Log::Message(Log::LT_ERROR, "list item template needs to be of type 'listitem', got '%s' instead", entryTemplate->GetTagName().c_str());
+			Log::Message(Log::LT_ERROR, "list needs a child of type 'listitem'");
 			return;
 		}
+
+		m_spacerTL = createSpacer();
+		m_spacerBR = createSpacer();
 
 		AddEventListener(EventId::Scroll, this);
 	}
@@ -111,13 +118,13 @@ namespace juceRmlUi
 		if (elementHeight <= 0.0f)
 			return false;
 
-		const auto firstEntry = static_cast<int>(scrollTop / elementHeight);
-		const auto lastEntry = static_cast<int>(std::ceil((scrollTop + size.y) / elementHeight));
+		const auto firstEntry = static_cast<size_t>(scrollTop / elementHeight);
+		const auto lastEntry = static_cast<size_t>(std::ceil((scrollTop + size.y) / elementHeight));
 
 		updateActiveEntries(firstEntry, lastEntry);
 
 		setSpacerTL(static_cast<float>(firstEntry) * elementHeight);
-		setSpacerBR(static_cast<float>(m_list.size() - lastEntry) * elementHeight);
+		setSpacerBR(lastEntry < m_list.size() ? static_cast<float>(m_list.size() - lastEntry) * elementHeight : 0);
 
 		return true;
 	}
@@ -208,6 +215,29 @@ namespace juceRmlUi
 		{
 			_spacer->SetProperty(PropertyId::Display, Property(Style::Display::None));
 		}
+	}
+
+	Rml::Element* ElemList::createSpacer()
+	{
+		auto* doc = GetOwnerDocument();
+
+		auto spacer = doc->CreateElement("div");
+
+		spacer->SetClass("listspacer", true);
+
+		if (getLayoutType() == LayoutType::List)
+		{
+			spacer->SetProperty(PropertyId::Width, Property(100.0f, Unit::PERCENT));
+			spacer->SetProperty(PropertyId::Height, Property(10.0f, Unit::DP));
+		}
+
+		spacer->SetProperty(PropertyId::Height, Property(10.0f, Unit::DP));
+
+		spacer->SetProperty("border-color", "#f0f7");
+		spacer->SetProperty("border-radius", "15dp");
+//		spacer->SetProperty(PropertyId::Display, Property(Style::Display::None));
+
+		return AppendChild(std::move(spacer));
 	}
 
 	void ElemList::onScroll(const Event& _event)
