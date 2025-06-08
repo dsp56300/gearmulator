@@ -116,25 +116,8 @@ namespace juceRmlUi
 
 		updateActiveEntries(firstEntry, lastEntry);
 
-		if (firstEntry > 0)
-		{
-			m_spacerTL->SetProperty(PropertyId::Height, Property(static_cast<float>(firstEntry) * elementHeight, Unit::PX));
-			m_spacerTL->SetProperty(PropertyId::Display, Property(Style::Display::Block));
-		}
-		else
-		{
-			m_spacerTL->SetProperty(PropertyId::Display, Property(Style::Display::None));
-		}
-
-		if (static_cast<size_t>(lastEntry) < m_list.size())
-		{
-			m_spacerBR->SetProperty(PropertyId::Height, Property(static_cast<float>(m_list.size() - lastEntry) * elementHeight, Unit::PX));
-			m_spacerBR->SetProperty(PropertyId::Display, Property(Style::Display::Block));
-		}
-		else
-		{
-			m_spacerBR->SetProperty(PropertyId::Display, Property(Style::Display::None));
-		}
+		setSpacerTL(static_cast<float>(firstEntry) * elementHeight);
+		setSpacerBR(static_cast<float>(m_list.size() - lastEntry) * elementHeight);
 
 		return true;
 	}
@@ -200,8 +183,57 @@ namespace juceRmlUi
 		}
 	}
 
+	void ElemList::setSpacerTL(const float _size)
+	{
+		setSpacer(m_spacerTL, _size);
+	}
+
+	void ElemList::setSpacerBR(const float _size)
+	{
+		return setSpacer(m_spacerBR, _size);
+	}
+
+	void ElemList::setSpacer(Rml::Element* _spacer, float _size)
+	{
+		if (_spacer == nullptr)
+			return;
+		if (_size > 0)
+		{
+			const auto layoutType = getLayoutType();
+
+			_spacer->SetProperty(layoutType == LayoutType::List ? PropertyId::Height : PropertyId::Width, Property(_size, Unit::PX));
+			_spacer->SetProperty(PropertyId::Display, Property(Style::Display::Block));
+		}
+		else
+		{
+			_spacer->SetProperty(PropertyId::Display, Property(Style::Display::None));
+		}
+	}
+
 	void ElemList::onScroll(const Event& _event)
 	{
 		m_layoutDirty = 1;
+	}
+
+	ElemList::LayoutType ElemList::getLayoutType()
+	{
+		auto propX = GetProperty(Rml::PropertyId::OverflowX);
+		auto propY = GetProperty(Rml::PropertyId::OverflowY);
+
+		if (propY)
+		{
+			const auto v = propY->Get<Rml::Style::Overflow>();
+
+			if (v == Rml::Style::Overflow::Scroll || v == Rml::Style::Overflow::Auto)
+				return LayoutType::List;
+		}
+		if (propX)
+		{
+			auto v = propX->Get<Rml::Style::Overflow>();
+
+			if (v == Rml::Style::Overflow::Scroll || v == Rml::Style::Overflow::Auto)
+				return LayoutType::Grid;
+		}
+		return LayoutType::None;
 	}
 }

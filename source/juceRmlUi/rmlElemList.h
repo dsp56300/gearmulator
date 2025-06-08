@@ -11,6 +11,13 @@ namespace juceRmlUi
 	class ElemList : public Element, public List, Rml::EventListener
 	{
 	public:
+		enum class LayoutType : uint8_t
+		{
+			None,
+			List,
+			Grid,
+		};
+
 		explicit ElemList(const Rml::String& _tag);
 
 		void OnChildAdd(Rml::Element* _child) override;
@@ -25,7 +32,13 @@ namespace juceRmlUi
 		bool updateLayout();
 		void updateActiveEntries(size_t _firstEntry, size_t _lastEntry);
 
+		void setSpacerTL(float _size);
+		void setSpacerBR(float _size);
+		void setSpacer(Rml::Element* _spacer, float _size);
+
 		void onScroll(const Rml::Event& _event);
+
+		LayoutType getLayoutType();
 
 		Rml::Element* m_spacerTL = nullptr;
 		Rml::Element* m_spacerBR = nullptr;
