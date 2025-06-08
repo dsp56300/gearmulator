@@ -23,7 +23,7 @@ namespace juceRmlUi
 	{
 		Element::OnUpdate();
 
-		if (m_spacerTop == nullptr || m_spacerBottom == nullptr || m_entryTemplate == nullptr)
+		if (m_spacerTL == nullptr || m_spacerBR == nullptr || m_entryTemplate == nullptr)
 		{
 			initialize();
 		}
@@ -59,8 +59,8 @@ namespace juceRmlUi
 		if (GetNumChildren() < 3)
 			return;
 
-		m_spacerTop = GetChild(0);
-		m_spacerBottom = GetChild(GetNumChildren() - 1);
+		m_spacerTL = GetChild(0);
+		m_spacerBR = GetChild(GetNumChildren() - 1);
 
 		const auto entryTemplate = GetChild(1);
 		m_entryTemplate = dynamic_cast<ElemListEntry*>(entryTemplate);
@@ -116,22 +116,22 @@ namespace juceRmlUi
 
 		if (firstEntry > 0)
 		{
-			m_spacerTop->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(firstEntry) * elementHeight, Rml::Unit::PX));
-			m_spacerTop->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
+			m_spacerTL->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(firstEntry) * elementHeight, Rml::Unit::PX));
+			m_spacerTL->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
 		}
 		else
 		{
-			m_spacerTop->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+			m_spacerTL->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
 		}
 
 		if (static_cast<size_t>(lastEntry) < m_list.size())
 		{
-			m_spacerBottom->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(m_list.size() - lastEntry) * elementHeight, Rml::Unit::PX));
-			m_spacerBottom->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
+			m_spacerBR->SetProperty(Rml::PropertyId::Height, Rml::Property(static_cast<float>(m_list.size() - lastEntry) * elementHeight, Rml::Unit::PX));
+			m_spacerBR->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::Block));
 		}
 		else
 		{
-			m_spacerBottom->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
+			m_spacerBR->SetProperty(Rml::PropertyId::Display, Rml::Property(Rml::Style::Display::None));
 		}
 
 		return true;
@@ -190,7 +190,7 @@ namespace juceRmlUi
 
 			Rml::Element* insertBefore = (itNext != m_activeEntries.end())
 				? itNext->second  // if there is a next entry, we insert before it
-				: m_spacerBottom; // otherwise we insert before the bottom spacer
+				: m_spacerBR; // otherwise we insert before the bottom spacer
 
 			m_activeEntries.insert({ i, entry });
 

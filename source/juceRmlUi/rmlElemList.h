@@ -27,8 +27,8 @@ namespace juceRmlUi
 
 		void onScroll(const Rml::Event& _event);
 
-		Rml::Element* m_spacerTop = nullptr;
-		Rml::Element* m_spacerBottom = nullptr;
+		Rml::Element* m_spacerTL = nullptr;
+		Rml::Element* m_spacerBR = nullptr;
 		ElemListEntry* m_entryTemplate = nullptr;
 
 		std::map<size_t, Rml::Element*> m_activeEntries;
