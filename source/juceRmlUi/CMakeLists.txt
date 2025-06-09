@@ -29,6 +29,8 @@ set(SOURCES
 	rmlShader.cpp rmlShader.h
 	rmlShaders.h
 	rmlSystemInterface.cpp rmlSystemInterface.h
+	rmlTree.cpp rmlTree.h
+	rmlTreeNode.cpp rmlTreeNode.h
 
 	RmlUi_Renderer_GL3.cpp RmlUi_Renderer_GL3.h
 )
