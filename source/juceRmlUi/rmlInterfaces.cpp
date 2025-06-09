@@ -8,6 +8,8 @@
 #include "rmlElemKnob.h"
 #include "rmlElemList.h"
 #include "rmlElemListEntry.h"
+#include "rmlElemTree.h"
+#include "rmlElemTreeNode.h"
 
 #include "RmlUi/Core/Core.h"
 #include "RmlUi/Core/ElementInstancer.h"
@@ -25,6 +27,8 @@ namespace juceRmlUi
 		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
 		Rml::ElementInstancerGeneric<ElemList> g_elemInstancerList;
 		Rml::ElementInstancerGeneric<ElemListEntry> g_elemInstancerListEntry;
+		Rml::ElementInstancerGeneric<ElemTree> g_elemInstancerTree;
+		Rml::ElementInstancerGeneric<ElemTreeNode> g_elemInstancerTreeNode;
 		RmlComponent* g_currentComponent;
 	}
 
@@ -57,6 +61,8 @@ namespace juceRmlUi
 			Rml::Factory::RegisterElementInstancer("combo", &g_elemInstancerCombo);
 			Rml::Factory::RegisterElementInstancer("list", &g_elemInstancerList);
 			Rml::Factory::RegisterElementInstancer("listentry", &g_elemInstancerListEntry);
+			Rml::Factory::RegisterElementInstancer("tree", &g_elemInstancerTree);
+			Rml::Factory::RegisterElementInstancer("treenode", &g_elemInstancerTreeNode);
 		}
 	}
 

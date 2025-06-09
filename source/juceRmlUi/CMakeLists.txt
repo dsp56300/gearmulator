@@ -13,6 +13,8 @@ set(SOURCES
 	rmlElemList.cpp rmlElemList.h
 	rmlElemListEntry.cpp rmlElemListEntry.h
 	rmlElemSlider.cpp rmlElemSlider.h
+	rmlElemTree.cpp rmlElemTree.h
+	rmlElemTreeNode.cpp rmlElemTreeNode.h
 	rmlElemValue.cpp rmlElemValue.h
 	rmlEventListener.cpp rmlEventListener.h
 	rmlFileInterface.cpp rmlFileInterface.h
