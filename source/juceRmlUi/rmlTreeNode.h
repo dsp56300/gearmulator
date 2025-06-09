@@ -32,12 +32,28 @@ namespace juceRmlUi
 		bool setParent(const TreeNodePtr& _parent);
 
 		const Children& getChildren() const { return m_children; }
+		TreeNodePtr getChild(size_t _index) const;
 
 		bool addChild(const TreeNodePtr& _child);
 		bool removeChild(const TreeNodePtr& _child);
-		TreeNodePtr createChild();
+
+		template<typename T, typename... Args>
+		std::shared_ptr<T> createChild(Args&& ..._args)
+		{
+			auto child = std::make_shared<T>(m_tree, std::forward<Args>(_args)...);
+			if (addChild(child))
+				return child;
+			return {};
+		}
 		bool isChild(const TreeNodePtr& _child) const;
 		size_t getChildIndex(const TreeNodePtr& _child) const;
+
+		operator TreeNodePtr() { return shared_from_this(); }
+
+		TreeNodePtr getPreviousNode();
+		TreeNodePtr getNextNode();
+
+		size_t getDepth() const;
 
 	private:
 		Tree& m_tree;

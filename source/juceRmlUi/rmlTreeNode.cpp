@@ -50,6 +50,13 @@ namespace juceRmlUi
 		return true;
 	}
 
+	TreeNodePtr TreeNode::getChild(const size_t _index) const
+	{
+		if (_index < m_children.size())
+			return m_children[_index];
+		return nullptr;
+	}
+
 	bool TreeNode::addChild(const TreeNodePtr& _child)
 	{
 		return _child->setParent(shared_from_this());
@@ -60,14 +67,6 @@ namespace juceRmlUi
 		if (_child->getParent().get() != this)
 			return false;
 		return _child->setParent(nullptr);
-	}
-
-	TreeNodePtr TreeNode::createChild()
-	{
-		auto child = std::make_shared<TreeNode>(m_tree);
-		if (addChild(child))
-			return child;
-		return {};
 	}
 
 	bool TreeNode::isChild(const TreeNodePtr& _child) const
@@ -81,5 +80,43 @@ namespace juceRmlUi
 		if (it != m_children.end())
 			return std::distance(m_children.begin(), it);
 		return InvalidIndex;
+	}
+
+	TreeNodePtr TreeNode::getPreviousNode()
+	{
+		const auto childIndex = getChildIndex(shared_from_this());
+		if (childIndex == 0)
+		{
+			auto parent = getParent();
+			if (!parent)
+				return {};
+			return parent->getPreviousNode();
+		}
+		return m_children[childIndex - 1];
+	}
+
+	TreeNodePtr TreeNode::getNextNode()
+	{
+		const auto childIndex = getChildIndex(shared_from_this());
+		const auto nextChild = childIndex +1;
+		if (nextChild < m_children.size())
+			return m_children[nextChild];
+
+		auto parent = getParent();
+		if (!parent)
+			return {};
+		return parent->getNextNode();
+	}
+
+	size_t TreeNode::getDepth() const
+	{
+		size_t depth = 0;
+		auto parent = getParent();
+		while (parent)
+		{
+			++depth;
+			parent = parent->getParent();
+		}
+		return depth;
 	}
 }
