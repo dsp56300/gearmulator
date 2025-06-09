@@ -10,10 +10,10 @@ namespace juceRmlUi
 		Tree();
 		~Tree();
 
-		TreeNode& getRoot() { return m_root; }
+		TreeNodePtr& getRoot() { return m_root; }
 
-		bool empty() const { return m_root.empty(); }
+		bool empty() const { return m_root->empty(); }
 	private:
-		TreeNode m_root;
+		TreeNodePtr m_root;
 	};
 }

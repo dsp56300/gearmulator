@@ -14,6 +14,8 @@ namespace juceRmlUi
 		{
 		}
 
+		const auto& text() const { return m_text; }
+
 	private:
 		std::string m_text;
 	};
@@ -21,7 +23,7 @@ namespace juceRmlUi
 	ElemTree::ElemTree(const Rml::String& _tag) : Element(_tag)
 	{
 		auto r = m_tree.getRoot();
-		const auto child = r.createChild<TestNode>("entry A");
+		const auto child = r->createChild<TestNode>("entry A");
 		child->createChild<TestNode>("subentry A");
 		child->createChild<TestNode>("subentry B");
 
@@ -29,7 +31,7 @@ namespace juceRmlUi
 		child2->createChild<TestNode>("subsubentry A");
 		child2->createChild<TestNode>("subsubentry B");
 
-		r.createChild<TestNode>("entry B");
+		r->createChild<TestNode>("entry B");
 	}
 
 	void ElemTree::OnChildAdd(Rml::Element* _child)
@@ -37,10 +39,13 @@ namespace juceRmlUi
 		Element::OnChildAdd(_child);
 
 		if (!m_template)
+		{
 			m_template = dynamic_cast<ElemTreeNode*>(_child);
-
-		if (m_template)
-			updateNodeElements();
+			if (m_template)
+			{
+				updateNodeElements();
+			}
+		}
 	}
 
 	void ElemTree::updateNodeElements()
@@ -51,7 +56,7 @@ namespace juceRmlUi
 	void ElemTree::updateNodeElements(const TreeNodePtr& _node)
 	{
 		const auto it = m_activeNodeElements.find(_node);
-		if (it != m_activeNodeElements.end())
+		if (it == m_activeNodeElements.end())
 		{
 			createNodeElement(_node);
 		}
@@ -83,6 +88,10 @@ namespace juceRmlUi
 		{
 			nodeElem->setTree(this);
 			nodeElem->setNode(_node);
+
+			auto* testNode = dynamic_cast<TestNode*>(_node.get());
+			if (testNode)
+				nodeElem->SetInnerRML(testNode->text());
 		}
 
 		m_activeNodeElements.insert({_node, e});

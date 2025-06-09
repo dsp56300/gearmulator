@@ -11,7 +11,7 @@ namespace juceRmlUi
 	class TreeNode;
 	using TreeNodePtr = std::shared_ptr<TreeNode>;
 
-	class TreeNode : std::enable_shared_from_this<TreeNode>
+	class TreeNode : public std::enable_shared_from_this<TreeNode>
 	{
 	public:
 		using Children = std::vector<TreeNodePtr>;
@@ -22,6 +22,7 @@ namespace juceRmlUi
 		baseLib::Event<TreeNodePtr, TreeNodePtr> evChildRemoved;
 
 		TreeNode(Tree& _tree);
+		virtual ~TreeNode() = default;
 
 		bool isRoot() const { return !m_parent.expired(); }
 		bool empty() const { return !m_children.empty(); }
