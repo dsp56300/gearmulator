@@ -23,6 +23,7 @@ namespace juceRmlUi
 		void OnChildAdd(Rml::Element* _child) override;
 		void OnUpdate() override;
 		void OnDpRatioChange() override;
+		void OnLayout() override;
 
 		void ProcessEvent(Rml::Event& _event) override;
 
@@ -30,7 +31,10 @@ namespace juceRmlUi
 		void initialize();
 		Rml::Vector2f updateElementSize();
 		bool updateLayout();
-		void updateActiveEntries(size_t _firstEntry, size_t _lastEntry);
+		bool updateLayoutVertical();
+		bool updateLayoutGrid();
+		bool updateActiveEntries(size_t _firstEntry, size_t _lastEntry);
+		bool updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn);
 
 		void setSpacerTL(float _size);
 		void setSpacerBR(float _size);
@@ -39,14 +43,21 @@ namespace juceRmlUi
 
 		void onScroll(const Rml::Event& _event);
 
+		uint32_t getItemsPerColumn();
+
 		LayoutType getLayoutType();
 
 		Rml::Element* m_spacerTL = nullptr;
 		Rml::Element* m_spacerBR = nullptr;
 		ElemListEntry* m_entryTemplate = nullptr;
+		Rml::ElementPtr m_entryTemplatePtr = nullptr;
 
 		std::map<size_t, Rml::Element*> m_activeEntries;
+		std::map<size_t, Rml::ElementPtr> m_detachedEntries;
 		std::vector<Rml::ElementPtr> m_inactiveEntries;
+
+		std::map<size_t, Rml::Element*> m_activeColumns;
+		std::vector<Rml::ElementPtr> m_inactiveColumns;
 
 		uint32_t m_layoutDirty = 1;
 

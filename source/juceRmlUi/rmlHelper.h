@@ -7,6 +7,8 @@
 
 namespace Rml
 {
+	class Property;
+	enum class PropertyId : uint8_t;
 	class Event;
 	class Element;
 }
@@ -43,5 +45,8 @@ namespace juceRmlUi
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
 
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child);
+
+		// apply property only if it is different from the current one
+		void changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
 	}
 }

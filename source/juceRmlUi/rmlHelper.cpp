@@ -1,5 +1,7 @@
 #include "rmlHelper.h"
 
+#include <cassert>
+
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
@@ -161,6 +163,16 @@ namespace juceRmlUi
 				_child = _child->GetParentNode();
 			}
 			return false;
+		}
+
+		void changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property)
+		{
+			assert(_element);
+
+			const auto* prop = _element->GetProperty(_propertyId);
+
+			if (!prop || *prop != _property)
+				_element->SetProperty(_propertyId, _property);
 		}
 	}
 }
