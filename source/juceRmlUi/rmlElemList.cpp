@@ -5,6 +5,7 @@
 #include "rmlListEntry.h"
 
 #include "RmlUi/Core/ElementDocument.h"
+#include "RmlUi/Debugger/Debugger.h"
 
 using namespace Rml;
 
@@ -90,6 +91,9 @@ namespace juceRmlUi
 		m_spacerBR = createSpacer();
 
 		AddEventListener(EventId::Scroll, this);
+
+//		Rml::Debugger::Initialise(GetContext());
+//		Rml::Debugger::SetVisible(true);
 	}
 
 	Vector2f ElemList::updateElementSize()
