@@ -47,6 +47,6 @@ namespace juceRmlUi
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child);
 
 		// apply property only if it is different from the current one
-		void changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
+		bool changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
 	}
 }

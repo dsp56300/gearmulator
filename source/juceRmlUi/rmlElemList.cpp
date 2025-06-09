@@ -5,7 +5,6 @@
 #include "rmlListEntry.h"
 
 #include "RmlUi/Core/ElementDocument.h"
-#include "RmlUi/Debugger/Debugger.h"
 
 using namespace Rml;
 
@@ -185,6 +184,14 @@ namespace juceRmlUi
 
 		bool changed = updateActiveEntries(firstEntry, lastEntry);
 		changed |= updateActiveColumns(firstColumn, lastColumn, itemsPerColumn);
+
+		// if the DP ratio changes, the element size will change. Ensure that columns have the correct width
+		for (auto it : m_activeColumns)
+		{
+			if (!helper::changeProperty(it.second, PropertyId::FlexBasis, Property(elementSize.x, Unit::PX)))
+				break;
+			changed = true;
+		}
 
 		if (changed)
 		{
