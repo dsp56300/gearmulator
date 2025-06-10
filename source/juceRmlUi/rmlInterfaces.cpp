@@ -69,6 +69,10 @@ namespace juceRmlUi
 			Rml::StyleSheetSpecification::RegisterProperty("spriteprefix", "frame", false).AddParser("string");
 			Rml::StyleSheetSpecification::RegisterProperty("items-per-column", "16", false).AddParser("number");
 
+			// tree style elements
+			Rml::StyleSheetSpecification::RegisterProperty("indent-margin-left", "0", false).AddParser("length");
+			Rml::StyleSheetSpecification::RegisterProperty("indent-padding-left", "0", false).AddParser("length");
+
 			registerInstancers();
 		}
 	}

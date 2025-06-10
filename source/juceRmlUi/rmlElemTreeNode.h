@@ -12,8 +12,8 @@ namespace juceRmlUi
 	public:
 		explicit ElemTreeNode(const Rml::String& _tag);
 
-		void setTree(ElemTree* _elemTree);
-		void setNode(const TreeNodePtr& _node);
+		virtual void setTree(ElemTree* _elemTree);
+		virtual void setNode(const TreeNodePtr& _node);
 
 	private:
 		ElemTree* m_tree = nullptr;
