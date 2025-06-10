@@ -10,9 +10,9 @@
 #include "rmlElemListEntry.h"
 #include "rmlElemTree.h"
 #include "rmlElemTreeNode.h"
+#include "rmlInstancers.h"
 
 #include "RmlUi/Core/Core.h"
-#include "RmlUi/Core/ElementInstancer.h"
 #include "RmlUi/Core/Factory.h"
 #include "RmlUi/Core/PropertyDefinition.h"
 #include "RmlUi/Core/StyleSheetSpecification.h"
@@ -23,13 +23,25 @@ namespace juceRmlUi
 	{
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
-		Rml::ElementInstancerGeneric<ElemComboBox> g_elemInstancerCombo;
-		Rml::ElementInstancerGeneric<ElemKnob> g_elemInstancerKnob;
-		Rml::ElementInstancerGeneric<ElemList> g_elemInstancerList;
-		Rml::ElementInstancerGeneric<ElemListEntry> g_elemInstancerListEntry;
-		Rml::ElementInstancerGeneric<ElemTree> g_elemInstancerTree;
-		Rml::ElementInstancerGeneric<ElemTreeNode> g_elemInstancerTreeNode;
+
+		GenericInstancers<ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemTree, ElemTreeNode> g_instancers
+		                 ("combo",      "knob",   "list",   "listentry",   "tree",   "treenode");
+
 		RmlComponent* g_currentComponent;
+
+		template<size_t... I>
+		void registerOne(std::index_sequence<I...>)
+		{
+			using Tuple = decltype(g_instancers)::MyTypes;
+			(Rml::Factory::RegisterElementInstancer(g_instancers.getName<I>(), &RmlInterfaces::getInstancer<std::tuple_element_t<I, Tuple>>()), ...);
+		}
+
+		void registerInstancers()
+		{
+			using T = decltype(g_instancers)::MyTypes;
+			constexpr size_t numInstancers = std::tuple_size_v<T>;
+			registerOne(std::make_index_sequence<numInstancers>{});
+		}
 	}
 
 	RmlInterfaces::ScopedAccess::ScopedAccess(RmlComponent& _component): m_rmlInterfaces(_component.getInterfaces())
@@ -57,12 +69,7 @@ namespace juceRmlUi
 			Rml::StyleSheetSpecification::RegisterProperty("spriteprefix", "frame", false).AddParser("string");
 			Rml::StyleSheetSpecification::RegisterProperty("items-per-column", "16", false).AddParser("number");
 
-			Rml::Factory::RegisterElementInstancer("knob", &g_elemInstancerKnob);
-			Rml::Factory::RegisterElementInstancer("combo", &g_elemInstancerCombo);
-			Rml::Factory::RegisterElementInstancer("list", &g_elemInstancerList);
-			Rml::Factory::RegisterElementInstancer("listentry", &g_elemInstancerListEntry);
-			Rml::Factory::RegisterElementInstancer("tree", &g_elemInstancerTree);
-			Rml::Factory::RegisterElementInstancer("treenode", &g_elemInstancerTreeNode);
+			registerInstancers();
 		}
 	}
 
@@ -110,5 +117,10 @@ namespace juceRmlUi
 	{
 		assert(g_currentComponent != nullptr && "RmlInterfaces::getCurrentComponent: No current component set");
 		return *g_currentComponent;
+	}
+
+	template <typename T> Rml::ElementInstancerGeneric<T>& RmlInterfaces::getInstancer()
+	{
+		return g_instancers.getInstancer<T>();
 	}
 }

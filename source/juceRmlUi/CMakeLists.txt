@@ -19,6 +19,7 @@ set(SOURCES
 	rmlEventListener.cpp rmlEventListener.h
 	rmlFileInterface.cpp rmlFileInterface.h
 	rmlHelper.cpp rmlHelper.h
+	rmlInstancers.h
 	rmlInterfaces.cpp rmlInterfaces.h
 	rmlList.cpp rmlList.h
 	rmlListEntry.cpp rmlListEntry.h

@@ -5,12 +5,14 @@
 
 #include "Core/FontEngineDefault/FontEngineInterfaceDefault.h"
 
+#include "RmlUi/Core/ElementInstancer.h"
+
 namespace juceRmlUi
 {
 	class RmlComponent;
 	class DataProvider;
 
-	struct RmlInterfaces
+	struct RmlInterfaces : Rml::NonCopyMoveable
 	{
 	public:
 		class ScopedAccess
@@ -42,6 +44,9 @@ namespace juceRmlUi
 		static RmlComponent& getCurrentComponent();
 
 		SystemInterface& getSystemInterface() { return m_systemInterface; }
+
+		template<typename T>
+		static Rml::ElementInstancerGeneric<T>& getInstancer();
 
 	private:
 		bool m_attached = false;
