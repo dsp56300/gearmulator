@@ -2,9 +2,11 @@
 
 #include <cassert>
 
+#include "Core/ElementStyle.h"
 #include "juce_gui_basics/juce_gui_basics.h"
 
 #include "RmlUi/Core/Element.h"
+#include "RmlUi/Core/ElementInstancer.h"
 #include "RmlUi/Core/Event.h"
 #include "RmlUi/Core/Input.h"
 
@@ -177,6 +179,37 @@ namespace juceRmlUi
 				return true;
 			}
 			return false;
+		}
+
+		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer)
+		{
+			// this is a copy of Rml::Element::Clone(), but supports another instancer
+			if (!_instancer)
+				return _element->Clone();
+
+			auto clone = _instancer->InstanceElement(nullptr, _element->GetTagName(), _element->GetAttributes());
+			if (!clone)
+				return {};
+
+			// Copy over the attributes. The 'style' and 'class' attributes are skipped because inline styles and class names are copied manually below.
+			// This is necessary in case any properties or classes have been set manually, in which case the 'style' and 'class' attributes are out of
+			// sync with the used style and active classes.
+			Rml::ElementAttributes clone_attributes = _element->GetAttributes();
+			clone_attributes.erase("style");
+			clone_attributes.erase("class");
+			clone->SetAttributes(clone_attributes);
+
+			for (auto& idProperty : _element->GetStyle()->GetLocalStyleProperties())
+				clone->SetProperty(idProperty.first, idProperty.second);
+
+			clone->GetStyle()->SetClassNames(_element->GetStyle()->GetClassNames());
+
+			Rml::String innerRml;
+			_element->GetInnerRML(innerRml);
+
+			clone->SetInnerRML(innerRml);
+
+			return clone;
 		}
 	}
 }

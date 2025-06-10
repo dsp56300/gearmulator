@@ -1,12 +1,12 @@
 #pragma once
 
-#include <cstdint>
-
+#include "RmlUi/Core/Element.h"
 #include "RmlUi/Core/Input.h"
 #include "RmlUi/Core/Vector2.h"
 
 namespace Rml
 {
+	class ElementInstancer;
 	class Property;
 	enum class PropertyId : uint8_t;
 	class Event;
@@ -48,5 +48,7 @@ namespace juceRmlUi
 
 		// apply property only if it is different from the current one
 		bool changeProperty(Rml::Element* _element, Rml::PropertyId _propertyId, const Rml::Property& _property);
+
+		Rml::ElementPtr clone(const Rml::Element* _element, Rml::ElementInstancer* _instancer);
 	}
 }
