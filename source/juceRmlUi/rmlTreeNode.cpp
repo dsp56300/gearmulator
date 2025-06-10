@@ -33,8 +33,9 @@ namespace juceRmlUi
 		{
 			const auto it = std::find(parent->m_children.begin(), parent->m_children.end(), self);
 			assert(it != parent->m_children.end() && "TreeNode::setParent: Node is not a child of its parent.");
+			const auto elem = *it;  // NOLINT(performance-unnecessary-copy-initialization)
 			parent->m_children.erase(it);
-			parent->evChildRemoved(parent, *it);
+			parent->evChildRemoved(parent, elem);
 		}
 
 		m_parent = _parent;
