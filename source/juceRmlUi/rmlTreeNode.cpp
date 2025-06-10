@@ -85,27 +85,28 @@ namespace juceRmlUi
 
 	TreeNodePtr TreeNode::getPreviousNode()
 	{
-		const auto childIndex = getChildIndex(shared_from_this());
+		auto parent = getParent();
+		if (!parent)
+			return {};
+		const auto childIndex = parent->getChildIndex(shared_from_this());
+		assert(childIndex != InvalidIndex && "TreeNode::getPreviousNode: Node is not a child of its parent.");
 		if (childIndex == 0)
-		{
-			auto parent = getParent();
-			if (!parent)
-				return {};
-			return parent->getPreviousNode();
-		}
+			return parent;
 		return m_children[childIndex - 1];
 	}
 
 	TreeNodePtr TreeNode::getNextNode()
 	{
-		const auto childIndex = getChildIndex(shared_from_this());
-		const auto nextChild = childIndex +1;
-		if (nextChild < m_children.size())
-			return m_children[nextChild];
-
 		auto parent = getParent();
 		if (!parent)
 			return {};
+
+		const auto childIndex = parent->getChildIndex(shared_from_this());
+		assert(childIndex != InvalidIndex && "TreeNode::getNextNode: Node is not a child of its parent.");
+		const auto nextChild = childIndex + 1;
+		if (nextChild < m_children.size())
+			return m_children[nextChild];
+
 		return parent->getNextNode();
 	}
 
