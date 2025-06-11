@@ -4,8 +4,10 @@ project(jucePluginData)
 
 set(SOURCES
 	arrow_drop_down.png
-	arrow_left.png
+	arrow_up.png
 	arrow_right.png
+	arrow_down.png
+	arrow_left.png
 	check.png
 	chevron_right.png
 	link.png

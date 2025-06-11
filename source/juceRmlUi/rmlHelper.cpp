@@ -154,6 +154,11 @@ namespace juceRmlUi
 			return {x, y};
 		}
 
+		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event)
+		{
+			return static_cast<Rml::Input::KeyIdentifier>(_event.GetParameter<int>("key_identifier", Rml::Input::KI_UNKNOWN));
+		}
+
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child)
 		{
 			if (!_parent || !_child)

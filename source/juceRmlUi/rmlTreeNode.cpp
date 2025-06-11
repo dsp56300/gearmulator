@@ -1,5 +1,7 @@
 #include "rmlTreeNode.h"
 
+#include "rmlTree.h"
+
 namespace juceRmlUi
 {
 	TreeNode::TreeNode(Tree& _tree) : m_tree(_tree)
@@ -45,6 +47,10 @@ namespace juceRmlUi
 			_parent->m_children.push_back(self);
 			_parent->evChildAdded(_parent, self);
 		}
+		else
+		{
+			setSelected(false);
+		}
 
 		evParentChanged(self);
 
@@ -88,26 +94,63 @@ namespace juceRmlUi
 		auto parent = getParent();
 		if (!parent)
 			return {};
+
+		auto sibling = getPreviousSibling();
+		if (!sibling)
+			return parent;
+
+		while(!sibling->empty())
+			sibling = sibling->getChildren().back();
+		return sibling;
+	}
+
+	TreeNodePtr TreeNode::getPreviousSibling()
+	{
+		auto parent = getParent();
+		if (!parent)
+			return {};
 		const auto childIndex = parent->getChildIndex(shared_from_this());
 		assert(childIndex != InvalidIndex && "TreeNode::getPreviousNode: Node is not a child of its parent.");
 		if (childIndex == 0)
-			return parent;
-		return m_children[childIndex - 1];
+			return {};
+		return parent->getChild(childIndex - 1);
 	}
 
 	TreeNodePtr TreeNode::getNextNode()
+	{
+		if (!empty())
+			return m_children.front();
+
+		auto parent = getParent();
+		if (!parent)
+			return {};
+
+		auto sibling = getNextSibling();
+		if (sibling)
+			return sibling;
+
+		while (parent)
+		{
+			auto s = parent->getNextSibling();
+			if (s)
+				return s;
+			parent = parent->getParent();
+		}
+		return {};
+	}
+
+	TreeNodePtr TreeNode::getNextSibling()
 	{
 		auto parent = getParent();
 		if (!parent)
 			return {};
 
 		const auto childIndex = parent->getChildIndex(shared_from_this());
-		assert(childIndex != InvalidIndex && "TreeNode::getNextNode: Node is not a child of its parent.");
+		assert(childIndex != InvalidIndex && "TreeNode::getNextSibling: Node is not a child of its parent.");
 		const auto nextChild = childIndex + 1;
-		if (nextChild < m_children.size())
-			return m_children[nextChild];
-
-		return parent->getNextNode();
+		if (nextChild < parent->getChildren().size())
+			return parent->getChild(nextChild);
+		return {};
 	}
 
 	size_t TreeNode::getDepth() const
@@ -120,5 +163,114 @@ namespace juceRmlUi
 			parent = parent->getParent();
 		}
 		return depth;
+	}
+
+	bool TreeNode::setOpened(const bool _isOpened)
+	{
+		if (m_isOpened == _isOpened)
+			return false;
+		m_isOpened = _isOpened;
+		evOpenedChanged(shared_from_this(), m_isOpened);
+
+		for (auto& child : m_children)
+			child->notifyVisibilityChanged();
+
+		return true;
+	}
+
+	bool TreeNode::isVisible() const
+	{
+		const auto parent = getParent();
+		if (!parent)
+			return true;
+		if (parent->isClosed())
+			return false;
+		return parent->isVisible();
+	}
+
+	bool TreeNode::setSelected(const bool _selected)
+	{
+		if (m_isSelected == _selected)
+			return false;
+
+		m_isSelected = _selected;
+
+		auto self = shared_from_this();
+
+		if (_selected)
+		{
+			auto prev = m_tree.getSelectedNode();
+			m_tree.setSelectedNode(self);
+			if (prev && prev != self)
+				prev->setSelected(false);
+		}
+		else if (!_selected && m_tree.getSelectedNode() == self)
+		{
+			m_tree.setSelectedNode(nullptr);
+		}
+
+		evSelectedChanged(self, m_isSelected);
+
+		return true;
+	}
+
+	bool TreeNode::handleNavigationKey(const Rml::Input::KeyIdentifier _key)
+	{
+		using namespace Rml::Input;
+
+		switch (_key)
+		{
+		case KI_RIGHT:
+			if (!empty() && isClosed())
+			{
+				setOpened(true);
+			}
+			else
+			{
+				auto child = getChild(0);
+				if (child)
+					return child->setSelected(true);
+				auto next = getNextSibling();
+				if (next)
+					next->setSelected(true);
+			}
+			break;
+		case KI_LEFT:
+			if (!empty() && isOpened())
+			{
+				setOpened(false);
+			}
+			else
+			{
+				auto parent = getParent();
+				if (parent)
+					return parent->setSelected(true);
+			}
+			break;
+		case KI_UP:
+			{
+				auto prev = getPreviousNode();
+				if (prev && !prev->isRoot())
+					return prev->setSelected(true);
+			}
+			break;
+		case KI_DOWN:
+			{
+				const auto next = getNextNode();
+				if (next)
+					return next->setSelected(true);
+			}
+			break;
+		default:
+			return false;
+		}
+		return false;
+	}
+
+	void TreeNode::notifyVisibilityChanged()
+	{
+		evVisibilityChanged(shared_from_this(), isVisible());
+		for (auto& child : m_children)
+			child->notifyVisibilityChanged();
 	}
 }

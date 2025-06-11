@@ -31,6 +31,7 @@ namespace juceRmlUi
 
 		void setNode(const TreeNodePtr& _node) override
 		{
+			ElemTreeNode::setNode(_node);
 			auto* testNode = dynamic_cast<TestNode*>(_node.get());
 			if (testNode)
 				SetInnerRML(testNode->text());
@@ -81,7 +82,10 @@ namespace juceRmlUi
 			m_template = dynamic_cast<ElemTreeNode*>(_child);
 
 			if (m_template)
+			{
+				m_template->SetProperty(Rml::PropertyId::Display, Rml::Style::Display::None);
 				updateNodeElements();
+			}
 		}
 	}
 

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "baseLib/event.h"
+#include "RmlUi/Core/Input.h"
 
 namespace juceRmlUi
 {
@@ -20,12 +21,15 @@ namespace juceRmlUi
 		baseLib::Event<TreeNodePtr> evParentChanged;
 		baseLib::Event<TreeNodePtr, TreeNodePtr> evChildAdded;
 		baseLib::Event<TreeNodePtr, TreeNodePtr> evChildRemoved;
+		baseLib::Event<TreeNodePtr, bool> evOpenedChanged;
+		baseLib::Event<TreeNodePtr, bool> evSelectedChanged;
+		baseLib::Event<TreeNodePtr, bool> evVisibilityChanged;
 
 		TreeNode(Tree& _tree);
 		virtual ~TreeNode() = default;
 
-		bool isRoot() const { return !m_parent.expired(); }
-		bool empty() const { return !m_children.empty(); }
+		bool isRoot() const { return m_parent.expired(); }
+		bool empty() const { return m_children.empty(); }
 		size_t size() const { return m_children.size(); }
 		void clear();
 
@@ -52,14 +56,32 @@ namespace juceRmlUi
 		operator TreeNodePtr() { return shared_from_this(); }
 
 		TreeNodePtr getPreviousNode();
+		TreeNodePtr getPreviousSibling();
 		TreeNodePtr getNextNode();
+		TreeNodePtr getNextSibling();
 
 		size_t getDepth() const;
 
+		bool isOpened() const { return m_isOpened; }
+		bool isClosed() const { return !m_isOpened; }
+		bool setOpened(bool _isOpened);
+		bool isVisible() const;	// returns true if all nodes in the path to the root are opened
+
+		bool isSelected() const { return m_isSelected; }
+		bool setSelected(bool _selected);
+
+		bool handleNavigationKey(Rml::Input::KeyIdentifier _key);
+
+		Tree& getTree() const { return m_tree; }
+
 	private:
+		void notifyVisibilityChanged();
+
 		Tree& m_tree;
 
 		std::weak_ptr<TreeNode> m_parent;
 		Children m_children;
+		bool m_isOpened = true;
+		bool m_isSelected = false;
 	};
 }
