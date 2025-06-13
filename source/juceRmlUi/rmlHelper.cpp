@@ -196,6 +196,8 @@ namespace juceRmlUi
 			if (!clone)
 				return {};
 
+			clone->SetInstancer(_instancer);
+
 			// Copy over the attributes. The 'style' and 'class' attributes are skipped because inline styles and class names are copied manually below.
 			// This is necessary in case any properties or classes have been set manually, in which case the 'style' and 'class' attributes are out of
 			// sync with the used style and active classes.
