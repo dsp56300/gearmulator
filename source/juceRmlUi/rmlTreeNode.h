@@ -55,9 +55,9 @@ namespace juceRmlUi
 
 		operator TreeNodePtr() { return shared_from_this(); }
 
-		TreeNodePtr getPreviousNode();
+		TreeNodePtr getPreviousNode(bool _visibleOnly);
 		TreeNodePtr getPreviousSibling();
-		TreeNodePtr getNextNode();
+		TreeNodePtr getNextNode(bool _visibleOnly);
 		TreeNodePtr getNextSibling();
 
 		size_t getDepth() const;

@@ -89,7 +89,7 @@ namespace juceRmlUi
 		return InvalidIndex;
 	}
 
-	TreeNodePtr TreeNode::getPreviousNode()
+	TreeNodePtr TreeNode::getPreviousNode(const bool _visibleOnly)
 	{
 		auto parent = getParent();
 		if (!parent)
@@ -99,7 +99,7 @@ namespace juceRmlUi
 		if (!sibling)
 			return parent;
 
-		while(!sibling->empty())
+		while(!sibling->empty() && (!_visibleOnly || sibling->isOpened()))
 			sibling = sibling->getChildren().back();
 		return sibling;
 	}
@@ -116,9 +116,9 @@ namespace juceRmlUi
 		return parent->getChild(childIndex - 1);
 	}
 
-	TreeNodePtr TreeNode::getNextNode()
+	TreeNodePtr TreeNode::getNextNode(const bool _visibleOnly)
 	{
-		if (!empty())
+		if (!empty() && (!_visibleOnly || isOpened()))
 			return m_children.front();
 
 		auto parent = getParent();
@@ -243,20 +243,20 @@ namespace juceRmlUi
 			else
 			{
 				auto parent = getParent();
-				if (parent)
+				if (parent && !parent->isRoot())
 					return parent->setSelected(true);
 			}
 			break;
 		case KI_UP:
 			{
-				auto prev = getPreviousNode();
+				auto prev = getPreviousNode(true);
 				if (prev && !prev->isRoot())
 					return prev->setSelected(true);
 			}
 			break;
 		case KI_DOWN:
 			{
-				const auto next = getNextNode();
+				const auto next = getNextNode(true);
 				if (next)
 					return next->setSelected(true);
 			}

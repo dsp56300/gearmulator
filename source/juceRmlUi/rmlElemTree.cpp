@@ -131,16 +131,13 @@ namespace juceRmlUi
 
 		Rml::Element* insertBefore = nullptr;
 
-		auto next = _node->getNextNode();
+		auto next = _node->getNextNode(false);
 
 		if (next)
 		{
 			const auto itNext = m_activeNodeElements.find(next);
 			if (itNext != m_activeNodeElements.end())
-			{
 				insertBefore = itNext->second;
-				_node->getNextNode();
-			}
 		}
 
 		Rml::Element* e = insertBefore ? InsertBefore(std::move(elem), insertBefore) : AppendChild(std::move(elem));
