@@ -8,6 +8,7 @@
 #include "rmlElemKnob.h"
 #include "rmlElemList.h"
 #include "rmlElemListEntry.h"
+#include "rmlElemSplitter.h"
 #include "rmlElemTree.h"
 #include "rmlElemTreeNode.h"
 #include "rmlInstancers.h"
@@ -24,8 +25,8 @@ namespace juceRmlUi
 		std::mutex g_accessMutex;
 		uint32_t g_instanceCount = 0;
 
-		GenericInstancers<ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemTree, ElemTreeNode> g_instancers
-		                 ("combo",      "knob",   "list",   "listentry",   "tree",   "treenode");
+		GenericInstancers<ElemComboBox, ElemKnob, ElemList, ElemListEntry, ElemSplitter, ElemTree, ElemTreeNode> g_instancers
+		                 ("combo",      "knob",   "list",   "listentry",   "splitter"  , "tree",   "treenode"  );
 
 		RmlComponent* g_currentComponent;
 

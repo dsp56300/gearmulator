@@ -12,7 +12,7 @@ set(SOURCES
 	rmlElemKnob.cpp rmlElemKnob.h
 	rmlElemList.cpp rmlElemList.h
 	rmlElemListEntry.cpp rmlElemListEntry.h
-	rmlElemSlider.cpp rmlElemSlider.h
+	rmlElemSplitter.cpp rmlElemSplitter.h
 	rmlElemTree.cpp rmlElemTree.h
 	rmlElemTreeNode.cpp rmlElemTreeNode.h
 	rmlElemValue.cpp rmlElemValue.h
