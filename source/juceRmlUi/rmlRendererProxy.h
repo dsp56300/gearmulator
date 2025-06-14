@@ -102,7 +102,8 @@ namespace juceRmlUi
 		std::mutex m_mutex;
 		std::mutex m_mutexRender;
 		std::vector<Func> m_enqueuedFunctions;
-		std::vector<Func> m_renderFunctions;
+		std::vector<std::vector<Func>> m_renderFunctions;
+		std::vector<Func> m_renderFunctionsToExecute;
 		std::unordered_map<Handle, Handle> m_handles;
 
 		std::stack<Handle> m_layerHandles;

@@ -364,25 +364,32 @@ namespace juceRmlUi
 
 	void RendererProxy::executeRenderFunctions()
 	{
-		std::lock_guard lock(m_mutexRender);
-
-		if (m_renderer)
 		{
-			for (auto& func : m_renderFunctions)
-				func();
-			m_renderFunctions.clear();
+			std::lock_guard lock(m_mutexRender);
+
+			if (!m_renderer)
+				return;
+
+			if (!m_renderFunctions.empty())
+			{
+				std::swap(m_renderFunctionsToExecute, m_renderFunctions.front());
+
+				if (m_renderFunctions.size() == 1)
+					m_renderFunctions.clear();
+				else
+					m_renderFunctions.erase(m_renderFunctions.begin());
+			}
 		}
 
+		for (auto& func : m_renderFunctionsToExecute)
+			func();
 	}
 
 	void RendererProxy::finishFrame()
 	{
 		std::lock_guard lockR(m_mutexRender);
 		std::lock_guard lock(m_mutex);
-		if (m_renderFunctions.empty())
-			m_renderFunctions.swap(m_enqueuedFunctions);
-		else
-			m_renderFunctions.insert(m_renderFunctions.end(), std::make_move_iterator(m_enqueuedFunctions.begin()), std::make_move_iterator(m_enqueuedFunctions.end()));
+		m_renderFunctions.emplace_back(std::move(m_enqueuedFunctions));
 		m_enqueuedFunctions.clear();
 	}
 
