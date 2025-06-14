@@ -59,18 +59,18 @@ namespace juceRmlUi
 	ElemTree::ElemTree(const Rml::String& _tag) : Element(_tag)
 	{
 		auto r = m_tree.getRoot();
-		const auto child = r->createChild<TestNode>("entry A");
-		child->createChild<TestNode>("subentry A");
-		child->createChild<TestNode>("subentry B");
+		const auto child = r->createChild<TestNode>("Entry A");
+		child->createChild<TestNode>("Subentry A");
+		child->createChild<TestNode>("Subentry B");
 
-		const auto child2 = child->createChild<TestNode>("subentry C");
-		child2->createChild<TestNode>("subsubentry A");
-		child2->createChild<TestNode>("subsubentry B");
+		const auto child2 = child->createChild<TestNode>("Subentry C");
+		child2->createChild<TestNode>("Subsubentry A");
+		child2->createChild<TestNode>("Subsubentry B");
 
 		for (size_t i=0; i<100; ++i)
-			r->createChild<TestNode>("entry " + std::to_string(i));
+			r->createChild<TestNode>("Entry " + std::to_string(i));
 
-		r->createChild<TestNode>("entry B");
+		r->createChild<TestNode>("Entry B");
 	}
 
 	void ElemTree::OnChildAdd(Rml::Element* _child)
