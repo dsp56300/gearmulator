@@ -20,10 +20,20 @@ namespace juceRmlUi
 		if (m_entry == _entry)
 			return;
 		if (m_entry)
+		{
+			m_onAdded.reset();
+			m_onRemoved.reset();
+			m_onIndexChanged.reset();
 			m_onSelected.reset();
+		}
 		m_entry = _entry;
 		if (m_entry)
+		{
+			m_onAdded.set(_entry->evAdded, [this](ListEntry*, List*) {  onAdded(); });
+			m_onRemoved.set(_entry->evRemoved, [this](ListEntry*, List*) {  onRemoved(); });
+			m_onIndexChanged.set(_entry->evIndexChanged, [this](ListEntry*) {  onIndexChanged(); });
 			m_onSelected.set(_entry->evSelected, [this](ListEntry*, bool _selected) {  onSelectedChanged(_selected); });
+		}
 		onEntryChanged();
 	}
 
@@ -47,6 +57,18 @@ namespace juceRmlUi
 		}
 
 		list.setSelected(m_entry->getIndex(), true, ctrl);
+	}
+
+	void ElemListEntry::onAdded()
+	{
+	}
+
+	void ElemListEntry::onRemoved()
+	{
+	}
+
+	void ElemListEntry::onIndexChanged()
+	{
 	}
 
 	void ElemListEntry::onSelectedChanged(const bool _selected)

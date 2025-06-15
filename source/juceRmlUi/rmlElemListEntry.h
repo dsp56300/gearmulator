@@ -17,12 +17,18 @@ namespace juceRmlUi
 		void onClick(const Rml::Event& _event);
 
 	private:
+		void onAdded();
+		void onRemoved();
+		void onIndexChanged();
 		void onSelectedChanged(bool _selected);
 
 		void updateState();
 
 		List::EntryPtr m_entry;
 
+		baseLib::EventListener<ListEntry*> m_onIndexChanged;
+		baseLib::EventListener<ListEntry*, List*> m_onRemoved;
+		baseLib::EventListener<ListEntry*, List*> m_onAdded;
 		baseLib::EventListener<ListEntry*, bool> m_onSelected;
 	};
 }

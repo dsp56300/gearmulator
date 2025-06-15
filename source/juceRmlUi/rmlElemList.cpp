@@ -105,6 +105,10 @@ namespace juceRmlUi
 
 //		Rml::Debugger::Initialise(GetContext());
 //		Rml::Debugger::SetVisible(true);
+
+		m_list.evEntryAdded.addListener([this](List*, const EntryPtr&) { onEntryAdded(); });
+		m_list.evEntryRemoved.addListener([this](List*, const EntryPtr&) { onEntryRemoved(); });
+		m_list.evEntriesMoved.addListener([this](List*) { onEntriesMoved(); });
 	}
 
 	Vector2f ElemList::updateElementSize()
@@ -395,6 +399,16 @@ namespace juceRmlUi
 		return dirty;
 	}
 
+	void ElemList::updateActiveEntriesListItems() const
+	{
+		for (const auto& [index, e] : m_activeEntries)
+		{
+			auto* entry = dynamic_cast<ElemListEntry*>(e);
+			if (entry)
+				entry->setListItem(m_list.getEntry(index));
+		}
+	}
+
 	void ElemList::setSpacerTL(const float _size)
 	{
 		setSpacer(m_spacerTL, _size);
@@ -499,6 +513,23 @@ namespace juceRmlUi
 				return LayoutType::Grid;
 		}
 		return LayoutType::None;
+	}
+
+	void ElemList::onEntryAdded()
+	{
+		updateLayout();
+		updateActiveEntriesListItems();
+	}
+
+	void ElemList::onEntryRemoved()
+	{
+		updateLayout();
+		updateActiveEntriesListItems();
+	}
+
+	void ElemList::onEntriesMoved()
+	{
+		updateActiveEntriesListItems();
 	}
 
 	uint32_t ElemList::getItemsPerColumn()

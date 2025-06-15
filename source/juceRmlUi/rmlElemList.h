@@ -36,6 +36,7 @@ namespace juceRmlUi
 		bool updateLayoutGrid();
 		bool updateActiveEntries(size_t _firstEntry, size_t _lastEntry, bool _forceRefresh);
 		bool updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn, bool _forceRefresh);
+		void updateActiveEntriesListItems() const;
 
 		void setSpacerTL(float _size);
 		void setSpacerBR(float _size);
@@ -48,6 +49,10 @@ namespace juceRmlUi
 		uint32_t getItemsPerColumn();
 
 		LayoutType getLayoutType();
+
+		void onEntryAdded();
+		void onEntryRemoved();
+		void onEntriesMoved();
 
 		Rml::Element* m_spacerTL = nullptr;
 		Rml::Element* m_spacerBR = nullptr;
