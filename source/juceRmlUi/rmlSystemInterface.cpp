@@ -4,6 +4,8 @@
 
 #include "dsp56300/source/dsp56kEmu/logging.h"
 
+#include "juce_gui_basics/juce_gui_basics.h"
+
 namespace juceRmlUi
 {
 
@@ -70,12 +72,12 @@ namespace juceRmlUi
 
 	void SystemInterface::SetClipboardText(const Rml::String& _text)
 	{
-		Rml::SystemInterface::SetClipboardText(_text);
+		juce::SystemClipboard::copyTextToClipboard(_text.c_str());
 	}
 
 	void SystemInterface::GetClipboardText(Rml::String& _text)
 	{
-		Rml::SystemInterface::GetClipboardText(_text);
+		_text = juce::SystemClipboard::getTextFromClipboard().toStdString();
 	}
 
 	void SystemInterface::ActivateKeyboard(const Rml::Vector2f _caretPosition, const float _lineHeight)
