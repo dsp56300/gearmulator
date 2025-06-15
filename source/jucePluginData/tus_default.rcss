@@ -1,4 +1,4 @@
-/* Root element, width and height should stay at 100% */
+/* root element, width and height should stay at 100% */
 
 body {
     font-family: Roboto;
@@ -12,7 +12,7 @@ body {
     left: 0px;
 }
 
-/* https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
+/* default table setup as explained in the manual: https://mikke89.github.io/RmlUiDoc/pages/rcss/tables.html */
 table {
 	box-sizing: border-box;
 	display: table;
@@ -36,7 +36,7 @@ thead, tbody, tfoot {
 	display: table-row-group;
 }
 
-/* All Menus and Drodown Boxes */
+/* all menus */
 
 .menubox {
 	box-shadow: #000a 0dp 0dp 8dp 3dp;
@@ -93,6 +93,7 @@ thead, tbody, tfoot {
 	margin: 4dp 0dp 4dp 0dp;
 }
 
+/* combo boxes use a menu to display the items to select. Number of items per column can be specified as attribute too */
 combo {
 	items-per-column: 8;
 	background-color: rgb(50,62,68);
@@ -100,4 +101,151 @@ combo {
 	width: 100dp;
 	padding: 5dp;
 	decorator: image(arrow_drop_down.png contain right);
+}
+
+/* default scrollbars for all scrollable containers */
+scrollbarvertical {
+	width: 8dp;
+}
+
+scrollbarhorizontal {
+	height: 8dp;
+}
+
+scrollbarvertical slidertrack, scrollbarhorizontal slidertrack {
+}
+
+scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
+	background-color: #999;
+	border-radius: 4dp;
+}
+
+/* vertical lists */
+.list {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	display: block;
+	border: 1dp #ccc;
+	padding: 0dp 4dp 0dp 4dp;
+	box-sizing: border-box;
+	position: relative;
+	clip: always;
+}
+.listentry {
+	width: 100%;
+	height: 1em;
+	drag: clone;
+	display: block;
+	padding: 2dp;
+	font-size: 12dp;
+}
+
+.listentry:selected, .gridentry:selected {
+	background-color: #666;
+}
+
+.listentry:drag {
+	background-color: #333;
+	min-width: 100dp;
+	opacity: 0.5;
+	position: absolute;
+}
+
+.listspacer {
+	width: 100%;
+	height: 30em;
+	background-color: #f0f;
+	border-radius: 10dp;
+}
+
+/* grid lists */
+.grid {
+	overflow-x: auto;
+	overflow-y: hidden;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	border: 1dp #ccc;
+	padding: 4dp 0dp 4dp 0dp;
+	box-sizing: border-box;
+/*	clip: always;*/
+}
+.gridentry {
+	width: 100dp;
+	height: 1em;
+	drag: clone;
+	display: block;
+	padding: 2dp;
+	font-size: 12dp;
+}
+
+.gridentry:drag {
+	background-color: #333;
+	min-width: 100dp;
+	opacity: 0.5;
+}
+
+/* tree controls */
+
+.tree {
+	overflow-x: hidden;
+	overflow-y: scroll;
+	display: block;
+	border: 1dp #ccc;
+	padding: 4dp;
+	box-sizing: border-box;
+	indent-margin-left: 20dp;
+}
+
+.treenode {
+	width: 100%;
+	height: 1em;
+	drag: clone;
+	display: block;
+	padding: 2dp 2dp 2dp 20dp;
+	font-size: 12dp;
+}
+
+.treenode:drag {
+	min-width: 150dp;
+}
+
+.treenode:opened {
+	decorator: image(arrow_down.png contain left);
+}
+
+.treenode:closed {
+	decorator: image(arrow_right.png contain left);
+}
+
+.treenode:selected {
+	background-color: #666;
+}
+
+splitter {
+	width: 5dp;
+	height: 100%;
+	background-color: #222;
+}
+
+splitter:hover {
+	background-color: #555;
+}
+
+splitter:active {
+	background-color: #999;
+}
+
+input {
+	color: #fff;
+	background: #222;
+	padding: 4dp;
+	border: 1dp #ccc;
+}
+
+.input-placeholder {
+	color: #888;
+	font-style: italic;
+	width: 100%;
+	height: 100%;
 }

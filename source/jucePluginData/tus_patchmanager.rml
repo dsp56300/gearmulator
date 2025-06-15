@@ -1,0 +1,50 @@
+<template name="patchmanager">
+<head>
+	<link type="text/rcss" href="tus_patchmanager.rcss"/>
+</head>
+<body>
+	<div class="pm-hlayout">
+		<div class="pm-vlayout" style="flex: 3;">
+			<tree class="tree">
+				<treenode class="treenode">
+				</treenode>
+			</tree>
+			<input class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/>
+		<div class="pm-vlayout" style="flex: 2;">
+			<tree class="tree">
+				<treenode class="treenode">
+				</treenode>
+			</tree>
+			<input class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/>
+		<div class="pm-vlayout" style="flex: 2;">
+			<list class="list">
+				<listentry class="listentry"/>
+			</list>
+			<input class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/>
+		<!-- div class="pm-vlayout" style="flex: 5;">
+			<list class="grid">
+				<listentry class="gridentry"/>
+			</list>
+			<input class="pm-search" type="text">
+				<div class="input-placeholder">Search...</div>
+			</input>
+		</div>
+		<splitter/ -->
+		<div id="static-column" style="flex: 3;">
+			<p>This is static text</p>
+		</div>
+	</div>
+</body>
+</template>

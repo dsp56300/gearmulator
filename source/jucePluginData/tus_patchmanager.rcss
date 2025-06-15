@@ -1,0 +1,26 @@
+.pm-hlayout {
+	display: flex;
+	flex-direction: row;
+	/*align-items: stretch;*/
+	gap: 2dp;
+	height: 100%;
+}
+
+.pm-vlayout {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+#static-column {
+	flex: 1 1 0;
+	overflow: hidden;
+	border: 1dp #ccc;
+	padding: 4dp;
+}
+
+.pm-search {
+	height: 24dp;
+	flex: 0 0 auto;
+	border: 1dp #fff;
+}
