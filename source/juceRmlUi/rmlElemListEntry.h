@@ -14,7 +14,15 @@ namespace juceRmlUi
 
 		virtual void onEntryChanged();
 
+		void onClick(const Rml::Event& _event);
+
 	private:
+		void onSelectedChanged(bool _selected);
+
+		void updateState();
+
 		List::EntryPtr m_entry;
+
+		baseLib::EventListener<ListEntry*, bool> m_onSelected;
 	};
 }

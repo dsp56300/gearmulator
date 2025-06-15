@@ -27,13 +27,16 @@ namespace juceRmlUi
 		virtual ~ListEntry() = default;
 
 		bool isSelected() const { return m_selected; }
-		void setSelected(bool _selected);
 
 		size_t getIndex() const { return m_index; }
 
 		bool isValid() const { return m_index != InvalidIndex; }
 
+		List& getList() const { return m_list; }
+
 	private:
+		void setSelected(bool _selected);
+
 		void setIndex(size_t _index);
 
 		List& m_list;

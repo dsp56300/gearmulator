@@ -5,6 +5,11 @@
 
 #include "baseLib/event.h"
 
+namespace Rml::Input
+{
+	enum KeyIdentifier : unsigned char;
+}
+
 namespace juceRmlUi
 {
 	class ListEntry;
@@ -38,7 +43,7 @@ namespace juceRmlUi
 
 		EntryPtr getEntry(size_t _index) const;
 
-		bool setSelected(size_t _index, bool _selected) const;
+		bool setSelected(size_t _index, bool _selected, bool _allowMultiselect = true) const;
 
 		bool moveEntryTo(size_t _oldIndex, size_t _newIndex);
 		bool moveEntriesTo(const std::vector<size_t>& _entries, size_t _newIndex);
@@ -50,6 +55,9 @@ namespace juceRmlUi
 
 		bool getMultiselect() const { return m_allowMultiselect; }
 		void setMultiselect(const bool _enabled) { m_allowMultiselect = _enabled; }
+
+		bool handleNavigationKey(Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, uint32_t _gridItemsPerColumn);
+		bool selectRangeViaShiftKey(size_t _index) const;
 
 	private:
 		bool moveEntryTo(const ListEntry& _e, size_t _newIndex);

@@ -159,6 +159,44 @@ namespace juceRmlUi
 			return static_cast<Rml::Input::KeyIdentifier>(_event.GetParameter<int>("key_identifier", Rml::Input::KI_UNKNOWN));
 		}
 
+		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event)
+		{
+			const bool ctrl = _event.GetParameter<int>("ctrl_key", 0) > 0;
+			const bool shift = _event.GetParameter<int>("shift_key", 0) > 0;
+			const bool alt = _event.GetParameter<int>("alt_key", 0) > 0;
+			const bool meta = _event.GetParameter<int>("meta_key", 0) > 0;
+			const bool capslock = _event.GetParameter<int>("caps_lock_key", 0) > 0;
+			const bool numlock = _event.GetParameter<int>("num_lock_key", 0) > 0;
+			const bool scrolllock = _event.GetParameter<int>("scroll_lock_key", 0) > 0;
+
+			uint8_t mods = 0;
+
+			if (ctrl      ) mods |= Rml::Input::KeyModifier::KM_CTRL;
+			if (shift     ) mods |= Rml::Input::KeyModifier::KM_SHIFT;
+			if (alt       ) mods |= Rml::Input::KeyModifier::KM_ALT;
+			if (meta      ) mods |= Rml::Input::KeyModifier::KM_META;
+			if (capslock  ) mods |= Rml::Input::KeyModifier::KM_CAPSLOCK;
+			if (numlock   ) mods |= Rml::Input::KeyModifier::KM_NUMLOCK;
+			if (scrolllock) mods |= Rml::Input::KeyModifier::KM_SCROLLLOCK;
+
+			return static_cast<Rml::Input::KeyModifier>(mods);
+		}
+
+		bool getKeyModCtrl(const Rml::Event& _event)
+		{
+			return _event.GetParameter<int>("ctrl_key", 0) > 0;
+		}
+
+		bool getKeyModShift(const Rml::Event& _event)
+		{
+			return _event.GetParameter<int>("shift_key", 0) > 0;
+		}
+
+		bool getKeyModAlt(const Rml::Event& _event)
+		{
+			return _event.GetParameter<int>("alt_key", 0) > 0;
+		}
+
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child)
 		{
 			if (!_parent || !_child)

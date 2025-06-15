@@ -10,8 +10,8 @@ namespace juceRmlUi
 	{
 		if (_selected == m_selected)
 			return;
-		evSelected(this, _selected);
 		m_selected = _selected;
+		evSelected(this, _selected);
 	}
 
 	void ListEntry::setIndex(const size_t _index)

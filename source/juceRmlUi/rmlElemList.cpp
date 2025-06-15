@@ -68,6 +68,9 @@ namespace juceRmlUi
 		case EventId::Scroll:
 			onScroll(_event);
 			break;
+		case EventId::Keydown:
+			onKeypress(_event);
+			break;
 		default:;
 		}
 	}
@@ -98,6 +101,7 @@ namespace juceRmlUi
 		m_spacerBR = createSpacer();
 
 		AddEventListener(EventId::Scroll, this);
+		AddEventListener(EventId::Keydown, this);
 
 //		Rml::Debugger::Initialise(GetContext());
 //		Rml::Debugger::SetVisible(true);
@@ -463,6 +467,16 @@ namespace juceRmlUi
 	{
 		updateLayout();
 //		m_layoutDirty = 1;
+	}
+
+	bool ElemList::onKeypress(const Rml::Event& _event)
+	{
+		const auto key = helper::getKeyIdentifier(_event);
+
+		const auto ctrl = helper::getKeyModCtrl(_event);
+		const auto shift = helper::getKeyModShift(_event);
+
+		return m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
 	}
 
 	ElemList::LayoutType ElemList::getLayoutType()

@@ -43,7 +43,12 @@ namespace juceRmlUi
 		Rml::Input::KeyIdentifier toRmlKey(const juce::KeyPress& _key);
 
 		Rml::Vector2<float> getMousePos(const Rml::Event& _event);
+
 		Rml::Input::KeyIdentifier getKeyIdentifier(const Rml::Event& _event);
+		Rml::Input::KeyModifier getKeyModifiers(const Rml::Event& _event);
+		bool getKeyModCtrl(const Rml::Event& _event);
+		bool getKeyModShift(const Rml::Event& _event);
+		bool getKeyModAlt(const Rml::Event& _event);
 
 		bool isChildOf(const Rml::Element* _parent, const Rml::Element* _child);
 

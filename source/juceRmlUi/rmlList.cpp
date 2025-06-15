@@ -73,12 +73,14 @@ namespace juceRmlUi
 		return _index < m_entries.size() ? m_entries[_index] : nullptr;
 	}
 
-	bool List::setSelected(const size_t _index, const bool _selected) const
+	bool List::setSelected(const size_t _index, const bool _selected, bool _allowMultiselect/* = true*/) const
 	{
 		if (_index >= m_entries.size())
 			return false;
 
-		if (_selected && !m_allowMultiselect)
+		const auto allowMultiselect = _allowMultiselect && m_allowMultiselect;
+
+		if (_selected && !allowMultiselect)
 		{
 			for (auto& entry : m_entries)
 				entry->setSelected(entry->getIndex() == _index);
@@ -87,6 +89,99 @@ namespace juceRmlUi
 		{
 			m_entries[_index]->setSelected(_selected);
 		}
+		return true;
+	}
+
+	bool List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn)
+	{
+		using namespace Rml::Input;
+
+		switch (_key)
+		{
+			case KI_UP:
+				{
+					const auto entries = getSelectedEntries();
+					if (entries.empty())
+						return false;
+					auto& e = entries.front();
+					if (e->getIndex() <= 0)
+						return false;
+					setSelected(e->getIndex() - 1, true, _ctrl || _shift);
+				}
+				return false;
+			case KI_DOWN:
+				{
+					const auto entries = getSelectedEntries();
+					if (entries.empty())
+						return false;
+					auto& e = entries.back();
+					if (e->getIndex() >= size() - 1)
+						return false;
+					setSelected(e->getIndex() + 1, true, _ctrl || _shift);
+				}
+				return false;
+			case KI_LEFT:
+				if (_gridItemsPerColumn > 1)
+				{
+					const auto entries = getSelectedEntries();
+					if (entries.empty())
+						return false;
+					auto& e = entries.front();
+					const auto currentIndex = e->getIndex();
+					if (currentIndex < _gridItemsPerColumn)
+						return false;
+					const auto newIndex = currentIndex - _gridItemsPerColumn;
+					if (_shift)
+						selectRangeViaShiftKey(newIndex);
+					else
+						setSelected(newIndex, true, false);
+				}
+				return false;
+			case KI_RIGHT:
+				if (_gridItemsPerColumn > 1)
+				{
+					const auto entries = getSelectedEntries();
+					if (entries.empty())
+						return false;
+					auto& e = entries.back();
+					const auto currentIndex = e->getIndex();
+					const auto newIndex = currentIndex + _gridItemsPerColumn;
+					if (newIndex >= size())
+						return false;
+					if (_shift)
+						selectRangeViaShiftKey(newIndex);
+					else
+						setSelected(newIndex, true, false);
+				}
+				return false;
+		default:
+			return false;
+		}
+	}
+
+	bool List::selectRangeViaShiftKey(const size_t _index) const
+	{
+		const auto selected = getSelectedEntries();
+		if (selected.empty())
+			return false;
+
+		const auto firstSelected = selected.front()->getIndex();
+		const auto lastSelected = selected.back()->getIndex();
+
+		if (_index < firstSelected)
+		{
+			for (size_t i=_index; i<firstSelected; ++i)
+				setSelected(i, true, true);
+			return true;
+		}
+		if (_index > lastSelected)
+		{
+			for (size_t i=lastSelected+1; i<=_index; ++i)
+				setSelected(i, true, true);
+			return true;
+		}
+
+		// _index is already selected, nothing to do
 		return true;
 	}
 
