@@ -53,6 +53,14 @@ namespace juceRmlUi
 		Element::OnLayout();
 	}
 
+	void ElemList::OnResize()
+	{
+		Element::OnResize();
+
+		if (m_entryTemplate && getItemsPerColumn() != m_lastItemsPerColumn)
+			m_layoutDirty = 1;
+	}
+
 	void ElemList::ProcessEvent(Event& _event)
 	{
 		switch (_event.GetId())
@@ -150,7 +158,7 @@ namespace juceRmlUi
 		const auto firstEntry = static_cast<size_t>(scrollTop / elementHeight);
 		const auto lastEntry = static_cast<size_t>(std::ceil((scrollTop + size.y) / elementHeight));
 
-		updateActiveEntries(firstEntry, lastEntry);
+		updateActiveEntries(firstEntry, lastEntry, false);
 
 		setSpacerTL(static_cast<float>(firstEntry) * elementHeight);
 		setSpacerBR(lastEntry < m_list.size() ? static_cast<float>(m_list.size() - lastEntry) * elementHeight : 0);
@@ -174,6 +182,9 @@ namespace juceRmlUi
 		if (!itemsPerColumn)
 			return false;
 
+		const auto itemsPerColumnChanged = m_lastItemsPerColumn != itemsPerColumn;
+		m_lastItemsPerColumn = itemsPerColumn;
+
 		const auto totalColumns = (m_list.size() + itemsPerColumn - 1) / itemsPerColumn;
 
 		const auto firstColumn = static_cast<size_t>(scrollLeft / elementSize.x);
@@ -182,8 +193,9 @@ namespace juceRmlUi
 		const auto firstEntry = firstColumn * itemsPerColumn;
 		const auto lastEntry = lastColumn * itemsPerColumn + itemsPerColumn - 1;
 
-		bool changed = updateActiveEntries(firstEntry, lastEntry);
-		changed |= updateActiveColumns(firstColumn, lastColumn, itemsPerColumn);
+		bool changed = updateActiveEntries(firstEntry, lastEntry, itemsPerColumnChanged);
+
+		changed |= updateActiveColumns(firstColumn, lastColumn, itemsPerColumn, itemsPerColumnChanged);
 
 		// if the DP ratio changes, the element size will change. Ensure that columns have the correct width
 		for (auto it : m_activeColumns)
@@ -202,7 +214,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool ElemList::updateActiveEntries(const size_t _firstEntry, size_t _lastEntry)
+	bool ElemList::updateActiveEntries(const size_t _firstEntry, size_t _lastEntry, bool _forceRefresh)
 	{
 		bool dirty = false;
 
@@ -214,7 +226,7 @@ namespace juceRmlUi
 			const auto i = it->first;
 			auto& entry = it->second;
 
-			const auto isInRange = i >= _firstEntry && i <= _lastEntry;
+			const auto isInRange = !_forceRefresh && i >= _firstEntry && i <= _lastEntry;
 
 			if (!isInRange)
 			{
@@ -281,7 +293,7 @@ namespace juceRmlUi
 		return dirty;
 	}
 
-	bool ElemList::updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn)
+	bool ElemList::updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn, bool _forceRefresh)
 	{
 		bool dirty = false;
 
@@ -291,7 +303,7 @@ namespace juceRmlUi
 			const auto i = it->first;
 			auto& entry = it->second;
 
-			const auto isInRange = i >= _firstColumn && i <= _lastColumn;
+			const auto isInRange = !_forceRefresh && i >= _firstColumn && i <= _lastColumn;
 
 			if (!isInRange)
 			{

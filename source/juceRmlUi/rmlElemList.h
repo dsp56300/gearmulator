@@ -24,6 +24,7 @@ namespace juceRmlUi
 		void OnUpdate() override;
 		void OnDpRatioChange() override;
 		void OnLayout() override;
+		void OnResize() override;
 
 		void ProcessEvent(Rml::Event& _event) override;
 
@@ -33,8 +34,8 @@ namespace juceRmlUi
 		bool updateLayout();
 		bool updateLayoutVertical();
 		bool updateLayoutGrid();
-		bool updateActiveEntries(size_t _firstEntry, size_t _lastEntry);
-		bool updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn);
+		bool updateActiveEntries(size_t _firstEntry, size_t _lastEntry, bool _forceRefresh);
+		bool updateActiveColumns(size_t _firstColumn, size_t _lastColumn, uint32_t _itemsPerColumn, bool _forceRefresh);
 
 		void setSpacerTL(float _size);
 		void setSpacerBR(float _size);
@@ -60,6 +61,7 @@ namespace juceRmlUi
 		std::vector<Rml::ElementPtr> m_inactiveColumns;
 
 		uint32_t m_layoutDirty = 1;
+		uint32_t m_lastItemsPerColumn = 0;
 
 		Rml::Vector2f m_elementSize{ 0,0 };
 
