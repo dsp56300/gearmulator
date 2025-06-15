@@ -4,6 +4,8 @@
 
 #include "rmlListEntry.h"
 
+#include "RmlUi/Core/Input.h"
+
 namespace juceRmlUi
 {
 	List::List()
