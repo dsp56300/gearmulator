@@ -8,7 +8,7 @@ namespace juceRmlUi
 {
 	class ElemListEntry;
 
-	class ElemList : public Element, public List, Rml::EventListener
+	class ElemList : public Element, Rml::EventListener
 	{
 	public:
 		enum class LayoutType : uint8_t
@@ -70,6 +70,10 @@ namespace juceRmlUi
 		uint32_t m_lastItemsPerColumn = 0;
 
 		Rml::Vector2f m_elementSize{ 0,0 };
+
+		Rml::Element* m_scrollDummy = nullptr;
+
+		uint32_t m_scrollTargetDirty = 0;
 
 		List m_list;
 	};

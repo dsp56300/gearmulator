@@ -94,7 +94,7 @@ namespace juceRmlUi
 		return true;
 	}
 
-	bool List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn)
+	size_t List::handleNavigationKey(const Rml::Input::KeyIdentifier _key, bool _ctrl, bool _shift, const uint32_t _gridItemsPerColumn)
 	{
 		using namespace Rml::Input;
 
@@ -104,62 +104,64 @@ namespace juceRmlUi
 				{
 					const auto entries = getSelectedEntries();
 					if (entries.empty())
-						return false;
+						return InvalidIndex;
 					auto& e = entries.front();
 					if (e->getIndex() <= 0)
-						return false;
-					setSelected(e->getIndex() - 1, true, _ctrl || _shift);
-					return true;
+						return InvalidIndex;
+					size_t newIndex = e->getIndex() - 1;
+					setSelected(newIndex, true, _ctrl || _shift);
+					return newIndex;
 				}
 			case KI_DOWN:
 				{
 					const auto entries = getSelectedEntries();
 					if (entries.empty())
-						return false;
+						return InvalidIndex;
 					auto& e = entries.back();
 					if (e->getIndex() >= size() - 1)
-						return false;
-					setSelected(e->getIndex() + 1, true, _ctrl || _shift);
-					return true;
+						return InvalidIndex;
+					size_t newIndex = e->getIndex() + 1;
+					setSelected(newIndex, true, _ctrl || _shift);
+					return newIndex;
 				}
 			case KI_LEFT:
 				if (_gridItemsPerColumn > 1)
 				{
 					const auto entries = getSelectedEntries();
 					if (entries.empty())
-						return false;
+						return InvalidIndex;
 					auto& e = entries.front();
 					const auto currentIndex = e->getIndex();
 					if (currentIndex < _gridItemsPerColumn)
-						return false;
+						return InvalidIndex;
 					const auto newIndex = currentIndex - _gridItemsPerColumn;
 					if (_shift)
 						selectRangeViaShiftKey(newIndex);
 					else
 						setSelected(newIndex, true, false);
-					return true;
+					return newIndex;
 				}
-				return false;
+				return InvalidIndex;
 			case KI_RIGHT:
 				if (_gridItemsPerColumn > 1)
 				{
 					const auto entries = getSelectedEntries();
 					if (entries.empty())
-						return false;
+						return InvalidIndex;
 					auto& e = entries.back();
 					const auto currentIndex = e->getIndex();
 					const auto newIndex = currentIndex + _gridItemsPerColumn;
 					if (newIndex >= size())
-						return false;
+						return InvalidIndex;
 					if (_shift)
 						selectRangeViaShiftKey(newIndex);
 					else
 						setSelected(newIndex, true, false);
-					return true;
+					return newIndex;
 				}
-				return false;
+				return InvalidIndex;
 		default:
-			return false;
+			return InvalidIndex;
 		}
 	}
 

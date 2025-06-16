@@ -40,6 +40,21 @@ namespace juceRmlUi
 			else if (updateLayout())
 				m_layoutDirty = 0;
 		}
+
+		if (m_scrollTargetDirty)
+		{
+			--m_scrollTargetDirty;
+
+			if (!m_scrollTargetDirty)
+			{
+				ScrollIntoViewOptions options;
+				options.vertical = ScrollAlignment::Nearest;
+				options.horizontal = ScrollAlignment::Nearest;
+				options.behavior = ScrollBehavior::Smooth;
+				options.parentage = ScrollParentage::Closest;
+				m_scrollDummy->ScrollIntoView(options);
+			}
+		}
 	}
 
 	void ElemList::OnDpRatioChange()
@@ -106,9 +121,20 @@ namespace juceRmlUi
 //		Rml::Debugger::Initialise(GetContext());
 //		Rml::Debugger::SetVisible(true);
 
-		m_list.evEntryAdded.addListener([this](List*, const EntryPtr&) { onEntryAdded(); });
-		m_list.evEntryRemoved.addListener([this](List*, const EntryPtr&) { onEntryRemoved(); });
+		m_list.evEntryAdded.addListener([this](List*, const List::EntryPtr&) { onEntryAdded(); });
+		m_list.evEntryRemoved.addListener([this](List*, const List::EntryPtr&) { onEntryRemoved(); });
 		m_list.evEntriesMoved.addListener([this](List*) { onEntriesMoved(); });
+
+		auto scrollDummy = GetOwnerDocument()->CreateElement("div");
+
+		scrollDummy->SetProperty(PropertyId::Position, Style::Position::Absolute);
+		scrollDummy->SetProperty(PropertyId::Top, Property(1, Unit::PX));
+		scrollDummy->SetProperty(PropertyId::Left, Property(1, Unit::PX));
+		scrollDummy->SetProperty(PropertyId::Width, Property(1, Unit::PX));
+		scrollDummy->SetProperty(PropertyId::Height, Property(1, Unit::PX));
+		scrollDummy->SetProperty(PropertyId::Visibility, Style::Visibility::Hidden);
+
+		m_scrollDummy = AppendChild(std::move(scrollDummy));
 	}
 
 	Vector2f ElemList::updateElementSize()
@@ -483,14 +509,45 @@ namespace juceRmlUi
 //		m_layoutDirty = 1;
 	}
 
-	bool ElemList::onKeypress(const Rml::Event& _event)
+	bool ElemList::onKeypress(const Event& _event)
 	{
 		const auto key = helper::getKeyIdentifier(_event);
 
 		const auto ctrl = helper::getKeyModCtrl(_event);
 		const auto shift = helper::getKeyModShift(_event);
 
-		return m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
+		auto lastSelected = m_list.handleNavigationKey(key, ctrl, shift, getLayoutType() == LayoutType::Grid ? getItemsPerColumn() : 0);
+
+		if (lastSelected == List::InvalidIndex)
+			return false;
+
+		float x, y;
+
+		const auto elemSize = updateElementSize();
+
+		if (getLayoutType() == LayoutType::Grid)
+		{
+			x = static_cast<float>(static_cast<int>(lastSelected / getItemsPerColumn()));
+			y = static_cast<float>(lastSelected) - x * static_cast<float>(getItemsPerColumn());
+
+			x *= elemSize.x;
+			y *= elemSize.y;
+		}
+		else 
+		{
+			x = 0.0f;
+			y = static_cast<float>(lastSelected) * updateElementSize().y;
+		}
+
+		m_scrollDummy->SetProperty(PropertyId::Left, Property(x, Unit::PX));
+		m_scrollDummy->SetProperty(PropertyId::Top, Property(y, Unit::PX));
+
+		m_scrollDummy->SetProperty(PropertyId::Width, Property(elemSize.x, Unit::PX));
+		m_scrollDummy->SetProperty(PropertyId::Height, Property(elemSize.y, Unit::PX));
+
+		m_scrollTargetDirty = 2;
+
+		return true;
 	}
 
 	ElemList::LayoutType ElemList::getLayoutType()
@@ -535,7 +592,7 @@ namespace juceRmlUi
 	uint32_t ElemList::getItemsPerColumn()
 	{
 		const auto box = GetBox();
-		const auto size = box.GetSize(Rml::BoxArea::Content);
+		const auto size = box.GetSize(BoxArea::Content);
 
 		const auto elementSize = updateElementSize();
 
