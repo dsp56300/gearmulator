@@ -78,6 +78,8 @@ namespace juceRmlUi
 		float m_contentScale = 1.0f;
 		float m_currentRenderScale = 0.0f;
 
+		std::mutex m_timerMutex;
+
 		JUCE_DECLARE_NON_COPYABLE(RmlComponent)
 		JUCE_DECLARE_NON_MOVEABLE(RmlComponent)
 	};

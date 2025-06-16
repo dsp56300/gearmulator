@@ -59,7 +59,10 @@ namespace juceRmlUi
 		m_renderInterface.reset(new RenderInterface_GL3());
 		m_renderProxy->setRenderer(m_renderInterface.get());
 
-		startTimer(1);
+		{
+			std::scoped_lock lock(m_timerMutex);
+			startTimer(1);
+		}
 	}
 
 	void RmlComponent::renderOpenGL()
@@ -81,6 +84,7 @@ namespace juceRmlUi
 		if (err != GL_NO_ERROR)
 			DBG("OpenGL error: " << juce::String::toHexString((int)err));
 
+		std::scoped_lock lock(m_timerMutex);
 		startTimer(1);
 	}
 
@@ -233,7 +237,10 @@ namespace juceRmlUi
 
 	void RmlComponent::timerCallback()
 	{
-		stopTimer();
+		{
+			std::scoped_lock lock(m_timerMutex);
+			stopTimer();
+		}
 		update();
 	}
 
