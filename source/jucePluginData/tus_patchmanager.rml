@@ -33,7 +33,7 @@
 			</input>
 		</div>
 		<splitter/>
-		<!-- div class="pm-vlayout" style="flex: 5;">
+		<div class="pm-vlayout" style="flex: 5;">
 			<list class="grid">
 				<listentry class="gridentry"/>
 			</list>
@@ -41,7 +41,7 @@
 				<div class="input-placeholder">Search...</div>
 			</input>
 		</div>
-		<splitter/ -->
+		<splitter/>
 		<div id="static-column" style="flex: 3;">
 			<p>This is static text</p>
 		</div>

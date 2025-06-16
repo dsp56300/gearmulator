@@ -168,6 +168,7 @@ scrollbarvertical sliderbar, scrollbarhorizontal sliderbar {
 	border: 1dp #ccc;
 	padding: 4dp 0dp 4dp 0dp;
 	box-sizing: border-box;
+	position: relative;
 /*	clip: always;*/
 }
 .gridentry {
