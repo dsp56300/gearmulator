@@ -109,8 +109,8 @@ namespace juceRmlUi
 					if (e->getIndex() <= 0)
 						return false;
 					setSelected(e->getIndex() - 1, true, _ctrl || _shift);
+					return true;
 				}
-				return false;
 			case KI_DOWN:
 				{
 					const auto entries = getSelectedEntries();
@@ -120,8 +120,8 @@ namespace juceRmlUi
 					if (e->getIndex() >= size() - 1)
 						return false;
 					setSelected(e->getIndex() + 1, true, _ctrl || _shift);
+					return true;
 				}
-				return false;
 			case KI_LEFT:
 				if (_gridItemsPerColumn > 1)
 				{
@@ -137,6 +137,7 @@ namespace juceRmlUi
 						selectRangeViaShiftKey(newIndex);
 					else
 						setSelected(newIndex, true, false);
+					return true;
 				}
 				return false;
 			case KI_RIGHT:
@@ -154,6 +155,7 @@ namespace juceRmlUi
 						selectRangeViaShiftKey(newIndex);
 					else
 						setSelected(newIndex, true, false);
+					return true;
 				}
 				return false;
 		default:
